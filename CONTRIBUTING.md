@@ -1,7 +1,7 @@
 Contributing to Flutter
 =======================
 
-[![Build Status](https://travis-ci.org/flutter/flutter.svg)](https://travis-ci.org/flutter/flutter)
+[![Build Status](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.org/flutter/flutter)
 
 _See also: [Flutter's code of conduct](https://flutter.io/design-principles/#code-of-conduct)_
 
@@ -29,7 +29,7 @@ Things you will need
 
  * Linux, Mac OS X, or Windows
  * git (used for source version control).
- * An IDE. We recommend [IntelliJ with the Flutter plugin](https://flutter.io/intellij-ide/).
+ * An IDE. We recommend [Android Studio with the Flutter plugin](https://flutter.io/using-ide/).
  * An ssh client (used to authenticate with GitHub).
  * Python (used by some of our tools).
  * The Android platform tools (see [Issue #55](https://github.com/flutter/flutter/issues/55)
@@ -37,7 +37,7 @@ Things you will need
    _If you're also working on the Flutter engine, you can use the
    copy of the Android platform tools in
    `.../engine/src/third_party/android_tools/sdk/platform-tools`._
-   - Mac: `brew install android-platform-tools`
+   - Mac: `brew cask install android-platform-tools`
    - Linux: `sudo apt-get install android-tools-adb`
 
 Getting the code and configuring your environment
@@ -129,7 +129,7 @@ which provides flutter-specific extensions on top of [package:test](https://pub.
 option to start the test in a paused state and wait for connection from a debugger. This option lets you
 set breakpoints before the test runs.
 
-To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `dart dev/bots/test.dart`.
+To run analysis and all the tests for the entire Flutter repository, the same way that Cirrus runs them, run `dart dev/bots/test.dart` and `dart dev/bots/analyze.dart`.
 
 If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you
 can pass `--local-engine` to change what flutter shell `flutter test` uses. For example,
@@ -190,7 +190,7 @@ To send us a pull request:
 Please make sure all your checkins have detailed commit messages explaining the patch.
 
 Once you've gotten an LGTM from a project maintainer and once your PR has received
-the green light from all our automated testing (Travis, Appveyor, etc), and once
+the green light from all our automated testing (running on Cirrus, etc), and once
 the tree is green (see the [design principles](https://flutter.io/design-principles/)
 document for more details), submit your changes to the `master` branch using one of
 the following methods:
@@ -285,7 +285,6 @@ Build infrastructure
 
 We build and test Flutter on:
 
-- Travis ([details](.travis.yml))
-- AppVeyor ([details](appveyor.yml))
+- [Cirrus](https://cirrus-ci.com/) ([details](.cirrus.yml))
 - Chromebots (a.k.a. "recipes", [details](dev/bots/README.md))
 - Devicelab (a.k.a. "cocoon", [details](dev/devicelab/README.md))

@@ -67,9 +67,9 @@ BorderRadius getBorderRadius(WidgetTester tester, int index) {
 void main() {
   testWidgets('MergeableMaterial empty', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial()
           ),
         ),
@@ -82,14 +82,14 @@ void main() {
 
   testWidgets('MergeableMaterial update slice', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   ),
@@ -105,14 +105,14 @@ void main() {
     expect(box.size.height, equals(100.0));
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 200.0
                   ),
@@ -130,21 +130,21 @@ void main() {
 
   testWidgets('MergeableMaterial swap slices', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   ),
@@ -162,21 +162,21 @@ void main() {
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   ),
@@ -200,14 +200,14 @@ void main() {
   testWidgets('MergeableMaterial paints shadows', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   ),
@@ -221,7 +221,7 @@ void main() {
 
     final BoxShadow boxShadow = kElevationToShadow[2][0];
     final RRect rrect = kMaterialEdges[MaterialType.card].toRRect(
-      new Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)
+      Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)
     );
     expect(
       find.byType(MergeableMaterial),
@@ -232,24 +232,24 @@ void main() {
 
   testWidgets('MergeableMaterial merge gap', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('x')
+                MaterialGap(
+                  key: ValueKey<String>('x')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   ),
@@ -268,21 +268,21 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   ),
@@ -309,21 +309,21 @@ void main() {
 
   testWidgets('MergeableMaterial separate slices', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   ),
@@ -341,24 +341,24 @@ void main() {
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('x')
+                MaterialGap(
+                  key: ValueKey<String>('x')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   ),
@@ -385,21 +385,21 @@ void main() {
 
   testWidgets('MergeableMaterial separate merge separate', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -417,24 +417,24 @@ void main() {
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('x')
+                MaterialGap(
+                  key: ValueKey<String>('x')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -459,21 +459,21 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -498,24 +498,24 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('x')
+                MaterialGap(
+                  key: ValueKey<String>('x')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -542,21 +542,21 @@ void main() {
 
   testWidgets('MergeableMaterial insert slice', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('C'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('C'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -574,28 +574,28 @@ void main() {
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('C'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('C'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -614,28 +614,28 @@ void main() {
 
   testWidgets('MergeableMaterial remove slice', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('C'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('C'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -653,21 +653,21 @@ void main() {
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('C'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('C'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -687,21 +687,21 @@ void main() {
 
   testWidgets('MergeableMaterial insert chunk', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('C'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('C'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -719,34 +719,34 @@ void main() {
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('x')
+                MaterialGap(
+                  key: ValueKey<String>('x')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('y')
+                MaterialGap(
+                  key: ValueKey<String>('y')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('C'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('C'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -775,34 +775,34 @@ void main() {
 
   testWidgets('MergeableMaterial remove chunk', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('x')
+                MaterialGap(
+                  key: ValueKey<String>('x')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('y')
+                MaterialGap(
+                  key: ValueKey<String>('y')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('C'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('C'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -822,21 +822,21 @@ void main() {
     matches(getBorderRadius(tester, 2), RadiusType.Round, RadiusType.Round);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('C'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('C'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -863,24 +863,24 @@ void main() {
 
   testWidgets('MergeableMaterial replace gap with chunk', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('x')
+                MaterialGap(
+                  key: ValueKey<String>('x')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('C'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('C'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -899,34 +899,34 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('y')
+                MaterialGap(
+                  key: ValueKey<String>('y')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('z')
+                MaterialGap(
+                  key: ValueKey<String>('z')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('C'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('C'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -955,34 +955,34 @@ void main() {
 
   testWidgets('MergeableMaterial replace chunk with gap', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('x')
+                MaterialGap(
+                  key: ValueKey<String>('x')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('y')
+                MaterialGap(
+                  key: ValueKey<String>('y')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('C'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('C'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -1002,24 +1002,24 @@ void main() {
     matches(getBorderRadius(tester, 2), RadiusType.Round, RadiusType.Round);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('z')
+                MaterialGap(
+                  key: ValueKey<String>('z')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('C'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('C'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -1046,10 +1046,10 @@ void main() {
 
   bool isDivider(Widget widget, bool top, bool bottom) {
     final DecoratedBox box = widget;
-    const BorderSide side = const BorderSide(color: const Color(0x1F000000), width: 0.5);
+    const BorderSide side = BorderSide(color: Color(0x1F000000), width: 0.5);
 
-    return box.decoration == new BoxDecoration(
-      border: new Border(
+    return box.decoration == BoxDecoration(
+      border: Border(
         top: top ? side : BorderSide.none,
         bottom: bottom ? side : BorderSide.none
       )
@@ -1058,36 +1058,36 @@ void main() {
 
   testWidgets('MergeableMaterial dividers', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
               hasDividers: true,
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('C'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('C'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('D'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('D'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
@@ -1108,39 +1108,39 @@ void main() {
     expect(isDivider(boxes[offset + 3], true, false), isTrue);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new SingleChildScrollView(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
             child: const MergeableMaterial(
               hasDividers: true,
-              children: const <MergeableMaterialItem>[
-                const MaterialSlice(
-                  key: const ValueKey<String>('A'),
-                  child: const SizedBox(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('B'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialGap(
-                  key: const ValueKey<String>('x')
+                MaterialGap(
+                  key: ValueKey<String>('x')
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('C'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('C'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )
                 ),
-                const MaterialSlice(
-                  key: const ValueKey<String>('D'),
-                  child: const SizedBox(
+                MaterialSlice(
+                  key: ValueKey<String>('D'),
+                  child: SizedBox(
                     width: 100.0,
                     height: 100.0
                   )

@@ -10,93 +10,119 @@ import 'package:path/path.dart' as path;
 import '../framework/framework.dart';
 import '../framework/utils.dart';
 
-/// Run each benchmark this many times and compute average.
+/// Run each benchmark this many times and compute average, min, max.
+///
+/// This must be small enough that we can do all the work in 15 minutes, the
+/// devicelab deadline. Since there's four different analysis tasks, on average,
+/// each can have 4 minutes. The tasks currently average a little more than a
+/// minute, so that allows three runs per task.
 const int _kRunsPerBenchmark = 3;
-
-/// Runs a benchmark once and reports the result as a lower-is-better numeric
-/// value.
-typedef Future<double> _Benchmark();
 
 /// Path to the generated "mega gallery" app.
 Directory get _megaGalleryDirectory => dir(path.join(Directory.systemTemp.path, 'mega_gallery'));
 
 Future<TaskResult> analyzerBenchmarkTask() async {
-  await inDirectory(flutterDirectory, () async {
+  await inDirectory<void>(flutterDirectory, () async {
     rmTree(_megaGalleryDirectory);
     mkdirs(_megaGalleryDirectory);
     await dart(<String>['dev/tools/mega_gallery.dart', '--out=${_megaGalleryDirectory.path}']);
   });
 
-  final Map<String, dynamic> data = <String, dynamic>{
-    'flutter_repo_batch': await _run(new _FlutterRepoBenchmark()),
-    'flutter_repo_watch': await _run(new _FlutterRepoBenchmark(watch: true)),
-    'mega_gallery_batch': await _run(new _MegaGalleryBenchmark()),
-    'mega_gallery_watch': await _run(new _MegaGalleryBenchmark(watch: true)),
-  };
+  final Map<String, dynamic> data = <String, dynamic>{};
+  data.addAll((await _run(_FlutterRepoBenchmark())).asMap('flutter_repo', 'batch'));
+  data.addAll((await _run(_FlutterRepoBenchmark(watch: true))).asMap('flutter_repo', 'watch'));
+  data.addAll((await _run(_MegaGalleryBenchmark())).asMap('mega_gallery', 'batch'));
+  data.addAll((await _run(_MegaGalleryBenchmark(watch: true))).asMap('mega_gallery', 'watch'));
 
-  return new TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
+  return TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
 }
 
-/// Times how long it takes to analyze the Flutter repository.
-class _FlutterRepoBenchmark {
-  _FlutterRepoBenchmark({ this.watch = false });
+class _BenchmarkResult {
+  const _BenchmarkResult(this.mean, this.min, this.max);
+
+  final double mean; // seconds
+
+  final double min; // seconds
+
+  final double max; // seconds
+
+  Map<String, dynamic> asMap(String benchmark, String mode) {
+    return <String, dynamic>{
+      '${benchmark}_$mode': mean,
+      '${benchmark}_${mode}_minimum': min,
+      '${benchmark}_${mode}_maximum': max,
+    };
+  }
+}
+
+abstract class _Benchmark {
+  _Benchmark({ this.watch = false });
 
   final bool watch;
 
-  Future<double> call() async {
-    section('Analyze Flutter repo ${watch ? 'with watcher' : ''}');
-    final Stopwatch stopwatch = new Stopwatch();
-    await inDirectory(flutterDirectory, () async {
-      final List<String> options = <String>[
-        '--flutter-repo',
-        '--benchmark',
-      ];
+  String get title;
 
-      if (watch)
-        options.add('--watch');
+  Directory get directory;
 
+  List<String> get options {
+    final List<String> result = <String>[ '--benchmark' ];
+    if (watch)
+      result.add('--watch');
+    return result;
+  }
+
+  Future<double> execute(int iteration, int targetIterations) async {
+    section('Analyze $title ${watch ? 'with watcher' : ''} - ${iteration + 1} / $targetIterations');
+    final Stopwatch stopwatch = Stopwatch();
+    await inDirectory<void>(directory, () async {
       stopwatch.start();
       await flutter('analyze', options: options);
       stopwatch.stop();
     });
-    return stopwatch.elapsedMilliseconds / 1000;
+    return stopwatch.elapsedMicroseconds / (1000.0 * 1000.0);
+  }
+}
+
+/// Times how long it takes to analyze the Flutter repository.
+class _FlutterRepoBenchmark extends _Benchmark {
+  _FlutterRepoBenchmark({ bool watch = false }) : super(watch: watch);
+
+  @override
+  String get title => 'Flutter repo';
+
+  @override
+  Directory get directory => flutterDirectory;
+
+  @override
+  List<String> get options {
+    return super.options
+      ..add('--flutter-repo');
   }
 }
 
 /// Times how long it takes to analyze the generated "mega_gallery" app.
-class _MegaGalleryBenchmark {
-  _MegaGalleryBenchmark({ this.watch = false });
+class _MegaGalleryBenchmark extends _Benchmark {
+  _MegaGalleryBenchmark({ bool watch = false }) : super(watch: watch);
 
-  final bool watch;
+  @override
+  String get title => 'mega gallery';
 
-  Future<double> call() async {
-    section('Analyze mega gallery ${watch ? 'with watcher' : ''}');
-    final Stopwatch stopwatch = new Stopwatch();
-    await inDirectory(_megaGalleryDirectory, () async {
-      final List<String> options = <String>[
-        '--benchmark',
-      ];
-
-      if (watch)
-        options.add('--watch');
-
-      stopwatch.start();
-      await flutter('analyze', options: options);
-      stopwatch.stop();
-    });
-    return stopwatch.elapsedMilliseconds / 1000;
-  }
+  @override
+  Directory get directory => _megaGalleryDirectory;
 }
 
-/// Runs a [benchmark] several times and reports the average result.
-Future<double> _run(_Benchmark benchmark) async {
-  double total = 0.0;
-  for (int i = 0; i < _kRunsPerBenchmark; i++) {
+/// Runs `benchmark` several times and reports the results.
+Future<_BenchmarkResult> _run(_Benchmark benchmark) async {
+  final List<double> results = <double>[];
+  for (int i = 0; i < _kRunsPerBenchmark; i += 1) {
     // Delete cached analysis results.
     rmTree(dir('${Platform.environment['HOME']}/.dartServer'));
-
-    total += await benchmark();
+    results.add(await benchmark.execute(i, _kRunsPerBenchmark));
   }
-  final double average = total / _kRunsPerBenchmark;
-  return average;
+  results.sort();
+  final double sum = results.fold<double>(
+    0.0,
+    (double previousValue, double element) => previousValue + element,
+  );
+  return _BenchmarkResult(sum / results.length, results.first, results.last);
 }

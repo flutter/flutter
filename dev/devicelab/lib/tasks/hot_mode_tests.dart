@@ -16,7 +16,7 @@ import '../framework/utils.dart';
 final Directory _editedFlutterGalleryDir = dir(path.join(Directory.systemTemp.path, 'edited_flutter_gallery'));
 final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'examples/flutter_gallery'));
 
-TaskFunction createHotModeTest({ bool isPreviewDart2 = true }) {
+TaskFunction createHotModeTest() {
   return () async {
     final Device device = await devices.workingDevice;
     await device.unlock();
@@ -25,19 +25,15 @@ TaskFunction createHotModeTest({ bool isPreviewDart2 = true }) {
     final List<String> options = <String>[
       '--hot', '-d', device.deviceId, '--benchmark', '--verbose', '--resident'
     ];
-    if (isPreviewDart2)
-      options.add('--preview-dart-2');
-    else
-      options.add('--no-preview-dart-2');
     setLocalEngineOptionIfNecessary(options);
     int hotReloadCount = 0;
     Map<String, dynamic> twoReloadsData;
     Map<String, dynamic> freshRestartReloadsData;
-    await inDirectory(flutterDirectory, () async {
+    await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
-      await inDirectory(_editedFlutterGalleryDir, () async {
+      await inDirectory<void>(_editedFlutterGalleryDir, () async {
         if (deviceOperatingSystem == DeviceOperatingSystem.ios)
           await prepareProvisioningCertificates(_editedFlutterGalleryDir.path);
         {
@@ -47,11 +43,11 @@ TaskFunction createHotModeTest({ bool isPreviewDart2 = true }) {
               environment: null
           );
 
-          final Completer<Null> stdoutDone = new Completer<Null>();
-          final Completer<Null> stderrDone = new Completer<Null>();
+          final Completer<Null> stdoutDone = Completer<Null>();
+          final Completer<Null> stderrDone = Completer<Null>();
           process.stdout
-              .transform(utf8.decoder)
-              .transform(const LineSplitter())
+              .transform<String>(utf8.decoder)
+              .transform<String>(const LineSplitter())
               .listen((String line) {
             if (line.contains('\] Reloaded ')) {
               if (hotReloadCount == 0) {
@@ -76,8 +72,8 @@ TaskFunction createHotModeTest({ bool isPreviewDart2 = true }) {
             stdoutDone.complete();
           });
           process.stderr
-              .transform(utf8.decoder)
-              .transform(const LineSplitter())
+              .transform<String>(utf8.decoder)
+              .transform<String>(const LineSplitter())
               .listen((String line) {
             print('stderr: $line');
           }, onDone: () {
@@ -92,19 +88,19 @@ TaskFunction createHotModeTest({ bool isPreviewDart2 = true }) {
         }
         benchmarkFile.deleteSync();
 
-        // start `flutter run` again to make sure it loads from the previous state
-        // (in case of --preview-dart-2 frontend loads up from previously generated kernel files).
+        // Start `flutter run` again to make sure it loads from the previous
+        // state. Frontend loads up from previously generated kernel files.
         {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
               <String>['run']..addAll(options),
               environment: null
           );
-          final Completer<Null> stdoutDone = new Completer<Null>();
-          final Completer<Null> stderrDone = new Completer<Null>();
+          final Completer<Null> stdoutDone = Completer<Null>();
+          final Completer<Null> stderrDone = Completer<Null>();
           process.stdout
-              .transform(utf8.decoder)
-              .transform(const LineSplitter())
+              .transform<String>(utf8.decoder)
+              .transform<String>(const LineSplitter())
               .listen((String line) {
             if (line.contains('\] Reloaded ')) {
               process.stdin.writeln('q');
@@ -114,8 +110,8 @@ TaskFunction createHotModeTest({ bool isPreviewDart2 = true }) {
             stdoutDone.complete();
           });
           process.stderr
-              .transform(utf8.decoder)
-              .transform(const LineSplitter())
+              .transform<String>(utf8.decoder)
+              .transform<String>(const LineSplitter())
               .listen((String line) {
             print('stderr: $line');
           }, onDone: () {
@@ -134,7 +130,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2 = true }) {
 
 
 
-    return new TaskResult.success(
+    return TaskResult.success(
       <String, dynamic> {
         'hotReloadInitialDevFSSyncMilliseconds': twoReloadsData['hotReloadInitialDevFSSyncMilliseconds'][0],
         'hotRestartMillisecondsToFrame': twoReloadsData['hotRestartMillisecondsToFrame'][0],

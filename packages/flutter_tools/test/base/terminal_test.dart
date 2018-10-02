@@ -5,24 +5,23 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
-
 
 void main() {
   group('character input prompt', () {
     AnsiTerminal terminalUnderTest;
 
     setUp(() {
-      terminalUnderTest = new TestTerminal();
+      terminalUnderTest = TestTerminal();
     });
 
     testUsingContext('character prompt', () async {
-      mockStdInStream = new Stream<String>.fromFutures(<Future<String>>[
-        new Future<String>.value('d'), // Not in accepted list.
-        new Future<String>.value('\n'), // Not in accepted list
-        new Future<String>.value('b'),
+      mockStdInStream = Stream<String>.fromFutures(<Future<String>>[
+        Future<String>.value('d'), // Not in accepted list.
+        Future<String>.value('\n'), // Not in accepted list
+        Future<String>.value('b'),
       ]).asBroadcastStream();
       final String choice =
           await terminalUnderTest.promptForCharInput(
@@ -40,8 +39,8 @@ void main() {
     });
 
     testUsingContext('default character choice without displayAcceptedCharacters', () async {
-      mockStdInStream = new Stream<String>.fromFutures(<Future<String>>[
-        new Future<String>.value('\n'), // Not in accepted list
+      mockStdInStream = Stream<String>.fromFutures(<Future<String>>[
+        Future<String>.value('\n'), // Not in accepted list
       ]).asBroadcastStream();
       final String choice =
           await terminalUnderTest.promptForCharInput(

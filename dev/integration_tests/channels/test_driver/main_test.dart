@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('channel suite', () {
@@ -25,7 +25,7 @@ void main() {
       if (status != 'complete') {
         fail('Failed at step $step with status $status');
       }
-    }, timeout: const Timeout(const Duration(minutes: 1)));
+    }, timeout: const Timeout(Duration(minutes: 1)));
 
     tearDownAll(() async {
       driver?.close();

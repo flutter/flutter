@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show ascii;
+import 'dart:convert' show AsciiDecoder;
 
 import 'package:quiver/strings.dart';
 
@@ -12,7 +12,7 @@ import 'context.dart';
 import 'io.dart' as io;
 import 'platform.dart';
 
-final AnsiTerminal _kAnsiTerminal = new AnsiTerminal();
+final AnsiTerminal _kAnsiTerminal = AnsiTerminal();
 
 AnsiTerminal get terminal {
   return (context == null || context[AnsiTerminal] == null)
@@ -20,35 +20,50 @@ AnsiTerminal get terminal {
       : context[AnsiTerminal];
 }
 
+enum TerminalColor {
+  red,
+  green,
+  blue,
+  cyan,
+  yellow,
+  magenta,
+  grey,
+}
+
 class AnsiTerminal {
-  static const String _bold  = '\u001B[1m';
-  static const String _reset = '\u001B[0m';
-  static const String _clear = '\u001B[2J\u001B[H';
+  static const String bold = '\u001B[1m';
+  static const String reset = '\u001B[0m';
+  static const String clear = '\u001B[2J\u001B[H';
 
-  static const int _EBADF = 9;
-  static const int _ENXIO = 6;
-  static const int _ENOTTY = 25;
-  static const int _ENETRESET = 102;
-  static const int _INVALID_HANDLE = 6;
+  static const String red = '\u001b[31m';
+  static const String green = '\u001b[32m';
+  static const String blue = '\u001b[34m';
+  static const String cyan = '\u001b[36m';
+  static const String magenta = '\u001b[35m';
+  static const String yellow = '\u001b[33m';
+  static const String grey = '\u001b[1;30m';
 
-  /// Setting the line mode can throw for some terminals (with "Operation not
-  /// supported on socket"), but the error can be safely ignored.
-  static const List<int> _lineModeIgnorableErrors = const <int>[
-    _EBADF,
-    _ENXIO,
-    _ENOTTY,
-    _ENETRESET,
-    _INVALID_HANDLE,
-  ];
+  static const Map<TerminalColor, String> _colorMap = <TerminalColor, String>{
+    TerminalColor.red: red,
+    TerminalColor.green: green,
+    TerminalColor.blue: blue,
+    TerminalColor.cyan: cyan,
+    TerminalColor.magenta: magenta,
+    TerminalColor.yellow: yellow,
+    TerminalColor.grey: grey,
+  };
 
-  bool supportsColor = platform.stdoutSupportsAnsi;
+  static String colorCode(TerminalColor color) => _colorMap[color];
+
+  bool supportsColor = platform.stdoutSupportsAnsi ?? false;
 
   String bolden(String message) {
-    if (!supportsColor)
+    assert(message != null);
+    if (!supportsColor || message.isEmpty)
       return message;
-    final StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     for (String line in message.split('\n'))
-      buffer.writeln('$_bold$line$_reset');
+      buffer.writeln('$bold$line$reset');
     final String result = buffer.toString();
     // avoid introducing a new newline to the emboldened text
     return (!message.endsWith('\n') && result.endsWith('\n'))
@@ -56,27 +71,32 @@ class AnsiTerminal {
         : result;
   }
 
-  String clearScreen() => supportsColor ? _clear : '\n\n';
+  String color(String message, TerminalColor color) {
+    assert(message != null);
+    if (!supportsColor || color == null || message.isEmpty)
+      return message;
+    final StringBuffer buffer = StringBuffer();
+    for (String line in message.split('\n'))
+      buffer.writeln('${_colorMap[color]}$line$reset');
+    final String result = buffer.toString();
+    // avoid introducing a new newline to the colored text
+    return (!message.endsWith('\n') && result.endsWith('\n'))
+        ? result.substring(0, result.length - 1)
+        : result;
+  }
+
+  String clearScreen() => supportsColor ? clear : '\n\n';
 
   set singleCharMode(bool value) {
-    // TODO(goderbauer): instead of trying to set lineMode and then catching
-    // [_ENOTTY] or [_INVALID_HANDLE], we should check beforehand if stdin is
-    // connected to a terminal or not.
-    // (Requires https://github.com/dart-lang/sdk/issues/29083 to be resolved.)
     final Stream<List<int>> stdin = io.stdin;
-    if (stdin is io.Stdin) {
-      try {
-        // The order of setting lineMode and echoMode is important on Windows.
-        if (value) {
-          stdin.echoMode = false;
-          stdin.lineMode = false;
-        } else {
-          stdin.lineMode = true;
-          stdin.echoMode = true;
-        }
-      } on io.StdinException catch (error) {
-        if (!_lineModeIgnorableErrors.contains(error.osError?.errorCode))
-          rethrow;
+    if (stdin is io.Stdin && stdin.hasTerminal) {
+      // The order of setting lineMode and echoMode is important on Windows.
+      if (value) {
+        stdin.echoMode = false;
+        stdin.lineMode = false;
+      } else {
+        stdin.lineMode = true;
+        stdin.echoMode = true;
       }
     }
   }
@@ -87,7 +107,7 @@ class AnsiTerminal {
   ///
   /// Useful when the console is in [singleCharMode].
   Stream<String> get onCharInput {
-    _broadcastStdInString ??= io.stdin.transform(ascii.decoder).asBroadcastStream();
+    _broadcastStdInString ??= io.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
     return _broadcastStdInString;
   }
 
@@ -113,7 +133,7 @@ class AnsiTerminal {
     List<String> charactersToDisplay = acceptedCharacters;
     if (defaultChoiceIndex != null) {
       assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
-      charactersToDisplay = new List<String>.from(charactersToDisplay);
+      charactersToDisplay = List<String>.from(charactersToDisplay);
       charactersToDisplay[defaultChoiceIndex] = bolden(charactersToDisplay[defaultChoiceIndex]);
       acceptedCharacters.add('\n');
     }
@@ -138,4 +158,3 @@ class AnsiTerminal {
     return choice;
   }
 }
-

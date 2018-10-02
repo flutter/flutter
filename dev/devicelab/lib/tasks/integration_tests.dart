@@ -10,21 +10,21 @@ import '../framework/ios.dart';
 import '../framework/utils.dart';
 
 TaskFunction createChannelsIntegrationTest() {
-  return new DriverTest(
+  return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/channels',
     'lib/main.dart',
   );
 }
 
 TaskFunction createPlatformInteractionTest() {
-  return new DriverTest(
+  return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/platform_interaction',
     'lib/main.dart',
   );
 }
 
 TaskFunction createFlavorsTest() {
-  return new DriverTest(
+  return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'lib/main.dart',
     extraOptions: <String>['--flavor', 'paid']
@@ -32,16 +32,30 @@ TaskFunction createFlavorsTest() {
 }
 
 TaskFunction createExternalUiIntegrationTest() {
-  return new DriverTest(
+  return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/external_ui',
     'lib/main.dart',
   );
 }
 
 TaskFunction createPlatformChannelSampleTest() {
-  return new DriverTest(
+  return DriverTest(
     '${flutterDirectory.path}/examples/platform_channel',
     'test_driver/button_tap.dart',
+  );
+}
+
+TaskFunction createEmbeddedAndroidViewsIntegrationTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/android_views',
+    'lib/main.dart',
+  );
+}
+
+TaskFunction createAndroidSemanticsIntegrationTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/android_semantics_testing',
+    'lib/main.dart',
   );
 }
 
@@ -59,7 +73,7 @@ class DriverTest {
   final List<String> extraOptions;
 
   Future<TaskResult> call() {
-    return inDirectory(testDirectory, () async {
+    return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
       final String deviceId = device.deviceId;
@@ -77,7 +91,7 @@ class DriverTest {
       options.addAll(extraOptions);
       await flutter('drive', options: options);
 
-      return new TaskResult.success(null);
+      return TaskResult.success(null);
     });
   }
 }

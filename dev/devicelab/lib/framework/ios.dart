@@ -13,7 +13,7 @@ import 'utils.dart';
 
 const String _kProvisioningConfigFileEnvironmentVariable = 'FLUTTER_DEVICELAB_XCODE_PROVISIONING_CONFIG';
 const String _kTestXcconfigFileName = 'TestConfig.xcconfig';
-const FileSystem _fs = const io.LocalFileSystem();
+const FileSystem _fs = io.LocalFileSystem();
 
 /// Patches the given Xcode project adding provisioning certificates and team
 /// information required to build and run the project, if
@@ -52,7 +52,7 @@ Future<Null> _patchXcconfigFilesIfNotPatched(String flutterProjectPath) async {
       final String contents = await file.readAsString();
       final bool alreadyPatched = contents.contains(include);
       if (!alreadyPatched) {
-        final IOSink patchOut = file.openWrite(mode: FileMode.APPEND); // ignore: deprecated_member_use
+        final IOSink patchOut = file.openWrite(mode: FileMode.append);
         patchOut.writeln(); // in case EOF is not preceded by line break
         patchOut.writeln(include);
         await patchOut.close();

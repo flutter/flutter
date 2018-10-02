@@ -29,6 +29,14 @@ class IdeConfigCommand extends FlutterCommand {
           'update any out-of-date files, and remove any deleted files from the '
           'template directory.',
     );
+    argParser.addFlag(
+      'with-root-module',
+      negatable: true,
+      defaultsTo: true,
+      help: 'Also create module that corresponds to the root of Flutter tree. '
+          'This makes the entire Flutter tree browsable and searchable in IDE. '
+          'Without this flag, only the child modules will be visible in IDE.',
+    );
   }
 
   @override
@@ -113,7 +121,7 @@ class IdeConfigCommand extends FlutterCommand {
       return;
     }
 
-    final Set<String> manifest = new Set<String>();
+    final Set<String> manifest = Set<String>();
     final List<FileSystemEntity> flutterFiles = _flutterRoot.listSync(recursive: true);
     for (FileSystemEntity entity in flutterFiles) {
       final String relativePath = fs.path.relative(entity.path, from: _flutterRoot.absolute.path);
@@ -131,7 +139,7 @@ class IdeConfigCommand extends FlutterCommand {
       }
 
       // Skip files we aren't interested in.
-      final RegExp _trackedIdeaFileRegExp = new RegExp(
+      final RegExp _trackedIdeaFileRegExp = RegExp(
         r'(\.name|modules.xml|vcs.xml)$',
       );
       final bool isATrackedIdeaFile = _hasDirectoryInPath(srcFile, '.idea') &&
@@ -223,13 +231,9 @@ class IdeConfigCommand extends FlutterCommand {
     }
 
     final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
-    String dirPath = fs.path.normalize(
+    final String dirPath = fs.path.normalize(
       fs.directory(fs.path.absolute(Cache.flutterRoot)).absolute.path,
     );
-    // TODO(goderbauer): Work-around for: https://github.com/dart-lang/path/issues/24
-    if (fs.path.basename(dirPath) == '.') {
-      dirPath = fs.path.dirname(dirPath);
-    }
 
     final String error = _validateFlutterDir(dirPath, flutterRoot: flutterRoot);
     if (error != null) {
@@ -238,7 +242,9 @@ class IdeConfigCommand extends FlutterCommand {
 
     printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
     int generatedCount = 0;
-    generatedCount += _renderTemplate(_ideName, dirPath, <String, dynamic>{});
+    generatedCount += _renderTemplate(_ideName, dirPath, <String, dynamic>{
+      'withRootModule': argResults['with-root-module'],
+    });
 
     printStatus('Wrote $generatedCount files.');
     printStatus('');
@@ -247,7 +253,7 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   int _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) {
-    final Template template = new Template(_templateDirectory, _templateDirectory);
+    final Template template = Template(_templateDirectory, _templateDirectory);
     return template.render(
       fs.directory(dirPath),
       context,
@@ -261,9 +267,9 @@ class IdeConfigCommand extends FlutterCommand {
 String _validateFlutterDir(String dirPath, {String flutterRoot}) {
   final FileSystemEntityType type = fs.typeSync(dirPath);
 
-  if (type != FileSystemEntityType.NOT_FOUND) { // ignore: deprecated_member_use
+  if (type != FileSystemEntityType.notFound) {
     switch (type) {
-      case FileSystemEntityType.LINK: // ignore: deprecated_member_use
+      case FileSystemEntityType.link:
         // Do not overwrite links.
         return "Invalid project root dir: '$dirPath' - refers to a link.";
     }

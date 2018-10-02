@@ -80,13 +80,26 @@ BuildApp() {
   AssertExists "${project_path}"
 
   local derived_dir="${SOURCE_ROOT}/Flutter"
+  if [[ -e "${project_path}/.ios" ]]; then
+    derived_dir="${project_path}/.ios/Flutter"
+  fi
   RunCommand mkdir -p -- "$derived_dir"
   AssertExists "$derived_dir"
 
-  RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
   RunCommand rm -rf -- "${derived_dir}/App.framework"
-  RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
-  RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
+
+  if [[ -e "${project_path}/.ios" ]]; then
+    RunCommand rm -rf -- "${derived_dir}/engine"
+    mkdir "${derived_dir}/engine"
+    RunCommand cp -r -- "${framework_path}/Flutter.podspec" "${derived_dir}/engine"
+    RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}/engine"
+    RunCommand find "${derived_dir}/engine/Flutter.framework" -type f -exec chmod a-w "{}" \;
+  else
+    RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
+    RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
+    RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
+  fi
+
   RunCommand pushd "${project_path}" > /dev/null
 
   AssertExists "${target_path}"
@@ -100,13 +113,6 @@ BuildApp() {
   local local_engine_flag=""
   if [[ -n "$LOCAL_ENGINE" ]]; then
     local_engine_flag="--local-engine=$LOCAL_ENGINE"
-  fi
-
-  local preview_dart_2_flag=""
-  if [[ -n "$PREVIEW_DART_2" ]]; then
-    preview_dart_2_flag="--preview-dart-2"
-  else
-    preview_dart_2_flag="--no-preview-dart-2"
   fi
 
   local track_widget_creation_flag=""
@@ -127,7 +133,6 @@ BuildApp() {
       --${build_mode}                                                       \
       --ios-arch="${archs}"                                                 \
       ${local_engine_flag}                                                  \
-      ${preview_dart_2_flag}                                                \
       ${track_widget_creation_flag}
 
     if [[ $? -ne 0 ]]; then
@@ -136,7 +141,26 @@ BuildApp() {
     fi
     StreamOutput "done"
 
-    RunCommand cp -r -- "${build_dir}/aot/App.framework" "${derived_dir}"
+    local app_framework="${build_dir}/aot/App.framework"
+
+    RunCommand cp -r -- "${app_framework}" "${derived_dir}"
+
+    StreamOutput " ├─Generating dSYM file..."
+    RunCommand xcrun dsymutil -o "${build_dir}/aot/App.dSYM" "${app_framework}/App"
+    if [[ $? -ne 0 ]]; then
+      EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
+      exit -1
+    fi
+    StreamOutput "done"
+
+    StreamOutput " ├─Stripping debug symbols..."
+    RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
+    if [[ $? -ne 0 ]]; then
+      EchoError "Failed to strip ${derived_dir}/App.framework/App."
+      exit -1
+    fi
+    StreamOutput "done"
+
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
 
@@ -155,7 +179,13 @@ BuildApp() {
         -install_name '@rpath/App.framework/App' \
         -o "${derived_dir}/App.framework/App" -)"
   fi
-  RunCommand cp -- "${project_path}/ios/Flutter/AppFrameworkInfo.plist" "${derived_dir}/App.framework/Info.plist"
+
+  local plistPath="${project_path}/ios/Flutter/AppFrameworkInfo.plist"
+  if [[ -e "${project_path}/.ios" ]]; then
+    plistPath="${project_path}/.ios/Flutter/AppFrameworkInfo.plist"
+  fi
+
+  RunCommand cp -- "$plistPath" "${derived_dir}/App.framework/Info.plist"
 
   local precompilation_flag=""
   if [[ "$CURRENT_ARCH" != "x86_64" ]] && [[ "$build_mode" != "debug" ]]; then
@@ -174,7 +204,6 @@ BuildApp() {
     --asset-dir="${derived_dir}/flutter_assets"                             \
     ${precompilation_flag}                                                  \
     ${local_engine_flag}                                                    \
-    ${preview_dart_2_flag}                                                  \
     ${track_widget_creation_flag}
 
   if [[ $? -ne 0 ]]; then
@@ -264,7 +293,7 @@ ThinAppFrameworks() {
 
 # Main entry point.
 
-# TODO(cbracken) improve error handling, then enable set -e
+# TODO(cbracken): improve error handling, then enable set -e
 
 if [[ $# == 0 ]]; then
   # Backwards-compatibility: if no args are provided, build.

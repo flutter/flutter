@@ -99,24 +99,24 @@ enum Brightness {
 class SystemUiOverlayStyle {
   /// System overlays should be drawn with a light color. Intended for
   /// applications with a dark background.
-  static const SystemUiOverlayStyle light = const SystemUiOverlayStyle(
-    systemNavigationBarColor: const Color(0xFFFFFFFF),
-    systemNavigationBarDividerColor: null,
-    statusBarColor: null,
-    systemNavigationBarIconBrightness: Brightness.dark,
-    statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness: Brightness.light,
-  );
-
-  /// System overlays should be drawn with a dark color. Intended for
-  /// applications with a light background.
-  static const SystemUiOverlayStyle dark = const SystemUiOverlayStyle(
-    systemNavigationBarColor: const Color(0xFF000000),
+  static const SystemUiOverlayStyle light = SystemUiOverlayStyle(
+    systemNavigationBarColor: Color(0xFF000000),
     systemNavigationBarDividerColor: null,
     statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
+  );
+
+  /// System overlays should be drawn with a dark color. Intended for
+  /// applications with a light background.
+  static const SystemUiOverlayStyle dark = SystemUiOverlayStyle(
+    systemNavigationBarColor: Color(0xFF000000),
+    systemNavigationBarDividerColor: null,
+    statusBarColor: null,
+    systemNavigationBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
   );
 
   /// Creates a new [SystemUiOverlayStyle].
@@ -130,32 +130,32 @@ class SystemUiOverlayStyle {
   });
 
   /// The color of the system bottom navigation bar.
-  /// 
+  ///
   /// Only honored in Android versions O and greater.
   final Color systemNavigationBarColor;
 
   /// The color of the divider between the system's bottom navigation bar and the app's content.
-  /// 
+  ///
   /// Only honored in Android versions P and greater.
   final Color systemNavigationBarDividerColor;
 
   /// The brightness of the system navigation bar icons.
-  /// 
+  ///
   /// Only honored in Android versions O and greater.
   final Brightness systemNavigationBarIconBrightness;
 
   /// The color of top status bar.
-  /// 
+  ///
   /// Only honored in Android version M and greater.
   final Color statusBarColor;
 
   /// The brightness of top status bar.
-  /// 
+  ///
   /// Only honored in iOS.
   final Brightness statusBarBrightness;
 
   /// The brightness of the top status bar icons.
-  /// 
+  ///
   /// Only honored in Android version M and greater.
   final Brightness statusBarIconBrightness;
 
@@ -183,7 +183,7 @@ class SystemUiOverlayStyle {
     Brightness statusBarIconBrightness,
     Brightness systemNavigationBarIconBrightness,
   }) {
-    return new SystemUiOverlayStyle(
+    return SystemUiOverlayStyle(
       systemNavigationBarColor: systemNavigationBarColor ?? this.systemNavigationBarColor,
       systemNavigationBarDividerColor: systemNavigationBarDividerColor ?? this.systemNavigationBarDividerColor,
       statusBarColor: statusBarColor ?? this.statusBarColor,
@@ -330,5 +330,9 @@ class SystemChrome {
   }
 
   static SystemUiOverlayStyle _pendingStyle;
+
+  /// The last style that was set using [SystemChrome.setSystemUIOverlayStyle].
+  @visibleForTesting
+  static SystemUiOverlayStyle get latestStyle => _latestStyle;
   static SystemUiOverlayStyle _latestStyle;
 }

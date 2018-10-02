@@ -77,13 +77,13 @@ class ManifestError extends Error {
 // manually. It's not too much code and produces good error messages.
 Manifest _validateAndParseManifest(Map<dynamic, dynamic> manifestYaml) {
   _checkKeys(manifestYaml, 'manifest', const <String>['tasks']);
-  return new Manifest._(_validateAndParseTasks(manifestYaml['tasks']));
+  return Manifest._(_validateAndParseTasks(manifestYaml['tasks']));
 }
 
 List<ManifestTask> _validateAndParseTasks(dynamic tasksYaml) {
   _checkType(tasksYaml is Map, tasksYaml, 'Value of "tasks"', 'dictionary');
   final List<dynamic> sortedKeys = tasksYaml.keys.toList()..sort();
-  return sortedKeys.map((dynamic taskName) => _validateAndParseTask(taskName, tasksYaml[taskName])).toList();
+  return sortedKeys.map<ManifestTask>((dynamic taskName) => _validateAndParseTask(taskName, tasksYaml[taskName])).toList();
 }
 
 ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
@@ -108,7 +108,7 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
   }
 
   final List<dynamic> capabilities = _validateAndParseCapabilities(taskName, taskYaml['required_agent_capabilities']);
-  return new ManifestTask._(
+  return ManifestTask._(
     name: taskName,
     description: taskYaml['description'],
     stage: taskYaml['stage'],
@@ -129,7 +129,7 @@ List<String> _validateAndParseCapabilities(String taskName, dynamic capabilities
 
 void _checkType(bool isValid, dynamic value, String variableName, String typeName) {
   if (!isValid) {
-    throw new ManifestError(
+    throw ManifestError(
       '$variableName must be a $typeName but was ${value.runtimeType}: $value',
     );
   }
@@ -137,14 +137,14 @@ void _checkType(bool isValid, dynamic value, String variableName, String typeNam
 
 void _checkIsNotBlank(dynamic value, String variableName, String ownerName) {
   if (value == null || value.isEmpty) {
-    throw new ManifestError('$variableName must not be empty in $ownerName.');
+    throw ManifestError('$variableName must not be empty in $ownerName.');
   }
 }
 
 void _checkKeys(Map<dynamic, dynamic> map, String variableName, List<String> allowedKeys) {
   for (String key in map.keys) {
     if (!allowedKeys.contains(key)) {
-      throw new ManifestError(
+      throw ManifestError(
         'Unrecognized property "$key" in $variableName. '
         'Allowed properties: ${allowedKeys.join(', ')}');
     }

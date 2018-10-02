@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'runner.dart' as runner;
 import 'src/commands/analyze.dart';
+import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
 import 'src/commands/channel.dart';
 import 'src/commands/clean.dart';
@@ -22,10 +23,12 @@ import 'src/commands/ide_config.dart';
 import 'src/commands/inject_plugins.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
+import 'src/commands/make_host_app_editable.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
 import 'src/commands/screenshot.dart';
+import 'src/commands/shell_completion.dart';
 import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
@@ -47,32 +50,35 @@ Future<Null> main(List<String> args) async {
   final bool verboseHelp = help && verbose;
 
   await runner.run(args, <FlutterCommand>[
-    new AnalyzeCommand(verboseHelp: verboseHelp),
-    new BuildCommand(verboseHelp: verboseHelp),
-    new ChannelCommand(verboseHelp: verboseHelp),
-    new CleanCommand(),
-    new InjectPluginsCommand(hidden: !verboseHelp),
-    new ConfigCommand(verboseHelp: verboseHelp),
-    new CreateCommand(),
-    new DaemonCommand(hidden: !verboseHelp),
-    new DevicesCommand(),
-    new DoctorCommand(verbose: verbose),
-    new DriveCommand(),
-    new EmulatorsCommand(),
-    new FormatCommand(),
-    new FuchsiaReloadCommand(),
-    new IdeConfigCommand(hidden: !verboseHelp),
-    new InstallCommand(),
-    new LogsCommand(),
-    new PackagesCommand(),
-    new PrecacheCommand(),
-    new RunCommand(verboseHelp: verboseHelp),
-    new ScreenshotCommand(),
-    new StopCommand(),
-    new TestCommand(verboseHelp: verboseHelp),
-    new TraceCommand(),
-    new UpdatePackagesCommand(hidden: !verboseHelp),
-    new UpgradeCommand(),
+    AnalyzeCommand(verboseHelp: verboseHelp),
+    AttachCommand(verboseHelp: verboseHelp),
+    BuildCommand(verboseHelp: verboseHelp),
+    ChannelCommand(verboseHelp: verboseHelp),
+    CleanCommand(),
+    ConfigCommand(verboseHelp: verboseHelp),
+    CreateCommand(),
+    DaemonCommand(hidden: !verboseHelp),
+    DevicesCommand(),
+    DoctorCommand(verbose: verbose),
+    DriveCommand(),
+    EmulatorsCommand(),
+    FormatCommand(),
+    FuchsiaReloadCommand(),
+    IdeConfigCommand(hidden: !verboseHelp),
+    InjectPluginsCommand(hidden: !verboseHelp),
+    InstallCommand(),
+    LogsCommand(),
+    MakeHostAppEditableCommand(),
+    PackagesCommand(),
+    PrecacheCommand(),
+    RunCommand(verboseHelp: verboseHelp),
+    ScreenshotCommand(),
+    ShellCompletionCommand(),
+    StopCommand(),
+    TestCommand(verboseHelp: verboseHelp),
+    TraceCommand(),
+    UpdatePackagesCommand(hidden: !verboseHelp),
+    UpgradeCommand(),
   ], verbose: verbose,
      muteCommandLogging: muteCommandLogging,
      verboseHelp: verboseHelp);

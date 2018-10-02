@@ -47,7 +47,7 @@ class ConfigCommand extends FlutterCommand {
   @override
   String get usageFooter {
     // List all config settings.
-    String values = config.keys.map((String key) {
+    String values = config.keys.map<String>((String key) {
       return '  $key: ${config.getValue(key)}';
     }).join('\n');
     if (values.isNotEmpty)
@@ -57,7 +57,7 @@ class ConfigCommand extends FlutterCommand {
       'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
   }
 
-  /// Return null to disable tracking of the `config` command.
+  /// Return null to disable analytics recording of the `config` command.
   @override
   Future<String> get usagePath => null;
 

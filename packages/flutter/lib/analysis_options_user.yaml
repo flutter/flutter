@@ -23,12 +23,9 @@
 analyzer:
   language:
     enableSuperMixins: true
-  strong-mode: true
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
-    # treat missing returns as a warning (not a hint)
-    missing_return: warning
     # allow having TODOs in the code
     todo: ignore
 
@@ -48,7 +45,7 @@ linter:
     - camel_case_types
     - cancel_subscriptions
     - close_sinks
-    # - comment_references # blocked on https://github.com/dart-lang/dartdoc/issues/1153
+    # - comment_references # we do not presume as to what people want to reference in their dartdocs
     # - constant_identifier_names # https://github.com/dart-lang/linter/issues/204
     - control_flow_in_finally
     - empty_constructor_bodies
@@ -81,5 +78,6 @@ linter:
     # - unawaited_futures
     - unnecessary_brace_in_string_interps
     - unnecessary_getters_setters
+    - unnecessary_statements
     - unrelated_type_equality_checks
     - valid_regexps

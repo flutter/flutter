@@ -17,19 +17,19 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
     verify(canvas.drawPath(any, argThat(hasColor(0xFF666666))));
   });
@@ -38,20 +38,20 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
             opacity: 0.5,
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
     verify(canvas.drawPath(any, argThat(hasColor(0x80666666))));
   });
@@ -60,20 +60,20 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
-            color: const Color(0xFF0000FF),
+            color: Color(0xFF0000FF),
           )
         ),
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
     verify(canvas.drawPath(any, argThat(hasColor(0xFF0000FF))));
   });
@@ -82,20 +82,20 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
             size: 12.0,
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(12.0, 12.0));
     // arrow_menu default size is 48x48 so we expect it to be scaled by 0.25.
     verify(canvas.scale(0.25, 0.25));
@@ -105,13 +105,13 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
             size: 12.0,
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
             size: 96.0,
           )
@@ -119,20 +119,20 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(12.0, 12.0));
     // arrow_menu default size is 48x48 so we expect it to be scaled by 2.
     verify(canvas.scale(2.0, 2.0));
   });
 
   testWidgets('Semantic label', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const AnimatedIcon(
-          progress: const AlwaysStoppedAnimation<double>(0.0),
+        child: AnimatedIcon(
+          progress: AlwaysStoppedAnimation<double>(0.0),
           icon: AnimatedIcons.arrow_menu,
           size: 96.0,
           semanticLabel: 'a label',
@@ -149,19 +149,19 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.rtl,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
     verifyInOrder(<void>[
       canvas.rotate(math.pi),
@@ -173,19 +173,19 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
     verifyNever(canvas.rotate(any));
     verifyNever(canvas.translate(any, any));
@@ -195,12 +195,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
             textDirection: TextDirection.rtl,
           )
@@ -208,7 +208,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
     verifyInOrder(<void>[
       canvas.rotate(math.pi),
@@ -218,7 +218,7 @@ void main() {
 }
 
 PaintColorMatcher hasColor(int color) {
-  return new PaintColorMatcher(color);
+  return PaintColorMatcher(color);
 }
 
 class PaintColorMatcher extends Matcher {
@@ -233,6 +233,6 @@ class PaintColorMatcher extends Matcher {
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     final Paint actualPaint = item;
-    return actualPaint.color == new Color(expectedColor);
+    return actualPaint.color == Color(expectedColor);
   }
 }

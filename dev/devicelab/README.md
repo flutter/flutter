@@ -64,7 +64,7 @@ Legend:
 ![Task status legend](images/legend.png)
 
 The example below shows that commit `e122d5d` caused a wide-spread breakage,
-which was fixed by `bdc6f10`. It also shows that Travis, AppVeyor and Chrome
+which was fixed by `bdc6f10`. It also shows that Cirrus and Chrome
 Infra (left-most tasks) decided to skip building these commits. Hovering over
 a cell will pop up a tooltip containing the name of the broken task. Clicking
 on the cell will open the log file in a new browser tab (only visible to core
@@ -75,9 +75,9 @@ contributors as of today).
 ## Why is a task stuck on "new task" status?
 
 The dashboard aggregates build results from multiple build environments,
-including Travis, AppVeyor, Chrome Infra, and devicelab. While devicelab
+including Cirrus, Chrome Infra, and devicelab. While devicelab
 tests every commit that goes into the `master` branch, other environments
-may skip some commits. For example, Travis and AppVeyor will only test the
+may skip some commits. For example, Cirrus will only test the
 _last_ commit of a PR that's merged into the `master` branch. Chrome Infra may
 skip commits when they come in too fast.
 
@@ -106,6 +106,24 @@ You must set the `ANDROID_HOME` environment variable to run tests on Android. If
 you have a local build of the Flutter engine, then you have a copy of the
 Android SDK at `.../engine/src/third_party/android_tools/sdk`.
 
+You can find where your Android SDK is using `flutter doctor`.
+
+## Warnings
+
+Running devicelab will do things to your environment.
+
+Notably, it will start and stop gradle, for instance.
+
+## Running all tests
+
+To run all tests defined in `manifest.yaml`, use option `-a` (`--all`):
+
+```sh
+dart bin/run.dart -a
+```
+
+## Running specific tests
+
 To run a test, use option `-t` (`--task`):
 
 ```sh
@@ -127,19 +145,14 @@ To run multiple tests, repeat option `-t` (`--task`) multiple times:
 dart bin/run.dart -t test1 -t test2 -t test3
 ```
 
-To run all tests defined in `manifest.yaml`, use option `-a` (`--all`):
+To run tests from a specific stage, use option `-s` (`--stage`).
+Currently there are only three stages defined, `devicelab`,
+`devicelab_ios` and `devicelab_win`.
 
-```sh
-dart bin/run.dart -a
-```
-
-To run tests from a specific stage, use option `-s` (`--stage`):
 
 ```sh
 dart bin/run.dart -s {NAME_OF_STAGE}
 ```
-
-Currently there are only three stages defined, `devicelab`, `devicelab_ios` and `devicelab_win`.
 
 # Reproducing broken builds locally
 

@@ -62,10 +62,7 @@ class DriveCommand extends RunCommandBase {
               'just before the extension, so e.g. if the target is "lib/main.dart", the\n'
               'driver will be "test_driver/main_test.dart".',
         valueHelp: 'path',
-      )
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        help: 'Preview Dart 2.0 functionality.');
+      );
   }
 
   @override
@@ -94,7 +91,7 @@ class DriveCommand extends RunCommandBase {
     if (device == null)
       throwToolExit(null);
 
-    if (await fs.type(testFile) != FileSystemEntityType.FILE) // ignore: deprecated_member_use
+    if (await fs.type(testFile) != FileSystemEntityType.file)
       throwToolExit('Test file not found: $testFile');
 
     String observatoryUri;
@@ -123,7 +120,7 @@ class DriveCommand extends RunCommandBase {
     Cache.releaseLockEarly();
 
     try {
-      await testRunner(<String>[testFile], observatoryUri, argResults['preview-dart-2']);
+      await testRunner(<String>[testFile], observatoryUri);
     } catch (error, stackTrace) {
       if (error is ToolExit)
         rethrow;
@@ -182,7 +179,7 @@ class DriveCommand extends RunCommandBase {
 }
 
 /// Finds a device to test on. May launch a simulator, if necessary.
-typedef Future<Device> TargetDeviceFinder();
+typedef TargetDeviceFinder = Future<Device> Function();
 TargetDeviceFinder targetDeviceFinder = findTargetDevice;
 void restoreTargetDeviceFinder() {
   targetDeviceFinder = findTargetDevice;
@@ -209,14 +206,14 @@ Future<Device> findTargetDevice() async {
     return null;
   } else if (devices.length > 1) {
     printStatus('Found multiple connected devices:');
-    printStatus(devices.map((Device d) => '  - ${d.name}\n').join(''));
+    printStatus(devices.map<String>((Device d) => '  - ${d.name}\n').join(''));
   }
   printStatus('Using device ${devices.first.name}.');
   return devices.first;
 }
 
 /// Starts the application on the device given command configuration.
-typedef Future<LaunchResult> AppStarter(DriveCommand command);
+typedef AppStarter = Future<LaunchResult> Function(DriveCommand command);
 
 AppStarter appStarter = _startApp; // (mutable for testing)
 void restoreAppStarter() {
@@ -225,7 +222,7 @@ void restoreAppStarter() {
 
 Future<LaunchResult> _startApp(DriveCommand command) async {
   final String mainPath = findMainDartFile(command.targetFile);
-  if (await fs.type(mainPath) != FileSystemEntityType.FILE) { // ignore: deprecated_member_use
+  if (await fs.type(mainPath) != FileSystemEntityType.file) {
     printError('Tried to run $mainPath, but that file does not exist.');
     return null;
   }
@@ -257,7 +254,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
     package,
     mainPath: mainPath,
     route: command.route,
-    debuggingOptions: new DebuggingOptions.enabled(
+    debuggingOptions: DebuggingOptions.enabled(
       command.getBuildInfo(),
       startPaused: true,
       observatoryPort: command.observatoryPort,
@@ -275,28 +272,25 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef Future<Null> TestRunner(List<String> testArgs, String observatoryUri, bool previewDart2);
+typedef TestRunner = Future<Null> Function(List<String> testArgs, String observatoryUri);
 TestRunner testRunner = _runTests;
 void restoreTestRunner() {
   testRunner = _runTests;
 }
 
-Future<Null> _runTests(List<String> testArgs, String observatoryUri, bool previewDart2) async {
+Future<Null> _runTests(List<String> testArgs, String observatoryUri) async {
   printTrace('Running driver tests.');
 
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
-  final List<String> args = testArgs.toList()
-    ..add('--packages=${PackageMap.globalPackagesPath}')
-    ..add('-rexpanded');
-  if (previewDart2) {
-    args.add('--preview-dart-2');
-  } else {
-    args.add('--no-preview-dart-2');
-  }
-
   final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
   final int result = await runCommandAndStreamOutput(
-    <String>[dartVmPath]..addAll(dartVmFlags)..addAll(args),
+    <String>[dartVmPath]
+      ..addAll(dartVmFlags)
+      ..addAll(testArgs)
+      ..addAll(<String>[
+        '--packages=${PackageMap.globalPackagesPath}',
+        '-rexpanded',
+      ]),
     environment: <String, String>{ 'VM_SERVICE_URL': observatoryUri }
   );
   if (result != 0)
@@ -305,7 +299,7 @@ Future<Null> _runTests(List<String> testArgs, String observatoryUri, bool previe
 
 
 /// Stops the application.
-typedef Future<bool> AppStopper(DriveCommand command);
+typedef AppStopper = Future<bool> Function(DriveCommand command);
 AppStopper appStopper = _stopApp;
 void restoreAppStopper() {
   appStopper = _stopApp;

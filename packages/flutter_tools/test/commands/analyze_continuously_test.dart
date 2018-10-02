@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
@@ -20,11 +20,11 @@ void main() {
 
   setUp(() {
     FlutterCommandRunner.initFlutterRoot();
-    tempDir = fs.systemTempDirectory.createTempSync('analysis_test');
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_analysis_test.');
   });
 
   tearDown(() {
-    tempDir?.deleteSync(recursive: true);
+    tryToDelete(tempDir);
     return server?.dispose();
   });
 
@@ -34,7 +34,7 @@ void main() {
 
       await pubGet(context: PubContext.flutterTests, directory: tempDir.path);
 
-      server = new AnalysisServer(dartSdkPath, <String>[tempDir.path]);
+      server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
       int errorCount = 0;
       final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
@@ -54,7 +54,7 @@ void main() {
 
     await pubGet(context: PubContext.flutterTests, directory: tempDir.path);
 
-    server = new AnalysisServer(dartSdkPath, <String>[tempDir.path]);
+    server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
     int errorCount = 0;
     final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
@@ -70,40 +70,19 @@ void main() {
     OperatingSystemUtils: () => os
   });
 
-  testUsingContext('--preview-dart-2', () async {
+  testUsingContext('Returns no errors when source is error-free', () async {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
-    server = new AnalysisServer(dartSdkPath, <String>[tempDir.path], previewDart2: true);
+    server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
     int errorCount = 0;
     final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
     server.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });
-
     await server.start();
     await onDone;
-
     expect(errorCount, 0);
-  }, overrides: <Type, Generator>{
-    OperatingSystemUtils: () => os
-  });
-
-  testUsingContext('no --preview-dart-2 shows errors', () async {
-    const String contents = "StringBuffer bar = StringBuffer('baz');";
-    tempDir.childFile('main.dart').writeAsStringSync(contents);
-    server = new AnalysisServer(dartSdkPath, <String>[tempDir.path], previewDart2: false);
-
-    int errorCount = 0;
-    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
-    server.onErrors.listen((FileAnalysisErrors errors) {
-      errorCount += errors.errors.length;
-    });
-
-    await server.start();
-    await onDone;
-
-    expect(errorCount, 1);
   }, overrides: <Type, Generator>{
     OperatingSystemUtils: () => os
   });

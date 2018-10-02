@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'list_tile.dart';
 import 'switch.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// A [ListTile] with a [Switch]. In other words, a switch with a label.
 ///
@@ -40,7 +41,7 @@ import 'theme.dart';
 /// member field called `_lights`.
 ///
 /// ```dart
-/// new SwitchListTile(
+/// SwitchListTile(
 ///   title: const Text('Lights'),
 ///   value: _lights,
 ///   onChanged: (bool value) { setState(() { _lights = value; }); },
@@ -105,14 +106,14 @@ class SwitchListTile extends StatelessWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new SwitchListTile(
+  /// SwitchListTile(
   ///   value: _lights,
   ///   onChanged: (bool newValue) {
   ///     setState(() {
   ///       _lights = newValue;
   ///     });
   ///   },
-  ///   title: new Text('Lights'),
+  ///   title: Text('Lights'),
   /// )
   /// ```
   final ValueChanged<bool> onChanged;
@@ -165,17 +166,18 @@ class SwitchListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget control = new Switch(
+    final Widget control = Switch(
       value: value,
       onChanged: onChanged,
       activeColor: activeColor,
       activeThumbImage: activeThumbImage,
       inactiveThumbImage: inactiveThumbImage,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
-    return new MergeSemantics(
+    return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
-        child: new ListTile(
+        child: ListTile(
           leading: secondary,
           title: title,
           subtitle: subtitle,

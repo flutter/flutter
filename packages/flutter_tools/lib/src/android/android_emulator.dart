@@ -9,7 +9,8 @@ import 'package:meta/meta.dart';
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
 import '../base/file_system.dart';
-import '../base/process.dart';
+import '../base/io.dart';
+import '../base/process_manager.dart';
 import '../emulator.dart';
 import 'android_sdk.dart';
 
@@ -31,21 +32,23 @@ class AndroidEmulator extends Emulator {
   Map<String, String> _properties;
 
   @override
-  String get name => _properties['hw.device.name'];
+  String get name => _prop('hw.device.name');
 
   @override
-  String get manufacturer => _properties['hw.device.manufacturer'];
+  String get manufacturer => _prop('hw.device.manufacturer');
 
   @override
-  String get label => _properties['avd.ini.displayname'];
+  String get label => _prop('avd.ini.displayname');
+
+  String _prop(String name) => _properties != null ? _properties[name] : null;
 
   @override
   Future<void> launch() async {
     final Future<void> launchResult =
-        runAsync(<String>[getEmulatorPath(), '-avd', id])
-            .then((RunResult runResult) {
+        processManager.run(<String>[getEmulatorPath(), '-avd', id])
+            .then((ProcessResult runResult) {
               if (runResult.exitCode != 0) {
-                throw '$runResult';
+                throw '${runResult.stdout}\n${runResult.stderr}'.trimRight();
               }
             });
     // emulator continues running on a successful launch so if we
@@ -53,7 +56,7 @@ class AndroidEmulator extends Emulator {
     // return.
     return Future.any<void>(<Future<void>>[
       launchResult,
-      new Future<void>.delayed(const Duration(seconds: 3))
+      Future<void>.delayed(const Duration(seconds: 3))
     ]);
   }
 }
@@ -65,10 +68,12 @@ List<AndroidEmulator> getEmulatorAvds() {
     return <AndroidEmulator>[];
   }
 
-  final String listAvdsOutput = runSync(<String>[emulatorPath, '-list-avds']);
+  final String listAvdsOutput = processManager.runSync(<String>[emulatorPath, '-list-avds']).stdout;
 
   final List<AndroidEmulator> emulators = <AndroidEmulator>[];
-  extractEmulatorAvdInfo(listAvdsOutput, emulators);
+  if (listAvdsOutput != null) {
+    extractEmulatorAvdInfo(listAvdsOutput, emulators);
+  }
   return emulators;
 }
 
@@ -76,25 +81,30 @@ List<AndroidEmulator> getEmulatorAvds() {
 /// of emulators by reading information from the relevant ini files.
 void extractEmulatorAvdInfo(String text, List<AndroidEmulator> emulators) {
   for (String id in text.trim().split('\n').where((String l) => l != '')) {
-    emulators.add(_createEmulator(id));
+    emulators.add(_loadEmulatorInfo(id));
   }
 }
 
-AndroidEmulator _createEmulator(String id) {
+AndroidEmulator _loadEmulatorInfo(String id) {
   id = id.trim();
-  final File iniFile = fs.file(fs.path.join(getAvdPath(), '$id.ini'));
-  final Map<String, String> ini = parseIniLines(iniFile.readAsLinesSync());
-
-  if (ini['path'] != null) {
-    final File configFile = fs.file(fs.path.join(ini['path'], 'config.ini'));
-    if (configFile.existsSync()) {
-      final Map<String, String> properties =
-          parseIniLines(configFile.readAsLinesSync());
-      return new AndroidEmulator(id, properties);
+  final String avdPath = getAvdPath();
+  if (avdPath != null) {
+    final File iniFile = fs.file(fs.path.join(avdPath, '$id.ini'));
+    if (iniFile.existsSync()) {
+      final Map<String, String> ini = parseIniLines(iniFile.readAsLinesSync());
+      if (ini['path'] != null) {
+        final File configFile =
+            fs.file(fs.path.join(ini['path'], 'config.ini'));
+        if (configFile.existsSync()) {
+          final Map<String, String> properties =
+              parseIniLines(configFile.readAsLinesSync());
+          return AndroidEmulator(id, properties);
+        }
+      }
     }
   }
 
-  return new AndroidEmulator(id);
+  return AndroidEmulator(id);
 }
 
 @visibleForTesting
@@ -102,13 +112,13 @@ Map<String, String> parseIniLines(List<String> contents) {
   final Map<String, String> results = <String, String>{};
 
   final Iterable<List<String>> properties = contents
-      .map((String l) => l.trim())
+      .map<String>((String l) => l.trim())
       // Strip blank lines/comments
       .where((String l) => l != '' && !l.startsWith('#'))
       // Discard anything that isn't simple name=value
       .where((String l) => l.contains('='))
       // Split into name/value
-      .map((String l) => l.split('='));
+      .map<List<String>>((String l) => l.split('='));
 
   for (List<String> property in properties) {
     results[property[0].trim()] = property[1].trim();

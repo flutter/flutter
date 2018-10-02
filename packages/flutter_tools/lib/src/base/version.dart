@@ -4,7 +4,7 @@
 
 class Version implements Comparable<Version> {
   static final RegExp versionPattern =
-      new RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?');
+      RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?');
 
   /// The major version number: "1" in "1.2.3".
   final int major;
@@ -31,16 +31,16 @@ class Version implements Comparable<Version> {
         text = '$text.$patch';
     }
 
-    return new Version._(major ?? 0, minor ?? 0, patch ?? 0, text);
+    return Version._(major ?? 0, minor ?? 0, patch ?? 0, text);
   }
 
   Version._(this.major, this.minor, this.patch, this._text) {
     if (major < 0)
-      throw new ArgumentError('Major version must be non-negative.');
+      throw ArgumentError('Major version must be non-negative.');
     if (minor < 0)
-      throw new ArgumentError('Minor version must be non-negative.');
+      throw ArgumentError('Minor version must be non-negative.');
     if (patch < 0)
-      throw new ArgumentError('Patch version must be non-negative.');
+      throw ArgumentError('Patch version must be non-negative.');
   }
 
   /// Creates a new [Version] by parsing [text].
@@ -54,7 +54,7 @@ class Version implements Comparable<Version> {
       final int major = int.parse(match[1] ?? '0');
       final int minor = int.parse(match[3] ?? '0');
       final int patch = int.parse(match[5] ?? '0');
-      return new Version._(major, minor, patch, text);
+      return Version._(major, minor, patch, text);
     } on FormatException {
       return null;
     }
@@ -74,7 +74,7 @@ class Version implements Comparable<Version> {
   }
 
 
-  static Version get unknown => new Version(0, 0, 0, text: 'unknown');
+  static Version get unknown => Version(0, 0, 0, text: 'unknown');
 
   /// Two [Version]s are equal if their version numbers are. The version text
   /// is ignored.

@@ -9,10 +9,10 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:test/test.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
+import 'src/pubspec_schema.dart';
 
 void main() {
   setUpAll(() {
@@ -360,6 +360,33 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isEmpty, false);
+      expect(flutterManifest.isModule, false);
+      expect(flutterManifest.isPlugin, false);
+      expect(flutterManifest.androidPackage, null);
+    });
+
+    test('allows a module declaration', () async {
+      const String manifest = '''
+name: test
+flutter:
+  module:
+    androidPackage: com.example
+''';
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      expect(flutterManifest.isModule, true);
+      expect(flutterManifest.androidPackage, 'com.example');
+    });
+
+    test('allows a plugin declaration', () async {
+      const String manifest = '''
+name: test
+flutter:
+  plugin:
+    androidPackage: com.example
+''';
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      expect(flutterManifest.isPlugin, true);
+      expect(flutterManifest.androidPackage, 'com.example');
     });
 
     Future<void> checkManifestVersion({
@@ -476,7 +503,7 @@ flutter:
   });
 
   group('FlutterManifest with MemoryFileSystem', () {
-    void assertSchemaIsReadable() async {
+    Future<void> assertSchemaIsReadable() async {
       const String manifest = '''
 name: test
 dependencies:
@@ -489,23 +516,11 @@ flutter:
       expect(flutterManifest.isEmpty, false);
     }
 
-    void writeSchemaFile(FileSystem filesystem, String schemaData) {
-      final String schemaPath = buildSchemaPath(filesystem);
-      final File schemaFile = filesystem.file(schemaPath);
-
-      final String schemaDir = buildSchemaDir(filesystem);
-
-      filesystem.directory(schemaDir).createSync(recursive: true);
-      filesystem.file(schemaFile).writeAsStringSync(schemaData);
-    }
-
     void testUsingContextAndFs(String description, FileSystem filesystem,
         dynamic testMethod()) {
-      const String schemaData = '{}';
-
       testUsingContext(description,
               () async {
-            writeSchemaFile( filesystem, schemaData);
+            writeEmptySchemaFile(filesystem);
             testMethod();
       },
           overrides: <Type, Generator>{
@@ -514,18 +529,18 @@ flutter:
       );
     }
 
-    testUsingContext('Validate manifest on original fs', () async {
+    testUsingContext('Validate manifest on original fs', () {
       assertSchemaIsReadable();
     });
 
     testUsingContextAndFs('Validate manifest on Posix FS',
-        new MemoryFileSystem(style: FileSystemStyle.posix), () async {
+        MemoryFileSystem(style: FileSystemStyle.posix), () {
           assertSchemaIsReadable();
         }
     );
 
     testUsingContextAndFs('Validate manifest on Windows FS',
-        new MemoryFileSystem(style: FileSystemStyle.windows), () async {
+        MemoryFileSystem(style: FileSystemStyle.windows), () {
           assertSchemaIsReadable();
         }
     );

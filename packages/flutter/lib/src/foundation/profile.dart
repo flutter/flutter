@@ -5,7 +5,7 @@
 import 'dart:ui';
 
 /// Whether we've been built in release mode.
-const bool _kReleaseMode = const bool.fromEnvironment('dart.vm.product');
+const bool _kReleaseMode = bool.fromEnvironment('dart.vm.product');
 
 /// When running in profile mode (or debug mode), invoke the given function.
 ///

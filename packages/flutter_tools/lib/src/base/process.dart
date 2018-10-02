@@ -11,10 +11,10 @@ import 'io.dart';
 import 'process_manager.dart';
 import 'utils.dart';
 
-typedef String StringConverter(String string);
+typedef StringConverter = String Function(String string);
 
 /// A function that will be run before the VM exits.
-typedef Future<dynamic> ShutdownHook();
+typedef ShutdownHook = Future<dynamic> Function();
 
 // TODO(ianh): We have way too many ways to run subprocesses in this project.
 // Convert most of these into one or more lightweight wrappers around the
@@ -33,19 +33,19 @@ class ShutdownStage implements Comparable<ShutdownStage> {
 
   /// The stage before the invocation recording (if one exists) is serialized
   /// to disk. Tasks performed during this stage *will* be recorded.
-  static const ShutdownStage STILL_RECORDING = const ShutdownStage._(1);
+  static const ShutdownStage STILL_RECORDING = ShutdownStage._(1);
 
   /// The stage during which the invocation recording (if one exists) will be
   /// serialized to disk. Invocations performed after this stage will not be
   /// recorded.
-  static const ShutdownStage SERIALIZE_RECORDING = const ShutdownStage._(2);
+  static const ShutdownStage SERIALIZE_RECORDING = ShutdownStage._(2);
 
   /// The stage during which a serialized recording will be refined (e.g.
   /// cleansed for tests, zipped up for bug reporting purposes, etc.).
-  static const ShutdownStage POST_PROCESS_RECORDING = const ShutdownStage._(3);
+  static const ShutdownStage POST_PROCESS_RECORDING = ShutdownStage._(3);
 
   /// The stage during which temporary files and directories will be deleted.
-  static const ShutdownStage CLEANUP = const ShutdownStage._(4);
+  static const ShutdownStage CLEANUP = ShutdownStage._(4);
 
   @override
   int compareTo(ShutdownStage other) => priority.compareTo(other.priority);
@@ -137,8 +137,8 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
     environment: environment
   );
   final StreamSubscription<String> stdoutSubscription = process.stdout
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
       if (mapFunction != null)
@@ -152,8 +152,8 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
       }
     });
   final StreamSubscription<String> stderrSubscription = process.stderr
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
       if (mapFunction != null)
@@ -191,7 +191,9 @@ Future<int> runInteractively(List<String> command, {
     allowReentrantFlutter: allowReentrantFlutter,
     environment: environment,
   );
-  process.stdin.addStream(stdin);
+  // The real stdin will never finish streaming. Pipe until the child process
+  // finishes.
+  process.stdin.addStream(stdin); // ignore: unawaited_futures
   // Wait for stdout and stderr to be fully processed, because process.exitCode
   // may complete first.
   await Future.wait<dynamic>(<Future<dynamic>>[
@@ -203,7 +205,7 @@ Future<int> runInteractively(List<String> command, {
 
 Future<Null> runAndKill(List<String> cmd, Duration timeout) {
   final Future<Process> proc = runDetached(cmd);
-  return new Future<Null>.delayed(timeout, () async {
+  return Future<Null>.delayed(timeout, () async {
     printTrace('Intentionally killing ${cmd[0]}');
     processManager.killPid((await proc).pid);
   });
@@ -213,7 +215,7 @@ Future<Process> runDetached(List<String> cmd) {
   _traceCommand(cmd);
   final Future<Process> proc = processManager.start(
     cmd,
-    mode: ProcessStartMode.DETACHED, // ignore: deprecated_member_use
+    mode: ProcessStartMode.detached,
   );
   return proc;
 }
@@ -229,7 +231,7 @@ Future<RunResult> runAsync(List<String> cmd, {
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter, environment),
   );
-  final RunResult runResults = new RunResult(results);
+  final RunResult runResults = RunResult(results, cmd);
   printTrace(runResults.toString());
   return runResults;
 }
@@ -240,10 +242,10 @@ Future<RunResult> runCheckedAsync(List<String> cmd, {
   Map<String, String> environment
 }) async {
   final RunResult result = await runAsync(
-      cmd,
-      workingDirectory: workingDirectory,
-      allowReentrantFlutter: allowReentrantFlutter,
-      environment: environment
+    cmd,
+    workingDirectory: workingDirectory,
+    allowReentrantFlutter: allowReentrantFlutter,
+    environment: environment,
   );
   if (result.exitCode != 0)
     throw 'Exit code ${result.exitCode} from: ${cmd.join(' ')}:\n$result';
@@ -302,10 +304,11 @@ String runSync(List<String> cmd, {
 
 void _traceCommand(List<String> args, { String workingDirectory }) {
   final String argsText = args.join(' ');
-  if (workingDirectory == null)
-    printTrace(argsText);
-  else
-    printTrace('[$workingDirectory${fs.path.separator}] $argsText');
+  if (workingDirectory == null) {
+    printTrace('executing: $argsText');
+  } else {
+    printTrace('executing: [$workingDirectory${fs.path.separator}] $argsText');
+  }
 }
 
 String _runWithLoggingSync(List<String> cmd, {
@@ -364,9 +367,11 @@ class ProcessExit implements Exception {
 }
 
 class RunResult {
-  RunResult(this.processResult);
+  RunResult(this.processResult, this._command) : assert(_command != null), assert(_command.isNotEmpty);
 
   final ProcessResult processResult;
+
+  final List<String> _command;
 
   int get exitCode => processResult.exitCode;
   String get stdout => processResult.stdout;
@@ -374,11 +379,21 @@ class RunResult {
 
   @override
   String toString() {
-    final StringBuffer out = new StringBuffer();
+    final StringBuffer out = StringBuffer();
     if (processResult.stdout.isNotEmpty)
       out.writeln(processResult.stdout);
     if (processResult.stderr.isNotEmpty)
       out.writeln(processResult.stderr);
     return out.toString().trimRight();
+  }
+
+ /// Throws a [ProcessException] with the given `message`.
+ void throwException(String message) {
+    throw ProcessException(
+      _command.first,
+      _command.skip(1).toList(),
+      message,
+      exitCode,
+    );
   }
 }

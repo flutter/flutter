@@ -103,7 +103,7 @@ GOTO :after_subroutine
     SET update_dart_bin=%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
     SET "update_dart_bin=!update_dart_bin:'=''!"
-    CALL PowerShell.exe -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
+    PowerShell.exe -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to update Dart SDK. Retrying...
       timeout /t 5 /nobreak
@@ -113,42 +113,51 @@ GOTO :after_subroutine
   :do_snapshot
     IF EXIST "%FLUTTER_ROOT%\version" DEL "%FLUTTER_ROOT%\version"
     ECHO: > "%cache_dir%\.dartignore"
-    ECHO Updating flutter tool...
+    ECHO Building flutter tool...
     PUSHD "%flutter_tools_dir%"
 
     REM Makes changes to PUB_ENVIRONMENT only visible to commands within SETLOCAL/ENDLOCAL
     SETLOCAL
-      IF "%TRAVIS%" == "true" GOTO on_bot
+      SET VERBOSITY=--verbosity=error
+      IF "%CI%" == "true" GOTO on_bot
       IF "%BOT%" == "true" GOTO on_bot
       IF "%CONTINUOUS_INTEGRATION%" == "true" GOTO on_bot
       IF "%CHROME_HEADLESS%" == "1" GOTO on_bot
-      IF "%APPVEYOR%" == "true" GOTO on_bot
-      IF "%CI%" == "true" GOTO on_bot
       GOTO not_on_bot
       :on_bot
         SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_bot
+        SET VERBOSITY=--verbosity=normal
       :not_on_bot
       SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_install
       IF "%PUB_CACHE%" == "" (
-       IF EXIST "%pub_cache_path%" SET PUB_CACHE=%pub_cache_path%
+        IF EXIST "%pub_cache_path%" SET PUB_CACHE=%pub_cache_path%
       )
+
+      SET /A total_tries=10
+      SET /A remaining_tries=%total_tries%-1
       :retry_pub_upgrade
-      CALL "%pub%" upgrade --verbosity=error --no-packages-dir
-      IF "%ERRORLEVEL%" NEQ "0" (
-        ECHO Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds...
-        timeout /t 5 /nobreak
+        ECHO Running pub upgrade...
+        CALL "%pub%" upgrade "%VERBOSITY%" --no-packages-dir
+        IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
+        ECHO Error Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left)
+        timeout /t 5 /nobreak 2>NUL
+        SET /A remaining_tries-=1
+        IF "%remaining_tries%" EQU "0" GOTO upgrade_retries_exhausted
         GOTO :retry_pub_upgrade
-      )
+      :upgrade_retries_exhausted
+        SET exit_code=%ERRORLEVEL%
+        ECHO Error: 'pub upgrade' still failing after %total_tries% tries, giving up.
+        GOTO final_exit
+      :upgrade_succeeded
     ENDLOCAL
 
     POPD
 
-    :retry_dart_snapshot
-    CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
+    "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
     IF "%ERRORLEVEL%" NEQ "0" (
-      ECHO Error: Unable to create dart snapshot for flutter tool. Retrying...
-      timeout /t 5 /nobreak
-      GOTO :retry_dart_snapshot
+      ECHO Error: Unable to create dart snapshot for flutter tool.
+      SET exit_code=%ERRORLEVEL%
+      GOTO :final_exit
     )
     >"%stamp_path%" ECHO %revision%
 
@@ -157,19 +166,15 @@ GOTO :after_subroutine
 
 :after_subroutine
 
-CALL "%dart%" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %*
-SET exit_code=%ERRORLEVEL%
+REM Chaining the call to 'dart' and 'exit' with an ampersand ensures that
+REM Windows reads both commands into memory once before executing them. This
+REM avoids nasty errors that may otherwise occure when the dart command (e.g. as
+REM part of 'flutter upgrade') modifies this batch script while it is executing.
+REM
+REM Do not use the CALL command in the next line to execute Dart. CALL causes
+REM Windows to re-read the line from disk after the CALL command has finished
+REM regardless of the ampersand chain.
+"%dart%" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & exit /B !ERRORLEVEL!
 
-REM The VM exits with code 253 if the snapshot version is out-of-date.
-IF "%exit_code%" EQU "253" (
-  CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
-  SET exit_code=%ERRORLEVEL%
-  IF "%exit_code%" EQU "253" (
-    ECHO Error: Unable to create dart snapshot for flutter tool.
-    EXIT /B %exit_code%
-  )
-  CALL "%dart%" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %*
-  SET exit_code=%ERRORLEVEL%
-)
-
+:final_exit
 EXIT /B %exit_code%
