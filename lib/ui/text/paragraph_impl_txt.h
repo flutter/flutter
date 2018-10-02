@@ -8,7 +8,6 @@
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/text/paragraph_impl.h"
 #include "flutter/lib/ui/text/text_box.h"
-#include "flutter/third_party/txt/src/txt/paragraph.h"
 
 namespace blink {
 
@@ -29,7 +28,10 @@ class ParagraphImplTxt : public ParagraphImpl {
   void layout(double width) override;
   void paint(Canvas* canvas, double x, double y) override;
 
-  std::vector<TextBox> getRectsForRange(unsigned start, unsigned end) override;
+  std::vector<TextBox> getRectsForRange(
+      unsigned start,
+      unsigned end,
+      txt::Paragraph::RectStyle rect_style) override;
   Dart_Handle getPositionForOffset(double dx, double dy) override;
   Dart_Handle getWordBoundary(unsigned offset) override;
 

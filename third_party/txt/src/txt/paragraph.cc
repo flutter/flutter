@@ -674,11 +674,10 @@ void Paragraph::Layout(double width, bool force) {
               word_start_position = std::numeric_limits<double>::quiet_NaN();
             }
           }
-        }
+        }  // for each in glyph_blob
 
         if (glyph_positions.empty())
           continue;
-
         SkPaint::FontMetrics metrics;
         paint.getFontMetrics(&metrics);
         paint_records.emplace_back(run.style(), SkPoint::Make(run_x_offset, 0),
@@ -701,10 +700,10 @@ void Paragraph::Layout(double width, bool force) {
             Range<double>(glyph_positions.front().x_pos.start,
                           glyph_positions.back().x_pos.end),
             line_number, metrics, run.direction());
-      }
+      }  // for each in glyph_blobs
 
       run_x_offset += layout.getAdvance();
-    }
+    }  // for each in line_runs
 
     // Adjust the glyph positions based on the alignment of the line.
     double line_x_offset = GetLineXOffset(run_x_offset);
@@ -772,7 +771,7 @@ void Paragraph::Layout(double width, bool force) {
           SkPoint::Make(paint_record.offset().x() + line_x_offset, y_offset));
       records_.emplace_back(std::move(paint_record));
     }
-  }
+  }  // for each line_number
 
   if (paragraph_style_.max_lines == 1 ||
       (paragraph_style_.unlimited_lines() && paragraph_style_.ellipsized())) {
@@ -1067,8 +1066,10 @@ void Paragraph::PaintBackground(SkCanvas* canvas,
   canvas->drawRect(rect, record.style().background);
 }
 
-std::vector<Paragraph::TextBox> Paragraph::GetRectsForRange(size_t start,
-                                                            size_t end) const {
+std::vector<Paragraph::TextBox> Paragraph::GetRectsForRange(
+    size_t start,
+    size_t end,
+    RectStyle rect_style) const {
   std::map<size_t, std::vector<Paragraph::TextBox>> line_boxes;
 
   for (const CodeUnitRun& run : code_unit_runs_) {
@@ -1123,7 +1124,23 @@ std::vector<Paragraph::TextBox> Paragraph::GetRectsForRange(size_t start,
 
   std::vector<Paragraph::TextBox> boxes;
   for (const auto& kv : line_boxes) {
-    boxes.insert(boxes.end(), kv.second.begin(), kv.second.end());
+    if (rect_style & RectStyle::kTight) {
+      // Ignore line max height and width and generate tight bounds.
+      boxes.insert(boxes.end(), kv.second.begin(), kv.second.end());
+    } else {
+      // Set each box to the max height of each line to ensure continuity.
+      float min_top = DBL_MAX;
+      float max_bottom = 0;
+      for (const Paragraph::TextBox& box : kv.second) {
+        min_top = std::min(box.rect.fTop, min_top);
+        max_bottom = std::max(box.rect.fBottom, max_bottom);
+      }
+      for (const Paragraph::TextBox& box : kv.second) {
+        boxes.emplace_back(SkRect::MakeLTRB(box.rect.fLeft, min_top,
+                                            box.rect.fRight, max_bottom),
+                           box.direction);
+      }
+    }
   }
   return boxes;
 }
