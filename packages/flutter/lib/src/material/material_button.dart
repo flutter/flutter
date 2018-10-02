@@ -108,7 +108,6 @@ class MaterialButton extends StatelessWidget {
   ///  * [textColor] - The color to use for this button's text when the button is [enabled].
   final Color disabledTextColor;
 
-
   /// The button's fill color, displayed by its [Material], while it
   /// is in its default (unpressed, [enabled]) state.
   ///
@@ -117,7 +116,6 @@ class MaterialButton extends StatelessWidget {
   /// See also:
   ///   * [disabledColor] - the fill color of the button when the button is disabled.
   final Color color;
-
 
   /// The fill color of the button when the button is disabled.
   ///
@@ -163,16 +161,6 @@ class MaterialButton extends StatelessWidget {
   ///  * [disabledElevation], the elevation when the button is disabled.
   ///  * [highlightElevation], the elevation when the button is pressed.
   final double elevation;
-
-  /// The elevation for the button's [Material] when the button
-  /// is [enabled] but not pressed.
-  ///
-  /// Defaults to 2.0.
-  ///
-  /// See also:
-  ///
-  ///  * [highlightElevation], the default elevation.
-  ///  * [disabledElevation], the elevation when the button is disabled.
 
   /// The elevation for the button's [Material] when the button
   /// is [enabled] and pressed.
@@ -291,7 +279,7 @@ class MaterialButton extends StatelessWidget {
 //
 // This class only exists to give the label and icon button widgets a distinct
 /// class for the sake of [ButtonTheme]. It can not be instantiated.
-abstract class MaterialButtonWithIconMixin {
+mixin MaterialButtonWithIconMixin {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory MaterialButtonWithIconMixin._() => null;
