@@ -26,6 +26,7 @@ Widget buildFrame({
   bool isDense = false,
   bool isExpanded = false,
   Widget hint,
+  Widget disabledHint,
   List<String> items = menuItems,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
@@ -40,6 +41,7 @@ Widget buildFrame({
             key: buttonKey,
             value: value,
             hint: hint,
+            disabledHint: disabledHint,
             onChanged: onChanged,
             isDense: isDense,
             isExpanded: isExpanded,
@@ -776,5 +778,31 @@ void main() {
       ],
     ), ignoreId: true, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
+  });
+
+  testWidgets('Empty items disables menu and displays disabledHint', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    List<String> items;
+
+    Widget build() => buildFrame(buttonKey: buttonKey, value: null,
+                        items: items,
+                        hint: const Text('enabled'),
+                        disabledHint: const Text('disabled'));
+
+    // [disabledHint] should display when [items] is an empty list.
+    items = <String>[];
+    await tester.pumpWidget(build());
+    expect(find.text('disabled'), findsOneWidget);
+    final RenderBox disabledHintBox = tester.renderObject(find.byKey(buttonKey));
+
+    // A Dropdown button with a disabled hint should be the same size as a
+    // one with a regular enabled hint.
+    items = menuItems;
+    await tester.pumpWidget(build());
+    expect(find.text('disabled'), findsNothing);
+    expect(find.text('enabled'), findsOneWidget);
+    final RenderBox enabledHintBox = tester.renderObject(find.byKey(buttonKey));
+    expect(enabledHintBox.localToGlobal(Offset.zero), equals(disabledHintBox.localToGlobal(Offset.zero)));
+    expect(enabledHintBox.size, equals(disabledHintBox.size));
   });
 }
