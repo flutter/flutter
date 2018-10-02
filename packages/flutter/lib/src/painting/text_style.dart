@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, lerpDouble, TextShadow;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, lerpDouble, Shadow;
 
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
-import 'shadow.dart';
 
 const String _kDefaultDebugLabel = 'unknown';
 
@@ -377,7 +376,7 @@ class TextStyle extends Diagnosticable {
   /// 
   /// Shadows must be in the same order for [TextStyle] to be considered as
   /// equivalent as order produces differing transparency.
-  final List<Shadow> shadows;
+  final List<ui.Shadow> shadows;
 
   /// Creates a copy of this text style but with the given fields replaced with
   /// the new values.
@@ -397,7 +396,7 @@ class TextStyle extends Diagnosticable {
     Locale locale,
     Paint foreground,
     Paint background,
-    List<Shadow> shadows,
+    List<ui.Shadow> shadows,
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,
@@ -665,16 +664,6 @@ class TextStyle extends Diagnosticable {
 
   /// The style information for text runs, encoded for use by `dart:ui`.
   ui.TextStyle getTextStyle({ double textScaleFactor = 1.0 }) {
-    // Convert shadows to `dart:ui` TextShadows
-    List<ui.TextShadow> dartShadows = null;
-    if (shadows != null) {
-      dartShadows = [];
-      if (shadows.length > 0) {
-        shadows.forEach((shadow) {
-          dartShadows.add(shadow.convertToDartUiTextShadow());
-        });
-      }
-    }
     return ui.TextStyle(
       color: color,
       decoration: decoration,
@@ -691,7 +680,7 @@ class TextStyle extends Diagnosticable {
       locale: locale,
       foreground: foreground,
       background: background,
-      shadows: dartShadows,
+      shadows: shadows,
     );
   }
 
@@ -748,7 +737,7 @@ class TextStyle extends Diagnosticable {
         locale != other.locale ||
         foreground != other.foreground ||
         background != other.background ||
-        !Shadow.shadowsListEquals(shadows, other.shadows))
+        !ui.Shadow.shadowsListEquals(shadows, other.shadows))
       return RenderComparison.layout;
     if (color != other.color ||
         decoration != other.decoration ||
@@ -781,7 +770,7 @@ class TextStyle extends Diagnosticable {
            decoration == typedOther.decoration &&
            decorationColor == typedOther.decorationColor &&
            decorationStyle == typedOther.decorationStyle &&
-           Shadow.shadowsListEquals(shadows, typedOther.shadows);
+           ui.Shadow.shadowsListEquals(shadows, typedOther.shadows);
   }
 
   @override

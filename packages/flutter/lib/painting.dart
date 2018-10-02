@@ -17,6 +17,8 @@
 ///    painting boxes.
 library painting;
 
+export 'dart:ui' show Shadow;
+
 export 'src/painting/alignment.dart';
 export 'src/painting/basic_types.dart';
 export 'src/painting/beveled_rectangle_border.dart';
@@ -47,7 +49,6 @@ export 'src/painting/matrix_utils.dart';
 export 'src/painting/notched_shapes.dart';
 export 'src/painting/paint_utilities.dart';
 export 'src/painting/rounded_rectangle_border.dart';
-export 'src/painting/shadow.dart';
 export 'src/painting/shape_decoration.dart';
 export 'src/painting/stadium_border.dart';
 export 'src/painting/text_painter.dart';

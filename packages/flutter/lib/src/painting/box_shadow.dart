@@ -3,12 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show lerpDouble;
+import 'dart:ui' as ui show Shadow, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
-import 'shadow.dart';
 import 'debug.dart';
 
 /// A shadow cast by a box.
@@ -25,7 +24,7 @@ import 'debug.dart';
 ///  * [Canvas.drawShadow], which is a more efficient way to draw shadows.
 ///  * [Shadow], which is the parent class that lacks [spreadRadius].
 @immutable
-class BoxShadow extends Shadow {
+class BoxShadow extends ui.Shadow {
   /// Creates a box shadow.
   ///
   /// By default, the shadow is solid black with zero [offset], [blurRadius],
@@ -46,9 +45,16 @@ class BoxShadow extends Shadow {
   /// To honor those as well, the shape should be inflated by [spreadRadius] pixels
   /// in every direction and then translated by [offset] before being filled using
   /// this [Paint].
-  @override
   Paint toPaint() {
-    return super.toPaint();
+    final Paint result = Paint()
+      ..color = color
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma);
+    assert(() {
+      if (debugDisableShadows)
+        result.maskFilter = null;
+      return true;
+    }());
+    return result;
   }
 
   /// Returns a new box shadow with its offset, blurRadius, and spreadRadius scaled by the given factor.
