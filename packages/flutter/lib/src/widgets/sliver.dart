@@ -196,6 +196,25 @@ abstract class SliverChildDelegate {
 /// default) and in [RepaintBoundary] widgets if [addRepaintBoundaries] is true
 /// (also the default).
 ///
+/// ## Accessibility
+///
+/// The [CustomScrollView] requires that its semantic children are annotated
+/// using [IndexedChildSemantics]. This is done by default in the delegate with
+/// the `addSemanticIndexes` parameter set to true.
+///
+/// If multiple delegates are using in a single scroll view, then the indexes
+/// will not be correct by default. The `semanticIndexOffset` can be used to
+/// offset the semantic indexes of each delegate so that the indexes are
+/// monotonically increasing. For example, if a scroll view contains two
+/// delegates where the first has 10 children contributing semantics, then the
+/// second delegate should offset its children by 10.
+///
+/// In certain cases, only a subset of child widgets should be annotated
+/// with a semantic index. For example, in [new ListView.separated()] the
+/// separators do not have an index assocaited with them. This is done by
+/// providing a `semanticIndexCallback` which returns null for separators
+/// indexes and rounds the non-separator indexes down by half.
+///
 /// See also:
 ///
 ///  * [SliverChildListDelegate], which is a delegate that has an explicit list
@@ -327,6 +346,25 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 /// [AutomaticKeepAlive] widgets if [addAutomaticKeepAlives] is true (the
 /// default) and in [RepaintBoundary] widgets if [addRepaintBoundaries] is true
 /// (also the default).
+///
+/// ## Accessibility
+///
+/// The [CustomScrollView] requires that its semantic children are annotated
+/// using [IndexedChildSemantics]. This is done by default in the delegate with
+/// the `addSemanticIndexes` parameter set to true.
+///
+/// If multiple delegates are using in a single scroll view, then the indexes
+/// will not be correct by default. The `semanticIndexOffset` can be used to
+/// offset the semantic indexes of each delegate so that the indexes are
+/// monotonically increasing. For example, if a scroll view contains two
+/// delegates where the first has 10 children contributing semantics, then the
+/// second delegate should offset its children by 10.
+///
+/// In certain cases, only a subset of child widgets should be annotated
+/// with a semantic index. For example, in [new ListView.separated()] the
+/// separators do not have an index assocaited with them. This is done by
+/// providing a `semanticIndexCallback` which returns null for separators
+/// indexes and rounds the non-separator indexes down by half.
 ///
 /// See also:
 ///
