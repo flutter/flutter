@@ -53,6 +53,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, pushShaderMask)                   \
   V(SceneBuilder, pushPhysicalShape)                \
   V(SceneBuilder, pop)                              \
+  V(SceneBuilder, addRetained)                      \
   V(SceneBuilder, addPicture)                       \
   V(SceneBuilder, addTexture)                       \
   V(SceneBuilder, addChildScene)                    \
@@ -80,11 +81,12 @@ void SceneBuilder::pushTransform(const tonic::Float64List& matrix4) {
   PushLayer(std::move(layer));
 }
 
-void SceneBuilder::pushOffset(double dx, double dy) {
+fml::RefPtr<EngineLayer> SceneBuilder::pushOffset(double dx, double dy) {
   SkMatrix sk_matrix = SkMatrix::MakeTrans(dx, dy);
-  auto layer = std::make_unique<flow::TransformLayer>();
+  auto layer = std::make_shared<flow::TransformLayer>();
   layer->set_transform(sk_matrix);
-  PushLayer(std::move(layer));
+  PushLayer(layer);
+  return EngineLayer::MakeRetained(layer);
 }
 
 void SceneBuilder::pushClipRect(double left,
@@ -148,21 +150,29 @@ void SceneBuilder::pushShaderMask(Shader* shader,
   PushLayer(std::move(layer));
 }
 
-void SceneBuilder::pushPhysicalShape(const CanvasPath* path,
-                                     double elevation,
-                                     int color,
-                                     int shadow_color,
-                                     int clipBehavior) {
+fml::RefPtr<EngineLayer> SceneBuilder::pushPhysicalShape(const CanvasPath* path,
+                                                         double elevation,
+                                                         int color,
+                                                         int shadow_color,
+                                                         int clipBehavior) {
   const SkPath& sk_path = path->path();
   flow::Clip clip_behavior = static_cast<flow::Clip>(clipBehavior);
-  auto layer = std::make_unique<flow::PhysicalShapeLayer>(clip_behavior);
+  auto layer = std::make_shared<flow::PhysicalShapeLayer>(clip_behavior);
   layer->set_path(sk_path);
   layer->set_elevation(elevation);
   layer->set_color(static_cast<SkColor>(color));
   layer->set_shadow_color(static_cast<SkColor>(shadow_color));
   layer->set_device_pixel_ratio(
       UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio);
-  PushLayer(std::move(layer));
+  PushLayer(layer);
+  return EngineLayer::MakeRetained(layer);
+}
+
+void SceneBuilder::addRetained(fml::RefPtr<EngineLayer> retainedLayer) {
+  if (!current_layer_) {
+    return;
+  }
+  current_layer_->Add(retainedLayer->Layer());
 }
 
 void SceneBuilder::pop() {
@@ -260,7 +270,7 @@ fml::RefPtr<Scene> SceneBuilder::build() {
   return scene;
 }
 
-void SceneBuilder::PushLayer(std::unique_ptr<flow::ContainerLayer> layer) {
+void SceneBuilder::PushLayer(std::shared_ptr<flow::ContainerLayer> layer) {
   FML_DCHECK(layer);
 
   if (!root_layer_) {
