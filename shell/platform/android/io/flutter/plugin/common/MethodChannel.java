@@ -4,6 +4,7 @@
 
 package io.flutter.plugin.common;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
 import io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler;
 import io.flutter.plugin.common.BinaryMessenger.BinaryReply;
@@ -65,7 +66,7 @@ public final class MethodChannel {
      * @param method the name String of the method.
      * @param arguments the arguments for the invocation, possibly null.
      */
-    public void invokeMethod(String method, Object arguments) {
+    public void invokeMethod(String method, @Nullable Object arguments) {
         invokeMethod(method, arguments, null);
     }
 
@@ -78,7 +79,7 @@ public final class MethodChannel {
      * @param arguments the arguments for the invocation, possibly null.
      * @param callback a {@link Result} callback for the invocation result, or null.
      */
-    public void invokeMethod(String method, Object arguments, Result callback) {
+    public void invokeMethod(String method, @Nullable Object arguments, Result callback) {
         messenger.send(name, codec.encodeMethodCall(new MethodCall(method, arguments)),
             callback == null ? null : new IncomingResultHandler(callback));
     }
@@ -97,7 +98,7 @@ public final class MethodChannel {
      *
      * @param handler a {@link MethodCallHandler}, or null to deregister.
      */
-    public void setMethodCallHandler(final MethodCallHandler handler) {
+    public void setMethodCallHandler(final @Nullable MethodCallHandler handler) {
         messenger.setMessageHandler(name,
             handler == null ? null : new IncomingMethodCallHandler(handler));
     }
@@ -143,7 +144,7 @@ public final class MethodChannel {
          *
          * @param result The result, possibly null.
          */
-        void success(Object result);
+        void success(@Nullable Object result);
 
         /**
          * Handles an error result.
@@ -152,7 +153,7 @@ public final class MethodChannel {
          * @param errorMessage A human-readable error message String, possibly null.
          * @param errorDetails Error details, possibly null
          */
-        void error(String errorCode, String errorMessage, Object errorDetails);
+        void error(String errorCode, @Nullable String errorMessage, @Nullable Object errorDetails);
 
         /**
          * Handles a call to an unimplemented method.
