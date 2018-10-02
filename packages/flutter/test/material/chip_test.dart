@@ -1416,6 +1416,7 @@ void main() {
     );
 
     await tester.tap(find.byType(ChoiceChip));
+    expect(tester.takeException(), null);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -1429,6 +1430,7 @@ void main() {
     );
 
     await tester.tap(find.byType(RawChip));
+    expect(tester.takeException(), null);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1442,6 +1444,7 @@ void main() {
     );
 
     await tester.tap(find.byType(ActionChip));
+    expect(tester.takeException(), null);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1456,6 +1459,7 @@ void main() {
     );
 
     await tester.tap(find.byType(FilterChip));
+    expect(tester.takeException(), null);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -1469,6 +1473,7 @@ void main() {
     );
 
     await tester.tap(find.byType(InputChip));
+    expect(tester.takeException(), null);
   });
 
   testWidgets('Chip elevation works correctly', (WidgetTester tester) async {
