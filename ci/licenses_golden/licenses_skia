@@ -1,4 +1,4 @@
-Signature: 37a36ee5292e7d3ae8d903f56ea28c9f
+Signature: 399cdb65314267a828389673f77bd9f5
 
 UNUSED LICENSES:
 
@@ -1336,6 +1336,7 @@ FILE: ../../../third_party/skia/gm/shadermaskfilter.cpp
 FILE: ../../../third_party/skia/gm/sharedcorners.cpp
 FILE: ../../../third_party/skia/gm/skinning.cpp
 FILE: ../../../third_party/skia/gm/trickycubicstrokes.cpp
+FILE: ../../../third_party/skia/gm/wacky_yuv_formats.cpp
 FILE: ../../../third_party/skia/include/android/SkAnimatedImage.h
 FILE: ../../../third_party/skia/include/c/sk_colorspace.h
 FILE: ../../../third_party/skia/include/c/sk_imageinfo.h
@@ -1593,6 +1594,8 @@ FILE: ../../../third_party/skia/src/gpu/vk/GrVkImageLayout.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkPipelineLayout.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkPipelineLayout.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTypesPriv.cpp
+FILE: ../../../third_party/skia/src/image/SkImage_GpuShared.cpp
+FILE: ../../../third_party/skia/src/image/SkImage_GpuShared.h
 FILE: ../../../third_party/skia/src/image/SkImage_GpuYUVA.cpp
 FILE: ../../../third_party/skia/src/image/SkImage_GpuYUVA.h
 FILE: ../../../third_party/skia/src/image/SkImage_Lazy.h
