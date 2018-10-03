@@ -15,7 +15,7 @@
 ///  * Use the [TextPainter] class for painting text.
 ///  * Use [Decoration] (and more concretely [BoxDecoration]) for
 ///    painting boxes.
-library painting;
+library flutter.painting;
 
 export 'src/painting/alignment.dart';
 export 'src/painting/basic_types.dart';
