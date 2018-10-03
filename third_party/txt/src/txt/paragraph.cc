@@ -736,10 +736,8 @@ void Paragraph::Layout(double width, bool force) {
         max_line_spacing = line_spacing;
         if (line_number == 0) {
           alphabetic_baseline_ = line_spacing;
-          // TODO(garyq): Properly implement ideographic_baseline_ and update
-          // tests.
           ideographic_baseline_ =
-              (metrics.fUnderlinePosition - metrics.fAscent) * style.height;
+              (metrics.fDescent - metrics.fAscent) * style.height;
         }
       }
       max_line_spacing = std::max(line_spacing, max_line_spacing);

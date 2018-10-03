@@ -1876,7 +1876,7 @@ TEST_F(ParagraphTest, BaselineParagraph) {
   GetCanvas()->drawLine(0, paragraph->GetAlphabeticBaseline(),
                         paragraph->GetMaxWidth(),
                         paragraph->GetAlphabeticBaseline(), paint);
-  ASSERT_DOUBLE_EQ(paragraph->GetIdeographicBaseline(), 70.180000305175781);
+  ASSERT_DOUBLE_EQ(paragraph->GetIdeographicBaseline(), 79.035003662109375);
   ASSERT_DOUBLE_EQ(paragraph->GetAlphabeticBaseline(), 63.305000305175781);
 
   ASSERT_TRUE(Snapshot());
