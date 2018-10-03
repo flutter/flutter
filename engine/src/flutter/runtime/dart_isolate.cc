@@ -243,7 +243,7 @@ bool DartIsolate::LoadLibraries(bool is_root_isolate) {
 
   DartIO::InitForIsolate();
 
-  DartUI::InitForIsolate();
+  DartUI::InitForIsolate(is_root_isolate);
 
   const bool is_service_isolate = Dart_IsServiceIsolate(isolate());
 
