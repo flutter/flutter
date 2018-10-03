@@ -51,7 +51,7 @@ class DriveCommand extends RunCommandBase {
               'running, and --no-keep-app-running overrides it.',
       )
       ..addOption('use-existing-app',
-        help: 'Connect to an already running instance via the given observatory URL.\n'
+        help: 'Connect to an already running instance via the given observatory URL. '
               'If this option is given, the application will not be automatically started, '
               'and it will only be stopped if --no-keep-app-running is explicitly set.',
         valueHelp: 'url',

@@ -38,8 +38,8 @@ class TraceCommand extends FlutterCommand {
 
   @override
   final String usageFooter =
-    '\`trace\` called without the --start or --stop flags will automatically start tracing,\n'
-    'delay a set amount of time (controlled by --duration), and stop tracing. To explicitly\n'
+    '\`trace\` called without the --start or --stop flags will automatically start tracing, '
+    'delay a set amount of time (controlled by --duration), and stop tracing. To explicitly '
     'control tracing, call trace with --start and later with --stop.\n'
     'The --debug-port argument is required.';
 

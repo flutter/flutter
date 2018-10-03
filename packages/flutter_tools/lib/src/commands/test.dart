@@ -94,8 +94,8 @@ class TestCommand extends FlutterCommand {
     if (!fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
-        'Run this command from the root of your project. Test files must be\n'
-        'called *_test.dart and must reside in the package\'s \'test\'\n'
+        'Run this command from the root of your project. Test files must be '
+        'called *_test.dart and must reside in the package\'s \'test\' '
         'directory (or one of its subdirectories).');
     }
   }

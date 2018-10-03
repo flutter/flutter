@@ -122,26 +122,28 @@ class Doctor {
     bool allGood = true;
 
     for (DoctorValidator validator in validators) {
+      final StringBuffer lineBuffer = StringBuffer();
       final ValidationResult result = await validator.validate();
-      buffer.write('${result.leadingBox} ${validator.title} is ');
+      lineBuffer.write('${result.leadingBox} ${validator.title} is ');
       switch (result.type) {
         case ValidationType.missing:
-          buffer.write('not installed.');
+          lineBuffer.write('not installed.');
           break;
         case ValidationType.partial:
-          buffer.write('partially installed; more components are available.');
+          lineBuffer.write('partially installed; more components are available.');
           break;
         case ValidationType.notAvailable:
-          buffer.write('not available.');
+          lineBuffer.write('not available.');
           break;
         case ValidationType.installed:
-          buffer.write('fully installed.');
+          lineBuffer.write('fully installed.');
           break;
       }
 
       if (result.statusInfo != null)
-        buffer.write(' (${result.statusInfo})');
+        lineBuffer.write(' (${result.statusInfo})');
 
+      buffer.write(wrapText(lineBuffer.toString(), hangingIndent: result.leadingBox.length + 1));
       buffer.writeln();
 
       if (result.type != ValidationType.installed)
@@ -192,10 +194,13 @@ class Doctor {
           break;
       }
 
-      if (result.statusInfo != null)
-        printStatus('${result.leadingBox} ${validator.title} (${result.statusInfo})');
-      else
-        printStatus('${result.leadingBox} ${validator.title}');
+      if (result.statusInfo != null) {
+        printStatus(wrapText('${result.leadingBox} ${validator.title} (${result.statusInfo})',
+            hangingIndent: result.leadingBox.length + 1));
+      } else {
+        printStatus(wrapText('${result.leadingBox} ${validator.title}',
+            hangingIndent: result.leadingBox.length + 1));
+      }
 
       for (ValidationMessage message in result.messages) {
         if (message.isError || message.isHint || verbose == true) {
