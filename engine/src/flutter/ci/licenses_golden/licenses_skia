@@ -1,4 +1,4 @@
-Signature: 399cdb65314267a828389673f77bd9f5
+Signature: e929f769731ca95f9225787a0c5a7ce9
 
 UNUSED LICENSES:
 
@@ -827,7 +827,6 @@ FILE: ../../../third_party/skia/include/codec/SkCodecAnimation.h
 FILE: ../../../third_party/skia/include/core/SkBlendMode.h
 FILE: ../../../third_party/skia/include/core/SkClipOp.h
 FILE: ../../../third_party/skia/include/core/SkColorSpace.h
-FILE: ../../../third_party/skia/include/core/SkColorSpaceXform.h
 FILE: ../../../third_party/skia/include/core/SkICC.h
 FILE: ../../../third_party/skia/include/core/SkMilestone.h
 FILE: ../../../third_party/skia/include/core/SkOverdrawCanvas.h
@@ -971,7 +970,6 @@ FILE: ../../../third_party/skia/src/core/SkClipOpPriv.h
 FILE: ../../../third_party/skia/src/core/SkColorMatrixFilterRowMajor255.h
 FILE: ../../../third_party/skia/src/core/SkColorSpace.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpacePriv.h
-FILE: ../../../third_party/skia/src/core/SkColorSpaceXform.cpp
 FILE: ../../../third_party/skia/src/core/SkCpu.cpp
 FILE: ../../../third_party/skia/src/core/SkCpu.h
 FILE: ../../../third_party/skia/src/core/SkDeduper.h
