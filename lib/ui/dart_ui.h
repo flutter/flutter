@@ -12,7 +12,7 @@ namespace blink {
 class DartUI {
  public:
   static void InitForGlobal();
-  static void InitForIsolate();
+  static void InitForIsolate(bool is_root_isolate);
 
  private:
   FML_DISALLOW_IMPLICIT_CONSTRUCTORS(DartUI);
