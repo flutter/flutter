@@ -493,7 +493,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   }
 
   Iterable<Widget> _detailItemsFor(Section section) {
-    final Iterable<Widget> detailItems = section.details.map((SectionDetail detail) {
+    final Iterable<Widget> detailItems = section.details.map<Widget>((SectionDetail detail) {
       return SectionDetailView(detail: detail);
     });
     return ListTile.divideTiles(context: context, tiles: detailItems);
@@ -591,7 +591,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
                       },
                       child: PageView(
                         controller: _detailsPageController,
-                        children: allSections.map((Section section) {
+                        children: allSections.map<Widget>((Section section) {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: _detailItemsFor(section).toList(),

@@ -381,7 +381,7 @@ class _VideoDemoState extends State<VideoDemo>
 
     initController(butterflyController);
     initController(beeController);
-    isIOSSimulator().then((bool result) {
+    isIOSSimulator().then<void>((bool result) {
       isSupported = !result;
     });
   }

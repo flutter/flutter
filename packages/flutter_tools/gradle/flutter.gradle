@@ -307,6 +307,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('precompile')) {
             compilationTraceFilePathValue = project.property('precompile')
         }
+        Boolean buildHotUpdateValue = false
+        if (project.hasProperty('hotupdate')) {
+            buildHotUpdateValue = project.property('hotupdate').toBoolean()
+        }
         String extraFrontEndOptionsValue = null
         if (project.hasProperty('extra-front-end-options')) {
             extraFrontEndOptionsValue = project.property('extra-front-end-options')
@@ -349,6 +353,7 @@ class FlutterPlugin implements Plugin<Project> {
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
                 compilationTraceFilePath compilationTraceFilePathValue
+                buildHotUpdate buildHotUpdateValue
                 buildSharedLibrary buildSharedLibraryValue
                 targetPlatform targetPlatformValue
                 sourceDir project.file(project.flutter.source)
@@ -397,6 +402,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean trackWidgetCreation
     @Optional @Input
     String compilationTraceFilePath
+    @Optional @Input
+    Boolean buildHotUpdate
     @Optional @Input
     Boolean buildSharedLibrary
     @Optional @Input
@@ -490,6 +497,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (compilationTraceFilePath != null) {
                 args "--precompile", compilationTraceFilePath
+            }
+            if (buildHotUpdate) {
+                args "--hotupdate"
             }
             if (extraFrontEndOptions != null) {
                 args "--extra-front-end-options", "${extraFrontEndOptions}"

@@ -43,7 +43,7 @@ Widget buildFrame({
             onChanged: onChanged,
             isDense: isDense,
             isExpanded: isExpanded,
-            items: items.map((String item) {
+            items: items.map<DropdownMenuItem<String>>((String item) {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
                 value: item,
@@ -407,7 +407,7 @@ void main() {
 
     // When isDense is true, the button's height is reduced. The menu items'
     // heights are not.
-    final double menuItemHeight = itemBoxes.map((RenderBox box) => box.size.height).reduce(math.max);
+    final double menuItemHeight = itemBoxes.map<double>((RenderBox box) => box.size.height).reduce(math.max);
     expect(menuItemHeight, greaterThan(buttonBox.size.height));
 
     for (RenderBox itemBox in itemBoxes) {

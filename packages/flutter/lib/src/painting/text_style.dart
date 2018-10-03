@@ -246,9 +246,7 @@ class TextStyle extends Diagnosticable {
     String package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        assert(inherit != null),
-       // TODO(dnfield): once https://github.com/dart-lang/sdk/issues/33408 is finished, this can be replaced with
-       // assert(color == null || foreground == null, _kColorForegroundWarning);
-       assert(identical(color, null) || identical(foreground, null), _kColorForegroundWarning);
+       assert(color == null || foreground == null, _kColorForegroundWarning);
 
 
   /// Whether null values are replaced with their value in an ancestor text

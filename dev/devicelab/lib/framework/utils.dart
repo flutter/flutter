@@ -172,14 +172,14 @@ Future<String> getCurrentFlutterRepoCommit() {
     return null;
   }
 
-  return inDirectory(flutterDirectory, () {
+  return inDirectory<String>(flutterDirectory, () {
     return eval('git', <String>['rev-parse', 'HEAD']);
   });
 }
 
 Future<DateTime> getFlutterRepoCommitTimestamp(String commit) {
   // git show -s --format=%at 4b546df7f0b3858aaaa56c4079e5be1ba91fbb65
-  return inDirectory(flutterDirectory, () async {
+  return inDirectory<DateTime>(flutterDirectory, () async {
     final String unixTimestamp = await eval('git', <String>[
       'show',
       '-s',
@@ -235,7 +235,7 @@ Future<Process> startProcess(
   final ProcessInfo processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
 
-  process.exitCode.then((int exitCode) {
+  process.exitCode.then<void>((int exitCode) {
     print('"$executable" exit code: $exitCode');
     _runningProcesses.remove(processInfo);
   });
@@ -273,14 +273,14 @@ Future<int> exec(
   final Completer<Null> stdoutDone = Completer<Null>();
   final Completer<Null> stderrDone = Completer<Null>();
   process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         print('stdout: $line');
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         print('stderr: $line');
       }, onDone: () { stderrDone.complete(); });
@@ -310,15 +310,15 @@ Future<String> eval(
   final Completer<Null> stdoutDone = Completer<Null>();
   final Completer<Null> stderrDone = Completer<Null>();
   process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         print('stdout: $line');
         output.writeln(line);
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         print('stderr: $line');
       }, onDone: () { stderrDone.complete(); });
@@ -427,11 +427,11 @@ Future<Null> getFlutter(String revision) async {
     flutterDirectory.deleteSync(recursive: true);
   }
 
-  await inDirectory(flutterDirectory.parent, () async {
+  await inDirectory<void>(flutterDirectory.parent, () async {
     await exec('git', <String>['clone', 'https://github.com/flutter/flutter.git']);
   });
 
-  await inDirectory(flutterDirectory, () async {
+  await inDirectory<void>(flutterDirectory, () async {
     await exec('git', <String>['checkout', revision]);
   });
 

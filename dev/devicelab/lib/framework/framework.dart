@@ -148,8 +148,8 @@ class _TaskRunner {
 class TaskResult {
   /// Constructs a successful result.
   TaskResult.success(this.data, {this.benchmarkScoreKeys = const <String>[]})
-      : this.succeeded = true,
-        this.message = 'success' {
+      : succeeded = true,
+        message = 'success' {
     const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
     if (benchmarkScoreKeys != null) {
       for (String key in benchmarkScoreKeys) {
@@ -173,9 +173,9 @@ class TaskResult {
 
   /// Constructs an unsuccessful result.
   TaskResult.failure(this.message)
-      : this.succeeded = false,
-        this.data = null,
-        this.benchmarkScoreKeys = const <String>[];
+      : succeeded = false,
+        data = null,
+        benchmarkScoreKeys = const <String>[];
 
   /// Whether the task succeeded.
   final bool succeeded;

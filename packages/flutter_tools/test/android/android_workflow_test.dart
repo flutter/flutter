@@ -33,7 +33,7 @@ void main() {
 
   MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {
     final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(
-        stdout.map((String s) => s.codeUnits));
+        stdout.map<List<int>>((String s) => s.codeUnits));
     return (List<String> command) => MockProcess(stdout: stdoutStream);
   }
 

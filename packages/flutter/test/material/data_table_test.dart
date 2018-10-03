@@ -32,7 +32,7 @@ void main() {
             }
           ),
         ],
-        rows: kDesserts.map((Dessert dessert) {
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
             key: Key(dessert.name),
             onSelectChanged: (bool selected) {

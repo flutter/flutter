@@ -107,7 +107,7 @@ class AnsiTerminal {
   ///
   /// Useful when the console is in [singleCharMode].
   Stream<String> get onCharInput {
-    _broadcastStdInString ??= io.stdin.transform(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
+    _broadcastStdInString ??= io.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
     return _broadcastStdInString;
   }
 

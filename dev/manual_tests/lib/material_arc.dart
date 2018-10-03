@@ -452,7 +452,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
         appBar: AppBar(
           title: const Text('Animation'),
           bottom: TabBar(
-            tabs: _allDemos.map((_ArcDemo demo) => Tab(text: demo.title)).toList(),
+            tabs: _allDemos.map<Tab>((_ArcDemo demo) => Tab(text: demo.title)).toList(),
           ),
         ),
         floatingActionButton: Builder(
@@ -466,7 +466,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
           },
         ),
         body: TabBarView(
-          children: _allDemos.map((_ArcDemo demo) => demo.builder(demo)).toList()
+          children: _allDemos.map<Widget>((_ArcDemo demo) => demo.builder(demo)).toList()
         )
       )
     );
