@@ -20,7 +20,7 @@ void main() {
     FlutterTestDriver _flutter;
 
     setUp(() async {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_expression_test.');
+      tempDir = createResolvedTempDirectorySync();
       await _project.setUpIn(tempDir);
       _flutter = FlutterTestDriver(tempDir);
     });

@@ -9,6 +9,7 @@ import 'package:vm_service_client/vm_service_client.dart';
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
+import 'test_utils.dart';
 
 void main() {
   group('hot', () {
@@ -17,7 +18,7 @@ void main() {
     FlutterTestDriver _flutter;
 
     setUp(() async {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_hot_reload_test_app.');
+      tempDir = createResolvedTempDirectorySync();
       await _project.setUpIn(tempDir);
       _flutter = FlutterTestDriver(tempDir);
     });
