@@ -341,11 +341,10 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       menuTop = math.min(buttonTop, topPreferredLimit);
     double bottom = menuTop + menuHeight;
     final double bottomPreferredLimit = screenHeight - _kMenuItemHeight;
-    bool menuTopModified = false;
-    if (bottom > bottomPreferredLimit) {
+    final bool bottomOverLimit = bottom > bottomPreferredLimit;
+    if (bottomOverLimit) {
       bottom = math.max(buttonTop + _kMenuItemHeight, bottomPreferredLimit);
       menuTop = bottom - menuHeight;
-      menuTopModified = true;
     }
 
     if (scrollController == null) {
@@ -357,7 +356,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
         // of the dropdown is greater than the height of the display. In this
         // case We need to use the original, raw value of the menuTop to find
         // out what the actual scroll position is.
-        if (menuTopModified) {
+        if (bottomOverLimit) {
           scrollOffset = selectedItemOffset - (buttonTop - originalMenuTop);
         }
       }

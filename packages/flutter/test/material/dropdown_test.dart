@@ -778,19 +778,14 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Dropdown listview scroll position when placed not at the top', (WidgetTester tester) async {
-    int value = 0;
+  testWidgets('Dropdown in middle showing middle item', (WidgetTester tester) async {
     final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
-    for (int i = 0; i < 222; ++i)
+    for (int i = 0; i < 100; ++i)
       items.add(DropdownMenuItem<int>(value: i, child: Text('$i')));
 
-    void handleChanged(int newValue) {
-      value = newValue;
-    }
-
     final DropdownButton<int> button = DropdownButton<int>(
-      value: value,
-      onChanged: handleChanged,
+      value: 50,
+      onChanged: (int newValue){},
       items: items,
     );
 
@@ -815,10 +810,119 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('0'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('50'));
+    await tester.pumpAndSettle();
+    expect(getMenuScroll(), 2180.0);
+  });
 
+  testWidgets('Dropdown in top showing bottom item', (WidgetTester tester) async {
+    final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
+    for (int i = 0; i < 100; ++i)
+      items.add(DropdownMenuItem<int>(value: i, child: Text('$i')));
+
+    final DropdownButton<int> button = DropdownButton<int>(
+      value: 99,
+      onChanged: (int newValue){},
+      items: items,
+    );
+
+    double getMenuScroll() {
+      double scrollPosition;
+      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ScrollController scrollController = listView.controller;
+      assert(scrollController != null);
+      scrollPosition = scrollController.position.pixels;
+      assert(scrollPosition != null);
+      return scrollPosition;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: button,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('99'));
+    await tester.pumpAndSettle();
+    expect(getMenuScroll(), 4312.0);
+  });
+
+  testWidgets('Dropdown in bottom showing top item', (WidgetTester tester) async {
+    final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
+    for (int i = 0; i < 100; ++i)
+      items.add(DropdownMenuItem<int>(value: i, child: Text('$i')));
+
+    final DropdownButton<int> button = DropdownButton<int>(
+      value: 0,
+      onChanged: (int newValue){},
+      items: items,
+    );
+
+    double getMenuScroll() {
+      double scrollPosition;
+      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ScrollController scrollController = listView.controller;
+      assert(scrollController != null);
+      scrollPosition = scrollController.position.pixels;
+      assert(scrollPosition != null);
+      return scrollPosition;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: button,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('0'));
+    await tester.pumpAndSettle();
     expect(getMenuScroll(), 0.0);
+  });
+
+  testWidgets('Dropdown in center showing bottom item', (WidgetTester tester) async {
+    final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
+    for (int i = 0; i < 100; ++i)
+      items.add(DropdownMenuItem<int>(value: i, child: Text('$i')));
+
+    final DropdownButton<int> button = DropdownButton<int>(
+      value: 99,
+      onChanged: (int newValue){},
+      items: items,
+    );
+
+    double getMenuScroll() {
+      double scrollPosition;
+      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ScrollController scrollController = listView.controller;
+      assert(scrollController != null);
+      scrollPosition = scrollController.position.pixels;
+      assert(scrollPosition != null);
+      return scrollPosition;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Align(
+            alignment: Alignment.center,
+            child: button,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('99'));
+    await tester.pumpAndSettle();
+    expect(getMenuScroll(), 4312.0);
   });
 }
