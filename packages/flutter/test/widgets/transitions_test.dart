@@ -257,9 +257,8 @@ void main() {
   });
 
   testWidgets('RotationTransition animates', (WidgetTester tester) async {
-    final AnimationController controller =
-        new AnimationController(vsync: const TestVSync());
-    final Widget widget = new RotationTransition(
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final Widget widget = RotationTransition(
       alignment: Alignment.topRight,
       turns: controller,
       child: const Text('Rotation', textDirection: TextDirection.ltr),
@@ -285,9 +284,8 @@ void main() {
 
   testWidgets('RotationTransition maintains chosen alignment during animation',
       (WidgetTester tester) async {
-    final AnimationController controller =
-        new AnimationController(vsync: const TestVSync());
-    final Widget widget = new RotationTransition(
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final Widget widget = RotationTransition(
       alignment: Alignment.topRight,
       turns: controller,
       child: const Text('Rotation', textDirection: TextDirection.ltr),
