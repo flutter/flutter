@@ -132,14 +132,9 @@ class Theme extends StatelessWidget {
     }
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    if (inheritedTheme == null) {
-      final TextTheme geometryTheme = MaterialTextGeometry.localizedFor(
-        version: 0,
-        scriptCategory: localizations?.scriptCategory ?? ScriptCategory.englishLike,
-      );
-      return ThemeData.localize(_kFallbackTheme, geometryTheme);
-    }
-    return inheritedTheme.theme.data.localizeFor(localizations);
+    final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
+    final ThemeData theme = inheritedTheme?.theme?.data ?? _kFallbackTheme;
+    return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
 
   @override

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'text_theme.dart';
 import 'time.dart';
 import 'typography.dart';
 
