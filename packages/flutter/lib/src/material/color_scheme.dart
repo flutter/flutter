@@ -17,6 +17,7 @@ import 'theme_data.dart';
 /// with [ColorScheme.fromSwatch].
 @immutable
 class ColorScheme extends Diagnosticable {
+  /// Create a ColorScheme instance.
   const ColorScheme({
     @required this.primary,
     @required this.primaryVariant,
@@ -45,6 +46,8 @@ class ColorScheme extends Diagnosticable {
        assert(onError != null),
        assert(brightness != null);
 
+  /// Create a ColorScheme based on a purple primary color that matches the
+  /// [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
   const ColorScheme.light({
     this.primary = const Color(0xff6200ee),
     this.primaryVariant = const Color(0xff3700b3),
@@ -73,6 +76,8 @@ class ColorScheme extends Diagnosticable {
        assert(onError != null),
        assert(brightness != null);
 
+  /// Create dark version of the
+  /// [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
   const ColorScheme.dark({
     this.primary = const Color(0xffbb86fc),
     this.primaryVariant = const Color(0xff4b01d0),
@@ -101,6 +106,10 @@ class ColorScheme extends Diagnosticable {
        assert(onError != null),
        assert(brightness != null);
 
+  /// Create a color scheme from a [MaterialColor] swatch.
+  ///
+  /// This constructor is used by [ThemeData] to create its default \
+  /// color scheme.
   factory ColorScheme.fromSwatch({
     MaterialColor primarySwatch = Colors.blue,
     Color primaryColorDark,
@@ -137,20 +146,49 @@ class ColorScheme extends Diagnosticable {
 
   static Brightness _brightnessFor(Color color) => ThemeData.estimateBrightnessForColor(color);
 
+  /// The color displayed most frequently across your app’s screens and components.
   final Color primary;
+
+  /// A darker version of the primary color.
   final Color primaryVariant;
+
+  /// An accent color that, when used sparingly, calls attention to parts
+  /// of your app.
   final Color secondary;
+
+  /// A darker version of the secondary color.
   final Color secondaryVariant;
+
+  /// A color that typically appears behind scrollable content.
   final Color background;
+
+  /// The color to use for input validation errors, e.g. for
+  /// [InputDecoration.errorText].
   final Color error;
+
+  /// The background color for widgets like [Card].
   final Color surface;
+
+  /// A color that's clearly legible when drawn on [primary].
   final Color onPrimary;
+
+  /// A color that's clearly legible when drawn on [secondary].
   final Color onSecondary;
+
+  /// A color that's clearly legible when drawn on [surface].
   final Color onSurface;
+
+  /// A color that's clearly legible when drawn on [error].
   final Color onError;
+
+  /// A color that's clearly legible when drawn on [background].
   final Color onBackground;
+
+  /// The overall brightness of this color scheme.
   final Brightness brightness;
 
+  /// Creates a copy of this color scheme with the given fields
+  /// replaced by the non-null parameter values.
   ColorScheme copyWith({
     Color primary,
     Color primaryVariant,
@@ -183,6 +221,9 @@ class ColorScheme extends Diagnosticable {
     );
   }
 
+  /// Linearly interpolate between two [ColorScheme] objects.
+  ///
+  /// {@macro flutter.material.themeData.lerp}
   static ColorScheme lerp(ColorScheme a, ColorScheme b, double t) {
     return ColorScheme(
       primary: Color.lerp(a.primary, b.primary, t),
