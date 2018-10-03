@@ -16,7 +16,7 @@ import 'hit_test.dart';
 import 'pointer_router.dart';
 
 /// A binding for the gesture subsystem.
-mixin GestureBinding on BindingBase, HitTestable, HitTestDispatcher, HitTestTarget {
+mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, HitTestTarget {
   @override
   void initInstances() {
     super.initInstances();

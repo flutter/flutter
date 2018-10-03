@@ -241,7 +241,7 @@ abstract class WidgetsBindingObserver {
 }
 
 /// The glue between the widgets layer and the Flutter engine.
-mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererBinding {
+mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
   @override
   void initInstances() {
     super.initInstances();
