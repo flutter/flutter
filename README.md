@@ -71,13 +71,13 @@ class CounterState extends State<Counter> {
     // build methods fast, so that you can just rebuild anything that
     // needs updating rather than having to individually change
     // instances of widgets.
-    return new Row(
+    return Row(
       children: <Widget>[
-        new RaisedButton(
+        RaisedButton(
           onPressed: increment,
-          child: new Text('Increment'),
+          child: Text('Increment'),
         ),
-        new Text('Count: $counter'),
+        Text('Count: $counter'),
       ],
     );
   }
