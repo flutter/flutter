@@ -28,6 +28,12 @@ if [[ "$SHARD" = "deploy_gallery" ]]; then
   version="$(<version)"
   if [[ "$OS" == "linux" ]]; then
     echo "Building Flutter Gallery $version for Android..."
+    set +x # Don't echo back the below.
+    if [ -n "$ANDROID_GALLERY_UPLOAD_KEY" ]; then
+      echo "$ANDROID_GALLERY_UPLOAD_KEY" | base64 --decode > /root/.android/debug.keystore
+    fi
+    set -x
+
     # ANDROID_HOME must be set in the env.
     (
       cd examples/flutter_gallery
