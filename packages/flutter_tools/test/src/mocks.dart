@@ -109,7 +109,7 @@ ro.build.version.codename=REL
 }
 
 /// A strategy for creating Process objects from a list of commands.
-typedef Process ProcessFactory(List<String> command);
+typedef ProcessFactory = Process Function(List<String> command);
 
 /// A ProcessManager that starts Processes by delegating to a ProcessFactory.
 class MockProcessManager implements ProcessManager {
@@ -287,10 +287,14 @@ class MemoryIOSink implements IOSink {
 /// A Stdio that collects stdout and supports simulated stdin.
 class MockStdio extends Stdio {
   final MemoryIOSink _stdout = MemoryIOSink();
+  final MemoryIOSink _stderr = MemoryIOSink();
   final StreamController<List<int>> _stdin = StreamController<List<int>>();
 
   @override
   IOSink get stdout => _stdout;
+
+  @override
+  IOSink get stderr => _stderr;
 
   @override
   Stream<List<int>> get stdin => _stdin.stream;
@@ -299,7 +303,8 @@ class MockStdio extends Stdio {
     _stdin.add(utf8.encode('$line\n'));
   }
 
-  List<String> get writtenToStdout => _stdout.writes.map(_stdout.encoding.decode).toList();
+  List<String> get writtenToStdout => _stdout.writes.map<String>(_stdout.encoding.decode).toList();
+  List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
 }
 
 class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {

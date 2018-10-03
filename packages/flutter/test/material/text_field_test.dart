@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:ui' as ui show window;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -144,7 +145,7 @@ void main() {
   }
 
   List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
-    return points.map((TextSelectionPoint point) {
+    return points.map<TextSelectionPoint>((TextSelectionPoint point) {
       return TextSelectionPoint(
         box.localToGlobal(point.point),
         point.direction,
@@ -1720,8 +1721,8 @@ void main() {
   });
 
   testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: const Material(
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
         child: DefaultTextStyle(
           style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
           child: Center(
@@ -1745,8 +1746,8 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: DefaultTextStyle(
             style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
             child: Center(
@@ -2842,7 +2843,7 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          label: 'label\nhelper',
+          label: 'label',
           id: 1,
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
@@ -2854,6 +2855,11 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: 2,
+              label: 'helper',
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              id: 3,
               label: '10 characters remaining',
               textDirection: TextDirection.ltr,
             ),
@@ -2868,7 +2874,7 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          label: 'hint\nhelper',
+          label: 'hint',
           id: 1,
           textDirection: TextDirection.ltr,
           textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
@@ -2884,7 +2890,15 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: 2,
+              label: 'helper',
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              id: 3,
               label: '10 characters remaining',
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isLiveRegion,
+              ],
               textDirection: TextDirection.ltr,
             ),
           ],
@@ -2921,8 +2935,7 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          label: 'label\nhelper',
-          id: 1,
+          label: 'label',
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
@@ -2931,6 +2944,10 @@ void main() {
             SemanticsFlag.isTextField,
           ],
           children: <TestSemantics>[
+            TestSemantics(
+              label: 'helper',
+              textDirection: TextDirection.ltr,
+            ),
             TestSemantics(
               label: '0 out of 10',
               textDirection: TextDirection.ltr,
@@ -2941,5 +2958,78 @@ void main() {
     ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
 
     semantics.dispose();
+  });
+
+  testWidgets('InputDecoration errorText semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'label',
+            hintText: 'hint',
+            errorText: 'oh no!',
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          label: 'label',
+          textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+          children: <TestSemantics>[
+            TestSemantics(
+              label: 'oh no!',
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isLiveRegion,
+              ],
+              textDirection: TextDirection.ltr,
+            ),
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('floating label does not overlap with value at large textScaleFactors', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'Just some text');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DefaultTextStyle(
+            style: const TextStyle(fontSize: 12.0, fontFamily: 'Ahem'),
+            child: MediaQuery(
+              data: MediaQueryData.fromWindow(ui.window).copyWith(textScaleFactor: 4.0),
+              child: Center(
+                child: TextField(
+                  decoration: const InputDecoration(labelText: 'Label', border: UnderlineInputBorder()),
+                  controller: controller,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    final Rect labelRect = tester.getRect(find.text('Label'));
+    final Rect fieldRect = tester.getRect(find.text('Just some text'));
+    expect(labelRect.bottom, lessThanOrEqualTo(fieldRect.top));
   });
 }

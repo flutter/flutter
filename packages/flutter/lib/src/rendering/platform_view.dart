@@ -303,7 +303,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 }
 
-typedef Offset _GlobalToLocal(Offset point);
+typedef _GlobalToLocal = Offset Function(Offset point);
 
 // Composes a stream of PointerEvent objects into AndroidMotionEvent objects
 // and dispatches them to the associated embedded Android view.
@@ -382,8 +382,8 @@ class _MotionEventsDispatcher {
         eventTime: event.timeStamp.inMilliseconds,
         action: action,
         pointerCount: pointerPositions.length,
-        pointerProperties: pointers.map((int i) => pointerProperties[i]).toList(),
-        pointerCoords: pointers.map((int i) => pointerPositions[i]).toList(),
+        pointerProperties: pointers.map<AndroidPointerProperties>((int i) => pointerProperties[i]).toList(),
+        pointerCoords: pointers.map<AndroidPointerCoords>((int i) => pointerPositions[i]).toList(),
         metaState: 0,
         buttonState: 0,
         xPrecision: 1.0,

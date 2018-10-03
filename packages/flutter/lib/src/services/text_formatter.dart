@@ -53,7 +53,7 @@ abstract class TextInputFormatter {
 
 /// Function signature expected for creating custom [TextInputFormatter]
 /// shorthands via [TextInputFormatter.withFunction];
-typedef TextEditingValue TextInputFormatFunction(
+typedef TextInputFormatFunction = TextEditingValue Function(
     TextEditingValue oldValue,
     TextEditingValue newValue,
 );
@@ -233,7 +233,7 @@ class WhitelistingTextInputFormatter extends TextInputFormatter {
       (String substring) {
         return whitelistedPattern
             .allMatches(substring)
-            .map((Match match) => match.group(0))
+            .map<String>((Match match) => match.group(0))
             .join();
       } ,
     );

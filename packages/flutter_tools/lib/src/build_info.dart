@@ -13,6 +13,7 @@ class BuildInfo {
   const BuildInfo(this.mode, this.flavor, {
     this.trackWidgetCreation = false,
     this.compilationTraceFilePath,
+    this.buildHotUpdate,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
     this.buildSharedLibrary,
@@ -41,6 +42,9 @@ class BuildInfo {
 
   /// Dart compilation trace file to use for JIT VM snapshot.
   final String compilationTraceFilePath;
+
+  /// Build differential snapshot.
+  final bool buildHotUpdate;
 
   /// Extra command-line options for front-end.
   final String extraFrontEndOptions;
@@ -97,6 +101,7 @@ class BuildInfo {
       BuildInfo(mode, flavor,
           trackWidgetCreation: trackWidgetCreation,
           compilationTraceFilePath: compilationTraceFilePath,
+          buildHotUpdate: buildHotUpdate,
           extraFrontEndOptions: extraFrontEndOptions,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
           buildSharedLibrary: buildSharedLibrary,

@@ -43,11 +43,11 @@ class AnalysisServer {
     _process.exitCode.whenComplete(() => _process = null); // ignore: unawaited_futures
 
     final Stream<String> errorStream =
-        _process.stderr.transform(utf8.decoder).transform(const LineSplitter());
+        _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
     errorStream.listen(printError);
 
     final Stream<String> inStream =
-        _process.stdout.transform(utf8.decoder).transform(const LineSplitter());
+        _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
     inStream.listen(_handleServerResponse);
 
     // Available options (many of these are obsolete):

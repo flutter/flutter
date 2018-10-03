@@ -53,7 +53,7 @@ Widget buildTest({ double startToEndThreshold, TextDirection textDirection = Tex
             itemExtent: itemExtent,
             children: <int>[0, 1, 2, 3, 4]
               .where((int i) => !dismissedItems.contains(i))
-              .map(buildDismissibleItem).toList(),
+              .map<Widget>(buildDismissibleItem).toList(),
           ),
         );
       },
@@ -61,7 +61,7 @@ Widget buildTest({ double startToEndThreshold, TextDirection textDirection = Tex
   );
 }
 
-typedef Future<Null> DismissMethod(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection });
+typedef DismissMethod = Future<Null> Function(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection });
 
 Future<Null> dismissElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection }) async {
   Offset downLocation;

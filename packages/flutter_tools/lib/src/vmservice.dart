@@ -22,7 +22,7 @@ import 'globals.dart';
 import 'vmservice_record_replay.dart';
 
 /// A function that opens a two-way communication channel to the specified [uri].
-typedef Future<StreamChannel<String>> _OpenChannel(Uri uri);
+typedef _OpenChannel = Future<StreamChannel<String>> Function(Uri uri);
 
 _OpenChannel _openChannel = _defaultOpenChannel;
 
@@ -37,13 +37,13 @@ _OpenChannel _openChannel = _defaultOpenChannel;
 /// hot mode.
 ///
 /// See: https://github.com/dart-lang/sdk/issues/30023
-typedef Future<Null> ReloadSources(
+typedef ReloadSources = Future<Null> Function(
   String isolateId, {
   bool force,
   bool pause,
 });
 
-typedef Future<String> CompileExpression(
+typedef CompileExpression = Future<String> Function(
   String isolateId,
   String expression,
   List<String> definitions,
@@ -289,7 +289,7 @@ class VMService {
     String method,
     Map<String, dynamic> params,
   ) {
-    return Future.any(<Future<Map<String, dynamic>>>[
+    return Future.any<Map<String, dynamic>>(<Future<Map<String, dynamic>>>[
       _peer.sendRequest(method, params).then<Map<String, dynamic>>(castStringKeyedMap),
       _connectionError.future,
     ]);
@@ -344,17 +344,10 @@ class VMService {
     return await _vm.reload();
   }
 
-  Future<Null> waitForViews({int attempts = 5, int attemptSeconds = 1}) async {
+  Future<Null> refreshViews() async {
     if (!vm.isFlutterEngine)
       return;
     await vm.refreshViews();
-    for (int i = 0; (vm.firstView == null) && (i < attempts); i++) {
-      // If the VM doesn't yet have a view, wait for one to show up.
-      printTrace('Waiting for Flutter view');
-      await Future<Null>.delayed(Duration(seconds: attemptSeconds));
-      await getVM();
-      await vm.refreshViews();
-    }
   }
 }
 
@@ -928,13 +921,12 @@ class VM extends ServiceObjectOwner {
                                Uri main,
                                Uri packages,
                                Uri assetsDirectory) {
-    // TODO(goderbauer): Transfer Uri (instead of file path) when remote end supports it.
     return invokeRpc<ServiceMap>('_flutter.runInView',
       params: <String, dynamic> {
         'viewId': viewId,
-        'mainScript': main.toFilePath(windows: false),
-        'packagesFile': packages.toFilePath(windows: false),
-        'assetDirectory': assetsDirectory.toFilePath(windows: false)
+        'mainScript': main.toString(),
+        'packagesFile': packages.toString(),
+        'assetDirectory': assetsDirectory.toString()
     });
   }
 
@@ -961,7 +953,7 @@ class VM extends ServiceObjectOwner {
       return;
     _viewCache.clear();
     for (Isolate isolate in isolates.toList()) {
-      await vmService.vm.invokeRpc('_flutter.listViews',
+      await vmService.vm.invokeRpc<ServiceObject>('_flutter.listViews',
           timeout: kLongRequestTimeout,
           params: <String, dynamic> {'isolateId': isolate.id});
     }
@@ -1215,7 +1207,7 @@ class Isolate extends ServiceObjectOwner {
       <Future<ProgramElement>>[];
     for (Map<String, dynamic> element in response['unused'])
       unusedElements.add(_describeElement(element));
-    return Future.wait(unusedElements);
+    return Future.wait<ProgramElement>(unusedElements);
   }
 
   /// Resumes the isolate.
@@ -1395,7 +1387,7 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   @override
   void removeWhere(bool test(String key, dynamic value)) => _map.removeWhere(test);
   @override
-  Map<K2, V2> map<K2, V2>(MapEntry<K2, V2> transform(String key, dynamic value)) => _map.map(transform);
+  Map<K2, V2> map<K2, V2>(MapEntry<K2, V2> transform(String key, dynamic value)) => _map.map<K2, V2>(transform);
   @override
   Iterable<MapEntry<String, dynamic>> get entries => _map.entries;
   @override
@@ -1447,7 +1439,7 @@ class FlutterView extends ServiceObject {
 
   Future<Null> setAssetDirectory(Uri assetsDirectory) async {
     assert(assetsDirectory != null);
-    await owner.vmService.vm.invokeRpc('_flutter.setAssetBundlePath',
+    await owner.vmService.vm.invokeRpc<ServiceObject>('_flutter.setAssetBundlePath',
         params: <String, dynamic>{
           'isolateId': _uiIsolate.id,
           'viewId': id,

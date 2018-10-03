@@ -43,11 +43,11 @@ class _SaltedKey<S, V> extends LocalKey {
 ///
 /// The position of the panel within an [ExpansionPanelList] is given by
 /// [panelIndex].
-typedef void ExpansionPanelCallback(int panelIndex, bool isExpanded);
+typedef ExpansionPanelCallback = void Function(int panelIndex, bool isExpanded);
 
 /// Signature for the callback that's called when the header of the
 /// [ExpansionPanel] needs to rebuild.
-typedef Widget ExpansionPanelHeaderBuilder(BuildContext context, bool isExpanded);
+typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool isExpanded);
 
 /// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
@@ -128,7 +128,7 @@ class ExpansionPanelList extends StatefulWidget {
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
-       this.initialOpenPanelValue = null,
+       initialOpenPanelValue = null,
        super(key: key);
 
   /// Creates a radio expansion panel list widget.

@@ -20,11 +20,6 @@ def parse_KV_file(file, separator='=')
     return pods_array
 end
 
-# Prepare symlinks folder. We use symlinks to avoid having Podfile.lock
-# referring to absolute paths on developers' machines.
-system('rm -rf .symlinks')
-system('mkdir -p .symlinks/plugins')
-
 def flutter_root(f)
     generated_xcode_build_settings = parse_KV_file(File.join(f, File.join('.ios', 'Flutter', 'Generated.xcconfig')))
     if generated_xcode_build_settings.empty?
@@ -38,32 +33,26 @@ def flutter_root(f)
     }
 end
 
-framework_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'Flutter')
+framework_dir = File.join(flutter_application_path, '.ios', 'Flutter')
+
 engine_dir = File.join(framework_dir, 'engine')
 if !File.exist?(engine_dir)
     # Copy the debug engine to have something to link against if the xcode backend script has not run yet.
     debug_framework_dir = File.join(flutter_root(flutter_application_path), 'bin', 'cache', 'artifacts', 'engine', 'ios')
-    FileUtils.mkdir(engine_dir)
+    FileUtils.mkdir_p(engine_dir)
     FileUtils.cp_r(File.join(debug_framework_dir, 'Flutter.framework'), engine_dir)
     FileUtils.cp(File.join(debug_framework_dir, 'Flutter.podspec'), engine_dir)
 end
 
-symlink = File.join('.symlinks', 'flutter')
+pod 'Flutter', :path => engine_dir
+pod 'FlutterPluginRegistrant', :path => File.join(framework_dir, 'FlutterPluginRegistrant')
 
-File.symlink(framework_dir, symlink)
-pod 'Flutter', :path => File.join(symlink, 'engine')
-
-
+symlinks_dir = File.join(framework_dir, '.symlinks')
+FileUtils.mkdir_p(symlinks_dir)
 plugin_pods = parse_KV_file(File.join(flutter_application_path, '.flutter-plugins'))
-
 plugin_pods.map { |r|
-    symlink = File.join('.symlinks', 'plugins', r[:name])
-
+    symlink = File.join(symlinks_dir, r[:name])
+    FileUtils.rm_f(symlink)
     File.symlink(r[:path], symlink)
     pod r[:name], :path => File.join(symlink, 'ios')
 }
-
-symlink = File.join('.symlinks', 'FlutterApp')
-File.symlink(File.absolute_path(flutter_application_path), symlink)
-
-pod 'FlutterPluginRegistrant', :path => File.join(symlink, '.ios', 'Flutter','FlutterPluginRegistrant')

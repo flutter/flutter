@@ -37,9 +37,9 @@ import 'icon_data.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.selectButtonBuilder].
-typedef Widget InspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed);
+typedef InspectorSelectButtonBuilder = Widget Function(BuildContext context, VoidCallback onPressed);
 
-typedef void _RegisterServiceExtensionCallback({
+typedef _RegisterServiceExtensionCallback = void Function({
   @required String name,
   @required ServiceExtensionCallback callback
 });
@@ -54,7 +54,7 @@ class _ProxyLayer extends Layer {
   _ProxyLayer(this._layer);
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     _layer.addToScene(builder, layerOffset);
   }
 
@@ -312,7 +312,7 @@ Rect _calculateSubtreeBounds(RenderObject object) {
 /// screenshots render to the scene in the local coordinate system of the layer.
 class _ScreenshotContainerLayer extends OffsetLayer {
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     addChildrenToScene(builder, layerOffset);
   }
 }
@@ -517,7 +517,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
   /// size of the output image. It is independent of the
   /// [window.devicePixelRatio] for the device, so specifying 1.0 (the default)
   /// will give you a 1:1 mapping between logical pixels and the output pixels
-  // / in the image.
+  /// in the image.
   ///
   /// The [debugPaint] argument specifies whether the image should include the
   /// output of [RenderObject.debugPaint] for [renderObject] with
@@ -588,7 +588,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
     // We must build the regular scene before we can build the screenshot
     // scene as building the screenshot scene assumes addToScene has already
     // been called successfully for all layers in the regular scene.
-    repaintBoundary.layer.addToScene(ui.SceneBuilder(), Offset.zero);
+    repaintBoundary.layer.addToScene(ui.SceneBuilder());
 
     return data.containerLayer.toImage(renderBounds, pixelRatio: pixelRatio);
   }
@@ -656,7 +656,7 @@ List<_DiagnosticsPathNode> _followDiagnosticableChain(List<Diagnosticable> chain
 
 /// Signature for the selection change callback used by
 /// [WidgetInspectorService.selectionChangedCallback].
-typedef void InspectorSelectionChangedCallback();
+typedef InspectorSelectionChangedCallback = void Function();
 
 /// Structure to help reference count Dart objects referenced by a GUI tool
 /// using [WidgetInspectorService].
@@ -1027,33 +1027,36 @@ class WidgetInspectorService {
       name: 'isWidgetCreationTracked',
       callback: isWidgetCreationTracked,
     );
-    registerServiceExtension(
-      name: 'screenshot',
-      callback: (Map<String, String> parameters) async {
-        assert(parameters.containsKey('id'));
-        assert(parameters.containsKey('width'));
-        assert(parameters.containsKey('height'));
+    assert(() {
+      registerServiceExtension(
+        name: 'screenshot',
+        callback: (Map<String, String> parameters) async {
+          assert(parameters.containsKey('id'));
+          assert(parameters.containsKey('width'));
+          assert(parameters.containsKey('height'));
 
-        final ui.Image image = await screenshot(
-          toObject(parameters['id']),
-          width: double.parse(parameters['width']),
-          height: double.parse(parameters['height']),
-          margin: parameters.containsKey('margin') ?
-              double.parse(parameters['margin']) : 0.0,
-          maxPixelRatio: parameters.containsKey('maxPixelRatio') ?
-              double.parse(parameters['maxPixelRatio']) : 1.0,
-          debugPaint: parameters['debugPaint'] == 'true',
-        );
-        if (image == null) {
-          return <String, Object>{'result': null};
-        }
-        final ByteData byteData = await image.toByteData(format:ui.ImageByteFormat.png);
+          final ui.Image image = await screenshot(
+            toObject(parameters['id']),
+            width: double.parse(parameters['width']),
+            height: double.parse(parameters['height']),
+            margin: parameters.containsKey('margin') ?
+                double.parse(parameters['margin']) : 0.0,
+            maxPixelRatio: parameters.containsKey('maxPixelRatio') ?
+                double.parse(parameters['maxPixelRatio']) : 1.0,
+            debugPaint: parameters['debugPaint'] == 'true',
+          );
+          if (image == null) {
+            return <String, Object>{'result': null};
+          }
+          final ByteData byteData = await image.toByteData(format:ui.ImageByteFormat.png);
 
-        return <String, Object>{
-          'result': base64.encoder.convert(Uint8List.view(byteData.buffer)),
-        };
-      },
-    );
+          return <String, Object>{
+            'result': base64.encoder.convert(Uint8List.view(byteData.buffer)),
+          };
+        },
+      );
+      return true;
+    }());
   }
 
   /// Clear all InspectorService object references.
@@ -1259,7 +1262,7 @@ class WidgetInspectorService {
     else
       throw FlutterError('Cannot get parent chain for node of type ${value.runtimeType}');
 
-    return path.map((_DiagnosticsPathNode node) => _pathNodeToJson(
+    return path.map<Object>((_DiagnosticsPathNode node) => _pathNodeToJson(
       node,
       _SerializeConfig(groupName: groupName),
     )).toList();
@@ -2232,7 +2235,7 @@ class _InspectorOverlayLayer extends Layer {
   double _textPainterMaxWidth;
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     if (!selection.active)
       return;
 

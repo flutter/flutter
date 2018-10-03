@@ -33,6 +33,13 @@ class TimelineSummary {
     return _averageInMillis(_extractFrameDurations());
   }
 
+  /// The [p]-th percentile frame rasterization time in milliseconds.
+  ///
+  /// Returns null if no frames were recorded.
+  double computePercentileFrameBuildTimeMillis(double p) {
+    return _percentileInMillis(_extractFrameDurations(), p);
+  }
+
   /// The longest frame build time in milliseconds.
   ///
   /// Returns null if no frames were recorded.
@@ -80,6 +87,8 @@ class TimelineSummary {
   Map<String, dynamic> get summaryJson {
     return <String, dynamic> {
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
+      '90th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(90.0),
+      '99th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(99.0),
       'worst_frame_build_time_millis': computeWorstFrameBuildTimeMillis(),
       'missed_frame_build_budget_count': computeMissedFrameBuildBudgetCount(),
       'average_frame_rasterizer_time_millis': computeAverageFrameRasterizerTimeMillis(),
@@ -89,10 +98,10 @@ class TimelineSummary {
       'missed_frame_rasterizer_budget_count': computeMissedFrameRasterizerBudgetCount(),
       'frame_count': countFrames(),
       'frame_build_times': _extractFrameDurations()
-        .map((Duration duration) => duration.inMicroseconds)
+        .map<int>((Duration duration) => duration.inMicroseconds)
         .toList(),
       'frame_rasterizer_times': _extractGpuRasterizerDrawEvents()
-        .map((TimedEvent event) => event.duration.inMicroseconds)
+        .map<int>((TimedEvent event) => event.duration.inMicroseconds)
         .toList(),
     };
   }
@@ -134,7 +143,7 @@ class TimelineSummary {
   }
 
   List<Duration> _extractDurations(String name) {
-    return _extractNamedEvents(name).map((TimelineEvent event) => event.duration).toList();
+    return _extractNamedEvents(name).map<Duration>((TimelineEvent event) => event.duration).toList();
   }
 
   /// Extracts timed events that are reported as a pair of begin/end events.
@@ -190,7 +199,7 @@ class TimelineSummary {
   List<Duration> _extractFrameDurations() => _extractDurations('Frame');
 
   Iterable<Duration> _extractDuration(Iterable<TimedEvent> events) {
-    return events.map((TimedEvent e) => e.duration);
+    return events.map<Duration>((TimedEvent e) => e.duration);
   }
 }
 
@@ -198,7 +207,7 @@ class TimelineSummary {
 class TimedEvent {
   /// Creates a timed event given begin and end timestamps in microseconds.
   TimedEvent(int beginTimeMicros, int endTimeMicros)
-    : this.duration = Duration(microseconds: endTimeMicros - beginTimeMicros);
+    : duration = Duration(microseconds: endTimeMicros - beginTimeMicros);
 
   /// The duration of the event.
   final Duration duration;

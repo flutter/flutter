@@ -48,7 +48,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'حول "$applicationName"';
 
   @override
-  String get alertDialogLabel => r'مربع حوار التنبيه';
+  String get alertDialogLabel => r'تنبيه';
 
   @override
   String get anteMeridiemAbbreviation => r'ص';
@@ -66,7 +66,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'إغلاق';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'توسيع';
 
   @override
   String get continueButtonLabel => r'متابعة';
@@ -87,7 +87,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get drawerLabel => r'قائمة تنقل';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'تصغير';
 
   @override
   String get hideAccountsLabel => r'إخفاء الحسابات';
@@ -132,31 +132,40 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'الصفحة السابقة';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => r'$remainingCount أحرف متبقية';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => r'$remainingCount حرفًا متبقيًا';
 
   @override
-  String get remainingTextFieldCharacterCountZero => r'TBD';
+  String get remainingTextFieldCharacterCountOne => r'حرف واحد متبقٍ';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount حرف متبقٍ';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get remainingTextFieldCharacterCountTwo => r'حرفان ($remainingCount) متبقيان';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get remainingTextFieldCharacterCountZero => r'لا أحرف متبقية';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemDown => r'نقل لأسفل';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemLeft => r'نقل لليمين';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemRight => r'نقل لليسار';
+
+  @override
+  String get reorderItemToEnd => r'نقل إلى نهاية القائمة';
+
+  @override
+  String get reorderItemToStart => r'نقل إلى بداية القائمة';
+
+  @override
+  String get reorderItemUp => r'نقل لأعلى';
 
   @override
   String get rowsPerPageTitle => r'عدد الصفوف في الصفحة:';
@@ -240,7 +249,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Всичко за $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Сигнал';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -258,7 +267,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Затваряне';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Разгъване';
 
   @override
   String get continueButtonLabel => r'НАПРЕД';
@@ -279,7 +288,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Меню за навигация';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Свиване';
 
   @override
   String get hideAccountsLabel => r'Скриване на профилите';
@@ -324,31 +333,40 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Предишната страница';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Остава 1 знак';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Остават $remainingCount знака';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Преместване надолу';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Преместване наляво';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Преместване надясно';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Преместване в края';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Преместване в началото';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Преместване нагоре';
 
   @override
   String get rowsPerPageTitle => r'Редове на страница:';
@@ -357,7 +375,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Търсене';
 
   @override
   String get selectAllButtonLabel => r'ИЗБИРАНЕ НА ВСИЧКО';
@@ -432,7 +450,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Upozorenje';
 
   @override
   String get anteMeridiemAbbreviation => r'prijepodne';
@@ -450,7 +468,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Zatvaranje';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Proširi';
 
   @override
   String get continueButtonLabel => r'NASTAVI';
@@ -471,7 +489,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Navigacijski izbornik';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Sažmi';
 
   @override
   String get hideAccountsLabel => r'Sakrijte račune';
@@ -516,31 +534,40 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Prethodna stranica';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => r'Preostala su $remainingCount znaka';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Preostao je 1 znak';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Preostalo je $remainingCount znakova';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Pomakni prema dolje';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Pomakni ulijevo';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Pomakni udesno';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Premjesti na kraj';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Premjesti na početak';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Pomakni prema gore';
 
   @override
   String get rowsPerPageTitle => r'Redaka po stranici:';
@@ -549,7 +576,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Pretražite';
 
   @override
   String get selectAllButtonLabel => r'ODABERI SVE';
@@ -624,7 +651,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Sobre $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Alerta';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -642,7 +669,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Tanca';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Desplega';
 
   @override
   String get continueButtonLabel => r'CONTINUA';
@@ -663,7 +690,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Menú de navegació';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Replega';
 
   @override
   String get hideAccountsLabel => r'Amaga els comptes';
@@ -708,31 +735,40 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Pàgina anterior';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 caràcter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Queden $remainingCount caràcters';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Mou avall';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Mou cap a l' "'" r'esquerra';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Mou cap a la dreta';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Mou al final';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Mou al principi';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Mou amunt';
 
   @override
   String get rowsPerPageTitle => r'Files per pàgina:';
@@ -741,7 +777,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Cerca';
 
   @override
   String get selectAllButtonLabel => r'SELECCIONA-HO TOT';
@@ -816,7 +852,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'O aplikaci $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Upozornění';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -834,7 +870,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Zavřít';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Rozbalit';
 
   @override
   String get continueButtonLabel => r'POKRAČOVAT';
@@ -855,7 +891,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Navigační nabídka';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Sbalit';
 
   @override
   String get hideAccountsLabel => r'Skrýt účty';
@@ -900,31 +936,40 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Předchozí stránka';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => r'Zbývají $remainingCount znaky';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => r'Zbývá $remainingCount znaku';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Zbývá 1 znak';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Zbývá $remainingCount znaků';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Přesunout dolů';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Přesunout doleva';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Přesunout doprava';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Přesunout na konec';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Přesunout na začátek';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Přesunout nahoru';
 
   @override
   String get rowsPerPageTitle => r'Počet řádků na stránku:';
@@ -933,7 +978,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Hledat';
 
   @override
   String get selectAllButtonLabel => r'VYBRAT VŠE';
@@ -1008,7 +1053,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Om $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Underretning';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -1026,7 +1071,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Luk';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Udvid';
 
   @override
   String get continueButtonLabel => r'FORTSÆT';
@@ -1047,7 +1092,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Navigationsmenu';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Skjul';
 
   @override
   String get hideAccountsLabel => r'Skjul konti';
@@ -1092,31 +1137,40 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Forrige side';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Ét tegn tilbage';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount tegn tilbage';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Flyt ned';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Flyt til venstre';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Flyt til højre';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Flyt til sidst på listen';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Flyt til først på listen';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Flyt op';
 
   @override
   String get rowsPerPageTitle => r'Rækker pr. side:';
@@ -1125,7 +1179,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Søg';
 
   @override
   String get selectAllButtonLabel => r'VÆLG ALLE';
@@ -1200,7 +1254,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Über $applicationName';
 
   @override
-  String get alertDialogLabel => r'Aufmerksam';
+  String get alertDialogLabel => r'Benachrichtigung';
 
   @override
   String get anteMeridiemAbbreviation => r'VORM.';
@@ -1218,7 +1272,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Schließen';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Maximieren';
 
   @override
   String get continueButtonLabel => r'WEITER';
@@ -1239,7 +1293,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Navigationsmenü';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Minimieren';
 
   @override
   String get hideAccountsLabel => r'Konten ausblenden';
@@ -1284,31 +1338,40 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Vorherige Seite';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Noch 1 Zeichen';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Noch $remainingCount Zeichen';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Nach unten verschieben';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Nach links verschieben';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Nach rechts verschieben';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'An das Ende verschieben';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'An den Anfang verschieben';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Nach oben verschieben';
 
   @override
   String get rowsPerPageTitle => r'Zeilen pro Seite:';
@@ -1422,7 +1485,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Σχετικά με την εφαρμογή $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Ειδοποίηση';
 
   @override
   String get anteMeridiemAbbreviation => r'π.μ.';
@@ -1440,7 +1503,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Κλείσιμο';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Ανάπτυξη';
 
   @override
   String get continueButtonLabel => r'ΣΥΝΕΧΕΙΑ';
@@ -1461,7 +1524,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Μενού πλοήγησης';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Σύμπτυξη';
 
   @override
   String get hideAccountsLabel => r'Απόκρυψη λογαριασμών';
@@ -1506,31 +1569,40 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Προηγούμενη σελίδα';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'απομένει 1 χαρακτήρας';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'απομένουν $remainingCount χαρακτήρες';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Μετακίνηση προς τα κάτω';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Μετακίνηση αριστερά';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Μετακίνηση δεξιά';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Μετακίνηση στο τέλος';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Μετακίνηση στην αρχή';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Μετακίνηση προς τα πάνω';
 
   @override
   String get rowsPerPageTitle => r'Σειρές ανά σελίδα:';
@@ -1539,7 +1611,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Αναζήτηση';
 
   @override
   String get selectAllButtonLabel => r'ΕΠΙΛΟΓΗ ΟΛΩΝ';
@@ -1698,10 +1770,19 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Previous page';
 
   @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
   String get remainingTextFieldCharacterCountOne => r'1 character remaining';
 
   @override
   String get remainingTextFieldCharacterCountOther => r'$remainingCount characters remaining';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'No characters remaining';
@@ -1813,6 +1894,12 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => r'Dialogue';
+
+  @override
+  String get reorderItemLeft => r'Move to the left';
+
+  @override
+  String get reorderItemRight => r'Move to the right';
 }
 
 /// The translations for English, as used in Canada (`en_CA`).
@@ -1849,6 +1936,12 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => r'Dialogue';
+
+  @override
+  String get reorderItemLeft => r'Move to the left';
+
+  @override
+  String get reorderItemRight => r'Move to the right';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).
@@ -1888,6 +1981,12 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => r'Dialogue';
+
+  @override
+  String get reorderItemLeft => r'Move to the left';
+
+  @override
+  String get reorderItemRight => r'Move to the right';
 }
 
 /// The translations for English, as used in Ireland (`en_IE`).
@@ -1927,6 +2026,12 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => r'Dialogue';
+
+  @override
+  String get reorderItemLeft => r'Move to the left';
+
+  @override
+  String get reorderItemRight => r'Move to the right';
 }
 
 /// The translations for English, as used in India (`en_IN`).
@@ -1963,6 +2068,12 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => r'Dialogue';
+
+  @override
+  String get reorderItemLeft => r'Move to the left';
+
+  @override
+  String get reorderItemRight => r'Move to the right';
 }
 
 /// The translations for English, as used in Singapore (`en_SG`).
@@ -1999,6 +2110,12 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => r'Dialogue';
+
+  @override
+  String get reorderItemLeft => r'Move to the left';
+
+  @override
+  String get reorderItemRight => r'Move to the right';
 }
 
 /// The translations for English, as used in South Africa (`en_ZA`).
@@ -2038,6 +2155,12 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => r'Dialogue';
+
+  @override
+  String get reorderItemLeft => r'Move to the left';
+
+  @override
+  String get reorderItemRight => r'Move to the right';
 }
 
 /// The translations for Spanish Castilian (`es`).
@@ -2085,7 +2208,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Cerrar';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Mostrar';
 
   @override
   String get continueButtonLabel => r'CONTINUAR';
@@ -2106,7 +2229,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Menú de navegación';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Ocultar';
 
   @override
   String get hideAccountsLabel => r'Ocultar cuentas';
@@ -2151,31 +2274,40 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Página anterior';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter.';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Mover hacia abajo';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Mover hacia la izquierda';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Mover hacia la derecha';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Mover al final';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Mover al principio';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Mover hacia arriba';
 
   @override
   String get rowsPerPageTitle => r'Filas por página:';
@@ -2296,6 +2428,21 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Argentina (`es_AR`).
@@ -2362,6 +2509,21 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Bolivia (`es_BO`).
@@ -2388,6 +2550,9 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -2428,6 +2593,18 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Chile (`es_CL`).
@@ -2454,6 +2631,9 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -2494,6 +2674,18 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Colombia (`es_CO`).
@@ -2520,6 +2712,9 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -2560,6 +2755,18 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Costa Rica (`es_CR`).
@@ -2586,6 +2793,9 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -2626,6 +2836,18 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in the Dominican Republic (`es_DO`).
@@ -2652,6 +2874,9 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -2692,6 +2917,18 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Ecuador (`es_EC`).
@@ -2718,6 +2955,9 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -2758,6 +2998,18 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Guatemala (`es_GT`).
@@ -2784,6 +3036,9 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -2824,6 +3079,18 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Honduras (`es_HN`).
@@ -2850,6 +3117,9 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -2890,6 +3160,18 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Mexico (`es_MX`).
@@ -2916,6 +3198,9 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -2956,6 +3241,18 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Nicaragua (`es_NI`).
@@ -2982,6 +3279,9 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -3022,6 +3322,18 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Panama (`es_PA`).
@@ -3048,6 +3360,9 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -3088,6 +3403,18 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Peru (`es_PE`).
@@ -3114,6 +3441,9 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -3154,6 +3484,18 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Puerto Rico (`es_PR`).
@@ -3180,6 +3522,9 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -3220,6 +3565,18 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Paraguay (`es_PY`).
@@ -3246,6 +3603,9 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -3286,6 +3646,18 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in El Salvador (`es_SV`).
@@ -3312,6 +3684,9 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -3352,6 +3727,18 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in the United States (`es_US`).
@@ -3376,6 +3763,9 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
+
+  @override
+  String get reorderItemToStart => r'Mover al inicio';
 
   @override
   String get modalBarrierDismissLabel => r'Descartar';
@@ -3421,6 +3811,18 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Uruguay (`es_UY`).
@@ -3447,6 +3849,9 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -3487,6 +3892,18 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Spanish Castilian, as used in Venezuela (`es_VE`).
@@ -3513,6 +3930,9 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   );
 
   @override
+  String get reorderItemToStart => r'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => r'Descartar';
 
   @override
@@ -3553,6 +3973,18 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
 
   @override
   String get dialogLabel => r'Diálogo';
+
+  @override
+  String get expandedIconTapHint => r'Contraer';
+
+  @override
+  String get collapsedIconTapHint => r'Expandir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
 /// The translations for Estonian (`et`).
@@ -3582,7 +4014,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Teave rakenduse $applicationName kohta';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Märguanne';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -3600,7 +4032,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Sule';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Laienda';
 
   @override
   String get continueButtonLabel => r'JÄTKA';
@@ -3621,7 +4053,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Navigeerimismenüü';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Ahenda';
 
   @override
   String get hideAccountsLabel => r'Peida kontod';
@@ -3666,31 +4098,40 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Eelmine leht';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Jäänud on 1 tähemärk';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Jäänud on $remainingCount tähemärki';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Teisalda alla';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Teisalda vasakule';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Teisalda paremale';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Teisalda lõppu';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Teisalda algusesse';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Teisalda üles';
 
   @override
   String get rowsPerPageTitle => r'Ridu lehe kohta:';
@@ -3699,7 +4140,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Otsing';
 
   @override
   String get selectAllButtonLabel => r'VALI KÕIK';
@@ -3792,7 +4233,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'بستن';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'بزرگ کردن';
 
   @override
   String get continueButtonLabel => r'ادامه';
@@ -3813,7 +4254,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get drawerLabel => r'منوی پیمایش';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'کوچک کردن';
 
   @override
   String get hideAccountsLabel => r'پنهان کردن حساب‌ها';
@@ -3858,31 +4299,40 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'صفحه قبل';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'۱ نویسه باقی مانده است';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount نویسه باقی مانده است';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'انتقال به پایین';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'انتقال به راست';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'انتقال به چپ';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'انتقال به انتها';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'انتقال به ابتدا';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'انتقال به بالا';
 
   @override
   String get rowsPerPageTitle => r'ردیف در هر صفحه:';
@@ -3891,7 +4341,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get scriptCategory => r'tall';
 
   @override
-  String get searchFieldLabel => r'جستجو کردن';
+  String get searchFieldLabel => r'جستجو';
 
   @override
   String get selectAllButtonLabel => r'انتخاب همه';
@@ -3963,10 +4413,10 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => r'Tietoja sovelluksesta $applicationName';
+  String get aboutListTileTitleRaw => r'Tietoja: $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Ilmoitus';
 
   @override
   String get anteMeridiemAbbreviation => r'ap';
@@ -3984,7 +4434,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Sulje';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Laajenna';
 
   @override
   String get continueButtonLabel => r'JATKA';
@@ -4005,7 +4455,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Navigointivalikko';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Tiivistä';
 
   @override
   String get hideAccountsLabel => r'Piilota tilit';
@@ -4050,31 +4500,40 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Edellinen sivu';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 merkki jäljellä';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount merkkiä jäljellä';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Siirrä alas';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Siirrä vasemmalle';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Siirrä oikealle';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Siirrä loppuun';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Siirrä alkuun';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Siirrä ylös';
 
   @override
   String get rowsPerPageTitle => r'Riviä/sivu:';
@@ -4083,7 +4542,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Haku';
 
   @override
   String get selectAllButtonLabel => r'VALITSE KAIKKI';
@@ -4158,7 +4617,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Tungkol sa $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Alerto';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -4176,7 +4635,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Isara';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'I-expand';
 
   @override
   String get continueButtonLabel => r'MAGPATULOY';
@@ -4197,7 +4656,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Menu ng navigation';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'I-collapse';
 
   @override
   String get hideAccountsLabel => r'Itago ang mga account';
@@ -4242,31 +4701,40 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Nakaraang page';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 character ang natitira';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount na character ang natitira';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Ilipat pababa';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Ilipat pakaliwa';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Ilipat pakanan';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Ilipat sa dulo';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Ilipat sa simula';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Ilipat pataas';
 
   @override
   String get rowsPerPageTitle => r'Mga row bawat page:';
@@ -4275,7 +4743,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Maghanap';
 
   @override
   String get selectAllButtonLabel => r'PILIIN LAHAT';
@@ -4368,7 +4836,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Fermer';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Développer';
 
   @override
   String get continueButtonLabel => r'CONTINUER';
@@ -4389,7 +4857,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Menu de navigation';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Réduire';
 
   @override
   String get hideAccountsLabel => r'Masquer les comptes';
@@ -4434,31 +4902,40 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Page précédente';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 caractère restant';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount caractères restants';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Déplacer vers le bas';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Déplacer vers la gauche';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Déplacer vers la droite';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Déplacer vers la fin';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Déplacer vers le début';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Déplacer vers le haut';
 
   @override
   String get rowsPerPageTitle => r'Lignes par page :';
@@ -4467,7 +4944,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'Chercher';
+  String get searchFieldLabel => r'Rechercher';
 
   @override
   String get selectAllButtonLabel => r'TOUT SÉLECTIONNER';
@@ -4569,7 +5046,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Über $applicationName';
 
   @override
-  String get alertDialogLabel => r'Aufmerksam';
+  String get alertDialogLabel => r'Benachrichtigung';
 
   @override
   String get anteMeridiemAbbreviation => r'VORM.';
@@ -4587,7 +5064,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Schließen';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Maximieren';
 
   @override
   String get continueButtonLabel => r'WEITER';
@@ -4608,7 +5085,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Navigationsmenü';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Minimieren';
 
   @override
   String get hideAccountsLabel => r'Konten ausblenden';
@@ -4653,31 +5130,40 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Vorherige Seite';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Noch 1 Zeichen';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Noch $remainingCount Zeichen';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Nach unten verschieben';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Nach links verschieben';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Nach rechts verschieben';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'An das Ende verschieben';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'An den Anfang verschieben';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Nach oben verschieben';
 
   @override
   String get rowsPerPageTitle => r'Zeilen pro Seite:';
@@ -4761,7 +5247,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'מידע על $applicationName';
 
   @override
-  String get alertDialogLabel => r'עֵרָנִי';
+  String get alertDialogLabel => r'התראה';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -4779,7 +5265,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'סגירה';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'הרחבה';
 
   @override
   String get continueButtonLabel => r'המשך';
@@ -4800,7 +5286,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get drawerLabel => r'תפריט ניווט';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'כיווץ';
 
   @override
   String get hideAccountsLabel => r'הסתרת החשבונות';
@@ -4845,31 +5331,40 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'הדף הקודם';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => r'נותרו $remainingCount תווים';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'נותר תו אחד';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'נותרו $remainingCount תווים';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => r'נותרו $remainingCount תווים';
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'העברה למטה';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'העברה שמאלה';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'העברה ימינה';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'העברה לסוף';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'העברה להתחלה';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'העברה למעלה';
 
   @override
   String get rowsPerPageTitle => r'שורות בכל דף:';
@@ -4878,7 +5373,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'לחפש';
+  String get searchFieldLabel => r'חיפוש';
 
   @override
   String get selectAllButtonLabel => r'בחירת הכול';
@@ -4953,7 +5448,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'$applicationName के बारे में जानकारी';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'अलर्ट';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -4971,7 +5466,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'बंद करें';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'बड़ा करें';
 
   @override
   String get continueButtonLabel => r'जारी रखें';
@@ -4992,7 +5487,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get drawerLabel => r'नेविगेशन मेन्यू';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'छोटा करें';
 
   @override
   String get hideAccountsLabel => r'खाते छिपाएं';
@@ -5037,31 +5532,40 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'पिछला पेज';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'एक वर्ण अाैर डाला जा सकता है';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount वर्ण अाैर डाले जा सकते हैं';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'नीचे ले जाएं';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'बाएं ले जाएं';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'दाएं ले जाएं';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'आखिर में ले जाएं';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'शुरुआत पर ले जाएं';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'ऊपर ले जाएं';
 
   @override
   String get rowsPerPageTitle => r'हर पेज में पंक्तियों की संख्या:';
@@ -5070,7 +5574,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get scriptCategory => r'dense';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'खोजें';
 
   @override
   String get selectAllButtonLabel => r'सभी चुनें';
@@ -5145,7 +5649,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Upozorenje';
 
   @override
   String get anteMeridiemAbbreviation => r'prijepodne';
@@ -5163,7 +5667,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Zatvaranje';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Proširi';
 
   @override
   String get continueButtonLabel => r'NASTAVI';
@@ -5184,7 +5688,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Navigacijski izbornik';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Sažmi';
 
   @override
   String get hideAccountsLabel => r'Sakrijte račune';
@@ -5229,31 +5733,40 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Prethodna stranica';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => r'Preostala su $remainingCount znaka';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Preostao je 1 znak';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Preostalo je $remainingCount znakova';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Pomakni prema dolje';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Pomakni ulijevo';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Pomakni udesno';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Premjesti na kraj';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Premjesti na početak';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Pomakni prema gore';
 
   @override
   String get rowsPerPageTitle => r'Redaka po stranici:';
@@ -5262,7 +5775,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Pretražite';
 
   @override
   String get selectAllButtonLabel => r'ODABERI SVE';
@@ -5337,7 +5850,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'A(z) $applicationName névjegye';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Értesítés';
 
   @override
   String get anteMeridiemAbbreviation => r'de.';
@@ -5355,7 +5868,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Bezárás';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Kibontás';
 
   @override
   String get continueButtonLabel => r'TOVÁBB';
@@ -5376,7 +5889,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Navigációs menü';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Összecsukás';
 
   @override
   String get hideAccountsLabel => r'Fiókok elrejtése';
@@ -5421,31 +5934,40 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Előző oldal';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 karakter maradt';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount karakter maradt';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Áthelyezés lefelé';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Áthelyezés balra';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Áthelyezés jobbra';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Áthelyezés a végére';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Áthelyezés az elejére';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Áthelyezés felfelé';
 
   @override
   String get rowsPerPageTitle => r'Oldalankénti sorszám:';
@@ -5454,7 +5976,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Keresés';
 
   @override
   String get selectAllButtonLabel => r'AZ ÖSSZES KIJELÖLÉSE';
@@ -5529,7 +6051,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Tentang $applicationName';
 
   @override
-  String get alertDialogLabel => r'Waspada';
+  String get alertDialogLabel => r'Notifikasi';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -5547,7 +6069,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Tutup';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Luaskan';
 
   @override
   String get continueButtonLabel => r'LANJUTKAN';
@@ -5568,7 +6090,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Menu navigasi';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Ciutkan';
 
   @override
   String get hideAccountsLabel => r'Sembunyikan akun';
@@ -5613,31 +6135,40 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Halaman sebelumnya';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Sisa 1 karakter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Sisa $remainingCount karakter';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Turunkan';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Pindahkan ke kiri';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Pindahkan ke kanan';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Pindahkan ke akhir';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Pindahkan ke awal';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Naikkan';
 
   @override
   String get rowsPerPageTitle => r'Baris per halaman:';
@@ -5646,7 +6177,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'Pencarian';
+  String get searchFieldLabel => r'Telusuri';
 
   @override
   String get selectAllButtonLabel => r'PILIH SEMUA';
@@ -5721,7 +6252,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Informazioni su $applicationName';
 
   @override
-  String get alertDialogLabel => r'Mettere in guardia';
+  String get alertDialogLabel => r'Avviso';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -5739,7 +6270,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Chiudi';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Espandi';
 
   @override
   String get continueButtonLabel => r'CONTINUA';
@@ -5760,7 +6291,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Menu di navigazione';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Comprimi';
 
   @override
   String get hideAccountsLabel => r'Nascondi account';
@@ -5805,31 +6336,40 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Pagina precedente';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 carattere rimanente';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount caratteri rimanenti';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Sposta giù';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Sposta a sinistra';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Sposta a destra';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Sposta alla fine';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Sposta all' "'" r'inizio';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Sposta su';
 
   @override
   String get rowsPerPageTitle => r'Righe per pagina:';
@@ -5838,7 +6378,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'Ricerca';
+  String get searchFieldLabel => r'Cerca';
 
   @override
   String get selectAllButtonLabel => r'SELEZIONA TUTTO';
@@ -5913,7 +6453,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'$applicationName について';
 
   @override
-  String get alertDialogLabel => r'アラート';
+  String get alertDialogLabel => r'通知';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -5931,7 +6471,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'閉じる';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'展開';
 
   @override
   String get continueButtonLabel => r'続行';
@@ -5952,7 +6492,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get drawerLabel => r'ナビゲーション メニュー';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'折りたたむ';
 
   @override
   String get hideAccountsLabel => r'アカウントを非表示';
@@ -5997,31 +6537,40 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'前のページ';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'残り 1 文字（半角相当）';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'残り $remainingCount 文字（半角相当）';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'下に移動';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'左に移動';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'右に移動';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'最後に移動';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'先頭に移動';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'上に移動';
 
   @override
   String get rowsPerPageTitle => r'ページあたりの行数:';
@@ -6030,7 +6579,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get scriptCategory => r'dense';
 
   @override
-  String get searchFieldLabel => r'サーチ';
+  String get searchFieldLabel => r'検索';
 
   @override
   String get selectAllButtonLabel => r'すべて選択';
@@ -6105,7 +6654,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'$applicationName 정보';
 
   @override
-  String get alertDialogLabel => r'경보';
+  String get alertDialogLabel => r'알림';
 
   @override
   String get anteMeridiemAbbreviation => r'오전';
@@ -6123,7 +6672,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'닫기';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'펼치기';
 
   @override
   String get continueButtonLabel => r'계속';
@@ -6144,7 +6693,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get drawerLabel => r'탐색 메뉴';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'접기';
 
   @override
   String get hideAccountsLabel => r'계정 숨기기';
@@ -6189,31 +6738,40 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'이전 페이지';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1자 남음';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount자 남음';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'아래로 이동';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'왼쪽으로 이동';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'오른쪽으로 이동';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'끝으로 이동';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'시작으로 이동';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'위로 이동';
 
   @override
   String get rowsPerPageTitle => r'페이지당 행 수:';
@@ -6222,7 +6780,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get scriptCategory => r'dense';
 
   @override
-  String get searchFieldLabel => r'수색';
+  String get searchFieldLabel => r'검색';
 
   @override
   String get selectAllButtonLabel => r'전체 선택';
@@ -6297,7 +6855,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Apie „$applicationName“';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Įspėjimas';
 
   @override
   String get anteMeridiemAbbreviation => r'priešpiet';
@@ -6315,7 +6873,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Uždaryti';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Išskleisti';
 
   @override
   String get continueButtonLabel => r'TĘSTI';
@@ -6336,7 +6894,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Naršymo meniu';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Sutraukti';
 
   @override
   String get hideAccountsLabel => r'Slėpti paskyras';
@@ -6381,31 +6939,40 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Ankstesnis puslapis';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => r'Liko $remainingCount simboliai';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => r'Liko $remainingCount simbolio';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Liko 1 simbolis';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Liko $remainingCount simbolių';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Perkelti žemyn';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Perkelti kairėn';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Perkelti dešinėn';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Perkelti į pabaigą';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Perkelti į pradžią';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Perkelti aukštyn';
 
   @override
   String get rowsPerPageTitle => r'Eilučių puslapyje:';
@@ -6414,7 +6981,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Paieška';
 
   @override
   String get selectAllButtonLabel => r'PASIRINKTI VISKĄ';
@@ -6489,7 +7056,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Par $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Brīdinājums';
 
   @override
   String get anteMeridiemAbbreviation => r'priekšpusdienā';
@@ -6507,7 +7074,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Aizvērt';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Izvērst';
 
   @override
   String get continueButtonLabel => r'TURPINĀT';
@@ -6528,7 +7095,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Navigācijas izvēlne';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Sakļaut';
 
   @override
   String get hideAccountsLabel => r'Slēpt kontus';
@@ -6573,31 +7140,40 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Iepriekšējā lapa';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => r'TBD';
+  String get remainingTextFieldCharacterCountOne => r'Atlikusi 1 rakstzīme.';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get remainingTextFieldCharacterCountOther => r'Atlikušas $remainingCount rakstzīmes.';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get remainingTextFieldCharacterCountZero => r'Nav atlikusi neviena rakstzīme.';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemDown => r'Pārvietot uz leju';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemLeft => r'Pārvietot pa kreisi';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemRight => r'Pārvietot pa labi';
+
+  @override
+  String get reorderItemToEnd => r'Pārvietot uz beigām';
+
+  @override
+  String get reorderItemToStart => r'Pārvietot uz sākumu';
+
+  @override
+  String get reorderItemUp => r'Pārvietot uz augšu';
 
   @override
   String get rowsPerPageTitle => r'Rindas lapā:';
@@ -6606,7 +7182,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Meklēt';
 
   @override
   String get selectAllButtonLabel => r'ATLASĪT VISU';
@@ -6681,7 +7257,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Perihal $applicationName';
 
   @override
-  String get alertDialogLabel => r'Amaran';
+  String get alertDialogLabel => r'Makluman';
 
   @override
   String get anteMeridiemAbbreviation => r'PG';
@@ -6699,7 +7275,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Tutup';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Kembangkan';
 
   @override
   String get continueButtonLabel => r'TERUSKAN';
@@ -6720,7 +7296,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Menu navigasi';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Runtuhkan';
 
   @override
   String get hideAccountsLabel => r'Sembunyikan akaun';
@@ -6765,31 +7341,40 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Halaman sebelumnya';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 aksara lagi';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount aksara lagi';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Alih ke bawah';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Alih ke kiri';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Alih ke kanan';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Alih ke penghujung';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Alih ke permulaan';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Alih ke atas';
 
   @override
   String get rowsPerPageTitle => r'Baris setiap halaman:';
@@ -6798,7 +7383,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'Carian';
+  String get searchFieldLabel => r'Cari';
 
   @override
   String get selectAllButtonLabel => r'PILIH SEMUA';
@@ -6873,7 +7458,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Om $applicationName';
 
   @override
-  String get alertDialogLabel => r'Varsling';
+  String get alertDialogLabel => r'Varsel';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -6891,7 +7476,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Lukk';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Vis';
 
   @override
   String get continueButtonLabel => r'FORTSETT';
@@ -6912,7 +7497,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Navigasjonsmeny';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Skjul';
 
   @override
   String get hideAccountsLabel => r'Skjul kontoer';
@@ -6957,31 +7542,40 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Forrige side';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 tegn gjenstår';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount tegn gjenstår';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Flytt ned';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Flytt til venstre';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Flytt til høyre';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Flytt til slutten';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Flytt til starten';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Flytt opp';
 
   @override
   String get rowsPerPageTitle => r'Rader per side:';
@@ -6990,7 +7584,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'Søke';
+  String get searchFieldLabel => r'Søk';
 
   @override
   String get selectAllButtonLabel => r'VELG ALLE';
@@ -7065,7 +7659,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Over $applicationName';
 
   @override
-  String get alertDialogLabel => r'Alarm';
+  String get alertDialogLabel => r'Melding';
 
   @override
   String get anteMeridiemAbbreviation => r'am';
@@ -7083,7 +7677,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Sluiten';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Uitvouwen';
 
   @override
   String get continueButtonLabel => r'DOORGAAN';
@@ -7104,7 +7698,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Navigatiemenu';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Samenvouwen';
 
   @override
   String get hideAccountsLabel => r'Accounts verbergen';
@@ -7149,31 +7743,40 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Vorige pagina';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 teken resterend';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount tekens resterend';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Omlaag verplaatsen';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Naar links verplaatsen';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Naar rechts verplaatsen';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Naar het einde verplaatsen';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Naar het begin verplaatsen';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Omhoog verplaatsen';
 
   @override
   String get rowsPerPageTitle => r'Rijen per pagina:';
@@ -7257,7 +7860,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'$applicationName – informacje';
 
   @override
-  String get alertDialogLabel => r'Alarm';
+  String get alertDialogLabel => r'Alert';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -7275,7 +7878,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Zamknij';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Rozwiń';
 
   @override
   String get continueButtonLabel => r'DALEJ';
@@ -7296,7 +7899,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Menu nawigacyjne';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Zwiń';
 
   @override
   String get hideAccountsLabel => r'Ukryj konta';
@@ -7341,31 +7944,40 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Poprzednia strona';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => r'Jeszcze $remainingCount znaki';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => r'Jeszcze $remainingCount znaków';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Jeszcze 1 znak';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Jeszcze $remainingCount znaku';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Przenieś w dół';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Przenieś w lewo';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Przenieś w prawo';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Przenieś na koniec';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Przenieś na początek';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Przenieś w górę';
 
   @override
   String get rowsPerPageTitle => r'Wiersze na stronie:';
@@ -7533,10 +8145,19 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'مخکینی مخ';
 
   @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
   String get remainingTextFieldCharacterCountOne => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
@@ -7659,7 +8280,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Fechar';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Expandir';
 
   @override
   String get continueButtonLabel => r'CONTINUAR';
@@ -7680,7 +8301,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Menu de navegação';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Recolher';
 
   @override
   String get hideAccountsLabel => r'Ocultar contas';
@@ -7725,31 +8346,40 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Página anterior';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 caractere restante';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount caracteres restantes';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Mover para baixo';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Mover para a esquerda';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Mover para a direita';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Mover para o final';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Mover para o início';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Mover para cima';
 
   @override
   String get rowsPerPageTitle => r'Linhas por página:';
@@ -7873,6 +8503,21 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
 
   @override
   String get modalBarrierDismissLabel => r'Ignorar';
+
+  @override
+  String get searchFieldLabel => r'Pesquisar';
+
+  @override
+  String get reorderItemToEnd => r'Mover para o fim';
+
+  @override
+  String get expandedIconTapHint => r'Reduzir';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Resta 1 caráter';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Restam $remainingCount carateres';
 }
 
 /// The translations for Romanian Moldavian Moldovan (`ro`).
@@ -7902,7 +8547,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Despre $applicationName';
 
   @override
-  String get alertDialogLabel => r'Alerta';
+  String get alertDialogLabel => r'Alertă';
 
   @override
   String get anteMeridiemAbbreviation => r'a.m.';
@@ -7920,7 +8565,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Închideți';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Extindeți';
 
   @override
   String get continueButtonLabel => r'CONTINUAȚI';
@@ -7941,7 +8586,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Meniu de navigare';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Restrângeți';
 
   @override
   String get hideAccountsLabel => r'Ascundeți conturile';
@@ -7986,31 +8631,40 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Pagina anterioară';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => r'$remainingCount caractere rămase';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'un caracter rămas';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount de caractere rămase';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Mutați în jos';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Mutați la stânga';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Mutați la dreapta';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Mutați la sfârșit';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Mutați la început';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Mutați în sus';
 
   @override
   String get rowsPerPageTitle => r'Rânduri pe pagină:';
@@ -8019,7 +8673,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'Căutare';
+  String get searchFieldLabel => r'Căutați';
 
   @override
   String get selectAllButtonLabel => r'SELECTAȚI TOATE';
@@ -8094,7 +8748,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'$applicationName: сведения';
 
   @override
-  String get alertDialogLabel => r'бдительный';
+  String get alertDialogLabel => r'Оповещение';
 
   @override
   String get anteMeridiemAbbreviation => r'АМ';
@@ -8112,7 +8766,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Закрыть';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Развернуть';
 
   @override
   String get continueButtonLabel => r'ПРОДОЛЖИТЬ';
@@ -8133,7 +8787,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Меню навигации';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Свернуть';
 
   @override
   String get hideAccountsLabel => r'Скрыть аккаунты';
@@ -8178,31 +8832,40 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Предыдущая страница';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => r'Осталось $remainingCount символа';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => r'Осталось $remainingCount символов';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Остался 1 символ';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Осталось $remainingCount символа';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Переместить вниз';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Переместить влево';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Переместить вправо';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Переместить в конец';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Переместить в начало';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Переместить вверх';
 
   @override
   String get rowsPerPageTitle => r'Строк на странице:';
@@ -8286,7 +8949,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'$applicationName – informácie';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Upozornenie';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -8304,7 +8967,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Zavrieť';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Rozbaliť';
 
   @override
   String get continueButtonLabel => r'POKRAČOVAŤ';
@@ -8325,7 +8988,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Navigačná ponuka';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Zbaliť';
 
   @override
   String get hideAccountsLabel => r'Skryť účty';
@@ -8370,31 +9033,40 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Predchádzajúca stránka';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => r'Zostávajú $remainingCount znaky';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => r'$remainingCount characters remaining';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Zostáva 1 znak';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Zostáva $remainingCount znakov';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Presunúť nadol';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Presunúť doľava';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Presunúť doprava';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Presunúť na koniec';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Presunúť na začiatok';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Presunúť nahor';
 
   @override
   String get rowsPerPageTitle => r'Počet riadkov na stránku:';
@@ -8403,7 +9075,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Hľadať';
 
   @override
   String get selectAllButtonLabel => r'VYBRAŤ VŠETKO';
@@ -8478,7 +9150,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Opozorilo';
 
   @override
   String get anteMeridiemAbbreviation => r'DOP.';
@@ -8496,7 +9168,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Zapiranje';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Razširiti';
 
   @override
   String get continueButtonLabel => r'NAPREJ';
@@ -8517,7 +9189,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Meni za krmarjenje';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Strniti';
 
   @override
   String get hideAccountsLabel => r'Skrivanje računov';
@@ -8562,31 +9234,40 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Prejšnja stran';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => r'Še $remainingCount znaki';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Še 1 znak';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Še $remainingCount znakov';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => r'Še $remainingCount znaka';
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Premakni navzdol';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Premakni levo';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Premakni desno';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Premakni na konec';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Premakni na začetek';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Premakni navzgor';
 
   @override
   String get rowsPerPageTitle => r'Vrstice na stran:';
@@ -8595,7 +9276,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Iskanje';
 
   @override
   String get selectAllButtonLabel => r'IZBERI VSE';
@@ -8670,7 +9351,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'О апликацији $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Обавештење';
 
   @override
   String get anteMeridiemAbbreviation => r'пре подне';
@@ -8688,7 +9369,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Затворите';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Прошири';
 
   @override
   String get continueButtonLabel => r'НАСТАВИ';
@@ -8709,7 +9390,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Мени за навигацију';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Скупи';
 
   @override
   String get hideAccountsLabel => r'Сакриј налоге';
@@ -8754,31 +9435,40 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Претходна страница';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => r'Преостала су $remainingCount знака';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Преостао је 1 знак';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Преостало је $remainingCount знакова';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Померите надоле';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Померите улево';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Померите удесно';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Померите на крај';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Померите на почетак';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Померите нагоре';
 
   @override
   String get rowsPerPageTitle => r'Редова по страници:';
@@ -8787,7 +9477,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Претражите';
 
   @override
   String get selectAllButtonLabel => r'ИЗАБЕРИ СВЕ';
@@ -8857,6 +9547,9 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
+
+  @override
+  String get remainingTextFieldCharacterCountFew => r'Preostala su $remainingCount znaka';
 
   @override
   String get selectedRowCountTitleFew => r'Izabrane su $selectedRowCount stavke';
@@ -8971,6 +9664,42 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
 
   @override
   String get dialogLabel => r'Dijalog';
+
+  @override
+  String get alertDialogLabel => r'Obaveštenje';
+
+  @override
+  String get searchFieldLabel => r'Pretražite';
+
+  @override
+  String get reorderItemToStart => r'Pomerite na početak';
+
+  @override
+  String get reorderItemToEnd => r'Pomerite na kraj';
+
+  @override
+  String get reorderItemUp => r'Pomerite nagore';
+
+  @override
+  String get reorderItemDown => r'Pomerite nadole';
+
+  @override
+  String get reorderItemLeft => r'Pomerite ulevo';
+
+  @override
+  String get reorderItemRight => r'Pomerite udesno';
+
+  @override
+  String get expandedIconTapHint => r'Skupi';
+
+  @override
+  String get collapsedIconTapHint => r'Proširi';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Preostao je 1 znak';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Preostalo je $remainingCount znakova';
 }
 
 /// The translations for Swedish (`sv`).
@@ -9000,7 +9729,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Om $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Varning';
 
   @override
   String get anteMeridiemAbbreviation => r'FM';
@@ -9018,7 +9747,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Stäng';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Utöka';
 
   @override
   String get continueButtonLabel => r'FORTSÄTT';
@@ -9039,7 +9768,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Navigeringsmeny';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Dölj';
 
   @override
   String get hideAccountsLabel => r'Dölj konton';
@@ -9084,31 +9813,40 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Föregående sida';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 tecken kvar';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount tecken kvar';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Flytta nedåt';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Flytta åt vänster';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Flytta åt höger';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Flytta till slutet';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Flytta till början';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Flytta uppåt';
 
   @override
   String get rowsPerPageTitle => r'Rader per sida:';
@@ -9117,7 +9855,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Sök';
 
   @override
   String get selectAllButtonLabel => r'MARKERA ALLA';
@@ -9192,7 +9930,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'เกี่ยวกับ $applicationName';
 
   @override
-  String get alertDialogLabel => r'เตือนภัย';
+  String get alertDialogLabel => r'การแจ้งเตือน';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -9210,7 +9948,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'ปิด';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'ขยาย';
 
   @override
   String get continueButtonLabel => r'ต่อไป';
@@ -9231,7 +9969,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get drawerLabel => r'เมนูการนำทาง';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'ยุบ';
 
   @override
   String get hideAccountsLabel => r'ซ่อนบัญชี';
@@ -9276,31 +10014,40 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'หน้าก่อน';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'เหลือ 1 อักขระ';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'เหลือ $remainingCount อักขระ';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'ย้ายลง';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'ย้ายไปทางซ้าย';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'ย้ายไปทางขวา';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'ย้ายไปท้ายรายการ';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'ย้ายไปต้นรายการ';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'ย้ายขึ้น';
 
   @override
   String get rowsPerPageTitle => r'แถวต่อหน้า:';
@@ -9384,7 +10131,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Tungkol sa $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Alerto';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -9402,7 +10149,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Isara';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'I-expand';
 
   @override
   String get continueButtonLabel => r'MAGPATULOY';
@@ -9423,7 +10170,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Menu ng navigation';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'I-collapse';
 
   @override
   String get hideAccountsLabel => r'Itago ang mga account';
@@ -9468,31 +10215,40 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Nakaraang page';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 character ang natitira';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount na character ang natitira';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Ilipat pababa';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Ilipat pakaliwa';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Ilipat pakanan';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Ilipat sa dulo';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Ilipat sa simula';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Ilipat pataas';
 
   @override
   String get rowsPerPageTitle => r'Mga row bawat page:';
@@ -9501,7 +10257,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Maghanap';
 
   @override
   String get selectAllButtonLabel => r'PILIIN LAHAT';
@@ -9576,7 +10332,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'$applicationName Hakkında';
 
   @override
-  String get alertDialogLabel => r'Alarm';
+  String get alertDialogLabel => r'Uyarı';
 
   @override
   String get anteMeridiemAbbreviation => r'ÖÖ';
@@ -9594,7 +10350,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Kapat';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Genişlet';
 
   @override
   String get continueButtonLabel => r'DEVAM';
@@ -9615,7 +10371,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Gezinme menüsü';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Daralt';
 
   @override
   String get hideAccountsLabel => r'Hesapları gizle';
@@ -9660,31 +10416,40 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Önceki sayfa';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 karakter kaldı';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount karakter kaldı';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Aşağı taşı';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Sola taşı';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Sağa taşı';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Sona taşı';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Başa taşı';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Yukarı taşı';
 
   @override
   String get rowsPerPageTitle => r'Sayfa başına satır sayısı:';
@@ -9693,7 +10458,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'Arama';
+  String get searchFieldLabel => r'Ara';
 
   @override
   String get selectAllButtonLabel => r'TÜMÜNÜ SEÇ';
@@ -9768,7 +10533,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Про додаток $applicationName';
 
   @override
-  String get alertDialogLabel => r'TBD';
+  String get alertDialogLabel => r'Сповіщення';
 
   @override
   String get anteMeridiemAbbreviation => r'дп';
@@ -9786,7 +10551,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Закрити';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Розгорнути';
 
   @override
   String get continueButtonLabel => r'ПРОДОВЖИТИ';
@@ -9807,7 +10572,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Меню навігації';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Згорнути';
 
   @override
   String get hideAccountsLabel => r'Сховати облікові записи';
@@ -9852,31 +10617,40 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Попередня сторінка';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => r'Залишилося $remainingCount символи';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => r'Залишилося $remainingCount символів';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Залишився 1 символ';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Залишилося $remainingCount символу';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Перемістити вниз';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Перемістити ліворуч';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Перемістити праворуч';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Перемістити в кінець';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Перемістити на початок';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Перемістити вгору';
 
   @override
   String get rowsPerPageTitle => r'Рядків на сторінці:';
@@ -9885,7 +10659,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get scriptCategory => r'English-like';
 
   @override
-  String get searchFieldLabel => r'TBD';
+  String get searchFieldLabel => r'Пошук';
 
   @override
   String get selectAllButtonLabel => r'ВИБРАТИ ВСІ';
@@ -9960,7 +10734,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'$applicationName کے بارے میں';
 
   @override
-  String get alertDialogLabel => r'انتباہ';
+  String get alertDialogLabel => r'الرٹ';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -9978,7 +10752,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'بند کریں';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'پھیلائیں';
 
   @override
   String get continueButtonLabel => r'جاری رکھیں';
@@ -9999,7 +10773,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get drawerLabel => r'نیویگیشن مینو';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'سکیڑیں';
 
   @override
   String get hideAccountsLabel => r'اکاؤنٹس چھپائیں';
@@ -10044,31 +10818,40 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'گزشتہ صفحہ';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 حرف باقی ہے';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount حروف باقی ہیں';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'نیچے منتقل کریں';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'بائیں منتقل کریں';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'دائیں منتقل کریں';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'آخر میں منتقل کریں';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'شروع میں منتقل کریں';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'اوپر منتقل کریں';
 
   @override
   String get rowsPerPageTitle => r'قطاریں فی صفحہ:';
@@ -10077,7 +10860,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get scriptCategory => r'tall';
 
   @override
-  String get searchFieldLabel => r'تلاش کریں';
+  String get searchFieldLabel => r'تلاش';
 
   @override
   String get selectAllButtonLabel => r'سبھی منتخب کریں';
@@ -10152,7 +10935,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'Giới thiệu về $applicationName';
 
   @override
-  String get alertDialogLabel => r'Hộp thoại';
+  String get alertDialogLabel => r'Thông báo';
 
   @override
   String get anteMeridiemAbbreviation => r'SÁNG';
@@ -10170,7 +10953,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Đóng';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'Mở rộng';
 
   @override
   String get continueButtonLabel => r'TIẾP TỤC';
@@ -10191,7 +10974,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get drawerLabel => r'Menu di chuyển';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'Thu gọn';
 
   @override
   String get hideAccountsLabel => r'Ẩn tài khoản';
@@ -10236,31 +11019,40 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Trang trước';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Còn lại 1 ký tự';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Còn lại $remainingCount ký tự';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'Di chuyển xuống';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'Di chuyển sang trái';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'Di chuyển sang phải';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'Di chuyển xuống cuối danh sách';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'Di chuyển lên đầu danh sách';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'Di chuyển lên';
 
   @override
   String get rowsPerPageTitle => r'Số hàng mỗi trang:';
@@ -10344,7 +11136,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'关于$applicationName';
 
   @override
-  String get alertDialogLabel => r'警报';
+  String get alertDialogLabel => r'提醒';
 
   @override
   String get anteMeridiemAbbreviation => r'上午';
@@ -10362,7 +11154,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'关闭';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'展开';
 
   @override
   String get continueButtonLabel => r'继续';
@@ -10383,7 +11175,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get drawerLabel => r'导航菜单';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'收起';
 
   @override
   String get hideAccountsLabel => r'隐藏帐号';
@@ -10428,31 +11220,40 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'上一页';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'还可输入 1 个字符';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'还可输入 $remainingCount 个字符';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
 
   @override
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'下移';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'左移';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'右移';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'移到末尾';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'移到开头';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'上移';
 
   @override
   String get rowsPerPageTitle => r'每页行数：';
@@ -10630,6 +11431,42 @@ class MaterialLocalizationZhHk extends MaterialLocalizationZh {
 
   @override
   String get dialogLabel => r'對話方塊';
+
+  @override
+  String get alertDialogLabel => r'快訊';
+
+  @override
+  String get searchFieldLabel => r'搜尋';
+
+  @override
+  String get reorderItemToStart => r'移至開頭';
+
+  @override
+  String get reorderItemToEnd => r'移至結尾';
+
+  @override
+  String get reorderItemUp => r'向上移';
+
+  @override
+  String get reorderItemDown => r'向下移';
+
+  @override
+  String get reorderItemLeft => r'向左移';
+
+  @override
+  String get reorderItemRight => r'向右移';
+
+  @override
+  String get expandedIconTapHint => r'收合';
+
+  @override
+  String get collapsedIconTapHint => r'展開';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'還可輸入 1 個字元';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -10753,6 +11590,42 @@ class MaterialLocalizationZhTw extends MaterialLocalizationZh {
 
   @override
   String get dialogLabel => r'對話方塊';
+
+  @override
+  String get alertDialogLabel => r'快訊';
+
+  @override
+  String get searchFieldLabel => r'搜尋';
+
+  @override
+  String get reorderItemToStart => r'移至開頭';
+
+  @override
+  String get reorderItemToEnd => r'移至結尾';
+
+  @override
+  String get reorderItemUp => r'向上移';
+
+  @override
+  String get reorderItemDown => r'向下移';
+
+  @override
+  String get reorderItemLeft => r'向左移';
+
+  @override
+  String get reorderItemRight => r'向右移';
+
+  @override
+  String get expandedIconTapHint => r'收合';
+
+  @override
+  String get collapsedIconTapHint => r'展開';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'還可輸入 1 個字元';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
 }
 
 /// The set of supported languages, as language code strings.

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 ///
 /// Messages are described in string form and should return a [Future] which
 /// eventually completes to a string response.
-typedef Future<String> DataHandler(String message);
+typedef DataHandler = Future<String> Function(String message);
 
 class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding, GestureBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding {
   _DriverBinding(this._handler, this._silenceErrors);
@@ -75,14 +76,14 @@ void enableFlutterDriverExtension({ DataHandler handler, bool silenceErrors = fa
 }
 
 /// Signature for functions that handle a command and return a result.
-typedef Future<Result> CommandHandlerCallback(Command c);
+typedef CommandHandlerCallback = Future<Result> Function(Command c);
 
 /// Signature for functions that deserialize a JSON map to a command object.
-typedef Command CommandDeserializerCallback(Map<String, String> params);
+typedef CommandDeserializerCallback = Command Function(Map<String, String> params);
 
 /// Signature for functions that run the given finder and return the [Element]
 /// found, if any, or null otherwise.
-typedef Finder FinderConstructor(SerializableFinder finder);
+typedef FinderConstructor = Finder Function(SerializableFinder finder);
 
 /// The class that manages communication between a Flutter Driver test and the
 /// application being remote-controlled, on the application side.
@@ -138,6 +139,7 @@ class FlutterDriverExtension {
       'ByTooltipMessage': (SerializableFinder finder) => _createByTooltipMessageFinder(finder),
       'ByValueKey': (SerializableFinder finder) => _createByValueKeyFinder(finder),
       'ByType': (SerializableFinder finder) => _createByTypeFinder(finder),
+      'PageBack': (SerializableFinder finder) => _createPageBackFinder(),
     });
   }
 
@@ -272,6 +274,17 @@ class FlutterDriverExtension {
     return find.byElementPredicate((Element element) {
       return element.widget.runtimeType.toString() == arguments.type;
     }, description: 'widget with runtimeType "${arguments.type}"');
+  }
+
+  Finder _createPageBackFinder() {
+    return find.byElementPredicate((Element element) {
+      final Widget widget = element.widget;
+      if (widget is Tooltip)
+        return widget.message == 'Back';
+      if (widget is CupertinoNavigationBarBackButton)
+        return true;
+      return false;
+    }, description: 'Material or Cupertino back button');
   }
 
   Finder _createFinder(SerializableFinder finder) {

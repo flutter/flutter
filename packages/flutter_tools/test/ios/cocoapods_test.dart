@@ -18,7 +18,7 @@ import 'package:process/process.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
-typedef Future<ProcessResult> InvokeProcess();
+typedef InvokeProcess = Future<ProcessResult> Function();
 
 void main() {
   FileSystem fs;
@@ -46,7 +46,7 @@ void main() {
     mockProcessManager = MockProcessManager();
     mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
     projectUnderTest = await FlutterProject.fromDirectory(fs.directory('project'));
-    projectUnderTest.ios.directory.childDirectory('Runner.xcodeproj').createSync(recursive: true);
+    projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     cocoaPodsUnderTest = CocoaPods();
     pretendPodVersionIs('1.5.0');
     fs.file(fs.path.join(

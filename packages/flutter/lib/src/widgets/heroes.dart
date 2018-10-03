@@ -18,12 +18,12 @@ import 'transitions.dart';
 /// This is typically used with a [HeroController] to provide an animation for
 /// [Hero] positions that looks nicer than a linear movement. For example, see
 /// [MaterialRectArcTween].
-typedef Tween<Rect> CreateRectTween(Rect begin, Rect end);
+typedef CreateRectTween = Tween<Rect> Function(Rect begin, Rect end);
 
 /// A function that lets [Hero]s self supply a [Widget] that is shown during the
 /// hero's flight from one route to another instead of default (which is to
 /// show the destination route's instance of the Hero).
-typedef Widget HeroFlightShuttleBuilder(
+typedef HeroFlightShuttleBuilder = Widget Function(
   BuildContext flightContext,
   Animation<double> animation,
   HeroFlightDirection flightDirection,
@@ -31,7 +31,7 @@ typedef Widget HeroFlightShuttleBuilder(
   BuildContext toHeroContext,
 );
 
-typedef void _OnFlightEnded(_HeroFlight flight);
+typedef _OnFlightEnded = void Function(_HeroFlight flight);
 
 /// Direction of the hero's flight based on the navigation operation.
 enum HeroFlightDirection {
@@ -326,6 +326,8 @@ class _HeroFlight {
     return RectTween(begin: begin, end: end);
   }
 
+  static final Animatable<double> _reverseTween = Tween<double>(begin: 1.0, end: 0.0);
+
   // The OverlayEntry WidgetBuilder callback for the hero's overlay.
   Widget _buildOverlay(BuildContext context) {
     assert(manifest != null);
@@ -347,9 +349,9 @@ class _HeroFlight {
           // The toHero no longer exists or it's no longer the flight's destination.
           // Continue flying while fading out.
           if (_heroOpacity.isCompleted) {
-            _heroOpacity = Tween<double>(begin: 1.0, end: 0.0)
-              .chain(CurveTween(curve: Interval(_proxyAnimation.value, 1.0)))
-              .animate(_proxyAnimation);
+            _heroOpacity = _proxyAnimation.drive(
+              _reverseTween.chain(CurveTween(curve: Interval(_proxyAnimation.value, 1.0))),
+            );
           }
         } else if (toHeroBox.hasSize) {
           // The toHero has been laid out. If it's no longer where the hero animation is
@@ -460,10 +462,12 @@ class _HeroFlight {
       assert(manifest.toHero == newManifest.fromHero);
       assert(manifest.toRoute == newManifest.fromRoute);
 
-      _proxyAnimation.parent = Tween<double>(
-        begin: manifest.animation.value,
-        end: 1.0,
-      ).animate(newManifest.animation);
+      _proxyAnimation.parent = newManifest.animation.drive(
+        Tween<double>(
+          begin: manifest.animation.value,
+          end: 1.0,
+        ),
+      );
 
       if (manifest.fromHero != newManifest.toHero) {
         manifest.fromHero.endFlight();

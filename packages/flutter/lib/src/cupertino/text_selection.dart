@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
 import 'button.dart';
+import 'localizations.dart';
 
 // Padding around the line at the edge of the text selection that has 0 width and
 // the height of the text font.
@@ -73,27 +74,28 @@ class _TextSelectionToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> items = <Widget>[];
     final Widget onePhysicalPixelVerticalDivider =
-        SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+    SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
 
     if (handleCut != null)
-      items.add(_buildToolbarButton('Cut', handleCut));
+      items.add(_buildToolbarButton(localizations.cutButtonLabel, handleCut));
 
     if (handleCopy != null) {
       if (items.isNotEmpty)
         items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton('Copy', handleCopy));
+      items.add(_buildToolbarButton(localizations.copyButtonLabel, handleCopy));
     }
 
     if (handlePaste != null) {
       if (items.isNotEmpty)
         items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton('Paste', handlePaste));
+      items.add(_buildToolbarButton(localizations.pasteButtonLabel, handlePaste));
     }
 
     if (handleSelectAll != null) {
       if (items.isNotEmpty)
         items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton('Select All', handleSelectAll));
+      items.add(_buildToolbarButton(localizations.selectAllButtonLabel, handleSelectAll));
     }
 
     final Widget triangle = SizedBox.fromSize(

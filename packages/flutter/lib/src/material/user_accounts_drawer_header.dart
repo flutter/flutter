@@ -30,7 +30,7 @@ class _AccountPictures extends StatelessWidget {
           top: 0.0,
           end: 0.0,
           child: Row(
-            children: (otherAccountsPictures ?? <Widget>[]).take(3).map((Widget picture) {
+            children: (otherAccountsPictures ?? <Widget>[]).take(3).map<Widget>((Widget picture) {
               return Padding(
                 padding: const EdgeInsetsDirectional.only(start: 8.0),
                 child: Semantics(
@@ -79,6 +79,7 @@ class _AccountDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
+    assert(debugCheckHasMaterialLocalizations(context));
 
     final ThemeData theme = Theme.of(context);
     final List<Widget> children = <Widget>[];
@@ -308,6 +309,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasMaterialLocalizations(context));
     return Semantics(
       container: true,
       label: MaterialLocalizations.of(context).signedInLabel,

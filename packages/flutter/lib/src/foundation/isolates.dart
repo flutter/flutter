@@ -18,7 +18,7 @@ import 'profile.dart';
 /// of classes, not closures or instance methods of objects.
 ///
 /// {@macro flutter.foundation.compute.limitations}
-typedef R ComputeCallback<Q, R>(Q message);
+typedef ComputeCallback<Q, R> = R Function(Q message);
 
 /// Spawn an isolate, run `callback` on that isolate, passing it `message`, and
 /// (eventually) return the value returned by `callback`.
@@ -50,7 +50,7 @@ Future<R> compute<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debu
   Timeline.startSync('$debugLabel: start', flow: flow);
   final ReceivePort resultPort = ReceivePort();
   Timeline.finishSync();
-  final Isolate isolate = await Isolate.spawn(
+  final Isolate isolate = await Isolate.spawn<_IsolateConfiguration<Q, R>>(
     _spawn,
     _IsolateConfiguration<Q, R>(
       callback,

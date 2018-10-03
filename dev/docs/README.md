@@ -8,4 +8,4 @@ source.
 * **Main site: [flutter.io](https://flutter.io/)**
 * [Install](https://flutter.io/setup/)
 * [Get started](https://flutter.io/getting-started/)
-* [Contribute](CONTRIBUTING.md)
+* [Contribute](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md#contributing-to-flutter)

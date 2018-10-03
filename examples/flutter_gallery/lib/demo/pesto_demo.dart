@@ -120,7 +120,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           final Size size = constraints.biggest;
           final double appBarHeight = size.height - statusBarHeight;
           final double t = (appBarHeight - kToolbarHeight) / (_kAppBarHeight - kToolbarHeight);
-          final double extraPadding = Tween<double>(begin: 10.0, end: 24.0).lerp(t);
+          final double extraPadding = Tween<double>(begin: 10.0, end: 24.0).transform(t);
           final double logoHeight = appBarHeight - 1.5 * extraPadding;
           return Padding(
             padding: EdgeInsets.only(
@@ -492,7 +492,7 @@ class RecipeSheet extends StatelessWidget {
                   ),
                 ]
               ),
-            ]..addAll(recipe.ingredients.map(
+            ]..addAll(recipe.ingredients.map<TableRow>(
               (RecipeIngredient ingredient) {
                 return _buildItemRow(ingredient.amount, ingredient.description);
               }
@@ -506,7 +506,7 @@ class RecipeSheet extends StatelessWidget {
                   ),
                 ]
               )
-            )..addAll(recipe.steps.map(
+            )..addAll(recipe.steps.map<TableRow>(
               (RecipeStep step) {
                 return _buildItemRow(step.duration ?? '', step.description);
               }

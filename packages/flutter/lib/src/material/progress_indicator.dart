@@ -374,9 +374,20 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 6666),
+      duration: const Duration(seconds: 5),
       vsync: this,
-    )..repeat();
+    );
+    if (widget.value == null)
+      _controller.repeat();
+  }
+
+  @override
+  void didUpdateWidget(CircularProgressIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value == null && !_controller.isAnimating)
+      _controller.repeat();
+    else if (widget.value != null && _controller.isAnimating)
+      _controller.stop();
   }
 
   @override
@@ -452,7 +463,7 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
 
   void paintArrowhead(Canvas canvas, Size size) {
     // ux, uy: a unit vector whose direction parallels the base of the arrowhead.
-    // Note that ux, -uy points in the direction the arrowhead points.
+    // (So ux, -uy points in the direction the arrowhead points.)
     final double arcEnd = arcStart + arcSweep;
     final double ux = math.cos(arcEnd);
     final double uy = math.sin(arcEnd);

@@ -318,19 +318,26 @@ void main() {
   testWidgets('NestedScrollViews with custom physics', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: NestedScrollView(
-          physics: const _CustomPhysics(),
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return <Widget>[
-              const SliverAppBar(
-                floating: true,
-                title: Text('AA'),
-              ),
-            ];
-          },
-          body: Container(),
+      child: Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: NestedScrollView(
+            physics: const _CustomPhysics(),
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                const SliverAppBar(
+                  floating: true,
+                  title: Text('AA'),
+                ),
+              ];
+            },
+            body: Container(),
+          ),
         ),
       ),
     ));
@@ -382,7 +389,7 @@ void main() {
                     forceElevated: innerBoxIsScrolled,
                     bottom: TabBar(
                       // These are the widgets to put in each tab in the tab bar.
-                      tabs: _tabs.map((String name) => Tab(text: name)).toList(),
+                      tabs: _tabs.map<Widget>((String name) => Tab(text: name)).toList(),
                     ),
                   ),
                 ),
@@ -390,7 +397,7 @@ void main() {
             },
             body: TabBarView(
               // These are the contents of the tab views, below the tabs.
-              children: _tabs.map((String name) {
+              children: _tabs.map<Widget>((String name) {
                 return SafeArea(
                   top: false,
                   bottom: false,

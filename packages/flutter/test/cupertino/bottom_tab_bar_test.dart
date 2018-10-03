@@ -68,6 +68,39 @@ void main() {
     expect(actualActive.text.style.color, const Color(0xFF123456));
   });
 
+  testWidgets('Use active icon', (WidgetTester tester) async {
+    const TestImageProvider activeIcon = TestImageProvider(16, 16);
+    const TestImageProvider inactiveIcon = TestImageProvider(24, 24);
+
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoTabBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            title: Text('Tab 1'),
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(inactiveIcon),
+            activeIcon: ImageIcon(activeIcon),
+            title: Text('Tab 2'),
+          ),
+        ],
+        currentIndex: 1,
+        activeColor: const Color(0xFF123456),
+        inactiveColor: const Color(0xFF654321),
+      ),
+    ));
+
+    final Image image = tester.widget(find.descendant(
+      of: find.widgetWithText(GestureDetector, 'Tab 2'),
+      matching: find.byType(Image)
+    ));
+
+    expect(image.color, const Color(0xFF123456));
+    expect(image.image, activeIcon);
+  });
+
   testWidgets('Adjusts height to account for bottom padding', (WidgetTester tester) async {
     final CupertinoTabBar tabBar = CupertinoTabBar(
       items: const <BottomNavigationBarItem>[

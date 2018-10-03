@@ -26,8 +26,8 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
 
   int exitCode;
   process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
     print('attach:stdout: $line');
     stdout.add(line);
@@ -43,14 +43,14 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
       finished.complete();
   });
   process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
     print('run:stderr: $line');
     stdout.add(line);
   });
 
-  process.exitCode.then((int processExitCode) { exitCode = processExitCode; });
+  process.exitCode.then<void>((int processExitCode) { exitCode = processExitCode; });
 
   Future<dynamic> eventOrExit(Future<Null> event) {
     return Future.any<dynamic>(<Future<dynamic>>[ event, process.exitCode ]);

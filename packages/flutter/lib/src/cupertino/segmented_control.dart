@@ -441,7 +441,7 @@ class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<Ren
   RRect surroundingRect;
 }
 
-typedef RenderBox _NextChild(RenderBox child);
+typedef _NextChild = RenderBox Function(RenderBox child);
 
 class _RenderSegmentedControl<T> extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,

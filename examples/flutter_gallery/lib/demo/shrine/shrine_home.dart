@@ -395,7 +395,7 @@ class _ShrineHomeState extends State<ShrineHome> {
             sliver: SliverGrid(
               gridDelegate: gridDelegate,
               delegate: SliverChildListDelegate(
-                _products.map((Product product) {
+                _products.map<Widget>((Product product) {
                   return _ProductItem(
                     product: product,
                     onPressed: () { _showOrderPage(product); },

@@ -1181,8 +1181,8 @@ void main() {
     testWidgets('label only', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
-      await tester.pumpWidget(MaterialApp(
-        home: const Material(
+      await tester.pumpWidget(const MaterialApp(
+        home: Material(
           child: RawChip(
             label: Text('test'),
           ),
@@ -1401,6 +1401,36 @@ void main() {
     await tester.tapAt(tester.getTopRight(find.byType(Chip)) - const Offset(2.0, -2.0));
     await tester.pumpAndSettle();
     expect(deleted, true);
+  });
+
+  testWidgets('Chip elevation works correctly', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.red,
+    );
+
+    final ChipThemeData chipTheme = theme.chipTheme;
+
+    InputChip inputChip = const InputChip(label: Text('Label'), pressElevation: 8.0);
+
+    Widget buildChip(ChipThemeData data) {
+      return _wrapForChip(
+        textDirection: TextDirection.ltr,
+        child: Theme(
+          data: theme,
+          child: inputChip,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip(chipTheme));
+    expect(inputChip.pressElevation, 8.0);
+
+    inputChip = const InputChip(label: Text('Label'), pressElevation: 12.0);
+
+    await tester.pumpWidget(buildChip(chipTheme));
+    await tester.pumpAndSettle();
+    expect(inputChip.pressElevation, 12.0);
   });
 
   testWidgets('can be tapped outside of chip body', (WidgetTester tester) async {

@@ -32,7 +32,7 @@ String get javaPath => androidStudio?.javaPath;
 class AndroidStudio implements Comparable<AndroidStudio> {
   AndroidStudio(this.directory,
       {Version version, this.configured, this.studioAppName = 'AndroidStudio'})
-      : this.version = version ?? Version.unknown {
+      : version = version ?? Version.unknown {
     _init();
   }
 
@@ -188,7 +188,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     return candidatePaths
-        .map((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
+        .map<AndroidStudio>((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
         .where((AndroidStudio s) => s != null)
         .toList();
   }

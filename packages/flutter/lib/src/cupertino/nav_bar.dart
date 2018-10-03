@@ -148,8 +148,8 @@ bool _isTransitionable(BuildContext context) {
 /// is provided and [automaticallyImplyLeading] is true (true by default).
 ///
 /// The [middle] widget will automatically be a title text from the current
-/// route if none is provided and [automaticallyImplyMiddle] is true (true by
-/// default).
+/// [CupertinoPageRoute] if none is provided and [automaticallyImplyMiddle] is
+/// true (true by default).
 ///
 /// It should be placed at top of the screen and automatically accounts for
 /// the OS's status bar.
@@ -158,11 +158,16 @@ bool _isTransitionable(BuildContext context) {
 /// default), it will produce a blurring effect to the content behind it.
 ///
 /// When [transitionBetweenRoutes] is true, this navigation bar will transition
-/// on top of the routes instead of inside it if the route being transitioned
+/// on top of the routes instead of inside them if the route being transitioned
 /// to also has a [CupertinoNavigationBar] or a [CupertinoSliverNavigationBar]
 /// with [transitionBetweenRoutes] set to true. If [transitionBetweenRoutes] is
 /// true, none of the [Widget] parameters can contain a key in its subtree since
 /// that widget will exist in multiple places in the tree simultaneously.
+///
+/// By default, only one [CupertinoNavigationBar] or [CupertinoSliverNavigationBar]
+/// should be present in each [PageRoute] to support the default transitions.
+/// Use [transitionBetweenRoutes] or [heroTag] to customize the transition
+/// behavior for multiple navigation bars per route.
 ///
 /// See also:
 ///
@@ -432,16 +437,21 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// is provided and [automaticallyImplyLeading] is true (true by default).
 ///
 /// The [largeTitle] widget will automatically be a title text from the current
-/// route if none is provided and [automaticallyImplyTitle] is true (true by
-/// default).
+/// [CupertinoPageRoute] if none is provided and [automaticallyImplyTitle] is
+/// true (true by default).
 ///
 /// When [transitionBetweenRoutes] is true, this navigation bar will transition
-/// on top of the routes instead of inside it if the route being transitioned
+/// on top of the routes instead of inside them if the route being transitioned
 /// to also has a [CupertinoNavigationBar] or a [CupertinoSliverNavigationBar]
 /// with [transitionBetweenRoutes] set to true. If [transitionBetweenRoutes] is
 /// true, none of the [Widget] parameters can contain any [GlobalKey]s in their
 /// subtrees since those widgets will exist in multiple places in the tree
 /// simultaneously.
+///
+/// By default, only one [CupertinoNavigationBar] or [CupertinoSliverNavigationBar]
+/// should be present in each [PageRoute] to support the default transitions.
+/// Use [transitionBetweenRoutes] or [heroTag] to customize the transition
+/// behavior for multiple navigation bars per route.
 ///
 /// See also:
 ///
@@ -1520,11 +1530,11 @@ class _NavigationBarComponentsTransition {
            // paintBounds are based on offset zero so it's ok to expand the Rects.
            bottomNavBar.renderBox.paintBounds.expandToInclude(topNavBar.renderBox.paintBounds);
 
-  static final Tween<double> fadeOut = Tween<double>(
+  static final Animatable<double> fadeOut = Tween<double>(
     begin: 1.0,
     end: 0.0,
   );
-  static final Tween<double> fadeIn = Tween<double>(
+  static final Animatable<double> fadeIn = Tween<double>(
     begin: 0.0,
     end: 1.0,
   );
@@ -1601,15 +1611,15 @@ class _NavigationBarComponentsTransition {
   }
 
   Animation<double> fadeInFrom(double t, { Curve curve = Curves.easeIn }) {
-    return fadeIn.animate(
-      CurvedAnimation(curve: Interval(t, 1.0, curve: curve), parent: animation),
-    );
+    return animation.drive(fadeIn.chain(
+      CurveTween(curve: Interval(t, 1.0, curve: curve)),
+    ));
   }
 
   Animation<double> fadeOutBy(double t, { Curve curve = Curves.easeOut }) {
-    return fadeOut.animate(
-      CurvedAnimation(curve: Interval(0.0, t, curve: curve), parent: animation),
-    );
+    return animation.drive(fadeOut.chain(
+      CurveTween(curve: Interval(0.0, t, curve: curve)),
+    ));
   }
 
   Widget get bottomLeading {
@@ -1663,7 +1673,7 @@ class _NavigationBarComponentsTransition {
     );
 
     return PositionedTransition(
-      rect: positionTween.animate(animation),
+      rect: animation.drive(positionTween),
       child: FadeTransition(
         opacity: fadeOutBy(0.2),
         child: DefaultTextStyle(
@@ -1687,12 +1697,12 @@ class _NavigationBarComponentsTransition {
 
     if (bottomMiddle != null && topBackLabel != null) {
       return PositionedTransition(
-        rect: slideFromLeadingEdge(
+        rect: animation.drive(slideFromLeadingEdge(
           fromKey: bottomComponents.middleKey,
           fromNavBarBox: bottomNavBarBox,
           toKey: topComponents.backLabelKey,
           toNavBarBox: topNavBarBox,
-        ).animate(animation),
+        )),
         child: FadeTransition(
           // A custom middle widget like a segmented control fades away faster.
           opacity: fadeOutBy(bottomHasUserMiddle ? 0.4 : 0.7),
@@ -1701,10 +1711,10 @@ class _NavigationBarComponentsTransition {
             // edge of a constantly sized outer box.
             alignment: AlignmentDirectional.centerStart,
             child: DefaultTextStyleTransition(
-              style: TextStyleTween(
+              style: animation.drive(TextStyleTween(
                 begin: _kMiddleTitleTextStyle,
                 end: topActionsStyle,
-              ).animate(animation),
+              )),
               child: bottomMiddle.child,
             ),
           ),
@@ -1742,12 +1752,12 @@ class _NavigationBarComponentsTransition {
 
     if (bottomLargeTitle != null && topBackLabel != null) {
       return PositionedTransition(
-        rect: slideFromLeadingEdge(
+        rect: animation.drive(slideFromLeadingEdge(
           fromKey: bottomComponents.largeTitleKey,
           fromNavBarBox: bottomNavBarBox,
           toKey: topComponents.backLabelKey,
           toNavBarBox: topNavBarBox,
-        ).animate(animation),
+        )),
         child: FadeTransition(
           opacity: fadeOutBy(0.6),
           child: Align(
@@ -1755,10 +1765,10 @@ class _NavigationBarComponentsTransition {
             // edge of a constantly sized outer box.
             alignment: AlignmentDirectional.centerStart,
             child: DefaultTextStyleTransition(
-              style: TextStyleTween(
+              style: animation.drive(TextStyleTween(
                 begin: _kLargeTitleTextStyle,
                 end: topActionsStyle,
-              ).animate(animation),
+              )),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               child: bottomLargeTitle.child,
@@ -1779,7 +1789,7 @@ class _NavigationBarComponentsTransition {
       // Just shift slightly towards the right instead of moving to the back
       // label position.
       return PositionedTransition(
-        rect: positionTween.animate(animation),
+        rect: animation.drive(positionTween),
         child: FadeTransition(
           opacity: fadeOutBy(0.4),
           // Keep the font when transitioning into a non-back-label leading.
@@ -1850,7 +1860,7 @@ class _NavigationBarComponentsTransition {
     );
 
     return PositionedTransition(
-      rect: positionTween.animate(animation),
+      rect: animation.drive(positionTween),
       child: FadeTransition(
         opacity: fadeInFrom(bottomBackChevron == null ? 0.7 : 0.4),
         child: DefaultTextStyle(
@@ -1877,10 +1887,10 @@ class _NavigationBarComponentsTransition {
 
     Animation<double> midClickOpacity;
     if (topBackLabelOpacity != null && topBackLabelOpacity.opacity.value < 1.0) {
-      midClickOpacity = Tween<double>(
+      midClickOpacity = animation.drive(Tween<double>(
         begin: 0.0,
         end: topBackLabelOpacity.opacity.value,
-      ).animate(animation);
+      ));
     }
 
     // Pick up from an incoming transition from the large title. This is
@@ -1893,19 +1903,19 @@ class _NavigationBarComponentsTransition {
         bottomLargeExpanded
     ) {
       return PositionedTransition(
-        rect: slideFromLeadingEdge(
+        rect: animation.drive(slideFromLeadingEdge(
           fromKey: bottomComponents.largeTitleKey,
           fromNavBarBox: bottomNavBarBox,
           toKey: topComponents.backLabelKey,
           toNavBarBox: topNavBarBox,
-        ).animate(animation),
+        )),
         child: FadeTransition(
           opacity: midClickOpacity ?? fadeInFrom(0.4),
           child: DefaultTextStyleTransition(
-            style: TextStyleTween(
+            style: animation.drive(TextStyleTween(
               begin: _kLargeTitleTextStyle,
               end: topActionsStyle,
-            ).animate(animation),
+            )),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             child: topBackLabel.child,
@@ -1918,19 +1928,19 @@ class _NavigationBarComponentsTransition {
     // and expanded instead of middle.
     if (bottomMiddle != null && topBackLabel != null) {
       return PositionedTransition(
-        rect: slideFromLeadingEdge(
+        rect: animation.drive(slideFromLeadingEdge(
           fromKey: bottomComponents.middleKey,
           fromNavBarBox: bottomNavBarBox,
           toKey: topComponents.backLabelKey,
           toNavBarBox: topNavBarBox,
-        ).animate(animation),
+        )),
         child: FadeTransition(
           opacity: midClickOpacity ?? fadeInFrom(0.3),
           child: DefaultTextStyleTransition(
-            style: TextStyleTween(
+            style: animation.drive(TextStyleTween(
               begin: _kMiddleTitleTextStyle,
               end: topActionsStyle,
-            ).animate(animation),
+            )),
             child: topBackLabel.child,
           ),
         ),
@@ -1962,7 +1972,7 @@ class _NavigationBarComponentsTransition {
     );
 
     return PositionedTransition(
-      rect: positionTween.animate(animation),
+      rect: animation.drive(positionTween),
       child: FadeTransition(
         opacity: fadeInFrom(0.25),
         child: DefaultTextStyle(
@@ -2005,7 +2015,7 @@ class _NavigationBarComponentsTransition {
     );
 
     return PositionedTransition(
-      rect: positionTween.animate(animation),
+      rect: animation.drive(positionTween),
       child: FadeTransition(
         opacity: fadeInFrom(0.3),
         child: DefaultTextStyle(

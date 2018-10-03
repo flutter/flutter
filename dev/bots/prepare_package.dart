@@ -175,7 +175,7 @@ class ProcessRunner {
   }
 }
 
-typedef Future<Uint8List> HttpReader(Uri url, {Map<String, String> headers});
+typedef HttpReader = Future<Uint8List> Function(Uri url, {Map<String, String> headers});
 
 /// Creates a pre-populated Flutter archive from a git repo.
 class ArchiveCreator {
@@ -567,8 +567,8 @@ class ArchivePublisher {
 /// packages, and the flutter cache in bin/cache with the appropriate
 /// dependencies and snapshots.
 ///
-/// Note that archives contain the executables and customizations for the
-/// platform that they are created on.
+/// Archives contain the executables and customizations for the platform that
+/// they are created on.
 Future<Null> main(List<String> argList) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
@@ -587,7 +587,7 @@ Future<Null> main(List<String> argList) async {
   argParser.addOption(
     'branch',
     defaultsTo: null,
-    allowed: Branch.values.map((Branch branch) => getBranchName(branch)),
+    allowed: Branch.values.map<String>((Branch branch) => getBranchName(branch)),
     help: 'The Flutter branch to build the archive with. Required.',
   );
   argParser.addOption(

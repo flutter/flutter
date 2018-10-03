@@ -34,7 +34,7 @@ BufferLogger get testLogger => context[Logger];
 MockDeviceManager get testDeviceManager => context[DeviceManager];
 MockDoctor get testDoctor => context[Doctor];
 
-typedef void ContextInitializer(AppContext testContext);
+typedef ContextInitializer = void Function(AppContext testContext);
 
 @isTest
 void testUsingContext(String description, dynamic testMethod(), {
@@ -76,7 +76,7 @@ void testUsingContext(String description, dynamic testMethod(), {
             when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
             return mock;
           },
-          Logger: () => BufferLogger(),
+          Logger: () => BufferLogger()..supportsColor = false,
           OperatingSystemUtils: () => MockOperatingSystemUtils(),
           SimControl: () => MockSimControl(),
           Usage: () => MockUsage(),
@@ -85,7 +85,7 @@ void testUsingContext(String description, dynamic testMethod(), {
         body: () {
           final String flutterRoot = getFlutterRoot();
 
-          return runZoned(() {
+          return runZoned<Future<dynamic>>(() {
             try {
               return context.run<dynamic>(
                 // Apply the overrides to the test context in the zone since their
@@ -198,7 +198,7 @@ class MockDoctor extends Doctor {
   /// the Doctor.
   List<DoctorValidator> get validators {
     final List<DoctorValidator> superValidators = super.validators;
-    return superValidators.map((DoctorValidator v) {
+    return superValidators.map<DoctorValidator>((DoctorValidator v) {
       if (v is AndroidValidator) {
         return MockAndroidWorkflowValidator();
       }

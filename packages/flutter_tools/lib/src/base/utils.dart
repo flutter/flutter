@@ -202,7 +202,7 @@ class SettingsFile {
   final Map<String, String> values = <String, String>{};
 
   void writeContents(File file) {
-    file.writeAsStringSync(values.keys.map((String key) {
+    file.writeAsStringSync(values.keys.map<String>((String key) {
       return '$key=${values[key]}';
     }).join('\n'));
   }
@@ -251,7 +251,7 @@ Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
 
 Clock get clock => context[Clock];
 
-typedef Future<Null> AsyncCallback();
+typedef AsyncCallback = Future<Null> Function();
 
 /// A [Timer] inspired class that:
 ///   - has a different initial value for the first callback delay

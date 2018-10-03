@@ -37,6 +37,7 @@ class RenderImage extends RenderBox {
     Rect centerSlice,
     bool matchTextDirection = false,
     TextDirection textDirection,
+    bool invertColors = false
   }) : assert(scale != null),
        assert(repeat != null),
        assert(alignment != null),
@@ -52,6 +53,7 @@ class RenderImage extends RenderBox {
        _repeat = repeat,
        _centerSlice = centerSlice,
        _matchTextDirection = matchTextDirection,
+       _invertColors = invertColors,
        _textDirection = textDirection {
     _updateColorFilter();
   }
@@ -215,6 +217,20 @@ class RenderImage extends RenderBox {
     markNeedsPaint();
   }
 
+  /// Whether to invert the colors of the image.
+  ///
+  /// inverting the colors of an image applies a new color filter to the paint.
+  /// If there is another specified color filter, the invert will be applied
+  /// after it. This is primarily used for implementing smart invert on iOS.
+  bool get invertColors => _invertColors;
+  bool _invertColors;
+  set invertColors(bool value) {
+    if (value == _invertColors)
+      return;
+    _invertColors = value;
+    markNeedsPaint();
+  }
+
   /// Whether to paint the image in the direction of the [TextDirection].
   ///
   /// If this is true, then in [TextDirection.ltr] contexts, the image will be
@@ -331,6 +347,7 @@ class RenderImage extends RenderBox {
       centerSlice: _centerSlice,
       repeat: _repeat,
       flipHorizontally: _flipHorizontally,
+      invertColors: invertColors,
     );
   }
 
@@ -349,5 +366,6 @@ class RenderImage extends RenderBox {
     properties.add(DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
     properties.add(FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
   }
 }

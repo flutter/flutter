@@ -143,11 +143,28 @@ class Directionality extends InheritedWidget {
 /// This is more efficient than adding and removing the child widget from the
 /// tree on demand.
 ///
-/// ## Opacity Animation
+/// ## Opacity animation
 ///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using
 /// an [AnimatedOpacity] instead.
+///
+/// ## Transparent image
+///
+/// If only a single [Image] needs to be composited with an opacity between 0.0
+/// and 1.0, it's much faster to directly use [Image].
+///
+/// ### Sample code
+///
+/// This example draws an [Image] with 0.5 opacity:
+///
+/// ```dart
+/// Image.network(
+///   'https://github.com/flutter/flutter_gallery_assets/raw/master/lib/products/backpack.png',
+///   color: Color.fromRGBO(255, 255, 255, 0.5),
+///   colorBlendMode: BlendMode.modulate
+/// )
+/// ```
 ///
 /// See also:
 ///
@@ -161,6 +178,8 @@ class Directionality extends InheritedWidget {
 ///    animate opacity.
 ///  * [FadeTransition], which uses a provided animation to efficiently animate
 ///    opacity.
+///  * [Image], which can directly provide a partially transparent image with
+///    much less performance hit.
 class Opacity extends SingleChildRenderObjectWidget {
   /// Creates a widget that makes its child partially transparent.
   ///
@@ -496,12 +515,12 @@ class ClipRect extends SingleChildRenderObjectWidget {
   ///
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
-  const ClipRect({ Key key, this.clipper, this.clipBehavior = Clip.antiAlias, Widget child }) : super(key: key, child: child);
+  const ClipRect({ Key key, this.clipper, this.clipBehavior = Clip.hardEdge, Widget child }) : super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   final CustomClipper<Rect> clipper;
 
-  /// {@macro flutter.widget.clipper.clipBehavior}
+  /// {@macro flutter.clipper.clipBehavior}
   final Clip clipBehavior;
 
   @override
@@ -564,7 +583,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// If non-null, determines which clip to use.
   final CustomClipper<RRect> clipper;
 
-  /// {@macro flutter.widget.clipper.clipBehavior}
+  /// {@macro flutter.clipper.clipBehavior}
   final Clip clipBehavior;
 
   @override
@@ -616,7 +635,7 @@ class ClipOval extends SingleChildRenderObjectWidget {
   /// object) instead.
   final CustomClipper<Rect> clipper;
 
-  /// {@macro flutter.widget.clipper.clipBehavior}
+  /// {@macro flutter.clipper.clipBehavior}
   final Clip clipBehavior;
 
   @override
@@ -667,7 +686,7 @@ class ClipPath extends SingleChildRenderObjectWidget {
   /// efficient way of obtaining that effect.
   final CustomClipper<Path> clipper;
 
-  /// {@macro flutter.widget.clipper.clipBehavior}
+  /// {@macro flutter.clipper.clipBehavior}
   final Clip clipBehavior;
 
   @override
@@ -4494,6 +4513,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.repeat = ImageRepeat.noRepeat,
     this.centerSlice,
     this.matchTextDirection = false,
+    this.invertColors = false,
   }) : assert(scale != null),
        assert(alignment != null),
        assert(repeat != null),
@@ -4595,6 +4615,17 @@ class RawImage extends LeafRenderObjectWidget {
   /// scope.
   final bool matchTextDirection;
 
+  /// Whether the colors of the image are inverted when drawn.
+  ///
+  /// inverting the colors of an image applies a new color filter to the paint.
+  /// If there is another specified color filter, the invert will be applied
+  /// after it. This is primarily used for implementing smart invert on iOS.
+  ///
+  /// See also:
+  ///
+  ///   * [Paint.invertColors], for the dart:ui implementation.
+  final bool invertColors;
+
   @override
   RenderImage createRenderObject(BuildContext context) {
     assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
@@ -4611,6 +4642,7 @@ class RawImage extends LeafRenderObjectWidget {
       centerSlice: centerSlice,
       matchTextDirection: matchTextDirection,
       textDirection: matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null,
+      invertColors: invertColors,
     );
   }
 
@@ -4628,7 +4660,8 @@ class RawImage extends LeafRenderObjectWidget {
       ..repeat = repeat
       ..centerSlice = centerSlice
       ..matchTextDirection = matchTextDirection
-      ..textDirection = matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null;
+      ..textDirection = matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null
+      ..invertColors = invertColors;
   }
 
   @override
@@ -4645,6 +4678,7 @@ class RawImage extends LeafRenderObjectWidget {
     properties.add(EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
     properties.add(DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
     properties.add(FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
+    properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
   }
 }
 
@@ -5593,7 +5627,7 @@ class Builder extends StatelessWidget {
 /// Signature for the builder callback used by [StatefulBuilder].
 ///
 /// Call [setState] to schedule the [StatefulBuilder] to rebuild.
-typedef Widget StatefulWidgetBuilder(BuildContext context, StateSetter setState);
+typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSetter setState);
 
 /// A platonic widget that both has state and calls a closure to obtain its child widget.
 ///

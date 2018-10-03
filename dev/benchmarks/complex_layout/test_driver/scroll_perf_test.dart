@@ -25,7 +25,7 @@ void main() {
       // period of increased load on the device. Without this delay, the
       // benchmark has greater noise.
       // See: https://github.com/flutter/flutter/issues/19434
-      await Future<Null>.delayed(const Duration(milliseconds: 1000));
+      await Future<Null>.delayed(const Duration(milliseconds: 250));
       final Timeline timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
         final SerializableFinder list = find.byValueKey(listKey);

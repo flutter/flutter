@@ -11,10 +11,10 @@ import 'io.dart';
 import 'process_manager.dart';
 import 'utils.dart';
 
-typedef String StringConverter(String string);
+typedef StringConverter = String Function(String string);
 
 /// A function that will be run before the VM exits.
-typedef Future<dynamic> ShutdownHook();
+typedef ShutdownHook = Future<dynamic> Function();
 
 // TODO(ianh): We have way too many ways to run subprocesses in this project.
 // Convert most of these into one or more lightweight wrappers around the
@@ -137,8 +137,8 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
     environment: environment
   );
   final StreamSubscription<String> stdoutSubscription = process.stdout
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
       if (mapFunction != null)
@@ -152,8 +152,8 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
       }
     });
   final StreamSubscription<String> stderrSubscription = process.stderr
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
       if (mapFunction != null)
