@@ -678,23 +678,23 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // would make this test fragile.
       expect(lineA + 1, equals(lineB));
       // Column numbers are more stable than line numbers.
-      expect(columnA, equals(21));
+      expect(columnA, equals(15));
       expect(columnA, equals(columnB));
       expect(parameterLocationsA.length, equals(1));
       final Map<String, Object> paramA = parameterLocationsA[0];
       expect(paramA['name'], equals('data'));
       expect(paramA['line'], equals(lineA));
-      expect(paramA['column'], equals(26));
+      expect(paramA['column'], equals(20));
 
       expect(parameterLocationsB.length, equals(2));
       final Map<String, Object> paramB1 = parameterLocationsB[0];
       expect(paramB1['name'], equals('data'));
       expect(paramB1['line'], equals(lineB));
-      expect(paramB1['column'], equals(26));
+      expect(paramB1['column'], equals(20));
       final Map<String, Object> paramB2 = parameterLocationsB[1];
       expect(paramB2['name'], equals('textDirection'));
       expect(paramB2['line'], equals(lineB));
-      expect(paramB2['column'], equals(31));
+      expect(paramB2['column'], equals(25));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('WidgetInspectorService setPubRootDirectories', (WidgetTester tester) async {
@@ -1204,23 +1204,23 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // would make this test fragile.
       expect(lineA + 1, equals(lineB));
       // Column numbers are more stable than line numbers.
-      expect(columnA, equals(21));
+      expect(columnA, equals(15));
       expect(columnA, equals(columnB));
       expect(parameterLocationsA.length, equals(1));
       final Map<String, Object> paramA = parameterLocationsA[0];
       expect(paramA['name'], equals('data'));
       expect(paramA['line'], equals(lineA));
-      expect(paramA['column'], equals(26));
+      expect(paramA['column'], equals(20));
 
       expect(parameterLocationsB.length, equals(2));
       final Map<String, Object> paramB1 = parameterLocationsB[0];
       expect(paramB1['name'], equals('data'));
       expect(paramB1['line'], equals(lineB));
-      expect(paramB1['column'], equals(26));
+      expect(paramB1['column'], equals(20));
       final Map<String, Object> paramB2 = parameterLocationsB[1];
       expect(paramB2['name'], equals('textDirection'));
       expect(paramB2['line'], equals(lineB));
-      expect(paramB2['column'], equals(31));
+      expect(paramB2['column'], equals(25));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.setPubRootDirectories', (WidgetTester tester) async {
