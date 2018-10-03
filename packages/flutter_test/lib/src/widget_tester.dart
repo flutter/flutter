@@ -677,6 +677,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   SemanticsHandle ensureSemantics() {
     return binding.pipelineOwner.ensureSemantics();
   }
+
+  /// Given a [Scrollable] widget specified by [finder], scrolls the widget
+  /// so as to make it visible
+  ///
+  /// Shorthand for `Scrollable.ensureVisible(tester.element(finder))`
+  Future<Null> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 }
 
 typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
