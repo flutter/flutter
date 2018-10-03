@@ -779,9 +779,9 @@ void main() {
   });
 
   testWidgets('Dropdown in middle showing middle item', (WidgetTester tester) async {
-    final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
-    for (int i = 0; i < 100; ++i)
-      items.add(DropdownMenuItem<int>(value: i, child: Text('$i')));
+    final List<DropdownMenuItem<int>> items =
+      List<DropdownMenuItem<int>>.generate(100, (int i) =>
+        DropdownMenuItem<int>(value: i, child: Text('$i')));
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 50,
@@ -816,9 +816,9 @@ void main() {
   });
 
   testWidgets('Dropdown in top showing bottom item', (WidgetTester tester) async {
-    final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
-    for (int i = 0; i < 100; ++i)
-      items.add(DropdownMenuItem<int>(value: i, child: Text('$i')));
+    final List<DropdownMenuItem<int>> items =
+      List<DropdownMenuItem<int>>.generate(100, (int i) =>
+        DropdownMenuItem<int>(value: i, child: Text('$i')));
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 99,
@@ -853,9 +853,9 @@ void main() {
   });
 
   testWidgets('Dropdown in bottom showing top item', (WidgetTester tester) async {
-    final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
-    for (int i = 0; i < 100; ++i)
-      items.add(DropdownMenuItem<int>(value: i, child: Text('$i')));
+    final List<DropdownMenuItem<int>> items =
+      List<DropdownMenuItem<int>>.generate(100, (int i) =>
+        DropdownMenuItem<int>(value: i, child: Text('$i')));
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 0,
@@ -890,9 +890,9 @@ void main() {
   });
 
   testWidgets('Dropdown in center showing bottom item', (WidgetTester tester) async {
-    final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
-    for (int i = 0; i < 100; ++i)
-      items.add(DropdownMenuItem<int>(value: i, child: Text('$i')));
+    final List<DropdownMenuItem<int>> items =
+      List<DropdownMenuItem<int>>.generate(100, (int i) =>
+        DropdownMenuItem<int>(value: i, child: Text('$i')));
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 99,
