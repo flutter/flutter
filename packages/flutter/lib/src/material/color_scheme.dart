@@ -108,7 +108,7 @@ class ColorScheme extends Diagnosticable {
 
   /// Create a color scheme from a [MaterialColor] swatch.
   ///
-  /// This constructor is used by [ThemeData] to create its default \
+  /// This constructor is used by [ThemeData] to create its default
   /// color scheme.
   factory ColorScheme.fromSwatch({
     MaterialColor primarySwatch = Colors.blue,
@@ -159,6 +159,9 @@ class ColorScheme extends Diagnosticable {
   /// A darker version of the secondary color.
   final Color secondaryVariant;
 
+  /// The background color for widgets like [Card].
+  final Color surface;
+
   /// A color that typically appears behind scrollable content.
   final Color background;
 
@@ -166,23 +169,40 @@ class ColorScheme extends Diagnosticable {
   /// [InputDecoration.errorText].
   final Color error;
 
-  /// The background color for widgets like [Card].
-  final Color surface;
-
   /// A color that's clearly legible when drawn on [primary].
+  ///
+  /// To ensure that an app is accessibile, a contrast ratio of 4.5:1 for [primary]
+  /// and [onPrimary] is recommended. See
+  /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   final Color onPrimary;
 
   /// A color that's clearly legible when drawn on [secondary].
+  ///
+  /// To ensure that an app is accessibile, a contrast ratio of 4.5:1 for [secondary]
+  /// and [onSecondary] is recommended. See
+  /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   final Color onSecondary;
 
   /// A color that's clearly legible when drawn on [surface].
+  ///
+  /// To ensure that an app is accessibile, a contrast ratio of 4.5:1 for [surface]
+  /// and [onSurface] is recommended. See
+  /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   final Color onSurface;
 
-  /// A color that's clearly legible when drawn on [error].
-  final Color onError;
-
   /// A color that's clearly legible when drawn on [background].
+  ///
+  /// To ensure that an app is accessibile, a contrast ratio of 4.5:1 for [background]
+  /// and [onBackground] is recommended. See
+  /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   final Color onBackground;
+
+  /// A color that's clearly legible when drawn on [error].
+  ///
+  /// To ensure that an app is accessibile, a contrast ratio of 4.5:1 for [error]
+  /// and [onError] is recommended. See
+  /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
+  final Color onError;
 
   /// The overall brightness of this color scheme.
   final Brightness brightness;
