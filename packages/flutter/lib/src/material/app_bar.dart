@@ -142,7 +142,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.flexibleSpace,
     this.bottom,
     this.elevation = 4.0,
-    this.shapeBorder,
+    this.shape,
     this.backgroundColor,
     this.brightness,
     this.iconTheme,
@@ -238,12 +238,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The material's shape as well its shadow.
   ///
-  /// If shape is non null, the [borderRadius] is ignored and the material's
-  /// clip boundary and shadow are defined by the shape.
-  ///
   /// A shadow is only displayed if the [elevation] is greater than
   /// zero.
-  final ShapeBorder shapeBorder;
+  final ShapeBorder shape;
 
   /// The color to use for the app bar's material. Typically this should be set
   /// along with [brightness], [iconTheme], [textTheme].
@@ -501,7 +498,7 @@ class _AppBarState extends State<AppBar> {
         child: Material(
           color: widget.backgroundColor ?? themeData.primaryColor,
           elevation: widget.elevation,
-          shape: widget.shapeBorder,
+          shape: widget.shape,
           child: appBar,
         ),
       ),
