@@ -196,7 +196,6 @@ class VerticalDivider extends StatelessWidget {
   /// ```
   static BorderSide createBorderSide(BuildContext context, { Color color, double width = 0.0 }) {
     assert(width != null);
-    debugPrint(color.toString());
     return BorderSide(
       color: color ?? Theme.of(context).dividerColor,
       width: width,
