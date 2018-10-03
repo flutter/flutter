@@ -46,9 +46,7 @@ import 'typography.dart';
 ///
 /// Each of the [TextTheme] text styles corresponds to one of the
 /// styles from the 2018. By default, the font sizes, font weights
-/// and letter spacing have not changed. To create a theme that uses
-/// the new sizes, weights, and spacing, configure a [Theme] with
-/// [ThemeData.typographyVersion] set to 1 (default is 0).
+/// and letter spacing have not changed.
 /// ```
 /// NAME       SIZE   WEIGHT   SPACING  2018 NAME
 /// display4   112.0  thin     0.0      headline1
@@ -69,6 +67,12 @@ import 'typography.dart';
 /// Where "thin" is `FontWeight.w100`, "normal" is `FontWeight.w400` and
 /// "medium" is `FontWeight.w500`. Letter spacing for all of the original
 /// text styles was 0.0.
+///
+/// To configure a [Theme] for the new sizes, weights, and letter spacings,
+/// initialize its [ThemeData.typography] value with a [Typography] that
+/// object that specifies the 2018 versions of the geometry themes:
+/// [Typography.englishLike2018], [Typography.dense2018],
+/// and [Typography.tall2018].
 ///
 /// The following image [from the material design
 /// specification](https://material.io/go/design-typography#typography-styles)
