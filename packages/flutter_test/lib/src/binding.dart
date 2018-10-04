@@ -228,7 +228,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Artificially calls dispatchLocaleChanged on the Widget binding,
   /// then flushes microtasks.
   Future<Null> setLocale(String languageCode, String countryCode) {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       assert(inTest);
       final Locale locale = Locale(languageCode, countryCode);
       dispatchLocaleChanged(locale);
@@ -243,7 +243,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// Set to null to use the default surface size.
   Future<Null> setSurfaceSize(Size size) {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       assert(inTest);
       if (_surfaceSize == size)
         return null;
@@ -273,7 +273,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// to recursively schedule new microtasks. Will not run any timers scheduled
   /// after this method was invoked, even if they are zero-time timers.
   Future<Null> idle() {
-    return TestAsyncUtils.guard(() {
+    return TestAsyncUtils.guard<Null>(() {
       final Completer<Null> completer = Completer<Null>();
       Timer.run(() {
         completer.complete(null);
@@ -537,7 +537,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     );
     _parentZone = Zone.current;
     final Zone testZone = _parentZone.fork(specification: errorHandlingZoneSpecification);
-    testZone.runBinary(_runTestBody, testBody, invariantTester)
+    testZone.runBinary<Future<Null>, Future<Null> Function(), VoidCallback>(_runTestBody, testBody, invariantTester)
       .whenComplete(testCompletionHandler);
     timeout?.catchError(handleUncaughtError);
     return testCompleter.future;
@@ -689,7 +689,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
-    return TestAsyncUtils.guard(() {
+    return TestAsyncUtils.guard<Null>(() {
       assert(inTest);
       assert(_clock != null);
       if (duration != null)
@@ -741,7 +741,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     addTime(additionalTime);
 
-    return realAsyncZone.run(() {
+    return realAsyncZone.run<Future<T>>(() {
       _pendingAsyncTasks = Completer<void>();
       return callback().catchError((dynamic exception, StackTrace stack) {
         FlutterError.reportError(FlutterErrorDetails(
@@ -1197,7 +1197,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(inTest);
     assert(!_expectingFrame);
     assert(_pendingFrame == null);
-    return TestAsyncUtils.guard(() {
+    return TestAsyncUtils.guard<Null>(() {
       if (duration != null) {
         Timer(duration, () {
           _expectingFrame = true;

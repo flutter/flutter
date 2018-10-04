@@ -174,7 +174,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
       ),
       body: TabBarView(
         controller: _controller,
-        children: _allPages.map((_Page page) {
+        children: _allPages.map<Widget>((_Page page) {
           return SafeArea(
             top: false,
             bottom: false,

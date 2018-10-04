@@ -29,7 +29,7 @@ void main() {
           onRefresh: refresh,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
               return SizedBox(
                 height: 200.0,
                 child: Text(item),
@@ -61,7 +61,7 @@ void main() {
               width: 600.0,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
+                children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
                   return SizedBox(
                     height: 200.0,
                     child: Text(item),
@@ -362,7 +362,7 @@ void main() {
           },
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
               return SizedBox(
                 height: 200.0,
                 child: Text(item),
@@ -393,7 +393,7 @@ void main() {
           child: ListView(
             controller: controller,
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
               return SizedBox(
                 height: 200.0,
                 child: Text(item),

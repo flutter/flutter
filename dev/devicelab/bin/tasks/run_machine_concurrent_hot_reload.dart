@@ -27,7 +27,7 @@ void main() {
   }
 
   Stream<String> transformToLines(Stream<List<int>> byteStream) {
-    return byteStream.transform(utf8.decoder).transform(const LineSplitter());
+    return byteStream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
   }
 
   task(() async {
@@ -74,7 +74,7 @@ void main() {
       transformToLines(run.stderr).listen((String line) {
         stderr.writeln('run:stderr: $line');
       });
-      run.exitCode.then((int exitCode) {
+      run.exitCode.then<void>((int exitCode) {
         ok = false;
       });
       await Future.any<dynamic>(<Future<dynamic>>[ready.future, run.exitCode]);

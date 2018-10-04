@@ -492,7 +492,7 @@ class RecipeSheet extends StatelessWidget {
                   ),
                 ]
               ),
-            ]..addAll(recipe.ingredients.map(
+            ]..addAll(recipe.ingredients.map<TableRow>(
               (RecipeIngredient ingredient) {
                 return _buildItemRow(ingredient.amount, ingredient.description);
               }
@@ -506,7 +506,7 @@ class RecipeSheet extends StatelessWidget {
                   ),
                 ]
               )
-            )..addAll(recipe.steps.map(
+            )..addAll(recipe.steps.map<TableRow>(
               (RecipeStep step) {
                 return _buildItemRow(step.duration ?? '', step.description);
               }

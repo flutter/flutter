@@ -251,7 +251,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               )
             )
           ]
-          .map((Widget child) {
+          .map<Widget>((Widget child) {
             return Container(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               height: 96.0,

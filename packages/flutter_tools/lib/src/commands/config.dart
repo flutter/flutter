@@ -47,7 +47,7 @@ class ConfigCommand extends FlutterCommand {
   @override
   String get usageFooter {
     // List all config settings.
-    String values = config.keys.map((String key) {
+    String values = config.keys.map<String>((String key) {
       return '  $key: ${config.getValue(key)}';
     }).join('\n');
     if (values.isNotEmpty)

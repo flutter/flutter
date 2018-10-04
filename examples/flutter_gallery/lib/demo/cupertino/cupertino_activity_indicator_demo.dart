@@ -13,7 +13,7 @@ class CupertinoProgressIndicatorDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        previousPageTitle: 'Cupertino',
+        previousPageTitle: 'Back',
         middle: const Text('Cupertino Activity Indicator'),
         trailing: CupertinoDemoDocumentationButton(routeName),
       ),

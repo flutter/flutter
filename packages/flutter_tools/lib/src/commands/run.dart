@@ -344,7 +344,7 @@ class RunCommand extends RunCommandBase {
       fs.file(pidFile).writeAsStringSync(pid.toString());
     }
 
-    final List<FlutterDevice> flutterDevices = devices.map((Device device) {
+    final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {
       return FlutterDevice(
         device,
         trackWidgetCreation: argResults['track-widget-creation'],
@@ -392,7 +392,7 @@ class RunCommand extends RunCommandBase {
     // Do not add more operations to the future.
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
-    appStartedTimeRecorder.future.then( // ignore: unawaited_futures
+    appStartedTimeRecorder.future.then<void>( // ignore: unawaited_futures
       (_) { appStartedTime = clock.now(); }
     );
 

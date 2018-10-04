@@ -99,7 +99,7 @@ class PaletteTabView extends StatelessWidget {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle whiteTextStyle = textTheme.body1.copyWith(color: Colors.white);
     final TextStyle blackTextStyle = textTheme.body1.copyWith(color: Colors.black);
-    final List<Widget> colorItems = primaryKeys.map((int index) {
+    final List<Widget> colorItems = primaryKeys.map<Widget>((int index) {
       return DefaultTextStyle(
         style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
         child: ColorItem(index: index, color: colors.primary[index]),
@@ -107,7 +107,7 @@ class PaletteTabView extends StatelessWidget {
     }).toList();
 
     if (colors.accent != null) {
-      colorItems.addAll(accentKeys.map((int index) {
+      colorItems.addAll(accentKeys.map<Widget>((int index) {
         return DefaultTextStyle(
           style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
           child: ColorItem(index: index, color: colors.accent[index], prefix: 'A'),
@@ -135,11 +135,11 @@ class ColorsDemo extends StatelessWidget {
           title: const Text('Colors'),
           bottom: TabBar(
             isScrollable: true,
-            tabs: allPalettes.map((Palette swatch) => Tab(text: swatch.name)).toList(),
+            tabs: allPalettes.map<Widget>((Palette swatch) => Tab(text: swatch.name)).toList(),
           ),
         ),
         body: TabBarView(
-          children: allPalettes.map((Palette colors) {
+          children: allPalettes.map<Widget>((Palette colors) {
             return PaletteTabView(colors: colors);
           }).toList(),
         ),

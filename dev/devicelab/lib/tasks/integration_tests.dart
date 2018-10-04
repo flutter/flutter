@@ -73,7 +73,7 @@ class DriverTest {
   final List<String> extraOptions;
 
   Future<TaskResult> call() {
-    return inDirectory(testDirectory, () async {
+    return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
       final String deviceId = device.deviceId;

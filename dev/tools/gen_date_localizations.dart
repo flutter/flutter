@@ -135,7 +135,7 @@ String _jsonToMap(dynamic json) {
   }
 
   if (json is Iterable)
-    return '<dynamic>[${json.map(_jsonToMap).join(',')}]';
+    return '<dynamic>[${json.map<String>(_jsonToMap).join(',')}]';
 
   if (json is Map<String, dynamic>) {
     final StringBuffer buffer = StringBuffer('<String, dynamic>{');

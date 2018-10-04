@@ -58,7 +58,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
               CupertinoSliverRefreshControl(
                 onRefresh: () {
                   return Future<void>.delayed(const Duration(seconds: 2))
-                      ..then((_) {
+                      ..then<void>((_) {
                         if (mounted) {
                           setState(() => repopulateList());
                         }
