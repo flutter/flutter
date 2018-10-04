@@ -97,7 +97,6 @@ class FuchsiaCompat {
   static Future<FuchsiaRemoteConnection> connect() async {
     await FuchsiaCompat._init();
     return FuchsiaRemoteConnection
-        // ignore: invalid_use_of_visible_for_testing_member
         .connectWithSshCommandRunner(_DummySshCommandRunner());
   }
 }
