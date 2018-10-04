@@ -353,7 +353,7 @@ abstract class ScrollView extends StatelessWidget {
 ///
 /// To determine visible indexes, the scroll view needs a way to associate the
 /// generated semantics of each scrollable item with a semantic index. This can
-/// be done by wrapping the child widgets in an [IndexedChildSemantics].
+/// be done by wrapping the child widgets in an [IndexedSemantics].
 ///
 /// This semantic index is not necesarily the same as the index of the widget
 /// in the scrollable, because some widgets may not contribute semantic
@@ -366,7 +366,7 @@ abstract class ScrollView extends StatelessWidget {
 ///
 /// The total number of visible children can be provided by the constructor
 /// parameter `semanticChildCount`. This should always be the same as the
-/// number of widgets wrapped in [IndexedChildSemantics].
+/// number of widgets wrapped in [IndexedSemantics].
 ///
 /// See also:
 ///
@@ -380,7 +380,7 @@ abstract class ScrollView extends StatelessWidget {
 ///    and float as the scroll view scrolls.
 ///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
-///  * [IndexedChildSemantics], which allows annotating child lists with an index
+///  * [IndexedSemantics], which allows annotating child lists with an index
 ///    for scroll announcements.
 class CustomScrollView extends ScrollView {
   /// Creates a [ScrollView] that creates custom scroll effects using slivers.

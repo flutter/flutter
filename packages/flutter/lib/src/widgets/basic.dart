@@ -5555,18 +5555,36 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 
 /// A widget that annotates the child semantics with an index.
 ///
-/// Certain widgets will automatically provide a child index for building
-/// semantics. For example, the [ScrollView] uses the index of the first
-/// visible child semantics node to determine the
-/// [SemanticsConfiguration.scrollIndex].
+/// Certain widgets like the [ListView] will automatically provide a child
+/// index for building semantics. A user may wish to manually provide semanitc
+/// indexes if not all child of the scrollable contribute semantics.
+///
+/// ## Sample code
+///
+/// Handle spacers in a scrollable that don't contribute semantics. The
+/// automatic indexes would give the spaces a semantic index, causing
+/// scroll announcements to state that there are four items visible.
+///
+/// ```
+///  ListView(
+///    addSemanticIndexes: false,
+///    semanticChildCount: 2,
+///    children: [
+///      IndexedSemantics(index: 0, child: const Text('First')),
+///      Spacer(),
+///      IndexedSemantics(index: 1, child: const Text('Second'))
+///      Spacer(),
+///    ]
+///  );
+/// ```
 ///
 /// See also:
 ///   * [CustomScrollView], for an explaination of index semantics.
-class IndexedChildSemantics extends SingleChildRenderObjectWidget {
+class IndexedSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that annotated the first child semantics node with an index.
   ///
   /// [index] must not be null.
-  const IndexedChildSemantics({
+  const IndexedSemantics({
     Key key,
     @required this.index,
     Widget child,
@@ -5577,10 +5595,10 @@ class IndexedChildSemantics extends SingleChildRenderObjectWidget {
   final int index;
 
   @override
-  RenderIndexedChildSemantics createRenderObject(BuildContext context) => RenderIndexedChildSemantics(index: index);
+  RenderIndexedSemantics createRenderObject(BuildContext context) => RenderIndexedSemantics(index: index);
 
   @override
-  void updateRenderObject(BuildContext context, RenderIndexedChildSemantics renderObject) {
+  void updateRenderObject(BuildContext context, RenderIndexedSemantics renderObject) {
     renderObject.index = index;
   }
   @override

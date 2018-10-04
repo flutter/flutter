@@ -22,13 +22,13 @@ export 'package:flutter/rendering.dart' show
 /// Return a null value to prevent a widget from receiving an index.
 ///
 /// A semantic index is used to tag child semantic nodes for accessibility
-/// announcements in scroll view.s
+/// announcements in scroll view.
 ///
 /// See also:
 ///
 ///  * [CustomScrollView], for an explanation of scroll semantics.
 ///  * [SliverChildBuilderDelegate], for an explanation of how this is used to
-///    generated indexes.
+///    generate indexes.
 typedef SemanticIndexCallback = int Function(Widget widget, int localIndex);
 
 int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
@@ -208,7 +208,7 @@ abstract class SliverChildDelegate {
 /// ## Accessibility
 ///
 /// The [CustomScrollView] requires that its semantic children are annotated
-/// using [IndexedChildSemantics]. This is done by default in the delegate with
+/// using [IndexedSemantics]. This is done by default in the delegate with
 /// the `addSemanticIndexes` parameter set to true.
 ///
 /// If multiple delegates are using in a single scroll view, then the indexes
@@ -289,7 +289,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Defaults to true.
   final bool addRepaintBoundaries;
 
-  /// Whether to wrap each child in an [IndexedChildSemantics].
+  /// Whether to wrap each child in an [IndexedSemantics].
   ///
   /// Typically, children in a scrolling container must be annotated with a
   /// semantic index in order to generate the correct accessibility
@@ -323,7 +323,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     if (addSemanticIndexes) {
       final int semanticIndex = semanticIndexCallback(child, index);
       if (semanticIndex != null)
-        child = IndexedChildSemantics(index: semanticIndex + semanticIndexOffset, child: child);
+        child = IndexedSemantics(index: semanticIndex + semanticIndexOffset, child: child);
     }
     if (addAutomaticKeepAlives)
       child = AutomaticKeepAlive(child: child);
@@ -365,7 +365,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 /// ## Accessibility
 ///
 /// The [CustomScrollView] requires that its semantic children are annotated
-/// using [IndexedChildSemantics]. This is done by default in the delegate with
+/// using [IndexedSemantics]. This is done by default in the delegate with
 /// the `addSemanticIndexes` parameter set to true.
 ///
 /// If multiple delegates are using in a single scroll view, then the indexes
@@ -427,7 +427,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// Defaults to true.
   final bool addRepaintBoundaries;
 
-  /// Whether to wrap each child in an [IndexedChildSemantics].
+  /// Whether to wrap each child in an [IndexedSemantics].
   ///
   /// Typically, children in a scrolling container must be annotated with a
   /// semantic index in order to generate the correct accessibility
@@ -463,7 +463,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     if (addSemanticIndexes) {
       final int semanticIndex = semanticIndexCallback(child, index);
       if (semanticIndex != null)
-        child = IndexedChildSemantics(index: semanticIndex + semanticIndexOffset, child: child);
+        child = IndexedSemantics(index: semanticIndex + semanticIndexOffset, child: child);
     }
     if (addAutomaticKeepAlives)
       child = AutomaticKeepAlive(child: child);

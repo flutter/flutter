@@ -4340,9 +4340,9 @@ class RenderExcludeSemantics extends RenderProxyBox {
 /// See also:
 ///
 ///  * [CustomScrollView], for an explanation of scroll semantics.
-class RenderIndexedChildSemantics extends RenderProxyBox {
+class RenderIndexedSemantics extends RenderProxyBox {
   /// Creates a render object that annotates the child semantics with an index.
-  RenderIndexedChildSemantics({
+  RenderIndexedSemantics({
     RenderBox child,
     @required int index,
   }) : assert(index != null),
