@@ -12,6 +12,7 @@ Flutter is Google’s mobile app SDK for crafting high-quality native interfaces
 * **Main site: [flutter.io][]**
 * [Install](https://flutter.io/get-started/install/)
 * [Get started](https://flutter.io/get-started/)
+* [Changelog](https://github.com/flutter/flutter/wiki/Changelog)
 * [Contribute](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md#contributing-to-flutter)
 
 ## Fast development
