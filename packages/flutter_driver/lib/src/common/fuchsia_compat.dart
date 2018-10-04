@@ -77,14 +77,14 @@ Future<PortForwarder> _dummyPortForwardingFunction(
 /// `FUCHSIA_SSH_CONFIG` variables must be set. If run on a Fuchsia device, will
 /// connect locally without need for environment variables.
 class FuchsiaCompat {
-  static Future<void> _init() async {
+  static void _init() {
     fuchsiaPortForwardingFunction = _dummyPortForwardingFunction;
   }
 
   /// Restores state to normal if running on a Fuchsia device.
   ///
   /// Noop if running on the host machine.
-  static Future<void> cleanup() async {
+  static void cleanup() {
     restoreFuchsiaPortForwardingFunction();
   }
 
@@ -95,7 +95,7 @@ class FuchsiaCompat {
   /// use. It is the caller's responsibility to call
   /// [FuchsiaRemoteConnection.stop].
   static Future<FuchsiaRemoteConnection> connect() async {
-    await FuchsiaCompat._init();
+    FuchsiaCompat._init();
     return FuchsiaRemoteConnection
         .connectWithSshCommandRunner(_DummySshCommandRunner());
   }

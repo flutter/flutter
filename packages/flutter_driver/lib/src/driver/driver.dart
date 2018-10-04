@@ -193,7 +193,7 @@ class FlutterDriver {
       isolateNumber = ref.number;
       dartVmServiceUrl = ref.dartVm.uri.toString();
       await fuchsiaConnection.stop();
-      await FuchsiaCompat.cleanup();
+      FuchsiaCompat.cleanup();
 
       // TODO(awdavies): Use something other than print. On fuchsia
       // `stderr`/`stdout` appear to have issues working correctly.
