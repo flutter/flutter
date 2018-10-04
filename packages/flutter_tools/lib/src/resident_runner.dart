@@ -83,7 +83,7 @@ class FlutterDevice {
     for (VMService service in vmServices)
       futures.add(service.vm.refreshViews());
     final Completer<Null> completer = Completer<Null>();
-    Future.wait(futures).whenComplete(() => completer.complete(null));
+    Future.wait(futures).whenComplete(() => completer.complete(null)); // ignore: unawaited_futures
     return completer.future;
   }
 

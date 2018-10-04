@@ -959,7 +959,7 @@ class VM extends ServiceObjectOwner {
           timeout: kLongRequestTimeout,
           params: <String, dynamic> {'isolateId': isolate.id}));
     }
-    Future.wait(futures).whenComplete(() => completer.complete(null));
+    Future.wait(futures).whenComplete(() => completer.complete(null)); // ignore: unawaited_futures
     return completer.future;
   }
 

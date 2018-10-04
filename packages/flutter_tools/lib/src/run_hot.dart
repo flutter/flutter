@@ -42,9 +42,10 @@ HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig];
 const bool kHotReloadDefault = true;
 
 class DeviceReloadReport {
+  DeviceReloadReport(this.device, this.reports);
+
   FlutterDevice device;
   List<Map<String, dynamic>> reports; // List has one report per Flutter view.
-  DeviceReloadReport(this.device, this.reports);
 }
 
 class HotRunner extends ResidentRunner {
@@ -383,7 +384,7 @@ class HotRunner extends ResidentRunner {
       device.devFS = null;
     }
     final Completer<Null> completer = Completer<Null>();
-    Future.wait(futures).whenComplete(() { completer.complete(null); } );
+    Future.wait(futures).whenComplete(() { completer.complete(null); } ); // ignore: unawaited_futures
     return completer.future;
   }
 
@@ -640,7 +641,7 @@ class HotRunner extends ResidentRunner {
           flutterUsage.sendEvent('hot', 'reload-reject');
           return OperationResult(1, 'Reload rejected');
         } else {
-          flutterUsage.sendEvent('hot', 'reload');
+          flutterUsage.sendEvent('hot', 'reload', parameters: analyticsParameters);
           final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
           final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
           printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
