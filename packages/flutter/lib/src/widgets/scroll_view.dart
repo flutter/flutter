@@ -882,7 +882,7 @@ class ListView extends BoxScrollView {
              ? itemBuilder(context, itemIndex)
              : separatorBuilder(context, itemIndex);
          },
-         childCount: math.max(0, itemCount * 2 - 1), // same calculation as in semanticChildrenCount below.
+         childCount: math.max(0, itemCount * 2 - 1), // same calculation as in semanticChildCount below.
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,

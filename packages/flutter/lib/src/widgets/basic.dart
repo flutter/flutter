@@ -5561,15 +5561,16 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 ///
 /// ## Sample code
 ///
-/// Handle spacers in a scrollable that don't contribute semantics. The
-/// automatic indexes would give the spaces a semantic index, causing
-/// scroll announcements to state that there are four items visible.
+/// The example below handles spacers in a scrollable that don't contribute
+/// semantics. The automatic indexes would give the spaces a semantic index,
+/// causing scroll announcements to erroneously state that there are four items
+/// visible.
 ///
 /// ```dart
 ///  ListView(
 ///    addSemanticIndexes: false,
 ///    semanticChildCount: 2,
-///    children: [
+///    children: <Widget>[
 ///      IndexedSemantics(index: 0, child: const Text('First')),
 ///      Spacer(),
 ///      IndexedSemantics(index: 1, child: const Text('Second'))
