@@ -336,9 +336,6 @@ class FuchsiaArtifacts extends CachedArtifacts {
   String _getHostArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
     switch (artifact) {
       case Artifact.genSnapshot:
-        // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
-        // android_arm in profile mode because it is available on all supported host platforms.
-        return _getAndroidArtifactPath(artifact, TargetPlatform.android_arm, BuildMode.profile);
       case Artifact.flutterTester:
       case Artifact.vmSnapshotData:
       case Artifact.isolateSnapshotData:
