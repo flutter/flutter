@@ -328,19 +328,34 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     assert(debugCheckHasDirectionality(context));
     final double screenHeight = MediaQuery.of(context).size.height;
-    final double maxMenuHeight = screenHeight - 2.0 * _kMenuItemHeight;
-    final double preferredMenuHeight = (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
-    final double menuHeight = math.min(maxMenuHeight, preferredMenuHeight);
+    double maxMenuHeight = screenHeight - 2.0 * _kMenuItemHeight;
+
+    const double topPreferredLimit = _kMenuItemHeight;
+    final double bottomPreferredLimit = screenHeight - _kMenuItemHeight;
 
     final double buttonTop = buttonRect.top;
+    final double buttonBottom = buttonRect.bottom;
+
+    if (buttonTop < topPreferredLimit)
+      maxMenuHeight = maxMenuHeight + topPreferredLimit - buttonTop;
+    if (buttonBottom > bottomPreferredLimit)
+      maxMenuHeight = maxMenuHeight + buttonBottom - bottomPreferredLimit;
+
     final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
+
     double menuTop = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
+    final double preferredMenuHeight = (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
+
+    final double menuHeight = math.min(maxMenuHeight, preferredMenuHeight);
+
+    double bottom = menuTop + menuHeight;
+
     final double originalMenuTop = menuTop;
-    const double topPreferredLimit = _kMenuItemHeight;
+
+
     if (menuTop < topPreferredLimit)
       menuTop = math.min(buttonTop, topPreferredLimit);
-    double bottom = menuTop + menuHeight;
-    final double bottomPreferredLimit = screenHeight - _kMenuItemHeight;
+
     final bool bottomOverLimit = bottom > bottomPreferredLimit;
     if (bottomOverLimit) {
       bottom = math.max(buttonTop + _kMenuItemHeight, bottomPreferredLimit);
