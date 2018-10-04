@@ -12,7 +12,7 @@
 ///    for a catalog of commonly-used Flutter widgets.
 ///  * [material.google.com](https://material.google.com/)
 ///    for an introduction to Material Design.
-library material;
+library flutter.material;
 
 export 'src/material/about.dart';
 export 'src/material/animated_icons.dart';

@@ -10,7 +10,7 @@
 ///
 ///  * [flutter.io/widgets](https://flutter.io/widgets/)
 ///    for a catalog of commonly-used Flutter widgets.
-library widgets;
+library flutter.widgets;
 
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
