@@ -4336,6 +4336,10 @@ class RenderExcludeSemantics extends RenderProxyBox {
 /// semantics. For example, the [ScrollView] uses the index of the first
 /// visible child semantics node to determine the
 /// [SemanticsConfiguration.scrollIndex].
+///
+/// See also:
+///
+///  * [CustomScrollView], for an explanation of scroll semantics.
 class RenderIndexedChildSemantics extends RenderProxyBox {
   /// Creates a render object that annotates the child semantics with an index.
   RenderIndexedChildSemantics({
