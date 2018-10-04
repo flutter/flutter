@@ -18,7 +18,7 @@ import 'package:fuchsia_remote_debug_protocol/logging.dart';
 ///
 /// $ dart examples/list_vms_and_flutter_views.dart \
 ///     fe80::8eae:4cff:fef4:9247 eno1
-Future<Null> main(List<String> args) async {
+Future<void> main(List<String> args) async {
   // Log only at info level within the library. If issues arise, this can be
   // changed to [LoggingLevel.all] or [LoggingLevel.fine] to see more
   // information.

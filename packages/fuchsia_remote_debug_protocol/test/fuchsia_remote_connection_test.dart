@@ -147,7 +147,7 @@ void main() {
     });
 
     test('env variable test without remote addr', () async {
-      Future<Null> failingFunction() async {
+      Future<void> failingFunction() async {
         await FuchsiaRemoteConnection.connect();
       }
 

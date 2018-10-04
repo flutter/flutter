@@ -55,7 +55,7 @@ Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
       await socket?.close();
       if (timer.elapsed < _kConnectTimeout) {
         _log.info('Attempting to reconnect');
-        await Future<Null>.delayed(_kReconnectAttemptInterval);
+        await Future<void>.delayed(_kReconnectAttemptInterval);
         return attemptConnection(uri);
       } else {
         _log.warning('Connection to Fuchsia\'s Dart VM timed out at '
@@ -181,7 +181,7 @@ class DartVm {
   /// Disconnects from the Dart VM Service.
   ///
   /// After this function completes this object is no longer usable.
-  Future<Null> stop() async {
+  Future<void> stop() async {
     await _peer?.close();
   }
 }
