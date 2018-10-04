@@ -355,10 +355,6 @@ DartVM::DartVM(const Settings& settings,
               arraysize(kDartWriteProtectCodeArgs));
 #endif
 
-  const bool is_preview_dart2 =
-      Dart_IsDart2Snapshot(isolate_snapshot_->GetData()->GetSnapshotPointer());
-  FML_CHECK(is_preview_dart2) << "Not Dart 2!";
-
   if (use_checked_mode) {
     PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
   }
