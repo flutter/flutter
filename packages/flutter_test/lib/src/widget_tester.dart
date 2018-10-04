@@ -649,7 +649,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   /// DEPRECATED: use getSemantics instead.
-  @Deprecated('use getSemantics instead')
+  @Deprecated('use [getSemantics] instead')
   SemanticsData getSemanticsData(Finder finder) {
     if (binding.pipelineOwner.semanticsOwner == null)
       throw StateError('Semantics are not enabled.');
