@@ -92,8 +92,6 @@ typedef FinderConstructor = Finder Function(SerializableFinder finder);
 /// calling [enableFlutterDriverExtension].
 @visibleForTesting
 class FlutterDriverExtension {
-  final TestTextInput _testTextInput = TestTextInput();
-
   /// Creates an object to manage a Flutter Driver connection.
   FlutterDriverExtension(this._requestDataHandler, this._silenceErrors) {
     _testTextInput.register();
@@ -142,6 +140,8 @@ class FlutterDriverExtension {
       'PageBack': (SerializableFinder finder) => _createPageBackFinder(),
     });
   }
+
+  final TestTextInput _testTextInput = TestTextInput();
 
   final DataHandler _requestDataHandler;
   final bool _silenceErrors;

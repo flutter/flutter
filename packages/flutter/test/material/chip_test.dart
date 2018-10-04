@@ -1403,6 +1403,79 @@ void main() {
     expect(deleted, true);
   });
 
+  testWidgets('Chips can be tapped', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: ChoiceChip(
+            selected: false,
+            label: Text('choice chip'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(ChoiceChip));
+    expect(tester.takeException(), null);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: RawChip(
+            selected: false,
+            label: Text('raw chip'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(RawChip));
+    expect(tester.takeException(), null);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ActionChip(
+            onPressed: (){},
+            label: const Text('action chip'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(ActionChip));
+    expect(tester.takeException(), null);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: FilterChip(
+            onSelected: (bool valueChanged){},
+            selected: false,
+            label: const Text('filter chip'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(FilterChip));
+    expect(tester.takeException(), null);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: InputChip(
+            selected: false,
+            label: Text('input chip'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(InputChip));
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('Chip elevation works correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,

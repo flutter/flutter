@@ -223,8 +223,9 @@ void main() {
 }
 
 class MockPortForwarder extends DevicePortForwarder {
-  final int availablePort;
   MockPortForwarder([this.availablePort]);
+
+  final int availablePort;
 
   @override
   Future<int> forward(int devicePort, {int hostPort}) async {

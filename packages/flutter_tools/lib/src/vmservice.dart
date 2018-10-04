@@ -559,7 +559,20 @@ abstract class ServiceObject {
 }
 
 class ServiceEvent extends ServiceObject {
-  /// The possible 'kind' values.
+  ServiceEvent._empty(ServiceObjectOwner owner) : super._empty(owner);
+
+  String _kind;
+  String get kind => _kind;
+  DateTime _timestamp;
+  DateTime get timestamp => _timestamp;
+  String _extensionKind;
+  String get extensionKind => _extensionKind;
+  Map<String, dynamic> _extensionData;
+  Map<String, dynamic> get extensionData => _extensionData;
+  List<Map<String, dynamic>> _timelineEvents;
+  List<Map<String, dynamic>> get timelineEvents => _timelineEvents;
+
+  // The possible 'kind' values.
   static const String kVMUpdate               = 'VMUpdate';
   static const String kIsolateStart           = 'IsolateStart';
   static const String kIsolateRunnable        = 'IsolateRunnable';
@@ -586,19 +599,6 @@ class ServiceEvent extends ServiceObject {
   static const String kConnectionClosed       = 'ConnectionClosed';
   static const String kLogging                = '_Logging';
   static const String kExtension              = 'Extension';
-
-  ServiceEvent._empty(ServiceObjectOwner owner) : super._empty(owner);
-
-  String _kind;
-  String get kind => _kind;
-  DateTime _timestamp;
-  DateTime get timestamp => _timestamp;
-  String _extensionKind;
-  String get extensionKind => _extensionKind;
-  Map<String, dynamic> _extensionData;
-  Map<String, dynamic> get extensionData => _extensionData;
-  List<Map<String, dynamic>> _timelineEvents;
-  List<Map<String, dynamic>> get timelineEvents => _timelineEvents;
 
   @override
   void _update(Map<String, dynamic> map, bool mapIsRef) {

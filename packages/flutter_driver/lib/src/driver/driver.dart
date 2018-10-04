@@ -770,6 +770,9 @@ class FlutterDriver {
 /// Encapsulates connection information to an instance of a Flutter application.
 @visibleForTesting
 class VMServiceClientConnection {
+  /// Creates an instance of this class given a [client] and a [peer].
+  VMServiceClientConnection(this.client, this.peer);
+
   /// Use this for structured access to the VM service's public APIs.
   final VMServiceClient client;
 
@@ -778,9 +781,6 @@ class VMServiceClientConnection {
   /// This object allows reaching into private VM service APIs. Use with
   /// caution.
   final rpc.Peer peer;
-
-  /// Creates an instance of this class given a [client] and a [peer].
-  VMServiceClientConnection(this.client, this.peer);
 }
 
 /// A function that connects to a Dart VM service given the [url].

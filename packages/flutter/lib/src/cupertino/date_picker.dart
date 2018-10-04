@@ -13,10 +13,14 @@ import 'picker.dart';
 const double _kItemExtent = 32.0;
 const double _kPickerWidth = 330.0;
 const bool _kUseMagnifier = true;
-const double _kMagnification = 1.1;
+const double _kMagnification = 1.05;
 const double _kDatePickerPadSize = 12.0;
 // Considers setting the default background color from the theme, in the future.
 const Color _kBackgroundColor = CupertinoColors.white;
+
+const TextStyle _kDefaultPickerTextStyle = TextStyle(
+  letterSpacing: -0.83,
+);
 
 // Lays out the date picker based on how much space each single column needs.
 //
@@ -639,12 +643,15 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     return MediaQuery(
       data: const MediaQueryData(textScaleFactor: 1.0),
-      child: CustomMultiChildLayout(
-        delegate: _DatePickerLayoutDelegate(
-          columnWidths: columnWidths,
-          textDirectionFactor: textDirectionFactor,
+      child: DefaultTextStyle.merge(
+        style: _kDefaultPickerTextStyle,
+        child: CustomMultiChildLayout(
+          delegate: _DatePickerLayoutDelegate(
+            columnWidths: columnWidths,
+            textDirectionFactor: textDirectionFactor,
+          ),
+          children: pickers,
         ),
-        children: pickers,
       ),
     );
   }
@@ -872,12 +879,15 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       data: const MediaQueryData(textScaleFactor: 1.0),
       child: NotificationListener<ScrollEndNotification>(
         onNotification: _keepInValidRange,
-        child: CustomMultiChildLayout(
-          delegate: _DatePickerLayoutDelegate(
-            columnWidths: columnWidths,
-            textDirectionFactor: textDirectionFactor,
+        child: DefaultTextStyle.merge(
+          style: _kDefaultPickerTextStyle,
+          child: CustomMultiChildLayout(
+            delegate: _DatePickerLayoutDelegate(
+              columnWidths: columnWidths,
+              textDirectionFactor: textDirectionFactor,
+            ),
+            children: pickers,
           ),
-          children: pickers,
         ),
       ),
     );

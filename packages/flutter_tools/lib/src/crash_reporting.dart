@@ -48,9 +48,9 @@ const String _kStackTraceFilename = 'stacktrace_file';
 /// * In tests call [initializeWith] and provide a mock implementation of
 ///   [http.Client].
 class CrashReportSender {
-  static CrashReportSender _instance;
-
   CrashReportSender._(this._client);
+
+  static CrashReportSender _instance;
 
   static CrashReportSender get instance => _instance ?? CrashReportSender._(http.Client());
 

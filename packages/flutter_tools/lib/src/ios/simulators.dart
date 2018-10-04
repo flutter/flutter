@@ -482,8 +482,6 @@ Future<Process> launchSystemLogTool(IOSSimulator device) async {
 }
 
 class _IOSSimulatorLogReader extends DeviceLogReader {
-  String _appName;
-
   _IOSSimulatorLogReader(this.device, IOSApp app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
@@ -493,6 +491,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   }
 
   final IOSSimulator device;
+
+  String _appName;
 
   StreamController<String> _linesController;
 

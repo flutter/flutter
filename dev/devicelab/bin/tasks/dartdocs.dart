@@ -10,7 +10,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-Future<Null> main() async {
+Future<void> main() async {
   await task(() async {
     final Stopwatch clock = Stopwatch()..start();
     final Process analysis = await startProcess(

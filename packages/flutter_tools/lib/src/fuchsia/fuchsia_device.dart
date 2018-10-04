@@ -10,9 +10,9 @@ import '../device.dart';
 
 /// Read the log for a particular device.
 class _FuchsiaLogReader extends DeviceLogReader {
-  FuchsiaDevice _device;
-
   _FuchsiaLogReader(this._device);
+
+  FuchsiaDevice _device;
 
   @override String get name => _device.name;
 

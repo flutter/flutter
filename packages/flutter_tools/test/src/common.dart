@@ -84,7 +84,7 @@ void updateFileModificationTime(String path,
 }
 
 /// Matcher for functions that throw [ToolExit].
-Matcher throwsToolExit({int exitCode, String message}) {
+Matcher throwsToolExit({int exitCode, Pattern message}) {
   Matcher matcher = isToolExit;
   if (exitCode != null)
     matcher = allOf(matcher, (ToolExit e) => e.exitCode == exitCode);

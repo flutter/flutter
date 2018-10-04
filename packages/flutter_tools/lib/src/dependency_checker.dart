@@ -8,10 +8,11 @@ import 'dart/dependencies.dart';
 import 'globals.dart';
 
 class DependencyChecker {
+  DependencyChecker(this.builder, this.assets);
+
   final DartDependencySetBuilder builder;
   final Set<String> _dependencies = Set<String>();
   final AssetBundle assets;
-  DependencyChecker(this.builder, this.assets);
 
   /// Returns [true] if any components have been modified after [threshold] or
   /// if it cannot be determined.

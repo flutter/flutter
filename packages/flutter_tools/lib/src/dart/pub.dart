@@ -23,7 +23,17 @@ import 'sdk.dart';
 // DO NOT update without contacting kevmoo.
 // We have server-side tooling that assumes the values are consistent.
 class PubContext {
-  static final RegExp _validContext = RegExp('[a-z][a-z_]*[a-z]');
+  PubContext._(this._values) {
+    for (String item in _values) {
+      if (!_validContext.hasMatch(item)) {
+        throw ArgumentError.value(
+            _values, 'value', 'Must match RegExp ${_validContext.pattern}');
+      }
+    }
+  }
+
+  static PubContext getVerifyContext(String commandName) =>
+      PubContext._(<String>['verify', commandName.replaceAll('-', '_')]);
 
   static final PubContext create = PubContext._(<String>['create']);
   static final PubContext createPackage = PubContext._(<String>['create_pkg']);
@@ -38,17 +48,7 @@ class PubContext {
 
   final List<String> _values;
 
-  PubContext._(this._values) {
-    for (String item in _values) {
-      if (!_validContext.hasMatch(item)) {
-        throw ArgumentError.value(
-            _values, 'value', 'Must match RegExp ${_validContext.pattern}');
-      }
-    }
-  }
-
-  static PubContext getVerifyContext(String commandName) =>
-      PubContext._(<String>['verify', commandName.replaceAll('-', '_')]);
+  static final RegExp _validContext = RegExp('[a-z][a-z_]*[a-z]');
 
   @override
   String toString() => 'PubContext: ${_values.join(':')}';

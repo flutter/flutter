@@ -420,9 +420,9 @@ class NoIdeValidator extends DoctorValidator {
 }
 
 abstract class IntelliJValidator extends DoctorValidator {
-  final String installPath;
-
   IntelliJValidator(String title, this.installPath) : super(title);
+
+  final String installPath;
 
   String get version;
   String get pluginsPath;
@@ -644,9 +644,9 @@ class DeviceValidator extends DoctorValidator {
 }
 
 class ValidatorWithResult extends DoctorValidator {
-  final ValidationResult result;
-
   ValidatorWithResult(String title, this.result) : super(title);
+
+  final ValidationResult result;
 
   @override
   Future<ValidationResult> validate() async => result;

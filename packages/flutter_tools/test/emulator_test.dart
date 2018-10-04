@@ -152,9 +152,9 @@ void main() {
 }
 
 class TestEmulatorManager extends EmulatorManager {
-  final List<Emulator> allEmulators;
-
   TestEmulatorManager(this.allEmulators);
+
+  final List<Emulator> allEmulators;
 
   @override
   Future<List<Emulator>> getAllAvailableEmulators() {
