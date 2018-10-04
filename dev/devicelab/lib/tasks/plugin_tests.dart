@@ -73,7 +73,7 @@ class FlutterProject {
 
   String get rootPath => path.join(parent.path, name);
 
-  Future<Null> addPlugin(String plugin) async {
+  Future<void> addPlugin(String plugin) async {
     final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = await pubspec.readAsString();
     content = content.replaceFirst(
@@ -83,13 +83,13 @@ class FlutterProject {
     await pubspec.writeAsString(content, flush: true);
   }
 
-  Future<Null> build(String target) async {
+  Future<void> build(String target) async {
     await inDirectory(Directory(rootPath), () async {
       await flutter('build', options: <String>[target]);
     });
   }
 
-  Future<Null> delete() async {
+  Future<void> delete() async {
     if (Platform.isWindows) {
       // A running Gradle daemon might prevent us from deleting the project
       // folder on Windows.
@@ -99,7 +99,7 @@ class FlutterProject {
         canFail: true,
       );
       // TODO(ianh): Investigating if flakiness is timing dependent.
-      await Future<Null>.delayed(const Duration(seconds: 10));
+      await Future<void>.delayed(const Duration(seconds: 10));
     }
     rmTree(parent);
   }

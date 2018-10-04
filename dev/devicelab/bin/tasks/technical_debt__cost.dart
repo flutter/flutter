@@ -76,7 +76,7 @@ Future<int> countDependencies() async {
 const String _kCostBenchmarkKey = 'technical_debt_in_dollars';
 const String _kNumberOfDependenciesKey = 'dependencies_count';
 
-Future<Null> main() async {
+Future<void> main() async {
   await task(() async {
     return TaskResult.success(
       <String, dynamic>{

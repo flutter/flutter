@@ -21,7 +21,7 @@ void main() {
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
-      final Completer<Null> ready = Completer<Null>();
+      final Completer<void> ready = Completer<void>();
       bool ok;
       print('run: starting...');
       final Process run = await startProcess(
@@ -107,7 +107,7 @@ class DriveHelper {
 
   final int vmServicePort;
 
-  Future<Null> drive(String name) async {
+  Future<void> drive(String name) async {
     print('drive: running commands_$name check...');
     final Process drive = await startProcess(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
