@@ -250,7 +250,7 @@ abstract class ScrollView extends StatelessWidget {
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,
-      semanticChildrenCount: semanticChildCount,
+      semanticChildCount: semanticChildCount,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return buildViewport(context, offset, axisDirection, slivers);
       },
@@ -284,40 +284,6 @@ abstract class ScrollView extends StatelessWidget {
 ///
 /// To control the initial scroll offset of the scroll view, provide a
 /// [controller] with its [ScrollController.initialScrollOffset] property set.
-///
-/// ## Accessibility
-///
-/// A [CustomScrollView] can make polite announcements to the user when
-/// scrolling. For example, on Android an announcement might read as
-/// "showing items 1 to 10 of 23". To produce this announcment, the scroll view
-/// needs three pieces of information:
-///
-///   * The first visible child index.
-///   * The total number of children.
-///   * The total number of visible children.
-///
-/// The last value can be computed exactly by the framework, however the first
-/// two must be provided. Most of the higher-level scrollable widgets provide
-/// this information automatically. For example, [ListView] provides each child
-/// widget with a semantic index automatically and sets the semantic child
-/// count to the length of the list.
-///
-/// To determine visible indexes, the scroll view needs a way to associate the
-/// generated semantics of each scrollable item with a semantic index. This can
-/// be done by wrapping the child widgets in an [IndexedChildSemantics].
-///
-/// This semantic index is not necesarily the same as the index of the widget
-/// in the scrollable, because some widgets may not contribute semantic
-/// information. Consider a [new ListView.separated()], every other widget is a
-/// divider with no semantic information. In this case, only odd numbered
-/// widgets have a semantic index (equal to the index ~/ 2). Furthermore, the
-/// total number of children in this example would be half the number of
-/// widgets. NB: [new ListView.separated()] handles this automatically and is only
-/// used as an example here.
-///
-/// The total number of visible children can be provided by the constructor
-/// parameter `semanticChildCount`. This should always be the same as the
-/// number of widgets wrapped in [IndexedChildSemantics].
 ///
 /// ## Sample code
 ///
@@ -367,6 +333,40 @@ abstract class ScrollView extends StatelessWidget {
 ///   ],
 /// )
 /// ```
+///
+/// ## Accessibility
+///
+/// A [CustomScrollView] can make polite announcements to the user when
+/// scrolling. For example, on Android an announcement might read as
+/// "showing items 1 to 10 of 23". To produce this announcment, the scroll view
+/// needs three pieces of information:
+///
+///   * The first visible child index.
+///   * The total number of children.
+///   * The total number of visible children.
+///
+/// The last value can be computed exactly by the framework, however the first
+/// two must be provided. Most of the higher-level scrollable widgets provide
+/// this information automatically. For example, [ListView] provides each child
+/// widget with a semantic index automatically and sets the semantic child
+/// count to the length of the list.
+///
+/// To determine visible indexes, the scroll view needs a way to associate the
+/// generated semantics of each scrollable item with a semantic index. This can
+/// be done by wrapping the child widgets in an [IndexedChildSemantics].
+///
+/// This semantic index is not necesarily the same as the index of the widget
+/// in the scrollable, because some widgets may not contribute semantic
+/// information. Consider a [new ListView.separated()], every other widget is a
+/// divider with no semantic information. In this case, only odd numbered
+/// widgets have a semantic index (equal to the index ~/ 2). Furthermore, the
+/// total number of children in this example would be half the number of
+/// widgets. NB: [new ListView.separated()] handles this automatically and is only
+/// used as an example here.
+///
+/// The total number of visible children can be provided by the constructor
+/// parameter `semanticChildCount`. This should always be the same as the
+/// number of widgets wrapped in [IndexedChildSemantics].
 ///
 /// See also:
 ///

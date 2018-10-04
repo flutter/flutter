@@ -5559,6 +5559,9 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 /// semantics. For example, the [ScrollView] uses the index of the first
 /// visible child semantics node to determine the
 /// [SemanticsConfiguration.scrollIndex].
+///
+/// See also:
+///   * [CustomScrollView], for an explaination of index semantics.
 class IndexedChildSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that annotated the first child semantics node with an index.
   ///
@@ -5570,7 +5573,7 @@ class IndexedChildSemantics extends SingleChildRenderObjectWidget {
   }) : assert(index != null),
        super(key: key, child: child);
 
-  /// The index used to annotated the first child semantics node.
+  /// The index used to annotate the first child semantics node.
   final int index;
 
   @override

@@ -80,7 +80,7 @@ class Scrollable extends StatefulWidget {
     this.physics,
     @required this.viewportBuilder,
     this.excludeFromSemantics = false,
-    this.semanticChildrenCount,
+    this.semanticChildCount,
   }) : assert(axisDirection != null),
        assert(viewportBuilder != null),
        assert(excludeFromSemantics != null),
@@ -163,7 +163,9 @@ class Scrollable extends StatefulWidget {
   ///    exclusion.
   final bool excludeFromSemantics;
 
-  /// The number of children which will contribute semantic information.
+  /// The number of children that will contribute semantic information.
+  ///
+  /// The value will be null if the number of children is unknown or unbounded.
   ///
   /// Some subtypes of [ScrollView] can infer this value automatically. For
   /// example [ListView] will use the number of widgets in the child list,
@@ -174,8 +176,9 @@ class Scrollable extends StatefulWidget {
   ///
   /// See also:
   ///
+  ///  * [CustomScrollView], for an explanation of scroll semantics.
   ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
-  final int semanticChildrenCount;
+  final int semanticChildCount;
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -525,7 +528,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
         child: result,
         position: position,
         allowImplicitScrolling: widget?.physics?.allowImplicitScrolling ?? false,
-        semanticChildrenCount: widget.semanticChildrenCount,
+        semanticChildrenCount: widget.semanticChildCount,
       );
     }
 

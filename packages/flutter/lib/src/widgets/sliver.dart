@@ -20,6 +20,15 @@ export 'package:flutter/rendering.dart' show
 /// A callback which produces a semantic index given a widget and the local index.
 ///
 /// Return a null value to prevent a widget from receiving an index.
+///
+/// A semantic index is used to tag child semantic nodes for accessibility
+/// announcements in scroll view.s
+///
+/// See also:
+///
+///  * [CustomScrollView], for an explanation of scroll semantics.
+///  * [SliverChildBuilderDelegate], for an explanation of how this is used to
+///    generated indexes.
 typedef SemanticIndexCallback = int Function(Widget widget, int localIndex);
 
 int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
@@ -282,6 +291,12 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 
   /// Whether to wrap each child in an [IndexedChildSemantics].
   ///
+  /// Typically, children in a scrolling container must be annotated with a
+  /// semantic index in order to generate the correct accessibility
+  /// announcements. This should only be set to false if the indexes have
+  /// already been provided by wrapping the correct child widgets in an
+  /// indexed child semantics widget.
+  ///
   /// Defaults to true.
   final bool addSemanticIndexes;
 
@@ -413,6 +428,12 @@ class SliverChildListDelegate extends SliverChildDelegate {
   final bool addRepaintBoundaries;
 
   /// Whether to wrap each child in an [IndexedChildSemantics].
+  ///
+  /// Typically, children in a scrolling container must be annotated with a
+  /// semantic index in order to generate the correct accessibility
+  /// announcements. This should only be set to false if the indexes have
+  /// already been provided by wrapping the correct child widgets in an
+  /// indexed child semantics widget.
   ///
   /// Defaults to true.
   final bool addSemanticIndexes;
