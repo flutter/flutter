@@ -5567,16 +5567,16 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 /// visible.
 ///
 /// ```dart
-///  ListView(
-///    addSemanticIndexes: false,
-///    semanticChildCount: 2,
-///    children: const <Widget>[
-///      IndexedSemantics(index: 0, child: Text('First')),
-///      Spacer(),
-///      IndexedSemantics(index: 1, child: Text('Second')),
-///      Spacer(),
-///    ],
-///  );
+/// ListView(
+///   addSemanticIndexes: false,
+///   semanticChildCount: 2,
+///   children: const <Widget>[
+///     IndexedSemantics(index: 0, child: Text('First')),
+///     Spacer(),
+///     IndexedSemantics(index: 1, child: Text('Second')),
+///     Spacer(),
+///   ],
+/// )
 /// ```
 ///
 /// See also:
