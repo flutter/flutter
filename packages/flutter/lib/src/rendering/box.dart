@@ -92,22 +92,6 @@ class BoxConstraints extends Constraints {
     this.maxHeight = double.infinity
   });
 
-  /// The minimum width that satisfies the constraints.
-  final double minWidth;
-
-  /// The maximum width that satisfies the constraints.
-  ///
-  /// Might be [double.infinity].
-  final double maxWidth;
-
-  /// The minimum height that satisfies the constraints.
-  final double minHeight;
-
-  /// The maximum height that satisfies the constraints.
-  ///
-  /// Might be [double.infinity].
-  final double maxHeight;
-
   /// Creates box constraints that is respected only by the given size.
   BoxConstraints.tight(Size size)
     : minWidth = size.width,
@@ -163,6 +147,22 @@ class BoxConstraints extends Constraints {
       maxWidth = width != null ? width : double.infinity,
       minHeight = height != null ? height : double.infinity,
       maxHeight = height != null ? height : double.infinity;
+
+  /// The minimum width that satisfies the constraints.
+  final double minWidth;
+
+  /// The maximum width that satisfies the constraints.
+  ///
+  /// Might be [double.infinity].
+  final double maxWidth;
+
+  /// The minimum height that satisfies the constraints.
+  final double minHeight;
+
+  /// The maximum height that satisfies the constraints.
+  ///
+  /// Might be [double.infinity].
+  final double maxHeight;
 
   /// Creates a copy of this box constraints but with the given fields replaced with the new values.
   BoxConstraints copyWith({

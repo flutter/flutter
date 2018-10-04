@@ -9,11 +9,12 @@ import '../doctor.dart';
 import 'vscode.dart';
 
 class VsCodeValidator extends DoctorValidator {
-  static const String extensionMarketplaceUrl =
-    'https://marketplace.visualstudio.com/items?itemName=${VsCode.extensionIdentifier}';
+  VsCodeValidator(this._vsCode) : super(_vsCode.productName);
+
   final VsCode _vsCode;
 
-  VsCodeValidator(this._vsCode) : super(_vsCode.productName);
+  static const String extensionMarketplaceUrl =
+    'https://marketplace.visualstudio.com/items?itemName=${VsCode.extensionIdentifier}';
 
   static Iterable<DoctorValidator> get installedValidators {
     return VsCode

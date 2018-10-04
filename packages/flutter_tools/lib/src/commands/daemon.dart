@@ -819,13 +819,13 @@ class AppInstance {
 
 /// This domain responds to methods like [getEmulators] and [launch].
 class EmulatorDomain extends Domain {
-  EmulatorManager emulators = EmulatorManager();
-
   EmulatorDomain(Daemon daemon) : super(daemon, 'emulator') {
     registerHandler('getEmulators', getEmulators);
     registerHandler('launch', launch);
     registerHandler('create', create);
   }
+
+  EmulatorManager emulators = EmulatorManager();
 
   Future<List<Map<String, dynamic>>> getEmulators([Map<String, dynamic> args]) async {
     final List<Emulator> list = await emulators.getAllAvailableEmulators();
@@ -971,9 +971,9 @@ class _AppRunLogger extends Logger {
 }
 
 class LogMessage {
+  LogMessage(this.level, this.message, [this.stackTrace]);
+
   final String level;
   final String message;
   final StackTrace stackTrace;
-
-  LogMessage(this.level, this.message, [this.stackTrace]);
 }

@@ -201,9 +201,9 @@ abstract class DevFSOperations {
 /// An implementation of [DevFSOperations] that speaks to the
 /// vm service.
 class ServiceProtocolDevFSOperations implements DevFSOperations {
-  final VMService vmService;
-
   ServiceProtocolDevFSOperations(this.vmService);
+
+  final VMService vmService;
 
   @override
   Future<Uri> create(String fsName) async {

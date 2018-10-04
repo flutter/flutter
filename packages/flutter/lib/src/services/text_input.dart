@@ -698,6 +698,8 @@ final _TextInputClientHandler _clientHandler = _TextInputClientHandler();
 
 /// An interface to the system's text input control.
 class TextInput {
+  TextInput._();
+
   static const List<TextInputAction> _androidSupportedInputActions = <TextInputAction>[
     TextInputAction.none,
     TextInputAction.unspecified,
@@ -723,8 +725,6 @@ class TextInput {
     TextInputAction.route,
     TextInputAction.emergencyCall,
   ];
-
-  TextInput._();
 
   /// Begin interacting with the text input control.
   ///

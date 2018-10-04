@@ -21,11 +21,11 @@ import 'project.dart';
 import 'tester/flutter_tester.dart';
 
 abstract class ApplicationPackage {
-  /// Package ID from the Android Manifest or equivalent.
-  final String id;
-
   ApplicationPackage({ @required this.id })
     : assert(id != null);
+
+  /// Package ID from the Android Manifest or equivalent.
+  final String id;
 
   String get name;
 
@@ -38,12 +38,6 @@ abstract class ApplicationPackage {
 }
 
 class AndroidApk extends ApplicationPackage {
-  /// Path to the actual apk file.
-  final File file;
-
-  /// The path to the activity that should be launched.
-  final String launchActivity;
-
   AndroidApk({
     String id,
     @required this.file,
@@ -87,6 +81,12 @@ class AndroidApk extends ApplicationPackage {
       launchActivity: '${data.packageName}/${data.launchableActivityName}'
     );
   }
+
+  /// Path to the actual apk file.
+  final File file;
+
+  /// The path to the activity that should be launched.
+  final String launchActivity;
 
   /// Creates a new AndroidApk based on the information in the Android manifest.
   static Future<AndroidApk> fromAndroidProject(AndroidProject androidProject) async {
@@ -250,14 +250,14 @@ class BuildableIOSApp extends IOSApp {
 }
 
 class PrebuiltIOSApp extends IOSApp {
-  final Directory bundleDir;
-  final String bundleName;
-
   PrebuiltIOSApp({
     this.bundleDir,
     this.bundleName,
     @required String projectBundleId,
   }) : super(projectBundleId: projectBundleId);
+
+  final Directory bundleDir;
+  final String bundleName;
 
   @override
   String get name => bundleName;
@@ -299,10 +299,10 @@ Future<ApplicationPackage> getApplicationPackageForPlatform(
 }
 
 class ApplicationPackageStore {
+  ApplicationPackageStore({ this.android, this.iOS });
+
   AndroidApk android;
   IOSApp iOS;
-
-  ApplicationPackageStore({ this.android, this.iOS });
 
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
     switch (platform) {
@@ -332,9 +332,6 @@ class _Entry {
 }
 
 class _Element extends _Entry {
-  List<_Entry> children;
-  String name;
-
   _Element.fromLine(String line, _Element parent) {
     //      E: application (line=29)
     final List<String> parts = line.trimLeft().split(' ');
@@ -343,6 +340,9 @@ class _Element extends _Entry {
     this.parent = parent;
     children = <_Entry>[];
   }
+
+  List<_Entry> children;
+  String name;
 
   void addChild(_Entry child) {
     children.add(child);
@@ -369,9 +369,6 @@ class _Element extends _Entry {
 }
 
 class _Attribute extends _Entry {
-  String key;
-  String value;
-
   _Attribute.fromLine(String line, _Element parent) {
     //     A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
     const String attributePrefix = 'A: ';
@@ -383,6 +380,9 @@ class _Attribute extends _Entry {
     level = line.length - line.trimLeft().length;
     this.parent = parent;
   }
+
+  String key;
+  String value;
 }
 
 class ApkManifestData {

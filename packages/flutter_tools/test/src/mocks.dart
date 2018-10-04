@@ -308,11 +308,11 @@ class MockStdio extends Stdio {
 }
 
 class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  MockPollingDeviceDiscovery() : super('mock');
+
   final List<Device> _devices = <Device>[];
   final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
   final StreamController<Device> _onRemovedController = StreamController<Device>.broadcast();
-
-  MockPollingDeviceDiscovery() : super('mock');
 
   @override
   Future<List<Device>> pollingGetDevices() async => _devices;
