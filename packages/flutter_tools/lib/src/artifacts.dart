@@ -303,10 +303,9 @@ class LocalEngineArtifacts extends Artifacts {
 /// A fuchsia host specific implementation of [Artifacts]
 ///
 /// Certain binaries will have different locations which are not relative to
-/// a flutter tool directory. This class allows full configuration of artifact
-/// locations, only falling back to the default artifacts if a path is not
-/// provided.
+/// a flutter tool directory.
 class FuchsiaHostArtifacts extends CachedArtifacts {
+  /// Create a [FuchsiaHostArtifacts] with the fuchsia host tools in `_fuchsiaHostTools`.
   FuchsiaHostArtifacts(this._fuchsiaHostTools);
 
   final Directory _fuchsiaHostTools;
