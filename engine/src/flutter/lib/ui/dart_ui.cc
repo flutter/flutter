@@ -89,6 +89,7 @@ void DartUI::InitForGlobal() {
     // Secondary isolates do not provide UI-related APIs.
     g_natives_secondary = new tonic::DartLibraryNatives();
     DartRuntimeHooks::RegisterNatives(g_natives_secondary);
+    IsolateNameServerNatives::RegisterNatives(g_natives_secondary);
   }
 }
 
