@@ -110,8 +110,8 @@ class FlutterProject {
     FlutterManifest.empty(),
   );
 
-  /// True, if this project is a Flutter module.
-  bool get isModule => manifest.isModule;
+  /// True, if this project is a Flutter application.
+  bool get isApplication => manifest.isApplication;
 
   /// True, if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
@@ -132,7 +132,7 @@ class FlutterProject {
   }
 
   /// Generates project files necessary to make Gradle builds work on Android
-  /// and CocoaPods+Xcode work on iOS, for app and module projects only.
+  /// and CocoaPods+Xcode work on iOS, for app and application projects only.
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (!directory.existsSync() || hasExampleApp)
       return;
@@ -146,7 +146,7 @@ class FlutterProject {
 /// Represents the iOS sub-project of a Flutter project.
 ///
 /// Instances will reflect the contents of the `ios/` sub-folder of
-/// Flutter applications and the `.ios/` sub-folder of Flutter modules.
+/// Flutter applications and the `.ios/` sub-folder of Flutter applications.
 class IosProject {
   IosProject._(this.parent);
 
@@ -162,7 +162,7 @@ class IosProject {
 
   /// This parent folder of `Runner.xcodeproj`.
   Directory get hostAppRoot {
-    if (!isModule || _editableDirectory.existsSync())
+    if (!isApplication || _editableDirectory.existsSync())
       return _editableDirectory;
     return _ephemeralDirectory;
   }
@@ -172,14 +172,14 @@ class IosProject {
   /// during build.
   ///
   /// This is the same as [hostAppRoot] except when the project is
-  /// a Flutter module with an editable host app.
-  Directory get _flutterLibRoot => isModule ? _ephemeralDirectory : _editableDirectory;
+  /// a Flutter application with an editable host app.
+  Directory get _flutterLibRoot => isApplication ? _ephemeralDirectory : _editableDirectory;
 
   /// The bundle name of the host app, `Runner.app`.
   String get hostAppBundleName => '$_hostAppBundleName.app';
 
-  /// True, if the parent Flutter project is a module.
-  bool get isModule => parent.isModule;
+  /// True, if the parent Flutter project is an application.
+  bool get isApplication => parent.isApplication;
 
   /// The xcode config file for [mode].
   File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
@@ -264,32 +264,32 @@ class IosProject {
   }
 
   void _regenerateFromTemplateIfNeeded() {
-    if (!isModule)
+    if (!isApplication)
       return;
     final bool pubspecChanged = isOlderThanReference(entity: _ephemeralDirectory, referenceFile: parent.pubspecFile);
     final bool toolingChanged = Cache.instance.isOlderThanToolsStamp(_ephemeralDirectory);
     if (!pubspecChanged && !toolingChanged)
       return;
     _deleteIfExistsSync(_ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), _ephemeralDirectory);
+    _overwriteFromTemplate(fs.path.join('application', 'ios', 'library'), _ephemeralDirectory);
     // Add ephemeral host app, if a editable host app does not already exist.
     if (!_editableDirectory.existsSync()) {
-      _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), _ephemeralDirectory);
+      _overwriteFromTemplate(fs.path.join('application', 'ios', 'host_app_ephemeral'), _ephemeralDirectory);
       if (hasPlugins(parent)) {
-        _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _ephemeralDirectory);
+        _overwriteFromTemplate(fs.path.join('application', 'ios', 'host_app_ephemeral_cocoapods'), _ephemeralDirectory);
       }
     }
   }
 
   Future<void> makeHostAppEditable() async {
-    assert(isModule);
+    assert(isApplication);
     if (_editableDirectory.existsSync())
       throwToolExit('iOS host app is already editable. To start fresh, delete the ios/ folder.');
     _deleteIfExistsSync(_ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), _ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), _editableDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _editableDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_editable_cocoapods'), _editableDirectory);
+    _overwriteFromTemplate(fs.path.join('application', 'ios', 'library'), _ephemeralDirectory);
+    _overwriteFromTemplate(fs.path.join('application', 'ios', 'host_app_ephemeral'), _editableDirectory);
+    _overwriteFromTemplate(fs.path.join('application', 'ios', 'host_app_ephemeral_cocoapods'), _editableDirectory);
+    _overwriteFromTemplate(fs.path.join('application', 'ios', 'host_app_editable_cocoapods'), _editableDirectory);
     await _updateGeneratedXcodeConfigIfNeeded();
     await injectPlugins(parent);
   }
@@ -297,7 +297,7 @@ class IosProject {
   File get generatedXcodePropertiesFile => _flutterLibRoot.childDirectory('Flutter').childFile('Generated.xcconfig');
 
   Directory get pluginRegistrantHost {
-    return isModule
+    return isApplication
         ? _flutterLibRoot.childDirectory('Flutter').childDirectory('FlutterPluginRegistrant')
         : hostAppRoot.childDirectory(_hostAppBundleName);
   }
@@ -319,7 +319,7 @@ class IosProject {
 /// Represents the Android sub-project of a Flutter project.
 ///
 /// Instances will reflect the contents of the `android/` sub-folder of
-/// Flutter applications and the `.android/` sub-folder of Flutter modules.
+/// Flutter applications and the `.android/` sub-folder of Flutter applications.
 class AndroidProject {
   AndroidProject._(this.parent);
 
@@ -333,21 +333,21 @@ class AndroidProject {
   /// containing the `app/` subdirectory and the `settings.gradle` file that
   /// includes it in the overall Gradle project.
   Directory get hostAppGradleRoot {
-    if (!isModule || _editableHostAppDirectory.existsSync())
+    if (!isApplication || _editableHostAppDirectory.existsSync())
       return _editableHostAppDirectory;
     return _ephemeralDirectory;
   }
 
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
-  /// a Flutter module with an editable host app.
-  Directory get _flutterLibGradleRoot => isModule ? _ephemeralDirectory : _editableHostAppDirectory;
+  /// a Flutter application with an editable host app.
+  Directory get _flutterLibGradleRoot => isApplication ? _ephemeralDirectory : _editableHostAppDirectory;
 
   Directory get _ephemeralDirectory => parent.directory.childDirectory('.android');
   Directory get _editableHostAppDirectory => parent.directory.childDirectory('android');
 
-  /// True, if the parent Flutter project is a module.
-  bool get isModule => parent.isModule;
+  /// True, if the parent Flutter project is an application.
+  bool get isApplication => parent.isApplication;
 
   File get appManifestFile {
     return isUsingGradle
@@ -376,12 +376,12 @@ class AndroidProject {
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
-    if (isModule && _shouldRegenerateFromTemplate()) {
+    if (isApplication && _shouldRegenerateFromTemplate()) {
       _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
       if (!_editableHostAppDirectory.existsSync()) {
-        _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _ephemeralDirectory);
-        _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_ephemeral'), _ephemeralDirectory);
+        _overwriteFromTemplate(fs.path.join('application', 'android', 'host_app_common'), _ephemeralDirectory);
+        _overwriteFromTemplate(fs.path.join('application', 'android', 'host_app_ephemeral'), _ephemeralDirectory);
       }
     }
     if (!hostAppGradleRoot.existsSync()) {
@@ -396,13 +396,13 @@ class AndroidProject {
   }
 
   Future<void> makeHostAppEditable() async {
-    assert(isModule);
+    assert(isApplication);
     if (_editableHostAppDirectory.existsSync())
       throwToolExit('Android host app is already editable. To start fresh, delete the android/ folder.');
     _regenerateLibrary();
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
+    _overwriteFromTemplate(fs.path.join('application', 'android', 'host_app_common'), _editableHostAppDirectory);
+    _overwriteFromTemplate(fs.path.join('application', 'android', 'host_app_editable'), _editableHostAppDirectory);
+    _overwriteFromTemplate(fs.path.join('application', 'android', 'gradle'), _editableHostAppDirectory);
     gradle.injectGradleWrapper(_editableHostAppDirectory);
     gradle.writeLocalProperties(_editableHostAppDirectory.childFile('local.properties'));
     await injectPlugins(parent);
@@ -410,12 +410,12 @@ class AndroidProject {
 
   File get localPropertiesFile => _flutterLibGradleRoot.childFile('local.properties');
 
-  Directory get pluginRegistrantHost => _flutterLibGradleRoot.childDirectory(isModule ? 'Flutter' : 'app');
+  Directory get pluginRegistrantHost => _flutterLibGradleRoot.childDirectory(isApplication ? 'Flutter' : 'app');
 
   void _regenerateLibrary() {
     _deleteIfExistsSync(_ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'library'), _ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _ephemeralDirectory);
+    _overwriteFromTemplate(fs.path.join('application', 'android', 'library'), _ephemeralDirectory);
+    _overwriteFromTemplate(fs.path.join('application', 'android', 'gradle'), _ephemeralDirectory);
     gradle.injectGradleWrapper(_ephemeralDirectory);
   }
 

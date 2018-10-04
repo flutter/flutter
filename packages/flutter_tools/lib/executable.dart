@@ -56,7 +56,7 @@ Future<Null> main(List<String> args) async {
     ChannelCommand(verboseHelp: verboseHelp),
     CleanCommand(),
     ConfigCommand(verboseHelp: verboseHelp),
-    CreateCommand(),
+    CreateCommand(verboseHelp: verboseHelp),
     DaemonCommand(hidden: !verboseHelp),
     DevicesCommand(),
     DoctorCommand(verbose: verbose),
