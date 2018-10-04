@@ -323,10 +323,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
         }
     );
 
-    assert(() {
-      WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
-      return true;
-    }());
+    WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
   }
 
   Future<Null> _forceRebuild() {

@@ -61,6 +61,8 @@ class TabBarTheme extends Diagnosticable {
 
   /// Linearly interpolate between two tab bar themes.
   ///
+  /// The arguments must not be null.
+  ///
   /// {@macro flutter.material.themeData.lerp}
   static TabBarTheme lerp(TabBarTheme a, TabBarTheme b, double t) {
     assert(a != null);

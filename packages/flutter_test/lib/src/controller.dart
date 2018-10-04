@@ -46,7 +46,7 @@ abstract class WidgetController {
   Iterable<Widget> get allWidgets {
     TestAsyncUtils.guardSync();
     return allElements
-           .map((Element element) => element.widget);
+           .map<Widget>((Element element) => element.widget);
   }
 
   /// The matching widget in the widget tree.
@@ -137,7 +137,7 @@ abstract class WidgetController {
     TestAsyncUtils.guardSync();
     return allElements
            .whereType<StatefulElement>()
-           .map((StatefulElement element) => element.state);
+           .map<State>((StatefulElement element) => element.state);
   }
 
   /// The matching state in the widget tree.
@@ -173,7 +173,7 @@ abstract class WidgetController {
   /// * Use [firstState] if you expect to match several but only want the first.
   Iterable<T> stateList<T extends State>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().map((Element element) => _stateOf<T>(element, finder));
+    return finder.evaluate().map<T>((Element element) => _stateOf<T>(element, finder));
   }
 
   T _stateOf<T extends State>(Element element, Finder finder) {
@@ -194,7 +194,7 @@ abstract class WidgetController {
   Iterable<RenderObject> get allRenderObjects {
     TestAsyncUtils.guardSync();
     return allElements
-           .map((Element element) => element.renderObject);
+           .map<RenderObject>((Element element) => element.renderObject);
   }
 
   /// The render object of the matching widget in the widget tree.
@@ -262,7 +262,7 @@ abstract class WidgetController {
 
   /// Dispatch a pointer down / pointer up sequence at the given location.
   Future<Null> tapAt(Offset location, { int pointer }) {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       final TestGesture gesture = await startGesture(location, pointer: pointer);
       await gesture.up();
       return null;
@@ -293,7 +293,7 @@ abstract class WidgetController {
   /// Dispatch a pointer down / pointer up sequence at the given location with
   /// a delay of [kLongPressTimeout] + [kPressTimeout] between the two events.
   Future<Null> longPressAt(Offset location, { int pointer }) {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       final TestGesture gesture = await startGesture(location, pointer: pointer);
       await pump(kLongPressTimeout + kPressTimeout);
       await gesture.up();
@@ -371,7 +371,7 @@ abstract class WidgetController {
   }) {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer());
       final HitTestResult result = hitTestOnBinding(startLocation);
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
@@ -428,7 +428,7 @@ abstract class WidgetController {
   /// system identifies the gesture as a fling, consider using [flingFrom]
   /// instead.
   Future<Null> dragFrom(Offset startLocation, Offset offset, { int pointer }) {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       assert(gesture != null);
       await gesture.moveBy(offset);
@@ -469,7 +469,7 @@ abstract class WidgetController {
 
   /// Forwards the given pointer event to the binding.
   Future<Null> sendEventToBinding(PointerEvent event, HitTestResult result) {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       binding.dispatchEvent(event, result);
       return null;
     });

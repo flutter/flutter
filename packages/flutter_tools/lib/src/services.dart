@@ -98,7 +98,7 @@ File generateServiceDefinitions(
   String dir, List<Map<String, String>> servicesIn
 ) {
   final List<Map<String, String>> services =
-      servicesIn.map((Map<String, String> service) => <String, String>{
+      servicesIn.map<Map<String, String>>((Map<String, String> service) => <String, String>{
         'name': service['name'],
         'class': service['android-class']
       }).toList();

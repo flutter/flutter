@@ -266,7 +266,7 @@ class FixedExtentScrollController extends ScrollController {
         curve: curve,
       ));
     }
-    await Future.wait(futures);
+    await Future.wait<void>(futures);
   }
 
   /// Changes which item index is centered in the controlled scroll view.

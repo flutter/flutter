@@ -34,7 +34,7 @@ Future<Null> test(WidgetTester tester, double offset, List<int> keys) {
         offset: ViewportOffset.fixed(offset),
         slivers: <Widget>[
           SliverList(
-            delegate: SliverChildListDelegate(keys.map((int key) {
+            delegate: SliverChildListDelegate(keys.map<Widget>((int key) {
               return SizedBox(key: GlobalObjectKey(key), height: 100.0, child: GenerationText(key));
             }).toList()),
           ),

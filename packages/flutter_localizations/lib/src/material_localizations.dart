@@ -100,19 +100,19 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : assert(localeName != null),
-       this._localeName = localeName,
+       _localeName = localeName,
        assert(fullYearFormat != null),
-       this._fullYearFormat = fullYearFormat,
+       _fullYearFormat = fullYearFormat,
        assert(mediumDateFormat != null),
-       this._mediumDateFormat = mediumDateFormat,
+       _mediumDateFormat = mediumDateFormat,
        assert(longDateFormat != null),
-       this._longDateFormat = longDateFormat,
+       _longDateFormat = longDateFormat,
        assert(yearMonthFormat != null),
-       this._yearMonthFormat = yearMonthFormat,
+       _yearMonthFormat = yearMonthFormat,
        assert(decimalFormat != null),
-       this._decimalFormat = decimalFormat,
+       _decimalFormat = decimalFormat,
        assert(twoDigitZeroPaddedFormat != null),
-       this._twoDigitZeroPaddedFormat = twoDigitZeroPaddedFormat;
+       _twoDigitZeroPaddedFormat = twoDigitZeroPaddedFormat;
 
   final String _localeName;
   final intl.DateFormat _fullYearFormat;

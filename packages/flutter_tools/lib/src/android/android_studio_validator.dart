@@ -22,7 +22,7 @@ class AndroidStudioValidator extends DoctorValidator {
       validators.add(NoAndroidStudioValidator());
     } else {
       validators.addAll(studios
-          .map((AndroidStudio studio) => AndroidStudioValidator(studio)));
+          .map<DoctorValidator>((AndroidStudio studio) => AndroidStudioValidator(studio)));
     }
     return validators;
   }
@@ -46,11 +46,11 @@ class AndroidStudioValidator extends DoctorValidator {
     if (_studio.isValid) {
       type = ValidationType.installed;
       messages.addAll(_studio.validationMessages
-          .map((String m) => ValidationMessage(m)));
+          .map<ValidationMessage>((String m) => ValidationMessage(m)));
     } else {
       type = ValidationType.partial;
       messages.addAll(_studio.validationMessages
-          .map((String m) => ValidationMessage.error(m)));
+          .map<ValidationMessage>((String m) => ValidationMessage.error(m)));
       messages.add(ValidationMessage(
           'Try updating or re-installing Android Studio.'));
       if (_studio.configured != null) {

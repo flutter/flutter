@@ -30,6 +30,7 @@ const String _kOptionTestDirectory = 'test-directory';
 const String _kOptionSdkRoot = 'sdk-root';
 const String _kOptionIcudtl = 'icudtl';
 const String _kOptionTests = 'tests';
+const String _kOptionCoverageDirectory = 'coverage-directory';
 const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionShell,
@@ -55,6 +56,7 @@ Future<Null> run(List<String> args) async {
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
     ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
     ..addOption(_kOptionTests, help: 'Path to json file that maps Dart test files to precompiled dill files')
+    ..addOption(_kOptionCoverageDirectory, help: 'The path to the directory that will have coverage collected')
     ..addFlag(_kOptionCoverage,
       defaultsTo: false,
       negatable: false,
@@ -84,6 +86,14 @@ Future<Null> run(List<String> args) async {
     final Directory sdkRootSrc = fs.directory(argResults[_kOptionSdkRoot]);
     if (!fs.isDirectorySync(sdkRootSrc.path)) {
       throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
+    }
+    Directory coverageDirectory;
+    final String coverageDirectoryPath = argResults[_kOptionCoverageDirectory];
+    if (coverageDirectoryPath != null) {
+      if (!fs.isDirectorySync(coverageDirectoryPath)) {
+        throwToolExit('Cannot find coverage directory at $coverageDirectoryPath');
+      }
+      coverageDirectory = fs.directory(coverageDirectoryPath);
     }
 
     // Put the tester shell where runTests expects it.
@@ -131,9 +141,14 @@ Future<Null> run(List<String> args) async {
 
     if (collector != null) {
       // collector expects currentDirectory to be the root of the dart
-      // package (i.e. contains lib/ and test/ sub-dirs).
-      fs.currentDirectory = testDirectory.parent;
-      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath]))
+      // package (i.e. contains lib/ and test/ sub-dirs). In some cases,
+      // test files may appear to be in the root directory.
+      if (coverageDirectory == null) {
+        fs.currentDirectory = testDirectory.parent;
+      } else {
+        fs.currentDirectory = testDirectory;
+      }
+      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath], coverageDirectory: coverageDirectory))
         throwToolExit('Failed to collect coverage data');
     }
   } finally {

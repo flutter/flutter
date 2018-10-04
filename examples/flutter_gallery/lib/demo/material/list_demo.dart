@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 enum _MaterialListType {
   /// A list tile that contains a single line of text.
   oneLine,
@@ -207,7 +209,7 @@ class _ListDemoState extends State<ListDemo> {
         break;
     }
 
-    Iterable<Widget> listTiles = items.map((String item) => buildListTile(context, item));
+    Iterable<Widget> listTiles = items.map<Widget>((String item) => buildListTile(context, item));
     if (_showDividers)
       listTiles = ListTile.divideTiles(context: context, tiles: listTiles);
 
@@ -216,6 +218,7 @@ class _ListDemoState extends State<ListDemo> {
       appBar: AppBar(
         title: Text('Scrolling list\n$itemTypeText$layoutText'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(ListDemo.routeName),
           IconButton(
             icon: const Icon(Icons.sort_by_alpha),
             tooltip: 'Sort',

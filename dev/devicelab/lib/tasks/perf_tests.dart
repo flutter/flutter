@@ -75,7 +75,7 @@ TaskFunction createBasicMaterialCompileTest() {
 
     rmTree(sampleDir);
 
-    await inDirectory(Directory.systemTemp, () async {
+    await inDirectory<void>(Directory.systemTemp, () async {
       await flutter('create', options: <String>[sampleAppName]);
     });
 
@@ -95,7 +95,7 @@ class StartupTest {
   final bool reportMetrics;
 
   Future<TaskResult> run() async {
-    return await inDirectory(testDirectory, () async {
+    return await inDirectory<TaskResult>(testDirectory, () async {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
@@ -131,7 +131,7 @@ class PerfTest {
   final String timelineFileName;
 
   Future<TaskResult> run() {
-    return inDirectory(testDirectory, () async {
+    return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
       final String deviceId = device.deviceId;
@@ -183,7 +183,7 @@ class CompileTest {
   final bool reportPackageContentSizes;
 
   Future<TaskResult> run() async {
-    return await inDirectory(testDirectory, () async {
+    return await inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
       await flutter('packages', options: <String>['get']);
@@ -402,7 +402,7 @@ class MemoryTest {
   Device _device;
 
   Future<TaskResult> run() {
-    return inDirectory(project, () async {
+    return inDirectory<TaskResult>(project, () async {
       // This test currently only works on Android, because device.logcat,
       // device.getMemoryStats, etc, aren't implemented for iOS.
 

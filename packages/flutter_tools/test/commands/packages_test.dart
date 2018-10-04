@@ -159,7 +159,7 @@ void main() {
         pubOutput,
         pluginRegistrants,
         pluginWitnesses,
-      ].expand((List<String> list) => list);
+      ].expand<String>((List<String> list) => list);
       for (String path in allFiles) {
         final File file = fs.file(fs.path.join(projectPath, path));
         if (file.existsSync())
@@ -285,7 +285,7 @@ void main() {
       final Future<Null> simulateUserInput = Future<Null>(() {
         mockStdio.simulateStdin('y');
       });
-      await Future.wait(<Future<Null>>[runPackages, runPrompt, simulateUserInput]);
+      await Future.wait<Null>(<Future<Null>>[runPackages, runPrompt, simulateUserInput]);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(2));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));

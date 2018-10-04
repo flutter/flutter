@@ -46,7 +46,7 @@ class IOSSimulatorUtils {
     if (!xcode.isInstalledAndMeetsVersionCheck)
       return <IOSSimulator>[];
 
-    return SimControl.instance.getConnectedDevices().map((SimDevice device) {
+    return SimControl.instance.getConnectedDevices().map<IOSSimulator>((SimDevice device) {
       return IOSSimulator(device.udid, name: device.name, category: device.category);
     }).toList();
   }
@@ -339,7 +339,7 @@ class IOSSimulator extends Device {
   }
 
   Future<bool> _applicationIsInstalledAndRunning(ApplicationPackage app) async {
-    final List<bool> criteria = await Future.wait(<Future<bool>>[
+    final List<bool> criteria = await Future.wait<bool>(<Future<bool>>[
       isAppInstalled(app),
       exitsHappyAsync(<String>['/usr/bin/killall', 'Runner']),
     ]);
@@ -510,15 +510,15 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     // Device log.
     await device.ensureLogsExists();
     _deviceProcess = await launchDeviceLogTool(device);
-    _deviceProcess.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
-    _deviceProcess.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
+    _deviceProcess.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onDeviceLine);
+    _deviceProcess.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onDeviceLine);
 
     // Track system.log crashes.
     // ReportCrash[37965]: Saved crash report for FlutterRunner[37941]...
     _systemProcess = await launchSystemLogTool(device);
     if (_systemProcess != null) {
-      _systemProcess.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
-      _systemProcess.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
+      _systemProcess.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onSystemLine);
+      _systemProcess.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onSystemLine);
     }
 
     // We don't want to wait for the process or its callback. Best effort
@@ -629,8 +629,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 }
 
 int compareIosVersions(String v1, String v2) {
-  final List<int> v1Fragments = v1.split('.').map(int.parse).toList();
-  final List<int> v2Fragments = v2.split('.').map(int.parse).toList();
+  final List<int> v1Fragments = v1.split('.').map<int>(int.parse).toList();
+  final List<int> v2Fragments = v2.split('.').map<int>(int.parse).toList();
 
   int i = 0;
   while (i < v1Fragments.length && i < v2Fragments.length) {

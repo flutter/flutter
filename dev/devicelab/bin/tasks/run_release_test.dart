@@ -29,8 +29,8 @@ void main() {
       final List<String> stderr = <String>[];
       int runExitCode;
       run.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String line) {
           print('run:stdout: $line');
           stdout.add(line);
@@ -38,13 +38,13 @@ void main() {
             ready.complete();
         });
       run.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String line) {
           print('run:stderr: $line');
           stdout.add(line);
         });
-      run.exitCode.then((int exitCode) { runExitCode = exitCode; });
+      run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; });
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (runExitCode != null)
         throw 'Failed to run test app; runner unexpected exited, with exit code $runExitCode.';

@@ -603,7 +603,7 @@ class DeviceDomain extends Domain {
 
   _DeviceEventHandler _onDeviceEvent(String eventName) {
     return (Device device) {
-      _serializeDeviceEvents = _serializeDeviceEvents.then((_) async {
+      _serializeDeviceEvents = _serializeDeviceEvents.then<Null>((_) async {
         sendEvent(eventName, await _deviceToMap(device));
       });
     };
@@ -679,10 +679,10 @@ class DeviceDomain extends Domain {
 }
 
 Stream<Map<String, dynamic>> get stdinCommandStream => stdin
-  .transform(utf8.decoder)
-  .transform(const LineSplitter())
+  .transform<String>(utf8.decoder)
+  .transform<String>(const LineSplitter())
   .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
-  .map((String line) {
+  .map<Map<String, dynamic>>((String line) {
     line = line.substring(1, line.length - 1);
     return json.decode(line);
   });
@@ -829,7 +829,7 @@ class EmulatorDomain extends Domain {
 
   Future<List<Map<String, dynamic>>> getEmulators([Map<String, dynamic> args]) async {
     final List<Emulator> list = await emulators.getAllAvailableEmulators();
-    return list.map(_emulatorToMap).toList();
+    return list.map<Map<String, dynamic>>(_emulatorToMap).toList();
   }
 
   Future<Null> launch(Map<String, dynamic> args) async {
