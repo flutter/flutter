@@ -119,8 +119,8 @@ class ProcessRunner {
       stderr.write('Running "${commandLine.join(' ')}" in ${workingDirectory.path}.\n');
     }
     final List<int> output = <int>[];
-    final Completer<Null> stdoutComplete = Completer<Null>();
-    final Completer<Null> stderrComplete = Completer<Null>();
+    final Completer<void> stdoutComplete = Completer<void>();
+    final Completer<void> stderrComplete = Completer<void>();
     Process process;
     Future<int> allComplete() async {
       await stderrComplete.future;
@@ -291,7 +291,7 @@ class ArchiveCreator {
 
   /// Clone the Flutter repo and make sure that the git environment is sane
   /// for when the user will unpack it.
-  Future<Null> _checkoutFlutter() async {
+  Future<void> _checkoutFlutter() async {
     // We want the user to start out the in the specified branch instead of a
     // detached head. To do that, we need to make sure the branch points at the
     // desired revision.
@@ -303,7 +303,7 @@ class ArchiveCreator {
   }
 
   /// Retrieve the MinGit executable from storage and unpack it.
-  Future<Null> _installMinGitIfNeeded() async {
+  Future<void> _installMinGitIfNeeded() async {
     if (!platform.isWindows) {
       return;
     }
@@ -319,7 +319,7 @@ class ArchiveCreator {
 
   /// Prepare the archive repo so that it has all of the caches warmed up and
   /// is configured for the user to begin working.
-  Future<Null> _populateCaches() async {
+  Future<void> _populateCaches() async {
     await _runFlutter(<String>['doctor']);
     await _runFlutter(<String>['update-packages']);
     await _runFlutter(<String>['precache']);
@@ -342,7 +342,7 @@ class ArchiveCreator {
   }
 
   /// Write the archive to the given output file.
-  Future<Null> _archiveFiles(File outputFile) async {
+  Future<void> _archiveFiles(File outputFile) async {
     if (outputFile.path.toLowerCase().endsWith('.zip')) {
       await _createZipArchive(outputFile, flutterRoot);
     } else if (outputFile.path.toLowerCase().endsWith('.tar.xz')) {
@@ -454,7 +454,7 @@ class ArchivePublisher {
   static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
 
   /// Publish the archive to Google Storage.
-  Future<Null> publishArchive() async {
+  Future<void> publishArchive() async {
     final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
     await _cloudCopy(outputFile.absolute.path, destGsPath);
     assert(tempDir.existsSync());
@@ -497,7 +497,7 @@ class ArchivePublisher {
     return jsonData;
   }
 
-  Future<Null> _updateMetadata() async {
+  Future<void> _updateMetadata() async {
     // We can't just cat the metadata from the server with 'gsutil cat', because
     // Windows wants to echo the commands that execute in gsutil.bat to the
     // stdout when we do that. So, we copy the file locally and then read it
@@ -569,7 +569,7 @@ class ArchivePublisher {
 ///
 /// Archives contain the executables and customizations for the platform that
 /// they are created on.
-Future<Null> main(List<String> argList) async {
+Future<void> main(List<String> argList) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp_dir',

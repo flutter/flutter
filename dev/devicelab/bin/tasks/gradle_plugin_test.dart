@@ -166,7 +166,7 @@ class FlutterProject {
   String get rootPath => path.join(parent.path, name);
   String get androidPath => path.join(rootPath, 'android');
 
-  Future<Null> addCustomBuildType(String name, {String initWith}) async {
+  Future<void> addCustomBuildType(String name, {String initWith}) async {
     final File buildScript = File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
@@ -183,7 +183,7 @@ android {
     ''');
   }
 
-  Future<Null> addProductFlavor(String name) async {
+  Future<void> addProductFlavor(String name) async {
     final File buildScript = File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
@@ -202,14 +202,14 @@ android {
     ''');
   }
 
-  Future<Null> introduceError() async {
+  Future<void> introduceError() async {
     final File buildScript = File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
     await buildScript.writeAsString((await buildScript.readAsString()).replaceAll('buildTypes', 'builTypes'));
   }
 
-  Future<Null> runGradleTask(String task, {List<String> options}) async {
+  Future<void> runGradleTask(String task, {List<String> options}) async {
     return _runGradleTask(workingDirectory: androidPath, task: task, options: options);
   }
 
@@ -244,14 +244,14 @@ class FlutterPluginProject {
   String get exampleAndroidPath => path.join(examplePath, 'android');
   String get debugApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'debug', 'app-debug.apk');
 
-  Future<Null> runGradleTask(String task, {List<String> options}) async {
+  Future<void> runGradleTask(String task, {List<String> options}) async {
     return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
   }
 
   bool get hasDebugApk => File(debugApkPath).existsSync();
 }
 
-Future<Null> _runGradleTask({String workingDirectory, String task, List<String> options}) async {
+Future<void> _runGradleTask({String workingDirectory, String task, List<String> options}) async {
   final ProcessResult result = await _resultOfGradleTask(
       workingDirectory: workingDirectory,
       task: task,

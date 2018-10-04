@@ -99,7 +99,7 @@ class Section {
 const String kDartDocPrefix = '///';
 const String kDartDocPrefixWithSpace = '$kDartDocPrefix ';
 
-Future<Null> main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   final Directory tempDir = Directory.systemTemp.createTempSync('flutter_analyze_sample_code.');
   int exitCode = 1;
   bool keepMain = false;

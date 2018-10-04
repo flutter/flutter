@@ -12,7 +12,7 @@ const String kDocRoot = 'dev/docs/doc';
 
 /// This script downloads an archive of Javadoc and objc doc for the engine from
 /// the artifact store and extracts them to the location used for Dartdoc.
-Future<Null> main(List<String> args) async {
+Future<void> main(List<String> args) async {
   final String engineVersion = File('bin/internal/engine.version').readAsStringSync().trim();
 
   final String javadocUrl = 'https://storage.googleapis.com/flutter_infra/flutter/$engineVersion/android-javadoc.zip';
@@ -22,7 +22,7 @@ Future<Null> main(List<String> args) async {
   generateDocs(objcdocUrl, 'objcdoc', 'Classes/FlutterViewController.html');
 }
 
-Future<Null> generateDocs(String url, String docName, String checkFile) async {
+Future<void> generateDocs(String url, String docName, String checkFile) async {
   final http.Response response = await http.get(url);
 
   final Archive archive = ZipDecoder().decodeBytes(response.bodyBytes);

@@ -243,12 +243,12 @@ Future<Process> startProcess(
   return process;
 }
 
-Future<Null> forceQuitRunningProcesses() async {
+Future<void> forceQuitRunningProcesses() async {
   if (_runningProcesses.isEmpty)
     return;
 
   // Give normally quitting processes a chance to report their exit code.
-  await Future<Null>.delayed(const Duration(seconds: 1));
+  await Future<void>.delayed(const Duration(seconds: 1));
 
   // Whatever's left, kill it.
   for (ProcessInfo p in _runningProcesses) {
@@ -270,8 +270,8 @@ Future<int> exec(
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
-  final Completer<Null> stdoutDone = Completer<Null>();
-  final Completer<Null> stderrDone = Completer<Null>();
+  final Completer<void> stdoutDone = Completer<void>();
+  final Completer<void> stderrDone = Completer<void>();
   process.stdout
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
@@ -285,7 +285,7 @@ Future<int> exec(
         print('stderr: $line');
       }, onDone: () { stderrDone.complete(); });
 
-  await Future.wait<Null>(<Future<Null>>[stdoutDone.future, stderrDone.future]);
+  await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
@@ -307,8 +307,8 @@ Future<String> eval(
   final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
   final StringBuffer output = StringBuffer();
-  final Completer<Null> stdoutDone = Completer<Null>();
-  final Completer<Null> stderrDone = Completer<Null>();
+  final Completer<void> stdoutDone = Completer<void>();
+  final Completer<void> stderrDone = Completer<void>();
   process.stdout
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
@@ -323,7 +323,7 @@ Future<String> eval(
         print('stderr: $line');
       }, onDone: () { stderrDone.complete(); });
 
-  await Future.wait<Null>(<Future<Null>>[stdoutDone.future, stderrDone.future]);
+  await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
@@ -420,7 +420,7 @@ String jsonEncode(dynamic data) {
   return const JsonEncoder.withIndent('  ').convert(data) + '\n';
 }
 
-Future<Null> getFlutter(String revision) async {
+Future<void> getFlutter(String revision) async {
   section('Get Flutter!');
 
   if (exists(flutterDirectory)) {
@@ -495,8 +495,8 @@ Iterable<String> grep(Pattern pattern, {@required String from}) {
 ///     } catch (error, chain) {
 ///
 ///     }
-Future<Null> runAndCaptureAsyncStacks(Future<Null> callback()) {
-  final Completer<Null> completer = Completer<Null>();
+Future<void> runAndCaptureAsyncStacks(Future<void> callback()) {
+  final Completer<void> completer = Completer<void>();
   Chain.capture(() async {
     await callback();
     completer.complete();
