@@ -78,11 +78,11 @@ class FlutterDevice {
 
   Future<void> refreshViews() async {
     if (vmServices == null || vmServices.isEmpty)
-      return Future.value(null);
-    List<Future<Null>> futures = <Future<Null>>[];
+      return Future<Null>.value(null);
+    final List<Future<Null>> futures = <Future<Null>>[];
     for (VMService service in vmServices)
       futures.add(service.vm.refreshViews());
-    Completer completer = new Completer<Null>();
+    final Completer<Null> completer = Completer<Null>();
     Future.wait(futures).whenComplete(() => completer.complete(null));
     return completer.future;
   }

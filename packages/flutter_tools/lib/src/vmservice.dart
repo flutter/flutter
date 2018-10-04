@@ -952,8 +952,8 @@ class VM extends ServiceObjectOwner {
     if (!isFlutterEngine)
       return Future<Null>.value(null);
     _viewCache.clear();
-    Completer<Null> completer = new Completer<Null>();
-    List<Future<ServiceObject>> futures = <Future<ServiceObject>>[];
+    final Completer<Null> completer = Completer<Null>();
+    final List<Future<ServiceObject>> futures = <Future<ServiceObject>>[];
     for (Isolate isolate in isolates.toList()) {
       futures.add(vmService.vm.invokeRpc<ServiceObject>('_flutter.listViews',
           timeout: kLongRequestTimeout,
