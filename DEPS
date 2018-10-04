@@ -129,7 +129,7 @@ deps = {
    Var('fuchsia_git') + '/tonic' + '@' + 'd91fa62844f8531a3701450f6192298d0e873246',
 
   'src/third_party/benchmark':
-   Var('fuchsia_git') + '/third_party/benchmark' + '@' + '296537bc48d380adf21567c5d736ab79f5363d22',
+   Var('fuchsia_git') + '/third_party/benchmark' + '@' + '21f1eb3fe269ea43eba862bf6b699cde46587ade',
 
   'src/third_party/googletest':
    Var('fuchsia_git') + '/third_party/googletest' + '@' + '2072b0053d3537fa5e8d222e34c759987aae1320',
