@@ -76,7 +76,7 @@ TaskFunction createBasicMaterialCompileTest() {
     rmTree(sampleDir);
 
     await inDirectory<void>(Directory.systemTemp, () async {
-      await flutter('create', options: <String>[sampleAppName]);
+      await flutter('create', options: <String>['--template=app', sampleAppName]);
     });
 
     if (!(await sampleDir.exists()))

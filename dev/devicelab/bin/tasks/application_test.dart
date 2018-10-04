@@ -9,7 +9,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-/// Tests that the Flutter module project template works and supports
+/// Tests that the Flutter application project template works and supports
 /// adding Flutter to an existing Android app.
 Future<void> main() async {
   await task(() async {
@@ -21,15 +21,15 @@ Future<void> main() async {
       return TaskResult.failure('Could not find Java');
     print('\nUsing JAVA_HOME=$javaHome');
 
-    section('Create Flutter module project');
+    section('Create Flutter application project');
 
-    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
+    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_application_test.');
     final Directory projectDir = Directory(path.join(tempDir.path, 'hello'));
     try {
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
-          options: <String>['--org', 'io.flutter.devicelab', '-t', 'module', 'hello'],
+          options: <String>['--org', 'io.flutter.devicelab', '--template=application', 'hello'],
         );
       });
 
@@ -49,7 +49,7 @@ Future<void> main() async {
         );
       });
 
-      section('Build Flutter module library archive');
+      section('Build Flutter application library archive');
 
       await inDirectory(Directory(path.join(projectDir.path, '.android')), () async {
         await exec(
