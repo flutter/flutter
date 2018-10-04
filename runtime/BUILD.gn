@@ -95,9 +95,12 @@ source_set("runtime") {
     "$flutter_root/third_party/txt",
     "//third_party/dart/runtime:dart_api",
     "//third_party/dart/runtime/bin:dart_io_api",
-    "//third_party/rapidjson",
     "//third_party/skia",
     "//third_party/tonic",
+  ]
+
+  public_deps = [
+    "//third_party/rapidjson",
   ]
 
   public_configs = [ "$flutter_root:config" ]

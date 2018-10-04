@@ -15,7 +15,7 @@
 #include "flutter/fml/string_view.h"
 #include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/task_runner.h"
-#include "third_party/rapidjson/rapidjson/document.h"
+#include "rapidjson/document.h"
 
 namespace blink {
 

@@ -1,4 +1,4 @@
-Signature: 251f936d9bd8ced851a73a4413f02e30
+Signature: 557450819efed148f52ea1b142c9d410
 
 UNUSED LICENSES:
 
@@ -15995,41 +15995,42 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: rapidjson
-ORIGIN: ../../../third_party/rapidjson/rapidjson/error/en.h
+ORIGIN: ../../../third_party/rapidjson/include/rapidjson/error/en.h
 TYPE: LicenseType.mit
-FILE: ../../../third_party/rapidjson/rapidjson/allocators.h
-FILE: ../../../third_party/rapidjson/rapidjson/document.h
-FILE: ../../../third_party/rapidjson/rapidjson/encodedstream.h
-FILE: ../../../third_party/rapidjson/rapidjson/encodings.h
-FILE: ../../../third_party/rapidjson/rapidjson/error/en.h
-FILE: ../../../third_party/rapidjson/rapidjson/error/error.h
-FILE: ../../../third_party/rapidjson/rapidjson/filereadstream.h
-FILE: ../../../third_party/rapidjson/rapidjson/filewritestream.h
-FILE: ../../../third_party/rapidjson/rapidjson/fwd.h
-FILE: ../../../third_party/rapidjson/rapidjson/internal/biginteger.h
-FILE: ../../../third_party/rapidjson/rapidjson/internal/diyfp.h
-FILE: ../../../third_party/rapidjson/rapidjson/internal/dtoa.h
-FILE: ../../../third_party/rapidjson/rapidjson/internal/ieee754.h
-FILE: ../../../third_party/rapidjson/rapidjson/internal/itoa.h
-FILE: ../../../third_party/rapidjson/rapidjson/internal/meta.h
-FILE: ../../../third_party/rapidjson/rapidjson/internal/pow10.h
-FILE: ../../../third_party/rapidjson/rapidjson/internal/regex.h
-FILE: ../../../third_party/rapidjson/rapidjson/internal/stack.h
-FILE: ../../../third_party/rapidjson/rapidjson/internal/strfunc.h
-FILE: ../../../third_party/rapidjson/rapidjson/internal/strtod.h
-FILE: ../../../third_party/rapidjson/rapidjson/internal/swap.h
-FILE: ../../../third_party/rapidjson/rapidjson/istreamwrapper.h
-FILE: ../../../third_party/rapidjson/rapidjson/memorybuffer.h
-FILE: ../../../third_party/rapidjson/rapidjson/memorystream.h
-FILE: ../../../third_party/rapidjson/rapidjson/ostreamwrapper.h
-FILE: ../../../third_party/rapidjson/rapidjson/pointer.h
-FILE: ../../../third_party/rapidjson/rapidjson/prettywriter.h
-FILE: ../../../third_party/rapidjson/rapidjson/rapidjson.h
-FILE: ../../../third_party/rapidjson/rapidjson/reader.h
-FILE: ../../../third_party/rapidjson/rapidjson/schema.h
-FILE: ../../../third_party/rapidjson/rapidjson/stream.h
-FILE: ../../../third_party/rapidjson/rapidjson/stringbuffer.h
-FILE: ../../../third_party/rapidjson/rapidjson/writer.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/allocators.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/cursorstreamwrapper.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/document.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/encodedstream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/encodings.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/error/en.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/error/error.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/filereadstream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/filewritestream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/fwd.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/biginteger.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/diyfp.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/dtoa.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/ieee754.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/itoa.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/meta.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/pow10.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/regex.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/stack.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/strfunc.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/strtod.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/swap.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/istreamwrapper.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/memorybuffer.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/memorystream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/ostreamwrapper.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/pointer.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/prettywriter.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/rapidjson.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/reader.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/schema.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/stream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/stringbuffer.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/writer.h
 ----------------------------------------------------------------------------------------------------
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -16040,10 +16041,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ====================================================================================================
 LIBRARY: rapidjson
-ORIGIN: ../../../third_party/rapidjson/rapidjson/msinttypes/inttypes.h
+ORIGIN: ../../../third_party/rapidjson/include/rapidjson/msinttypes/inttypes.h
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/rapidjson/rapidjson/msinttypes/inttypes.h
-FILE: ../../../third_party/rapidjson/rapidjson/msinttypes/stdint.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/msinttypes/inttypes.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/msinttypes/stdint.h
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2006-2013 Alexander Chemeris
 
