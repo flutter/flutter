@@ -12,7 +12,7 @@ class TestTestBinding extends AutomatedTestWidgetsFlutterBinding {
   static void testPrint(String message, { int wrapWidth }) { print(message); }
 }
 
-Future<Null> guardedHelper(WidgetTester tester) {
+Future<void> guardedHelper(WidgetTester tester) {
   return TestAsyncUtils.guard(() async {
     await tester.pumpWidget(const Text('Hello', textDirection: TextDirection.ltr));
   });

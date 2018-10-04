@@ -30,7 +30,7 @@ void printProgress(String action, String workingDir, String command) {
   print('$arrow $action: cd $cyan$workingDir$reset; $yellow$command$reset');
 }
 
-Future<Null> runCommand(String executable, List<String> arguments, {
+Future<void> runCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
   bool expectNonZeroExit = false,
