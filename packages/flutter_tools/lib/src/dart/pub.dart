@@ -69,7 +69,7 @@ bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
 
 /// [context] provides extra information to package server requests to
 /// understand usage.
-Future<Null> pubGet({
+Future<void> pubGet({
   @required PubContext context,
   String directory,
   bool skipIfAbsent = false,
@@ -135,7 +135,7 @@ typedef MessageFilter = String Function(String message);
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
-Future<Null> pub(List<String> arguments, {
+Future<void> pub(List<String> arguments, {
   @required PubContext context,
   String directory,
   MessageFilter filter,
@@ -161,7 +161,7 @@ Future<Null> pub(List<String> arguments, {
     if (code != 69) // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
       break;
     printStatus('$failureMessage ($code) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
-    await Future<Null>.delayed(Duration(seconds: duration));
+    await Future<void>.delayed(Duration(seconds: duration));
     if (duration < 64)
       duration *= 2;
   }
@@ -173,7 +173,7 @@ Future<Null> pub(List<String> arguments, {
 /// Runs pub in 'interactive' mode, directly piping the stdin stream of this
 /// process to that of pub, and the stdout/stderr stream of pub to the corresponding
 /// streams of this process.
-Future<Null> pubInteractively(List<String> arguments, {
+Future<void> pubInteractively(List<String> arguments, {
   String directory,
 }) async {
   Cache.releaseLockEarly();

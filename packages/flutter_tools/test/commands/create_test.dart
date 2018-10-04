@@ -234,7 +234,7 @@ void main() {
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
-    final CommandRunner<Null> runner = createTestCommandRunner(command);
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--template=application', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
 
@@ -305,7 +305,7 @@ void main() {
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
-    final CommandRunner<Null> runner = createTestCommandRunner(command);
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
 
@@ -374,7 +374,7 @@ void main() {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
-    final CommandRunner<Null> runner = createTestCommandRunner(command);
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
@@ -385,7 +385,7 @@ void main() {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
-    final CommandRunner<Null> runner = createTestCommandRunner(command);
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
 
@@ -402,7 +402,7 @@ void main() {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
-    final CommandRunner<Null> runner = createTestCommandRunner(command);
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
 
@@ -416,7 +416,7 @@ void main() {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
-    final CommandRunner<Null> runner = createTestCommandRunner(command);
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
@@ -430,7 +430,7 @@ void main() {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
-    final CommandRunner<Null> runner = createTestCommandRunner(command);
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
 
@@ -555,7 +555,7 @@ void main() {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
-    final CommandRunner<Null> runner = createTestCommandRunner(command);
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
     expect(
       runner.run(<String>['create', projectDir.path, '--pub']),
@@ -567,7 +567,7 @@ void main() {
   testUsingContext('fails when file exists', () async {
     Cache.flutterRoot = '../..';
     final CreateCommand command = CreateCommand();
-    final CommandRunner<Null> runner = createTestCommandRunner(command);
+    final CommandRunner<void> runner = createTestCommandRunner(command);
     final File existingFile = fs.file('${projectDir.path.toString()}/bad');
     if (!existingFile.existsSync()) {
       existingFile.createSync(recursive: true);
@@ -581,7 +581,7 @@ void main() {
   testUsingContext('fails when invalid package name', () async {
     Cache.flutterRoot = '../..';
     final CreateCommand command = CreateCommand();
-    final CommandRunner<Null> runner = createTestCommandRunner(command);
+    final CommandRunner<void> runner = createTestCommandRunner(command);
     expect(
       runner.run(<String>['create', fs.path.join(projectDir.path, 'invalidName')]),
       throwsToolExit(message: '"invalidName" is not a valid Dart package name.'),
@@ -594,7 +594,7 @@ void main() {
       Cache.flutterRoot = '../..';
 
       final CreateCommand command = CreateCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
       expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
@@ -612,7 +612,7 @@ void main() {
       Cache.flutterRoot = '../..';
 
       final CreateCommand command = CreateCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--pub', projectDir.path]);
       expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
@@ -625,7 +625,7 @@ void main() {
   );
 }
 
-Future<Null> _createProject(
+Future<void> _createProject(
   Directory dir,
   List<String> createArgs,
   List<String> expectedPaths, {
@@ -633,7 +633,7 @@ Future<Null> _createProject(
 }) async {
   Cache.flutterRoot = '../..';
   final CreateCommand command = CreateCommand();
-  final CommandRunner<Null> runner = createTestCommandRunner(command);
+  final CommandRunner<void> runner = createTestCommandRunner(command);
   final List<String> args = <String>['create'];
   args.addAll(createArgs);
   args.add(dir.path);
@@ -658,7 +658,7 @@ Future<Null> _createProject(
   expect(failures, isEmpty, reason: failures.join('\n'));
 }
 
-Future<Null> _createAndAnalyzeProject(
+Future<void> _createAndAnalyzeProject(
   Directory dir,
   List<String> createArgs,
   List<String> expectedPaths, {
@@ -668,7 +668,7 @@ Future<Null> _createAndAnalyzeProject(
   await _analyzeProject(dir.path);
 }
 
-Future<Null> _analyzeProject(String workingDir) async {
+Future<void> _analyzeProject(String workingDir) async {
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',
@@ -691,7 +691,7 @@ Future<Null> _analyzeProject(String workingDir) async {
   expect(exec.exitCode, 0);
 }
 
-Future<Null> _runFlutterTest(Directory workingDir, {String target}) async {
+Future<void> _runFlutterTest(Directory workingDir, {String target}) async {
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',

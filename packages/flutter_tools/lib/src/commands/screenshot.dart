@@ -76,22 +76,27 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     File outputFile;
     if (argResults.wasParsed(_kOut))
       outputFile = fs.file(argResults[_kOut]);
 
     switch (argResults[_kType]) {
       case _kDeviceType:
-        return runScreenshot(outputFile);
+        await runScreenshot(outputFile);
+        return null;
       case _kSkiaType:
-        return runSkia(outputFile);
+        await runSkia(outputFile);
+        return null;
       case _kRasterizerType:
-        return runRasterizer(outputFile);
+        await runRasterizer(outputFile);
+        return null;
     }
+
+    return null;
   }
 
-  Future<Null> runScreenshot(File outputFile) async {
+  Future<void> runScreenshot(File outputFile) async {
     outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
       await device.takeScreenshot(outputFile);
@@ -101,7 +106,7 @@ class ScreenshotCommand extends FlutterCommand {
     await showOutputFileInfo(outputFile);
   }
 
-  Future<Null> runSkia(File outputFile) async {
+  Future<void> runSkia(File outputFile) async {
     final Map<String, dynamic> skp = await _invokeVmServiceRpc('_flutter.screenshotSkp');
     outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
     final IOSink sink = outputFile.openWrite();
@@ -138,7 +143,7 @@ class ScreenshotCommand extends FlutterCommand {
     }
   }
 
-  Future<Null> showOutputFileInfo(File outputFile) async {
+  Future<void> showOutputFileInfo(File outputFile) async {
     final int sizeKB = (await outputFile.length()) ~/ 1024;
     printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
   }

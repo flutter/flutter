@@ -438,7 +438,7 @@ class MockVMService extends BasicMock implements VMService {
   @override
   VM get vm => _vm;
 
-  Future<Null> setUp() async {
+  Future<void> setUp() async {
     try {
       _server = await HttpServer.bind(InternetAddress.loopbackIPv6, 0);
       _httpAddress = Uri.parse('http://[::1]:${_server.port}');
@@ -451,7 +451,7 @@ class MockVMService extends BasicMock implements VMService {
       final String fsName = request.headers.value('dev_fs_name');
       final String devicePath = utf8.decode(base64.decode(request.headers.value('dev_fs_uri_b64')));
       messages.add('writeFile $fsName $devicePath');
-      request.drain<List<int>>().then<Null>((List<int> value) {
+      request.drain<List<int>>().then<void>((List<int> value) {
         request.response
           ..write('Got it')
           ..close();
@@ -459,7 +459,7 @@ class MockVMService extends BasicMock implements VMService {
     });
   }
 
-  Future<Null> tearDown() async {
+  Future<void> tearDown() async {
     await _server?.close();
   }
 
@@ -522,7 +522,7 @@ void _cleanupTempDirs() {
     tryToDelete(_tempDirs.removeLast());
 }
 
-Future<Null> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash = false }) async {
+Future<void> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash = false }) async {
   final Directory pkgTempDir = _newTempDir(fs);
   String pkgFilePath = fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName);
   if (doubleSlash) {

@@ -38,7 +38,7 @@ const String kSnapshotFileName = 'flutter_tools.snapshot'; // in //flutter/bin/c
 const String kFlutterToolsScriptFileName = 'flutter_tools.dart'; // in //flutter/packages/flutter_tools/bin/
 const String kFlutterEnginePackageName = 'sky_engine';
 
-class FlutterCommandRunner extends CommandRunner<Null> {
+class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({ bool verboseHelp = false }) : super(
     'flutter',
     'Manage your Flutter app development.\n'
@@ -191,7 +191,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         usageException(error.message);
       }
 
-      Command<Null> command = commands[error.commands.first];
+      Command<void> command = commands[error.commands.first];
       for (String commandName in error.commands.skip(1)) {
         command = command.subcommands[commandName];
       }
@@ -202,7 +202,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   }
 
   @override
-  Future<Null> run(Iterable<String> args) {
+  Future<void> run(Iterable<String> args) {
     // Have an invocation of 'build' print out it's sub-commands.
     // TODO(ianh): Move this to the Build command itself somehow.
     if (args.length == 1 && args.first == 'build')
@@ -212,7 +212,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   }
 
   @override
-  Future<Null> runCommand(ArgResults topLevelResults) async {
+  Future<void> runCommand(ArgResults topLevelResults) async {
     final Map<Type, dynamic> contextOverrides = <Type, dynamic>{
       Flags: Flags(topLevelResults),
     };
@@ -300,7 +300,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       });
     }
 
-    await context.run<Null>(
+    await context.run<void>(
       overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
         return MapEntry<Type, Generator>(type, () => value);
       }),

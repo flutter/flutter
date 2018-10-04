@@ -14,7 +14,7 @@ import '../project.dart';
 import 'android_sdk.dart';
 import 'gradle.dart';
 
-Future<Null> buildApk({
+Future<void> buildApk({
   @required FlutterProject project,
   @required String target,
   BuildInfo buildInfo = BuildInfo.debug

@@ -32,7 +32,7 @@ class BuildCommand extends FlutterCommand {
   final String description = 'Flutter build commands.';
 
   @override
-  Future<Null> runCommand() async { }
+  Future<FlutterCommandResult> runCommand() async => null;
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
@@ -42,7 +42,7 @@ abstract class BuildSubCommand extends FlutterCommand {
 
   @override
   @mustCallSuper
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     if (isRunningOnBot) {
       final File dotPackages = fs.file('.packages');
       printStatus('Contents of .packages:');
@@ -58,5 +58,6 @@ abstract class BuildSubCommand extends FlutterCommand {
       else
         printError('File not found: ${pubspecLock.absolute.path}');
     }
+    return null;
   }
 }

@@ -89,7 +89,7 @@ class TestCommand extends FlutterCommand {
   String get description => 'Run Flutter unit tests for the current project.';
 
   @override
-  Future<Null> validateCommand() async {
+  Future<void> validateCommand() async {
     await super.validateCommand();
     if (!fs.isFileSync('pubspec.yaml')) {
       throwToolExit(

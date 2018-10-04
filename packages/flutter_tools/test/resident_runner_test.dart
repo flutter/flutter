@@ -18,13 +18,13 @@ class TestRunner extends ResidentRunner {
   String receivedCommand;
 
   @override
-  Future<Null> cleanupAfterSignal() => null;
+  Future<void> cleanupAfterSignal() => null;
 
   @override
-  Future<Null> cleanupAtFinish() => null;
+  Future<void> cleanupAtFinish() => null;
 
   @override
-  Future<Null> handleTerminalCommand(String code) async {
+  Future<void> handleTerminalCommand(String code) async {
     receivedCommand = code;
   }
 

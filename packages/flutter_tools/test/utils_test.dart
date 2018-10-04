@@ -134,7 +134,7 @@ baz=qux
         called = true;
       }, const Duration(seconds: 1));
       expect(called, false);
-      await Future<Null>.delayed(kShortDelay);
+      await Future<void>.delayed(kShortDelay);
       expect(called, true);
     });
 
@@ -145,7 +145,7 @@ baz=qux
         callCount++;
       }, Duration(milliseconds: kShortDelay.inMilliseconds ~/ 2));
       expect(callCount, 0);
-      await Future<Null>.delayed(kShortDelay);
+      await Future<void>.delayed(kShortDelay);
       expect(callCount, greaterThanOrEqualTo(2));
     });
 
@@ -160,7 +160,7 @@ baz=qux
           completer.complete(DateTime.now().difference(firstTime));
 
         // introduce a delay
-        await Future<Null>.delayed(kShortDelay);
+        await Future<void>.delayed(kShortDelay);
       }, kShortDelay);
       final Duration duration = await completer.future;
       expect(duration, greaterThanOrEqualTo(Duration(milliseconds: kShortDelay.inMilliseconds * 2)));

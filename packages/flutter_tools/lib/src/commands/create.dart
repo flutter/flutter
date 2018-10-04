@@ -171,7 +171,7 @@ class CreateCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     if (argResults.rest.isEmpty)
       throwToolExit('No option specified for the output directory.\n$usage', exitCode: 2);
 
@@ -334,6 +334,8 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
         printStatus('Your application code is in $relativeAppMain');
       }
     }
+
+    return null;
   }
 
   Future<int> _generateApplication(Directory directory, Map<String, dynamic> templateContext) async {

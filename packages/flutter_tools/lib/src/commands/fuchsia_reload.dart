@@ -102,7 +102,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
   bool _list;
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
 
     await _validateArguments();
@@ -130,7 +130,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
         // continue to work.
         printStatus('Press Enter to exit.');
         await stdin.first;
-        return;
+        return null;
       }
 
       // Check that there are running VM services on the returned
@@ -168,8 +168,10 @@ class FuchsiaReloadCommand extends FlutterCommand {
       printStatus('Connecting to $_modName');
       await hotRunner.attach(viewFilter: isolateName);
     } finally {
-      await Future.wait<Null>(forwardedPorts.map<Future<Null>>((_PortForwarder pf) => pf.stop()));
+      await Future.wait<void>(forwardedPorts.map<Future<void>>((_PortForwarder pf) => pf.stop()));
     }
+
+    return null;
   }
 
   // A cache of VMService connections.
@@ -286,7 +288,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
       '${extraTabs}External: $external\n';
   }
 
-  Future<Null> _listVMs(List<int> ports) async {
+  Future<void> _listVMs(List<int> ports) async {
     for (int port in ports) {
       final VMService vmService = await _getVMService(port);
       await vmService.getVM();
@@ -295,7 +297,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     }
   }
 
-  Future<Null> _validateArguments() async {
+  Future<void> _validateArguments() async {
     final String fuchsiaBuildDir = argResults['build-dir'];
     final String gnTarget = argResults['gn-target'];
 
@@ -485,7 +487,7 @@ class _PortForwarder {
     return _PortForwarder._(address, remotePort, localPort, process, sshConfig);
   }
 
-  Future<Null> stop() async {
+  Future<void> stop() async {
     // Kill the original ssh process if it is still around.
     if (_process != null) {
       printTrace('_PortForwarder killing ${_process.pid} for port $_localPort');

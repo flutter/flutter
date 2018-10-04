@@ -211,7 +211,7 @@ Future<int> _exit(int code) async {
   // Run shutdown hooks before flushing logs
   await runShutdownHooks();
 
-  final Completer<Null> completer = Completer<Null>();
+  final Completer<void> completer = Completer<void>();
 
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {

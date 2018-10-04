@@ -82,7 +82,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   @override
   final bool hidden;
 
-  Future<Null> _downloadCoverageData() async {
+  Future<void> _downloadCoverageData() async {
     final Status status = logger.startProgress(
       'Downloading lcov data for package:flutter...',
       expectSlowOperation: true,
@@ -100,7 +100,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     final List<Directory> packages = runner.getRepoPackages();
 
     final bool upgrade = argResults['force-upgrade'];
@@ -163,7 +163,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         );
       }
       printStatus('All pubspecs were up to date.');
-      return;
+      return null;
     }
 
     if (upgrade || isPrintPaths || isPrintTransitiveClosure) {
@@ -265,12 +265,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         tree._dependencyTree.forEach((String from, Set<String> to) {
           printStatus('$from -> $to');
         });
-        return;
+        return null;
       }
 
       if (isPrintPaths) {
         showDependencyPaths(from: argResults['from'], to: argResults['to'], tree: tree);
-        return;
+        return null;
       }
 
       // Now that we have collected all the data, we can apply our dependency
@@ -302,6 +302,8 @@ class UpdatePackagesCommand extends FlutterCommand {
 
     final double seconds = timer.elapsedMilliseconds / 1000.0;
     printStatus('\nRan \'pub\' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.');
+
+    return null;
   }
 
   void showDependencyPaths({

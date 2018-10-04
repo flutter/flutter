@@ -74,7 +74,7 @@ void addShutdownHook(
 /// hooks within a given stage will be started in parallel and will be
 /// guaranteed to run to completion before shutdown hooks in the next stage are
 /// started.
-Future<Null> runShutdownHooks() async {
+Future<void> runShutdownHooks() async {
   printTrace('Running shutdown hooks');
   _shutdownHooksRunning = true;
   try {
@@ -164,12 +164,12 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
 
   // Wait for stdout to be fully processed
   // because process.exitCode may complete first causing flaky tests.
-  await waitGroup<Null>(<Future<Null>>[
-    stdoutSubscription.asFuture<Null>(),
-    stderrSubscription.asFuture<Null>(),
+  await waitGroup<void>(<Future<void>>[
+    stdoutSubscription.asFuture<void>(),
+    stderrSubscription.asFuture<void>(),
   ]);
 
-  await waitGroup<Null>(<Future<Null>>[
+  await waitGroup<void>(<Future<void>>[
     stdoutSubscription.cancel(),
     stderrSubscription.cancel(),
   ]);
@@ -203,9 +203,9 @@ Future<int> runInteractively(List<String> command, {
   return await process.exitCode;
 }
 
-Future<Null> runAndKill(List<String> cmd, Duration timeout) {
+Future<void> runAndKill(List<String> cmd, Duration timeout) {
   final Future<Process> proc = runDetached(cmd);
-  return Future<Null>.delayed(timeout, () async {
+  return Future<void>.delayed(timeout, () async {
     printTrace('Intentionally killing ${cmd[0]}');
     processManager.killPid((await proc).pid);
   });

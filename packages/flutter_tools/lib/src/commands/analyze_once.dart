@@ -33,7 +33,7 @@ class AnalyzeOnce extends AnalyzeBase {
   final Directory workingDirectory;
 
   @override
-  Future<Null> analyze() async {
+  Future<void> analyze() async {
     final String currentDirectory =
         (workingDirectory ?? fs.currentDirectory).path;
 
@@ -68,7 +68,7 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Nothing to analyze.', exitCode: 0);
 
     // analyze all
-    final Completer<Null> analysisCompleter = Completer<Null>();
+    final Completer<void> analysisCompleter = Completer<void>();
     final List<AnalysisError> errors = <AnalysisError>[];
 
     final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;

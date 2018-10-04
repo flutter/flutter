@@ -27,7 +27,7 @@ class AnalysisServer {
 
   int _id = 0;
 
-  Future<Null> start() async {
+  Future<void> start() async {
     final String snapshot =
         fs.path.join(sdkPath, 'bin/snapshots/analysis_server.dart.snapshot');
     final List<String> command = <String>[

@@ -84,7 +84,7 @@ void main() {
         );
         printStatus('daemon.logMessage test');
         // Service the event loop.
-        await Future<Null>.value();
+        await Future<void>.value();
       }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
         buffer.writeln(line);
       }));
@@ -103,7 +103,7 @@ void main() {
         notifyingLogger: notifyingLogger
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.shutdown'});
-      return daemon.onExit.then<Null>((int code) async {
+      return daemon.onExit.then<void>((int code) async {
         await commands.close();
         expect(code, 0);
       });

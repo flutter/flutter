@@ -237,7 +237,7 @@ class RunCommand extends RunCommandBase {
   bool get stayResident => argResults['resident'];
 
   @override
-  Future<Null> validateCommand() async {
+  Future<void> validateCommand() async {
     // When running with a prebuilt application, no command validation is
     // necessary.
     if (!runningWithPrebuiltApplication)

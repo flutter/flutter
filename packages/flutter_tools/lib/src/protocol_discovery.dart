@@ -50,9 +50,9 @@ class ProtocolDiscovery {
   /// The discovered service URI.
   Future<Uri> get uri => _completer.future;
 
-  Future<Null> cancel() => _stopScrapingLogs();
+  Future<void> cancel() => _stopScrapingLogs();
 
-  Future<Null> _stopScrapingLogs() async {
+  Future<void> _stopScrapingLogs() async {
     await _deviceLogSubscription?.cancel();
     _deviceLogSubscription = null;
   }

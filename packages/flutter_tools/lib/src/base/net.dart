@@ -23,7 +23,7 @@ Future<List<int>> fetchUrl(Uri url) async {
     if (result != null)
       return result;
     printStatus('Download failed -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
-    await Future<Null>.delayed(Duration(seconds: duration));
+    await Future<void>.delayed(Duration(seconds: duration));
     if (duration < 64)
       duration *= 2;
   }

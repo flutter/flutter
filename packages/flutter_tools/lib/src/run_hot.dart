@@ -120,7 +120,7 @@ class HotRunner extends ResidentRunner {
     return true;
   }
 
-  Future<Null> _reloadSourcesService(String isolateId,
+  Future<void> _reloadSourcesService(String isolateId,
       { bool force = false, bool pause = false }) async {
     // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     final OperationResult result = await restart(pauseAfterRestart: pause);
@@ -276,7 +276,7 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  Future<Null> handleTerminalCommand(String code) async {
+  Future<void> handleTerminalCommand(String code) async {
     final String lower = code.toLowerCase();
     if (lower == 'r') {
       final OperationResult result = await restart(fullRestart: code == 'R');
@@ -340,7 +340,7 @@ class HotRunner extends ResidentRunner {
     return true;
   }
 
-  Future<Null> _evictDirtyAssets() async {
+  Future<void> _evictDirtyAssets() async {
     for (FlutterDevice device in flutterDevices) {
       if (device.devFS.assetPathsToEvict.isEmpty)
         return;
@@ -357,7 +357,7 @@ class HotRunner extends ResidentRunner {
       device.devFS.assetPathsToEvict.clear();
   }
 
-  Future<Null> _cleanupDevFS() async {
+  Future<void> _cleanupDevFS() async {
     for (FlutterDevice device in flutterDevices) {
       if (device.devFS != null) {
         // Cleanup the devFS; don't wait indefinitely, and ignore any errors.
@@ -371,7 +371,7 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  Future<Null> _launchInView(FlutterDevice device,
+  Future<void> _launchInView(FlutterDevice device,
                              Uri entryUri,
                              Uri packagesUri,
                              Uri assetsDirectoryUri) async {
@@ -379,7 +379,7 @@ class HotRunner extends ResidentRunner {
       await view.runFromSource(entryUri, packagesUri, assetsDirectoryUri);
   }
 
-  Future<Null> _launchFromDevFS(String mainScript) async {
+  Future<void> _launchFromDevFS(String mainScript) async {
     final String entryUri = fs.path.relative(mainScript, from: projectRootPath);
     for (FlutterDevice device in flutterDevices) {
       final Uri deviceEntryUri = device.devFS.baseUri.resolveUri(
@@ -764,7 +764,7 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  Future<Null> cleanupAfterSignal() async {
+  Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
     if (_didAttach) {
       appFinished();
@@ -774,10 +774,10 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  Future<Null> preStop() => _cleanupDevFS();
+  Future<void> preStop() => _cleanupDevFS();
 
   @override
-  Future<Null> cleanupAtFinish() async {
+  Future<void> cleanupAtFinish() async {
     await _cleanupDevFS();
     await stopEchoingDeviceLog();
   }

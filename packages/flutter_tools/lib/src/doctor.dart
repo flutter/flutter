@@ -112,7 +112,7 @@ class Doctor {
   }
 
   /// Print a summary of the state of the tooling, as well as how to get more info.
-  Future<Null> summary() async {
+  Future<void> summary() async {
     printStatus(await summaryText);
   }
 

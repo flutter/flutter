@@ -21,7 +21,7 @@ abstract class AnalyzeBase {
   final ArgResults argResults;
 
   /// Called by [AnalyzeCommand] to start the analysis process.
-  Future<Null> analyze();
+  Future<void> analyze();
 
   void dumpErrors(Iterable<String> errors) {
     if (argResults['write'] != null) {

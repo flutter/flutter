@@ -40,7 +40,7 @@ class CoverageCollector extends TestWatcher {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<Null> collectCoverage(Process process, Uri observatoryUri) async {
+  Future<void> collectCoverage(Process process, Uri observatoryUri) async {
     assert(process != null);
     assert(observatoryUri != null);
 

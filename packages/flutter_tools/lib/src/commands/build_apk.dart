@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../android/apk.dart';
 import '../project.dart';
+import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
@@ -38,12 +39,13 @@ class BuildApkCommand extends BuildSubCommand {
     'suitable for deploying to app stores.';
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     await super.runCommand();
     await buildApk(
       project: await FlutterProject.current(),
       target: targetFile,
       buildInfo: getBuildInfo(),
     );
+    return null;
   }
 }

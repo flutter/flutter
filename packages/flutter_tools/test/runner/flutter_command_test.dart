@@ -188,7 +188,7 @@ class DummyFlutterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    return commandFunction == null ? null : commandFunction();
+    return commandFunction == null ? null : await commandFunction();
   }
 }
 

@@ -76,7 +76,7 @@ class AttachCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> validateCommand() async {
+  Future<void> validateCommand() async {
     await super.validateCommand();
     if (await findTargetDevice() == null)
       throwToolExit(null);
@@ -84,7 +84,7 @@ class AttachCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
 
     await _validateArguments();
@@ -152,6 +152,7 @@ class AttachCommand extends FlutterCommand {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
       ports.forEach(device.portForwarder.unforward);
     }
+    return null;
   }
 
   Future<void> _validateArguments() async {}

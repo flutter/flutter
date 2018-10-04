@@ -14,6 +14,7 @@ import '../dart/sdk.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../resident_runner.dart';
+import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'run.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
@@ -82,7 +83,7 @@ class DriveCommand extends RunCommandBase {
   StreamSubscription<String> _deviceLogSubscription;
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     final String testFile = _getTestFile();
     if (testFile == null)
       throwToolExit(null);
@@ -133,6 +134,8 @@ class DriveCommand extends RunCommandBase {
         await appStopper(this);
       }
     }
+
+    return null;
   }
 
   String _getTestFile() {
@@ -272,13 +275,13 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef TestRunner = Future<Null> Function(List<String> testArgs, String observatoryUri);
+typedef TestRunner = Future<void> Function(List<String> testArgs, String observatoryUri);
 TestRunner testRunner = _runTests;
 void restoreTestRunner() {
   testRunner = _runTests;
 }
 
-Future<Null> _runTests(List<String> testArgs, String observatoryUri) async {
+Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
   printTrace('Running driver tests.');
 
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));

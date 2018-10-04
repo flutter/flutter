@@ -234,7 +234,7 @@ void main() {
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
       });
 
-      void testWithMocks(String description, Future<Null> testMethod()) {
+      void testWithMocks(String description, Future<void> testMethod()) {
         testUsingContext(description, testMethod, overrides: <Type, Generator>{
           FileSystem: () => fs,
           IOSWorkflow: () => mockIOSWorkflow,
@@ -365,7 +365,7 @@ flutter:
 
 /// Executes the [testMethod] in a context where the file system
 /// is in memory.
-void testInMemory(String description, Future<Null> testMethod()) {
+void testInMemory(String description, Future<void> testMethod()) {
   Cache.flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = MemoryFileSystem(
     style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
@@ -406,7 +406,7 @@ void transfer(FileSystemEntity entity, FileSystem target) {
   }
 }
 
-Future<Null> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
+Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
   try {
     await future;
     fail('ToolExit expected, but nothing thrown');

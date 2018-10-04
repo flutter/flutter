@@ -32,7 +32,7 @@ void main() {
     FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironment, isNull);
       expect(testLogger.statusText, '');
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -102,7 +102,7 @@ void main() {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -128,7 +128,7 @@ void main() {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -213,7 +213,7 @@ class MockStreamSubscription<T> implements StreamSubscription<T> {
   Future<E> asFuture<E>([E futureValue]) => Future<E>.value();
 
   @override
-  Future<Null> cancel() => null;
+  Future<void> cancel() => null;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;

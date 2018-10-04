@@ -109,16 +109,16 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  Future<Null> handleTerminalCommand(String code) async => null;
+  Future<void> handleTerminalCommand(String code) async => null;
 
   @override
-  Future<Null> cleanupAfterSignal() async {
+  Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
     await stopApp();
   }
 
   @override
-  Future<Null> cleanupAtFinish() async {
+  Future<void> cleanupAtFinish() async {
     await stopEchoingDeviceLog();
   }
 
@@ -152,7 +152,7 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  Future<Null> preStop() async {
+  Future<void> preStop() async {
     for (FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
       if (device.vmServices == null || device.vmServices.isEmpty)

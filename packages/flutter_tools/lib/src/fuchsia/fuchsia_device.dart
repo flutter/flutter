@@ -68,7 +68,7 @@ class FuchsiaDevice extends Device {
     bool applicationNeedsRebuild = false,
     bool usesTerminalUi = false,
     bool ipv6 = false,
-  }) => Future<Null>.error('unimplemented');
+  }) => Future<void>.error('unimplemented');
 
   @override
   Future<bool> stopApp(ApplicationPackage app) async {
