@@ -1,0 +1,26 @@
+# Copyright 2018 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("benchmark_config") {
+  include_dirs = [ "//third_party/benchmark:benchmark_config" ]
+}
+
+source_set("benchmarking") {
+  testonly = true
+
+  sources = [
+    "benchmarking.cc",
+    "benchmarking.h",
+  ]
+
+  public_deps = [
+    "$flutter_root/fml",
+    "//third_party/benchmark",
+  ]
+
+  public_configs = [
+    "$flutter_root:config",
+    ":benchmark_config",
+  ]
+}

@@ -470,70 +470,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: engine
-ORIGIN: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_locations.dart + ../../../LICENSE
+ORIGIN: ../../../flutter/benchmarking/benchmarking.cc + ../../../LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_locations.dart
-FILE: ../../../flutter/fml/paths_unittests.cc
-FILE: ../../../flutter/lib/ui/isolate_name_server.dart
-FILE: ../../../flutter/lib/ui/painting/image_encoding.cc
-FILE: ../../../flutter/lib/ui/painting/image_encoding.h
-FILE: ../../../flutter/lib/ui/plugins.dart
-FILE: ../../../flutter/lib/ui/semantics/custom_accessibility_action.cc
-FILE: ../../../flutter/lib/ui/semantics/custom_accessibility_action.h
-FILE: ../../../flutter/lib/ui/text/asset_manager_font_provider.cc
-FILE: ../../../flutter/lib/ui/text/asset_manager_font_provider.h
-FILE: ../../../flutter/shell/platform/android/apk_asset_provider.h
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformView.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewFactory.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewRegistry.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewRegistryImpl.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/SingleViewPresentation.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/VirtualDisplayController.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterCallbackInformation.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterRunArguments.java
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterCallbackCache.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache.mm
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache_Internal.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate.mm
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.mm
-FILE: ../../../flutter/shell/platform/darwin/ios/headless_platform_view_ios.h
-----------------------------------------------------------------------------------------------------
-Copyright 2018 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: engine
-ORIGIN: ../../../flutter/fml/platform/android/paths_android.h + ../../../LICENSE
-TYPE: LicenseType.bsd
+FILE: ../../../flutter/benchmarking/benchmarking.cc
+FILE: ../../../flutter/benchmarking/benchmarking.h
 FILE: ../../../flutter/fml/base32.cc
 FILE: ../../../flutter/fml/base32.h
 FILE: ../../../flutter/fml/base32_unittest.cc
@@ -570,6 +510,7 @@ FILE: ../../../flutter/shell/common/isolate_configuration.cc
 FILE: ../../../flutter/shell/common/isolate_configuration.h
 FILE: ../../../flutter/shell/common/persistent_cache.cc
 FILE: ../../../flutter/shell/common/persistent_cache.h
+FILE: ../../../flutter/shell/common/shell_benchmarks.cc
 FILE: ../../../flutter/shell/platform/android/android_shell_holder.cc
 FILE: ../../../flutter/shell/platform/android/android_shell_holder.h
 FILE: ../../../flutter/shell/platform/android/platform_message_response_android.cc
@@ -587,6 +528,68 @@ FILE: ../../../flutter/shell/version/version.cc
 FILE: ../../../flutter/shell/version/version.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Flutter Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: engine
+ORIGIN: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_locations.dart + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_locations.dart
+FILE: ../../../flutter/fml/paths_unittests.cc
+FILE: ../../../flutter/lib/ui/isolate_name_server.dart
+FILE: ../../../flutter/lib/ui/painting/image_encoding.cc
+FILE: ../../../flutter/lib/ui/painting/image_encoding.h
+FILE: ../../../flutter/lib/ui/plugins.dart
+FILE: ../../../flutter/lib/ui/semantics/custom_accessibility_action.cc
+FILE: ../../../flutter/lib/ui/semantics/custom_accessibility_action.h
+FILE: ../../../flutter/lib/ui/text/asset_manager_font_provider.cc
+FILE: ../../../flutter/lib/ui/text/asset_manager_font_provider.h
+FILE: ../../../flutter/shell/platform/android/apk_asset_provider.h
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformView.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewFactory.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewRegistry.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewRegistryImpl.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/SingleViewPresentation.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/VirtualDisplayController.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterCallbackInformation.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterRunArguments.java
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterCallbackCache.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache_Internal.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/headless_platform_view_ios.h
+----------------------------------------------------------------------------------------------------
+Copyright 2018 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
