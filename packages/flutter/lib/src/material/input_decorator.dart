@@ -1443,6 +1443,7 @@ class InputDecorator extends StatefulWidget {
     this.isFocused = false,
     this.isEmpty = false,
     this.child,
+    this.hintTextOverflow = TextOverflow.ellipsis
   }) : assert(isFocused != null),
        assert(isEmpty != null),
        super(key: key);
@@ -1487,6 +1488,15 @@ class InputDecorator extends StatefulWidget {
   ///
   /// Typically an [EditableText], [DropdownButton], or [InkWell].
   final Widget child;
+
+  /// The overflow type of hint text
+  ///
+  /// Defaults to [TextOverflow.ellipsis]
+  /// When the text input has more than 1 line (maxLines > 1) and the hint text
+  /// is too long, it should be wrapped, instead of be cut off with ellipsis
+  /// (three dots at the end).
+  /// This issue was reported here: https://github.com/flutter/flutter/issues/21045
+  final TextOverflow hintTextOverflow;
 
   bool get _labelIsFloating => !isEmpty || isFocused;
 
@@ -1706,7 +1716,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       child: Text(
         decoration.hintText,
         style: hintStyle,
-        overflow: TextOverflow.ellipsis,
+        overflow: widget.hintTextOverflow,
         textAlign: textAlign,
       ),
     );

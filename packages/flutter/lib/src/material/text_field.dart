@@ -595,6 +595,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
             isFocused: focusNode.hasFocus,
             isEmpty: controller.value.text.isEmpty,
             child: child,
+            hintTextOverflow: (widget.maxLines == null || widget.maxLines <= 1) ? TextOverflow.ellipsis : TextOverflow.clip,
           );
         },
         child: child,
