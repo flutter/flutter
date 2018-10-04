@@ -396,8 +396,6 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterView.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.mm
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/platform_view_ios.h

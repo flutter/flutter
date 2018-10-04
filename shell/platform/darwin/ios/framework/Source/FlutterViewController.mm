@@ -18,7 +18,6 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
-#include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
@@ -55,7 +54,6 @@
   UIInterfaceOrientationMask _orientationPreferences;
   UIStatusBarStyle _statusBarStyle;
   blink::ViewportMetrics _viewportMetrics;
-  shell::TouchMapper _touchMapper;
   int64_t _nextTextureId;
   BOOL _initialized;
 }
@@ -543,32 +541,25 @@
 
 #pragma mark - Touch event handling
 
-enum MapperPhase {
-  Accessed,
-  Added,
-  Removed,
-};
-
-using PointerChangeMapperPhase = std::pair<blink::PointerData::Change, MapperPhase>;
-static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(UITouchPhase phase) {
+static blink::PointerData::Change PointerDataChangeFromUITouchPhase(UITouchPhase phase) {
   switch (phase) {
     case UITouchPhaseBegan:
-      return PointerChangeMapperPhase(blink::PointerData::Change::kDown, MapperPhase::Added);
+      return blink::PointerData::Change::kDown;
     case UITouchPhaseMoved:
     case UITouchPhaseStationary:
       // There is no EVENT_TYPE_POINTER_STATIONARY. So we just pass a move type
       // with the same coordinates
-      return PointerChangeMapperPhase(blink::PointerData::Change::kMove, MapperPhase::Accessed);
+      return blink::PointerData::Change::kMove;
     case UITouchPhaseEnded:
-      return PointerChangeMapperPhase(blink::PointerData::Change::kUp, MapperPhase::Removed);
+      return blink::PointerData::Change::kUp;
     case UITouchPhaseCancelled:
-      return PointerChangeMapperPhase(blink::PointerData::Change::kCancel, MapperPhase::Removed);
+      return blink::PointerData::Change::kCancel;
   }
 
-  return PointerChangeMapperPhase(blink::PointerData::Change::kCancel, MapperPhase::Accessed);
+  return blink::PointerData::Change::kCancel;
 }
 
-static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) {
+static blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) {
   if (@available(iOS 9, *)) {
     switch (touch.type) {
       case UITouchTypeDirect:
@@ -584,33 +575,18 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
   return blink::PointerData::DeviceKind::kTouch;
 }
 
-- (void)dispatchTouches:(NSSet*)touches phase:(UITouchPhase)phase {
-  // Note: we cannot rely on touch.phase, since in some cases, e.g.,
-  // handleStatusBarTouches, we synthesize touches from existing events.
-  //
-  // TODO(cbracken) consider creating out own class with the touch fields we
-  // need.
-  auto eventTypePhase = PointerChangePhaseFromUITouchPhase(phase);
+// Dispatches the UITouches to the engine. Usually, the type of change of the touch is determined
+// from the UITouch's phase. However, FlutterAppDelegate fakes touches to ensure that touch events
+// in the status bar area are available to framework code. The change type (optional) of the faked
+// touch is specified in the second argument.
+- (void)dispatchTouches:(NSSet*)touches
+    pointerDataChangeOverride:(blink::PointerData::Change*)overridden_change {
   const CGFloat scale = [UIScreen mainScreen].scale;
   auto packet = std::make_unique<blink::PointerDataPacket>(touches.count);
 
-  int i = 0;
+  size_t pointer_index = 0;
+
   for (UITouch* touch in touches) {
-    int device_id = 0;
-
-    switch (eventTypePhase.second) {
-      case Accessed:
-        device_id = _touchMapper.identifierOf(touch);
-        break;
-      case Added:
-        device_id = _touchMapper.registerTouch(touch);
-        break;
-      case Removed:
-        device_id = _touchMapper.unregisterTouch(touch);
-        break;
-    }
-
-    FML_DCHECK(device_id != 0);
     CGPoint windowCoordinates = [touch locationInView:self.view];
 
     blink::PointerData pointer_data;
@@ -619,11 +595,13 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
     constexpr int kMicrosecondsPerSecond = 1000 * 1000;
     pointer_data.time_stamp = touch.timestamp * kMicrosecondsPerSecond;
 
-    pointer_data.change = eventTypePhase.first;
+    pointer_data.change = overridden_change != nullptr
+                              ? *overridden_change
+                              : PointerDataChangeFromUITouchPhase(touch.phase);
 
     pointer_data.kind = DeviceKindFromTouchType(touch);
 
-    pointer_data.device = device_id;
+    pointer_data.device = reinterpret_cast<int64_t>(touch);
 
     pointer_data.physical_x = windowCoordinates.x * scale;
     pointer_data.physical_y = windowCoordinates.y * scale;
@@ -681,7 +659,7 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
       pointer_data.orientation = [touch azimuthAngleInView:nil] - M_PI_2;
     }
 
-    packet->SetPointerData(i++, pointer_data);
+    packet->SetPointerData(pointer_index++, pointer_data);
   }
 
   _shell->GetTaskRunners().GetUITaskRunner()->PostTask(
@@ -693,19 +671,19 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
-  [self dispatchTouches:touches phase:UITouchPhaseBegan];
+  [self dispatchTouches:touches pointerDataChangeOverride:nullptr];
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
-  [self dispatchTouches:touches phase:UITouchPhaseMoved];
+  [self dispatchTouches:touches pointerDataChangeOverride:nullptr];
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
-  [self dispatchTouches:touches phase:UITouchPhaseEnded];
+  [self dispatchTouches:touches pointerDataChangeOverride:nullptr];
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
-  [self dispatchTouches:touches phase:UITouchPhaseCancelled];
+  [self dispatchTouches:touches pointerDataChangeOverride:nullptr];
 }
 
 #pragma mark - Handle view resizing
@@ -1024,8 +1002,11 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
       CGPoint screenLoc = [touch.window convertPoint:windowLoc toWindow:nil];
       if (CGRectContainsPoint(statusBarFrame, screenLoc)) {
         NSSet* statusbarTouches = [NSSet setWithObject:touch];
-        [self dispatchTouches:statusbarTouches phase:UITouchPhaseBegan];
-        [self dispatchTouches:statusbarTouches phase:UITouchPhaseEnded];
+
+        blink::PointerData::Change change = blink::PointerData::Change::kDown;
+        [self dispatchTouches:statusbarTouches pointerDataChangeOverride:&change];
+        change = blink::PointerData::Change::kUp;
+        [self dispatchTouches:statusbarTouches pointerDataChangeOverride:&change];
         return;
       }
     }

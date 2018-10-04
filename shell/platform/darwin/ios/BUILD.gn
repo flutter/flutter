@@ -69,8 +69,6 @@ shared_library("create_flutter_framework_dylib") {
     "framework/Source/accessibility_bridge.mm",
     "framework/Source/accessibility_text_entry.h",
     "framework/Source/accessibility_text_entry.mm",
-    "framework/Source/flutter_touch_mapper.h",
-    "framework/Source/flutter_touch_mapper.mm",
     "framework/Source/platform_message_response_darwin.h",
     "framework/Source/platform_message_response_darwin.mm",
     "framework/Source/platform_message_router.h",
