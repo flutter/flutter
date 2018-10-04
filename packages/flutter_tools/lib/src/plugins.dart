@@ -248,7 +248,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   };
 
   final String registryDirectory = project.ios.pluginRegistrantHost.path;
-  if (project.isModule) {
+  if (project.isApplication) {
     final String registryClassesDirectory = fs.path.join(registryDirectory, 'Classes');
     _renderTemplateToFile(
       _iosPluginRegistrantPodspecTemplate,
@@ -297,7 +297,7 @@ Future<void> injectPlugins(FlutterProject project) async {
   final List<Plugin> plugins = findPlugins(project);
   await _writeAndroidPluginRegistrant(project, plugins);
   await _writeIOSPluginRegistrant(project, plugins);
-  if (!project.isModule && project.ios.hostAppRoot.existsSync()) {
+  if (!project.isApplication && project.ios.hostAppRoot.existsSync()) {
     final CocoaPods cocoaPods = CocoaPods();
     if (plugins.isNotEmpty)
       cocoaPods.setupPodfile(project.ios);

@@ -143,7 +143,7 @@ Future<void> cleanupSystem() async {
     final String gradlewBinaryName = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_shutdown_gradle.');
     recursiveCopy(Directory(path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper')), tempDir);
-    copy(File(path.join(path.join(flutterDirectory.path, 'packages', 'flutter_tools'), 'templates', 'create', 'android.tmpl', 'gradle', 'wrapper', 'gradle-wrapper.properties')), Directory(path.join(tempDir.path, 'gradle', 'wrapper')));
+    copy(File(path.join(path.join(flutterDirectory.path, 'packages', 'flutter_tools'), 'templates', 'app', 'android.tmpl', 'gradle', 'wrapper', 'gradle-wrapper.properties')), Directory(path.join(tempDir.path, 'gradle', 'wrapper')));
     if (!Platform.isWindows) {
       await exec(
         'chmod',
