@@ -26,10 +26,10 @@ TaskFunction combine(List<TaskFunction> tasks) {
 /// Defines task that creates new Flutter project, adds a plugin, and then
 /// builds the specified [buildTarget].
 class PluginTest {
+  PluginTest(this.buildTarget, this.options);
+
   final String buildTarget;
   final List<String> options;
-
-  PluginTest(this.buildTarget, this.options);
 
   Future<TaskResult> call() async {
     section('Create Flutter project');

@@ -97,21 +97,6 @@ class PlatformViewsService {
 ///
 /// A Dart version of Android's [MotionEvent.PointerProperties](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties).
 class AndroidPointerProperties {
-  /// Value for `toolType` when the tool type is unknown.
-  static const int kToolTypeUnknown = 0;
-
-  /// Value for `toolType` when the tool type is a finger.
-  static const int kToolTypeFinger = 1;
-
-  /// Value for `toolType` when the tool type is a stylus.
-  static const int kToolTypeStylus = 2;
-
-  /// Value for `toolType` when the tool type is a mouse.
-  static const int kToolTypeMouse = 3;
-
-  /// Value for `toolType` when the tool type is an eraser.
-  static const int kToolTypeEraser = 4;
-
   /// Creates an AndroidPointerProperties.
   ///
   /// All parameters must not be null.
@@ -127,6 +112,21 @@ class AndroidPointerProperties {
   /// The type of tool used to make contact such as a finger or stylus, if known.
   /// See Android's [MotionEvent.PointerProperties#toolType](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties.html#toolType).
   final int toolType;
+
+  /// Value for `toolType` when the tool type is unknown.
+  static const int kToolTypeUnknown = 0;
+
+  /// Value for `toolType` when the tool type is a finger.
+  static const int kToolTypeFinger = 1;
+
+  /// Value for `toolType` when the tool type is a stylus.
+  static const int kToolTypeStylus = 2;
+
+  /// Value for `toolType` when the tool type is a mouse.
+  static const int kToolTypeMouse = 3;
+
+  /// Value for `toolType` when the tool type is an eraser.
+  static const int kToolTypeEraser = 4;
 
   List<int> _asList() => <int>[id, toolType];
 

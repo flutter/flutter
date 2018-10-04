@@ -444,17 +444,17 @@ class FuchsiaReloadCommand extends FlutterCommand {
 // VM service running on a Fuchsia device. [process] is the ssh process running
 // the tunnel and [port] is the local port.
 class _PortForwarder {
-  final String _remoteAddress;
-  final int _remotePort;
-  final int _localPort;
-  final Process _process;
-  final String _sshConfig;
-
   _PortForwarder._(this._remoteAddress,
                    this._remotePort,
                    this._localPort,
                    this._process,
                    this._sshConfig);
+
+  final String _remoteAddress;
+  final int _remotePort;
+  final int _localPort;
+  final Process _process;
+  final String _sshConfig;
 
   int get port => _localPort;
 
@@ -519,10 +519,10 @@ class _PortForwarder {
 }
 
 class FuchsiaDeviceCommandRunner {
+  FuchsiaDeviceCommandRunner(this._address, this._sshConfig);
+
   final String _address;
   final String _sshConfig;
-
-  FuchsiaDeviceCommandRunner(this._address, this._sshConfig);
 
   Future<List<String>> run(String command) async {
     final List<String> args = <String>['ssh', '-F', _sshConfig, _address, command];

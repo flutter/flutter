@@ -96,10 +96,6 @@ class _InkSplashFactory extends InteractiveInkFeatureFactory {
 ///  * [InkHighlight], which is an ink feature that emphasizes a part of a
 ///    [Material].
 class InkSplash extends InteractiveInkFeature {
-  /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
-  /// or material [Theme].
-  static const InteractiveInkFeatureFactory splashFactory = _InkSplashFactory();
-
   /// Begin a splash, centered at position relative to [referenceBox].
   ///
   /// The [controller] argument is typically obtained via
@@ -168,6 +164,10 @@ class InkSplash extends InteractiveInkFeature {
 
   Animation<int> _alpha;
   AnimationController _alphaController;
+
+  /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
+  /// or material [Theme].
+  static const InteractiveInkFeatureFactory splashFactory = _InkSplashFactory();
 
   @override
   void confirm() {

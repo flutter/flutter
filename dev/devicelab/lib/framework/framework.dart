@@ -49,17 +49,6 @@ Future<TaskResult> task(TaskFunction task) {
 }
 
 class _TaskRunner {
-  static final Logger logger = Logger('TaskRunner');
-
-  final TaskFunction task;
-
-  // TODO(ianh): workaround for https://github.com/dart-lang/sdk/issues/23797
-  RawReceivePort _keepAlivePort;
-  Timer _startTaskTimeout;
-  bool _taskStarted = false;
-
-  final Completer<TaskResult> _completer = Completer<TaskResult>();
-
   _TaskRunner(this.task) {
     registerExtension('ext.cocoonRunTask',
         (String method, Map<String, String> parameters) async {
@@ -74,6 +63,17 @@ class _TaskRunner {
       return ServiceExtensionResponse.result('"ready"');
     });
   }
+
+  final TaskFunction task;
+
+  // TODO(ianh): workaround for https://github.com/dart-lang/sdk/issues/23797
+  RawReceivePort _keepAlivePort;
+  Timer _startTaskTimeout;
+  bool _taskStarted = false;
+
+  final Completer<TaskResult> _completer = Completer<TaskResult>();
+
+  static final Logger logger = Logger('TaskRunner');
 
   /// Signals that this task runner finished running the task.
   Future<TaskResult> get whenDone => _completer.future;

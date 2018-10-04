@@ -432,13 +432,13 @@ class _RecipePageState extends State<RecipePage> {
 
 /// Displays the recipe's name and instructions.
 class RecipeSheet extends StatelessWidget {
+  RecipeSheet({ Key key, this.recipe }) : super(key: key);
+
   final TextStyle titleStyle = const PestoStyle(fontSize: 34.0);
   final TextStyle descriptionStyle = const PestoStyle(fontSize: 15.0, color: Colors.black54, height: 24.0/15.0);
   final TextStyle itemStyle = const PestoStyle(fontSize: 15.0, height: 24.0/15.0);
   final TextStyle itemAmountStyle = PestoStyle(fontSize: 15.0, color: _kTheme.primaryColor, height: 24.0/15.0);
   final TextStyle headingStyle = const PestoStyle(fontSize: 16.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
-
-  RecipeSheet({ Key key, this.recipe }) : super(key: key);
 
   final Recipe recipe;
 

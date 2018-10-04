@@ -148,14 +148,14 @@ class FlutterProject {
 /// Instances will reflect the contents of the `ios/` sub-folder of
 /// Flutter applications and the `.ios/` sub-folder of Flutter modules.
 class IosProject {
-  static final RegExp _productBundleIdPattern = RegExp(r'^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(.*);\s*$');
-  static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
-  static const String _hostAppBundleName = 'Runner';
-
   IosProject._(this.parent);
 
   /// The parent of this project.
   final FlutterProject parent;
+
+  static final RegExp _productBundleIdPattern = RegExp(r'^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(.*);\s*$');
+  static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
+  static const String _hostAppBundleName = 'Runner';
 
   Directory get _ephemeralDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
@@ -321,13 +321,13 @@ class IosProject {
 /// Instances will reflect the contents of the `android/` sub-folder of
 /// Flutter applications and the `.android/` sub-folder of Flutter modules.
 class AndroidProject {
-  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
-  static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
-
   AndroidProject._(this.parent);
 
   /// The parent of this project.
   final FlutterProject parent;
+
+  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
+  static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
   /// containing the `app/` subdirectory and the `settings.gradle` file that

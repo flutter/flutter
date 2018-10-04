@@ -22,12 +22,6 @@ void _renderTemplateToFile(String template, dynamic context, String filePath) {
 }
 
 class Plugin {
-  final String name;
-  final String path;
-  final String androidPackage;
-  final String iosPrefix;
-  final String pluginClass;
-
   Plugin({
     this.name,
     this.path,
@@ -53,6 +47,12 @@ class Plugin {
       pluginClass: pluginClass,
     );
   }
+
+  final String name;
+  final String path;
+  final String androidPackage;
+  final String iosPrefix;
+  final String pluginClass;
 }
 
 Plugin _pluginFromPubspec(String name, Uri packageRoot) {
