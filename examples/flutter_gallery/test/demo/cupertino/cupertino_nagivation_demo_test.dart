@@ -5,8 +5,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/demo/cupertino/cupertino_navigation_demo.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 void main() {
+  debugDefaultTargetPlatformOverride = TargetPlatform.android;
   testWidgets('Back button doesn\'t work on Android', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -15,6 +17,6 @@ void main() {
     );
 
     await tester.pageBack();
-
   });
+  debugDefaultTargetPlatformOverride = null;
 }
