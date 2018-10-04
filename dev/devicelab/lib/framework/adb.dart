@@ -39,7 +39,7 @@ abstract class DeviceDiscovery {
   ///
   /// Calling this method does not guarantee that the same device will be
   /// returned. For such behavior see [workingDevice].
-  Future<Null> chooseWorkingDevice();
+  Future<void> chooseWorkingDevice();
 
   /// A device to work with.
   ///
@@ -55,7 +55,7 @@ abstract class DeviceDiscovery {
   Future<Map<String, HealthCheckResult>> checkDevices();
 
   /// Prepares the system to run tasks.
-  Future<Null> performPreflightTasks();
+  Future<void> performPreflightTasks();
 }
 
 /// A proxy for one specific device.
@@ -70,21 +70,21 @@ abstract class Device {
   Future<bool> isAsleep();
 
   /// Wake up the device if it is not awake.
-  Future<Null> wakeUp();
+  Future<void> wakeUp();
 
   /// Send the device to sleep mode.
-  Future<Null> sendToSleep();
+  Future<void> sendToSleep();
 
   /// Emulates pressing the power button, toggling the device's on/off state.
-  Future<Null> togglePower();
+  Future<void> togglePower();
 
   /// Unlocks the device.
   ///
   /// Assumes the device doesn't have a secure unlock pattern.
-  Future<Null> unlock();
+  Future<void> unlock();
 
   /// Emulate a tap on the touch screen.
-  Future<Null> tap(int x, int y);
+  Future<void> tap(int x, int y);
 
   /// Read memory statistics for a process.
   Future<Map<String, dynamic>> getMemoryStats(String packageName);
@@ -96,7 +96,7 @@ abstract class Device {
   Stream<String> get logcat;
 
   /// Stop a process.
-  Future<Null> stop(String packageName);
+  Future<void> stop(String packageName);
 }
 
 class AndroidDeviceDiscovery implements DeviceDiscovery {
@@ -127,7 +127,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   /// Picks a random Android device out of connected devices and sets it as
   /// [workingDevice].
   @override
-  Future<Null> chooseWorkingDevice() async {
+  Future<void> chooseWorkingDevice() async {
     final List<Device> allDevices = (await discoverDevices())
       .map<Device>((String id) => AndroidDevice(deviceId: id))
       .toList();
@@ -187,7 +187,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   }
 
   @override
-  Future<Null> performPreflightTasks() async {
+  Future<void> performPreflightTasks() async {
     // Kills the `adb` server causing it to start a new instance upon next
     // command.
     //
@@ -218,14 +218,14 @@ class AndroidDevice implements Device {
 
   /// Wake up the device if it is not awake using [togglePower].
   @override
-  Future<Null> wakeUp() async {
+  Future<void> wakeUp() async {
     if (!(await isAwake()))
       await togglePower();
   }
 
   /// Send the device to sleep mode if it is not asleep using [togglePower].
   @override
-  Future<Null> sendToSleep() async {
+  Future<void> sendToSleep() async {
     if (!(await isAsleep()))
       await togglePower();
   }
@@ -233,7 +233,7 @@ class AndroidDevice implements Device {
   /// Sends `KEYCODE_POWER` (26), which causes the device to toggle its mode
   /// between awake and asleep.
   @override
-  Future<Null> togglePower() async {
+  Future<void> togglePower() async {
     await shellExec('input', const <String>['keyevent', '26']);
   }
 
@@ -241,13 +241,13 @@ class AndroidDevice implements Device {
   ///
   /// This only works when the device doesn't have a secure unlock pattern.
   @override
-  Future<Null> unlock() async {
+  Future<void> unlock() async {
     await wakeUp();
     await shellExec('input', const <String>['keyevent', '82']);
   }
 
   @override
-  Future<Null> tap(int x, int y) async {
+  Future<void> tap(int x, int y) async {
     await shellExec('input', <String>['tap', '$x', '$y']);
   }
 
@@ -261,7 +261,7 @@ class AndroidDevice implements Device {
   }
 
   /// Executes [command] on `adb shell` and returns its exit code.
-  Future<Null> shellExec(String command, List<String> arguments, { Map<String, String> environment }) async {
+  Future<void> shellExec(String command, List<String> arguments, { Map<String, String> environment }) async {
     await adb(<String>['shell', command]..addAll(arguments), environment: environment);
   }
 
@@ -343,7 +343,7 @@ class AndroidDevice implements Device {
   }
 
   @override
-  Future<Null> stop(String packageName) async {
+  Future<void> stop(String packageName) async {
     return shellExec('am', <String>['force-stop', packageName]);
   }
 }
@@ -371,7 +371,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   /// Picks a random iOS device out of connected devices and sets it as
   /// [workingDevice].
   @override
-  Future<Null> chooseWorkingDevice() async {
+  Future<void> chooseWorkingDevice() async {
     final List<IosDevice> allDevices = (await discoverDevices())
       .map<IosDevice>((String id) => IosDevice(deviceId: id))
       .toList();
@@ -405,7 +405,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   }
 
   @override
-  Future<Null> performPreflightTasks() async {
+  Future<void> performPreflightTasks() async {
     // Currently we do not have preflight tasks for iOS.
     return null;
   }
@@ -430,19 +430,19 @@ class IosDevice implements Device {
   Future<bool> isAsleep() async => false;
 
   @override
-  Future<Null> wakeUp() async {}
+  Future<void> wakeUp() async {}
 
   @override
-  Future<Null> sendToSleep() async {}
+  Future<void> sendToSleep() async {}
 
   @override
-  Future<Null> togglePower() async {}
+  Future<void> togglePower() async {}
 
   @override
-  Future<Null> unlock() async {}
+  Future<void> unlock() async {}
 
   @override
-  Future<Null> tap(int x, int y) async {
+  Future<void> tap(int x, int y) async {
     throw 'Not implemented';
   }
 
@@ -457,7 +457,7 @@ class IosDevice implements Device {
   }
 
   @override
-  Future<Null> stop(String packageName) async {}
+  Future<void> stop(String packageName) async {}
 }
 
 /// Path to the `adb` executable.

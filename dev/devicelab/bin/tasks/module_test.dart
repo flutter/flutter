@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
-Future<Null> main() async {
+Future<void> main() async {
   await task(() async {
 
     section('Find Java');

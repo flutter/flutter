@@ -19,7 +19,7 @@ List<String> _taskNames = <String>[];
 ///
 /// The tasks are chosen depending on the command-line options
 /// (see [_argParser]).
-Future<Null> main(List<String> rawArgs) async {
+Future<void> main(List<String> rawArgs) async {
   ArgResults args;
   try {
     args = _argParser.parse(rawArgs);
