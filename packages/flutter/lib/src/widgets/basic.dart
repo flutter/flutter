@@ -5575,7 +5575,7 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 ///      IndexedSemantics(index: 1, child: const Text('Second'))
 ///      Spacer(),
 ///    ]
-///  );
+///  )
 /// ```
 ///
 /// See also:
