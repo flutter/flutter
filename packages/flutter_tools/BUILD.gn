@@ -43,6 +43,16 @@ dart_library("flutter_tools") {
   ]
 }
 
+dart_tool("fuchsia_tool") {
+  main_dart = "bin/fuchsia_tools.dart"
+
+  disable_analysis = true
+
+  deps = [
+    ":flutter_tools",
+  ]
+}
+
 dart_tool("fuchsia_builder") {
   main_dart = "bin/fuchsia_builder.dart"
 
