@@ -2,7 +2,7 @@
 
 ## common
 
-Written to root of Flutter module.
+Written to root of Flutter application.
 
 Adds Dart project files including `pubspec.yaml`.
 
