@@ -502,7 +502,9 @@ class HotRunner extends ResidentRunner {
       try {
         if (!(await hotRunnerConfig.setupHotRestart()))
           return OperationResult(1, 'setupHotRestart failed');
-        await _restartFromSources();
+        final OperationResult result = await _restartFromSources();
+        if (!result.isOk)
+          return result;
       } finally {
         status.cancel();
       }
