@@ -300,15 +300,16 @@ class LocalEngineArtifacts extends Artifacts {
   }
 }
 
-/// A fuchsia host specific implementation of [Artifacts]
+/// A fuchsia specific implementation of [Artifacts]
 ///
 /// Certain binaries will have different locations which are not relative to
 /// a flutter tool directory.
-class FuchsiaHostArtifacts extends CachedArtifacts {
-  /// Create a [FuchsiaHostArtifacts] with the fuchsia host tools in `_fuchsiaHostTools`.
-  FuchsiaHostArtifacts(this._fuchsiaHostTools);
+class FuchsiaArtifacts extends CachedArtifacts {
+  /// Create a [FuchsiaArtifacts] with the fuchsia tools in [fuchsiaTools].
+  FuchsiaArtifacts(this.fuchsiaTools);
 
-  final Directory _fuchsiaHostTools;
+  /// The directory of the fuchisa-specific artifacts.
+  final Directory fuchsiaTools;
 
   @override
   String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
@@ -325,7 +326,7 @@ class FuchsiaHostArtifacts extends CachedArtifacts {
       case TargetPlatform.windows_x64:
       case TargetPlatform.tester:
       case TargetPlatform.ios:
-        throw StateError('Invalid platform for fuchsia host');
+        throw StateError('Invalid target platform: $platform');
     }
     assert(false, 'Invalid platform $platform.');
     return null;
@@ -345,7 +346,7 @@ class FuchsiaHostArtifacts extends CachedArtifacts {
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform));
       case Artifact.frontendServerSnapshotForEngineDartSdk:
-        return fs.path.join(_fuchsiaHostTools.path, _artifactToFileName(artifact, platform));
+        return fs.path.join(fuchsiaTools.path, _artifactToFileName(artifact, platform));
       case Artifact.engineDartSdkPath:
         return dartSdkPath;
       case Artifact.engineDartBinary:

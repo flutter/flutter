@@ -33,11 +33,11 @@ final ArgParser _fuchsiaArgParser = ArgParser.allowAnything()
 /// This function is intended to be used from the `fx` command line tool.
 Future<void> main(List<String> args) async {
   final ArgResults results = _fuchsiaArgParser.parse(args);
-  final bool verbose = results[_kVerboseFlag] == true;
-  final bool help = results[_kHelpFlag] == true;
+  final bool verbose = results[_kVerboseFlag];
+  final bool help = results[_kHelpFlag];
   final Directory fuchsiaToolsDirectory = fs.directory(results[_kFuchsiaToolsOptions]);
   if (!fuchsiaToolsDirectory.existsSync()) {
-    throwToolExit('fuchsia_tools directory must be provided.');
+    throwToolExit('the fuchsia_tools directory ${fuchsiaToolsDirectory.path} could not be found.');
   }
 
   await runner.run(args, <FlutterCommand>[
@@ -46,7 +46,7 @@ Future<void> main(List<String> args) async {
      muteCommandLogging: help,
      verboseHelp: help && verbose,
      overrides: <Type, Generator>{
-       Artifacts: () => FuchsiaHostArtifacts(fuchsiaToolsDirectory),
+       Artifacts: () => FuchsiaArtifacts(fuchsiaToolsDirectory),
      },
   );
 }

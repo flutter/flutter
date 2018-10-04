@@ -4,6 +4,6 @@
 
 import 'package:flutter_tools/fuchsia_executable.dart' as executable;
 
-void main(List<String> args) {
-  executable.main(args);
+Future<void> main(List<String> args) async {
+  await executable.main(args);
 }
