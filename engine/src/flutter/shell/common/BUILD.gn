@@ -114,22 +114,47 @@ source_set("common") {
   public_configs = [ "$flutter_root:config" ]
 }
 
-executable("shell_unittests") {
-  testonly = true
+template("shell_host_executable") {
+  executable(target_name) {
+    testonly = true
 
+    deps = []
+
+    ldflags = []
+
+    forward_variables_from(invoker, "*")
+
+    deps += [
+      ":common",
+      "$flutter_root/fml",
+      "$flutter_root/lib/snapshot",
+      "//third_party/dart/runtime:libdart_jit",
+      "//third_party/skia",
+      "//third_party/tonic",
+    ]
+
+    if (is_linux) {
+      ldflags += [ "-rdynamic" ]
+    }
+  }
+}
+
+shell_host_executable("shell_unittests") {
   sources = [
     "shell_unittests.cc",
   ]
+
   deps = [
-    ":common",
-    "$flutter_root/fml",
-    "$flutter_root/lib/snapshot",
     "$flutter_root/testing",
-    "//third_party/dart/runtime:libdart_jit",
-    "//third_party/skia",
-    "//third_party/tonic",
   ]
-  if (is_linux) {
-    ldflags = [ "-rdynamic" ]
-  }
+}
+
+shell_host_executable("shell_benchmarks") {
+  sources = [
+    "shell_benchmarks.cc",
+  ]
+
+  deps = [
+    "$flutter_root/benchmarking",
+  ]
 }
