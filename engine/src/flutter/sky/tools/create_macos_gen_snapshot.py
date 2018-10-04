@@ -30,7 +30,7 @@ def main():
     print 'Cannot find i386 (armv7) gen_snapshot at', armv7_gen_snapshot
     return 1
 
-  subprocess.call([
+  subprocess.check_call([
     'lipo',
     arm64_gen_snapshot,
     armv7_gen_snapshot,

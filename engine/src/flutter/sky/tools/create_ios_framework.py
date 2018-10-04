@@ -60,7 +60,7 @@ def main():
 
   linker_out = os.path.join(fat_framework, 'Flutter')
 
-  subprocess.call([
+  subprocess.check_call([
     'lipo',
     arm64_dylib,
     armv7_dylib,
@@ -72,14 +72,14 @@ def main():
 
   if args.dsym:
     dsym_out = os.path.splitext(fat_framework)[0] + '.dSYM'
-    subprocess.call(['dsymutil', '-o', dsym_out, linker_out])
+    subprocess.check_call(['dsymutil', '-o', dsym_out, linker_out])
 
   if args.strip:
     # copy unstripped
     unstripped_out = os.path.join(args.dst, 'Flutter.unstripped')
     shutil.copyfile(linker_out, unstripped_out)
 
-    subprocess.call(["strip", "-x", "-S", linker_out])
+    subprocess.check_call(["strip", "-x", "-S", linker_out])
 
 
 if __name__ == '__main__':
