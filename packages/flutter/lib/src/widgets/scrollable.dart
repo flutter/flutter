@@ -528,7 +528,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
         child: result,
         position: position,
         allowImplicitScrolling: widget?.physics?.allowImplicitScrolling ?? false,
-        semanticChildrenCount: widget.semanticChildCount,
+        semanticChildCount: widget.semanticChildCount,
       );
     }
 
@@ -561,20 +561,20 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     Key key,
     @required this.position,
     @required this.allowImplicitScrolling,
-    @required this.semanticChildrenCount,
+    @required this.semanticChildCount,
     Widget child
   }) : assert(position != null), super(key: key, child: child);
 
   final ScrollPosition position;
   final bool allowImplicitScrolling;
-  final int semanticChildrenCount;
+  final int semanticChildCount;
 
   @override
   _RenderScrollSemantics createRenderObject(BuildContext context) {
     return _RenderScrollSemantics(
       position: position,
       allowImplicitScrolling: allowImplicitScrolling,
-      semanticChildren: semanticChildrenCount,
+      semanticChildCount: semanticChildCount,
     );
   }
 
@@ -583,7 +583,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     renderObject
       ..allowImplicitScrolling = allowImplicitScrolling
       ..position = position
-      ..semanticChildrenCount = semanticChildrenCount;
+      ..semanticChildCount = semanticChildCount;
   }
 }
 
@@ -591,11 +591,11 @@ class _RenderScrollSemantics extends RenderProxyBox {
   _RenderScrollSemantics({
     @required ScrollPosition position,
     @required bool allowImplicitScrolling,
-    @required int semanticChildren,
+    @required int semanticChildCount,
     RenderBox child,
   }) : _position = position,
        _allowImplicitScrolling = allowImplicitScrolling,
-       _semanticChildren = semanticChildren,
+       _semanticChildCount = semanticChildCount,
        assert(position != null), super(child) {
     position.addListener(markNeedsSemanticsUpdate);
   }
@@ -623,12 +623,12 @@ class _RenderScrollSemantics extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  int get semanticChildrenCount => _semanticChildren;
-  int _semanticChildren;
-  set semanticChildrenCount(int value) {
-    if (value == semanticChildrenCount)
+  int get semanticChildCount => _semanticChildCount;
+  int _semanticChildCount;
+  set semanticChildCount(int value) {
+    if (value == semanticChildCount)
       return;
-    _semanticChildren = value;
+    _semanticChildCount = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -642,7 +642,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
           ..scrollPosition = _position.pixels
           ..scrollExtentMax = _position.maxScrollExtent
           ..scrollExtentMin = _position.minScrollExtent
-          ..scrollChildCount = semanticChildrenCount;
+          ..scrollChildCount = semanticChildCount;
     }
   }
 
