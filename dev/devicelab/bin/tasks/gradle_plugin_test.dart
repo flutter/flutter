@@ -158,7 +158,7 @@ class FlutterProject {
 
   static Future<FlutterProject> create(Directory directory, String name) async {
     await inDirectory(directory, () async {
-      await flutter('create', options: <String>[name]);
+      await flutter('create', options: <String>['--template=app', name]);
     });
     return FlutterProject(directory, name);
   }
@@ -234,7 +234,7 @@ class FlutterPluginProject {
 
   static Future<FlutterPluginProject> create(Directory directory, String name) async {
     await inDirectory(directory, () async {
-      await flutter('create', options: <String>['-t', 'plugin', name]);
+      await flutter('create', options: <String>['--template=plugin', name]);
     });
     return FlutterPluginProject(directory, name);
   }

@@ -10,20 +10,20 @@ import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-/// Tests that the Flutter module project template works and supports
+/// Tests that the Flutter application project template works and supports
 /// adding Flutter to an existing iOS app.
 Future<void> main() async {
   await task(() async {
 
-    section('Create Flutter module project');
+    section('Create Flutter application project');
 
-    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
+    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_application_test.');
     final Directory projectDir = Directory(path.join(tempDir.path, 'hello'));
     try {
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
-          options: <String>['--org', 'io.flutter.devicelab', '-t', 'module', 'hello'],
+          options: <String>['--org', 'io.flutter.devicelab', '--template=application', 'hello'],
         );
       });
       await prepareProvisioningCertificates(projectDir.path);
