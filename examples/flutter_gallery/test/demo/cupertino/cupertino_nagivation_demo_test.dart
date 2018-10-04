@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 
 void main() {
 
-  // This test just verifies that specifically on android devices, a page back
+  // This verifies that specifically on android devices, a page back
   // swipe doesn't work when looking at Cupertino pages in the flutter gallery.
   testWidgets('test only edge swipes work (LTR)', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
@@ -45,6 +45,5 @@ void main() {
     expect(find.text('Page 1'), findsNothing);
 
     debugDefaultTargetPlatformOverride = null;
-
   });
 }
