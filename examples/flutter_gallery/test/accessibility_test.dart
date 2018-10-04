@@ -300,7 +300,8 @@ void main() {
       }, skip: true); // https://github.com/flutter/flutter/issues/21651
 
       testWidgets('chip_demo $themeName', (WidgetTester tester) async {
-                final AutomatedTestWidgetsFlutterBinding binding = tester.binding;         binding.addTime(const Duration(seconds: 3));
+        final AutomatedTestWidgetsFlutterBinding binding = tester.binding;
+        binding.addTime(const Duration(seconds: 3));
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: ChipDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
