@@ -1009,6 +1009,21 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
 ///
 /// This widget is for use in [SliverMultiBoxAdaptorWidget]s, such as
 /// [SliverGrid] or [SliverList].
+///
+/// This widget is rarely used directly. The [SliverChildBuilderDelegate] and
+/// [SliverChildListDelegate] delegates, used with [SliverList] and
+/// [SliverGrid], as well as the scroll view counterparts [ListView] and
+/// [GridView], have an `addAutomaticKeepAlives` feature, which is enabled by
+/// default, and which causes [AutomaticKeepAlive] widgets to be inserted around
+/// each child, causing [KeepAlive] widgets to be automatically added and
+/// configured in response to [KeepAliveNotification]s.
+///
+/// Therefore, to keep a widget alive, it is more common to use those
+/// notifications than to directly deal with [KeepAlive] widgets.
+///
+/// In practice, the simplest way to deal with these notifications is to mix
+/// [AutomaticKeepAliveClientMixin] into one's [State]. See the documentation
+/// for that mixin class for details.
 class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
   /// Marks a child as needing to remain alive.
   ///

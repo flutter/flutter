@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../../gallery/demo.dart';
+
 enum _ReorderableListType {
   /// A list tile that contains a [CircleAvatar].
   horizontalAvatar,
@@ -42,7 +44,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
   bool _reverseSort = false;
   final List<_ListItem> _items = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-  ].map((String item) => _ListItem(item, false)).toList();
+  ].map<_ListItem>((String item) => _ListItem(item, false)).toList();
 
   void changeItemType(_ReorderableListType type) {
     setState(() {
@@ -157,6 +159,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
       appBar: AppBar(
         title: const Text('Reorderable list'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(ReorderableListDemo.routeName),
           IconButton(
             icon: const Icon(Icons.sort_by_alpha),
             tooltip: 'Sort',
@@ -188,7 +191,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
           onReorder: _onReorder,
           scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
-          children: _items.map(buildListTile).toList(),
+          children: _items.map<Widget>(buildListTile).toList(),
         ),
       ),
     );

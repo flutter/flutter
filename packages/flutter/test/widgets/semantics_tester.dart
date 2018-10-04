@@ -325,7 +325,7 @@ class TestSemantics {
     if (rect != null)
       buf.writeln('$indent  rect: $rect,');
     if (transform != null)
-      buf.writeln('$indent  transform:\n${transform.toString().trim().split('\n').map((String line) => '$indent    $line').join('\n')},');
+      buf.writeln('$indent  transform:\n${transform.toString().trim().split('\n').map<String>((String line) => '$indent    $line').join('\n')},');
     buf.writeln('$indent  children: <TestSemantics>[');
     for (TestSemantics child in children) {
       buf.writeln('${child.toString(indentAmount + 2)},');
@@ -403,13 +403,13 @@ class SemanticsTester {
       if (textDirection != null && node.textDirection != textDirection)
         return false;
       if (actions != null) {
-        final int expectedActions = actions.fold(0, (int value, SemanticsAction action) => value | action.index);
+        final int expectedActions = actions.fold<int>(0, (int value, SemanticsAction action) => value | action.index);
         final int actualActions = node.getSemanticsData().actions;
         if (expectedActions != actualActions)
           return false;
       }
       if (flags != null) {
-        final int expectedFlags = flags.fold(0, (int value, SemanticsFlag flag) => value | flag.index);
+        final int expectedFlags = flags.fold<int>(0, (int value, SemanticsFlag flag) => value | flag.index);
         final int actualFlags = node.getSemanticsData().flags;
         if (expectedFlags != actualFlags)
           return false;
@@ -503,7 +503,7 @@ class SemanticsTester {
   }
 
   static String _tagsToSemanticsTagExpression(Set<SemanticsTag> tags) {
-    return '<SemanticsTag>[${tags.map((SemanticsTag tag) => 'const SemanticsTag(\'${tag.name}\')').join(', ')}]';
+    return '<SemanticsTag>[${tags.map<String>((SemanticsTag tag) => 'const SemanticsTag(\'${tag.name}\')').join(', ')}]';
   }
 
   static String _actionsToSemanticsActionExpression(dynamic actions) {
@@ -565,7 +565,7 @@ class SemanticsTester {
     }
 
     buf.write(')');
-    return buf.toString().split('\n').map((String l) => '$indent$l').join('\n');
+    return buf.toString().split('\n').map<String>((String l) => '$indent$l').join('\n');
   }
 }
 
@@ -614,7 +614,7 @@ class _HasSemantics extends Matcher {
   }
 
   String _indent(String text) {
-    return text.toString().trimRight().split('\n').map((String line) => '  $line').join('\n');
+    return text.toString().trimRight().split('\n').map<String>((String line) => '  $line').join('\n');
   }
 
   @override

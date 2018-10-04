@@ -5,6 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class TravelDestination {
@@ -168,6 +170,7 @@ class _CardsDemoState extends State<CardsDemo> {
       appBar: AppBar(
         title: const Text('Travel stream'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(CardsDemo.routeName),
           IconButton(
             icon: const Icon(Icons.sentiment_very_satisfied),
             onPressed: () {
@@ -188,7 +191,7 @@ class _CardsDemoState extends State<CardsDemo> {
       body: ListView(
         itemExtent: TravelDestinationItem.height,
         padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-        children: destinations.map((TravelDestination destination) {
+        children: destinations.map<Widget>((TravelDestination destination) {
           return Container(
             margin: const EdgeInsets.only(bottom: 8.0),
             child: TravelDestinationItem(

@@ -89,8 +89,8 @@ $fontsSection
     }
 
     expect(
-      utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
-      expectedAssetManifest,
+      json.decode(utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes())),
+      json.decode(expectedAssetManifest),
     );
   }
 

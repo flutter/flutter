@@ -212,6 +212,9 @@ class JSONMethodCodec implements MethodCodec {
 /// The codec is extensible by subclasses overriding [writeValue] and
 /// [readValueOfType].
 class StandardMessageCodec implements MessageCodec<dynamic> {
+  /// Creates a [MessageCodec] using the Flutter standard binary encoding.
+  const StandardMessageCodec();
+
   // The codec serializes messages as outlined below. This format must
   // match the Android and iOS counterparts.
   //
@@ -263,9 +266,6 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   static const int _valueFloat64List = 11;
   static const int _valueList = 12;
   static const int _valueMap = 13;
-
-  /// Creates a [MessageCodec] using the Flutter standard binary encoding.
-  const StandardMessageCodec();
 
   @override
   ByteData encodeMessage(dynamic message) {

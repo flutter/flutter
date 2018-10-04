@@ -96,10 +96,6 @@ class _InkSplashFactory extends InteractiveInkFeatureFactory {
 ///  * [InkHighlight], which is an ink feature that emphasizes a part of a
 ///    [Material].
 class InkSplash extends InteractiveInkFeature {
-  /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
-  /// or material [Theme].
-  static const InteractiveInkFeatureFactory splashFactory = _InkSplashFactory();
-
   /// Begin a splash, centered at position relative to [referenceBox].
   ///
   /// The [controller] argument is typically obtained via
@@ -140,17 +136,17 @@ class InkSplash extends InteractiveInkFeature {
     _radiusController = AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
-    _radius = Tween<double>(
+    _radius = _radiusController.drive(Tween<double>(
       begin: _kSplashInitialSize,
-      end: _targetRadius
-    ).animate(_radiusController);
+      end: _targetRadius,
+    ));
     _alphaController = AnimationController(duration: _kSplashFadeDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged);
-    _alpha = IntTween(
+    _alpha = _alphaController.drive(IntTween(
       begin: color.alpha,
-      end: 0
-    ).animate(_alphaController);
+      end: 0,
+    ));
 
     controller.addInkFeature(this);
   }
@@ -168,6 +164,10 @@ class InkSplash extends InteractiveInkFeature {
 
   Animation<int> _alpha;
   AnimationController _alphaController;
+
+  /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
+  /// or material [Theme].
+  static const InteractiveInkFeatureFactory splashFactory = _InkSplashFactory();
 
   @override
   void confirm() {

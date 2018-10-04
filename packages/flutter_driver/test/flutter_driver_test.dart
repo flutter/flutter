@@ -28,7 +28,7 @@ void main() {
     MockPeer mockPeer;
 
     void expectLogContains(String message) {
-      expect(log.map((LogRecord r) => '$r'), anyElement(contains(message)));
+      expect(log.map<String>((LogRecord r) => '$r'), anyElement(contains(message)));
     }
 
     setUp(() {

@@ -39,7 +39,7 @@ void main() {
             width: itemHeight * 10,
             child: ReorderableListView(
               header: header,
-              children: listItems.map(listItemToWidget).toList(),
+              children: listItems.map<Widget>(listItemToWidget).toList(),
               scrollDirection: scrollDirection,
               onReorder: onReorder,
             ),

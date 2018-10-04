@@ -98,7 +98,7 @@ Future<Null> precacheImage(
     }
   }
   stream.addListener(listener, onError: errorListener);
-  completer.future.then((Null _) { stream.removeListener(listener); });
+  completer.future.then<void>((Null _) { stream.removeListener(listener); });
   return completer.future;
 }
 
@@ -250,7 +250,8 @@ class Image extends StatefulWidget {
   /// addition:
   ///
   /// * If the `scale` argument is provided and is not null, then the exact
-  /// asset specified will be used.
+  /// asset specified will be used. To display an image variant with a specific
+  /// density, the exact path must be provided (e.g. `images/2x/cat.png`).
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   //

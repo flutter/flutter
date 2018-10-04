@@ -54,7 +54,7 @@ Future<double> findCostsForRepo() async {
     workingDirectory: flutterDirectory.path,
   );
   double total = 0.0;
-  await for (String entry in git.stdout.transform(utf8.decoder).transform(const LineSplitter()))
+  await for (String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()))
     total += await findCostsForFile(File(path.join(flutterDirectory.path, entry)));
   final int gitExitCode = await git.exitCode;
   if (gitExitCode != 0)
@@ -76,7 +76,7 @@ Future<int> countDependencies() async {
 const String _kCostBenchmarkKey = 'technical_debt_in_dollars';
 const String _kNumberOfDependenciesKey = 'dependencies_count';
 
-Future<Null> main() async {
+Future<void> main() async {
   await task(() async {
     return TaskResult.success(
       <String, dynamic>{

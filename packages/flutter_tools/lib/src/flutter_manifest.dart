@@ -110,14 +110,14 @@ class FlutterManifest {
     return _flutterDescriptor['uses-material-design'] ?? false;
   }
 
-  /// True if this manifest declares a Flutter module project.
+  /// True if this manifest declares a Flutter application project.
   ///
-  /// A Flutter project is considered a module when it has a `module:`
-  /// descriptor. A Flutter module project supports integration into an
+  /// A Flutter project is considered an application when it has a `application:`
+  /// descriptor. A Flutter application project supports integration into an
   /// existing host app.
   ///
-  /// Such a project can be created using `flutter create -t module`.
-  bool get isModule => _flutterDescriptor.containsKey('module');
+  /// Such a project can be created using `flutter create -t application`.
+  bool get isApplication => _flutterDescriptor.containsKey('application');
 
   /// True if this manifest declares a Flutter plugin project.
   ///
@@ -130,25 +130,29 @@ class FlutterManifest {
   bool get isPlugin => _flutterDescriptor.containsKey('plugin');
 
   /// Returns the Android package declared by this manifest in its
-  /// module or plugin descriptor. Returns null, if there is no
+  /// application or plugin descriptor. Returns null, if there is no
   /// such declaration.
   String get androidPackage {
-    if (isModule)
-      return _flutterDescriptor['module']['androidPackage'];
+    if (isApplication)
+      return _flutterDescriptor['application']['androidPackage'];
     if (isPlugin)
       return _flutterDescriptor['plugin']['androidPackage'];
     return null;
   }
 
   /// Returns the iOS bundle identifier declared by this manifest in its
-  /// module descriptor. Returns null, if there is no such declaration.
+  /// application descriptor. Returns null, if there is no such declaration.
   String get iosBundleIdentifier {
-    if (isModule)
-      return _flutterDescriptor['module']['iosBundleIdentifier'];
+    if (isApplication)
+      return _flutterDescriptor['application']['iosBundleIdentifier'];
     return null;
   }
 
   List<Map<String, dynamic>> get fontsDescriptor {
+    return fonts.map((Font font) => font.descriptor).toList();
+  }
+
+  List<Map<String, dynamic>> get _rawFontsDescriptor {
     final List<dynamic> fontList = _flutterDescriptor['fonts'];
     return fontList == null
         ? const <Map<String, dynamic>>[]
@@ -179,7 +183,7 @@ class FlutterManifest {
       return <Font>[];
 
     final List<Font> fonts = <Font>[];
-    for (Map<String, dynamic> fontFamily in fontsDescriptor) {
+    for (Map<String, dynamic> fontFamily in _rawFontsDescriptor) {
       final List<dynamic> fontFiles = fontFamily['fonts'];
       final String familyName = fontFamily['family'];
       if (familyName == null) {
@@ -224,7 +228,7 @@ class Font {
   Map<String, dynamic> get descriptor {
     return <String, dynamic>{
       'family': familyName,
-      'fonts': fontAssets.map((FontAsset a) => a.descriptor).toList(),
+      'fonts': fontAssets.map<Map<String, dynamic>>((FontAsset a) => a.descriptor).toList(),
     };
   }
 

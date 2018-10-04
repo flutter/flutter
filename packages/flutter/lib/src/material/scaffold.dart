@@ -83,9 +83,10 @@ class ScaffoldPrelayoutGeometry {
   /// keeping it above the [BottomSheet], the [Scaffold.bottomNavigationBar],
   /// or the keyboard.
   ///
-  /// Note that [Scaffold.body] is laid out with respect to [minInsets] already.
-  /// This means that a [FloatingActionButtonLocation] does not need to factor
-  /// in [minInsets.bottom] when aligning a [FloatingActionButton] to [contentBottom].
+  /// The [Scaffold.body] is laid out with respect to [minInsets] already. This
+  /// means that a [FloatingActionButtonLocation] does not need to factor in
+  /// [minInsets.bottom] when aligning a [FloatingActionButton] to
+  /// [contentBottom].
   final double contentBottom;
 
   /// The vertical distance from the [Scaffold]'s origin to the top of
@@ -95,9 +96,9 @@ class ScaffoldPrelayoutGeometry {
   /// place the [FloatingActionButton] at the top of the screen, while
   /// keeping it below the [Scaffold.appBar].
   ///
-  /// Note that [Scaffold.body] is laid out with respect to [minInsets] already.
-  /// This means that a [FloatingActionButtonLocation] does not need to factor
-  /// in [minInsets.top] when aligning a [FloatingActionButton] to [contentTop].
+  /// The [Scaffold.body] is laid out with respect to [minInsets] already. This
+  /// means that a [FloatingActionButtonLocation] does not need to factor in
+  /// [minInsets.top] when aligning a [FloatingActionButton] to [contentTop].
   final double contentTop;
 
   /// The minimum padding to inset the [FloatingActionButton] by for it
@@ -535,6 +536,11 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     }
   }
 
+  static final Animatable<double> _entranceTurnTween = Tween<double>(
+    begin: 1.0 - kFloatingActionButtonTurnInterval,
+    end: 1.0,
+  ).chain(CurveTween(curve: Curves.easeIn));
+
   void _updateAnimations() {
     // Get the animations for exit and entrance.
     final CurvedAnimation previousExitScaleAnimation = CurvedAnimation(
@@ -552,15 +558,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       parent: _currentController,
       curve: Curves.easeIn,
     );
-    final Animation<double> currentEntranceRotationAnimation = Tween<double>(
-      begin: 1.0 - kFloatingActionButtonTurnInterval,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _currentController,
-        curve: Curves.easeIn
-      ),
-    );
+    final Animation<double> currentEntranceRotationAnimation = _currentController.drive(_entranceTurnTween);
 
     // Get the animations for when the FAB is moving.
     final Animation<double> moveScaleAnimation = widget.fabMotionAnimator.getScaleAnimation(parent: widget.fabMoveAnimation);
@@ -569,10 +567,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     // Aggregate the animations.
     _previousScaleAnimation = AnimationMin<double>(moveScaleAnimation, previousExitScaleAnimation);
     _currentScaleAnimation = AnimationMin<double>(moveScaleAnimation, currentEntranceScaleAnimation);
-    _extendedCurrentScaleAnimation = CurvedAnimation(
-      parent: _currentScaleAnimation,
-      curve: const Interval(0.0, 0.1),
-    );
+    _extendedCurrentScaleAnimation = _currentScaleAnimation.drive(CurveTween(curve: const Interval(0.0, 0.1)));
 
     _previousRotationAnimation = TrainHoppingAnimation(previousExitRotationAnimation, moveRotationAnimation);
     _currentRotationAnimation = TrainHoppingAnimation(currentEntranceRotationAnimation, moveRotationAnimation);
@@ -661,6 +656,34 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// To display a snackbar or a persistent bottom sheet, obtain the
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
+///
+/// ## Sample code
+///
+/// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar]
+/// and a [FloatingActionButton]. The [body] is a [Text] placed in a [Center]
+/// in order to center the text within the [Scaffold] and the
+/// [FloatingActionButton] is centered and docked within the
+/// [BottomAppBar] using [FloatingActionButtonLocation.centerDocked].
+///
+/// ```dart
+/// Scaffold(
+///   appBar: AppBar(
+///     title: Text('Sample Code'),
+///   ),
+///   body: Center(
+///     child: Text('Scaffold'),
+///   ),
+///   bottomNavigationBar: BottomAppBar(
+///     child: Container(height: 50.0,),
+///   ),
+///   floatingActionButton: FloatingActionButton(
+///     onPressed: () {},
+///     tooltip: 'Increment',
+///     child: Icon(Icons.add),
+///   ),
+///   floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+/// )
+/// ```
 ///
 /// See also:
 ///

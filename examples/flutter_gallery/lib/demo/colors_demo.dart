@@ -83,9 +83,6 @@ class ColorItem extends StatelessWidget {
 }
 
 class PaletteTabView extends StatelessWidget {
-  static const List<int> primaryKeys = <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
-  static const List<int> accentKeys = <int>[100, 200, 400, 700];
-
   PaletteTabView({
     Key key,
     @required this.colors,
@@ -94,12 +91,15 @@ class PaletteTabView extends StatelessWidget {
 
   final Palette colors;
 
+  static const List<int> primaryKeys = <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
+  static const List<int> accentKeys = <int>[100, 200, 400, 700];
+
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle whiteTextStyle = textTheme.body1.copyWith(color: Colors.white);
     final TextStyle blackTextStyle = textTheme.body1.copyWith(color: Colors.black);
-    final List<Widget> colorItems = primaryKeys.map((int index) {
+    final List<Widget> colorItems = primaryKeys.map<Widget>((int index) {
       return DefaultTextStyle(
         style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
         child: ColorItem(index: index, color: colors.primary[index]),
@@ -107,7 +107,7 @@ class PaletteTabView extends StatelessWidget {
     }).toList();
 
     if (colors.accent != null) {
-      colorItems.addAll(accentKeys.map((int index) {
+      colorItems.addAll(accentKeys.map<Widget>((int index) {
         return DefaultTextStyle(
           style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
           child: ColorItem(index: index, color: colors.accent[index], prefix: 'A'),
@@ -135,11 +135,11 @@ class ColorsDemo extends StatelessWidget {
           title: const Text('Colors'),
           bottom: TabBar(
             isScrollable: true,
-            tabs: allPalettes.map((Palette swatch) => Tab(text: swatch.name)).toList(),
+            tabs: allPalettes.map<Widget>((Palette swatch) => Tab(text: swatch.name)).toList(),
           ),
         ),
         body: TabBarView(
-          children: allPalettes.map((Palette colors) {
+          children: allPalettes.map<Widget>((Palette colors) {
             return PaletteTabView(colors: colors);
           }).toList(),
         ),

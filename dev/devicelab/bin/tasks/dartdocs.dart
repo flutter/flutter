@@ -10,7 +10,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-Future<Null> main() async {
+Future<void> main() async {
   await task(() async {
     final Stopwatch clock = Stopwatch()..start();
     final Process analysis = await startProcess(
@@ -21,7 +21,7 @@ Future<Null> main() async {
     int publicMembers = 0;
     int otherErrors = 0;
     int otherLines = 0;
-    await for (String entry in analysis.stdout.transform(utf8.decoder).transform(const LineSplitter())) {
+    await for (String entry in analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
       entry = entry.trim();
       print('analyzer stdout: $entry');
       if (entry == 'Building flutter tool...') {
@@ -36,7 +36,7 @@ Future<Null> main() async {
         otherLines += 1;
       }
     }
-    await for (String entry in analysis.stderr.transform(utf8.decoder).transform(const LineSplitter())) {
+    await for (String entry in analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
       print('analyzer stderr: $entry');
       if (entry.startsWith('[lint] ')) {
         // ignore this line

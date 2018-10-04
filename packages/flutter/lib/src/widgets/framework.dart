@@ -1559,8 +1559,8 @@ abstract class InheritedWidget extends ProxyWidget {
   ///
   /// When this widget is rebuilt, sometimes we need to rebuild the widgets that
   /// inherit from this widget but sometimes we do not. For example, if the data
-  /// held by this widget is the same as the data held by `oldWidget`, then then
-  /// we do not need to rebuild the widgets that inherited the data held by
+  /// held by this widget is the same as the data held by `oldWidget`, then we
+  /// do not need to rebuild the widgets that inherited the data held by
   /// `oldWidget`.
   ///
   /// The framework distinguishes these cases by calling this function with the

@@ -251,12 +251,12 @@ class MockFile implements File {
 }
 
 class MockDirectory implements Directory {
-  static bool findCache = false;
-
   MockDirectory(this.path);
 
   @override
   final String path;
+
+  static bool findCache = false;
 
   @override
   bool existsSync() => findCache && path.endsWith('.pub-cache');

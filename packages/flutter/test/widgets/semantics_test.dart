@@ -427,7 +427,7 @@ void main() {
         TestSemantics.rootChild(
           id: expectedId,
           rect: TestSemantics.fullScreen,
-          actions: allActions.fold(0, (int previous, SemanticsAction action) => previous | action.index),
+          actions: allActions.fold<int>(0, (int previous, SemanticsAction action) => previous | action.index),
         ),
       ],
     );

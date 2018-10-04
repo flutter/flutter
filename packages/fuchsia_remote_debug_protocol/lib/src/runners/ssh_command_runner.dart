@@ -42,9 +42,8 @@ class SshCommandRunner {
   /// undefined.
   ///
   /// [ArgumentError] is thrown in the event that `address` is neither valid
-  /// IPv4 nor IPv6. Note that when connecting to a link local address (fe80::
-  /// is usually at the start of the address), then an interface should be
-  /// supplied.
+  /// IPv4 nor IPv6. When connecting to a link local address (`fe80::` is
+  /// usually at the start of the address), an interface should be supplied.
   SshCommandRunner({
     this.address,
     this.interface = '',

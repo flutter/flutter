@@ -14,7 +14,7 @@ const bool _includeInsiders = false;
 
 class VsCode {
   VsCode._(this.directory, this.extensionDirectory, { Version version, this.edition })
-      : this.version = version ?? Version.unknown {
+      : version = version ?? Version.unknown {
 
     if (!fs.isDirectorySync(directory)) {
       _validationMessages.add('VS Code not found at $directory');
@@ -45,17 +45,6 @@ class VsCode {
     }
   }
 
-  final String directory;
-  final String extensionDirectory;
-  final Version version;
-  final String edition;
-
-  static const String extensionIdentifier = 'Dart-Code.flutter';
-
-  bool _isValid = false;
-  Version _extensionVersion;
-  final List<String> _validationMessages = <String>[];
-
   factory VsCode.fromDirectory(String installPath, String extensionDirectory,
       { String edition }) {
     final String packageJsonPath =
@@ -66,6 +55,17 @@ class VsCode {
       version = Version.parse(versionString);
     return VsCode._(installPath, extensionDirectory, version: version, edition: edition);
   }
+
+  final String directory;
+  final String extensionDirectory;
+  final Version version;
+  final String edition;
+
+  static const String extensionIdentifier = 'Dart-Code.flutter';
+
+  bool _isValid = false;
+  Version _extensionVersion;
+  final List<String> _validationMessages = <String>[];
 
   bool get isValid => _isValid;
   String get productName => 'VS Code' + (edition != null ? ', $edition' : '');
@@ -195,7 +195,7 @@ class VsCode {
 
 class _VsCodeInstallLocation {
   const _VsCodeInstallLocation(this.installPath, this.extensionsFolder, { this.edition, bool isInsiders })
-    : this.isInsiders = isInsiders ?? false;
+    : isInsiders = isInsiders ?? false;
   final String installPath;
   final String extensionsFolder;
   final String edition;

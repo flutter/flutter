@@ -35,7 +35,7 @@ class FlutterDevice {
     this.fileSystemRoots,
     this.fileSystemScheme,
     ResidentCompiler generator,
-  }) : this.generator = generator ?? ResidentCompiler(
+  }) : generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
@@ -89,7 +89,7 @@ class FlutterDevice {
 
     return vmServices
       .where((VMService service) => !service.isClosed)
-      .expand((VMService service) => viewFilter != null
+      .expand<FlutterView>((VMService service) => viewFilter != null
           ? service.vm.allViewsWithName(viewFilter)
           : service.vm.views)
       .toList();
@@ -98,12 +98,6 @@ class FlutterDevice {
   Future<Null> getVMs() async {
     for (VMService service in vmServices)
       await service.getVM();
-  }
-
-  Future<Null> waitForViews() async {
-    // Refresh the view list, and wait a bit for the list to populate.
-    for (VMService service in vmServices)
-      await service.waitForViews();
   }
 
   Future<Null> stopApps() async {
@@ -155,7 +149,7 @@ class FlutterDevice {
     final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(
         fs.path.toUri(getAssetBuildDirectory()));
     assert(deviceAssetsDirectoryUri != null);
-    await Future.wait(views.map(
+    await Future.wait<Null>(views.map<Future<Null>>(
       (FlutterView view) => view.setAssetDirectory(deviceAssetsDirectoryUri)
     ));
   }
@@ -617,8 +611,8 @@ abstract class ResidentRunner {
   }
 
   Future<Null> stopEchoingDeviceLog() async {
-    await Future.wait(
-      flutterDevices.map((FlutterDevice device) => device.stopEchoingDeviceLog())
+    await Future.wait<Null>(
+      flutterDevices.map<Future<Null>>((FlutterDevice device) => device.stopEchoingDeviceLog())
     );
   }
 
@@ -635,7 +629,7 @@ abstract class ResidentRunner {
       await device._connect(reloadSources: reloadSources,
           compileExpression: compileExpression);
       await device.getVMs();
-      await device.waitForViews();
+      await device.refreshViews();
       if (device.views.isEmpty)
         printStatus('No Flutter views available on ${device.device.name}');
       else

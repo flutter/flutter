@@ -221,7 +221,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     Duration duration,
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
-    return TestAsyncUtils.guard(() {
+    return TestAsyncUtils.guard<Null>(() {
       binding.attachRootWidget(widget);
       binding.scheduleFrame();
       return binding.pump(duration, phase);
@@ -244,7 +244,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     Duration duration,
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
-    return TestAsyncUtils.guard(() => binding.pump(duration, phase));
+    return TestAsyncUtils.guard<Null>(() => binding.pump(duration, phase));
   }
 
   /// Repeatedly calls [pump] with the given `duration` until there are no
@@ -292,7 +292,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       return true;
     }());
     int count = 0;
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       final DateTime endTime = binding.clock.fromNowBy(timeout);
       do {
         if (binding.clock.now().isAfter(endTime))
@@ -325,7 +325,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// [TestFailure] error being thrown.
   Future<T> runAsync<T>(Future<T> callback(), {
     Duration additionalTime = const Duration(milliseconds: 250),
-  }) => binding.runAsync(callback, additionalTime: additionalTime);
+  }) => binding.runAsync<T>(callback, additionalTime: additionalTime);
 
   /// Whether there are any any transient callbacks scheduled.
   ///
@@ -351,7 +351,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   Future<Null> sendEventToBinding(PointerEvent event, HitTestResult result) {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       binding.dispatchEvent(event, result, source: TestBindingEventSource.test);
       return null;
     });
@@ -485,7 +485,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Does not run timers. May result in an infinite loop or run out of memory
   /// if microtasks continue to recursively schedule new microtasks.
   Future<Null> idle() {
-    return TestAsyncUtils.guard(() => binding.idle());
+    return TestAsyncUtils.guard<Null>(() => binding.idle());
   }
 
   Set<Ticker> _tickers;
@@ -570,8 +570,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Tests that just need to add text to widgets like [TextField]
   /// or [TextFormField] only need to call [enterText].
   Future<Null> showKeyboard(Finder finder) async {
-    return TestAsyncUtils.guard(() async {
-      final EditableTextState editable = state(
+    return TestAsyncUtils.guard<Null>(() async {
+      final EditableTextState editable = state<EditableTextState>(
         find.descendant(
           of: finder,
           matching: find.byType(EditableText),
@@ -593,7 +593,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// To just give [finder] the focus without entering any text,
   /// see [showKeyboard].
   Future<Null> enterText(Finder finder, String text) async {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       await showKeyboard(finder);
       testTextInput.enterText(text);
       await idle();
@@ -605,7 +605,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// Will throw an error if there is no back button in the page.
   Future<void> pageBack() async {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<void>(() async {
       Finder backButton = find.byTooltip('Back');
       if (backButton.evaluate().isEmpty) {
         backButton = find.byType(CupertinoNavigationBarBackButton);

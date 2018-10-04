@@ -177,7 +177,7 @@ import 'dart:async';
 
 import 'package:flutter_devicelab/framework/framework.dart';
 
-Future<Null> main() async {
+Future<void> main() async {
   await task(() async {
     ... do something interesting ...
 

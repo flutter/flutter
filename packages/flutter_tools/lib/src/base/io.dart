@@ -127,7 +127,7 @@ class ProcessSignal implements io.ProcessSignal {
 
   @override
   Stream<ProcessSignal> watch() {
-    return _delegate.watch().map((io.ProcessSignal signal) => this);
+    return _delegate.watch().map<ProcessSignal>((io.ProcessSignal signal) => this);
   }
 
   @override
@@ -155,6 +155,11 @@ class Stdio {
   Stream<List<int>> get stdin => io.stdin;
   io.IOSink get stdout => io.stdout;
   io.IOSink get stderr => io.stderr;
+
+  bool get hasTerminal => io.stdout.hasTerminal;
+  int get terminalColumns => hasTerminal ? io.stdout.terminalColumns : null;
+  int get terminalLines => hasTerminal ? io.stdout.terminalLines : null;
+  bool get supportsAnsiEscapes => hasTerminal ? io.stdout.supportsAnsiEscapes : false;
 }
 
 io.IOSink get stderr => context[Stdio].stderr;
@@ -162,3 +167,5 @@ io.IOSink get stderr => context[Stdio].stderr;
 Stream<List<int>> get stdin => context[Stdio].stdin;
 
 io.IOSink get stdout => context[Stdio].stdout;
+
+Stdio get stdio => context[Stdio];

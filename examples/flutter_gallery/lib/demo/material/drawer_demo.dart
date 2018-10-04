@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 const String _kAsset0 = 'people/square/trevor.png';
 const String _kAsset1 = 'people/square/stella.png';
 const String _kAsset2 = 'people/square/sandra.png';
@@ -23,6 +25,13 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
     'A', 'B', 'C', 'D', 'E',
   ];
 
+  static final Animatable<Offset> _drawerDetailsTween = Tween<Offset>(
+    begin: const Offset(0.0, -1.0),
+    end: Offset.zero,
+  ).chain(CurveTween(
+    curve: Curves.fastOutSlowIn,
+  ));
+
   AnimationController _controller;
   Animation<double> _drawerContentsOpacity;
   Animation<Offset> _drawerDetailsPosition;
@@ -39,13 +48,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
       parent: ReverseAnimation(_controller),
       curve: Curves.fastOutSlowIn,
     );
-    _drawerDetailsPosition = Tween<Offset>(
-      begin: const Offset(0.0, -1.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.fastOutSlowIn,
-    ));
+    _drawerDetailsPosition = _controller.drive(_drawerDetailsTween);
   }
 
   @override
@@ -87,6 +90,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
           },
         ),
         title: const Text('Navigation drawer'),
+        actions: <Widget>[MaterialDemoDocumentationButton(DrawerDemo.routeName)],
       ),
       drawer: Drawer(
         child: Column(
@@ -155,7 +159,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: _drawerContents.map((String id) {
+                            children: _drawerContents.map<Widget>((String id) {
                               return ListTile(
                                 leading: CircleAvatar(child: Text(id)),
                                 title: Text('Drawer item $id'),

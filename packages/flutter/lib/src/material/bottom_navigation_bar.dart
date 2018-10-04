@@ -316,7 +316,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   // animation is complete.
   Color _backgroundColor;
 
-  static final Tween<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
+  static final Animatable<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
 
   void _resetState() {
     for (AnimationController controller in _controllers)
@@ -582,7 +582,7 @@ class _Circle {
     double weightSum(Iterable<Animation<double>> animations) {
       // We're adding flex values instead of animation values to produce correct
       // ratios.
-      return animations.map(state._evaluateFlex).fold(0.0, (double sum, double value) => sum + value);
+      return animations.map<double>(state._evaluateFlex).fold<double>(0.0, (double sum, double value) => sum + value);
     }
 
     final double allWeights = weightSum(state._animations);
@@ -655,7 +655,7 @@ class _RadialPainter extends CustomPainter {
       );
       canvas.drawCircle(
         center,
-        radiusTween.lerp(circle.animation.value),
+        radiusTween.transform(circle.animation.value),
         paint,
       );
     }

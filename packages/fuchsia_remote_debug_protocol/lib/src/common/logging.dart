@@ -13,8 +13,7 @@ enum LoggingLevel {
   /// Logs no logs.
   none,
 
-  /// Logs severe messages at the most (note that severe messages are always
-  /// logged).
+  /// Logs severe messages at the most (severe messages are always logged).
   ///
   /// Severe means that the process has encountered a critical level of failure
   /// in which it cannot recover and will terminate as a result.
@@ -70,9 +69,9 @@ class LogMessage {
   ///
   /// When this message is created, it sets its [time] to [DateTime.now].
   LogMessage(this.message, this.tag, this.level)
-      : this.levelName =
+      : levelName =
             level.toString().substring(level.toString().indexOf('.') + 1),
-        this.time = DateTime.now();
+        time = DateTime.now();
 
   /// The actual log message.
   final String message;
