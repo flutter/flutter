@@ -380,7 +380,7 @@ class FuchsiaArtifacts extends CachedArtifacts {
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
       case TargetPlatform.windows_x64:
-        throw StateError('Invalid platform for fuchsia host');
+        throw StateError('Invalid target platform $platform.');
     }
     assert(false, 'Invalid platform $platform.');
     return null;
