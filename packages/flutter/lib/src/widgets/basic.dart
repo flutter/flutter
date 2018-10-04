@@ -5570,13 +5570,13 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 ///  ListView(
 ///    addSemanticIndexes: false,
 ///    semanticChildCount: 2,
-///    children: <Widget>[
-///      IndexedSemantics(index: 0, child: const Text('First')),
+///    children: const <Widget>[
+///      IndexedSemantics(index: 0, child: Text('First')),
 ///      Spacer(),
-///      IndexedSemantics(index: 1, child: const Text('Second')),
+///      IndexedSemantics(index: 1, child: Text('Second')),
 ///      Spacer(),
-///    ]
-///  )
+///    ],
+///  );
 /// ```
 ///
 /// See also:
