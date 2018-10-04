@@ -23,6 +23,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
@@ -61,6 +62,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
         negatable: false,
         hide: !verboseHelp,
         help: 'Reduce the amount of output from some commands.');
+    argParser.addFlag('wrap',
+        negatable: true,
+        hide: !verboseHelp,
+        help: 'Toggles output word wrapping, regardless of whether or not the output is a terminal.',
+        defaultsTo: true);
+    argParser.addOption('wrap-column',
+        hide: !verboseHelp,
+        help: 'Sets the output wrap column. If not set, uses the width of the terminal, or 100 if '
+            'the output is not a terminal. Use --no-wrap to turn off wrapping entirely.',
+        defaultsTo: null);
     argParser.addOption('device-id',
         abbr: 'd',
         help: 'Target device id or name (prefixes allowed).');
@@ -74,7 +85,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('color',
         negatable: true,
         hide: !verboseHelp,
-        help: 'Whether to use terminal colors (requires support for ANSI escape sequences).');
+        help: 'Whether to use terminal colors (requires support for ANSI escape sequences).',
+        defaultsTo: true);
     argParser.addFlag('version-check',
         negatable: true,
         defaultsTo: true,
@@ -150,7 +162,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
     allowTrailingOptions: false,
-    usageLineLength: const io.Stdio().terminalColumns ?? kDefaultTerminalColumns,
+    usageLineLength: outputPreferences.wrapText ? outputPreferences.wrapColumn : null,
   );
 
   @override
@@ -233,6 +245,26 @@ class FlutterCommandRunner extends CommandRunner<void> {
       // Override the logger.
       contextOverrides[Logger] = VerboseLogger(logger);
     }
+
+    int wrapColumn = const io.Stdio().terminalColumns ?? kDefaultTerminalColumns;
+    if (topLevelResults['wrap-column'] != null) {
+      try {
+        wrapColumn = int.parse(topLevelResults['wrap-column']);
+        if (wrapColumn < 0) {
+          throwToolExit('Argument to --wrap-column must be a positive integer. '
+              'You supplied ${topLevelResults['wrap-column']}.');
+        }
+      } on FormatException {
+        throwToolExit('Unable to parse argument '
+            '--wrap-column=${topLevelResults['wrap-column']}. Must be a positive integer.');
+      }
+    }
+
+    contextOverrides[OutputPreferences] = OutputPreferences(
+      wrapText: topLevelResults['wrap'],
+      showColor: topLevelResults['color'],
+      wrapColumn: wrapColumn,
+    );
 
     if (topLevelResults['show-test-device'] ||
         topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
@@ -317,9 +349,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }),
       body: () async {
         logger.quiet = topLevelResults['quiet'];
-
-        if (topLevelResults.wasParsed('color'))
-          logger.supportsColor = topLevelResults['color'];
 
         if (platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true')
           await Cache.lock();

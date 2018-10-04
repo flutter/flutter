@@ -2,28 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:test/test.dart';
-
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+
+import 'src/common.dart';
 
 const int _lineLength = 40;
 const String _longLine = 'This is a long line that needs to be wrapped.';
 final String _longLineWithNewlines = 'This is a long line with newlines that\n'
-  'needs to be wrapped.\n\n' +
-  '0123456789' * 5;
-final String _longAnsiLineWithNewlines = '${AnsiTerminal.red}This${AnsiTerminal.reset} is a long line with newlines that\n'
     'needs to be wrapped.\n\n' +
-    '0123456789' * 4 +
+    '0123456789' * 5;
+final String _longAnsiLineWithNewlines = '${AnsiTerminal.red}This${AnsiTerminal.reset} is a long line with newlines that\n'
+    'needs to be wrapped.\n\n'
+    '${AnsiTerminal.green}0123456789${AnsiTerminal.reset}' +
+    '0123456789' * 3 +
     '${AnsiTerminal.green}0123456789${AnsiTerminal.reset}';
 const String _onlyAnsiSequences = '${AnsiTerminal.red}${AnsiTerminal.reset}';
-final String _indentedLongLineWithNewlines =
-  '    This is an indented long line with newlines that\n'
+final String _indentedLongLineWithNewlines = '    This is an indented long line with newlines that\n'
     'needs to be wrapped.\n\tAnd preserves tabs.\n      \n  ' +
     '0123456789' * 5;
 const String _shortLine = 'Short line.';
 const String _indentedLongLine = '    This is an indented long line that needs to be '
-  'wrapped and indentation preserved.';
+    'wrapped and indentation preserved.';
 
 void main() {
   group('text wrapping', () {
@@ -80,15 +80,15 @@ needs to be wrapped.
 ${AnsiTerminal.red}This${AnsiTerminal.reset} is a long line with newlines that
 needs to be wrapped.
 
-0123456789012345678901234567890123456789
+${AnsiTerminal.green}0123456789${AnsiTerminal.reset}012345678901234567890123456789
 ${AnsiTerminal.green}0123456789${AnsiTerminal.reset}'''));
     });
     test('wraps text with only ANSI sequences', () {
-      expect(wrapText(_onlyAnsiSequences, columnWidth: _lineLength), equals('${AnsiTerminal.red}${AnsiTerminal.reset}'));
+      expect(wrapText(_onlyAnsiSequences, columnWidth: _lineLength),
+          equals('${AnsiTerminal.red}${AnsiTerminal.reset}'));
     });
     test('preserves indentation in the presence of newlines', () {
-      expect(wrapText(_indentedLongLineWithNewlines, columnWidth: _lineLength),
-        equals('''
+      expect(wrapText(_indentedLongLineWithNewlines, columnWidth: _lineLength), equals('''
     This is an indented long line with
     newlines that
 needs to be wrapped.
@@ -103,50 +103,40 @@ This is a long line that needs to be
 wrapped.'''));
     });
     test('honors hangingIndent parameter', () {
-      expect(
-        wrapText(_longLine, columnWidth: _lineLength, hangingIndent: 6), equals('''
+      expect(wrapText(_longLine, columnWidth: _lineLength, hangingIndent: 6), equals('''
 This is a long line that needs to be
       wrapped.'''));
     });
     test('handles hangingIndent with a single unwrapped line.', () {
-      expect(wrapText(_shortLine, columnWidth: _lineLength, hangingIndent: 6),
-        equals('''
+      expect(wrapText(_shortLine, columnWidth: _lineLength, hangingIndent: 6), equals('''
 Short line.'''));
     });
-    test(
-      'handles hangingIndent with two unwrapped lines and the second is empty.',
-        () {
-        expect(wrapText('$_shortLine\n', columnWidth: _lineLength, hangingIndent: 6),
-          equals('''
+    test('handles hangingIndent with two unwrapped lines and the second is empty.', () {
+      expect(wrapText('$_shortLine\n', columnWidth: _lineLength, hangingIndent: 6), equals('''
 Short line.
 '''));
-      });
+    });
     test('honors hangingIndent parameter on already indented line.', () {
-      expect(wrapText(_indentedLongLine, columnWidth: _lineLength, hangingIndent: 6),
-        equals('''
+      expect(wrapText(_indentedLongLine, columnWidth: _lineLength, hangingIndent: 6), equals('''
     This is an indented long line that
           needs to be wrapped and
           indentation preserved.'''));
     });
     test('honors hangingIndent and indent parameters at the same time.', () {
-      expect(wrapText(_indentedLongLine, columnWidth: _lineLength, indent: 6, hangingIndent: 6),
-        equals('''
-          This is an indented long line that
-                needs to be wrapped and
-                indentation preserved.'''));
+      expect(wrapText(_indentedLongLine, columnWidth: _lineLength, indent: 6, hangingIndent: 6), equals('''
+          This is an indented long line
+                that needs to be wrapped
+                and indentation
+                preserved.'''));
     });
     test('honors indent parameter on already indented line.', () {
-      expect(wrapText(_indentedLongLine, columnWidth: _lineLength, indent: 6),
-        equals('''
-          This is an indented long line that
-          needs to be wrapped and indentation
-          preserved.'''));
+      expect(wrapText(_indentedLongLine, columnWidth: _lineLength, indent: 6), equals('''
+          This is an indented long line
+          that needs to be wrapped and
+          indentation preserved.'''));
     });
     test('honors hangingIndent parameter on already indented line.', () {
-      expect(
-        wrapText(_indentedLongLineWithNewlines,
-          columnWidth: _lineLength, hangingIndent: 6),
-        equals('''
+      expect(wrapText(_indentedLongLineWithNewlines, columnWidth: _lineLength, hangingIndent: 6), equals('''
     This is an indented long line with
           newlines that
 needs to be wrapped.

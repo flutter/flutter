@@ -67,11 +67,11 @@ void printStatus(
 void printTrace(String message) => logger.printTrace(message);
 
 /// The terminal width used by the [wrapText] function if there is no terminal
-/// attached to [io.Stdio].
+/// attached to [io.Stdio], --wrap is on, and --wrap-columns was not specified.
 const int kDefaultTerminalColumns = 100;
 
-// Smallest column that will be used. If the requested column width is smaller
-// than this, then this is what will be used.
+// Smallest column that will be used for text wrapping. If the requested column
+// width is smaller than this, then this is what will be used.
 const int _kMinColumnWidth = 10;
 
 /// Wraps a block of text into lines no longer than [columnWidth].
@@ -97,17 +97,23 @@ const int _kMinColumnWidth = 10;
 ///        [arguments]
 /// ```
 ///
-/// If [columnWidth] is not specified, then the column width will be the width of the
-/// terminal window by default. If the stdout is not a terminal window, then the
-/// default will be [kDefaultTerminalColumns].
+/// If [columnWidth] is not specified, then the column width will be the
+/// [outputPreferences.wrapColumn], which is set with the --wrap-column option.
+///
+/// If [outputPreferences.wrapText] is false, then the text will be returned
+/// unchanged.
 ///
 /// The [indent] must be smaller than [columnWidth].
 String wrapText(String text, {int columnWidth, int hangingIndent, int indent}) {
   if (text == null || text.isEmpty) {
     return '';
   }
+  if (!outputPreferences.wrapText) {
+    return text;
+  }
   indent ??= 0;
-  columnWidth ??= (const io.Stdio().terminalColumns ?? kDefaultTerminalColumns) - indent;
+  columnWidth ??= outputPreferences.wrapColumn;
+  columnWidth -= indent;
   assert(columnWidth >= 0);
 
   hangingIndent ??= 0;
@@ -142,7 +148,7 @@ String wrapText(String text, {int columnWidth, int hangingIndent, int indent}) {
     String hangingIndentString;
     final String indentString = ' ' * indent;
     result.addAll(notIndented.map(
-        (String line) {
+      (String line) {
         // Don't return any lines with just whitespace on them.
         if (line.isEmpty) {
           return '';
@@ -189,18 +195,18 @@ List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth}) {
   /// Based on: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
   bool isWhitespace(_AnsiRun run) {
     final int rune = run.character.isNotEmpty ? run.character.codeUnitAt(0) : 0x0;
-    return rune >= 0x0009 && rune <= 0x000D
-        || rune == 0x0020
-        || rune == 0x0085
-        || rune == 0x1680
-        || rune == 0x180E
-        || rune >= 0x2000 && rune <= 0x200A
-        || rune == 0x2028
-        || rune == 0x2029
-        || rune == 0x202F
-        || rune == 0x205F
-        || rune == 0x3000
-        || rune == 0xFEFF;
+    return rune >= 0x0009 && rune <= 0x000D ||
+        rune == 0x0020 ||
+        rune == 0x0085 ||
+        rune == 0x1680 ||
+        rune == 0x180E ||
+        rune >= 0x2000 && rune <= 0x200A ||
+        rune == 0x2028 ||
+        rune == 0x2029 ||
+        rune == 0x202F ||
+        rune == 0x205F ||
+        rune == 0x3000 ||
+        rune == 0xFEFF;
   }
 
   // Splits a string so that the resulting list has the same number of elements
@@ -241,6 +247,12 @@ List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth}) {
   final List<String> result = <String>[];
   final int effectiveLength = math.max(columnWidth - start, _kMinColumnWidth);
   for (String line in text.split('\n')) {
+    // If the line is short enough, even with ANSI codes, then we can just add
+    // add it and move on.
+    if (line.length <= effectiveLength) {
+      result.add(line);
+      continue;
+    }
     final List<_AnsiRun> splitLine = splitWithCodes(line);
     if (splitLine.length <= effectiveLength) {
       result.add(line);

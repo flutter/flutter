@@ -30,6 +30,31 @@ enum TerminalColor {
   grey,
 }
 
+final OutputPreferences _kOutputPreferences = OutputPreferences();
+
+OutputPreferences get outputPreferences => (context == null || context[OutputPreferences] == null)
+    ? _kOutputPreferences
+    : context[OutputPreferences];
+
+class OutputPreferences {
+  OutputPreferences({
+    bool wrapText,
+    int wrapColumn,
+    bool showColor,
+  })  : wrapText = wrapText ?? true,
+        wrapColumn = wrapColumn ?? const io.Stdio().terminalColumns ?? kDefaultTerminalColumns,
+        showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
+
+  final bool wrapText;
+  final int wrapColumn;
+  final bool showColor;
+
+  @override
+  String toString() {
+    return '$runtimeType[wrapText: $wrapText, wrapColumn: $wrapColumn, showColor: $showColor]';
+  }
+}
+
 class AnsiTerminal {
   static const String bold = '\u001B[1m';
   static const String reset = '\u001B[0m';
@@ -55,8 +80,6 @@ class AnsiTerminal {
 
   static String colorCode(TerminalColor color) => _colorMap[color];
 
-  static String removeCodes(String source) => source.replaceAll(RegExp('\u001b\[[0-9;]*m'), '');
-
   bool supportsColor = platform.stdoutSupportsAnsi ?? false;
 
   String bolden(String message) {
@@ -66,9 +89,13 @@ class AnsiTerminal {
     final StringBuffer buffer = StringBuffer();
     for (String line in message.split('\n')) {
       // If there were resets in the string before, then keep them, but
-      // restart the bold right after. This prevents embedded colors from
+      // restart the bold right after. This prevents embedded resets from
       // stopping the boldness.
-      buffer.writeln('$bold${line.replaceAll(reset, '$reset$bold')}$reset');
+      line = line.replaceAll(reset, '$reset$bold');
+      // Remove any extra codes at the end of the string, since we're just going
+      // to reset them.
+      line = line.replaceAll(RegExp('(\u001b\[[0-9;]*m)+\$'), '');
+      buffer.writeln('$bold$line$reset');
     }
     final String result = buffer.toString();
     // avoid introducing a new newline to the emboldened text
@@ -85,9 +112,13 @@ class AnsiTerminal {
     final String colorCodes = _colorMap[color];
     for (String line in message.split('\n')) {
       // If there were resets in the string before, then keep them, but
-      // restart the color right after. This prevents embedded boldness from
+      // restart the color right after. This prevents embedded resets from
       // stopping the colors.
-      buffer.writeln('$colorCodes${line.replaceAll(reset, '$reset$colorCodes')}$reset');
+      line = line.replaceAll(reset, '$reset$colorCodes');
+      // Remove any extra codes at the end of the string, since we're just going
+      // to reset them.
+      line = line.replaceAll(RegExp('(\u001b\[[0-9;]*m)+\$'), '');
+      buffer.writeln('$colorCodes$line$reset');
     }
     final String result = buffer.toString();
     // avoid introducing a new newline to the colored text

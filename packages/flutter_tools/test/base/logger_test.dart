@@ -51,7 +51,7 @@ void main() {
       expect(mockLogger.traceText, '');
       expect(
           mockLogger.errorText,
-          matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Helpless!$reset$reset' r'\n$'));
+          matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Helpless!$reset' r'\n$'));
     });
   });
 
