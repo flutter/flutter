@@ -196,14 +196,8 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
             }
           ),
           // Disabled switches
-          const Switch.adaptive(
-            value: true,
-            onChanged: null
-          ),
-          const Switch.adaptive(
-            value: false,
-            onChanged: null
-          )
+          const Switch.adaptive(value: true, onChanged: null),
+          const Switch.adaptive(value: false, onChanged: null),
         ],
       ),
     );
