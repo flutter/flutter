@@ -382,7 +382,9 @@ class HotRunner extends ResidentRunner {
       }
       device.devFS = null;
     }
-    return Future.wait(futures);
+    final Completer<Null> completer = Completer<Null>();
+    Future.wait(futures).whenComplete(() { completer.complete(null); } );
+    return completer.future;
   }
 
   Future<void> _launchInView(FlutterDevice device,
