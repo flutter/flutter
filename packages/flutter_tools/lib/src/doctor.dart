@@ -14,6 +14,7 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
+import 'base/terminal.dart';
 import 'base/version.dart';
 import 'cache.dart';
 import 'device.dart';
@@ -124,7 +125,7 @@ class Doctor {
     for (DoctorValidator validator in validators) {
       final StringBuffer lineBuffer = StringBuffer();
       final ValidationResult result = await validator.validate();
-      lineBuffer.write('${result.leadingBox} ${validator.title} is ');
+      lineBuffer.write('${result.coloredLeadingBox} ${validator.title} is ');
       switch (result.type) {
         case ValidationType.missing:
           lineBuffer.write('not installed.');
@@ -195,22 +196,22 @@ class Doctor {
       }
 
       if (result.statusInfo != null) {
-        printStatus(wrapText('${result.leadingBox} ${validator.title} (${result.statusInfo})',
+        printStatus(wrapText('${result.coloredLeadingBox} ${validator.title} (${result.statusInfo})',
             hangingIndent: result.leadingBox.length + 1));
       } else {
-        printStatus(wrapText('${result.leadingBox} ${validator.title}',
+        printStatus(wrapText('${result.coloredLeadingBox} ${validator.title}',
             hangingIndent: result.leadingBox.length + 1));
       }
 
       for (ValidationMessage message in result.messages) {
-        if (message.isError || message.isHint || verbose == true) {
-          final String text = message.message.replaceAll('\n', '\n      ');
-          if (message.isError) {
-            printStatus('    ✗ $text', emphasis: true);
-          } else if (message.isHint) {
-            printStatus('    ! $text');
-          } else {
-            printStatus('    • $text');
+        if (message.type != ValidationMessageType.information || verbose == true) {
+          int hangingIndent = 2;
+          int indent = 4;
+          for (String line in '${message.coloredIndicator} ${message.message}'.split('\n')) {
+            printStatus(wrapText(line, hangingIndent: hangingIndent, indent: indent), emphasis: true);
+            // Only do hanging indent for the first line.
+            hangingIndent = 0;
+            indent = 6;
           }
         }
       }
@@ -221,10 +222,11 @@ class Doctor {
     // Make sure there's always one line before the summary even when not verbose.
     if (!verbose)
       printStatus('');
+
     if (issues > 0) {
-      printStatus('! Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.');
+      printStatus('${terminal.color('!', TerminalColor.yellow)} Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.');
     } else {
-      printStatus('• No issues found!');
+      printStatus('${terminal.color('•', TerminalColor.green)} No issues found!');
     }
 
     return doctorResult;
@@ -259,6 +261,12 @@ enum ValidationType {
   partial,
   notAvailable,
   installed,
+}
+
+enum ValidationMessageType {
+  error,
+  hint,
+  information,
 }
 
 abstract class DoctorValidator {
@@ -349,16 +357,55 @@ class ValidationResult {
     }
     return null;
   }
+
+  String get coloredLeadingBox {
+    assert(type != null);
+    switch (type) {
+      case ValidationType.missing:
+        return terminal.color(leadingBox, TerminalColor.red);
+      case ValidationType.installed:
+        return terminal.color(leadingBox, TerminalColor.green);
+      case ValidationType.notAvailable:
+      case ValidationType.partial:
+       return terminal.color(leadingBox, TerminalColor.yellow);
+    }
+    return null;
+  }
 }
 
 class ValidationMessage {
-  ValidationMessage(this.message) : isError = false, isHint = false;
-  ValidationMessage.error(this.message) : isError = true, isHint = false;
-  ValidationMessage.hint(this.message) : isError = false, isHint = true;
+  ValidationMessage(this.message) : type = ValidationMessageType.information;
+  ValidationMessage.error(this.message) : type = ValidationMessageType.error;
+  ValidationMessage.hint(this.message) : type = ValidationMessageType.hint;
 
-  final bool isError;
-  final bool isHint;
+  final ValidationMessageType type;
+  bool get isError => type == ValidationMessageType.error;
+  bool get isHint => type == ValidationMessageType.hint;
   final String message;
+
+  String get indicator {
+    switch (type) {
+      case ValidationMessageType.error:
+        return '✗';
+      case ValidationMessageType.hint:
+        return '!';
+      case ValidationMessageType.information:
+        return '•';
+    }
+    return null;
+  }
+
+  String get coloredIndicator {
+    switch (type) {
+      case ValidationMessageType.error:
+        return terminal.color(indicator, TerminalColor.red);
+      case ValidationMessageType.hint:
+        return terminal.color(indicator, TerminalColor.yellow);
+      case ValidationMessageType.information:
+        return terminal.color(indicator, TerminalColor.green);
+    }
+    return null;
+  }
 
   @override
   String toString() => message;

@@ -115,8 +115,7 @@ String wrapText(String text, {int columnWidth, int hangingIndent, int indent}) {
   final List<String> result = <String>[];
   for (String line in splitText) {
     String trimmedText = line.trimLeft();
-    final String leadingWhitespace =
-    line.substring(0, line.length - trimmedText.length);
+    final String leadingWhitespace = line.substring(0, line.length - trimmedText.length);
     List<String> notIndented;
     if (hangingIndent != 0) {
       // When we have a hanging indent, we want to wrap the first line at one
@@ -157,6 +156,15 @@ String wrapText(String text, {int columnWidth, int hangingIndent, int indent}) {
   return result.join('\n');
 }
 
+// Used to represent a run of ANSI control sequences next to a visible
+// character.
+class _AnsiRun {
+  _AnsiRun(this.original, this.character);
+
+  String original;
+  String character;
+}
+
 /// Wraps a block of text into lines no longer than [columnWidth], starting at the
 /// [start] column, and returning the result as a list of strings.
 ///
@@ -169,7 +177,7 @@ String wrapText(String text, {int columnWidth, int hangingIndent, int indent}) {
 /// default will be [kDefaultTerminalColumns].
 List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth}) {
   if (text == null || text.isEmpty) {
-    return <String>[];
+    return <String>[''];
   }
   columnWidth ??= const io.Stdio().terminalColumns ?? kDefaultTerminalColumns;
   assert(columnWidth >= 0);
@@ -179,8 +187,8 @@ List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth}) {
   /// character.
   ///
   /// Based on: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
-  bool isWhitespace(String text, int index) {
-    final int rune = text.codeUnitAt(index);
+  bool isWhitespace(_AnsiRun run) {
+    final int rune = run.character.isNotEmpty ? run.character.codeUnitAt(0) : 0x0;
     return rune >= 0x0009 && rune <= 0x000D
         || rune == 0x0020
         || rune == 0x0085
@@ -195,19 +203,55 @@ List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth}) {
         || rune == 0xFEFF;
   }
 
+  // Splits a string so that the resulting list has the same number of elements
+  // as there are visible characters in the string, but elements may include one
+  // or more adjacent ANSI sequences. Joining the list elements again will
+  // reconstitute the original string. This is useful for manipulating "visible"
+  // characters in the presence of ANSI control codes.
+  List<_AnsiRun> splitWithCodes(String input) {
+    final RegExp characterOrCode = RegExp('(\u001b\[[0-9;]*m|.)', multiLine: true);
+    List<_AnsiRun> result = <_AnsiRun>[];
+    final StringBuffer current = StringBuffer();
+    for (Match match in characterOrCode.allMatches(input)) {
+      current.write(match[0]);
+      if (match[0].length < 4) {
+        // This is a regular character, write it out.
+        result.add(_AnsiRun(current.toString(), match[0]));
+        current.clear();
+      }
+    }
+    // If there's something accumulated, then it must be an ANSI sequence, so
+    // add it to the end of the last entry so that we don't lose it.
+    if (current.isNotEmpty) {
+      if (result.isNotEmpty) {
+        result.last.original += current.toString();
+      } else {
+        // If there is nothing in the string besides control codes, then just
+        // return them as the only entry.
+        result = <_AnsiRun>[_AnsiRun(current.toString(), '')];
+      }
+    }
+    return result;
+  }
+
+  String joinRun(List<_AnsiRun> list, int start, [int end]) {
+    return list.sublist(start, end).map<String>((_AnsiRun run) => run.original).join().trim();
+  }
+
   final List<String> result = <String>[];
   final int effectiveLength = math.max(columnWidth - start, _kMinColumnWidth);
   for (String line in text.split('\n')) {
-    line = line.trim();
-    if (line.length <= effectiveLength) {
+    final List<_AnsiRun> splitLine = splitWithCodes(line);
+    if (splitLine.length <= effectiveLength) {
       result.add(line);
       continue;
     }
 
     int currentLineStart = 0;
     int lastWhitespace;
-    for (int index = 0; index < line.length; ++index) {
-      if (isWhitespace(line, index)) {
+    // Find the start of the current line.
+    for (int index = 0; index < splitLine.length; ++index) {
+      if (splitLine[index].character.isNotEmpty && isWhitespace(splitLine[index])) {
         lastWhitespace = index;
       }
 
@@ -218,10 +262,10 @@ List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth}) {
           index = lastWhitespace;
         }
 
-        result.add(line.substring(currentLineStart, index).trim());
+        result.add(joinRun(splitLine, currentLineStart, index));
 
         // Skip any intervening whitespace.
-        while (isWhitespace(line, index) && index < line.length) {
+        while (isWhitespace(splitLine[index]) && index < splitLine.length) {
           index++;
         }
 
@@ -229,7 +273,7 @@ List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth}) {
         lastWhitespace = null;
       }
     }
-    result.add(line.substring(currentLineStart).trim());
+    result.add(joinRun(splitLine, currentLineStart));
   }
   return result;
 }

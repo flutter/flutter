@@ -5,12 +5,18 @@
 import 'package:test/test.dart';
 
 import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 
 const int _lineLength = 40;
 const String _longLine = 'This is a long line that needs to be wrapped.';
 final String _longLineWithNewlines = 'This is a long line with newlines that\n'
   'needs to be wrapped.\n\n' +
   '0123456789' * 5;
+final String _longAnsiLineWithNewlines = '${AnsiTerminal.red}This${AnsiTerminal.reset} is a long line with newlines that\n'
+    'needs to be wrapped.\n\n' +
+    '0123456789' * 4 +
+    '${AnsiTerminal.green}0123456789${AnsiTerminal.reset}';
+const String _onlyAnsiSequences = '${AnsiTerminal.red}${AnsiTerminal.reset}';
 final String _indentedLongLineWithNewlines =
   '    This is an indented long line with newlines that\n'
     'needs to be wrapped.\n\tAnd preserves tabs.\n      \n  ' +
@@ -68,6 +74,17 @@ needs to be wrapped.
 
 0123456789012345678901234567890123456789
 0123456789'''));
+    });
+    test('wraps text with ANSI sequences embedded', () {
+      expect(wrapText(_longAnsiLineWithNewlines, columnWidth: _lineLength), equals('''
+${AnsiTerminal.red}This${AnsiTerminal.reset} is a long line with newlines that
+needs to be wrapped.
+
+0123456789012345678901234567890123456789
+${AnsiTerminal.green}0123456789${AnsiTerminal.reset}'''));
+    });
+    test('wraps text with only ANSI sequences', () {
+      expect(wrapText(_onlyAnsiSequences, columnWidth: _lineLength), equals('${AnsiTerminal.red}${AnsiTerminal.reset}'));
     });
     test('preserves indentation in the presence of newlines', () {
       expect(wrapText(_indentedLongLineWithNewlines, columnWidth: _lineLength),
