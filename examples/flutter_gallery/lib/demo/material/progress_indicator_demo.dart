@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class ProgressIndicatorDemo extends StatefulWidget {
   static const String routeName = '/material/progress-indicator';
 
@@ -92,7 +94,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     ];
     return Column(
       children: indicators
-        .map((Widget c) => Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)))
+        .map<Widget>((Widget c) => Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)))
         .toList(),
     );
   }
@@ -100,7 +102,10 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Progress indicators')),
+      appBar: AppBar(
+        title: const Text('Progress indicators'),
+        actions: <Widget>[MaterialDemoDocumentationButton(ProgressIndicatorDemo.routeName)],
+      ),
       body: Center(
         child: SingleChildScrollView(
           child: DefaultTextStyle(

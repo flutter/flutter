@@ -123,7 +123,7 @@ class PlatformViewState extends State<PlatformViewPage> {
       final List<dynamic> unTypedRecordedEvents = codec.decodeMessage(data);
       final List<Map<String, dynamic>> recordedEvents = unTypedRecordedEvents
           .cast<Map<dynamic, dynamic>>()
-          .map((Map<dynamic, dynamic> e) =>e.cast<String, dynamic>())
+          .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) =>e.cast<String, dynamic>())
           .toList();
       await channel.invokeMethod('pipeFlutterViewEvents');
       await viewChannel.invokeMethod('pipeTouchEvents');

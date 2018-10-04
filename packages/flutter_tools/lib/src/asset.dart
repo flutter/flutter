@@ -56,20 +56,20 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
 }
 
 class _ManifestAssetBundle implements AssetBundle {
+  /// Constructs an [_ManifestAssetBundle] that gathers the set of assets from the
+  /// pubspec.yaml manifest.
+  _ManifestAssetBundle();
+
   @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
+
+  DateTime _lastBuildTimestamp;
 
   static const String defaultManifestPath = 'pubspec.yaml';
   static const String _assetManifestJson = 'AssetManifest.json';
   static const String _fontManifestJson = 'FontManifest.json';
   static const String _fontSetMaterial = 'material';
   static const String _license = 'LICENSE';
-
-  DateTime _lastBuildTimestamp;
-
-  /// Constructs an [_ManifestAssetBundle] that gathers the set of assets from the
-  /// pubspec.yaml manifest.
-  _ManifestAssetBundle();
 
   @override
   bool wasBuiltOnce() => _lastBuildTimestamp != null;
@@ -354,7 +354,7 @@ Future<DevFSContent> _obtainLicenses(
     printStatus(allPackagesList.join(', '));
   }
 
-  final List<String> combinedLicensesList = packageLicenses.keys.map(
+  final List<String> combinedLicensesList = packageLicenses.keys.map<String>(
     (String license) {
       final List<String> packageNames = packageLicenses[license].toList()
        ..sort();
@@ -444,7 +444,7 @@ List<Font> _parsePackageFonts(
 }
 
 List<Map<String, dynamic>> _createFontsDescriptor(List<Font> fonts) {
-  return fonts.map((Font font) => font.descriptor).toList();
+  return fonts.map<Map<String, dynamic>>((Font font) => font.descriptor).toList();
 }
 
 // Given an assets directory like this:

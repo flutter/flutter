@@ -303,16 +303,16 @@ class MockStdio extends Stdio {
     _stdin.add(utf8.encode('$line\n'));
   }
 
-  List<String> get writtenToStdout => _stdout.writes.map(_stdout.encoding.decode).toList();
-  List<String> get writtenToStderr => _stderr.writes.map(_stderr.encoding.decode).toList();
+  List<String> get writtenToStdout => _stdout.writes.map<String>(_stdout.encoding.decode).toList();
+  List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
 }
 
 class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  MockPollingDeviceDiscovery() : super('mock');
+
   final List<Device> _devices = <Device>[];
   final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
   final StreamController<Device> _onRemovedController = StreamController<Device>.broadcast();
-
-  MockPollingDeviceDiscovery() : super('mock');
 
   @override
   Future<List<Device>> pollingGetDevices() async => _devices;

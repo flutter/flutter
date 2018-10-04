@@ -430,6 +430,45 @@ void main() {
     expect(MediaQuery.of(popupContext).padding, EdgeInsets.zero);
   });
 
+  testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
+    const Offset offset = Offset(100.0, 100.0);
+
+    final PopupMenuButton<int> popupMenuButton =
+      PopupMenuButton<int>(
+        offset: offset,
+        itemBuilder: (BuildContext context) {
+          return <PopupMenuItem<int>>[
+            PopupMenuItem<int>(
+              value: 1,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return const Text('AAA');
+                },
+              ),
+            ),
+          ];
+        },
+      );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Material(
+              child: popupMenuButton,
+            ),
+          )
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    // The position is different than the offset because the default position isn't at the origin.
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int>')), const Offset(364.0, 324.0));
+  });
+
   testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(MaterialApp(

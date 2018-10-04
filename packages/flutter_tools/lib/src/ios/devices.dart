@@ -440,11 +440,6 @@ String decodeSyslog(String line) {
 }
 
 class _IOSDeviceLogReader extends DeviceLogReader {
-  // Matches a syslog line from the runner.
-  RegExp _runnerLineRegex;
-  // Matches a syslog line from any app.
-  RegExp _anyLineRegex;
-
   _IOSDeviceLogReader(this.device, ApplicationPackage app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
@@ -465,6 +460,11 @@ class _IOSDeviceLogReader extends DeviceLogReader {
 
   final IOSDevice device;
 
+  // Matches a syslog line from the runner.
+  RegExp _runnerLineRegex;
+  // Matches a syslog line from any app.
+  RegExp _anyLineRegex;
+
   StreamController<String> _linesController;
   Process _process;
 
@@ -477,8 +477,8 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   void _start() {
     iMobileDevice.startLogger().then<Null>((Process process) {
       _process = process;
-      _process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_newLineHandler());
-      _process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_newLineHandler());
+      _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
+      _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
       _process.exitCode.whenComplete(() {
         if (_linesController.hasListener)
           _linesController.close();

@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('ThemeDataTween control test', () {
     final ThemeData light = ThemeData.light();
-    final ThemeData dark = ThemeData.light();
+    final ThemeData dark = ThemeData.dark();
     final ThemeDataTween tween = ThemeDataTween(begin: light, end: dark);
     expect(tween.lerp(0.25), equals(ThemeData.lerp(light, dark, 0.25)));
   });
@@ -388,7 +388,7 @@ void main() {
     }
 
     for (TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
-      for (TextStyle style in extractStyles(textTheme).map((TextStyle style) => _TextStyleProxy(style))) {
+      for (TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
         expect(style.inherit, false);
         expect(style.color, isNotNull);
         expect(style.fontFamily, isNotNull);

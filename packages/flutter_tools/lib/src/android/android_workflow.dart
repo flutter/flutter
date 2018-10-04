@@ -94,7 +94,8 @@ class AndroidValidator extends DoctorValidator {
           'Install Android Studio from: https://developer.android.com/studio/index.html\n'
           'On first launch it will assist you in installing the Android SDK components.\n'
           '(or visit https://flutter.io/setup/#android-setup for detailed instructions).\n'
-          'If Android SDK has been installed to a custom location, set \$$kAndroidHome to that location.'
+          'If Android SDK has been installed to a custom location, set \$$kAndroidHome to that location.\n'
+          'You may also want to add it to your PATH environment variable.\n'
         ));
       }
 
@@ -126,7 +127,7 @@ class AndroidValidator extends DoctorValidator {
 
     if (validationResult.isNotEmpty) {
       // Android SDK is not functional.
-      messages.addAll(validationResult.map((String message) {
+      messages.addAll(validationResult.map<ValidationMessage>((String message) {
         return ValidationMessage.error(message);
       }));
       messages.add(ValidationMessage(
@@ -199,13 +200,13 @@ class AndroidValidator extends DoctorValidator {
     );
     process.stdin.write('n\n');
     final Future<void> output = process.stdout
-      .transform(const Utf8Decoder(allowMalformed: true))
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder(allowMalformed: true))
+      .transform<String>(const LineSplitter())
       .listen(_onLine)
       .asFuture<void>(null);
     final Future<void> errors = process.stderr
-      .transform(const Utf8Decoder(allowMalformed: true))
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder(allowMalformed: true))
+      .transform<String>(const LineSplitter())
       .listen(_onLine)
       .asFuture<void>(null);
     try {

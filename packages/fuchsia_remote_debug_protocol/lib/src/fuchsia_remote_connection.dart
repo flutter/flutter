@@ -249,17 +249,17 @@ class FuchsiaRemoteConnection {
     Pattern pattern,
     Duration timeout = _kIsolateFindTimeout,
   ]) async {
-    final Completer<List<IsolateRef>> completer =
-        Completer<List<IsolateRef>>();
+    final Completer<List<IsolateRef>> completer = Completer<List<IsolateRef>>();
     _onDartVmEvent.listen(
       (DartVmEvent event) async {
         if (event.eventType == DartVmEventType.started) {
           _log.fine('New VM found on port: ${event.servicePort}. Searching '
               'for Isolate: $pattern');
           final DartVm vmService = await _getDartVm(event.uri.port);
+          // If the VM service is null, set the result to the empty list.
           final List<IsolateRef> result = await vmService
-              .getMainIsolatesByPattern(pattern)
-              .timeout(timeout);
+                  ?.getMainIsolatesByPattern(pattern, timeout: timeout) ??
+              <IsolateRef>[];
           if (result.isNotEmpty) {
             if (!completer.isCompleted) {
               completer.complete(result);
@@ -301,11 +301,14 @@ class FuchsiaRemoteConnection {
         <Future<List<IsolateRef>>>[];
     for (PortForwarder fp in _dartVmPortMap.values) {
       final DartVm vmService = await _getDartVm(fp.port).timeout(timeout);
+      if (vmService == null) {
+        continue;
+      }
       isolates.add(vmService.getMainIsolatesByPattern(pattern));
     }
-    final List<IsolateRef> result = await Future.wait(isolates)
+    final List<IsolateRef> result = await Future.wait<List<IsolateRef>>(isolates)
         .timeout(timeout)
-        .then((List<List<IsolateRef>> listOfLists) {
+        .then<List<IsolateRef>>((List<List<IsolateRef>> listOfLists) {
       final List<List<IsolateRef>> mutableListOfLists =
           List<List<IsolateRef>>.from(listOfLists)
             ..retainWhere((List<IsolateRef> list) => list.isNotEmpty);
@@ -379,16 +382,11 @@ class FuchsiaRemoteConnection {
     }
 
     for (PortForwarder pf in _dartVmPortMap.values) {
-      // When raising an HttpException this means that there is no instance of
-      // the Dart VM to communicate with.  The TimeoutException is raised when
-      // the Dart VM instance is shut down in the middle of communicating.
-      try {
-        final DartVm service = await _getDartVm(pf.port);
+      final DartVm service = await _getDartVm(pf.port);
+      if (service == null) {
+        await shutDownPortForwarder(pf);
+      } else {
         result.add(await vmFunction(service));
-      } on HttpException {
-        await shutDownPortForwarder(pf);
-      } on TimeoutException {
-        await shutDownPortForwarder(pf);
       }
     }
     _stalePorts.forEach(_dartVmPortMap.remove);
@@ -407,10 +405,25 @@ class FuchsiaRemoteConnection {
     return uri;
   }
 
+  /// Attempts to create a connection to a Dart VM.
+  ///
+  /// Returns null if either there is an [HttpException] or a
+  /// [TimeoutException], else a [DartVm] instance.
   Future<DartVm> _getDartVm(int port) async {
     if (!_dartVmCache.containsKey(port)) {
-      final DartVm dartVm = await DartVm.connect(_getDartVmUri(port));
-      _dartVmCache[port] = dartVm;
+      // When raising an HttpException this means that there is no instance of
+      // the Dart VM to communicate with.  The TimeoutException is raised when
+      // the Dart VM instance is shut down in the middle of communicating.
+      try {
+        final DartVm dartVm = await DartVm.connect(_getDartVmUri(port));
+        _dartVmCache[port] = dartVm;
+      } on HttpException {
+        _log.warning('HTTP Exception encountered connecting to new VM');
+        return null;
+      } on TimeoutException {
+        _log.warning('TimeoutException encountered connecting to new VM');
+        return null;
+      }
     }
     return _dartVmCache[port];
   }
@@ -464,7 +477,7 @@ class FuchsiaRemoteConnection {
     await stop();
     final List<int> servicePorts = await getDeviceServicePorts();
     final List<PortForwarder> forwardedVmServicePorts =
-        await Future.wait(servicePorts.map((int deviceServicePort) {
+        await Future.wait<PortForwarder>(servicePorts.map<Future<PortForwarder>>((int deviceServicePort) {
       return fuchsiaPortForwardingFunction(
           _sshCommandRunner.address,
           deviceServicePort,
@@ -506,7 +519,6 @@ class FuchsiaRemoteConnection {
       final int lastSpace = trimmed.lastIndexOf(' ');
       final String lastWord = trimmed.substring(lastSpace + 1);
       if ((lastWord != '.') && (lastWord != '..')) {
-
         final int value = int.tryParse(lastWord);
         if (value != null) {
           ports.add(value);

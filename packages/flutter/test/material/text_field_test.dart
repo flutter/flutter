@@ -145,7 +145,7 @@ void main() {
   }
 
   List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
-    return points.map((TextSelectionPoint point) {
+    return points.map<TextSelectionPoint>((TextSelectionPoint point) {
       return TextSelectionPoint(
         box.localToGlobal(point.point),
         point.direction,
@@ -1721,8 +1721,8 @@ void main() {
   });
 
   testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: const Material(
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
         child: DefaultTextStyle(
           style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
           child: Center(
@@ -1746,8 +1746,8 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: DefaultTextStyle(
             style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
             child: Center(

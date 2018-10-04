@@ -124,12 +124,20 @@ class Doctor {
     for (DoctorValidator validator in validators) {
       final ValidationResult result = await validator.validate();
       buffer.write('${result.leadingBox} ${validator.title} is ');
-      if (result.type == ValidationType.missing)
-        buffer.write('not installed.');
-      else if (result.type == ValidationType.partial)
-        buffer.write('partially installed; more components are available.');
-      else
-        buffer.write('fully installed.');
+      switch (result.type) {
+        case ValidationType.missing:
+          buffer.write('not installed.');
+          break;
+        case ValidationType.partial:
+          buffer.write('partially installed; more components are available.');
+          break;
+        case ValidationType.notAvailable:
+          buffer.write('not available.');
+          break;
+        case ValidationType.installed:
+          buffer.write('fully installed.');
+          break;
+      }
 
       if (result.statusInfo != null)
         buffer.write(' (${result.statusInfo})');
@@ -171,11 +179,17 @@ class Doctor {
       }
       status.stop();
 
-      if (result.type == ValidationType.missing) {
-        doctorResult = false;
-      }
-      if (result.type != ValidationType.installed) {
-        issues += 1;
+      switch (result.type) {
+        case ValidationType.missing:
+          doctorResult = false;
+          issues += 1;
+          break;
+        case ValidationType.partial:
+        case ValidationType.notAvailable:
+          issues += 1;
+          break;
+        case ValidationType.installed:
+          break;
       }
 
       if (result.statusInfo != null)
@@ -238,7 +252,8 @@ abstract class Workflow {
 enum ValidationType {
   missing,
   partial,
-  installed
+  notAvailable,
+  installed,
 }
 
 abstract class DoctorValidator {
@@ -286,6 +301,7 @@ class GroupedValidator extends DoctorValidator {
             mergedType = ValidationType.partial;
           }
           break;
+        case ValidationType.notAvailable:
         case ValidationType.partial:
           mergedType = ValidationType.partial;
           break;
@@ -322,6 +338,7 @@ class ValidationResult {
         return '[✗]';
       case ValidationType.installed:
         return '[✓]';
+      case ValidationType.notAvailable:
       case ValidationType.partial:
         return '[!]';
     }
@@ -403,9 +420,9 @@ class NoIdeValidator extends DoctorValidator {
 }
 
 abstract class IntelliJValidator extends DoctorValidator {
-  final String installPath;
-
   IntelliJValidator(String title, this.installPath) : super(title);
+
+  final String installPath;
 
   String get version;
   String get pluginsPath;
@@ -552,9 +569,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
     try {
       final Iterable<Directory> installDirs = installPaths
-              .map((String installPath) => fs.directory(installPath))
-              .map((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
-              .expand((List<FileSystemEntity> mappedDirs) => mappedDirs)
+              .map<Directory>((String installPath) => fs.directory(installPath))
+              .map<List<FileSystemEntity>>((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
+              .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
               .whereType<Directory>();
       for (Directory dir in installDirs) {
         checkForIntelliJ(dir);
@@ -600,7 +617,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 }
 
 class DeviceValidator extends DoctorValidator {
-  DeviceValidator() : super('Connected devices');
+  DeviceValidator() : super('Connected device');
 
   @override
   Future<ValidationResult> validate() async {
@@ -609,17 +626,17 @@ class DeviceValidator extends DoctorValidator {
     if (devices.isEmpty) {
       final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
       if (diagnostics.isNotEmpty) {
-        messages = diagnostics.map((String message) => ValidationMessage(message)).toList();
+        messages = diagnostics.map<ValidationMessage>((String message) => ValidationMessage(message)).toList();
       } else {
         messages = <ValidationMessage>[ValidationMessage.hint('No devices available')];
       }
     } else {
       messages = await Device.descriptions(devices)
-          .map((String msg) => ValidationMessage(msg)).toList();
+          .map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
     }
 
     if (devices.isEmpty) {
-      return ValidationResult(ValidationType.partial, messages);
+      return ValidationResult(ValidationType.notAvailable, messages);
     } else {
       return ValidationResult(ValidationType.installed, messages, statusInfo: '${devices.length} available');
     }
@@ -627,9 +644,9 @@ class DeviceValidator extends DoctorValidator {
 }
 
 class ValidatorWithResult extends DoctorValidator {
-  final ValidationResult result;
-
   ValidatorWithResult(String title, this.result) : super(title);
+
+  final ValidationResult result;
 
   @override
   Future<ValidationResult> validate() async => result;

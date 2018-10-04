@@ -72,12 +72,6 @@ abstract class RunCommandBase extends FlutterCommand {
 }
 
 class RunCommand extends RunCommandBase {
-  @override
-  final String name = 'run';
-
-  @override
-  final String description = 'Run your Flutter app on an attached device.';
-
   RunCommand({ bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
@@ -129,6 +123,14 @@ class RunCommand extends RunCommandBase {
               'engine, the application will use its own snapshot that includes\n'
               'additional functions.'
       )
+      ..addFlag('hotupdate',
+        hide: !verboseHelp,
+        help: 'Build differential snapshot based on the last state of the build\n'
+              'tree and any changes to the application source code since then.\n'
+              'This flag is only allowed when using --dynamic. With this flag,\n'
+              'a partial VM snapshot is generated that is loaded on top of the\n'
+              'original VM snapshot that contains precompiled code.'
+      )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
         help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
@@ -170,6 +172,12 @@ class RunCommand extends RunCommandBase {
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
       ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true);
   }
+
+  @override
+  final String name = 'run';
+
+  @override
+  final String description = 'Run your Flutter app on an attached device.';
 
   List<Device> devices;
 
@@ -336,7 +344,7 @@ class RunCommand extends RunCommandBase {
       fs.file(pidFile).writeAsStringSync(pid.toString());
     }
 
-    final List<FlutterDevice> flutterDevices = devices.map((Device device) {
+    final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {
       return FlutterDevice(
         device,
         trackWidgetCreation: argResults['track-widget-creation'],
@@ -384,7 +392,7 @@ class RunCommand extends RunCommandBase {
     // Do not add more operations to the future.
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
-    appStartedTimeRecorder.future.then( // ignore: unawaited_futures
+    appStartedTimeRecorder.future.then<void>( // ignore: unawaited_futures
       (_) { appStartedTime = clock.now(); }
     );
 

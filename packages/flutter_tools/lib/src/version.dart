@@ -161,7 +161,7 @@ class FlutterVersion {
   static Future<Null> _removeVersionCheckRemoteIfExists() async {
     final List<String> remotes = (await _run(<String>['git', 'remote']))
         .split('\n')
-        .map((String name) => name.trim()) // to account for OS-specific line-breaks
+        .map<String>((String name) => name.trim()) // to account for OS-specific line-breaks
         .toList();
     if (remotes.contains(_versionCheckRemote))
       await _run(<String>['git', 'remote', 'remove', _versionCheckRemote]);
@@ -368,10 +368,6 @@ class FlutterVersion {
 /// Contains data and load/save logic pertaining to Flutter version checks.
 @visibleForTesting
 class VersionCheckStamp {
-  /// The prefix of the stamp file where we cache Flutter version check data.
-  @visibleForTesting
-  static const String kFlutterVersionCheckStampFile = 'flutter_version_check';
-
   const VersionCheckStamp({
     this.lastTimeVersionWasChecked,
     this.lastKnownRemoteVersion,
@@ -381,6 +377,10 @@ class VersionCheckStamp {
   final DateTime lastTimeVersionWasChecked;
   final DateTime lastKnownRemoteVersion;
   final DateTime lastTimeWarningWasPrinted;
+
+  /// The prefix of the stamp file where we cache Flutter version check data.
+  @visibleForTesting
+  static const String kFlutterVersionCheckStampFile = 'flutter_version_check';
 
   static Future<VersionCheckStamp> load() async {
     final String versionCheckStamp = Cache.instance.getStampFor(kFlutterVersionCheckStampFile);

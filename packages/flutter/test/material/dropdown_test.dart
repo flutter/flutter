@@ -43,7 +43,7 @@ Widget buildFrame({
             onChanged: onChanged,
             isDense: isDense,
             isExpanded: isExpanded,
-            items: items.map((String item) {
+            items: items.map<DropdownMenuItem<String>>((String item) {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
                 value: item,
@@ -407,7 +407,7 @@ void main() {
 
     // When isDense is true, the button's height is reduced. The menu items'
     // heights are not.
-    final double menuItemHeight = itemBoxes.map((RenderBox box) => box.size.height).reduce(math.max);
+    final double menuItemHeight = itemBoxes.map<double>((RenderBox box) => box.size.height).reduce(math.max);
     expect(menuItemHeight, greaterThan(buttonBox.size.height));
 
     for (RenderBox itemBox in itemBoxes) {
@@ -421,6 +421,57 @@ void main() {
     // should have the same size and location.
     checkSelectedItemTextGeometry(tester, 'two');
   });
+
+  testWidgets('Dropdown menu scrolls to first item in long lists', (WidgetTester tester) async {
+    // Open the dropdown menu
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      value: null, // nothing selected
+      items: List<String>.generate(/*length=*/ 100, (int index) => index.toString())
+    ));
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pump();
+    await tester.pumpAndSettle(); // finish the menu animation
+
+    // Find the first item in the scrollable dropdown list
+    final Finder menuItemFinder = find.byType(Scrollable);
+    final RenderBox menuItemContainer = tester.renderObject<RenderBox>(menuItemFinder);
+    final RenderBox firstItem = tester.renderObject<RenderBox>(
+      find.descendant(of: menuItemFinder, matching: find.byKey(const ValueKey<String>('0'))));
+
+    // List should be scrolled so that the first item is at the top. Menu items
+    // are offset 8.0 from the top edge of the scrollable menu.
+    const Offset selectedItemOffset = Offset(0.0, -8.0);
+    expect(
+      firstItem.size.topCenter(firstItem.localToGlobal(selectedItemOffset)).dy,
+      equals(menuItemContainer.size.topCenter(menuItemContainer.localToGlobal(Offset.zero)).dy)
+    );
+  });
+
+  testWidgets('Dropdown menu aligns selected item with button in long lists', (WidgetTester tester) async {
+    // Open the dropdown menu
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      value: '50',
+      items: List<String>.generate(/*length=*/ 100, (int index) => index.toString())
+    ));
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle(); // finish the menu animation
+
+    // Find the selected item in the scrollable dropdown list
+    final RenderBox selectedItem = tester.renderObject<RenderBox>(
+      find.descendant(of: find.byType(Scrollable), matching: find.byKey(const ValueKey<String>('50'))));
+
+    // List should be scrolled so that the selected item is in line with the button
+    expect(
+      selectedItem.size.center(selectedItem.localToGlobal(Offset.zero)).dy,
+      equals(buttonBox.size.center(buttonBox.localToGlobal(Offset.zero)).dy)
+    );
+  });
+
 
   testWidgets('Size of DropdownButton with null value', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();

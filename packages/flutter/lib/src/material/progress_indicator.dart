@@ -69,6 +69,20 @@ abstract class ProgressIndicator extends StatefulWidget {
 }
 
 class _LinearProgressIndicatorPainter extends CustomPainter {
+  const _LinearProgressIndicatorPainter({
+    this.backgroundColor,
+    this.valueColor,
+    this.value,
+    this.animationValue,
+    @required this.textDirection,
+  }) : assert(textDirection != null);
+
+  final Color backgroundColor;
+  final Color valueColor;
+  final double value;
+  final double animationValue;
+  final TextDirection textDirection;
+
   // The indeterminate progress animation displays two lines whose leading (head)
   // and trailing (tail) endpoints are defined by the following four curves.
   static const Curve line1Head = Interval(
@@ -91,20 +105,6 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     (1267.0 + 533.0) / _kIndeterminateLinearDuration,
     curve: Cubic(0.10, 0.0, 0.45, 1.0),
   );
-
-  const _LinearProgressIndicatorPainter({
-    this.backgroundColor,
-    this.valueColor,
-    this.value,
-    this.animationValue,
-    @required this.textDirection,
-  }) : assert(textDirection != null);
-
-  final Color backgroundColor;
-  final Color valueColor;
-  final double value;
-  final double animationValue;
-  final TextDirection textDirection;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -254,12 +254,6 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 }
 
 class _CircularProgressIndicatorPainter extends CustomPainter {
-  static const double _twoPi = math.pi * 2.0;
-  static const double _epsilon = .001;
-  // Canvas.drawArc(r, 0, 2*PI) doesn't draw anything, so just get close.
-  static const double _sweep = _twoPi - _epsilon;
-  static const double _startAngle = -math.pi / 2.0;
-
   _CircularProgressIndicatorPainter({
     this.valueColor,
     this.value,
@@ -284,6 +278,12 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   final double strokeWidth;
   final double arcStart;
   final double arcSweep;
+
+  static const double _twoPi = math.pi * 2.0;
+  static const double _epsilon = .001;
+  // Canvas.drawArc(r, 0, 2*PI) doesn't draw anything, so just get close.
+  static const double _sweep = _twoPi - _epsilon;
+  static const double _startAngle = -math.pi / 2.0;
 
   @override
   void paint(Canvas canvas, Size size) {

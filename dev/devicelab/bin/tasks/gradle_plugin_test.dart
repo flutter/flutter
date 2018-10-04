@@ -281,8 +281,6 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
 }
 
 class _Dependencies {
-  String target;
-  Set<String> dependencies;
   _Dependencies(String depfilePath) {
     final RegExp _separatorExpr = RegExp(r'([^\\]) ');
     final RegExp _escapeExpr = RegExp(r'\\(.)');
@@ -297,10 +295,13 @@ class _Dependencies {
         .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
         .split('\n')
         // Expand escape sequences, so that '\ ', for example,ß becomes ' '
-        .map((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
+        .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
         .where((String path) => path.isNotEmpty)
         .toSet();
   }
+
+  String target;
+  Set<String> dependencies;
 }
 
 /// Returns [null] if target matches [expectedTarget], otherwise returns an error message.

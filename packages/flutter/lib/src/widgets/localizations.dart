@@ -74,7 +74,7 @@ Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegat
     return SynchronousFuture<Map<Type, dynamic>>(output);
 
   // Some of delegate.load() values were asynchronous futures. Wait for them.
-  return Future.wait<dynamic>(pendingList.map((_Pending p) => p.futureValue))
+  return Future.wait<dynamic>(pendingList.map<Future<dynamic>>((_Pending p) => p.futureValue))
     .then<Map<Type, dynamic>>((List<dynamic> values) {
       assert(values.length == pendingList.length);
       for (int i = 0; i < values.length; i += 1) {
@@ -502,7 +502,7 @@ class _LocalizationsState extends State<Localizations> {
 
     Map<Type, dynamic> typeToResources;
     final Future<Map<Type, dynamic>> typeToResourcesFuture = _loadAll(locale, delegates)
-      .then((Map<Type, dynamic> value) {
+      .then<Map<Type, dynamic>>((Map<Type, dynamic> value) {
         return typeToResources = value;
       });
 
@@ -516,7 +516,7 @@ class _LocalizationsState extends State<Localizations> {
       // - If we're running at app startup time then defer reporting the first
       // "useful" frame until after the async load has completed.
       WidgetsBinding.instance.deferFirstFrameReport();
-      typeToResourcesFuture.then((Map<Type, dynamic> value) {
+      typeToResourcesFuture.then<void>((Map<Type, dynamic> value) {
         WidgetsBinding.instance.allowFirstFrameReport();
         if (!mounted)
           return;
