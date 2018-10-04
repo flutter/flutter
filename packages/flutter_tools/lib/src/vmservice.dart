@@ -950,13 +950,17 @@ class VM extends ServiceObjectOwner {
 
   Future<void> refreshViews() async {
     if (!isFlutterEngine)
-      return;
+      return Future<Null>.value(null);
     _viewCache.clear();
+    Completer<Null> completer = new Completer<Null>();
+    List<Future<ServiceObject>> futures = <Future<ServiceObject>>[];
     for (Isolate isolate in isolates.toList()) {
-      await vmService.vm.invokeRpc<ServiceObject>('_flutter.listViews',
+      futures.add(vmService.vm.invokeRpc<ServiceObject>('_flutter.listViews',
           timeout: kLongRequestTimeout,
-          params: <String, dynamic> {'isolateId': isolate.id});
+          params: <String, dynamic> {'isolateId': isolate.id}));
     }
+    Future.wait(futures).whenComplete(() => completer.complete(null));
+    return completer.future;
   }
 
   Iterable<FlutterView> get views => _viewCache.values;
@@ -1225,15 +1229,15 @@ class Isolate extends ServiceObjectOwner {
       Duration timeout,
       bool timeoutFatal = true,
     }
-  ) async {
-    try {
-      return await invokeRpcRaw(method, params: params, timeout: timeout, timeoutFatal: timeoutFatal);
-    } on rpc.RpcException catch (e) {
-      // If an application is not using the framework
-      if (e.code == rpc_error_code.METHOD_NOT_FOUND)
-        return null;
-      rethrow;
-    }
+  ) {
+    return invokeRpcRaw(method, params: params, timeout: timeout,
+        timeoutFatal: timeoutFatal).catchError((dynamic error) {
+            if (error is rpc.RpcException) {
+              // If an application is not using the framework
+              if (error.code == rpc_error_code.METHOD_NOT_FOUND)
+                return null;
+              throw error;
+            }});
   }
 
   // Debug dump extension methods.
@@ -1288,23 +1292,24 @@ class Isolate extends ServiceObjectOwner {
 
   // Reload related extension methods.
   Future<Map<String, dynamic>> flutterReassemble() async {
-    return await invokeFlutterExtensionRpcRaw(
+    return invokeFlutterExtensionRpcRaw(
       'ext.flutter.reassemble',
       timeout: kShortRequestTimeout,
       timeoutFatal: true,
     );
   }
 
-  Future<bool> flutterFrameworkPresent() async {
-    return await invokeFlutterExtensionRpcRaw('ext.flutter.frameworkPresent') != null;
+  Future<bool> flutterFrameworkPresent() {
+    return invokeFlutterExtensionRpcRaw('ext.flutter.frameworkPresent').then(
+        (Map<String, dynamic> result) => result != null);
   }
 
-  Future<Map<String, dynamic>> uiWindowScheduleFrame() async {
-    return await invokeFlutterExtensionRpcRaw('ext.ui.window.scheduleFrame');
+  Future<Map<String, dynamic>> uiWindowScheduleFrame() {
+    return invokeFlutterExtensionRpcRaw('ext.ui.window.scheduleFrame');
   }
 
-  Future<Map<String, dynamic>> flutterEvictAsset(String assetPath) async {
-    return await invokeFlutterExtensionRpcRaw('ext.flutter.evict',
+  Future<Map<String, dynamic>> flutterEvictAsset(String assetPath) {
+    return invokeFlutterExtensionRpcRaw('ext.flutter.evict',
       params: <String, dynamic>{
         'value': assetPath,
       }
@@ -1312,8 +1317,8 @@ class Isolate extends ServiceObjectOwner {
   }
 
   // Application control extension methods.
-  Future<Map<String, dynamic>> flutterExit() async {
-    return await invokeFlutterExtensionRpcRaw(
+  Future<Map<String, dynamic>> flutterExit() {
+    return invokeFlutterExtensionRpcRaw(
       'ext.flutter.exit',
       timeout: const Duration(seconds: 2),
       timeoutFatal: false,
