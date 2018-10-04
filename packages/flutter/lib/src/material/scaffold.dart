@@ -687,7 +687,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///     child: Icon(Icons.add),
 ///   ),
 ///   floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-///   )
+/// )
 /// ```
 ///
 /// See also:
