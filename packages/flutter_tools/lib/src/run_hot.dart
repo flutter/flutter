@@ -713,13 +713,15 @@ class HotRunner extends ResidentRunner {
     bool reassembleTimedOut = false;
     List<Future<void>> futures = <Future<void>>[];
     for (FlutterView view in reassembleViews) {
-      futures.add(view.uiIsolate.flutterReassemble().whenComplete(() async {
-        await view.uiIsolate.uiWindowScheduleFrame();
+      futures.add(view.uiIsolate.flutterReassemble().then((_) {
+        return view.uiIsolate.uiWindowScheduleFrame();
       }).catchError((dynamic error) {
         reassembleAndScheduleErrors = true;
         printError('Reassembling ${view.uiIsolate.name} failed: $error');
       }));
     }
+    await Future.wait(futures);
+
     // Record time it took for Flutter to reassemble the application.
     _addBenchmarkData('hotReloadFlutterReassembleMilliseconds',
         reassembleTimer.elapsed.inMilliseconds);
