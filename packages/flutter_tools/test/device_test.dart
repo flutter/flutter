@@ -39,9 +39,9 @@ void main() {
 }
 
 class TestDeviceManager extends DeviceManager {
-  final List<Device> allDevices;
-
   TestDeviceManager(this.allDevices);
+
+  final List<Device> allDevices;
 
   @override
   Stream<Device> getAllConnectedDevices() {
@@ -50,10 +50,10 @@ class TestDeviceManager extends DeviceManager {
 }
 
 class _MockDevice extends Device {
+  _MockDevice(this.name, String id) : super(id);
+
   @override
   final String name;
-
-  _MockDevice(this.name, String id) : super(id);
 
   @override
   void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

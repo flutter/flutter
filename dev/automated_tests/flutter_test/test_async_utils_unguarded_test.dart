@@ -11,7 +11,7 @@ class TestTestBinding extends AutomatedTestWidgetsFlutterBinding {
   static void testPrint(String message, { int wrapWidth }) { print(message); }
 }
 
-Future<Null> helperFunction(WidgetTester tester) async {
+Future<void> helperFunction(WidgetTester tester) async {
   await tester.pump();
 }
 

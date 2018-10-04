@@ -268,10 +268,6 @@ class _DemosPage extends StatelessWidget {
 }
 
 class GalleryHome extends StatefulWidget {
-  // In checked mode our MaterialApp will show the default "debug" banner.
-  // Otherwise show the "preview" banner.
-  static bool showPreviewBanner = true;
-
   const GalleryHome({
     Key key,
     this.testMode = false,
@@ -280,6 +276,10 @@ class GalleryHome extends StatefulWidget {
 
   final Widget optionsPage;
   final bool testMode;
+
+  // In checked mode our MaterialApp will show the default "debug" banner.
+  // Otherwise show the "preview" banner.
+  static bool showPreviewBanner = true;
 
   @override
   _GalleryHomeState createState() => _GalleryHomeState();

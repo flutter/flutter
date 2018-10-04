@@ -56,20 +56,20 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
 }
 
 class _ManifestAssetBundle implements AssetBundle {
+  /// Constructs an [_ManifestAssetBundle] that gathers the set of assets from the
+  /// pubspec.yaml manifest.
+  _ManifestAssetBundle();
+
   @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
+
+  DateTime _lastBuildTimestamp;
 
   static const String defaultManifestPath = 'pubspec.yaml';
   static const String _assetManifestJson = 'AssetManifest.json';
   static const String _fontManifestJson = 'FontManifest.json';
   static const String _fontSetMaterial = 'material';
   static const String _license = 'LICENSE';
-
-  DateTime _lastBuildTimestamp;
-
-  /// Constructs an [_ManifestAssetBundle] that gathers the set of assets from the
-  /// pubspec.yaml manifest.
-  _ManifestAssetBundle();
 
   @override
   bool wasBuiltOnce() => _lastBuildTimestamp != null;

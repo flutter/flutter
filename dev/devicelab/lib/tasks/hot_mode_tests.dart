@@ -43,8 +43,8 @@ TaskFunction createHotModeTest() {
               environment: null
           );
 
-          final Completer<Null> stdoutDone = Completer<Null>();
-          final Completer<Null> stderrDone = Completer<Null>();
+          final Completer<void> stdoutDone = Completer<void>();
+          final Completer<void> stderrDone = Completer<void>();
           process.stdout
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
@@ -80,8 +80,8 @@ TaskFunction createHotModeTest() {
             stderrDone.complete();
           });
 
-          await Future.wait<Null>(
-              <Future<Null>>[stdoutDone.future, stderrDone.future]);
+          await Future.wait<void>(
+              <Future<void>>[stdoutDone.future, stderrDone.future]);
           await process.exitCode;
 
           twoReloadsData = json.decode(benchmarkFile.readAsStringSync());
@@ -96,8 +96,8 @@ TaskFunction createHotModeTest() {
               <String>['run']..addAll(options),
               environment: null
           );
-          final Completer<Null> stdoutDone = Completer<Null>();
-          final Completer<Null> stderrDone = Completer<Null>();
+          final Completer<void> stdoutDone = Completer<void>();
+          final Completer<void> stderrDone = Completer<void>();
           process.stdout
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
@@ -118,8 +118,8 @@ TaskFunction createHotModeTest() {
             stderrDone.complete();
           });
 
-          await Future.wait<Null>(
-              <Future<Null>>[stdoutDone.future, stderrDone.future]);
+          await Future.wait<void>(
+              <Future<void>>[stdoutDone.future, stderrDone.future]);
           await process.exitCode;
 
           freshRestartReloadsData =

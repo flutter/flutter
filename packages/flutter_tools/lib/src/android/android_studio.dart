@@ -36,16 +36,6 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     _init();
   }
 
-  final String directory;
-  final String studioAppName;
-  final Version version;
-  final String configured;
-
-  String _pluginsPath;
-  String _javaPath;
-  bool _isValid = false;
-  final List<String> _validationMessages = <String>[];
-
   factory AndroidStudio.fromMacOSBundle(String bundlePath) {
     final String studioPath = fs.path.join(bundlePath, 'Contents');
     final String plistFile = fs.path.join(studioPath, 'Info.plist');
@@ -88,6 +78,16 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
     return null;
   }
+
+  final String directory;
+  final String studioAppName;
+  final Version version;
+  final String configured;
+
+  String _pluginsPath;
+  String _javaPath;
+  bool _isValid = false;
+  final List<String> _validationMessages = <String>[];
 
   String get javaPath => _javaPath;
 

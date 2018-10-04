@@ -424,13 +424,13 @@ void main() {
 }
 
 class MockVMService extends BasicMock implements VMService {
-  Uri _httpAddress;
-  HttpServer _server;
-  MockVM _vm;
-
   MockVMService() {
     _vm = MockVM(this);
   }
+
+  Uri _httpAddress;
+  HttpServer _server;
+  MockVM _vm;
 
   @override
   Uri get httpAddress => _httpAddress;
@@ -468,13 +468,13 @@ class MockVMService extends BasicMock implements VMService {
 }
 
 class MockVM implements VM {
+  MockVM(this._service);
+
   final MockVMService _service;
   final Uri _baseUri = Uri.parse('file:///tmp/devfs/test');
   bool _devFSExists = false;
 
   static const int kFileSystemAlreadyExists = 1001;
-
-  MockVM(this._service);
 
   @override
   Future<Map<String, dynamic>> createDevFS(String fsName) async {

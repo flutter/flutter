@@ -97,7 +97,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
   //                delay to let the task process open up the VM service port.
   //                Otherwise we almost always hit the non-ready case first and
   //                wait a whole 1 second, which is annoying.
-  await Future<Null>.delayed(const Duration(milliseconds: 100));
+  await Future<void>.delayed(const Duration(milliseconds: 100));
 
   while (true) {
     try {
@@ -123,7 +123,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
       print('VM service not ready yet: $error');
       const Duration pauseBetweenRetries = Duration(milliseconds: 200);
       print('Will retry in $pauseBetweenRetries.');
-      await Future<Null>.delayed(pauseBetweenRetries);
+      await Future<void>.delayed(pauseBetweenRetries);
     }
   }
 }

@@ -22,8 +22,6 @@ import '../protocol_discovery.dart';
 import '../version.dart';
 
 class FlutterTesterApp extends ApplicationPackage {
-  final Directory _directory;
-
   factory FlutterTesterApp.fromCurrentDirectory() {
     return FlutterTesterApp._(fs.currentDirectory);
   }
@@ -31,6 +29,8 @@ class FlutterTesterApp extends ApplicationPackage {
   FlutterTesterApp._(Directory directory)
       : _directory = directory,
         super(id: directory.path);
+
+  final Directory _directory;
 
   @override
   String get name => _directory.basename;
