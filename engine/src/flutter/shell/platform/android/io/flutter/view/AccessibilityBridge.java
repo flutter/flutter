@@ -5,7 +5,6 @@
 package io.flutter.view;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Rect;
 import android.opengl.Matrix;
 import android.os.Build;
@@ -600,8 +599,6 @@ class AccessibilityBridge
     }
 
     void updateCustomAccessibilityActions(ByteBuffer buffer, String[] strings) {
-        ArrayList<CustomAccessibilityAction> updatedActions =
-                new ArrayList<CustomAccessibilityAction>();
         while (buffer.hasRemaining()) {
             int id = buffer.getInt();
             CustomAccessibilityAction action = getOrCreateAction(id);
