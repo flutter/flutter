@@ -11,6 +11,7 @@ import '../globals.dart';
 import 'context.dart';
 import 'io.dart' as io;
 import 'platform.dart';
+import 'utils.dart';
 
 final AnsiTerminal _kAnsiTerminal = AnsiTerminal();
 

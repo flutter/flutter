@@ -39,7 +39,7 @@ class DevicesCommand extends FlutterCommand {
       if (diagnostics.isNotEmpty) {
         printStatus('');
         for (String diagnostic in diagnostics) {
-          printStatus(wrapText('• $diagnostic', hangingIndent: 2));
+          printStatus('• $diagnostic', hangingIndent: 2);
         }
       }
     } else {

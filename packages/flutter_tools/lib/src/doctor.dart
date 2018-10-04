@@ -15,6 +15,7 @@ import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
 import 'base/terminal.dart';
+import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
 import 'device.dart';
@@ -196,11 +197,11 @@ class Doctor {
       }
 
       if (result.statusInfo != null) {
-        printStatus(wrapText('${result.coloredLeadingBox} ${validator.title} (${result.statusInfo})',
-            hangingIndent: result.leadingBox.length + 1));
+        printStatus('${result.coloredLeadingBox} ${validator.title} (${result.statusInfo})',
+            hangingIndent: result.leadingBox.length + 1);
       } else {
-        printStatus(wrapText('${result.coloredLeadingBox} ${validator.title}',
-            hangingIndent: result.leadingBox.length + 1));
+        printStatus('${result.coloredLeadingBox} ${validator.title}',
+            hangingIndent: result.leadingBox.length + 1);
       }
 
       for (ValidationMessage message in result.messages) {
@@ -208,7 +209,7 @@ class Doctor {
           int hangingIndent = 2;
           int indent = 4;
           for (String line in '${message.coloredIndicator} ${message.message}'.split('\n')) {
-            printStatus(wrapText(line, hangingIndent: hangingIndent, indent: indent), emphasis: true);
+            printStatus(line, hangingIndent: hangingIndent, indent: indent, emphasis: true);
             // Only do hanging indent for the first line.
             hangingIndent = 0;
             indent = 6;
@@ -224,9 +225,9 @@ class Doctor {
       printStatus('');
 
     if (issues > 0) {
-      printStatus('${terminal.color('!', TerminalColor.yellow)} Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.');
+      printStatus('${terminal.color('!', TerminalColor.yellow)} Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.', hangingIndent: 2);
     } else {
-      printStatus('${terminal.color('•', TerminalColor.green)} No issues found!');
+      printStatus('${terminal.color('•', TerminalColor.green)} No issues found!', hangingIndent: 2);
     }
 
     return doctorResult;

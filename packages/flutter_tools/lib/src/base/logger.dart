@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show LineSplitter;
 
 import 'package:meta/meta.dart';
 
@@ -35,6 +34,8 @@ abstract class Logger {
     StackTrace stackTrace,
     bool emphasis,
     TerminalColor color,
+    int indent,
+    int hangingIndent,
   });
 
   /// Display normal output of the command. This should be used for things like
@@ -48,6 +49,7 @@ abstract class Logger {
     TerminalColor color,
     bool newline,
     int indent,
+    int hangingIndent,
   });
 
   /// Use this for verbose tracing output. Users can turn this output on in order
@@ -82,8 +84,11 @@ class StdoutLogger extends Logger {
     StackTrace stackTrace,
     bool emphasis,
     TerminalColor color,
+    int indent,
+    int hangingIndent,
   }) {
     message ??= '';
+    message = wrapText(message, indent: indent, hangingIndent: hangingIndent);
     _status?.cancel();
     _status = null;
     if (emphasis == true)
@@ -102,19 +107,16 @@ class StdoutLogger extends Logger {
     TerminalColor color,
     bool newline,
     int indent,
+    int hangingIndent,
   }) {
     message ??= '';
+    message = wrapText(message, indent: indent, hangingIndent: hangingIndent);
     _status?.cancel();
     _status = null;
     if (emphasis == true)
       message = terminal.bolden(message);
     if (color != null)
       message = terminal.color(message, color);
-    if (indent != null && indent > 0) {
-      message = LineSplitter.split(message)
-          .map<String>((String line) => ' ' * indent + line)
-          .join('\n');
-    }
     if (newline != false)
       message = '$message\n';
     writeToStdOut(message);
@@ -203,8 +205,13 @@ class BufferLogger extends Logger {
     StackTrace stackTrace,
     bool emphasis,
     TerminalColor color,
+    int indent,
+    int hangingIndent,
   }) {
-    _error.writeln(terminal.color(message, color ?? TerminalColor.red));
+    _error.writeln(terminal.color(
+      wrapText(message, indent: indent, hangingIndent: hangingIndent),
+      color ?? TerminalColor.red,
+    ));
   }
 
   @override
@@ -214,11 +221,12 @@ class BufferLogger extends Logger {
     TerminalColor color,
     bool newline,
     int indent,
+    int hangingIndent,
   }) {
     if (newline != false)
-      _status.writeln(message);
+      _status.writeln(wrapText(message, indent: indent, hangingIndent: hangingIndent));
     else
-      _status.write(message);
+      _status.write(wrapText(message, indent: indent, hangingIndent: hangingIndent));
   }
 
   @override
@@ -262,8 +270,14 @@ class VerboseLogger extends Logger {
     StackTrace stackTrace,
     bool emphasis,
     TerminalColor color,
+    int indent,
+    int hangingIndent,
   }) {
-    _emit(_LogType.error, message, stackTrace);
+    _emit(
+      _LogType.error,
+      wrapText(message, indent: indent, hangingIndent: hangingIndent),
+      stackTrace,
+    );
   }
 
   @override
@@ -273,8 +287,9 @@ class VerboseLogger extends Logger {
     TerminalColor color,
     bool newline,
     int indent,
+    int hangingIndent,
   }) {
-    _emit(_LogType.status, message);
+    _emit(_LogType.status, wrapText(message, indent: indent, hangingIndent: hangingIndent));
   }
 
   @override
