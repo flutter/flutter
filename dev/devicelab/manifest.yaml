@@ -263,9 +263,9 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  module_test:
+  application_test:
     description: >
-      Checks that the module project template works and supports add2app on Android.
+      Checks that the application project template works and supports add2app on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
@@ -297,9 +297,9 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  module_test_ios:
+  application_test_ios:
     description: >
-      Checks that the module project template works and supports add2app on iOS.
+      Checks that the application project template works and supports add2app on iOS.
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
 
