@@ -5565,7 +5565,7 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 /// automatic indexes would give the spaces a semantic index, causing
 /// scroll announcements to state that there are four items visible.
 ///
-/// ```
+/// ```dart
 ///  ListView(
 ///    addSemanticIndexes: false,
 ///    semanticChildCount: 2,
