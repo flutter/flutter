@@ -534,7 +534,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                 Material( // Splashes.
                   type: MaterialType.transparency,
                   child: Padding(
-                    padding: EdgeInsets.only(bottom: additionalBottomPadding),
+                    padding: EdgeInsets.symmetric(vertical: additionalBottomPadding),
                     child: MediaQuery.removePadding(
                       context: context,
                       removeBottom: true,
