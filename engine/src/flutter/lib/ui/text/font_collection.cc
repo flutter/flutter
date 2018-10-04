@@ -8,8 +8,8 @@
 
 #include "flutter/lib/ui/text/asset_manager_font_provider.h"
 #include "flutter/runtime/test_font_data.h"
-#include "third_party/rapidjson/rapidjson/document.h"
-#include "third_party/rapidjson/rapidjson/rapidjson.h"
+#include "rapidjson/document.h"
+#include "rapidjson/rapidjson.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/skia/include/core/SkStream.h"

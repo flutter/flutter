@@ -100,7 +100,6 @@ source_set("common") {
     "$flutter_root/runtime",
     "$flutter_root/synchronization",
     "//third_party/dart/runtime:dart_api",
-    "//third_party/rapidjson",
     "//third_party/skia",
     "//third_party/skia:gpu",
   ]
@@ -109,6 +108,7 @@ source_set("common") {
     "$flutter_root/shell/version",
     "$flutter_root/third_party/txt",
     "//third_party/tonic",
+    "//third_party/rapidjson",
   ]
 
   public_configs = [ "$flutter_root:config" ]
