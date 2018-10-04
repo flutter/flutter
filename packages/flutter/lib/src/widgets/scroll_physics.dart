@@ -234,12 +234,6 @@ class ScrollPhysics {
   /// scroll position to fulfill such a request.
   bool get allowImplicitScrolling => true;
 
-  /// Generates a semantic scroll value, or null if none should be created.
-  String semanticScrollValue({
-    @required int firstIndex,
-    @required int lastIndex,
-    @required int childCount}) => null;
-
   @override
   String toString() {
     if (parent == null)
