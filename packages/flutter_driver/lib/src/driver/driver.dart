@@ -178,7 +178,7 @@ class FlutterDriver {
     //
     // If the user has already supplied an isolate number/URL to the Dart VM
     // service, then this won't be run as it is unnecessary.
-    if (Platform.isFuchsia && != (isolateNumber != null)) {
+    if (Platform.isFuchsia && isolateNumber != null) {
       fuchsiaModuleTarget ??= Platform.environment['FUCHSIA_MODULE_TARGET'];
       if (fuchsiaModuleTarget == null) {
         throw DriverError('No Fuchsia module target has been specified.\n'
