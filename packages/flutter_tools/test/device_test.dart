@@ -25,7 +25,7 @@ void main() {
       final List<Device> devices = <Device>[device1, device2, device3];
       final DeviceManager deviceManager = TestDeviceManager(devices);
 
-      Future<Null> expectDevice(String id, List<Device> expected) async {
+      Future<void> expectDevice(String id, List<Device> expected) async {
         expect(await deviceManager.getDevicesById(id).toList(), expected);
       }
       await expectDevice('01abfc49119c410e', <Device>[device2]);

@@ -80,7 +80,7 @@ class CrashReportSender {
   /// Sends one crash report.
   ///
   /// The report is populated from data in [error] and [stackTrace].
-  Future<Null> sendReport({
+  Future<void> sendReport({
     @required dynamic error,
     @required StackTrace stackTrace,
     @required String getFlutterVersion(),

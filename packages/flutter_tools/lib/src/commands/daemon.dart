@@ -50,14 +50,14 @@ class DaemonCommand extends FlutterCommand {
   final bool hidden;
 
   @override
-  Future<Null> runCommand() {
+  Future<FlutterCommandResult> runCommand() async {
     printStatus('Starting device daemon...');
 
     final NotifyingLogger notifyingLogger = NotifyingLogger();
 
     Cache.releaseLockEarly();
 
-    return context.run<Null>(
+    await context.run<void>(
       body: () async {
         final Daemon daemon = Daemon(
             stdinCommandStream, stdoutCommandResponse,
@@ -71,6 +71,7 @@ class DaemonCommand extends FlutterCommand {
         Logger: () => notifyingLogger,
       },
     );
+    return null;
   }
 }
 
@@ -295,9 +296,9 @@ class DaemonDomain extends Domain {
     return Future<String>.value(protocolVersion);
   }
 
-  Future<Null> shutdown(Map<String, dynamic> args) {
+  Future<void> shutdown(Map<String, dynamic> args) {
     Timer.run(daemon.shutdown);
-    return Future<Null>.value();
+    return Future<void>.value();
   }
 
   @override
@@ -413,7 +414,7 @@ class AppDomain extends Domain {
       connectionInfoCompleter = Completer<DebugConnectionInfo>();
       // We don't want to wait for this future to complete and callbacks won't fail.
       // As it just writes to stdout.
-      connectionInfoCompleter.future.then<Null>((DebugConnectionInfo info) { // ignore: unawaited_futures
+      connectionInfoCompleter.future.then<void>((DebugConnectionInfo info) { // ignore: unawaited_futures
         final Map<String, dynamic> params = <String, dynamic>{
           'port': info.httpUri.port,
           'wsUri': info.wsUri.toString(),
@@ -435,7 +436,7 @@ class AppDomain extends Domain {
       _sendAppEvent(app, 'started');
     });
 
-    await app._runInZone<Null>(this, () async {
+    await app._runInZone<void>(this, () async {
       try {
         await runOrAttach(
             connectionInfoCompleter: connectionInfoCompleter,
@@ -599,11 +600,11 @@ class DeviceDomain extends Domain {
     discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
   }
 
-  Future<Null> _serializeDeviceEvents = Future<Null>.value();
+  Future<void> _serializeDeviceEvents = Future<void>.value();
 
   _DeviceEventHandler _onDeviceEvent(String eventName) {
     return (Device device) {
-      _serializeDeviceEvents = _serializeDeviceEvents.then<Null>((_) async {
+      _serializeDeviceEvents = _serializeDeviceEvents.then<void>((_) async {
         sendEvent(eventName, await _deviceToMap(device));
       });
     };
@@ -620,17 +621,17 @@ class DeviceDomain extends Domain {
   }
 
   /// Enable device events.
-  Future<Null> enable(Map<String, dynamic> args) {
+  Future<void> enable(Map<String, dynamic> args) {
     for (PollingDeviceDiscovery discoverer in _discoverers)
       discoverer.startPolling();
-    return Future<Null>.value();
+    return Future<void>.value();
   }
 
   /// Disable device events.
-  Future<Null> disable(Map<String, dynamic> args) {
+  Future<void> disable(Map<String, dynamic> args) {
     for (PollingDeviceDiscovery discoverer in _discoverers)
       discoverer.stopPolling();
-    return Future<Null>.value();
+    return Future<void>.value();
   }
 
   /// Forward a host port to a device port.
@@ -649,7 +650,7 @@ class DeviceDomain extends Domain {
   }
 
   /// Removes a forwarded port.
-  Future<Null> unforward(Map<String, dynamic> args) async {
+  Future<void> unforward(Map<String, dynamic> args) async {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final int devicePort = _getIntArg(args, 'devicePort', required: true);
     final int hostPort = _getIntArg(args, 'hostPort', required: true);
@@ -798,8 +799,8 @@ class AppInstance {
     return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
   }
 
-  Future<Null> stop() => runner.stop();
-  Future<Null> detach() => runner.detach();
+  Future<void> stop() => runner.stop();
+  Future<void> detach() => runner.detach();
 
   void closeLogger() {
     _logger.close();
@@ -832,7 +833,7 @@ class EmulatorDomain extends Domain {
     return list.map<Map<String, dynamic>>(_emulatorToMap).toList();
   }
 
-  Future<Null> launch(Map<String, dynamic> args) async {
+  Future<void> launch(Map<String, dynamic> args) async {
     final String emulatorId = _getStringArg(args, 'emulatorId', required: true);
     final List<Emulator> matches =
         await emulators.getEmulatorsMatching(emulatorId);
