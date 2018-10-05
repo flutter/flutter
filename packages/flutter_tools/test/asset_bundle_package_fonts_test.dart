@@ -60,7 +60,7 @@ $fontsSection
       ..writeAsStringSync(packages);
   }
 
-  Future<Null> buildAndVerifyFonts(
+  Future<void> buildAndVerifyFonts(
     List<String> localFonts,
     List<String> packageFonts,
     List<String> packages,

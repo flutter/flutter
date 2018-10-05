@@ -68,7 +68,7 @@ String getFlutterRoot() {
   return fs.path.normalize(fs.path.join(toolsPath, '..', '..'));
 }
 
-CommandRunner<Null> createTestCommandRunner([FlutterCommand command]) {
+CommandRunner<void> createTestCommandRunner([FlutterCommand command]) {
   final FlutterCommandRunner runner = FlutterCommandRunner();
   if (command != null)
     runner.addCommand(command);
@@ -113,7 +113,7 @@ Future<String> createProject(Directory temp, {List<String> arguments}) async {
   arguments ??= <String>['--no-pub'];
   final String projectPath = fs.path.join(temp.path, 'flutter_project');
   final CreateCommand command = CreateCommand();
-  final CommandRunner<Null> runner = createTestCommandRunner(command);
+  final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create']..addAll(arguments)..add(projectPath));
   return projectPath;
 }

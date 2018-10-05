@@ -191,7 +191,7 @@ void assertContains(String text, List<String> patterns) {
   }
 }
 
-Future<Null> runCommand({
+Future<void> runCommand({
   FlutterCommand command,
   List<String> arguments,
   List<String> statusTextContains,

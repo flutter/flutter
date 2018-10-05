@@ -264,13 +264,13 @@ class _DevFSHttpWriter {
 
   int _inFlight = 0;
   Map<Uri, DevFSContent> _outstanding;
-  Completer<Null> _completer;
+  Completer<void> _completer;
   HttpClient _client;
 
-  Future<Null> write(Map<Uri, DevFSContent> entries) async {
+  Future<void> write(Map<Uri, DevFSContent> entries) async {
     _client = HttpClient();
     _client.maxConnectionsPerHost = kMaxInFlight;
-    _completer = Completer<Null>();
+    _completer = Completer<void>();
     _outstanding = Map<Uri, DevFSContent>.from(entries);
     _scheduleWrites();
     await _completer.future;
@@ -290,7 +290,7 @@ class _DevFSHttpWriter {
     }
   }
 
-  Future<Null> _scheduleWrite(
+  Future<void> _scheduleWrite(
     Uri deviceUri,
     DevFSContent content, [
     int retry = 0,
@@ -304,7 +304,7 @@ class _DevFSHttpWriter {
       final Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       final HttpClientResponse response = await request.close();
-      await response.drain<Null>();
+      await response.drain<void>();
     } on SocketException catch (socketException, stackTrace) {
       // We have one completer and can get up to kMaxInFlight errors.
       if (!_completer.isCompleted)
@@ -322,7 +322,7 @@ class _DevFSHttpWriter {
     }
     _inFlight--;
     if ((_outstanding.isEmpty) && (_inFlight == 0)) {
-      _completer.complete(null);
+      _completer.complete();
     } else {
       _scheduleWrites();
     }
@@ -392,7 +392,7 @@ class DevFS {
     return _baseUri;
   }
 
-  Future<Null> destroy() async {
+  Future<void> destroy() async {
     printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
     await _operations.destroy(fsName);
     printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
@@ -701,7 +701,7 @@ class DevFS {
     );
   }
 
-  Future<Null> _scanPackages(Set<String> fileFilter) async {
+  Future<void> _scanPackages(Set<String> fileFilter) async {
     StringBuffer sb;
     final PackageMap packageMap = PackageMap(_packagesFilePath);
 

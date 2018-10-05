@@ -272,7 +272,7 @@ void _exitIfNoAndroidSdk() {
   }
 }
 
-Future<Null> buildGradleProject({
+Future<void> buildGradleProject({
   @required FlutterProject project,
   @required BuildInfo buildInfo,
   @required String target,
@@ -301,7 +301,7 @@ Future<Null> buildGradleProject({
   }
 }
 
-Future<Null> _buildGradleProjectV1(FlutterProject project, String gradle) async {
+Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async {
   // Run 'gradlew build'.
   final Status status = logger.startProgress(
     "Running 'gradlew build'...",
@@ -322,7 +322,7 @@ Future<Null> _buildGradleProjectV1(FlutterProject project, String gradle) async 
   printStatus('Built ${fs.path.relative(project.android.gradleAppOutV1File.path)}.');
 }
 
-Future<Null> _buildGradleProjectV2(
+Future<void> _buildGradleProjectV2(
     FlutterProject flutterProject,
     String gradle,
     BuildInfo buildInfo,

@@ -262,7 +262,7 @@ class MockUsage implements Usage {
   Stream<Map<String, dynamic>> get onSend => null;
 
   @override
-  Future<Null> ensureAnalyticsSent() => Future<Null>.value();
+  Future<void> ensureAnalyticsSent() => Future<void>.value();
 
   @override
   void printWelcome() { }

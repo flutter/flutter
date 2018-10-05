@@ -56,7 +56,7 @@ class BuildAotCommand extends BuildSubCommand {
   final String description = "Build an ahead-of-time compiled snapshot of your app's Dart code.";
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     await super.runCommand();
 
     final String targetPlatform = argResults['target-platform'];
@@ -89,7 +89,7 @@ class BuildAotCommand extends BuildSubCommand {
       );
       if (mainPath == null) {
         throwToolExit('Compiler terminated unexpectedly.');
-        return;
+        return null;
       }
 
       // Build AOT snapshot.
@@ -152,7 +152,7 @@ class BuildAotCommand extends BuildSubCommand {
       // Catch the String exceptions thrown from the `runCheckedSync` methods below.
       status?.cancel();
       printError(error);
-      return;
+      return null;
     }
     status?.stop();
 
@@ -165,5 +165,6 @@ class BuildAotCommand extends BuildSubCommand {
     } else {
       printStatus(builtMessage);
     }
+    return null;
   }
 }

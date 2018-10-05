@@ -376,7 +376,7 @@ void main() {
   });
 }
 
-Future<Null> _recompile(StreamController<List<int>> streamController,
+Future<void> _recompile(StreamController<List<int>> streamController,
   ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
   String mockCompilerOutput) async {
   // Put content into the output stream after generator.recompile gets

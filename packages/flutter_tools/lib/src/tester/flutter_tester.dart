@@ -246,5 +246,5 @@ class _NoopPortForwarder extends DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
 
   @override
-  Future<Null> unforward(ForwardedPort forwardedPort) => null;
+  Future<void> unforward(ForwardedPort forwardedPort) => null;
 }
