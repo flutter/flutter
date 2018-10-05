@@ -349,15 +349,18 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     // so it is at most the maxMenuHeight.
     final double menuHeight = math.min(maxMenuHeight, preferredMenuHeight);
 
-    double bottom = menuTop + menuHeight;
+    double menuBottom = menuTop + menuHeight;
 
     // If the computed top or bottom of the menu are outside of the range
-    // specified, we need to bring them into range.
+    // specified, we need to bring them into range. If the item height is larger
+    // than the button height and the button is at the very bottom or top of the
+    // screen, the menu will be aligned with the bottom or top of the button
+    // respectively.
     if (menuTop < topLimit)
       menuTop = math.min(buttonTop, topLimit);
-    if (bottom > bottomLimit) {
-      bottom = math.max(buttonTop + _kMenuItemHeight, bottomLimit);
-      menuTop = bottom - menuHeight;
+    if (menuBottom > bottomLimit) {
+      menuBottom = math.max(buttonBottom, bottomLimit);
+      menuTop = menuBottom - menuHeight;
     }
 
     if (scrollController == null) {
