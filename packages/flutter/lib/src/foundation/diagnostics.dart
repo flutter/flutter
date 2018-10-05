@@ -2355,7 +2355,8 @@ abstract class Diagnosticable {
 ///
 /// See also:
 ///
-///  * [DiagnosticableTreeMixin], a mixin that implements this class.
+///  * [DiagnosticableTreeMixin], which provides a mixin that implements this
+///    class.
 ///  * [Diagnosticable], which should be used instead of this class to provide
 ///    diagnostics for objects without children.
 abstract class DiagnosticableTree extends Diagnosticable {
@@ -2454,10 +2455,16 @@ abstract class DiagnosticableTree extends Diagnosticable {
   List<DiagnosticsNode> debugDescribeChildren() => const <DiagnosticsNode>[];
 }
 
-/// A mixin that helps dump string and [DiagnosticsNode] representations of trees.
+/// A class that can be used as a mixin that helps dump string and
+/// [DiagnosticsNode] representations of trees.
 ///
-/// This mixin is identical to class [DiagnosticableTree].
-mixin DiagnosticableTreeMixin implements DiagnosticableTree {
+/// This class is identical to DiagnosticableTree except that it can be used as
+/// a mixin.
+abstract class DiagnosticableTreeMixin implements DiagnosticableTree {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory DiagnosticableTreeMixin._() => null;
+
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) {
     return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);

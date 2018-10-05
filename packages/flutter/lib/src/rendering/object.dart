@@ -2670,7 +2670,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 /// Generic mixin for render objects with one child.
 ///
 /// Provides a child model for a render object subclass that has a unique child.
-mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject {
+abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> extends RenderObject {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory RenderObjectWithChildMixin._() => null;
 
   /// Checks whether the given render object has the correct [runtimeType] to be
   /// a child of this render object.
@@ -2746,7 +2749,11 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
 }
 
 /// Parent data to support a doubly-linked list of children.
-mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
+abstract class ContainerParentDataMixin<ChildType extends RenderObject> extends ParentData {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory ContainerParentDataMixin._() => null;
+
   /// The previous sibling in the parent's child list.
   ChildType previousSibling;
   /// The next sibling in the parent's child list.
@@ -2777,7 +2784,11 @@ mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
 ///
 /// Provides a child model for a render object subclass that has a doubly-linked
 /// list of children.
-mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> on RenderObject {
+abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> extends RenderObject {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory ContainerRenderObjectMixin._() => null;
+
   bool _debugUltimatePreviousSiblingOf(ChildType child, { ChildType equals }) {
     ParentDataType childParentData = child.parentData;
     while (childParentData.previousSibling != null) {
