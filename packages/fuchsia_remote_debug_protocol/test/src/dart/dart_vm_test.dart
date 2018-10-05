@@ -199,7 +199,7 @@ void main() {
       final DartVm vm =
           await DartVm.connect(Uri.parse('http://whatever.com/ws'));
       expect(vm, isNot(null));
-      Future<Null> failingFunction() async {
+      Future<void> failingFunction() async {
         await vm.getAllFlutterViews();
       }
 
@@ -279,7 +279,7 @@ void main() {
       final DartVm vm =
           await DartVm.connect(Uri.parse('http://whatever.com/ws'));
       expect(vm, isNot(null));
-      Future<Null> failingFunction() async {
+      Future<void> failingFunction() async {
         await vm.getAllFlutterViews();
       }
 
@@ -312,7 +312,7 @@ void main() {
       final DartVm vm =
           await DartVm.connect(Uri.parse('http://whatever.com/ws'));
       expect(vm, isNot(null));
-      Future<Null> failingFunction() async {
+      Future<void> failingFunction() async {
         await vm.invokeRpc('somesillyfunction', timeout: timeoutTime);
       }
 
