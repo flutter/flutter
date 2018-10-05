@@ -48,7 +48,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       _validators.add(_FlutterValidator());
 
       if (androidWorkflow.appliesToHostPlatform)
-        _validators.add(androidValidator);
+        _validators.add(GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]));
 
       if (iosWorkflow.appliesToHostPlatform)
         _validators.add(GroupedValidator(<DoctorValidator>[iosValidator, cocoapodsValidator]));
@@ -159,7 +159,7 @@ class Doctor {
   /// Print information about the state of installed tooling.
   Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true }) async {
     if (androidLicenses)
-      return AndroidValidator.runLicenseManager();
+      return AndroidLicenseValidator.runLicenseManager();
 
     if (!verbose) {
       printStatus('Doctor summary (to see all details, run flutter doctor -v):');
