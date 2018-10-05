@@ -21,6 +21,7 @@ final List<String> flutterTestArgs = <String>[];
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'tool_tests': _runToolTests,
+  'aot_build_tests': _runAotBuildTests,
   'coverage': _runCoverage,
 };
 
@@ -147,6 +148,27 @@ Future<void> _runToolTests() async {
   );
 
   print('${bold}DONE: All tests successful.$reset');
+}
+
+/// Verifies that AOT builds of some examples apps finish
+/// without crashing. It does not actually launch the AOT-built
+/// apps. That happens later in the devicelab. This is just
+/// a smoke-test.
+Future<void> _runAotBuildTests() async {
+  await _flutterBuildAot(path.join('examples', 'hello_world'));
+  await _flutterBuildAot(path.join('examples', 'flutter_gallery'));
+  await _flutterBuildAot(path.join('examples', 'flutter_view'));
+
+  print('${bold}DONE: All AOT build tests successful.$reset');
+}
+
+Future<void> _flutterBuildAot(String relativePathToApplication) {
+  return runCommand(flutter,
+    <String>['build', 'aot'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
 }
 
 Future<void> _runTests() async {
