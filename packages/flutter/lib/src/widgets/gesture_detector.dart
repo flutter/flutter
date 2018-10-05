@@ -225,8 +225,7 @@ class GestureDetector extends StatelessWidget {
   /// a long period of time.
   final GestureLongPressCallback onLongPress;
 
-  /// A pointer has left the contact with the screen at the same location after
-  /// a long period of time.
+  /// A pointer that has triggered a long-press has stopped contacting the screen.
   final GestureLongPressUpCallback onLongPressUp;
 
   /// A pointer has contacted the screen and might begin to move vertically.
