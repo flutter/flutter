@@ -306,9 +306,9 @@ Future<List<T>> waitGroup<T>(Iterable<Future<T>> futures) {
 /// attached to [io.Stdio], --wrap is on, and --wrap-columns was not specified.
 const int kDefaultTerminalColumns = 100;
 
-// Smallest column that will be used for text wrapping. If the requested column
-// width is smaller than this, then this is what will be used.
-const int _kMinColumnWidth = 10;
+/// Smallest column that will be used for text wrapping. If the requested column
+/// width is smaller than this, then this is what will be used.
+const int kMinColumnWidth = 10;
 
 /// Wraps a block of text into lines no longer than [columnWidth].
 ///
@@ -316,21 +316,23 @@ const int _kMinColumnWidth = 10;
 /// under the limit, then it splits in the middle of a word.
 ///
 /// Preserves indentation (leading whitespace) for each line (delimited by '\n')
-/// in the input, and will indent wrapped lines the same amount.
+/// in the input, and will indent wrapped lines that same amount, adding
+/// [indent] spaces in addition to any existing indent.
 ///
-/// If [hangingIndent] is supplied, then that many spaces will be added to each
-/// line, except for the first line. This is useful for flowing text with a
-/// heading prefix (e.g. "Usage: "):
+/// If [hangingIndent] is supplied, then that many additional spaces will be
+/// added to each line, except for the first line. The [hangingIndent] is added
+/// to the specified [indent], if any. This is useful for wrapping
+/// text with a heading prefix (e.g. "Usage: "):
 ///
 /// ```dart
 /// String prefix = "Usage: ";
-/// print(prefix + wrapText(invocation, hangingIndent: prefix.length, columnWidth: 40));
+/// print(prefix + wrapText(invocation, indent: 2, hangingIndent: prefix.length, columnWidth: 40));
 /// ```
 ///
 /// yields:
 /// ```
-/// Usage: app main_command <subcommand>
-///        [arguments]
+///   Usage: app main_command <subcommand>
+///          [arguments]
 /// ```
 ///
 /// If [columnWidth] is not specified, then the column width will be the
@@ -339,7 +341,8 @@ const int _kMinColumnWidth = 10;
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// unchanged.
 ///
-/// The [indent] must be smaller than [columnWidth].
+/// The [indent] and [hangingIndent] must be smaller than [columnWidth] when
+/// added together.
 String wrapText(String text, {int columnWidth, int hangingIndent, int indent}) {
   if (text == null || text.isEmpty) {
     return '';
@@ -381,7 +384,7 @@ String wrapText(String text, {int columnWidth, int hangingIndent, int indent}) {
     String hangingIndentString;
     final String indentString = ' ' * indent;
     result.addAll(notIndented.map(
-          (String line) {
+      (String line) {
         // Don't return any lines with just whitespace on them.
         if (line.isEmpty) {
           return '';
@@ -481,7 +484,7 @@ List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth}) {
   }
 
   final List<String> result = <String>[];
-  final int effectiveLength = max(columnWidth - start, _kMinColumnWidth);
+  final int effectiveLength = max(columnWidth - start, kMinColumnWidth);
   for (String line in text.split('\n')) {
     // If the line is short enough, even with ANSI codes, then we can just add
     // add it and move on.

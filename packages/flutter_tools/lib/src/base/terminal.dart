@@ -37,6 +37,8 @@ OutputPreferences get outputPreferences => (context == null || context[OutputPre
     ? _kOutputPreferences
     : context[OutputPreferences];
 
+/// A class that contains the context settings for command text output to the
+/// console.
 class OutputPreferences {
   OutputPreferences({
     bool wrapText,
@@ -46,8 +48,20 @@ class OutputPreferences {
         wrapColumn = wrapColumn ?? const io.Stdio().terminalColumns ?? kDefaultTerminalColumns,
         showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
 
+  /// If [wrapText] is true, then output text sent to the context's [Logger]
+  /// instance (e.g. from the [printError] or [printStatus] functions) will be
+  /// wrapped to be no longer than the [wrapColumn] specifies. Defaults to true.
   final bool wrapText;
+
+  /// The column at which any output sent to the context's [Logger] instance
+  /// (e.g. from the [printError] or [printStatus] functions) will be wrapped.
+  /// Ignored if [wrapText] is false. Defaults to the width of the output
+  /// terminal, or to [kDefaultTerminalColumns] if not writing to a terminal.
   final int wrapColumn;
+
+  /// Whether or not to output ANSI color codes when writing to the output
+  /// terminal. Defaults to whatever [platform.stdoutSupportsAnsi] says if
+  /// writing to a terminal, and false otherwise.
   final bool showColor;
 
   @override
@@ -93,9 +107,9 @@ class AnsiTerminal {
       // restart the bold right after. This prevents embedded resets from
       // stopping the boldness.
       line = line.replaceAll(reset, '$reset$bold');
-      // Remove any extra codes at the end of the string, since we're just going
-      // to reset them.
-      line = line.replaceAll(RegExp('(\u001b\[[0-9;]*m)+\$'), '');
+      // Remove all codes at the end of the string, since we're just going
+      // to reset them, and they would either be redundant, or have no effect.
+      line = line.replaceAll(RegExp('(\u001b\[[0-9;]+m)+\$'), '');
       buffer.writeln('$bold$line$reset');
     }
     final String result = buffer.toString();

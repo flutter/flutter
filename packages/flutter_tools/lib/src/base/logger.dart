@@ -27,8 +27,22 @@ abstract class Logger {
 
   bool get hasTerminal => stdio.hasTerminal;
 
-  /// Display an error level message to the user. Commands should use this if they
+  /// Display an error [message] to the user. Commands should use this if they
   /// fail in some way.
+  ///
+  /// The [message] argument is printed to the stderr in red by default.
+  /// The [stackTrace] argument is the stack trace that will be printed if
+  /// supplied.
+  /// The [emphasis] argument will cause the output message be printed in bold text.
+  /// The [color] argument will print the message in the supplied color instead
+  /// of the default of red. Colors will not be printed if the output terminal
+  /// doesn't support them.
+  /// The [indent] argument specifies the number of spaces to indent the overall
+  /// message. If wrapping is enabled in [outputPreferences], then the wrapped
+  /// lines will be indented as well.
+  /// If [hangingIndent] is specified, then any wrapped lines will be indented
+  /// by this much more than the first line, if wrapping is enabled in
+  /// [outputPreferences].
   void printError(
     String message, {
     StackTrace stackTrace,
@@ -41,8 +55,22 @@ abstract class Logger {
   /// Display normal output of the command. This should be used for things like
   /// progress messages, success messages, or just normal command output.
   ///
-  /// If [newline] is null, then it defaults to "true".  If [emphasis] is null,
-  /// then it defaults to "false".
+  /// The [message] argument is printed to the stderr in red by default.
+  /// The [stackTrace] argument is the stack trace that will be printed if
+  /// supplied.
+  /// If the [emphasis] argument is true, it will cause the output message be
+  /// printed in bold text. Defaults to false.
+  /// The [color] argument will print the message in the supplied color instead
+  /// of the default of red. Colors will not be printed if the output terminal
+  /// doesn't support them.
+  /// If [newline] is true, then a newline will be added after printing the
+  /// status. Defaults to true.
+  /// The [indent] argument specifies the number of spaces to indent the overall
+  /// message. If wrapping is enabled in [outputPreferences], then the wrapped
+  /// lines will be indented as well.
+  /// If [hangingIndent] is specified, then any wrapped lines will be indented
+  /// by this much more than the first line, if wrapping is enabled in
+  /// [outputPreferences].
   void printStatus(
     String message, {
     bool emphasis,
