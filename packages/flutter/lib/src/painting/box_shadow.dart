@@ -94,7 +94,7 @@ class BoxShadow {
   /// a box shadow that matches the other box shadow in color but has a zero
   /// offset and a zero blurRadius.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static BoxShadow lerp(BoxShadow a, BoxShadow b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -115,7 +115,7 @@ class BoxShadow {
   ///
   /// If the lists differ in length, excess items are lerped with null.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static List<BoxShadow> lerpList(List<BoxShadow> a, List<BoxShadow> b, double t) {
     assert(t != null);
     if (a == null && b == null)

@@ -131,7 +131,7 @@ class RelativeRect {
   ///
   /// If either rect is null, this function interpolates from [RelativeRect.fill].
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static RelativeRect lerp(RelativeRect a, RelativeRect b, double t) {
     assert(t != null);
     if (a == null && b == null)
