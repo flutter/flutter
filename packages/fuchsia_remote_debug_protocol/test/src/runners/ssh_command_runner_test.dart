@@ -96,7 +96,7 @@ void main() {
           address: addr);
       when<String>(mockProcessResult.stdout).thenReturn('whatever');
       when(mockProcessResult.exitCode).thenReturn(1);
-      Future<Null> failingFunction() async {
+      Future<void> failingFunction() async {
         await runner.run('oihaw');
       }
 
