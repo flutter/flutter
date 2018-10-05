@@ -120,11 +120,7 @@ class AlwaysStoppedAnimation<T> extends Animation<T> {
 ///
 /// To define a mapping from values in the range 0..1, consider subclassing
 /// [Tween] instead.
-abstract class AnimationWithParentMixin<T> {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory AnimationWithParentMixin._() => null;
-
+mixin AnimationWithParentMixin<T> {
   /// The animation whose value this animation will proxy.
   ///
   /// This animation must remain the same for the lifetime of this object. If
