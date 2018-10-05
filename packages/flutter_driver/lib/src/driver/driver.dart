@@ -162,9 +162,9 @@ class FlutterDriver {
   /// service we will wait for the first isolate to become runnable.
   ///
   /// [fuchsiaModuleTarget] (optional) If running on a Fuchsia Device, either
-  /// this or the `FUCHSIA_MODULE_TARGET` must be set. Causes
-  /// [isolateNumber] to be ignored/overwritten. This will connect to the
-  /// first Isolate whose name matches.
+  /// this or the environment variable `FUCHSIA_MODULE_TARGET` must be set. This
+  /// field will be ignored if [isolateNumber] is set, as this is already
+  /// enough information to connect to an Isolate.
   static Future<FlutterDriver> connect({
     String dartVmServiceUrl,
     bool printCommunication = false,
@@ -173,11 +173,12 @@ class FlutterDriver {
     Duration isolateReadyTimeout = _kIsolateLoadRunnableTimeout,
     Pattern fuchsiaModuleTarget,
   }) async {
-    dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
-
     // If running on a Fuchsia device, connect to the first Isolate whose name
     // matches FUCHSIA_MODULE_TARGET.
-    if (Platform.isFuchsia) {
+    //
+    // If the user has already supplied an isolate number/URL to the Dart VM
+    // service, then this won't be run as it is unnecessary.
+    if (Platform.isFuchsia && != (isolateNumber != null)) {
       fuchsiaModuleTarget ??= Platform.environment['FUCHSIA_MODULE_TARGET'];
       if (fuchsiaModuleTarget == null) {
         throw DriverError('No Fuchsia module target has been specified.\n'
@@ -199,6 +200,8 @@ class FlutterDriver {
       // `stderr`/`stdout` appear to have issues working correctly.
       flutterDriverLog.listen(print);
     }
+
+    dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
 
     if (dartVmServiceUrl == null) {
       throw DriverError(
