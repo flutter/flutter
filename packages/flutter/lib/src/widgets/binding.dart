@@ -23,8 +23,6 @@ export 'dart:ui' show AppLifecycleState, Locale;
 
 /// Interface for classes that register with the Widgets layer binding.
 ///
-/// When used as a mixin, provides noop method implementations.
-///
 /// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
 ///
 /// This class can be extended directly, to get default behaviors for all of the
@@ -241,7 +239,11 @@ abstract class WidgetsBindingObserver {
 }
 
 /// The glue between the widgets layer and the Flutter engine.
-mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
+abstract class WidgetsBinding extends BindingBase with SchedulerBinding, GestureBinding, RendererBinding {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory WidgetsBinding._() => null;
+
   @override
   void initInstances() {
     super.initInstances();
@@ -931,7 +933,6 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
 }
 
 /// A concrete binding for applications based on the Widgets framework.
-///
 /// This is the glue that binds the framework to the Flutter engine.
 class WidgetsFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding {
 

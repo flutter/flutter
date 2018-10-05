@@ -27,7 +27,7 @@ typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<Str
 /// Base class for mixins that provide singleton services (also known as
 /// "bindings").
 ///
-/// To use this class in an `on` clause of a mixin, inherit from it and implement
+/// To use this class in a mixin, inherit from it and implement
 /// [initInstances()]. The mixin is guaranteed to only be constructed once in
 /// the lifetime of the app (more precisely, it will assert if constructed twice
 /// in checked mode).

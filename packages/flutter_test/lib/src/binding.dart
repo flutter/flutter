@@ -84,11 +84,11 @@ const Size _kDefaultTestViewportSize = Size(800.0, 600.0);
 /// When using these bindings, certain features are disabled. For
 /// example, [timeDilation] is reset to 1.0 on initialization.
 abstract class TestWidgetsFlutterBinding extends BindingBase
-  with ServicesBinding,
-       SchedulerBinding,
+  with SchedulerBinding,
        GestureBinding,
        SemanticsBinding,
        RendererBinding,
+       ServicesBinding,
        PaintingBinding,
        WidgetsBinding {
 

@@ -13,7 +13,11 @@ import 'animation.dart';
 /// This mixin provides implementations of [didRegisterListener] and [didUnregisterListener],
 /// and therefore can be used in conjunction with mixins that require these methods,
 /// [AnimationLocalListenersMixin] and [AnimationLocalStatusListenersMixin].
-mixin AnimationLazyListenerMixin {
+abstract class AnimationLazyListenerMixin {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory AnimationLazyListenerMixin._() => null;
+
   int _listenerCounter = 0;
 
   /// Calls [didStartListening] every time a registration of a listener causes
@@ -62,7 +66,11 @@ mixin AnimationLazyListenerMixin {
 /// This mixin provides implementations of [didRegisterListener] and [didUnregisterListener],
 /// and therefore can be used in conjunction with mixins that require these methods,
 /// [AnimationLocalListenersMixin] and [AnimationLocalStatusListenersMixin].
-mixin AnimationEagerListenerMixin {
+abstract class AnimationEagerListenerMixin {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory AnimationEagerListenerMixin._() => null;
+
   /// This implementation ignores listener registrations.
   void didRegisterListener() { }
 
@@ -81,7 +89,11 @@ mixin AnimationEagerListenerMixin {
 /// This mixin requires that the mixing class provide methods [didRegisterListener]
 /// and [didUnregisterListener]. Implementations of these methods can be obtained
 /// by mixing in another mixin from this library, such as [AnimationLazyListenerMixin].
-mixin AnimationLocalListenersMixin {
+abstract class AnimationLocalListenersMixin {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory AnimationLocalListenersMixin._() => null;
+
   final ObserverList<VoidCallback> _listeners = ObserverList<VoidCallback>();
 
   /// Called immediately before a listener is added via [addListener].
@@ -145,7 +157,11 @@ mixin AnimationLocalListenersMixin {
 /// This mixin requires that the mixing class provide methods [didRegisterListener]
 /// and [didUnregisterListener]. Implementations of these methods can be obtained
 /// by mixing in another mixin from this library, such as [AnimationLazyListenerMixin].
-mixin AnimationLocalStatusListenersMixin {
+abstract class AnimationLocalStatusListenersMixin {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory AnimationLocalStatusListenersMixin._() => null;
+
   final ObserverList<AnimationStatusListener> _statusListeners = ObserverList<AnimationStatusListener>();
 
   /// Called immediately before a status listener is added via [addStatusListener].
