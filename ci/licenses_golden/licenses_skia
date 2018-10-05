@@ -1,4 +1,4 @@
-Signature: 76fb69fe41cbf1b35143a06ea0df41c3
+Signature: 877dcc6b7b8f49083ea08a854cb1c450
 
 UNUSED LICENSES:
 
@@ -1444,9 +1444,11 @@ FILE: ../../../third_party/skia/src/core/SkCubicMap.cpp
 FILE: ../../../third_party/skia/src/core/SkCubicMap.h
 FILE: ../../../third_party/skia/src/core/SkDeferredDisplayList.cpp
 FILE: ../../../third_party/skia/src/core/SkDeferredDisplayListPriv.h
+FILE: ../../../third_party/skia/src/core/SkDraw_text.cpp
 FILE: ../../../third_party/skia/src/core/SkGlyph.cpp
 FILE: ../../../third_party/skia/src/core/SkIPoint16.h
 FILE: ../../../third_party/skia/src/core/SkMaskFilterBase.h
+FILE: ../../../third_party/skia/src/core/SkPaint_text.cpp
 FILE: ../../../third_party/skia/src/core/SkPath_serial.cpp
 FILE: ../../../third_party/skia/src/core/SkPicturePriv.h
 FILE: ../../../third_party/skia/src/core/SkRRectPriv.h
