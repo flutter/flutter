@@ -130,22 +130,32 @@ class Switch extends StatefulWidget {
   /// The color to use on the track when this switch is on.
   ///
   /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final Color activeTrackColor;
 
   /// The color to use on the thumb when this switch is off.
   ///
   /// Defaults to the colors described in the Material design specification.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final Color inactiveThumbColor;
 
   /// The color to use on the track when this switch is off.
   ///
   /// Defaults to the colors described in the Material design specification.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final Color inactiveTrackColor;
 
   /// An image to use on the thumb of this switch when the switch is on.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final ImageProvider activeThumbImage;
 
   /// An image to use on the thumb of this switch when the switch is off.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final ImageProvider inactiveThumbImage;
 
   /// Configures the minimum size of the tap target.
@@ -221,7 +231,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
   Widget buildCupertinoSwitch(BuildContext context) {
     final Size size = getSwitchSize(Theme.of(context));
     return Container(
-      width: size.width,
+      width: size.width,  // Same size as the Material switch.
       height: size.height,
       alignment: Alignment.center,
       child: CupertinoSwitch(
