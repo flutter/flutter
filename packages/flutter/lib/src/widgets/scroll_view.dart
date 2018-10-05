@@ -882,7 +882,7 @@ class ListView extends BoxScrollView {
              ? itemBuilder(context, itemIndex)
              : separatorBuilder(context, itemIndex);
          },
-         childCount: math.max(0, itemCount * 2 - 1), // same calculation as in semanticChildCount below.
+         childCount: _computeSemanticChildCount(itemCount),
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
@@ -899,7 +899,7 @@ class ListView extends BoxScrollView {
     shrinkWrap: shrinkWrap,
     padding: padding,
     cacheExtent: cacheExtent,
-    semanticChildCount: math.max(0, itemCount * 2 - 1), // same calculation as in the builder above.
+    semanticChildCount: _computeSemanticChildCount(itemCount),
   );
 
   /// Creates a scrollable, linear array of widgets with a custom child model.
@@ -965,6 +965,11 @@ class ListView extends BoxScrollView {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('itemExtent', itemExtent, defaultValue: null));
+  }
+
+  // Helper method to compute the semantic child count for the separated constructor.
+  static int _computeSemanticChildCount(int itemCount) {
+    return math.max(0, itemCount * 2 - 1);
   }
 }
 
