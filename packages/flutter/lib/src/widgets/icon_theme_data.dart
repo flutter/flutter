@@ -68,7 +68,7 @@ class IconThemeData extends Diagnosticable {
 
   /// Linearly interpolate between two icon theme data objects.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static IconThemeData lerp(IconThemeData a, IconThemeData b, double t) {
     assert(t != null);
     return IconThemeData(
