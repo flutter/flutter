@@ -450,6 +450,9 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 /// providing a `semanticIndexCallback` which returns null for separators
 /// indexes and rounds the non-separator indexes down by half.
 ///
+/// See [SliverChildBuilderDelegate] for sample code using
+/// `semanticIndexOffset` and `semanticIndexCallback`.
+///
 /// See also:
 ///
 ///  * [SliverChildBuilderDelegate], which is a delegate that uses a builder
