@@ -336,10 +336,10 @@ abstract class ScrollView extends StatelessWidget {
 ///
 /// ## Accessibility
 ///
-/// A [CustomScrollView] can make polite announcements to the user when
-/// scrolling. For example, on Android an announcement might read as
-/// "showing items 1 to 10 of 23". To produce this announcment, the scroll view
-/// needs three pieces of information:
+/// A [CustomScrollView] can allow Talkback/VoiceOver to make announcements
+/// to the user when the scroll state changes. For example, on Android an
+/// announcement might be read as "showing items 1 to 10 of 23". To produce
+/// this announcment, the scroll view needs three pieces of information:
 ///
 ///   * The first visible child index.
 ///   * The total number of children.
@@ -361,8 +361,8 @@ abstract class ScrollView extends StatelessWidget {
 /// divider with no semantic information. In this case, only odd numbered
 /// widgets have a semantic index (equal to the index ~/ 2). Furthermore, the
 /// total number of children in this example would be half the number of
-/// widgets. NB: [new ListView.separated()] handles this automatically and is only
-/// used as an example here.
+/// widgets. Note that [new ListView.separated()] handles this automatically
+/// and is only used here as an example.
 ///
 /// The total number of visible children can be provided by the constructor
 /// parameter `semanticChildCount`. This should always be the same as the

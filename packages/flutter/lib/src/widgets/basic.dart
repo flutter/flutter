@@ -5555,9 +5555,11 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 
 /// A widget that annotates the child semantics with an index.
 ///
-/// Certain widgets like the [ListView] will automatically provide a child
-/// index for building semantics. A user may wish to manually provide semanitc
-/// indexes if not all child of the scrollable contribute semantics.
+/// Semantic indexes are used by TalkBack/Voiceover to make announcements about
+/// the current scroll state. Certain widgets like the [ListView] will
+/// automatically provide a child index for building semantics. A user may wish
+/// to manually provide semanitc indexes if not all child of the scrollable
+/// contribute semantics.
 ///
 /// ## Sample code
 ///
