@@ -21,8 +21,6 @@
 # When editing, make sure you keep this and /analysis_options.yaml consistent.
 
 analyzer:
-  language:
-    enableSuperMixins: true
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning

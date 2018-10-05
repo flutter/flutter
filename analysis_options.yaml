@@ -19,8 +19,6 @@
 # Android Studio, and the `flutter analyze` command.
 
 analyzer:
-  language:
-    enableSuperMixins: true
   strong-mode:
     implicit-dynamic: false
   errors:
