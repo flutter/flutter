@@ -12,11 +12,7 @@ import 'image_cache.dart';
 /// Hooks into the cache eviction logic to clear the image cache.
 ///
 /// Requires the [ServicesBinding] to be mixed in earlier.
-abstract class PaintingBinding extends BindingBase with ServicesBinding {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory PaintingBinding._() => null;
-
+mixin PaintingBinding on BindingBase, ServicesBinding {
   @override
   void initInstances() {
     super.initInstances();
