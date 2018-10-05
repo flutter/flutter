@@ -19,6 +19,8 @@
 # Android Studio, and the `flutter analyze` command.
 
 analyzer:
+  language:
+    enableSuperMixins: true
   strong-mode:
     implicit-dynamic: false
   errors:
@@ -132,7 +134,6 @@ linter:
     - prefer_is_empty
     - prefer_is_not_empty
     - prefer_iterable_whereType
-    # - prefer_mixin # https://github.com/dart-lang/language/issues/32
     - prefer_single_quotes
     - prefer_typing_uninitialized_variables
     # - prefer_void_to_null # not yet tested
