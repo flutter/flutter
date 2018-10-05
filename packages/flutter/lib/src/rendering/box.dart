@@ -449,7 +449,7 @@ class BoxConstraints extends Constraints {
   /// If either is null, this function interpolates from a [BoxConstraints]
   /// object whose fields are all set to 0.0.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static BoxConstraints lerp(BoxConstraints a, BoxConstraints b, double t) {
     assert(t != null);
     if (a == null && b == null)

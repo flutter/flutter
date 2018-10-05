@@ -127,7 +127,7 @@ abstract class BorderRadiusGeometry {
   /// representing a combination of both is returned. That object can be turned
   /// into a concrete [BorderRadius] using [resolve].
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static BorderRadiusGeometry lerp(BorderRadiusGeometry a, BorderRadiusGeometry b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -471,7 +471,7 @@ class BorderRadius extends BorderRadiusGeometry {
   ///
   /// If either is null, this function interpolates from [BorderRadius.zero].
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static BorderRadius lerp(BorderRadius a, BorderRadius b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -688,7 +688,7 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   ///
   /// If either is null, this function interpolates from [BorderRadiusDirectional.zero].
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static BorderRadiusDirectional lerp(BorderRadiusDirectional a, BorderRadiusDirectional b, double t) {
     assert(t != null);
     if (a == null && b == null)
