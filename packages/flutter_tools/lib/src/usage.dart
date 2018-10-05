@@ -122,7 +122,7 @@ class Usage {
 
   /// Returns when the last analytics event has been sent, or after a fixed
   /// (short) delay, whichever is less.
-  Future<Null> ensureAnalyticsSent() async {
+  Future<void> ensureAnalyticsSent() async {
     // TODO(devoncarew): This may delay tool exit and could cause some analytics
     // events to not be reported. Perhaps we could send the analytics pings
     // out-of-process from flutter_tools?

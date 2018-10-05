@@ -7,7 +7,7 @@ import 'dart:async';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
-import '../runner/flutter_command.dart' show FlutterOptions;
+import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
@@ -78,7 +78,7 @@ class BuildBundleCommand extends BuildSubCommand {
       ' iOS runtimes.';
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     await super.runCommand();
 
     final String targetPlatform = argResults['target-platform'];
@@ -108,5 +108,6 @@ class BuildBundleCommand extends BuildSubCommand {
       fileSystemScheme: argResults['filesystem-scheme'],
       fileSystemRoots: argResults['filesystem-root'],
     );
+    return null;
   }
 }

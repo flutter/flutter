@@ -253,7 +253,7 @@ class _ReplaySink implements StreamSink<String> {
   _ReplaySink(this.channel);
 
   final ReplayVMServiceChannel channel;
-  final Completer<Null> _completer = Completer<Null>();
+  final Completer<void> _completer = Completer<void>();
 
   @override
   Future<dynamic> close() {

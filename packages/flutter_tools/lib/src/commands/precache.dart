@@ -23,7 +23,7 @@ class PrecacheCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     if (argResults['all-platforms'])
       cache.includeAllPlatforms = true;
 
@@ -31,5 +31,7 @@ class PrecacheCommand extends FlutterCommand {
       printStatus('Already up-to-date.');
     else
       await cache.updateAll();
+
+    return null;
   }
 }

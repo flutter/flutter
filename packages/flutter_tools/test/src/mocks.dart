@@ -173,7 +173,7 @@ class MockProcess extends Mock implements Process {
 /// A process that prompts the user to proceed, then asynchronously writes
 /// some lines to stdout before it exits.
 class PromptingProcess implements Process {
-  Future<Null> showPrompt(String prompt, List<String> outputLines) async {
+  Future<void> showPrompt(String prompt, List<String> outputLines) async {
     _stdoutController.add(utf8.encode(prompt));
     final List<int> bytesOnStdin = await _stdin.future;
     // Echo stdin to stdout.
@@ -234,11 +234,11 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  Future<Null> addStream(Stream<List<int>> stream) {
-    final Completer<Null> completer = Completer<Null>();
+  Future<void> addStream(Stream<List<int>> stream) {
+    final Completer<void> completer = Completer<void>();
     stream.listen((List<int> data) {
       add(data);
-    }).onDone(() => completer.complete(null));
+    }).onDone(() => completer.complete());
     return completer.future;
   }
 
@@ -275,13 +275,13 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  Future<Null> get done => close();
+  Future<void> get done => close();
 
   @override
-  Future<Null> close() async => null;
+  Future<void> close() async => null;
 
   @override
-  Future<Null> flush() async => null;
+  Future<void> flush() async => null;
 }
 
 /// A Stdio that collects stdout and supports simulated stdin.

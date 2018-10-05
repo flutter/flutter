@@ -58,7 +58,7 @@ void main() {
       final TestEmulatorManager testEmulatorManager =
           TestEmulatorManager(emulators);
 
-      Future<Null> expectEmulator(String id, List<Emulator> expected) async {
+      Future<void> expectEmulator(String id, List<Emulator> expected) async {
         expect(await testEmulatorManager.getEmulatorsMatching(id), expected);
       }
 

@@ -80,20 +80,22 @@ class AnalyzeCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() {
+  Future<FlutterCommandResult> runCommand() async {
     if (argResults['watch']) {
-      return AnalyzeContinuously(
+      await AnalyzeContinuously(
         argResults,
         runner.getRepoRoots(),
         runner.getRepoPackages(),
       ).analyze();
+      return null;
     } else {
-      return AnalyzeOnce(
+      await AnalyzeOnce(
         argResults,
         runner.getRepoRoots(),
         runner.getRepoPackages(),
         workingDirectory: workingDirectory,
       ).analyze();
+      return null;
     }
   }
 }

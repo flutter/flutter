@@ -376,7 +376,7 @@ class IOSDevice extends Device {
   bool get supportsScreenshot => iMobileDevice.isInstalled;
 
   @override
-  Future<Null> takeScreenshot(File outputFile) async {
+  Future<void> takeScreenshot(File outputFile) async {
     await iMobileDevice.takeScreenshot(outputFile);
   }
 }
@@ -475,7 +475,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   String get name => device.name;
 
   void _start() {
-    iMobileDevice.startLogger().then<Null>((Process process) {
+    iMobileDevice.startLogger().then<void>((Process process) {
       _process = process;
       _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
       _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
@@ -576,7 +576,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
   }
 
   @override
-  Future<Null> unforward(ForwardedPort forwardedPort) async {
+  Future<void> unforward(ForwardedPort forwardedPort) async {
     if (!_forwardedPorts.remove(forwardedPort)) {
       // Not in list. Nothing to remove.
       return null;

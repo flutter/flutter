@@ -24,7 +24,7 @@ class MakeHostAppEditableCommand extends FlutterCommand {
   bool get hidden => true;
 
   @override
-  Future<Null> runCommand() async { }
+  Future<FlutterCommandResult> runCommand() async => null;
 }
 
 abstract class MakeHostAppEditableSubCommand extends FlutterCommand {
@@ -36,12 +36,13 @@ abstract class MakeHostAppEditableSubCommand extends FlutterCommand {
 
   @override
   @mustCallSuper
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     await _project.ensureReadyForPlatformSpecificTooling();
+    return null;
   }
 
   @override
-  Future<Null> validateCommand() async {
+  Future<void> validateCommand() async {
     await super.validateCommand();
     _project = await FlutterProject.current();
     if (!_project.isApplication)
@@ -57,9 +58,11 @@ class MakeHostAppEditableAndroidCommand extends MakeHostAppEditableSubCommand {
   String get description => 'Make an Android host app editable within a Flutter project';
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     await super.runCommand();
     await _project.android.makeHostAppEditable();
+
+    return null;
   }
 }
 
@@ -71,8 +74,10 @@ class MakeHostAppEditableIosCommand extends MakeHostAppEditableSubCommand {
   String get description => 'Make an iOS host app editable within a Flutter project';
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     await super.runCommand();
     await _project.ios.makeHostAppEditable();
+
+    return null;
   }
 }

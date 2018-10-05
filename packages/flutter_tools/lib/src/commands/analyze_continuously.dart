@@ -33,7 +33,7 @@ class AnalyzeContinuously extends AnalyzeBase {
   Status analysisStatus;
 
   @override
-  Future<Null> analyze() async {
+  Future<void> analyze() async {
     List<String> directories;
 
     if (argResults['flutter-repo']) {
