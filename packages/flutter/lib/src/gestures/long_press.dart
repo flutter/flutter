@@ -11,7 +11,7 @@ import 'recognizer.dart';
 /// same location for a long period of time.
 typedef void GestureLongPressCallback();
 
-/// Signature for when the pointer ends to contat the same location for a long period of time on the screen
+/// Signature for when a pointer stops to contacting the screen after a long period of time
 typedef void GestureLongPressUpCallback();
 
 /// Recognizes when the user has pressed down at the same location for a long
@@ -20,37 +20,40 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a long-press gesture recognizer.
   ///
   /// Consider assigning the [onLongPress] callback after creating this object.
-  LongPressGestureRecognizer({ Object debugOwner }) : super(deadline: kLongPressTimeout, debugOwner: debugOwner);
+  LongPressGestureRecognizer({ Object debugOwner })
+      : super(deadline: kLongPressTimeout, debugOwner: debugOwner);
 
-  //is a flag which is used to determine if the longPress action happened
   bool _longPressAccepted = false;
 
-  /// Called when a long-press is recognized.
+  /// Called when the pointer stops contacting the screen after the long-press gesture has been recognized.
   GestureLongPressCallback onLongPress;
-  
-  /// Called when long-press is recognized and the pointer stops to contact the screen
+
+  /// Called when the pointer stops contacting the screen after the long-press gesture has been recognized
   GestureLongPressUpCallback onLongPressUp;
 
   @override
   void didExceedDeadline() {
     resolve(GestureDisposition.accepted);
     _longPressAccepted = true;
-    if (onLongPress != null)
+    if (onLongPress != null) {
       invokeCallback<void>('onLongPress', onLongPress);
+    }
   }
 
   @override
   void handlePrimaryPointer(PointerEvent event) {
     if (event is PointerUpEvent) {
-      /// only accept the event if the pointer is for a longer period of a time on the screen
-      /// and the onLongPressUp event is registered
-      if( _longPressAccepted == true && onLongPressUp != null ) {
-        _longPressAccepted= false;
-        resolve(GestureDisposition.accepted);
+      if (_longPressAccepted == true && onLongPressUp != null) {
+        _longPressAccepted = false;
         invokeCallback<void>('onLongPressUp', onLongPressUp);
       } else {
         resolve(GestureDisposition.rejected);
       }
+    }
+
+    else if (event is PointerDownEvent) {
+      // the first touch, initialize the  flag with false
+      _longPressAccepted = false;
     }
   }
 
