@@ -361,7 +361,7 @@ class TextTheme extends Diagnosticable {
   ///
   /// The arguments must not be null.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static TextTheme lerp(TextTheme a, TextTheme b, double t) {
     assert(a != null);
     assert(b != null);

@@ -558,7 +558,7 @@ class TextStyle extends Diagnosticable {
   ///
   /// This will not work well if the styles don't set the same fields.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   ///
   /// If [foreground] is specified on either of `a` or `b`, both will be treated
   /// as if they have a [foreground] paint (creating a new [Paint] if necessary

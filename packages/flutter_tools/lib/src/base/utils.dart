@@ -251,14 +251,14 @@ Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
 
 Clock get clock => context[Clock];
 
-typedef AsyncCallback = Future<Null> Function();
+typedef AsyncCallback = Future<void> Function();
 
 /// A [Timer] inspired class that:
 ///   - has a different initial value for the first callback delay
 ///   - waits for a callback to be complete before it starts the next timer
 class Poller {
   Poller(this.callback, this.pollingInterval, { this.initialDelay = Duration.zero }) {
-    Future<Null>.delayed(initialDelay, _handleCallback);
+    Future<void>.delayed(initialDelay, _handleCallback);
   }
 
   final AsyncCallback callback;
@@ -268,7 +268,7 @@ class Poller {
   bool _cancelled = false;
   Timer _timer;
 
-  Future<Null> _handleCallback() async {
+  Future<void> _handleCallback() async {
     if (_cancelled)
       return;
 

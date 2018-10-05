@@ -25,7 +25,7 @@ const String kDocRoot = 'dev/docs/doc';
 /// in your path. It requires that 'flutter' has been run previously. It uses
 /// the version of Dart downloaded by the 'flutter' tool in this repository and
 /// will crash if that is absent.
-Future<Null> main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   final ArgParser argParser = _createArgsParser();
   final ArgResults args = argParser.parse(arguments);
   if (args['help']) {

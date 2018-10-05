@@ -510,18 +510,17 @@ class FakeGroupedDoctorWithStatus extends Doctor {
 /// A doctor that takes any two validators. Used to check behavior when
 /// merging ValidationTypes (installed, missing, partial).
 class FakeSmallGroupDoctor extends Doctor {
-  List<DoctorValidator> _validators;
   FakeSmallGroupDoctor(DoctorValidator val1, DoctorValidator val2) {
     _validators = <DoctorValidator>[GroupedValidator(<DoctorValidator>[val1, val2])];
   }
+
+  List<DoctorValidator> _validators;
+
   @override
   List<DoctorValidator> get validators => _validators;
 }
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {
-  static final String validInstall = fs.path.join('test', 'data', 'vscode', 'application');
-  static final String validExtensions = fs.path.join('test', 'data', 'vscode', 'extensions');
-  static final String missingExtensions = fs.path.join('test', 'data', 'vscode', 'notExtensions');
   VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition})
       : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
 
@@ -533,4 +532,8 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
 
   static VsCodeValidatorTestTargets get installedWithoutExtension =>
       VsCodeValidatorTestTargets._(validInstall, missingExtensions);
+
+  static final String validInstall = fs.path.join('test', 'data', 'vscode', 'application');
+  static final String validExtensions = fs.path.join('test', 'data', 'vscode', 'extensions');
+  static final String missingExtensions = fs.path.join('test', 'data', 'vscode', 'notExtensions');
 }

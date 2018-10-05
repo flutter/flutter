@@ -37,7 +37,7 @@ class LogsCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     if (argResults['clear'])
       device.clearLogs();
 
@@ -76,5 +76,7 @@ class LogsCommand extends FlutterCommand {
     await subscription.cancel();
     if (result != 0)
       throwToolExit('Error listening to $logReader logs.');
+
+    return null;
   }
 }

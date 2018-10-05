@@ -5564,16 +5564,16 @@ class KeyedSubtree extends StatelessWidget {
   }) : assert(child != null),
        super(key: key);
 
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.child}
-  final Widget child;
-
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.
   factory KeyedSubtree.wrap(Widget child, int childIndex) {
     final Key key = child.key != null ? ValueKey<Key>(child.key) : ValueKey<int>(childIndex);
     return KeyedSubtree(key: key, child: child);
   }
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
 
   /// Wrap each item in a KeyedSubtree whose key is based on the item's existing key or
   /// the sum of its list index and `baseIndex`.

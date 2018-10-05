@@ -39,7 +39,7 @@ import 'src/runner/flutter_command.dart';
 /// Main entry point for commands.
 ///
 /// This function is intended to be used from the `flutter` command line tool.
-Future<Null> main(List<String> args) async {
+Future<void> main(List<String> args) async {
   final bool verbose = args.contains('-v') || args.contains('--verbose');
 
   final bool doctor = (args.isNotEmpty && args.first == 'doctor') ||
@@ -56,7 +56,7 @@ Future<Null> main(List<String> args) async {
     ChannelCommand(verboseHelp: verboseHelp),
     CleanCommand(),
     ConfigCommand(verboseHelp: verboseHelp),
-    CreateCommand(),
+    CreateCommand(verboseHelp: verboseHelp),
     DaemonCommand(hidden: !verboseHelp),
     DevicesCommand(),
     DoctorCommand(verbose: verbose),

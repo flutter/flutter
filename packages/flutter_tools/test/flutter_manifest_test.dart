@@ -355,20 +355,20 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isEmpty, false);
-      expect(flutterManifest.isModule, false);
+      expect(flutterManifest.isApplication, false);
       expect(flutterManifest.isPlugin, false);
       expect(flutterManifest.androidPackage, null);
     });
 
-    test('allows a module declaration', () async {
+    test('allows an application declaration', () async {
       const String manifest = '''
 name: test
 flutter:
-  module:
+  application:
     androidPackage: com.example
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
-      expect(flutterManifest.isModule, true);
+      expect(flutterManifest.isApplication, true);
       expect(flutterManifest.androidPackage, 'com.example');
     });
 

@@ -558,11 +558,11 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
 }
 
 class _TestRecordingCanvasPaintsCountMatcher extends _TestRecordingCanvasMatcher {
-  final Symbol _methodName;
-  final int _count;
-
   _TestRecordingCanvasPaintsCountMatcher(Symbol methodName, int count)
       : _methodName = methodName, _count = count;
+
+  final Symbol _methodName;
+  final int _count;
 
   @override
   Description describe(Description description) {

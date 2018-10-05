@@ -657,6 +657,34 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
 ///
+/// ## Sample code
+///
+/// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar]
+/// and a [FloatingActionButton]. The [body] is a [Text] placed in a [Center]
+/// in order to center the text within the [Scaffold] and the
+/// [FloatingActionButton] is centered and docked within the
+/// [BottomAppBar] using [FloatingActionButtonLocation.centerDocked].
+///
+/// ```dart
+/// Scaffold(
+///   appBar: AppBar(
+///     title: Text('Sample Code'),
+///   ),
+///   body: Center(
+///     child: Text('Scaffold'),
+///   ),
+///   bottomNavigationBar: BottomAppBar(
+///     child: Container(height: 50.0,),
+///   ),
+///   floatingActionButton: FloatingActionButton(
+///     onPressed: () {},
+///     tooltip: 'Increment',
+///     child: Icon(Icons.add),
+///   ),
+///   floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+/// )
+/// ```
+///
 /// See also:
 ///
 ///  * [AppBar], which is a horizontal bar typically shown at the top of an app

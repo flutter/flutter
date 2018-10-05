@@ -72,12 +72,6 @@ abstract class RunCommandBase extends FlutterCommand {
 }
 
 class RunCommand extends RunCommandBase {
-  @override
-  final String name = 'run';
-
-  @override
-  final String description = 'Run your Flutter app on an attached device.';
-
   RunCommand({ bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
@@ -179,6 +173,12 @@ class RunCommand extends RunCommandBase {
       ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true);
   }
 
+  @override
+  final String name = 'run';
+
+  @override
+  final String description = 'Run your Flutter app on an attached device.';
+
   List<Device> devices;
 
   @override
@@ -237,7 +237,7 @@ class RunCommand extends RunCommandBase {
   bool get stayResident => argResults['resident'];
 
   @override
-  Future<Null> validateCommand() async {
+  Future<void> validateCommand() async {
     // When running with a prebuilt application, no command validation is
     // necessary.
     if (!runningWithPrebuiltApplication)

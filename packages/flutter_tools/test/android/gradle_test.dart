@@ -63,53 +63,51 @@ void main() {
   });
 
   group('gradle project', () {
-    GradleProject projectFrom(String properties) => GradleProject.fromAppProperties(properties);
+    GradleProject projectFrom(String properties, String tasks) => GradleProject.fromAppProperties(properties, tasks);
 
     test('should extract build directory from app properties', () {
       final GradleProject project = projectFrom('''
 someProperty: someValue
 buildDir: /Users/some/apps/hello/build/app
 someOtherProperty: someOtherValue
-      ''');
+      ''', '');
       expect(
         fs.path.normalize(project.apkDirectory.path),
         fs.path.normalize('/Users/some/apps/hello/build/app/outputs/apk'),
       );
     });
     test('should extract default build variants from app properties', () {
-      final GradleProject project = projectFrom('''
-someProperty: someValue
-assemble: task ':app:assemble'
-assembleAndroidTest: task ':app:assembleAndroidTest'
-assembleDebug: task ':app:assembleDebug'
-assembleProfile: task ':app:assembleProfile'
-assembleRelease: task ':app:assembleRelease'
-buildDir: /Users/some/apps/hello/build/app
-someOtherProperty: someOtherValue
+      final GradleProject project = projectFrom('buildDir: /Users/some/apps/hello/build/app', '''
+someTask
+assemble
+assembleAndroidTest
+assembleDebug
+assembleProfile
+assembleRelease
+someOtherTask
       ''');
       expect(project.buildTypes, <String>['debug', 'profile', 'release']);
       expect(project.productFlavors, isEmpty);
     });
     test('should extract custom build variants from app properties', () {
-      final GradleProject project = projectFrom('''
-someProperty: someValue
-assemble: task ':app:assemble'
-assembleAndroidTest: task ':app:assembleAndroidTest'
-assembleDebug: task ':app:assembleDebug'
-assembleFree: task ':app:assembleFree'
-assembleFreeAndroidTest: task ':app:assembleFreeAndroidTest'
-assembleFreeDebug: task ':app:assembleFreeDebug'
-assembleFreeProfile: task ':app:assembleFreeProfile'
-assembleFreeRelease: task ':app:assembleFreeRelease'
-assemblePaid: task ':app:assemblePaid'
-assemblePaidAndroidTest: task ':app:assemblePaidAndroidTest'
-assemblePaidDebug: task ':app:assemblePaidDebug'
-assemblePaidProfile: task ':app:assemblePaidProfile'
-assemblePaidRelease: task ':app:assemblePaidRelease'
-assembleProfile: task ':app:assembleProfile'
-assembleRelease: task ':app:assembleRelease'
-buildDir: /Users/some/apps/hello/build/app
-someOtherProperty: someOtherValue
+      final GradleProject project = projectFrom('buildDir: /Users/some/apps/hello/build/app', '''
+someTask
+assemble
+assembleAndroidTest
+assembleDebug
+assembleFree
+assembleFreeAndroidTest
+assembleFreeDebug
+assembleFreeProfile
+assembleFreeRelease
+assemblePaid
+assemblePaidAndroidTest
+assemblePaidDebug
+assemblePaidProfile
+assemblePaidRelease
+assembleProfile
+assembleRelease
+someOtherTask
       ''');
       expect(project.buildTypes, <String>['debug', 'profile', 'release']);
       expect(project.productFlavors, <String>['free', 'paid']);

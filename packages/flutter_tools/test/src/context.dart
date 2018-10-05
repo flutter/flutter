@@ -179,7 +179,7 @@ class MockDeviceManager implements DeviceManager {
   Future<List<String>> getDeviceDiagnostics() async => <String>[];
 }
 
-class MockAndroidWorkflowValidator extends AndroidValidator {
+class MockAndroidLicenseValidator extends AndroidLicenseValidator {
   @override
   Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
 }
@@ -200,8 +200,8 @@ class MockDoctor extends Doctor {
   List<DoctorValidator> get validators {
     final List<DoctorValidator> superValidators = super.validators;
     return superValidators.map<DoctorValidator>((DoctorValidator v) {
-      if (v is AndroidValidator) {
-        return MockAndroidWorkflowValidator();
+      if (v is AndroidLicenseValidator) {
+        return MockAndroidLicenseValidator();
       }
       return v;
     }).toList();
@@ -262,7 +262,7 @@ class MockUsage implements Usage {
   Stream<Map<String, dynamic>> get onSend => null;
 
   @override
-  Future<Null> ensureAnalyticsSent() => Future<Null>.value();
+  Future<void> ensureAnalyticsSent() => Future<void>.value();
 
   @override
   void printWelcome() { }

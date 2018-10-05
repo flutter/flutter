@@ -37,11 +37,10 @@ class MakeHostAppEditableCommand extends FlutterCommand {
   bool get hidden => false;
 
   @override
-  Future<Null> validateCommand() async {
+  Future<void> validateCommand() async {
     await super.validateCommand();
     _project = await FlutterProject.current();
-    // TODO(mattcarroll): change _project.isModule to use Greg's updated inspection
-    if (!_project.isModule)
+    if (!_project.isApplication)
       throw ToolExit("Only projects created using 'flutter create -t application' can have their host apps made editable.");
   }
 

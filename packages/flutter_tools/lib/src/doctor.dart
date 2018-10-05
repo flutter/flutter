@@ -48,7 +48,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       _validators.add(_FlutterValidator());
 
       if (androidWorkflow.appliesToHostPlatform)
-        _validators.add(androidValidator);
+        _validators.add(GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]));
 
       if (iosWorkflow.appliesToHostPlatform)
         _validators.add(GroupedValidator(<DoctorValidator>[iosValidator, cocoapodsValidator]));
@@ -112,7 +112,7 @@ class Doctor {
   }
 
   /// Print a summary of the state of the tooling, as well as how to get more info.
-  Future<Null> summary() async {
+  Future<void> summary() async {
     printStatus(await summaryText);
   }
 
@@ -159,7 +159,7 @@ class Doctor {
   /// Print information about the state of installed tooling.
   Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true }) async {
     if (androidLicenses)
-      return AndroidValidator.runLicenseManager();
+      return AndroidLicenseValidator.runLicenseManager();
 
     if (!verbose) {
       printStatus('Doctor summary (to see all details, run flutter doctor -v):');
@@ -420,9 +420,9 @@ class NoIdeValidator extends DoctorValidator {
 }
 
 abstract class IntelliJValidator extends DoctorValidator {
-  final String installPath;
-
   IntelliJValidator(String title, this.installPath) : super(title);
+
+  final String installPath;
 
   String get version;
   String get pluginsPath;
@@ -644,9 +644,9 @@ class DeviceValidator extends DoctorValidator {
 }
 
 class ValidatorWithResult extends DoctorValidator {
-  final ValidationResult result;
-
   ValidatorWithResult(String title, this.result) : super(title);
+
+  final ValidationResult result;
 
   @override
   Future<ValidationResult> validate() async => result;

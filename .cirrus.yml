@@ -120,8 +120,10 @@ task:
     SHARD: deploy_gallery
     # Apple Certificates Match Passphrase
     MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
-    # Apple Fastlane Password
+    # Apple Fastlane password, ASP, and Session information.
     FASTLANE_PASSWORD: ENCRYPTED[0bf9bb0cc2cb32a0ed18470cf2c9df0f587cce5f8b04adbd6cff15ca5bde7a74f721ee580227b132ab6b032f08e52ae0]
+    FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ENCRYPTED[b219cc13c757f36cb62bfca5102d6115f1cc283aeb974f20c657bc4991c0cc144e30cf5d8183e41cc1df1668b4d14210]
+    FASTLANE_SESSION: ENCRYPTED[88246e355e55cd5e361a575f5d5b762f5826cb9d5285cb93a263b1cad04ec09bdedb1cbd74df5ec02d6043360fa04acd]
     # Private repo for publishing certificates.
     PUBLISHING_MATCH_CERTIFICATE_REPO: git@github.com:flutter/private_publishing_certificates.git
   osx_instance:

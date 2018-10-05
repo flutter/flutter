@@ -386,7 +386,7 @@ class SvgPathCommand {
 }
 
 class SvgPathCommandBuilder {
-  static const Map<String, Null> kRelativeCommands = <String, Null> {
+  static const Map<String, void> kRelativeCommands = <String, void> {
     'c': null,
     'l': null,
     'm': null,

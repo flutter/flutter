@@ -40,8 +40,8 @@ void main() {
   testUsingContext('licensesAccepted throws if cannot run sdkmanager', () async {
     processManager.succeed = false;
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
-    final AndroidValidator androidValidator = AndroidValidator();
-    expect(androidValidator.licensesAccepted, throwsToolExit());
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
+    expect(licenseValidator.licensesAccepted, throwsToolExit());
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
@@ -52,8 +52,8 @@ void main() {
 
   testUsingContext('licensesAccepted handles garbage/no output', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
-    final AndroidValidator androidValidator = AndroidValidator();
-    final LicensesAccepted result = await androidValidator.licensesAccepted;
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
+    final LicensesAccepted result = await licenseValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.unknown));
     expect(processManager.commands.first, equals('/foo/bar/sdkmanager'));
     expect(processManager.commands.last, equals('--licenses'));
@@ -72,8 +72,8 @@ void main() {
        'All SDK package licenses accepted.'
     ]);
 
-    final AndroidValidator androidValidator = AndroidValidator();
-    final LicensesAccepted result = await androidValidator.licensesAccepted;
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
+    final LicensesAccepted result = await licenseValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.all));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
@@ -91,8 +91,8 @@ void main() {
       'Review licenses that have not been accepted (y/N)?',
     ]);
 
-    final AndroidValidator androidValidator = AndroidValidator();
-    final LicensesAccepted result = await androidValidator.licensesAccepted;
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
+    final LicensesAccepted result = await licenseValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.some));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
@@ -110,8 +110,8 @@ void main() {
       'Review licenses that have not been accepted (y/N)?',
     ]);
 
-    final AndroidValidator androidValidator = AndroidValidator();
-    final LicensesAccepted result = await androidValidator.licensesAccepted;
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
+    final LicensesAccepted result = await licenseValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.none));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
@@ -125,7 +125,7 @@ void main() {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn('26.0.0');
 
-    expect(await AndroidValidator.runLicenseManager(), isTrue);
+    expect(await AndroidLicenseValidator.runLicenseManager(), isTrue);
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
@@ -138,7 +138,7 @@ void main() {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn('25.0.0');
 
-    expect(AndroidValidator.runLicenseManager(), throwsToolExit(message: 'To update, run'));
+    expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit(message: 'To update, run'));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
@@ -151,7 +151,7 @@ void main() {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn(null);
 
-    expect(AndroidValidator.runLicenseManager(), throwsToolExit(message: 'To update, run'));
+    expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit(message: 'To update, run'));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
@@ -164,7 +164,7 @@ void main() {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.succeed = false;
 
-    expect(AndroidValidator.runLicenseManager(), throwsToolExit());
+    expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit());
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,

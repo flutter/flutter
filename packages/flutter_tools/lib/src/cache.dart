@@ -70,7 +70,7 @@ class Cache {
   /// Normally the lock will be held until the process exits (this uses normal
   /// POSIX flock semantics). Long-lived commands should release the lock by
   /// calling [Cache.releaseLockEarly] once they are no longer touching the cache.
-  static Future<Null> lock() async {
+  static Future<void> lock() async {
     if (!_lockEnabled)
       return null;
     assert(_lock == null);
@@ -87,7 +87,7 @@ class Cache {
           printStatus('Waiting for another flutter command to release the startup lock...');
           printed = true;
         }
-        await Future<Null>.delayed(const Duration(milliseconds: 50));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
       }
     }
   }
@@ -199,7 +199,7 @@ class Cache {
     return cachedFile.path;
   }
 
-  Future<Null> updateAll() async {
+  Future<void> updateAll() async {
     if (!_lockEnabled)
       return null;
     try {
@@ -245,7 +245,7 @@ abstract class CachedArtifact {
     return isUpToDateInner();
   }
 
-  Future<Null> update() async {
+  Future<void> update() async {
     if (location.existsSync())
       location.deleteSync(recursive: true);
     location.createSync(recursive: true);
@@ -272,7 +272,7 @@ abstract class CachedArtifact {
   bool isUpToDateInner() => true;
 
   /// Template method to perform artifact update.
-  Future<Null> updateInner();
+  Future<void> updateInner();
 
   String get _storageBaseUrl {
     final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
@@ -285,7 +285,7 @@ abstract class CachedArtifact {
   Uri _toStorageUri(String path) => Uri.parse('$_storageBaseUrl/$path');
 
   /// Download an archive from the given [url] and unzip it to [location].
-  Future<Null> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f), void extractor(File f, Directory d)) {
+  Future<void> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f), void extractor(File f, Directory d)) {
     return _withDownloadFile('${flattenNameSubdirs(url)}', (File tempFile) async {
       if (!verifier(tempFile)) {
         final Status status = logger.startProgress(message, expectSlowOperation: true);
@@ -305,18 +305,18 @@ abstract class CachedArtifact {
   }
 
   /// Download a zip archive from the given [url] and unzip it to [location].
-  Future<Null> _downloadZipArchive(String message, Uri url, Directory location) {
+  Future<void> _downloadZipArchive(String message, Uri url, Directory location) {
     return _downloadArchive(message, url, location, os.verifyZip, os.unzip);
   }
 
   /// Download a gzipped tarball from the given [url] and unpack it to [location].
-  Future<Null> _downloadZippedTarball(String message, Uri url, Directory location) {
+  Future<void> _downloadZippedTarball(String message, Uri url, Directory location) {
     return _downloadArchive(message, url, location, os.verifyGzip, os.unpack);
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
   /// argument, then add the temporary file to the [_downloadedFiles].
-  Future<Null> _withDownloadFile(String name, Future<Null> onTemporaryFile(File file)) async {
+  Future<void> _withDownloadFile(String name, Future<void> onTemporaryFile(File file)) async {
     final File tempFile = fs.file(fs.path.join(cache.getDownloadDir().path, name));
     _downloadedFiles.add(tempFile);
     await onTemporaryFile(tempFile);
@@ -340,7 +340,7 @@ class MaterialFonts extends CachedArtifact {
   MaterialFonts(Cache cache): super('material_fonts', cache);
 
   @override
-  Future<Null> updateInner() {
+  Future<void> updateInner() {
     final Uri archiveUri = _toStorageUri(version);
     return _downloadZipArchive('Downloading Material fonts...', archiveUri, location);
   }
@@ -470,7 +470,7 @@ class FlutterEngine extends CachedArtifact {
   }
 
   @override
-  Future<Null> updateInner() async {
+  Future<void> updateInner() async {
     final String url = '$_storageBaseUrl/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
@@ -521,9 +521,9 @@ class GradleWrapper extends CachedArtifact {
   GradleWrapper(Cache cache): super('gradle_wrapper', cache);
 
   @override
-  Future<Null> updateInner() {
+  Future<void> updateInner() {
     final Uri archiveUri = _toStorageUri(version);
-    return _downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location).then<Null>((_) {
+    return _downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location).then<void>((_) {
       // Delete property file, allowing templates to provide it.
       fs.file(fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
       // Remove NOTICE file. Should not be part of the template.
@@ -565,7 +565,7 @@ String flattenNameSubdirs(Uri url) {
 }
 
 /// Download a file from the given [url] and write it to [location].
-Future<Null> _downloadFile(Uri url, File location) async {
+Future<void> _downloadFile(Uri url, File location) async {
   _ensureExists(location.parent);
   final List<int> fileBytes = await fetchUrl(url);
   location.writeAsBytesSync(fileBytes, flush: true);

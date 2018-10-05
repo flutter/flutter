@@ -277,10 +277,10 @@ abstract class Emulator {
 }
 
 class CreateEmulatorResult {
+  CreateEmulatorResult(this.emulatorName, {this.success, this.output, this.error});
+
   final bool success;
   final String emulatorName;
   final String output;
   final String error;
-
-  CreateEmulatorResult(this.emulatorName, {this.success, this.output, this.error});
 }

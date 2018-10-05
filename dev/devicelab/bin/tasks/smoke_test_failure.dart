@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter_devicelab/framework/framework.dart';
 
 /// Smoke test of a task that fails by returning an unsuccessful response.
-Future<Null> main() async {
+Future<void> main() async {
   await task(() async {
     return TaskResult.failure('Failed');
   });

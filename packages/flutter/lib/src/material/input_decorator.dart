@@ -2362,6 +2362,12 @@ class InputDecoration {
 
   /// The shape of the border to draw around the decoration's container.
   ///
+  /// This border's [InputBorder.borderSide], i.e. the border's color and width,
+  /// will be overridden to reflect the input decorator's state. Only the
+  /// border's shape is used. If custom  [BorderSide] values are desired for
+  /// a given state, all four borders – [errorBorder], [focusedBorder],
+  /// [enabledBorder], [disabledBorder] – must be set.
+  ///
   /// The decoration's container is the area which is filled if [isFilled] is
   /// true and bordered per the [border]. It's the area adjacent to
   /// [InputDecoration.icon] and above the widgets that contain
