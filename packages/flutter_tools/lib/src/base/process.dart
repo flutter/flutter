@@ -247,8 +247,10 @@ Future<RunResult> runCheckedAsync(List<String> cmd, {
     allowReentrantFlutter: allowReentrantFlutter,
     environment: environment,
   );
-  if (result.exitCode != 0)
-    throw 'Exit code ${result.exitCode} from: ${cmd.join(' ')}:\n$result';
+  if (result.exitCode != 0) {
+    throw ProcessException(cmd[0], cmd.sublist(1),
+      'Process "${cmd[0]}" exited abnormally:\n$result', result.exitCode);
+  }
   return result;
 }
 
