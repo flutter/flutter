@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-class MemoryPressureObserver with WidgetsBindingObserver {
+class MemoryPressureObserver extends WidgetsBindingObserver {
   bool sawMemoryPressure = false;
 
   @override
@@ -17,7 +17,7 @@ class MemoryPressureObserver with WidgetsBindingObserver {
   }
 }
 
-class AppLifecycleStateObserver with WidgetsBindingObserver {
+class AppLifecycleStateObserver extends WidgetsBindingObserver {
   AppLifecycleState lifecycleState;
 
   @override
@@ -26,7 +26,7 @@ class AppLifecycleStateObserver with WidgetsBindingObserver {
   }
 }
 
-class PushRouteObserver with WidgetsBindingObserver {
+class PushRouteObserver extends WidgetsBindingObserver {
   String pushedRoute;
 
   @override

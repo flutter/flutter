@@ -712,8 +712,8 @@ class _SerializeConfig {
   final bool expandPropertyValues;
 }
 
-// Production implementation of [WidgetInspectorService].
-class _WidgetInspectorService = Object with WidgetInspectorService;
+class _WidgetInspectorService extends Object with WidgetInspectorService {
+}
 
 /// Service used by GUI tools to interact with the [WidgetInspector].
 ///
@@ -735,7 +735,11 @@ class _WidgetInspectorService = Object with WidgetInspectorService;
 /// widget inspector support still works with the changes.
 ///
 /// All methods returning String values return JSON.
-mixin WidgetInspectorService {
+class WidgetInspectorService {
+  // This class is usable as a mixin for test purposes and as a singleton
+  // [instance] for production purposes.
+  factory WidgetInspectorService._() => _WidgetInspectorService();
+
   /// Ring of cached JSON values to prevent json from being garbage
   /// collected before it can be requested over the Observatory protocol.
   final List<String> _serializeRing = List<String>(20);
@@ -743,7 +747,7 @@ mixin WidgetInspectorService {
 
   /// The current [WidgetInspectorService].
   static WidgetInspectorService get instance => _instance;
-  static WidgetInspectorService _instance = _WidgetInspectorService();
+  static WidgetInspectorService _instance = WidgetInspectorService._();
   @protected
   static set instance(WidgetInspectorService instance) {
     _instance = instance;

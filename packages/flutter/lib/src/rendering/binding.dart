@@ -21,7 +21,11 @@ import 'view.dart';
 export 'package:flutter/gestures.dart' show HitTestResult;
 
 /// The glue between the render tree and the Flutter engine.
-mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, SemanticsBinding, HitTestable {
+abstract class RendererBinding extends BindingBase with ServicesBinding, SchedulerBinding, SemanticsBinding, HitTestable {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory RendererBinding._() => null;
+
   @override
   void initInstances() {
     super.initInstances();

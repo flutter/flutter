@@ -50,6 +50,13 @@ class AnalysisServer {
         _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
     inStream.listen(_handleServerResponse);
 
+    // Available options (many of these are obsolete):
+    //   enableAsync, enableDeferredLoading, enableEnums, enableNullAwareOperators,
+    //   enableSuperMixins, generateDart2jsHints, generateHints, generateLints
+    _sendCommand('analysis.updateOptions', <String, dynamic>{
+      'options': <String, dynamic>{'enableSuperMixins': true}
+    });
+
     _sendCommand('server.setSubscriptions', <String, dynamic>{
       'subscriptions': <String>['STATUS']
     });
