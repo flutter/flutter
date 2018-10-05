@@ -19,11 +19,12 @@ task:
     gclient sync
 
   matrix:
-    - name: build_host
+    - name: build_and_test_host
       compile_host_script: |
         cd $ENGINE_PATH/src
         ./flutter/tools/gn --unoptimized
         ninja -C out/host_debug_unopt
+      test_host_script: cd $ENGINE_PATH/src && ./flutter/testing/run_tests.sh
     - name: build_android
       compile_host_script: |
         cd $ENGINE_PATH/src
@@ -45,4 +46,3 @@ format_and_dart_test_task:
 
   format_script: cd $ENGINE_PATH/src/flutter && ./ci/format.sh
   build_script: cd $ENGINE_PATH/src/flutter && ./ci/build.sh
-  test_script: cd $ENGINE_PATH/src/flutter && ./ci/test.sh
