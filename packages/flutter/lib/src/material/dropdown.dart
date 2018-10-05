@@ -328,54 +328,45 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     assert(debugCheckHasDirectionality(context));
     final double screenHeight = MediaQuery.of(context).size.height;
-    double maxMenuHeight = screenHeight - 2.0 * _kMenuItemHeight;
-
-    const double topPreferredLimit = _kMenuItemHeight;
-    final double bottomPreferredLimit = screenHeight - _kMenuItemHeight;
+    final double maxMenuHeight = screenHeight - 2.0 * _kMenuItemHeight;
 
     final double buttonTop = buttonRect.top;
     final double buttonBottom = buttonRect.bottom;
 
-    if (buttonTop < topPreferredLimit)
-      maxMenuHeight = maxMenuHeight + topPreferredLimit - buttonTop;
-    if (buttonBottom > bottomPreferredLimit)
-      maxMenuHeight = maxMenuHeight + buttonBottom - bottomPreferredLimit;
+    // If the button is placed on the bottom or top of the screen, its top or
+    // bottom may be less than [_kMenuItemHeight] from the edge of the screen.
+    // In this case, we want to change the menu limits to align with the top
+    // or bottom edge of the button.
+    final double topLimit = math.min(_kMenuItemHeight, buttonTop);
+    final double bottomLimit = math.max(screenHeight - _kMenuItemHeight, buttonBottom);
 
     final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
 
     double menuTop = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
     final double preferredMenuHeight = (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
 
+    // If there are too many elements in the menu, we need to shrink it down
+    // so it is at most the maxMenuHeight.
     final double menuHeight = math.min(maxMenuHeight, preferredMenuHeight);
 
     double bottom = menuTop + menuHeight;
 
-    final double originalMenuTop = menuTop;
-
-
-    if (menuTop < topPreferredLimit)
-      menuTop = math.min(buttonTop, topPreferredLimit);
-
-    final bool bottomOverLimit = bottom > bottomPreferredLimit;
-    if (bottomOverLimit) {
-      bottom = math.max(buttonTop + _kMenuItemHeight, bottomPreferredLimit);
+    // If the computed top or bottom of the menu are outside of the range
+    // specified, we need to bring them into range.
+    if (menuTop < topLimit)
+      menuTop = math.min(buttonTop, topLimit);
+    if (bottom > bottomLimit) {
+      bottom = math.max(buttonTop + _kMenuItemHeight, bottomLimit);
       menuTop = bottom - menuHeight;
     }
 
     if (scrollController == null) {
-      double scrollOffset = 0.0;
-      if (preferredMenuHeight > maxMenuHeight) {
-        scrollOffset = selectedItemOffset - (buttonTop - menuTop);
-        // If the menuTop value has been modified so that it can be used to
-        // construct the widget, then the scroll offset will be off if the height
-        // of the dropdown is greater than the height of the display. In this
-        // case We need to use the original, raw value of the menuTop to find
-        // out what the actual scroll position is.
-        if (bottomOverLimit) {
-          scrollOffset = selectedItemOffset - (buttonTop - originalMenuTop);
-        }
-      }
-
+      // The limit is asymmetrical because we do not care how far positive the
+      // limit goes. We are only concerned about the case where the value of
+      // [buttonTop - menuTop] is larger than selectedItemOffset, ie. when
+      // the button is close to the bottom of the screen and the selected item
+      // is close to 0.
+      final double scrollOffset = preferredMenuHeight > maxMenuHeight ? math.max(0.0, selectedItemOffset - (buttonTop - menuTop)) : 0.0;
       scrollController = ScrollController(initialScrollOffset: scrollOffset);
     }
 
