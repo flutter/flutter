@@ -24,28 +24,36 @@ import '../runner/flutter_command.dart';
 import '../template.dart';
 import '../version.dart';
 
-enum ProjectType {
+enum _ProjectType {
+  /// This is the legacy "app" module type that was created before the default
+  /// was "application". It is kept around to allow users to recreate files that
+  /// have been removed in old projects.
   app,
+  /// The is the default type of project created. It is an application with
+  /// ephemeral .ios and .android directories that can be updated automatically.
   application,
+  /// This is the old name for the [application] style project.
   module, // TODO(gspencer): deprecated -- should be removed once IntelliJ no longer uses it.
+  /// This is a Flutter Dart package project. It doesn't have any native
+  /// components, only Dart.
   package,
+  /// This is a native plugin project.
   plugin,
 }
 
-ProjectType _stringToProjectType(String value) {
-  ProjectType result;
+_ProjectType _stringToProjectType(String value) {
+  _ProjectType result;
   // TODO(gspencer): remove module when it is no longer used by IntelliJ plugin.
   // Module is just an alias for application.
   if (value == 'module') {
     value = 'application';
   }
-  for (ProjectType type in ProjectType.values) {
+  for (_ProjectType type in _ProjectType.values) {
     if (value == getEnumName(type)) {
       result = type;
       break;
     }
   }
-  assert(result != null, 'Unsupported template type $value requested.');
   return result;
 }
 
@@ -70,23 +78,23 @@ class CreateCommand extends FlutterCommand {
     argParser.addOption(
       'template',
       abbr: 't',
-      allowed: ProjectType.values.map<String>((ProjectType type) => getEnumName(type)),
+      allowed: _ProjectType.values.map<String>((_ProjectType type) => getEnumName(type)),
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
       allowedHelp: <String, String>{
-        getEnumName(ProjectType.application): '(default) Generate a Flutter application.',
-        getEnumName(ProjectType.package): 'Generate a shareable Flutter project containing modular '
+        getEnumName(_ProjectType.application): '(default) Generate a Flutter application.',
+        getEnumName(_ProjectType.package): 'Generate a shareable Flutter project containing modular '
             'Dart code.',
-        getEnumName(ProjectType.plugin): 'Generate a shareable Flutter project containing an API '
+        getEnumName(_ProjectType.plugin): 'Generate a shareable Flutter project containing an API '
             'in Dart code with a platform-specific implementation for Android, for iOS code, or '
             'for both.',
       }..addAll(verboseHelp
           ? <String, String>{
-        getEnumName(ProjectType.app): 'Generate the legacy form of an application project. Use '
+        getEnumName(_ProjectType.app): 'Generate the legacy form of an application project. Use '
             '"application" instead, unless you are working with an existing legacy app project. '
             'This is not just an alias for the "application" template, it produces different '
             'output.',
-        getEnumName(ProjectType.module): 'Legacy, deprecated form of an application project. Use '
+        getEnumName(_ProjectType.module): 'Legacy, deprecated form of an application project. Use '
             '"application" instead. This is just an alias for the "application" template, it '
             'produces the same output. It will be removed in a future release.',
             }
@@ -130,18 +138,21 @@ class CreateCommand extends FlutterCommand {
 
   // If it has a .metadata file with the project_type in it, use that.
   // If it has an android dir and an android/app dir, it's a legacy app
-  // If it has an android dir and an android/src dir, it's a plugin
-  // If it has .ios and/or .android dirs, it's an application (nee module)
-  // If it has an ios dir and an ios/Classes dir, it's a plugin
-  // If it has no ios dir, no android dir, and no .ios or .android, then it's a package.
-  ProjectType _determineTemplateType(Directory projectDir) {
+  // If it has an ios dir and an ios/Flutter dir, it's a legacy app
+  // Otherwise, we don't presume to know what type of project it could be, since
+  // many of the files could be missing, and we can't really tell definitively.
+  _ProjectType _determineTemplateType(Directory projectDir) {
     yaml.YamlMap loadMetadata(Directory projectDir) {
       if (!projectDir.existsSync())
         return null;
-      final File metadataFile =fs.file(fs.path.join(projectDir.absolute.path, '.metadata'));
+      final File metadataFile = fs.file(fs.path.join(projectDir.absolute.path, '.metadata'));
       if (!metadataFile.existsSync())
         return null;
       return yaml.loadYaml(metadataFile.readAsStringSync());
+    }
+
+    bool exists(List<String> path) {
+      return fs.directory(fs.path.joinAll(<String>[projectDir.absolute.path] + path)).existsSync();
     }
 
     // If it exists, the project type in the metadata is definitive.
@@ -153,20 +164,13 @@ class CreateCommand extends FlutterCommand {
     // There either wasn't any metadata, or it didn't contain the project type,
     // so try and figure out what type of project it is from the existing
     // directory structure.
-    if (fs.directory(fs.path.join(projectDir.absolute.path, 'android', 'app')).existsSync())
-      return ProjectType.app;
-    final bool dotPlatformDirExists = fs.directory(fs.path.join(projectDir.absolute.path, '.ios')).existsSync() ||
-        fs.directory(fs.path.join(projectDir.absolute.path, '.android')).existsSync();
-    final bool platformDirExists = fs.directory(fs.path.join(projectDir.absolute.path, 'ios')).existsSync() ||
-        fs.directory(fs.path.join(projectDir.absolute.path, 'android')).existsSync();
-    if (dotPlatformDirExists)
-      return ProjectType.application;
-    if (!platformDirExists && !dotPlatformDirExists)
-      return ProjectType.package;
-    if (platformDirExists &&
-        (fs.directory(fs.path.join(projectDir.absolute.path, 'ios', 'Classes')).existsSync() ||
-         fs.directory(fs.path.join(projectDir.absolute.path, 'android', 'src')).existsSync()))
-      return ProjectType.plugin;
+    if (exists(<String>['android', 'app'])
+        || exists(<String>['ios', 'Runner'])
+        || exists(<String>['ios', 'Flutter'])) {
+      return _ProjectType.app;
+    }
+    // Since we can't really be definitive on nearly-empty directories, err on
+    // the side of prudence and just say we don't know.
     return null;
   }
 
@@ -204,31 +208,36 @@ class CreateCommand extends FlutterCommand {
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
     final Directory projectDir = fs.directory(argResults.rest.first);
-    final String dirPath = fs.path.normalize(projectDir.absolute.path);
+    final String projectDirPath = fs.path.normalize(projectDir.absolute.path);
 
-    ProjectType detectedProjectType;
-    if (projectDir.existsSync()) {
-      detectedProjectType = _determineTemplateType(projectDir);
-      if (detectedProjectType == null) {
-        throwToolExit('Sorry, unable to detect the type of project to recreate. '
-            'Try creating a fresh project and migrating your existing code to '
-            'the new project manually.');
-      }
-    }
-
-    ProjectType template;
+    _ProjectType template;
+    _ProjectType detectedProjectType;
+    final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
     if (argResults['template'] != null) {
       template = _stringToProjectType(argResults['template']);
+    } else {
+      if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
+        detectedProjectType = _determineTemplateType(projectDir);
+        if (detectedProjectType == null && metadataExists) {
+          // We can only be definitive that this is the wrong type if the .metadata file
+          // exists and contains a type that we don't understand, or doesn't contain a type.
+          throwToolExit('Sorry, unable to detect the type of project to recreate. '
+              'Try creating a fresh project and migrating your existing code to '
+              'the new project manually.');
+        }
+      }
     }
-    template ??= detectedProjectType ?? ProjectType.application;
-    if (detectedProjectType != null && template != detectedProjectType) {
+    template ??= detectedProjectType ?? _ProjectType.application;
+    if (detectedProjectType != null && template != detectedProjectType && metadataExists) {
+      // We can only be definitive that this is the wrong type if the .metadata file
+      // exists and contains a type that doesn't match.
       throwToolExit("The requested template type '${getEnumName(template)}' doesn't match the "
           "existing template type of '${getEnumName(detectedProjectType)}'.");
     }
 
-    final bool generateApplication = template == ProjectType.application;
-    final bool generatePlugin = template == ProjectType.plugin;
-    final bool generatePackage = template == ProjectType.package;
+    final bool generateApplication = template == _ProjectType.application;
+    final bool generatePlugin = template == _ProjectType.plugin;
+    final bool generatePackage = template == _ProjectType.package;
 
     String organization = argResults['org'];
     if (!argResults.wasParsed('org')) {
@@ -243,9 +252,9 @@ class CreateCommand extends FlutterCommand {
         );
       }
     }
-    final String projectName = fs.path.basename(dirPath);
+    final String projectName = fs.path.basename(projectDirPath);
 
-    String error =_validateProjectDir(dirPath, flutterRoot: flutterRoot);
+    String error = _validateProjectDir(projectDirPath, flutterRoot: flutterRoot);
     if (error != null)
       throwToolExit(error);
 
@@ -264,40 +273,51 @@ class CreateCommand extends FlutterCommand {
       iosLanguage: argResults['ios-language'],
     );
 
-    final String relativeDirPath = fs.path.relative(dirPath);
-    printStatus('Creating project $relativeDirPath...');
-    final Directory directory = fs.directory(dirPath);
+    final String relativeDirPath = fs.path.relative(projectDirPath);
+    if (!projectDir.existsSync()) {
+      printStatus('Creating project $relativeDirPath...');
+    } else {
+      printStatus('Recreating project $relativeDirPath...');
+    }
     int generatedFileCount = 0;
     switch (template) {
-      case ProjectType.app:
-        generatedFileCount += await _generateLegacyApp(directory, templateContext);
+      case _ProjectType.app:
+        generatedFileCount += await _generateLegacyApp(projectDir, templateContext);
         break;
-      case ProjectType.module:
-      case ProjectType.application:
-        generatedFileCount += await _generateApplication(directory, templateContext);
+      case _ProjectType.module:
+      case _ProjectType.application:
+        generatedFileCount += await _generateApplication(projectDir, templateContext);
         break;
-      case ProjectType.package:
-        generatedFileCount += await _generatePackage(directory, templateContext);
+      case _ProjectType.package:
+        generatedFileCount += await _generatePackage(projectDir, templateContext);
         break;
-      case ProjectType.plugin:
-        generatedFileCount += await _generatePlugin(directory, templateContext);
+      case _ProjectType.plugin:
+        generatedFileCount += await _generatePlugin(projectDir, templateContext);
         break;
     }
     printStatus('Wrote $generatedFileCount files.');
     printStatus('\nAll done!');
     if (generatePackage) {
-      final String relativeMainPath = fs.path.normalize(fs.path.join(relativeDirPath, 'lib', '${templateContext['projectName']}.dart'));
+      final String relativeMainPath = fs.path.normalize(fs.path.join(
+        relativeDirPath,
+        'lib',
+        '${templateContext['projectName']}.dart',
+      ));
       printStatus('Your package code is in $relativeMainPath');
     } else if (generateApplication) {
-      final String relativeMainPath = fs.path.normalize(fs.path.join(relativeDirPath, 'lib', 'main.dart'));
+      final String relativeMainPath = fs.path.normalize(fs.path.join(
+          relativeDirPath,
+          'lib',
+          'main.dart',
+      ));
       printStatus('Your application code is in $relativeMainPath.');
     } else {
       // Run doctor; tell the user the next steps.
-      final FlutterProject project = await FlutterProject.fromPath(dirPath);
+      final FlutterProject project = await FlutterProject.fromPath(projectDirPath);
       final FlutterProject app = project.hasExampleApp ? project.example : project;
       final String relativeAppPath = fs.path.normalize(fs.path.relative(app.directory.path));
       final String relativeAppMain = fs.path.join(relativeAppPath, 'lib', 'main.dart');
-      final String relativePluginPath = fs.path.normalize(fs.path.relative(dirPath));
+      final String relativePluginPath = fs.path.normalize(fs.path.relative(projectDirPath));
       final String relativePluginMain = fs.path.join(relativePluginPath, 'lib', '$projectName.dart');
       if (doctor.canLaunchAnything) {
         // Let them know a summary of the state of their tooling.
@@ -360,8 +380,8 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
   Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
-       ? argResults['description']
-       : 'A new flutter package project.';
+        ? argResults['description']
+        : 'A new flutter package project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate('package', directory, templateContext);
     if (argResults['pub']) {
