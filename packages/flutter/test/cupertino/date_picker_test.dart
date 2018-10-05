@@ -99,9 +99,8 @@ void main() {
 
     testWidgets('columns are ordered correctly when text direction is ltr', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: CupertinoTimerPicker(
+        CupertinoApp(
+          home: CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
             initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
           ),
@@ -127,11 +126,13 @@ void main() {
 
     testWidgets('columns are ordered correctly when text direction is rtl', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.rtl,
-          child: CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
-            initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
+        CupertinoApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: CupertinoTimerPicker(
+              onTimerDurationChanged: (_) {},
+              initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
+            ),
           ),
         ),
       );
@@ -155,11 +156,10 @@ void main() {
 
     testWidgets('width of picker is consistent', (WidgetTester tester) async {
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 400.0,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 400.0,
             child: CupertinoTimerPicker(
               onTimerDurationChanged: (_) {},
               initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
@@ -173,11 +173,10 @@ void main() {
         tester.getCenter(find.text('sec')).dx - tester.getCenter(find.text('12')).dx;
 
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 800.0,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 800.0,
             child: CupertinoTimerPicker(
               onTimerDurationChanged: (_) {},
               initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
@@ -246,11 +245,10 @@ void main() {
     testWidgets('changing initialDateTime after first build does not do anything', (WidgetTester tester) async {
       DateTime selectedDateTime;
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 400.0,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 400.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.dateAndTime,
               onDateTimeChanged: (DateTime dateTime) => selectedDateTime = dateTime,
@@ -267,11 +265,10 @@ void main() {
       expect(selectedDateTime, DateTime(2018, 1, 1, 9, 30));
 
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 400.0,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 400.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.dateAndTime,
               onDateTimeChanged: (DateTime dateTime) => selectedDateTime = dateTime,
@@ -292,11 +289,10 @@ void main() {
 
     testWidgets('date picker has expected string', (WidgetTester tester) async {
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 400.0,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 400.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
               onDateTimeChanged: (_) {},
@@ -313,11 +309,10 @@ void main() {
 
     testWidgets('datetime picker has expected string', (WidgetTester tester) async {
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 400.0,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 400.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.dateAndTime,
               onDateTimeChanged: (_) {},
@@ -335,10 +330,8 @@ void main() {
 
     testWidgets('width of picker in date and time mode is consistent', (WidgetTester tester) async {
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 400.0,
-          child: Directionality(
+        CupertinoApp(
+          home: Directionality(
             textDirection: TextDirection.ltr,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.dateAndTime,
@@ -354,11 +347,10 @@ void main() {
           tester.getCenter(find.text('Mon Jan 1 ')).dx - tester.getCenter(find.text('AM')).dx;
 
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 800.0,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 800.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.dateAndTime,
               onDateTimeChanged: (_) {},
@@ -377,11 +369,10 @@ void main() {
 
     testWidgets('width of picker in date mode is consistent', (WidgetTester tester) async {
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 400.0,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 400.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
               onDateTimeChanged: (_) {},
@@ -396,11 +387,10 @@ void main() {
           tester.getCenter(find.text('January')).dx - tester.getCenter(find.text('2018')).dx;
 
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 800.0,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 800.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
               onDateTimeChanged: (_) {},
@@ -419,11 +409,10 @@ void main() {
 
     testWidgets('width of picker in time mode is consistent', (WidgetTester tester) async {
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 400.0,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 400.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.time,
               onDateTimeChanged: (_) {},
@@ -438,11 +427,10 @@ void main() {
           tester.getCenter(find.text('10')).dx - tester.getCenter(find.text('AM')).dx;
 
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 800.0,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 800.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.time,
               onDateTimeChanged: (_) {},
@@ -462,11 +450,10 @@ void main() {
     testWidgets('picker automatically scrolls away from invalid date on month change', (WidgetTester tester) async {
       DateTime date;
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 400.0,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 400.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
               onDateTimeChanged: (DateTime newDate) {
@@ -501,11 +488,10 @@ void main() {
     testWidgets('picker automatically scrolls away from invalid date on day change', (WidgetTester tester) async {
       DateTime date;
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 400.0,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 400.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
               onDateTimeChanged: (DateTime newDate) {
@@ -555,11 +541,10 @@ void main() {
     testWidgets('picker automatically scrolls the am/pm column when the hour column changes enough', (WidgetTester tester) async {
       DateTime date;
       await tester.pumpWidget(
-        SizedBox(
-          height: 400.0,
-          width: 400.0,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 400.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.time,
               onDateTimeChanged: (DateTime newDate) {

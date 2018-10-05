@@ -18,7 +18,7 @@ Process daemon;
 //   emulators: list emulators
 //   launch: launch an emulator
 
-Future<Null> main() async {
+Future<void> main() async {
   daemon = await Process.start('dart', <String>['bin/flutter_tools.dart', 'daemon']);
   print('daemon process started, pid: ${daemon.pid}');
 
@@ -82,7 +82,7 @@ Future<Null> main() async {
   });
 
   // Print in the callback can't fail.
-  daemon.exitCode.then<Null>((int code) { // ignore: unawaited_futures
+  daemon.exitCode.then<void>((int code) { // ignore: unawaited_futures
     print('daemon exiting ($code)');
     exit(code);
   });

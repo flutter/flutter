@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 
 import 'run_command.dart';
 
-typedef ShardRunner = Future<Null> Function();
+typedef ShardRunner = Future<void> Function();
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
@@ -37,7 +37,7 @@ const Duration _kShortTimeout = Duration(minutes: 5);
 /// For example:
 /// SHARD=tool_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 /// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
-Future<Null> main(List<String> args) async {
+Future<void> main(List<String> args) async {
   flutterTestArgs.addAll(args);
 
   final String shard = Platform.environment['SHARD'];
@@ -58,7 +58,7 @@ Future<Null> main(List<String> args) async {
   }
 }
 
-Future<Null> _runSmokeTests() async {
+Future<void> _runSmokeTests() async {
   // Verify that the tests actually return failure on failure and success on
   // success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
@@ -138,7 +138,7 @@ Future<Null> _runSmokeTests() async {
   await _verifyVersion(path.join(flutterRoot, 'version'));
 }
 
-Future<Null> _runToolTests() async {
+Future<void> _runToolTests() async {
   await _runSmokeTests();
 
   await _pubRunTest(
@@ -149,7 +149,7 @@ Future<Null> _runToolTests() async {
   print('${bold}DONE: All tests successful.$reset');
 }
 
-Future<Null> _runTests() async {
+Future<void> _runTests() async {
   await _runSmokeTests();
 
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
@@ -171,7 +171,7 @@ Future<Null> _runTests() async {
   print('${bold}DONE: All tests successful.$reset');
 }
 
-Future<Null> _runCoverage() async {
+Future<void> _runCoverage() async {
   final File coverageFile = File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
   if (!coverageFile.existsSync()) {
     print('${red}Coverage file not found.$reset');
@@ -193,7 +193,7 @@ Future<Null> _runCoverage() async {
   print('${bold}DONE: Coverage collection successful.$reset');
 }
 
-Future<Null> _pubRunTest(
+Future<void> _pubRunTest(
   String workingDirectory, {
   String testPath,
   bool enableFlutterToolAsserts = false
@@ -234,7 +234,7 @@ class EvalResult {
   final int exitCode;
 }
 
-Future<Null> _runFlutterTest(String workingDirectory, {
+Future<void> _runFlutterTest(String workingDirectory, {
   String script,
   bool expectFailure = false,
   bool printOutput = true,
@@ -268,7 +268,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
   );
 }
 
-Future<Null> _verifyVersion(String filename) async {
+Future<void> _verifyVersion(String filename) async {
   if (!File(filename).existsSync()) {
     print('$redLine');
     print('The version logic failed to create the Flutter version file.');

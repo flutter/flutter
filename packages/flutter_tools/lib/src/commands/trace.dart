@@ -44,7 +44,7 @@ class TraceCommand extends FlutterCommand {
     'The --debug-port argument is required.';
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     int observatoryPort;
     if (argResults.wasParsed('debug-port')) {
       observatoryPort = int.tryParse(argResults['debug-port']);
@@ -88,12 +88,14 @@ class TraceCommand extends FlutterCommand {
 
     if (start)
       await tracing.startTracing();
-    await Future<Null>.delayed(duration);
+    await Future<void>.delayed(duration);
     if (stop)
       await _stopTracing(tracing);
+
+    return null;
   }
 
-  Future<Null> _stopTracing(Tracing tracing) async {
+  Future<void> _stopTracing(Tracing tracing) async {
     final Map<String, dynamic> timeline = await tracing.stopTracingAndDownloadTimeline();
     File localFile;
 

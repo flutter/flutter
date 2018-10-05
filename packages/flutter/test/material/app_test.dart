@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class StateMarker extends StatefulWidget {
@@ -411,5 +412,27 @@ void main() {
       home: const Placeholder(),
     ));
     expect(key.currentState, isInstanceOf<NavigatorState>());
+  });
+
+  testWidgets('Has default material and cupertino localizations', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Column(
+              children: <Widget>[
+                Text(MaterialLocalizations.of(context).selectAllButtonLabel),
+                Text(CupertinoLocalizations.of(context).selectAllButtonLabel),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    // Default US "select all" text.
+    expect(find.text('SELECT ALL'), findsOneWidget);
+    // Default Cupertino US "select all" text.
+    expect(find.text('Select All'), findsOneWidget);
   });
 }

@@ -438,7 +438,7 @@ class IOSSimulator extends Device {
     }
   }
 
-  Future<Null> ensureLogsExists() async {
+  Future<void> ensureLogsExists() async {
     if (await sdkMajorVersion < 11) {
       final File logFile = fs.file(logFilePath);
       if (!logFile.existsSync())
@@ -482,8 +482,6 @@ Future<Process> launchSystemLogTool(IOSSimulator device) async {
 }
 
 class _IOSSimulatorLogReader extends DeviceLogReader {
-  String _appName;
-
   _IOSSimulatorLogReader(this.device, IOSApp app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
@@ -493,6 +491,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   }
 
   final IOSSimulator device;
+
+  String _appName;
 
   StreamController<String> _linesController;
 
@@ -506,7 +506,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   @override
   String get name => device.name;
 
-  Future<Null> _start() async {
+  Future<void> _start() async {
     // Device log.
     await device.ensureLogsExists();
     _deviceProcess = await launchDeviceLogTool(device);
@@ -695,7 +695,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
   }
 
   @override
-  Future<Null> unforward(ForwardedPort forwardedPort) async {
+  Future<void> unforward(ForwardedPort forwardedPort) async {
     _ports.remove(forwardedPort);
   }
 }

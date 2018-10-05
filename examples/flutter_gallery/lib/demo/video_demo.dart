@@ -14,12 +14,12 @@ const String beeUri =
     'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
 
 class VideoCard extends StatelessWidget {
+  const VideoCard({Key key, this.controller, this.title, this.subtitle})
+      : super(key: key);
+
   final VideoPlayerController controller;
   final String title;
   final String subtitle;
-
-  const VideoCard({Key key, this.controller, this.title, this.subtitle})
-      : super(key: key);
 
   Widget _buildInlineVideo() {
     return Padding(
@@ -93,9 +93,9 @@ class VideoCard extends StatelessWidget {
 }
 
 class VideoPlayerLoading extends StatefulWidget {
-  final VideoPlayerController controller;
-
   const VideoPlayerLoading(this.controller);
+
+  final VideoPlayerController controller;
 
   @override
   _VideoPlayerLoadingState createState() => _VideoPlayerLoadingState();
@@ -137,24 +137,24 @@ class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
 }
 
 class VideoPlayPause extends StatefulWidget {
-  final VideoPlayerController controller;
-
   const VideoPlayPause(this.controller);
+
+  final VideoPlayerController controller;
 
   @override
   State createState() => _VideoPlayPauseState();
 }
 
 class _VideoPlayPauseState extends State<VideoPlayPause> {
-  FadeAnimation imageFadeAnimation;
-  VoidCallback listener;
-
   _VideoPlayPauseState() {
     listener = () {
       if (mounted)
         setState(() {});
     };
   }
+
+  FadeAnimation imageFadeAnimation;
+  VoidCallback listener;
 
   VideoPlayerController get controller => widget.controller;
 
@@ -202,13 +202,13 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
 }
 
 class FadeAnimation extends StatefulWidget {
-  final Widget child;
-  final Duration duration;
-
   const FadeAnimation({
     this.child,
     this.duration = const Duration(milliseconds: 500),
   });
+
+  final Widget child;
+  final Duration duration;
 
   @override
   _FadeAnimationState createState() => _FadeAnimationState();
@@ -265,15 +265,15 @@ class _FadeAnimationState extends State<FadeAnimation>
 }
 
 class ConnectivityOverlay extends StatefulWidget {
-  final Widget child;
-  final Completer<Null> connectedCompleter;
-  final GlobalKey<ScaffoldState> scaffoldKey;
-
   const ConnectivityOverlay({
     this.child,
     this.connectedCompleter,
     this.scaffoldKey,
   });
+
+  final Widget child;
+  final Completer<Null> connectedCompleter;
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
   @override
   _ConnectivityOverlayState createState() => _ConnectivityOverlayState();

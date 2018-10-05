@@ -13,11 +13,11 @@ import 'package:flutter_devicelab/framework/utils.dart';
 
 Future<void> testReload(Process process, { Future<void> Function() onListening }) async {
   section('Testing hot reload, restart and quit');
-  final Completer<Null> listening = Completer<Null>();
-  final Completer<Null> ready = Completer<Null>();
-  final Completer<Null> reloaded = Completer<Null>();
-  final Completer<Null> restarted = Completer<Null>();
-  final Completer<Null> finished = Completer<Null>();
+  final Completer<void> listening = Completer<void>();
+  final Completer<void> ready = Completer<void>();
+  final Completer<void> reloaded = Completer<void>();
+  final Completer<void> restarted = Completer<void>();
+  final Completer<void> finished = Completer<void>();
   final List<String> stdout = <String>[];
   final List<String> stderr = <String>[];
 
@@ -52,7 +52,7 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
 
   process.exitCode.then<void>((int processExitCode) { exitCode = processExitCode; });
 
-  Future<dynamic> eventOrExit(Future<Null> event) {
+  Future<dynamic> eventOrExit(Future<void> event) {
     return Future.any<dynamic>(<Future<dynamic>>[ event, process.exitCode ]);
   }
 
@@ -116,7 +116,7 @@ void main() {
         });
 
         // Give the device the time to really shut down the app.
-        await Future<Null>.delayed(const Duration(milliseconds: 200));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
         // After the delay, force-stopping it shouldn't do anything, but doesn't hurt.
         await device.shellExec('am', <String>['force-stop', kAppId]);
 

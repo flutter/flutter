@@ -42,14 +42,14 @@ class ShellCompletionCommand extends FlutterCommand {
   Future<String> get usagePath => null;
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     if (argResults.rest.length > 1) {
       throwToolExit('Too many arguments given to bash-completion command.', exitCode: 1);
     }
 
     if (argResults.rest.isEmpty || argResults.rest.first == '-') {
       stdout.write(generateCompletionScript(<String>['flutter']));
-      return;
+      return null;
     }
 
     final File outputFile = fs.file(argResults.rest.first);
@@ -65,5 +65,7 @@ class ShellCompletionCommand extends FlutterCommand {
     } on FileSystemException catch (error) {
       throwToolExit('Unable to write shell completion setup script.\n$error', exitCode: 1);
     }
+
+    return null;
   }
 }

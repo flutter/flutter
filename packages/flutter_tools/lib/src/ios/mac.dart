@@ -335,7 +335,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildInfo: buildInfo,
   );
   refreshPluginsList(project);
-  if (hasPlugins(project) || (project.isModule && project.ios.podfile.existsSync())) {
+  if (hasPlugins(project) || (project.isApplication && project.ios.podfile.existsSync())) {
     // If the Xcode project, Podfile, or Generated.xcconfig have changed since
     // last run, pods should be updated.
     final Fingerprinter fingerprinter = Fingerprinter(
@@ -530,7 +530,7 @@ String readGeneratedXcconfig(String appPath) {
   return generatedXcconfigFile.readAsStringSync();
 }
 
-Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
+Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.contains('BCEROR') == true &&
@@ -625,7 +625,7 @@ bool _checkXcodeVersion() {
   return true;
 }
 
-Future<Null> _addServicesToBundle(Directory bundle) async {
+Future<void> _addServicesToBundle(Directory bundle) async {
   final List<Map<String, String>> services = <Map<String, String>>[];
   printTrace('Trying to resolve native pub services.');
 
@@ -644,7 +644,7 @@ Future<Null> _addServicesToBundle(Directory bundle) async {
   _copyServiceDefinitionsManifest(services, manifestFile);
 }
 
-Future<Null> _copyServiceFrameworks(List<Map<String, String>> services, Directory frameworksDirectory) async {
+Future<void> _copyServiceFrameworks(List<Map<String, String>> services, Directory frameworksDirectory) async {
   printTrace("Copying service frameworks to '${fs.path.absolute(frameworksDirectory.path)}'.");
   frameworksDirectory.createSync(recursive: true);
   for (Map<String, String> service in services) {

@@ -275,7 +275,7 @@ abstract class Device {
 
   bool get supportsScreenshot => false;
 
-  Future<void> takeScreenshot(File outputFile) => Future<Null>.error('unimplemented');
+  Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
 
   @override
   int get hashCode => id.hashCode;
@@ -326,7 +326,7 @@ abstract class Device {
     }
   }
 
-  static Future<Null> printDevices(List<Device> devices) async {
+  static Future<void> printDevices(List<Device> devices) async {
     await descriptions(devices).forEach(printStatus);
   }
 }
@@ -405,7 +405,7 @@ abstract class DevicePortForwarder {
   Future<int> forward(int devicePort, {int hostPort});
 
   /// Stops forwarding [forwardedPort].
-  Future<Null> unforward(ForwardedPort forwardedPort);
+  Future<void> unforward(ForwardedPort forwardedPort);
 }
 
 /// Read the log for a particular device.

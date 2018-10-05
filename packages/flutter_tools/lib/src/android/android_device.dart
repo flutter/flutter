@@ -533,7 +533,13 @@ List<AndroidDevice> getAdbDevices() {
   final String adbPath = getAdbPath(androidSdk);
   if (adbPath == null)
     return <AndroidDevice>[];
-  final String text = runSync(<String>[adbPath, 'devices', '-l']);
+  String text;
+  try {
+    text = runSync(<String>[adbPath, 'devices', '-l']);
+  } on ArgumentError catch (exception) {
+    throwToolExit('Unable to run "adb", check your Android SDK installation and '
+      'ANDROID_HOME environment variable: ${exception.message}');
+  }
   final List<AndroidDevice> devices = <AndroidDevice>[];
   parseADBDeviceOutput(text, devices: devices);
   return devices;
@@ -670,7 +676,7 @@ class _AdbLogReader extends DeviceLogReader {
         _timeOrigin = _adbTimestampToDateTime(lastTimestamp);
     else
         _timeOrigin = null;
-    runCommand(device.adbCommandForDevice(args)).then<Null>((Process process) {
+    runCommand(device.adbCommandForDevice(args)).then<void>((Process process) {
       _process = process;
       const Utf8Decoder decoder = Utf8Decoder(allowMalformed: true);
       _process.stdout.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
@@ -862,7 +868,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
   }
 
   @override
-  Future<Null> unforward(ForwardedPort forwardedPort) async {
+  Future<void> unforward(ForwardedPort forwardedPort) async {
     await runCheckedAsync(device.adbCommandForDevice(
       <String>['forward', '--remove', 'tcp:${forwardedPort.hostPort}']
     ));

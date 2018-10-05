@@ -55,7 +55,7 @@ Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
       await socket?.close();
       if (timer.elapsed < _kConnectTimeout) {
         _log.info('Attempting to reconnect');
-        await Future<Null>.delayed(_kReconnectAttemptInterval);
+        await Future<void>.delayed(_kReconnectAttemptInterval);
         return attemptConnection(uri);
       } else {
         _log.warning('Connection to Fuchsia\'s Dart VM timed out at '
@@ -120,16 +120,24 @@ class DartVm {
   ///
   /// This is not limited to Isolates running Flutter, but to any Isolate on the
   /// VM.
+  ///
+  /// `includeNonFlutterIsolates` makes sure to add non-flutter Dart isolates,
+  /// and defaults to `false`.
   Future<List<IsolateRef>> getMainIsolatesByPattern(
     Pattern pattern, {
     Duration timeout = _kRpcTimeout,
+    bool includeNonFlutterIsolates = false,
   }) async {
     final Map<String, dynamic> jsonVmRef =
         await invokeRpc('getVM', timeout: timeout);
     final List<IsolateRef> result = <IsolateRef>[];
     for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
       final String name = jsonIsolate['name'];
-      if (name.contains(pattern)) {
+      // `:main()` is included at the end of a flutter isolate, whereas the
+      // name of a dart Isolate is concluded as if the name were a function.
+      if (name.contains(pattern) &&
+          (includeNonFlutterIsolates || name.contains(RegExp(r':main\(\)')))) {
+        _log.fine('Found Isolate matching "$pattern": "$name"');
         result.add(IsolateRef._fromJson(jsonIsolate, this));
       }
     }
@@ -181,7 +189,7 @@ class DartVm {
   /// Disconnects from the Dart VM Service.
   ///
   /// After this function completes this object is no longer usable.
-  Future<Null> stop() async {
+  Future<void> stop() async {
     await _peer?.close();
   }
 }

@@ -30,15 +30,6 @@ enum DayPeriod {
 ///    time zones.
 @immutable
 class TimeOfDay {
-  /// The number of hours in one day, i.e. 24.
-  static const int hoursPerDay = 24;
-
-  /// The number of hours in one day period (see also [DayPeriod]), i.e. 12.
-  static const int hoursPerPeriod = 12;
-
-  /// The number of minutes in one hour, i.e. 60.
-  static const int minutesPerHour = 60;
-
   /// Creates a time of day.
   ///
   /// The [hour] argument must be between 0 and 23, inclusive. The [minute]
@@ -56,6 +47,15 @@ class TimeOfDay {
   /// The [hour] is set to the current hour and the [minute] is set to the
   /// current minute in the local time zone.
   factory TimeOfDay.now() { return TimeOfDay.fromDateTime(DateTime.now()); }
+
+  /// The number of hours in one day, i.e. 24.
+  static const int hoursPerDay = 24;
+
+  /// The number of hours in one day period (see also [DayPeriod]), i.e. 12.
+  static const int hoursPerPeriod = 12;
+
+  /// The number of minutes in one hour, i.e. 60.
+  static const int minutesPerHour = 60;
 
   /// Returns a new TimeOfDay with the hour and/or minute replaced.
   TimeOfDay replacing({ int hour, int minute }) {

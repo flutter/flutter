@@ -135,10 +135,10 @@ class FuchsiaRemoteConnection {
     await connection._forwardLocalPortsToDeviceServicePorts();
 
     Stream<DartVmEvent> dartVmStream() {
-      Future<Null> listen() async {
+      Future<void> listen() async {
         while (connection._pollDartVms) {
           await connection._pollVms();
-          await Future<Null>.delayed(_kVmPollInterval);
+          await Future<void>.delayed(_kVmPollInterval);
         }
         connection._dartVmEventController.close();
       }
@@ -218,7 +218,7 @@ class FuchsiaRemoteConnection {
   /// Any objects that this class returns (including any child objects from
   /// those objects) will subsequently have its connection closed as well, so
   /// behavior for them will be undefined.
-  Future<Null> stop() async {
+  Future<void> stop() async {
     for (PortForwarder pf in _forwardedVmServicePorts) {
       // Closes VM service first to ensure that the connection is closed cleanly
       // on the target before shutting down the forwarding itself.
@@ -369,7 +369,7 @@ class FuchsiaRemoteConnection {
     final List<E> result = <E>[];
 
     // Helper function loop.
-    Future<Null> shutDownPortForwarder(PortForwarder pf) async {
+    Future<void> shutDownPortForwarder(PortForwarder pf) async {
       await pf.stop();
       _stalePorts.add(pf.remotePort);
       if (queueEvents) {
@@ -432,7 +432,7 @@ class FuchsiaRemoteConnection {
   ///
   /// If there are new instances of the Dart VM, then connections will be
   /// attempted (after clearing out stale connections).
-  Future<Null> _pollVms() async {
+  Future<void> _pollVms() async {
     await _checkPorts();
     final List<int> servicePorts = await getDeviceServicePorts();
     for (int servicePort in servicePorts) {
@@ -456,7 +456,7 @@ class FuchsiaRemoteConnection {
   /// Runs a dummy heartbeat command on all Dart VM instances.
   ///
   /// Removes any failing ports from the cache.
-  Future<Null> _checkPorts([bool queueEvents = true]) async {
+  Future<void> _checkPorts([bool queueEvents = true]) async {
     // Filters out stale ports after connecting. Ignores results.
     await _invokeForAllVms<Map<String, dynamic>>(
       (DartVm vmService) async {
@@ -473,7 +473,7 @@ class FuchsiaRemoteConnection {
   ///
   /// When this function is run, all existing forwarded ports and connections
   /// are reset by way of [stop].
-  Future<Null> _forwardLocalPortsToDeviceServicePorts() async {
+  Future<void> _forwardLocalPortsToDeviceServicePorts() async {
     await stop();
     final List<int> servicePorts = await getDeviceServicePorts();
     final List<PortForwarder> forwardedVmServicePorts =
@@ -543,7 +543,7 @@ abstract class PortForwarder {
   int get remotePort;
 
   /// Shuts down and cleans up port forwarding.
-  Future<Null> stop();
+  Future<void> stop();
 }
 
 /// Instances of this class represent a running SSH tunnel.
@@ -628,7 +628,7 @@ class _SshPortForwarder implements PortForwarder {
   /// Kills the SSH forwarding command, then to ensure no ports are forwarded,
   /// runs the SSH 'cancel' command to shut down port forwarding completely.
   @override
-  Future<Null> stop() async {
+  Future<void> stop() async {
     // Cancel the forwarding request. See [start] for commentary about why this
     // uses the IPv4 loopback.
     final String formattedForwardingUrl =
