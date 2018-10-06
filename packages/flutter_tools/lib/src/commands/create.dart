@@ -109,7 +109,7 @@ class CreateCommand extends FlutterCommand {
     argParser.addOption(
       'org',
       defaultsTo: 'com.example',
-      help: 'The organization responsible for your new Flutter project, in reverse domain name notation. '
+      help: 'The organization responsible for your new Flutter project, in reverse domain name notation.\n'
             'This string is used in Java package names and as prefix in the iOS bundle identifier.'
     );
     argParser.addOption(
@@ -191,7 +191,7 @@ class CreateCommand extends FlutterCommand {
     }
 
     if (Cache.flutterRoot == null)
-      throwToolExit('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment '
+      throwToolExit('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment\n'
         'variable was specified. Unable to find package:flutter.', exitCode: 2);
 
     await Cache.instance.updateAll();
@@ -247,7 +247,7 @@ class CreateCommand extends FlutterCommand {
         organization = existingOrganizations.first;
       } else if (1 < existingOrganizations.length) {
         throwToolExit(
-          'Ambiguous organization in existing files: $existingOrganizations. '
+          'Ambiguous organization in existing files: $existingOrganizations.\n'
           'The --org command line argument must be specified to recreate project.'
         );
       }
@@ -571,7 +571,7 @@ String _validateProjectName(String projectName) {
 /// if we should disallow the directory name.
 String _validateProjectDir(String dirPath, { String flutterRoot }) {
   if (fs.path.isWithin(flutterRoot, dirPath)) {
-    return 'Cannot create a project within the Flutter SDK. '
+    return 'Cannot create a project within the Flutter SDK.\n'
       "Target directory '$dirPath' is within the Flutter SDK at '$flutterRoot'.";
   }
 

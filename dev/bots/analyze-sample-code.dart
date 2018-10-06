@@ -223,7 +223,7 @@ linter:
     print('Found $sampleCodeSections sample code sections.');
     final Process process = await Process.start(
       _flutter,
-      <String>['--no-wrap', 'analyze', '--no-preamble', '--no-congratulate', mainDart.parent.path],
+      <String>['analyze', '--no-preamble', '--no-congratulate', mainDart.parent.path],
       workingDirectory: tempDir.path,
     );
     final List<String> errors = <String>[];

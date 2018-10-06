@@ -53,8 +53,6 @@ void main() {
       expect(testLogger.statusText, equals(
         'Automatically signing iOS for device deployment using specified development team in Xcode project: abc\n'
       ));
-    }, overrides: <Type, Generator>{
-      OutputPreferences: () => OutputPreferences(wrapText: false),
     });
 
     testUsingContext('No auto-sign if security or openssl not available', () async {
@@ -90,7 +88,6 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
     });
 
     testUsingContext('Test single identity and certificate organization works', () async {
@@ -150,7 +147,6 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
     });
 
     testUsingContext('Test Google cert also manually selects a provisioning profile', () async {
@@ -214,7 +210,6 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
     });
 
     testUsingContext('Test multiple identity and certificate organization works', () async {
@@ -289,7 +284,6 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Config: () => mockConfig,
       AnsiTerminal: () => testTerminal,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
     });
 
     testUsingContext('Test multiple identity in machine mode works', () async {
@@ -358,7 +352,6 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Config: () => mockConfig,
       AnsiTerminal: () => testTerminal,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
     });
 
     testUsingContext('Test saved certificate used', () async {
@@ -429,7 +422,6 @@ void main() {
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Config: () => mockConfig,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
     });
 
     testUsingContext('Test invalid saved certificate shows error and prompts again', () async {

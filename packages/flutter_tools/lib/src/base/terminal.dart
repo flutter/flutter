@@ -11,7 +11,6 @@ import '../globals.dart';
 import 'context.dart';
 import 'io.dart' as io;
 import 'platform.dart';
-import 'utils.dart';
 
 final AnsiTerminal _kAnsiTerminal = AnsiTerminal();
 
@@ -29,45 +28,6 @@ enum TerminalColor {
   yellow,
   magenta,
   grey,
-}
-
-final OutputPreferences _kOutputPreferences = OutputPreferences();
-
-OutputPreferences get outputPreferences => (context == null || context[OutputPreferences] == null)
-    ? _kOutputPreferences
-    : context[OutputPreferences];
-
-/// A class that contains the context settings for command text output to the
-/// console.
-class OutputPreferences {
-  OutputPreferences({
-    bool wrapText,
-    int wrapColumn,
-    bool showColor,
-  })  : wrapText = wrapText ?? true,
-        wrapColumn = wrapColumn ?? const io.Stdio().terminalColumns ?? kDefaultTerminalColumns,
-        showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
-
-  /// If [wrapText] is true, then output text sent to the context's [Logger]
-  /// instance (e.g. from the [printError] or [printStatus] functions) will be
-  /// wrapped to be no longer than the [wrapColumn] specifies. Defaults to true.
-  final bool wrapText;
-
-  /// The column at which any output sent to the context's [Logger] instance
-  /// (e.g. from the [printError] or [printStatus] functions) will be wrapped.
-  /// Ignored if [wrapText] is false. Defaults to the width of the output
-  /// terminal, or to [kDefaultTerminalColumns] if not writing to a terminal.
-  final int wrapColumn;
-
-  /// Whether or not to output ANSI color codes when writing to the output
-  /// terminal. Defaults to whatever [platform.stdoutSupportsAnsi] says if
-  /// writing to a terminal, and false otherwise.
-  final bool showColor;
-
-  @override
-  String toString() {
-    return '$runtimeType[wrapText: $wrapText, wrapColumn: $wrapColumn, showColor: $showColor]';
-  }
 }
 
 class AnsiTerminal {
@@ -102,16 +62,8 @@ class AnsiTerminal {
     if (!supportsColor || message.isEmpty)
       return message;
     final StringBuffer buffer = StringBuffer();
-    for (String line in message.split('\n')) {
-      // If there were resets in the string before, then keep them, but
-      // restart the bold right after. This prevents embedded resets from
-      // stopping the boldness.
-      line = line.replaceAll(reset, '$reset$bold');
-      // Remove all codes at the end of the string, since we're just going
-      // to reset them, and they would either be redundant, or have no effect.
-      line = line.replaceAll(RegExp('(\u001b\[[0-9;]+m)+\$'), '');
+    for (String line in message.split('\n'))
       buffer.writeln('$bold$line$reset');
-    }
     final String result = buffer.toString();
     // avoid introducing a new newline to the emboldened text
     return (!message.endsWith('\n') && result.endsWith('\n'))
@@ -124,17 +76,8 @@ class AnsiTerminal {
     if (!supportsColor || color == null || message.isEmpty)
       return message;
     final StringBuffer buffer = StringBuffer();
-    final String colorCodes = _colorMap[color];
-    for (String line in message.split('\n')) {
-      // If there were resets in the string before, then keep them, but
-      // restart the color right after. This prevents embedded resets from
-      // stopping the colors.
-      line = line.replaceAll(reset, '$reset$colorCodes');
-      // Remove any extra codes at the end of the string, since we're just going
-      // to reset them.
-      line = line.replaceAll(RegExp('(\u001b\[[0-9;]*m)+\$'), '');
-      buffer.writeln('$colorCodes$line$reset');
-    }
+    for (String line in message.split('\n'))
+      buffer.writeln('${_colorMap[color]}$line$reset');
     final String result = buffer.toString();
     // avoid introducing a new newline to the colored text
     return (!message.endsWith('\n') && result.endsWith('\n'))

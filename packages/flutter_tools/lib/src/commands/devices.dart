@@ -33,13 +33,13 @@ class DevicesCommand extends FlutterCommand {
       printStatus(
         'No devices detected.\n\n'
         "Run 'flutter emulators' to list and start any available device emulators.\n\n"
-        'Or, if you expected your device to be detected, please run "flutter doctor" to diagnose '
+        'Or, if you expected your device to be detected, please run "flutter doctor" to diagnose\n'
         'potential issues, or visit https://flutter.io/setup/ for troubleshooting tips.');
       final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
       if (diagnostics.isNotEmpty) {
         printStatus('');
         for (String diagnostic in diagnostics) {
-          printStatus('• $diagnostic', hangingIndent: 2);
+          printStatus('• ${diagnostic.replaceAll('\n', '\n  ')}');
         }
       }
     } else {
