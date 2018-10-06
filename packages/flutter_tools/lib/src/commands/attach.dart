@@ -50,7 +50,7 @@ class AttachCommand extends FlutterCommand {
       )..addFlag('machine',
           hide: !verboseHelp,
           negatable: false,
-          help: 'Handle machine structured JSON command input and provide output\n'
+          help: 'Handle machine structured JSON command input and provide output '
                 'and progress in machine friendly format.',
       );
     hotRunnerFactory ??= HotRunnerFactory();
