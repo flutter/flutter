@@ -555,7 +555,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    expect(tester.getSemanticsData(find.text('snack')), matchesSemanticsData(
+    expect(tester.getSemantics(find.text('snack')), matchesSemantics(
       isLiveRegion: true,
       hasDismissAction: true,
       hasScrollDownAction: true,
