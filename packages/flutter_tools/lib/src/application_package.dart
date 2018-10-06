@@ -158,6 +158,9 @@ class AndroidApk extends ApplicationPackage {
 
     String launchActivity;
     for (xml.XmlElement activity in document.findAllElements('activity')) {
+      final String enabled = activity.getAttribute('android:enabled');
+      if(enabled!=null && enabled!='true')
+        continue;
       for(xml.XmlElement element in activity.findElements('intent-filter')){
         String actionName = '', categoryName = '';
         for(xml.XmlNode node in element.children){
@@ -450,8 +453,11 @@ class ApkManifestData {
 
     _Element launchActivity;
     for (_Element activity in activities) {
+      final _Attribute enabled = activity.firstAttribute('android:enabled');
       final Iterable<_Element> intentFilters =
           activity.allElements('intent-filter').cast<_Element>();
+      if(enabled!=null && !enabled.value.contains('0xffffffff'))
+        continue;
       for (_Element element in intentFilters) {
         final _Element action = element.firstElement('action');
         final _Element category = element.firstElement('category');
