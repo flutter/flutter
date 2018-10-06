@@ -16,7 +16,7 @@ export 'package:flutter/services.dart' show TextInputType, TextInputAction, Text
 const BorderSide _kDefaultRoundedBorderSide = BorderSide(
   color: CupertinoColors.lightBackgroundGray,
   style: BorderStyle.solid,
-  width: 1.0,
+  width: 1.5,
 );
 const Border _kDefaultRoundedBorder = Border(
   top: _kDefaultRoundedBorderSide,
@@ -36,6 +36,8 @@ const TextStyle _kDefaultTextStyle = TextStyle(
   color: CupertinoColors.black,
   decoration: TextDecoration.none,
 );
+
+const Color _kSelectionHighlightColor = Color(0x667FAACF);
 
 enum OverlayVisibilityMode {
   never,
@@ -477,7 +479,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
-        // selectionColor: themeData.textSelectionColor,
+        selectionColor: _kSelectionHighlightColor,
         selectionControls: cupertinoTextSelectionControls,
         onChanged: widget.onChanged,
         onEditingComplete: widget.onEditingComplete,
@@ -494,11 +496,25 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     );
 
     if (widget.placeholder != null) {
-      child = Stack(
-        children: <Widget>[
-          Text(widget.placeholder, style: widget.style.merge(const TextStyle(color: Color(0xFFC2C2C2)))),
-          child,
-        ],
+      child = ValueListenableBuilder<TextEditingValue>(
+        valueListenable: _controller,
+        builder: (BuildContext context, TextEditingValue text, Widget child) {
+          if (text.text.isNotEmpty) {
+            return child;
+          }
+
+          return Stack(
+            children: <Widget>[
+              Text(
+                widget.placeholder,
+                maxLines: 1,
+                style: widget.style.merge(const TextStyle(color: Color(0xFFC2C2C2))),
+              ),
+              child,
+            ],
+          );
+        },
+        child: child,
       );
     }
 
