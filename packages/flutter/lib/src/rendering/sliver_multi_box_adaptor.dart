@@ -151,7 +151,7 @@ abstract class RenderSliverWithKeepAliveMixin extends RenderSliver {
 class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with ContainerParentDataMixin<RenderBox>, KeepAliveParentDataMixin {
   /// The index of this child according to the [RenderSliverBoxChildManager].
   int index;
-  
+
   @override
   bool get keptAlive => _keptAlive;
   bool _keptAlive = false;
