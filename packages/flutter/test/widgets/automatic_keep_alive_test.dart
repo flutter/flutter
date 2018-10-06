@@ -562,13 +562,13 @@ class _SliverAlternativeToMultiBoxAdaptorWidget extends SliverWithKeepAliveWidge
 
   @override
   _SliverAlternativeToMultiBoxAdaptorElement createElement() =>
-      new _SliverAlternativeToMultiBoxAdaptorElement(this);
+      _SliverAlternativeToMultiBoxAdaptorElement(this);
 
   @override
-  RenderSliverAlternativeToMultiBoxAdaptor createRenderObject(BuildContext context) => new RenderSliverAlternativeToMultiBoxAdaptor();
+  RenderSliverAlternativeToMultiBoxAdaptor createRenderObject(BuildContext context) => RenderSliverAlternativeToMultiBoxAdaptor();
 }
 
-class _SliverAlternativeToMultiBoxAdaptorElement extends RenderObjectElement with SliverWithKeepAliveElementMixin{
+class _SliverAlternativeToMultiBoxAdaptorElement extends RenderObjectElement{
   _SliverAlternativeToMultiBoxAdaptorElement(_SliverAlternativeToMultiBoxAdaptorWidget widget)
       : super(widget);
 
@@ -600,5 +600,7 @@ class RenderSliverAlternativeToMultiBoxAdaptor extends RenderSliver
          RenderSliverHelpers {
   @override
   void performLayout() {
+    // Perform a layout where children are not laid out in the same order
+    // as they are defined.  
   }
 }

@@ -129,6 +129,10 @@ abstract class KeepAliveParentDataMixin extends ParentData {
 
   /// Whether to keep the child alive even when it is no longer visible.
   bool keepAlive = false;
+
+  /// Whether the widget is currently being kept alive, i.e. has [keepAlive] set
+  /// to true and is offscreen.
+  bool get keptAlive;
 }
 
 // This class exists to dissociate [KeepAlive] from [RenderSliverMultiBoxAdaptor].
@@ -147,12 +151,8 @@ abstract class RenderSliverWithKeepAliveMixin extends RenderSliver {
 class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with ContainerParentDataMixin<RenderBox>, KeepAliveParentDataMixin {
   /// The index of this child according to the [RenderSliverBoxChildManager].
   int index;
-
-  /// Whether to keep the child alive even when it is no longer visible.
-  bool keepAlive = false;
-
-  /// Whether the widget is currently being kept alive, i.e. has [keepAlive] set
-  /// to true and is offscreen.
+  
+  @override
   bool get keptAlive => _keptAlive;
   bool _keptAlive = false;
 

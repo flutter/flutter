@@ -374,9 +374,6 @@ abstract class SliverWithKeepAliveWidget extends RenderObjectWidget {
   }) : super(key : key);
 
   @override
-  SliverWithKeepAliveElementMixin createElement();
-
-  @override
   RenderSliverWithKeepAliveMixin createRenderObject(BuildContext context);
 }
 
@@ -389,7 +386,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
     Key key,
     @required this.delegate,
   }) : assert(delegate != null),
-        super(key: key);
+       super(key: key);
 
   /// The delegate that provides the children for this widget.
   ///
@@ -420,12 +417,12 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   /// The default implementation defers to [delegate] via its
   /// [SliverChildDelegate.estimateMaxScrollOffset] method.
   double estimateMaxScrollOffset(
-      SliverConstraints constraints,
-      int firstIndex,
-      int lastIndex,
-      double leadingScrollOffset,
-      double trailingScrollOffset,
-      ) {
+    SliverConstraints constraints,
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+  ) {
     assert(lastIndex >= firstIndex);
     return delegate.estimateMaxScrollOffset(
       firstIndex,
@@ -727,18 +724,11 @@ class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
   }
 }
 
-// This class exists to dissociate [KeepAlive] from [RenderSliverMultiBoxAdaptor].
-abstract class SliverWithKeepAliveElementMixin extends RenderObjectElement {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory SliverWithKeepAliveElementMixin._() => null;
-}
-
 /// An element that lazily builds children for a [SliverMultiBoxAdaptorWidget].
 ///
 /// Implements [RenderSliverBoxChildManager], which lets this element manage
 /// the children of subclasses of [RenderSliverMultiBoxAdaptor].
-class SliverMultiBoxAdaptorElement extends RenderObjectElement with SliverWithKeepAliveElementMixin implements RenderSliverBoxChildManager {
+class SliverMultiBoxAdaptorElement extends RenderObjectElement implements RenderSliverBoxChildManager {
   /// Creates an element that lazily builds children for the given widget.
   SliverMultiBoxAdaptorElement(SliverMultiBoxAdaptorWidget widget) : super(widget);
 
