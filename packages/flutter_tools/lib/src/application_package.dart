@@ -159,11 +159,12 @@ class AndroidApk extends ApplicationPackage {
     String launchActivity;
     for (xml.XmlElement activity in document.findAllElements('activity')) {
       for(xml.XmlElement element in activity.findElements('intent-filter')){
-        String actionName = "", categoryName = "";
+        String actionName = '', categoryName = '';
         for(xml.XmlNode node in element.children){
           if(!(node is xml.XmlElement))
             continue;
-          String name = (node as xml.XmlElement).getAttribute('android:name');
+          final xml.XmlElement xmlElement = node;
+          final String name = xmlElement.getAttribute('android:name');
           if(name == 'android.intent.action.MAIN'){
             actionName = name;
           }
@@ -171,7 +172,7 @@ class AndroidApk extends ApplicationPackage {
             categoryName = name;
           }
         }
-        if(actionName.length>0 && categoryName.length>0){
+        if(actionName.isNotEmpty && categoryName.isNotEmpty){
           final String activityName = activity.getAttribute('android:name');
           launchActivity = '$packageId/$activityName';
           break;
@@ -449,9 +450,9 @@ class ApkManifestData {
 
     _Element launchActivity;
     for (_Element activity in activities) {
-      final Iterable<_Element> intent_filters =
+      final Iterable<_Element> intentFilters =
           activity.allElements('intent-filter').cast<_Element>();
-      for (_Element element in intent_filters) {
+      for (_Element element in intentFilters) {
         final _Element action = element.firstElement('action');
         final _Element category = element.firstElement('category');
         final String actionAttributeValue =
