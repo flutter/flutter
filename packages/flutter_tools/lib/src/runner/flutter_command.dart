@@ -100,7 +100,7 @@ abstract class FlutterCommand extends Command<void> {
       abbr: 't',
       defaultsTo: bundle.defaultMainPath,
       help: 'The main entry-point file of the application, as run on the device.\n'
-            'If the --target option is omitted, but a file name is provided on '
+            'If the --target option is omitted, but a file name is provided on\n'
             'the command line, then that is used instead.',
       valueHelp: 'path');
     _usesTargetOption = true;

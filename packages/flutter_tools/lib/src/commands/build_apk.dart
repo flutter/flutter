@@ -34,8 +34,8 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   final String description = 'Build an Android APK file from your app.\n\n'
-    'This command can build debug and release versions of your application. \'debug\' builds support '
-    'debugging and a quick development cycle. \'release\' builds don\'t support debugging and are '
+    'This command can build debug and release versions of your application. \'debug\' builds support\n'
+    'debugging and a quick development cycle. \'release\' builds don\'t support debugging and are\n'
     'suitable for deploying to app stores.';
 
   @override

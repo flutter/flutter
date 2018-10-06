@@ -41,7 +41,7 @@ void main() {
     testUsingContext('flutter create', () async {
       await runCommand(
         command: CreateCommand(),
-        arguments: <String>['--no-wrap', 'create', projectPath],
+        arguments: <String>['create', projectPath],
         statusTextContains: <String>[
           'All done!',
           'Your application code is in ${fs.path.normalize(fs.path.join(fs.path.relative(projectPath), 'lib', 'main.dart'))}',
