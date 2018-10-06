@@ -601,6 +601,6 @@ class RenderSliverAlternativeToMultiBoxAdaptor extends RenderSliver
   @override
   void performLayout() {
     // Perform a layout where children are not laid out in the same order
-    // as they are defined.  
+    // as they are defined.
   }
 }
