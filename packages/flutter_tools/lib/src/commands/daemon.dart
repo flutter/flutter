@@ -748,26 +748,18 @@ class NotifyingLogger extends Logger {
   Stream<LogMessage> get onMessage => _messageController.stream;
 
   @override
-  void printError(
-      String message, {
-      StackTrace stackTrace,
-      bool emphasis = false,
-      TerminalColor color,
-      int indent,
-      int hangingIndent,
-    }) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis = false, TerminalColor color }) {
     _messageController.add(LogMessage('error', message, stackTrace));
   }
 
   @override
   void printStatus(
       String message, {
-      bool emphasis = false,
-      TerminalColor color,
-      bool newline = true,
-      int indent,
-      int hangingIndent,
-    }) {
+        bool emphasis = false,
+        TerminalColor color,
+        bool newline = true,
+        int indent,
+      }) {
     _messageController.add(LogMessage('status', message));
   }
 
@@ -882,22 +874,9 @@ class _AppRunLogger extends Logger {
   int _nextProgressId = 0;
 
   @override
-  void printError(
-      String message, {
-      StackTrace stackTrace,
-      bool emphasis,
-      TerminalColor color,
-      int indent,
-      int hangingIndent,
-    }) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis, TerminalColor color}) {
     if (parent != null) {
-      parent.printError(
-        message,
-        stackTrace: stackTrace,
-        emphasis: emphasis,
-        indent: indent,
-        hangingIndent: hangingIndent,
-      );
+      parent.printError(message, stackTrace: stackTrace, emphasis: emphasis);
     } else {
       if (stackTrace != null) {
         _sendLogEvent(<String, dynamic>{
@@ -917,12 +896,11 @@ class _AppRunLogger extends Logger {
   @override
   void printStatus(
       String message, {
-      bool emphasis = false,
-      TerminalColor color,
-      bool newline = true,
-      int indent,
-      int hangingIndent,
-    }) {
+        bool emphasis = false,
+        TerminalColor color,
+        bool newline = true,
+        int indent,
+      }) {
     if (parent != null) {
       parent.printStatus(
         message,
@@ -930,7 +908,6 @@ class _AppRunLogger extends Logger {
         color: color,
         newline: newline,
         indent: indent,
-        hangingIndent: hangingIndent,
       );
     } else {
       _sendLogEvent(<String, dynamic>{'log': message});

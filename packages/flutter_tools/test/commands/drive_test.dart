@@ -123,7 +123,6 @@ void main() {
       final String appFile = fs.path.join(tempDir.dirname, 'other_app', 'app.dart');
       fs.file(appFile).createSync(recursive: true);
       final List<String> args = <String>[
-        '--no-wrap',
         'drive',
         '--target=$appFile',
       ];
@@ -144,7 +143,6 @@ void main() {
       final String appFile = fs.path.join(tempDir.path, 'main.dart');
       fs.file(appFile).createSync(recursive: true);
       final List<String> args = <String>[
-        '--no-wrap',
         'drive',
         '--target=$appFile',
       ];

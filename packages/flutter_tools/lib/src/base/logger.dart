@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert' show LineSplitter;
 
 import 'package:meta/meta.dart';
 
@@ -27,57 +28,26 @@ abstract class Logger {
 
   bool get hasTerminal => stdio.hasTerminal;
 
-  /// Display an error [message] to the user. Commands should use this if they
+  /// Display an error level message to the user. Commands should use this if they
   /// fail in some way.
-  ///
-  /// The [message] argument is printed to the stderr in red by default.
-  /// The [stackTrace] argument is the stack trace that will be printed if
-  /// supplied.
-  /// The [emphasis] argument will cause the output message be printed in bold text.
-  /// The [color] argument will print the message in the supplied color instead
-  /// of the default of red. Colors will not be printed if the output terminal
-  /// doesn't support them.
-  /// The [indent] argument specifies the number of spaces to indent the overall
-  /// message. If wrapping is enabled in [outputPreferences], then the wrapped
-  /// lines will be indented as well.
-  /// If [hangingIndent] is specified, then any wrapped lines will be indented
-  /// by this much more than the first line, if wrapping is enabled in
-  /// [outputPreferences].
   void printError(
     String message, {
     StackTrace stackTrace,
     bool emphasis,
     TerminalColor color,
-    int indent,
-    int hangingIndent,
   });
 
   /// Display normal output of the command. This should be used for things like
   /// progress messages, success messages, or just normal command output.
   ///
-  /// The [message] argument is printed to the stderr in red by default.
-  /// The [stackTrace] argument is the stack trace that will be printed if
-  /// supplied.
-  /// If the [emphasis] argument is true, it will cause the output message be
-  /// printed in bold text. Defaults to false.
-  /// The [color] argument will print the message in the supplied color instead
-  /// of the default of red. Colors will not be printed if the output terminal
-  /// doesn't support them.
-  /// If [newline] is true, then a newline will be added after printing the
-  /// status. Defaults to true.
-  /// The [indent] argument specifies the number of spaces to indent the overall
-  /// message. If wrapping is enabled in [outputPreferences], then the wrapped
-  /// lines will be indented as well.
-  /// If [hangingIndent] is specified, then any wrapped lines will be indented
-  /// by this much more than the first line, if wrapping is enabled in
-  /// [outputPreferences].
+  /// If [newline] is null, then it defaults to "true".  If [emphasis] is null,
+  /// then it defaults to "false".
   void printStatus(
     String message, {
     bool emphasis,
     TerminalColor color,
     bool newline,
     int indent,
-    int hangingIndent,
   });
 
   /// Use this for verbose tracing output. Users can turn this output on in order
@@ -112,11 +82,8 @@ class StdoutLogger extends Logger {
     StackTrace stackTrace,
     bool emphasis,
     TerminalColor color,
-    int indent,
-    int hangingIndent,
   }) {
     message ??= '';
-    message = wrapText(message, indent: indent, hangingIndent: hangingIndent);
     _status?.cancel();
     _status = null;
     if (emphasis == true)
@@ -135,16 +102,19 @@ class StdoutLogger extends Logger {
     TerminalColor color,
     bool newline,
     int indent,
-    int hangingIndent,
   }) {
     message ??= '';
-    message = wrapText(message, indent: indent, hangingIndent: hangingIndent);
     _status?.cancel();
     _status = null;
     if (emphasis == true)
       message = terminal.bolden(message);
     if (color != null)
       message = terminal.color(message, color);
+    if (indent != null && indent > 0) {
+      message = LineSplitter.split(message)
+          .map<String>((String line) => ' ' * indent + line)
+          .join('\n');
+    }
     if (newline != false)
       message = '$message\n';
     writeToStdOut(message);
@@ -233,13 +203,8 @@ class BufferLogger extends Logger {
     StackTrace stackTrace,
     bool emphasis,
     TerminalColor color,
-    int indent,
-    int hangingIndent,
   }) {
-    _error.writeln(terminal.color(
-      wrapText(message, indent: indent, hangingIndent: hangingIndent),
-      color ?? TerminalColor.red,
-    ));
+    _error.writeln(terminal.color(message, color ?? TerminalColor.red));
   }
 
   @override
@@ -249,12 +214,11 @@ class BufferLogger extends Logger {
     TerminalColor color,
     bool newline,
     int indent,
-    int hangingIndent,
   }) {
     if (newline != false)
-      _status.writeln(wrapText(message, indent: indent, hangingIndent: hangingIndent));
+      _status.writeln(message);
     else
-      _status.write(wrapText(message, indent: indent, hangingIndent: hangingIndent));
+      _status.write(message);
   }
 
   @override
@@ -298,14 +262,8 @@ class VerboseLogger extends Logger {
     StackTrace stackTrace,
     bool emphasis,
     TerminalColor color,
-    int indent,
-    int hangingIndent,
   }) {
-    _emit(
-      _LogType.error,
-      wrapText(message, indent: indent, hangingIndent: hangingIndent),
-      stackTrace,
-    );
+    _emit(_LogType.error, message, stackTrace);
   }
 
   @override
@@ -315,9 +273,8 @@ class VerboseLogger extends Logger {
     TerminalColor color,
     bool newline,
     int indent,
-    int hangingIndent,
   }) {
-    _emit(_LogType.status, wrapText(message, indent: indent, hangingIndent: hangingIndent));
+    _emit(_LogType.status, message);
   }
 
   @override

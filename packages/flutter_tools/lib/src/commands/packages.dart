@@ -105,10 +105,10 @@ class PackagesTestCommand extends FlutterCommand {
   @override
   String get description {
     return 'Run the "test" package.\n'
-           'This is similar to "flutter test", but instead of hosting the tests in the '
-           'flutter environment it hosts the tests in a pure Dart environment. The main '
-           'differences are that the "dart:ui" library is not available and that tests '
-           'run faster. This is helpful for testing libraries that do not depend on any '
+           'This is similar to "flutter test", but instead of hosting the tests in the\n'
+           'flutter environment it hosts the tests in a pure Dart environment. The main\n'
+           'differences are that the "dart:ui" library is not available and that tests\n'
+           'run faster. This is helpful for testing libraries that do not depend on any\n'
            'packages from the Flutter SDK. It is equivalent to "pub run test".';
   }
 

@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
@@ -133,7 +132,7 @@ void main() {
               '[!] Partial Validator with only a Hint\n'
               '    ! There is a hint here\n'
               '[!] Partial Validator with Errors\n'
-              '    ✗ An error message indicating partial installation\n'
+              '    ✗ A error message indicating partial installation\n'
               '    ! Maybe a hint will help the user\n'
               '[✓] Another Passing Validator (with statusInfo)\n'
               '\n'
@@ -155,7 +154,7 @@ void main() {
               '[!] Partial Validator with only a Hint\n'
               '    ! There is a hint here\n'
               '[!] Partial Validator with Errors\n'
-              '    ✗ An error message indicating partial installation\n'
+              '    ✗ A error message indicating partial installation\n'
               '    ! Maybe a hint will help the user\n'
               '\n'
               '! Doctor found issues in 4 categories.\n'
@@ -184,7 +183,7 @@ void main() {
               '    • But there is no error\n'
               '\n'
               '[!] Partial Validator with Errors\n'
-              '    ✗ An error message indicating partial installation\n'
+              '    ✗ A error message indicating partial installation\n'
               '    ! Maybe a hint will help the user\n'
               '    • An extra message with some verbose details\n'
               '\n'
@@ -192,84 +191,6 @@ void main() {
       ));
     });
   });
-
-  testUsingContext('validate non-verbose output wrapping', () async {
-    expect(await FakeDoctor().diagnose(verbose: false), isFalse);
-    expect(testLogger.statusText, equals(
-        'Doctor summary (to see all\n'
-        'details, run flutter doctor\n'
-        '-v):\n'
-        '[✓] Passing Validator (with\n'
-        '    statusInfo)\n'
-        '[✗] Missing Validator\n'
-        '    ✗ A useful error message\n'
-        '    ! A hint message\n'
-        '[!] Not Available Validator\n'
-        '    ✗ A useful error message\n'
-        '    ! A hint message\n'
-        '[!] Partial Validator with\n'
-        '    only a Hint\n'
-        '    ! There is a hint here\n'
-        '[!] Partial Validator with\n'
-        '    Errors\n'
-        '    ✗ An error message\n'
-        '      indicating partial\n'
-        '      installation\n'
-        '    ! Maybe a hint will help\n'
-        '      the user\n'
-        '\n'
-        '! Doctor found issues in 4\n'
-        '  categories.\n'
-        ''
-    ));
-  }, overrides: <Type, Generator>{
-    OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 30),
-  });
-
-  testUsingContext('validate verbose output wrapping', () async {
-    expect(await FakeDoctor().diagnose(verbose: true), isFalse);
-    expect(testLogger.statusText, equals(
-        '[✓] Passing Validator (with\n'
-        '    statusInfo)\n'
-        '    • A helpful message\n'
-        '    • A second, somewhat\n'
-        '      longer helpful message\n'
-        '\n'
-        '[✗] Missing Validator\n'
-        '    ✗ A useful error message\n'
-        '    • A message that is not an\n'
-        '      error\n'
-        '    ! A hint message\n'
-        '\n'
-        '[!] Not Available Validator\n'
-        '    ✗ A useful error message\n'
-        '    • A message that is not an\n'
-        '      error\n'
-        '    ! A hint message\n'
-        '\n'
-        '[!] Partial Validator with\n'
-        '    only a Hint\n'
-        '    ! There is a hint here\n'
-        '    • But there is no error\n'
-        '\n'
-        '[!] Partial Validator with\n'
-        '    Errors\n'
-        '    ✗ An error message\n'
-        '      indicating partial\n'
-        '      installation\n'
-        '    ! Maybe a hint will help\n'
-        '      the user\n'
-        '    • An extra message with\n'
-        '      some verbose details\n'
-        '\n'
-        '! Doctor found issues in 4\n'
-        '  categories.\n'
-        ''
-    ));
-  }, overrides: <Type, Generator>{
-    OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 30),
-  });
-
 
   group('doctor with grouped validators', () {
     testUsingContext('validate diagnose combines validator output', () async {
@@ -407,7 +328,7 @@ class PartialValidatorWithErrors extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    messages.add(ValidationMessage.error('An error message indicating partial installation'));
+    messages.add(ValidationMessage.error('A error message indicating partial installation'));
     messages.add(ValidationMessage.hint('Maybe a hint will help the user'));
     messages.add(ValidationMessage('An extra message with some verbose details'));
     return ValidationResult(ValidationType.partial, messages);
