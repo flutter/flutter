@@ -25,16 +25,12 @@ void printError(
   StackTrace stackTrace,
   bool emphasis,
   TerminalColor color,
-  int indent,
-  int hangingIndent,
 }) {
   logger.printError(
     message,
     stackTrace: stackTrace,
     emphasis: emphasis ?? false,
     color: color,
-    indent: indent,
-    hangingIndent: hangingIndent,
   );
 }
 
@@ -53,7 +49,6 @@ void printStatus(
   bool newline,
   TerminalColor color,
   int indent,
-  int hangingIndent,
 }) {
   logger.printStatus(
     message,
@@ -61,7 +56,6 @@ void printStatus(
     color: color,
     newline: newline ?? true,
     indent: indent,
-    hangingIndent: hangingIndent,
   );
 }
 

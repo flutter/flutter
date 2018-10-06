@@ -132,7 +132,7 @@ class AnalyzeOnce extends AnalyzeBase {
       printStatus('');
     errors.sort();
     for (AnalysisError error in errors)
-      printStatus(error.toString(), hangingIndent: 7);
+      printStatus(error.toString());
 
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 

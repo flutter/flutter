@@ -375,7 +375,7 @@ void main() {
     ]);
   }, timeout: allowForRemotePubInvocation);
 
-  testUsingContext('has correct content and formatting with application template', () async {
+  testUsingContext('has correct content and formatting with applicaiton template', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
