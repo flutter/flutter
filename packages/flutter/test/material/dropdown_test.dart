@@ -692,7 +692,7 @@ void main() {
     ));
 
     // By default the hint contributes the label.
-    expect(tester.getSemanticsData(find.byKey(key)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
       isButton: true,
       label: 'test',
       hasTapAction: true,
@@ -707,7 +707,7 @@ void main() {
     ));
 
     // Displays label of select item and is no longer tappable.
-    expect(tester.getSemanticsData(find.byKey(key)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
       isButton: true,
       label: 'three',
       hasTapAction: true,
