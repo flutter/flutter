@@ -284,6 +284,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
     return FlatButton(
       textColor: widget.textColor,
       disabledTextColor: widget.disabledTextColor,
+      color: widget.color,
       splashColor: widget.splashColor,
       highlightColor: widget.highlightColor,
       disabledColor: Colors.transparent,

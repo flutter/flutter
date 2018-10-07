@@ -102,26 +102,24 @@ void main() {
     // Wait for the border color to change from disabled to enabled.
     await tester.pumpAndSettle();
 
-    // Expect that the button is disabled and painted with the enabled border color.
+    // Expect that the button is enabled and painted with the enabled border color.
     expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
     expect(
       outlineButton,
       paints
-        // initially the interior of the button is transparent
-        ..path(color: fillColor.withAlpha(0x00))
+        ..path(color: fillColor)
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: borderColor, strokeWidth: borderWidth));
 
     final Offset center = tester.getCenter(outlineButton);
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start gesture
-    // Wait for the border's color to change to highlightedBorderColor and
-    // the fillColor to become opaque.
+    // Wait for the border's color to change to highlightedBorderColor
     await tester.pump(const Duration(milliseconds: 200));
     expect(
       outlineButton,
       paints
-        ..path(color: fillColor.withAlpha(0xFF))
+        ..path(color: fillColor)
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: highlightedBorderColor, strokeWidth: borderWidth));
 
@@ -131,7 +129,7 @@ void main() {
     expect(
       outlineButton,
       paints
-        ..path(color: fillColor.withAlpha(0x00))
+        ..path(color: fillColor)
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: borderColor, strokeWidth: borderWidth));
   });
