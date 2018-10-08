@@ -33,11 +33,9 @@ task:
         FIREBASE_PUBLIC_TOKEN: ENCRYPTED[37e8b82f167864cae9a3f4d2cf3f37dea331d9375c295327c45de524f6c588fa6f6d63e5784f10f6d43ce29689f36c92]
       docs_script: ./dev/bots/docs.sh
     - name: deploy_gallery
-      only_if: $CIRRUS_BRANCH == 'dev'
       depends_on:
         - docs
         - analyze
-        - tests-linux
         - tool_tests-linux
         - build_tests-linux
       env:
@@ -144,12 +142,10 @@ task:
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   name: deploy_gallery-macos
-  only_if: $CIRRUS_BRANCH == 'dev'
   pub_cache:
     folder: ~/.pub-cache
   depends_on:
     - analyze
-    - tests-macos
     - tool_tests-macos
     - build_tests-macos
     - add2app-macos
