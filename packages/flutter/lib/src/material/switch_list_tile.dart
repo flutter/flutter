@@ -141,7 +141,6 @@ class SwitchListTile extends StatelessWidget {
   /// Defaults to the colors described in the Material design specification.
   final Color inactiveTrackColor;
 
-
   /// An image to use on the thumb of this switch when the switch is on.
   final ImageProvider activeThumbImage;
 
