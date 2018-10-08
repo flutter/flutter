@@ -244,7 +244,10 @@ void main() {
     competingDrag.dispose();
 
     expect(positionAtOnStart, const Offset(10.0, 10.0));
-    expect(updateOffset, const Offset(30.0, 0.0));
+    
+    // The drag is horizontal so we're going to ignore the vertical delta position
+    // when calculating the new global position.
+    expect(updateOffset, const Offset(30.0, 10.0));
     expect(updateDelta, const Offset(20.0, 0.0));
   });
 
