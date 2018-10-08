@@ -137,27 +137,6 @@ void main() {
     drag.dispose();
   });
 
-  testGesture('Should recognize long press', (GestureTester tester) {
-    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
-
-    bool longPressRecognized = false;
-    longPress.onLongPress = () {
-      longPressRecognized = true;
-    };
-
-    longPress.addPointer(down);
-    tester.closeArena(5);
-    expect(longPressRecognized, isFalse);
-    tester.route(down);
-    expect(longPressRecognized, isFalse);
-    tester.async.elapse(const Duration(milliseconds: 300));
-    expect(longPressRecognized, isFalse);
-    tester.async.elapse(const Duration(milliseconds: 700));
-    expect(longPressRecognized, isTrue);
-
-    longPress.dispose();
-  });
-
   testGesture('Should recognize long press up', (GestureTester tester) {
     final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
 
