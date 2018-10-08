@@ -5,6 +5,6 @@
 
 version:
   revision: 2d3ff10d62a1f1fdcbdbe92cbcc5a5594f95d500
-  channel: unknown
+  channel: master
 
 project_type: application
