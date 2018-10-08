@@ -94,9 +94,14 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Must not be null.
   final double iconSize;
 
-  /// TODO: comment
+  /// The parameter which allows hiding titles of the [BottomNavigationBarItem] items.
+  /// 
+  /// True if the only icons mode should ne enabled and all labels should be hidden.
   final bool onlyIcons;
 
+  /// The parameter which allows hiding of the top border of the [CupertinoTabBar].
+  ///
+  /// True if the top border of the tab bar should be hidden.
   final bool hideBorder;
 
   /// True if the tab bar's background color has no transparency.
