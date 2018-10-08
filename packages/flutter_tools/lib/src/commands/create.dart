@@ -279,20 +279,21 @@ class CreateCommand extends FlutterCommand {
     } else {
       printStatus('Recreating project $relativeDirPath...');
     }
+    final Directory relativeDir = fs.directory(projectDirPath);
     int generatedFileCount = 0;
     switch (template) {
       case _ProjectType.app:
-        generatedFileCount += await _generateLegacyApp(projectDir, templateContext);
+        generatedFileCount += await _generateLegacyApp(relativeDir, templateContext);
         break;
       case _ProjectType.module:
       case _ProjectType.application:
-        generatedFileCount += await _generateApplication(projectDir, templateContext);
+        generatedFileCount += await _generateApplication(relativeDir, templateContext);
         break;
       case _ProjectType.package:
-        generatedFileCount += await _generatePackage(projectDir, templateContext);
+        generatedFileCount += await _generatePackage(relativeDir, templateContext);
         break;
       case _ProjectType.plugin:
-        generatedFileCount += await _generatePlugin(projectDir, templateContext);
+        generatedFileCount += await _generatePlugin(relativeDir, templateContext);
         break;
     }
     printStatus('Wrote $generatedFileCount files.');
