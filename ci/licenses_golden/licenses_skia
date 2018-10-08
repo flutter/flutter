@@ -1,4 +1,4 @@
-Signature: c33540d273fea073d81cf55b79bf712a
+Signature: 3447be96d07b045cfb2799700dc3d7f7
 
 UNUSED LICENSES:
 
@@ -2206,6 +2206,8 @@ FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Release-Flutter_Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Mac-Clang-x86_64-Debug-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-Clang-x86-Debug.json
+FILE: ../../../third_party/skia/infra/bots/recipes/compute_buildstats.expected/normal_bot.json
+FILE: ../../../third_party/skia/infra/bots/recipes/compute_buildstats.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compute_test.expected/Test-Debian9-Clang-NUC7i5BNK-GPU-IntelIris640-x86_64-Debug-All-OpenCL.json
 FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_10k_SKPs_UnknownBuilder.json
 FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_CPU_BENCH_10k_SKPs.json
@@ -2314,6 +2316,8 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-De
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-Debian9-EMCC-GCE-CPU-AVX2-wasm-Debug-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/pathkit_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/update_go_deps.expected/Housekeeper-Nightly-UpdateGoDEPS.json
+FILE: ../../../third_party/skia/infra/bots/recipes/upload_buildstats_results.expected/normal_bot.json
+FILE: ../../../third_party/skia/infra/bots/recipes/upload_buildstats_results.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_calmbench_results.expected/normal_bot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_calmbench_results.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_dm_results.expected/alternate_bucket.json
@@ -3957,7 +3961,6 @@ FILE: ../../../third_party/skia/gm/dropshadowimagefilter.cpp
 FILE: ../../../third_party/skia/gm/dstreadshuffle.cpp
 FILE: ../../../third_party/skia/gm/fontcache.cpp
 FILE: ../../../third_party/skia/gm/fontmgr.cpp
-FILE: ../../../third_party/skia/gm/gm_expectations.h
 FILE: ../../../third_party/skia/gm/gradientDirtyLaundry.cpp
 FILE: ../../../third_party/skia/gm/gradient_matrix.cpp
 FILE: ../../../third_party/skia/gm/gradients_no_texture.cpp
