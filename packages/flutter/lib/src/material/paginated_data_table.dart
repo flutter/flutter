@@ -400,6 +400,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                   opacity: 0.54
                 ),
                 child: ButtonTheme.bar(
+                  colorScheme: themeData.colorScheme,
                   child: Ink(
                     height: 64.0,
                     color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
