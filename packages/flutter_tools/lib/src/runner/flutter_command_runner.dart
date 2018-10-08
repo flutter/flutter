@@ -246,7 +246,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
       contextOverrides[Logger] = VerboseLogger(logger);
     }
 
-    int wrapColumn = const io.Stdio().terminalColumns ?? kDefaultTerminalColumns;
+    final int terminalColumns = io.stdio.terminalColumns;
+    int wrapColumn = terminalColumns ?? kDefaultTerminalColumns;
     if (topLevelResults['wrap-column'] != null) {
       try {
         wrapColumn = int.parse(topLevelResults['wrap-column']);
@@ -260,8 +261,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
     }
 
+    // If we're not writing to a terminal with a defined width, then don't wrap
+    // anything, unless the user explicitly said to.
+    final bool useWrapping = topLevelResults.wasParsed('wrap')
+        ? topLevelResults['wrap']
+        : terminalColumns == null ? false : topLevelResults['wrap'];
     contextOverrides[OutputPreferences] = OutputPreferences(
-      wrapText: topLevelResults['wrap'],
+      wrapText: useWrapping,
       showColor: topLevelResults['color'],
       wrapColumn: wrapColumn,
     );
@@ -383,7 +389,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
         if (topLevelResults['machine']) {
           throwToolExit('The --machine flag is only valid with the --version flag.', exitCode: 2);
         }
-
         await super.runCommand(topLevelResults);
       },
     );

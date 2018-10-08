@@ -187,12 +187,12 @@ baz=qux
     final String _longLineWithNewlines = 'This is a long line with newlines that\n'
         'needs to be wrapped.\n\n' +
         '0123456789' * 5;
-    final String _longAnsiLineWithNewlines = '${AnsiTerminal.red}This${AnsiTerminal.reset} is a long line with newlines that\n'
+    final String _longAnsiLineWithNewlines = '${AnsiTerminal.red}This${AnsiTerminal.resetAll} is a long line with newlines that\n'
         'needs to be wrapped.\n\n'
-        '${AnsiTerminal.green}0123456789${AnsiTerminal.reset}' +
+        '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}' +
         '0123456789' * 3 +
-        '${AnsiTerminal.green}0123456789${AnsiTerminal.reset}';
-    const String _onlyAnsiSequences = '${AnsiTerminal.red}${AnsiTerminal.reset}';
+        '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}';
+    const String _onlyAnsiSequences = '${AnsiTerminal.red}${AnsiTerminal.resetAll}';
     final String _indentedLongLineWithNewlines = '    This is an indented long line with newlines that\n'
         'needs to be wrapped.\n\tAnd preserves tabs.\n      \n  ' +
         '0123456789' * 5;
@@ -250,15 +250,15 @@ needs to be wrapped.
     });
     test('wraps text with ANSI sequences embedded', () {
       expect(wrapText(_longAnsiLineWithNewlines, columnWidth: _lineLength), equals('''
-${AnsiTerminal.red}This${AnsiTerminal.reset} is a long line with newlines that
+${AnsiTerminal.red}This${AnsiTerminal.resetAll} is a long line with newlines that
 needs to be wrapped.
 
-${AnsiTerminal.green}0123456789${AnsiTerminal.reset}012345678901234567890123456789
-${AnsiTerminal.green}0123456789${AnsiTerminal.reset}'''));
+${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}012345678901234567890123456789
+${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}'''));
     });
     test('wraps text with only ANSI sequences', () {
       expect(wrapText(_onlyAnsiSequences, columnWidth: _lineLength),
-          equals('${AnsiTerminal.red}${AnsiTerminal.reset}'));
+          equals('${AnsiTerminal.red}${AnsiTerminal.resetAll}'));
     });
     test('preserves indentation in the presence of newlines', () {
       expect(wrapText(_indentedLongLineWithNewlines, columnWidth: _lineLength), equals('''

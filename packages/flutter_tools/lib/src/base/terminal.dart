@@ -44,19 +44,27 @@ class OutputPreferences {
     bool wrapText,
     int wrapColumn,
     bool showColor,
-  })  : wrapText = wrapText ?? true,
-        wrapColumn = wrapColumn ?? const io.Stdio().terminalColumns ?? kDefaultTerminalColumns,
+  })  : wrapText = wrapText ?? io.stdio?.hasTerminal ?? const io.Stdio().hasTerminal,
+        wrapColumn = wrapColumn ?? io.stdio?.terminalColumns ?? const io.Stdio().terminalColumns ?? kDefaultTerminalColumns,
         showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
 
-  /// If [wrapText] is true, then output text sent to the context's [Logger]
+  /// If [wrapText] is true, then any text sent to the context's [Logger]
   /// instance (e.g. from the [printError] or [printStatus] functions) will be
-  /// wrapped to be no longer than the [wrapColumn] specifies. Defaults to true.
+  /// wrapped (newlines added between words) to be no longer than the
+  /// [wrapColumn] specifies. Defaults to true if there is a terminal. To
+  /// determine if there's a terminal, [OutputPreferences] asks the context's
+  /// stdio to see, and if that's not set, it tries creating a new [io.Stdio]
+  /// and asks it if there is a terminal.
   final bool wrapText;
 
-  /// The column at which any output sent to the context's [Logger] instance
+  /// The column at which output sent to the context's [Logger] instance
   /// (e.g. from the [printError] or [printStatus] functions) will be wrapped.
   /// Ignored if [wrapText] is false. Defaults to the width of the output
   /// terminal, or to [kDefaultTerminalColumns] if not writing to a terminal.
+  /// To find out if we're writing to a terminal, it tries the context's stdio,
+  /// and if that's not set, it tries creating a new [io.Stdio] and asks it, if
+  /// that doesn't have an idea of the terminal width, then we just use a
+  /// default of 100. It will be ignored if wrapText is false.
   final int wrapColumn;
 
   /// Whether or not to output ANSI color codes when writing to the output
@@ -72,7 +80,9 @@ class OutputPreferences {
 
 class AnsiTerminal {
   static const String bold = '\u001B[1m';
-  static const String reset = '\u001B[0m';
+  static const String resetAll = '\u001B[0m';
+  static const String resetColor = '\u001B[39m';
+  static const String resetBold = '\u001B[22m';
   static const String clear = '\u001B[2J\u001B[H';
 
   static const String red = '\u001b[31m';
@@ -95,7 +105,8 @@ class AnsiTerminal {
 
   static String colorCode(TerminalColor color) => _colorMap[color];
 
-  bool supportsColor = platform.stdoutSupportsAnsi ?? false;
+  bool get supportsColor => platform.stdoutSupportsAnsi ?? false;
+  final RegExp _boldControls = RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
 
   String bolden(String message) {
     assert(message != null);
@@ -103,14 +114,11 @@ class AnsiTerminal {
       return message;
     final StringBuffer buffer = StringBuffer();
     for (String line in message.split('\n')) {
-      // If there were resets in the string before, then keep them, but
-      // restart the bold right after. This prevents embedded resets from
+      // If there were bolds or resetBolds in the string before, then nuke them:
+      // they're redundant. This prevents previously embedded resets from
       // stopping the boldness.
-      line = line.replaceAll(reset, '$reset$bold');
-      // Remove all codes at the end of the string, since we're just going
-      // to reset them, and they would either be redundant, or have no effect.
-      line = line.replaceAll(RegExp('(\u001b\[[0-9;]+m)+\$'), '');
-      buffer.writeln('$bold$line$reset');
+      line = line.replaceAll(_boldControls, '');
+      buffer.writeln('$bold$line$resetBold');
     }
     final String result = buffer.toString();
     // avoid introducing a new newline to the emboldened text
@@ -128,12 +136,9 @@ class AnsiTerminal {
     for (String line in message.split('\n')) {
       // If there were resets in the string before, then keep them, but
       // restart the color right after. This prevents embedded resets from
-      // stopping the colors.
-      line = line.replaceAll(reset, '$reset$colorCodes');
-      // Remove any extra codes at the end of the string, since we're just going
-      // to reset them.
-      line = line.replaceAll(RegExp('(\u001b\[[0-9;]*m)+\$'), '');
-      buffer.writeln('$colorCodes$line$reset');
+      // stopping the colors, and allows nesting of colors.
+      line = line.replaceAll(resetColor, '$resetColor$colorCodes');
+      buffer.writeln('$colorCodes$line$resetColor');
     }
     final String result = buffer.toString();
     // avoid introducing a new newline to the colored text
@@ -168,13 +173,14 @@ class AnsiTerminal {
     return _broadcastStdInString;
   }
 
-  /// Prompts the user to input a character within the accepted list.
-  /// Reprompts if inputted character is not in the list.
+  /// Prompts the user to input a character within the accepted list. Re-prompts
+  /// if entered character is not in the list.
   ///
-  /// `prompt` is the text displayed prior to waiting for user input each time.
-  /// `defaultChoiceIndex`, if given, will be the character in `acceptedCharacters`
-  ///     in the index given if the user presses enter without any key input.
-  /// `displayAcceptedCharacters` prints also the accepted keys next to the `prompt` if true.
+  /// The [prompt] is the text displayed prior to waiting for user input. The
+  /// [defaultChoiceIndex], if given, will be the character appearing in
+  /// [acceptedCharacters] in the index given if the user presses enter without
+  /// any key input. Setting [displayAcceptedCharacters] also prints the
+  /// accepted keys next to the [prompt].
   ///
   /// Throws a [TimeoutException] if a `timeout` is provided and its duration
   /// expired without user input. Duration resets per key press.

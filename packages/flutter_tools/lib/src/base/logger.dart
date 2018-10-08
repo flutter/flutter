@@ -21,9 +21,6 @@ abstract class Logger {
   bool quiet = false;
 
   bool get supportsColor => terminal.supportsColor;
-  set supportsColor(bool value) {
-    terminal.supportsColor = value;
-  }
 
   bool get hasTerminal => stdio.hasTerminal;
 

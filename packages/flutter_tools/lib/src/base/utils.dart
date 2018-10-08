@@ -424,7 +424,7 @@ List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth}) {
   if (text == null || text.isEmpty) {
     return <String>[''];
   }
-  columnWidth ??= const io.Stdio().terminalColumns ?? kDefaultTerminalColumns;
+  assert(columnWidth != null);
   assert(columnWidth >= 0);
   assert(start >= 0);
 
