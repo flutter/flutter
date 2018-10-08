@@ -7,7 +7,6 @@ import 'dart:ui';
 import 'package:test/test.dart';
 
 void main() {
-  // TODO(flutter/flutter#22682): Re-enable this test.
   test('Should be able to build and layout a paragraph', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
     builder.addText('Hello');
@@ -17,5 +16,5 @@ void main() {
     paragraph.layout(ParagraphConstraints(width: 800.0));
     expect(paragraph.width, isNonZero);
     expect(paragraph.height, isNonZero);
-  }, skip: 'Fails on cirrus.');
+  });
 }

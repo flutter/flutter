@@ -11,7 +11,7 @@ popd
 
 run_test () {
   out/host_debug_unopt/dart out/host_debug_unopt/gen/frontend_server.dart.snapshot --sdk-root out/host_debug_unopt/flutter_patched_sdk --incremental --strong --target=flutter --packages flutter/testing/dart/.packages --output-dill out/host_debug_unopt/engine_test.dill $1
-  out/host_debug_unopt/flutter_tester --disable-observatory out/host_debug_unopt/engine_test.dill
+  out/host_debug_unopt/flutter_tester --disable-observatory --use-test-fonts out/host_debug_unopt/engine_test.dill
 }
 
 # Verify that a failing test returns a failure code.
