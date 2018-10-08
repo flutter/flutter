@@ -212,6 +212,7 @@ class SnackBar extends StatelessWidget {
     ];
     if (action != null) {
       children.add(ButtonTheme.bar(
+        colorScheme: theme.colorScheme,
         padding: const EdgeInsets.symmetric(horizontal: _kSnackBarPadding),
         textTheme: ButtonTextTheme.accent,
         child: action,

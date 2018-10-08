@@ -952,6 +952,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       ),
     );
     final Widget actions = ButtonTheme.bar(
+      colorScheme: theme.colorScheme,
       child: ButtonBar(
         children: <Widget>[
           FlatButton(
