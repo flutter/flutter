@@ -335,7 +335,7 @@ void main() {
     final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox));
     final BoxDecoration boxDecoration = decoratedBox.decoration;
     expect(boxDecoration.border != null, equals(true));
-    
+
     await pumpWidgetWithBoilerplate(
         tester,
         MediaQuery(
