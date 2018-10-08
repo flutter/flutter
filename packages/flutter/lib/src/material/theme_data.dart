@@ -75,6 +75,23 @@ enum MaterialTapTargetSize {
   shrinkWrap,
 }
 
+/// Configures whether SnackBar should be fixed to the bottom or floating
+/// like described in Material Design spec.
+enum SnackBarBehaviour {
+  /// Fixed the SnackBar position to the bottom of the Scaffold when possible.
+  /// One of the possible scenario where SnackBar will be shown above another
+  /// widget is SnackBar above BottomNavigationBar.
+  /// Other than that SnackBar will caused the other non-fixed widget inside
+  /// Scaffold to be pushed above (e.g. Floating Action Button).
+  fixed,
+
+  /// Change the design and behaviour of SnackBar to float like described in
+  /// <https://material.io/design/components/snackbars.html>.
+  /// This behaviour will cause SnackBar to be shown on top of other non-fixed
+  /// widget like Floating Action Button rather than pushing it above SnackBar.
+  floating
+}
+
 /// Holds the color and typography values for a material design theme.
 ///
 /// Use this class to configure a [Theme] widget.
@@ -149,6 +166,7 @@ class ThemeData extends Diagnosticable {
     MaterialTapTargetSize materialTapTargetSize,
     PageTransitionsTheme pageTransitionsTheme,
     ColorScheme colorScheme,
+    SnackBarBehaviour snackBarBehaviour,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -241,6 +259,7 @@ class ThemeData extends Diagnosticable {
       brightness: brightness,
       labelStyle: textTheme.body2,
     );
+    snackBarBehaviour ??= SnackBarBehaviour.fixed;
 
     return ThemeData.raw(
       brightness: brightness,
@@ -287,6 +306,7 @@ class ThemeData extends Diagnosticable {
       materialTapTargetSize: materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme,
       colorScheme: colorScheme,
+      snackBarBehaviour: snackBarBehaviour,
     );
   }
 
@@ -344,6 +364,7 @@ class ThemeData extends Diagnosticable {
     @required this.materialTapTargetSize,
     @required this.pageTransitionsTheme,
     @required this.colorScheme,
+    @required this.snackBarBehaviour,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -386,7 +407,8 @@ class ThemeData extends Diagnosticable {
        assert(platform != null),
        assert(materialTapTargetSize != null),
        assert(pageTransitionsTheme != null),
-       assert(colorScheme != null);
+       assert(colorScheme != null),
+       assert(snackBarBehaviour != null);
 
   // Warning: make sure these properties are in the exact same order as in
   // hashValues() and in the raw constructor and in the order of fields in
@@ -612,6 +634,9 @@ class ThemeData extends Diagnosticable {
   /// that is possible without significant backwards compatibility breaks.
   final ColorScheme colorScheme;
 
+  /// Configures how SnackBar should be positioned and shown.
+  final SnackBarBehaviour snackBarBehaviour;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -658,6 +683,7 @@ class ThemeData extends Diagnosticable {
     MaterialTapTargetSize materialTapTargetSize,
     PageTransitionsTheme pageTransitionsTheme,
     ColorScheme colorScheme,
+    SnackBarBehaviour snackBarBehaviour,
   }) {
     return ThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -704,6 +730,7 @@ class ThemeData extends Diagnosticable {
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       colorScheme: colorScheme ?? this.colorScheme,
+      snackBarBehaviour: snackBarBehaviour ?? this.snackBarBehaviour,
     );
   }
 
@@ -829,6 +856,7 @@ class ThemeData extends Diagnosticable {
       materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
       pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
+      snackBarBehaviour: t < 0.5 ? a.snackBarBehaviour : b.snackBarBehaviour,
     );
   }
 

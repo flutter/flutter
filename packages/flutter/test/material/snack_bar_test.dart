@@ -404,8 +404,61 @@ void main() {
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0); // margin (with no bottom padding)
   });
 
+  testWidgets('SnackBar should push FloatingActionButton above', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(
+            left: 10.0,
+            top: 20.0,
+            right: 30.0,
+            bottom: 40.0,
+          ),
+        ),
+        child: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            child: const Icon(Icons.send),
+            onPressed: () {}
+          ),
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: const Text('I am a snack bar.'),
+                    duration: const Duration(seconds: 2),
+                    action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                  ));
+                },
+                child: const Text('X')
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+    final RenderBox floatingActionButtonOriginBox= tester.firstRenderObject(find.byType(FloatingActionButton));
+    final Offset floatingActionButtonOriginBottomCenter = floatingActionButtonOriginBox.localToGlobal(floatingActionButtonOriginBox.size.bottomCenter(Offset.zero));
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
+    final RenderBox floatingActionButtonBox = tester.firstRenderObject(find.byType(FloatingActionButton));
+
+    final Offset snackBarTopCenter = snackBarBox.localToGlobal(snackBarBox.size.topCenter(Offset.zero));
+    final Offset floatingActionButtonBottomCenter = floatingActionButtonBox.localToGlobal(floatingActionButtonBox.size.bottomCenter(Offset.zero));
+
+    expect(floatingActionButtonOriginBottomCenter.dy > floatingActionButtonBottomCenter.dy, true);
+    expect(snackBarTopCenter.dy > floatingActionButtonBottomCenter.dy, true);
+  });
+
   testWidgets('Floating SnackBar button text alignment', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        snackBarBehaviour: SnackBarBehaviour.floating,
+      ),
       home: MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.only(
@@ -424,7 +477,6 @@ void main() {
                           content: const Text('I am a snack bar.'),
                           duration: const Duration(seconds: 2),
                           action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-                          snackBarBehaviour: SnackBarBehaviour.floating,
                       ));
                     },
                     child: const Text('X')
@@ -458,6 +510,9 @@ void main() {
 
   testWidgets('Floating SnackBar is positioned above BottomNavigationBar', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        snackBarBehaviour: SnackBarBehaviour.floating,
+      ),
       home: MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.only(
@@ -482,7 +537,6 @@ void main() {
                           content: const Text('I am a snack bar.'),
                           duration: const Duration(seconds: 2),
                           action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-                          snackBarBehaviour: SnackBarBehaviour.floating,
                       ));
                     },
                     child: const Text('X')
@@ -516,6 +570,9 @@ void main() {
 
   testWidgets('Floating SnackBar is positioned above FloatingActionButton', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        snackBarBehaviour: SnackBarBehaviour.floating,
+      ),
       home: MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.only(
@@ -538,7 +595,6 @@ void main() {
                         content: const Text('I am a snack bar.'),
                         duration: const Duration(seconds: 2),
                         action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-                        snackBarBehaviour: SnackBarBehaviour.floating,
                       ));
                     },
                     child: const Text('X')
@@ -558,8 +614,6 @@ void main() {
     final Offset snackBarBottomCenter = snackBarBox.localToGlobal(snackBarBox.size.bottomCenter(Offset.zero));
     final Offset floatingActionButtonTopCenter = floatingActionButtonBox.localToGlobal(floatingActionButtonBox.size.topCenter(Offset.zero));
 
-    print(snackBarBottomCenter);
-    print(floatingActionButtonTopCenter);
     // Since padding and margin is handled inside snackBarBox,
     // the bottom offset of snackbar should equal with top offset of FAB
     expect(snackBarBottomCenter.dy == floatingActionButtonTopCenter.dy, true);

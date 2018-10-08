@@ -82,7 +82,11 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
         // Create an inner BuildContext so that the snackBar onPressed methods
         // can refer to the Scaffold with Scaffold.of().
         builder: buildBody
-      )
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.send),
+        onPressed: () {}
+      ),
     );
   }
 }

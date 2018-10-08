@@ -25,10 +25,8 @@ const Color _kSnackBackground = Color(0xFF323232);
 const Duration _kSnackBarTransitionDuration = Duration(milliseconds: 250);
 const Duration _kSnackBarDisplayDuration = Duration(milliseconds: 4000);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
-const Curve _snackBarFadeInCurve =
-    Interval(0.45, 1.0, curve: Curves.fastOutSlowIn);
-const Curve _snackBarFadeOutCurve =
-    Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
+const Curve _snackBarFadeInCurve = Interval(0.45, 1.0, curve: Curves.fastOutSlowIn);
+const Curve _snackBarFadeOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
 /// Specify how a [SnackBar] was closed.
 ///
@@ -67,23 +65,6 @@ enum SnackBarClosedReason {
   timeout,
 }
 
-/// Configures whether SnackBar should be fixed to the bottom or floating
-/// like described in Material Design spec.
-enum SnackBarBehaviour {
-  /// Fixed the SnackBar position to the bottom of the Scaffold when possible.
-  /// One of the possible scenario where SnackBar will be shown above another
-  /// widget is SnackBar above BottomNavigationBar.
-  /// Other than that SnackBar will caused the other non-fixed widget inside
-  /// Scaffold to be pushed above (e.g. Floating Action Button).
-  fixed,
-
-  /// Change the design and behaviour of SnackBar to float like described in
-  /// <https://material.io/design/components/snackbars.html>.
-  /// This behaviour will cause SnackBar to be shown on top of other non-fixed
-  /// widget like Floating Action Button rather than pushing it above SnackBar.
-  floating
-}
-
 /// A button for a [SnackBar], known as an "action".
 ///
 /// Snack bar actions are always enabled. If you want to disable a snack bar
@@ -103,9 +84,9 @@ class SnackBarAction extends StatefulWidget {
     Key key,
     @required this.label,
     @required this.onPressed,
-  })  : assert(label != null),
-        assert(onPressed != null),
-        super(key: key);
+  }) : assert(label != null),
+       assert(onPressed != null),
+       super(key: key);
 
   /// The button label.
   final String label;
@@ -130,8 +111,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
       _haveTriggeredAction = true;
     });
     widget.onPressed();
-    Scaffold.of(context)
-        .hideCurrentSnackBar(reason: SnackBarClosedReason.action);
+    Scaffold.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
   }
 
   @override
@@ -175,9 +155,8 @@ class SnackBar extends StatelessWidget {
     this.action,
     this.duration = _kSnackBarDisplayDuration,
     this.animation,
-    this.snackBarBehaviour = SnackBarBehaviour.fixed,
-  })  : assert(content != null),
-        super(key: key);
+  }) : assert(content != null),
+       super(key: key);
 
   /// The primary content of the snack bar.
   ///
@@ -210,9 +189,6 @@ class SnackBar extends StatelessWidget {
   /// The animation driving the entrance and exit of the snack bar.
   final Animation<double> animation;
 
-  /// Configures how SnackBar should be positioned and shown.
-  final SnackBarBehaviour snackBarBehaviour;
-
   @override
   Widget build(BuildContext context) {
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
@@ -227,8 +203,7 @@ class SnackBar extends StatelessWidget {
       const SizedBox(width: _kSnackBarPadding),
       Expanded(
         child: Container(
-          padding:
-              const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
+          padding: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
           child: DefaultTextStyle(
             style: darkTheme.textTheme.subhead,
             child: content,
@@ -256,7 +231,7 @@ class SnackBar extends StatelessWidget {
         reverseCurve: const Threshold(0.0));
 
     final bool isFloatingSnackBar =
-        snackBarBehaviour == SnackBarBehaviour.floating;
+        theme.snackBarBehaviour == SnackBarBehaviour.floating;
 
     Widget snackBar = SafeArea(
       top: false,
@@ -357,7 +332,6 @@ class SnackBar extends StatelessWidget {
       action: action,
       duration: duration,
       animation: newAnimation,
-      snackBarBehaviour: snackBarBehaviour,
     );
   }
 }

@@ -23,6 +23,7 @@ import 'floating_action_button_location.dart';
 import 'material.dart';
 import 'snack_bar.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
@@ -359,6 +360,12 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     Size bottomSheetSize = Size.zero;
     Size snackBarSize = Size.zero;
 
+    // Set the size of the SnackBar early if the behaviour is fixed one so
+    // the FAB can be positioned based on SnackBar availability.
+    if (hasChild(_ScaffoldSlot.snackBar) && !shouldShowFloatingSnackBar) {
+      snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
+    }
+
     if (hasChild(_ScaffoldSlot.bottomSheet)) {
       final BoxConstraints bottomSheetConstraints = BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
@@ -396,7 +403,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ScaffoldSlot.snackBar)) {
-      snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
+      if (snackBarSize == Size.zero) {
+        snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
+      }
       final double snackBarYOffsetBase =
       floatingActionButtonRect != null && shouldShowFloatingSnackBar
           ? floatingActionButtonRect.top
@@ -1593,9 +1602,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_snackBars.isNotEmpty) {
       final bool removeBottomPadding = widget.persistentFooterButtons != null ||
         widget.bottomNavigationBar != null;
-      final SnackBar snackBar = _snackBars.first._widget;
       shouldShowFloatingSnackBar =
-          snackBar.snackBarBehaviour == SnackBarBehaviour.floating;
+          themeData.snackBarBehaviour == SnackBarBehaviour.floating;
       _addIfNonNull(
         children,
         _snackBars.first._widget,
