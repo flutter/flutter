@@ -44,12 +44,16 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.activeColor = CupertinoColors.activeBlue,
     this.inactiveColor = CupertinoColors.inactiveGray,
     this.iconSize = 30.0,
-  }) : assert(items != null),
-       assert(items.length >= 2),
-       assert(currentIndex != null),
-       assert(0 <= currentIndex && currentIndex < items.length),
-       assert(iconSize != null),
-       super(key: key);
+    this.onlyIcons = false,
+    this.hideBorder = false,
+  })  : assert(items != null),
+        assert(items.length >= 2),
+        assert(currentIndex != null),
+        assert(0 <= currentIndex && currentIndex < items.length),
+        assert(iconSize != null),
+        assert(onlyIcons != null),
+        assert(hideBorder != null),
+        super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
   ///
@@ -90,6 +94,11 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Must not be null.
   final double iconSize;
 
+  /// TODO: comment
+  final bool onlyIcons;
+
+  final bool hideBorder;
+
   /// True if the tab bar's background color has no transparency.
   bool get opaque => backgroundColor.alpha == 0xFF;
 
@@ -101,24 +110,27 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
     Widget result = DecoratedBox(
       decoration: BoxDecoration(
-        border: const Border(
-          top: BorderSide(
-            color: _kDefaultTabBarBorderColor,
-            width: 0.0, // One physical pixel.
-            style: BorderStyle.solid,
-          ),
-        ),
+        border: !hideBorder
+            ? const Border(
+                top: BorderSide(
+                  color: _kDefaultTabBarBorderColor,
+                  width: 0.0, // One physical pixel.
+                  style: BorderStyle.solid,
+                ),
+              )
+            : null,
         color: backgroundColor,
       ),
-      // TODO(xster): allow icons-only versions of the tab bar too.
       child: SizedBox(
         height: _kTabBarHeight + bottomPadding,
-        child: IconTheme.merge( // Default with the inactive state.
+        child: IconTheme.merge(
+          // Default with the inactive state.
           data: IconThemeData(
             color: inactiveColor,
             size: iconSize,
           ),
-          child: DefaultTextStyle( // Default with the inactive state.
+          child: DefaultTextStyle(
+            // Default with the inactive state.
             style: TextStyle(
               fontFamily: '.SF UI Text',
               fontSize: 10.0,
@@ -131,7 +143,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
               child: Row(
                 // Align bottom since we want the labels to be aligned.
                 crossAxisAlignment: CrossAxisAlignment.end,
-                children: _buildTabItems(),
+                children: _buildTabItems(onlyIcons),
               ),
             ),
           ),
@@ -152,7 +164,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     return result;
   }
 
-  List<Widget> _buildTabItems() {
+  List<Widget> _buildTabItems(bool onlyIcons) {
     final List<Widget> result = <Widget>[];
 
     for (int index = 0; index < items.length; index += 1) {
@@ -166,20 +178,21 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
               hint: 'tab, ${index + 1} of ${items.length}',
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: onTap == null ? null : () { onTap(index); },
+                onTap: onTap == null
+                    ? null
+                    : () {
+                        onTap(index);
+                      },
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget> [
-                      Expanded(child:
-                        Center(child: active
-                            ? items[index].activeIcon
-                            : items[index].icon
-                        ),
-                      ),
-                      items[index].title,
-                    ],
+                    children: _buildSingleTabItem(
+                        items[index].activeIcon,
+                        items[index].icon,
+                        active,
+                        items[index].title,
+                        onlyIcons),
                   ),
                 ),
               ),
@@ -193,10 +206,24 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     return result;
   }
 
+  List<Widget> _buildSingleTabItem(Widget activeIcon, Widget icon, bool active,
+      Widget title, bool onlyIcons) {
+    List<Widget> components = [
+      Expanded(
+        child: Center(child: active ? activeIcon : icon),
+      )
+    ];
+
+    if (!onlyIcons) {
+      components.add(title);
+    }
+
+    return components;
+  }
+
   /// Change the active tab item's icon and title colors to active.
-  Widget _wrapActiveItem(Widget item, { @required bool active }) {
-    if (!active)
-      return item;
+  Widget _wrapActiveItem(Widget item, {@required bool active}) {
+    if (!active) return item;
 
     return IconTheme.merge(
       data: IconThemeData(color: activeColor),
@@ -220,14 +247,16 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     ValueChanged<int> onTap,
   }) {
     return CupertinoTabBar(
-       key: key ?? this.key,
-       items: items ?? this.items,
-       backgroundColor: backgroundColor ?? this.backgroundColor,
-       activeColor: activeColor ?? this.activeColor,
-       inactiveColor: inactiveColor ?? this.inactiveColor,
-       iconSize: iconSize ?? this.iconSize,
-       currentIndex: currentIndex ?? this.currentIndex,
-       onTap: onTap ?? this.onTap,
+      key: key ?? this.key,
+      items: items ?? this.items,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      activeColor: activeColor ?? this.activeColor,
+      inactiveColor: inactiveColor ?? this.inactiveColor,
+      iconSize: iconSize ?? this.iconSize,
+      onlyIcons: onlyIcons ?? this.onlyIcons,
+      hideBorder: hideBorder ?? this.hideBorder,
+      currentIndex: currentIndex ?? this.currentIndex,
+      onTap: onTap ?? this.onTap,
     );
   }
 }
