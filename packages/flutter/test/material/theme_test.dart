@@ -410,7 +410,7 @@ void main() {
       }
     }
 
-    expect(theme.textTheme.display4.debugLabel, '(englishLike display4).merge(blackMountainView display4)');
+    expect(theme.textTheme.display4.debugLabel, '(englishLike display4 2014).merge(blackMountainView display4)');
   });
 }
 

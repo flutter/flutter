@@ -31,22 +31,26 @@ import 'typography.dart';
 /// headline6    20.0  medium   0.15
 /// subtitle1    16.0  normal   0.15
 /// subtitle2    14.0  medium   0.1
-/// paragraph1   16.0  normal   0.5
-/// paragraph2   14.0  normal   0.25
+/// body1        16.0  normal   0.5
+/// body2        14.0  normal   0.25
 /// button       14.0  medium   0.75
 /// caption      12.0  normal   0.4
 /// overline     10.0  normal   1.5
 ///
 /// ```
 /// Where "light" is `FontWeight.w300`, "normal" is `FontWeight.w400` and
-/// "medium" is `FontWeight.w500`. The spec calls 'paragraph1' and
-/// 'paragraph2', 'body1' and 'body2'. They've been changed here to
-/// make it possible to support both the old text style names and the
-/// new ones.
+/// "medium" is `FontWeight.w500`.
+///
+/// The [TextTheme] API is based on the original material (2014)
+/// design spec, which used different text style names. For backwards
+/// compatability's sake, this API continues to use the original
+/// names. The table below should help with understanding the API in
+/// terms of the 2018 material spec.
 ///
 /// Each of the [TextTheme] text styles corresponds to one of the
-/// styles from the 2018. By default, the font sizes, font weights
-/// and letter spacing have not changed.
+/// styles from 2018 spec. By default, the font sizes, font weights
+/// and letter spacings have not changed from their original,
+/// 2014, values.
 /// ```
 /// NAME       SIZE   WEIGHT   SPACING  2018 NAME
 /// display4   112.0  thin     0.0      headline1
@@ -481,18 +485,18 @@ class TextTheme extends Diagnosticable {
       return false;
     final TextTheme typedOther = other;
     return display4 == typedOther.display4
-      && display3 == typedOther.display3
-      && display2 == typedOther.display2
-      && display1 == typedOther.display1
-      && headline == typedOther.headline
-      && title == typedOther.title
-      && subhead == typedOther.subhead
-      && body2 == typedOther.body2
-      && body1 == typedOther.body1
-      && caption == typedOther.caption
-      && button == typedOther.button
-      && subtitle == typedOther.subtitle
-      && overline == typedOther.overline;
+        && display3 == typedOther.display3
+        && display2 == typedOther.display2
+        && display1 == typedOther.display1
+        && headline == typedOther.headline
+        && title == typedOther.title
+        && subhead == typedOther.subhead
+        && body2 == typedOther.body2
+        && body1 == typedOther.body1
+        && caption == typedOther.caption
+        && button == typedOther.button
+        && subtitle == typedOther.subtitle
+        && overline == typedOther.overline;
   }
 
   @override

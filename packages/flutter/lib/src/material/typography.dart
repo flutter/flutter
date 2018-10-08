@@ -13,7 +13,7 @@ import 'text_theme.dart';
 ///
 /// The script category defines the overall geometry of a [TextTheme] for
 /// the static [MaterialTextGeometry.localizedFor] method in terms of the
-/// three language categories defined in https://material.io/go/design-typography.
+/// three language categories defined in <https://material.io/go/design-typography>.
 ///
 /// Generally speaking, font sizes for [ScriptCategory.tall] and
 /// [ScriptCategory.dense] scripts - for text styles that are smaller than the
@@ -55,13 +55,14 @@ enum ScriptCategory {
 ///
 /// The color text themes are [blackMountainView],
 /// [whiteMountainView], and [blackCupertino] and [whiteCupertino]. The
-/// MountainView theme [TextStyles] are based on the Roboto fonts and the
+/// Mountain View theme [TextStyles] are based on the Roboto fonts and the
 /// Cupertino themes are based on the San Francisco fonts.
 ///
 /// Two sets of geometry themes are provided: 2014 and 2018. The 2014 themes
 /// correspond to the original version of the Material Design spec and are
-/// the defaults. The 2018 themes correspond the current spec and feature
-/// different font sizes, font weights, and letter spacing values.
+/// the defaults. The 2018 themes correspond the second iteration of the
+/// specification and feature different font sizes, font weights, and
+/// letter spacing values.
 ///
 /// By default, [ThemeData.typography] is
 /// `Typography(platform: platform)` which uses [englishLike2014],
@@ -80,7 +81,7 @@ enum ScriptCategory {
 ///
 ///  * [ThemeData.typography], which can be used to configure the
 ///    text themes used to create [ThemeData.textTheme],
-///    [ThemeData.primaryTxtTheme], [ThemeData.accentTextTheme].
+///    [ThemeData.primaryTextTheme], [ThemeData.accentTextTheme].
 ///  * <https://material.io/design/typography/>
 @immutable
 class Typography extends Diagnosticable {
@@ -105,7 +106,8 @@ class Typography extends Diagnosticable {
         black ??= blackCupertino;
         white ??= whiteCupertino;
         break;
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
         black ??= blackMountainView;
         white ??= whiteMountainView;
     }
@@ -124,9 +126,9 @@ class Typography extends Diagnosticable {
 
   /// A material design text theme with dark glyphs.
   ///
-  /// This [TextTheme] provides color but not geometry (font size, weight, etc).
-  /// A text theme's geometry depends on the locale. To look up a localized
-  /// [TextTheme], use the the overall [Theme], for example:
+  /// This [TextTheme] should provide color but not geometry (font size,
+  /// weight, etc). A text theme's geometry depends on the locale. To look
+  /// up a localized [TextTheme], use the the overall [Theme], for example:
   /// `Theme.of(context).textTheme`.
   ///
   /// The [englishLike], [dense], and [tall] text theme's provide locale-specific
@@ -179,7 +181,7 @@ class Typography extends Diagnosticable {
   /// Returns one of [englishLike], [dense], or [tall].
   TextTheme geometryThemeFor(ScriptCategory category) {
     assert(category != null);
-    switch(category) {
+    switch (category) {
       case ScriptCategory.englishLike:
         return englishLike;
       case ScriptCategory.dense:
@@ -187,7 +189,6 @@ class Typography extends Diagnosticable {
       case ScriptCategory.tall:
         return tall;
     }
-    assert(false);
     return null;
   }
 
@@ -337,27 +338,26 @@ class Typography extends Diagnosticable {
   /// Defines text geometry for [ScriptCategory.englishLike] scripts, such as
   /// English, French, Russian, etc.
   static const TextTheme englishLike2014 = TextTheme(
-    display4 : TextStyle(debugLabel: 'englishLike display4', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic),
-    display3 : TextStyle(debugLabel: 'englishLike display3', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    display2 : TextStyle(debugLabel: 'englishLike display2', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    display1 : TextStyle(debugLabel: 'englishLike display1', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headline : TextStyle(debugLabel: 'englishLike headline', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    title    : TextStyle(debugLabel: 'englishLike title',    inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    subhead  : TextStyle(debugLabel: 'englishLike subhead',  inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    body2    : TextStyle(debugLabel: 'englishLike body2',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    body1    : TextStyle(debugLabel: 'englishLike body1',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    caption  : TextStyle(debugLabel: 'englishLike caption',  inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    button   : TextStyle(debugLabel: 'englishLike button',   inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    subtitle : TextStyle(debugLabel: 'englishLike subtitle', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.1),
-    overline : TextStyle(debugLabel: 'englishLike overline', inherit: false, fontSize:  10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
+    display4 : TextStyle(debugLabel: 'englishLike display4 2014', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic),
+    display3 : TextStyle(debugLabel: 'englishLike display3 2014', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display2 : TextStyle(debugLabel: 'englishLike display2 2014', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display1 : TextStyle(debugLabel: 'englishLike display1 2014', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headline : TextStyle(debugLabel: 'englishLike headline 2014', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    title    : TextStyle(debugLabel: 'englishLike title 2014',    inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+    subhead  : TextStyle(debugLabel: 'englishLike subhead 2014',  inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    body2    : TextStyle(debugLabel: 'englishLike body2 2014',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+    body1    : TextStyle(debugLabel: 'englishLike body1 2014',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    caption  : TextStyle(debugLabel: 'englishLike caption 2014',  inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    button   : TextStyle(debugLabel: 'englishLike button 2014',   inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+    subtitle : TextStyle(debugLabel: 'englishLike subtitle 2014', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.1),
+    overline : TextStyle(debugLabel: 'englishLike overline 2014', inherit: false, fontSize:  10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
   );
 
   /// Defines text geometry for [ScriptCategory.englishLike] scripts, such as
   /// English, French, Russian, etc.
   ///
   /// The font sizes, weights, and letter spacings in this version match the
-  /// latest Material Design spec:
-  /// (https://material.io/go/design-typography#typography-styles).
+  /// [latest Material Design specification](https://material.io/go/design-typography#typography-styles).
   static const TextTheme englishLike2018 = TextTheme(
     display4   : TextStyle(debugLabel: 'englishLike display4 2018', fontSize: 96.0, fontWeight: FontWeight.w300, textBaseline: TextBaseline.alphabetic, letterSpacing: -1.5),
     display3   : TextStyle(debugLabel: 'englishLike display3 2018', fontSize: 60.0, fontWeight: FontWeight.w300, textBaseline: TextBaseline.alphabetic, letterSpacing: -0.5),
@@ -377,27 +377,26 @@ class Typography extends Diagnosticable {
   /// Defines text geometry for dense scripts, such as Chinese, Japanese
   /// and Korean.
   static const TextTheme dense2014 = TextTheme(
-    display4 : TextStyle(debugLabel: 'dense display4', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
-    display3 : TextStyle(debugLabel: 'dense display3', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    display2 : TextStyle(debugLabel: 'dense display2', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    display1 : TextStyle(debugLabel: 'dense display1', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    headline : TextStyle(debugLabel: 'dense headline', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    title    : TextStyle(debugLabel: 'dense title',    inherit: false, fontSize:  21.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    subhead  : TextStyle(debugLabel: 'dense subhead',  inherit: false, fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    body2    : TextStyle(debugLabel: 'dense body2',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    body1    : TextStyle(debugLabel: 'dense body1',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    caption  : TextStyle(debugLabel: 'dense caption',  inherit: false, fontSize:  13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    button   : TextStyle(debugLabel: 'dense button',   inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    subtitle : TextStyle(debugLabel: 'dense subtitle', inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    overline : TextStyle(debugLabel: 'dense overline', inherit: false, fontSize:  11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    display4 : TextStyle(debugLabel: 'dense display4 2014', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
+    display3 : TextStyle(debugLabel: 'dense display3 2014', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    display2 : TextStyle(debugLabel: 'dense display2 2014', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    display1 : TextStyle(debugLabel: 'dense display1 2014', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    headline : TextStyle(debugLabel: 'dense headline 2014', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    title    : TextStyle(debugLabel: 'dense title 2014',    inherit: false, fontSize:  21.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    subhead  : TextStyle(debugLabel: 'dense subhead 2014',  inherit: false, fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    body2    : TextStyle(debugLabel: 'dense body2 2014',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    body1    : TextStyle(debugLabel: 'dense body1 2014',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    caption  : TextStyle(debugLabel: 'dense caption 2014',  inherit: false, fontSize:  13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    button   : TextStyle(debugLabel: 'dense button 2014',   inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    subtitle : TextStyle(debugLabel: 'dense subtitle 2014', inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    overline : TextStyle(debugLabel: 'dense overline 2014', inherit: false, fontSize:  11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
   );
 
   /// Defines text geometry for dense scripts, such as Chinese, Japanese
   /// and Korean.
   ///
   /// The font sizes, weights, and letter spacings in this version match the
-  /// latest Material Design spec:
-  /// (https://material.io/go/design-typography#typography-styles).
+  /// latest [Material Design specification](https://material.io/go/design-typography#typography-styles).
   static const TextTheme dense2018 = TextTheme(
     display4  : TextStyle(debugLabel: 'dense display4 2018',  fontSize: 96.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
     display3  : TextStyle(debugLabel: 'dense display3 2018',  fontSize: 60.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
@@ -416,26 +415,25 @@ class Typography extends Diagnosticable {
 
   /// Defines text geometry for tall scripts, such as Farsi, Hindi, and Thai.
   static const TextTheme tall2014 = TextTheme(
-    display4 : TextStyle(debugLabel: 'tall display4', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    display3 : TextStyle(debugLabel: 'tall display3', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    display2 : TextStyle(debugLabel: 'tall display2', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    display1 : TextStyle(debugLabel: 'tall display1', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headline : TextStyle(debugLabel: 'tall headline', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    title    : TextStyle(debugLabel: 'tall title',    inherit: false, fontSize:  21.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
-    subhead  : TextStyle(debugLabel: 'tall subhead',  inherit: false, fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    body2    : TextStyle(debugLabel: 'tall body2',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
-    body1    : TextStyle(debugLabel: 'tall body1',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    caption  : TextStyle(debugLabel: 'tall caption',  inherit: false, fontSize:  13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    button   : TextStyle(debugLabel: 'tall button',   inherit: false, fontSize:  15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
-    subtitle : TextStyle(debugLabel: 'tall subtitle', inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    overline : TextStyle(debugLabel: 'tall overline', inherit: false, fontSize:  11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display4 : TextStyle(debugLabel: 'tall display4 2014', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display3 : TextStyle(debugLabel: 'tall display3 2014', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display2 : TextStyle(debugLabel: 'tall display2 2014', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display1 : TextStyle(debugLabel: 'tall display1 2014', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headline : TextStyle(debugLabel: 'tall headline 2014', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    title    : TextStyle(debugLabel: 'tall title 2014',    inherit: false, fontSize:  21.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    subhead  : TextStyle(debugLabel: 'tall subhead 2014',  inherit: false, fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    body2    : TextStyle(debugLabel: 'tall body2 2014',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    body1    : TextStyle(debugLabel: 'tall body1 2014',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    caption  : TextStyle(debugLabel: 'tall caption 2014',  inherit: false, fontSize:  13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    button   : TextStyle(debugLabel: 'tall button 2014',   inherit: false, fontSize:  15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    subtitle : TextStyle(debugLabel: 'tall subtitle 2014', inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+    overline : TextStyle(debugLabel: 'tall overline 2014', inherit: false, fontSize:  11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
   );
 
   /// Defines text geometry for tall scripts, such as Farsi, Hindi, and Thai.
   ///
   /// The font sizes, weights, and letter spacings in this version match the
-  /// latest Material Design spec:
-  /// (https://material.io/go/design-typography#typography-styles).
+  /// latest [Material Design specification](https://material.io/go/design-typography#typography-styles).
   static const TextTheme tall2018 = TextTheme(
     display4  : TextStyle(debugLabel: 'tall display4 2018',  fontSize: 96.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     display3  : TextStyle(debugLabel: 'tall display3 2018',  fontSize: 60.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),

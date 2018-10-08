@@ -15,7 +15,6 @@ import 'colors.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
-import 'material_localizations.dart';
 import 'page_transitions_theme.dart';
 import 'slider_theme.dart';
 import 'tab_bar_theme.dart';
@@ -618,6 +617,8 @@ class ThemeData extends Diagnosticable {
   /// that is possible without significant backwards compatibility breaks.
   final ColorScheme colorScheme;
 
+  /// The color and geometry [TextTheme] values used to configure [textTheme],
+  /// [primaryTextTheme], and [accentTextTheme].
   final Typography typography;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
@@ -716,22 +717,6 @@ class ThemeData extends Diagnosticable {
       typography: typography ?? this.typography,
     );
   }
-
-  /// Returns a copy of this theme with [primaryTextTheme], [accentTextTheme],
-  /// and [textTheme] replaced by versions that have been localized
-  /// per [MaterialLocalizations.scriptCategory] and whose sizes, weights,
-  /// and letter spacing correspond to [typographyVersion].
-  ///
-  /// The returned values are cached, see [ThemeData.localize].
-  /*
-  ThemeData localizeFor(MaterialLocalizations localizations) {
-    final TextTheme geometryTheme = MaterialTextGeometry.localizedFor(
-      version: typographyVersion,
-      scriptCategory: localizations?.scriptCategory ?? ScriptCategory.englishLike,
-    );
-    return ThemeData.localize(this, geometryTheme);
-  }
-  */
 
   // The number 5 was chosen without any real science or research behind it. It
   // just seemed like a number that's not too big (we should be able to fit 5
