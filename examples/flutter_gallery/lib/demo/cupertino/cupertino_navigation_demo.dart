@@ -47,8 +47,9 @@ class CupertinoNavigationDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      // Prevent swipe popping of this page. Use explicit exit buttons only.
-      onWillPop: () => Future<bool>.value(true),
+      // If you change the below, change this to prevent iOS back-swipe gesture
+      // or Android back button popping of this page. Use explicit exit buttons only.
+      onWillPop: () => Future<bool>.value(false),
       child: DefaultTextStyle(
         style: const TextStyle(
           fontFamily: '.SF UI Text',
