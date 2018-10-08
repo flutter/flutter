@@ -161,7 +161,7 @@ class FlatButton extends MaterialButton {
 ///
 /// This class only exists to give FlatButtons created with [FlatButton.icon]
 /// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.
-class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
+class _FlatButtonWithIcon extends FlatButton implements MaterialButtonWithIconMixin {
   _FlatButtonWithIcon({
     Key key,
     @required VoidCallback onPressed,
