@@ -230,7 +230,7 @@ void main() {
       DefaultWidgetsLocalizations.delegate,
     ];
 
-    Future<Null> pumpTest(Locale locale) async {
+    Future<void> pumpTest(Locale locale) async {
       await tester.pumpWidget(Localizations(
         locale: locale,
         delegates: delegates,
