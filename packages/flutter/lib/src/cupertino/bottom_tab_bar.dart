@@ -95,7 +95,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   final double iconSize;
 
   /// The parameter which allows hiding titles of the [BottomNavigationBarItem] items.
-  /// 
+  ///
   /// True if the only icons mode should ne enabled and all labels should be hidden.
   final bool onlyIcons;
 
@@ -213,7 +213,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   List<Widget> _buildSingleTabItem(Widget activeIcon, Widget icon, bool active,
       Widget title, bool onlyIcons) {
-    List<Widget> components = [
+    final List<Widget> components = <Widget>[
       Expanded(
         child: Center(child: active ? activeIcon : icon),
       )
@@ -228,7 +228,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// Change the active tab item's icon and title colors to active.
   Widget _wrapActiveItem(Widget item, {@required bool active}) {
-    if (!active) return item;
+    if (!active)
+      return item;
 
     return IconTheme.merge(
       data: IconThemeData(color: activeColor),
@@ -248,6 +249,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Color activeColor,
     Color inactiveColor,
     Size iconSize,
+    bool onlyIcons,
+    bool hideBorder,
     int currentIndex,
     ValueChanged<int> onTap,
   }) {
