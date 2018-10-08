@@ -1,4 +1,4 @@
-Signature: 3447be96d07b045cfb2799700dc3d7f7
+Signature: 2c9aa7fee4a4c60a58457bf452f366bf
 
 UNUSED LICENSES:
 
@@ -1296,8 +1296,9 @@ LIBRARY: skcms
 LIBRARY: skia
 LIBRARY: vulkan
 LIBRARY: vulkanmemoryallocator
-ORIGIN: ../../../third_party/skia/bench/CompositingImagesBench.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/bench/ClearBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/bench/ClearBench.cpp
 FILE: ../../../third_party/skia/bench/CompositingImagesBench.cpp
 FILE: ../../../third_party/skia/bench/CubicMapBench.cpp
 FILE: ../../../third_party/skia/bench/GrCCFillGeometryBench.cpp
@@ -1979,6 +1980,7 @@ FILE: ../../../third_party/skia/docker/skia-with-swift-shader-base/Dockerfile
 FILE: ../../../third_party/skia/docker/skia-with-swift-shader-base/build-with-swift-shader-and-run
 FILE: ../../../third_party/skia/docs/SkAutoCanvasRestore_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkBitmap_Reference.bmh
+FILE: ../../../third_party/skia/docs/SkBlendMode_Overview.bmh
 FILE: ../../../third_party/skia/docs/SkBlendMode_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkCanvas_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkColor4f_Reference.bmh
@@ -1993,6 +1995,7 @@ FILE: ../../../third_party/skia/docs/SkImage_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkMatrix_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkMemoryStream_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkPaint_Reference.bmh
+FILE: ../../../third_party/skia/docs/SkPath_Overview.bmh
 FILE: ../../../third_party/skia/docs/SkPath_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkPicture_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkPixmap_Reference.bmh
@@ -2076,7 +2079,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/binary_size/examples/f
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-arm-Release-Android_API26.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-arm-Release-Android_ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-arm-Release-Chromebook_GLES.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-universal-devrel-Android_SKQP.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86-devrel-Android_SKQP.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Debug-Chromebook_GLES.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Debug-Coverage.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Debug-MSAN.json
@@ -2111,6 +2114,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Win-Clang-x86_64-Debug-OpenCL.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Win-Clang-x86_64-Release-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Housekeeper-PerCommit-CheckGeneratedFiles.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Test-Debian9-Clang-GCE-CPU-AVX2-universal-devrel-All-Android_SKQP.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/builder_name_schema/builder_name_schema.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/builder_name_schema/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/Build-Debian9-Clang-x86_64-Release-NoDEPS.json
@@ -2315,6 +2319,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-De
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-Debian9-EMCC-GCE-CPU-AVX2-asmjs-Release-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-Debian9-EMCC-GCE-CPU-AVX2-wasm-Debug-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/pathkit_trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test_skqp_emulator.expected/Test-Debian9-Clang-GCE-CPU-Emulator-x86-devrel-All-Android_SKQP.json
 FILE: ../../../third_party/skia/infra/bots/recipes/update_go_deps.expected/Housekeeper-Nightly-UpdateGoDEPS.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_buildstats_results.expected/normal_bot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_buildstats_results.expected/trybot.json
@@ -2348,6 +2353,7 @@ FILE: ../../../third_party/skia/infra/pathkit/docker/karma-chrome-tests/Dockerfi
 FILE: ../../../third_party/skia/infra/project-config/cr-buildbucket.cfg
 FILE: ../../../third_party/skia/infra/project-config/project.cfg
 FILE: ../../../third_party/skia/infra/project-config/refs.cfg
+FILE: ../../../third_party/skia/infra/skqp/docker/android-skqp/Dockerfile
 FILE: ../../../third_party/skia/modules/pathkit/chaining.js
 FILE: ../../../third_party/skia/modules/pathkit/externs.js
 FILE: ../../../third_party/skia/modules/pathkit/helper.js
