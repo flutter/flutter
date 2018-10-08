@@ -1,4 +1,5 @@
 name: hello_world
+description: A minimal Flutter application.
 
 environment:
   # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
@@ -67,5 +68,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  application:
+    androidPackage: com.example.helloworld
+    iosBundleIdentifier: com.example.helloWorld
 
 # PUBSPEC CHECKSUM: 3200
