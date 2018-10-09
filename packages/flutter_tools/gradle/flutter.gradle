@@ -555,7 +555,7 @@ class FlutterTask extends BaseFlutterTask {
 
             include "flutter_assets/**" // the working dir and its files
 
-            if (buildMode != 'debug' || compilationTraceFilePath) {
+            if (buildMode == 'release' || buildMode == 'profile') {
                 if (buildSharedLibrary) {
                     include "app.so"
                 } else {
