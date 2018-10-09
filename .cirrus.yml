@@ -62,6 +62,14 @@ task:
       container:
         cpu: 4
         memory: 8G
+    - name: aot_build_tests-linux
+      env:
+        SHARD: aot_build_tests
+      test_script:
+        - dart ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 8G
     - name: codelabs-build-test
       env:
         SHARD: codelabs-build-test

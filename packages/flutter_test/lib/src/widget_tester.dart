@@ -617,15 +617,39 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     });
   }
 
-  /// Attempts to find the [SemanticsData] of first result from `finder`.
+  /// Attempts to find the [SemanticsNode] of first result from `finder`.
   ///
   /// If the object identified by the finder doesn't own it's semantic node,
-  /// this will return the semantics data of the first ancestor with semantics
-  /// data. The ancestor's semantic data will include the child's as well as
+  /// this will return the semantics data of the first ancestor with semantics.
+  /// The ancestor's semantic data will include the child's as well as
   /// other nodes that have been merged together.
   ///
   /// Will throw a [StateError] if the finder returns more than one element or
   /// if no semantics are found or are not enabled.
+  SemanticsNode getSemantics(Finder finder) {
+    if (binding.pipelineOwner.semanticsOwner == null)
+      throw StateError('Semantics are not enabled.');
+    final Iterable<Element> candidates = finder.evaluate();
+    if (candidates.isEmpty) {
+      throw StateError('Finder returned no matching elements.');
+    }
+    if (candidates.length > 1) {
+      throw StateError('Finder returned more than one element.');
+    }
+    final Element element = candidates.single;
+    RenderObject renderObject = element.findRenderObject();
+    SemanticsNode result = renderObject.debugSemantics;
+    while (renderObject != null && result == null) {
+      renderObject = renderObject?.parent;
+      result = renderObject?.debugSemantics;
+    }
+    if (result == null)
+      throw StateError('No Semantics data found.');
+    return result;
+  }
+
+  /// DEPRECATED: use [getSemantics] instead.
+  @Deprecated('use getSemantics instead')
   SemanticsData getSemanticsData(Finder finder) {
     if (binding.pipelineOwner.semanticsOwner == null)
       throw StateError('Semantics are not enabled.');

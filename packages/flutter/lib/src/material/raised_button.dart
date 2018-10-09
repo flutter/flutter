@@ -171,7 +171,7 @@ class RaisedButton extends MaterialButton {
 ///
 /// This class only exists to give RaisedButtons created with [RaisedButton.icon]
 /// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.
-class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixin {
+class _RaisedButtonWithIcon extends RaisedButton implements MaterialButtonWithIconMixin {
   _RaisedButtonWithIcon({
     Key key,
     @required VoidCallback onPressed,

@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'common/logging.dart';
@@ -127,7 +126,6 @@ class FuchsiaRemoteConnection {
 
   /// Same as [FuchsiaRemoteConnection.connect] albeit with a provided
   /// [SshCommandRunner] instance.
-  @visibleForTesting
   static Future<FuchsiaRemoteConnection> connectWithSshCommandRunner(
       SshCommandRunner commandRunner) async {
     final FuchsiaRemoteConnection connection = FuchsiaRemoteConnection._(

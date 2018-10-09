@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -485,4 +487,46 @@ void main() {
     semanticsTester.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);
   });
+
+  testWidgets('Switch.adaptive', (WidgetTester tester) async {
+    bool value = false;
+
+    Widget buildFrame(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: Switch.adaptive(
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.iOS));
+    expect(find.byType(CupertinoSwitch), findsOneWidget);
+
+    expect(value, isFalse);
+    await tester.tap(find.byType(Switch));
+    expect(value, isTrue);
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.android));
+    await tester.pumpAndSettle(); // Finish the theme change animation.
+    expect(find.byType(CupertinoSwitch), findsNothing);
+    expect(value, isTrue);
+    await tester.tap(find.byType(Switch));
+    expect(value, isFalse);
+
+  });
+
 }

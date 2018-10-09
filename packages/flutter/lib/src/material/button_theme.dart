@@ -399,7 +399,7 @@ class ButtonThemeData extends Diagnosticable {
 
   /// The [button]'s overall brightness.
   ///
-  /// Returns the button's [MaterialButton.colorBrightness] it it is non-null,
+  /// Returns the button's [MaterialButton.colorBrightness] if it is non-null,
   /// otherwise the color scheme's [ColorScheme.brightness] is returned.
   Brightness getBrightness(MaterialButton button) {
     return button.colorBrightness ?? colorScheme.brightness;

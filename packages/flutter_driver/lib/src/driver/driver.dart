@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart' as f;
+import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart' as fuchsia;
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
@@ -17,6 +18,7 @@ import 'package:web_socket_channel/io.dart';
 import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';
+import '../common/fuchsia_compat.dart';
 import '../common/gesture.dart';
 import '../common/health.dart';
 import '../common/message.dart';
@@ -64,6 +66,9 @@ const Duration _kShortTimeout = Duration(seconds: 5);
 
 /// Default timeout for awaiting an Isolate to become runnable.
 const Duration _kIsolateLoadRunnableTimeout = Duration(minutes: 1);
+
+/// Time to delay before driving a Fuchsia module.
+const Duration _kFuchsiaDriveDelay = Duration(milliseconds: 500);
 
 /// Default timeout for long-running RPCs.
 final Duration _kLongTimeout = _kShortTimeout * 6;
@@ -155,13 +160,47 @@ class FlutterDriver {
   ///
   /// [isolateReadyTimeout] determines how long after we connect to the VM
   /// service we will wait for the first isolate to become runnable.
+  ///
+  /// [fuchsiaModuleTarget] (optional) If running on a Fuchsia Device, either
+  /// this or the environment variable `FUCHSIA_MODULE_TARGET` must be set. This
+  /// field will be ignored if [isolateNumber] is set, as this is already
+  /// enough information to connect to an Isolate.
   static Future<FlutterDriver> connect({
     String dartVmServiceUrl,
     bool printCommunication = false,
     bool logCommunicationToFile = true,
     int isolateNumber,
     Duration isolateReadyTimeout = _kIsolateLoadRunnableTimeout,
+    Pattern fuchsiaModuleTarget,
   }) async {
+    // If running on a Fuchsia device, connect to the first Isolate whose name
+    // matches FUCHSIA_MODULE_TARGET.
+    //
+    // If the user has already supplied an isolate number/URL to the Dart VM
+    // service, then this won't be run as it is unnecessary.
+    if (Platform.isFuchsia && isolateNumber == null) {
+      fuchsiaModuleTarget ??= Platform.environment['FUCHSIA_MODULE_TARGET'];
+      if (fuchsiaModuleTarget == null) {
+        throw DriverError('No Fuchsia module target has been specified.\n'
+            'Please make sure to specify the FUCHSIA_MODULE_TARGET\n'
+            'environment variable.');
+      }
+      final fuchsia.FuchsiaRemoteConnection fuchsiaConnection =
+          await FuchsiaCompat.connect();
+      final List<fuchsia.IsolateRef> refs =
+          await fuchsiaConnection.getMainIsolatesByPattern(fuchsiaModuleTarget);
+      final fuchsia.IsolateRef ref = refs.first;
+      await Future<void>.delayed(_kFuchsiaDriveDelay);
+      isolateNumber = ref.number;
+      dartVmServiceUrl = ref.dartVm.uri.toString();
+      await fuchsiaConnection.stop();
+      FuchsiaCompat.cleanup();
+
+      // TODO(awdavies): Use something other than print. On fuchsia
+      // `stderr`/`stdout` appear to have issues working correctly.
+      flutterDriverLog.listen(print);
+    }
+
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
 
     if (dartVmServiceUrl == null) {

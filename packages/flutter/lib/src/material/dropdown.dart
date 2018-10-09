@@ -329,25 +329,47 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     assert(debugCheckHasDirectionality(context));
     final double screenHeight = MediaQuery.of(context).size.height;
     final double maxMenuHeight = screenHeight - 2.0 * _kMenuItemHeight;
-    final double preferredMenuHeight = (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
-    final double menuHeight = math.min(maxMenuHeight, preferredMenuHeight);
 
     final double buttonTop = buttonRect.top;
+    final double buttonBottom = buttonRect.bottom;
+
+    // If the button is placed on the bottom or top of the screen, its top or
+    // bottom may be less than [_kMenuItemHeight] from the edge of the screen.
+    // In this case, we want to change the menu limits to align with the top
+    // or bottom edge of the button.
+    final double topLimit = math.min(_kMenuItemHeight, buttonTop);
+    final double bottomLimit = math.max(screenHeight - _kMenuItemHeight, buttonBottom);
+
     final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
+
     double menuTop = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
-    const double topPreferredLimit = _kMenuItemHeight;
-    if (menuTop < topPreferredLimit)
-      menuTop = math.min(buttonTop, topPreferredLimit);
-    double bottom = menuTop + menuHeight;
-    final double bottomPreferredLimit = screenHeight - _kMenuItemHeight;
-    if (bottom > bottomPreferredLimit) {
-      bottom = math.max(buttonTop + _kMenuItemHeight, bottomPreferredLimit);
-      menuTop = bottom - menuHeight;
+    final double preferredMenuHeight = (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
+
+    // If there are too many elements in the menu, we need to shrink it down
+    // so it is at most the maxMenuHeight.
+    final double menuHeight = math.min(maxMenuHeight, preferredMenuHeight);
+
+    double menuBottom = menuTop + menuHeight;
+
+    // If the computed top or bottom of the menu are outside of the range
+    // specified, we need to bring them into range. If the item height is larger
+    // than the button height and the button is at the very bottom or top of the
+    // screen, the menu will be aligned with the bottom or top of the button
+    // respectively.
+    if (menuTop < topLimit)
+      menuTop = math.min(buttonTop, topLimit);
+    if (menuBottom > bottomLimit) {
+      menuBottom = math.max(buttonBottom, bottomLimit);
+      menuTop = menuBottom - menuHeight;
     }
 
     if (scrollController == null) {
-      final double scrollOffset = (preferredMenuHeight > maxMenuHeight) ?
-        math.max(0.0, selectedItemOffset - (buttonTop - menuTop)) : 0.0;
+      // The limit is asymmetrical because we do not care how far positive the
+      // limit goes. We are only concerned about the case where the value of
+      // [buttonTop - menuTop] is larger than selectedItemOffset, ie. when
+      // the button is close to the bottom of the screen and the selected item
+      // is close to 0.
+      final double scrollOffset = preferredMenuHeight > maxMenuHeight ? math.max(0.0, selectedItemOffset - (buttonTop - menuTop)) : 0.0;
       scrollController = ScrollController(initialScrollOffset: scrollOffset);
     }
 
