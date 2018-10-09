@@ -49,9 +49,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
       } else {
         resolve(GestureDisposition.rejected);
       }
-    }
-
-    else if (event is PointerDownEvent) {
+    } else if (event is PointerDownEvent) {
       // the first touch, initialize the  flag with false
       _longPressAccepted = false;
     }
