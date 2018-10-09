@@ -2,25 +2,63 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//third_party/dart/utils/application_snapshot.gni")
+if (is_fuchsia_host || is_fuchsia) {
+  import("//build/dart/dart_library.gni")
+  import("//build/dart/dart_tool.gni")
 
-application_snapshot("frontend_server") {
-  main_dart = "bin/starter.dart"
-  deps = [
-    "$flutter_root/lib/snapshot:kernel_platform_files",
-  ]
-  dot_packages = rebase_path(".packages")
-  flutter_patched_sdk = rebase_path("$root_out_dir/flutter_patched_sdk")
-  training_args = [ "--train", "--sdk-root=$flutter_patched_sdk" ]
+  dart_library("frontend_server") {
+    disable_analysis = true
+    package_name = "frontend_server"
 
-  frontend_server_files = exec_script("//third_party/dart/tools/list_dart_files.py",
-     [ "absolute", rebase_path("."), ], "list lines")
+    sources = [
+      "server.dart",
+    ]
 
-  frontend_server_files += exec_script("//third_party/dart/tools/list_dart_files.py",
-     [ "absolute", rebase_path("../flutter_kernel_transformers"), ], "list lines")
+    deps = [
+      "//third_party/dart/pkg/build_integration",
+      "//third_party/dart/pkg/front_end",
+      "//third_party/dart/pkg/kernel",
+      "//third_party/dart/pkg/vm",
+      "//third_party/dart-pkg/pub/args",
+      "//third_party/dart-pkg/pub/path",
+      "//third_party/dart-pkg/pub/usage",
+      "//third_party/flutter/flutter_kernel_transformers"
+    ]
+  }
 
-  frontend_server_files += exec_script("//third_party/dart/tools/list_dart_files.py",
-     [ "absolute", rebase_path("../../third_party/dart/pkg"), ], "list lines")
+  dart_tool("frontend_server_tool") {
+    main_dart = "bin/starter.dart"
+    source_dir = "."
+    disable_analysis = true
+    output_name = "frontend_server"
 
-  inputs = frontend_server_files
+    sources = []
+
+    deps = [
+      ":frontend_server",
+    ]
+  }
+} else {
+  import("//third_party/dart/utils/application_snapshot.gni")
+
+  application_snapshot("frontend_server") {
+    main_dart = "bin/starter.dart"
+    deps = [
+      "$flutter_root/lib/snapshot:kernel_platform_files",
+    ]
+    dot_packages = rebase_path(".packages")
+    flutter_patched_sdk = rebase_path("$root_out_dir/flutter_patched_sdk")
+    training_args = [ "--train", "--sdk-root=$flutter_patched_sdk" ]
+
+    frontend_server_files = exec_script("//third_party/dart/tools/list_dart_files.py",
+      [ "absolute", rebase_path("."), ], "list lines")
+
+    frontend_server_files += exec_script("//third_party/dart/tools/list_dart_files.py",
+      [ "absolute", rebase_path("../flutter_kernel_transformers"), ], "list lines")
+
+    frontend_server_files += exec_script("//third_party/dart/tools/list_dart_files.py",
+      [ "absolute", rebase_path("../../third_party/dart/pkg"), ], "list lines")
+
+    inputs = frontend_server_files
+  }
 }
