@@ -18,7 +18,6 @@ import 'globals.dart';
 const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
-String get defaultSnapshotPath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin');
 String get defaultDepfilePath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 String get defaultApplicationKernelPath => fs.path.join(getBuildDirectory(), 'app.dill');
 const String defaultPrivateKeyPath = 'privatekey.der';
@@ -27,15 +26,12 @@ const String _kKernelKey = 'kernel_blob.bin';
 const String _kVMSnapshotData = 'vm_snapshot_data';
 const String _kIsolateSnapshotData = 'isolate_snapshot_data';
 const String _kIsolateSnapshotInstr = 'isolate_snapshot_instr';
-const String _kDylibKey = 'libapp.so';
-const String _kPlatformKernelKey = 'platform_strong.dill';
 
 Future<void> build({
   TargetPlatform platform,
   BuildMode buildMode,
   String mainPath = defaultMainPath,
   String manifestPath = defaultManifestPath,
-  String snapshotPath,
   String applicationKernelFilePath,
   String depfilePath,
   String privateKeyPath = defaultPrivateKeyPath,
@@ -51,7 +47,6 @@ Future<void> build({
   List<String> fileSystemRoots,
   String fileSystemScheme,
 }) async {
-  snapshotPath ??= defaultSnapshotPath;
   depfilePath ??= defaultDepfilePath;
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
@@ -150,7 +145,6 @@ Future<void> assemble({
   BuildMode buildMode,
   AssetBundle assetBundle,
   DevFSContent kernelContent,
-  File dylibFile,
   String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
   String compilationTraceFilePath,
@@ -168,17 +162,13 @@ Future<void> assemble({
       assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
       assetEntries[_kIsolateSnapshotInstr] = DevFSFileContent(fs.file(isolateSnapshotInstr));
     } else {
-      final String platformKernelDill = artifacts.getArtifactPath(Artifact.platformKernelDill);
       final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, null, buildMode);
       final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, null, buildMode);
       assetEntries[_kKernelKey] = kernelContent;
-      assetEntries[_kPlatformKernelKey] = DevFSFileContent(fs.file(platformKernelDill));
       assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
       assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
     }
   }
-  if (dylibFile != null)
-    assetEntries[_kDylibKey] = DevFSFileContent(dylibFile);
 
   printTrace('Writing asset files to $assetDirPath');
   ensureDirectoryExists(assetDirPath);
