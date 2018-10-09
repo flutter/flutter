@@ -92,9 +92,7 @@ class DevFSFileContent extends DevFSContent {
       }
     }
     final FileStat fileStat = file.statSync();
-    _fileStat = fileStat.type == FileSystemEntityType.notFound
-      ? _fileStat = null
-      : _fileStat = fileStat;
+    _fileStat = fileStat.type == FileSystemEntityType.notFound ? null : fileStat;
     if (_fileStat != null && _fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
