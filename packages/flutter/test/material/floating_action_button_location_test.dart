@@ -74,47 +74,151 @@ void main() {
 
     });
 
-    testWidgets('interrupts in-progress animations without jumps', (WidgetTester tester) async {
+    group('interrupts in-progress animations without jumps', () {
       final _GeometryListener geometryListener = new _GeometryListener();
       ScaffoldGeometry geometry;
       _GeometryListenerState listenerState;
       Size previousRect;
-      // The maximum amounts we expect the fab width and height to change during one step of a transition.
+      double previousRotation;
+      
+      // The maximum amounts we expect the fab width and height to change
+      // during one step of a transition.
       const double maxDeltaWidth = 12.0;
       const double maxDeltaHeight = 12.0;
-      // Measure the delta in width and height of the fab, and check that it never grows
-      // by more than the expected maximum deltas.
-      void check() {
-        geometry = listenerState.cache.value;
-        final Size currentRect = geometry.floatingActionButtonArea?.size;
-        // Measure the delta in width and height of the rect, and check that it never grows
-        // by more than a safe amount.
-        if (previousRect != null && currentRect != null) {
-          final double deltaWidth = currentRect.width - previousRect.width;
-          final double deltaHeight = currentRect.height - previousRect.height;
-          expect(deltaWidth.abs(), lessThanOrEqualTo(maxDeltaWidth), reason: "The Floating Action Button's width should not change faster than $maxDeltaWidth per animation step.");
-          expect(deltaHeight.abs(), lessThanOrEqualTo(maxDeltaHeight), reason: "The Floating Action Button's width should not change faster than $maxDeltaHeight per animation step.");
+
+      // The maximum amounts we expect the fab icon to rotate during one step
+      // of a transition.
+      const double maxDeltaRotation = 0.125;
+
+      // We'll listen to the Scaffold's geometry for any 'jumps' to detect
+      // changes in the size and rotation of the fab.
+      void setupListener(WidgetTester tester) {
+        // Measure the delta in width and height of the fab, and check that it never grows
+        // by more than the expected maximum deltas.
+        void check() {
+          geometry = listenerState.cache.value;
+          final Size currentRect = geometry.floatingActionButtonArea?.size;
+          // Measure the delta in width and height of the rect, and check that it never grows
+          // by more than a safe amount.
+          if (previousRect != null && currentRect != null) {
+            final double deltaWidth = currentRect.width - previousRect.width;
+            final double deltaHeight = currentRect.height - previousRect.height;
+            expect(deltaWidth.abs(), lessThanOrEqualTo(maxDeltaWidth), reason: "The Floating Action Button's width should not change faster than $maxDeltaWidth per animation step.");
+            expect(deltaHeight.abs(), lessThanOrEqualTo(maxDeltaHeight), reason: "The Floating Action Button's width should not change faster than $maxDeltaHeight per animation step.");
+          }
+          previousRect = currentRect;
+
+          // Measure the delta in rotation of the rect.
+          // Check that it never grows by more than a safe amount.
+          final RotationTransition rotationTransition = tester.widget(
+            find.byType(RotationTransition),
+          );
+          final double currentRotation = rotationTransition?.turns?.value;
+          if (previousRotation != null && currentRotation != null) {
+            final double deltaRotation = currentRotation - previousRotation;
+            expect(
+              deltaRotation.abs(), 
+              lessThanOrEqualTo(maxDeltaRotation), 
+              reason: "The Floating Action Button's rotation should not change "
+                  'faster than $maxDeltaRotation per animation step.',
+            );
+          }
+          previousRotation = currentRotation;
         }
-        previousRect = currentRect;
+
+        listenerState = tester.state(find.byType(_GeometryListener));
+        listenerState.geometryListenable.addListener(check);
       }
 
-      // We'll listen to the Scaffold's geometry for any 'jumps' to a size of 1 to detect changes in the size and rotation of the fab.
-      // Creating a scaffold with the fab at endFloat
-      await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
+      testWidgets('Moving the fab to centerFloat', (WidgetTester tester) async {
+        // Creating a scaffold with the fab at endFloat
+        await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
+        setupListener(tester);
 
-      listenerState = tester.state(find.byType(_GeometryListener));
-      listenerState.geometryListenable.addListener(check);
+        // Moving the fab to centerFloat'
+        await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
+        await tester.pumpAndSettle();
+      });
 
-      // Moving the fab to centerFloat'
-      await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
-      await tester.pumpAndSettle();
+      testWidgets('Interrupting motion towards the StartTop location.', (WidgetTester tester) async {
+        await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
+        setupListener(tester);
 
-      // Moving the fab to the top start after finishing the previous motion
-      await tester.pumpWidget(buildFrame(location: const _StartTopFloatingActionButtonLocation(), listener: geometryListener));
+        // Moving the fab to the top start after finishing the previous motion
+        await tester.pumpWidget(buildFrame(location: const _StartTopFloatingActionButtonLocation(), listener: geometryListener));
+        await tester.pump(kFloatingActionButtonSegue ~/ 2);
 
-      // Interrupting motion to move to the end float
-      await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
-      await tester.pumpAndSettle();
+        // Interrupting motion to move to the end float
+        await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
+        await tester.pumpAndSettle();
+      });
+
+      testWidgets('Interrupting motion towards the StartTop location.', (WidgetTester tester) async {
+        await tester.pumpWidget(buildFrame(location: const _StartTopFloatingActionButtonLocation(), listener: geometryListener));
+        setupListener(tester);
+
+        // Interrupting motion to move to the end float
+        await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
+        await tester.pump(kFloatingActionButtonSegue ~/ 2);
+        
+        // Interrupting motion to remove the fab.
+        await tester.pumpWidget(
+          buildFrame(
+            fab: null,
+            location: FloatingActionButtonLocation.endFloat,
+            listener: geometryListener,
+          ),
+        );
+        await tester.pumpAndSettle();
+      });
+
+      testWidgets('Interrupting entrance of a new fab.', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildFrame(
+            fab: null,
+            location: FloatingActionButtonLocation.endFloat,
+            listener: geometryListener,
+          ),
+        );
+        setupListener(tester);
+
+        // Bringing in a new fab.
+        await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
+        await tester.pump(kFloatingActionButtonSegue ~/ 2);
+
+        // Interrupting motion to move the fab.
+        await tester.pumpWidget(
+          buildFrame(
+            location: FloatingActionButtonLocation.endFloat,
+            listener: geometryListener,
+          ),
+        );
+        await tester.pumpAndSettle();
+      });
+
+      testWidgets('Interrupting the exit of the fab.', (WidgetTester tester) async {
+        await tester.pumpWidget(buildFrame(fab: null, location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
+        setupListener(tester);
+
+        // Removing the fab.
+        await tester.pumpWidget(
+          buildFrame(
+            fab: null,
+            location: FloatingActionButtonLocation.endFloat,
+            listener: geometryListener,
+          ),
+        );
+        await tester.pump(kFloatingActionButtonSegue ~/ 2);
+
+        // Interrupting motion to move the fab.
+        await tester.pumpWidget(
+          buildFrame(
+            location: FloatingActionButtonLocation.centerFloat,
+            listener: geometryListener,
+          ),
+        );
+        await tester.pumpAndSettle();
+      });
     });
   });
 
