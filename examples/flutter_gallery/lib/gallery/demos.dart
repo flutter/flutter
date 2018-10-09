@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gallery/demo/shrine/app.dart';
 
 import '../demo/all.dart';
 import 'icons.dart';
@@ -93,7 +94,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       icon: GalleryIcons.shrine,
       category: _kDemos,
       routeName: ShrineDemo.routeName,
-      buildRoute: (BuildContext context) => ShrineDemo(),
+      buildRoute: (BuildContext context) => ShrineApp(),
     ),
     GalleryDemo(
       title: 'Contact profile',
