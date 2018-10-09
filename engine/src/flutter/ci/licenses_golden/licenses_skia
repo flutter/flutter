@@ -1,4 +1,4 @@
-Signature: 3ea6a5469cbb3993666d62c1ea1dd496
+Signature: 92e03111bad096c7328ae95d608a41ed
 
 UNUSED LICENSES:
 
@@ -1582,6 +1582,8 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlResourceProvider.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlSampler.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlSampler.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlStencilAttachment.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlStencilAttachment.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTextureRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTextureRenderTarget.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUniformHandler.h
@@ -1623,6 +1625,7 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLAppendStage.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.cpp
 FILE: ../../../third_party/skia/src/utils/Sk3D.cpp
 FILE: ../../../third_party/skia/src/utils/SkAnimCodecPlayer.cpp
+FILE: ../../../third_party/skia/src/utils/SkCallableTraits.h
 FILE: ../../../third_party/skia/src/utils/SkJSON.cpp
 FILE: ../../../third_party/skia/src/utils/SkJSON.h
 FILE: ../../../third_party/skia/src/utils/mac/SkUniqueCFRef.h
@@ -2015,9 +2018,11 @@ FILE: ../../../third_party/skia/docs/status.json
 FILE: ../../../third_party/skia/docs/undocumented.bmh
 FILE: ../../../third_party/skia/docs/usingBookmaker.bmh
 FILE: ../../../third_party/skia/experimental/canvaskit/canvas-kit/example.html
+FILE: ../../../third_party/skia/experimental/canvaskit/canvas-kit/package.json
 FILE: ../../../third_party/skia/experimental/canvaskit/externs.js
 FILE: ../../../third_party/skia/experimental/canvaskit/helper.js
 FILE: ../../../third_party/skia/experimental/canvaskit/interface.js
+FILE: ../../../third_party/skia/experimental/canvaskit/package.json
 FILE: ../../../third_party/skia/experimental/docs/animationCommon.js
 FILE: ../../../third_party/skia/experimental/docs/backend.js
 FILE: ../../../third_party/skia/experimental/docs/canvasBackend.js
@@ -2065,8 +2070,6 @@ FILE: ../../../third_party/skia/infra/bots/assets/win_toolchain_2015/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_vulkan_sdk/VERSION
 FILE: ../../../third_party/skia/infra/bots/calmbench.isolate
 FILE: ../../../third_party/skia/infra/bots/cfg.json
-FILE: ../../../third_party/skia/infra/bots/ct/blacklists/get_images_from_skps_100k_c37e844a6f8708-eee762104c75bd.json
-FILE: ../../../third_party/skia/infra/bots/ct/blacklists/get_images_from_skps_100k_fad657e-276e633.json
 FILE: ../../../third_party/skia/infra/bots/empty.isolate
 FILE: ../../../third_party/skia/infra/bots/infrabots.isolate
 FILE: ../../../third_party/skia/infra/bots/ios_bin.isolate
@@ -2095,7 +2098,9 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Release-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-asmjs-Debug-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-asmjs-Release-PathKit.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-wasm-Debug-CanvasKit.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-wasm-Debug-PathKit.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-wasm-Release-CanvasKit.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-wasm-Release-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-GCC-arm-Release-Chromecast.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-GCC-loongson3a-Release.json
@@ -2125,8 +2130,6 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/flutter_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/parent_revision_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/trybot.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/ct/examples/full.expected/failed_gsutil.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/ct/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/doxygen/examples/full.expected/doxygen.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/env/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Perf-Android-Clang-GalaxyS7_G930FD-GPU-MaliT880-arm64-Debug-All-Android.json
@@ -2164,30 +2167,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/gsutil/examples/full.e
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/gsutil/examples/full.expected/failed_one_upload.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/gsutil/examples/full.expected/gsutil_tests.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/infra/examples/full.expected/infra_tests.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/always-use-exparchive.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/basic.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/discover.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/exparchive-batch-bmiss.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/exparchive-batch-emiss.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/exparchive-batch.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/exparchive-miss.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/exparchive-multi-miss.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/exparchive-multi.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/exparchive.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/extra.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/missing.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/none.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/run/examples/full.expected/test.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/skia_swarming/examples/full.expected/test.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/swarming/examples/full.expected/basic.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/swarming/examples/full.expected/show_isolated_out_in_collect_step.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/swarming/examples/full.expected/show_shards_in_collect_step.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/swarming/examples/full.expected/swarming_expired_new.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/swarming/examples/full.expected/swarming_expired_old.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/swarming/examples/full.expected/swarming_timeout_new.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/swarming/examples/full.expected/swarming_timeout_old.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/swarming/examples/full.expected/trybot.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/swarming_client/examples/full.expected/basic.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Build-Debian9-Clang-x86_64-Release-SKNX_NO_SIMD.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Housekeeper-Weekly-RecreateSKPs.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/win_test.json
@@ -2213,20 +2193,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/compute_buildstats.expected/normal_bot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compute_buildstats.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compute_test.expected/Test-Debian9-Clang-NUC7i5BNK-GPU-IntelIris640-x86_64-Debug-All-OpenCL.json
-FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_10k_SKPs_UnknownBuilder.json
-FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_CPU_BENCH_10k_SKPs.json
-FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_DM_100k_SKPs.json
-FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_DM_10k_SKPs.json
-FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_DM_10k_SKPs_Trybot.json
-FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_DM_1m_SKPs.json
-FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_DM_1m_SKPs_2slaves_failure.json
-FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_DM_1m_SKPs_slave3_failure.json
-FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_DM_SKPs_UnknownBuilder.json
-FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_GPU_BENCH_10k_SKPs.json
-FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_GPU_BENCH_1k_SKPs.json
-FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_IMG_DECODE_100k_SKPs.json
-FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_IMG_DECODE_10k_SKPs.json
-FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_IMG_DECODE_10k_SKPs_Trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/housekeeper.expected/Housekeeper-PerCommit-Trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/housekeeper.expected/Housekeeper-PerCommit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/infra.expected/infra_tests.json
@@ -5365,41 +5331,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/infra/bots/ct/ct_skps.isolate + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/infra/bots/ct/ct_skps.isolate
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2015 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skia
 ORIGIN: ../../../third_party/skia/infra/bots/gen_tasks.go + ../../../LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/infra/bots/gen_tasks.go
@@ -6076,4 +6007,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ====================================================================================================
-Total license count: 54
+Total license count: 53
