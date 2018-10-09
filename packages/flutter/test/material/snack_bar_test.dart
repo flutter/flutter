@@ -662,4 +662,32 @@ void main() {
     expect(find.text('test'), findsNothing);
   });
 
+  testWidgets('Snackbar asserts if passed a null duration', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Text(nonconst('hello')),
+                  duration: null,
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+                key: tapTarget
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byKey(tapTarget));
+    expect(tester.takeException(), isNotNull);
+  });
 }
