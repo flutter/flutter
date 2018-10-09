@@ -428,13 +428,9 @@ config("compiler") {
       "-Wl,--no-undefined",
       "-Wl,--exclude-libs,ALL",
       "-fuse-ld=lld",
+      # Enable identical code folding to reduce size.
+      "-Wl,--icf=all",
     ]
-    if (current_cpu == "arm") {
-      ldflags += [
-        # Enable identical code folding to reduce size.
-        "-Wl,--icf=all",
-      ]
-    }
 
     if (is_clang) {
       if (current_cpu == "arm") {
