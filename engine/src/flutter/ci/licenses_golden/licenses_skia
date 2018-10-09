@@ -1,4 +1,4 @@
-Signature: 92e03111bad096c7328ae95d608a41ed
+Signature: a8dd4c7419fbae97e5aaa22a1f9843a5
 
 UNUSED LICENSES:
 
@@ -1008,7 +1008,6 @@ FILE: ../../../third_party/skia/src/core/SkRecordedDrawable.cpp
 FILE: ../../../third_party/skia/src/core/SkRecordedDrawable.h
 FILE: ../../../third_party/skia/src/core/SkScaleToSides.h
 FILE: ../../../third_party/skia/src/core/SkScopeExit.h
-FILE: ../../../third_party/skia/src/core/SkSinglyLinkedList.h
 FILE: ../../../third_party/skia/src/core/SkSpecialImage.cpp
 FILE: ../../../third_party/skia/src/core/SkSpecialImage.h
 FILE: ../../../third_party/skia/src/core/SkSpecialSurface.cpp
@@ -2039,6 +2038,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_windows/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_sdk_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/armhf_sysroot/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/bloaty/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/cast_toolchain/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/chromebook_arm_gles/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/chromebook_x86_64_gles/VERSION
