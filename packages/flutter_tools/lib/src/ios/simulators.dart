@@ -120,22 +120,44 @@ class SimControl {
   }
 
   Future<RunResult> install(String deviceId, String appPath) {
-    return runCheckedAsync(<String>[_xcrunPath, 'simctl', 'install', deviceId, appPath]);
+    Future<RunResult> result;
+    try {
+      result = runCheckedAsync(<String>[_xcrunPath, 'simctl', 'install', deviceId, appPath]);
+    } on ProcessException catch (exception) {
+      throwToolExit('Unable to install $appPath on $deviceId:\n$exception');
+    }
+    return result;
   }
 
   Future<RunResult> uninstall(String deviceId, String appId) {
-    return runCheckedAsync(<String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId]);
+    Future<RunResult> result;
+    try {
+      result = runCheckedAsync(<String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId]);
+    } on ProcessException catch (exception) {
+      throwToolExit('Unable to uninstall $appId from $deviceId:\n$exception');
+    }
+    return result;
   }
 
   Future<RunResult> launch(String deviceId, String appIdentifier, [List<String> launchArgs]) {
     final List<String> args = <String>[_xcrunPath, 'simctl', 'launch', deviceId, appIdentifier];
     if (launchArgs != null)
       args.addAll(launchArgs);
-    return runCheckedAsync(args);
+    Future<RunResult> result;
+    try {
+      result = runCheckedAsync(args);
+    } on ProcessException catch (exception) {
+      throwToolExit('Unable to launch $appIdentifier on $deviceId:\n$exception');
+    }
+    return result;
   }
 
   Future<void> takeScreenshot(String deviceId, String outputPath) async {
-    await runCheckedAsync(<String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath]);
+    try {
+      await runCheckedAsync(<String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath]);
+    } on ProcessException catch (exception) {
+      throwToolExit('Unable to take screenshot of $deviceId:\n$exception');
+    }
   }
 }
 
