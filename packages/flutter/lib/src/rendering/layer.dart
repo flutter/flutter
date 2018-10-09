@@ -145,7 +145,17 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     // of A has changed so A is dirty. This contradicts that this layer's
     // subtree is not dirty.
     if (!_isSubtreeDirty && _engineLayer != null) {
-      print('add retained layer!!!'); // TODO TEST
+      // TODO TEST
+//      assert((){
+//        if (this is OffsetLayer) {
+//          print('add retained OffsetLayer!!!');
+//        } else if (this is PhysicalModelLayer) {
+//          print('add retained PhysicalLayer!!!');
+//        } else {
+//          print('add retained layer!!!');
+//        }
+//        return true;
+//      }());
       builder.addRetained(_engineLayer);
       return;
     }

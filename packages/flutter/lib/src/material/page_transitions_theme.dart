@@ -37,9 +37,11 @@ class _FadeUpwardsPageTransition extends StatelessWidget {
     return SlideTransition(
       position: _positionAnimation,
       // TODO(ianh): tell the transform to be un-transformed for hit testing
-      child: FadeTransition(
-        opacity: _opacityAnimation,
-        child: child,
+      child: RepaintBoundary(
+        child: FadeTransition(
+          opacity: _opacityAnimation,
+          child: child,
+        ),
       ),
     );
   }
