@@ -70,6 +70,7 @@ void tests({ @required bool impliedMode }) {
         child: ListView(
           addAutomaticKeepAlives: impliedMode,
           addRepaintBoundaries: impliedMode,
+          addSemanticIndexes: false,
           itemExtent: 12.3, // about 50 widgets visible
           cacheExtent: 0.0,
           children: generateList(const Placeholder(), impliedMode: impliedMode),
@@ -117,6 +118,7 @@ void tests({ @required bool impliedMode }) {
         child: ListView(
           addAutomaticKeepAlives: impliedMode,
           addRepaintBoundaries: impliedMode,
+          addSemanticIndexes: false,
           cacheExtent: 0.0,
           children: generateList(
             Container(height: 12.3, child: const Placeholder()), // about 50 widgets visible
@@ -166,6 +168,7 @@ void tests({ @required bool impliedMode }) {
         child: GridView.count(
           addAutomaticKeepAlives: impliedMode,
           addRepaintBoundaries: impliedMode,
+          addSemanticIndexes: false,
           crossAxisCount: 2,
           childAspectRatio: 400.0 / 24.6, // about 50 widgets visible
           cacheExtent: 0.0,
@@ -222,6 +225,7 @@ void main() {
         child: ListView(
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           cacheExtent: 0.0,
           children: <Widget>[
             AutomaticKeepAlive(
@@ -305,6 +309,7 @@ void main() {
         child: ListView(
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           cacheExtent: 0.0,
           children: <Widget>[
             AutomaticKeepAlive(
@@ -360,6 +365,7 @@ void main() {
       child: ListView(
         addAutomaticKeepAlives: false,
         addRepaintBoundaries: false,
+        addSemanticIndexes: false,
         cacheExtent: 0.0,
         children: <Widget>[
           AutomaticKeepAlive(
@@ -423,6 +429,7 @@ void main() {
       child: ListView(
         addAutomaticKeepAlives: false,
         addRepaintBoundaries: false,
+        addSemanticIndexes: false,
         cacheExtent: 0.0,
         children: <Widget>[
           AutomaticKeepAlive(
@@ -468,6 +475,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
+        addSemanticIndexes: false,
         itemCount: 50,
         itemBuilder: (BuildContext context, int index){
           if (index == 0){
@@ -501,6 +509,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
+        addSemanticIndexes: false,
         itemCount: 250,
         itemBuilder: (BuildContext context, int index){
           if (index % 2 == 0){

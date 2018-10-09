@@ -16,6 +16,25 @@ export 'package:flutter/rendering.dart' show
   SliverGridDelegateWithFixedCrossAxisCount,
   SliverGridDelegateWithMaxCrossAxisExtent;
 
+// Examples can assume:
+// SliverGridDelegateWithMaxCrossAxisExtent _gridDelegate;
+
+/// A callback which produces a semantic index given a widget and the local index.
+///
+/// Return a null value to prevent a widget from receiving an index.
+///
+/// A semantic index is used to tag child semantic nodes for accessibility
+/// announcements in scroll view.
+///
+/// See also:
+///
+///  * [CustomScrollView], for an explanation of scroll semantics.
+///  * [SliverChildBuilderDelegate], for an explanation of how this is used to
+///    generate indexes.
+typedef SemanticIndexCallback = int Function(Widget widget, int localIndex);
+
+int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
+
 /// A delegate that supplies children for slivers.
 ///
 /// Many slivers lazily construct their box children to avoid creating more
@@ -188,10 +207,96 @@ abstract class SliverChildDelegate {
 /// default) and in [RepaintBoundary] widgets if [addRepaintBoundaries] is true
 /// (also the default).
 ///
+/// ## Accessibility
+///
+/// The [CustomScrollView] requires that its semantic children are annotated
+/// using [IndexedSemantics]. This is done by default in the delegate with
+/// the `addSemanticIndexes` parameter set to true.
+///
+/// If multiple delegates are used in a single scroll view, then the indexes
+/// will not be correct by default. The `semanticIndexOffset` can be used to
+/// offset the semantic indexes of each delegate so that the indexes are
+/// monotonically increasing. For example, if a scroll view contains two
+/// delegates where the first has 10 children contributing semantics, then the
+/// second delegate should offset its children by 10.
+///
+/// ## Sample code
+///
+/// This sample code shows how to use `semanticIndexOffset` to handle multiple
+/// delegates in a single scroll view.
+///
+/// ```dart
+/// CustomScrollView(
+///   semanticChildCount: 4,
+///   slivers: <Widget>[
+///     SliverGrid(
+///       gridDelegate: _gridDelegate,
+///       delegate: SliverChildBuilderDelegate(
+///         (BuildContext context, int index) {
+///            return Text('...');
+///          },
+///          childCount: 2,
+///        ),
+///      ),
+///     SliverGrid(
+///       gridDelegate: _gridDelegate,
+///       delegate: SliverChildBuilderDelegate(
+///         (BuildContext context, int index) {
+///            return Text('...');
+///          },
+///          childCount: 2,
+///          semanticIndexOffset: 2,
+///        ),
+///      ),
+///   ],
+/// )
+/// ```
+///
+/// In certain cases, only a subset of child widgets should be annotated
+/// with a semantic index. For example, in [new ListView.separated()] the
+/// separators do not have an index assocaited with them. This is done by
+/// providing a `semanticIndexCallback` which returns null for separators
+/// indexes and rounds the non-separator indexes down by half.
+///
+/// ## Sample code
+///
+/// This sample code shows how to use `semanticIndexCallback` to handle
+/// annotating a subset of child nodes with a semantic index. There is
+/// a [Spacer] widget at odd indexes which should not have a semantic
+/// index.
+///
+/// ```dart
+/// CustomScrollView(
+///   semanticChildCount: 5,
+///   slivers: <Widget>[
+///     SliverGrid(
+///       gridDelegate: _gridDelegate,
+///       delegate: SliverChildBuilderDelegate(
+///         (BuildContext context, int index) {
+///            if (index.isEven) {
+///              return Text('...');
+///            }
+///            return Spacer();
+///          },
+///          semanticIndexCallback: (Widget widget, int localIndex) {
+///            if (localIndex.isEven) {
+///              return localIndex ~/ 2;
+///            }
+///            return null;
+///          },
+///          childCount: 10,
+///        ),
+///      ),
+///   ],
+/// )
+/// ```
+///
 /// See also:
 ///
 ///  * [SliverChildListDelegate], which is a delegate that has an explicit list
 ///    of children.
+///  * [IndexedSemantics], for an example of manually annotating child nodes
+///    with semantic indexes.
 class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Creates a delegate that supplies children for slivers using the given
   /// builder callback.
@@ -203,6 +308,9 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     this.childCount,
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
+    this.addSemanticIndexes = true,
+    this.semanticIndexCallback = _kDefaultSemanticIndexCallback,
+    this.semanticIndexOffset = 0,
   }) : assert(builder != null),
        assert(addAutomaticKeepAlives != null),
        assert(addRepaintBoundaries != null);
@@ -250,6 +358,27 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Defaults to true.
   final bool addRepaintBoundaries;
 
+  /// Whether to wrap each child in an [IndexedSemantics].
+  ///
+  /// Typically, children in a scrolling container must be annotated with a
+  /// semantic index in order to generate the correct accessibility
+  /// announcements. This should only be set to false if the indexes have
+  /// already been provided by wrapping the correct child widgets in an
+  /// indexed child semantics widget.
+  ///
+  /// Defaults to true.
+  final bool addSemanticIndexes;
+
+  /// An initial offset to add to the semantic indexes generated by this widget.
+  ///
+  /// Defaults to zero.
+  final int semanticIndexOffset;
+
+  /// A [SemanticIndexCallback] which is used when [addSemanticIndexes] is true.
+  ///
+  /// Defaults to providing an index for each widget.
+  final SemanticIndexCallback semanticIndexCallback;
+
   @override
   Widget build(BuildContext context, int index) {
     assert(builder != null);
@@ -260,6 +389,11 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
       return null;
     if (addRepaintBoundaries)
       child = RepaintBoundary.wrap(child, index);
+    if (addSemanticIndexes) {
+      final int semanticIndex = semanticIndexCallback(child, index);
+      if (semanticIndex != null)
+        child = IndexedSemantics(index: semanticIndex + semanticIndexOffset, child: child);
+    }
     if (addAutomaticKeepAlives)
       child = AutomaticKeepAlive(child: child);
     return child;
@@ -297,6 +431,28 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 /// default) and in [RepaintBoundary] widgets if [addRepaintBoundaries] is true
 /// (also the default).
 ///
+/// ## Accessibility
+///
+/// The [CustomScrollView] requires that its semantic children are annotated
+/// using [IndexedSemantics]. This is done by default in the delegate with
+/// the `addSemanticIndexes` parameter set to true.
+///
+/// If multiple delegates are used in a single scroll view, then the indexes
+/// will not be correct by default. The `semanticIndexOffset` can be used to
+/// offset the semantic indexes of each delegate so that the indexes are
+/// monotonically increasing. For example, if a scroll view contains two
+/// delegates where the first has 10 children contributing semantics, then the
+/// second delegate should offset its children by 10.
+///
+/// In certain cases, only a subset of child widgets should be annotated
+/// with a semantic index. For example, in [new ListView.separated()] the
+/// separators do not have an index assocaited with them. This is done by
+/// providing a `semanticIndexCallback` which returns null for separators
+/// indexes and rounds the non-separator indexes down by half.
+///
+/// See [SliverChildBuilderDelegate] for sample code using
+/// `semanticIndexOffset` and `semanticIndexCallback`.
+///
 /// See also:
 ///
 ///  * [SliverChildBuilderDelegate], which is a delegate that uses a builder
@@ -311,6 +467,9 @@ class SliverChildListDelegate extends SliverChildDelegate {
     this.children, {
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
+    this.addSemanticIndexes = true,
+    this.semanticIndexCallback = _kDefaultSemanticIndexCallback,
+    this.semanticIndexOffset = 0,
   }) : assert(children != null),
        assert(addAutomaticKeepAlives != null),
        assert(addRepaintBoundaries != null);
@@ -340,6 +499,27 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// Defaults to true.
   final bool addRepaintBoundaries;
 
+  /// Whether to wrap each child in an [IndexedSemantics].
+  ///
+  /// Typically, children in a scrolling container must be annotated with a
+  /// semantic index in order to generate the correct accessibility
+  /// announcements. This should only be set to false if the indexes have
+  /// already been provided by wrapping the correct child widgets in an
+  /// indexed child semantics widget.
+  ///
+  /// Defaults to true.
+  final bool addSemanticIndexes;
+
+  /// An initial offset to add to the semantic indexes generated by this widget.
+  ///
+  /// Defaults to zero.
+  final int semanticIndexOffset;
+
+  /// A [SemanticIndexCallback] which is used when [addSemanticIndexes] is true.
+  ///
+  /// Defaults to providing an index for each widget.
+  final SemanticIndexCallback semanticIndexCallback;
+
   /// The widgets to display.
   final List<Widget> children;
 
@@ -352,6 +532,11 @@ class SliverChildListDelegate extends SliverChildDelegate {
     assert(child != null);
     if (addRepaintBoundaries)
       child = RepaintBoundary.wrap(child, index);
+    if (addSemanticIndexes) {
+      final int semanticIndex = semanticIndexCallback(child, index);
+      if (semanticIndex != null)
+        child = IndexedSemantics(index: semanticIndex + semanticIndexOffset, child: child);
+    }
     if (addAutomaticKeepAlives)
       child = AutomaticKeepAlive(child: child);
     return child;
