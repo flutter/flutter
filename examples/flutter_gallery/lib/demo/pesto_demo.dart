@@ -91,6 +91,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           },
         ),
         body: CustomScrollView(
+          semanticChildCount: widget.recipes.length,
           slivers: <Widget>[
             _buildAppBar(context, statusBarHeight),
             _buildBody(context, statusBarHeight),
