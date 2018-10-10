@@ -352,7 +352,7 @@ void main() {
               ),
             ],
             backgroundColor: const Color(0xFFFFFFFF), // Opaque white.
-            hideBorder: true,
+            border: null,
           ),
         ));
 
