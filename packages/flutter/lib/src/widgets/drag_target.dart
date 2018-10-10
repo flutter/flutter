@@ -423,6 +423,11 @@ class _DraggableState<T> extends State<Draggable<T>> {
 /// Represents the draggable's current details, such as whether the
 /// [DragTarget] accepted it, its [Velocity], and its [Offset].
 class DraggableDetails {
+  DraggableDetails._({
+    this.wasAccepted,
+    this.velocity,
+    this.offset});
+
   /// Determines whether the [DragTarget] accepted this draggable
   final bool wasAccepted;
 
@@ -431,11 +436,6 @@ class DraggableDetails {
 
   /// This draggable's current [Offset]
   final Offset offset;
-
-  DraggableDetails._({
-    this.wasAccepted,
-    this.velocity,
-    this.offset});
 }
 
 /// A widget that receives data when a [Draggable] widget is dropped.
