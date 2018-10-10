@@ -129,7 +129,6 @@ class TravelDestinationItem extends StatelessWidget {
               ),
               // share, explore buttons
               ButtonTheme.bar(
-                colorScheme: theme.colorScheme,
                 child: ButtonBar(
                   alignment: MainAxisAlignment.start,
                   children: <Widget>[

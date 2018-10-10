@@ -274,7 +274,6 @@ class AlertDialog extends StatelessWidget {
 
     if (actions != null) {
       children.add(ButtonTheme.bar(
-        colorScheme: Theme.of(context).colorScheme,
         child: ButtonBar(
           children: actions,
         ),
