@@ -48,7 +48,6 @@ class GenSnapshot {
     Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
-      '--await_is_keyword',
       '--causal_async_stacks',
       '--packages=$packagesPath',
     ]..addAll(additionalArgs);
