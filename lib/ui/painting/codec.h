@@ -41,7 +41,8 @@ class MultiFrameCodec : public Codec {
   Dart_Handle getNextFrame(Dart_Handle args);
 
  private:
-  MultiFrameCodec(std::unique_ptr<SkCodec> codec);
+  MultiFrameCodec(std::unique_ptr<SkCodec> codec,
+                  const float decodedCacheRatioCap);
 
   ~MultiFrameCodec() {}
 
@@ -57,9 +58,27 @@ class MultiFrameCodec : public Codec {
   const std::unique_ptr<SkCodec> codec_;
   int repetitionCount_;
   int nextFrameIndex_;
+  // The default max amount of memory to use for caching decoded animated image
+  // frames compared to total undecoded size.
+  const float decodedCacheRatioCap_;
+  size_t compressedSizeBytes_;
+  size_t decodedCacheSize_;
 
   std::vector<SkCodec::FrameInfo> frameInfos_;
-  std::vector<SkBitmap> frameBitmaps_;
+  // A struct linking the bitmap of a frame to whether it's required to render
+  // other dependent frames.
+  struct DecodedFrame {
+    std::unique_ptr<SkBitmap> bitmap_ = nullptr;
+    const bool required_;
+
+    DecodedFrame(bool required) : required_(required) {}
+  };
+
+  // A cache of previously loaded bitmaps, indexed by the frame they belong to.
+  // Always holds at least the frames marked as required for reuse by
+  // [SkCodec::getFrameInfo()]. Will cache other non-essential frames until
+  // [decodedCacheSize_] : [compressedSize_] exceeds [decodedCacheRatioCap_].
+  std::map<int, std::unique_ptr<DecodedFrame>> frameBitmaps_;
 
   FML_FRIEND_MAKE_REF_COUNTED(MultiFrameCodec);
   FML_FRIEND_REF_COUNTED_THREAD_SAFE(MultiFrameCodec);

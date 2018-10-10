@@ -86,6 +86,7 @@ static sk_sp<SkImage> DecodeImage(fml::WeakPtr<GrContext> context,
 fml::RefPtr<Codec> InitCodec(fml::WeakPtr<GrContext> context,
                              sk_sp<SkData> buffer,
                              fml::RefPtr<flow::SkiaUnrefQueue> unref_queue,
+                             const float decodedCacheRatioCap,
                              size_t trace_id) {
   TRACE_FLOW_STEP("flutter", kInitCodecTraceTag, trace_id);
   TRACE_EVENT0("blink", "InitCodec");
@@ -102,7 +103,8 @@ fml::RefPtr<Codec> InitCodec(fml::WeakPtr<GrContext> context,
     return nullptr;
   }
   if (skCodec->getFrameCount() > 1) {
-    return fml::MakeRefCounted<MultiFrameCodec>(std::move(skCodec));
+    return fml::MakeRefCounted<MultiFrameCodec>(std::move(skCodec),
+                                                decodedCacheRatioCap);
   }
   auto skImage = DecodeImage(context, buffer, trace_id);
   if (!skImage) {
@@ -120,6 +122,7 @@ fml::RefPtr<Codec> InitCodecUncompressed(
     sk_sp<SkData> buffer,
     ImageInfo image_info,
     fml::RefPtr<flow::SkiaUnrefQueue> unref_queue,
+    const float decodedCacheRatioCap,
     size_t trace_id) {
   TRACE_FLOW_STEP("flutter", kInitCodecTraceTag, trace_id);
   TRACE_EVENT0("blink", "InitCodecUncompressed");
@@ -152,14 +155,16 @@ void InitCodecAndInvokeCodecCallback(
     std::unique_ptr<DartPersistentValue> callback,
     sk_sp<SkData> buffer,
     std::unique_ptr<ImageInfo> image_info,
+    const float decodedCacheRatioCap,
     size_t trace_id) {
   fml::RefPtr<Codec> codec;
   if (image_info) {
     codec = InitCodecUncompressed(context, std::move(buffer), *image_info,
-                                  std::move(unref_queue), trace_id);
+                                  std::move(unref_queue), decodedCacheRatioCap,
+                                  trace_id);
   } else {
-    codec =
-        InitCodec(context, std::move(buffer), std::move(unref_queue), trace_id);
+    codec = InitCodec(context, std::move(buffer), std::move(unref_queue),
+                      decodedCacheRatioCap, trace_id);
   }
   ui_task_runner->PostTask(
       fml::MakeCopyable([callback = std::move(callback),
@@ -277,6 +282,9 @@ void InstantiateImageCodec(Dart_NativeArguments args) {
     }
   }
 
+  const float decodedCacheRatioCap =
+      tonic::DartConverter<float>::FromDart(Dart_GetNativeArgument(args, 3));
+
   auto buffer = SkData::MakeWithCopy(list.data(), list.num_elements());
 
   auto dart_state = UIDartState::Current();
@@ -288,11 +296,12 @@ void InstantiateImageCodec(Dart_NativeArguments args) {
        buffer = std::move(buffer), trace_id, image_info = std::move(image_info),
        ui_task_runner = task_runners.GetUITaskRunner(),
        context = dart_state->GetResourceContext(),
-       queue = UIDartState::Current()->GetSkiaUnrefQueue()]() mutable {
-        InitCodecAndInvokeCodecCallback(std::move(ui_task_runner), context,
-                                        std::move(queue), std::move(callback),
-                                        std::move(buffer),
-                                        std::move(image_info), trace_id);
+       queue = UIDartState::Current()->GetSkiaUnrefQueue(),
+       decodedCacheRatioCap]() mutable {
+        InitCodecAndInvokeCodecCallback(
+            std::move(ui_task_runner), context, std::move(queue),
+            std::move(callback), std::move(buffer), std::move(image_info),
+            decodedCacheRatioCap, trace_id);
       }));
 }
 
@@ -358,17 +367,36 @@ void Codec::dispose() {
   ClearDartWrapper();
 }
 
-MultiFrameCodec::MultiFrameCodec(std::unique_ptr<SkCodec> codec)
-    : codec_(std::move(codec)) {
+MultiFrameCodec::MultiFrameCodec(std::unique_ptr<SkCodec> codec,
+                                 const float decodedCacheRatioCap)
+    : codec_(std::move(codec)), decodedCacheRatioCap_(decodedCacheRatioCap) {
   repetitionCount_ = codec_->getRepetitionCount();
   frameInfos_ = codec_->getFrameInfo();
-  frameBitmaps_.resize(frameInfos_.size());
+  compressedSizeBytes_ = codec_->getInfo().computeMinByteSize();
+  frameBitmaps_.clear();
+  decodedCacheSize_ = 0;
+  // Initialize the frame cache, marking frames that are required for other
+  // dependent frames to render.
+  for (size_t frameIndex = 0; frameIndex < frameInfos_.size(); frameIndex++) {
+    const auto& frameInfo = frameInfos_[frameIndex];
+    if (frameInfo.fRequiredFrame != SkCodec::kNoFrame) {
+      frameBitmaps_[frameInfo.fRequiredFrame] =
+          std::make_unique<DecodedFrame>(/*required=*/true);
+    }
+    if (frameBitmaps_.count(frameIndex) < 1) {
+      frameBitmaps_[frameIndex] =
+          std::make_unique<DecodedFrame>(/*required=*/false);
+    }
+  }
   nextFrameIndex_ = 0;
 }
 
 sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage(
     fml::WeakPtr<GrContext> resourceContext) {
-  SkBitmap& bitmap = frameBitmaps_[nextFrameIndex_];
+  // Populate this bitmap from the cache if it exists
+  DecodedFrame& cacheEntry = *frameBitmaps_[nextFrameIndex_];
+  SkBitmap bitmap =
+      cacheEntry.bitmap_ != nullptr ? *cacheEntry.bitmap_ : SkBitmap();
   if (!bitmap.getPixels()) {  // We haven't decoded this frame yet
     const SkImageInfo info = codec_->getInfo().makeColorType(kN32_SkColorType);
     bitmap.allocPixels(info);
@@ -377,17 +405,16 @@ sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage(
     options.fFrameIndex = nextFrameIndex_;
     const int requiredFrame = frameInfos_[nextFrameIndex_].fRequiredFrame;
     if (requiredFrame != SkCodec::kNone) {
-      if (requiredFrame < 0 ||
-          static_cast<size_t>(requiredFrame) >= frameBitmaps_.size()) {
+      const SkBitmap* requiredBitmap =
+          frameBitmaps_[requiredFrame]->bitmap_.get();
+      if (requiredBitmap == nullptr) {
         FML_LOG(ERROR) << "Frame " << nextFrameIndex_ << " depends on frame "
-                       << requiredFrame << " which out of range (0,"
-                       << frameBitmaps_.size() << ").";
+                       << requiredFrame << " which has not been cached.";
         return NULL;
       }
-      SkBitmap& requiredBitmap = frameBitmaps_[requiredFrame];
-      // For simplicity, do not try to cache old frames
-      if (requiredBitmap.getPixels() &&
-          copy_to(&bitmap, requiredBitmap.colorType(), requiredBitmap)) {
+
+      if (requiredBitmap->getPixels() &&
+          copy_to(&bitmap, requiredBitmap->colorType(), *requiredBitmap)) {
         options.fPriorFrame = requiredFrame;
       }
     }
@@ -396,6 +423,16 @@ sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage(
                                                bitmap.rowBytes(), &options)) {
       FML_LOG(ERROR) << "Could not getPixels for frame " << nextFrameIndex_;
       return NULL;
+    }
+
+    // Cache the bitmap if this is a required frame or if we're still under our
+    // ratio cap.
+    const size_t cachedFrameSize = bitmap.computeByteSize();
+    if (cacheEntry.required_ ||
+        ((decodedCacheSize_ + cachedFrameSize) / compressedSizeBytes_) <=
+            decodedCacheRatioCap_) {
+      cacheEntry.bitmap_ = std::make_unique<SkBitmap>(bitmap);
+      decodedCacheSize_ += cachedFrameSize;
     }
   }
 
@@ -485,7 +522,7 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
 
 void Codec::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
-      {"instantiateImageCodec", InstantiateImageCodec, 3, true},
+      {"instantiateImageCodec", InstantiateImageCodec, 4, true},
   });
   natives->Register({FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
