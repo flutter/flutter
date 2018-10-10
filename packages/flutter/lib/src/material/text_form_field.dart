@@ -74,6 +74,8 @@ class TextFormField extends FormField<String> {
     bool enabled = true,
     Brightness keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
+    bool enableInteractiveCaret = true,
+    bool enableInteractiveSelection = true,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -84,6 +86,8 @@ class TextFormField extends FormField<String> {
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
+       assert(enableInteractiveCaret != null),
+       assert(enableInteractiveSelection != null),
        super(
     key: key,
     initialValue: controller != null ? controller.text : (initialValue ?? ''),
@@ -117,6 +121,8 @@ class TextFormField extends FormField<String> {
         enabled: enabled,
         scrollPadding: scrollPadding,
         keyboardAppearance: keyboardAppearance,
+        enableInteractiveCaret: enableInteractiveCaret,
+        enableInteractiveSelection: enableInteractiveSelection,
       );
     },
   );

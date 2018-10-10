@@ -88,7 +88,9 @@ class TextField extends StatefulWidget {
   /// characters may be entered, and the error counter and divider will
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
-  /// The [textAlign], [autofocus], [obscureText], and [autocorrect] arguments
+  /// The [textAlign], [autofocus], [obscureText], [autocorrect],
+  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
+  /// [enableInteractiveCaret], and [enableInteractiveSelection] arguments
   /// must not be null.
   ///
   /// See also:
@@ -121,6 +123,8 @@ class TextField extends StatefulWidget {
     this.cursorColor,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
+    this.enableInteractiveCaret = true,
+    this.enableInteractiveSelection = true,
   }) : assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
@@ -130,6 +134,8 @@ class TextField extends StatefulWidget {
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+       assert(enableInteractiveCaret != null),
+       assert(enableInteractiveSelection != null),
        super(key: key);
 
   /// Controls the text being edited.
@@ -343,6 +349,23 @@ class TextField extends StatefulWidget {
   /// Defaults to EdgeInserts.all(20.0).
   final EdgeInsets scrollPadding;
 
+  /// If true, then tapping this TextField will move the text caret.
+  ///
+  /// True by default.
+  ///
+  /// If both [enableInteractiveSelection] and [enableInteractiveCaret] are
+  /// false the caret will remain at the end of the [controller]'s text.
+  final bool enableInteractiveCaret;
+
+  /// If true, then long-pressing this TextField will select text and show the
+  /// cut/copy/paste menu.
+  ///
+  /// True by default.
+  ///
+  /// If both [enableInteractiveSelection] and [enableInteractiveCaret] are
+  /// false the caret will remain at the end of the [controller]'s text.
+  final bool enableInteractiveSelection;
+
   @override
   _TextFieldState createState() => _TextFieldState();
 
@@ -487,7 +510,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleTap() {
-    _renderEditable.handleTap();
+    if (widget.enableInteractiveCaret)
+      _renderEditable.handleTap();
     _requestKeyboard();
     _confirmCurrentSplash();
   }
@@ -497,7 +521,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleLongPress() {
-    _renderEditable.handleLongPress();
+    if (widget.enableInteractiveSelection)
+      _renderEditable.handleLongPress();
     _confirmCurrentSplash();
   }
 
@@ -567,9 +592,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
         selectionColor: themeData.textSelectionColor,
-        selectionControls: themeData.platform == TargetPlatform.iOS
-            ? cupertinoTextSelectionControls
-            : materialTextSelectionControls,
+        selectionControls: widget.enableInteractiveSelection
+          ? (themeData.platform == TargetPlatform.iOS
+             ? cupertinoTextSelectionControls
+             : materialTextSelectionControls)
+          : null,
         onChanged: widget.onChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
