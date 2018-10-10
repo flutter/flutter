@@ -51,12 +51,12 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         style: BorderStyle.solid,
       ),
     ),
-  })  : assert(items != null),
-        assert(items.length >= 2),
-        assert(currentIndex != null),
-        assert(0 <= currentIndex && currentIndex < items.length),
-        assert(iconSize != null),
-        super(key: key);
+  }) : assert(items != null),
+       assert(items.length >= 2),
+       assert(currentIndex != null),
+       assert(0 <= currentIndex && currentIndex < items.length),
+       assert(iconSize != null),
+       super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
   ///
@@ -211,7 +211,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   /// Change the active tab item's icon and title colors to active.
-  Widget _wrapActiveItem(Widget item, {@required bool active}) {
+  Widget _wrapActiveItem(Widget item, { @required bool active }) {
     if (!active)
       return item;
 

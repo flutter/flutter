@@ -21,7 +21,7 @@ import 'framework.dart';
 class BottomNavigationBarItem {
   /// Creates an item that is used with [BottomNavigationBar.items].
   ///
-  /// The argument [icon] should not be null and the argument [title] should not be null for [BottomNavigationBar] parent.
+  /// The argument [icon] should not be null and the argument [title] should not be null when used in a Material Design's [BottomNavigationBar].
   const BottomNavigationBarItem({
     @required this.icon,
     this.title,
@@ -60,7 +60,7 @@ class BottomNavigationBarItem {
   ///   * [BottomNavigationBarItem.icon], for a description of how to pair icons.
   final Widget activeIcon;
 
-  /// The title of the item.
+  /// The title of the item. If the title is not provided only the icon will be shown.
   final Widget title;
 
   /// The color of the background radial animation for material [BottomNavigationBar].

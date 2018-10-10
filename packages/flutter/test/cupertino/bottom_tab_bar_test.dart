@@ -265,8 +265,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Title of items should be nullable',
-      (WidgetTester tester) async {
+  testWidgets('Title of items should be nullable', (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(
         tester,
         MediaQuery(
@@ -278,8 +277,7 @@ void main() {
                 title: Text('Tab 1'),
               ),
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24))
-              ),
+                  icon: ImageIcon(TestImageProvider(24, 24))),
             ],
           ),
         ));
@@ -297,11 +295,15 @@ void main() {
           child: CupertinoTabBar(
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
+                icon: ImageIcon(
+                  TestImageProvider(24, 24),
+                ),
                 title: Text('Tab 1'),
               ),
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
+                icon: ImageIcon(
+                  TestImageProvider(24, 24),
+                ),
                 title: Text('Tab 2'),
               ),
             ],
@@ -310,7 +312,7 @@ void main() {
 
     final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox));
     final BoxDecoration boxDecoration = decoratedBox.decoration;
-    expect(boxDecoration.border != null, equals(true));
+    expect(boxDecoration.border, isNotNull);
 
     await pumpWidgetWithBoilerplate(
         tester,
@@ -319,11 +321,15 @@ void main() {
           child: CupertinoTabBar(
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
+                icon: ImageIcon(
+                  TestImageProvider(24, 24),
+                ),
                 title: Text('Tab 1'),
               ),
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
+                icon: ImageIcon(
+                  TestImageProvider(24, 24),
+                ),
                 title: Text('Tab 2'),
               ),
             ],
@@ -332,8 +338,10 @@ void main() {
           ),
         ));
 
-    final DecoratedBox decoratedBoxHiddenBorder = tester.widget(find.byType(DecoratedBox));
-    final BoxDecoration boxDecorationHiddenBorder = decoratedBoxHiddenBorder.decoration;
-    expect(boxDecorationHiddenBorder.border == null, equals(true));
+    final DecoratedBox decoratedBoxHiddenBorder =
+        tester.widget(find.byType(DecoratedBox));
+    final BoxDecoration boxDecorationHiddenBorder =
+        decoratedBoxHiddenBorder.decoration;
+    expect(boxDecorationHiddenBorder.border, isNull);
   });
 }
