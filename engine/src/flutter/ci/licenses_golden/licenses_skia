@@ -1,4 +1,4 @@
-Signature: efb6aaf991503977ced711cca648bc41
+Signature: eb326c1e2221d68c4673c5f81b8f019b
 
 UNUSED LICENSES:
 
@@ -4614,6 +4614,7 @@ FILE: ../../../third_party/skia/fuzz/FuzzEncoders.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzPolyUtils.cpp
 FILE: ../../../third_party/skia/include/private/GrSkSLFPFactoryCache.h
 FILE: ../../../third_party/skia/modules/pathkit/pathkit_wasm_bindings.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCoverageCountingPathRenderer_none.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 Google LLC
 
