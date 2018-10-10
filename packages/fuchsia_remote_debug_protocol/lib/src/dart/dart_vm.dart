@@ -18,7 +18,7 @@ const Duration _kRpcTimeout = Duration(seconds: 5);
 
 final Logger _log = Logger('DartVm');
 
-/// Signature of an asynchronous function for astablishing a JSON RPC-2
+/// Signature of an asynchronous function for establishing a JSON RPC-2
 /// connection to a [Uri].
 typedef RpcPeerConnectionFunction = Future<json_rpc.Peer> Function(
   Uri uri, {
