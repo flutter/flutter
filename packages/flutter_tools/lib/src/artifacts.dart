@@ -299,3 +299,87 @@ class LocalEngineArtifacts extends Artifacts {
     throw Exception('Unsupported platform $platform.');
   }
 }
+
+/// A fuchsia specific implementation of [Artifacts]
+///
+/// Certain binaries will have different locations which are not relative to
+/// a flutter tool directory.
+class FuchsiaArtifacts extends CachedArtifacts {
+  /// Create a [FuchsiaArtifacts] with the fuchsia tools in [fuchsiaTools].
+  FuchsiaArtifacts(this.fuchsiaTools);
+
+  /// The directory of the fuchisa-specific artifacts.
+  final Directory fuchsiaTools;
+
+  @override
+  String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
+    platform ??= _currentHostPlatform;
+    switch (platform) {
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.fuchsia:
+        return _getHostArtifactPath(artifact, platform, mode);
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.tester:
+      case TargetPlatform.ios:
+        throw StateError('Invalid target platform: $platform');
+    }
+    assert(false, 'Invalid platform $platform.');
+    return null;
+  }
+
+  @override
+  String _getHostArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
+    switch (artifact) {
+      case Artifact.genSnapshot:
+      case Artifact.flutterTester:
+      case Artifact.vmSnapshotData:
+      case Artifact.isolateSnapshotData:
+        final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
+        final String platformDirName = getNameForTargetPlatform(platform);
+        return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform));
+      case Artifact.frontendServerSnapshotForEngineDartSdk:
+        return fs.path.join(fuchsiaTools.path, _artifactToFileName(artifact, platform));
+      case Artifact.engineDartSdkPath:
+        return dartSdkPath;
+      case Artifact.engineDartBinary:
+        return fs.path.join(dartSdkPath,'bin', _artifactToFileName(artifact));
+      case Artifact.platformKernelDill:
+        return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
+      case Artifact.platformLibrariesJson:
+        return fs.path.join(_getFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
+      case Artifact.flutterPatchedSdkPath:
+        return _getFlutterPatchedSdkPath();
+      default:
+        assert(false, 'Artifact $artifact not available for platform $platform.');
+        return null;
+    }
+  }
+
+  @override
+  String getEngineType(TargetPlatform platform, [BuildMode mode]) {
+    final String engineDir = cache.getArtifactDirectory('engine').path;
+    final String platformName = getNameForTargetPlatform(platform);
+    switch (platform) {
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.tester:
+        assert(mode == null, 'Platform $platform does not support different build modes.');
+        return fs.path.join(engineDir, platformName);
+      case TargetPlatform.ios:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+      case TargetPlatform.windows_x64:
+        throw StateError('Invalid target platform $platform.');
+    }
+    assert(false, 'Invalid platform $platform.');
+    return null;
+  }
+}
