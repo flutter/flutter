@@ -302,7 +302,8 @@ class LocalEngineArtifacts extends Artifacts {
 
 /// An implementation of [Artifacts] that provides individual overrides.
 ///
-/// If an artifact is no provided, the lookup delegates to the parent.
+/// If an artifact is not provided, the lookup delegates to the parent.
+/// Currently only allows overriding the location of the [frontendServer].
 class OverrideArtifacts implements Artifacts {
   /// Creates a new [OverrideArtifacts].
   ///
