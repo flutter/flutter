@@ -503,8 +503,8 @@ class GradleProject {
   String _productFlavorFor(BuildInfo buildInfo) {
     if (buildInfo.flavor == null)
       return productFlavors.isEmpty ? '' : null;
-    else if (productFlavors.contains(buildInfo.flavor.toLowerCase()))
-      return buildInfo.flavor.toLowerCase();
+    else if (productFlavors.contains(buildInfo.flavor))
+      return buildInfo.flavor;
     else
       return null;
   }
