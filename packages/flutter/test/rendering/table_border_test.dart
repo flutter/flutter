@@ -28,7 +28,7 @@ void main() {
   });
 
   test('TableBorder.all constructor', () {
-    final TableBorder border2 = new TableBorder.all(
+    final TableBorder border2 = TableBorder.all(
       width: 2.0,
       color: const Color(0xFF00FFFF),
     );
@@ -40,11 +40,11 @@ void main() {
     expect(border2.verticalInside, const BorderSide(width: 2.0, color: Color(0xFF00FFFF)));
     expect(border2.dimensions, const EdgeInsets.symmetric(horizontal: 2.0, vertical: 2.0));
     expect(border2.isUniform, isTrue);
-    expect(border2.scale(0.5), new TableBorder.all(color: const Color(0xFF00FFFF)));
+    expect(border2.scale(0.5), TableBorder.all(color: const Color(0xFF00FFFF)));
   });
 
   test('TableBorder.symmetric constructor', () {
-    final TableBorder border3 = new TableBorder.symmetric(
+    final TableBorder border3 = TableBorder.symmetric(
       inside: const BorderSide(width: 3.0),
       outside: const BorderSide(color: Color(0xFFFF0000)),
     );
@@ -56,7 +56,7 @@ void main() {
     expect(border3.verticalInside, const BorderSide(width: 3.0));
     expect(border3.dimensions, const EdgeInsets.symmetric(horizontal: 1.0, vertical: 1.0));
     expect(border3.isUniform, isFalse);
-    expect(border3.scale(0.0), new TableBorder.symmetric(
+    expect(border3.scale(0.0), TableBorder.symmetric(
       inside: const BorderSide(width: 0.0, style: BorderStyle.none),
       outside: const BorderSide(width: 0.0, color: Color(0xFFFF0000), style: BorderStyle.none),
     ));
@@ -79,7 +79,7 @@ void main() {
     );
     expect(tableA.isUniform, isFalse);
     expect(tableA.dimensions, const EdgeInsets.fromLTRB(4.0, 1.0, 2.0, 3.0));
-    final TableBorder tableB = new TableBorder(
+    final TableBorder tableB = TableBorder(
       top: side1.scale(2.0),
       right: side2.scale(2.0),
       bottom: side3.scale(2.0),
@@ -89,7 +89,7 @@ void main() {
     );
     expect(tableB.isUniform, isFalse);
     expect(tableB.dimensions, const EdgeInsets.fromLTRB(4.0, 1.0, 2.0, 3.0) * 2.0);
-    final TableBorder tableC = new TableBorder(
+    final TableBorder tableC = TableBorder(
       top: side1.scale(3.0),
       right: side2.scale(3.0),
       bottom: side3.scale(3.0),
@@ -108,8 +108,8 @@ void main() {
   });
 
   test('TableBorder.lerp with nulls', () {
-    final TableBorder table2 = new TableBorder.all(width: 2.0);
-    final TableBorder table1 = new TableBorder.all(width: 1.0);
+    final TableBorder table2 = TableBorder.all(width: 2.0);
+    final TableBorder table1 = TableBorder.all(width: 1.0);
     expect(TableBorder.lerp(table2, null, 0.5), table1);
     expect(TableBorder.lerp(null, table2, 0.5), table1);
     expect(TableBorder.lerp(null, null, 0.5), null);

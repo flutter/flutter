@@ -126,7 +126,7 @@ class Ink extends StatefulWidget {
          'Cannot provide both a color and a decoration\n'
          'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
        ),
-       decoration = decoration ?? (color != null ? new BoxDecoration(color: color) : null),
+       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
        super(key: key);
 
   /// Creates a widget that shows an image (obtained from an [ImageProvider]) on
@@ -160,8 +160,8 @@ class Ink extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       decoration = new BoxDecoration(
-         image: new DecorationImage(
+       decoration = BoxDecoration(
+         image: DecorationImage(
            image: image,
            colorFilter: colorFilter,
            fit: fit,
@@ -215,12 +215,12 @@ class Ink extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
   }
 
   @override
-  _InkState createState() => new _InkState();
+  _InkState createState() => _InkState();
 }
 
 class _InkState extends State<Ink> {
@@ -239,7 +239,7 @@ class _InkState extends State<Ink> {
 
   Widget _build(BuildContext context, BoxConstraints constraints) {
     if (_ink == null) {
-      _ink = new InkDecoration(
+      _ink = InkDecoration(
         decoration: widget.decoration,
         configuration: createLocalImageConfiguration(context),
         controller: Material.of(context),
@@ -253,18 +253,18 @@ class _InkState extends State<Ink> {
     Widget current = widget.child;
     final EdgeInsetsGeometry effectivePadding = widget._paddingIncludingDecoration;
     if (effectivePadding != null)
-      current = new Padding(padding: effectivePadding, child: current);
+      current = Padding(padding: effectivePadding, child: current);
     return current;
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    Widget result = new LayoutBuilder(
+    Widget result = LayoutBuilder(
       builder: _build,
     );
     if (widget.width != null || widget.height != null) {
-      result = new SizedBox(
+      result = SizedBox(
         width: widget.width,
         height: widget.height,
         child: result,

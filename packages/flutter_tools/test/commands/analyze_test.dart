@@ -17,7 +17,7 @@ void main() {
   Directory tempDir;
 
   setUp(() {
-    fs = new MemoryFileSystem();
+    fs = MemoryFileSystem();
     fs.directory(_kFlutterRoot).createSync(recursive: true);
     Cache.flutterRoot = _kFlutterRoot;
     tempDir = fs.systemTempDirectory.createTempSync('flutter_analysis_test.');

@@ -32,7 +32,7 @@ const Duration _kIndicatorScaleDuration = Duration(milliseconds: 200);
 /// finished.
 ///
 /// Used by [RefreshIndicator.onRefresh].
-typedef Future<void> RefreshCallback();
+typedef RefreshCallback = Future<void> Function();
 
 // The state machine moves through these modes only when the scrollable
 // identified by scrollableKey has been scrolled to its min or max limit.
@@ -132,7 +132,7 @@ class RefreshIndicator extends StatefulWidget {
   final ScrollNotificationPredicate notificationPredicate;
 
   @override
-  RefreshIndicatorState createState() => new RefreshIndicatorState();
+  RefreshIndicatorState createState() => RefreshIndicatorState();
 }
 
 /// Contains the state for a [RefreshIndicator]. This class can be used to
@@ -150,36 +150,32 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   bool _isIndicatorAtTop;
   double _dragOffset;
 
+  static final Animatable<double> _threeQuarterTween = Tween<double>(begin: 0.0, end: 0.75);
+  static final Animatable<double> _kDragSizeFactorLimitTween = Tween<double>(begin: 0.0, end: _kDragSizeFactorLimit);
+  static final Animatable<double> _oneToZeroTween = Tween<double>(begin: 1.0, end: 0.0);
+
   @override
   void initState() {
     super.initState();
-    _positionController = new AnimationController(vsync: this);
-    _positionFactor = new Tween<double>(
-      begin: 0.0,
-      end: _kDragSizeFactorLimit,
-    ).animate(_positionController);
-    _value = new Tween<double>( // The "value" of the circular progress indicator during a drag.
-      begin: 0.0,
-      end: 0.75,
-    ).animate(_positionController);
+    _positionController = AnimationController(vsync: this);
+    _positionFactor = _positionController.drive(_kDragSizeFactorLimitTween);
+    _value = _positionController.drive(_threeQuarterTween); // The "value" of the circular progress indicator during a drag.
 
-    _scaleController = new AnimationController(vsync: this);
-    _scaleFactor = new Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(_scaleController);
+    _scaleController = AnimationController(vsync: this);
+    _scaleFactor = _scaleController.drive(_oneToZeroTween);
   }
 
   @override
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
-    _valueColor = new ColorTween(
-      begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
-      end: (widget.color ?? theme.accentColor).withOpacity(1.0)
-    ).animate(new CurvedAnimation(
-      parent: _positionController,
-      curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
-    ));
+    _valueColor = _positionController.drive(
+      ColorTween(
+        begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
+        end: (widget.color ?? theme.accentColor).withOpacity(1.0)
+      ).chain(CurveTween(
+        curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
+      )),
+    );
     super.didChangeDependencies();
   }
 
@@ -297,7 +293,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 
   // Stop showing the refresh indicator.
   Future<void> _dismiss(_RefreshIndicatorMode newMode) async {
-    await new Future<void>.value();
+    await Future<void>.value();
     // This can only be called from _show() when refreshing and
     // _handleScrollNotification in response to a ScrollEndNotification or
     // direction change.
@@ -327,7 +323,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   void _show() {
     assert(_mode != _RefreshIndicatorMode.refresh);
     assert(_mode != _RefreshIndicatorMode.snap);
-    final Completer<void> completer = new Completer<void>();
+    final Completer<void> completer = Completer<void>();
     _pendingRefreshFuture = completer.future;
     _mode = _RefreshIndicatorMode.snap;
     _positionController
@@ -343,8 +339,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           final Future<void> refreshResult = widget.onRefresh();
           assert(() {
             if (refreshResult == null)
-              FlutterError.reportError(new FlutterErrorDetails(
-                exception: new FlutterError(
+              FlutterError.reportError(FlutterErrorDetails(
+                exception: FlutterError(
                   'The onRefresh callback returned null.\n'
                   'The RefreshIndicator onRefresh callback must return a Future.'
                 ),
@@ -391,14 +387,14 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     return _pendingRefreshFuture;
   }
 
-  final GlobalKey _key = new GlobalKey();
+  final GlobalKey _key = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
-    final Widget child = new NotificationListener<ScrollNotification>(
+    final Widget child = NotificationListener<ScrollNotification>(
       key: _key,
       onNotification: _handleScrollNotification,
-      child: new NotificationListener<OverscrollIndicatorNotification>(
+      child: NotificationListener<OverscrollIndicatorNotification>(
         onNotification: _handleGlowNotification,
         child: widget.child,
       ),
@@ -414,30 +410,30 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     final bool showIndeterminateIndicator =
       _mode == _RefreshIndicatorMode.refresh || _mode == _RefreshIndicatorMode.done;
 
-    return new Stack(
+    return Stack(
       children: <Widget>[
         child,
-        new Positioned(
+        Positioned(
           top: _isIndicatorAtTop ? 0.0 : null,
           bottom: !_isIndicatorAtTop ? 0.0 : null,
           left: 0.0,
           right: 0.0,
-          child: new SizeTransition(
+          child: SizeTransition(
             axisAlignment: _isIndicatorAtTop ? 1.0 : -1.0,
             sizeFactor: _positionFactor, // this is what brings it down
-            child: new Container(
+            child: Container(
               padding: _isIndicatorAtTop
-                ? new EdgeInsets.only(top: widget.displacement)
-                : new EdgeInsets.only(bottom: widget.displacement),
+                ? EdgeInsets.only(top: widget.displacement)
+                : EdgeInsets.only(bottom: widget.displacement),
               alignment: _isIndicatorAtTop
                 ? Alignment.topCenter
                 : Alignment.bottomCenter,
-              child: new ScaleTransition(
+              child: ScaleTransition(
                 scale: _scaleFactor,
-                child: new AnimatedBuilder(
+                child: AnimatedBuilder(
                   animation: _positionController,
                   builder: (BuildContext context, Widget child) {
-                    return new RefreshProgressIndicator(
+                    return RefreshProgressIndicator(
                       value: showIndeterminateIndicator ? null : _value.value,
                       valueColor: _valueColor,
                       backgroundColor: widget.backgroundColor,

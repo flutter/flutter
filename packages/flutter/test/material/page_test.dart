@@ -11,8 +11,8 @@ import '../rendering/mock_canvas.dart';
 void main() {
   testWidgets('test Android page transition', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.android),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
         home: const Material(child: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
@@ -68,14 +68,14 @@ void main() {
   });
 
   testWidgets('test iOS page transition', (WidgetTester tester) async {
-    final Key page2Key = new UniqueKey();
+    final Key page2Key = UniqueKey();
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.iOS),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
         home: const Material(child: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return new Material(
+            return Material(
               key: page2Key,
               child: const Text('Page 2'),
             );
@@ -110,7 +110,7 @@ void main() {
     // width to the left of 0 offset box rect and nothing is drawn inside the
     // box's rect.
     expect(box, paints..rect(
-      rect: new Rect.fromLTWH(-800.0, 0.0, 800.0, 600.0)
+      rect: Rect.fromLTWH(-800.0, 0.0, 800.0, 600.0)
     ));
 
     await tester.pumpAndSettle();
@@ -148,15 +148,15 @@ void main() {
 
   testWidgets('test iOS fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.iOS),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
         home: const Material(child: Text('Page 1')),
       )
     );
 
     final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<void>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return const Material(child: Text('Page 2'));
       },
@@ -209,8 +209,8 @@ void main() {
 
   testWidgets('test no back gesture on Android', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.android),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
         home: const Scaffold(body: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
@@ -240,8 +240,8 @@ void main() {
 
   testWidgets('test back gesture on iOS', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.iOS),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
         home: const Scaffold(body: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
@@ -282,17 +282,17 @@ void main() {
 
   testWidgets('back gesture while OS changes', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => new Material(
-        child: new FlatButton(
+      '/': (BuildContext context) => Material(
+        child: FlatButton(
           child: const Text('PUSH'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
       ),
-      '/b': (BuildContext context) => new Container(child: const Text('HELLO')),
+      '/b': (BuildContext context) => Container(child: const Text('HELLO')),
     };
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.iOS),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
         routes: routes,
       ),
     );
@@ -314,8 +314,8 @@ void main() {
     expect(helloPosition1.dy, helloPosition2.dy);
     expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.iOS);
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.android),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
         routes: routes,
       ),
     );
@@ -349,13 +349,13 @@ void main() {
 
   testWidgets('test no back gesture on iOS fullscreen dialogs', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.iOS),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
         home: const Scaffold(body: Text('Page 1')),
       )
     );
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<void>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return const Scaffold(body: Text('Page 2'));
       },
@@ -380,8 +380,8 @@ void main() {
 
   testWidgets('test adaptable transitions switch during execution', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.android),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
         home: const Material(child: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
@@ -415,8 +415,8 @@ void main() {
 
     // Re-pump the same app but with iOS instead of Android.
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.iOS),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
         home: const Material(child: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {

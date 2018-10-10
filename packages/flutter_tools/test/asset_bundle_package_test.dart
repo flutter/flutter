@@ -31,7 +31,7 @@ void main() {
     if (assets == null) {
       assetsSection = '';
     } else {
-      final StringBuffer buffer = new StringBuffer();
+      final StringBuffer buffer = StringBuffer();
       buffer.write('''
 flutter:
      assets:
@@ -66,7 +66,7 @@ $assetsSection
       ..writeAsStringSync(packages);
   }
 
-  Future<Null> buildAndVerifyAssets(
+  Future<void> buildAndVerifyAssets(
     List<String> assets,
     List<String> packages,
     String expectedAssetManifest,
@@ -104,7 +104,7 @@ $assetsSection
   FileSystem testFileSystem;
 
   setUp(() async {
-    testFileSystem = new MemoryFileSystem(
+    testFileSystem = MemoryFileSystem(
       style: platform.isWindows
         ? FileSystemStyle.windows
         : FileSystemStyle.posix,

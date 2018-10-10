@@ -16,28 +16,28 @@ void main() {
     (WidgetTester tester) async {
 
       await tester.pumpWidget(
-        new MaterialApp(
+        MaterialApp(
           supportedLocales: const <Locale>[
             Locale('en', 'US'),
             Locale('ja'),
             Locale('zh'),
           ],
-          home: new Builder(
+          home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
               final TextStyle style = Theme.of(context).textTheme.display3;
-              return new Scaffold(
-                body: new Container(
+              return Scaffold(
+                body: Container(
                   padding: const EdgeInsets.all(48.0),
                   alignment: Alignment.center,
-                  child: new RepaintBoundary(
+                  child: RepaintBoundary(
                     // Expected result can be seen here:
                     // https://user-images.githubusercontent.com/1377460/40503473-faad6f34-5f42-11e8-972b-d83b727c9d0e.png
-                    child: new RichText(
-                      text: new TextSpan(
+                    child: RichText(
+                      text: TextSpan(
                         children: <TextSpan>[
-                          new TextSpan(text: character, style: style.copyWith(locale: const Locale('ja'))),
-                          new TextSpan(text: character, style: style.copyWith(locale: const Locale('zh'))),
+                          TextSpan(text: character, style: style.copyWith(locale: const Locale('ja'))),
+                          TextSpan(text: character, style: style.copyWith(locale: const Locale('zh'))),
                         ],
                       ),
                     ),
@@ -61,35 +61,35 @@ void main() {
     'Text with locale-specific glyphs, ambient locale',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        new MaterialApp(
+        MaterialApp(
           supportedLocales: const <Locale>[
             Locale('en', 'US'),
             Locale('ja'),
             Locale('zh'),
           ],
-          home: new Builder(
+          home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
               final TextStyle style = Theme.of(context).textTheme.display3;
-              return new Scaffold(
-                body: new Container(
+              return Scaffold(
+                body: Container(
                   padding: const EdgeInsets.all(48.0),
                   alignment: Alignment.center,
-                  child: new RepaintBoundary(
+                  child: RepaintBoundary(
                     // Expected result can be seen here:
                     // https://user-images.githubusercontent.com/1377460/40503473-faad6f34-5f42-11e8-972b-d83b727c9d0e.png
-                    child: new Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        new Localizations.override(
+                        Localizations.override(
                           context: context,
                           locale: const Locale('ja'),
-                          child: new Text(character, style: style),
+                          child: Text(character, style: style),
                         ),
-                        new Localizations.override(
+                        Localizations.override(
                           context: context,
                           locale: const Locale('zh'),
-                          child: new Text(character, style: style),
+                          child: Text(character, style: style),
                         ),
                       ],
                     ),
@@ -113,28 +113,28 @@ void main() {
     'Text with locale-specific glyphs, explicit locale',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        new MaterialApp(
+        MaterialApp(
           supportedLocales: const <Locale>[
             Locale('en', 'US'),
             Locale('ja'),
             Locale('zh'),
           ],
-          home: new Builder(
+          home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
               final TextStyle style = Theme.of(context).textTheme.display3;
-              return new Scaffold(
-                body: new Container(
+              return Scaffold(
+                body: Container(
                   padding: const EdgeInsets.all(48.0),
                   alignment: Alignment.center,
-                  child: new RepaintBoundary(
+                  child: RepaintBoundary(
                     // Expected result can be seen here:
                     // https://user-images.githubusercontent.com/1377460/40503473-faad6f34-5f42-11e8-972b-d83b727c9d0e.png
-                    child: new Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        new Text(character, style: style, locale: const Locale('ja')),
-	                new Text(character, style: style, locale: const Locale('zh')),
+                        Text(character, style: style, locale: const Locale('ja')),
+	                Text(character, style: style, locale: const Locale('zh')),
                       ],
                     ),
                   ),

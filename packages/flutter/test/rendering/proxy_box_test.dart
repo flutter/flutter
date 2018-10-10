@@ -18,9 +18,9 @@ void main() {
   test('RenderFittedBox paint', () {
     bool painted;
     RenderFittedBox makeFittedBox() {
-      return new RenderFittedBox(
-        child: new RenderCustomPaint(
-          painter: new TestCallbackPainter(onPaint: () {
+      return RenderFittedBox(
+        child: RenderCustomPaint(
+          painter: TestCallbackPainter(onPaint: () {
             painted = true;
           }),
         ),
@@ -33,14 +33,14 @@ void main() {
 
     // The RenderFittedBox should not paint if it is empty.
     painted = false;
-    layout(makeFittedBox(), constraints: new BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
+    layout(makeFittedBox(), constraints: BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
     expect(painted, equals(false));
   });
 
   test('RenderPhysicalModel compositing on Fuchsia', () {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
 
-    final RenderPhysicalModel root = new RenderPhysicalModel(color: const Color(0xffff00ff));
+    final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
     layout(root, phase: EnginePhase.composite);
     expect(root.needsCompositing, isFalse);
 
@@ -60,7 +60,7 @@ void main() {
   test('RenderPhysicalModel compositing on non-Fuchsia', () {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-    final RenderPhysicalModel root = new RenderPhysicalModel(color: const Color(0xffff00ff));
+    final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
     layout(root, phase: EnginePhase.composite);
     expect(root.needsCompositing, isFalse);
 
@@ -77,18 +77,18 @@ void main() {
   });
 
   test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
-    final RenderSemanticsGestureHandler renderObj = new RenderSemanticsGestureHandler(
+    final RenderSemanticsGestureHandler renderObj = RenderSemanticsGestureHandler(
       onTap: () {},
       onHorizontalDragUpdate: (DragUpdateDetails details) {},
     );
 
-    SemanticsConfiguration config = new SemanticsConfiguration();
+    SemanticsConfiguration config = SemanticsConfiguration();
     renderObj.describeSemanticsConfiguration(config);
     expect(config.getActionHandler(SemanticsAction.tap), isNotNull);
     expect(config.getActionHandler(SemanticsAction.scrollLeft), isNotNull);
     expect(config.getActionHandler(SemanticsAction.scrollRight), isNotNull);
 
-    config = new SemanticsConfiguration();
+    config = SemanticsConfiguration();
     renderObj.validActions = <SemanticsAction>[SemanticsAction.tap, SemanticsAction.scrollLeft].toSet();
 
     renderObj.describeSemanticsConfiguration(config);
@@ -103,7 +103,7 @@ void main() {
     });
 
     test('shape change triggers repaint', () {
-      final RenderPhysicalShape root = new RenderPhysicalShape(
+      final RenderPhysicalShape root = RenderPhysicalShape(
         color: const Color(0xffff00ff),
         clipper: const ShapeBorderClipper(shape: CircleBorder()),
       );
@@ -120,7 +120,7 @@ void main() {
     });
 
     test('compositing on non-Fuchsia', () {
-      final RenderPhysicalShape root = new RenderPhysicalShape(
+      final RenderPhysicalShape root = RenderPhysicalShape(
         color: const Color(0xffff00ff),
         clipper: const ShapeBorderClipper(shape: CircleBorder()),
       );
@@ -141,38 +141,38 @@ void main() {
   });
 
   test('RenderRepaintBoundary can capture images of itself', () async {
-    RenderRepaintBoundary boundary = new RenderRepaintBoundary();
-    layout(boundary, constraints: new BoxConstraints.tight(const Size(100.0, 200.0)));
+    RenderRepaintBoundary boundary = RenderRepaintBoundary();
+    layout(boundary, constraints: BoxConstraints.tight(const Size(100.0, 200.0)));
     pumpFrame(phase: EnginePhase.composite);
     ui.Image image = await boundary.toImage();
     expect(image.width, equals(100));
     expect(image.height, equals(200));
 
     // Now with pixel ratio set to something other than 1.0.
-    boundary = new RenderRepaintBoundary();
-    layout(boundary, constraints: new BoxConstraints.tight(const Size(100.0, 200.0)));
+    boundary = RenderRepaintBoundary();
+    layout(boundary, constraints: BoxConstraints.tight(const Size(100.0, 200.0)));
     pumpFrame(phase: EnginePhase.composite);
     image = await boundary.toImage(pixelRatio: 2.0);
     expect(image.width, equals(200));
     expect(image.height, equals(400));
 
     // Try building one with two child layers and make sure it renders them both.
-    boundary = new RenderRepaintBoundary();
-    final RenderStack stack = new RenderStack()..alignment = Alignment.topLeft;
-    final RenderDecoratedBox blackBox = new RenderDecoratedBox(
+    boundary = RenderRepaintBoundary();
+    final RenderStack stack = RenderStack()..alignment = Alignment.topLeft;
+    final RenderDecoratedBox blackBox = RenderDecoratedBox(
         decoration: const BoxDecoration(color: Color(0xff000000)),
-        child: new RenderConstrainedBox(
-          additionalConstraints: new BoxConstraints.tight(const Size.square(20.0)),
+        child: RenderConstrainedBox(
+          additionalConstraints: BoxConstraints.tight(const Size.square(20.0)),
         ));
-    stack.add(new RenderOpacity()
+    stack.add(RenderOpacity()
       ..opacity = 0.5
       ..child = blackBox);
-    final RenderDecoratedBox whiteBox = new RenderDecoratedBox(
+    final RenderDecoratedBox whiteBox = RenderDecoratedBox(
         decoration: const BoxDecoration(color: Color(0xffffffff)),
-        child: new RenderConstrainedBox(
-          additionalConstraints: new BoxConstraints.tight(const Size.square(10.0)),
+        child: RenderConstrainedBox(
+          additionalConstraints: BoxConstraints.tight(const Size.square(10.0)),
         ));
-    final RenderPositionedBox positioned = new RenderPositionedBox(
+    final RenderPositionedBox positioned = RenderPositionedBox(
       widthFactor: 2.0,
       heightFactor: 2.0,
       alignment: Alignment.topRight,
@@ -180,7 +180,7 @@ void main() {
     );
     stack.add(positioned);
     boundary.child = stack;
-    layout(boundary, constraints: new BoxConstraints.tight(const Size(20.0, 20.0)));
+    layout(boundary, constraints: BoxConstraints.tight(const Size(20.0, 20.0)));
     pumpFrame(phase: EnginePhase.composite);
     image = await boundary.toImage();
     expect(image.width, equals(20));
@@ -225,9 +225,9 @@ void main() {
   });
 
   test('RenderOpacity does not composite if it is transparent', () {
-    final RenderOpacity renderOpacity = new RenderOpacity(
+    final RenderOpacity renderOpacity = RenderOpacity(
       opacity: 0.0,
-      child: new RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
 
     layout(renderOpacity, phase: EnginePhase.composite);
@@ -235,9 +235,9 @@ void main() {
   });
 
   test('RenderOpacity does not composite if it is opaque', () {
-    final RenderOpacity renderOpacity = new RenderOpacity(
+    final RenderOpacity renderOpacity = RenderOpacity(
       opacity: 1.0,
-      child: new RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
 
     layout(renderOpacity, phase: EnginePhase.composite);
@@ -245,14 +245,14 @@ void main() {
   });
 
   test('RenderAnimatedOpacity does not composite if it is transparent', () async {
-    final Animation<double> opacityAnimation = new AnimationController(
-      vsync: new _FakeTickerProvider(),
+    final Animation<double> opacityAnimation = AnimationController(
+      vsync: _FakeTickerProvider(),
     )..value = 0.0;
 
-    final RenderAnimatedOpacity renderAnimatedOpacity = new RenderAnimatedOpacity(
+    final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
       alwaysIncludeSemantics: false,
       opacity: opacityAnimation,
-      child: new RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
 
     layout(renderAnimatedOpacity, phase: EnginePhase.composite);
@@ -260,14 +260,14 @@ void main() {
   });
 
   test('RenderAnimatedOpacity does not composite if it is opaque', () {
-    final Animation<double> opacityAnimation = new AnimationController(
-      vsync: new _FakeTickerProvider(),
+    final Animation<double> opacityAnimation = AnimationController(
+      vsync: _FakeTickerProvider(),
     )..value = 1.0;
 
-    final RenderAnimatedOpacity renderAnimatedOpacity = new RenderAnimatedOpacity(
+    final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
       alwaysIncludeSemantics: false,
       opacity: opacityAnimation,
-      child: new RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
 
     layout(renderAnimatedOpacity, phase: EnginePhase.composite);
@@ -278,7 +278,7 @@ void main() {
 class _FakeTickerProvider implements TickerProvider {
   @override
   Ticker createTicker(TickerCallback onTick, [bool disableAnimations = false]) {
-    return new _FakeTicker();
+    return _FakeTicker();
   }
 }
 

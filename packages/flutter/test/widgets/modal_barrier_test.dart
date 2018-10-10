@@ -16,7 +16,7 @@ void main() {
 
   setUp(() {
     tapped = false;
-    tapTarget = new GestureDetector(
+    tapTarget = GestureDetector(
       onTap: () {
         tapped = true;
       },
@@ -29,7 +29,7 @@ void main() {
   });
 
   testWidgets('ModalBarrier prevents interactions with widgets behind it', (WidgetTester tester) async {
-    final Widget subject = new Stack(
+    final Widget subject = Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
         tapTarget,
@@ -45,7 +45,7 @@ void main() {
   });
 
   testWidgets('ModalBarrier does not prevent interactions with widgets in front of it', (WidgetTester tester) async {
-    final Widget subject = new Stack(
+    final Widget subject = Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
         const ModalBarrier(dismissible: false),
@@ -62,11 +62,11 @@ void main() {
 
   testWidgets('ModalBarrier pops the Navigator when dismissed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => new FirstWidget(),
-      '/modal': (BuildContext context) => new SecondWidget(),
+      '/': (BuildContext context) => FirstWidget(),
+      '/modal': (BuildContext context) => SecondWidget(),
     };
 
-    await tester.pumpWidget(new MaterialApp(routes: routes));
+    await tester.pumpWidget(MaterialApp(routes: routes));
 
     // Initially the barrier is not visible
     expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -86,10 +86,10 @@ void main() {
   });
 
   testWidgets('Undismissible ModalBarrier hidden in semantic tree', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(const ModalBarrier(dismissible: false));
 
-    final TestSemantics expectedSemantics = new TestSemantics.root();
+    final TestSemantics expectedSemantics = TestSemantics.root();
     expect(semantics, hasSemantics(expectedSemantics));
 
     semantics.dispose();
@@ -98,7 +98,7 @@ void main() {
   testWidgets('Dismissible ModalBarrier includes button in semantic tree on iOS', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: ModalBarrier(
@@ -107,9 +107,9 @@ void main() {
       ),
     ));
 
-    final TestSemantics expectedSemantics = new TestSemantics.root(
+    final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           rect: TestSemantics.fullScreen,
           actions: SemanticsAction.tap.index,
           label: 'Dismiss',
@@ -124,10 +124,10 @@ void main() {
   });
 
   testWidgets('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(const ModalBarrier(dismissible: true));
 
-    final TestSemantics expectedSemantics = new TestSemantics.root();
+    final TestSemantics expectedSemantics = TestSemantics.root();
     expect(semantics, hasSemantics(expectedSemantics));
 
     semantics.dispose();
@@ -137,11 +137,11 @@ void main() {
 class FirstWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-  return new GestureDetector(
+  return GestureDetector(
     onTap: () {
       Navigator.pushNamed(context, '/modal');
     },
-    child: new Container(
+    child: Container(
       child: const Text('X')
     )
   );

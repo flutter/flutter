@@ -12,11 +12,11 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('can change semantics in a branch blocked by BlockSemantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-    final TestSemantics expectedSemantics = new TestSemantics.root(
+    final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           id: 1,
           label: 'hello',
           textDirection: TextDirection.ltr,
@@ -51,22 +51,22 @@ void main() {
 
 Widget buildWidget({ @required String blockedText, bool blocking = true }) {
   assert(blockedText != null);
-  return new Directionality(
+  return Directionality(
     textDirection: TextDirection.ltr,
-    child: new Stack(
+    child: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          new Semantics(
+          Semantics(
             container: true,
-            child: new ListView(
+            child: ListView(
               children: <Widget>[
-                new Text(blockedText),
+                Text(blockedText),
               ],
             ),
           ),
-          new BlockSemantics(
+          BlockSemantics(
             blocking: blocking,
-            child: new Semantics(
+            child: Semantics(
               label: 'hello',
               container: true,
             ),

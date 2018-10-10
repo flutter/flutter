@@ -139,7 +139,7 @@ class GoldensClient {
         workingDirectory: workingDirectory?.path,
       );
       if (result.exitCode != 0) {
-        throw new NonZeroExitCode(result.exitCode, result.stderr);
+        throw NonZeroExitCode(result.exitCode, result.stderr);
       }
     }
   }

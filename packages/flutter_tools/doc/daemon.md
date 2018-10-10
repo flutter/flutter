@@ -188,7 +188,7 @@ The returned `params` will contain:
 - `emulatorName` - the name of the emulator created; this will have been auto-generated if you did not supply one
 - `error` - when `success`=`false`, a message explaining why the creation of the emulator failed
 
-## 'flutter run --machine' and 'flutter attach --machine' 
+## 'flutter run --machine' and 'flutter attach --machine'
 
 When running `flutter run --machine` or `flutter attach --machine` the following subset of the daemon is available:
 

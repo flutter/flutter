@@ -20,7 +20,7 @@ void main() {
   test('Throws on missing executable', () async {
     // Uses a *real* process manager, since we want to know what happens if
     // it can't find an executable.
-    final ProcessRunner processRunner = new ProcessRunner(subprocessOutput: false);
+    final ProcessRunner processRunner = ProcessRunner(subprocessOutput: false);
     expect(
         expectAsync1((List<String> commandLine) async {
           return processRunner.runProcess(commandLine);
@@ -36,27 +36,27 @@ void main() {
     }
   });
   for (String platformName in <String>['macos', 'linux', 'windows']) {
-    final FakePlatform platform = new FakePlatform(
+    final FakePlatform platform = FakePlatform(
       operatingSystem: platformName,
       environment: <String, String>{},
     );
     group('ProcessRunner for $platform', () {
       test('Returns stdout', () async {
-        final FakeProcessManager fakeProcessManager = new FakeProcessManager();
+        final FakeProcessManager fakeProcessManager = FakeProcessManager();
         fakeProcessManager.fakeResults = <String, List<ProcessResult>>{
-          'echo test': <ProcessResult>[new ProcessResult(0, 0, 'output', 'error')],
+          'echo test': <ProcessResult>[ProcessResult(0, 0, 'output', 'error')],
         };
-        final ProcessRunner processRunner = new ProcessRunner(
+        final ProcessRunner processRunner = ProcessRunner(
             subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
         final String output = await processRunner.runProcess(<String>['echo', 'test']);
         expect(output, equals('output'));
       });
       test('Throws on process failure', () async {
-        final FakeProcessManager fakeProcessManager = new FakeProcessManager();
+        final FakeProcessManager fakeProcessManager = FakeProcessManager();
         fakeProcessManager.fakeResults = <String, List<ProcessResult>>{
-          'echo test': <ProcessResult>[new ProcessResult(0, -1, 'output', 'error')],
+          'echo test': <ProcessResult>[ProcessResult(0, -1, 'output', 'error')],
         };
-        final ProcessRunner processRunner = new ProcessRunner(
+        final ProcessRunner processRunner = ProcessRunner(
             subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
         expect(
             expectAsync1((List<String> commandLine) async {
@@ -75,17 +75,17 @@ void main() {
       String flutter;
 
       Future<Uint8List> fakeHttpReader(Uri url, {Map<String, String> headers}) {
-        return new Future<Uint8List>.value(new Uint8List(0));
+        return Future<Uint8List>.value(Uint8List(0));
       }
 
       setUp(() async {
-        processManager = new FakeProcessManager();
+        processManager = FakeProcessManager();
         args.clear();
         namedArgs.clear();
         tempDir = Directory.systemTemp.createTempSync('flutter_prepage_package_test.');
-        flutterDir = new Directory(path.join(tempDir.path, 'flutter'));
+        flutterDir = Directory(path.join(tempDir.path, 'flutter'));
         flutterDir.createSync(recursive: true);
-        creator = new ArchiveCreator(
+        creator = ArchiveCreator(
           tempDir,
           tempDir,
           testRef,
@@ -108,7 +108,7 @@ void main() {
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
-          'git describe --tags --abbrev=0': <ProcessResult>[new ProcessResult(0, 0, 'v1.2.3', '')],
+          'git describe --tags --abbrev=0': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
         };
         if (platform.isWindows) {
           calls['7za x ${path.join(tempDir.path, 'mingit.zip')}'] = null;
@@ -151,7 +151,7 @@ void main() {
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
-          'git describe --tags --abbrev=0': <ProcessResult>[new ProcessResult(0, 0, 'v1.2.3', '')],
+          'git describe --tags --abbrev=0': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
         };
         if (platform.isWindows) {
           calls['7za x ${path.join(tempDir.path, 'mingit.zip')}'] = null;
@@ -176,7 +176,7 @@ void main() {
           calls['tar cJf $archiveName flutter'] = null;
         }
         processManager.fakeResults = calls;
-        creator = new ArchiveCreator(
+        creator = ArchiveCreator(
           tempDir,
           tempDir,
           testRef,
@@ -194,8 +194,8 @@ void main() {
       test('throws when a command errors out', () async {
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter':
-              <ProcessResult>[new ProcessResult(0, 0, 'output1', '')],
-          'git reset --hard $testRef': <ProcessResult>[new ProcessResult(0, -1, 'output2', '')],
+              <ProcessResult>[ProcessResult(0, 0, 'output1', '')],
+          'git reset --hard $testRef': <ProcessResult>[ProcessResult(0, -1, 'output2', '')],
         };
         processManager.fakeResults = calls;
         expect(expectAsync0(creator.initializeRepo),
@@ -208,7 +208,7 @@ void main() {
       Directory tempDir;
 
       setUp(() async {
-        processManager = new FakeProcessManager();
+        processManager = FakeProcessManager();
         tempDir = Directory.systemTemp.createTempSync('flutter_prepage_package_test.');
       });
 
@@ -255,7 +255,7 @@ void main() {
   ]
 }
 ''';
-        new File(jsonPath).writeAsStringSync(releasesJson);
+        File(jsonPath).writeAsStringSync(releasesJson);
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
           'gsutil rm $gsArchivePath': null,
           'gsutil -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
@@ -264,9 +264,9 @@ void main() {
           'gsutil -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
         };
         processManager.fakeResults = calls;
-        final File outputFile = new File(path.join(tempDir.absolute.path, archiveName));
+        final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
         assert(tempDir.existsSync());
-        final ArchivePublisher publisher = new ArchivePublisher(
+        final ArchivePublisher publisher = ArchivePublisher(
           tempDir,
           testRef,
           Branch.release,
@@ -279,7 +279,7 @@ void main() {
         assert(tempDir.existsSync());
         await publisher.publishArchive();
         processManager.verifyCalls(calls.keys.toList());
-        final File releaseFile = new File(jsonPath);
+        final File releaseFile = File(jsonPath);
         expect(releaseFile.existsSync(), isTrue);
         final String contents = releaseFile.readAsStringSync();
         // Make sure new data is added.
@@ -299,7 +299,7 @@ void main() {
         // Make sure the new entry is first (and hopefully it takes less than a
         // minute to go from publishArchive above to this line!).
         expect(
-          new DateTime.now().difference(DateTime.parse(releases[0]['release_date'])),
+          DateTime.now().difference(DateTime.parse(releases[0]['release_date'])),
           lessThan(const Duration(minutes: 1)),
         );
         const JsonEncoder encoder = JsonEncoder.withIndent('  ');

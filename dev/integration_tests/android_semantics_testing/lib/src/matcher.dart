@@ -31,7 +31,7 @@ Matcher hasAndroidSemantics({
   bool isPassword,
   bool isLongClickable,
 }) {
-  return new _AndroidSemanticsMatcher(
+  return _AndroidSemanticsMatcher(
     text: text,
     contentDescription: contentDescription,
     className: className,

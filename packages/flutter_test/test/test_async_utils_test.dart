@@ -35,7 +35,7 @@ Future<Null> _guardedThrower() {
 
 void main() {
   test('TestAsyncUtils - one class', () async {
-    final TestAPI testAPI = new TestAPI();
+    final TestAPI testAPI = TestAPI();
     Future<Null> f1, f2;
     f1 = testAPI.testGuard1();
     try {
@@ -56,7 +56,7 @@ void main() {
   });
 
   test('TestAsyncUtils - two classes, all callers in superclass', () async {
-    final TestAPI testAPI = new TestAPISubclass();
+    final TestAPI testAPI = TestAPISubclass();
     Future<Null> f1, f2;
     f1 = testAPI.testGuard1();
     try {
@@ -77,7 +77,7 @@ void main() {
   });
 
   test('TestAsyncUtils - two classes, mixed callers', () async {
-    final TestAPISubclass testAPI = new TestAPISubclass();
+    final TestAPISubclass testAPI = TestAPISubclass();
     Future<Null> f1, f2;
     f1 = testAPI.testGuard1();
     try {
@@ -98,7 +98,7 @@ void main() {
   });
 
   test('TestAsyncUtils - expect() catches pending async work', () async {
-    final TestAPI testAPI = new TestAPISubclass();
+    final TestAPI testAPI = TestAPISubclass();
     Future<Null> f1;
     f1 = testAPI.testGuard1();
     try {

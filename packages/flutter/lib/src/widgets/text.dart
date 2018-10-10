@@ -76,10 +76,10 @@ class DefaultTextStyle extends InheritedWidget {
     @required Widget child,
   }) {
     assert(child != null);
-    return new Builder(
+    return Builder(
       builder: (BuildContext context) {
         final DefaultTextStyle parent = DefaultTextStyle.of(context);
-        return new DefaultTextStyle(
+        return DefaultTextStyle(
           key: key,
           style: parent.style.merge(style),
           textAlign: textAlign ?? parent.textAlign,
@@ -144,10 +144,10 @@ class DefaultTextStyle extends InheritedWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     style?.debugFillProperties(properties);
-    properties.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-    properties.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
-    properties.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
-    properties.add(new IntProperty('maxLines', maxLines, defaultValue: null));
+    properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
   }
 }
 
@@ -344,7 +344,7 @@ class Text extends StatelessWidget {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     if (MediaQuery.boldTextOverride(context))
       effectiveTextStyle = effectiveTextStyle.merge(const TextStyle(fontWeight: FontWeight.bold));
-    Widget result = new RichText(
+    Widget result = RichText(
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
       locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
@@ -352,17 +352,17 @@ class Text extends StatelessWidget {
       overflow: overflow ?? defaultTextStyle.overflow,
       textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
       maxLines: maxLines ?? defaultTextStyle.maxLines,
-      text: new TextSpan(
+      text: TextSpan(
         style: effectiveTextStyle,
         text: data,
         children: textSpan != null ? <TextSpan>[textSpan] : null,
       ),
     );
     if (semanticsLabel != null) {
-      result = new Semantics(
+      result = Semantics(
         textDirection: textDirection,
         label: semanticsLabel,
-        child: new ExcludeSemantics(
+        child: ExcludeSemantics(
           child: result,
         )
       );
@@ -373,20 +373,20 @@ class Text extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new StringProperty('data', data, showName: false));
+    properties.add(StringProperty('data', data, showName: false));
     if (textSpan != null) {
       properties.add(textSpan.toDiagnosticsNode(name: 'textSpan', style: DiagnosticsTreeStyle.transition));
     }
     style?.debugFillProperties(properties);
-    properties.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
-    properties.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
-    properties.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
-    properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
-    properties.add(new IntProperty('maxLines', maxLines, defaultValue: null));
+    properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
+    properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     if (semanticsLabel != null) {
-      properties.add(new StringProperty('semanticsLabel', semanticsLabel));
+      properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }
   }
 }

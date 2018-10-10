@@ -55,12 +55,12 @@ abstract class AnimatedWidget extends StatefulWidget {
 
   /// Subclasses typically do not override this method.
   @override
-  _AnimatedState createState() => new _AnimatedState();
+  _AnimatedState createState() => _AnimatedState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Listenable>('animation', listenable));
+    properties.add(DiagnosticsProperty<Listenable>('animation', listenable));
   }
 }
 
@@ -170,8 +170,8 @@ class SlideTransition extends AnimatedWidget {
   Widget build(BuildContext context) {
     Offset offset = position.value;
     if (textDirection == TextDirection.rtl)
-      offset = new Offset(-offset.dx, offset.dy);
-    return new FractionalTranslation(
+      offset = Offset(-offset.dx, offset.dy);
+    return FractionalTranslation(
       translation: offset,
       transformHitTests: transformHitTests,
       child: child,
@@ -226,9 +226,9 @@ class ScaleTransition extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final double scaleValue = scale.value;
-    final Matrix4 transform = new Matrix4.identity()
+    final Matrix4 transform = Matrix4.identity()
       ..scale(scaleValue, scaleValue, 1.0);
-    return new Transform(
+    return Transform(
       transform: transform,
       alignment: alignment,
       child: child,
@@ -254,6 +254,7 @@ class RotationTransition extends AnimatedWidget {
   const RotationTransition({
     Key key,
     @required Animation<double> turns,
+    this.alignment = Alignment.center,
     this.child,
   }) : super(key: key, listenable: turns);
 
@@ -263,6 +264,13 @@ class RotationTransition extends AnimatedWidget {
   /// rotated v * 2 * pi radians before being painted.
   Animation<double> get turns => listenable;
 
+  /// The alignment of the origin of the coordinate system around which the
+  /// rotation occurs, relative to the size of the box.
+  ///
+  /// For example, to set the origin of the rotation to top right corner, use
+  /// an alignment of (1.0, -1.0) or use [Alignment.topRight]
+  final Alignment alignment;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
@@ -271,10 +279,10 @@ class RotationTransition extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final double turnsValue = turns.value;
-    final Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.pi * 2.0);
-    return new Transform(
+    final Matrix4 transform = Matrix4.rotationZ(turnsValue * math.pi * 2.0);
+    return Transform(
       transform: transform,
-      alignment: Alignment.center,
+      alignment: alignment,
       child: child,
     );
   }
@@ -360,11 +368,11 @@ class SizeTransition extends AnimatedWidget {
   Widget build(BuildContext context) {
     AlignmentDirectional alignment;
     if (axis == Axis.vertical)
-      alignment = new AlignmentDirectional(-1.0, axisAlignment);
+      alignment = AlignmentDirectional(-1.0, axisAlignment);
     else
-      alignment = new AlignmentDirectional(axisAlignment, -1.0);
-    return new ClipRect(
-      child: new Align(
+      alignment = AlignmentDirectional(axisAlignment, -1.0);
+    return ClipRect(
+      child: Align(
         alignment: alignment,
         heightFactor: axis == Axis.vertical ? math.max(sizeFactor.value, 0.0) : null,
         widthFactor: axis == Axis.horizontal ? math.max(sizeFactor.value, 0.0) : null,
@@ -413,7 +421,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 
   @override
   RenderAnimatedOpacity createRenderObject(BuildContext context) {
-    return new RenderAnimatedOpacity(
+    return RenderAnimatedOpacity(
       opacity: opacity,
       alwaysIncludeSemantics: alwaysIncludeSemantics,
     );
@@ -429,8 +437,8 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
-    properties.add(new FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
+    properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
+    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -495,7 +503,7 @@ class PositionedTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Positioned.fromRelativeRect(
+    return Positioned.fromRelativeRect(
       rect: rect.value,
       child: child,
     );
@@ -553,8 +561,8 @@ class RelativePositionedTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final RelativeRect offsets = new RelativeRect.fromSize(rect.value, size);
-    return new Positioned(
+    final RelativeRect offsets = RelativeRect.fromSize(rect.value, size);
+    return Positioned(
       top: offsets.top,
       right: offsets.right,
       bottom: offsets.bottom,
@@ -608,7 +616,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new DecoratedBox(
+    return DecoratedBox(
       decoration: decoration.value,
       position: position,
       child: child,
@@ -663,7 +671,7 @@ class AlignTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Align(
+    return Align(
       alignment: alignment.value,
       widthFactor: widthFactor,
       heightFactor: heightFactor,
@@ -719,7 +727,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new DefaultTextStyle(
+    return DefaultTextStyle(
       style: style.value,
       textAlign: textAlign,
       softWrap: softWrap,

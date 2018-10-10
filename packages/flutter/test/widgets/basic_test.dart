@@ -27,12 +27,12 @@ void main() {
 
     testWidgets('hit test', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new PhysicalShape(
+        PhysicalShape(
           clipper: const ShapeBorderClipper(shape: CircleBorder()),
           elevation: 2.0,
           color: const Color(0xFF0000FF),
           shadowColor: const Color(0xFF00FF00),
-          child: new Container(color: const Color(0xFF0000FF)),
+          child: Container(color: const Color(0xFF0000FF)),
         )
       );
 
@@ -56,23 +56,23 @@ void main() {
 
   group('FractionalTranslation', () {
     testWidgets('hit test - entirely inside the bounding box', (WidgetTester tester) async {
-      final GlobalKey key1 = new GlobalKey();
+      final GlobalKey key1 = GlobalKey();
       bool _pointerDown = false;
 
       await tester.pumpWidget(
-        new Center(
-          child: new FractionalTranslation(
+        Center(
+          child: FractionalTranslation(
             translation: Offset.zero,
             transformHitTests: true,
-            child: new Listener(
+            child: Listener(
               onPointerDown: (PointerDownEvent event) {
                 _pointerDown = true;
               },
-              child: new SizedBox(
+              child: SizedBox(
                 key: key1,
                 width: 100.0,
                 height: 100.0,
-                child: new Container(
+                child: Container(
                   color: const Color(0xFF0000FF)
                 ),
               ),
@@ -86,23 +86,23 @@ void main() {
     });
 
     testWidgets('hit test - partially inside the bounding box', (WidgetTester tester) async {
-      final GlobalKey key1 = new GlobalKey();
+      final GlobalKey key1 = GlobalKey();
       bool _pointerDown = false;
 
       await tester.pumpWidget(
-        new Center(
-          child: new FractionalTranslation(
+        Center(
+          child: FractionalTranslation(
             translation: const Offset(0.5, 0.5),
             transformHitTests: true,
-            child: new Listener(
+            child: Listener(
               onPointerDown: (PointerDownEvent event) {
                 _pointerDown = true;
               },
-              child: new SizedBox(
+              child: SizedBox(
                 key: key1,
                 width: 100.0,
                 height: 100.0,
-                child: new Container(
+                child: Container(
                   color: const Color(0xFF0000FF)
                 ),
               ),
@@ -116,23 +116,23 @@ void main() {
     });
 
     testWidgets('hit test - completely outside the bounding box', (WidgetTester tester) async {
-      final GlobalKey key1 = new GlobalKey();
+      final GlobalKey key1 = GlobalKey();
       bool _pointerDown = false;
 
       await tester.pumpWidget(
-        new Center(
-          child: new FractionalTranslation(
+        Center(
+          child: FractionalTranslation(
             translation: const Offset(1.0, 1.0),
             transformHitTests: true,
-            child: new Listener(
+            child: Listener(
               onPointerDown: (PointerDownEvent event) {
                 _pointerDown = true;
               },
-              child: new SizedBox(
+              child: SizedBox(
                 key: key1,
                 width: 100.0,
                 height: 100.0,
-                child: new Container(
+                child: Container(
                   color: const Color(0xFF0000FF)
                 ),
               ),
@@ -147,7 +147,7 @@ void main() {
   });
 }
 
-HitsRenderBox hits(RenderBox renderBox) => new HitsRenderBox(renderBox);
+HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
 
 class HitsRenderBox extends Matcher {
   const HitsRenderBox(this.renderBox);
@@ -167,7 +167,7 @@ class HitsRenderBox extends Matcher {
   }
 }
 
-DoesNotHitRenderBox doesNotHit(RenderBox renderBox) => new DoesNotHitRenderBox(renderBox);
+DoesNotHitRenderBox doesNotHit(RenderBox renderBox) => DoesNotHitRenderBox(renderBox);
 
 class DoesNotHitRenderBox extends Matcher {
   const DoesNotHitRenderBox(this.renderBox);

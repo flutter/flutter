@@ -23,8 +23,8 @@ Rect boundsFor(WidgetController controller, Finder item) {
 }
 
 Future<void> main() async {
-  final Completer<void> ready = new Completer<void>();
-  runApp(new GestureDetector(
+  final Completer<void> ready = Completer<void>();
+  runApp(GestureDetector(
     onTap: () {
       debugPrint('Received tap.');
       ready.complete();
@@ -36,14 +36,14 @@ Future<void> main() async {
     ),
   ));
   await SchedulerBinding.instance.endOfFrame;
-  await new Future<Null>.delayed(const Duration(milliseconds: 50));
+  await Future<Null>.delayed(const Duration(milliseconds: 50));
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');
 
   await ready.future;
   debugPrint('Continuing...');
 
   // remove onTap handler, enable pointer events for app
-  runApp(new GestureDetector(
+  runApp(GestureDetector(
     child: const IgnorePointer(
       ignoring: false,
       child: GalleryApp(testMode: true),
@@ -51,16 +51,16 @@ Future<void> main() async {
   ));
   await SchedulerBinding.instance.endOfFrame;
 
-  final WidgetController controller = new LiveWidgetController(WidgetsBinding.instance);
+  final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
 
   debugPrint('Navigating...');
   await controller.tap(find.text('Material'));
-  await new Future<Null>.delayed(const Duration(milliseconds: 150));
+  await Future<Null>.delayed(const Duration(milliseconds: 150));
   final Finder demoList = find.byKey(const Key('GalleryDemoList'));
   final Finder demoItem = find.text('Text fields');
   do {
     await controller.drag(demoList, const Offset(0.0, -300.0));
-    await new Future<Null>.delayed(const Duration(milliseconds: 20));
+    await Future<Null>.delayed(const Duration(milliseconds: 20));
   } while (!demoItem.precache());
 
   // Ensure that the center of the "Text fields" item is visible
@@ -68,7 +68,7 @@ Future<void> main() async {
   final Rect demoItemBounds = boundsFor(controller, demoItem);
   final Rect demoListBounds = boundsFor(controller, demoList);
   if (!demoListBounds.contains(demoItemBounds.center)) {
-    await controller.drag(demoList, new Offset(0.0, demoListBounds.center.dy - demoItemBounds.center.dy));
+    await controller.drag(demoList, Offset(0.0, demoListBounds.center.dy - demoItemBounds.center.dy));
     await endOfAnimation();
   }
 

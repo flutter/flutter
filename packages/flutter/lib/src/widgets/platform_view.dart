@@ -44,7 +44,7 @@ import 'framework.dart';
 /// The Android view's lifetime is the same as the lifetime of the [State] object for this widget.
 /// When the [State] is disposed the platform view (and auxiliary resources) are lazily
 /// released (some resources are immediately released and some by platform garbage collector).
-/// A stateful widget's state is disposed the the widget is removed from the tree or when it is
+/// A stateful widget's state is disposed when the widget is removed from the tree or when it is
 /// moved within the tree. If the stateful widget has a key and it's only moved relative to its siblings,
 /// or it has a [GlobalKey] and it's moved within the tree, it will not be disposed.
 class AndroidView extends StatefulWidget {
@@ -146,7 +146,7 @@ class AndroidView extends StatefulWidget {
   final MessageCodec<dynamic> creationParamsCodec;
 
   @override
-  State createState() => new _AndroidViewState();
+  State createState() => _AndroidViewState();
 }
 
 class _AndroidViewState extends State<AndroidView> {
@@ -157,7 +157,7 @@ class _AndroidViewState extends State<AndroidView> {
 
   @override
   Widget build(BuildContext context) {
-    return new _AndroidPlatformView(
+    return _AndroidPlatformView(
         controller: _controller,
         hitTestBehavior: widget.hitTestBehavior,
         gestureRecognizers: widget.gestureRecognizers,
@@ -249,7 +249,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
-      new RenderAndroidView(
+      RenderAndroidView(
         viewController: controller,
         hitTestBehavior: hitTestBehavior,
         gestureRecognizers: gestureRecognizers,

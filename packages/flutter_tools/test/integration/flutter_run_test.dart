@@ -13,7 +13,7 @@ import 'test_data/basic_project.dart';
 void main() {
   group('flutter_run', () {
     Directory tempDir;
-    final BasicProject _project = new BasicProject();
+    final BasicProject _project = BasicProject();
 
     setUp(() async {
       tempDir = fs.systemTempDirectory.createTempSync('flutter_run_integration_test.');

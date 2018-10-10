@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+//ignore: Remove this once Google catches up with dev.4 Dart.
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox;
 
@@ -21,7 +23,7 @@ const double _kCaretHeightOffset = 2.0; // pixels
 /// (including the cursor location).
 ///
 /// Used by [RenderEditable.onSelectionChanged].
-typedef void SelectionChangedHandler(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
+typedef SelectionChangedHandler = void Function(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
 
 /// Indicates what triggered the change in selected text (including changes to
 /// the cursor location).
@@ -45,7 +47,7 @@ enum SelectionChangedCause {
 /// Signature for the callback that reports when the caret location changes.
 ///
 /// Used by [RenderEditable.onCaretChanged].
-typedef void CaretChangedHandler(Rect caretRect);
+typedef CaretChangedHandler = void Function(Rect caretRect);
 
 /// Represents the coordinates of the point in a selection, and the text
 /// direction at that point, relative to top left of the [RenderEditable] that
@@ -135,6 +137,7 @@ class RenderEditable extends RenderBox {
     Locale locale,
     double cursorWidth = 1.0,
     Radius cursorRadius,
+    @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
@@ -142,7 +145,8 @@ class RenderEditable extends RenderBox {
        assert(offset != null),
        assert(ignorePointer != null),
        assert(obscureText != null),
-       _textPainter = new TextPainter(
+       assert(textSelectionDelegate != null),
+  _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
          textDirection: textDirection,
@@ -150,7 +154,7 @@ class RenderEditable extends RenderBox {
          locale: locale,
        ),
        _cursorColor = cursorColor,
-       _showCursor = showCursor ?? new ValueNotifier<bool>(false),
+       _showCursor = showCursor ?? ValueNotifier<bool>(false),
        _hasFocus = hasFocus ?? false,
        _maxLines = maxLines,
        _selectionColor = selectionColor,
@@ -161,10 +165,10 @@ class RenderEditable extends RenderBox {
        _obscureText = obscureText {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
-    _tap = new TapGestureRecognizer(debugOwner: this)
+    _tap = TapGestureRecognizer(debugOwner: this)
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap;
-    _longPress = new LongPressGestureRecognizer(debugOwner: this)
+    _longPress = LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
   }
 
@@ -196,12 +200,24 @@ class RenderEditable extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// The object that controls the text selection, used by this render object
+  /// for implementing cut, copy, and paste keyboard shortcuts.
+  ///
+  /// It must not be null. It will make cut, copy and paste functionality work
+  /// with the most recently set [TextSelectionDelegate].
+  TextSelectionDelegate textSelectionDelegate;
+
   Rect _lastCaretRect;
 
   static const int _kLeftArrowCode = 21;
   static const int _kRightArrowCode = 22;
   static const int _kUpArrowCode = 19;
   static const int _kDownArrowCode = 20;
+  static const int _kXKeyCode = 52;
+  static const int _kCKeyCode = 31;
+  static const int _kVKeyCode = 50;
+  static const int _kAKeyCode = 29;
+  static const int _kDelKeyCode = 112;
 
   // The extent offset of the current selection
   int _extentOffset = -1;
@@ -221,7 +237,7 @@ class RenderEditable extends RenderBox {
   static const int _kControlMask = 1 << 12; // https://developer.android.com/reference/android/view/KeyEvent.html#META_CTRL_ON
 
   // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
-  void _handleKeyEvent(RawKeyEvent keyEvent){
+  void _handleKeyEvent(RawKeyEvent keyEvent) {
     if (defaultTargetPlatform != TargetPlatform.android)
       return;
 
@@ -246,6 +262,11 @@ class RenderEditable extends RenderBox {
     final bool upArrow = pressedKeyCode == _kUpArrowCode;
     final bool downArrow = pressedKeyCode == _kDownArrowCode;
     final bool arrow = leftArrow || rightArrow || upArrow || downArrow;
+    final bool aKey = pressedKeyCode == _kAKeyCode;
+    final bool xKey = pressedKeyCode == _kXKeyCode;
+    final bool vKey = pressedKeyCode == _kVKeyCode;
+    final bool cKey = pressedKeyCode == _kCKeyCode;
+    final bool del = pressedKeyCode == _kDelKeyCode;
 
     // We will only move select or more the caret if an arrow is pressed
     if (arrow) {
@@ -262,7 +283,12 @@ class RenderEditable extends RenderBox {
       newOffset = _handleShift(rightArrow, leftArrow, shift, newOffset);
 
       _extentOffset = newOffset;
+    } else if (ctrl && (xKey || vKey || cKey || aKey)) {
+      // _handleShortcuts depends on being started in the same stack invocation as the _handleKeyEvent method
+      _handleShortcuts(pressedKeyCode);
     }
+    if (del)
+      _handleDelete();
   }
 
   // Handles full word traversal using control.
@@ -270,10 +296,10 @@ class RenderEditable extends RenderBox {
     // If control is pressed, we will decide which way to look for a word
     // based on which arrow is pressed.
     if (leftArrow && _extentOffset > 2) {
-      final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset - 2));
+      final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: _extentOffset - 2));
       newOffset = textSelection.baseOffset + 1;
     } else if (rightArrow && _extentOffset < text.text.length - 2) {
-      final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset + 1));
+      final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: _extentOffset + 1));
       newOffset = textSelection.extentOffset - 1;
     }
     return newOffset;
@@ -305,7 +331,7 @@ class RenderEditable extends RenderBox {
     final double plh = _textPainter.preferredLineHeight;
     final double verticalOffset = upArrow ? -0.5 * plh : 1.5 * plh;
 
-    final Offset caretOffset = _textPainter.getOffsetForCaret(new TextPosition(offset: _extentOffset), _caretPrototype);
+    final Offset caretOffset = _textPainter.getOffsetForCaret(TextPosition(offset: _extentOffset), _caretPrototype);
     final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
     final TextPosition position = _textPainter.getPositionForOffset(caretOffsetTranslated);
 
@@ -339,7 +365,7 @@ class RenderEditable extends RenderBox {
     if (shift) {
       if (_baseOffset < newOffset) {
         onSelectionChanged(
-          new TextSelection(
+          TextSelection(
             baseOffset: _baseOffset,
             extentOffset: newOffset
           ),
@@ -348,7 +374,7 @@ class RenderEditable extends RenderBox {
         );
       } else {
         onSelectionChanged(
-          new TextSelection(
+          TextSelection(
             baseOffset: newOffset,
             extentOffset: _baseOffset
           ),
@@ -366,9 +392,9 @@ class RenderEditable extends RenderBox {
           newOffset = _baseOffset > _extentOffset ? _baseOffset : _extentOffset;
       }
       onSelectionChanged(
-        new TextSelection.fromPosition(
-          new TextPosition(
-              offset: newOffset
+        TextSelection.fromPosition(
+          TextPosition(
+            offset: newOffset
           )
         ),
         this,
@@ -376,6 +402,75 @@ class RenderEditable extends RenderBox {
       );
     }
     return newOffset;
+  }
+
+  // Handles shortcut functionality including cut, copy, paste and select all
+  // using control + (X, C, V, A).
+  Future<void> _handleShortcuts(int pressedKeyCode) async {
+    switch (pressedKeyCode) {
+      case _kCKeyCode:
+        if (!selection.isCollapsed) {
+          Clipboard.setData(
+            ClipboardData(text: selection.textInside(text.text)));
+        }
+        break;
+      case _kXKeyCode:
+        if (!selection.isCollapsed) {
+          Clipboard.setData(
+            ClipboardData(text: selection.textInside(text.text)));
+          textSelectionDelegate.textEditingValue = TextEditingValue(
+            text: selection.textBefore(text.text)
+              + selection.textAfter(text.text),
+            selection: TextSelection.collapsed(offset: selection.start),
+          );
+        }
+        break;
+      case _kVKeyCode:
+        // Snapshot the input before using `await`.
+        // See https://github.com/flutter/flutter/issues/11427
+        final TextEditingValue value = textSelectionDelegate.textEditingValue;
+        final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
+        if (data != null) {
+          textSelectionDelegate.textEditingValue = TextEditingValue(
+            text: value.selection.textBefore(value.text)
+              + data.text
+              + value.selection.textAfter(value.text),
+            selection: TextSelection.collapsed(
+              offset: value.selection.start + data.text.length
+            ),
+          );
+        }
+        break;
+      case _kAKeyCode:
+        _baseOffset = 0;
+        _extentOffset = textSelectionDelegate.textEditingValue.text.length;
+        onSelectionChanged(
+          TextSelection(
+            baseOffset: 0,
+            extentOffset: textSelectionDelegate.textEditingValue.text.length,
+          ),
+          this,
+          SelectionChangedCause.keyboard,
+        );
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+  void _handleDelete() {
+    if (selection.textAfter(text.text).isNotEmpty) {
+      textSelectionDelegate.textEditingValue = TextEditingValue(
+        text: selection.textBefore(text.text)
+          + selection.textAfter(text.text).substring(1),
+        selection: TextSelection.collapsed(offset: selection.start)
+      );
+    } else {
+      textSelectionDelegate.textEditingValue = TextEditingValue(
+        text: selection.textBefore(text.text),
+        selection: TextSelection.collapsed(offset: selection.start)
+      );
+    }
   }
 
   /// Marks the render object as needing to be laid out again and have its text
@@ -638,7 +733,7 @@ class RenderEditable extends RenderBox {
       return;
     final int baseOffset = !extentSelection ? extentOffset : _selection.baseOffset;
     onSelectionChanged(
-      new TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), this, SelectionChangedCause.keyboard,
+      TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), this, SelectionChangedCause.keyboard,
     );
   }
 
@@ -648,7 +743,7 @@ class RenderEditable extends RenderBox {
       return;
     final int baseOffset = !extentSelection ? extentOffset : _selection.baseOffset;
     onSelectionChanged(
-      new TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), this, SelectionChangedCause.keyboard,
+      TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), this, SelectionChangedCause.keyboard,
     );
   }
 
@@ -661,7 +756,7 @@ class RenderEditable extends RenderBox {
       return;
     final int baseOffset = extentSelection ? _selection.baseOffset : nextWord.start;
     onSelectionChanged(
-      new TextSelection(
+      TextSelection(
         baseOffset: baseOffset,
         extentOffset: nextWord.start,
       ),
@@ -679,7 +774,7 @@ class RenderEditable extends RenderBox {
       return;
     final int baseOffset = extentSelection ?  _selection.baseOffset : previousWord.start;
     onSelectionChanged(
-      new TextSelection(
+      TextSelection(
         baseOffset: baseOffset,
         extentOffset: previousWord.start,
       ),
@@ -690,7 +785,7 @@ class RenderEditable extends RenderBox {
 
   TextRange _getNextWord(int offset) {
     while (true) {
-      final TextRange range = _textPainter.getWordBoundary(new TextPosition(offset: offset));
+      final TextRange range = _textPainter.getWordBoundary(TextPosition(offset: offset));
       if (range == null || !range.isValid || range.isCollapsed)
         return null;
       if (!_onlyWhitespace(range))
@@ -701,7 +796,7 @@ class RenderEditable extends RenderBox {
 
   TextRange _getPreviousWord(int offset) {
     while (offset >= 0) {
-      final TextRange range = _textPainter.getWordBoundary(new TextPosition(offset: offset));
+      final TextRange range = _textPainter.getWordBoundary(TextPosition(offset: offset));
       if (range == null || !range.isValid || range.isCollapsed)
         return null;
       if (!_onlyWhitespace(range))
@@ -778,9 +873,9 @@ class RenderEditable extends RenderBox {
   Offset get _paintOffset {
     switch (_viewportAxis) {
       case Axis.horizontal:
-        return new Offset(-offset.pixels, 0.0);
+        return Offset(-offset.pixels, 0.0);
       case Axis.vertical:
-        return new Offset(0.0, -offset.pixels);
+        return Offset(0.0, -offset.pixels);
     }
     return null;
   }
@@ -830,15 +925,15 @@ class RenderEditable extends RenderBox {
     if (selection.isCollapsed) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       final Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
-      final Offset start = new Offset(0.0, preferredLineHeight) + caretOffset + paintOffset;
-      return <TextSelectionPoint>[new TextSelectionPoint(start, null)];
+      final Offset start = Offset(0.0, preferredLineHeight) + caretOffset + paintOffset;
+      return <TextSelectionPoint>[TextSelectionPoint(start, null)];
     } else {
       final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
-      final Offset start = new Offset(boxes.first.start, boxes.first.bottom) + paintOffset;
-      final Offset end = new Offset(boxes.last.end, boxes.last.bottom) + paintOffset;
+      final Offset start = Offset(boxes.first.start, boxes.first.bottom) + paintOffset;
+      final Offset end = Offset(boxes.last.end, boxes.last.bottom) + paintOffset;
       return <TextSelectionPoint>[
-        new TextSelectionPoint(start, boxes.first.direction),
-        new TextSelectionPoint(end, boxes.last.direction),
+        TextSelectionPoint(start, boxes.first.direction),
+        TextSelectionPoint(end, boxes.last.direction),
       ];
     }
   }
@@ -872,7 +967,7 @@ class RenderEditable extends RenderBox {
     _layoutText(constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
     // This rect is the same as _caretPrototype but without the vertical padding.
-    return new Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight).shift(caretOffset + _paintOffset);
+    return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight).shift(caretOffset + _paintOffset);
   }
 
   @override
@@ -967,7 +1062,7 @@ class RenderEditable extends RenderBox {
     assert(_lastTapDownPosition != null);
     if (onSelectionChanged != null) {
       final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
-      onSelectionChanged(new TextSelection.fromPosition(position), this, SelectionChangedCause.tap);
+      onSelectionChanged(TextSelection.fromPosition(position), this, SelectionChangedCause.tap);
     }
   }
   void _handleTap() {
@@ -999,8 +1094,8 @@ class RenderEditable extends RenderBox {
     final TextRange word = _textPainter.getWordBoundary(position);
     // When long-pressing past the end of the text, we want a collapsed cursor.
     if (position.offset >= word.end)
-      return new TextSelection.fromPosition(position);
-    return new TextSelection(baseOffset: word.start, extentOffset: word.end);
+      return TextSelection.fromPosition(position);
+    return TextSelection(baseOffset: word.start, extentOffset: word.end);
   }
 
   Rect _caretPrototype;
@@ -1019,7 +1114,7 @@ class RenderEditable extends RenderBox {
   @override
   void performLayout() {
     _layoutText(constraints.maxWidth);
-    _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
+    _caretPrototype = Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
@@ -1030,8 +1125,8 @@ class RenderEditable extends RenderBox {
     // though we currently don't use those here.
     // See also RenderParagraph which has a similar issue.
     final Size textPainterSize = _textPainter.size;
-    size = new Size(constraints.maxWidth, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
-    final Size contentSize = new Size(textPainterSize.width + _kCaretGap + cursorWidth, textPainterSize.height);
+    size = Size(constraints.maxWidth, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
+    final Size contentSize = Size(textPainterSize.width + _kCaretGap + cursorWidth, textPainterSize.height);
     final double _maxScrollExtent = _getMaxScrollExtent(contentSize);
     _hasVisualOverflow = _maxScrollExtent > 0.0;
     offset.applyViewportDimension(_viewportExtent);
@@ -1041,7 +1136,7 @@ class RenderEditable extends RenderBox {
   void _paintCaret(Canvas canvas, Offset effectiveOffset) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(_selection.extent, _caretPrototype);
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
       ..color = _cursorColor;
 
     final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset);
@@ -1063,7 +1158,7 @@ class RenderEditable extends RenderBox {
   void _paintSelection(Canvas canvas, Offset effectiveOffset) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     assert(_selectionRects != null);
-    final Paint paint = new Paint()..color = _selectionColor;
+    final Paint paint = Paint()..color = _selectionColor;
     for (ui.TextBox box in _selectionRects)
       canvas.drawRect(box.toRect().shift(effectiveOffset), paint);
   }
@@ -1099,14 +1194,14 @@ class RenderEditable extends RenderBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Color>('cursorColor', cursorColor));
-    properties.add(new DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
-    properties.add(new IntProperty('maxLines', maxLines));
-    properties.add(new DiagnosticsProperty<Color>('selectionColor', selectionColor));
-    properties.add(new DoubleProperty('textScaleFactor', textScaleFactor));
-    properties.add(new DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
-    properties.add(new DiagnosticsProperty<TextSelection>('selection', selection));
-    properties.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
+    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor));
+    properties.add(DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
+    properties.add(IntProperty('maxLines', maxLines));
+    properties.add(DiagnosticsProperty<Color>('selectionColor', selectionColor));
+    properties.add(DoubleProperty('textScaleFactor', textScaleFactor));
+    properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(DiagnosticsProperty<ViewportOffset>('offset', offset));
   }
 
   @override

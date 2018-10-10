@@ -21,8 +21,8 @@ class EmulatorManager {
   /// of their methods are called.
   EmulatorManager() {
     // Register the known discoverers.
-    _emulatorDiscoverers.add(new AndroidEmulators());
-    _emulatorDiscoverers.add(new IOSEmulators());
+    _emulatorDiscoverers.add(AndroidEmulators());
+    _emulatorDiscoverers.add(IOSEmulators());
   }
 
   final List<EmulatorDiscovery> _emulatorDiscoverers = <EmulatorDiscovery>[];
@@ -54,7 +54,7 @@ class EmulatorManager {
   /// Return the list of all available emulators.
   Future<List<Emulator>> getAllAvailableEmulators() async {
     final List<Emulator> emulators = <Emulator>[];
-    await Future.forEach(_platformDiscoverers, (EmulatorDiscovery discoverer) async {
+    await Future.forEach<EmulatorDiscovery>(_platformDiscoverers, (EmulatorDiscovery discoverer) async {
       emulators.addAll(await discoverer.emulators);
     });
     return emulators;
@@ -69,7 +69,7 @@ class EmulatorManager {
       // so we can keep adding suffixes until we miss.
       final List<Emulator> all = await getAllAvailableEmulators();
       final Set<String> takenNames = all
-          .map((Emulator e) => e.id)
+          .map<String>((Emulator e) => e.id)
           .where((String id) => id.startsWith(autoName))
           .toSet();
       int suffix = 1;
@@ -81,12 +81,12 @@ class EmulatorManager {
 
     final String device = await _getPreferredAvailableDevice();
     if (device == null)
-      return new CreateEmulatorResult(name,
+      return CreateEmulatorResult(name,
           success: false, error: 'No device definitions are available');
 
     final String sdkId = await _getPreferredSdkId();
     if (sdkId == null)
-      return new CreateEmulatorResult(name,
+      return CreateEmulatorResult(name,
           success: false,
           error:
               'No suitable Android AVD system images are available. You may need to install these'
@@ -119,7 +119,7 @@ class EmulatorManager {
     ];
     final ProcessResult runResult = processManager.runSync(args,
         environment: androidSdk?.sdkManagerEnv);
-    return new CreateEmulatorResult(
+    return CreateEmulatorResult(
       name,
       success: runResult.exitCode == 0,
       output: runResult.stdout,
@@ -154,7 +154,7 @@ class EmulatorManager {
     );
   }
 
-  RegExp androidApiVersion = new RegExp(r';android-(\d+);');
+  RegExp androidApiVersion = RegExp(r';android-(\d+);');
   Future<String> _getPreferredSdkId() async {
     // It seems that to get the available list of images, we need to send a
     // request to create without the image and it'll provide us a list :-(
@@ -176,8 +176,8 @@ class EmulatorManager {
         .toList();
 
     final List<int> availableApiVersions = availableIDs
-        .map((String id) => androidApiVersion.firstMatch(id).group(1))
-        .map((String apiVersion) => int.parse(apiVersion))
+        .map<String>((String id) => androidApiVersion.firstMatch(id).group(1))
+        .map<int>((String apiVersion) => int.parse(apiVersion))
         .toList();
 
     // Get the highest Android API version or whats left
@@ -252,22 +252,22 @@ abstract class Emulator {
     }
 
     // Calculate column widths
-    final List<int> indices = new List<int>.generate(table[0].length - 1, (int i) => i);
-    List<int> widths = indices.map((int i) => 0).toList();
+    final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
+    List<int> widths = indices.map<int>((int i) => 0).toList();
     for (List<String> row in table) {
-      widths = indices.map((int i) => math.max(widths[i], row[i].length)).toList();
+      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
     // Join columns into lines of text
-    final RegExp whiteSpaceAndDots = new RegExp(r'[•\s]+$');
+    final RegExp whiteSpaceAndDots = RegExp(r'[•\s]+$');
     return table
-        .map((List<String> row) {
+        .map<String>((List<String> row) {
           return indices
-                  .map((int i) => row[i].padRight(widths[i]))
+                  .map<String>((int i) => row[i].padRight(widths[i]))
                   .join(' • ') +
               ' • ${row.last}';
         })
-        .map((String line) => line.replaceAll(whiteSpaceAndDots, ''))
+        .map<String>((String line) => line.replaceAll(whiteSpaceAndDots, ''))
         .toList();
   }
 
@@ -277,10 +277,10 @@ abstract class Emulator {
 }
 
 class CreateEmulatorResult {
+  CreateEmulatorResult(this.emulatorName, {this.success, this.output, this.error});
+
   final bool success;
   final String emulatorName;
   final String output;
   final String error;
-
-  CreateEmulatorResult(this.emulatorName, {this.success, this.output, this.error});
 }

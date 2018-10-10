@@ -22,15 +22,15 @@ import '../protocol_discovery.dart';
 import '../version.dart';
 
 class FlutterTesterApp extends ApplicationPackage {
-  final Directory _directory;
-
   factory FlutterTesterApp.fromCurrentDirectory() {
-    return new FlutterTesterApp._(fs.currentDirectory);
+    return FlutterTesterApp._(fs.currentDirectory);
   }
 
   FlutterTesterApp._(Directory directory)
       : _directory = directory,
         super(id: directory.path);
+
+  final Directory _directory;
 
   @override
   String get name => _directory.basename;
@@ -44,7 +44,7 @@ class FlutterTesterDevice extends Device {
   FlutterTesterDevice(String deviceId) : super(deviceId);
 
   Process _process;
-  final DevicePortForwarder _portForwarder = new _NoopPortForwarder();
+  final DevicePortForwarder _portForwarder = _NoopPortForwarder();
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -68,7 +68,7 @@ class FlutterTesterDevice extends Device {
   void clearLogs() {}
 
   final _FlutterTesterDeviceLogReader _logReader =
-      new _FlutterTesterDeviceLogReader();
+      _FlutterTesterDeviceLogReader();
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader;
@@ -104,7 +104,7 @@ class FlutterTesterDevice extends Device {
 
     if (!buildInfo.isDebug) {
       printError('This device only supports debug mode.');
-      return new LaunchResult.failed();
+      return LaunchResult.failed();
     }
 
     final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
@@ -153,33 +153,33 @@ class FlutterTesterDevice extends Device {
         },
       );
       // Setting a bool can't fail in the callback.
-      _process.exitCode.then((_) => _isRunning = false); // ignore: unawaited_futures
+      _process.exitCode.then<void>((_) => _isRunning = false); // ignore: unawaited_futures
       _process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
           .listen((String line) {
         _logReader.addLine(line);
       });
       _process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
           .listen((String line) {
         _logReader.addLine(line);
       });
 
       if (!debuggingOptions.debuggingEnabled)
-        return new LaunchResult.succeeded();
+        return LaunchResult.succeeded();
 
-      final ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(
+      final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(
         getLogReader(),
         hostPort: debuggingOptions.observatoryPort,
       );
 
       final Uri observatoryUri = await observatoryDiscovery.uri;
-      return new LaunchResult.succeeded(observatoryUri: observatoryUri);
+      return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
       printError('Failed to launch $package: $error');
-      return new LaunchResult.failed();
+      return LaunchResult.failed();
     }
   }
 
@@ -202,7 +202,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
   static bool showFlutterTesterDevice = false;
 
   final FlutterTesterDevice _testerDevice =
-      new FlutterTesterDevice(kTesterDeviceId);
+      FlutterTesterDevice(kTesterDeviceId);
 
   @override
   bool get canListAnything => true;
@@ -218,7 +218,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
 
 class _FlutterTesterDeviceLogReader extends DeviceLogReader {
   final StreamController<String> _logLinesController =
-      new StreamController<String>.broadcast();
+      StreamController<String>.broadcast();
 
   @override
   int get appPid => 0;
@@ -239,12 +239,12 @@ class _NoopPortForwarder extends DevicePortForwarder {
   Future<int> forward(int devicePort, {int hostPort}) {
     if (hostPort != null && hostPort != devicePort)
       throw 'Forwarding to a different port is not supported by flutter tester';
-    return new Future<int>.value(devicePort);
+    return Future<int>.value(devicePort);
   }
 
   @override
   List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
 
   @override
-  Future<Null> unforward(ForwardedPort forwardedPort) => null;
+  Future<void> unforward(ForwardedPort forwardedPort) => null;
 }

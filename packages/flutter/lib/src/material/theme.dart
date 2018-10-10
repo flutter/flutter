@@ -64,7 +64,7 @@ class Theme extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  static final ThemeData _kFallbackTheme = new ThemeData.fallback();
+  static final ThemeData _kFallbackTheme = ThemeData.fallback();
 
   /// The data from the closest [Theme] instance that encloses the given
   /// context.
@@ -124,25 +124,24 @@ class Theme extends StatelessWidget {
   /// }
   /// ```
   static ThemeData of(BuildContext context, { bool shadowThemeOnly = false }) {
-    final _InheritedTheme inheritedTheme =
-        context.inheritFromWidgetOfExactType(_InheritedTheme);
+    final _InheritedTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedTheme);
     if (shadowThemeOnly) {
       if (inheritedTheme == null || inheritedTheme.theme.isMaterialAppTheme)
         return null;
       return inheritedTheme.theme.data;
     }
 
-    final ThemeData colorTheme = (inheritedTheme != null) ? inheritedTheme.theme.data : _kFallbackTheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final TextTheme geometryTheme = localizations?.localTextGeometry ?? MaterialTextGeometry.englishLike;
-    return ThemeData.localize(colorTheme, geometryTheme);
+    final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
+    final ThemeData theme = inheritedTheme?.theme?.data ?? _kFallbackTheme;
+    return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
 
   @override
   Widget build(BuildContext context) {
-    return new _InheritedTheme(
+    return _InheritedTheme(
       theme: this,
-      child: new IconTheme(
+      child: IconTheme(
         data: data.iconTheme,
         child: child,
       ),
@@ -152,7 +151,7 @@ class Theme extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<ThemeData>('data', data, showName: false));
+    properties.add(DiagnosticsProperty<ThemeData>('data', data, showName: false));
   }
 }
 
@@ -230,7 +229,7 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
   final Widget child;
 
   @override
-  _AnimatedThemeState createState() => new _AnimatedThemeState();
+  _AnimatedThemeState createState() => _AnimatedThemeState();
 }
 
 class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
@@ -239,13 +238,13 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
-    _data = visitor(_data, widget.data, (dynamic value) => new ThemeDataTween(begin: value));
+    _data = visitor(_data, widget.data, (dynamic value) => ThemeDataTween(begin: value));
     assert(_data != null);
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Theme(
+    return Theme(
       isMaterialAppTheme: widget.isMaterialAppTheme,
       child: widget.child,
       data: _data.evaluate(animation)
@@ -255,6 +254,6 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<ThemeDataTween>('data', _data, showName: false, defaultValue: null));
+    description.add(DiagnosticsProperty<ThemeDataTween>('data', _data, showName: false, defaultValue: null));
   }
 }

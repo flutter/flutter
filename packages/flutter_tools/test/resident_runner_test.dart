@@ -18,13 +18,13 @@ class TestRunner extends ResidentRunner {
   String receivedCommand;
 
   @override
-  Future<Null> cleanupAfterSignal() => null;
+  Future<void> cleanupAfterSignal() => null;
 
   @override
-  Future<Null> cleanupAtFinish() => null;
+  Future<void> cleanupAtFinish() => null;
 
   @override
-  Future<Null> handleTerminalCommand(String code) async {
+  Future<void> handleTerminalCommand(String code) async {
     receivedCommand = code;
   }
 
@@ -46,8 +46,8 @@ void main() {
   TestRunner createTestRunner() {
     // TODO(jacobr): make these tests run with `trackWidgetCreation: true` as
     // well as the default flags.
-    return new TestRunner(
-      <FlutterDevice>[new FlutterDevice(new MockDevice(), trackWidgetCreation: false)],
+    return TestRunner(
+      <FlutterDevice>[FlutterDevice(MockDevice(), trackWidgetCreation: false)],
     );
   }
 

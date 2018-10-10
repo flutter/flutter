@@ -89,7 +89,7 @@ class BottomAppBar extends StatefulWidget {
   final double notchMargin;
 
   @override
-  State createState() => new _BottomAppBarState();
+  State createState() => _BottomAppBarState();
 }
 
 class _BottomAppBarState extends State<BottomAppBar> {
@@ -104,22 +104,22 @@ class _BottomAppBarState extends State<BottomAppBar> {
   @override
   Widget build(BuildContext context) {
     final CustomClipper<Path> clipper = widget.shape != null
-      ? new _BottomAppBarClipper(
+      ? _BottomAppBarClipper(
         geometry: geometryListenable,
         shape: widget.shape,
         notchMargin: widget.notchMargin,
       )
       : const ShapeBorderClipper(shape: RoundedRectangleBorder());
-    return new PhysicalShape(
+    return PhysicalShape(
       clipper: clipper,
       elevation: widget.elevation,
       color: widget.color ?? Theme.of(context).bottomAppBarColor,
       clipBehavior: widget.clipBehavior,
-      child: new Material(
+      child: Material(
         type: MaterialType.transparency,
         child: widget.child == null
           ? null
-          : new SafeArea(child: widget.child),
+          : SafeArea(child: widget.child),
       ),
     );
   }
@@ -143,7 +143,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     final Rect appBar = Offset.zero & size;
     if (geometry.value.floatingActionButtonArea == null) {
-      return new Path()..addRect(appBar);
+      return Path()..addRect(appBar);
     }
 
     // button is the floating action button's bounding rectangle in the

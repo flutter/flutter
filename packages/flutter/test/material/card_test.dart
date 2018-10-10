@@ -11,19 +11,19 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Card can take semantic text from multiple children', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Card(
+        child: Material(
+          child: Center(
+            child: Card(
               semanticContainer: false,
-              child: new Column(
+              child: Column(
                 children: <Widget>[
                   const Text('I am text!'),
                   const Text('Moar text!!1'),
-                  new MaterialButton(
+                  MaterialButton(
                     child: const Text('Button'),
                     onPressed: () { },
                   )
@@ -36,19 +36,19 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics(
+          TestSemantics(
             id: 1,
             label: 'I am text!',
             textDirection: TextDirection.ltr,
           ),
-          new TestSemantics(
+          TestSemantics(
             id: 2,
             label: 'Moar text!!1',
              textDirection: TextDirection.ltr,
           ),
-          new TestSemantics(
+          TestSemantics(
             id: 3,
             label: 'Button',
             textDirection: TextDirection.ltr,
@@ -71,17 +71,17 @@ void main() {
   });
 
   testWidgets('Card merges children when it is a semanticContainer', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     debugResetSemanticsIdCounter();
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Card(
+        child: Material(
+          child: Center(
+            child: Card(
               semanticContainer: true,
-              child: new Column(
+              child: Column(
                 children: const <Widget>[
                   Text('First child'),
                   Text('Second child')
@@ -94,9 +94,9 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics(
+          TestSemantics(
             id: 1,
             label: 'First child\nSecond child',
             textDirection: TextDirection.ltr,
@@ -114,10 +114,10 @@ void main() {
     const Key contentsKey = ValueKey<String>('contents');
 
     await tester.pumpWidget(
-      new Container(
+      Container(
         alignment: Alignment.topLeft,
-        child: new Card(
-          child: new Container(
+        child: Card(
+          child: Container(
             key: contentsKey,
             color: const Color(0xFF00FF00),
             width: 100.0,
@@ -135,11 +135,11 @@ void main() {
     expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
 
     await tester.pumpWidget(
-      new Container(
+      Container(
         alignment: Alignment.topLeft,
-        child: new Card(
+        child: Card(
           margin: EdgeInsets.zero,
-          child: new Container(
+          child: Container(
             key: contentsKey,
             color: const Color(0xFF00FF00),
             width: 100.0,

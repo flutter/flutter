@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 class AnimatedIconsTestApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return const MaterialApp(
       title: 'Animated Icons Test',
-      home: const Scaffold(
+      home: Scaffold(
         body: IconsList(),
       ),
     );
@@ -21,8 +21,8 @@ class IconsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ListView(
-      children: samples.map((IconSample s) => new IconSampleRow(s)).toList(),
+    return ListView(
+      children: samples.map<IconSampleRow>((IconSample s) => IconSampleRow(s)).toList(),
     );
   }
 }
@@ -33,7 +33,7 @@ class IconSampleRow extends StatefulWidget {
   final IconSample sample;
 
   @override
-  State createState() => new IconSampleRowState();
+  State createState() => IconSampleRowState();
 }
 
 class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderStateMixin {
@@ -41,17 +41,17 @@ class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderS
 
   @override
   Widget build(BuildContext context) {
-    return new ListTile(
-      leading: new InkWell(
+    return ListTile(
+      leading: InkWell(
         onTap: () { progress.forward(from: 0.0); },
-        child: new AnimatedIcon(
+        child: AnimatedIcon(
           icon: widget.sample.icon,
           progress: progress,
           color: Colors.lightBlue,
         ),
       ),
-      title: new Text(widget.sample.description),
-      subtitle: new Slider(
+      title: Text(widget.sample.description),
+      subtitle: Slider(
         value: progress.value,
         onChanged: (double v) { progress.animateTo(v, duration: Duration.zero); },
       ),
@@ -61,7 +61,7 @@ class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderS
   @override
   void initState() {
     super.initState();
-    progress = new AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    progress = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
     progress.addListener(_handleChange);
   }
 
@@ -105,4 +105,4 @@ class IconSample {
   final String description;
 }
 
-void main() => runApp(new AnimatedIconsTestApp());
+void main() => runApp(AnimatedIconsTestApp());

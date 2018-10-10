@@ -57,8 +57,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 50.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 50.0, 6.0))
     );
 
     expect(tester.binding.transientCallbackCount, 0);
@@ -80,8 +80,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(150.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(150.0, 0.0, 200.0, 6.0))
     );
 
     expect(tester.binding.transientCallbackCount, 0);
@@ -107,8 +107,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 6.0))
     );
 
     expect(tester.binding.transientCallbackCount, 1);
@@ -134,8 +134,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(200.0 - animationValue * 200.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(200.0 - animationValue * 200.0, 0.0, 200.0, 6.0))
     );
 
     expect(tester.binding.transientCallbackCount, 1);
@@ -161,8 +161,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 50.0, 6.0), color: Colors.white)
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 50.0, 6.0), color: Colors.white)
     );
   });
 
@@ -183,14 +183,14 @@ void main() {
   });
 
   testWidgets('LinearProgressIndicator causes a repaint when it changes', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView(children: const <Widget>[LinearProgressIndicator(value: 0.0)]),
+      child: ListView(children: const <Widget>[LinearProgressIndicator(value: 0.0)]),
     ));
     final List<Layer> layers1 = tester.layers;
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView(children: const <Widget>[LinearProgressIndicator(value: 0.5)])),
+      child: ListView(children: const <Widget>[LinearProgressIndicator(value: 0.5)])),
     );
     final List<Layer> layers2 = tester.layers;
     expect(layers1, isNot(equals(layers2)));
@@ -222,7 +222,7 @@ void main() {
     );
     expect(tester.hasRunningAnimations, isTrue);
 
-    await tester.pump(const Duration(milliseconds: 6666));
+    await tester.pump(const Duration(seconds: 5));
     expect(tester.hasRunningAnimations, isTrue);
 
     await tester.pump(const Duration(milliseconds: 1));
@@ -232,4 +232,27 @@ void main() {
     expect(tester.hasRunningAnimations, isTrue);
   });
 
+  testWidgets('Determinate CircularProgressIndicator stops the animator', (WidgetTester tester) async {
+    double progressValue;
+    StateSetter setState;
+    await tester.pumpWidget(
+      Center(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return CircularProgressIndicator(value: progressValue);
+          }
+        ),
+      )
+    );
+    expect(tester.hasRunningAnimations, isTrue);
+
+    setState(() { progressValue = 1.0; });
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(tester.hasRunningAnimations, isFalse);
+
+    setState(() { progressValue = null; });
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(tester.hasRunningAnimations, isTrue);
+  });
 }

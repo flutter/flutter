@@ -44,14 +44,14 @@ Future<Null> main() async {
     // Verify that _kUnsynchronizedDemos and _kSkippedDemos identify
     // demos that actually exist.
     final List<String> allDemoTitles = kAllGalleryDemos.map((GalleryDemo demo) => demo.title).toList();
-    if (!new Set<String>.from(allDemoTitles).containsAll(_kUnsynchronizedDemoTitles))
+    if (!Set<String>.from(allDemoTitles).containsAll(_kUnsynchronizedDemoTitles))
       fail('Unrecognized demo titles in _kUnsynchronizedDemosTitles: $_kUnsynchronizedDemoTitles');
-    if (!new Set<String>.from(allDemoTitles).containsAll(_kSkippedDemoTitles))
+    if (!Set<String>.from(allDemoTitles).containsAll(_kSkippedDemoTitles))
       fail('Unrecognized demo names in _kSkippedDemoTitles: $_kSkippedDemoTitles');
 
     print('Starting app...');
     runApp(const GalleryApp(testMode: true));
-    final _LiveWidgetController controller = new _LiveWidgetController(WidgetsBinding.instance);
+    final _LiveWidgetController controller = _LiveWidgetController(WidgetsBinding.instance);
     for (GalleryDemoCategory category in kAllGalleryDemoCategories) {
       print('Tapping "${category.name}" section...');
       await controller.tap(find.text(category.name));
@@ -90,7 +90,7 @@ class _LiveWidgetController extends LiveWidgetController {
 
   /// Waits until at the end of a frame the provided [condition] is [true].
   Future<Null> _waitUntilFrame(bool condition(), [Completer<Null> completer]) {
-    completer ??= new Completer<Null>();
+    completer ??= Completer<Null>();
     if (!condition()) {
       SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
         _waitUntilFrame(condition, completer);

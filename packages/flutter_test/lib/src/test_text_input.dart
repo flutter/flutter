@@ -104,11 +104,11 @@ class TestTextInput {
     // Not using the `expect` function because in the case of a FlutterDriver
     // test this code does not run in a package:test test zone.
     if (_client == 0)
-      throw new TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
+      throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
     BinaryMessages.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
-        new MethodCall(
+        MethodCall(
           'TextInputClient.updateEditingState',
           <dynamic>[_client, value.toJSON()],
         ),
@@ -119,7 +119,7 @@ class TestTextInput {
 
   /// Simulates the user typing the given text.
   void enterText(String text) {
-    updateEditingValue(new TextEditingValue(
+    updateEditingValue(TextEditingValue(
       text: text,
     ));
   }
@@ -132,15 +132,15 @@ class TestTextInput {
       // Not using the `expect` function because in the case of a FlutterDriver
       // test this code does not run in a package:test test zone.
       if (_client == 0) {
-        throw new TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
+        throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
       }
 
-      final Completer<Null> completer = new Completer<Null>();
+      final Completer<Null> completer = Completer<Null>();
 
       BinaryMessages.handlePlatformMessage(
         SystemChannels.textInput.name,
         SystemChannels.textInput.codec.encodeMethodCall(
-          new MethodCall(
+          MethodCall(
             'TextInputClient.performAction',
             <dynamic>[_client, action.toString()],
           ),

@@ -47,7 +47,7 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsStream();
 
   Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().transform(gzip.encoder);
+    return contentsAsStream().transform<List<int>>(gzip.encoder);
   }
 
   /// Return the list of files this content depends on.
@@ -59,7 +59,7 @@ class DevFSFileContent extends DevFSContent {
   DevFSFileContent(this.file);
 
   static DevFSFileContent clone(DevFSFileContent fsFileContent) {
-    final DevFSFileContent newFsFileContent = new DevFSFileContent(fsFileContent.file);
+    final DevFSFileContent newFsFileContent = DevFSFileContent(fsFileContent.file);
     newFsFileContent._linkTarget = fsFileContent._linkTarget;
     newFsFileContent._fileStat = fsFileContent._fileStat;
     return newFsFileContent;
@@ -83,19 +83,31 @@ class DevFSFileContent extends DevFSContent {
   void _stat() {
     if (_linkTarget != null) {
       // Stat the cached symlink target.
-      _fileStat = _linkTarget.statSync();
-      return;
+      final FileStat fileStat = _linkTarget.statSync();
+      if (fileStat.type == FileSystemEntityType.notFound) {
+        _linkTarget = null;
+      } else {
+        _fileStat = fileStat;
+        return;
+      }
     }
-    _fileStat = file.statSync();
-    if (_fileStat.type == FileSystemEntityType.link) {
+    final FileStat fileStat = file.statSync();
+    _fileStat = fileStat.type == FileSystemEntityType.notFound ? null : fileStat;
+    if (_fileStat != null && _fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
       final FileSystemEntity linkTarget = fs.file(resolved);
       // Stat the link target.
-      _fileStat = linkTarget.statSync();
-      if (devFSConfig.cacheSymlinks) {
+      final FileStat fileStat = linkTarget.statSync();
+      if (fileStat.type == FileSystemEntityType.notFound) {
+        _fileStat = null;
+        _linkTarget = null;
+      } else if (devFSConfig.cacheSymlinks) {
         _linkTarget = linkTarget;
       }
+    }
+    if (_fileStat == null) {
+      printError('Unable to get status of file "${file.path}": file not found.');
     }
   }
 
@@ -106,21 +118,29 @@ class DevFSFileContent extends DevFSContent {
   bool get isModified {
     final FileStat _oldFileStat = _fileStat;
     _stat();
-    return _oldFileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
+    if (_oldFileStat == null && _fileStat == null)
+      return false;
+    return _oldFileStat == null || _fileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
   }
 
   @override
   bool isModifiedAfter(DateTime time) {
     final FileStat _oldFileStat = _fileStat;
     _stat();
-    return _oldFileStat == null || time == null || _fileStat.modified.isAfter(time);
+    if (_oldFileStat == null && _fileStat == null)
+      return false;
+    return time == null
+        || _oldFileStat == null
+        || _fileStat == null
+        || _fileStat.modified.isAfter(time);
   }
 
   @override
   int get size {
     if (_fileStat == null)
       _stat();
-    return _fileStat.size;
+    // Can still be null if the file wasn't found.
+    return _fileStat?.size ?? 0;
   }
 
   @override
@@ -137,14 +157,14 @@ class DevFSByteContent extends DevFSContent {
   List<int> _bytes;
 
   bool _isModified = true;
-  DateTime _modificationTime = new DateTime.now();
+  DateTime _modificationTime = DateTime.now();
 
   List<int> get bytes => _bytes;
 
   set bytes(List<int> value) {
     _bytes = value;
     _isModified = true;
-    _modificationTime = new DateTime.now();
+    _modificationTime = DateTime.now();
   }
 
   /// Return true only once so that the content is written to the device only once.
@@ -168,7 +188,7 @@ class DevFSByteContent extends DevFSContent {
 
   @override
   Stream<List<int>> contentsAsStream() =>
-      new Stream<List<int>>.fromIterable(<List<int>>[_bytes]);
+      Stream<List<int>>.fromIterable(<List<int>>[_bytes]);
 }
 
 /// String content to be copied to the device.
@@ -201,9 +221,9 @@ abstract class DevFSOperations {
 /// An implementation of [DevFSOperations] that speaks to the
 /// vm service.
 class ServiceProtocolDevFSOperations implements DevFSOperations {
-  final VMService vmService;
-
   ServiceProtocolDevFSOperations(this.vmService);
+
+  final VMService vmService;
 
   @override
   Future<Uri> create(String fsName) async {
@@ -264,14 +284,14 @@ class _DevFSHttpWriter {
 
   int _inFlight = 0;
   Map<Uri, DevFSContent> _outstanding;
-  Completer<Null> _completer;
+  Completer<void> _completer;
   HttpClient _client;
 
-  Future<Null> write(Map<Uri, DevFSContent> entries) async {
-    _client = new HttpClient();
+  Future<void> write(Map<Uri, DevFSContent> entries) async {
+    _client = HttpClient();
     _client.maxConnectionsPerHost = kMaxInFlight;
-    _completer = new Completer<Null>();
-    _outstanding = new Map<Uri, DevFSContent>.from(entries);
+    _completer = Completer<void>();
+    _outstanding = Map<Uri, DevFSContent>.from(entries);
     _scheduleWrites();
     await _completer.future;
     _client.close();
@@ -290,7 +310,7 @@ class _DevFSHttpWriter {
     }
   }
 
-  Future<Null> _scheduleWrite(
+  Future<void> _scheduleWrite(
     Uri deviceUri,
     DevFSContent content, [
     int retry = 0,
@@ -304,7 +324,7 @@ class _DevFSHttpWriter {
       final Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       final HttpClientResponse response = await request.close();
-      await response.drain<Null>();
+      await response.drain<void>();
     } on SocketException catch (socketException, stackTrace) {
       // We have one completer and can get up to kMaxInFlight errors.
       if (!_completer.isCompleted)
@@ -322,7 +342,7 @@ class _DevFSHttpWriter {
     }
     _inFlight--;
     if ((_outstanding.isEmpty) && (_inFlight == 0)) {
-      _completer.complete(null);
+      _completer.complete();
     } else {
       _scheduleWrites();
     }
@@ -336,8 +356,8 @@ class DevFS {
         this.rootDirectory, {
         String packagesFilePath
       })
-    : _operations = new ServiceProtocolDevFSOperations(serviceProtocol),
-      _httpWriter = new _DevFSHttpWriter(fsName, serviceProtocol) {
+    : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
+      _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol) {
     _packagesFilePath =
         packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
   }
@@ -358,7 +378,7 @@ class DevFS {
   final Directory rootDirectory;
   String _packagesFilePath;
   final Map<Uri, DevFSContent> _entries = <Uri, DevFSContent>{};
-  final Set<String> assetPathsToEvict = new Set<String>();
+  final Set<String> assetPathsToEvict = Set<String>();
 
   final List<Future<Map<String, dynamic>>> _pendingOperations =
       <Future<Map<String, dynamic>>>[];
@@ -392,7 +412,7 @@ class DevFS {
     return _baseUri;
   }
 
-  Future<Null> destroy() async {
+  Future<void> destroy() async {
     printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
     await _operations.destroy(fsName);
     printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
@@ -445,7 +465,7 @@ class DevFS {
       if (!content._exists) {
         final Future<Map<String, dynamic>> operation =
             _operations.deleteFile(fsName, deviceUri)
-            .then((dynamic v) => v?.cast<String,dynamic>());
+            .then<Map<String, dynamic>>((dynamic v) => v?.cast<String,dynamic>());
         if (operation != null)
           _pendingOperations.add(operation);
         toRemove.add(deviceUri);
@@ -458,7 +478,7 @@ class DevFS {
     if (toRemove.isNotEmpty) {
       printTrace('Removing deleted files');
       toRemove.forEach(_entries.remove);
-      await Future.wait(_pendingOperations);
+      await Future.wait<Map<String, dynamic>>(_pendingOperations);
       _pendingOperations.clear();
     }
 
@@ -485,7 +505,7 @@ class DevFS {
     // run with no changes is supposed to be fast (considering that it is
     // initiated by user key press).
     final List<String> invalidatedFiles = <String>[];
-    final Set<Uri> filesUris = new Set<Uri>();
+    final Set<Uri> filesUris = Set<Uri>();
     for (Uri uri in dirtyEntries.keys.toList()) {
       if (!uri.path.startsWith(assetBuildDirPrefix)) {
         final DevFSContent content = dirtyEntries[uri];
@@ -509,16 +529,20 @@ class DevFS {
       outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
       packagesFilePath : _packagesFilePath,
     );
-    final String compiledBinary = compilerOutput?.outputFilename;
-    if (compiledBinary != null && compiledBinary.isNotEmpty) {
-      final Uri entryUri = fs.path.toUri(projectRootPath != null
-        ? fs.path.relative(pathToReload, from: projectRootPath)
-        : pathToReload,
-      );
-      if (!dirtyEntries.containsKey(entryUri)) {
-        final DevFSFileContent content = new DevFSFileContent(fs.file(compiledBinary));
-        dirtyEntries[entryUri] = content;
-        numBytes += content.size;
+    // Don't send full kernel file that would overwrite what VM already
+    // started loading from.
+    if (!bundleFirstUpload) {
+      final String compiledBinary = compilerOutput?.outputFilename;
+      if (compiledBinary != null && compiledBinary.isNotEmpty) {
+        final Uri entryUri = fs.path.toUri(projectRootPath != null
+          ? fs.path.relative(pathToReload, from: projectRootPath)
+          : pathToReload,
+        );
+        if (!dirtyEntries.containsKey(entryUri)) {
+          final DevFSFileContent content = DevFSFileContent(fs.file(compiledBinary));
+          dirtyEntries[entryUri] = content;
+          numBytes += content.size;
+        }
       }
     }
     if (dirtyEntries.isNotEmpty) {
@@ -528,21 +552,21 @@ class DevFS {
           await _httpWriter.write(dirtyEntries);
         } on SocketException catch (socketException, stackTrace) {
           printTrace('DevFS sync failed. Lost connection to device: $socketException');
-          throw new DevFSException('Lost connection to device.', socketException, stackTrace);
+          throw DevFSException('Lost connection to device.', socketException, stackTrace);
         } catch (exception, stackTrace) {
           printError('Could not update files on device: $exception');
-          throw new DevFSException('Sync failed', exception, stackTrace);
+          throw DevFSException('Sync failed', exception, stackTrace);
         }
       } else {
         // Make service protocol requests for each.
         dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
           final Future<Map<String, dynamic>> operation =
               _operations.writeFile(fsName, deviceUri, content)
-                  .then((dynamic v) => v?.cast<String, dynamic>());
+                  .then<Map<String, dynamic>>((dynamic v) => v?.cast<String, dynamic>());
           if (operation != null)
             _pendingOperations.add(operation);
         });
-        await Future.wait(_pendingOperations, eagerError: true);
+        await Future.wait<Map<String, dynamic>>(_pendingOperations, eagerError: true);
         _pendingOperations.clear();
       }
     }
@@ -552,7 +576,7 @@ class DevFS {
   }
 
   void _scanFile(Uri deviceUri, FileSystemEntity file) {
-    final DevFSContent content = _entries.putIfAbsent(deviceUri, () => new DevFSFileContent(file));
+    final DevFSContent content = _entries.putIfAbsent(deviceUri, () => DevFSFileContent(file));
     content._exists = true;
   }
 
@@ -601,7 +625,7 @@ class DevFS {
     if (directoryUriOnDevice == null) {
       final String relativeRootPath = fs.path.relative(directory.path, from: rootDirectory.path);
       if (relativeRootPath == '.') {
-        directoryUriOnDevice = new Uri();
+        directoryUriOnDevice = Uri();
       } else {
         directoryUriOnDevice = fs.path.toUri(relativeRootPath);
       }
@@ -697,9 +721,9 @@ class DevFS {
     );
   }
 
-  Future<Null> _scanPackages(Set<String> fileFilter) async {
+  Future<void> _scanPackages(Set<String> fileFilter) async {
     StringBuffer sb;
-    final PackageMap packageMap = new PackageMap(_packagesFilePath);
+    final PackageMap packageMap = PackageMap(_packagesFilePath);
 
     for (String packageName in packageMap.map.keys) {
       final Uri packageUri = packageMap.map[packageName];
@@ -726,7 +750,7 @@ class DevFS {
                                  fileFilter: fileFilter);
       }
       if (packageExists) {
-        sb ??= new StringBuffer();
+        sb ??= StringBuffer();
         sb.writeln('$packageName:$directoryUriOnDevice');
       }
     }

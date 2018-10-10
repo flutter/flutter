@@ -9,9 +9,9 @@ import '../widgets/gestures.dart';
 
 void main() {
   testWidgets('Tap on center change color', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new GestureDemo(),
+      child: GestureDemo(),
     ));
     final Finder finder = find.byType(GestureDemo);
 

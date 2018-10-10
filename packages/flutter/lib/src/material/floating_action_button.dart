@@ -109,8 +109,8 @@ class FloatingActionButton extends StatefulWidget {
         assert(clipBehavior != null),
         _sizeConstraints = _kExtendedSizeConstraints,
         mini = false,
-        child = new _ChildOverflowBox(
-          child: new Row(
+        child = _ChildOverflowBox(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               const SizedBox(width: 16.0),
@@ -222,7 +222,7 @@ class FloatingActionButton extends StatefulWidget {
   final BoxConstraints _sizeConstraints;
 
   @override
-  _FloatingActionButtonState createState() => new _FloatingActionButtonState();
+  _FloatingActionButtonState createState() => _FloatingActionButtonState();
 }
 
 class _FloatingActionButtonState extends State<FloatingActionButton> {
@@ -242,14 +242,14 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
 
     if (widget.child != null) {
       result = IconTheme.merge(
-        data: new IconThemeData(
+        data: IconThemeData(
           color: foregroundColor,
         ),
         child: widget.child,
       );
     }
 
-    result = new RawMaterialButton(
+    result = RawMaterialButton(
       onPressed: widget.onPressed,
       onHighlightChanged: _handleHighlightChanged,
       elevation: _highlight ? widget.highlightElevation : widget.elevation,
@@ -266,8 +266,8 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     );
 
     if (widget.tooltip != null) {
-      result = new MergeSemantics(
-        child: new Tooltip(
+      result = MergeSemantics(
+        child: Tooltip(
           message: widget.tooltip,
           child: result,
         ),
@@ -275,7 +275,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     }
 
     if (widget.heroTag != null) {
-      result = new Hero(
+      result = Hero(
         tag: widget.heroTag,
         child: result,
       );
@@ -298,7 +298,7 @@ class _ChildOverflowBox extends SingleChildRenderObjectWidget {
 
   @override
   _RenderChildOverflowBox createRenderObject(BuildContext context) {
-    return new _RenderChildOverflowBox(
+    return _RenderChildOverflowBox(
       textDirection: Directionality.of(context),
     );
   }
@@ -326,7 +326,7 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
   void performLayout() {
     if (child != null) {
       child.layout(const BoxConstraints(), parentUsesSize: true);
-      size = new Size(
+      size = Size(
         math.max(constraints.minWidth, math.min(constraints.maxWidth, child.size.width)),
         math.max(constraints.minHeight, math.min(constraints.maxHeight, child.size.height)),
       );

@@ -90,7 +90,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
   const InheritedModel({ Key key, Widget child }) : super(key: key, child: child);
 
   @override
-  InheritedModelElement<T> createElement() => new InheritedModelElement<T>(this);
+  InheritedModelElement<T> createElement() => InheritedModelElement<T>(this);
 
   /// Return true if the changes between this model and [oldWidget] match any
   /// of the [dependencies].
@@ -179,10 +179,10 @@ class InheritedModelElement<T> extends InheritedElement {
       return;
 
     if (aspect == null) {
-      setDependencies(dependent, new HashSet<T>());
+      setDependencies(dependent, HashSet<T>());
     } else {
       assert(aspect is T);
-      setDependencies(dependent, (dependencies ?? new HashSet<T>())..add(aspect));
+      setDependencies(dependent, (dependencies ?? HashSet<T>())..add(aspect));
     }
   }
 

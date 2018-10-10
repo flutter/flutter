@@ -8,18 +8,18 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('FractionallySizedBox', (WidgetTester tester) async {
-    final GlobalKey inner = new GlobalKey();
-    await tester.pumpWidget(new OverflowBox(
+    final GlobalKey inner = GlobalKey();
+    await tester.pumpWidget(OverflowBox(
       minWidth: 0.0,
       maxWidth: 100.0,
       minHeight: 0.0,
       maxHeight: 100.0,
       alignment: const Alignment(-1.0, -1.0),
-      child: new Center(
-        child: new FractionallySizedBox(
+      child: Center(
+        child: FractionallySizedBox(
           widthFactor: 0.5,
           heightFactor: 0.25,
-          child: new Container(
+          child: Container(
             key: inner
           )
         )

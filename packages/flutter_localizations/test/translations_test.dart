@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   for (String language in kSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
-      final Locale locale = new Locale(language, '');
+      final Locale locale = Locale(language, '');
 
       expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
 
@@ -116,23 +116,36 @@ void main() {
     expect(localizations.selectedRowCountTitle(10000), '10.000 de articole selectate');
     expect(localizations.selectedRowCountTitle(10019), '10.019 articole selectate');
     expect(localizations.selectedRowCountTitle(123456789), '123.456.789 de articole selectate');
+
+    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('km', ''));
+    expect(localizations.selectedRowCountTitle(0), 'បានជ្រើស 0 ធាតុ');
+    expect(localizations.selectedRowCountTitle(1), 'បានជ្រើស 1 ធាតុ');
+    expect(localizations.selectedRowCountTitle(2), 'បានជ្រើស 2 ធាតុ');
+    expect(localizations.selectedRowCountTitle(3), 'បានជ្រើស 3 ធាតុ');
+    expect(localizations.selectedRowCountTitle(5), 'បានជ្រើស 5 ធាតុ');
+    expect(localizations.selectedRowCountTitle(10), 'បានជ្រើស 10 ធាតុ');
+    expect(localizations.selectedRowCountTitle(15), 'បានជ្រើស 15 ធាតុ');
+    expect(localizations.selectedRowCountTitle(29), 'បានជ្រើស 29 ធាតុ');
+    expect(localizations.selectedRowCountTitle(10000), 'បានជ្រើស 10.000 ធាតុ');
+    expect(localizations.selectedRowCountTitle(10019), 'បានជ្រើស 10.019 ធាតុ');
+    expect(localizations.selectedRowCountTitle(123456789), 'បានជ្រើស 123.456.789 ធាតុ');
   });
 
   testWidgets('spot check formatMediumDate(), formatFullDate() translations', (WidgetTester tester) async {
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', ''));
-    expect(localizations.formatMediumDate(new DateTime(2015, 7, 23)), 'Thu, Jul 23');
-    expect(localizations.formatFullDate(new DateTime(2015, 7, 23)), 'Thursday, July 23, 2015');
+    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Thu, Jul 23');
+    expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, July 23, 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'GB'));
-    expect(localizations.formatMediumDate(new DateTime(2015, 7, 23)), 'Thu 23 Jul');
-    expect(localizations.formatFullDate(new DateTime(2015, 7, 23)), 'Thursday, 23 July 2015');
+    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Thu 23 Jul');
+    expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, 23 July 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('es', ''));
-    expect(localizations.formatMediumDate(new DateTime(2015, 7, 23)), 'jue., 23 jul.');
-    expect(localizations.formatFullDate(new DateTime(2015, 7, 23)), 'jueves, 23 de julio de 2015');
+    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'jue., 23 jul.');
+    expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'jueves, 23 de julio de 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('de', ''));
-    expect(localizations.formatMediumDate(new DateTime(2015, 7, 23)), 'Do., 23. Juli');
-    expect(localizations.formatFullDate(new DateTime(2015, 7, 23)), 'Donnerstag, 23. Juli 2015');
+    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Do., 23. Juli');
+    expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Donnerstag, 23. Juli 2015');
   });
 }

@@ -10,7 +10,7 @@ import '../widgets/semantics_tester.dart';
 
 Future<Null> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async {
   await tester.pumpWidget(
-    new Directionality(
+    Directionality(
       textDirection: TextDirection.ltr,
       child: widget,
     ),
@@ -20,7 +20,7 @@ Future<Null> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async
 void main() {
   testWidgets('Need at least 2 tabs', (WidgetTester tester) async {
     try {
-      await pumpWidgetWithBoilerplate(tester, new CupertinoTabBar(
+      await pumpWidgetWithBoilerplate(tester, CupertinoTabBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: ImageIcon(TestImageProvider(24, 24)),
@@ -36,9 +36,9 @@ void main() {
   });
 
   testWidgets('Active and inactive colors', (WidgetTester tester) async {
-    await pumpWidgetWithBoilerplate(tester, new MediaQuery(
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),
-      child: new CupertinoTabBar(
+      child: CupertinoTabBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: ImageIcon(TestImageProvider(24, 24)),
@@ -68,8 +68,41 @@ void main() {
     expect(actualActive.text.style.color, const Color(0xFF123456));
   });
 
+  testWidgets('Use active icon', (WidgetTester tester) async {
+    const TestImageProvider activeIcon = TestImageProvider(16, 16);
+    const TestImageProvider inactiveIcon = TestImageProvider(24, 24);
+
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoTabBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            title: Text('Tab 1'),
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(inactiveIcon),
+            activeIcon: ImageIcon(activeIcon),
+            title: Text('Tab 2'),
+          ),
+        ],
+        currentIndex: 1,
+        activeColor: const Color(0xFF123456),
+        inactiveColor: const Color(0xFF654321),
+      ),
+    ));
+
+    final Image image = tester.widget(find.descendant(
+      of: find.widgetWithText(GestureDetector, 'Tab 2'),
+      matching: find.byType(Image)
+    ));
+
+    expect(image.color, const Color(0xFF123456));
+    expect(image.image, activeIcon);
+  });
+
   testWidgets('Adjusts height to account for bottom padding', (WidgetTester tester) async {
-    final CupertinoTabBar tabBar = new CupertinoTabBar(
+    final CupertinoTabBar tabBar = CupertinoTabBar(
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: ImageIcon(TestImageProvider(24, 24)),
@@ -83,9 +116,9 @@ void main() {
     );
 
     // Verify height with no bottom padding.
-    await pumpWidgetWithBoilerplate(tester, new MediaQuery(
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),
-      child: new CupertinoTabScaffold(
+      child: CupertinoTabScaffold(
         tabBar: tabBar,
         tabBuilder: (BuildContext context, int index) {
           return const Placeholder();
@@ -95,9 +128,9 @@ void main() {
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, 50.0);
 
     // Verify height with bottom padding.
-    await pumpWidgetWithBoilerplate(tester, new MediaQuery(
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
-      child: new CupertinoTabScaffold(
+      child: CupertinoTabScaffold(
         tabBar: tabBar,
         tabBuilder: (BuildContext context, int index) {
           return const Placeholder();
@@ -108,9 +141,9 @@ void main() {
   });
 
   testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
-    await pumpWidgetWithBoilerplate(tester, new MediaQuery(
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),
-      child: new CupertinoTabBar(
+      child: CupertinoTabBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: ImageIcon(TestImageProvider(24, 24)),
@@ -126,9 +159,9 @@ void main() {
 
     expect(find.byType(BackdropFilter), findsOneWidget);
 
-    await pumpWidgetWithBoilerplate(tester, new MediaQuery(
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),
-      child: new CupertinoTabBar(
+      child: CupertinoTabBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: ImageIcon(TestImageProvider(24, 24)),
@@ -149,9 +182,9 @@ void main() {
   testWidgets('Tap callback', (WidgetTester tester) async {
     int callbackTab;
 
-      await pumpWidgetWithBoilerplate(tester, new MediaQuery(
+      await pumpWidgetWithBoilerplate(tester, MediaQuery(
         data: const MediaQueryData(),
-        child: new CupertinoTabBar(
+        child: CupertinoTabBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: ImageIcon(TestImageProvider(24, 24)),
@@ -172,11 +205,11 @@ void main() {
   });
 
   testWidgets('tabs announce semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-    await pumpWidgetWithBoilerplate(tester, new MediaQuery(
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),
-      child: new CupertinoTabBar(
+      child: CupertinoTabBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: ImageIcon(TestImageProvider(24, 24)),

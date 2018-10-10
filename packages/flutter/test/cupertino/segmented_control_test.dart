@@ -24,10 +24,10 @@ StatefulBuilder setupSimpleSegmentedControl() {
   children[1] = const Text('Child 2');
   int sharedValue = 0;
 
-  return new StatefulBuilder(
+  return StatefulBuilder(
     builder: (BuildContext context, StateSetter setState) {
       return boilerplate(
-        child: new CupertinoSegmentedControl<int>(
+        child: CupertinoSegmentedControl<int>(
           children: children,
           onValueChanged: (int newValue) {
             setState(() {
@@ -42,9 +42,9 @@ StatefulBuilder setupSimpleSegmentedControl() {
 }
 
 Widget boilerplate({Widget child}) {
-  return new Directionality(
+  return Directionality(
     textDirection: TextDirection.ltr,
-    child: new Center(child: child),
+    child: Center(child: child),
   );
 }
 
@@ -62,10 +62,10 @@ void main() {
     int sharedValue = 0;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
@@ -92,7 +92,7 @@ void main() {
     try {
       await tester.pumpWidget(
         boilerplate(
-          child: new CupertinoSegmentedControl<int>(
+          child: CupertinoSegmentedControl<int>(
             children: children,
             onValueChanged: (int newValue) {},
           ),
@@ -107,7 +107,7 @@ void main() {
 
       await tester.pumpWidget(
         boilerplate(
-          child: new CupertinoSegmentedControl<int>(
+          child: CupertinoSegmentedControl<int>(
             children: children,
             onValueChanged: (int newValue) {},
           ),
@@ -128,7 +128,7 @@ void main() {
     try {
       await tester.pumpWidget(
         boilerplate(
-          child: new CupertinoSegmentedControl<int>(
+          child: CupertinoSegmentedControl<int>(
             children: children,
             onValueChanged: (int newValue) {},
             groupValue: 2,
@@ -147,7 +147,7 @@ void main() {
     try {
       await tester.pumpWidget(
         boilerplate(
-          child: new CupertinoSegmentedControl<int>(
+          child: CupertinoSegmentedControl<int>(
             children: null,
             onValueChanged: (int newValue) {},
           ),
@@ -165,7 +165,7 @@ void main() {
     try {
       await tester.pumpWidget(
         boilerplate(
-          child: new CupertinoSegmentedControl<int>(
+          child: CupertinoSegmentedControl<int>(
             children: children,
             onValueChanged: null,
           ),
@@ -179,7 +179,7 @@ void main() {
     try {
       await tester.pumpWidget(
         boilerplate(
-          child: new CupertinoSegmentedControl<int>(
+          child: CupertinoSegmentedControl<int>(
             children: children,
             onValueChanged: (int newValue) {},
             unselectedColor: null,
@@ -201,10 +201,10 @@ void main() {
     int sharedValue = 0;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -245,10 +245,10 @@ void main() {
     int sharedValue = 0;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -300,14 +300,14 @@ void main() {
     children[1] = const Text('Child 2');
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Align(
+        child: Align(
           alignment: Alignment.topLeft,
-          child: new SizedBox(
+          child: SizedBox(
             width: 200.0,
             height: 200.0,
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {},
             ),
@@ -329,10 +329,10 @@ void main() {
     bool value = false;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 value = true;
@@ -359,10 +359,10 @@ void main() {
     const int sharedValue = 0;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {},
               groupValue: sharedValue,
@@ -406,7 +406,7 @@ void main() {
     (WidgetTester tester) async {
       final Map<int, Widget> children = <int, Widget>{};
       children[0] = const Text('Child 1');
-      children[1] = new Container(
+      children[1] = Container(
         constraints: const BoxConstraints.tightFor(width: 50.0, height: 50.0),
       );
       children[2] = const Placeholder();
@@ -414,10 +414,10 @@ void main() {
       int sharedValue = 0;
 
       await tester.pumpWidget(
-        new StatefulBuilder(
+        StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return boilerplate(
-              child: new CupertinoSegmentedControl<int>(
+              child: CupertinoSegmentedControl<int>(
                 children: children,
                 onValueChanged: (int newValue) {
                   setState(() {
@@ -452,10 +452,10 @@ void main() {
     int sharedValue;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -508,21 +508,21 @@ void main() {
   testWidgets('Height of segmented control is determined by tallest widget',
           (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
-    children[0] = new Container(
+    children[0] = Container(
       constraints: const BoxConstraints.tightFor(height: 100.0),
     );
-    children[1] = new Container(
+    children[1] = Container(
       constraints: const BoxConstraints.tightFor(height: 400.0),
     );
-    children[2] = new Container(
+    children[2] = Container(
       constraints: const BoxConstraints.tightFor(height: 200.0),
     );
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {},
@@ -541,21 +541,21 @@ void main() {
   testWidgets('Width of each segmented control segment is determined by widest widget',
           (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
-    children[0] = new Container(
+    children[0] = Container(
       constraints: const BoxConstraints.tightFor(width: 50.0),
     );
-    children[1] = new Container(
+    children[1] = Container(
       constraints: const BoxConstraints.tightFor(width: 100.0),
     );
-    children[2] = new Container(
+    children[2] = Container(
       constraints: const BoxConstraints.tightFor(width: 200.0),
     );
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {},
@@ -588,12 +588,12 @@ void main() {
     children[1] = const Text('Child 2');
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
             child: Row(
               children: <Widget>[
-                new CupertinoSegmentedControl<int>(
+                CupertinoSegmentedControl<int>(
                   key: const ValueKey<String>('Segmented Control'),
                   children: children,
                   onValueChanged: (int newValue) {},
@@ -620,8 +620,8 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
-        child: new Center(
-          child: new CupertinoSegmentedControl<int>(
+        child: Center(
+          child: CupertinoSegmentedControl<int>(
             children: children,
             onValueChanged: (int newValue) {},
           ),
@@ -642,12 +642,12 @@ void main() {
     int sharedValue = 0;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return Directionality(
             textDirection: TextDirection.rtl,
-            child: new Center(
-              child: new CupertinoSegmentedControl<int>(
+            child: Center(
+              child: CupertinoSegmentedControl<int>(
                 children: children,
                 onValueChanged: (int newValue) {
                   setState(() {
@@ -678,7 +678,7 @@ void main() {
   });
 
   testWidgets('Segmented control semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
@@ -686,12 +686,12 @@ void main() {
     int sharedValue = 0;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return Directionality(
             textDirection: TextDirection.ltr,
-            child: new Center(
-              child: new CupertinoSegmentedControl<int>(
+            child: Center(
+              child: CupertinoSegmentedControl<int>(
                 children: children,
                 onValueChanged: (int newValue) {
                   setState(() {
@@ -709,9 +709,9 @@ void main() {
     expect(
       semantics,
         hasSemantics(
-          new TestSemantics.root(
+          TestSemantics.root(
             children: <TestSemantics>[
-              new TestSemantics.rootChild(
+              TestSemantics.rootChild(
                 label: 'Child 1',
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isButton,
@@ -722,7 +722,7 @@ void main() {
                   SemanticsAction.tap,
                 ],
               ),
-              new TestSemantics.rootChild(
+              TestSemantics.rootChild(
                 label: 'Child 2',
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isButton,
@@ -746,9 +746,9 @@ void main() {
     expect(
         semantics,
         hasSemantics(
-          new TestSemantics.root(
+          TestSemantics.root(
             children: <TestSemantics>[
-              new TestSemantics.rootChild(
+              TestSemantics.rootChild(
                 label: 'Child 1',
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isButton,
@@ -758,7 +758,7 @@ void main() {
                   SemanticsAction.tap,
                 ],
               ),
-              new TestSemantics.rootChild(
+              TestSemantics.rootChild(
                 label: 'Child 2',
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isButton,
@@ -787,10 +787,10 @@ void main() {
     int sharedValue = 1;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
@@ -812,7 +812,7 @@ void main() {
 
     // Tap just inside segment bounds
     await tester.tapAt(
-      new Offset(
+      Offset(
         centerOfSegmentedControl.dx + (childWidth / 2) - 10.0,
         centerOfSegmentedControl.dy,
       ),
@@ -859,10 +859,10 @@ void main() {
     int sharedValue = 0;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -879,10 +879,10 @@ void main() {
     await tester.tap(find.text('Child 2'));
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -899,10 +899,10 @@ void main() {
     expect(getBackgroundColor(tester, 1), const Color(0x33007aff));
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -920,10 +920,10 @@ void main() {
     expect(getBackgroundColor(tester, 1), const Color(0x64007aff));
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -941,10 +941,10 @@ void main() {
     expect(getBackgroundColor(tester, 1), const Color(0x95007aff));
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -962,10 +962,10 @@ void main() {
     expect(getBackgroundColor(tester, 1), const Color(0xc7007aff));
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -983,10 +983,10 @@ void main() {
     expect(getBackgroundColor(tester, 1), const Color(0xf8007aff));
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -1012,10 +1012,10 @@ void main() {
     int sharedValue = 0;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
@@ -1055,10 +1055,10 @@ void main() {
     int sharedValue = 0;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
@@ -1146,10 +1146,10 @@ void main() {
     int sharedValue = 0;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
@@ -1157,7 +1157,7 @@ void main() {
                   sharedValue = newValue;
                 });
                 if (sharedValue == 1) {
-                  children = new Map<int, Widget>.from(children);
+                  children = Map<int, Widget>.from(children);
                   children[3] = const Text('D');
                 }
               },
@@ -1194,10 +1194,10 @@ void main() {
     int sharedValue = 0;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
@@ -1206,7 +1206,7 @@ void main() {
                 });
                 if (sharedValue == 1) {
                   children.remove(2);
-                  children = new Map<int, Widget>.from(children);
+                  children = Map<int, Widget>.from(children);
                 }
               },
               groupValue: sharedValue,
@@ -1239,10 +1239,10 @@ void main() {
     int sharedValue = 0;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
+      StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
@@ -1251,7 +1251,7 @@ void main() {
                 });
                 if (sharedValue == 1) {
                   children.remove(1);
-                  children = new Map<int, Widget>.from(children);
+                  children = Map<int, Widget>.from(children);
                   sharedValue = null;
                 }
               },
@@ -1284,20 +1284,20 @@ void main() {
 
   testWidgets('Golden Test Placeholder Widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
-    children[0] = new Container();
+    children[0] = Container();
     children[1] = const Placeholder();
-    children[2] = new Container();
+    children[2] = Container();
 
     const int currentValue = 0;
 
     await tester.pumpWidget(
-      new RepaintBoundary(
-        child: new StatefulBuilder(
+      RepaintBoundary(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return boilerplate(
-              child: new SizedBox(
+              child: SizedBox(
                 width: 800.0,
-                child: new CupertinoSegmentedControl<int>(
+                child: CupertinoSegmentedControl<int>(
                   key: const ValueKey<String>('Segmented Control'),
                   children: children,
                   onValueChanged: (int newValue) {},
@@ -1325,13 +1325,13 @@ void main() {
     const int currentValue = 0;
 
     await tester.pumpWidget(
-      new RepaintBoundary(
-        child: new StatefulBuilder(
+      RepaintBoundary(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return boilerplate(
-              child: new SizedBox(
+              child: SizedBox(
                 width: 800.0,
-                child: new CupertinoSegmentedControl<int>(
+                child: CupertinoSegmentedControl<int>(
                   key: const ValueKey<String>('Segmented Control'),
                   children: children,
                   onValueChanged: (int newValue) {},

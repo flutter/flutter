@@ -12,7 +12,7 @@ Future<void> main() async {
 
   setUpAll(() async {
     print('Cloning goldens repository...');
-    final GoldensClient goldensClient = new GoldensClient();
+    final GoldensClient goldensClient = GoldensClient();
     await goldensClient.prepare();
   });
 

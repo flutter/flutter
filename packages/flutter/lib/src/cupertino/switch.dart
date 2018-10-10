@@ -87,20 +87,20 @@ class CupertinoSwitch extends StatefulWidget {
   final Color activeColor;
 
   @override
-  _CupertinoSwitchState createState() => new _CupertinoSwitchState();
+  _CupertinoSwitchState createState() => _CupertinoSwitchState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true));
-    properties.add(new ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
+    properties.add(FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true));
+    properties.add(ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
   }
 }
 
 class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    return new _CupertinoSwitchRenderObjectWidget(
+    return _CupertinoSwitchRenderObjectWidget(
       value: widget.value,
       activeColor: widget.activeColor ?? CupertinoColors.activeGreen,
       onChanged: widget.onChanged,
@@ -125,7 +125,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   _RenderCupertinoSwitch createRenderObject(BuildContext context) {
-    return new _RenderCupertinoSwitch(
+    return _RenderCupertinoSwitch(
       value: value,
       activeColor: activeColor,
       onChanged: onChanged,
@@ -174,30 +174,30 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
        _textDirection = textDirection,
        _vsync = vsync,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
-    _tap = new TapGestureRecognizer()
+    _tap = TapGestureRecognizer()
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap
       ..onTapUp = _handleTapUp
       ..onTapCancel = _handleTapCancel;
-    _drag = new HorizontalDragGestureRecognizer()
+    _drag = HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd;
-    _positionController = new AnimationController(
+    _positionController = AnimationController(
       duration: _kToggleDuration,
       value: value ? 1.0 : 0.0,
       vsync: vsync,
     );
-    _position = new CurvedAnimation(
+    _position = CurvedAnimation(
       parent: _positionController,
       curve: Curves.linear,
     )..addListener(markNeedsPaint)
      ..addStatusListener(_handlePositionStateChanged);
-    _reactionController = new AnimationController(
+    _reactionController = AnimationController(
       duration: _kReactionDuration,
       vsync: vsync,
     );
-    _reaction = new CurvedAnimation(
+    _reaction = CurvedAnimation(
       parent: _reactionController,
       curve: Curves.ease,
     )..addListener(markNeedsPaint);
@@ -387,7 +387,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     config.isToggled = _value;
   }
 
-  final CupertinoThumbPainter _thumbPainter = new CupertinoThumbPainter();
+  final CupertinoThumbPainter _thumbPainter = CupertinoThumbPainter();
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -409,17 +409,17 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     final Color trackColor = _value ? activeColor : _kTrackColor;
     final double borderThickness = 1.5 + (_kTrackRadius - 1.5) * math.max(currentReactionValue, currentValue);
 
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
       ..color = trackColor;
 
-    final Rect trackRect = new Rect.fromLTWH(
+    final Rect trackRect = Rect.fromLTWH(
         offset.dx + (size.width - _kTrackWidth) / 2.0,
         offset.dy + (size.height - _kTrackHeight) / 2.0,
         _kTrackWidth,
         _kTrackHeight
     );
-    final RRect outerRRect = new RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
-    final RRect innerRRect = new RRect.fromRectAndRadius(trackRect.deflate(borderThickness), const Radius.circular(_kTrackRadius));
+    final RRect outerRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
+    final RRect innerRRect = RRect.fromRectAndRadius(trackRect.deflate(borderThickness), const Radius.circular(_kTrackRadius));
     canvas.drawDRRect(outerRRect, innerRRect, paint);
 
     final double currentThumbExtension = CupertinoThumbPainter.extension * currentReactionValue;
@@ -435,7 +435,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     );
     final double thumbCenterY = offset.dy + size.height / 2.0;
 
-    _thumbPainter.paint(canvas, new Rect.fromLTRB(
+    _thumbPainter.paint(canvas, Rect.fromLTRB(
       thumbLeft,
       thumbCenterY - CupertinoThumbPainter.radius,
       thumbRight,
@@ -446,7 +446,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new FlagProperty('value', value: value, ifTrue: 'checked', ifFalse: 'unchecked', showName: true));
-    description.add(new FlagProperty('isInteractive', value: isInteractive, ifTrue: 'enabled', ifFalse: 'disabled', showName: true, defaultValue: true));
+    description.add(FlagProperty('value', value: value, ifTrue: 'checked', ifFalse: 'unchecked', showName: true));
+    description.add(FlagProperty('isInteractive', value: isInteractive, ifTrue: 'enabled', ifFalse: 'disabled', showName: true, defaultValue: true));
   }
 }

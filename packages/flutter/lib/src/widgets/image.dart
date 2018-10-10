@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/semantics.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -42,7 +43,7 @@ export 'package:flutter/painting.dart' show
 ///
 ///  * [ImageProvider], which has an example showing how this might be used.
 ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size size }) {
-  return new ImageConfiguration(
+  return ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
     devicePixelRatio: MediaQuery.of(context, nullOk: true)?.devicePixelRatio ?? 1.0,
     locale: Localizations.localeOf(context, nullOk: true),
@@ -77,7 +78,7 @@ Future<Null> precacheImage(
   ImageErrorListener onError,
 }) {
   final ImageConfiguration config = createLocalImageConfiguration(context, size: size);
-  final Completer<Null> completer = new Completer<Null>();
+  final Completer<Null> completer = Completer<Null>();
   final ImageStream stream = provider.resolve(config);
   void listener(ImageInfo image, bool sync) {
     completer.complete();
@@ -87,7 +88,7 @@ Future<Null> precacheImage(
     if (onError != null) {
       onError(exception, stackTrace);
     } else {
-      FlutterError.reportError(new FlutterErrorDetails(
+      FlutterError.reportError(FlutterErrorDetails(
         context: 'image failed to precache',
         library: 'image resource service',
         exception: exception,
@@ -97,7 +98,7 @@ Future<Null> precacheImage(
     }
   }
   stream.addListener(listener, onError: errorListener);
-  completer.future.then((Null _) { stream.removeListener(listener); });
+  completer.future.then<void>((Null _) { stream.removeListener(listener); });
   return completer.future;
 }
 
@@ -195,7 +196,7 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     Map<String, String> headers,
-  }) : image = new NetworkImage(src, scale: scale, headers: headers),
+  }) : image = NetworkImage(src, scale: scale, headers: headers),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -229,7 +230,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
-  }) : image = new FileImage(file, scale: scale),
+  }) : image = FileImage(file, scale: scale),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -249,7 +250,8 @@ class Image extends StatefulWidget {
   /// addition:
   ///
   /// * If the `scale` argument is provided and is not null, then the exact
-  /// asset specified will be used.
+  /// asset specified will be used. To display an image variant with a specific
+  /// density, the exact path must be provided (e.g. `images/2x/cat.png`).
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   //
@@ -369,8 +371,8 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     String package,
   }) : image = scale != null
-         ? new ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
-         : new AssetImage(name, bundle: bundle, package: package),
+         ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
+         : AssetImage(name, bundle: bundle, package: package),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -401,7 +403,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
-  }) : image = new MemoryImage(bytes, scale: scale),
+  }) : image = MemoryImage(bytes, scale: scale),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -526,23 +528,23 @@ class Image extends StatefulWidget {
   final bool excludeFromSemantics;
 
   @override
-  _ImageState createState() => new _ImageState();
+  _ImageState createState() => _ImageState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<ImageProvider>('image', image));
-    properties.add(new DoubleProperty('width', width, defaultValue: null));
-    properties.add(new DoubleProperty('height', height, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(new EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
-    properties.add(new EnumProperty<BoxFit>('fit', fit, defaultValue: null));
-    properties.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
-    properties.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
-    properties.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
-    properties.add(new FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
-    properties.add(new StringProperty('semanticLabel', semanticLabel, defaultValue: null));
-    properties.add(new DiagnosticsProperty<bool>('this.excludeFromSemantics', excludeFromSemantics));
+    properties.add(DiagnosticsProperty<ImageProvider>('image', image));
+    properties.add(DoubleProperty('width', width, defaultValue: null));
+    properties.add(DoubleProperty('height', height, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
+    properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
+    properties.add(DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
+    properties.add(FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
+    properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('this.excludeFromSemantics', excludeFromSemantics));
   }
 }
 
@@ -550,9 +552,12 @@ class _ImageState extends State<Image> {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
   bool _isListeningToStream = false;
+  bool _invertColors;
 
   @override
   void didChangeDependencies() {
+    _invertColors = MediaQuery.of(context, nullOk: true)?.invertColors
+      ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
     _resolveImage();
 
     if (TickerMode.of(context))
@@ -580,7 +585,7 @@ class _ImageState extends State<Image> {
     final ImageStream newStream =
       widget.image.resolve(createLocalImageConfiguration(
           context,
-          size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null
+          size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null
       ));
     assert(newStream != null);
     _updateSourceStream(newStream);
@@ -633,7 +638,7 @@ class _ImageState extends State<Image> {
 
   @override
   Widget build(BuildContext context) {
-    final RawImage image = new RawImage(
+    final RawImage image = RawImage(
       image: _imageInfo?.image,
       width: widget.width,
       height: widget.height,
@@ -645,10 +650,11 @@ class _ImageState extends State<Image> {
       repeat: widget.repeat,
       centerSlice: widget.centerSlice,
       matchTextDirection: widget.matchTextDirection,
+      invertColors: _invertColors,
     );
     if (widget.excludeFromSemantics)
       return image;
-    return new Semantics(
+    return Semantics(
       container: widget.semanticLabel != null,
       image: true,
       label: widget.semanticLabel == null ? '' : widget.semanticLabel,
@@ -659,7 +665,7 @@ class _ImageState extends State<Image> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<ImageStream>('stream', _imageStream));
-    description.add(new DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));
+    description.add(DiagnosticsProperty<ImageStream>('stream', _imageStream));
+    description.add(DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));
   }
 }

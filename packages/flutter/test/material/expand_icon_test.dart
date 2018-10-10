@@ -11,7 +11,7 @@ void main() {
 
     await tester.pumpWidget(
       wrap(
-          child: new ExpandIcon(
+          child: ExpandIcon(
             onPressed: (bool isExpanded) {
               expanded = !expanded;
             }
@@ -45,7 +45,7 @@ void main() {
 
     await tester.pumpWidget(
       wrap(
-          child: new ExpandIcon(
+          child: ExpandIcon(
             isExpanded: false,
             onPressed: (bool isExpanded) {
               expanded = !expanded;
@@ -56,7 +56,7 @@ void main() {
 
     await tester.pumpWidget(
       wrap(
-          child: new ExpandIcon(
+          child: ExpandIcon(
             isExpanded: true,
             onPressed: (bool isExpanded) {
               expanded = !expanded;
@@ -73,7 +73,7 @@ void main() {
 
     await tester.pumpWidget(
         wrap(
-            child: new ExpandIcon(
+            child: ExpandIcon(
               isExpanded: expanded,
               onPressed: (bool isExpanded) {
                 expanded = !isExpanded;
@@ -89,13 +89,13 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
     await tester.pumpWidget(wrap(
-        child: new ExpandIcon(
+        child: ExpandIcon(
           isExpanded: true,
           onPressed: (bool _) {},
         )
     ));
 
-    expect(tester.getSemanticsData(find.byType(ExpandIcon)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(ExpandIcon)), matchesSemantics(
       hasTapAction: true,
       hasEnabledState: true,
       isEnabled: true,
@@ -104,13 +104,13 @@ void main() {
     ));
 
     await tester.pumpWidget(wrap(
-      child: new ExpandIcon(
+      child: ExpandIcon(
         isExpanded: false,
         onPressed: (bool _) {},
       )
     ));
 
-    expect(tester.getSemanticsData(find.byType(ExpandIcon)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(ExpandIcon)), matchesSemantics(
       hasTapAction: true,
       hasEnabledState: true,
       isEnabled: true,
@@ -122,9 +122,9 @@ void main() {
 }
 
 Widget wrap({ Widget child }) {
-  return new MaterialApp(
-    home: new Center(
-      child: new Material(child: child),
+  return MaterialApp(
+    home: Center(
+      child: Material(child: child),
     ),
   );
 }

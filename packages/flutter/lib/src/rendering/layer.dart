@@ -104,10 +104,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   S find<S>(Offset regionOffset);
 
   /// Override this method to upload this layer to the engine.
-  ///
-  /// The `layerOffset` is the accumulated offset of this layer's parent from the
-  /// origin of the builder's coordinate system.
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset);
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]);
 
   /// The object responsible for creating this layer.
   ///
@@ -121,8 +118,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
-    properties.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
+    properties.add(DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
   }
 }
 
@@ -171,14 +168,14 @@ class PictureLayer extends Layer {
   bool willChangeHint = false;
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     builder.addPicture(layerOffset, picture, isComplexHint: isComplexHint, willChangeHint: willChangeHint);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Rect>('paint bounds', canvasBounds));
+    properties.add(DiagnosticsProperty<Rect>('paint bounds', canvasBounds));
   }
 
   @override
@@ -237,7 +234,7 @@ class TextureLayer extends Layer {
   final bool freeze;
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     final Rect shiftedRect = rect.shift(layerOffset);
     builder.addTexture(
       textureId,
@@ -305,7 +302,7 @@ class PerformanceOverlayLayer extends Layer {
   final bool checkerboardOffscreenLayers;
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     assert(optionsMask != null);
     builder.addPerformanceOverlay(optionsMask, overlayRect.shift(layerOffset));
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
@@ -454,7 +451,7 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     addChildrenToScene(builder, layerOffset);
   }
 
@@ -465,7 +462,7 @@ class ContainerLayer extends Layer {
   /// to apply effects to the scene using the [SceneBuilder] API, then insert
   /// their children using [addChildrenToScene], then reverse the aforementioned
   /// effects before returning from [addToScene].
-  void addChildrenToScene(ui.SceneBuilder builder, Offset childOffset) {
+  void addChildrenToScene(ui.SceneBuilder builder, [Offset childOffset = Offset.zero]) {
     Layer child = firstChild;
     while (child != null) {
       child.addToScene(builder, childOffset);
@@ -560,14 +557,28 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    addChildrenToScene(builder, offset + layerOffset);
+  void applyTransform(Layer child, Matrix4 transform) {
+    assert(child != null);
+    assert(transform != null);
+    transform.multiply(Matrix4.translationValues(offset.dx, offset.dy, 0.0));
+  }
+
+  @override
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+    // Skia has a fast path for concatenating scale/translation only matrices.
+    // Hence pushing a translation-only transform layer should be fast. For
+    // retained rendering, we don't want to push the offset down to each leaf
+    // node. Otherwise, changing an offset layer on the very high level could
+    // cascade the change to too many leaves.
+    builder.pushOffset(layerOffset.dx + offset.dx, layerOffset.dy + offset.dy);
+    addChildrenToScene(builder);
+    builder.pop();
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Offset>('offset', offset));
+    properties.add(DiagnosticsProperty<Offset>('offset', offset));
   }
 
   /// Capture an image of the current state of this layer and its children.
@@ -589,15 +600,15 @@ class OffsetLayer extends ContainerLayer {
   Future<ui.Image> toImage(Rect bounds, {double pixelRatio = 1.0}) async {
     assert(bounds != null);
     assert(pixelRatio != null);
-    final ui.SceneBuilder builder = new ui.SceneBuilder();
-    final Matrix4 transform = new Matrix4.translationValues(
+    final ui.SceneBuilder builder = ui.SceneBuilder();
+    final Matrix4 transform = Matrix4.translationValues(
       (-bounds.left  - offset.dx) * pixelRatio,
       (-bounds.top - offset.dy) * pixelRatio,
       0.0,
     );
     transform.scale(pixelRatio, pixelRatio);
     builder.pushTransform(transform.storage);
-    addToScene(builder, Offset.zero);
+    addToScene(builder);
     final ui.Scene scene = builder.build();
     try {
       // Size is rounded up to the next pixel to make sure we don't clip off
@@ -622,7 +633,7 @@ class ClipRectLayer extends ContainerLayer {
   ///
   /// The [clipRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRectLayer({ this.clipRect, Clip clipBehavior = Clip.antiAlias }) :
+  ClipRectLayer({ this.clipRect, Clip clipBehavior = Clip.hardEdge }) :
         _clipBehavior = clipBehavior, assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
@@ -652,7 +663,7 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -668,7 +679,7 @@ class ClipRectLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Rect>('clipRect', clipRect));
+    properties.add(DiagnosticsProperty<Rect>('clipRect', clipRect));
   }
 }
 
@@ -708,7 +719,7 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -724,7 +735,7 @@ class ClipRRectLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<RRect>('clipRRect', clipRRect));
+    properties.add(DiagnosticsProperty<RRect>('clipRRect', clipRRect));
   }
 }
 
@@ -764,7 +775,7 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -815,15 +826,15 @@ class TransformLayer extends OffsetLayer {
   bool _inverseDirty = true;
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     _lastEffectiveTransform = transform;
     final Offset totalOffset = offset + layerOffset;
     if (totalOffset != Offset.zero) {
-      _lastEffectiveTransform = new Matrix4.translationValues(totalOffset.dx, totalOffset.dy, 0.0)
+      _lastEffectiveTransform = Matrix4.translationValues(totalOffset.dx, totalOffset.dy, 0.0)
         ..multiply(_lastEffectiveTransform);
     }
     builder.pushTransform(_lastEffectiveTransform.storage);
-    addChildrenToScene(builder, Offset.zero);
+    addChildrenToScene(builder);
     builder.pop();
   }
 
@@ -835,9 +846,9 @@ class TransformLayer extends OffsetLayer {
     }
     if (_invertedTransform == null)
       return null;
-    final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
+    final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
-    return super.find<S>(new Offset(result[0], result[1]));
+    return super.find<S>(Offset(result[0], result[1]));
   }
 
   @override
@@ -850,7 +861,7 @@ class TransformLayer extends OffsetLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new TransformProperty('transform', transform));
+    properties.add(TransformProperty('transform', transform));
   }
 }
 
@@ -876,7 +887,7 @@ class OpacityLayer extends ContainerLayer {
   int alpha;
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     bool enabled = true;
     assert(() {
       enabled = !debugDisableOpacityLayers;
@@ -892,7 +903,7 @@ class OpacityLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new IntProperty('alpha', alpha));
+    properties.add(IntProperty('alpha', alpha));
   }
 }
 
@@ -923,7 +934,7 @@ class ShaderMaskLayer extends ContainerLayer {
   BlendMode blendMode;
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     builder.pushShaderMask(shader, maskRect.shift(layerOffset), blendMode);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
@@ -932,9 +943,9 @@ class ShaderMaskLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Shader>('shader', shader));
-    properties.add(new DiagnosticsProperty<Rect>('maskRect', maskRect));
-    properties.add(new DiagnosticsProperty<BlendMode>('blendMode', blendMode));
+    properties.add(DiagnosticsProperty<Shader>('shader', shader));
+    properties.add(DiagnosticsProperty<Rect>('maskRect', maskRect));
+    properties.add(DiagnosticsProperty<BlendMode>('blendMode', blendMode));
   }
 }
 
@@ -953,7 +964,7 @@ class BackdropFilterLayer extends ContainerLayer {
   ui.ImageFilter filter;
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     builder.pushBackdropFilter(filter);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
@@ -1024,7 +1035,7 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     bool enabled = true;
     assert(() {
       enabled = !debugDisablePhysicalShapeLayers;
@@ -1047,8 +1058,8 @@ class PhysicalModelLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DoubleProperty('elevation', elevation));
-    properties.add(new DiagnosticsProperty<Color>('color', color));
+    properties.add(DoubleProperty('elevation', elevation));
+    properties.add(DiagnosticsProperty<Color>('color', color));
   }
 }
 
@@ -1129,16 +1140,16 @@ class LeaderLayer extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    return super.find(regionOffset - offset);
+    return super.find<S>(regionOffset - offset);
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     assert(offset != null);
     _lastOffset = offset + layerOffset;
     if (_lastOffset != Offset.zero)
-      builder.pushTransform(new Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage);
-    addChildrenToScene(builder, Offset.zero);
+      builder.pushTransform(Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage);
+    addChildrenToScene(builder);
     if (_lastOffset != Offset.zero)
       builder.pop();
   }
@@ -1160,8 +1171,8 @@ class LeaderLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Offset>('offset', offset));
-    properties.add(new DiagnosticsProperty<LayerLink>('link', link));
+    properties.add(DiagnosticsProperty<Offset>('offset', offset));
+    properties.add(DiagnosticsProperty<LayerLink>('link', link));
   }
 }
 
@@ -1254,9 +1265,9 @@ class FollowerLayer extends ContainerLayer {
     }
     if (_invertedTransform == null)
       return null;
-    final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
+    final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
-    return super.find<S>(new Offset(result[0] - linkedOffset.dx, result[1] - linkedOffset.dy));
+    return super.find<S>(Offset(result[0] - linkedOffset.dx, result[1] - linkedOffset.dy));
   }
 
   /// The transform that was used during the last composition phase.
@@ -1268,7 +1279,7 @@ class FollowerLayer extends ContainerLayer {
   Matrix4 getLastTransform() {
     if (_lastTransform == null)
       return null;
-    final Matrix4 result = new Matrix4.translationValues(-_lastOffset.dx, -_lastOffset.dy, 0.0);
+    final Matrix4 result = Matrix4.translationValues(-_lastOffset.dx, -_lastOffset.dy, 0.0);
     result.multiply(_lastTransform);
     return result;
   }
@@ -1281,7 +1292,7 @@ class FollowerLayer extends ContainerLayer {
   /// null.
   Matrix4 _collectTransformForLayerChain(List<ContainerLayer> layers) {
     // Initialize our result matrix.
-    final Matrix4 result = new Matrix4.identity();
+    final Matrix4 result = Matrix4.identity();
     // Apply each layer to the matrix in turn, starting from the last layer,
     // and providing the previous layer as the child.
     for (int index = layers.length - 1; index > 0; index -= 1)
@@ -1300,7 +1311,7 @@ class FollowerLayer extends ContainerLayer {
     assert(link.leader.owner == owner, 'Linked LeaderLayer anchor is not in the same layer tree as the FollowerLayer.');
     assert(link.leader._lastOffset != null, 'LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.');
     // Collect all our ancestors into a Set so we can recognize them.
-    final Set<Layer> ancestors = new HashSet<Layer>();
+    final Set<Layer> ancestors = HashSet<Layer>();
     Layer ancestor = parent;
     while (ancestor != null) {
       ancestors.add(ancestor);
@@ -1337,7 +1348,7 @@ class FollowerLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     assert(link != null);
     assert(showWhenUnlinked != null);
     if (link.leader == null && !showWhenUnlinked) {
@@ -1349,12 +1360,15 @@ class FollowerLayer extends ContainerLayer {
     _establishTransform();
     if (_lastTransform != null) {
       builder.pushTransform(_lastTransform.storage);
-      addChildrenToScene(builder, Offset.zero);
+      addChildrenToScene(builder);
       builder.pop();
       _lastOffset = unlinkedOffset + layerOffset;
     } else {
       _lastOffset = null;
-      addChildrenToScene(builder, unlinkedOffset + layerOffset);
+      final Matrix4 matrix = Matrix4.translationValues(unlinkedOffset.dx, unlinkedOffset.dy, .0);
+      builder.pushTransform(matrix.storage);
+      addChildrenToScene(builder);
+      builder.pop();
     }
     _inverseDirty = true;
   }
@@ -1363,15 +1377,18 @@ class FollowerLayer extends ContainerLayer {
   void applyTransform(Layer child, Matrix4 transform) {
     assert(child != null);
     assert(transform != null);
-    if (_lastTransform != null)
+    if (_lastTransform != null) {
       transform.multiply(_lastTransform);
+    } else {
+      transform.multiply(Matrix4.translationValues(unlinkedOffset.dx, unlinkedOffset.dy, .0));
+    }
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<LayerLink>('link', link));
-    properties.add(new TransformProperty('transform', getLastTransform(), defaultValue: null));
+    properties.add(DiagnosticsProperty<LayerLink>('link', link));
+    properties.add(TransformProperty('transform', getLastTransform(), defaultValue: null));
   }
 }
 
@@ -1413,7 +1430,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<T>('value', value));
-    properties.add(new DiagnosticsProperty<Size>('size', size, defaultValue: null));
+    properties.add(DiagnosticsProperty<T>('value', value));
+    properties.add(DiagnosticsProperty<Size>('size', size, defaultValue: null));
   }
 }

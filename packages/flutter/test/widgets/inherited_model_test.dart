@@ -59,7 +59,7 @@ class ShowABCField extends StatefulWidget {
   final String fieldName;
 
   @override
-  _ShowABCFieldState createState() => new _ShowABCFieldState();
+  _ShowABCFieldState createState() => _ShowABCFieldState();
 }
 
 class _ShowABCFieldState extends State<ShowABCField> {
@@ -69,7 +69,7 @@ class _ShowABCFieldState extends State<ShowABCField> {
   Widget build(BuildContext context) {
     final ABCModel abc = ABCModel.of(context, fieldName: widget.fieldName);
     final int value = widget.fieldName == 'a' ? abc.a : (widget.fieldName == 'b' ? abc.b : abc.c);
-    return new Text('${widget.fieldName}: $value [${_buildCount++}]');
+    return Text('${widget.fieldName}: $value [${_buildCount++}]');
   }
 }
 
@@ -79,7 +79,7 @@ void main() {
     int _b = 1;
     int _c = 2;
 
-    final Widget abcPage = new StatefulBuilder(
+    final Widget abcPage = StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         const Widget showA = ShowABCField(fieldName: 'a');
         const Widget showB = ShowABCField(fieldName: 'b');
@@ -87,29 +87,29 @@ void main() {
 
         // Unconditionally depends on the ABCModel: rebuilt when any
         // aspect of the model changes.
-        final Widget showABC = new Builder(
+        final Widget showABC = Builder(
           builder: (BuildContext context) {
             final ABCModel abc = ABCModel.of(context);
-            return new Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}');
+            return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}');
           }
         );
 
-        return new Scaffold(
-          body: new StatefulBuilder(
+        return Scaffold(
+          body: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return new ABCModel(
+              return ABCModel(
                 a: _a,
                 b: _b,
                 c: _c,
-                child: new Center(
-                  child: new Column(
+                child: Center(
+                  child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       showA,
                       showB,
                       showC,
                       showABC,
-                      new RaisedButton(
+                      RaisedButton(
                         child: const Text('Increment a'),
                         onPressed: () {
                           // Rebuilds the ABCModel which triggers a rebuild
@@ -118,7 +118,7 @@ void main() {
                           setState(() { _a += 1; });
                         },
                       ),
-                      new RaisedButton(
+                      RaisedButton(
                         child: const Text('Increment b'),
                         onPressed: () {
                           // Rebuilds the ABCModel which triggers a rebuild
@@ -127,7 +127,7 @@ void main() {
                           setState(() { _b += 1; });
                         },
                       ),
-                      new RaisedButton(
+                      RaisedButton(
                         child: const Text('Increment c'),
                         onPressed: () {
                           // Rebuilds the ABCModel which triggers a rebuild
@@ -146,7 +146,7 @@ void main() {
       },
     );
 
-    await tester.pumpWidget(new MaterialApp(home: abcPage));
+    await tester.pumpWidget(MaterialApp(home: abcPage));
 
     expect(find.text('a: 0 [0]'), findsOneWidget);
     expect(find.text('b: 1 [0]'), findsOneWidget);
@@ -200,7 +200,7 @@ void main() {
     // properties shadow (override) the outer model. Further complicating
     // matters: the inner model only supports the model's "a" aspect,
     // so showB and showC will depend on the outer model.
-    final Widget abcPage = new StatefulBuilder(
+    final Widget abcPage = StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         const Widget showA = ShowABCField(fieldName: 'a');
         const Widget showB = ShowABCField(fieldName: 'b');
@@ -208,26 +208,26 @@ void main() {
 
         // Unconditionally depends on the closest ABCModel ancestor.
         // Which is the inner model, for which b,c are null.
-        final Widget showABC = new Builder(
+        final Widget showABC = Builder(
           builder: (BuildContext context) {
             final ABCModel abc = ABCModel.of(context);
-            return new Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.title);
+            return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.title);
           }
         );
 
-        return new Scaffold(
-          body: new StatefulBuilder(
+        return Scaffold(
+          body: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return new ABCModel( // The "outer" model
+              return ABCModel( // The "outer" model
                 a: _a,
                 b: _b,
                 c: _c,
-                child: new ABCModel( // The "inner" model
+                child: ABCModel( // The "inner" model
                   a: 100 + _a,
                   b: 100 + _b,
-                  aspects: new Set<String>.of(<String>['a']),
-                  child: new Center(
-                    child: new Column(
+                  aspects: Set<String>.of(<String>['a']),
+                  child: Center(
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         showA,
@@ -236,19 +236,19 @@ void main() {
                         const SizedBox(height: 24.0),
                         showABC,
                         const SizedBox(height: 24.0),
-                        new RaisedButton(
+                        RaisedButton(
                           child: const Text('Increment a'),
                           onPressed: () {
                             setState(() { _a += 1; });
                           },
                         ),
-                        new RaisedButton(
+                        RaisedButton(
                           child: const Text('Increment b'),
                           onPressed: () {
                             setState(() { _b += 1; });
                           },
                         ),
-                        new RaisedButton(
+                        RaisedButton(
                           child: const Text('Increment c'),
                           onPressed: () {
                             setState(() { _c += 1; });
@@ -265,7 +265,7 @@ void main() {
       },
     );
 
-    await tester.pumpWidget(new MaterialApp(home: abcPage));
+    await tester.pumpWidget(MaterialApp(home: abcPage));
     expect(find.text('a: 100 [0]'), findsOneWidget);
     expect(find.text('b: 1 [0]'), findsOneWidget);
     expect(find.text('c: 2 [0]'), findsOneWidget);
@@ -312,12 +312,12 @@ void main() {
     int _a = 0;
     int _b = 1;
     int _c = 2;
-    Set<String> _innerModelAspects = new Set<String>.of(<String>['a']);
+    Set<String> _innerModelAspects = Set<String>.of(<String>['a']);
 
     // Same as in abcPage in the "Inner InheritedModel shadows the outer one"
     // test except: the "Add b aspect" changes adds 'b' to the set of
     // aspects supported by the inner model.
-    final Widget abcPage = new StatefulBuilder(
+    final Widget abcPage = StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         const Widget showA = ShowABCField(fieldName: 'a');
         const Widget showB = ShowABCField(fieldName: 'b');
@@ -325,26 +325,26 @@ void main() {
 
         // Unconditionally depends on the closest ABCModel ancestor.
         // Which is the inner model, for which b,c are null.
-        final Widget showABC = new Builder(
+        final Widget showABC = Builder(
           builder: (BuildContext context) {
             final ABCModel abc = ABCModel.of(context);
-            return new Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.title);
+            return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.title);
           }
         );
 
-        return new Scaffold(
-          body: new StatefulBuilder(
+        return Scaffold(
+          body: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return new ABCModel( // The "outer" model
+              return ABCModel( // The "outer" model
                 a: _a,
                 b: _b,
                 c: _c,
-                child: new ABCModel( // The "inner" model
+                child: ABCModel( // The "inner" model
                   a: 100 + _a,
                   b: 100 + _b,
                   aspects: _innerModelAspects,
-                  child: new Center(
-                    child: new Column(
+                  child: Center(
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         showA,
@@ -353,25 +353,25 @@ void main() {
                         const SizedBox(height: 24.0),
                         showABC,
                         const SizedBox(height: 24.0),
-                        new RaisedButton(
+                        RaisedButton(
                           child: const Text('Increment a'),
                           onPressed: () {
                             setState(() { _a += 1; });
                           },
                         ),
-                        new RaisedButton(
+                        RaisedButton(
                           child: const Text('Increment b'),
                           onPressed: () {
                             setState(() { _b += 1; });
                           },
                         ),
-                        new RaisedButton(
+                        RaisedButton(
                           child: const Text('Increment c'),
                           onPressed: () {
                             setState(() { _c += 1; });
                           },
                         ),
-                        new RaisedButton(
+                        RaisedButton(
                           child: const Text('rebuild'),
                           onPressed: () {
                             setState(() {
@@ -390,14 +390,14 @@ void main() {
       },
     );
 
-    _innerModelAspects = new Set<String>.of(<String>['a']);
-    await tester.pumpWidget(new MaterialApp(home: abcPage));
+    _innerModelAspects = Set<String>.of(<String>['a']);
+    await tester.pumpWidget(MaterialApp(home: abcPage));
     expect(find.text('a: 100 [0]'), findsOneWidget); // showA depends on the inner model
     expect(find.text('b: 1 [0]'), findsOneWidget); // showB depends on the outer model
     expect(find.text('c: 2 [0]'), findsOneWidget);
     expect(find.text('a: 100 b: 101 c: null'), findsOneWidget); // inner model's a, b, c
 
-    _innerModelAspects = new Set<String>.of(<String>['a', 'b']);
+    _innerModelAspects = Set<String>.of(<String>['a', 'b']);
     await tester.tap(find.text('rebuild'));
     await tester.pumpAndSettle();
     expect(find.text('a: 100 [1]'), findsOneWidget); // rebuilt showA still depend on the inner model
@@ -432,7 +432,7 @@ void main() {
     expect(find.text('c: 3 [2]'), findsOneWidget); // rebuilt showC still depends on the outer model
     expect(find.text('a: 101 b: 102 c: null'), findsOneWidget);
 
-    _innerModelAspects = new Set<String>.of(<String>['a', 'b', 'c']);
+    _innerModelAspects = Set<String>.of(<String>['a', 'b', 'c']);
     await tester.tap(find.text('rebuild'));
     await tester.pumpAndSettle();
     expect(find.text('a: 101 [3]'), findsOneWidget); // rebuilt showA still depend on the inner model
@@ -441,7 +441,7 @@ void main() {
     expect(find.text('a: 101 b: 102 c: null'), findsOneWidget); // inner model's a, b, c
 
     // Now the inner model supports no aspects
-    _innerModelAspects = new Set<String>.of(<String>[]);
+    _innerModelAspects = Set<String>.of(<String>[]);
     await tester.tap(find.text('rebuild'));
     await tester.pumpAndSettle();
     expect(find.text('a: 1 [4]'), findsOneWidget); // rebuilt showA now depends on the outer model

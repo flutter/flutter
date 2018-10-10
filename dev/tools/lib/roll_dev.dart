@@ -24,7 +24,7 @@ const String kHelp = 'help';
 const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
 
 void main(List<String> args) {
-  final ArgParser argParser = new ArgParser(allowTrailingOptions: false);
+  final ArgParser argParser = ArgParser(allowTrailingOptions: false);
   argParser.addOption(
     kIncrement,
     help: 'Specifies which part of the x.y.z version number to increment. Required.',
@@ -105,7 +105,7 @@ void main(List<String> args) {
     exit(1);
   }
 
-  final List<int> parts = match.groups(<int>[1, 2, 3]).map(int.parse).toList();
+  final List<int> parts = match.groups(<int>[1, 2, 3]).map<int>(int.parse).toList();
 
   if (match.group(4) == '0') {
     print('This commit has already been released, as version ${parts.join(".")}.');
@@ -168,7 +168,7 @@ String getFullTag() {
 }
 
 Match parseFullTag(String version) {
-  final RegExp versionPattern = new RegExp('^v([0-9]+)\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)\$');
+  final RegExp versionPattern = RegExp('^v([0-9]+)\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)\$');
   return versionPattern.matchAsPrefix(version);
 }
 

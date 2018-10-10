@@ -38,7 +38,7 @@ class AndroidEmulator extends Emulator {
   String get manufacturer => _prop('hw.device.manufacturer');
 
   @override
-  String get label => _properties['avd.ini.displayname'];
+  String get label => _prop('avd.ini.displayname');
 
   String _prop(String name) => _properties != null ? _properties[name] : null;
 
@@ -56,7 +56,7 @@ class AndroidEmulator extends Emulator {
     // return.
     return Future.any<void>(<Future<void>>[
       launchResult,
-      new Future<void>.delayed(const Duration(seconds: 3))
+      Future<void>.delayed(const Duration(seconds: 3))
     ]);
   }
 }
@@ -98,13 +98,13 @@ AndroidEmulator _loadEmulatorInfo(String id) {
         if (configFile.existsSync()) {
           final Map<String, String> properties =
               parseIniLines(configFile.readAsLinesSync());
-          return new AndroidEmulator(id, properties);
+          return AndroidEmulator(id, properties);
         }
       }
     }
   }
 
-  return new AndroidEmulator(id);
+  return AndroidEmulator(id);
 }
 
 @visibleForTesting
@@ -112,13 +112,13 @@ Map<String, String> parseIniLines(List<String> contents) {
   final Map<String, String> results = <String, String>{};
 
   final Iterable<List<String>> properties = contents
-      .map((String l) => l.trim())
+      .map<String>((String l) => l.trim())
       // Strip blank lines/comments
       .where((String l) => l != '' && !l.startsWith('#'))
       // Discard anything that isn't simple name=value
       .where((String l) => l.contains('='))
       // Split into name/value
-      .map((String l) => l.split('='));
+      .map<List<String>>((String l) => l.split('='));
 
   for (List<String> property in properties) {
     results[property[0].trim()] = property[1].trim();

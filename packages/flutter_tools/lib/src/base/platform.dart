@@ -36,7 +36,7 @@ Future<FakePlatform> getReplayPlatform(String location) async {
   final Directory dir = getReplaySource(location, _kRecordingType);
   final File file = _getPlatformManifest(dir);
   final String json = await file.readAsString();
-  return new FakePlatform.fromJson(json);
+  return FakePlatform.fromJson(json);
 }
 
 File _getPlatformManifest(Directory dir) {

@@ -14,6 +14,7 @@ import '../dart/sdk.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../resident_runner.dart';
+import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'run.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
@@ -82,7 +83,7 @@ class DriveCommand extends RunCommandBase {
   StreamSubscription<String> _deviceLogSubscription;
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     final String testFile = _getTestFile();
     if (testFile == null)
       throwToolExit(null);
@@ -133,6 +134,8 @@ class DriveCommand extends RunCommandBase {
         await appStopper(this);
       }
     }
+
+    return null;
   }
 
   String _getTestFile() {
@@ -179,7 +182,7 @@ class DriveCommand extends RunCommandBase {
 }
 
 /// Finds a device to test on. May launch a simulator, if necessary.
-typedef Future<Device> TargetDeviceFinder();
+typedef TargetDeviceFinder = Future<Device> Function();
 TargetDeviceFinder targetDeviceFinder = findTargetDevice;
 void restoreTargetDeviceFinder() {
   targetDeviceFinder = findTargetDevice;
@@ -206,14 +209,14 @@ Future<Device> findTargetDevice() async {
     return null;
   } else if (devices.length > 1) {
     printStatus('Found multiple connected devices:');
-    printStatus(devices.map((Device d) => '  - ${d.name}\n').join(''));
+    printStatus(devices.map<String>((Device d) => '  - ${d.name}\n').join(''));
   }
   printStatus('Using device ${devices.first.name}.');
   return devices.first;
 }
 
 /// Starts the application on the device given command configuration.
-typedef Future<LaunchResult> AppStarter(DriveCommand command);
+typedef AppStarter = Future<LaunchResult> Function(DriveCommand command);
 
 AppStarter appStarter = _startApp; // (mutable for testing)
 void restoreAppStarter() {
@@ -254,7 +257,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
     package,
     mainPath: mainPath,
     route: command.route,
-    debuggingOptions: new DebuggingOptions.enabled(
+    debuggingOptions: DebuggingOptions.enabled(
       command.getBuildInfo(),
       startPaused: true,
       observatoryPort: command.observatoryPort,
@@ -272,13 +275,13 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef Future<Null> TestRunner(List<String> testArgs, String observatoryUri);
+typedef TestRunner = Future<void> Function(List<String> testArgs, String observatoryUri);
 TestRunner testRunner = _runTests;
 void restoreTestRunner() {
   testRunner = _runTests;
 }
 
-Future<Null> _runTests(List<String> testArgs, String observatoryUri) async {
+Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
   printTrace('Running driver tests.');
 
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
@@ -299,7 +302,7 @@ Future<Null> _runTests(List<String> testArgs, String observatoryUri) async {
 
 
 /// Stops the application.
-typedef Future<bool> AppStopper(DriveCommand command);
+typedef AppStopper = Future<bool> Function(DriveCommand command);
 AppStopper appStopper = _stopApp;
 void restoreAppStopper() {
   appStopper = _stopApp;

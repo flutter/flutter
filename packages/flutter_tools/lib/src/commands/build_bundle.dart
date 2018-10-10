@@ -7,7 +7,7 @@ import 'dart:async';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
-import '../runner/flutter_command.dart' show FlutterOptions;
+import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
@@ -22,7 +22,6 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('asset-base', help: 'Ignored. Will be removed.', hide: !verboseHelp)
       ..addOption('manifest', defaultsTo: defaultManifestPath)
       ..addOption('private-key', defaultsTo: defaultPrivateKeyPath)
-      ..addOption('snapshot', defaultsTo: defaultSnapshotPath)
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
       ..addOption('kernel-file', defaultsTo: defaultApplicationKernelPath)
       ..addOption('target-platform',
@@ -40,7 +39,15 @@ class BuildBundleCommand extends BuildSubCommand {
               'file produced by the training run of the application. With this\n'
               'flag, instead of using default Dart VM snapshot provided by the\n'
               'engine, the application will use its own snapshot that includes\n'
-              'additional functions.'
+              'additional compiled functions.'
+      )
+      ..addFlag('hotupdate',
+        hide: !verboseHelp,
+        help: 'Build differential snapshot based on the last state of the build\n'
+              'tree and any changes to the application source code since then.\n'
+              'This flag is only allowed when using --dynamic. With this flag,\n'
+              'a partial VM snapshot is generated that is loaded on top of the\n'
+              'original VM snapshot that contains precompiled code.'
       )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
@@ -70,7 +77,7 @@ class BuildBundleCommand extends BuildSubCommand {
       ' iOS runtimes.';
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     await super.runCommand();
 
     final String targetPlatform = argResults['target-platform'];
@@ -85,7 +92,6 @@ class BuildBundleCommand extends BuildSubCommand {
       buildMode: buildMode,
       mainPath: targetFile,
       manifestPath: argResults['manifest'],
-      snapshotPath: argResults['snapshot'],
       applicationKernelFilePath: argResults['kernel-file'],
       depfilePath: argResults['depfile'],
       privateKeyPath: argResults['private-key'],
@@ -94,10 +100,12 @@ class BuildBundleCommand extends BuildSubCommand {
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
       compilationTraceFilePath: argResults['precompile'],
+      buildHotUpdate: argResults['hotupdate'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],
       fileSystemRoots: argResults['filesystem-root'],
     );
+    return null;
   }
 }

@@ -169,31 +169,31 @@ class CircleAvatar extends StatelessWidget {
     }
     final double minDiameter = _minDiameter;
     final double maxDiameter = _maxDiameter;
-    return new AnimatedContainer(
-      constraints: new BoxConstraints(
+    return AnimatedContainer(
+      constraints: BoxConstraints(
         minHeight: minDiameter,
         minWidth: minDiameter,
         maxWidth: maxDiameter,
         maxHeight: maxDiameter,
       ),
       duration: kThemeChangeDuration,
-      decoration: new BoxDecoration(
+      decoration: BoxDecoration(
         color: effectiveBackgroundColor,
         image: backgroundImage != null
-          ? new DecorationImage(image: backgroundImage, fit: BoxFit.cover)
+          ? DecorationImage(image: backgroundImage, fit: BoxFit.cover)
           : null,
         shape: BoxShape.circle,
       ),
       child: child == null
           ? null
-          : new Center(
-              child: new MediaQuery(
+          : Center(
+              child: MediaQuery(
                 // Need to ignore the ambient textScaleFactor here so that the
                 // text doesn't escape the avatar when the textScaleFactor is large.
                 data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                child: new IconTheme(
+                child: IconTheme(
                   data: theme.iconTheme.copyWith(color: textStyle.color),
-                  child: new DefaultTextStyle(
+                  child: DefaultTextStyle(
                     style: textStyle,
                     child: child,
                   ),

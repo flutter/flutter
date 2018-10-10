@@ -21,13 +21,13 @@ class AnalysisServer {
 
   Process _process;
   final StreamController<bool> _analyzingController =
-      new StreamController<bool>.broadcast();
+      StreamController<bool>.broadcast();
   final StreamController<FileAnalysisErrors> _errorsController =
-      new StreamController<FileAnalysisErrors>.broadcast();
+      StreamController<FileAnalysisErrors>.broadcast();
 
   int _id = 0;
 
-  Future<Null> start() async {
+  Future<void> start() async {
     final String snapshot =
         fs.path.join(sdkPath, 'bin/snapshots/analysis_server.dart.snapshot');
     final List<String> command = <String>[
@@ -43,11 +43,11 @@ class AnalysisServer {
     _process.exitCode.whenComplete(() => _process = null); // ignore: unawaited_futures
 
     final Stream<String> errorStream =
-        _process.stderr.transform(utf8.decoder).transform(const LineSplitter());
+        _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
     errorStream.listen(printError);
 
     final Stream<String> inStream =
-        _process.stdout.transform(utf8.decoder).transform(const LineSplitter());
+        _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
     inStream.listen(_handleServerResponse);
 
     // Available options (many of these are obsolete):
@@ -132,10 +132,10 @@ class AnalysisServer {
     final List<dynamic> errorsList = issueInfo['errors'];
     final List<AnalysisError> errors = errorsList
         .map<Map<String, dynamic>>(castStringKeyedMap)
-        .map<AnalysisError>((Map<String, dynamic> json) => new AnalysisError(json))
+        .map<AnalysisError>((Map<String, dynamic> json) => AnalysisError(json))
         .toList();
     if (!_errorsController.isClosed)
-      _errorsController.add(new FileAnalysisErrors(file, errors));
+      _errorsController.add(FileAnalysisErrors(file, errors));
   }
 
   Future<bool> dispose() async {

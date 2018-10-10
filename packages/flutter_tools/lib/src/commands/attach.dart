@@ -53,7 +53,7 @@ class AttachCommand extends FlutterCommand {
           help: 'Handle machine structured JSON command input and provide output\n'
                 'and progress in machine friendly format.',
       );
-    hotRunnerFactory ??= new HotRunnerFactory();
+    hotRunnerFactory ??= HotRunnerFactory();
   }
 
   HotRunnerFactory hotRunnerFactory;
@@ -76,7 +76,7 @@ class AttachCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> validateCommand() async {
+  Future<void> validateCommand() async {
     await super.validateCommand();
     if (await findTargetDevice() == null)
       throwToolExit(null);
@@ -84,7 +84,7 @@ class AttachCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
 
     await _validateArguments();
@@ -93,15 +93,15 @@ class AttachCommand extends FlutterCommand {
     final int devicePort = observatoryPort;
 
     final Daemon daemon = argResults['machine']
-      ? new Daemon(stdinCommandStream, stdoutCommandResponse,
-            notifyingLogger: new NotifyingLogger(), logToStdout: true)
+      ? Daemon(stdinCommandStream, stdoutCommandResponse,
+            notifyingLogger: NotifyingLogger(), logToStdout: true)
       : null;
 
     Uri observatoryUri;
     if (devicePort == null) {
       ProtocolDiscovery observatoryDiscovery;
       try {
-        observatoryDiscovery = new ProtocolDiscovery.observatory(
+        observatoryDiscovery = ProtocolDiscovery.observatory(
           device.getLogReader(),
           portForwarder: device.portForwarder,
         );
@@ -116,7 +116,7 @@ class AttachCommand extends FlutterCommand {
       observatoryUri = Uri.parse('http://$ipv4Loopback:$localPort/');
     }
     try {
-      final FlutterDevice flutterDevice = new FlutterDevice(
+      final FlutterDevice flutterDevice = FlutterDevice(
         device,
         trackWidgetCreation: false,
         dillOutputPath: argResults['output-dill'],
@@ -127,7 +127,7 @@ class AttachCommand extends FlutterCommand {
       final HotRunner hotRunner = hotRunnerFactory.build(
         <FlutterDevice>[flutterDevice],
         target: targetFile,
-        debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
+        debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
         packagesFilePath: globalResults['packages'],
         usesTerminalUI: daemon == null,
         projectRootPath: argResults['project-root'],
@@ -152,6 +152,7 @@ class AttachCommand extends FlutterCommand {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
       ports.forEach(device.portForwarder.unforward);
     }
+    return null;
   }
 
   Future<void> _validateArguments() async {}
@@ -170,7 +171,7 @@ class HotRunnerFactory {
       String dillOutputPath,
       bool stayResident = true,
       bool ipv6 = false,
-  }) => new HotRunner(
+  }) => HotRunner(
     devices,
     target: target,
     debuggingOptions: debuggingOptions,

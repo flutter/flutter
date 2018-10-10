@@ -11,7 +11,7 @@ export 'controls_constants.dart';
 /// A test page with a checkbox, three radio buttons, and a switch.
 class SelectionControlsPage extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _SelectionControlsPageState();
+  State<StatefulWidget> createState() => _SelectionControlsPageState();
 }
 
 class _SelectionControlsPageState extends State<SelectionControlsPage> {
@@ -53,13 +53,13 @@ class _SelectionControlsPageState extends State<SelectionControlsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(leading: const BackButton(key: ValueKey<String>('back'))),
-      body: new Material(
-        child: new Column(children: <Widget>[
-          new Row(
+    return Scaffold(
+      appBar: AppBar(leading: const BackButton(key: ValueKey<String>('back'))),
+      body: Material(
+        child: Column(children: <Widget>[
+          Row(
             children: <Widget>[
-              new Checkbox(
+              Checkbox(
                 key: checkbox1Key,
                 value: _isChecked,
                 onChanged: _updateCheckbox,
@@ -72,23 +72,23 @@ class _SelectionControlsPageState extends State<SelectionControlsPage> {
             ],
           ),
           const Spacer(),
-          new Row(children: <Widget>[
-            new Radio<int>(key: radio1Key, value: 0, groupValue: _radio, onChanged: _updateRadio),
-            new Radio<int>(key: radio2Key, value: 1, groupValue: _radio, onChanged: _updateRadio),
-            new Radio<int>(key: radio3Key, value: 2, groupValue: _radio, onChanged: _updateRadio),
+          Row(children: <Widget>[
+            Radio<int>(key: radio1Key, value: 0, groupValue: _radio, onChanged: _updateRadio),
+            Radio<int>(key: radio2Key, value: 1, groupValue: _radio, onChanged: _updateRadio),
+            Radio<int>(key: radio3Key, value: 2, groupValue: _radio, onChanged: _updateRadio),
           ]),
           const Spacer(),
-          new Switch(
+          Switch(
             key: switchKey,
             value: _isOn,
             onChanged: _updateSwitch,
           ),
           const Spacer(),
-          new MergeSemantics(
-            child: new Row(
+          MergeSemantics(
+            child: Row(
               children: <Widget>[
                 const Text(switchLabel),
-                new Switch(
+                Switch(
                   key: labeledSwitchKey,
                   value: _isLabeledOn,
                   onChanged: _updateLabeledSwitch,

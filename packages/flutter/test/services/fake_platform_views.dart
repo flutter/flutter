@@ -22,7 +22,7 @@ class FakePlatformViewsController {
 
   final Map<int, List<FakeMotionEvent>> motionEvents = <int, List<FakeMotionEvent>>{};
 
-  final Set<String> _registeredViewTypes = new Set<String>();
+  final Set<String> _registeredViewTypes = Set<String>();
 
   int _textureCounter = 0;
 
@@ -35,7 +35,7 @@ class FakePlatformViewsController {
   Future<dynamic> _onMethodCall(MethodCall call) {
     if (targetPlatform == TargetPlatform.android)
       return _onMethodCallAndroid(call);
-    return new Future<Null>.sync(() => null);
+    return Future<Null>.sync(() => null);
   }
 
   Future<dynamic> _onMethodCallAndroid(MethodCall call) {
@@ -51,7 +51,7 @@ class FakePlatformViewsController {
       case 'setDirection':
         return _setDirection(call);
     }
-    return new Future<Null>.sync(() => null);
+    return Future<Null>.sync(() => null);
   }
 
   Future<dynamic> _create(MethodCall call) {
@@ -64,33 +64,33 @@ class FakePlatformViewsController {
     final Uint8List creationParams = args['params'];
 
     if (_views.containsKey(id))
-      throw new PlatformException(
+      throw PlatformException(
         code: 'error',
         message: 'Trying to create an already created platform view, view id: $id',
       );
 
     if (!_registeredViewTypes.contains(viewType))
-      throw new PlatformException(
+      throw PlatformException(
         code: 'error',
         message: 'Trying to create a platform view of unregistered type: $viewType',
       );
 
-    _views[id] = new FakePlatformView(id, viewType, new Size(width, height), layoutDirection, creationParams);
+    _views[id] = FakePlatformView(id, viewType, Size(width, height), layoutDirection, creationParams);
     final int textureId = _textureCounter++;
-    return new Future<int>.sync(() => textureId);
+    return Future<int>.sync(() => textureId);
   }
 
   Future<dynamic> _dispose(MethodCall call) {
     final int id = call.arguments;
 
     if (!_views.containsKey(id))
-      throw new PlatformException(
+      throw PlatformException(
         code: 'error',
         message: 'Trying to dispose a platform view with unknown id: $id',
       );
 
     _views.remove(id);
-    return new Future<Null>.sync(() => null);
+    return Future<Null>.sync(() => null);
   }
 
   Future<dynamic> _resize(MethodCall call) async {
@@ -100,7 +100,7 @@ class FakePlatformViewsController {
     final double height = args['height'];
 
     if (!_views.containsKey(id))
-      throw new PlatformException(
+      throw PlatformException(
         code: 'error',
         message: 'Trying to resize a platform view with unknown id: $id',
       );
@@ -108,9 +108,9 @@ class FakePlatformViewsController {
     if (resizeCompleter != null) {
       await resizeCompleter.future;
     }
-    _views[id].size = new Size(width, height);
+    _views[id].size = Size(width, height);
 
-    return new Future<Null>.sync(() => null);
+    return Future<Null>.sync(() => null);
   }
 
   Future<dynamic> _touch(MethodCall call) {
@@ -125,14 +125,14 @@ class FakePlatformViewsController {
       pointerIds.add(pointerProperties[i][0]);
       final double x = pointerCoords[i][7];
       final double y = pointerCoords[i][8];
-      pointerOffsets.add(new Offset(x, y));
+      pointerOffsets.add(Offset(x, y));
     }
 
     if (!motionEvents.containsKey(id))
       motionEvents[id] = <FakeMotionEvent> [];
 
-    motionEvents[id].add(new FakeMotionEvent(action, pointerIds, pointerOffsets));
-    return new Future<Null>.sync(() => null);
+    motionEvents[id].add(FakeMotionEvent(action, pointerIds, pointerOffsets));
+    return Future<Null>.sync(() => null);
   }
 
   Future<dynamic> _setDirection(MethodCall call) async {
@@ -141,14 +141,14 @@ class FakePlatformViewsController {
     final int layoutDirection = args['direction'];
 
     if (!_views.containsKey(id))
-      throw new PlatformException(
+      throw PlatformException(
         code: 'error',
         message: 'Trying to resize a platform view with unknown id: $id',
       );
 
     _views[id].layoutDirection = layoutDirection;
 
-    return new Future<Null>.sync(() => null);
+    return Future<Null>.sync(() => null);
   }
 }
 

@@ -29,7 +29,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
     verify(canvas.drawPath(any, argThat(hasColor(0xFF666666))));
   });
@@ -51,7 +51,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
     verify(canvas.drawPath(any, argThat(hasColor(0x80666666))));
   });
@@ -73,7 +73,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
     verify(canvas.drawPath(any, argThat(hasColor(0xFF0000FF))));
   });
@@ -95,7 +95,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(12.0, 12.0));
     // arrow_menu default size is 48x48 so we expect it to be scaled by 0.25.
     verify(canvas.scale(0.25, 0.25));
@@ -119,14 +119,14 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(12.0, 12.0));
     // arrow_menu default size is 48x48 so we expect it to be scaled by 2.
     verify(canvas.scale(2.0, 2.0));
   });
 
   testWidgets('Semantic label', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const Directionality(
@@ -161,7 +161,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
     verifyInOrder(<void>[
       canvas.rotate(math.pi),
@@ -185,7 +185,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
     verifyNever(canvas.rotate(any));
     verifyNever(canvas.translate(any, any));
@@ -208,7 +208,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = new MockCanvas();
+    final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
     verifyInOrder(<void>[
       canvas.rotate(math.pi),
@@ -218,7 +218,7 @@ void main() {
 }
 
 PaintColorMatcher hasColor(int color) {
-  return new PaintColorMatcher(color);
+  return PaintColorMatcher(color);
 }
 
 class PaintColorMatcher extends Matcher {
@@ -233,6 +233,6 @@ class PaintColorMatcher extends Matcher {
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     final Paint actualPaint = item;
-    return actualPaint.color == new Color(expectedColor);
+    return actualPaint.color == Color(expectedColor);
   }
 }

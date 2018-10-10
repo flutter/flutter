@@ -16,12 +16,12 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   final ui.Image testImage;
 
-  final Completer<ImageInfo> _completer = new Completer<ImageInfo>.sync();
+  final Completer<ImageInfo> _completer = Completer<ImageInfo>.sync();
   ImageConfiguration configuration;
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
-    return new SynchronousFuture<TestImageProvider>(this);
+    return SynchronousFuture<TestImageProvider>(this);
   }
 
   @override
@@ -32,10 +32,10 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   @override
   ImageStreamCompleter load(TestImageProvider key) =>
-      new OneFrameImageStreamCompleter(_completer.future);
+      OneFrameImageStreamCompleter(_completer.future);
 
   ImageInfo complete() {
-    final ImageInfo imageInfo = new ImageInfo(image: testImage);
+    final ImageInfo imageInfo = ImageInfo(image: testImage);
     _completer.complete(imageInfo);
     return imageInfo;
   }
@@ -45,7 +45,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 }
 
 Future<ui.Image> createTestImage() {
-  final Completer<ui.Image> uiImage = new Completer<ui.Image>();
-  ui.decodeImageFromList(new Uint8List.fromList(kTransparentImage), uiImage.complete);
+  final Completer<ui.Image> uiImage = Completer<ui.Image>();
+  ui.decodeImageFromList(Uint8List.fromList(kTransparentImage), uiImage.complete);
   return uiImage.future;
 }

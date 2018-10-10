@@ -11,11 +11,11 @@ void main() {
   testWidgets('MediaQuery does not have a default', (WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
-      new Builder(
+      Builder(
         builder: (BuildContext context) {
           tested = true;
           MediaQuery.of(context); // should throw
-          return new Container();
+          return Container();
         }
       )
     );
@@ -26,12 +26,12 @@ void main() {
   testWidgets('MediaQuery defaults to null', (WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
-      new Builder(
+      Builder(
         builder: (BuildContext context) {
           final MediaQueryData data = MediaQuery.of(context, nullOk: true);
           expect(data, isNull);
           tested = true;
-          return new Container();
+          return Container();
         }
       )
     );
@@ -39,7 +39,7 @@ void main() {
   });
 
   testWidgets('MediaQueryData is sane', (WidgetTester tester) async {
-    final MediaQueryData data = new MediaQueryData.fromWindow(ui.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(ui.window);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
     expect(data.size, equals(ui.window.physicalSize / ui.window.devicePixelRatio));
@@ -50,7 +50,7 @@ void main() {
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
-    final MediaQueryData data = new MediaQueryData.fromWindow(ui.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(ui.window);
     final MediaQueryData copied = data.copyWith();
     expect(copied.size, data.size);
     expect(copied.devicePixelRatio, data.devicePixelRatio);
@@ -65,7 +65,7 @@ void main() {
   });
 
   testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
-    final MediaQueryData data = new MediaQueryData.fromWindow(ui.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(ui.window);
     final MediaQueryData copied = data.copyWith(
       size: const Size(3.14, 2.72),
       devicePixelRatio: 1.41,
@@ -99,7 +99,7 @@ void main() {
 
    MediaQueryData unpadded;
    await tester.pumpWidget(
-     new MediaQuery(
+     MediaQuery(
        data: const MediaQueryData(
          size: size,
          devicePixelRatio: devicePixelRatio,
@@ -112,18 +112,18 @@ void main() {
          disableAnimations: true,
          boldText: true,
        ),
-       child: new Builder(
+       child: Builder(
          builder: (BuildContext context) {
-           return new MediaQuery.removePadding(
+           return MediaQuery.removePadding(
              context: context,
              removeLeft: true,
              removeTop: true,
              removeRight: true,
              removeBottom: true,
-             child: new Builder(
+             child: Builder(
                builder: (BuildContext context) {
                  unpadded = MediaQuery.of(context);
-                 return new Container();
+                 return Container();
                }
              ),
            );
@@ -153,7 +153,7 @@ void main() {
 
     MediaQueryData unpadded;
     await tester.pumpWidget(
-      new MediaQuery(
+      MediaQuery(
         data: const MediaQueryData(
           size: size,
           devicePixelRatio: devicePixelRatio,
@@ -166,18 +166,18 @@ void main() {
           disableAnimations: true,
           boldText: true,
         ),
-        child: new Builder(
+        child: Builder(
           builder: (BuildContext context) {
-            return new MediaQuery.removeViewInsets(
+            return MediaQuery.removeViewInsets(
               context: context,
               removeLeft: true,
               removeTop: true,
               removeRight: true,
               removeBottom: true,
-              child: new Builder(
+              child: Builder(
                 builder: (BuildContext context) {
                   unpadded = MediaQuery.of(context);
-                  return new Container();
+                  return Container();
                 }
               ),
             );
@@ -203,17 +203,17 @@ void main() {
    double insideTextScaleFactor;
 
    await tester.pumpWidget(
-     new Builder(
+     Builder(
        builder: (BuildContext context) {
          outsideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
-         return new MediaQuery(
+         return MediaQuery(
            data: const MediaQueryData(
              textScaleFactor: 4.0,
            ),
-           child: new Builder(
+           child: Builder(
              builder: (BuildContext context) {
                insideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
-               return new Container();
+               return Container();
              },
            ),
          );
@@ -230,17 +230,17 @@ void main() {
     bool insideBoldTextOverride;
 
     await tester.pumpWidget(
-      new Builder(
+      Builder(
         builder: (BuildContext context) {
           outsideBoldTextOverride = MediaQuery.boldTextOverride(context);
-          return new MediaQuery(
+          return MediaQuery(
             data: const MediaQueryData(
               boldText: true,
             ),
-            child: new Builder(
+            child: Builder(
               builder: (BuildContext context) {
                 insideBoldTextOverride = MediaQuery.boldTextOverride(context);
-                return new Container();
+                return Container();
               },
             ),
           );

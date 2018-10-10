@@ -115,8 +115,7 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 ///    - packages/fancy_backgrounds/backgrounds/background1.png
 /// ```
 ///
-/// Note that the `lib/` is implied, so it should not be included in the asset
-/// path.
+/// The `lib/` is implied, so it should not be included in the asset path.
 ///
 /// See also:
 ///
@@ -180,7 +179,7 @@ class AssetImage extends AssetBundleImageProvider {
           manifest == null ? null : manifest[keyName]
         );
         final double chosenScale = _parseScale(chosenName);
-        final AssetBundleImageKey key = new AssetBundleImageKey(
+        final AssetBundleImageKey key = AssetBundleImageKey(
           bundle: chosenBundle,
           name: chosenName,
           scale: chosenScale
@@ -195,7 +194,7 @@ class AssetImage extends AssetBundleImageProvider {
           // just after loadStructuredData returned (which means it provided us
           // with a SynchronousFuture). Let's return a SynchronousFuture
           // ourselves.
-          result = new SynchronousFuture<AssetBundleImageKey>(key);
+          result = SynchronousFuture<AssetBundleImageKey>(key);
         }
       }
     ).catchError((dynamic error, StackTrace stack) {
@@ -212,7 +211,7 @@ class AssetImage extends AssetBundleImageProvider {
     }
     // The code above hasn't yet run its "then" handler yet. Let's prepare a
     // completer for it to use when it does run.
-    completer = new Completer<AssetBundleImageKey>();
+    completer = Completer<AssetBundleImageKey>();
     return completer.future;
   }
 
@@ -223,17 +222,17 @@ class AssetImage extends AssetBundleImageProvider {
     final Map<String, dynamic> parsedJson = json.decode(jsonData);
     final Iterable<String> keys = parsedJson.keys;
     final Map<String, List<String>> parsedManifest =
-        new Map<String, List<String>>.fromIterables(keys,
-          keys.map((String key) => new List<String>.from(parsedJson[key])));
+        Map<String, List<String>>.fromIterables(keys,
+          keys.map<List<String>>((String key) => List<String>.from(parsedJson[key])));
     // TODO(ianh): convert that data structure to the right types.
-    return new SynchronousFuture<Map<String, List<String>>>(parsedManifest);
+    return SynchronousFuture<Map<String, List<String>>>(parsedManifest);
   }
 
   String _chooseVariant(String main, ImageConfiguration config, List<String> candidates) {
     if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty)
       return main;
     // TODO(ianh): Consider moving this parsing logic into _manifestParser.
-    final SplayTreeMap<double, String> mapping = new SplayTreeMap<double, String>();
+    final SplayTreeMap<double, String> mapping = SplayTreeMap<double, String>();
     for (String candidate in candidates)
       mapping[_parseScale(candidate)] = candidate;
     // TODO(ianh): implement support for config.locale, config.textDirection,
@@ -258,7 +257,7 @@ class AssetImage extends AssetBundleImageProvider {
       return candidates[lower];
   }
 
-  static final RegExp _extractRatioRegExp = new RegExp(r'/?(\d+(\.\d*)?)x$');
+  static final RegExp _extractRatioRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
 
   double _parseScale(String key) {
 
@@ -266,7 +265,7 @@ class AssetImage extends AssetBundleImageProvider {
       return _naturalResolution;
     }
 
-    final File assetPath = new File(key);
+    final File assetPath = File(key);
     final Directory assetDir = assetPath.parent;
 
     final Match match = _extractRatioRegExp.firstMatch(assetDir.path);

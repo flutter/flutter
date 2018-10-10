@@ -23,7 +23,7 @@ abstract class ClipContext {
         break;
       case Clip.antiAliasWithSaveLayer:
         canvasClipCall(true);
-        canvas.saveLayer(bounds, new Paint());
+        canvas.saveLayer(bounds, Paint());
         break;
     }
     painter();

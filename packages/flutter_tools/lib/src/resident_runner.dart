@@ -35,7 +35,7 @@ class FlutterDevice {
     this.fileSystemRoots,
     this.fileSystemScheme,
     ResidentCompiler generator,
-  }) : this.generator = generator ?? new ResidentCompiler(
+  }) : generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
@@ -62,20 +62,21 @@ class FlutterDevice {
   /// expressions requested during debugging of the application.
   /// This ensures that the reload process follows the normal orchestration of
   /// the Flutter Tools and not just the VM internal service.
-  Future<Null> _connect({ReloadSources reloadSources, CompileExpression compileExpression}) async {
+  Future<void> _connect({ReloadSources reloadSources, CompileExpression compileExpression}) async {
     if (vmServices != null)
       return;
-    vmServices = new List<VMService>(observatoryUris.length);
+    final List<VMService> localVmServices = List<VMService>(observatoryUris.length);
     for (int i = 0; i < observatoryUris.length; i++) {
       printTrace('Connecting to service protocol: ${observatoryUris[i]}');
-      vmServices[i] = await VMService.connect(observatoryUris[i],
+      localVmServices[i] = await VMService.connect(observatoryUris[i],
           reloadSources: reloadSources,
           compileExpression: compileExpression);
       printTrace('Successfully connected to service protocol: ${observatoryUris[i]}');
     }
+    vmServices = localVmServices;
   }
 
-  Future<Null> refreshViews() async {
+  Future<void> refreshViews() async {
     if (vmServices == null || vmServices.isEmpty)
       return;
     for (VMService service in vmServices)
@@ -88,24 +89,18 @@ class FlutterDevice {
 
     return vmServices
       .where((VMService service) => !service.isClosed)
-      .expand((VMService service) => viewFilter != null
+      .expand<FlutterView>((VMService service) => viewFilter != null
           ? service.vm.allViewsWithName(viewFilter)
           : service.vm.views)
       .toList();
   }
 
-  Future<Null> getVMs() async {
+  Future<void> getVMs() async {
     for (VMService service in vmServices)
       await service.getVM();
   }
 
-  Future<Null> waitForViews() async {
-    // Refresh the view list, and wait a bit for the list to populate.
-    for (VMService service in vmServices)
-      await service.waitForViews();
-  }
-
-  Future<Null> stopApps() async {
+  Future<void> stopApps() async {
     final List<FlutterView> flutterViews = views;
     if (flutterViews == null || flutterViews.isEmpty)
       return;
@@ -115,7 +110,7 @@ class FlutterDevice {
         view.uiIsolate.flutterExit(); // ignore: unawaited_futures
       }
     }
-    await new Future<Null>.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
   }
 
   Future<Uri> setupDevFS(String fsName,
@@ -123,7 +118,7 @@ class FlutterDevice {
     String packagesFilePath
   }) {
     // One devFS per device. Shared by all running instances.
-    devFS = new DevFS(
+    devFS = DevFS(
       vmServices[0],
       fsName,
       rootDirectory,
@@ -150,11 +145,11 @@ class FlutterDevice {
     return reports;
   }
 
-  Future<Null> resetAssetDirectory() async {
+  Future<void> resetAssetDirectory() async {
     final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(
         fs.path.toUri(getAssetBuildDirectory()));
     assert(deviceAssetsDirectoryUri != null);
-    await Future.wait(views.map(
+    await Future.wait<void>(views.map<Future<void>>(
       (FlutterView view) => view.setAssetDirectory(deviceAssetsDirectoryUri)
     ));
   }
@@ -169,7 +164,7 @@ class FlutterDevice {
     final List<ProgramElement> elements = <ProgramElement>[];
     for (Future<List<ProgramElement>> report in reports) {
       for (ProgramElement element in await report)
-        elements.add(new ProgramElement(element.qualifiedName,
+        elements.add(ProgramElement(element.qualifiedName,
                                         devFS.deviceUriToHostUri(element.uri),
                                         element.line,
                                         element.column));
@@ -177,42 +172,42 @@ class FlutterDevice {
     return elements;
   }
 
-  Future<Null> debugDumpApp() async {
+  Future<void> debugDumpApp() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterDebugDumpApp();
   }
 
-  Future<Null> debugDumpRenderTree() async {
+  Future<void> debugDumpRenderTree() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterDebugDumpRenderTree();
   }
 
-  Future<Null> debugDumpLayerTree() async {
+  Future<void> debugDumpLayerTree() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterDebugDumpLayerTree();
   }
 
-  Future<Null> debugDumpSemanticsTreeInTraversalOrder() async {
+  Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterDebugDumpSemanticsTreeInTraversalOrder();
   }
 
-  Future<Null> debugDumpSemanticsTreeInInverseHitTestOrder() async {
+  Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterDebugDumpSemanticsTreeInInverseHitTestOrder();
   }
 
-  Future<Null> toggleDebugPaintSizeEnabled() async {
+  Future<void> toggleDebugPaintSizeEnabled() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterToggleDebugPaintSizeEnabled();
   }
 
-  Future<Null> debugTogglePerformanceOverlayOverride() async {
+  Future<void> debugTogglePerformanceOverlayOverride() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterTogglePerformanceOverlayOverride();
   }
 
-  Future<Null> toggleWidgetInspector() async {
+  Future<void> toggleWidgetInspector() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterToggleWidgetInspector();
   }
@@ -242,7 +237,7 @@ class FlutterDevice {
     });
   }
 
-  Future<Null> stopEchoingDeviceLog() async {
+  Future<void> stopEchoingDeviceLog() async {
     if (_loggingSubscription == null)
       return;
     await _loggingSubscription.cancel();
@@ -438,7 +433,7 @@ abstract class ResidentRunner {
   final bool usesTerminalUI;
   final bool stayResident;
   final bool ipv6;
-  final Completer<int> _finished = new Completer<int>();
+  final Completer<int> _finished = Completer<int>();
   bool _stopped = false;
   String _packagesFilePath;
   String get packagesFilePath => _packagesFilePath;
@@ -469,73 +464,73 @@ abstract class ResidentRunner {
     throw 'unsupported';
   }
 
-  Future<Null> stop() async {
+  Future<void> stop() async {
     _stopped = true;
     await stopEchoingDeviceLog();
     await preStop();
     return stopApp();
   }
 
-  Future<Null> detach() async {
+  Future<void> detach() async {
     await stopEchoingDeviceLog();
     await preStop();
     appFinished();
   }
 
-  Future<Null> refreshViews() async {
+  Future<void> refreshViews() async {
     for (FlutterDevice device in flutterDevices)
       await device.refreshViews();
   }
 
-  Future<Null> _debugDumpApp() async {
+  Future<void> _debugDumpApp() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpApp();
   }
 
-  Future<Null> _debugDumpRenderTree() async {
+  Future<void> _debugDumpRenderTree() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpRenderTree();
   }
 
-  Future<Null> _debugDumpLayerTree() async {
+  Future<void> _debugDumpLayerTree() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpLayerTree();
   }
 
-  Future<Null> _debugDumpSemanticsTreeInTraversalOrder() async {
+  Future<void> _debugDumpSemanticsTreeInTraversalOrder() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpSemanticsTreeInTraversalOrder();
   }
 
-  Future<Null> _debugDumpSemanticsTreeInInverseHitTestOrder() async {
+  Future<void> _debugDumpSemanticsTreeInInverseHitTestOrder() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpSemanticsTreeInInverseHitTestOrder();
   }
 
-  Future<Null> _debugToggleDebugPaintSizeEnabled() async {
+  Future<void> _debugToggleDebugPaintSizeEnabled() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.toggleDebugPaintSizeEnabled();
   }
 
-  Future<Null> _debugTogglePerformanceOverlayOverride() async {
+  Future<void> _debugTogglePerformanceOverlayOverride() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugTogglePerformanceOverlayOverride();
   }
 
-  Future<Null> _debugToggleWidgetInspector() async {
+  Future<void> _debugToggleWidgetInspector() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.toggleWidgetInspector();
   }
 
-  Future<Null> _screenshot(FlutterDevice device) async {
+  Future<void> _screenshot(FlutterDevice device) async {
     final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...');
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
@@ -573,7 +568,7 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<Null> _debugTogglePlatform() async {
+  Future<void> _debugTogglePlatform() async {
     await refreshViews();
     final String from = await flutterDevices[0].views[0].uiIsolate.flutterPlatformOverride();
     String to;
@@ -592,14 +587,14 @@ abstract class ResidentRunner {
     ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
   }
 
-  Future<Null> _cleanUpAndExit(ProcessSignal signal) async {
+  Future<void> _cleanUpAndExit(ProcessSignal signal) async {
     _resetTerminal();
     await cleanupAfterSignal();
     exit(0);
   }
 
   bool _processingUserRequest = false;
-  Future<Null> _handleSignal(ProcessSignal signal) async {
+  Future<void> _handleSignal(ProcessSignal signal) async {
     if (_processingUserRequest) {
       printTrace('Ignoring signal: "$signal" because we are busy.');
       return;
@@ -615,18 +610,18 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<Null> stopEchoingDeviceLog() async {
-    await Future.wait(
-      flutterDevices.map((FlutterDevice device) => device.stopEchoingDeviceLog())
+  Future<void> stopEchoingDeviceLog() async {
+    await Future.wait<void>(
+      flutterDevices.map<Future<void>>((FlutterDevice device) => device.stopEchoingDeviceLog())
     );
   }
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered
-  Future<Null> connectToServiceProtocol({String viewFilter,
+  Future<void> connectToServiceProtocol({String viewFilter,
       ReloadSources reloadSources, CompileExpression compileExpression}) async {
     if (!debuggingOptions.debuggingEnabled)
-      return new Future<Null>.error('Error the service protocol is not enabled.');
+      return Future<void>.error('Error the service protocol is not enabled.');
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
@@ -634,7 +629,7 @@ abstract class ResidentRunner {
       await device._connect(reloadSources: reloadSources,
           compileExpression: compileExpression);
       await device.getVMs();
-      await device.waitForViews();
+      await device.refreshViews();
       if (device.views.isEmpty)
         printStatus('No Flutter views available on ${device.device.name}');
       else
@@ -649,7 +644,7 @@ abstract class ResidentRunner {
         // This hooks up callbacks for when the connection stops in the future.
         // We don't want to wait for them. We don't handle errors in those callbacks'
         // futures either because they just print to logger and is not critical.
-        service.done.then<Null>( // ignore: unawaited_futures
+        service.done.then<void>( // ignore: unawaited_futures
           _serviceProtocolDone,
           onError: _serviceProtocolError
         ).whenComplete(_serviceDisconnected);
@@ -657,14 +652,14 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<Null> _serviceProtocolDone(dynamic object) {
+  Future<void> _serviceProtocolDone(dynamic object) {
     printTrace('Service protocol connection closed.');
-    return new Future<Null>.value(object);
+    return Future<void>.value(object);
   }
 
-  Future<Null> _serviceProtocolError(dynamic error, StackTrace stack) {
+  Future<void> _serviceProtocolError(dynamic error, StackTrace stack) {
     printTrace('Service protocol connection closed with an error: $error\n$stack');
-    return new Future<Null>.error(error, stack);
+    return Future<void>.error(error, stack);
   }
 
   /// Returns [true] if the input has been handled by this function.
@@ -739,7 +734,7 @@ abstract class ResidentRunner {
     return false;
   }
 
-  Future<Null> processTerminalInput(String command) async {
+  Future<void> processTerminalInput(String command) async {
     // When terminal doesn't support line mode, '\n' can sneak into the input.
     command = command.trim();
     if (_processingUserRequest) {
@@ -804,9 +799,9 @@ abstract class ResidentRunner {
 
   bool hasDirtyDependencies(FlutterDevice device) {
     final DartDependencySetBuilder dartDependencySetBuilder =
-        new DartDependencySetBuilder(mainPath, packagesFilePath);
+        DartDependencySetBuilder(mainPath, packagesFilePath);
     final DependencyChecker dependencyChecker =
-        new DependencyChecker(dartDependencySetBuilder, assetBundle);
+        DependencyChecker(dartDependencySetBuilder, assetBundle);
     if (device.package.packagesFile == null || !device.package.packagesFile.existsSync()) {
       return true;
     }
@@ -815,9 +810,9 @@ abstract class ResidentRunner {
     return dependencyChecker.check(lastBuildTime);
   }
 
-  Future<Null> preStop() async { }
+  Future<void> preStop() async { }
 
-  Future<Null> stopApp() async {
+  Future<void> stopApp() async {
     for (FlutterDevice device in flutterDevices)
       await device.stopApps();
     appFinished();
@@ -846,11 +841,11 @@ abstract class ResidentRunner {
   }
 
   /// Called when a signal has requested we exit.
-  Future<Null> cleanupAfterSignal();
+  Future<void> cleanupAfterSignal();
   /// Called right before we exit.
-  Future<Null> cleanupAtFinish();
+  Future<void> cleanupAtFinish();
   /// Called when the runner should handle a terminal command.
-  Future<Null> handleTerminalCommand(String code);
+  Future<void> handleTerminalCommand(String code);
 }
 
 class OperationResult {
@@ -875,7 +870,7 @@ class OperationResult {
 
   bool get isOk => code == 0;
 
-  static final OperationResult ok = new OperationResult(0, '');
+  static final OperationResult ok = OperationResult(0, '');
 }
 
 /// Given the value of the --target option, return the path of the Dart file

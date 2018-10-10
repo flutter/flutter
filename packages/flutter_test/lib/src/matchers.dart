@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:ui';
 
@@ -81,7 +82,7 @@ const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
-Matcher findsNWidgets(int n) => new _FindsWidgetMatcher(n, n);
+Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
 
 /// Asserts that the [Finder] locates the a single widget that has at
 /// least one [Offstage] widget ancestor.
@@ -194,7 +195,7 @@ final Matcher isAssertionError = isInstanceOf<AssertionError>();
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
-Matcher isInstanceOf<T>() => new test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
+Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
@@ -211,7 +212,7 @@ Matcher isInstanceOf<T>() => new test_package.TypeMatcher<T>(); // ignore: prefe
 ///  * [inInclusiveRange], which matches if the argument is in a specified
 ///    range.
 Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
-  return new _MoreOrLessEquals(value, epsilon);
+  return _MoreOrLessEquals(value, epsilon);
 }
 
 /// Asserts that two [String]s are equal after normalizing likely hash codes.
@@ -228,7 +229,7 @@ Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
 ///  * [TreeDiagnosticsMixin.toStringDeep], a method that returns a [String]
 ///    typically containing multiple hash codes.
 Matcher equalsIgnoringHashCodes(String value) {
-  return new _EqualsIgnoringHashCodes(value);
+  return _EqualsIgnoringHashCodes(value);
 }
 
 /// A matcher for [MethodCall]s, asserting that it has the specified
@@ -236,7 +237,7 @@ Matcher equalsIgnoringHashCodes(String value) {
 ///
 /// Arguments checking implements deep equality for [List] and [Map] types.
 Matcher isMethodCall(String name, {@required dynamic arguments}) {
-  return new _IsMethodCall(name, arguments);
+  return _IsMethodCall(name, arguments);
 }
 
 /// Asserts that 2 paths cover the same area by sampling multiple points.
@@ -249,7 +250,7 @@ Matcher isMethodCall(String name, {@required dynamic arguments}) {
 /// the area you expect to paint in for [areaToCompare] to catch errors where
 /// the path draws outside the expected area.
 Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int sampleSize = 20})
-  => new _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
+  => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
 
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
 /// golden image file identified by [key].
@@ -275,24 +276,62 @@ Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int s
 /// See also:
 ///
 ///  * [goldenFileComparator], which acts as the backend for this matcher.
+///  * [matchesReferenceImage], which should be used instead if you want to
+///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-Matcher matchesGoldenFile(dynamic key) {
+AsyncMatcher matchesGoldenFile(dynamic key) {
   if (key is Uri) {
-    return new _MatchesGoldenFile(key);
+    return _MatchesGoldenFile(key);
   } else if (key is String) {
-    return new _MatchesGoldenFile.forStringPath(key);
+    return _MatchesGoldenFile.forStringPath(key);
   }
-  throw new ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
+  throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
 }
 
-/// Asserts that a [SemanticsData] contains the specified information.
+/// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches a
+/// reference image identified by [image].
+///
+/// For the case of a [Finder], the [Finder] must match exactly one widget and
+/// the rendered image of the first [RepaintBoundary] ancestor of the widget is
+/// treated as the image for the widget.
+///
+/// This is an asynchronous matcher, meaning that callers should use
+/// [expectLater] when using this matcher and await the future returned by
+/// [expectLater].
+///
+/// ## Sample code
+///
+/// ```dart
+/// final ui.Paint paint = ui.Paint()
+///   ..style = ui.PaintingStyle.stroke
+///   ..strokeWidth = 1.0;
+/// final ui.PictureRecorder recorder = ui.PictureRecorder();
+/// final ui.Canvas pictureCanvas = ui.Canvas(recorder);
+/// pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
+/// final ui.Picture picture = recorder.endRecording();
+/// ui.Image referenceImage = picture.toImage(50, 50);
+///
+/// await expectLater(find.text('Save'), matchesReferenceImage(referenceImage));
+/// await expectLater(image, matchesReferenceImage(referenceImage);
+/// await expectLater(imageFuture, matchesReferenceImage(referenceImage));
+/// ```
+///
+/// See also:
+///
+///  * [matchesGoldenFile], which should be used instead if you need to verify
+///    that a [Finder] or [ui.Image] matches a golden image.
+AsyncMatcher matchesReferenceImage(ui.Image image) {
+  return _MatchesReferenceImage(image);
+}
+
+/// Asserts that a [SemanticsNode] contains the specified information.
 ///
 /// If either the label, hint, value, textDirection, or rect fields are not
 /// provided, then they are not part of the comparison.  All of the boolean
 /// flag and action fields must match, and default to false.
 ///
-/// To retrieve the semantics data of a widget, use [tester.getSemanticsData]
+/// To retrieve the semantics data of a widget, use [tester.getSemantics]
 /// with a [Finder] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
@@ -300,15 +339,14 @@ Matcher matchesGoldenFile(dynamic key) {
 ///
 /// ```dart
 /// final SemanticsHandle handle = tester.ensureSemantics();
-/// final SemanticsData data = tester.getSemanticsData(find.text('hello'));
-/// expect(data, matchesSemanticsData(label: 'hello'));
+/// expect(tester.getSemantics(find.text('hello')), matchesSemanticsNode(label: 'hello'));
 /// handle.dispose();
 /// ```
 ///
 /// See also:
 ///
-///   * [WidgetTester.getSemanticsData], the tester method which retrieves data.
-Matcher matchesSemanticsData({
+///   * [WidgetTester.getSemantics], the tester method which retrieves semantics.
+Matcher matchesSemantics({
   String label,
   String hint,
   String value,
@@ -362,6 +400,7 @@ Matcher matchesSemanticsData({
   String onTapHint,
   String onLongPressHint,
   List<CustomSemanticsAction> customActions,
+  List<Matcher> children,
 }) {
   final List<SemanticsFlag> flags = <SemanticsFlag>[];
   if (hasCheckedState)
@@ -448,12 +487,176 @@ Matcher matchesSemanticsData({
     actions.add(SemanticsAction.moveCursorBackwardByWord);
   SemanticsHintOverrides hintOverrides;
   if (onTapHint != null || onLongPressHint != null)
-    hintOverrides = new SemanticsHintOverrides(
+    hintOverrides = SemanticsHintOverrides(
       onTapHint: onTapHint,
       onLongPressHint: onLongPressHint,
     );
 
-  return new _MatchesSemanticsData(
+  return _MatchesSemanticsData(
+    label: label,
+    hint: hint,
+    value: value,
+    increasedValue: increasedValue,
+    decreasedValue: decreasedValue,
+    actions: actions,
+    flags: flags,
+    textDirection: textDirection,
+    rect: rect,
+    size: size,
+    customActions: customActions,
+    hintOverrides: hintOverrides,
+    children: children,
+  );
+}
+
+/// DEPRECATED: use [matchesSemantics] instead.
+@Deprecated('use matchesSemantics instead')
+Matcher matchesSemanticsData({
+  String label,
+  String hint,
+  String value,
+  String increasedValue,
+  String decreasedValue,
+  TextDirection textDirection,
+  Rect rect,
+  Size size,
+  // Flags //
+  bool hasCheckedState = false,
+  bool isChecked = false,
+  bool isSelected = false,
+  bool isButton = false,
+  bool isFocused = false,
+  bool isTextField = false,
+  bool hasEnabledState = false,
+  bool isEnabled = false,
+  bool isInMutuallyExclusiveGroup = false,
+  bool isHeader = false,
+  bool isObscured = false,
+  bool namesRoute = false,
+  bool scopesRoute = false,
+  bool isHidden = false,
+  bool isImage = false,
+  bool isLiveRegion = false,
+  bool hasToggledState = false,
+  bool isToggled = false,
+  bool hasImplicitScrolling = false,
+  // Actions //
+  bool hasTapAction = false,
+  bool hasLongPressAction = false,
+  bool hasScrollLeftAction = false,
+  bool hasScrollRightAction = false,
+  bool hasScrollUpAction = false,
+  bool hasScrollDownAction = false,
+  bool hasIncreaseAction = false,
+  bool hasDecreaseAction = false,
+  bool hasShowOnScreenAction = false,
+  bool hasMoveCursorForwardByCharacterAction = false,
+  bool hasMoveCursorBackwardByCharacterAction = false,
+  bool hasMoveCursorForwardByWordAction = false,
+  bool hasMoveCursorBackwardByWordAction = false,
+  bool hasSetSelectionAction = false,
+  bool hasCopyAction = false,
+  bool hasCutAction = false,
+  bool hasPasteAction = false,
+  bool hasDidGainAccessibilityFocusAction = false,
+  bool hasDidLoseAccessibilityFocusAction = false,
+  bool hasDismissAction = false,
+  // Custom actions and overrides
+  String onTapHint,
+  String onLongPressHint,
+  List<CustomSemanticsAction> customActions,
+}) {
+    final List<SemanticsFlag> flags = <SemanticsFlag>[];
+  if (hasCheckedState)
+    flags.add(SemanticsFlag.hasCheckedState);
+  if (isChecked)
+    flags.add(SemanticsFlag.isChecked);
+  if (isSelected)
+    flags.add(SemanticsFlag.isSelected);
+  if (isButton)
+    flags.add(SemanticsFlag.isButton);
+  if (isTextField)
+    flags.add(SemanticsFlag.isTextField);
+  if (isFocused)
+    flags.add(SemanticsFlag.isFocused);
+  if (hasEnabledState)
+    flags.add(SemanticsFlag.hasEnabledState);
+  if (isEnabled)
+    flags.add(SemanticsFlag.isEnabled);
+  if (isInMutuallyExclusiveGroup)
+    flags.add(SemanticsFlag.isInMutuallyExclusiveGroup);
+  if (isHeader)
+    flags.add(SemanticsFlag.isHeader);
+  if (isObscured)
+    flags.add(SemanticsFlag.isObscured);
+  if (namesRoute)
+    flags.add(SemanticsFlag.namesRoute);
+  if (scopesRoute)
+    flags.add(SemanticsFlag.scopesRoute);
+  if (isHidden)
+    flags.add(SemanticsFlag.isHidden);
+  if (isImage)
+    flags.add(SemanticsFlag.isImage);
+  if (isLiveRegion)
+    flags.add(SemanticsFlag.isLiveRegion);
+  if (hasToggledState)
+    flags.add(SemanticsFlag.hasToggledState);
+  if (isToggled)
+    flags.add(SemanticsFlag.isToggled);
+  if (hasImplicitScrolling)
+    flags.add(SemanticsFlag.hasImplicitScrolling);
+
+  final List<SemanticsAction> actions = <SemanticsAction>[];
+  if (hasTapAction)
+    actions.add(SemanticsAction.tap);
+  if (hasLongPressAction)
+    actions.add(SemanticsAction.longPress);
+  if (hasScrollLeftAction)
+    actions.add(SemanticsAction.scrollLeft);
+  if (hasScrollRightAction)
+    actions.add(SemanticsAction.scrollRight);
+  if (hasScrollUpAction)
+    actions.add(SemanticsAction.scrollUp);
+  if (hasScrollDownAction)
+    actions.add(SemanticsAction.scrollDown);
+  if (hasIncreaseAction)
+    actions.add(SemanticsAction.increase);
+  if (hasDecreaseAction)
+    actions.add(SemanticsAction.decrease);
+  if (hasShowOnScreenAction)
+    actions.add(SemanticsAction.showOnScreen);
+  if (hasMoveCursorForwardByCharacterAction)
+    actions.add(SemanticsAction.moveCursorForwardByCharacter);
+  if (hasMoveCursorBackwardByCharacterAction)
+    actions.add(SemanticsAction.moveCursorBackwardByCharacter);
+  if (hasSetSelectionAction)
+    actions.add(SemanticsAction.setSelection);
+  if (hasCopyAction)
+    actions.add(SemanticsAction.copy);
+  if (hasCutAction)
+    actions.add(SemanticsAction.cut);
+  if (hasPasteAction)
+    actions.add(SemanticsAction.paste);
+  if (hasDidGainAccessibilityFocusAction)
+    actions.add(SemanticsAction.didGainAccessibilityFocus);
+  if (hasDidLoseAccessibilityFocusAction)
+    actions.add(SemanticsAction.didLoseAccessibilityFocus);
+  if (customActions != null && customActions.isNotEmpty)
+    actions.add(SemanticsAction.customAction);
+  if (hasDismissAction)
+    actions.add(SemanticsAction.dismiss);
+  if (hasMoveCursorForwardByWordAction)
+    actions.add(SemanticsAction.moveCursorForwardByWord);
+  if (hasMoveCursorBackwardByWordAction)
+    actions.add(SemanticsAction.moveCursorBackwardByWord);
+  SemanticsHintOverrides hintOverrides;
+  if (onTapHint != null || onLongPressHint != null)
+    hintOverrides = SemanticsHintOverrides(
+      onTapHint: onTapHint,
+      onLongPressHint: onLongPressHint,
+    );
+
+  return _MatchesSemanticsData(
     label: label,
     hint: hint,
     value: value,
@@ -489,7 +692,7 @@ Matcher matchesSemanticsData({
 ///   * [iOSTapTargetGuideline], for iOS minimum tapable area guidelines.
 ///   * [textContrastGuideline], for WCAG minimum text contrast guidelines.
 AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
-  return new _MatchesAccessibilityGuideline(guideline);
+  return _MatchesAccessibilityGuideline(guideline);
 }
 
 /// The inverse matcher of [meetsGuideline].
@@ -497,7 +700,7 @@ AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
 /// This is needed because the [isNot] matcher does not compose with an
 /// [AsyncMatcher].
 AsyncMatcher doesNotMeetGuideline(AccessibilityGuideline guideline) {
-  return new _DoesNotMatchAccessibilityGuideline(guideline);
+  return _DoesNotMatchAccessibilityGuideline(guideline);
 }
 
 class _FindsWidgetMatcher extends Matcher {
@@ -678,10 +881,10 @@ class _EqualsIgnoringHashCodes extends Matcher {
 
   final String _value;
 
-  static final Object _mismatchedValueKey = new Object();
+  static final Object _mismatchedValueKey = Object();
 
   static String _normalize(String s) {
-    return s.replaceAll(new RegExp(r'#[0-9a-f]{5}'), '#00000');
+    return s.replaceAll(RegExp(r'#[0-9a-f]{5}'), '#00000');
   }
 
   @override
@@ -751,7 +954,7 @@ bool _isAllTreeConnectorCharacters(String line) {
 class _HasGoodToStringDeep extends Matcher {
   const _HasGoodToStringDeep();
 
-  static final Object _toStringDeepErrorDescriptionKey = new Object();
+  static final Object _toStringDeepErrorDescriptionKey = Object();
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
@@ -810,7 +1013,7 @@ class _HasGoodToStringDeep extends Matcher {
         prefixIssues.add('Line ${i+1} does not contain the expected prefix.');
     }
 
-    final StringBuffer errorDescription = new StringBuffer();
+    final StringBuffer errorDescription = StringBuffer();
     if (issues.isNotEmpty) {
       errorDescription.writeln('Bad toStringDeep():');
       errorDescription.writeln(description);
@@ -865,7 +1068,7 @@ class _HasGoodToStringDeep extends Matcher {
 ///
 /// This makes it useful for comparing numbers, [Color]s, [Offset]s and other
 /// sets of value for which a metric space is defined.
-typedef num DistanceFunction<T>(T a, T b);
+typedef DistanceFunction<T> = num Function(T a, T b);
 
 /// The type of a union of instances of [DistanceFunction<T>] for various types
 /// T.
@@ -878,7 +1081,7 @@ typedef num DistanceFunction<T>(T a, T b);
 ///
 /// Calling an instance of this type must either be done dynamically, or by
 /// first casting it to a [DistanceFunction<T>] for some concrete T.
-typedef num AnyDistanceFunction(Null a, Null b);
+typedef AnyDistanceFunction = num Function(Null a, Null b);
 
 const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = <Type, AnyDistanceFunction>{
   Color: _maxComponentColorDistance,
@@ -960,14 +1163,14 @@ Matcher within<T>({
   distanceFunction ??= _kStandardDistanceFunctions[from.runtimeType];
 
   if (distanceFunction == null) {
-    throw new ArgumentError(
+    throw ArgumentError(
       'The specified distanceFunction was null, and a standard distance '
       'function was not found for type ${from.runtimeType} of the provided '
       '`from` argument.'
     );
   }
 
-  return new _IsWithinDistance<T>(distanceFunction, from, distance);
+  return _IsWithinDistance<T>(distanceFunction, from, distance);
 }
 
 class _IsWithinDistance<T> extends Matcher {
@@ -986,7 +1189,7 @@ class _IsWithinDistance<T> extends Matcher {
     final T test = object;
     final num distance = distanceFunction(test, value);
     if (distance < 0) {
-      throw new ArgumentError(
+      throw ArgumentError(
         'Invalid distance function was used to compare a ${value.runtimeType} '
         'to a ${object.runtimeType}. The function must return a non-negative '
         'double value, but it returned $distance.'
@@ -1098,14 +1301,14 @@ const Matcher hasNoImmediateClip = _MatchAnythingExceptClip();
 /// is a [RenderClipRRect] with no clipper set, and border radius equals to
 /// [borderRadius], or an equivalent [RenderClipPath].
 Matcher clipsWithBoundingRRect({@required BorderRadius borderRadius}) {
-  return new _ClipsWithBoundingRRect(borderRadius: borderRadius);
+  return _ClipsWithBoundingRRect(borderRadius: borderRadius);
 }
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipPath] with a [ShapeBorderClipper] that clips to
 /// [shape].
 Matcher clipsWithShapeBorder({@required ShapeBorder shape}) {
-  return new _ClipsWithShapeBorder(shape: shape);
+  return _ClipsWithShapeBorder(shape: shape);
 }
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
@@ -1130,7 +1333,7 @@ Matcher rendersOnPhysicalModel({
   BorderRadius borderRadius,
   double elevation,
 }) {
-  return new _RendersOnPhysicalModel(
+  return _RendersOnPhysicalModel(
     shape: shape,
     borderRadius: borderRadius,
     elevation: elevation,
@@ -1146,7 +1349,7 @@ Matcher rendersOnPhysicalShape({
   ShapeBorder shape,
   double elevation,
 }) {
-  return new _RendersOnPhysicalShape(
+  return _RendersOnPhysicalShape(
     shape: shape,
     elevation: elevation,
   );
@@ -1438,7 +1641,7 @@ class _CoversSameAreaAs extends Matcher {
   }) : maxHorizontalNoise = areaToCompare.width / sampleSize,
        maxVerticalNoise = areaToCompare.height / sampleSize {
     // Use a fixed random seed to make sure tests are deterministic.
-    random = new math.Random(1);
+    random = math.Random(1);
   }
 
   final Path expectedPath;
@@ -1452,7 +1655,7 @@ class _CoversSameAreaAs extends Matcher {
   bool matches(covariant Path actualPath, Map<dynamic, dynamic> matchState) {
     for (int i = 0; i < sampleSize; i += 1) {
       for (int j = 0; j < sampleSize; j += 1) {
-        final Offset offset = new Offset(
+        final Offset offset = Offset(
           i * (areaToCompare.width / sampleSize),
           j * (areaToCompare.height / sampleSize)
         );
@@ -1460,7 +1663,7 @@ class _CoversSameAreaAs extends Matcher {
         if (!_samplePoint(matchState, actualPath, offset))
           return false;
 
-        final Offset noise = new Offset(
+        final Offset noise = Offset(
           maxHorizontalNoise * random.nextDouble(),
           maxVerticalNoise * random.nextDouble(),
         );
@@ -1513,6 +1716,76 @@ Future<ui.Image> _captureImage(Element element) {
   return layer.toImage(renderObject.paintBounds);
 }
 
+int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {
+  assert(imageA.length == imageB.length);
+  int delta = 0;
+  for (int i = 0; i < imageA.length; i+=4) {
+    if (imageA[i] != imageB[i] ||
+      imageA[i+1] != imageB[i+1] ||
+      imageA[i+2] != imageB[i+2] ||
+      imageA[i+3] != imageB[i+3]) {
+      delta++;
+    }
+  }
+  return delta;
+}
+
+class _MatchesReferenceImage extends AsyncMatcher {
+  const _MatchesReferenceImage(this.referenceImage);
+
+  final ui.Image referenceImage;
+
+  @override
+  Future<String> matchAsync(dynamic item) async {
+    Future<ui.Image> imageFuture;
+    if (item is Future<ui.Image>) {
+      imageFuture = item;
+    } else if (item is ui.Image) {
+      imageFuture = Future<ui.Image>.value(item);
+    } else {
+      final Finder finder = item;
+      final Iterable<Element> elements = finder.evaluate();
+      if (elements.isEmpty) {
+        return 'could not be rendered because no widget was found';
+      } else if (elements.length > 1) {
+        return 'matched too many widgets';
+      }
+      imageFuture = _captureImage(elements.single);
+    }
+
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    return binding.runAsync<String>(() async {
+      final ui.Image image = await imageFuture;
+      final ByteData bytes = await image.toByteData()
+        .timeout(const Duration(seconds: 10), onTimeout: () => null);
+      if (bytes == null) {
+        return 'Failed to generate an image from engine within the 10,000ms timeout.';
+      }
+
+      final ByteData referenceBytes = await referenceImage.toByteData()
+        .timeout(const Duration(seconds: 10), onTimeout: () => null);
+      if (referenceBytes == null) {
+        return 'Failed to generate an image from engine within the 10,000ms timeout.';
+      }
+
+      if (referenceImage.height != image.height || referenceImage.width != image.width) {
+        return 'does not match as width or height do not match. $image != $referenceImage';
+      }
+
+      final int countDifferentPixels = _countDifferentPixels(
+        Uint8List.view(bytes.buffer),
+        Uint8List.view(referenceBytes.buffer),
+      );
+      return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
+    }, additionalTime: const Duration(seconds: 21));
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('rasterized image matches that of a $referenceImage reference image');
+  }
+}
+
 class _MatchesGoldenFile extends AsyncMatcher {
   const _MatchesGoldenFile(this.key);
 
@@ -1526,7 +1799,7 @@ class _MatchesGoldenFile extends AsyncMatcher {
     if (item is Future<ui.Image>) {
       imageFuture = item;
     } else if (item is ui.Image) {
-      imageFuture = new Future<ui.Image>.value(item);
+      imageFuture = Future<ui.Image>.value(item);
     } else {
       final Finder finder = item;
       final Iterable<Element> elements = finder.evaluate();
@@ -1577,6 +1850,7 @@ class _MatchesSemanticsData extends Matcher {
     this.size,
     this.customActions,
     this.hintOverrides,
+    this.children,
   });
 
   final String label;
@@ -1591,43 +1865,51 @@ class _MatchesSemanticsData extends Matcher {
   final TextDirection textDirection;
   final Rect rect;
   final Size size;
+  final List<Matcher> children;
 
   @override
   Description describe(Description description) {
     description.add('has semantics');
     if (label != null)
-      description.add('with label: $label ');
+      description.add(' with label: $label');
     if (value != null)
-      description.add('with value: $value ');
+      description.add(' with value: $value');
     if (hint != null)
-      description.add('with hint: $hint ');
+      description.add(' with hint: $hint');
     if (increasedValue != null)
-      description.add('with increasedValue: $increasedValue');
+      description.add(' with increasedValue: $increasedValue ');
     if (decreasedValue != null)
-      description.add('with decreasedValue: $decreasedValue');
+      description.add(' with decreasedValue: $decreasedValue ');
     if (actions != null)
-      description.add('with actions:').addDescriptionOf(actions);
+      description.add(' with actions: ').addDescriptionOf(actions);
     if (flags != null)
-      description.add('with flags:').addDescriptionOf(flags);
+      description.add(' with flags: ').addDescriptionOf(flags);
     if (textDirection != null)
-      description.add('with textDirection: $textDirection ');
+      description.add(' with textDirection: $textDirection ');
     if (rect != null)
-      description.add('with rect: $rect');
+      description.add(' with rect: $rect');
     if (size != null)
-      description.add('with size: $size');
+      description.add(' with size: $size');
     if (customActions != null)
-      description.add('with custom actions: $customActions');
+      description.add(' with custom actions: $customActions');
     if (hintOverrides != null)
-      description.add('with custom hints: $hintOverrides');
+      description.add(' with custom hints: $hintOverrides');
+    if (children != null) {
+      description.add(' with children:\n');
+      for (_MatchesSemanticsData child in children)
+        child.describe(description);
+    }
     return description;
   }
 
 
   @override
-  bool matches(covariant SemanticsData data, Map<dynamic, dynamic> matchState) {
-    if (data == null)
+  bool matches(dynamic node, Map<dynamic, dynamic> matchState) {
+    // TODO(jonahwilliams): remove dynamic once we have removed getSemanticsData.
+    if (node == null)
       return failWithDescription(matchState, 'No SemanticsData provided. '
-        'Maybe you forgot to enabled semantics?');
+        'Maybe you forgot to enable semantics?');
+    final SemanticsData data = node is SemanticsNode ? node.getSemanticsData() : node;
     if (label != null && label != data.label)
       return failWithDescription(matchState, 'label was: ${data.label}');
     if (hint != null && hint != data.hint)
@@ -1661,11 +1943,11 @@ class _MatchesSemanticsData extends Matcher {
       final List<CustomSemanticsAction> providedCustomActions = data.customSemanticsActionIds.map((int id) {
         return CustomSemanticsAction.getAction(id);
       }).toList();
-      final List<CustomSemanticsAction> expectedCustomActions = new List<CustomSemanticsAction>.from(customActions ?? const <int>[]);
+      final List<CustomSemanticsAction> expectedCustomActions = List<CustomSemanticsAction>.from(customActions ?? const <int>[]);
       if (hintOverrides?.onTapHint != null)
-        expectedCustomActions.add(new CustomSemanticsAction.overridingAction(hint: hintOverrides.onTapHint, action: SemanticsAction.tap));
+        expectedCustomActions.add(CustomSemanticsAction.overridingAction(hint: hintOverrides.onTapHint, action: SemanticsAction.tap));
       if (hintOverrides?.onLongPressHint != null)
-        expectedCustomActions.add(new CustomSemanticsAction.overridingAction(hint: hintOverrides.onLongPressHint, action: SemanticsAction.longPress));
+        expectedCustomActions.add(CustomSemanticsAction.overridingAction(hint: hintOverrides.onLongPressHint, action: SemanticsAction.longPress));
       if (expectedCustomActions.length != providedCustomActions.length)
         return failWithDescription(matchState, 'custom actions where: $providedCustomActions');
       int sortActions(CustomSemanticsAction left, CustomSemanticsAction right) {
@@ -1691,7 +1973,16 @@ class _MatchesSemanticsData extends Matcher {
         return failWithDescription(matchState, 'flags were: $flagSummary');
       }
     }
-    return true;
+    bool allMatched = true;
+    if (children != null) {
+      int i = 0;
+      node.visitChildren((SemanticsNode child) {
+        allMatched = children[i].matches(child, matchState) && allMatched;
+        i += 1;
+        return allMatched;
+      });
+    }
+    return allMatched;
   }
 
   bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {

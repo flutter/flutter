@@ -63,82 +63,84 @@ void main() {
   });
 
   group('gradle project', () {
-    GradleProject projectFrom(String properties) => new GradleProject.fromAppProperties(properties);
+    GradleProject projectFrom(String properties, String tasks) => GradleProject.fromAppProperties(properties, tasks);
 
     test('should extract build directory from app properties', () {
       final GradleProject project = projectFrom('''
 someProperty: someValue
 buildDir: /Users/some/apps/hello/build/app
 someOtherProperty: someOtherValue
-      ''');
+      ''', '');
       expect(
         fs.path.normalize(project.apkDirectory.path),
         fs.path.normalize('/Users/some/apps/hello/build/app/outputs/apk'),
       );
     });
     test('should extract default build variants from app properties', () {
-      final GradleProject project = projectFrom('''
-someProperty: someValue
-assemble: task ':app:assemble'
-assembleAndroidTest: task ':app:assembleAndroidTest'
-assembleDebug: task ':app:assembleDebug'
-assembleProfile: task ':app:assembleProfile'
-assembleRelease: task ':app:assembleRelease'
-buildDir: /Users/some/apps/hello/build/app
-someOtherProperty: someOtherValue
+      final GradleProject project = projectFrom('buildDir: /Users/some/apps/hello/build/app', '''
+someTask
+assemble
+assembleAndroidTest
+assembleDebug
+assembleProfile
+assembleRelease
+someOtherTask
       ''');
       expect(project.buildTypes, <String>['debug', 'profile', 'release']);
       expect(project.productFlavors, isEmpty);
     });
     test('should extract custom build variants from app properties', () {
-      final GradleProject project = projectFrom('''
-someProperty: someValue
-assemble: task ':app:assemble'
-assembleAndroidTest: task ':app:assembleAndroidTest'
-assembleDebug: task ':app:assembleDebug'
-assembleFree: task ':app:assembleFree'
-assembleFreeAndroidTest: task ':app:assembleFreeAndroidTest'
-assembleFreeDebug: task ':app:assembleFreeDebug'
-assembleFreeProfile: task ':app:assembleFreeProfile'
-assembleFreeRelease: task ':app:assembleFreeRelease'
-assemblePaid: task ':app:assemblePaid'
-assemblePaidAndroidTest: task ':app:assemblePaidAndroidTest'
-assemblePaidDebug: task ':app:assemblePaidDebug'
-assemblePaidProfile: task ':app:assemblePaidProfile'
-assemblePaidRelease: task ':app:assemblePaidRelease'
-assembleProfile: task ':app:assembleProfile'
-assembleRelease: task ':app:assembleRelease'
-buildDir: /Users/some/apps/hello/build/app
-someOtherProperty: someOtherValue
+      final GradleProject project = projectFrom('buildDir: /Users/some/apps/hello/build/app', '''
+someTask
+assemble
+assembleAndroidTest
+assembleDebug
+assembleFree
+assembleFreeAndroidTest
+assembleFreeDebug
+assembleFreeProfile
+assembleFreeRelease
+assemblePaid
+assemblePaidAndroidTest
+assemblePaidDebug
+assemblePaidProfile
+assemblePaidRelease
+assembleProfile
+assembleRelease
+someOtherTask
       ''');
       expect(project.buildTypes, <String>['debug', 'profile', 'release']);
       expect(project.productFlavors, <String>['free', 'paid']);
     });
     test('should provide apk file name for default build types', () {
-      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'));
+      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'));
       expect(project.apkFileFor(BuildInfo.debug), 'app-debug.apk');
       expect(project.apkFileFor(BuildInfo.profile), 'app-profile.apk');
       expect(project.apkFileFor(BuildInfo.release), 'app-release.apk');
       expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
     });
     test('should provide apk file name for flavored build types', () {
-      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'));
+      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'));
       expect(project.apkFileFor(const BuildInfo(BuildMode.debug, 'free')), 'app-free-debug.apk');
       expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'paid')), 'app-paid-release.apk');
       expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
     });
     test('should provide assemble task name for default build types', () {
-      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'));
+      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'));
       expect(project.assembleTaskFor(BuildInfo.debug), 'assembleDebug');
       expect(project.assembleTaskFor(BuildInfo.profile), 'assembleProfile');
       expect(project.assembleTaskFor(BuildInfo.release), 'assembleRelease');
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
     });
     test('should provide assemble task name for flavored build types', () {
-      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'));
+      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'));
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.debug, 'free')), 'assembleFreeDebug');
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'paid')), 'assemblePaidRelease');
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
+    });
+    test('should respect format of the flavored build types', () {
+      final GradleProject project = GradleProject(<String>['debug'], <String>['randomFlavor'], fs.directory('/some/dir'));
+      expect(project.assembleTaskFor(const BuildInfo(BuildMode.debug, 'randomFlavor')), 'assembleRandomFlavorDebug');
     });
   });
 
@@ -149,9 +151,9 @@ someOtherProperty: someOtherValue
     FileSystem fs;
 
     setUp(() {
-      fs = new MemoryFileSystem();
-      mockArtifacts = new MockLocalEngineArtifacts();
-      mockProcessManager = new MockProcessManager();
+      fs = MemoryFileSystem();
+      mockArtifacts = MockLocalEngineArtifacts();
+      mockProcessManager = MockProcessManager();
       android = fakePlatform('android');
     });
 
@@ -331,7 +333,7 @@ flutter:
 }
 
 Platform fakePlatform(String name) {
-  return new FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
+  return FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
 }
 
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}

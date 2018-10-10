@@ -11,14 +11,14 @@ import 'test_driver.dart';
 
 void main() {
   FlutterTestDriver _flutterRun, _flutterAttach;
-  final BasicProject _project = new BasicProject();
+  final BasicProject _project = BasicProject();
   Directory tempDir;
 
   setUp(() async {
     tempDir = fs.systemTempDirectory.createTempSync('flutter_attach_test.');
     await _project.setUpIn(tempDir);
-    _flutterRun = new FlutterTestDriver(tempDir, logPrefix: 'RUN');
-    _flutterAttach = new FlutterTestDriver(tempDir, logPrefix: 'ATTACH');
+    _flutterRun = FlutterTestDriver(tempDir, logPrefix: 'RUN');
+    _flutterAttach = FlutterTestDriver(tempDir, logPrefix: 'ATTACH');
   });
 
   tearDown(() async {
@@ -44,7 +44,7 @@ void main() {
       await _flutterRun.run(withDebugger: true);
       await _flutterAttach.attach(_flutterRun.vmServicePort);
       await _flutterAttach.quit();
-      _flutterAttach = new FlutterTestDriver(tempDir, logPrefix: 'ATTACH-2');
+      _flutterAttach = FlutterTestDriver(tempDir, logPrefix: 'ATTACH-2');
       await _flutterAttach.attach(_flutterRun.vmServicePort);
       await _flutterAttach.hotReload();
     });

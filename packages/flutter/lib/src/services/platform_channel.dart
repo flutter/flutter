@@ -272,10 +272,10 @@ class MethodChannel {
     assert(method != null);
     final dynamic result = await BinaryMessages.send(
       name,
-      codec.encodeMethodCall(new MethodCall(method, arguments)),
+      codec.encodeMethodCall(MethodCall(method, arguments)),
     );
     if (result == null)
-      throw new MissingPluginException('No implementation found for method $method on channel $name');
+      throw MissingPluginException('No implementation found for method $method on channel $name');
     return codec.decodeEnvelope(result);
   }
 
@@ -405,9 +405,9 @@ class EventChannel {
   /// stream listener count changes from 0 to 1. Stream deactivation happens
   /// only when stream listener count changes from 1 to 0.
   Stream<dynamic> receiveBroadcastStream([dynamic arguments]) {
-    final MethodChannel methodChannel = new MethodChannel(name, codec);
+    final MethodChannel methodChannel = MethodChannel(name, codec);
     StreamController<dynamic> controller;
-    controller = new StreamController<dynamic>.broadcast(onListen: () async {
+    controller = StreamController<dynamic>.broadcast(onListen: () async {
       BinaryMessages.setMessageHandler(name, (ByteData reply) async {
         if (reply == null) {
           controller.close();
@@ -423,7 +423,7 @@ class EventChannel {
       try {
         await methodChannel.invokeMethod('listen', arguments);
       } catch (exception, stack) {
-        FlutterError.reportError(new FlutterErrorDetails(
+        FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,
           library: 'services library',
@@ -435,7 +435,7 @@ class EventChannel {
       try {
         await methodChannel.invokeMethod('cancel', arguments);
       } catch (exception, stack) {
-        FlutterError.reportError(new FlutterErrorDetails(
+        FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,
           library: 'services library',

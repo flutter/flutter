@@ -27,7 +27,7 @@ void main() {
     Directory tempDir;
 
     void withMockDevice([Device mock]) {
-      mockDevice = mock ?? new MockDevice();
+      mockDevice = mock ?? MockDevice();
       targetDeviceFinder = () async => mockDevice;
       testDeviceManager.addDevice(mockDevice);
     }
@@ -37,9 +37,9 @@ void main() {
     });
 
     setUp(() {
-      command = new DriveCommand();
+      command = DriveCommand();
       applyMocksToCommand(command);
-      fs = new MemoryFileSystem();
+      fs = MemoryFileSystem();
       tempDir = fs.systemTempDirectory.createTempSync('flutter_drive_test.');
       fs.currentDirectory = tempDir;
       fs.directory('test').createSync();
@@ -167,7 +167,7 @@ void main() {
       final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
       appStarter = expectAsync1((DriveCommand command) async {
-        return new LaunchResult.succeeded();
+        return LaunchResult.succeeded();
       });
       testRunner = expectAsync2((List<String> testArgs, String observatoryUri) async {
         expect(testArgs, <String>[testFile]);
@@ -198,7 +198,7 @@ void main() {
       final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
       appStarter = expectAsync1((DriveCommand command) async {
-        return new LaunchResult.succeeded();
+        return LaunchResult.succeeded();
       });
       testRunner = (List<String> testArgs, String observatoryUri) async {
         throwToolExit(null, exitCode: 123);
@@ -241,7 +241,7 @@ void main() {
     });
 
     void findTargetDeviceOnOperatingSystem(String operatingSystem) {
-      Platform platform() => new FakePlatform(operatingSystem: operatingSystem);
+      Platform platform() => FakePlatform(operatingSystem: operatingSystem);
 
       testUsingContext('returns null if no devices found', () async {
         expect(await findTargetDevice(), isNull);
@@ -251,7 +251,7 @@ void main() {
       });
 
       testUsingContext('uses existing Android device', () async {
-        mockDevice = new MockAndroidDevice();
+        mockDevice = MockAndroidDevice();
         when(mockDevice.name).thenReturn('mock-android-device');
         withMockDevice(mockDevice);
 
@@ -274,13 +274,13 @@ void main() {
     group('findTargetDevice on macOS', () {
       findTargetDeviceOnOperatingSystem('macos');
 
-      Platform macOsPlatform() => new FakePlatform(operatingSystem: 'macos');
+      Platform macOsPlatform() => FakePlatform(operatingSystem: 'macos');
 
       testUsingContext('uses existing simulator', () async {
         withMockDevice();
         when(mockDevice.name).thenReturn('mock-simulator');
         when(mockDevice.isLocalEmulator)
-            .thenAnswer((Invocation invocation) => new Future<bool>.value(true));
+            .thenAnswer((Invocation invocation) => Future<bool>.value(true));
 
         final Device device = await findTargetDevice();
         expect(device.name, 'mock-simulator');

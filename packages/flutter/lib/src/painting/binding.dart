@@ -42,7 +42,7 @@ abstract class PaintingBinding extends BindingBase with ServicesBinding {
   ///
   /// This method can be overridden to provide a custom image cache.
   @protected
-  ImageCache createImageCache() => new ImageCache();
+  ImageCache createImageCache() => ImageCache();
 
   @override
   void evict(String asset) {

@@ -23,7 +23,7 @@ void main() {
 
     expect(BorderSide.lerp(side1, side2, 0.0), equals(side1));
     expect(BorderSide.lerp(side1, side2, 1.0), equals(side2));
-    expect(BorderSide.lerp(side1, side2, 0.5), equals(new BorderSide(
+    expect(BorderSide.lerp(side1, side2, 0.5), equals(BorderSide(
       color: Color.lerp(const Color(0xFF000000), const Color(0xFF00FFFF), 0.5),
       width: 1.5,
       style: BorderStyle.solid,
@@ -52,7 +52,7 @@ void main() {
   });
 
   test('Border control test', () {
-    final Border border1 = new Border.all(width: 4.0);
+    final Border border1 = Border.all(width: 4.0);
     final Border border2 = Border.lerp(null, border1, 0.25);
     final Border border3 = Border.lerp(border1, null, 0.25);
 
@@ -68,7 +68,7 @@ void main() {
 
   test('Border toString test', () {
     expect(
-      new Border.all(width: 4.0).toString(),
+      Border.all(width: 4.0).toString(),
       equals(
         'Border.all(BorderSide(Color(0xff000000), 4.0, BorderStyle.solid))',
       ),

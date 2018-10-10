@@ -170,7 +170,7 @@ class CheckboxListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget control = new Checkbox(
+    final Widget control = Checkbox(
       value: value,
       onChanged: onChanged,
       activeColor: activeColor,
@@ -188,10 +188,10 @@ class CheckboxListTile extends StatelessWidget {
         trailing = control;
         break;
     }
-    return new MergeSemantics(
+    return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
-        child: new ListTile(
+        child: ListTile(
           leading: leading,
           title: title,
           subtitle: subtitle,

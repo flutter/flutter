@@ -30,16 +30,16 @@ void main() {
     });
 
     setUp(() {
-      fs = new MemoryFileSystem();
+      fs = MemoryFileSystem();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
       fs.directory(_kProjectRoot).createSync(recursive: true);
       fs.currentDirectory = _kProjectRoot;
 
-      platform = new FakePlatform(environment: <String, String>{
+      platform = FakePlatform(environment: <String, String>{
         'FLUTTER_ROOT': _kFlutterRoot,
       });
 
-      runner = createTestCommandRunner(new DummyFlutterCommand());
+      runner = createTestCommandRunner(DummyFlutterCommand());
     });
 
     group('run', () {

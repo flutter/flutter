@@ -15,6 +15,7 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(2.0)),
     ));
     expect(theme.alignedDropdown, false);
+    expect(theme.layoutBehavior, ButtonBarLayoutBehavior.padded);
   });
 
   test('ButtonThemeData default overrides', () {
@@ -40,15 +41,15 @@ void main() {
     ShapeBorder shape;
 
     await tester.pumpWidget(
-      new ButtonTheme(
-        child: new Builder(
+      ButtonTheme(
+        child: Builder(
           builder: (BuildContext context) {
             final ButtonThemeData theme = ButtonTheme.of(context);
             textTheme = theme.textTheme;
             constraints = theme.constraints;
             padding = theme.padding;
             shape = theme.shape;
-            return new Container(
+            return Container(
               alignment: Alignment.topLeft,
               child: const Directionality(
                 textDirection: TextDirection.ltr,
@@ -100,16 +101,18 @@ void main() {
   });
 
   testWidgets('Theme buttonTheme defaults', (WidgetTester tester) async {
-    final ThemeData lightTheme = new ThemeData.light();
+    final ThemeData lightTheme = ThemeData.light();
     ButtonTextTheme textTheme;
     BoxConstraints constraints;
     EdgeInsets padding;
     ShapeBorder shape;
 
+    const Color disabledColor = Color(0xFF00FF00);
     await tester.pumpWidget(
-      new Theme(
+      Theme(
         data: lightTheme.copyWith(
-          disabledColor: const Color(0xFF00FF00), // disabled RaisedButton fill color
+          disabledColor: disabledColor, // disabled RaisedButton fill color
+          buttonTheme: const ButtonThemeData(disabledColor: disabledColor),
           textTheme: lightTheme.textTheme.copyWith(
             button: lightTheme.textTheme.button.copyWith(
               // The button's height will match because there's no
@@ -118,14 +121,14 @@ void main() {
             ),
           ),
         ),
-        child: new Builder(
+        child: Builder(
           builder: (BuildContext context) {
             final ButtonThemeData theme = ButtonTheme.of(context);
             textTheme = theme.textTheme;
             constraints = theme.constraints;
             padding = theme.padding;
             shape = theme.shape;
-            return new Container(
+            return Container(
               alignment: Alignment.topLeft,
               child: const Directionality(
                 textDirection: TextDirection.ltr,
@@ -148,7 +151,7 @@ void main() {
     ));
 
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
-    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xFF00FF00));
+    expect(tester.widget<Material>(find.byType(Material)).color, disabledColor);
     expect(tester.getSize(find.byType(Material)), const Size(88.0, 48.0));
   });
 
@@ -159,28 +162,29 @@ void main() {
     ShapeBorder shape;
 
     await tester.pumpWidget(
-      new Theme(
-        data: new ThemeData.light().copyWith(
+      Theme(
+        data: ThemeData.light().copyWith(
           buttonColor: const Color(0xFF00FF00), // enabled RaisedButton fill color
         ),
-        child: new ButtonTheme(
+        child: ButtonTheme(
           textTheme: ButtonTextTheme.primary,
           minWidth: 100.0,
           height: 200.0,
           padding: EdgeInsets.zero,
+          buttonColor: const Color(0xFF00FF00), // enabled RaisedButton fill color
           shape: const RoundedRectangleBorder(),
-          child: new Builder(
+          child: Builder(
             builder: (BuildContext context) {
               final ButtonThemeData theme = ButtonTheme.of(context);
               textTheme = theme.textTheme;
               constraints = theme.constraints;
               padding = theme.padding;
               shape = theme.shape;
-              return new Container(
+              return Container(
                 alignment: Alignment.topLeft,
-                child: new Directionality(
+                child: Directionality(
                   textDirection: TextDirection.ltr,
-                  child: new RaisedButton(
+                  child: RaisedButton(
                     onPressed: () { },
                     child: const Text('b'), // intrinsic width < minimum width
                   ),
@@ -203,27 +207,27 @@ void main() {
   });
 
   testWidgets('ButtonTheme alignedDropdown', (WidgetTester tester) async {
-    final Key dropdownKey = new UniqueKey();
+    final Key dropdownKey = UniqueKey();
 
     Widget buildFrame({ bool alignedDropdown, TextDirection textDirection }) {
-      return new MaterialApp(
+      return MaterialApp(
         builder: (BuildContext context, Widget child) {
-          return new Directionality(
+          return Directionality(
             textDirection: textDirection,
             child: child,
           );
         },
-        home: new ButtonTheme(
+        home: ButtonTheme(
           alignedDropdown: alignedDropdown,
-          child: new Material(
-            child: new Builder(
+          child: Material(
+            child: Builder(
               builder: (BuildContext context) {
-                return new Container(
+                return Container(
                   alignment: Alignment.center,
-                  child: new DropdownButtonHideUnderline(
-                    child: new Container(
+                  child: DropdownButtonHideUnderline(
+                    child: Container(
                       width: 200.0,
-                      child: new DropdownButton<String>(
+                      child: DropdownButton<String>(
                         key: dropdownKey,
                         onChanged: (String value) { },
                         value: 'foo',

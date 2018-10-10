@@ -19,17 +19,17 @@ TaskFunction combine(List<TaskFunction> tasks) {
         return result;
       }
     }
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   };
 }
 
 /// Defines task that creates new Flutter project, adds a plugin, and then
 /// builds the specified [buildTarget].
 class PluginTest {
+  PluginTest(this.buildTarget, this.options);
+
   final String buildTarget;
   final List<String> options;
-
-  PluginTest(this.buildTarget, this.options);
 
   Future<TaskResult> call() async {
     section('Create Flutter project');
@@ -46,9 +46,9 @@ class PluginTest {
       } finally {
         await project.delete();
       }
-      return new TaskResult.success(null);
+      return TaskResult.success(null);
     } catch (e) {
-      return new TaskResult.failure(e.toString());
+      return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);
     }
@@ -65,16 +65,16 @@ class FlutterProject {
     await inDirectory(directory, () async {
       await flutter(
         'create',
-        options: <String>['--org', 'io.flutter.devicelab']..addAll(options)..add('plugintest')
+        options: <String>['--template=app', '--org', 'io.flutter.devicelab']..addAll(options)..add('plugintest')
       );
     });
-    return new FlutterProject(directory, 'plugintest');
+    return FlutterProject(directory, 'plugintest');
   }
 
   String get rootPath => path.join(parent.path, name);
 
-  Future<Null> addPlugin(String plugin) async {
-    final File pubspec = new File(path.join(rootPath, 'pubspec.yaml'));
+  Future<void> addPlugin(String plugin) async {
+    final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = await pubspec.readAsString();
     content = content.replaceFirst(
       '\ndependencies:\n',
@@ -83,13 +83,13 @@ class FlutterProject {
     await pubspec.writeAsString(content, flush: true);
   }
 
-  Future<Null> build(String target) async {
-    await inDirectory(new Directory(rootPath), () async {
+  Future<void> build(String target) async {
+    await inDirectory(Directory(rootPath), () async {
       await flutter('build', options: <String>[target]);
     });
   }
 
-  Future<Null> delete() async {
+  Future<void> delete() async {
     if (Platform.isWindows) {
       // A running Gradle daemon might prevent us from deleting the project
       // folder on Windows.
@@ -99,7 +99,7 @@ class FlutterProject {
         canFail: true,
       );
       // TODO(ianh): Investigating if flakiness is timing dependent.
-      await new Future<Null>.delayed(const Duration(seconds: 10));
+      await Future<void>.delayed(const Duration(seconds: 10));
     }
     rmTree(parent);
   }

@@ -8,25 +8,25 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('SemanticsEvent.toString', () {
     expect(
-      new TestSemanticsEvent().toString(),
+      TestSemanticsEvent().toString(),
       'TestSemanticsEvent()',
     );
     expect(
-      new TestSemanticsEvent(number: 10).toString(),
+      TestSemanticsEvent(number: 10).toString(),
       'TestSemanticsEvent(number: 10)',
     );
     expect(
-      new TestSemanticsEvent(text: 'hello').toString(),
+      TestSemanticsEvent(text: 'hello').toString(),
       'TestSemanticsEvent(text: hello)',
     );
     expect(
-      new TestSemanticsEvent(text: 'hello', number: 10).toString(),
+      TestSemanticsEvent(text: 'hello', number: 10).toString(),
       'TestSemanticsEvent(number: 10, text: hello)',
     );
   });
   test('SemanticsEvent.toMap', () {
     expect(
-      new TestSemanticsEvent(text: 'hi', number: 11).toMap(),
+      TestSemanticsEvent(text: 'hi', number: 11).toMap(),
       <String, dynamic> {
         'type': 'TestEvent',
         'data': <String, dynamic> {
@@ -36,7 +36,7 @@ void main() {
       }
     );
     expect(
-      new TestSemanticsEvent(text: 'hi', number: 11).toMap(nodeId: 123),
+      TestSemanticsEvent(text: 'hi', number: 11).toMap(nodeId: 123),
       <String, dynamic> {
         'type': 'TestEvent',
         'nodeId': 123,

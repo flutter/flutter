@@ -10,8 +10,8 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('FlatButton implements debugFillDescription', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = new DiagnosticPropertiesBuilder();
-    new FlatButton(
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    FlatButton(
         onPressed: () {},
         textColor: const Color(0xFF00FF00),
         disabledTextColor: const Color(0xFFFF0000),
@@ -34,11 +34,11 @@ void main() {
 
   testWidgets('FlatButton has no clip by default', (WidgetTester tester) async{
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new FlatButton(
-            child: new Container(),
+        child: Material(
+          child: FlatButton(
+            child: Container(),
             onPressed: () { /* to make sure the button is enabled */ },
           ),
         )

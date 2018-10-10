@@ -15,19 +15,13 @@ import 'project.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate =
-     new mustache.Template(template).renderString(context);
+     mustache.Template(template).renderString(context);
   final File file = fs.file(filePath);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
 }
 
 class Plugin {
-  final String name;
-  final String path;
-  final String androidPackage;
-  final String iosPrefix;
-  final String pluginClass;
-
   Plugin({
     this.name,
     this.path,
@@ -45,7 +39,7 @@ class Plugin {
       iosPrefix = pluginYaml['iosPrefix'] ?? '';
       pluginClass = pluginYaml['pluginClass'];
     }
-    return new Plugin(
+    return Plugin(
       name: name,
       path: path,
       androidPackage: androidPackage,
@@ -53,6 +47,12 @@ class Plugin {
       pluginClass: pluginClass,
     );
   }
+
+  final String name;
+  final String path;
+  final String androidPackage;
+  final String iosPrefix;
+  final String pluginClass;
 }
 
 Plugin _pluginFromPubspec(String name, Uri packageRoot) {
@@ -67,7 +67,7 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
     return null;
   final String packageRootPath = fs.path.fromUri(packageRoot);
   printTrace('Found plugin $name at $packageRootPath');
-  return new Plugin.fromYaml(name, packageRootPath, flutterConfig['plugin']);
+  return Plugin.fromYaml(name, packageRootPath, flutterConfig['plugin']);
 }
 
 List<Plugin> findPlugins(FlutterProject project) {
@@ -75,7 +75,7 @@ List<Plugin> findPlugins(FlutterProject project) {
   Map<String, Uri> packages;
   try {
     final String packagesFile = fs.path.join(project.directory.path, PackageMap.globalPackagesPath);
-    packages = new PackageMap(packagesFile).map;
+    packages = PackageMap(packagesFile).map;
   } on FormatException catch (e) {
     printTrace('Invalid .packages file: $e');
     return plugins;
@@ -94,7 +94,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsFile;
   final String oldContents = _readFlutterPluginsList(project);
   final String pluginManifest =
-      plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
+      plugins.map<String>((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
   if (pluginManifest.isNotEmpty) {
     pluginsFile.writeAsStringSync('$pluginManifest\n', flush: true);
   } else {
@@ -147,7 +147,7 @@ public final class GeneratedPluginRegistrant {
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> androidPlugins = plugins
       .where((Plugin p) => p.androidPackage != null && p.pluginClass != null)
-      .map((Plugin p) => <String, dynamic>{
+      .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
           'name': p.name,
           'package': p.androidPackage,
           'class': p.pluginClass,
@@ -224,10 +224,11 @@ Depends on all your plugins, and provides a function to register them.
   s.homepage         = 'https://flutter.io'
   s.license          = { :type => 'BSD' }
   s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
-  s.ios.deployment_target = '7.0'
+  s.ios.deployment_target = '8.0'
   s.source_files =  "Classes", "Classes/**/*.{h,m}"
   s.source           = { :path => '.' }
   s.public_header_files = './Classes/**/*.h'
+  s.dependency 'Flutter'
   {{#plugins}}
   s.dependency '{{name}}'
   {{/plugins}}
@@ -237,7 +238,7 @@ end
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> iosPlugins = plugins
       .where((Plugin p) => p.pluginClass != null)
-      .map((Plugin p) => <String, dynamic>{
+      .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
     'name': p.name,
     'prefix': p.iosPrefix,
     'class': p.pluginClass,
@@ -247,7 +248,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   };
 
   final String registryDirectory = project.ios.pluginRegistrantHost.path;
-  if (project.isModule) {
+  if (project.isApplication) {
     final String registryClassesDirectory = fs.path.join(registryDirectory, 'Classes');
     _renderTemplateToFile(
       _iosPluginRegistrantPodspecTemplate,
@@ -296,8 +297,8 @@ Future<void> injectPlugins(FlutterProject project) async {
   final List<Plugin> plugins = findPlugins(project);
   await _writeAndroidPluginRegistrant(project, plugins);
   await _writeIOSPluginRegistrant(project, plugins);
-  if (!project.isModule && project.ios.directory.existsSync()) {
-    final CocoaPods cocoaPods = new CocoaPods();
+  if (!project.isApplication && project.ios.hostAppRoot.existsSync()) {
+    final CocoaPods cocoaPods = CocoaPods();
     if (plugins.isNotEmpty)
       cocoaPods.setupPodfile(project.ios);
   }

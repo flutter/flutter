@@ -82,7 +82,7 @@ class TabController extends ChangeNotifier {
       assert(initialIndex != null && initialIndex >= 0 && (length == 0 || initialIndex < length)),
       _index = initialIndex,
       _previousIndex = initialIndex,
-      _animationController = length < 2 ? null : new AnimationController(
+      _animationController = length < 2 ? null : AnimationController(
         value: initialIndex.toDouble(),
         upperBound: (length - 1).toDouble(),
         vsync: vsync
@@ -282,7 +282,7 @@ class DefaultTabController extends StatefulWidget {
   }
 
   @override
-  _DefaultTabControllerState createState() => new _DefaultTabControllerState();
+  _DefaultTabControllerState createState() => _DefaultTabControllerState();
 }
 
 class _DefaultTabControllerState extends State<DefaultTabController> with SingleTickerProviderStateMixin {
@@ -291,7 +291,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
   @override
   void initState() {
     super.initState();
-    _controller = new TabController(
+    _controller = TabController(
       vsync: this,
       length: widget.length,
       initialIndex: widget.initialIndex,
@@ -306,7 +306,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
 
   @override
   Widget build(BuildContext context) {
-    return new _TabControllerScope(
+    return _TabControllerScope(
       controller: _controller,
       enabled: TickerMode.of(context),
       child: widget.child,

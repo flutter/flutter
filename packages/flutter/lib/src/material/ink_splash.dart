@@ -59,7 +59,7 @@ class _InkSplashFactory extends InteractiveInkFeatureFactory {
     double radius,
     VoidCallback onRemoved,
   }) {
-    return new InkSplash(
+    return InkSplash(
       controller: controller,
       referenceBox: referenceBox,
       position: position,
@@ -96,10 +96,6 @@ class _InkSplashFactory extends InteractiveInkFeatureFactory {
 ///  * [InkHighlight], which is an ink feature that emphasizes a part of a
 ///    [Material].
 class InkSplash extends InteractiveInkFeature {
-  /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
-  /// or material [Theme].
-  static const InteractiveInkFeatureFactory splashFactory = _InkSplashFactory();
-
   /// Begin a splash, centered at position relative to [referenceBox].
   ///
   /// The [controller] argument is typically obtained via
@@ -137,20 +133,20 @@ class InkSplash extends InteractiveInkFeature {
        _textDirection = textDirection,
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     assert(_borderRadius != null);
-    _radiusController = new AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
+    _radiusController = AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
-    _radius = new Tween<double>(
+    _radius = _radiusController.drive(Tween<double>(
       begin: _kSplashInitialSize,
-      end: _targetRadius
-    ).animate(_radiusController);
-    _alphaController = new AnimationController(duration: _kSplashFadeDuration, vsync: controller.vsync)
+      end: _targetRadius,
+    ));
+    _alphaController = AnimationController(duration: _kSplashFadeDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged);
-    _alpha = new IntTween(
+    _alpha = _alphaController.drive(IntTween(
       begin: color.alpha,
-      end: 0
-    ).animate(_alphaController);
+      end: 0,
+    ));
 
     controller.addInkFeature(this);
   }
@@ -169,11 +165,15 @@ class InkSplash extends InteractiveInkFeature {
   Animation<int> _alpha;
   AnimationController _alphaController;
 
+  /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
+  /// or material [Theme].
+  static const InteractiveInkFeatureFactory splashFactory = _InkSplashFactory();
+
   @override
   void confirm() {
     final int duration = (_targetRadius / _kSplashConfirmedVelocity).floor();
     _radiusController
-      ..duration = new Duration(milliseconds: duration)
+      ..duration = Duration(milliseconds: duration)
       ..forward();
     _alphaController.forward();
   }
@@ -198,7 +198,7 @@ class InkSplash extends InteractiveInkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    final Paint paint = new Paint()..color = color.withAlpha(_alpha.value);
+    final Paint paint = Paint()..color = color.withAlpha(_alpha.value);
     Offset center = _position;
     if (_repositionToReferenceBox)
       center = Offset.lerp(center, referenceBox.size.center(Offset.zero), _radiusController.value);
@@ -214,7 +214,7 @@ class InkSplash extends InteractiveInkFeature {
       if (_customBorder != null) {
         canvas.clipPath(_customBorder.getOuterPath(rect, textDirection: _textDirection));
       } else if (_borderRadius != BorderRadius.zero) {
-        canvas.clipRRect(new RRect.fromRectAndCorners(
+        canvas.clipRRect(RRect.fromRectAndCorners(
           rect,
           topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
           bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,

@@ -22,13 +22,13 @@ class _StockSymbolView extends StatelessWidget {
       changeInPrice = '+' + changeInPrice;
 
     final TextStyle headings = Theme.of(context).textTheme.body2;
-    return new Container(
+    return Container(
       padding: const EdgeInsets.all(20.0),
-      child: new Column(
+      child: Column(
         children: <Widget>[
-          new Row(
+          Row(
             children: <Widget>[
-              new Text(
+              Text(
                 '${stock.symbol}',
                 style: Theme.of(context).textTheme.display2
               ),
@@ -36,18 +36,18 @@ class _StockSymbolView extends StatelessWidget {
             ],
             mainAxisAlignment: MainAxisAlignment.spaceBetween
           ),
-          new Text('Last Sale', style: headings),
-          new Text('$lastSale ($changeInPrice)'),
-          new Container(
+          Text('Last Sale', style: headings),
+          Text('$lastSale ($changeInPrice)'),
+          Container(
             height: 8.0
           ),
-          new Text('Market Cap', style: headings),
-          new Text('${stock.marketCap}'),
-          new Container(
+          Text('Market Cap', style: headings),
+          Text('${stock.marketCap}'),
+          Container(
             height: 8.0
           ),
-          new RichText(
-            text: new TextSpan(
+          RichText(
+            text: TextSpan(
               style: DefaultTextStyle.of(context).style.merge(const TextStyle(fontSize: 8.0)),
               text: 'Prices may be delayed by ',
               children: const <TextSpan>[
@@ -71,34 +71,34 @@ class StockSymbolPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new AnimatedBuilder(
+    return AnimatedBuilder(
       animation: stocks,
       builder: (BuildContext context, Widget child) {
         final Stock stock = stocks[symbol];
-        return new Scaffold(
-          appBar: new AppBar(
-            title: new Text(stock?.name ?? symbol)
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(stock?.name ?? symbol)
           ),
-          body: new SingleChildScrollView(
-            child: new Container(
+          body: SingleChildScrollView(
+            child: Container(
               margin: const EdgeInsets.all(20.0),
-              child: new Card(
-                child: new AnimatedCrossFade(
+              child: Card(
+                child: AnimatedCrossFade(
                   duration: const Duration(milliseconds: 300),
                   firstChild: const Padding(
                     padding: EdgeInsets.all(20.0),
                     child: Center(child: CircularProgressIndicator()),
                   ),
                   secondChild: stock != null
-                    ? new _StockSymbolView(
+                    ? _StockSymbolView(
                       stock: stock,
-                      arrow: new Hero(
+                      arrow: Hero(
                         tag: stock,
-                        child: new StockArrow(percentChange: stock.percentChange),
+                        child: StockArrow(percentChange: stock.percentChange),
                       ),
-                    ) : new Padding(
+                    ) : Padding(
                         padding: const EdgeInsets.all(20.0),
-                        child: new Center(child: new Text('$symbol not found')),
+                        child: Center(child: Text('$symbol not found')),
                     ),
                   crossFadeState: stock == null && stocks.loading ? CrossFadeState.showFirst : CrossFadeState.showSecond,
                 ),
@@ -118,14 +118,14 @@ class StockSymbolBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return Container(
       padding: const EdgeInsets.all(10.0),
       decoration: const BoxDecoration(
         border: Border(top: BorderSide(color: Colors.black26))
       ),
-      child: new _StockSymbolView(
+      child: _StockSymbolView(
         stock: stock,
-        arrow: new StockArrow(percentChange: stock.percentChange)
+        arrow: StockArrow(percentChange: stock.percentChange)
       )
    );
   }

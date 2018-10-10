@@ -10,12 +10,12 @@ void main() {
   testWidgets('Does not animate if already at target position', (WidgetTester tester) async {
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 80; i++)
-      textWidgets.add(new Text('$i', textDirection: TextDirection.ltr));
-    final ScrollController controller = new ScrollController();
+      textWidgets.add(Text('$i', textDirection: TextDirection.ltr));
+    final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           children: textWidgets,
           controller: controller,
         ),
@@ -33,12 +33,12 @@ void main() {
   testWidgets('Does not animate if already at target position within tolerance', (WidgetTester tester) async {
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 80; i++)
-      textWidgets.add(new Text('$i', textDirection: TextDirection.ltr));
-    final ScrollController controller = new ScrollController();
+      textWidgets.add(Text('$i', textDirection: TextDirection.ltr));
+    final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           children: textWidgets,
           controller: controller,
         ),
@@ -59,12 +59,12 @@ void main() {
   testWidgets('Animates if going to a position outside of tolerance', (WidgetTester tester) async {
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 80; i++)
-      textWidgets.add(new Text('$i', textDirection: TextDirection.ltr));
-    final ScrollController controller = new ScrollController();
+      textWidgets.add(Text('$i', textDirection: TextDirection.ltr));
+    final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           children: textWidgets,
           controller: controller,
         ),

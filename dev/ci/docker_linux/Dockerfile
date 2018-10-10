@@ -35,6 +35,7 @@ RUN bash "${NODEJS_INSTALL}/nodejs_install.sh"
 RUN apt-get install -y --no-install-recommends \
   locales \
   ruby \
+  ruby-dev \
   nodejs \
   lib32stdc++6 \
   libstdc++6 \
