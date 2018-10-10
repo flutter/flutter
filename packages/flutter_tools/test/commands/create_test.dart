@@ -43,46 +43,12 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  // Verify that we create a default project ('application') that is
+  // Verify that we create a default project ('app') that is
   // well-formed.
   testUsingContext('can create a default project', () async {
-    await _createAndAnalyzeProject(projectDir, <String>[], <String>[
-      '.android/app/',
-      '.gitignore',
-      '.ios/Flutter',
-      '.metadata',
-      'lib/main.dart',
-      'pubspec.yaml',
-      'README.md',
-      'test/widget_test.dart',
-    ], unexpectedPaths: <String>[
-      'android/',
-      'ios/',
-    ]);
-    return _runFlutterTest(projectDir);
-  }, timeout: allowForRemotePubInvocation);
-
-  testUsingContext('can create a default project if empty directory exists', () async {
-    await projectDir.create(recursive: true);
-    return _createAndAnalyzeProject(projectDir, <String>[], <String>[
-      '.android/app/',
-      '.gitignore',
-      '.ios/Flutter',
-      '.metadata',
-      'lib/main.dart',
-      'pubspec.yaml',
-      'README.md',
-      'test/widget_test.dart',
-    ], unexpectedPaths: <String>[
-      'android/',
-      'ios/',
-    ]);
-  }, timeout: allowForRemotePubInvocation);
-
-  testUsingContext('creates a legacy app project correctly', () async {
     await _createAndAnalyzeProject(
       projectDir,
-      <String>['--template=app'],
+      <String>[],
       <String>[
         'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
@@ -95,22 +61,26 @@ void main() {
     return _runFlutterTest(projectDir);
   }, timeout: allowForRemotePubInvocation);
 
-  testUsingContext('cannot create a project if non-empty non-project directory exists with .metadata', () async {
-    await projectDir.absolute.childDirectory('blag').create(recursive: true);
-    await projectDir.absolute.childFile('.metadata').writeAsString('project_type: blag\n');
-    expect(() async => await _createAndAnalyzeProject(projectDir, <String>[], <String>[
-    ], unexpectedPaths: <String>[
-      'android/',
-      'ios/',
-      '.android/',
-      '.ios/',
-    ]), throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'));
+  testUsingContext('can create a default project if empty directory exists', () async {
+    await projectDir.create(recursive: true);
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>[],
+      <String>[
+        'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'flutter_project.iml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+      ],
+    );
   }, timeout: allowForRemotePubInvocation);
 
-  testUsingContext('Will create an application project if non-empty non-project directory exists without .metadata', () async {
-    await projectDir.absolute.childDirectory('blag').create(recursive: true);
-    await projectDir.absolute.childDirectory('.idea').create(recursive: true);
-    return _createAndAnalyzeProject(projectDir, <String>[], <String>[
+  testUsingContext('creates a module project correctly', () async {
+    await _createAndAnalyzeProject(projectDir, <String>[
+      '--template=module'
+    ], <String>[
       '.android/app/',
       '.gitignore',
       '.ios/Flutter',
@@ -123,23 +93,51 @@ void main() {
       'android/',
       'ios/',
     ]);
+    return _runFlutterTest(projectDir);
   }, timeout: allowForRemotePubInvocation);
 
-  testUsingContext('detects and recreates an application project correctly', () async {
-    await projectDir.absolute.childDirectory('lib').create(recursive: true);
-    await projectDir.absolute.childDirectory('.ios').create(recursive: true);
-    return _createAndAnalyzeProject(projectDir, <String>[], <String>[
-      '.android/app/',
-      '.gitignore',
-      '.ios/Flutter',
-      '.metadata',
-      'lib/main.dart',
-      'pubspec.yaml',
-      'README.md',
-      'test/widget_test.dart',
+  testUsingContext('cannot create a project if non-empty non-project directory exists with .metadata', () async {
+    await projectDir.absolute.childDirectory('blag').create(recursive: true);
+    await projectDir.absolute.childFile('.metadata').writeAsString('project_type: blag\n');
+    expect(
+        () async => await _createAndAnalyzeProject(projectDir, <String>[], <String>[], unexpectedPaths: <String>[
+              'android/',
+              'ios/',
+              '.android/',
+              '.ios/',
+            ]),
+        throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'));
+  }, timeout: allowForRemotePubInvocation);
+
+  testUsingContext('Will create an app project if non-empty non-project directory exists without .metadata', () async {
+    await projectDir.absolute.childDirectory('blag').create(recursive: true);
+    await projectDir.absolute.childDirectory('.idea').create(recursive: true);
+    await _createAndAnalyzeProject(projectDir, <String>[], <String>[
+      'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+      'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+      'flutter_project.iml',
+      'ios/Flutter/AppFrameworkInfo.plist',
+      'ios/Runner/AppDelegate.m',
+      'ios/Runner/GeneratedPluginRegistrant.h',
     ], unexpectedPaths: <String>[
-      'android/',
-      'ios/',
+      '.android/',
+      '.ios/',
+    ]);
+  }, timeout: allowForRemotePubInvocation);
+
+  testUsingContext('detects and recreates an app project correctly', () async {
+    await projectDir.absolute.childDirectory('lib').create(recursive: true);
+    await projectDir.absolute.childDirectory('ios').create(recursive: true);
+    await _createAndAnalyzeProject(projectDir, <String>[], <String>[
+      'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+      'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+      'flutter_project.iml',
+      'ios/Flutter/AppFrameworkInfo.plist',
+      'ios/Runner/AppDelegate.m',
+      'ios/Runner/GeneratedPluginRegistrant.h',
+    ], unexpectedPaths: <String>[
+      '.android/',
+      '.ios/',
     ]);
   }, timeout: allowForRemotePubInvocation);
 
@@ -191,41 +189,6 @@ void main() {
         'test/widget_test.dart',
       ],
     );
-  }, timeout: allowForRemotePubInvocation);
-
-  testUsingContext('detects and recreates a legacy app project correctly', () async {
-    await projectDir.absolute.childDirectory('lib').create(recursive: true);
-    await projectDir.absolute.childDirectory('ios').childDirectory('Flutter').create(recursive: true);
-    return _createAndAnalyzeProject(
-      projectDir,
-      <String>[],
-      <String>[
-        'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
-        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-        'flutter_project.iml',
-        'ios/Flutter/AppFrameworkInfo.plist',
-        'ios/Runner/AppDelegate.m',
-        'ios/Runner/GeneratedPluginRegistrant.h',
-      ],
-    );
-  }, timeout: allowForRemotePubInvocation);
-
-  testUsingContext('can create a legacy module project', () async {
-    return _createAndAnalyzeProject(projectDir, <String>[
-      '--template=module',
-    ], <String>[
-      '.android/app/',
-      '.gitignore',
-      '.ios/Flutter',
-      '.metadata',
-      'lib/main.dart',
-      'pubspec.yaml',
-      'README.md',
-      'test/widget_test.dart',
-    ], unexpectedPaths: <String>[
-      'android/',
-      'ios/',
-    ]);
   }, timeout: allowForRemotePubInvocation);
 
   testUsingContext('kotlin/swift legacy app project', () async {
@@ -343,9 +306,9 @@ void main() {
     );
   }, timeout: allowForRemotePubInvocation);
 
-  testUsingContext('application project with pub', () async {
+  testUsingContext('module project with pub', () async {
     return _createProject(projectDir, <String>[
-      '--template=application'
+      '--template=module'
     ], <String>[
       '.android/build.gradle',
       '.android/Flutter/build.gradle',
@@ -375,7 +338,7 @@ void main() {
     ]);
   }, timeout: allowForRemotePubInvocation);
 
-  testUsingContext('has correct content and formatting with applicaiton template', () async {
+  testUsingContext('has correct content and formatting with module template', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -383,7 +346,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--template=application', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
+    await runner.run(<String>['create', '--template=module', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
 
     void expectExists(String relPath) {
       expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
@@ -446,7 +409,7 @@ void main() {
     FlutterVersion: () => mockFlutterVersion,
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext('has correct content and formatting with legacy app template', () async {
+  testUsingContext('has correct content and formatting with app template', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -526,9 +489,12 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    expect(metadata, contains('project_type: app\n'));
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext('can re-gen default template over existing legacy app project with no metadta and detect the type', () async {
+  testUsingContext('can re-gen default template over existing app project with no metadta and detect the type', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -545,7 +511,7 @@ void main() {
     expect(metadata, contains('project_type: app\n'));
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext('can re-gen default template over existing legacy app project and detect the type', () async {
+  testUsingContext('can re-gen app template over existing app project and detect the type', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -557,6 +523,20 @@ void main() {
 
     final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: app\n'));
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('can re-gen template over existing module project and detect the type', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=module', projectDir.path]);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    expect(metadata, contains('project_type: module\n'));
   }, timeout: allowForCreateFlutterProject);
 
   testUsingContext('can re-gen default template over existing plugin project and detect the type', () async {
@@ -587,10 +567,10 @@ void main() {
     expect(metadata, contains('project_type: package'));
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext('can re-gen application .android/ folder, reusing custom org', () async {
+  testUsingContext('can re-gen module .android/ folder, reusing custom org', () async {
     await _createProject(
       projectDir,
-      <String>['--template=application', '--org', 'com.bar.foo'],
+      <String>['--template=module', '--org', 'com.bar.foo'],
       <String>[],
     );
     projectDir.childDirectory('.android').deleteSync(recursive: true);
@@ -603,10 +583,10 @@ void main() {
     );
   }, timeout: allowForRemotePubInvocation);
 
-  testUsingContext('can re-gen application .ios/ folder, reusing custom org', () async {
+  testUsingContext('can re-gen module .ios/ folder, reusing custom org', () async {
     await _createProject(
       projectDir,
-      <String>['--template=application', '--org', 'com.bar.foo'],
+      <String>['--template=module', '--org', 'com.bar.foo'],
       <String>[],
     );
     projectDir.childDirectory('.ios').deleteSync(recursive: true);
@@ -618,7 +598,7 @@ void main() {
     );
   }, timeout: allowForRemotePubInvocation);
 
-  testUsingContext('can re-gen legacy app android/ folder, reusing custom org', () async {
+  testUsingContext('can re-gen app android/ folder, reusing custom org', () async {
     await _createProject(
       projectDir,
       <String>['--no-pub', '--template=app', '--org', 'com.bar.foo'],
@@ -637,7 +617,7 @@ void main() {
     );
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext('can re-gen legacy app ios/ folder, reusing custom org', () async {
+  testUsingContext('can re-gen app ios/ folder, reusing custom org', () async {
     await _createProject(
       projectDir,
       <String>['--no-pub', '--template=app', '--org', 'com.bar.foo'],
