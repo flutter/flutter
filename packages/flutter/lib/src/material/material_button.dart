@@ -279,6 +279,4 @@ class MaterialButton extends StatelessWidget {
 ///
 /// This mixin only exists to give the "label and icon" button widgets a distinct
 /// type for the sake of [ButtonTheme].
-abstract class MaterialButtonWithIconMixin {
-  MaterialButtonWithIconMixin._();
-}
+mixin MaterialButtonWithIconMixin { }
