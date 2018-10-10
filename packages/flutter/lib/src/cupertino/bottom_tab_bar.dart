@@ -105,7 +105,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   final bool onlyIcons;
 
   /// The border of the [CupertinoTabBar].
-  /// 
+  ///
   /// The default value is a one physical pixel top border with grey color.
   final Border border;
 
