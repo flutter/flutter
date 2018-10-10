@@ -48,9 +48,11 @@ class FuchsiaReloadCommand extends FlutterCommand {
   FuchsiaReloadCommand() {
     addBuildModeFlags(defaultToRelease: false);
     argParser.addOption('frontend-server',
-        abbr: 'fe', help: 'The frontend server location');
+      abbr: 'fe',
+      help: 'The frontend server location');
     argParser.addOption('address',
-        abbr: 'a', help: 'Fuchsia device network name or address.');
+      abbr: 'a',
+      help: 'Fuchsia device network name or address.');
     argParser.addOption('build-dir',
       abbr: 'b',
       defaultsTo: null,
@@ -68,13 +70,17 @@ class FuchsiaReloadCommand extends FlutterCommand {
       help: 'To reload only one instance, specify the isolate number, e.g. '
             'the number in foo\$main-###### given by --list.');
     argParser.addFlag('list',
-        abbr: 'l', defaultsTo: false, help: 'Lists the running modules. ');
+      abbr: 'l',
+      defaultsTo: false,
+      help: 'Lists the running modules. ');
     argParser.addOption('mod-name',
       abbr: 'm',
       help: 'Name of the flutter mod. If used with -g, overrides the name '
             'inferred from the GN target.');
     argParser.addOption('path',
-        abbr: 'p', defaultsTo: null, help: 'Path to the flutter mod project.');
+      abbr: 'p',
+      defaultsTo: null,
+      help: 'Path to the flutter mod project.');
     argParser.addOption('ssh-config',
       abbr: 's',
       defaultsTo: null,
