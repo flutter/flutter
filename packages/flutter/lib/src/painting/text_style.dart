@@ -737,7 +737,7 @@ class TextStyle extends Diagnosticable {
         locale != other.locale ||
         foreground != other.foreground ||
         background != other.background ||
-        !ui.Shadow.shadowsListEquals(shadows, other.shadows))
+        !listEquals(shadows, other.shadows))
       return RenderComparison.layout;
     if (color != other.color ||
         decoration != other.decoration ||
@@ -770,7 +770,7 @@ class TextStyle extends Diagnosticable {
            decoration == typedOther.decoration &&
            decorationColor == typedOther.decorationColor &&
            decorationStyle == typedOther.decorationStyle &&
-           ui.Shadow.shadowsListEquals(shadows, typedOther.shadows);
+           listEquals(shadows, typedOther.shadows);
   }
 
   @override
