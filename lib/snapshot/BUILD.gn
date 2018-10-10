@@ -57,7 +57,6 @@ compiled_action("generate_snapshot_bin") {
     "--sync-async",
     "--reify-generic-functions",
     "--snapshot_kind=core",
-    "--await_is_keyword",
     "--enable_mirrors=false",
     "--vm_snapshot_data=" + rebase_path(vm_snapshot_data),
     "--vm_snapshot_instructions=" + rebase_path(vm_snapshot_instructions),
@@ -196,7 +195,6 @@ compile_platform("strong_platform") {
 
   args = [
     "--target=flutter",
-    "--strong",
     "dart:core",
   ]
 }
