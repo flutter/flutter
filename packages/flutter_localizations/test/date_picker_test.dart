@@ -225,7 +225,7 @@ void main() {
   });
 }
 
-Future<Null> _pumpBoilerplate(
+Future<void> _pumpBoilerplate(
   WidgetTester tester,
   Widget child, {
   Locale locale = const Locale('en', 'US'),
