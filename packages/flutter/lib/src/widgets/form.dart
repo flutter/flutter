@@ -258,6 +258,10 @@ class FormField<T> extends StatefulWidget {
   final bool autovalidate;
 
   /// If true, indicates that the widget is enabled.
+  ///
+  /// Unless enabled, the widged is greyed out, does not accept focus,
+  /// performs no validation, does not save the value when the form
+  /// containing it is submitted.
   final bool enabled;
 
   @override
@@ -296,20 +300,23 @@ class FormFieldState<T> extends State<FormField<T>> {
     });
   }
 
-  /// Calls [FormField.validator] to set the [errorText]. Returns true if there
-  /// were no errors.
+  /// If [FormField.enabled] is true, calls [FormField.validator] to set the [errorText].
+  ///
+  /// Returns true if there were no errors.
   bool validate() {
-    setState(() {
-      _validate();
-    });
-    return !hasError;
+    if (widget.enabled) {
+      setState(() {
+        _validate();
+      });
+      return !hasError;
+    }
+    return true;
   }
 
   bool _validate() {
-    if (!widget.enabled)
-      _errorText = null;
-    else if (widget.validator != null)
+    if (widget.validator != null) {
       _errorText = widget.validator(_value);
+    }
     return !hasError;
   }
 
@@ -351,8 +358,9 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.autovalidate)
-      _validate();
+    if (widget.autovalidate) {
+      validate();
+    }
     Form.of(context)?._register(this);
     return widget.builder(this);
   }
