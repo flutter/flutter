@@ -399,7 +399,12 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  Future<OperationResult> _restartFromSources() async {
+  Future<OperationResult> _restartFromSources({ String reason }) async {
+    final Map<String, String> analyticsParameters =
+      reason == null
+        ? null
+        : <String, String>{ kEventReloadReasonParameterName: reason };
+
     if (!_isPaused()) {
       printTrace('Refreshing active FlutterViews before restarting.');
       await refreshViews();
@@ -446,7 +451,7 @@ class HotRunner extends ResidentRunner {
     _runningFromSnapshot = false;
     _addBenchmarkData('hotRestartMillisecondsToFrame',
         restartTimer.elapsed.inMilliseconds);
-    flutterUsage.sendEvent('hot', 'restart');
+    flutterUsage.sendEvent('hot', 'restart', parameters: analyticsParameters);
     flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
     return OperationResult.ok;
   }
@@ -492,7 +497,7 @@ class HotRunner extends ResidentRunner {
   bool get supportsRestart => true;
 
   @override
-  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false }) async {
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) async {
     final Stopwatch timer = Stopwatch()..start();
     if (fullRestart) {
       final Status status = logger.startProgress(
@@ -502,7 +507,7 @@ class HotRunner extends ResidentRunner {
       try {
         if (!(await hotRunnerConfig.setupHotRestart()))
           return OperationResult(1, 'setupHotRestart failed');
-        final OperationResult result = await _restartFromSources();
+        final OperationResult result = await _restartFromSources(reason: reason);
         if (!result.isOk)
           return result;
       } finally {
@@ -519,7 +524,7 @@ class HotRunner extends ResidentRunner {
       );
       OperationResult result;
       try {
-        result = await _reloadSources(pause: pauseAfterRestart);
+        result = await _reloadSources(pause: pauseAfterRestart, reason: reason);
       } finally {
         status.cancel();
       }
@@ -531,7 +536,11 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  Future<OperationResult> _reloadSources({ bool pause = false }) async {
+  Future<OperationResult> _reloadSources({ bool pause = false, String reason }) async {
+    final Map<String, String> analyticsParameters =
+      reason == null
+        ? null
+        : <String, String>{ kEventReloadReasonParameterName: reason };
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         if (view.uiIsolate == null)
@@ -617,7 +626,7 @@ class HotRunner extends ResidentRunner {
         flutterUsage.sendEvent('hot', 'reload-reject');
         return OperationResult(1, 'Reload rejected');
       } else {
-        flutterUsage.sendEvent('hot', 'reload');
+        flutterUsage.sendEvent('hot', 'reload', parameters: analyticsParameters);
         final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
         final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
         printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
