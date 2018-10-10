@@ -1606,22 +1606,32 @@ class Codec extends NativeFieldWrapperClass2 {
 /// Instantiates an image codec [Codec] object.
 ///
 /// [list] is the binary image data (e.g a PNG or GIF binary data).
-/// The data can be for either static or animated images.
+/// The data can be for either static or animated images. The following image
+/// formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
-/// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
+/// The [decodedCacheRatioCap] is the default maximum multiple of the compressed
+/// image size to cache when decoding animated image frames. For example,
+/// setting this to `2.0` means that a 400KB GIF would be allowed at most to use
+/// 800KB of memory caching unessential decoded frames. Caching decoded frames
+/// saves CPU but can result in out-of-memory crashes when decoding large (or
+/// multiple) animated images. Note that GIFs are highly compressed, and it's
+/// unlikely that a factor that low will be sufficient to cache all decoded
+/// frames. The default value is `25.0`.
 ///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
-Future<Codec> instantiateImageCodec(Uint8List list) {
+Future<Codec> instantiateImageCodec(Uint8List list, {
+  double decodedCacheRatioCap = double.infinity,
+}) {
   return _futurize(
-    (_Callback<Codec> callback) => _instantiateImageCodec(list, callback, null)
+    (_Callback<Codec> callback) => _instantiateImageCodec(list, callback, null, decodedCacheRatioCap),
   );
 }
 
 /// Instantiates a [Codec] object for an image binary data.
 ///
 /// Returns an error message if the instantiation has failed, null otherwise.
-String _instantiateImageCodec(Uint8List list, _Callback<Codec> callback, _ImageInfo imageInfo)
+String _instantiateImageCodec(Uint8List list, _Callback<Codec> callback, _ImageInfo imageInfo, double decodedCacheRatioCap)
   native 'instantiateImageCodec';
 
 /// Loads a single image frame from a byte array into an [Image] object.
@@ -1646,17 +1656,26 @@ Future<Null> _decodeImageFromListAsync(Uint8List list,
 /// [rowBytes] is the number of bytes consumed by each row of pixels in the
 /// data buffer.  If unspecified, it defaults to [width] multipled by the
 /// number of bytes per pixel in the provided [format].
+///
+/// The [decodedCacheRatioCap] is the default maximum multiple of the compressed
+/// image size to cache when decoding animated image frames. For example,
+/// setting this to `2.0` means that a 400KB GIF would be allowed at most to use
+/// 800KB of memory caching unessential decoded frames. Caching decoded frames
+/// saves CPU but can result in out-of-memory crashes when decoding large (or
+/// multiple) animated images. Note that GIFs are highly compressed, and it's
+/// unlikely that a factor that low will be sufficient to cache all decoded
+/// frames. The default value is `25.0`.
 void decodeImageFromPixels(
   Uint8List pixels,
   int width,
   int height,
   PixelFormat format,
   ImageDecoderCallback callback,
-  {int rowBytes}
+  {int rowBytes, double decodedCacheRatioCap = double.infinity}
 ) {
   final _ImageInfo imageInfo = new _ImageInfo(width, height, format.index, rowBytes);
   final Future<Codec> codecFuture = _futurize(
-    (_Callback<Codec> callback) => _instantiateImageCodec(pixels, callback, imageInfo)
+    (_Callback<Codec> callback) => _instantiateImageCodec(pixels, callback, imageInfo, decodedCacheRatioCap)
   );
   codecFuture.then((Codec codec) => codec.getNextFrame())
       .then((FrameInfo frameInfo) => callback(frameInfo.image));
