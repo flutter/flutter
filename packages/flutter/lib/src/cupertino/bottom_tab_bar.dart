@@ -45,14 +45,19 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.inactiveColor = CupertinoColors.inactiveGray,
     this.iconSize = 30.0,
     this.onlyIcons = false,
-    this.hideBorder = false,
+    this.border = const Border(
+      top: BorderSide(
+        color: _kDefaultTabBarBorderColor,
+        width: 0.0, // One physical pixel.
+        style: BorderStyle.solid,
+      ),
+    ),
   })  : assert(items != null),
         assert(items.length >= 2),
         assert(currentIndex != null),
         assert(0 <= currentIndex && currentIndex < items.length),
         assert(iconSize != null),
         assert(onlyIcons != null),
-        assert(hideBorder != null),
         super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
@@ -99,10 +104,10 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// True if the only icons mode should ne enabled and all labels should be hidden.
   final bool onlyIcons;
 
-  /// The parameter which allows hiding of the top border of the [CupertinoTabBar].
-  ///
-  /// True if the top border of the tab bar should be hidden.
-  final bool hideBorder;
+  /// The border of the [CupertinoTabBar].
+  /// 
+  /// The default value is a one physical pixel top border with grey color.
+  final Border border;
 
   /// True if the tab bar's background color has no transparency.
   bool get opaque => backgroundColor.alpha == 0xFF;
@@ -115,15 +120,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
     Widget result = DecoratedBox(
       decoration: BoxDecoration(
-        border: !hideBorder
-            ? const Border(
-                top: BorderSide(
-                  color: _kDefaultTabBarBorderColor,
-                  width: 0.0, // One physical pixel.
-                  style: BorderStyle.solid,
-                ),
-              )
-            : null,
+        border: border,
         color: backgroundColor,
       ),
       child: SizedBox(
@@ -250,7 +247,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Color inactiveColor,
     Size iconSize,
     bool onlyIcons,
-    bool hideBorder,
+    Border border,
     int currentIndex,
     ValueChanged<int> onTap,
   }) {
@@ -262,7 +259,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       inactiveColor: inactiveColor ?? this.inactiveColor,
       iconSize: iconSize ?? this.iconSize,
       onlyIcons: onlyIcons ?? this.onlyIcons,
-      hideBorder: hideBorder ?? this.hideBorder,
+      border: border ?? this.border,
       currentIndex: currentIndex ?? this.currentIndex,
       onTap: onTap ?? this.onTap,
     );
