@@ -305,7 +305,7 @@ void main() {
   });
 
   testWidgets('AnimatedSwitcher updates widgets without animating if they are isomorphic.', (WidgetTester tester) async {
-    Future<Null> pumpChild(Widget child) async {
+    Future<void> pumpChild(Widget child) async {
       return tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.rtl,

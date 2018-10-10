@@ -12,7 +12,7 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
 
-  Future<Null> _dragSlider(WidgetTester tester, Key sliderKey) {
+  Future<void> _dragSlider(WidgetTester tester, Key sliderKey) {
     final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
     const double unit = CupertinoThumbPainter.radius;
     const double delta = 3.0 * unit;
