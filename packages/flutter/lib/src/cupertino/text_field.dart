@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'icons.dart';
 import 'text_selection.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
@@ -16,7 +15,7 @@ export 'package:flutter/services.dart' show TextInputType, TextInputAction, Text
 const BorderSide _kDefaultRoundedBorderSide = BorderSide(
   color: CupertinoColors.lightBackgroundGray,
   style: BorderStyle.solid,
-  width: 1.5,
+  width: 1.0,
 );
 const Border _kDefaultRoundedBorder = Border(
   top: _kDefaultRoundedBorderSide,
@@ -38,15 +37,27 @@ const TextStyle _kDefaultTextStyle = TextStyle(
 );
 
 const Color _kSelectionHighlightColor = Color(0x667FAACF);
+const Color _kInactiveTextColor = Color(0xFFC2C2C2);
 
+/// Visibility of text field overlays based on the state of the current text entry.
 enum OverlayVisibilityMode {
+  /// Overlay will never appear regardless of the text entry state.
   never,
-  whileEditing,
-  unlessEditing,
+  /// Overlay will only appear when the current text entry is not empty.
+  ///
+  /// This includes pre-filled text that the user did not type in manually. But
+  /// does not include text in placeholders.
+  editing,
+  /// Overlay will only appear when the current text entry is empty.
+  ///
+  /// This also includes not having pre-filled text that the user did not type
+  /// in manually. Texts in placeholders are ignored.
+  notEditing,
+  /// Always show the overlay regardless of the text entry state.
   always,
 }
 
-/// A material design text field.
+/// An iOS-style text field.
 ///
 /// A text field lets the user enter text, either with hardware keyboard or with
 /// an onscreen keyboard.
@@ -128,6 +139,11 @@ class CupertinoTextField extends StatefulWidget {
     this.decoration = _kDefaultRoundedBorderDecoration,
     this.padding = const EdgeInsets.all(6.0),
     this.placeholder,
+    this.leading,
+    this.leadingMode = OverlayVisibilityMode.always,
+    this.trailing,
+    this.trailingMode = OverlayVisibilityMode.always,
+    this.clearButtonMode = OverlayVisibilityMode.never,
     TextInputType keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
@@ -157,6 +173,7 @@ class CupertinoTextField extends StatefulWidget {
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
+       assert(clearButtonMode != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        super(key: key);
 
@@ -175,6 +192,16 @@ class CupertinoTextField extends StatefulWidget {
   final EdgeInsets padding;
 
   final String placeholder;
+
+  final Widget leading;
+
+  final OverlayVisibilityMode leadingMode;
+
+  final Widget trailing;
+
+  final OverlayVisibilityMode trailingMode;
+
+  final OverlayVisibilityMode clearButtonMode;
 
   /// The type of keyboard to use for editing the text.
   ///
@@ -454,6 +481,19 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     super.deactivate();
   }
 
+  bool _shouldAppearForModeAndText(OverlayVisibilityMode mode, bool hasText) {
+    switch (mode) {
+      case OverlayVisibilityMode.never:
+        return false;
+      case OverlayVisibilityMode.always:
+        return true;
+      case OverlayVisibilityMode.editing:
+        return hasText;
+      case OverlayVisibilityMode.notEditing:
+        return !hasText;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
@@ -465,54 +505,92 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     if (widget.maxLength != null && widget.maxLengthEnforced)
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
 
-    Widget child = RepaintBoundary(
-      child: EditableText(
-        key: _editableTextKey,
-        controller: controller,
-        focusNode: focusNode,
-        keyboardType: widget.keyboardType,
-        textInputAction: widget.textInputAction,
-        textCapitalization: widget.textCapitalization,
-        style: widget.style,
-        textAlign: widget.textAlign,
-        autofocus: widget.autofocus,
-        obscureText: widget.obscureText,
-        autocorrect: widget.autocorrect,
-        maxLines: widget.maxLines,
-        selectionColor: _kSelectionHighlightColor,
-        selectionControls: cupertinoTextSelectionControls,
-        onChanged: widget.onChanged,
-        onEditingComplete: widget.onEditingComplete,
-        onSubmitted: widget.onSubmitted,
-        // onSelectionChanged: _handleSelectionChanged,
-        inputFormatters: formatters,
-        rendererIgnoresPointer: true,
-        cursorWidth: widget.cursorWidth,
-        cursorRadius: widget.cursorRadius,
-        cursorColor: widget.cursorColor,
-        scrollPadding: widget.scrollPadding,
-        keyboardAppearance: keyboardAppearance,
+    Widget child = Padding(
+      padding: widget.padding,
+      child: RepaintBoundary(
+        child: EditableText(
+          key: _editableTextKey,
+          controller: controller,
+          focusNode: focusNode,
+          keyboardType: widget.keyboardType,
+          textInputAction: widget.textInputAction,
+          textCapitalization: widget.textCapitalization,
+          style: widget.style,
+          textAlign: widget.textAlign,
+          autofocus: widget.autofocus,
+          obscureText: widget.obscureText,
+          autocorrect: widget.autocorrect,
+          maxLines: widget.maxLines,
+          selectionColor: _kSelectionHighlightColor,
+          selectionControls: cupertinoTextSelectionControls,
+          onChanged: widget.onChanged,
+          onEditingComplete: widget.onEditingComplete,
+          onSubmitted: widget.onSubmitted,
+          // onSelectionChanged: _handleSelectionChanged,
+          inputFormatters: formatters,
+          rendererIgnoresPointer: true,
+          cursorWidth: widget.cursorWidth,
+          cursorRadius: widget.cursorRadius,
+          cursorColor: widget.cursorColor,
+          scrollPadding: widget.scrollPadding,
+          keyboardAppearance: keyboardAppearance,
+        ),
       ),
     );
 
-    if (widget.placeholder != null) {
+    if (widget.placeholder != null ||
+        widget.clearButtonMode != OverlayVisibilityMode.never ||
+        widget.leading != null) {
       child = ValueListenableBuilder<TextEditingValue>(
         valueListenable: _controller,
         builder: (BuildContext context, TextEditingValue text, Widget child) {
-          if (text.text.isNotEmpty) {
-            return child;
+          final List<Widget> stackChildren = <Widget>[];
+
+          if (widget.placeholder != null && text.text.isEmpty) {
+            stackChildren.add(
+              Padding(
+                padding: widget.padding,
+                child: Text(
+                  widget.placeholder,
+                  maxLines: 1,
+                  style: widget.style.merge(
+                    const TextStyle(color: _kInactiveTextColor),
+                  ),
+                ),
+              ),
+            );
+          }
+          final List<Widget> rowChildren = <Widget>[];
+
+          if (widget.leading != null &&
+              _shouldAppearForModeAndText(widget.leadingMode, text.text.isNotEmpty)) {
+            rowChildren.add(widget.leading);
           }
 
-          return Stack(
-            children: <Widget>[
-              Text(
-                widget.placeholder,
-                maxLines: 1,
-                style: widget.style.merge(const TextStyle(color: Color(0xFFC2C2C2))),
+          rowChildren.add(Expanded(child: child));
+
+          if (widget.trailing != null &&
+              _shouldAppearForModeAndText(widget.trailingMode, text.text.isNotEmpty)) {
+            rowChildren.add(widget.trailing);
+          } else if (_shouldAppearForModeAndText(widget.clearButtonMode, text.text.isNotEmpty)) {
+            rowChildren.add(
+              GestureDetector(
+                onTap: () => _controller.clear(),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6.0),
+                  child: Icon(
+                    CupertinoIcons.clear_thick_circled,
+                    size: 18.0,
+                    color: _kInactiveTextColor,
+                  ),
+                ),
               ),
-              child,
-            ],
-          );
+            );
+          }
+
+          stackChildren.add(Row(children: rowChildren));
+
+          return Stack(children: stackChildren);
         },
         child: child,
       );
@@ -526,9 +604,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       },
       child: IgnorePointer(
         ignoring: !(widget.enabled ?? true),
-        child: Container(
+        child: DecoratedBox(
           decoration: widget.decoration,
-          padding: widget.padding,
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTapDown: _handleTapDown,
