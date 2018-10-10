@@ -20,7 +20,7 @@ class ModalBottomSheetDemo extends StatelessWidget {
         child: RaisedButton(
           child: const Text('SHOW BOTTOM SHEET'),
           onPressed: () {
-            showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
+            showModalBottomSheet(context: context, builder: (BuildContext context) {
               return Container(
                 child: Padding(
                   padding: const EdgeInsets.all(32.0),

@@ -263,7 +263,7 @@ class StockHomeState extends State<StockHome> {
         Navigator.pushNamed(context, '/stock:${stock.symbol}');
       },
       onShow: (Stock stock) {
-        _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) => StockSymbolBottomSheet(stock: stock));
+        _scaffoldKey.currentState.showBottomSheet((BuildContext context) => StockSymbolBottomSheet(stock: stock));
       },
     );
   }
@@ -297,7 +297,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleCreateCompany() {
-    showModalBottomSheet<void>(
+    showModalBottomSheet(
       context: context,
       builder: (BuildContext context) => _CreateCompanySheet(),
     );

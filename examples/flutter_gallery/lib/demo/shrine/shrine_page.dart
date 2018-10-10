@@ -50,7 +50,7 @@ class ShrinePageState extends State<ShrinePage> {
   }
 
   void _showShoppingCart() {
-    showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
+    showModalBottomSheet(context: context, builder: (BuildContext context) {
       if (widget.shoppingCart.isEmpty) {
         return const Padding(
           padding: EdgeInsets.all(24.0),
