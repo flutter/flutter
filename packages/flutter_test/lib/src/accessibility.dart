@@ -441,5 +441,6 @@ const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline._
 /// these colors according to the [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef)
 const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuideline._();
 
-/// A gudeline which requres tappable widgets to have labels.
+/// A guideline which enforces that all nodes with a tap or long press action
+/// also have a label.
 const AccessibilityGuideline labeledTapTargetGuideline = LabeledTapTargetGuideline._();
