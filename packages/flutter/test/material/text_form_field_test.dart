@@ -125,7 +125,7 @@ void main() {
             child: TextFormField(
               enabled: false,
               autovalidate: true,
-              validator: (String value) { _validateCalled++; return null; },
+              validator: (String value) { _validateCalled+=1; return null; },
             ),
           ),
         ),
