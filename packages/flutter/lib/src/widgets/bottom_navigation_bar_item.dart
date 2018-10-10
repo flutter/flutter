@@ -21,15 +21,14 @@ import 'framework.dart';
 class BottomNavigationBarItem {
   /// Creates an item that is used with [BottomNavigationBar.items].
   ///
-  /// The arguments [icon] and [title] should not be null.
+  /// The argument [icon] should not be null and the argument [title] should not be null for [BottomNavigationBar] parent.
   const BottomNavigationBarItem({
     @required this.icon,
-    @required this.title,
+    this.title,
     Widget activeIcon,
     this.backgroundColor,
   }) : activeIcon = activeIcon ?? icon,
-       assert(icon != null),
-       assert(title != null);
+       assert(icon != null);
 
   /// The icon of the item.
   ///

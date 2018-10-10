@@ -95,6 +95,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.iconSize = 24.0,
   }) : assert(items != null),
        assert(items.length >= 2),
+       assert(items.every((item) => item.title != null) == true, "Each item's title should not be null"),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
        type = type ?? (items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting),

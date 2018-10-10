@@ -265,7 +265,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Only icons hides labels of items on tabBar',
+  testWidgets('Title of items should be nullable',
       (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(
         tester,
@@ -278,37 +278,13 @@ void main() {
                 title: Text('Tab 1'),
               ),
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 2'),
+                icon: ImageIcon(TestImageProvider(24, 24))
               ),
             ],
           ),
         ));
 
     expect(find.text('Tab 1'), findsOneWidget);
-    expect(find.text('Tab 2'), findsOneWidget);
-
-    await pumpWidgetWithBoilerplate(
-        tester,
-        MediaQuery(
-          data: const MediaQueryData(),
-          child: CupertinoTabBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 1'),
-              ),
-              BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 2'),
-              ),
-            ],
-            backgroundColor: const Color(0xFFFFFFFF), // Opaque white.
-            onlyIcons: true,
-          ),
-        ));
-
-    expect(find.text('Tab 1'), findsNothing);
     expect(find.text('Tab 2'), findsNothing);
   });
 

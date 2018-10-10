@@ -44,7 +44,6 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.activeColor = CupertinoColors.activeBlue,
     this.inactiveColor = CupertinoColors.inactiveGray,
     this.iconSize = 30.0,
-    this.onlyIcons = false,
     this.border = const Border(
       top: BorderSide(
         color: _kDefaultTabBarBorderColor,
@@ -57,7 +56,6 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         assert(currentIndex != null),
         assert(0 <= currentIndex && currentIndex < items.length),
         assert(iconSize != null),
-        assert(onlyIcons != null),
         super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
@@ -98,11 +96,6 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   ///
   /// Must not be null.
   final double iconSize;
-
-  /// The parameter which allows hiding titles of the [BottomNavigationBarItem] items.
-  ///
-  /// True if the only icons mode should ne enabled and all labels should be hidden.
-  final bool onlyIcons;
 
   /// The border of the [CupertinoTabBar].
   ///
@@ -145,7 +138,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
               child: Row(
                 // Align bottom since we want the labels to be aligned.
                 crossAxisAlignment: CrossAxisAlignment.end,
-                children: _buildTabItems(onlyIcons),
+                children: _buildTabItems(),
               ),
             ),
           ),
@@ -166,7 +159,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     return result;
   }
 
-  List<Widget> _buildTabItems(bool onlyIcons) {
+  List<Widget> _buildTabItems() {
     final List<Widget> result = <Widget>[];
 
     for (int index = 0; index < items.length; index += 1) {
@@ -189,12 +182,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
                   padding: const EdgeInsets.only(bottom: 4.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    children: _buildSingleTabItem(
-                        items[index].activeIcon,
-                        items[index].icon,
-                        active,
-                        items[index].title,
-                        onlyIcons),
+                    children: _buildSingleTabItem(items[index], active),
                   ),
                 ),
               ),
@@ -208,16 +196,15 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     return result;
   }
 
-  List<Widget> _buildSingleTabItem(Widget activeIcon, Widget icon, bool active,
-      Widget title, bool onlyIcons) {
+  List<Widget> _buildSingleTabItem(BottomNavigationBarItem item, bool active) {
     final List<Widget> components = <Widget>[
       Expanded(
-        child: Center(child: active ? activeIcon : icon),
+        child: Center(child: active ? item.activeIcon : item.icon),
       )
     ];
 
-    if (!onlyIcons) {
-      components.add(title);
+    if (item.title != null) {
+      components.add(item.title);
     }
 
     return components;
@@ -246,7 +233,6 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Color activeColor,
     Color inactiveColor,
     Size iconSize,
-    bool onlyIcons,
     Border border,
     int currentIndex,
     ValueChanged<int> onTap,
@@ -258,7 +244,6 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       activeColor: activeColor ?? this.activeColor,
       inactiveColor: inactiveColor ?? this.inactiveColor,
       iconSize: iconSize ?? this.iconSize,
-      onlyIcons: onlyIcons ?? this.onlyIcons,
       border: border ?? this.border,
       currentIndex: currentIndex ?? this.currentIndex,
       onTap: onTap ?? this.onTap,
