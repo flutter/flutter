@@ -146,9 +146,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
         return result;
       final SemanticsData data = node.getSemanticsData();
       // Skip node if it has no actions, or is marked as hidden.
-      if ((!data.hasAction(ui.SemanticsAction.longPress)
-        && !data.hasAction(ui.SemanticsAction.tap))
-        || data.hasFlag(ui.SemanticsFlag.isHidden))
+      if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap))
         return result;
       if (data.label == null || data.label.isEmpty) {
         result += Evaluation.fail(
