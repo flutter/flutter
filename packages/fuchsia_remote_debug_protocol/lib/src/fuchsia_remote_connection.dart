@@ -414,7 +414,7 @@ class FuchsiaRemoteConnection {
   /// [TimeoutException], else a [DartVm] instance.
   Future<DartVm> _getDartVm(
     int port, {
-    Duration timeout: _kDartVmConnectionTimeout,
+    Duration timeout = _kDartVmConnectionTimeout,
   }) async {
     if (!_dartVmCache.containsKey(port)) {
       // When raising an HttpException this means that there is no instance of

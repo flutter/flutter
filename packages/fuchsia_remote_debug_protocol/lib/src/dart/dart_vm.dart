@@ -36,7 +36,7 @@ RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 /// Gives up after `timeout` has elapsed.
 Future<json_rpc.Peer> _waitAndConnect(
   Uri uri, {
-  Duration timeout: _kConnectTimeout,
+  Duration timeout = _kConnectTimeout,
 }) async {
   final Stopwatch timer = Stopwatch()..start();
 
@@ -112,7 +112,7 @@ class DartVm {
   /// Throws an error if unable to connect.
   static Future<DartVm> connect(
     Uri uri, {
-    Duration timeout: _kConnectTimeout,
+    Duration timeout = _kConnectTimeout,
   }) async {
     if (uri.scheme == 'http') {
       uri = uri.replace(scheme: 'ws', path: '/ws');
