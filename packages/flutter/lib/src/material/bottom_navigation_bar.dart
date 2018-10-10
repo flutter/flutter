@@ -327,8 +327,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
       Tween<double>(begin: 1.0, end: 1.5);
 
   void _resetState() {
-    for (AnimationController controller in _controllers) controller.dispose();
-    for (_Circle circle in _circles) circle.dispose();
+    for (AnimationController controller in _controllers)
+      controller.dispose();
+    for (_Circle circle in _circles)
+      circle.dispose();
     _circles.clear();
 
     _controllers =
@@ -364,8 +366,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
 
   @override
   void dispose() {
-    for (AnimationController controller in _controllers) controller.dispose();
-    for (_Circle circle in _circles) circle.dispose();
+    for (AnimationController controller in _controllers)
+      controller.dispose();
+    for (_Circle circle in _circles)
+      circle.dispose();
     super.dispose();
   }
 
@@ -457,7 +461,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
               _animations[i],
               widget.iconSize,
               onTap: () {
-                if (widget.onTap != null) widget.onTap(i);
+                if (widget.onTap != null)
+                  widget.onTap(i);
               },
               colorTween: colorTween,
               selected: i == widget.currentIndex,
@@ -475,7 +480,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
             _animations[i],
             widget.iconSize,
             onTap: () {
-              if (widget.onTap != null) widget.onTap(i);
+              if (widget.onTap != null)
+                widget.onTap(i);
             },
             flex: _evaluateFlex(_animations[i]),
             selected: i == widget.currentIndex,
@@ -634,11 +640,15 @@ class _RadialPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RadialPainter oldPainter) {
-    if (textDirection != oldPainter.textDirection) return true;
-    if (circles == oldPainter.circles) return false;
-    if (circles.length != oldPainter.circles.length) return true;
+    if (textDirection != oldPainter.textDirection)
+      return true;
+    if (circles == oldPainter.circles)
+      return false;
+    if (circles.length != oldPainter.circles.length)
+      return true;
     for (int i = 0; i < circles.length; i += 1)
-      if (circles[i] != oldPainter.circles[i]) return true;
+      if (circles[i] != oldPainter.circles[i])
+        return true;
     return false;
   }
 
