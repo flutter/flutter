@@ -248,6 +248,7 @@ class FuchsiaRemoteConnection {
   Future<List<IsolateRef>> _waitForMainIsolatesByPattern([
     Pattern pattern,
     Duration timeout = _kIsolateFindTimeout,
+    Duration vmConnectionTimeout = _kDartVmConnectionTimeout,
   ]) async {
     final Completer<List<IsolateRef>> completer = Completer<List<IsolateRef>>();
     _onDartVmEvent.listen(
@@ -255,7 +256,8 @@ class FuchsiaRemoteConnection {
         if (event.eventType == DartVmEventType.started) {
           _log.fine('New VM found on port: ${event.servicePort}. Searching '
               'for Isolate: $pattern');
-          final DartVm vmService = await _getDartVm(event.uri.port);
+          final DartVm vmService = await _getDartVm(event.uri.port,
+              timeout: _kDartVmConnectionTimeout);
           // If the VM service is null, set the result to the empty list.
           final List<IsolateRef> result = await vmService
                   ?.getMainIsolatesByPattern(pattern, timeout: timeout) ??
@@ -294,7 +296,8 @@ class FuchsiaRemoteConnection {
     // start with the Isolate in question.
     if (_dartVmPortMap.isEmpty) {
       _log.fine('No live Dart VMs found. Awaiting new VM startup');
-      return _waitForMainIsolatesByPattern(pattern, timeout);
+      return _waitForMainIsolatesByPattern(
+          pattern, timeout, vmConnectionTimeout);
     }
     // Accumulate a list of eventual IsolateRef lists so that they can be loaded
     // simultaneously via Future.wait.
@@ -335,7 +338,8 @@ class FuchsiaRemoteConnection {
     // TODO(awdavies): Set this up to handle multiple Isolates per Dart VM.
     if (result.isEmpty) {
       _log.fine('No instance of the Isolate found. Awaiting new VM startup');
-      return _waitForMainIsolatesByPattern(pattern, timeout);
+      return _waitForMainIsolatesByPattern(
+          pattern, timeout, vmConnectionTimeout);
     }
     return result;
   }
@@ -421,7 +425,8 @@ class FuchsiaRemoteConnection {
       // the Dart VM to communicate with.  The TimeoutException is raised when
       // the Dart VM instance is shut down in the middle of communicating.
       try {
-        final DartVm dartVm = await DartVm.connect(_getDartVmUri(port));
+        final DartVm dartVm =
+            await DartVm.connect(_getDartVmUri(port), timeout: timeout);
         _dartVmCache[port] = dartVm;
       } on HttpException {
         _log.warning('HTTP Exception encountered connecting to new VM');
