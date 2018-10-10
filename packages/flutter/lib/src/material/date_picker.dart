@@ -21,8 +21,8 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'text_theme.dart';
 import 'theme.dart';
-import 'typography.dart';
 
 /// Initial display mode of the date picker dialog.
 ///
