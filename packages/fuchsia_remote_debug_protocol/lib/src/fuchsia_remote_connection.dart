@@ -20,6 +20,8 @@ const ProcessManager _processManager = LocalProcessManager();
 
 const Duration _kIsolateFindTimeout = Duration(minutes: 1);
 
+const Duration _kDartVmConnectionTimeout = Duration(seconds: 9);
+
 const Duration _kVmPollInterval = Duration(milliseconds: 1500);
 
 final Logger _log = Logger('FuchsiaRemoteConnection');
@@ -284,9 +286,10 @@ class FuchsiaRemoteConnection {
   /// either `timeout` is reached, or a Dart VM starts up with a name that
   /// matches `pattern`.
   Future<List<IsolateRef>> getMainIsolatesByPattern(
-    Pattern pattern, [
+    Pattern pattern, {
     Duration timeout = _kIsolateFindTimeout,
-  ]) async {
+    Duration vmConnectionTimeout = _kDartVmConnectionTimeout,
+  }) async {
     // If for some reason there are no Dart VM's that are alive, wait for one to
     // start with the Isolate in question.
     if (_dartVmPortMap.isEmpty) {
@@ -298,15 +301,17 @@ class FuchsiaRemoteConnection {
     final List<Future<List<IsolateRef>>> isolates =
         <Future<List<IsolateRef>>>[];
     for (PortForwarder fp in _dartVmPortMap.values) {
-      final DartVm vmService = await _getDartVm(fp.port).timeout(timeout);
+      final DartVm vmService =
+          await _getDartVm(fp.port, timeout: vmConnectionTimeout);
       if (vmService == null) {
         continue;
       }
       isolates.add(vmService.getMainIsolatesByPattern(pattern));
     }
-    final List<IsolateRef> result = await Future.wait<List<IsolateRef>>(isolates)
-        .timeout(timeout)
-        .then<List<IsolateRef>>((List<List<IsolateRef>> listOfLists) {
+    final List<IsolateRef> result =
+        await Future.wait<List<IsolateRef>>(isolates)
+            .timeout(timeout)
+            .then<List<IsolateRef>>((List<List<IsolateRef>> listOfLists) {
       final List<List<IsolateRef>> mutableListOfLists =
           List<List<IsolateRef>>.from(listOfLists)
             ..retainWhere((List<IsolateRef> list) => list.isNotEmpty);
@@ -407,7 +412,10 @@ class FuchsiaRemoteConnection {
   ///
   /// Returns null if either there is an [HttpException] or a
   /// [TimeoutException], else a [DartVm] instance.
-  Future<DartVm> _getDartVm(int port) async {
+  Future<DartVm> _getDartVm(
+    int port, {
+    Duration timeout: _kDartVmConnectionTimeout,
+  }) async {
     if (!_dartVmCache.containsKey(port)) {
       // When raising an HttpException this means that there is no instance of
       // the Dart VM to communicate with.  The TimeoutException is raised when
@@ -460,7 +468,7 @@ class FuchsiaRemoteConnection {
       (DartVm vmService) async {
         final Map<String, dynamic> res =
             await vmService.invokeRpc('getVersion');
-        _log.fine('DartVM version check result: $res');
+        _log.fine('DartVM(${vmService.uri}) version check result: $res');
         return res;
       },
       queueEvents,
@@ -475,7 +483,8 @@ class FuchsiaRemoteConnection {
     await stop();
     final List<int> servicePorts = await getDeviceServicePorts();
     final List<PortForwarder> forwardedVmServicePorts =
-        await Future.wait<PortForwarder>(servicePorts.map<Future<PortForwarder>>((int deviceServicePort) {
+        await Future.wait<PortForwarder>(
+            servicePorts.map<Future<PortForwarder>>((int deviceServicePort) {
       return fuchsiaPortForwardingFunction(
           _sshCommandRunner.address,
           deviceServicePort,
