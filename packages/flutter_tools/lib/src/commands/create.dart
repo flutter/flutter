@@ -25,15 +25,13 @@ import '../template.dart';
 import '../version.dart';
 
 enum _ProjectType {
-  /// This is the legacy "app" module type that was created before the default
-  /// was "application". It is kept around to allow users to recreate files that
-  /// have been removed in old projects.
+  /// This is the default project with the user-managed host code.
+  /// It is different than the "module" template in that it exposes and doesn't
+  /// manage the platform code.
   app,
-  /// The is the default type of project created. It is an application with
+  /// The is a project that has managed platform host code. It is an application with
   /// ephemeral .ios and .android directories that can be updated automatically.
-  application,
-  /// This is the old name for the [application] style project.
-  module, // TODO(gspencer): deprecated -- should be removed once IntelliJ no longer uses it.
+  module,
   /// This is a Flutter Dart package project. It doesn't have any native
   /// components, only Dart.
   package,
@@ -43,11 +41,6 @@ enum _ProjectType {
 
 _ProjectType _stringToProjectType(String value) {
   _ProjectType result;
-  // TODO(gspencer): remove module when it is no longer used by IntelliJ plugin.
-  // Module is just an alias for application.
-  if (value == 'module') {
-    value = 'application';
-  }
   for (_ProjectType type in _ProjectType.values) {
     if (value == getEnumName(type)) {
       result = type;
@@ -58,7 +51,7 @@ _ProjectType _stringToProjectType(String value) {
 }
 
 class CreateCommand extends FlutterCommand {
-  CreateCommand({bool verboseHelp = false }) {
+  CreateCommand() {
     argParser.addFlag('pub',
       defaultsTo: true,
       help: 'Whether to run "flutter packages get" after the project has been created.'
@@ -82,23 +75,13 @@ class CreateCommand extends FlutterCommand {
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
       allowedHelp: <String, String>{
-        getEnumName(_ProjectType.application): '(default) Generate a Flutter application.',
+        getEnumName(_ProjectType.app): '(default) Generate a Flutter application.',
         getEnumName(_ProjectType.package): 'Generate a shareable Flutter project containing modular '
             'Dart code.',
         getEnumName(_ProjectType.plugin): 'Generate a shareable Flutter project containing an API '
             'in Dart code with a platform-specific implementation for Android, for iOS code, or '
             'for both.',
-      }..addAll(verboseHelp
-          ? <String, String>{
-        getEnumName(_ProjectType.app): 'Generate the legacy form of an application project. Use '
-            '"application" instead, unless you are working with an existing legacy app project. '
-            'This is not just an alias for the "application" template, it produces different '
-            'output.',
-        getEnumName(_ProjectType.module): 'Legacy, deprecated form of an application project. Use '
-            '"application" instead. This is just an alias for the "application" template, it '
-            'produces the same output. It will be removed in a future release.',
-            }
-          : <String, String>{}),
+      },
       defaultsTo: null,
     );
     argParser.addOption(
@@ -227,7 +210,7 @@ class CreateCommand extends FlutterCommand {
         }
       }
     }
-    template ??= detectedProjectType ?? _ProjectType.application;
+    template ??= detectedProjectType ?? _ProjectType.app;
     if (detectedProjectType != null && template != detectedProjectType && metadataExists) {
       // We can only be definitive that this is the wrong type if the .metadata file
       // exists and contains a type that doesn't match.
@@ -235,7 +218,7 @@ class CreateCommand extends FlutterCommand {
           "existing template type of '${getEnumName(detectedProjectType)}'.");
     }
 
-    final bool generateApplication = template == _ProjectType.application;
+    final bool generateModule = template == _ProjectType.module;
     final bool generatePlugin = template == _ProjectType.plugin;
     final bool generatePackage = template == _ProjectType.package;
 
@@ -283,11 +266,10 @@ class CreateCommand extends FlutterCommand {
     int generatedFileCount = 0;
     switch (template) {
       case _ProjectType.app:
-        generatedFileCount += await _generateLegacyApp(relativeDir, templateContext);
+        generatedFileCount += await _generateApp(relativeDir, templateContext);
         break;
       case _ProjectType.module:
-      case _ProjectType.application:
-        generatedFileCount += await _generateApplication(relativeDir, templateContext);
+        generatedFileCount += await _generateModule(relativeDir, templateContext);
         break;
       case _ProjectType.package:
         generatedFileCount += await _generatePackage(relativeDir, templateContext);
@@ -305,13 +287,13 @@ class CreateCommand extends FlutterCommand {
         '${templateContext['projectName']}.dart',
       ));
       printStatus('Your package code is in $relativeMainPath');
-    } else if (generateApplication) {
+    } else if (generateModule) {
       final String relativeMainPath = fs.path.normalize(fs.path.join(
           relativeDirPath,
           'lib',
           'main.dart',
       ));
-      printStatus('Your application code is in $relativeMainPath.');
+      printStatus('Your module code is in $relativeMainPath.');
     } else {
       // Run doctor; tell the user the next steps.
       final FlutterProject project = await FlutterProject.fromPath(projectDirPath);
@@ -359,13 +341,13 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return null;
   }
 
-  Future<int> _generateApplication(Directory directory, Map<String, dynamic> templateContext) async {
+  Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
-        : 'A new flutter application project.';
+        : 'A new flutter module project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate(fs.path.join('application', 'common'), directory, templateContext);
+    generatedCount += _renderTemplate(fs.path.join('module', 'common'), directory, templateContext);
     if (argResults['pub']) {
       await pubGet(
         context: PubContext.create,
@@ -382,7 +364,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
-        : 'A new flutter package project.';
+        : 'A new Flutter package project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate('package', directory, templateContext);
     if (argResults['pub']) {
@@ -423,11 +405,11 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     templateContext['pluginProjectName'] = projectName;
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
 
-    generatedCount += await _generateLegacyApp(project.example.directory, templateContext);
+    generatedCount += await _generateApp(project.example.directory, templateContext);
     return generatedCount;
   }
 
-  Future<int> _generateLegacyApp(Directory directory, Map<String, dynamic> templateContext) async {
+  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext) async {
     int generatedCount = 0;
     generatedCount += _renderTemplate('app', directory, templateContext);
     final FlutterProject project = await FlutterProject.fromDirectory(directory);
