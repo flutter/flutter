@@ -16,7 +16,7 @@ import 'globals.dart';
 import 'version.dart';
 
 const String _kFlutterUA = 'UA-67589403-6';
-const String kEventReasonParameterName = 'cd5';
+const String kEventReloadReasonParameterName = 'cd5';
 
 Usage get flutterUsage => Usage.instance;
 

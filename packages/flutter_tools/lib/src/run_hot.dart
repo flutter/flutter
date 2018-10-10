@@ -399,11 +399,11 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  Future<OperationResult> _restartFromSources({String reason}) async {
+  Future<OperationResult> _restartFromSources({ String reason }) async {
     final Map<String, String> analyticsParameters =
       reason == null
         ? null
-        : <String, String>{kEventReasonParameterName: reason};
+        : <String, String>{ kEventReloadReasonParameterName: reason };
 
     if (!_isPaused()) {
       printTrace('Refreshing active FlutterViews before restarting.');
@@ -540,7 +540,7 @@ class HotRunner extends ResidentRunner {
     final Map<String, String> analyticsParameters =
       reason == null
         ? null
-        : <String, String>{kEventReasonParameterName: reason};
+        : <String, String>{ kEventReloadReasonParameterName: reason };
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         if (view.uiIsolate == null)
