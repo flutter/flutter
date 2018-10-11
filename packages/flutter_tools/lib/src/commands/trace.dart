@@ -23,7 +23,7 @@ class TraceCommand extends FlutterCommand {
     argParser.addFlag('stop', negatable: false, help: 'Stop tracing. Implied if --start is also omitted.');
     argParser.addOption('duration',
       abbr: 'd',
-      help: 'Time to wait after starting (if --start is specified or implied) and before\n'
+      help: 'Time to wait after starting (if --start is specified or implied) and before '
             'stopping (if --stop is specified or implied).\n'
             'Defaults to ten seconds if --stop is specified or implied, zero otherwise.',
     );
@@ -38,8 +38,8 @@ class TraceCommand extends FlutterCommand {
 
   @override
   final String usageFooter =
-    '\`trace\` called without the --start or --stop flags will automatically start tracing,\n'
-    'delay a set amount of time (controlled by --duration), and stop tracing. To explicitly\n'
+    '\`trace\` called without the --start or --stop flags will automatically start tracing, '
+    'delay a set amount of time (controlled by --duration), and stop tracing. To explicitly '
     'control tracing, call trace with --start and later with --stop.\n'
     'The --debug-port argument is required.';
 
