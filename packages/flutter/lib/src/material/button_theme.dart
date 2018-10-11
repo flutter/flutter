@@ -80,7 +80,7 @@ class ButtonTheme extends InheritedWidget {
     Color disabledColor,
     Color highlightColor,
     Color splashColor,
-    ColorScheme colorScheme,
+    ColorScheme colorScheme = const ColorScheme.light(),
     MaterialTapTargetSize materialTapTargetSize,
     Widget child,
   }) : assert(textTheme != null),
@@ -88,6 +88,7 @@ class ButtonTheme extends InheritedWidget {
        assert(height != null && height >= 0.0),
        assert(alignedDropdown != null),
        assert(layoutBehavior != null),
+       assert(colorScheme != null),
        data = ButtonThemeData(
          textTheme: textTheme,
          minWidth: minWidth,
@@ -141,13 +142,14 @@ class ButtonTheme extends InheritedWidget {
     Color disabledColor,
     Color highlightColor,
     Color splashColor,
-    ColorScheme colorScheme,
+    ColorScheme colorScheme = const ColorScheme.light(),
     Widget child,
     ButtonBarLayoutBehavior layoutBehavior = ButtonBarLayoutBehavior.padded,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
        assert(alignedDropdown != null),
+       assert(colorScheme != null),
        data = ButtonThemeData(
          textTheme: textTheme,
          minWidth: minWidth,
@@ -175,19 +177,8 @@ class ButtonTheme extends InheritedWidget {
   /// ButtonThemeData theme = ButtonTheme.of(context);
   /// ```
   static ButtonThemeData of(BuildContext context) {
-    final ButtonTheme inheritedButtonTheme = context.inheritFromWidgetOfExactType(ButtonTheme);
-    ButtonThemeData buttonTheme = inheritedButtonTheme?.data;
-    if (buttonTheme?.colorScheme == null) { // if buttonTheme or buttonTheme.colorScheme is null
-      final ThemeData theme = Theme.of(context);
-      buttonTheme ??= theme.buttonTheme;
-      if (buttonTheme.colorScheme == null) {
-        buttonTheme = buttonTheme.copyWith(
-          colorScheme: theme.buttonTheme.colorScheme ?? theme.colorScheme,
-        );
-        assert(buttonTheme.colorScheme != null);
-      }
-    }
-    return buttonTheme;
+    final ButtonTheme result = context.inheritFromWidgetOfExactType(ButtonTheme);
+    return result?.data ?? Theme.of(context).buttonTheme;
   }
 
   @override
@@ -203,9 +194,7 @@ class ButtonThemeData extends Diagnosticable {
   /// Create a button theme object that can be used with [ButtonTheme]
   /// or [ThemeData].
   ///
-  /// The [textTheme], [minWidth], [height], [alignedDropDown], and
-  /// [layoutBehavior] parameters must not be null. The [minWidth] and
-  /// [height] parameters must greater than or equal to zero.
+  /// The [textTheme], [minWidth], and [height] parameters must not be null.
   ///
   /// The ButtonTheme's methods that have a [MaterialButton] parameter and
   /// have a name with a `get` prefix are used by [RaisedButton],
@@ -222,13 +211,14 @@ class ButtonThemeData extends Diagnosticable {
     Color disabledColor,
     Color highlightColor,
     Color splashColor,
-    this.colorScheme,
+    this.colorScheme = const ColorScheme.light(),
     MaterialTapTargetSize materialTapTargetSize,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
        assert(alignedDropdown != null),
        assert(layoutBehavior != null),
+       assert(colorScheme != null),
        _buttonColor = buttonColor,
        _disabledColor = disabledColor,
        _highlightColor = highlightColor,
@@ -729,7 +719,6 @@ class ButtonThemeData extends Diagnosticable {
   /// replaced with the non-null parameter values.
   ButtonThemeData copyWith({
     ButtonTextTheme textTheme,
-    ButtonBarLayoutBehavior layoutBehavior,
     double minWidth,
     double height,
     EdgeInsetsGeometry padding,
@@ -744,7 +733,6 @@ class ButtonThemeData extends Diagnosticable {
   }) {
     return ButtonThemeData(
       textTheme: textTheme ?? this.textTheme,
-      layoutBehavior: layoutBehavior ?? this.layoutBehavior,
       minWidth: minWidth ?? this.minWidth,
       height: height ?? this.height,
       padding: padding ?? this.padding,

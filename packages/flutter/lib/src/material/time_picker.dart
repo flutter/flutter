@@ -1541,6 +1541,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     );
 
     final Widget actions = ButtonTheme.bar(
+      colorScheme: theme.colorScheme,
       child: ButtonBar(
         children: <Widget>[
           FlatButton(
