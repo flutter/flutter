@@ -478,7 +478,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
               _animations[i],
               widget.iconSize,
               onTap: () {
-                if (widget.onTap != null) widget.onTap(i);
+                if (widget.onTap != null)
+                  widget.onTap(i);
               },
               flex: _evaluateFlex(_animations[i]),
               selected: i == widget.currentIndex,
