@@ -267,7 +267,7 @@ void main() {
 
   testWidgets('Title of items should be nullable', (WidgetTester tester) async {
     const TestImageProvider iconProvider = TestImageProvider(16, 16);
-    List<int> itemsTapped = [];
+    final List<int> itemsTapped = <int>[];
 
     await pumpWidgetWithBoilerplate(
         tester,
@@ -287,7 +287,7 @@ void main() {
                 ),
               ),
             ],
-            onTap: (index) => itemsTapped.add(index),
+            onTap: (int index) => itemsTapped.add(index),
           ),
         ));
 
