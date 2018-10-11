@@ -6,17 +6,9 @@
 // Like what you see? Tweet us @flutterio
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
-import 'package:scoped_model/scoped_model.dart';
 
 import 'gallery/app.dart';
 
 void main() {
-  final AppStateModel model = AppStateModel()..loadProducts();
-
-  runApp(ScopedModel<AppStateModel>(
-    model: model,
-    child: const GalleryApp(),
-  ));
-  //runApp(const GalleryApp());
+  runApp(const GalleryApp());
 }
