@@ -60,7 +60,7 @@ class BottomNavigationBarItem {
   ///   * [BottomNavigationBarItem.icon], for a description of how to pair icons.
   final Widget activeIcon;
 
-  /// The title of the item. If the title is not provided only the icon will be shown.
+  /// The title of the item. If the title is not provided only the icon will be shown when not used in a Material Design [BottomNavigationBar].
   final Widget title;
 
   /// The color of the background radial animation for material [BottomNavigationBar].

@@ -273,11 +273,16 @@ void main() {
           child: CupertinoTabBar(
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
+                icon: ImageIcon(
+                  TestImageProvider(24, 24),
+                ),
                 title: Text('Tab 1'),
               ),
               BottomNavigationBarItem(
-                  icon: ImageIcon(TestImageProvider(24, 24))),
+                icon: ImageIcon(
+                  TestImageProvider(24, 24),
+                ),
+              ),
             ],
           ),
         ));

@@ -96,9 +96,9 @@ class BottomNavigationBar extends StatefulWidget {
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
-           items.every((BottomNavigationBarItem item) => item.title != null) ==
-               true,
-           "Each item's title should not be null"),
+        items.every((BottomNavigationBarItem item) => item.title != null) == true,
+        "Every item must have a non-null title",
+       ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
        type = type ??
@@ -343,9 +343,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
     _animations =
         List<CurvedAnimation>.generate(widget.items.length, (int index) {
       return CurvedAnimation(
-          parent: _controllers[index],
-          curve: Curves.fastOutSlowIn,
-          reverseCurve: Curves.fastOutSlowIn.flipped);
+        parent: _controllers[index],
+        curve: Curves.fastOutSlowIn,
+        reverseCurve: Curves.fastOutSlowIn.flipped,
+      );
     });
     _controllers[widget.currentIndex].value = 1.0;
     _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
@@ -574,9 +575,9 @@ class _Circle {
     @required this.index,
     @required this.color,
     @required TickerProvider vsync,
-  })  : assert(state != null),
-        assert(index != null),
-        assert(color != null) {
+  }) : assert(state != null),
+       assert(index != null),
+       assert(color != null) {
     controller = AnimationController(
       duration: kThemeAnimationDuration,
       vsync: vsync,
@@ -607,9 +608,7 @@ class _Circle {
         weightSum(state._animations.sublist(0, index));
 
     // Add half of its flex value in order to get to the center.
-    return (leadingWeights +
-            state._evaluateFlex(state._animations[index]) / 2.0) /
-        allWeights;
+    return (leadingWeights + state._evaluateFlex(state._animations[index]) / 2.0) / allWeights;
   }
 
   void dispose() {
@@ -622,8 +621,8 @@ class _RadialPainter extends CustomPainter {
   _RadialPainter({
     @required this.circles,
     @required this.textDirection,
-  })  : assert(circles != null),
-        assert(textDirection != null);
+  }) : assert(circles != null),
+       assert(textDirection != null);
 
   final List<_Circle> circles;
   final TextDirection textDirection;
