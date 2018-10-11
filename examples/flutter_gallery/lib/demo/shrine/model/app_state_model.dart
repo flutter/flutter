@@ -28,24 +28,25 @@ class AppStateModel extends Model {
   Category _selectedCategory = Category.all;
 
   // The IDs and quantities of products currently in the cart.
-  Map<int, int> _productsInCart = {};
+  final Map<int, int> _productsInCart = <int, int>{};
 
-  Map<int, int> get productsInCart => Map.from(_productsInCart);
+  Map<int, int> get productsInCart => Map<int, int>.from(_productsInCart);
 
   // Total number of items in the cart.
-  int get totalCartQuantity => _productsInCart.values.fold(0, (v, e) => v + e);
+  int get totalCartQuantity =>
+      _productsInCart.values.fold(0, (int v, int e) => v + e);
 
   Category get selectedCategory => _selectedCategory;
 
   // Totaled prices of the items in the cart.
   double get subtotalCost => _productsInCart.keys
-      .map((id) => _availableProducts[id].price * _productsInCart[id])
-      .fold(0.0, (sum, e) => sum + e);
+      .map((int id) => _availableProducts[id].price * _productsInCart[id])
+      .fold(0.0, (double sum, int e) => sum + e);
 
   // Total shipping cost for the items in the cart.
   double get shippingCost =>
       _shippingCostPerItem *
-      _productsInCart.values.fold(0.0, (sum, e) => sum + e);
+      _productsInCart.values.fold(0.0, (num sum, int e) => sum + e);
 
   // Sales tax for the items in the cart
   double get tax => subtotalCost * _salesTaxRate;
@@ -55,13 +56,15 @@ class AppStateModel extends Model {
 
   // Returns a copy of the list of available products, filtered by category.
   List<Product> getProducts() {
-    if (_availableProducts == null) return List<Product>();
+    if (_availableProducts == null) {
+      return <Product>[];
+    }
 
     if (_selectedCategory == Category.all) {
-      return List.from(_availableProducts);
+      return List<Product>.from(_availableProducts);
     } else {
       return _availableProducts
-          .where((p) => p.category == _selectedCategory)
+          .where((Product p) => p.category == _selectedCategory)
           .toList();
     }
   }
@@ -92,7 +95,7 @@ class AppStateModel extends Model {
 
   // Returns the Product instance matching the provided id.
   Product getProductById(int id) {
-    return _availableProducts.firstWhere((p) => p.id == id);
+    return _availableProducts.firstWhere((Product p) => p.id == id);
   }
 
   // Removes everything from the cart.

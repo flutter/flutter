@@ -16,7 +16,7 @@ import 'package:flutter_gallery/demo/shrine/model/product.dart';
 
 class ProductsRepository {
   static List<Product> loadProducts(Category category) {
-    const allProducts = <Product>[
+    const List<Product> allProducts = <Product>[
       Product(
         category: Category.accessories,
         id: 0,

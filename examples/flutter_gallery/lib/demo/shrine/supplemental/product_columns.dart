@@ -18,8 +18,8 @@ import 'package:flutter_gallery/demo/shrine/model/product.dart';
 import 'package:flutter_gallery/demo/shrine/supplemental/product_card.dart';
 
 class TwoProductCardColumn extends StatelessWidget {
-  TwoProductCardColumn({
-    this.bottom,
+  const TwoProductCardColumn({
+    @required this.bottom,
     this.top,
   }) : assert(bottom != null);
 
@@ -29,11 +29,12 @@ class TwoProductCardColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-      const spacerHeight = 44.0;
+      const double spacerHeight = 44.0;
 
-      double heightOfCards = (constraints.biggest.height - spacerHeight) / 2.0;
-      double heightOfImages = heightOfCards - ProductCard.kTextBoxHeight;
-      double imageAspectRatio =
+      final double heightOfCards =
+          (constraints.biggest.height - spacerHeight) / 2.0;
+      final double heightOfImages = heightOfCards - ProductCard.kTextBoxHeight;
+      final double imageAspectRatio =
           (heightOfImages >= 0.0 && constraints.biggest.width > heightOfImages)
               ? constraints.biggest.width / heightOfImages
               : 33 / 49;
@@ -41,7 +42,7 @@ class TwoProductCardColumn extends StatelessWidget {
       return ListView(
         children: <Widget>[
           Padding(
-            padding: EdgeInsetsDirectional.only(start: 28.0),
+            padding: const EdgeInsetsDirectional.only(start: 28.0),
             child: top != null
                 ? ProductCard(
                     imageAspectRatio: imageAspectRatio,
@@ -51,9 +52,9 @@ class TwoProductCardColumn extends StatelessWidget {
                     height: heightOfCards > 0 ? heightOfCards : spacerHeight,
                   ),
           ),
-          SizedBox(height: spacerHeight),
+          const SizedBox(height: spacerHeight),
           Padding(
-            padding: EdgeInsetsDirectional.only(end: 28.0),
+            padding: const EdgeInsetsDirectional.only(end: 28.0),
             child: ProductCard(
               imageAspectRatio: imageAspectRatio,
               product: bottom,
@@ -66,7 +67,7 @@ class TwoProductCardColumn extends StatelessWidget {
 }
 
 class OneProductCardColumn extends StatelessWidget {
-  OneProductCardColumn({this.product});
+  const OneProductCardColumn({this.product});
 
   final Product product;
 
@@ -75,7 +76,7 @@ class OneProductCardColumn extends StatelessWidget {
     return ListView(
       reverse: true,
       children: <Widget>[
-        SizedBox(
+        const SizedBox(
           height: 40.0,
         ),
         ProductCard(

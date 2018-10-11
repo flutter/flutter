@@ -20,13 +20,13 @@ import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
 import 'package:flutter_gallery/demo/shrine/model/product.dart';
 
 class ProductCard extends StatelessWidget {
-  ProductCard({this.imageAspectRatio: 33 / 49, this.product})
+  const ProductCard({this.imageAspectRatio = 33 / 49, this.product})
       : assert(imageAspectRatio == null || imageAspectRatio > 0);
 
   final double imageAspectRatio;
   final Product product;
 
-  static final kTextBoxHeight = 65.0;
+  static const double kTextBoxHeight = 65.0;
 
   @override
   Widget build(BuildContext context) {
@@ -34,14 +34,15 @@ class ProductCard extends StatelessWidget {
         decimalDigits: 0, locale: Localizations.localeOf(context).toString());
     final ThemeData theme = Theme.of(context);
 
-    final imageWidget = Image.asset(
+    final Image imageWidget = Image.asset(
       product.assetName,
       package: product.assetPackage,
       fit: BoxFit.cover,
     );
 
     return ScopedModelDescendant<AppStateModel>(
-      builder: (context, child, model) => GestureDetector(
+      builder: (BuildContext context, Widget child, AppStateModel model) =>
+          GestureDetector(
             onTap: () {
               model.addProductToCart(product.id);
               // TODO: Add Snackbar
@@ -72,7 +73,7 @@ class ProductCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
-                    SizedBox(height: 4.0),
+                    const SizedBox(height: 4.0),
                     Text(
                       product == null ? '' : formatter.format(product.price),
                       style: theme.textTheme.caption,
@@ -82,8 +83,8 @@ class ProductCard extends StatelessWidget {
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          const Padding(
+            padding: EdgeInsets.all(16.0),
             child: Icon(Icons.add_shopping_cart),
           ),
         ],
