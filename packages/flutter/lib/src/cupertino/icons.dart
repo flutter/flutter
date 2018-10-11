@@ -721,4 +721,16 @@ class CupertinoIcons {
   ///  * [group], which is similar, but not filled in.
   ///  * [person_solid], which is just a single person.
   static const IconData group_solid = IconData(0xf47c, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outline of a closed mail envelope.
+  static const IconData mail = IconData(0xf422, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outline of a closed mail envelope. This icon is filled in.
+  static const IconData mail_solid = IconData(0xf423, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outline of a location pin.
+  static const IconData location = IconData(0xf455, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outline of a location pin. This icon is filled in.
+  static const IconData location_solid = IconData(0xf456, fontFamily: iconFont, fontPackage: iconFontPackage);
 }

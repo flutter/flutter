@@ -15,7 +15,7 @@ export 'package:flutter/services.dart' show TextInputType, TextInputAction, Text
 const BorderSide _kDefaultRoundedBorderSide = BorderSide(
   color: CupertinoColors.lightBackgroundGray,
   style: BorderStyle.solid,
-  width: 1.0,
+  width: 0.0,
 );
 const Border _kDefaultRoundedBorder = Border(
   top: _kDefaultRoundedBorderSide,
@@ -30,7 +30,7 @@ const BoxDecoration _kDefaultRoundedBorderDecoration = BoxDecoration(
 
 const TextStyle _kDefaultTextStyle = TextStyle(
   fontFamily: '.SF Pro Text',
-  fontSize: 14.0,
+  fontSize: 17.0,
   letterSpacing: -0.38,
   color: CupertinoColors.black,
   decoration: TextDecoration.none,
@@ -189,7 +189,7 @@ class CupertinoTextField extends StatefulWidget {
 
   final BoxDecoration decoration;
 
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   final String placeholder;
 
@@ -540,10 +540,18 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
     if (widget.placeholder != null ||
         widget.clearButtonMode != OverlayVisibilityMode.never ||
-        widget.leading != null) {
+        widget.leading != null ||
+        widget.trailing != null) {
       child = ValueListenableBuilder<TextEditingValue>(
-        valueListenable: _controller,
+        valueListenable: controller,
         builder: (BuildContext context, TextEditingValue text, Widget child) {
+          final List<Widget> rowChildren = <Widget>[];
+
+          if (widget.leading != null &&
+              _shouldAppearForModeAndText(widget.leadingMode, text.text.isNotEmpty)) {
+            rowChildren.add(widget.leading);
+          }
+
           final List<Widget> stackChildren = <Widget>[];
 
           if (widget.placeholder != null && text.text.isEmpty) {
@@ -554,20 +562,17 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                   widget.placeholder,
                   maxLines: 1,
                   style: widget.style.merge(
-                    const TextStyle(color: _kInactiveTextColor),
+                    const TextStyle(
+                      color: _kInactiveTextColor,
+                      fontWeight: FontWeight.w300,
+                    ),
                   ),
                 ),
               ),
             );
           }
-          final List<Widget> rowChildren = <Widget>[];
 
-          if (widget.leading != null &&
-              _shouldAppearForModeAndText(widget.leadingMode, text.text.isNotEmpty)) {
-            rowChildren.add(widget.leading);
-          }
-
-          rowChildren.add(Expanded(child: child));
+          rowChildren.add(Expanded(child: Stack(children: stackChildren..add(child))));
 
           if (widget.trailing != null &&
               _shouldAppearForModeAndText(widget.trailingMode, text.text.isNotEmpty)) {
@@ -588,9 +593,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
             );
           }
 
-          stackChildren.add(Row(children: rowChildren));
-
-          return Stack(children: stackChildren);
+          return Row(children: rowChildren);
         },
         child: child,
       );
