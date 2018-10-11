@@ -25,9 +25,6 @@ TextTheme _buildTextTheme(TextTheme base) {
 ThemeData _buildDarkTheme() {
   const Color primaryColor = Color(0xFF0175c2);
   final ThemeData base = ThemeData.dark();
-  final ColorScheme colorScheme = const ColorScheme.dark().copyWith(
-    primary: primaryColor,
-  );
   return base.copyWith(
     primaryColor: primaryColor,
     buttonColor: primaryColor,
@@ -37,8 +34,7 @@ ThemeData _buildDarkTheme() {
     scaffoldBackgroundColor: const Color(0xFF202124),
     backgroundColor: const Color(0xFF202124),
     errorColor: const Color(0xFFB00020),
-    buttonTheme: ButtonThemeData(
-      colorScheme: colorScheme,
+    buttonTheme: const ButtonThemeData(
       textTheme: ButtonTextTheme.primary,
     ),
     textTheme: _buildTextTheme(base.textTheme),
@@ -49,12 +45,8 @@ ThemeData _buildDarkTheme() {
 
 ThemeData _buildLightTheme() {
   const Color primaryColor = Color(0xFF0175c2);
-  final ColorScheme colorScheme = const ColorScheme.light().copyWith(
-    primary: primaryColor,
-  );
   final ThemeData base = ThemeData.light();
   return base.copyWith(
-    colorScheme: colorScheme,
     primaryColor: primaryColor,
     buttonColor: primaryColor,
     indicatorColor: Colors.white,
@@ -65,8 +57,7 @@ ThemeData _buildLightTheme() {
     scaffoldBackgroundColor: Colors.white,
     backgroundColor: Colors.white,
     errorColor: const Color(0xFFB00020),
-    buttonTheme: ButtonThemeData(
-      colorScheme: colorScheme,
+    buttonTheme: const ButtonThemeData(
       textTheme: ButtonTextTheme.primary,
     ),
     textTheme: _buildTextTheme(base.textTheme),
