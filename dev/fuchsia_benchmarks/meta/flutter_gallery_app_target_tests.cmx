@@ -1,0 +1,12 @@
+{
+    "program": {
+        "data": "data/flutter_gallery_app_target_tests"
+    },
+    "sandbox": {
+        "features": [
+            "deprecated-all-services",
+            "root-ssl-certificates",
+            "system-temp"
+        ]
+    }
+}
