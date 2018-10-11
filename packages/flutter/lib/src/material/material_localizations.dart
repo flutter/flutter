@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'text_theme.dart';
 import 'time.dart';
 import 'typography.dart';
 
@@ -35,10 +34,6 @@ import 'typography.dart';
 //
 // 5. If you are a Google employee, you should then also follow the instructions
 //    at go/flutter-l10n. If you're not, don't worry about it.
-//
-// 6. If you're adding a String for the sake of Flutter, not for an app-specific
-//    version of this interface, you are making a breaking API change. See
-//    https://flutter.io/design-principles/#handling-breaking-changes.
 
 /// Defines the localized resource values used by the Material widgets.
 ///
@@ -173,17 +168,22 @@ abstract class MaterialLocalizations {
   /// each supported layout.
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false });
 
-  /// Defines the localized [TextStyle] geometry for [ThemeData.textTheme].
+  /// Provides geometric text preferences for the current locale.
   ///
-  /// The [scriptCategory] defines the overall geometry of a [TextTheme] for
-  /// the static [MaterialTextGeometry.localizedFor] method in terms of the
-  /// three language categories defined in https://material.io/go/design-typography.
+  /// This text theme is incomplete. For example, it lacks text color
+  /// information. This theme must be merged with another text theme that
+  /// provides the missing values.
   ///
-  /// Generally speaking, font sizes for [ScriptCategory.tall] and
-  /// [ScriptCategory.dense] scripts - for text styles that are smaller than the
-  /// title style - are one unit larger than they are for
-  /// [ScriptCategory.englishLike] scripts.
-  ScriptCategory get scriptCategory;
+  /// Typically a complete theme is obtained via [Theme.of], which can be
+  /// localized using the [Localizations] widget.
+  ///
+  /// The text styles provided by this theme are expected to have their
+  /// [TextStyle.inherit] property set to false, so that the [ThemeData]
+  /// obtained from [Theme.of] no longer inherits text style properties and
+  /// contains a complete set of properties needed to style a [Text] widget.
+  ///
+  /// See also: https://material.io/go/design-typography
+  TextTheme get localTextGeometry;
 
   /// Formats [number] as a decimal, inserting locale-appropriate thousands
   /// separators as necessary.
@@ -653,14 +653,15 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get modalBarrierDismissLabel => 'Dismiss';
 
   @override
-  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
-
-  @override
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
     return alwaysUse24HourFormat
       ? TimeOfDayFormat.HH_colon_mm
       : TimeOfDayFormat.h_colon_mm_space_a;
   }
+
+  /// Looks up text geometry defined in [MaterialTextGeometry].
+  @override
+  TextTheme get localTextGeometry => MaterialTextGeometry.englishLike;
 
   @override
   String get signedInLabel => 'Signed in';

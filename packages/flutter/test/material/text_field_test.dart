@@ -915,7 +915,7 @@ void main() {
     );
     final Text helperText = tester.widget(find.text('helper text'));
     expect(helperText.style.color, themeData.hintColor);
-    expect(helperText.style.fontSize, Typography.englishLike2014.caption.fontSize);
+    expect(helperText.style.fontSize, MaterialTextGeometry.englishLike.caption.fontSize);
   });
 
   testWidgets('TextField with specified helperStyle', (WidgetTester tester) async {
