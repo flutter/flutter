@@ -3,9 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -96,5 +100,80 @@ void main() {
         Platform: () => platform,
       }, initializeFlutterRoot: false);
     });
+
+    group('wrapping', () {
+      testUsingContext('checks that output wrapping is turned on when writing to a terminal', () async {
+        final FakeCommand fakeCommand = FakeCommand();
+        runner.addCommand(fakeCommand);
+        await runner.run(<String>['fake']);
+        expect(fakeCommand.preferences.wrapText, isTrue);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        Stdio: () => FakeStdio(hasFakeTerminal: true),
+      }, initializeFlutterRoot: false);
+
+      testUsingContext('checks that output wrapping is turned off when not writing to a terminal', () async {
+        final FakeCommand fakeCommand = FakeCommand();
+        runner.addCommand(fakeCommand);
+        await runner.run(<String>['fake']);
+        expect(fakeCommand.preferences.wrapText, isFalse);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        Stdio: () => FakeStdio(hasFakeTerminal: false),
+      }, initializeFlutterRoot: false);
+
+      testUsingContext('checks that output wrapping is turned off when set on the command line and writing to a terminal', () async {
+        final FakeCommand fakeCommand = FakeCommand();
+        runner.addCommand(fakeCommand);
+        await runner.run(<String>['--no-wrap', 'fake']);
+        expect(fakeCommand.preferences.wrapText, isFalse);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        Stdio: () => FakeStdio(hasFakeTerminal: true),
+      }, initializeFlutterRoot: false);
+
+      testUsingContext('checks that output wrapping is turned on when set on the command line, but not writing to a terminal', () async {
+        final FakeCommand fakeCommand = FakeCommand();
+        runner.addCommand(fakeCommand);
+        await runner.run(<String>['--wrap', 'fake']);
+        expect(fakeCommand.preferences.wrapText, isTrue);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        Stdio: () => FakeStdio(hasFakeTerminal: false),
+      }, initializeFlutterRoot: false);
+    });
   });
+}
+
+class FakeCommand extends FlutterCommand {
+  OutputPreferences preferences;
+
+  @override
+  Future<FlutterCommandResult> runCommand() {
+    preferences = outputPreferences;
+    return Future<FlutterCommandResult>.value(const FlutterCommandResult(ExitStatus.success));
+  }
+
+  @override
+  String get description => null;
+
+  @override
+  String get name => 'fake';
+}
+
+class FakeStdio extends Stdio {
+  FakeStdio({this.hasFakeTerminal});
+
+  final bool hasFakeTerminal;
+
+  @override
+  bool get hasTerminal => hasFakeTerminal;
+
+  @override
+  int get terminalColumns => hasFakeTerminal ? 80 : null;
+
+  @override
+  int get terminalLines => hasFakeTerminal ? 24 : null;
+  @override
+  bool get supportsAnsiEscapes => hasFakeTerminal;
 }
