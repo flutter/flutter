@@ -20,34 +20,36 @@ import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
 import 'package:flutter_gallery/demo/shrine/model/product.dart';
 
 class CategoryMenuPage extends StatelessWidget {
-  final List<Category> _categories = Category.values;
-  final VoidCallback onCategoryTap;
-
   const CategoryMenuPage({
     Key key,
     this.onCategoryTap,
   }) : super(key: key);
 
+  final VoidCallback onCategoryTap;
+
   Widget _buildCategory(Category category, BuildContext context) {
-    final categoryString =
+    final String categoryString =
         category.toString().replaceAll('Category.', '').toUpperCase();
     final ThemeData theme = Theme.of(context);
     return ScopedModelDescendant<AppStateModel>(
-      builder: (context, child, model) => GestureDetector(
+      builder: (BuildContext context, Widget child, AppStateModel model) =>
+          GestureDetector(
             onTap: () {
               model.setCategory(category);
-              if (onCategoryTap != null) onCategoryTap();
+              if (onCategoryTap != null) {
+                onCategoryTap();
+              }
             },
             child: model.selectedCategory == category
                 ? Column(
                     children: <Widget>[
-                      SizedBox(height: 16.0),
+                      const SizedBox(height: 16.0),
                       Text(
                         categoryString,
                         style: theme.textTheme.body2,
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 14.0),
+                      const SizedBox(height: 14.0),
                       Container(
                         width: 70.0,
                         height: 2.0,
@@ -56,7 +58,7 @@ class CategoryMenuPage extends StatelessWidget {
                     ],
                   )
                 : Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: Text(
                       categoryString,
                       style: theme.textTheme.body2
@@ -72,10 +74,10 @@ class CategoryMenuPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        padding: EdgeInsets.only(top: 40.0),
+        padding: const EdgeInsets.only(top: 40.0),
         color: kShrinePink100,
         child: ListView(
-            children: _categories
+            children: Category.values
                 .map((Category c) => _buildCategory(c, context))
                 .toList()),
       ),

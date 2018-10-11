@@ -22,9 +22,9 @@ import 'package:flutter_gallery/demo/shrine/model/product.dart';
 import 'package:flutter_gallery/demo/shrine/supplemental/asymmetric_view.dart';
 
 class ProductPage extends StatelessWidget {
-  final Category category;
+  const ProductPage({this.category = Category.all});
 
-  const ProductPage({this.category: Category.all});
+  final Category category;
 
   @override
   Widget build(BuildContext context) {
@@ -38,14 +38,11 @@ class ProductPage extends StatelessWidget {
 }
 
 class HomePage extends StatelessWidget {
+  const HomePage({Key key, this.expandingBottomSheet, this.backdrop})
+      : super(key: key);
+
   final ExpandingBottomSheet expandingBottomSheet;
   final Backdrop backdrop;
-
-  const HomePage({
-    Key key,
-    this.expandingBottomSheet,
-    this.backdrop
-  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

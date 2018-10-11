@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gallery/demo/shrine/app.dart';
 import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
-import 'package:scoped_model/scoped_model.dart';
 
 class ShrineDemo extends StatelessWidget {
   ShrineDemo({Key key}) : super(key: key) {

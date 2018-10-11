@@ -18,9 +18,9 @@ import 'package:flutter_gallery/demo/shrine/model/product.dart';
 import 'package:flutter_gallery/demo/shrine/supplemental/product_columns.dart';
 
 class AsymmetricView extends StatelessWidget {
-  final List<Product> products;
+  const AsymmetricView({Key key, this.products}) : super(key: key);
 
-  const AsymmetricView({Key key, this.products});
+  final List<Product> products;
 
   List<Container> _buildColumns(BuildContext context) {
     if (products == null || products.isEmpty) {
@@ -35,12 +35,13 @@ class AsymmetricView extends StatelessWidget {
     /// some kinda awkward math so we use _evenCasesIndex and _oddCasesIndex as
     /// helpers for creating the index of the product list that will correspond
     /// to the index of the list of columns.
-    return List.generate(_listItemCount(products.length), (int index) {
+    return List<Container>.generate(_listItemCount(products.length),
+        (int index) {
       double width = .59 * MediaQuery.of(context).size.width;
       Widget column;
       if (index % 2 == 0) {
         /// Even cases
-        int bottom = _evenCasesIndex(index);
+        final int bottom = _evenCasesIndex(index);
         column = TwoProductCardColumn(
             bottom: products[bottom],
             top: products.length - 1 >= bottom + 1
@@ -56,7 +57,7 @@ class AsymmetricView extends StatelessWidget {
       return Container(
         width: width,
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: column,
         ),
       );
@@ -88,9 +89,9 @@ class AsymmetricView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.fromLTRB(0.0, 34.0, 16.0, 44.0),
+      padding: const EdgeInsets.fromLTRB(0.0, 34.0, 16.0, 44.0),
       children: _buildColumns(context),
-      physics: AlwaysScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
     );
   }
 }

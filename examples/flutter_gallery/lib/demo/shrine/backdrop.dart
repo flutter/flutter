@@ -36,7 +36,7 @@ class _FrontLayer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       elevation: 16.0,
-      shape: BeveledRectangleBorder(
+      shape: const BeveledRectangleBorder(
         borderRadius: BorderRadius.only(topLeft: Radius.circular(46.0)),
       ),
       child: Column(
@@ -60,10 +60,6 @@ class _FrontLayer extends StatelessWidget {
 }
 
 class _BackdropTitle extends AnimatedWidget {
-  final Function onPress;
-  final Widget frontTitle;
-  final Widget backTitle;
-
   const _BackdropTitle({
     Key key,
     Listenable listenable,
@@ -74,11 +70,15 @@ class _BackdropTitle extends AnimatedWidget {
         assert(backTitle != null),
         super(key: key, listenable: listenable);
 
+  final Function onPress;
+  final Widget frontTitle;
+  final Widget backTitle;
+
   @override
   Widget build(BuildContext context) {
     final Animation<double> animation = CurvedAnimation(
-      parent: this.listenable,
-      curve: Interval(0.0, 0.78),
+      parent: listenable,
+      curve: const Interval(0.0, 0.78),
     );
 
     return DefaultTextStyle(
@@ -90,19 +90,21 @@ class _BackdropTitle extends AnimatedWidget {
         SizedBox(
           width: 72.0,
           child: IconButton(
-            padding: EdgeInsets.only(right: 8.0),
-            onPressed: this.onPress,
+            padding: const EdgeInsets.only(right: 8.0),
+            onPressed: onPress,
             icon: Stack(children: <Widget>[
               Opacity(
                 opacity: animation.value,
-                child: ImageIcon(AssetImage('packages/shrine_images/slanted_menu.png')),
+                child: const ImageIcon(
+                    AssetImage('packages/shrine_images/slanted_menu.png')),
               ),
               FractionalTranslation(
                 translation: Tween<Offset>(
                   begin: Offset.zero,
-                  end: Offset(1.0, 0.0),
+                  end: const Offset(1.0, 0.0),
                 ).evaluate(animation),
-                child: ImageIcon(AssetImage('packages/shrine_images/diamond.png')),
+                child: const ImageIcon(
+                    AssetImage('packages/shrine_images/diamond.png')),
               )
             ]),
           ),
@@ -114,12 +116,12 @@ class _BackdropTitle extends AnimatedWidget {
             Opacity(
               opacity: CurvedAnimation(
                 parent: ReverseAnimation(animation),
-                curve: Interval(0.5, 1.0),
+                curve: const Interval(0.5, 1.0),
               ).value,
               child: FractionalTranslation(
                 translation: Tween<Offset>(
                   begin: Offset.zero,
-                  end: Offset(0.5, 0.0),
+                  end: const Offset(0.5, 0.0),
                 ).evaluate(animation),
                 child: backTitle,
               ),
@@ -127,11 +129,11 @@ class _BackdropTitle extends AnimatedWidget {
             Opacity(
               opacity: CurvedAnimation(
                 parent: animation,
-                curve: Interval(0.5, 1.0),
+                curve: const Interval(0.5, 1.0),
               ).value,
               child: FractionalTranslation(
                 translation: Tween<Offset>(
-                  begin: Offset(-0.25, 0.0),
+                  begin: const Offset(-0.25, 0.0),
                   end: Offset.zero,
                 ).evaluate(animation),
                 child: frontTitle,
@@ -151,12 +153,6 @@ class _BackdropTitle extends AnimatedWidget {
 /// can make a selection. The user can also configure the titles for when the
 /// front or back layer is showing.
 class Backdrop extends StatefulWidget {
-  final Widget frontLayer;
-  final Widget backLayer;
-  final Widget frontTitle;
-  final Widget backTitle;
-  final AnimationController controller;
-
   const Backdrop({
     @required this.frontLayer,
     @required this.backLayer,
@@ -168,6 +164,12 @@ class Backdrop extends StatefulWidget {
         assert(frontTitle != null),
         assert(backTitle != null),
         assert(controller != null);
+
+  final Widget frontLayer;
+  final Widget backLayer;
+  final Widget frontTitle;
+  final Widget backTitle;
+  final AnimationController controller;
 
   @override
   _BackdropState createState() => _BackdropState();
@@ -212,7 +214,7 @@ class _BackdropState extends State<Backdrop>
     Curve secondCurve; // Curve for second TweenSequenceItem
     double firstWeight; // Weight of first TweenSequenceItem
     double secondWeight; // Weight of second TweenSequenceItem
-    Animation animation; // Animation on which TweenSequence runs
+    Animation<double> animation; // Animation on which TweenSequence runs
 
     if (_frontLayerVisible) {
       firstCurve = _kAccelerateCurve;
@@ -221,7 +223,7 @@ class _BackdropState extends State<Backdrop>
       secondWeight = 1.0 - _kPeakVelocityTime;
       animation = CurvedAnimation(
         parent: _controller.view,
-        curve: Interval(0.0, 0.78),
+        curve: const Interval(0.0, 0.78),
       );
     } else {
       // These values are only used when the controller runs from t=1.0 to t=0.0
@@ -232,7 +234,7 @@ class _BackdropState extends State<Backdrop>
       animation = _controller.view;
     }
 
-    return TweenSequence(
+    return TweenSequence<RelativeRect>(
       <TweenSequenceItem<RelativeRect>>[
         TweenSequenceItem<RelativeRect>(
           tween: RelativeRectTween(
@@ -291,7 +293,7 @@ class _BackdropState extends State<Backdrop>
 
   @override
   Widget build(BuildContext context) {
-    var appBar = AppBar(
+    final AppBar appBar = AppBar(
       brightness: Brightness.light,
       elevation: 0.0,
       titleSpacing: 0.0,
@@ -307,7 +309,8 @@ class _BackdropState extends State<Backdrop>
           onPressed: () {
             Navigator.push<void>(
               context,
-              MaterialPageRoute<void>(builder: (BuildContext context) => LoginPage()),
+              MaterialPageRoute<void>(
+                  builder: (BuildContext context) => LoginPage()),
             );
           },
         ),
@@ -316,7 +319,8 @@ class _BackdropState extends State<Backdrop>
           onPressed: () {
             Navigator.push<void>(
               context,
-              MaterialPageRoute<void>(builder: (BuildContext context) => LoginPage()),
+              MaterialPageRoute<void>(
+                  builder: (BuildContext context) => LoginPage()),
             );
           },
         ),
