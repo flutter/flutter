@@ -422,7 +422,8 @@ class DraggableDetails {
   DraggableDetails._({
     this.wasAccepted,
     this.velocity,
-    this.offset});
+    this.offset
+  });
 
   /// Determines whether the [DragTarget] accepted this draggable
   final bool wasAccepted;
