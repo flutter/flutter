@@ -1998,11 +1998,29 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This method is implemented in terms of [getTransformTo].
   Offset globalToLocal(Offset point, { RenderObject ancestor }) {
+    // We want to find point (l) that corresponds to a given point on the
+    // screen (s), but that also physically resides on the local render plane,
+    // so that it is useful for visually accurate gesture processing in the
+    // local space. For that, we can't simply transform 2D screen point to
+    // 3D local space since the screen space lacks the depth component |z|,
+    // and so there are many 3D points that correspond to a screen point. We
+    // must first unproject the screen point onto the render plane to find the
+    // true 3D point (g) in global space that corresponds to the screen point.
+    // The render plane is specified by renderBox offset (o) and Z axis (n).
+    // Unprojection is done by finding the intersection of the view vector (v)
+    // with the local X-Y plane: (o-s).dot(n) == (g-s).dot(n), (g-s) == |z|*v.
     final Matrix4 transform = getTransformTo(ancestor);
+    final Vector3 v = Vector3(0.0, 0.0, 1.0);
+    final Vector3 s = Vector3(point.dx, point.dy, 0.0);
+    final Vector3 o = transform.getTranslation();
+    final Vector3 n = transform.getColumn(2).xyz;
+    final double z = n.dot(o - s) / n.dot(v);
+    final Vector3 g = Vector3(point.dx, point.dy, z);
     final double det = transform.invert();
     if (det == 0.0)
       return Offset.zero;
-    return MatrixUtils.transformPoint(transform, point);
+    final Vector3 l = transform.perspectiveTransform(g.clone());
+    return Offset(l.x, l.y);
   }
 
   /// Convert the given point from the local coordinate system for this box to
