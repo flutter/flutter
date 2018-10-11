@@ -36,8 +36,11 @@ typedef DragTargetBuilder<T> = Widget Function(BuildContext context, List<T> can
 /// Used by [Draggable.onDraggableCanceled].
 typedef DraggableCanceledCallback = void Function(Velocity velocity, Offset offset);
 
-/// Signature for when the draggable is dropped, returning its current
-/// [DraggableDetails].
+/// Signature for when the draggable is dropped.
+///
+/// The velocity and offset at which the pointer was moving when the draggable
+/// was dropped is available in the [DraggableDetails]. Also included in the
+/// `details` is whether the draggable's [DragTarget] accepted it.
 ///
 /// Used by [Draggable.onDragEnd]
 typedef DragEndCallback = void Function(DraggableDetails details);
@@ -236,8 +239,11 @@ class Draggable<T> extends StatefulWidget {
   /// callback is still in the tree.
   final VoidCallback onDragCompleted;
 
-  /// Called when the draggable is dropped, returning its current
-  /// [DraggableDetails].
+  /// Called when the draggable is dropped.
+  ///
+  /// The velocity and offset at which the pointer was moving when it was
+  /// dropped is available in the [DraggableDetails]. Also included in the
+  /// `details` is whether the draggable's [DragTarget] accepted it.
   ///
   /// This function will only be called while this widget is still mounted to
   /// the tree (i.e. [State.mounted] is true).
@@ -418,8 +424,13 @@ class _DraggableState<T> extends State<Draggable<T>> {
   }
 }
 
-/// Represents the draggable's current details, such as whether the
-/// [DragTarget] accepted it, its [Velocity], and its [Offset].
+/// Represents the details when a specific pointer event occurred on
+/// the [Draggable].
+///
+/// This includes the [Velocity] at which the pointer was moving and [Offset]
+/// when the draggable event occurred, and whether its [DragTarget] accepted it.
+///
+/// Also, this is the Details object for callbacks that use [DragEndCallback].
 class DraggableDetails {
   DraggableDetails._({
     this.wasAccepted,
@@ -430,10 +441,12 @@ class DraggableDetails {
   /// Determines whether the [DragTarget] accepted this draggable
   final bool wasAccepted;
 
-  /// This draggable's current [Velocity]
+  /// The velocity at which the pointer was moving when the specific pointer
+  /// event occurred on the draggable.
   final Velocity velocity;
 
-  /// This draggable's current [Offset]
+  /// The global position when the specific pointer event occurred on
+  /// the draggable.
   final Offset offset;
 }
 
