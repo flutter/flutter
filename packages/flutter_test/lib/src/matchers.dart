@@ -1506,7 +1506,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
   }
 }
 
-class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, Null> {
+class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, RenderPhysicalModel> {
   const _RendersOnPhysicalShape({
     this.shape,
     this.elevation,
@@ -1607,7 +1607,7 @@ class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipPath, RenderC
     description.add('clips with bounding rounded rectangle with borderRadius: $borderRadius');
 }
 
-class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, Null> {
+class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, RenderClipRRect> {
   const _ClipsWithShapeBorder({@required this.shape});
 
   final ShapeBorder shape;

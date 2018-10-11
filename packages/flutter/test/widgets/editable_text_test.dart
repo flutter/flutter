@@ -1444,7 +1444,7 @@ void main() {
   });
 
   group('a11y copy/cut/paste', () {
-    Future<Null> _buildApp(
+    Future<void> _buildApp(
         MockTextSelectionControls controls, WidgetTester tester) {
       return tester.pumpWidget(MaterialApp(
         home: EditableText(
