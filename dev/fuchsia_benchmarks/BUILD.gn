@@ -1,0 +1,61 @@
+# Copyright 2018 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_fuchsia_host || is_fuchsia)
+
+import("//build/dart/dart_remote_test.gni")
+import("//build/dart/dart_fuchsia_test.gni")
+import("//topaz/runtime/flutter_runner/flutter_app.gni")
+
+flutter_app("flutter_gallery_app") {
+  main_dart = "lib/main_fuchsia.dart"
+
+  package_name = "flutter_gallery_app"
+  flutter_driver_extendable = true
+  disable_analysis = true
+
+  deps = [
+    "//third_party/dart-pkg/git/flutter/examples/flutter_gallery",
+    "//third_party/dart-pkg/git/flutter/packages/flutter",
+    "//topaz/public/lib/app/dart",
+    "//topaz/public/lib/app_driver/dart",
+    "//topaz/public/lib/widgets/dart",
+  ]
+}
+
+dart_remote_test("flutter_gallery_app_remote_tests") {
+  disable_analysis = true
+
+  sources = [
+    "transitions_perf_fuchsia_test.dart",
+  ]
+
+  deps = [
+    ":flutter_gallery_app_dart_library",
+    "//topaz/public/lib/fuchsia_driver",
+    "//third_party/dart-pkg/pub/test",
+    "//third_party/dart-pkg/pub/file",
+  ]
+}
+
+dart_fuchsia_test("flutter_gallery_app_target_tests") {
+  source_dir = "."
+  package_only = true
+  disable_analysis = true
+
+  sources = []
+
+  deps = [
+    ":flutter_gallery_app_dart_library",
+    "//topaz/public/lib/fuchsia_driver",
+    "//third_party/dart-pkg/pub/test",
+  ]
+
+  meta = [
+    {
+      path = rebase_path("meta/flutter_gallery_app_target_tests.cmx")
+      dest = "flutter_gallery_app_target_tests.cmx"
+    },
+  ]
+}

@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:connectivity/connectivity.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:device_info/device_info.dart';
@@ -309,6 +310,9 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
   @override
   void initState() {
     super.initState();
+    if (defaultTargetPlatform == TargetPlatform.fuchsia) {
+      return;
+    }
     connectivitySubscription = connectivityStream().listen(
       (ConnectivityResult connectivityResult) {
         if (!mounted) {
@@ -327,7 +331,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
 
   @override
   void dispose() {
-    connectivitySubscription.cancel();
+    connectivitySubscription?.cancel();
     super.dispose();
   }
 

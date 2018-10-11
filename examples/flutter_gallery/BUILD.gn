@@ -2,18 +2,24 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("$flutter_root/build/flutter_app.gni")
+assert(is_fuchsia || is_fuchsia_host)
 
-assert(is_fuchsia)
+import("//build/dart/dart_library.gni")
+import("//build/dart/dart_remote_test.gni")
+import("//build/dart/dart_fuchsia_test.gni")
+import("//topaz/runtime/flutter_runner/flutter_app.gni")
 
-flutter_app("flutter_gallery") {
-  main_dart = "lib/main.dart"
-
+dart_library("flutter_gallery") {
   disable_analysis = true
+  package_name = "flutter_gallery"
+
+  sources = []
 
   deps = [
     "../../packages/flutter",
     "//third_party/dart-pkg/pub/url_launcher",
+    "//third_party/dart-pkg/pub/connectivity",
+    "//third_party/dart-pkg/pub/device_info",
+    "//third_party/dart-pkg/pub/video_player",
   ]
-
 }
