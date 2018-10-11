@@ -35,7 +35,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 }
 
-Future<Null> main() async {
+Future<void> main() async {
   TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
 
   testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {

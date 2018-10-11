@@ -39,7 +39,7 @@ const List<String> _kSkippedDemoTitles = <String>[
   'Video',
 ];
 
-Future<Null> main() async {
+Future<void> main() async {
   try {
     // Verify that _kUnsynchronizedDemos and _kSkippedDemos identify
     // demos that actually exist.
