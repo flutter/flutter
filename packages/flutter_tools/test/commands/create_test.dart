@@ -355,10 +355,14 @@ void main() {
     expectExists('lib/main.dart');
     expectExists('test/widget_test.dart');
 
+    final Future<String> fileContents = fs.file(projectDir.path + '/test/widget_test.dart').readAsString();
+    final String actualContents = await fileContents;
+
+    expect(actualContents.contains('flutter_test.dart'), true);
+
     for (FileSystemEntity file in projectDir.listSync(recursive: true)) {
       if (file is File && file.path.endsWith('.dart')) {
         final String original = file.readAsStringSync();
-
         final Process process = await Process.start(
           sdkBinaryName('dartfmt'),
           <String>[file.path],
