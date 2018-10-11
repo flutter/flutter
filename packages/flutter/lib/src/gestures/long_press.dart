@@ -11,7 +11,7 @@ import 'recognizer.dart';
 /// same location for a long period of time.
 typedef GestureLongPressCallback = void Function();
 
-/// Signature for when a pointer stops to contacting the screen after a long period of time
+/// Signature for when a pointer stops contacting the screen after a long press gesture was detected.
 typedef GestureLongPressUpCallback = void Function();
 
 /// Recognizes when the user has pressed down at the same location for a long
@@ -25,10 +25,10 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   bool _longPressAccepted = false;
 
-  /// Called when the pointer stops contacting the screen after the long-press gesture has been recognized.
+  /// Called when a long press gesture has been recognized.
   GestureLongPressCallback onLongPress;
 
-  /// Called when the pointer stops contacting the screen after the long-press gesture has been recognized
+  /// Called when the pointer stops contacting the screen after the long-press gesture has been recognized.
   GestureLongPressUpCallback onLongPressUp;
 
   @override
@@ -52,6 +52,8 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     } else if (event is PointerDownEvent) {
       // the first touch, initialize the  flag with false
       _longPressAccepted = false;
+    } else if (event is PointerCancelEvent) {
+      _longPressAccepted = null;
     }
   }
 
