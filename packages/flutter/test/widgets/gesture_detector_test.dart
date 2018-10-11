@@ -286,7 +286,7 @@ void main() {
     // Pointer is dragged from the center of the 800x100 gesture detector
     // to a point (400,300) below it. This always causes onTapCancel to be
     // called; onTap should never be called.
-    Future<Null> dragOut(Duration timeout) async {
+    Future<void> dragOut(Duration timeout) async {
       final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
       // If the timeout is less than kPressTimeout the recognizer will just trigger
       // the onTapCancel callback. If the timeout is greater than kLongPressTimeout

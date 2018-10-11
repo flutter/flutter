@@ -26,10 +26,10 @@ class OverscrollDemoState extends State<OverscrollDemo> {
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'
   ];
 
-  Future<Null> _handleRefresh() {
-    final Completer<Null> completer = Completer<Null>();
-    Timer(const Duration(seconds: 3), () { completer.complete(null); });
-    return completer.future.then<Null>((_) {
+  Future<void> _handleRefresh() {
+    final Completer<void> completer = Completer<void>();
+    Timer(const Duration(seconds: 3), () { completer.complete(); });
+    return completer.future.then<void>((_) {
        _scaffoldKey.currentState?.showSnackBar(SnackBar(
          content: const Text('Refresh complete'),
          action: SnackBarAction(

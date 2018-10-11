@@ -54,7 +54,7 @@ const int _kDebugPrintCapacity = 12 * 1024;
 const Duration _kDebugPrintPauseTime = Duration(seconds: 1);
 final Queue<String> _debugPrintBuffer = Queue<String>();
 final Stopwatch _debugPrintStopwatch = Stopwatch();
-Completer<Null> _debugPrintCompleter;
+Completer<void> _debugPrintCompleter;
 bool _debugPrintScheduled = false;
 void _debugPrintTask() {
   _debugPrintScheduled = false;
@@ -72,7 +72,7 @@ void _debugPrintTask() {
     _debugPrintScheduled = true;
     _debugPrintedCharacters = 0;
     Timer(_kDebugPrintPauseTime, _debugPrintTask);
-    _debugPrintCompleter ??= Completer<Null>();
+    _debugPrintCompleter ??= Completer<void>();
   } else {
     _debugPrintStopwatch.start();
     _debugPrintCompleter?.complete();
@@ -83,7 +83,7 @@ void _debugPrintTask() {
 /// A Future that resolves when there is no longer any buffered content being
 /// printed by [debugPrintThrottled] (which is the default implementation for
 /// [debugPrint], which is used to report errors to the console).
-Future<Null> get debugPrintDone => _debugPrintCompleter?.future ?? Future<Null>.value();
+Future<void> get debugPrintDone => _debugPrintCompleter?.future ?? Future<void>.value();
 
 final RegExp _indentPattern = RegExp('^ *(?:[-+*] |[0-9]+[.):] )?');
 enum _WordWrapParseMode { inSpace, inWord, atBreak }

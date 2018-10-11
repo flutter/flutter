@@ -121,9 +121,8 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   int rebuildCount = 0;
 
   @override
-  Future<Null> forceRebuild() async {
+  Future<void> forceRebuild() async {
     rebuildCount++;
-    return null;
   }
 
 

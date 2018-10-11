@@ -18,7 +18,7 @@ import '../rendering/mock_canvas.dart';
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   TestImageProvider(this.future);
 
-  final Future<Null> future;
+  final Future<void> future;
 
   static ui.Image image;
 
@@ -30,7 +30,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   @override
   ImageStreamCompleter load(TestImageProvider key) {
     return OneFrameImageStreamCompleter(
-      future.then<ImageInfo>((Null value) => ImageInfo(image: image))
+      future.then<ImageInfo>((void _) => ImageInfo(image: image))
     );
   }
 }
@@ -40,7 +40,7 @@ Future<void> main() async {
 
   testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    final Completer<Null> completer = Completer<Null>();
+    final Completer<void> completer = Completer<void>();
     await tester.pumpWidget(
       KeyedSubtree(
         key: key,
@@ -62,7 +62,7 @@ Future<void> main() async {
   });
 
   testWidgets('Moving a DecoratedBox', (WidgetTester tester) async {
-    final Completer<Null> completer = Completer<Null>();
+    final Completer<void> completer = Completer<void>();
     final Widget subtree = KeyedSubtree(
       key: GlobalKey(),
       child: RepaintBoundary(

@@ -35,7 +35,7 @@ class FakePlatformViewsController {
   Future<dynamic> _onMethodCall(MethodCall call) {
     if (targetPlatform == TargetPlatform.android)
       return _onMethodCallAndroid(call);
-    return Future<Null>.sync(() => null);
+    return Future<dynamic>.sync(() => null);
   }
 
   Future<dynamic> _onMethodCallAndroid(MethodCall call) {
@@ -51,7 +51,7 @@ class FakePlatformViewsController {
       case 'setDirection':
         return _setDirection(call);
     }
-    return Future<Null>.sync(() => null);
+    return Future<dynamic>.sync(() => null);
   }
 
   Future<dynamic> _create(MethodCall call) {
@@ -90,7 +90,7 @@ class FakePlatformViewsController {
       );
 
     _views.remove(id);
-    return Future<Null>.sync(() => null);
+    return Future<dynamic>.sync(() => null);
   }
 
   Future<dynamic> _resize(MethodCall call) async {
@@ -110,7 +110,7 @@ class FakePlatformViewsController {
     }
     _views[id].size = Size(width, height);
 
-    return Future<Null>.sync(() => null);
+    return Future<dynamic>.sync(() => null);
   }
 
   Future<dynamic> _touch(MethodCall call) {
@@ -132,7 +132,7 @@ class FakePlatformViewsController {
       motionEvents[id] = <FakeMotionEvent> [];
 
     motionEvents[id].add(FakeMotionEvent(action, pointerIds, pointerOffsets));
-    return Future<Null>.sync(() => null);
+    return Future<dynamic>.sync(() => null);
   }
 
   Future<dynamic> _setDirection(MethodCall call) async {
@@ -148,7 +148,7 @@ class FakePlatformViewsController {
 
     _views[id].layoutDirection = layoutDirection;
 
-    return Future<Null>.sync(() => null);
+    return Future<dynamic>.sync(() => null);
   }
 }
 

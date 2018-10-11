@@ -89,7 +89,7 @@ class TestRoute extends LocalHistoryRoute<String> {
 
 }
 
-Future<Null> runNavigatorTest(
+Future<void> runNavigatorTest(
   WidgetTester tester,
   NavigatorState host,
   VoidCallback test,

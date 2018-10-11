@@ -488,7 +488,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Animates the position such that the given object is as visible as possible
   /// by just scrolling this position.
-  Future<Null> ensureVisible(RenderObject object, {
+  Future<void> ensureVisible(RenderObject object, {
     double alignment = 0.0,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
@@ -500,11 +500,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     final double target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent);
 
     if (target == pixels)
-      return Future<Null>.value();
+      return Future<void>.value();
 
     if (duration == Duration.zero) {
       jumpTo(target);
-      return Future<Null>.value();
+      return Future<void>.value();
     }
 
     return animateTo(target, duration: duration, curve: curve);
@@ -545,7 +545,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// The animation is typically handled by an [DrivenScrollActivity].
   @override
-  Future<Null> animateTo(double to, {
+  Future<void> animateTo(double to, {
     @required Duration duration,
     @required Curve curve,
   });

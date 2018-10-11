@@ -81,7 +81,7 @@ Widget _wrapForChip({
 /// further constraining the size of its child, the label widget.
 /// Optionally, adding an avatar or delete icon to the chip should not
 /// cause the chip or label to exceed its constrained height.
-Future<Null> _testConstrainedLabel(
+Future<void> _testConstrainedLabel(
   WidgetTester tester, {
   CircleAvatar avatar,
   VoidCallback onDeleted,
