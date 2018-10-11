@@ -1,4 +1,4 @@
-Signature: 0199dcdafd3495bf4b303746950b19ce
+Signature: 7701b1987ce9cb5d5fe0d41c967d65cf
 
 UNUSED LICENSES:
 
@@ -1608,6 +1608,7 @@ FILE: ../../../third_party/skia/src/image/SkImage_Lazy.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_hsw.cpp
 FILE: ../../../third_party/skia/src/opts/SkRasterPipeline_opts.h
 FILE: ../../../third_party/skia/src/pathops/SkPathOpsAsWinding.cpp
+FILE: ../../../third_party/skia/src/pathops/SkPathOpsTCurve.h
 FILE: ../../../third_party/skia/src/pdf/SkClusterator.cpp
 FILE: ../../../third_party/skia/src/pdf/SkClusterator.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFTag.cpp
