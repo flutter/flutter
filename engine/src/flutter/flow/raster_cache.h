@@ -28,14 +28,12 @@ class RasterCacheResult {
 
   bool is_valid() const { return static_cast<bool>(image_); };
 
-  void draw(SkCanvas& canvas, const SkPaint* paint = nullptr) const;
+  void draw(SkCanvas& canvas) const;
 
  private:
   sk_sp<SkImage> image_;
   SkRect logical_rect_;
 };
-
-struct PrerollContext;
 
 class RasterCache {
  public:
@@ -58,26 +56,12 @@ class RasterCache {
     return result;
   }
 
-  // Return true if the cache is generated.
-  //
-  // We may return false and not generate the cache if
-  // 1. The picture is not worth rasterizing
-  // 2. The matrix is singular
-  // 3. The picture is accessed too few times
-  bool Prepare(GrContext* context,
-               SkPicture* picture,
-               const SkMatrix& transformation_matrix,
-               SkColorSpace* dst_color_space,
-               bool is_complex,
-               bool will_change);
-
-  void Prepare(PrerollContext* context,
-               std::shared_ptr<Layer> layer,
-               const SkMatrix& ctm);
-
-  RasterCacheResult Get(const SkPicture& picture, const SkMatrix& ctm) const;
-  RasterCacheResult Get(std::shared_ptr<Layer> layer,
-                        const SkMatrix& ctm) const;
+  RasterCacheResult GetPrerolledImage(GrContext* context,
+                                      SkPicture* picture,
+                                      const SkMatrix& transformation_matrix,
+                                      SkColorSpace* dst_color_space,
+                                      bool is_complex,
+                                      bool will_change);
 
   void SweepAfterFrame();
 
@@ -92,26 +76,8 @@ class RasterCache {
     RasterCacheResult image;
   };
 
-  template <class Cache, class Iterator>
-  static void SweepOneCacheAfterFrame(Cache& cache) {
-    std::vector<Iterator> dead;
-
-    for (auto it = cache.begin(); it != cache.end(); ++it) {
-      Entry& entry = it->second;
-      if (!entry.used_this_frame) {
-        dead.push_back(it);
-      }
-      entry.used_this_frame = false;
-    }
-
-    for (auto it : dead) {
-      cache.erase(it);
-    }
-  }
-
   const size_t threshold_;
-  PictureRasterCacheKey::Map<Entry> picture_cache_;
-  LayerRasterCacheKey::Map<Entry> layer_cache_;
+  RasterCacheKey::Map<Entry> cache_;
   bool checkerboard_images_;
   fml::WeakPtrFactory<RasterCache> weak_factory_;
 

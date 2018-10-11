@@ -40,25 +40,19 @@ enum Clip { none, hardEdge, antiAlias, antiAliasWithSaveLayer };
 
 class ContainerLayer;
 
-struct PrerollContext {
-  RasterCache* raster_cache;
-  GrContext* gr_context;
-  SkColorSpace* dst_color_space;
-  SkRect child_paint_bounds;
-
-  // The following allows us to paint in the end of subtree preroll
-  const Stopwatch& frame_time;
-  const Stopwatch& engine_time;
-  TextureRegistry& texture_registry;
-  const bool checkerboard_offscreen_layers;
-};
-
 // Represents a single composited layer. Created on the UI thread but then
 // subquently used on the Rasterizer thread.
 class Layer {
  public:
   Layer();
   virtual ~Layer();
+
+  struct PrerollContext {
+    RasterCache* raster_cache;
+    GrContext* gr_context;
+    SkColorSpace* dst_color_space;
+    SkRect child_paint_bounds;
+  };
 
   virtual void Preroll(PrerollContext* context, const SkMatrix& matrix);
 
@@ -67,7 +61,6 @@ class Layer {
     const Stopwatch& frame_time;
     const Stopwatch& engine_time;
     TextureRegistry& texture_registry;
-    const RasterCache* raster_cache;
     const bool checkerboard_offscreen_layers;
   };
 
