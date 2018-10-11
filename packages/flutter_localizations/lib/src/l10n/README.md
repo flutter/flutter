@@ -138,11 +138,11 @@ It is converted to an enum value because the `material_en.arb` file
 has this value labeled as `"x-flutter-type": "icuShortTimePattern"`.
 
 The value of `scriptCategory` is based on the
-[Language categories reference](https://material.io/go/design-typography#typography-language-categories-reference)
+[Language categories reference](https://material.io/design/typography/language-support.html#language-categories-reference)
 section in the Material spec. The `scriptCategory` value is used when looking up
 the `TextTheme`, see the
-[MaterialTextGeometry](https://docs.flutter.io/flutter/material/MaterialTextGeometry/forScriptCategory.html)
-class.
+[MaterialTextGeometry](https://docs.flutter.io/flutter/material/MaterialTextGeometry/localizedFor.html)
+method.
 
 
 ### Generated file localizations.dart: all of the localizations as a Map

@@ -155,6 +155,7 @@ class SnackBar extends StatelessWidget {
     this.duration = _kSnackBarDisplayDuration,
     this.animation,
   }) : assert(content != null),
+       assert(duration != null),
        super(key: key);
 
   /// The primary content of the snack bar.

@@ -18,6 +18,7 @@ import 'input_decorator.dart';
 import 'page_transitions_theme.dart';
 import 'slider_theme.dart';
 import 'tab_bar_theme.dart';
+import 'text_theme.dart';
 import 'typography.dart';
 
 export 'package:flutter/services.dart' show Brightness;
@@ -149,6 +150,7 @@ class ThemeData extends Diagnosticable {
     MaterialTapTargetSize materialTapTargetSize,
     PageTransitionsTheme pageTransitionsTheme,
     ColorScheme colorScheme,
+    Typography typography,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -200,7 +202,7 @@ class ThemeData extends Diagnosticable {
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
     platform ??= defaultTargetPlatform;
-    final Typography typography = Typography(platform: platform);
+    typography ??= Typography(platform: platform);
     final TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
     textTheme = defaultTextTheme.merge(textTheme);
     final TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
@@ -287,6 +289,7 @@ class ThemeData extends Diagnosticable {
       materialTapTargetSize: materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme,
       colorScheme: colorScheme,
+      typography: typography,
     );
   }
 
@@ -344,6 +347,7 @@ class ThemeData extends Diagnosticable {
     @required this.materialTapTargetSize,
     @required this.pageTransitionsTheme,
     @required this.colorScheme,
+    @required this.typography,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -386,7 +390,8 @@ class ThemeData extends Diagnosticable {
        assert(platform != null),
        assert(materialTapTargetSize != null),
        assert(pageTransitionsTheme != null),
-       assert(colorScheme != null);
+       assert(colorScheme != null),
+       assert(typography != null);
 
   // Warning: make sure these properties are in the exact same order as in
   // hashValues() and in the raw constructor and in the order of fields in
@@ -612,6 +617,10 @@ class ThemeData extends Diagnosticable {
   /// that is possible without significant backwards compatibility breaks.
   final ColorScheme colorScheme;
 
+  /// The color and geometry [TextTheme] values used to configure [textTheme],
+  /// [primaryTextTheme], and [accentTextTheme].
+  final Typography typography;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -658,6 +667,7 @@ class ThemeData extends Diagnosticable {
     MaterialTapTargetSize materialTapTargetSize,
     PageTransitionsTheme pageTransitionsTheme,
     ColorScheme colorScheme,
+    Typography typography,
   }) {
     return ThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -704,6 +714,7 @@ class ThemeData extends Diagnosticable {
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       colorScheme: colorScheme ?? this.colorScheme,
+      typography: typography ?? this.typography,
     );
   }
 
@@ -829,6 +840,7 @@ class ThemeData extends Diagnosticable {
       materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
       pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
+      typography: Typography.lerp(a.typography, b.typography, t),
     );
   }
 
@@ -883,7 +895,8 @@ class ThemeData extends Diagnosticable {
            (otherData.platform == platform) &&
            (otherData.materialTapTargetSize == materialTapTargetSize) &&
            (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
-           (otherData.colorScheme == colorScheme);
+           (otherData.colorScheme == colorScheme) &&
+           (otherData.typography == typography);
   }
 
   @override
@@ -939,6 +952,7 @@ class ThemeData extends Diagnosticable {
           materialTapTargetSize,
           pageTransitionsTheme,
           colorScheme,
+          typography,
         ),
       ),
     );
@@ -989,6 +1003,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme));
+    properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography));
   }
 }
 

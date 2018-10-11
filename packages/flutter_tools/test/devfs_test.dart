@@ -62,6 +62,36 @@ void main() {
       expect(content.isModified, isTrue);
       expect(content.isModified, isFalse);
     });
+    testUsingContext('file', () async {
+      final File file = fs.file(filePath);
+      final DevFSFileContent content = DevFSFileContent(file);
+      expect(content.isModified, isFalse);
+      expect(content.isModified, isFalse);
+
+      file.parent.createSync(recursive: true);
+      file.writeAsBytesSync(<int>[1, 2, 3]);
+
+      final DateTime fiveSecondsAgo = DateTime.now().subtract(Duration(seconds:5));
+      expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
+      expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
+      expect(content.isModifiedAfter(null), isTrue);
+
+      file.writeAsBytesSync(<int>[2, 3, 4]);
+      expect(content.fileDependencies, <String>[filePath]);
+      expect(content.isModified, isTrue);
+      expect(content.isModified, isFalse);
+      expect(await content.contentsAsBytes(), <int>[2, 3, 4]);
+      updateFileModificationTime(file.path, fiveSecondsAgo, 0);
+      expect(content.isModified, isFalse);
+      expect(content.isModified, isFalse);
+
+      file.deleteSync();
+      expect(content.isModified, isTrue);
+      expect(content.isModified, isFalse);
+      expect(content.isModified, isFalse);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
   });
 
   group('devfs local', () {

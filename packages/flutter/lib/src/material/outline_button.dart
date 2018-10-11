@@ -185,7 +185,7 @@ class OutlineButton extends MaterialButton {
 //
 // This class only exists to give RaisedButtons created with [RaisedButton.icon]
 // a distinct class for the sake of [ButtonTheme]. It can not be instantiated.
-class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMixin {
+class _OutlineButtonWithIcon extends OutlineButton implements MaterialButtonWithIconMixin {
   _OutlineButtonWithIcon({
     Key key,
     @required VoidCallback onPressed,

@@ -169,7 +169,6 @@ void main() {
 
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -213,7 +212,6 @@ void main() {
 
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -258,7 +256,6 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'vm_snapshot_instr'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -307,7 +304,6 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'vm_snapshot_instr'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -351,7 +347,6 @@ void main() {
 
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -395,7 +390,6 @@ void main() {
 
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -458,7 +452,6 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'vm_snapshot_instr'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -507,7 +500,6 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'vm_snapshot_instr'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -599,7 +591,6 @@ void main() {
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -643,7 +634,6 @@ void main() {
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -698,7 +688,6 @@ void main() {
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -741,7 +730,6 @@ void main() {
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -795,7 +783,6 @@ void main() {
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -838,7 +825,6 @@ void main() {
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final int genSnapshotExitCode = await snapshotter.build(
