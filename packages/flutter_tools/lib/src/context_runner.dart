@@ -48,6 +48,7 @@ Future<T> runInContext<T>(
       AndroidStudio: AndroidStudio.latestValid,
       AndroidWorkflow: () => AndroidWorkflow(),
       AndroidValidator: () => AndroidValidator(),
+      AndroidLicenseValidator: () => AndroidLicenseValidator(),
       Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
       BotDetector: () => const BotDetector(),

@@ -126,7 +126,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       );
     } else {
       body = ListView(
-        children: leaveBehindItems.map((LeaveBehindItem item) {
+        children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
           return _LeaveBehindListItem(
             item: item,
             onArchive: _handleArchive,

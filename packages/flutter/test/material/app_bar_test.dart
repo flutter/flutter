@@ -33,7 +33,7 @@ Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight,
                   expandedHeight: expandedHeight,
                   snap: snap,
                   bottom: TabBar(
-                    tabs: <String>['A','B','C'].map((String t) => Tab(text: 'TAB $t')).toList(),
+                    tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
                   ),
                 ),
                 SliverToBoxAdapter(

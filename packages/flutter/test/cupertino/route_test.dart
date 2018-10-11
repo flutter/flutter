@@ -80,7 +80,7 @@ void main() {
           );
         });
 
-    final Iterable<double> opacities = titles.map((Element element) {
+    final Iterable<double> opacities = titles.map<double>((Element element) {
       final RenderAnimatedOpacity renderOpacity =
           element.ancestorRenderObjectOfType(const TypeMatcher<RenderAnimatedOpacity>());
       return renderOpacity.opacity.value;

@@ -173,7 +173,7 @@ class _CrashCommand extends FlutterCommand {
   String get name => 'crash';
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     void fn1() {
       throw StateError('Test bad state error');
     }
@@ -187,6 +187,8 @@ class _CrashCommand extends FlutterCommand {
     }
 
     fn3();
+
+    return null;
   }
 }
 

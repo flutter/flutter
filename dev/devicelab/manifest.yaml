@@ -302,7 +302,6 @@ tasks:
       Checks that the module project template works and supports add2app on iOS.
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   external_ui_integration_test_ios:
     description: >

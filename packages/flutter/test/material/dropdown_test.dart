@@ -43,7 +43,7 @@ Widget buildFrame({
             onChanged: onChanged,
             isDense: isDense,
             isExpanded: isExpanded,
-            items: items.map((String item) {
+            items: items.map<DropdownMenuItem<String>>((String item) {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
                 value: item,
@@ -407,7 +407,7 @@ void main() {
 
     // When isDense is true, the button's height is reduced. The menu items'
     // heights are not.
-    final double menuItemHeight = itemBoxes.map((RenderBox box) => box.size.height).reduce(math.max);
+    final double menuItemHeight = itemBoxes.map<double>((RenderBox box) => box.size.height).reduce(math.max);
     expect(menuItemHeight, greaterThan(buttonBox.size.height));
 
     for (RenderBox itemBox in itemBoxes) {
@@ -692,7 +692,7 @@ void main() {
     ));
 
     // By default the hint contributes the label.
-    expect(tester.getSemanticsData(find.byKey(key)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
       isButton: true,
       label: 'test',
       hasTapAction: true,
@@ -707,7 +707,7 @@ void main() {
     ));
 
     // Displays label of select item and is no longer tappable.
-    expect(tester.getSemanticsData(find.byKey(key)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
       isButton: true,
       label: 'three',
       hasTapAction: true,
@@ -776,5 +776,153 @@ void main() {
       ],
     ), ignoreId: true, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
+  });
+
+  testWidgets('Dropdown in middle showing middle item', (WidgetTester tester) async {
+    final List<DropdownMenuItem<int>> items =
+      List<DropdownMenuItem<int>>.generate(100, (int i) =>
+        DropdownMenuItem<int>(value: i, child: Text('$i')));
+
+    final DropdownButton<int> button = DropdownButton<int>(
+      value: 50,
+      onChanged: (int newValue){},
+      items: items,
+    );
+
+    double getMenuScroll() {
+      double scrollPosition;
+      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ScrollController scrollController = listView.controller;
+      assert(scrollController != null);
+      scrollPosition = scrollController.position.pixels;
+      assert(scrollPosition != null);
+      return scrollPosition;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Align(
+            alignment: Alignment.center,
+            child: button,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('50'));
+    await tester.pumpAndSettle();
+    expect(getMenuScroll(), 2180.0);
+  });
+
+  testWidgets('Dropdown in top showing bottom item', (WidgetTester tester) async {
+    final List<DropdownMenuItem<int>> items =
+      List<DropdownMenuItem<int>>.generate(100, (int i) =>
+        DropdownMenuItem<int>(value: i, child: Text('$i')));
+
+    final DropdownButton<int> button = DropdownButton<int>(
+      value: 99,
+      onChanged: (int newValue){},
+      items: items,
+    );
+
+    double getMenuScroll() {
+      double scrollPosition;
+      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ScrollController scrollController = listView.controller;
+      assert(scrollController != null);
+      scrollPosition = scrollController.position.pixels;
+      assert(scrollPosition != null);
+      return scrollPosition;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: button,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('99'));
+    await tester.pumpAndSettle();
+    expect(getMenuScroll(), 4312.0);
+  });
+
+  testWidgets('Dropdown in bottom showing top item', (WidgetTester tester) async {
+    final List<DropdownMenuItem<int>> items =
+      List<DropdownMenuItem<int>>.generate(100, (int i) =>
+        DropdownMenuItem<int>(value: i, child: Text('$i')));
+
+    final DropdownButton<int> button = DropdownButton<int>(
+      value: 0,
+      onChanged: (int newValue){},
+      items: items,
+    );
+
+    double getMenuScroll() {
+      double scrollPosition;
+      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ScrollController scrollController = listView.controller;
+      assert(scrollController != null);
+      scrollPosition = scrollController.position.pixels;
+      assert(scrollPosition != null);
+      return scrollPosition;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: button,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('0'));
+    await tester.pumpAndSettle();
+    expect(getMenuScroll(), 0.0);
+  });
+
+  testWidgets('Dropdown in center showing bottom item', (WidgetTester tester) async {
+    final List<DropdownMenuItem<int>> items =
+      List<DropdownMenuItem<int>>.generate(100, (int i) =>
+        DropdownMenuItem<int>(value: i, child: Text('$i')));
+
+    final DropdownButton<int> button = DropdownButton<int>(
+      value: 99,
+      onChanged: (int newValue){},
+      items: items,
+    );
+
+    double getMenuScroll() {
+      double scrollPosition;
+      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ScrollController scrollController = listView.controller;
+      assert(scrollController != null);
+      scrollPosition = scrollController.position.pixels;
+      assert(scrollPosition != null);
+      return scrollPosition;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Align(
+            alignment: Alignment.center,
+            child: button,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('99'));
+    await tester.pumpAndSettle();
+    expect(getMenuScroll(), 4312.0);
   });
 }

@@ -201,7 +201,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                       _activity = newValue;
                     });
                   },
-                  items: _allActivities.map((String value) {
+                  items: _allActivities.map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),

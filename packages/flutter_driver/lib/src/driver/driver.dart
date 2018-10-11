@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart' as f;
+import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart' as fuchsia;
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
@@ -17,6 +18,7 @@ import 'package:web_socket_channel/io.dart';
 import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';
+import '../common/fuchsia_compat.dart';
 import '../common/gesture.dart';
 import '../common/health.dart';
 import '../common/message.dart';
@@ -65,6 +67,9 @@ const Duration _kShortTimeout = Duration(seconds: 5);
 /// Default timeout for awaiting an Isolate to become runnable.
 const Duration _kIsolateLoadRunnableTimeout = Duration(minutes: 1);
 
+/// Time to delay before driving a Fuchsia module.
+const Duration _kFuchsiaDriveDelay = Duration(milliseconds: 500);
+
 /// Default timeout for long-running RPCs.
 final Duration _kLongTimeout = _kShortTimeout * 6;
 
@@ -78,7 +83,7 @@ final Duration _kPauseBetweenReconnectAttempts = _kShortTimeout ~/ 5;
 
 // See https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc#L32
 String _timelineStreamsToString(List<TimelineStream> streams) {
-  final String contents = streams.map((TimelineStream stream) {
+  final String contents = streams.map<String>((TimelineStream stream) {
     switch (stream) {
       case TimelineStream.all: return 'all';
       case TimelineStream.api: return 'API';
@@ -155,13 +160,47 @@ class FlutterDriver {
   ///
   /// [isolateReadyTimeout] determines how long after we connect to the VM
   /// service we will wait for the first isolate to become runnable.
+  ///
+  /// [fuchsiaModuleTarget] (optional) If running on a Fuchsia Device, either
+  /// this or the environment variable `FUCHSIA_MODULE_TARGET` must be set. This
+  /// field will be ignored if [isolateNumber] is set, as this is already
+  /// enough information to connect to an Isolate.
   static Future<FlutterDriver> connect({
     String dartVmServiceUrl,
     bool printCommunication = false,
     bool logCommunicationToFile = true,
     int isolateNumber,
     Duration isolateReadyTimeout = _kIsolateLoadRunnableTimeout,
+    Pattern fuchsiaModuleTarget,
   }) async {
+    // If running on a Fuchsia device, connect to the first Isolate whose name
+    // matches FUCHSIA_MODULE_TARGET.
+    //
+    // If the user has already supplied an isolate number/URL to the Dart VM
+    // service, then this won't be run as it is unnecessary.
+    if (Platform.isFuchsia && isolateNumber == null) {
+      fuchsiaModuleTarget ??= Platform.environment['FUCHSIA_MODULE_TARGET'];
+      if (fuchsiaModuleTarget == null) {
+        throw DriverError('No Fuchsia module target has been specified.\n'
+            'Please make sure to specify the FUCHSIA_MODULE_TARGET\n'
+            'environment variable.');
+      }
+      final fuchsia.FuchsiaRemoteConnection fuchsiaConnection =
+          await FuchsiaCompat.connect();
+      final List<fuchsia.IsolateRef> refs =
+          await fuchsiaConnection.getMainIsolatesByPattern(fuchsiaModuleTarget);
+      final fuchsia.IsolateRef ref = refs.first;
+      await Future<void>.delayed(_kFuchsiaDriveDelay);
+      isolateNumber = ref.number;
+      dartVmServiceUrl = ref.dartVm.uri.toString();
+      await fuchsiaConnection.stop();
+      FuchsiaCompat.cleanup();
+
+      // TODO(awdavies): Use something other than print. On fuchsia
+      // `stderr`/`stdout` appear to have issues working correctly.
+      flutterDriverLog.listen(print);
+    }
+
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
 
     if (dartVmServiceUrl == null) {
@@ -428,7 +467,7 @@ class FlutterDriver {
   /// The move events are generated at a given [frequency] in Hz (or events per
   /// second). It defaults to 60Hz.
   Future<Null> scroll(SerializableFinder finder, double dx, double dy, Duration duration, { int frequency = 60, Duration timeout }) async {
-    return await _sendCommand(Scroll(finder, dx, dy, duration, frequency, timeout: timeout)).then((Map<String, dynamic> _) => null);
+    return await _sendCommand(Scroll(finder, dx, dy, duration, frequency, timeout: timeout)).then<Null>((Map<String, dynamic> _) => null);
   }
 
   /// Scrolls the Scrollable ancestor of the widget located by [finder]
@@ -439,7 +478,7 @@ class FlutterDriver {
   /// then this method may fail because [finder] doesn't actually exist.
   /// The [scrollUntilVisible] method can be used in this case.
   Future<Null> scrollIntoView(SerializableFinder finder, { double alignment = 0.0, Duration timeout }) async {
-    return await _sendCommand(ScrollIntoView(finder, alignment: alignment, timeout: timeout)).then((Map<String, dynamic> _) => null);
+    return await _sendCommand(ScrollIntoView(finder, alignment: alignment, timeout: timeout)).then<Null>((Map<String, dynamic> _) => null);
   }
 
   /// Repeatedly [scroll] the widget located by [scrollable] by [dxScroll] and
@@ -483,7 +522,7 @@ class FlutterDriver {
     // the chance to complete if the item is already onscreen; if not, scroll
     // repeatedly until we either find the item or time out.
     bool isVisible = false;
-    waitFor(item, timeout: timeout).then((Null value) { isVisible = true; });
+    waitFor(item, timeout: timeout).then<void>((Null value) { isVisible = true; });
     await Future<Null>.delayed(const Duration(milliseconds: 500));
     while (!isVisible) {
       await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));
@@ -770,6 +809,9 @@ class FlutterDriver {
 /// Encapsulates connection information to an instance of a Flutter application.
 @visibleForTesting
 class VMServiceClientConnection {
+  /// Creates an instance of this class given a [client] and a [peer].
+  VMServiceClientConnection(this.client, this.peer);
+
   /// Use this for structured access to the VM service's public APIs.
   final VMServiceClient client;
 
@@ -778,9 +820,6 @@ class VMServiceClientConnection {
   /// This object allows reaching into private VM service APIs. Use with
   /// caution.
   final rpc.Peer peer;
-
-  /// Creates an instance of this class given a [client] and a [peer].
-  VMServiceClientConnection(this.client, this.peer);
 }
 
 /// A function that connects to a Dart VM service given the [url].
@@ -854,4 +893,7 @@ class CommonFinders {
 
   /// Finds widgets whose class name matches the given string.
   SerializableFinder byType(String type) => ByType(type);
+
+  /// Finds the back button on a Material or Cupertino page's scaffold.
+  SerializableFinder pageBack() => PageBack();
 }

@@ -25,7 +25,7 @@ class _ElevationDemoState extends State<ElevationDemo> {
       24.0,
     ];
 
-    return elevations.map((double elevation) {
+    return elevations.map<Widget>((double elevation) {
       return Center(
         child: Card(
           margin: const EdgeInsets.all(20.0),

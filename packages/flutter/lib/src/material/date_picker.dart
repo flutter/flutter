@@ -21,8 +21,8 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'text_theme.dart';
 import 'theme.dart';
-import 'typography.dart';
 
 /// Initial display mode of the date picker dialog.
 ///
@@ -720,11 +720,11 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
 // Defines semantic traversal order of the top-level widgets inside the month
 // picker.
 class _MonthPickerSortKey extends OrdinalSortKey {
+  const _MonthPickerSortKey(double order) : super(order);
+
   static const _MonthPickerSortKey previousMonth = _MonthPickerSortKey(1.0);
   static const _MonthPickerSortKey nextMonth = _MonthPickerSortKey(2.0);
   static const _MonthPickerSortKey calendar = _MonthPickerSortKey(3.0);
-
-  const _MonthPickerSortKey(double order) : super(order);
 }
 
 /// A scrollable list of years to allow picking a year.

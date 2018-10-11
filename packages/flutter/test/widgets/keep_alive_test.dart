@@ -50,6 +50,7 @@ void main() {
           cacheExtent: 0.0,
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           itemExtent: 12.3, // about 50 widgets visible
           children: generateList(const Placeholder()),
         ),
@@ -97,6 +98,7 @@ void main() {
           cacheExtent: 0.0,
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           children: generateList(Container(height: 12.3, child: const Placeholder())), // about 50 widgets visible
         ),
       ),
@@ -143,6 +145,7 @@ void main() {
           cacheExtent: 0.0,
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           crossAxisCount: 2,
           childAspectRatio: 400.0 / 24.6, // about 50 widgets visible
           children: generateList(Container(child: const Placeholder())),
@@ -190,6 +193,7 @@ void main() {
         child: ListView(
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           itemExtent: 400.0, // 2 visible children
           children: generateList(const Placeholder()),
         ),

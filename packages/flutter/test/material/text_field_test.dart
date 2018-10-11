@@ -145,7 +145,7 @@ void main() {
   }
 
   List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
-    return points.map((TextSelectionPoint point) {
+    return points.map<TextSelectionPoint>((TextSelectionPoint point) {
       return TextSelectionPoint(
         box.localToGlobal(point.point),
         point.direction,
@@ -915,7 +915,7 @@ void main() {
     );
     final Text helperText = tester.widget(find.text('helper text'));
     expect(helperText.style.color, themeData.hintColor);
-    expect(helperText.style.fontSize, MaterialTextGeometry.englishLike.caption.fontSize);
+    expect(helperText.style.fontSize, Typography.englishLike2014.caption.fontSize);
   });
 
   testWidgets('TextField with specified helperStyle', (WidgetTester tester) async {

@@ -191,7 +191,7 @@ class _CardsDemoState extends State<CardsDemo> {
       body: ListView(
         itemExtent: TravelDestinationItem.height,
         padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-        children: destinations.map((TravelDestination destination) {
+        children: destinations.map<Widget>((TravelDestination destination) {
           return Container(
             margin: const EdgeInsets.only(bottom: 8.0),
             child: TravelDestinationItem(

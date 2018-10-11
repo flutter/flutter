@@ -374,7 +374,7 @@ class GridListDemoState extends State<GridListDemo> {
                 crossAxisSpacing: 4.0,
                 padding: const EdgeInsets.all(4.0),
                 childAspectRatio: (orientation == Orientation.portrait) ? 1.0 : 1.3,
-                children: photos.map((Photo photo) {
+                children: photos.map<Widget>((Photo photo) {
                   return GridDemoPhotoItem(
                     photo: photo,
                     tileStyle: _tileStyle,

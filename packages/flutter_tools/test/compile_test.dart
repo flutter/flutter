@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -54,7 +55,8 @@ void main() {
       expect(output.outputFilename, equals('/path/to/main.dart.dill'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
     });
 
     testUsingContext('single dart failed compilation', () async {
@@ -75,7 +77,8 @@ void main() {
       expect(output, equals(null));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
     });
 
     testUsingContext('single dart abnormal compiler termination', () async {
@@ -98,7 +101,8 @@ void main() {
       expect(output, equals(null));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
     });
   });
 
@@ -153,7 +157,8 @@ void main() {
       expect(output.outputFilename, equals('/path/to/main.dart.dill'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
     });
 
     testUsingContext('single dart compile abnormally terminates', () async {
@@ -167,7 +172,8 @@ void main() {
       expect(output, equals(null));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
     });
 
     testUsingContext('compile and recompile', () async {
@@ -191,7 +197,8 @@ void main() {
       ));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
     });
 
     testUsingContext('compile and recompile twice', () async {
@@ -220,7 +227,8 @@ void main() {
       ));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
     });
   });
 
@@ -309,7 +317,8 @@ void main() {
 
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
     });
 
     testUsingContext('compile expressions without awaiting', () async {
@@ -371,12 +380,13 @@ void main() {
       expect(await lastExpressionCompleted.future, isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
     });
   });
 }
 
-Future<Null> _recompile(StreamController<List<int>> streamController,
+Future<void> _recompile(StreamController<List<int>> streamController,
   ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
   String mockCompilerOutput) async {
   // Put content into the output stream after generator.recompile gets

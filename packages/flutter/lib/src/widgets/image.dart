@@ -98,7 +98,7 @@ Future<Null> precacheImage(
     }
   }
   stream.addListener(listener, onError: errorListener);
-  completer.future.then((Null _) { stream.removeListener(listener); });
+  completer.future.then<void>((Null _) { stream.removeListener(listener); });
   return completer.future;
 }
 

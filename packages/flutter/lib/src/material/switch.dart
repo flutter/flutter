@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -22,6 +23,8 @@ const double _kThumbRadius = 10.0;
 const double _kSwitchWidth = _kTrackWidth - 2 * _kTrackRadius + 2 * kRadialReactionRadius;
 const double _kSwitchHeight = 2 * kRadialReactionRadius + 8.0;
 const double _kSwitchHeightCollapsed = 2 * kRadialReactionRadius;
+
+enum _SwitchType { material, adaptive }
 
 /// A material design switch.
 ///
@@ -65,7 +68,30 @@ class Switch extends StatefulWidget {
     this.activeThumbImage,
     this.inactiveThumbImage,
     this.materialTapTargetSize,
-  }) : super(key: key);
+  }) : _switchType = _SwitchType.material,
+       super(key: key);
+
+  /// Creates a [CupertinoSwitch] if the target platform is iOS, creates a
+  /// material design switch otherwise.
+  ///
+  /// If a [CupertinoSwitch] is created, the following parameters are
+  /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
+  /// [activeThumbImage], [inactiveThumbImage], [materialTapTargetSize].
+  ///
+  /// The target platform is based on the current [Theme]: [ThemeData.platform].
+  const Switch.adaptive({
+    Key key,
+    @required this.value,
+    @required this.onChanged,
+    this.activeColor,
+    this.activeTrackColor,
+    this.inactiveThumbColor,
+    this.inactiveTrackColor,
+    this.activeThumbImage,
+    this.inactiveThumbImage,
+    this.materialTapTargetSize,
+  }) : _switchType = _SwitchType.adaptive,
+       super(key: key);
 
   /// Whether this switch is on or off.
   ///
@@ -104,22 +130,32 @@ class Switch extends StatefulWidget {
   /// The color to use on the track when this switch is on.
   ///
   /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final Color activeTrackColor;
 
   /// The color to use on the thumb when this switch is off.
   ///
   /// Defaults to the colors described in the Material design specification.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final Color inactiveThumbColor;
 
   /// The color to use on the track when this switch is off.
   ///
   /// Defaults to the colors described in the Material design specification.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final Color inactiveTrackColor;
 
   /// An image to use on the thumb of this switch when the switch is on.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final ImageProvider activeThumbImage;
 
   /// An image to use on the thumb of this switch when the switch is off.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final ImageProvider inactiveThumbImage;
 
   /// Configures the minimum size of the tap target.
@@ -130,6 +166,8 @@ class Switch extends StatefulWidget {
   ///
   ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
+
+  final _SwitchType _switchType;
 
   @override
   _SwitchState createState() => _SwitchState();
@@ -143,13 +181,25 @@ class Switch extends StatefulWidget {
 }
 
 class _SwitchState extends State<Switch> with TickerProviderStateMixin {
-  @override
-  Widget build(BuildContext context) {
-    assert(debugCheckHasMaterial(context));
-    final ThemeData themeData = Theme.of(context);
-    final bool isDark = themeData.brightness == Brightness.dark;
+  Size getSwitchSize(ThemeData theme) {
+    switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
+      case MaterialTapTargetSize.padded:
+        return const Size(_kSwitchWidth, _kSwitchHeight);
+        break;
+      case MaterialTapTargetSize.shrinkWrap:
+        return const Size(_kSwitchWidth, _kSwitchHeightCollapsed);
+        break;
+    }
+    assert(false);
+    return null;
+  }
 
-    final Color activeThumbColor = widget.activeColor ?? themeData.toggleableActiveColor;
+  Widget buildMaterialSwitch(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
+    final ThemeData theme = Theme.of(context);
+    final bool isDark = theme.brightness == Brightness.dark;
+
+    final Color activeThumbColor = widget.activeColor ?? theme.toggleableActiveColor;
     final Color activeTrackColor = widget.activeTrackColor ?? activeThumbColor.withAlpha(0x80);
 
     Color inactiveThumbColor;
@@ -162,16 +212,6 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade800 : Colors.grey.shade400);
       inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white10 : Colors.black12);
     }
-    Size size;
-    switch (widget.materialTapTargetSize ?? themeData.materialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        size = const Size(_kSwitchWidth, _kSwitchHeight);
-        break;
-      case MaterialTapTargetSize.shrinkWrap:
-        size = const Size(_kSwitchWidth, _kSwitchHeightCollapsed);
-        break;
-    }
-    final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
 
     return _SwitchRenderObjectWidget(
       value: widget.value,
@@ -183,9 +223,45 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       inactiveTrackColor: inactiveTrackColor,
       configuration: createLocalImageConfiguration(context),
       onChanged: widget.onChanged,
-      additionalConstraints: additionalConstraints,
+      additionalConstraints: BoxConstraints.tight(getSwitchSize(theme)),
       vsync: this,
     );
+  }
+
+  Widget buildCupertinoSwitch(BuildContext context) {
+    final Size size = getSwitchSize(Theme.of(context));
+    return Container(
+      width: size.width,  // Same size as the Material switch.
+      height: size.height,
+      alignment: Alignment.center,
+      child: CupertinoSwitch(
+        value: widget.value,
+        onChanged: widget.onChanged,
+        activeColor: widget.activeColor,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    switch (widget._switchType) {
+      case _SwitchType.material:
+        return buildMaterialSwitch(context);
+
+      case _SwitchType.adaptive: {
+        final ThemeData theme = Theme.of(context);
+        assert(theme.platform != null);
+        switch (theme.platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            return buildMaterialSwitch(context);
+          case TargetPlatform.iOS:
+            return buildCupertinoSwitch(context);
+        }
+      }
+    }
+    assert(false);
+    return null;
   }
 }
 

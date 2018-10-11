@@ -4,8 +4,6 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-
 import 'package:vm_service_client/vm_service_client.dart';
 
 import '../src/common.dart';
@@ -37,9 +35,7 @@ void main() {
     test('restart works without error', () async {
       await _flutter.run();
       await _flutter.hotRestart();
-      // TODO(dantup): Unskip after flutter-tester restart issue is fixed on Windows:
-      // https://github.com/flutter/flutter/issues/21348.
-    }, skip: platform.isWindows);
+    });
 
     test('reload hits breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);

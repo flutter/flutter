@@ -171,7 +171,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'عدد الصفوف في الصفحة:';
 
   @override
-  String get scriptCategory => r'tall';
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
   String get searchFieldLabel => r'بحث';
@@ -372,7 +372,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Редове на страница:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Търсене';
@@ -573,7 +573,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Redaka po stranici:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Pretražite';
@@ -774,7 +774,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Files per pàgina:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Cerca';
@@ -975,7 +975,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Počet řádků na stránku:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Hledat';
@@ -1176,7 +1176,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Rækker pr. side:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Søg';
@@ -1377,7 +1377,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Zeilen pro Seite:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Suchen';
@@ -1608,7 +1608,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Σειρές ανά σελίδα:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Αναζήτηση';
@@ -1809,7 +1809,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Rows per page:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Search';
@@ -2313,7 +2313,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Filas por página:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Buscar';
@@ -4137,7 +4137,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Ridu lehe kohta:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Otsing';
@@ -4338,7 +4338,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'ردیف در هر صفحه:';
 
   @override
-  String get scriptCategory => r'tall';
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
   String get searchFieldLabel => r'جستجو';
@@ -4539,7 +4539,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Riviä/sivu:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Haku';
@@ -4740,7 +4740,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Mga row bawat page:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Maghanap';
@@ -4941,7 +4941,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Lignes par page :';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Rechercher';
@@ -5169,7 +5169,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Zeilen pro Seite:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Suchen';
@@ -5370,7 +5370,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'שורות בכל דף:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'חיפוש';
@@ -5571,7 +5571,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'हर पेज में पंक्तियों की संख्या:';
 
   @override
-  String get scriptCategory => r'dense';
+  ScriptCategory get scriptCategory => ScriptCategory.dense;
 
   @override
   String get searchFieldLabel => r'खोजें';
@@ -5772,7 +5772,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Redaka po stranici:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Pretražite';
@@ -5973,7 +5973,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Oldalankénti sorszám:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Keresés';
@@ -6174,7 +6174,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Baris per halaman:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Telusuri';
@@ -6375,7 +6375,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Righe per pagina:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Cerca';
@@ -6576,7 +6576,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'ページあたりの行数:';
 
   @override
-  String get scriptCategory => r'dense';
+  ScriptCategory get scriptCategory => ScriptCategory.dense;
 
   @override
   String get searchFieldLabel => r'検索';
@@ -6625,6 +6625,207 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get viewLicensesButtonLabel => r'ライセンスを表示';
+}
+
+/// The translations for Khmer Central Khmer (`km`).
+class MaterialLocalizationKm extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Khmer Central Khmer.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationKm({
+    String localeName = 'km',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'អំពី $applicationName';
+
+  @override
+  String get alertDialogLabel => r'ការជូនដំណឹង';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'ថយក្រោយ';
+
+  @override
+  String get cancelButtonLabel => r'បោះបង់';
+
+  @override
+  String get closeButtonLabel => r'បិទ';
+
+  @override
+  String get closeButtonTooltip => r'បិទ';
+
+  @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
+  String get continueButtonLabel => r'បន្ត';
+
+  @override
+  String get copyButtonLabel => r'ចម្លង';
+
+  @override
+  String get cutButtonLabel => r'កាត់';
+
+  @override
+  String get deleteButtonTooltip => r'យកចេញ';
+
+  @override
+  String get dialogLabel => r'ប្រអប់';
+
+  @override
+  String get drawerLabel => r'ម៉ឺនុយរុករក';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
+
+  @override
+  String get hideAccountsLabel => r'លាក់គណនី';
+
+  @override
+  String get licensesPageTitle => r'អាជ្ញាប័ណ្ណ';
+
+  @override
+  String get modalBarrierDismissLabel => r'បិទ';
+
+  @override
+  String get nextMonthTooltip => r'ខែក្រោយ';
+
+  @override
+  String get nextPageTooltip => r'ទំព័របន្ទាប់';
+
+  @override
+  String get okButtonLabel => r'យល់ព្រម';
+
+  @override
+  String get openAppDrawerTooltip => r'បើកម៉ឺនុយរុករក';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow ពី $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ពីប្រហែល $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'ដាក់';
+
+  @override
+  String get popupMenuLabel => r'ម៉ឺនុយលេចឡើង';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'កាលពីខែមុន';
+
+  @override
+  String get previousPageTooltip => r'ទំព័រមុន';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
+  String get rowsPerPageTitle => r'ជួរមុខ:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.dense;
+
+  @override
+  String get searchFieldLabel => r'ស្វែងរក';
+
+  @override
+  String get selectAllButtonLabel => r'ជ្រើសទាំងអស់';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'បានជ្រើស 1 ធាតុ';
+
+  @override
+  String get selectedRowCountTitleOther => r'បានជ្រើស $selectedRowCount ធាតុ';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'បង្ហាញគណនី';
+
+  @override
+  String get showMenuTooltip => r'បង្ហាញម៉ឺនុយ';
+
+  @override
+  String get signedInLabel => r'ចូល';
+
+  @override
+  String get tabLabelRaw => r'ថេប $tabIndex ពី $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'ជ្រើសរើសមួយម៉ោង';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'ជ្រើសនាទី';
+
+  @override
+  String get viewLicensesButtonLabel => r'មើលអាជ្ញាប័ណ្ណ';
 }
 
 /// The translations for Korean (`ko`).
@@ -6777,7 +6978,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'페이지당 행 수:';
 
   @override
-  String get scriptCategory => r'dense';
+  ScriptCategory get scriptCategory => ScriptCategory.dense;
 
   @override
   String get searchFieldLabel => r'검색';
@@ -6978,7 +7179,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Eilučių puslapyje:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Paieška';
@@ -7179,7 +7380,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Rindas lapā:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Meklēt';
@@ -7380,7 +7581,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Baris setiap halaman:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Cari';
@@ -7581,7 +7782,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Rader per side:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Søk';
@@ -7782,7 +7983,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Rijen per pagina:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Zoeken';
@@ -7983,7 +8184,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Wiersze na stronie:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Szukaj';
@@ -8184,7 +8385,7 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'د هرې پاڼې پاڼې:';
 
   @override
-  String get scriptCategory => r'tall';
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
   String get searchFieldLabel => r'لټون';
@@ -8385,7 +8586,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Linhas por página:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Pesquisa';
@@ -8670,7 +8871,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Rânduri pe pagină:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Căutați';
@@ -8871,7 +9072,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Строк на странице:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Поиск';
@@ -9072,7 +9273,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Počet riadkov na stránku:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Hľadať';
@@ -9273,7 +9474,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Vrstice na stran:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Iskanje';
@@ -9474,7 +9675,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Редова по страници:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Претражите';
@@ -9852,7 +10053,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Rader per sida:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Sök';
@@ -10053,7 +10254,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'แถวต่อหน้า:';
 
   @override
-  String get scriptCategory => r'tall';
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
   String get searchFieldLabel => r'ค้นหา';
@@ -10254,7 +10455,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Mga row bawat page:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Maghanap';
@@ -10455,7 +10656,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Sayfa başına satır sayısı:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Ara';
@@ -10656,7 +10857,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Рядків на сторінці:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Пошук';
@@ -10857,7 +11058,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'قطاریں فی صفحہ:';
 
   @override
-  String get scriptCategory => r'tall';
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
   String get searchFieldLabel => r'تلاش';
@@ -11058,7 +11259,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'Số hàng mỗi trang:';
 
   @override
-  String get scriptCategory => r'English-like';
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
   String get searchFieldLabel => r'Tìm kiếm';
@@ -11259,7 +11460,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'每页行数：';
 
   @override
-  String get scriptCategory => r'dense';
+  ScriptCategory get scriptCategory => ScriptCategory.dense;
 
   @override
   String get searchFieldLabel => r'搜索';
@@ -11663,6 +11864,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
   'id', // Indonesian
   'it', // Italian
   'ja', // Japanese
+  'km', // Khmer Central Khmer
   'ko', // Korean
   'lt', // Lithuanian
   'lv', // Latvian
@@ -11720,6 +11922,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `id` - Indonesian
 ///  * `it` - Italian
 ///  * `ja` - Japanese
+///  * `km` - Khmer Central Khmer
 ///  * `ko` - Korean
 ///  * `lt` - Lithuanian
 ///  * `lv` - Latvian
@@ -11872,6 +12075,8 @@ GlobalMaterialLocalizations getTranslation(
       return MaterialLocalizationIt(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ja':
       return MaterialLocalizationJa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'km':
+      return MaterialLocalizationKm(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ko':
       return MaterialLocalizationKo(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'lt':

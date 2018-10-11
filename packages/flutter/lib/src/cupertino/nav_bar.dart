@@ -148,8 +148,8 @@ bool _isTransitionable(BuildContext context) {
 /// is provided and [automaticallyImplyLeading] is true (true by default).
 ///
 /// The [middle] widget will automatically be a title text from the current
-/// route if none is provided and [automaticallyImplyMiddle] is true (true by
-/// default).
+/// [CupertinoPageRoute] if none is provided and [automaticallyImplyMiddle] is
+/// true (true by default).
 ///
 /// It should be placed at top of the screen and automatically accounts for
 /// the OS's status bar.
@@ -158,11 +158,16 @@ bool _isTransitionable(BuildContext context) {
 /// default), it will produce a blurring effect to the content behind it.
 ///
 /// When [transitionBetweenRoutes] is true, this navigation bar will transition
-/// on top of the routes instead of inside it if the route being transitioned
+/// on top of the routes instead of inside them if the route being transitioned
 /// to also has a [CupertinoNavigationBar] or a [CupertinoSliverNavigationBar]
 /// with [transitionBetweenRoutes] set to true. If [transitionBetweenRoutes] is
 /// true, none of the [Widget] parameters can contain a key in its subtree since
 /// that widget will exist in multiple places in the tree simultaneously.
+///
+/// By default, only one [CupertinoNavigationBar] or [CupertinoSliverNavigationBar]
+/// should be present in each [PageRoute] to support the default transitions.
+/// Use [transitionBetweenRoutes] or [heroTag] to customize the transition
+/// behavior for multiple navigation bars per route.
 ///
 /// See also:
 ///
@@ -432,16 +437,21 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// is provided and [automaticallyImplyLeading] is true (true by default).
 ///
 /// The [largeTitle] widget will automatically be a title text from the current
-/// route if none is provided and [automaticallyImplyTitle] is true (true by
-/// default).
+/// [CupertinoPageRoute] if none is provided and [automaticallyImplyTitle] is
+/// true (true by default).
 ///
 /// When [transitionBetweenRoutes] is true, this navigation bar will transition
-/// on top of the routes instead of inside it if the route being transitioned
+/// on top of the routes instead of inside them if the route being transitioned
 /// to also has a [CupertinoNavigationBar] or a [CupertinoSliverNavigationBar]
 /// with [transitionBetweenRoutes] set to true. If [transitionBetweenRoutes] is
 /// true, none of the [Widget] parameters can contain any [GlobalKey]s in their
 /// subtrees since those widgets will exist in multiple places in the tree
 /// simultaneously.
+///
+/// By default, only one [CupertinoNavigationBar] or [CupertinoSliverNavigationBar]
+/// should be present in each [PageRoute] to support the default transitions.
+/// Use [transitionBetweenRoutes] or [heroTag] to customize the transition
+/// behavior for multiple navigation bars per route.
 ///
 /// See also:
 ///

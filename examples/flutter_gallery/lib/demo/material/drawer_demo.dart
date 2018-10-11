@@ -159,7 +159,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: _drawerContents.map((String id) {
+                            children: _drawerContents.map<Widget>((String id) {
                               return ListTile(
                                 leading: CircleAvatar(child: Text(id)),
                                 title: Text('Drawer item $id'),

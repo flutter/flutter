@@ -60,7 +60,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
           ),
           const Text(_text3),
         ]
-        .map((Widget child) {
+        .map<Widget>((Widget child) {
           return Container(
             margin: const EdgeInsets.symmetric(vertical: 12.0),
             child: child

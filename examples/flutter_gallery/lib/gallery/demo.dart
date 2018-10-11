@@ -96,11 +96,11 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
           ),
           bottom: TabBar(
             isScrollable: true,
-            tabs: demos.map((ComponentDemoTabData data) => Tab(text: data.tabName)).toList(),
+            tabs: demos.map<Widget>((ComponentDemoTabData data) => Tab(text: data.tabName)).toList(),
           ),
         ),
         body: TabBarView(
-          children: demos.map((ComponentDemoTabData demo) {
+          children: demos.map<Widget>((ComponentDemoTabData demo) {
             return SafeArea(
               top: false,
               bottom: false,
@@ -206,6 +206,7 @@ class MaterialDemoDocumentationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       icon: const Icon(Icons.library_books),
+      tooltip: 'API documentation',
       onPressed: () => launch(documentationUrl, forceWebView: true)
     );
   }
@@ -226,7 +227,10 @@ class CupertinoDemoDocumentationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoButton(
       padding: EdgeInsets.zero,
-      child: const Icon(CupertinoIcons.book),
+      child: Semantics(
+        label: 'API documentation',
+        child: const Icon(CupertinoIcons.book),
+      ),
       onPressed: () => launch(documentationUrl, forceWebView: true)
     );
   }

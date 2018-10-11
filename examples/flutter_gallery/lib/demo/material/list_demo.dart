@@ -209,7 +209,7 @@ class _ListDemoState extends State<ListDemo> {
         break;
     }
 
-    Iterable<Widget> listTiles = items.map((String item) => buildListTile(context, item));
+    Iterable<Widget> listTiles = items.map<Widget>((String item) => buildListTile(context, item));
     if (_showDividers)
       listTiles = ListTile.divideTiles(context: context, tiles: listTiles);
 

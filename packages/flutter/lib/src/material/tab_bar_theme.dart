@@ -63,7 +63,7 @@ class TabBarTheme extends Diagnosticable {
   ///
   /// The arguments must not be null.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static TabBarTheme lerp(TabBarTheme a, TabBarTheme b, double t) {
     assert(a != null);
     assert(b != null);

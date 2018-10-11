@@ -147,7 +147,7 @@ class TableBorder {
   /// If a border is null, it is treated as having only [BorderSide.none]
   /// borders.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static TableBorder lerp(TableBorder a, TableBorder b, double t) {
     assert(t != null);
     if (a == null && b == null)

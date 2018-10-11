@@ -49,9 +49,9 @@ typedef _RegisterServiceExtensionCallback = void Function({
 /// A proxy layer is used for cases where a layer needs to be placed into
 /// multiple trees of layers.
 class _ProxyLayer extends Layer {
-  final Layer _layer;
-
   _ProxyLayer(this._layer);
+
+  final Layer _layer;
 
   @override
   void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
@@ -66,9 +66,6 @@ class _ProxyLayer extends Layer {
 /// secondary screenshot canvas so that a screenshot can be recorded at the same
 /// time as performing a normal paint.
 class _MulticastCanvas implements Canvas {
-  final Canvas _main;
-  final Canvas _screenshot;
-
   _MulticastCanvas({
     @required Canvas main,
     @required Canvas screenshot,
@@ -76,6 +73,9 @@ class _MulticastCanvas implements Canvas {
        assert(screenshot != null),
        _main = main,
        _screenshot = screenshot;
+
+  final Canvas _main;
+  final Canvas _screenshot;
 
   @override
   void clipPath(Path path, {bool doAntiAlias = true}) {
@@ -1262,7 +1262,7 @@ class WidgetInspectorService {
     else
       throw FlutterError('Cannot get parent chain for node of type ${value.runtimeType}');
 
-    return path.map((_DiagnosticsPathNode node) => _pathNodeToJson(
+    return path.map<Object>((_DiagnosticsPathNode node) => _pathNodeToJson(
       node,
       _SerializeConfig(groupName: groupName),
     )).toList();

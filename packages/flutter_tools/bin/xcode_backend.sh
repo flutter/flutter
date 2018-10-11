@@ -146,7 +146,13 @@ BuildApp() {
     RunCommand cp -r -- "${app_framework}" "${derived_dir}"
 
     StreamOutput " ├─Generating dSYM file..."
-    RunCommand xcrun dsymutil -o "${build_dir}/aot/App.dSYM" "${app_framework}/App"
+    # Xcode calls `symbols` during app store upload, which uses Spotlight to
+    # find dSYM files for embedded frameworks. When it finds the dSYM file for
+    # `App.framework` it throws an error, which aborts the app store upload.
+    # To avoid this, we place the dSYM files in a folder ending with ".noindex",
+    # which hides it from Spotlight, https://github.com/flutter/flutter/issues/22560.
+    RunCommand mkdir -p -- "${build_dir}/dSYMs.noindex"
+    RunCommand xcrun dsymutil -o "${build_dir}/dSYMs.noindex/App.framework.dSYM" "${app_framework}/App"
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
       exit -1
@@ -198,7 +204,6 @@ BuildApp() {
     build bundle                                                            \
     --target-platform=ios                                                   \
     --target="${target_path}"                                               \
-    --snapshot="${build_dir}/snapshot_blob.bin"                             \
     --${build_mode}                                                         \
     --depfile="${build_dir}/snapshot_blob.bin.d"                            \
     --asset-dir="${derived_dir}/flutter_assets"                             \

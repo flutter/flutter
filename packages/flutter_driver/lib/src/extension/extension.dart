@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -91,8 +92,6 @@ typedef FinderConstructor = Finder Function(SerializableFinder finder);
 /// calling [enableFlutterDriverExtension].
 @visibleForTesting
 class FlutterDriverExtension {
-  final TestTextInput _testTextInput = TestTextInput();
-
   /// Creates an object to manage a Flutter Driver connection.
   FlutterDriverExtension(this._requestDataHandler, this._silenceErrors) {
     _testTextInput.register();
@@ -138,8 +137,11 @@ class FlutterDriverExtension {
       'ByTooltipMessage': (SerializableFinder finder) => _createByTooltipMessageFinder(finder),
       'ByValueKey': (SerializableFinder finder) => _createByValueKeyFinder(finder),
       'ByType': (SerializableFinder finder) => _createByTypeFinder(finder),
+      'PageBack': (SerializableFinder finder) => _createPageBackFinder(),
     });
   }
+
+  final TestTextInput _testTextInput = TestTextInput();
 
   final DataHandler _requestDataHandler;
   final bool _silenceErrors;
@@ -272,6 +274,17 @@ class FlutterDriverExtension {
     return find.byElementPredicate((Element element) {
       return element.widget.runtimeType.toString() == arguments.type;
     }, description: 'widget with runtimeType "${arguments.type}"');
+  }
+
+  Finder _createPageBackFinder() {
+    return find.byElementPredicate((Element element) {
+      final Widget widget = element.widget;
+      if (widget is Tooltip)
+        return widget.message == 'Back';
+      if (widget is CupertinoNavigationBarBackButton)
+        return true;
+      return false;
+    }, description: 'Material or Cupertino back button');
   }
 
   Finder _createFinder(SerializableFinder finder) {

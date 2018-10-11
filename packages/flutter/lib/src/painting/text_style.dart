@@ -246,9 +246,7 @@ class TextStyle extends Diagnosticable {
     String package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        assert(inherit != null),
-       // TODO(dnfield): once https://github.com/dart-lang/sdk/issues/33408 is finished, this can be replaced with
-       // assert(color == null || foreground == null, _kColorForegroundWarning);
-       assert(identical(color, null) || identical(foreground, null), _kColorForegroundWarning);
+       assert(color == null || foreground == null, _kColorForegroundWarning);
 
 
   /// Whether null values are replaced with their value in an ancestor text
@@ -560,7 +558,7 @@ class TextStyle extends Diagnosticable {
   ///
   /// This will not work well if the styles don't set the same fields.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   ///
   /// If [foreground] is specified on either of `a` or `b`, both will be treated
   /// as if they have a [foreground] paint (creating a new [Paint] if necessary

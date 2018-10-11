@@ -53,7 +53,7 @@ Widget buildTest({ double startToEndThreshold, TextDirection textDirection = Tex
             itemExtent: itemExtent,
             children: <int>[0, 1, 2, 3, 4]
               .where((int i) => !dismissedItems.contains(i))
-              .map(buildDismissibleItem).toList(),
+              .map<Widget>(buildDismissibleItem).toList(),
           ),
         );
       },

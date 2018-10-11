@@ -262,7 +262,7 @@ void main() {
           return aParagraph.text.style.fontSize.compareTo(bParagraph.text.style.fontSize);
         });
 
-    Iterable<double> opacities = titles.map((Element element) {
+    Iterable<double> opacities = titles.map<double>((Element element) {
       final RenderAnimatedOpacity renderOpacity = element.ancestorRenderObjectOfType(const TypeMatcher<RenderAnimatedOpacity>());
       return renderOpacity.opacity.value;
     });
@@ -287,7 +287,7 @@ void main() {
           return aParagraph.text.style.fontSize.compareTo(bParagraph.text.style.fontSize);
         });
 
-    opacities = titles.map((Element element) {
+    opacities = titles.map<double>((Element element) {
       final RenderAnimatedOpacity renderOpacity = element.ancestorRenderObjectOfType(const TypeMatcher<RenderAnimatedOpacity>());
       return renderOpacity.opacity.value;
     });

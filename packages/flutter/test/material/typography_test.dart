@@ -74,6 +74,8 @@ void main() {
       expect(textTheme.body1, isTextFont);
       expect(textTheme.caption, isTextFont);
       expect(textTheme.button, isTextFont);
+      expect(textTheme.subtitle, isTextFont);
+      expect(textTheme.overline, isTextFont);
     }
   });
 }

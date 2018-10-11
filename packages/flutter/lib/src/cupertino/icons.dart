@@ -669,4 +669,56 @@ class CupertinoIcons {
   ///
   ///  * [eye], which is similar, but not filled in.
   static const IconData eye_solid = IconData(0xf425, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A single person. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [person_solid], which is similar, but filled in.
+  ///  * [person_add], which has an additional plus sign next to the person.
+  ///  * [group], which consists of three people.
+  static const IconData person = IconData(0xf47d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A single person. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [person], which is similar, but not filled in.
+  ///  * [person_add_solid], which has an additional plus sign next to the person.
+  ///  * [group_solid], which consists of three people.
+  static const IconData person_solid = IconData(0xf47e, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A single person with a plus sign next to it. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [person_add_solid], which is similar, but filled in.
+  ///  * [person], which is just the person.
+  ///  * [group], which consists of three people.
+  static const IconData person_add = IconData(0xf47f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A single person with a plus sign next to it. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [person_add], which is similar, but not filled in.
+  ///  * [person_solid], which is just the person.
+  ///  * [group_solid], which consists of three people.
+  static const IconData person_add_solid = IconData(0xf480, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A group of three people. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [group_solid], which is similar, but filled in.
+  ///  * [person], which is just a single person.
+  static const IconData group = IconData(0xf47b, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A group of three people. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [group], which is similar, but not filled in.
+  ///  * [person_solid], which is just a single person.
+  static const IconData group_solid = IconData(0xf47c, fontFamily: iconFont, fontPackage: iconFontPackage);
 }

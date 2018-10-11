@@ -948,7 +948,7 @@ void main() {
 
     // One Opacity widget per Hero, only one now has opacity 0.0
     final Iterable<RenderOpacity> renderers = tester.renderObjectList(find.byType(Opacity));
-    final Iterable<double> opacities = renderers.map((RenderOpacity r) => r.opacity);
+    final Iterable<double> opacities = renderers.map<double>((RenderOpacity r) => r.opacity);
     expect(opacities.singleWhere((double opacity) => opacity == 0.0), 0.0);
 
     // Hero BC's flight finishes normally.

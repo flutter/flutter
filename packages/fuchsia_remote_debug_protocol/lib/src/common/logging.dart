@@ -69,9 +69,9 @@ class LogMessage {
   ///
   /// When this message is created, it sets its [time] to [DateTime.now].
   LogMessage(this.message, this.tag, this.level)
-      : this.levelName =
+      : levelName =
             level.toString().substring(level.toString().indexOf('.') + 1),
-        this.time = DateTime.now();
+        time = DateTime.now();
 
   /// The actual log message.
   final String message;

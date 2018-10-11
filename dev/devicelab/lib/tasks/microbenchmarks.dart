@@ -78,8 +78,8 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   final Completer<Map<String, double>> completer = Completer<Map<String, double>>();
 
   final StreamSubscription<String> stderrSub = process.stderr
-      .transform(const Utf8Decoder())
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder())
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         stderr.writeln('[STDERR] $line');
       });
@@ -87,8 +87,8 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   bool processWasKilledIntentionally = false;
   bool resultsHaveBeenParsed = false;
   final StreamSubscription<String> stdoutSub = process.stdout
-      .transform(const Utf8Decoder())
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder())
+      .transform<String>(const LineSplitter())
       .listen((String line) async {
     print(line);
 

@@ -190,7 +190,7 @@ void main() {
 
 enum _InitialResult { crashed, timedOut, connected }
 enum _TestResult { crashed, harnessBailed, testBailed }
-typedef _Finalizer = Future<Null> Function();
+typedef _Finalizer = Future<void> Function();
 
 class _CompilationRequest {
   _CompilationRequest(this.path, this.result);
@@ -238,7 +238,8 @@ class _Compiler {
         packagesPath: PackageMap.globalPackagesPath,
         trackWidgetCreation: trackWidgetCreation,
         compilerMessageConsumer: reportCompilerMessage,
-        initializeFromDill: testFilePath
+        initializeFromDill: testFilePath,
+        unsafePackageSerialization: true,
       );
     }
 
@@ -526,7 +527,7 @@ class _FlutterPlatform extends PlatformPlugin {
           watcher?.handleStartedProcess(ProcessEvent(ourTestCount, process, processObservatoryUri));
         },
         startTimeoutTimer: () {
-          Future<_InitialResult>.delayed(_kTestStartupTimeout).then((_) => timeout.complete());
+          Future<_InitialResult>.delayed(_kTestStartupTimeout).then<void>((_) => timeout.complete());
         },
       );
 
@@ -536,7 +537,7 @@ class _FlutterPlatform extends PlatformPlugin {
       // The local test harness could get bored of us.
 
       printTrace('test $ourTestCount: awaiting initial result for pid ${process.pid}');
-      final _InitialResult initialResult = await Future.any(<Future<_InitialResult>>[
+      final _InitialResult initialResult = await Future.any<_InitialResult>(<Future<_InitialResult>>[
         process.exitCode.then<_InitialResult>((int exitCode) => _InitialResult.crashed),
         timeout.future.then<_InitialResult>((void value) => _InitialResult.timedOut),
         Future<_InitialResult>.delayed(_kTestProcessTimeout, () => _InitialResult.timedOut),
@@ -615,13 +616,13 @@ class _FlutterPlatform extends PlatformPlugin {
           );
 
           printTrace('test $ourTestCount: awaiting test result for pid ${process.pid}');
-          final _TestResult testResult = await Future.any(<Future<_TestResult>>[
+          final _TestResult testResult = await Future.any<_TestResult>(<Future<_TestResult>>[
             process.exitCode.then<_TestResult>((int exitCode) { return _TestResult.crashed; }),
             harnessDone.future.then<_TestResult>((void value) { return _TestResult.harnessBailed; }),
             testDone.future.then<_TestResult>((void value) { return _TestResult.testBailed; }),
           ]);
 
-          await Future.wait(<Future<void>>[
+          await Future.wait<void>(<Future<void>>[
             harnessToTest.cancel(),
             testToHarness.cancel(),
           ]);
@@ -870,8 +871,8 @@ class _FlutterPlatform extends PlatformPlugin {
     const String observatoryString = 'Observatory listening on ';
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
-      stream.transform(utf8.decoder)
-        .transform(const LineSplitter())
+      stream.transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen(
           (String line) {
             if (line == _kStartTimeoutTimerMessage) {

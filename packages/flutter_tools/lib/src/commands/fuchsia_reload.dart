@@ -102,7 +102,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
   bool _list;
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
 
     await _validateArguments();
@@ -120,7 +120,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     // Wrap everything in try/finally to make sure we kill the ssh processes
     // doing the port forwarding.
     try {
-      final List<int> servicePorts = forwardedPorts.map(
+      final List<int> servicePorts = forwardedPorts.map<int>(
           (_PortForwarder pf) => pf.port).toList();
 
       if (_list) {
@@ -130,7 +130,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
         // continue to work.
         printStatus('Press Enter to exit.');
         await stdin.first;
-        return;
+        return null;
       }
 
       // Check that there are running VM services on the returned
@@ -145,10 +145,10 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
       // Set up a device and hot runner and attach the hot runner to the first
       // vm service we found.
-      final List<String> fullAddresses = targetPorts.map(
+      final List<String> fullAddresses = targetPorts.map<String>(
         (int p) => '$ipv4Loopback:$p'
       ).toList();
-      final List<Uri> observatoryUris = fullAddresses.map(
+      final List<Uri> observatoryUris = fullAddresses.map<Uri>(
         (String a) => Uri.parse('http://$a')
       ).toList();
       final FuchsiaDevice device = FuchsiaDevice(
@@ -168,8 +168,10 @@ class FuchsiaReloadCommand extends FlutterCommand {
       printStatus('Connecting to $_modName');
       await hotRunner.attach(viewFilter: isolateName);
     } finally {
-      await Future.wait(forwardedPorts.map((_PortForwarder pf) => pf.stop()));
+      await Future.wait<void>(forwardedPorts.map<Future<void>>((_PortForwarder pf) => pf.stop()));
     }
+
+    return null;
   }
 
   // A cache of VMService connections.
@@ -286,7 +288,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
       '${extraTabs}External: $external\n';
   }
 
-  Future<Null> _listVMs(List<int> ports) async {
+  Future<void> _listVMs(List<int> ports) async {
     for (int port in ports) {
       final VMService vmService = await _getVMService(port);
       await vmService.getVM();
@@ -295,7 +297,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     }
   }
 
-  Future<Null> _validateArguments() async {
+  Future<void> _validateArguments() async {
     final String fuchsiaBuildDir = argResults['build-dir'];
     final String gnTarget = argResults['gn-target'];
 
@@ -444,17 +446,17 @@ class FuchsiaReloadCommand extends FlutterCommand {
 // VM service running on a Fuchsia device. [process] is the ssh process running
 // the tunnel and [port] is the local port.
 class _PortForwarder {
-  final String _remoteAddress;
-  final int _remotePort;
-  final int _localPort;
-  final Process _process;
-  final String _sshConfig;
-
   _PortForwarder._(this._remoteAddress,
                    this._remotePort,
                    this._localPort,
                    this._process,
                    this._sshConfig);
+
+  final String _remoteAddress;
+  final int _remotePort;
+  final int _localPort;
+  final Process _process;
+  final String _sshConfig;
 
   int get port => _localPort;
 
@@ -474,18 +476,18 @@ class _PortForwarder {
     printTrace("_PortForwarder running '${command.join(' ')}'");
     final Process process = await processManager.start(command);
     process.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String data) { printTrace(data); });
     // Best effort to print the exit code.
-    process.exitCode.then((int c) { // ignore: unawaited_futures
+    process.exitCode.then<void>((int c) { // ignore: unawaited_futures
       printTrace("'${command.join(' ')}' exited with exit code $c");
     });
     printTrace('Set up forwarding from $localPort to $address:$remotePort');
     return _PortForwarder._(address, remotePort, localPort, process, sshConfig);
   }
 
-  Future<Null> stop() async {
+  Future<void> stop() async {
     // Kill the original ssh process if it is still around.
     if (_process != null) {
       printTrace('_PortForwarder killing ${_process.pid} for port $_localPort');
@@ -519,10 +521,10 @@ class _PortForwarder {
 }
 
 class FuchsiaDeviceCommandRunner {
+  FuchsiaDeviceCommandRunner(this._address, this._sshConfig);
+
   final String _address;
   final String _sshConfig;
-
-  FuchsiaDeviceCommandRunner(this._address, this._sshConfig);
 
   Future<List<String>> run(String command) async {
     final List<String> args = <String>['ssh', '-F', _sshConfig, _address, command];

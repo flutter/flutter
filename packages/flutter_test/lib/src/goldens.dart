@@ -181,7 +181,7 @@ class LocalFileComparator implements GoldenFileComparator {
       throw test_package.TestFailure('Could not be compared against non-existent file: "$golden"');
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
-    return _areListsEqual(imageBytes, goldenBytes);
+    return _areListsEqual<int>(imageBytes, goldenBytes);
   }
 
   @override

@@ -78,7 +78,7 @@ abstract class Route<T> {
   ///
   /// If the [settings] are not provided, an empty [RouteSettings] object is
   /// used instead.
-  Route({ RouteSettings settings }) : this.settings = settings ?? const RouteSettings();
+  Route({ RouteSettings settings }) : settings = settings ?? const RouteSettings();
 
   /// The navigator that the route is in, if any.
   NavigatorState get navigator => _navigator;

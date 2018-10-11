@@ -45,9 +45,7 @@ const List<String> kUnsynchronizedDemos = <String>[
   'Video@Media',
 ];
 
-const List<String> kSkippedDemos = <String>[
-  'Pull to refresh@Cupertino', // The back button lacks a tooltip.
-];
+const List<String> kSkippedDemos = <String>[];
 
 // All of the gallery demos, identified as "title@category".
 //
@@ -157,10 +155,10 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
 
       if (kUnsynchronizedDemos.contains(demo)) {
         await driver.runUnsynchronized<void>(() async {
-          await driver.tap(find.byTooltip('Back'));
+          await driver.tap(find.pageBack());
         });
       } else {
-        await driver.tap(find.byTooltip('Back'));
+        await driver.tap(find.pageBack());
       }
     }
 

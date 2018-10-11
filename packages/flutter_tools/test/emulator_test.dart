@@ -58,7 +58,7 @@ void main() {
       final TestEmulatorManager testEmulatorManager =
           TestEmulatorManager(emulators);
 
-      Future<Null> expectEmulator(String id, List<Emulator> expected) async {
+      Future<void> expectEmulator(String id, List<Emulator> expected) async {
         expect(await testEmulatorManager.getEmulatorsMatching(id), expected);
       }
 
@@ -152,9 +152,9 @@ void main() {
 }
 
 class TestEmulatorManager extends EmulatorManager {
-  final List<Emulator> allEmulators;
-
   TestEmulatorManager(this.allEmulators);
+
+  final List<Emulator> allEmulators;
 
   @override
   Future<List<Emulator>> getAllAvailableEmulators() {

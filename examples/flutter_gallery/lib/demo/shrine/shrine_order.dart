@@ -46,7 +46,7 @@ class _ProductItem extends StatelessWidget {
                 ),
               ),
               child: DropdownButton<int>(
-                items: <int>[0, 1, 2, 3, 4, 5].map((int value) {
+                items: <int>[0, 1, 2, 3, 4, 5].map<DropdownMenuItem<int>>((int value) {
                   return DropdownMenuItem<int>(
                     value: value,
                     child: Padding(
@@ -272,6 +272,7 @@ class _OrderPageState extends State<OrderPage> {
           );
         },
         backgroundColor: const Color(0xFF16F0F0),
+        tooltip: 'Add to cart',
         child: const Icon(
           Icons.add_shopping_cart,
           color: Colors.black,

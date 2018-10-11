@@ -281,7 +281,7 @@ class _ColorsItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: colors.map((_NamedColor namedColor) {
+      children: colors.map<Widget>((_NamedColor namedColor) {
         return RawMaterialButton(
           onPressed: () {
             onChanged(namedColor.color);
