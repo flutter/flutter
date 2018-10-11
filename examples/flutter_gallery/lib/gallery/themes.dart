@@ -24,17 +24,15 @@ TextTheme _buildTextTheme(TextTheme base) {
 
 ThemeData _buildDarkTheme() {
   const Color primaryColor = Color(0xFF0175c2);
-  const Color secondaryColor = Color(0xFF13B9FD);
   final ThemeData base = ThemeData.dark();
   final ColorScheme colorScheme = const ColorScheme.dark().copyWith(
     primary: primaryColor,
-    secondary: secondaryColor,
   );
   return base.copyWith(
     primaryColor: primaryColor,
     buttonColor: primaryColor,
     indicatorColor: Colors.white,
-    accentColor: secondaryColor,
+    accentColor: const Color(0xFF13B9FD),
     canvasColor: const Color(0xFF202124),
     scaffoldBackgroundColor: const Color(0xFF202124),
     backgroundColor: const Color(0xFF202124),
@@ -51,10 +49,8 @@ ThemeData _buildDarkTheme() {
 
 ThemeData _buildLightTheme() {
   const Color primaryColor = Color(0xFF0175c2);
-  const Color secondaryColor = Color(0xFF13B9FD);
   final ColorScheme colorScheme = const ColorScheme.light().copyWith(
     primary: primaryColor,
-    secondary: secondaryColor,
   );
   final ThemeData base = ThemeData.light();
   return base.copyWith(
@@ -64,7 +60,7 @@ ThemeData _buildLightTheme() {
     indicatorColor: Colors.white,
     splashColor: Colors.white24,
     splashFactory: InkRipple.splashFactory,
-    accentColor: secondaryColor,
+    accentColor: const Color(0xFF13B9FD),
     canvasColor: Colors.white,
     scaffoldBackgroundColor: Colors.white,
     backgroundColor: Colors.white,
