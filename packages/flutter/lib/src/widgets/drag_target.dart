@@ -239,12 +239,8 @@ class Draggable<T> extends StatefulWidget {
   /// Called when the draggable is dropped, returning its current
   /// [DraggableDetails].
   ///
-  /// This function might be called after this widget has been removed from the
-  /// tree. For example, if a drag was in progress when this widget was removed
-  /// from the tree and the drag ended up completing, this callback will
-  /// still be called. For this reason, implementations of this callback might
-  /// need to check [State.mounted] to check whether the state receiving the
-  /// callback is still in the tree.
+  /// This function will only be called while this widget is still mounted to
+  /// the tree (i.e. [State.mounted] is true).
   final DragEndCallback onDragEnd;
 
   /// Creates a gesture recognizer that recognizes the start of the drag.
@@ -392,7 +388,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
           _activeCount -= 1;
           _disposeRecognizerIfInactive();
         }
-        if(widget.onDragEnd != null)
+        if(mounted && widget.onDragEnd != null)
           widget.onDragEnd(DraggableDetails._(
               wasAccepted: wasAccepted, velocity: velocity, offset: offset)
           );

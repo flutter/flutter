@@ -1103,6 +1103,69 @@ void main() {
             Offset(droppedLocation.dx, secondLocation.dy - firstLocation.dy)));
   });
 
+  testWidgets('DragTarget does not call onDragEnd when remove from the tree', (WidgetTester tester) async {
+    final List<String> events = <String>[];
+    Offset firstLocation, secondLocation;
+    int timesOnDragEndCalled = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          Draggable<int>(
+              data: 1,
+              child: const Text('Source'),
+              feedback: const Text('Dragging'),
+              onDragEnd: (DraggableDetails details) {
+                timesOnDragEndCalled++;
+              },
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+              return const Text('Target');
+            },
+            onAccept: (int data) {
+              events.add('drop');
+            },
+          ),
+        ],
+      ),
+    ));
+
+    expect(events, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Target'), findsOneWidget);
+
+    expect(events, isEmpty);
+    await tester.tap(find.text('Source'));
+    expect(events, isEmpty);
+
+    firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 20));
+
+    secondLocation = tester.getCenter(find.text('Target'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    await tester.pumpWidget(MaterialApp(
+        home: Column(
+            children: const <Widget>[
+              Draggable<int>(
+                  data: 1,
+                  child: Text('Source'),
+                  feedback: Text('Dragging')
+              ),
+            ]
+        )
+    ));
+
+    expect(events, isEmpty);
+    expect(timesOnDragEndCalled, equals(1));
+    await gesture.up();
+    await tester.pump();
+  });
+
   testWidgets('Drag and drop - onDragCompleted called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     bool onDragCompletedCalled = false;
