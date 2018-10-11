@@ -19,8 +19,9 @@ const String _flatText = 'A flat button displays an ink splash on press '
 const String _flatCode = 'buttons_flat';
 
 const String _outlineText =
-    'Outline buttons become opaque and elevate when pressed. They are often '
-    'paired with raised buttons to indicate an alternative, secondary action.';
+    'Outlined buttons display a stroke around a text label and an ink splash '
+    'on press. They contain actions that are important, but aren’t the '
+    'primary action in an app.';
 
 const String _outlineCode = 'buttons_outline';
 
