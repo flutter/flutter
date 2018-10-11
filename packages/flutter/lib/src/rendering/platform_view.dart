@@ -68,8 +68,11 @@ class RenderAndroidView extends RenderBox {
        _viewController = viewController
   {
     _motionEventsDispatcher = _MotionEventsDispatcher(globalToLocal, viewController);
-    this.gestureRecognizers = gestureRecognizers ?? Set<Factory<OneSequenceGestureRecognizer>>();
+    setGestureRecognizers(gestureRecognizers ?? _emptyRecognizersSet);
   }
+
+  static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
+      Set<Factory<OneSequenceGestureRecognizer>>();
 
   _PlatformViewState _state = _PlatformViewState.uninitialized;
 
@@ -98,13 +101,13 @@ class RenderAndroidView extends RenderBox {
   /// pointer that was put down on the render box. If any of the recognizers on this list wins the
   /// gesture arena, the entire pointer event sequence starting from the pointer down event
   /// will be dispatched to the Android view.
-  set gestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> recognizers) {
-    assert(recognizers != null);
-    if (setEquals(recognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
+  void setGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
+    assert(gestureRecognizers != null);
+    if (setEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
       return;
     }
     _gestureRecognizer?.dispose();
-    _gestureRecognizer = _AndroidViewGestureRecognizer(_motionEventsDispatcher, recognizers);
+    _gestureRecognizer = _AndroidViewGestureRecognizer(_motionEventsDispatcher, gestureRecognizers);
   }
 
   @override
@@ -214,7 +217,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _AndroidViewGestureRecognizer(this.dispatcher, this.gestureRecognizerFactories) {
     _gestureRecognizers = gestureRecognizerFactories
         .map((Factory<OneSequenceGestureRecognizer> factory) => factory.constructor()).toSet();
-    team = new GestureArenaTeam();
+    team = GestureArenaTeam();
     team.captain = this;
     for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.team = team;

@@ -281,25 +281,20 @@ class _LazyListIterator<E> implements Iterator<E> {
   }
 }
 
-/// A factory interface, that also reports the type of the created objects.
+/// A factory interface that also reports the type of the created objects.
 ///
 /// The equality of [Factory] object is determined solely by [Factory.type].
 class Factory<T> {
   /// Creates a new factory.
   ///
-  /// If `type` is null, [Factory.type] returns [T], else it returns `type`.
-  ///
   /// The `constructor` parameter must not be null.
-  const Factory(this.constructor, {Type type})
-      : assert(constructor != null),
-        _type = type;
+  const Factory(this.constructor) : assert(constructor != null);
 
   /// Creates a new object of type T.
   final ValueGetter<T> constructor;
 
-  final Type _type;
   /// The type of the objects created by this factory.
-  Type get type => _type ?? T;
+  Type get type => T;
 
   @override
   bool operator ==(Object other) {
@@ -311,6 +306,11 @@ class Factory<T> {
   }
 
   @override
-  int get hashCode => _type.hashCode;
+  int get hashCode => T.hashCode;
+
+  @override
+  String toString() {
+    return 'Factory(type: $type)';
+  }
 }
 

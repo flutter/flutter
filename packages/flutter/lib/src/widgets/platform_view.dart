@@ -50,7 +50,7 @@ import 'framework.dart';
 class AndroidView extends StatefulWidget {
   /// Creates a widget that embeds an Android view.
   ///
-  /// The `viewType`, and `hitTestBehavior` parameters must not be null.
+  /// The `viewType` and `hitTestBehavior` parameters must not be null.
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
   AndroidView({ // ignore: prefer_const_constructors_in_immutables
                 // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
@@ -96,8 +96,8 @@ class AndroidView extends StatefulWidget {
   /// gesture arena, the entire pointer event sequence starting from the pointer down event
   /// will be dispatched to the Android view.
   ///
-  /// When null an empty set of gesture recognizer factories is used, and a pointer event sequence
-  /// wil only be dispatched to the Android view if no other member of the arena claimed it.
+  /// When null, an empty set of gesture recognizer factories is used, in which case a pointer event sequence
+  /// will only be dispatched to the Android view if no other member of the arena claimed it.
   ///
   /// For example, with the following setup vertical drags will not be dispatched to the Android
   /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
@@ -167,7 +167,7 @@ class _AndroidViewState extends State<AndroidView> {
     return _AndroidPlatformView(
         controller: _controller,
         hitTestBehavior: widget.hitTestBehavior,
-        gestureRecognizers: widget.gestureRecognizers ?? new Set<Factory<OneSequenceGestureRecognizer>>(),
+        gestureRecognizers: widget.gestureRecognizers ?? Set<Factory<OneSequenceGestureRecognizer>>(),
     );
   }
 
@@ -266,6 +266,6 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderAndroidView renderObject) {
     renderObject.viewController = controller;
     renderObject.hitTestBehavior = hitTestBehavior;
-    renderObject.gestureRecognizers = gestureRecognizers;
+    renderObject.setGestureRecognizers(gestureRecognizers);
   }
 }

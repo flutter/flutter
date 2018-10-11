@@ -564,9 +564,8 @@ void main() {
             child: AndroidView(
               viewType: 'webview',
               gestureRecognizers: <Factory<OneSequenceGestureRecognizer>> [
-                Factory<OneSequenceGestureRecognizer>(
+                Factory<VerticalDragGestureRecognizer>(
                   () => VerticalDragGestureRecognizer(),
-                  type: VerticalDragGestureRecognizer,
                 ),
               ].toSet(),
               layoutDirection: TextDirection.ltr,
@@ -693,7 +692,6 @@ void main() {
               gestureRecognizers: <Factory<OneSequenceGestureRecognizer>> [
                 Factory<OneSequenceGestureRecognizer>(
                   () => EagerGestureRecognizer(),
-                  type: VerticalDragGestureRecognizer,
                 ),
               ].toSet(),
               layoutDirection: TextDirection.ltr,
@@ -717,16 +715,15 @@ void main() {
     );
   });
 
-  testWidgets('AndroidView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
-    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+  testWidgets('RenderAndroidView reconstructed with same gestureRecognizers', (WidgetTester tester) async {
+    final FakePlatformViewsController viewsController = FakePlatformViewsController(TargetPlatform.android);
     viewsController.registerViewType('webview');
 
     final AndroidView androidView = AndroidView(
       viewType: 'webview',
       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>> [
-        new Factory<OneSequenceGestureRecognizer>(
-          () => new EagerGestureRecognizer(),
-          type: VerticalDragGestureRecognizer,
+        Factory<EagerGestureRecognizer>(
+          () => EagerGestureRecognizer(),
         ),
       ].toSet(),
       layoutDirection: TextDirection.ltr,
@@ -735,5 +732,39 @@ void main() {
     await tester.pumpWidget(androidView);
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpWidget(androidView);
+  });
+
+  testWidgets('AndroidView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
+    final FakePlatformViewsController viewsController = FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+
+    int factoryInvocationCount = 0;
+    final ValueGetter<EagerGestureRecognizer> constructRecognizer = () {
+        factoryInvocationCount += 1;
+        return EagerGestureRecognizer();
+      };
+
+    await tester.pumpWidget(
+      AndroidView(
+        viewType: 'webview',
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>> [
+          Factory<EagerGestureRecognizer>(constructRecognizer),
+        ].toSet(),
+        layoutDirection: TextDirection.ltr,
+      ),
+    );
+
+    await tester.pumpWidget(
+      AndroidView(
+        viewType: 'webview',
+        hitTestBehavior: PlatformViewHitTestBehavior.translucent,
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>> [
+          Factory<EagerGestureRecognizer>(constructRecognizer),
+        ].toSet(),
+        layoutDirection: TextDirection.ltr,
+      ),
+    );
+
+    expect(factoryInvocationCount, 1);
   });
 }
