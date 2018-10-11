@@ -97,7 +97,7 @@ class BottomNavigationBar extends StatefulWidget {
        assert(items.length >= 2),
        assert(
         items.every((BottomNavigationBarItem item) => item.title != null) == true,
-        "Every item must have a non-null title",
+        'Every item must have a non-null title',
        ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
