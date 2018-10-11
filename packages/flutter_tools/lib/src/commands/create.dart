@@ -96,9 +96,9 @@ class CreateCommand extends FlutterCommand {
             'This string is used in Java package names and as prefix in the iOS bundle identifier.'
     );
     argParser.addOption(
-      'project',
+      'project-name',
       defaultsTo: null,
-      help: 'The package name for this new Flutter project. This must be a valid dart package name.'
+      help: 'The project name for this new Flutter project. This must be a valid dart package name.'
     );
     argParser.addOption(
       'ios-language',
@@ -241,12 +241,11 @@ class CreateCommand extends FlutterCommand {
       }
     }
 
-    final String projectName = argResults['project'] ?? fs.path.basename(projectDirPath);
-
     String error = _validateProjectDir(projectDirPath, flutterRoot: flutterRoot);
     if (error != null)
       throwToolExit(error);
 
+    final String projectName = argResults['project-name'] ?? fs.path.basename(projectDirPath);
     error = _validateProjectName(projectName);
     if (error != null)
       throwToolExit(error);
