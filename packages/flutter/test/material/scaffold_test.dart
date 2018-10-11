@@ -306,7 +306,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context).showBottomSheet<Null>((BuildContext context) {
+                  Scaffold.of(context).showBottomSheet((BuildContext context) {
                     return Container(
                       key: sheetKey,
                       color: Colors.blue[500],

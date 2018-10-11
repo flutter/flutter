@@ -193,7 +193,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 class _ModalBottomSheet<T> extends StatefulWidget {
   const _ModalBottomSheet({ Key key, this.route }) : super(key: key);
 
-  final _ModalBottomSheetRoute<T> route;
+  final _ModalBottomSheetRoute route;
 
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
@@ -246,7 +246,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   }
 }
 
-class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
+class _ModalBottomSheetRoute extends PopupRoute<void> {
   _ModalBottomSheetRoute({
     this.builder,
     this.theme,
@@ -285,7 +285,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: _ModalBottomSheet<T>(route: this),
+      child: _ModalBottomSheet<void>(route: this),
     );
     if (theme != null)
       bottomSheet = Theme(data: theme, child: bottomSheet);
@@ -319,14 +319,14 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 ///  * [showBottomSheet] and [ScaffoldState.showBottomSheet], for showing
 ///    non-modal bottom sheets.
 ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-modal-bottom-sheets>
-Future<T> showModalBottomSheet<T>({
+Future<void> showModalBottomSheet({
   @required BuildContext context,
   @required WidgetBuilder builder,
 }) {
   assert(context != null);
   assert(builder != null);
   assert(debugCheckHasMaterialLocalizations(context));
-  return Navigator.push(context, _ModalBottomSheetRoute<T>(
+  return Navigator.push(context, _ModalBottomSheetRoute(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
@@ -370,11 +370,11 @@ Future<T> showModalBottomSheet<T>({
 ///    sheet.
 ///  * [Scaffold.of], for information about how to obtain the [BuildContext].
 ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
-PersistentBottomSheetController<T> showBottomSheet<T>({
+PersistentBottomSheetController<void> showBottomSheet({
   @required BuildContext context,
   @required WidgetBuilder builder,
 }) {
   assert(context != null);
   assert(builder != null);
-  return Scaffold.of(context).showBottomSheet<T>(builder);
+  return Scaffold.of(context).showBottomSheet(builder);
 }

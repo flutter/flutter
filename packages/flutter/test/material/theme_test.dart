@@ -163,7 +163,7 @@ void main() {
                 builder: (BuildContext context) {
                   return RaisedButton(
                     onPressed: () {
-                      showModalBottomSheet<void>(
+                      showModalBottomSheet(
                         context: context,
                         builder: (BuildContext context) => const Text('bottomSheet'),
                       );

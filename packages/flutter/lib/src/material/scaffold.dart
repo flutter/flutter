@@ -1206,14 +1206,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // PERSISTENT BOTTOM SHEET API
 
   final List<_PersistentBottomSheet> _dismissedBottomSheets = <_PersistentBottomSheet>[];
-  PersistentBottomSheetController<dynamic> _currentBottomSheet;
+  PersistentBottomSheetController<void> _currentBottomSheet;
 
   void _maybeBuildCurrentBottomSheet() {
     if (widget.bottomSheet != null) {
       // The new _currentBottomSheet is not a local history entry so a "back" button
       // will not be added to the Scaffold's appbar and the bottom sheet will not
       // support drag or swipe to dismiss.
-      _currentBottomSheet = _buildBottomSheet<void>(
+      _currentBottomSheet = _buildBottomSheet(
         (BuildContext context) => widget.bottomSheet,
         BottomSheet.createAnimationController(this) ..value = 1.0,
         false,
@@ -1228,8 +1228,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
   }
 
-  PersistentBottomSheetController<T> _buildBottomSheet<T>(WidgetBuilder builder, AnimationController controller, bool isLocalHistoryEntry) {
-    final Completer<T> completer = Completer<T>();
+  PersistentBottomSheetController<void> _buildBottomSheet(WidgetBuilder builder, AnimationController controller, bool isLocalHistoryEntry) {
+    final Completer<void> completer = Completer<void>();
     final GlobalKey<_PersistentBottomSheetState> bottomSheetKey = GlobalKey<_PersistentBottomSheetState>();
     _PersistentBottomSheet bottomSheet;
 
@@ -1274,7 +1274,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (isLocalHistoryEntry)
       ModalRoute.of(context).addLocalHistoryEntry(entry);
 
-    return PersistentBottomSheetController<T>._(
+    return PersistentBottomSheetController<void>._(
       bottomSheet,
       completer,
       isLocalHistoryEntry ? entry.remove : _removeCurrentBottomSheet,
@@ -1317,12 +1317,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
-  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder) {
+  PersistentBottomSheetController<void> showBottomSheet(WidgetBuilder builder) {
     _closeCurrentBottomSheet();
     final AnimationController controller = BottomSheet.createAnimationController(this)
       ..forward();
     setState(() {
-      _currentBottomSheet = _buildBottomSheet<T>(builder, controller, true);
+      _currentBottomSheet = _buildBottomSheet(builder, controller, true);
     });
     return _currentBottomSheet;
   }
