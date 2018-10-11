@@ -39,6 +39,7 @@ class PictureLayer : public Layer {
   SkiaGPUObject<SkPicture> picture_;
   bool is_complex_ = false;
   bool will_change_ = false;
+  RasterCacheResult raster_cache_result_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PictureLayer);
 };

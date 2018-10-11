@@ -16,7 +16,7 @@
 #define DEF_PRINTER(x) std::ostream& operator<<(std::ostream&, const x&);
 
 DEF_PRINTER(flow::MatrixDecomposition);
-DEF_PRINTER(flow::PictureRasterCacheKey);
+DEF_PRINTER(flow::RasterCacheKey);
 DEF_PRINTER(SkISize);
 DEF_PRINTER(SkMatrix);
 DEF_PRINTER(SkMatrix44);

@@ -25,8 +25,9 @@ std::ostream& operator<<(std::ostream& os, const flow::MatrixDecomposition& m) {
 
 std::ostream& operator<<(std::ostream& os, const SkMatrix& m) {
   SkString string;
-  string.printf("[%8.4f %8.4f %8.4f][%8.4f %8.4f %8.4f][%8.4f %8.4f %8.4f]",
-                m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8]);
+  string.printf(
+      "[%8.4f %8.4f %8.4f][%8.4f %8.4f %8.4f][%8.4f %8.4f %8.4f]",
+      m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8]);
   os << string.c_str();
   return os;
 }
@@ -71,9 +72,8 @@ std::ostream& operator<<(std::ostream& os, const SkPoint& r) {
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os,
-                         const flow::PictureRasterCacheKey& k) {
-  os << "Picture: " << k.id() << " matrix: " << k.matrix();
+std::ostream& operator<<(std::ostream& os, const flow::RasterCacheKey& k) {
+  os << "Picture: " << k.picture_id() << " matrix: " << k.matrix();
   return os;
 }
 

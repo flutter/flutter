@@ -32,8 +32,7 @@ class LayerTree {
                    scenic::ContainerNode& container);
 #endif
 
-  void Paint(CompositorContext::ScopedFrame& frame,
-             bool ignore_raster_cache = false) const;
+  void Paint(CompositorContext::ScopedFrame& frame) const;
 
   sk_sp<SkPicture> Flatten(const SkRect& bounds);
 
