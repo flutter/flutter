@@ -183,4 +183,59 @@ void main() {
     });
   });
 
+  group('FloatingActionButton', () {
+    testWidgets('theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          home: Center(
+              child: FloatingActionButton(
+                onPressed: () { }, // button.enabled == true
+                child: const Icon(Icons.add),
+              )
+          ),
+        ),
+      );
+
+      final FloatingActionButton raw = tester.widget<FloatingActionButton>(find.byType(FloatingActionButton));
+      expect(raw.foregroundColor, const Color(0xffffffff));
+      expect(raw.backgroundColor, const Color(0xff2196f3));
+      expect(raw.elevation, 2.0);
+      expect(raw.highlightElevation, 8.0);
+      expect(raw.disabledElevation, 0.0);
+      expect(raw.constraints, defaultButtonConstraints);
+      expect(raw.padding, defaultButtonPadding);
+      expect(raw.shape, defaultButtonShape);
+      expect(raw.animationDuration, defaultButtonDuration);
+      expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
+    });
+
+    testWidgets('theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          home: const Center(
+              child: FloatingActionButton(
+                onPressed: null, // button.enabled == false
+                child: Icon(Icons.add),
+              )
+          ),
+        ),
+      );
+
+      final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
+      expect(raw.textStyle.color, const Color(0x61000000));
+      expect(raw.fillColor, const Color(0x61000000));
+      // highlightColor, disabled button can't be pressed
+      // splashColor, disabled button doesn't splash
+      expect(raw.elevation, 2.0);
+      expect(raw.highlightElevation, 8.0);
+      expect(raw.disabledElevation, 0.0);
+      expect(raw.constraints, defaultButtonConstraints);
+      expect(raw.padding, defaultButtonPadding);
+      expect(raw.shape, defaultButtonShape);
+      expect(raw.animationDuration, defaultButtonDuration);
+      expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
+    });
+  });
 }
