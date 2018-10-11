@@ -163,7 +163,9 @@ void Window::UpdateWindowMetrics(const ViewportMetrics& metrics) {
 }
 
 void Window::UpdateLocale(const std::string& language_code,
-                          const std::string& country_code) {
+                          const std::string& country_code,
+                          const std::string& script_code,
+                          const std::string& variant_code) {
   std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
   if (!dart_state)
     return;
@@ -173,6 +175,8 @@ void Window::UpdateLocale(const std::string& language_code,
                   {
                       StdStringToDart(language_code),
                       StdStringToDart(country_code),
+                      StdStringToDart(script_code),
+                      StdStringToDart(variant_code),
                   });
 }
 

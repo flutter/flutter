@@ -894,8 +894,16 @@ static blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) {
   NSLocale* currentLocale = [NSLocale currentLocale];
   NSString* languageCode = [currentLocale objectForKey:NSLocaleLanguageCode];
   NSString* countryCode = [currentLocale objectForKey:NSLocaleCountryCode];
+  NSString* scriptCode = [currentLocale objectForKey:NSLocaleScriptCode];
+  NSString* variantCode = [currentLocale objectForKey:NSLocaleVariantCode];
   if (languageCode && countryCode)
-    [_localizationChannel.get() invokeMethod:@"setLocale" arguments:@[ languageCode, countryCode ]];
+    // We pass empty strings for undefined scripts and variants to ensure the JSON encoder/decoder
+    // functions properly.
+    [_localizationChannel.get() invokeMethod:@"setLocale"
+                                   arguments:@[
+                                     languageCode, countryCode, scriptCode ? scriptCode : @"",
+                                     variantCode ? variantCode : @""
+                                   ]];
 }
 
 #pragma mark - Set user settings
