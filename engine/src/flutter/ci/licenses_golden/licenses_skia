@@ -1,4 +1,4 @@
-Signature: e6e4ae7d6d20cbfce295e960bdfe551c
+Signature: 0199dcdafd3495bf4b303746950b19ce
 
 UNUSED LICENSES:
 
@@ -2015,6 +2015,7 @@ FILE: ../../../third_party/skia/docs/overview.bmh
 FILE: ../../../third_party/skia/docs/status.json
 FILE: ../../../third_party/skia/docs/undocumented.bmh
 FILE: ../../../third_party/skia/docs/usingBookmaker.bmh
+FILE: ../../../third_party/skia/experimental/canvaskit/canvas-kit/cpu_example.html
 FILE: ../../../third_party/skia/experimental/canvaskit/canvas-kit/example.html
 FILE: ../../../third_party/skia/experimental/canvaskit/canvas-kit/package.json
 FILE: ../../../third_party/skia/experimental/canvaskit/externs.js
@@ -4697,6 +4698,7 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzNullCanvas.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPNGEncoder.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathMeasure.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathop.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPolyUtils.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRasterN32Canvas.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzTextBlobDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzWEBPEncoder.cpp
