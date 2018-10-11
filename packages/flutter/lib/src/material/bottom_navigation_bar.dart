@@ -333,15 +333,13 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
       circle.dispose();
     _circles.clear();
 
-    _controllers =
-        List<AnimationController>.generate(widget.items.length, (int index) {
+    _controllers = List<AnimationController>.generate(widget.items.length, (int index) {
       return AnimationController(
         duration: kThemeAnimationDuration,
         vsync: this,
       )..addListener(_rebuild);
     });
-    _animations =
-        List<CurvedAnimation>.generate(widget.items.length, (int index) {
+    _animations = List<CurvedAnimation>.generate(widget.items.length, (int index) {
       return CurvedAnimation(
         parent: _controllers[index],
         curve: Curves.fastOutSlowIn,
@@ -374,8 +372,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
     super.dispose();
   }
 
-  double _evaluateFlex(Animation<double> animation) =>
-      _flexTween.evaluate(animation);
+  double _evaluateFlex(Animation<double> animation) => _flexTween.evaluate(animation);
 
   void _pushCircle(int index) {
     if (widget.items[index].backgroundColor != null) {
@@ -433,8 +430,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
   }
 
   List<Widget> _createTiles() {
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     assert(localizations != null);
     final List<Widget> children = <Widget>[];
     switch (widget.type) {
@@ -475,20 +471,21 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
         break;
       case BottomNavigationBarType.shifting:
         for (int i = 0; i < widget.items.length; i += 1) {
-          children.add(_BottomNavigationTile(
-            widget.type,
-            widget.items[i],
-            _animations[i],
-            widget.iconSize,
-            onTap: () {
-              if (widget.onTap != null)
-                widget.onTap(i);
-            },
-            flex: _evaluateFlex(_animations[i]),
-            selected: i == widget.currentIndex,
-            indexLabel: localizations.tabLabel(
-                tabIndex: i + 1, tabCount: widget.items.length),
-          ));
+          children.add(
+            _BottomNavigationTile(
+              widget.type,
+              widget.items[i],
+              _animations[i],
+              widget.iconSize,
+              onTap: () {
+                if (widget.onTap != null) widget.onTap(i);
+              },
+              flex: _evaluateFlex(_animations[i]),
+              selected: i == widget.currentIndex,
+              indexLabel: localizations.tabLabel(
+                  tabIndex: i + 1, tabCount: widget.items.length),
+            ),
+          );
         }
         break;
     }
@@ -511,8 +508,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
     assert(debugCheckHasMaterialLocalizations(context));
 
     // Labels apply up to _bottomMargin padding. Remainder is media padding.
-    final double additionalBottomPadding =
-        math.max(MediaQuery.of(context).padding.bottom - _kBottomMargin, 0.0);
+    final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - _kBottomMargin, 0.0);
     Color backgroundColor;
     switch (widget.type) {
       case BottomNavigationBarType.fixed:
@@ -535,8 +531,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
           ),
           ConstrainedBox(
             constraints: BoxConstraints(
-                minHeight:
-                    kBottomNavigationBarHeight + additionalBottomPadding),
+              minHeight: kBottomNavigationBarHeight + additionalBottomPadding,
+            ),
             child: Stack(
               children: <Widget>[
                 Positioned.fill(
@@ -582,8 +578,10 @@ class _Circle {
       duration: kThemeAnimationDuration,
       vsync: vsync,
     );
-    animation =
-        CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
+    animation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.fastOutSlowIn,
+    );
     controller.forward();
   }
 
@@ -604,8 +602,7 @@ class _Circle {
 
     final double allWeights = weightSum(state._animations);
     // These weights sum to the start edge of the indexed item.
-    final double leadingWeights =
-        weightSum(state._animations.sublist(0, index));
+    final double leadingWeights = weightSum(state._animations.sublist(0, index));
 
     // Add half of its flex value in order to get to the center.
     return (leadingWeights + state._evaluateFlex(state._animations[index]) / 2.0) / allWeights;
@@ -666,8 +663,7 @@ class _RadialPainter extends CustomPainter {
           leftFraction = circle.horizontalLeadingOffset;
           break;
       }
-      final Offset center =
-          Offset(leftFraction * size.width, size.height / 2.0);
+      final Offset center = Offset(leftFraction * size.width, size.height / 2.0);
       final Tween<double> radiusTween = Tween<double>(
         begin: 0.0,
         end: _maxRadius(center, size),
