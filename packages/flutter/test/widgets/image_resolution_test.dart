@@ -156,7 +156,7 @@ TestImage getTestImage(WidgetTester tester, Key key) {
   return tester.renderObject<RenderImage>(find.byKey(key)).image;
 }
 
-Future<Null> pumpTreeToLayout(WidgetTester tester, Widget widget) {
+Future<void> pumpTreeToLayout(WidgetTester tester, Widget widget) {
   const Duration pumpDuration = Duration(milliseconds: 0);
   const EnginePhase pumpPhase = EnginePhase.layout;
   return tester.pumpWidget(widget, pumpDuration, pumpPhase);
