@@ -124,7 +124,8 @@ std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
 
 bool RuntimeController::FlushRuntimeStateToIsolate() {
   return SetViewportMetrics(window_data_.viewport_metrics) &&
-         SetLocale(window_data_.language_code, window_data_.country_code) &&
+         SetLocale(window_data_.language_code, window_data_.country_code,
+                   window_data_.script_code, window_data_.variant_code) &&
          SetSemanticsEnabled(window_data_.semantics_enabled) &&
          SetAccessibilityFeatures(window_data_.accessibility_feature_flags_);
 }
@@ -140,12 +141,17 @@ bool RuntimeController::SetViewportMetrics(const ViewportMetrics& metrics) {
 }
 
 bool RuntimeController::SetLocale(const std::string& language_code,
-                                  const std::string& country_code) {
+                                  const std::string& country_code,
+                                  const std::string& script_code,
+                                  const std::string& variant_code) {
   window_data_.language_code = language_code;
   window_data_.country_code = country_code;
+  window_data_.script_code = script_code;
+  window_data_.variant_code = variant_code;
 
   if (auto window = GetWindowIfAvailable()) {
-    window->UpdateLocale(window_data_.language_code, window_data_.country_code);
+    window->UpdateLocale(window_data_.language_code, window_data_.country_code,
+                         window_data_.script_code, window_data_.variant_code);
     return true;
   }
 

@@ -317,7 +317,7 @@ public class FlutterView extends SurfaceView
     }
 
     private void setLocale(Locale locale) {
-        mFlutterLocalizationChannel.invokeMethod("setLocale", Arrays.asList(locale.getLanguage(), locale.getCountry()));
+        mFlutterLocalizationChannel.invokeMethod("setLocale", Arrays.asList(locale.getLanguage(), locale.getCountry(), locale.getScript(), locale.getVariant()));
     }
 
     @Override

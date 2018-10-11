@@ -48,7 +48,7 @@ String _localeClosure() => window._locale.toString();
 _LocaleClosure _getLocaleClosure() => _localeClosure;
 
 @pragma('vm:entry-point')
-void _updateLocale(String languageCode, String countryCode) {
+void _updateLocale(String languageCode, String countryCode, String scriptCode, String variantCode) {
   window._locale = new Locale(languageCode, countryCode);
   _invoke(window.onLocaleChanged, window._onLocaleChangedZone);
 }

@@ -327,12 +327,15 @@ bool Engine::HandleLocalizationPlatformMessage(
 
   const auto& language = args->value[0];
   const auto& country = args->value[1];
+  const auto& script = args->value[2];
+  const auto& variant = args->value[3];
 
   if (!language.IsString() || !country.IsString())
     return false;
 
   return runtime_controller_->SetLocale(language.GetString(),
-                                        country.GetString());
+                                        country.GetString(), script.GetString(),
+                                        variant.GetString());
 }
 
 void Engine::HandleSettingsPlatformMessage(blink::PlatformMessage* message) {
