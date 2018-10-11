@@ -62,6 +62,9 @@ enum OverlayVisibilityMode {
 /// A text field lets the user enter text, either with hardware keyboard or with
 /// an onscreen keyboard.
 ///
+/// This widget corresponds to both a [UITextField] and an editable [UITextView]
+/// on iOS.
+///
 /// The text field calls the [onChanged] callback whenever the user changes the
 /// text in the field. If the user indicates that they are done typing in the
 /// field (e.g., by pressing a button on the soft keyboard), the text field
@@ -73,60 +76,31 @@ enum OverlayVisibilityMode {
 /// control the selection and composing region (and to observe changes to the
 /// text, selection, and composing region).
 ///
-/// By default, a text field has a [decoration] that draws a divider below the
-/// text field. You can use the [decoration] property to control the decoration,
-/// for example by adding a label or an icon. If you set the [decoration]
-/// property to null, the decoration will be removed entirely, including the
-/// extra padding introduced by the decoration to save space for the labels.
-///
-/// If [decoration] is non-null (which is the default), the text field requires
-/// one of its ancestors to be a [Material] widget. When the [CupertinoTextField] is
-/// tapped an ink splash that paints on the material is triggered, see
-/// [ThemeData.splashFactory].
-///
-/// To integrate the [CupertinoTextField] into a [Form] with other [FormField] widgets,
-/// consider using [TextFormField].
+/// The text field has an overridable [decoration] that, by default, draws a
+/// rounded rectangle border around the text field. If you set the [decoration]
+/// property to null, the decoration will be removed entirely.
 ///
 /// See also:
 ///
-///  * <https://material.google.com/components/text-fields.html>
-///  * [TextFormField], which integrates with the [Form] widget.
-///  * [InputDecorator], which shows the labels and other visual elements that
-///    surround the actual text editing widget.
+///  * <https://developer.apple.com/documentation/uikit/uitextfield>
+///  * [TextField], an alternative text field widget that follows the Material
+///    Design UI conventions.
 ///  * [EditableText], which is the raw text editing control at the heart of a
-///    [TextField]. (The [EditableText] widget is rarely used directly unless
-///    you are implementing an entirely different design language, such as
-///    Cupertino.)
+///    [TextField].
 class CupertinoTextField extends StatefulWidget {
-  /// Creates a Material Design text field.
+  /// Creates an iOS-style text field.
   ///
-  /// If [decoration] is non-null (which is the default), the text field requires
-  /// one of its ancestors to be a [Material] widget.
+  /// To provide a prefilled text entry, pass in a [TextEditingController] with
+  /// an initial value to the [controller] parameter.
   ///
-  /// To remove the decoration entirely (including the extra padding introduced
-  /// by the decoration to save space for the labels), set the [decoration] to
-  /// null.
+  /// To provide a hint placeholder text that appears when the text entry is
+  /// empty, pass a [String] to the [placeholder] parameter.
   ///
   /// The [maxLines] property can be set to null to remove the restriction on
-  /// the number of lines. By default, it is one, meaning this is a single-line
-  /// text field. [maxLines] must not be zero.
-  ///
-  /// The [maxLength] property is set to null by default, which means the
-  /// number of characters allowed in the text field is not restricted. If
-  /// [maxLength] is set, a character counter will be displayed below the
-  /// field, showing how many characters have been entered and how many are
-  /// allowed. After [maxLength] characters have been input, additional input
-  /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
-  /// enforces the length with a [LengthLimitingTextInputFormatter], which is
-  /// evaluated after the supplied [inputFormatters], if any. The [maxLength]
-  /// value must be either null or greater than zero.
-  ///
-  /// If [maxLengthEnforced] is set to false, then more than [maxLength]
-  /// characters may be entered, and the error counter and divider will
-  /// switch to the [decoration.errorStyle] when the limit is exceeded.
-  ///
-  /// The [textAlign], [autofocus], [obscureText], and [autocorrect] arguments
-  /// must not be null.
+  /// the number of lines. In this mode, the intrinsic height of the widget will
+  /// grow as the number of lines of text grows. By default, it is `1`, meaning
+  /// this is a single-line text field and will scroll horizontally when
+  /// overflown. [maxLines] must not be zero.
   ///
   /// See also:
   ///
@@ -174,6 +148,8 @@ class CupertinoTextField extends StatefulWidget {
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
        assert(clearButtonMode != null),
+       assert(leadingMode != null),
+       assert(trailingMode != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        super(key: key);
 
@@ -187,20 +163,57 @@ class CupertinoTextField extends StatefulWidget {
   /// If null, this widget will create its own [FocusNode].
   final FocusNode focusNode;
 
+  /// Controls the [BoxDecoration] of the box behind the text input.
+  ///
+  /// Defaults to having a rounded rectangle grey border and can be null to have
+  /// no box decoration.
   final BoxDecoration decoration;
 
+  /// Padding around the text entry area between the [leading] and [trailing]
+  /// or the clear button when [clearButtonMode] is not never.
+  ///
+  /// Defaults to a padding of 6 pixels on all sides and can be null.
   final EdgeInsetsGeometry padding;
 
+  /// A lighter colored placeholder hint that appears on the first line of the
+  /// text field when the text entry is empty.
+  ///
+  /// Defaults to having no placeholder text.
+  ///
+  /// The text style of the placeholder text matches that of the text field's
+  /// main text entry except a lighter font weight and a grey font color.
   final String placeholder;
 
+  /// An optional [Widget] to display before the text.
   final Widget leading;
 
+  /// Controls the visibility of the [leading] widget based on the state of
+  /// text entry when the [leading] argument is not null.
+  ///
+  /// Defaults to [OverlayVisibilityMode.always] and cannot be null.
+  ///
+  /// Has no effect when [leading] is null.
   final OverlayVisibilityMode leadingMode;
 
+  /// An optional [Widget] to display after the text.
   final Widget trailing;
 
+  /// Controls the visibility of the [trailing] widget based on the state of
+  /// text entry when the [trailing] argument is not null.
+  ///
+  /// Defaults to [OverlayVisibilityMode.always] and cannot be null.
+  ///
+  /// Has no effect when [trailing] is null.
   final OverlayVisibilityMode trailingMode;
 
+  /// Show an iOS-style clear button to clear the current text entry.
+  ///
+  /// Can be made to appear depending on various text states of the
+  /// [TextEditingController].
+  ///
+  /// Will only appear if no [trailing] widget is appearing.
+  ///
+  /// Defaults to never appearing and cannot be null.
   final OverlayVisibilityMode clearButtonMode;
 
   /// The type of keyboard to use for editing the text.
@@ -427,15 +440,19 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   @override
   void initState() {
     super.initState();
-    if (widget.controller == null)
+    if (widget.controller == null) {
       _controller = TextEditingController();
+      _controller.addListener(updateKeepAlive);
+    }
   }
 
   @override
   void didUpdateWidget(CupertinoTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller == null && oldWidget.controller != null)
+    if (widget.controller == null && oldWidget.controller != null) {
       _controller = TextEditingController.fromValue(oldWidget.controller.value);
+      _controller.addListener(updateKeepAlive);
+    }
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
     final bool isEnabled = widget.enabled ?? true;
@@ -448,6 +465,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   @override
   void dispose() {
     _focusNode?.dispose();
+    _controller?.removeListener(updateKeepAlive);
     super.dispose();
   }
 
@@ -474,7 +492,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   }
 
   @override
-  bool get wantKeepAlive => false; //_splashes != null && _splashes.isNotEmpty;
+  bool get wantKeepAlive => _controller?.text?.isNotEmpty == true;
 
   @override
   void deactivate() {
@@ -492,6 +510,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       case OverlayVisibilityMode.notEditing:
         return !hasText;
     }
+    assert(false);
+    return null;
   }
 
   @override
