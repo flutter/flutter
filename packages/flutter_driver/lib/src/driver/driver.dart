@@ -242,7 +242,7 @@ class FlutterDriver {
         isolate.pauseEvent is! VMPauseExceptionEvent &&
         isolate.pauseEvent is! VMPauseInterruptedEvent &&
         isolate.pauseEvent is! VMResumeEvent) {
-      await Future<Null>.delayed(_kShortTimeout ~/ 10);
+      await Future<void>.delayed(_kShortTimeout ~/ 10);
       isolate = await isolateRef.loadRunnable();
     }
 
@@ -523,10 +523,10 @@ class FlutterDriver {
     // repeatedly until we either find the item or time out.
     bool isVisible = false;
     waitFor(item, timeout: timeout).then<void>((Null value) { isVisible = true; });
-    await Future<Null>.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     while (!isVisible) {
       await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));
-      await Future<Null>.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
     }
 
     return scrollIntoView(item, alignment: alignment);
@@ -661,7 +661,7 @@ class FlutterDriver {
     //       The two-second gap should be long enough for the GPU thread to
     //       finish rasterizing the frame, but not longer than necessary to keep
     //       driver tests as fast a possible.
-    await Future<Null>.delayed(const Duration(seconds: 2));
+    await Future<void>.delayed(const Duration(seconds: 2));
 
     final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot').timeout(timeout);
     return base64.decode(result['screenshot']);
@@ -863,7 +863,7 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
 
       if (timer.elapsed < _kLongTimeout * 2) {
         _log.info('Waiting for application to start');
-        await Future<Null>.delayed(_kPauseBetweenReconnectAttempts);
+        await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
         return attemptConnection();
       } else {
         _log.critical(

@@ -354,7 +354,7 @@ class FlutterDriverExtension {
     for (int moves = 0; moves < totalMoves; moves += 1) {
       currentLocation = currentLocation + delta;
       _prober.binding.dispatchEvent(pointer.move(currentLocation), hitTest);
-      await Future<Null>.delayed(pause);
+      await Future<void>.delayed(pause);
     }
     _prober.binding.dispatchEvent(pointer.up(), hitTest);
 
