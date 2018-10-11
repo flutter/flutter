@@ -191,6 +191,13 @@ class FlutterPlugin implements Plugin<Project> {
                         compile pluginProject
                     }
                 }
+		pluginProject.afterEvaluate {
+                    pluginProject.android.buildTypes {
+                        profile {
+                            initWith debug
+                        }
+                    }
+		}
                 pluginProject.afterEvaluate this.&addFlutterJarCompileOnlyDependency
             } else {
                 project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
@@ -212,9 +219,11 @@ class FlutterPlugin implements Plugin<Project> {
             } else {
                 if (project.getConfigurations().findByName("debugCompileOnly")) {
                     debugCompileOnly project.files(debugFlutterJar)
+                    profileCompileOnly project.files(profileFlutterJar)
                     releaseCompileOnly project.files(releaseFlutterJar)
                 } else {
                     debugProvided project.files(debugFlutterJar)
+                    profileProvided project.files(profileFlutterJar)
                     releaseProvided project.files(releaseFlutterJar)
                 }
             }

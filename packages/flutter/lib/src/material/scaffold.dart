@@ -1605,7 +1605,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           ),
           child: SafeArea(
             child: ButtonTheme.bar(
-              colorScheme: themeData.colorScheme,
               child: SafeArea(
                 top: false,
                 child: ButtonBar(
