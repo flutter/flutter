@@ -286,10 +286,10 @@ void main() {
   testUsingContext('plugin project with custom org', () async {
     return _createProject(
       projectDir,
-      <String>['--no-pub', '--template=plugin', '--org', 'com.bar.foo'],
+      <String>['--no-pub', '--template=plugin', '--org', 'com.bar.foo', '--project', 'xyz'],
       <String>[
-        'android/src/main/java/com/bar/foo/flutterproject/FlutterProjectPlugin.java',
-        'example/android/app/src/main/java/com/bar/foo/flutterprojectexample/MainActivity.java',
+        'android/src/main/java/com/bar/foo/xyz/XyzPlugin.java',
+        'example/android/app/src/main/java/com/bar/foo/xyzexample/MainActivity.java',
       ],
       unexpectedPaths: <String>[
         'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
