@@ -388,7 +388,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
           _activeCount -= 1;
           _disposeRecognizerIfInactive();
         }
-        if(mounted && widget.onDragEnd != null)
+        if (mounted && widget.onDragEnd != null)
           widget.onDragEnd(DraggableDetails._(
               wasAccepted: wasAccepted, velocity: velocity, offset: offset)
           );
