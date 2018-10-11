@@ -371,7 +371,7 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<void> _cleanupDevFS() async {
-    final List<Future<Null>> futures = <Future<Null>>[];
+    final List<Future<void>> futures = <Future<void>>[];
     for (FlutterDevice device in flutterDevices) {
       if (device.devFS != null) {
         // Cleanup the devFS; don't wait indefinitely, and ignore any errors.
@@ -383,7 +383,7 @@ class HotRunner extends ResidentRunner {
       }
       device.devFS = null;
     }
-    final Completer<Null> completer = Completer<Null>();
+    final Completer<void> completer = Completer<void>();
     Future.wait(futures).whenComplete(() { completer.complete(null); } ); // ignore: unawaited_futures
     return completer.future;
   }
@@ -392,17 +392,17 @@ class HotRunner extends ResidentRunner {
                              Uri entryUri,
                              Uri packagesUri,
                              Uri assetsDirectoryUri) async {
-    final List<Future<Null>> futures = <Future<Null>>[];
+    final List<Future<void>> futures = <Future<void>>[];
     for (FlutterView view in device.views)
       futures.add(view.runFromSource(entryUri, packagesUri, assetsDirectoryUri));
-    final Completer<Null> completer = Completer<Null>();
+    final Completer<void> completer = Completer<void>();
     Future.wait(futures).whenComplete(() { completer.complete(null); }); // ignore: unawaited_futures
     return completer.future;
   }
 
   Future<void> _launchFromDevFS(String mainScript) async {
     final String entryUri = fs.path.relative(mainScript, from: projectRootPath);
-    final List<Future<Null>> futures = <Future<Null>>[];
+    final List<Future<void>> futures = <Future<void>>[];
     for (FlutterDevice device in flutterDevices) {
       final Uri deviceEntryUri = device.devFS.baseUri.resolveUri(
         fs.path.toUri(entryUri));
@@ -455,12 +455,12 @@ class HotRunner extends ResidentRunner {
         device.generator.accept();
     }
     // Check if the isolate is paused and resume it.
-    final List<Future<Null>> futures = <Future<Null>>[];
+    final List<Future<void>> futures = <Future<void>>[];
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         if (view.uiIsolate != null) {
           // Reload the isolate.
-          final Completer<Null> completer = Completer<Null>();
+          final Completer<void> completer = Completer<void>();
           futures.add(completer.future);
           view.uiIsolate.reload().whenComplete(() { // ignore: unawaited_futures
             final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
@@ -673,7 +673,7 @@ class HotRunner extends ResidentRunner {
         vmReloadTimer.elapsed.inMilliseconds);
     final Stopwatch reassembleTimer = Stopwatch()..start();
     // Reload the isolate.
-    final List<Future<Null>> allDevices = <Future<Null>>[];
+    final List<Future<void>> allDevices = <Future<void>>[];
     for (FlutterDevice device in flutterDevices) {
       printTrace('Sending reload events to ${device.device.name}');
       final List<Future<ServiceObject>> futuresViews = <Future<ServiceObject>>[];
@@ -681,7 +681,7 @@ class HotRunner extends ResidentRunner {
         printTrace('Sending reload event to "${view.uiIsolate.name}"');
         futuresViews.add(view.uiIsolate.reload());
       }
-      final Completer<Null> deviceCompleter = Completer<Null>();
+      final Completer<void> deviceCompleter = Completer<void>();
       Future.wait(futuresViews).whenComplete(() { // ignore: unawaited_futures
         deviceCompleter.complete(device.refreshViews());
       });

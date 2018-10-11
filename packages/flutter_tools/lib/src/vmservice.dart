@@ -950,9 +950,9 @@ class VM extends ServiceObjectOwner {
 
   Future<void> refreshViews() async {
     if (!isFlutterEngine)
-      return Future<Null>.value(null);
+      return Future<void>.value(null);
     _viewCache.clear();
-    final Completer<Null> completer = Completer<Null>();
+    final Completer<void> completer = Completer<void>();
     final List<Future<ServiceObject>> futures = <Future<ServiceObject>>[];
     for (Isolate isolate in isolates.toList()) {
       futures.add(vmService.vm.invokeRpc<ServiceObject>('_flutter.listViews',
