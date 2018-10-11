@@ -266,6 +266,9 @@ void main() {
   });
 
   testWidgets('Title of items should be nullable', (WidgetTester tester) async {
+    const TestImageProvider iconProvider = TestImageProvider(16, 16);
+    List<int> itemsTapped = [];
+
     await pumpWidgetWithBoilerplate(
         tester,
         MediaQuery(
@@ -280,15 +283,21 @@ void main() {
               ),
               BottomNavigationBarItem(
                 icon: ImageIcon(
-                  TestImageProvider(24, 24),
+                  iconProvider,
                 ),
               ),
             ],
+            onTap: (index) => itemsTapped.add(index),
           ),
         ));
 
     expect(find.text('Tab 1'), findsOneWidget);
-    expect(find.text('Tab 2'), findsNothing);
+
+    final Finder finder = find.byWidgetPredicate(
+        (Widget widget) => widget is Image && widget.image == iconProvider);
+
+    await tester.tap(finder);
+    expect(itemsTapped, <int>[1]);
   });
 
   testWidgets('Hide border hides the top border of the tabBar',
