@@ -49,11 +49,11 @@ class _ShrineAppState extends State<ShrineApp>
       title: 'Shrine',
       home: HomePage(
         backdrop: Backdrop(
-          frontLayer: ProductPage(),
+          frontLayer: const ProductPage(),
           backLayer:
-          CategoryMenuPage(onCategoryTap: () => _controller.forward()),
-          frontTitle: Text('SHRINE'),
-          backTitle: Text('MENU'),
+              CategoryMenuPage(onCategoryTap: () => _controller.forward()),
+          frontTitle: const Text('SHRINE'),
+          backTitle: const Text('MENU'),
           controller: _controller,
         ),
         expandingBottomSheet: ExpandingBottomSheet(hideController: _controller),
@@ -99,7 +99,8 @@ ThemeData _buildShrineTheme() {
       textTheme: ButtonTextTheme.normal,
     ),
     primaryIconTheme: base.iconTheme.copyWith(color: kShrineBrown900),
-    inputDecorationTheme: InputDecorationTheme(border: CutCornersBorder()),
+    inputDecorationTheme:
+        const InputDecorationTheme(border: CutCornersBorder()),
     textTheme: _buildShrineTextTheme(base.textTheme),
     primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),
     accentTextTheme: _buildShrineTextTheme(base.accentTextTheme),
@@ -126,7 +127,7 @@ TextTheme _buildShrineTextTheme(TextTheme base) {
       fontSize: 14.0,
     ),
   )
-      .apply(
+  .apply(
     //fontFamily: 'Rubik',
     fontFamily: 'Raleway',
     displayColor: kShrineBrown900,
@@ -134,7 +135,7 @@ TextTheme _buildShrineTextTheme(TextTheme base) {
   );
 }
 
-const kShrineColorScheme = ColorScheme(
+const ColorScheme kShrineColorScheme = ColorScheme(
   primary: kShrinePink100,
   primaryVariant: kShrineBrown900,
   secondary: kShrinePink50,
