@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -76,7 +77,8 @@ void testUsingContext(String description, dynamic testMethod(), {
             when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
             return mock;
           },
-          Logger: () => BufferLogger()..supportsColor = false,
+          OutputPreferences: () => OutputPreferences(showColor: false),
+          Logger: () => BufferLogger(),
           OperatingSystemUtils: () => MockOperatingSystemUtils(),
           SimControl: () => MockSimControl(),
           Usage: () => MockUsage(),
