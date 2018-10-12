@@ -1,4 +1,4 @@
-Signature: 93e25f3892c4748d74a3d1abf63db5f2
+Signature: 93edc8d2e9428f87e18fbdf46ebe5ef9
 
 UNUSED LICENSES:
 
@@ -723,12 +723,6 @@ FILE: ../../../third_party/skia/bench/StreamBench.cpp
 FILE: ../../../third_party/skia/bench/SwizzleBench.cpp
 FILE: ../../../third_party/skia/bench/TileImageFilterBench.cpp
 FILE: ../../../third_party/skia/bench/VertexColorSpaceBench.cpp
-FILE: ../../../third_party/skia/experimental/pipe/SkPipe.h
-FILE: ../../../third_party/skia/experimental/pipe/SkPipeCanvas.cpp
-FILE: ../../../third_party/skia/experimental/pipe/SkPipeCanvas.h
-FILE: ../../../third_party/skia/experimental/pipe/SkPipeFormat.h
-FILE: ../../../third_party/skia/experimental/pipe/SkPipeReader.cpp
-FILE: ../../../third_party/skia/experimental/pipe/SkRefSet.h
 FILE: ../../../third_party/skia/experimental/svg/model/SkPEG.h
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGAttribute.cpp
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGAttribute.h
@@ -1494,9 +1488,6 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStrokeGeometry.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStrokeGeometry.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStroker.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStroker.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrAlphaThresholdFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAlphaThresholdFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAlphaThresholdFragmentProcessor.h
