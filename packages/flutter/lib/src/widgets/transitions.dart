@@ -390,6 +390,68 @@ class SizeTransition extends AnimatedWidget {
 /// Here's an illustration of the [FadeTransition] widget, with it's [opacity]
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/fade_transition.mp4}
+///
+/// ## Sample code
+///
+/// This code creates a widget that fades in some text. It needs to be implemented
+/// using a [StatefulWidget] to manage the state of the animation as it progresses.
+/// FadeTransition requires an [Animation], which is created from an
+/// [AnimationController] and a [Tween]. The [AnimationController] determines the
+/// duration of the animation, and is both initialized and started in the stateful
+/// widget's initState. The [Tween] defines the opacity value range from the
+/// beginning to the end of the animation.
+///
+/// ```dart
+/// class TextFadeIn extends StatefulWidget {
+///   TextFadeIn(this.text, {@required this.duration});
+///   final String text;
+///   final Duration duration;
+///
+///   @override
+///   createState() => _MyTextFadeInState();
+/// }
+///
+/// class _MyTextFadeInState extends State<TextFadeIn>
+///     with SingleTickerProviderStateMixin {
+///   AnimationController _controller;
+///   Animation _animation;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _controller = AnimationController(
+///       vsync: this,
+///       duration: widget.duration,
+///     );
+///     _animation = Tween(begin: 0.0, end: 1.0).animate(_controller);
+///     _controller.forward();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return FadeTransition(
+///         opacity: _animation,
+///         child: Text(widget.text));
+///   }
+///
+///   @override
+///   void didUpdateWidget(TextFadeIn oldWidget) {
+///     if(oldWidget.duration != widget.duration) {
+///     _controller
+///       ..reset()
+///       ..forward();
+///     }
+///     super.didUpdateWidget(oldWidget);
+///   }
+///
+///   @override
+///   dispose() {
+///     _controller.dispose();
+///     super.dispose();
+///   }
+/// }
+/// ```
+///
 class FadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
   ///
