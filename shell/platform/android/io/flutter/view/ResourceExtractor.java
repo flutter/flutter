@@ -101,6 +101,11 @@ class ResourceExtractor {
                     TIMESTAMP_PREFIX + packageInfo.versionCode + "-" + packageInfo.lastUpdateTime;
 
             final String[] existingTimestamps = getExistingTimestamps(dataDir);
+
+            if (existingTimestamps == null) {
+                return null;
+            }
+
             if (existingTimestamps.length != 1
                     || !expectedTimestamp.equals(existingTimestamps[0])) {
                 return expectedTimestamp;
@@ -173,7 +178,11 @@ class ResourceExtractor {
                 file.delete();
             }
         }
-        for (String timestamp : getExistingTimestamps(dataDir)) {
+        final String[] existingTimestamps = getExistingTimestamps(dataDir);
+        if (existingTimestamps == null) {
+            return;
+        }
+        for (String timestamp : existingTimestamps) {
             new File(dataDir, timestamp).delete();
         }
     }
