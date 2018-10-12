@@ -129,7 +129,6 @@ TextTheme _buildShrineTextTheme(TextTheme base) {
         ),
       )
       .apply(
-        //fontFamily: 'Rubik',
         fontFamily: 'Raleway',
         displayColor: kShrineBrown900,
         bodyColor: kShrineBrown900,
