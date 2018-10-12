@@ -332,5 +332,4 @@ void main() {
         decoratedBoxHiddenBorder.decoration;
     expect(boxDecorationHiddenBorder.border, isNull);
   });
-  
 }
