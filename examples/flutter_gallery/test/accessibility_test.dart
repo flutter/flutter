@@ -649,14 +649,12 @@ void main() {
         handle.dispose();
       });
 
-    testWidgets('overscroll_demo', (WidgetTester tester) async {
-      final AutomatedTestWidgetsFlutterBinding binding = tester.binding;
-      binding.addTime(const Duration(seconds: 3));
-      final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(const MaterialApp(home: OverscrollDemo()));
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
-      handle.dispose();
-    });
+      testWidgets('overscroll_demo $themeName', (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await tester.pumpWidget(MaterialApp(theme: theme, home: const OverscrollDemo()));
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        handle.dispose();
+      });
 
       testWidgets('page_selector_demo $themeName', (WidgetTester tester) async {
         final AutomatedTestWidgetsFlutterBinding binding = tester.binding;
