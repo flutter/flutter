@@ -13,6 +13,10 @@
 #include "flutter/fml/memory/ref_ptr.h"
 #include "txt/font_collection.h"
 
+namespace tonic {
+class DartLibraryNatives;
+}  // namespace tonic
+
 namespace blink {
 
 class FontCollection {
@@ -21,14 +25,21 @@ class FontCollection {
 
   ~FontCollection();
 
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
+
   std::shared_ptr<txt::FontCollection> GetFontCollection() const;
 
   void RegisterFonts(fml::RefPtr<AssetManager> asset_manager);
 
   void RegisterTestFonts();
 
+  void LoadFontFromList(const uint8_t* font_data,
+                        int length,
+                        std::string family_name);
+
  private:
   std::shared_ptr<txt::FontCollection> collection_;
+  sk_sp<txt::DynamicFontManager> dynamic_font_manager_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FontCollection);
 };

@@ -1087,3 +1087,16 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   /// cannot be used further.
   Paragraph build() native 'ParagraphBuilder_build';
 }
+
+/// Loads a font from a buffer and makes it available for rendering text.
+///
+/// * `list`: A list of bytes containing the font file.
+/// * `fontFamily`: The family name used to identify the font in text styles.
+///  If this is not provided, then the family name will be extracted from the font file.
+Future<void> loadFontFromList(Uint8List list, {String fontFamily}) {
+  return _futurize(
+    (_Callback<void> callback) => _loadFontFromList(list, callback, fontFamily)
+  );
+}
+
+String _loadFontFromList(Uint8List list, _Callback<void> callback, String fontFamily) native 'loadFontFromList';
