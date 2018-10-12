@@ -1023,6 +1023,8 @@ FILE: ../../../flutter/third_party/txt/src/txt/test_font_manager.h
 FILE: ../../../flutter/third_party/txt/src/txt/text_baseline.h
 FILE: ../../../flutter/third_party/txt/src/txt/text_decoration.cc
 FILE: ../../../flutter/third_party/txt/src/txt/text_decoration.h
+FILE: ../../../flutter/third_party/txt/src/txt/text_shadow.cc
+FILE: ../../../flutter/third_party/txt/src/txt/text_shadow.h
 FILE: ../../../flutter/third_party/txt/src/txt/text_style.cc
 FILE: ../../../flutter/third_party/txt/src/txt/text_style.h
 FILE: ../../../flutter/third_party/txt/src/txt/typeface_font_asset_provider.cc

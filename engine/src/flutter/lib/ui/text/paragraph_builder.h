@@ -44,7 +44,8 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
                  Dart_Handle background_objects,
                  Dart_Handle background_data,
                  Dart_Handle foreground_objects,
-                 Dart_Handle foreground_data);
+                 Dart_Handle foreground_data,
+                 Dart_Handle shadows_data);
 
   void pop();
 

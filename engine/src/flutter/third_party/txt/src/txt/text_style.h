@@ -18,11 +18,13 @@
 #define LIB_TXT_SRC_TEXT_STYLE_H_
 
 #include <string>
+#include <vector>
 
 #include "font_style.h"
 #include "font_weight.h"
 #include "text_baseline.h"
 #include "text_decoration.h"
+#include "text_shadow.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkPaint.h"
 
@@ -51,6 +53,7 @@ class TextStyle {
   SkPaint background;
   bool has_foreground = false;
   SkPaint foreground;
+  std::vector<TextShadow> text_shadows;
 
   TextStyle();
 

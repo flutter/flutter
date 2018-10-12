@@ -51,6 +51,13 @@ bool TextStyle::equals(const TextStyle& other) const {
     return false;
   if (foreground != other.foreground)
     return false;
+  if (text_shadows.size() != other.text_shadows.size())
+    return false;
+  for (size_t shadow_index = 0; shadow_index < text_shadows.size();
+       ++shadow_index) {
+    if (text_shadows[shadow_index] != other.text_shadows[shadow_index])
+      return false;
+  }
 
   return true;
 }
