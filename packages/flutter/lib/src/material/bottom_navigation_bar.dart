@@ -477,8 +477,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
               },
               flex: _evaluateFlex(_animations[i]),
               selected: i == widget.currentIndex,
-              indexLabel: localizations.tabLabel(
-                  tabIndex: i + 1, tabCount: widget.items.length),
+              indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
             ),
           );
         }
