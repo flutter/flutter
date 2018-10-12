@@ -496,7 +496,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           onChanged: widget.onChanged,
           onEditingComplete: widget.onEditingComplete,
           onSubmitted: widget.onSubmitted,
-          // onSelectionChanged: _handleSelectionChanged,
           inputFormatters: formatters,
           rendererIgnoresPointer: true,
           cursorWidth: widget.cursorWidth,
@@ -579,8 +578,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       },
       child: IgnorePointer(
         ignoring: !enabled,
-        child: DecoratedBox(
+        child: Container(
           decoration: widget.decoration,
+          // The main decoration and the disabled scrim exists separately.
           child: Container(
             color: enabled ? null : _kDisabledBackground,
             child: GestureDetector(
