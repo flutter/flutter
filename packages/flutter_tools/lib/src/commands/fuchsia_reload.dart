@@ -158,6 +158,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
         final FlutterDevice flutterDevice = FlutterDevice(
           device,
           trackWidgetCreation: false,
+          viewFilter: isolateName,
         );
         flutterDevice.observatoryUris = observatoryUris;
           final HotRunner hotRunner = HotRunner(<FlutterDevice>[flutterDevice],
@@ -166,7 +167,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
           projectRootPath: _fuchsiaProjectPath,
               packagesFilePath: _dotPackagesPath);
         printStatus('Connecting to $_modName');
-        await hotRunner.attach(viewFilter: isolateName);
+        await hotRunner.attach();
       } finally {
         await Future.wait<void>(forwardedPorts.map<Future<void>>((_PortForwarder pf) => pf.stop()));
       }

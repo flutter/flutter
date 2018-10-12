@@ -166,6 +166,14 @@ abstract class FlutterCommand extends Command<void> {
         valueHelp: 'x.y.z');
   }
 
+  void usesViewFilterOption({@required bool hide}) {
+    argParser.addOption('view-filter',
+      defaultsTo: null,
+      hide: hide,
+      help: 'Specify the view control. All views are targeted when this isn\'t '
+            'specified.');
+  }
+
   void addBuildModeFlags({bool defaultToRelease = true, bool verboseHelp = false}) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 

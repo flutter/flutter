@@ -46,6 +46,7 @@ abstract class RunCommandBase extends FlutterCommand {
     usesTargetOption();
     usesPortOptions();
     usesPubOption();
+    usesViewFilterOption(hide: !verboseHelp);
   }
 
   bool get traceStartup => argResults['trace-startup'];
@@ -351,6 +352,7 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
+        viewFilter: argResults['view-filter'],
       );
     }).toList();
 

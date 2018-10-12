@@ -338,6 +338,7 @@ class AppDomain extends Domain {
     String packagesFilePath,
     String dillOutputPath,
     bool ipv6 = false,
+    String viewFilter,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
       throw '${toTitleCase(options.buildInfo.modeName)} mode is not supported for emulators.';
@@ -351,6 +352,7 @@ class AppDomain extends Domain {
       device,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
+      viewFilter: viewFilter,
     );
 
     ResidentRunner runner;
