@@ -65,6 +65,20 @@ class _LoginPageState extends State<LoginPage> {
             ),
             ButtonBar(
               children: <Widget>[
+                Tooltip(
+                  message: 'Back',
+                  child: FlatButton(
+                    child: const Text(
+                      'EXIT',
+                    ),
+                    shape: const BeveledRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true).pop();
+                    },
+                  ),
+                ),
                 FlatButton(
                   child: const Text('CANCEL'),
                   shape: const BeveledRectangleBorder(
