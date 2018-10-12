@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-#ifndef TXT_FONT_ASSET_PROVIDER_H_
-#define TXT_FONT_ASSET_PROVIDER_H_
+#include <algorithm>
+#include <string>
 
-#include "third_party/skia/include/core/SkFontMgr.h"
+#include "txt/font_asset_provider.h"
 
 namespace txt {
 
-class FontAssetProvider {
- public:
-  virtual ~FontAssetProvider() = default;
+// Return a canonicalized version of a family name that is suitable for
+// matching.
+std::string FontAssetProvider::CanonicalFamilyName(std::string family_name) {
+  std::string result(family_name.length(), 0);
 
-  virtual size_t GetFamilyCount() const = 0;
-  virtual std::string GetFamilyName(int index) const = 0;
-  virtual SkFontStyleSet* MatchFamily(const std::string& family_name) = 0;
+  // Convert ASCII characters to lower case.
+  std::transform(family_name.begin(), family_name.end(), result.begin(),
+                 [](char c) { return (c & 0x80) ? c : ::tolower(c); });
 
- protected:
-  static std::string CanonicalFamilyName(std::string family_name);
-};
+  return result;
+}
 
 }  // namespace txt
-
-#endif  // TXT_FONT_ASSET_PROVIDER_H_

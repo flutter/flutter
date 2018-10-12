@@ -66,6 +66,7 @@ source_set("txt") {
     "src/minikin/WordBreaker.h",
     "src/txt/asset_font_manager.cc",
     "src/txt/asset_font_manager.h",
+    "src/txt/font_asset_provider.cc",
     "src/txt/font_asset_provider.h",
     "src/txt/font_collection.cc",
     "src/txt/font_collection.h",

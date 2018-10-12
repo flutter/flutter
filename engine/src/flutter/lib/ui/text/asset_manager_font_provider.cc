@@ -40,7 +40,7 @@ std::string AssetManagerFontProvider::GetFamilyName(int index) const {
 // |FontAssetProvider|
 SkFontStyleSet* AssetManagerFontProvider::MatchFamily(
     const std::string& family_name) {
-  auto found = registered_families_.find(family_name);
+  auto found = registered_families_.find(CanonicalFamilyName(family_name));
   if (found == registered_families_.end()) {
     return nullptr;
   }
@@ -49,13 +49,14 @@ SkFontStyleSet* AssetManagerFontProvider::MatchFamily(
 
 void AssetManagerFontProvider::RegisterAsset(std::string family_name,
                                              std::string asset) {
-  auto family_it = registered_families_.find(family_name);
+  std::string canonical_name = CanonicalFamilyName(family_name);
+  auto family_it = registered_families_.find(canonical_name);
 
   if (family_it == registered_families_.end()) {
     family_names_.push_back(family_name);
     family_it = registered_families_
                     .emplace(std::piecewise_construct,
-                             std::forward_as_tuple(family_name),
+                             std::forward_as_tuple(canonical_name),
                              std::forward_as_tuple(asset_manager_))
                     .first;
   }
