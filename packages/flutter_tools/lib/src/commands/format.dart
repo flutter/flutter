@@ -28,6 +28,10 @@ class FormatCommand extends FlutterCommand {
       defaultsTo: false,
       negatable: false,
     );
+    argParser.addOption('line-length',
+      abbr: 'l',
+      help: 'Wrap lines longer than this.',
+    );
   }
 
   @override
@@ -70,6 +74,12 @@ class FormatCommand extends FlutterCommand {
 
     if (argResults['set-exit-if-changed']) {
       command.add('--set-exit-if-changed');
+    }
+
+    final String lineLength = argResults['line-length'];
+    if (lineLength != null) {
+      command.add('-l');
+      command.add(lineLength);
     }
 
     command..addAll(argResults.rest);
