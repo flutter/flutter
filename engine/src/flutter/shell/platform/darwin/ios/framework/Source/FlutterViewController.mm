@@ -51,6 +51,7 @@
   // setup a shell along with its platform view before the view has to appear.
   fml::scoped_nsobject<FlutterView> _flutterView;
   fml::scoped_nsobject<UIView> _splashScreenView;
+  fml::ScopedBlock<void (^)(void)> _flutterViewRenderedCallback;
   UIInterfaceOrientationMask _orientationPreferences;
   UIStatusBarStyle _statusBarStyle;
   blink::ViewportMetrics _viewportMetrics;
@@ -367,6 +368,10 @@
       completion:^(BOOL finished) {
         [_splashScreenView.get() removeFromSuperview];
         _splashScreenView.reset();
+        if (_flutterViewRenderedCallback != nil) {
+          _flutterViewRenderedCallback.get()();
+          _flutterViewRenderedCallback.reset();
+        }
       }];
 }
 
@@ -441,6 +446,10 @@
   _splashScreenView.reset([view retain]);
   _splashScreenView.get().autoresizingMask =
       UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+}
+
+- (void)setFlutterViewDidRenderCallback:(void (^)(void))callback {
+  _flutterViewRenderedCallback.reset(callback, fml::OwnershipPolicy::Retain);
 }
 
 #pragma mark - Surface creation and teardown updates
