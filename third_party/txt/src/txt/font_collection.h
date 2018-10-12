@@ -42,6 +42,7 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
 
   void SetDefaultFontManager(sk_sp<SkFontMgr> font_manager);
   void SetAssetFontManager(sk_sp<SkFontMgr> font_manager);
+  void SetDynamicFontManager(sk_sp<SkFontMgr> font_manager);
   void SetTestFontManager(sk_sp<SkFontMgr> font_manager);
 
   std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamily(
@@ -73,6 +74,7 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
 
   sk_sp<SkFontMgr> default_font_manager_;
   sk_sp<SkFontMgr> asset_font_manager_;
+  sk_sp<SkFontMgr> dynamic_font_manager_;
   sk_sp<SkFontMgr> test_font_manager_;
   std::unordered_map<FamilyKey,
                      std::shared_ptr<minikin::FontCollection>,
