@@ -69,7 +69,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// This is equivalent to [pushTransform] with a matrix with only translation.
   ///
   /// See [pop] for details about the operation stack.
-  void pushOffset(double dx, double dy) native 'SceneBuilder_pushOffset';
+  EngineLayer pushOffset(double dx, double dy) native 'SceneBuilder_pushOffset';
 
   /// Pushes a rectangular clip operation onto the operation stack.
   ///
@@ -177,10 +177,10 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   ///
   /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
   // ignore: deprecated_member_use
-  void pushPhysicalShape({ Path path, double elevation, Color color, Color shadowColor, Clip clipBehavior = defaultClipBehavior}) {
-    _pushPhysicalShape(path, elevation, color.value, shadowColor?.value ?? 0xFF000000, clipBehavior.index);
+  EngineLayer pushPhysicalShape({ Path path, double elevation, Color color, Color shadowColor, Clip clipBehavior = defaultClipBehavior}) {
+    return _pushPhysicalShape(path, elevation, color.value, shadowColor?.value ?? 0xFF000000, clipBehavior.index);
   }
-  void _pushPhysicalShape(Path path, double elevation, int color, int shadowColor, int clipBehavior) native
+  EngineLayer _pushPhysicalShape(Path path, double elevation, int color, int shadowColor, int clipBehavior) native
     'SceneBuilder_pushPhysicalShape';
 
   /// Ends the effect of the most recently pushed operation.
@@ -190,6 +190,16 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Calling this function removes the most recently added operation from the
   /// stack.
   void pop() native 'SceneBuilder_pop';
+
+  /// Add a retained engine layer subtree from previous frames.
+  ///
+  /// All the engine layers that are in the subtree of the retained layer will
+  /// be automatically appended to the current engine layer tree.
+  ///
+  /// Therefore, when implementing a subclas of the [Layer] concept defined in
+  /// the rendering layer of Flutter's framework, once this is called, there's
+  /// no need to call [addToScene] for its children layers.
+  EngineLayer addRetained(EngineLayer retainedLayer) native 'SceneBuilder_addRetained';
 
   /// Adds an object to the scene that displays performance statistics.
   ///
