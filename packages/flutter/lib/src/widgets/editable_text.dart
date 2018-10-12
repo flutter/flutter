@@ -543,7 +543,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         widget.focusNode.unfocus();
     }
 
-        // Invoke optional callback with the user's submitted content.
+    // Invoke optional callback with the user's submitted content.
     if (widget.onSubmitted != null)
       widget.onSubmitted(_value.text);
   }
