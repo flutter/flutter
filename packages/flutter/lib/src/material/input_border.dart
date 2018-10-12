@@ -169,7 +169,7 @@ class FilledInputBorder extends InputBorder {
   @override
   Path getInnerPath(Rect rect, { TextDirection textDirection }) {
     return Path()
-      ..addRect(Rect.fromLTWH(rect.left, rect.top, rect.width, math.max(0.0, rect.height - borderSide.width)));
+      ..addRect(rect);
   }
 
   @override
@@ -194,12 +194,11 @@ class FilledInputBorder extends InputBorder {
     if (runtimeType != other.runtimeType)
       return false;
     final FilledInputBorder typedOther = other;
-    return typedOther.borderSide == borderSide
-        && typedOther.borderRadius == borderRadius;
+    return typedOther.borderRadius == borderRadius;
   }
 
   @override
-  int get hashCode => borderSide.hashCode;
+  int get hashCode => borderRadius.hashCode;
 }
 
 /// Draws a horizontal line at the bottom of an [InputDecorator]'s container and
