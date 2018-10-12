@@ -93,9 +93,41 @@ abstract class BindingBase {
   /// Implementations of this method must call their superclass
   /// implementation.
   ///
-  /// Service extensions are only exposed when the observatory is
-  /// included in the build, which should only happen in checked mode
-  /// and in profile mode.
+  /// A registered service extension can only be activated if the vm-service
+  /// is included in the build, which only happens in debug and profile mode.
+  /// Although a service extension cannot be used in release mode its code may
+  /// still be included in the Dart snapshot and blow up binary size if it is
+  /// not wrapped in a guard that allows the tree shaker to remove it.
+  ///
+  /// ## Sample Code
+  ///
+  /// The following code registers a service extension that is only included in
+  /// debug builds:
+  ///
+  /// ```dart
+  /// assert(() {
+  ///   registerSignalServiceExtension(
+  ///     name: 'noop-debug-only',
+  ///     callback: () => Future<Null>.value(),
+  ///   );
+  /// }());
+  ///
+  /// ```
+  ///
+  /// A service extension registered with the following code snippet is
+  /// available in debug and profile mode:
+  ///
+  /// ```dart
+  /// if (!const bool.fromEnvironment('dart.vm.product')) {
+  //   registerSignalServiceExtension(
+  //     'ext.flutter.noop-debug-and-profile',
+  //     () => Future<Null>.value(),
+  //   );
+  // }
+  /// ```
+  ///
+  /// Both guards ensure that Dart's tree shaker can remove the code for the
+  /// service extension in release builds.
   ///
   /// See also:
   ///
@@ -104,18 +136,23 @@ abstract class BindingBase {
   @mustCallSuper
   void initServiceExtensions() {
     assert(!_debugServiceExtensionsRegistered);
-    registerSignalServiceExtension(
-      name: 'reassemble',
-      callback: reassembleApplication,
-    );
-    registerSignalServiceExtension(
-      name: 'exit',
-      callback: _exitApplication,
-    );
-    registerSignalServiceExtension(
-      name: 'frameworkPresent',
-      callback: () => Future<Null>.value(),
-    );
+
+    assert(() {
+      registerSignalServiceExtension(
+        name: 'reassemble',
+        callback: reassembleApplication,
+      );
+    }());
+
+    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
+
+    if (!isReleaseMode) {
+      registerSignalServiceExtension(
+        name: 'exit',
+        callback: _exitApplication,
+      );
+    }
+
     assert(() {
       registerServiceExtension(
         name: 'platformOverride',
