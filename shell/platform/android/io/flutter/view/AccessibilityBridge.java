@@ -216,7 +216,7 @@ class AccessibilityBridge
             // TODO(jonahwilliams): Figure out a way conform to the expected id from TalkBack's
             // CustomLabelManager. talkback/src/main/java/labeling/CustomLabelManager.java#L525
         }
-        if (object.hasAction(Action.DISMISS)) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2 && object.hasAction(Action.DISMISS)) {
             result.setDismissable(true);
             result.addAction(AccessibilityNodeInfo.ACTION_DISMISS);
         }
