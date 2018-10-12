@@ -259,6 +259,7 @@ Int32List _encodeTextStyle(
   Locale locale,
   Paint background,
   Paint foreground,
+  List<Shadow> shadows
 ) {
   final Int32List result = new Int32List(8);
   if (color != null) {
@@ -321,6 +322,10 @@ Int32List _encodeTextStyle(
     result[0] |= 1 << 15;
     // Passed separately to native.
   }
+  if (shadows != null) {
+    result[0] |= 1 << 16;
+    // Passed separately to native.
+  }
   return result;
 }
 
@@ -359,6 +364,7 @@ class TextStyle {
     Locale locale,
     Paint background,
     Paint foreground,
+    List<Shadow> shadows,
   }) : assert(color == null || foreground == null,
          'Cannot provide both a color and a foreground\n'
          'The color argument is just a shorthand for "foreground: new Paint()..color = color".'
@@ -379,6 +385,7 @@ class TextStyle {
          locale,
          background,
          foreground,
+         shadows,
        ),
        _fontFamily = fontFamily ?? '',
        _fontSize = fontSize,
@@ -387,7 +394,8 @@ class TextStyle {
        _height = height,
        _locale = locale,
        _background = background,
-       _foreground = foreground;
+       _foreground = foreground,
+       _shadows = shadows;
 
   final Int32List _encoded;
   final String _fontFamily;
@@ -398,6 +406,7 @@ class TextStyle {
   final Locale _locale;
   final Paint _background;
   final Paint _foreground;
+  final List<Shadow> _shadows;
 
   @override
   bool operator ==(dynamic other) {
@@ -419,6 +428,8 @@ class TextStyle {
       if (_encoded[index] != typedOther._encoded[index])
         return false;
     }
+    if (!Shadow._shadowsListEquals(_shadows, typedOther._shadows))
+      return false;
     return true;
   }
 
@@ -428,21 +439,22 @@ class TextStyle {
   @override
   String toString() {
     return 'TextStyle('
-             'color: ${          _encoded[0] & 0x0002 == 0x0002 ? new Color(_encoded[1])                  : "unspecified"}, '
-             'decoration: ${     _encoded[0] & 0x0004 == 0x0004 ? new TextDecoration._(_encoded[2])       : "unspecified"}, '
-             'decorationColor: ${_encoded[0] & 0x0008 == 0x0008 ? new Color(_encoded[3])                  : "unspecified"}, '
-             'decorationStyle: ${_encoded[0] & 0x0010 == 0x0010 ? TextDecorationStyle.values[_encoded[4]] : "unspecified"}, '
-             'fontWeight: ${     _encoded[0] & 0x0020 == 0x0020 ? FontWeight.values[_encoded[5]]          : "unspecified"}, '
-             'fontStyle: ${      _encoded[0] & 0x0040 == 0x0040 ? FontStyle.values[_encoded[6]]           : "unspecified"}, '
-             'textBaseline: ${   _encoded[0] & 0x0080 == 0x0080 ? TextBaseline.values[_encoded[7]]        : "unspecified"}, '
-             'fontFamily: ${     _encoded[0] & 0x0100 == 0x0100 ? _fontFamily                             : "unspecified"}, '
-             'fontSize: ${       _encoded[0] & 0x0200 == 0x0200 ? _fontSize                               : "unspecified"}, '
-             'letterSpacing: ${  _encoded[0] & 0x0400 == 0x0400 ? "${_letterSpacing}x"                    : "unspecified"}, '
-             'wordSpacing: ${    _encoded[0] & 0x0800 == 0x0800 ? "${_wordSpacing}x"                      : "unspecified"}, '
-             'height: ${         _encoded[0] & 0x1000 == 0x1000 ? "${_height}x"                           : "unspecified"}, '
-             'locale: ${         _encoded[0] & 0x2000 == 0x2000 ? _locale                                 : "unspecified"}, '
-             'background: ${     _encoded[0] & 0x4000 == 0x4000 ? _background                             : "unspecified"}, '
-             'foreground: ${     _encoded[0] & 0x8000 == 0x8000 ? _foreground                             : "unspecified"}'
+             'color: ${          _encoded[0] & 0x00002 == 0x00002 ? new Color(_encoded[1])                  : "unspecified"}, '
+             'decoration: ${     _encoded[0] & 0x00004 == 0x00004 ? new TextDecoration._(_encoded[2])       : "unspecified"}, '
+             'decorationColor: ${_encoded[0] & 0x00008 == 0x00008 ? new Color(_encoded[3])                  : "unspecified"}, '
+             'decorationStyle: ${_encoded[0] & 0x00010 == 0x00010 ? TextDecorationStyle.values[_encoded[4]] : "unspecified"}, '
+             'fontWeight: ${     _encoded[0] & 0x00020 == 0x00020 ? FontWeight.values[_encoded[5]]          : "unspecified"}, '
+             'fontStyle: ${      _encoded[0] & 0x00040 == 0x00040 ? FontStyle.values[_encoded[6]]           : "unspecified"}, '
+             'textBaseline: ${   _encoded[0] & 0x00080 == 0x00080 ? TextBaseline.values[_encoded[7]]        : "unspecified"}, '
+             'fontFamily: ${     _encoded[0] & 0x00100 == 0x00100 ? _fontFamily                             : "unspecified"}, '
+             'fontSize: ${       _encoded[0] & 0x00200 == 0x00200 ? _fontSize                               : "unspecified"}, '
+             'letterSpacing: ${  _encoded[0] & 0x00400 == 0x00400 ? "${_letterSpacing}x"                    : "unspecified"}, '
+             'wordSpacing: ${    _encoded[0] & 0x00800 == 0x00800 ? "${_wordSpacing}x"                      : "unspecified"}, '
+             'height: ${         _encoded[0] & 0x01000 == 0x01000 ? "${_height}x"                           : "unspecified"}, '
+             'locale: ${         _encoded[0] & 0x02000 == 0x02000 ? _locale                                 : "unspecified"}, '
+             'background: ${     _encoded[0] & 0x04000 == 0x04000 ? _background                             : "unspecified"}, '
+             'foreground: ${     _encoded[0] & 0x08000 == 0x08000 ? _foreground                             : "unspecified"}, '
+             'shadows: ${        _encoded[0] & 0x10000 == 0x10000 ? _shadows                                : "unspecified"}'
            ')';
   }
 }
@@ -1035,6 +1047,7 @@ class Paragraph extends NativeFieldWrapperClass2 {
 /// After constructing a [Paragraph], call [Paragraph.layout] on it and then
 /// paint it with [Canvas.drawParagraph].
 class ParagraphBuilder extends NativeFieldWrapperClass2 {
+
   /// Creates a [ParagraphBuilder] object, which is used to create a
   /// [Paragraph].
   @pragma('vm:entry-point')
@@ -1044,8 +1057,8 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   /// Applies the given style to the added text until [pop] is called.
   ///
   /// See [pop] for details.
-  void pushStyle(TextStyle style) => _pushStyle(style._encoded, style._fontFamily, style._fontSize, style._letterSpacing, style._wordSpacing, style._height, _encodeLocale(style._locale), style._background?._objects, style._background?._data, style._foreground?._objects, style._foreground?._data);
-  void _pushStyle(Int32List encoded, String fontFamily, double fontSize, double letterSpacing, double wordSpacing, double height, String locale, List<dynamic> backgroundObjects, ByteData backgroundData, List<dynamic> foregroundObjects, ByteData foregroundData) native 'ParagraphBuilder_pushStyle';
+  void pushStyle(TextStyle style) => _pushStyle(style._encoded, style._fontFamily, style._fontSize, style._letterSpacing, style._wordSpacing, style._height, _encodeLocale(style._locale), style._background?._objects, style._background?._data, style._foreground?._objects, style._foreground?._data, Shadow._encodeShadows(style._shadows));
+  void _pushStyle(Int32List encoded, String fontFamily, double fontSize, double letterSpacing, double wordSpacing, double height, String locale, List<dynamic> backgroundObjects, ByteData backgroundData, List<dynamic> foregroundObjects, ByteData foregroundData, ByteData shadowsData) native 'ParagraphBuilder_pushStyle';
 
   static String _encodeLocale(Locale locale) => locale?.toString() ?? '';
 

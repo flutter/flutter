@@ -89,6 +89,8 @@ source_set("txt") {
     "src/txt/text_baseline.h",
     "src/txt/text_decoration.cc",
     "src/txt/text_decoration.h",
+    "src/txt/text_shadow.cc",
+    "src/txt/text_shadow.h",
     "src/txt/text_style.cc",
     "src/txt/text_style.h",
     "src/txt/typeface_font_asset_provider.cc",
