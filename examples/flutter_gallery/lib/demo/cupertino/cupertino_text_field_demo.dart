@@ -66,7 +66,6 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
         size: 28.0,
       ),
       padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
-      leadingMode: OverlayVisibilityMode.always,
       clearButtonMode: OverlayVisibilityMode.editing,
       textCapitalization: TextCapitalization.words,
       autocorrect: false,
@@ -85,9 +84,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
         size: 28.0,
       ),
       padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
-      leadingMode: OverlayVisibilityMode.always,
       clearButtonMode: OverlayVisibilityMode.editing,
-      textCapitalization: TextCapitalization.none,
       keyboardType: TextInputType.emailAddress,
       autocorrect: false,
       decoration: BoxDecoration(
@@ -106,7 +103,6 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
         size: 28.0,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
-      leadingMode: OverlayVisibilityMode.always,
       clearButtonMode: OverlayVisibilityMode.editing,
       textCapitalization: TextCapitalization.words,
       decoration: const BoxDecoration(
@@ -124,9 +120,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
         size: 28.0,
       ),
       padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
-      leadingMode: OverlayVisibilityMode.always,
       clearButtonMode: OverlayVisibilityMode.editing,
-      textCapitalization: TextCapitalization.none,
       autocorrect: false,
       obscureText: true,
       decoration: BoxDecoration(
@@ -136,9 +130,26 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
     );
   }
 
+  Widget _buildTagsField() {
+    return CupertinoTextField(
+      controller: TextEditingController(text: 'colleague, reading club'),
+      leading: const Icon(
+        CupertinoIcons.tags_solid,
+        color: CupertinoColors.lightBackgroundGray,
+        size: 28.0,
+      ),
+      enabled: false,
+      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
+      // We don't want a new navigator but we want the CupertinoApp's defaults.
       builder: (BuildContext context, Widget navigator) {
         return CupertinoPageScaffold(
           navigationBar: const CupertinoNavigationBar(
@@ -155,6 +166,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
                     _buildEmailField(),
                     _buildLocationField(),
                     _buildPinField(),
+                    _buildTagsField(),
                   ],
                 ),
               ),

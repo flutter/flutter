@@ -38,6 +38,7 @@ const TextStyle _kDefaultTextStyle = TextStyle(
 
 const Color _kSelectionHighlightColor = Color(0x667FAACF);
 const Color _kInactiveTextColor = Color(0xFFC2C2C2);
+const Color _kDisabledBackground = Color(0xFFFAFAFA);
 
 /// Visibility of text field overlays based on the state of the current text entry.
 enum OverlayVisibilityMode {
@@ -216,10 +217,7 @@ class CupertinoTextField extends StatefulWidget {
   /// Defaults to never appearing and cannot be null.
   final OverlayVisibilityMode clearButtonMode;
 
-  /// The type of keyboard to use for editing the text.
-  ///
-  /// Defaults to [TextInputType.text] if [maxLines] is one and
-  /// [TextInputType.multiline] otherwise.
+  /// {@macro flutter.widgets.editableText.keyboardType}
   final TextInputType keyboardType;
 
   /// The type of action button to use for the keyboard.
@@ -228,62 +226,29 @@ class CupertinoTextField extends StatefulWidget {
   /// [TextInputType.multiline] and [TextInputAction.done] otherwise.
   final TextInputAction textInputAction;
 
-  /// Configures how the platform keyboard will select an uppercase or
-  /// lowercase keyboard.
-  ///
-  /// Only supports text keyboards, other keyboard types will ignore this
-  /// configuration. Capitalization is locale-aware.
-  ///
-  /// Defaults to [TextCapitalization.none]. Must not be null.
-  ///
-  /// See also:
-  ///
-  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization textCapitalization;
 
   /// The style to use for the text being edited.
   ///
-  /// This text style is also used as the base style for the [decoration].
+  /// Also serves as a base for the [placeholder] text's style.
   ///
-  /// If null, defaults to the `subhead` text style from the current [Theme].
+  /// Defaults to a standard iOS style and cannot be null.
   final TextStyle style;
 
-  /// How the text being edited should be aligned horizontally.
-  ///
-  /// Defaults to [TextAlign.start].
+  /// {@macro flutter.widgets.editableText.textAlign}
   final TextAlign textAlign;
 
-  /// Whether this text field should focus itself if nothing else is already
-  /// focused.
-  ///
-  /// If true, the keyboard will open as soon as this text field obtains focus.
-  /// Otherwise, the keyboard is only shown after the user taps the text field.
-  ///
-  /// Defaults to false. Cannot be null.
-  // See https://github.com/flutter/flutter/issues/7035 for the rationale for this
-  // keyboard behavior.
+  /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
 
-  /// Whether to hide the text being edited (e.g., for passwords).
-  ///
-  /// When this is set to true, all the characters in the text field are
-  /// replaced by U+2022 BULLET characters (•).
-  ///
-  /// Defaults to false. Cannot be null.
+  /// {@macro flutter.widgets.editableText.obscureText}
   final bool obscureText;
 
-  /// Whether to enable autocorrection.
-  ///
-  /// Defaults to true. Cannot be null.
+  /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
 
-  /// The maximum number of lines for the text to span, wrapping if necessary.
-  ///
-  /// If this is 1 (the default), the text will not wrap, but will scroll
-  /// horizontally instead.
-  ///
-  /// If this is null, there is no limit to the number of lines. If it is not
-  /// null, the value must be greater than zero.
+  /// {@macro flutter.widgets.editableText.maxLines}
   final int maxLines;
 
   /// The maximum number of characters (Unicode scalar values) to allow in the
@@ -308,11 +273,11 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// ## Limitations
   ///
-  /// The TextField does not currently count Unicode grapheme clusters (i.e.
-  /// characters visible to the user), it counts Unicode scalar values, which
-  /// leaves out a number of useful possible characters (like many emoji and
-  /// composed characters), so this will be inaccurate in the presence of those
-  /// characters. If you expect to encounter these kinds of characters, be
+  /// The CupertinoTextField does not currently count Unicode grapheme clusters
+  /// (i.e. characters visible to the user), it counts Unicode scalar values,
+  /// which leaves out a number of useful possible characters (like many emoji
+  /// and composed characters), so this will be inaccurate in the presence of
+  /// those characters. If you expect to encounter these kinds of characters, be
   /// generous in the maxLength used.
   ///
   /// For instance, the character "ö" can be represented as '\u{006F}\u{0308}',
@@ -342,70 +307,44 @@ class CupertinoTextField extends StatefulWidget {
   /// [maxLength] is exceeded.
   final bool maxLengthEnforced;
 
-  /// Called when the text being edited changes.
+  /// {@macro flutter.widgets.editableText.onChanged}
   final ValueChanged<String> onChanged;
 
-  /// Called when the user submits editable content (e.g., user presses the "done"
-  /// button on the keyboard).
-  ///
-  /// The default implementation of [onEditingComplete] executes 2 different
-  /// behaviors based on the situation:
-  ///
-  ///  - When a completion action is pressed, such as "done", "go", "send", or
-  ///    "search", the user's content is submitted to the [controller] and then
-  ///    focus is given up.
-  ///
-  ///  - When a non-completion action is pressed, such as "next" or "previous",
-  ///    the user's content is submitted to the [controller], but focus is not
-  ///    given up because developers may want to immediately move focus to
-  ///    another input widget within [onSubmitted].
-  ///
-  /// Providing [onEditingComplete] prevents the aforementioned default behavior.
+  /// {@macro flutter.widgets.editableText.onEditingComplete}
   final VoidCallback onEditingComplete;
 
-  /// Called when the user indicates that they are done editing the text in the
-  /// field.
+  /// {@macro flutter.widgets.editableText.onSubmitted}
   final ValueChanged<String> onSubmitted;
 
-  /// Optional input validation and formatting overrides.
-  ///
-  /// Formatters are run in the provided order when the text input changes.
+  /// {@macro flutter.widgets.editableText.inputFormatters}
   final List<TextInputFormatter> inputFormatters;
 
-  /// If false the textfield is "disabled": it ignores taps and its
-  /// [decoration] is rendered in grey.
+  /// Disables the text field when false.
   ///
-  /// If non-null this property overrides the [decoration]'s
-  /// [Decoration.enabled] property.
+  /// Text fields in disabled states have a light grey background and don't
+  /// respond to touch events including the [leading], [trailing] and the clear
+  /// button.
   final bool enabled;
 
-  /// How thick the cursor will be.
-  ///
-  /// Defaults to 2.0.
+  /// {@macro flutter.widgets.editableText.cursorWidth}
   final double cursorWidth;
 
-  /// How rounded the corners of the cursor should be.
-  /// By default, the cursor has a null Radius
+  /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius cursorRadius;
 
   /// The color to use when painting the cursor.
+  ///
+  /// Defaults to the standard iOS blue color. Cannot be null.
   final Color cursorColor;
 
   /// The appearance of the keyboard.
   ///
   /// This setting is only honored on iOS devices.
   ///
-  /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
+  /// If null, defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 
-  /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view.
-  ///
-  /// When this widget receives focus and is not completely visible (for example scrolled partially
-  /// off the screen or overlapped by the keyboard)
-  /// then it will attempt to make itself visible by scrolling a surrounding [Scrollable], if one is present.
-  /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
-  ///
-  /// Defaults to EdgeInserts.all(20.0).
+  /// {@macro flutter.widgets.editableText.scrollPadding}
   final EdgeInsets scrollPadding;
 
   @override
@@ -414,9 +353,19 @@ class CupertinoTextField extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxDecoration>('decoration', decoration));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
+    properties.add(StringProperty('placeholder', placeholder));
+    if (leading != null) {
+      properties.add(DiagnosticsProperty<OverlayVisibilityMode>('leading', leadingMode));
+    }
+    if (trailing != null) {
+      properties.add(DiagnosticsProperty<OverlayVisibilityMode>('trailing', trailingMode));
+    }
+    properties.add(DiagnosticsProperty<OverlayVisibilityMode>('clearButtonMode', clearButtonMode));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
@@ -522,6 +471,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
+    final bool enabled = widget.enabled ?? true;
     if (widget.maxLength != null && widget.maxLengthEnforced)
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
 
@@ -600,7 +550,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           } else if (_shouldAppearForModeAndText(widget.clearButtonMode, text.text.isNotEmpty)) {
             rowChildren.add(
               GestureDetector(
-                onTap: () => _controller.clear(),
+                onTap: enabled
+                    ? () => _controller.clear()
+                    : null,
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6.0),
                   child: Icon(
@@ -626,17 +578,20 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         _requestKeyboard();
       },
       child: IgnorePointer(
-        ignoring: !(widget.enabled ?? true),
+        ignoring: !enabled,
         child: DecoratedBox(
           decoration: widget.decoration,
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTapDown: _handleTapDown,
-            onTap: _handleTap,
-            onTapCancel: _handleTapCancel,
-            onLongPress: _handleLongPress,
-            excludeFromSemantics: true,
-            child: child,
+          child: Container(
+            color: enabled ? null : _kDisabledBackground,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTapDown: _handleTapDown,
+              onTap: _handleTap,
+              onTapCancel: _handleTapCancel,
+              onLongPress: _handleLongPress,
+              excludeFromSemantics: true,
+              child: child,
+            ),
           ),
         ),
       ),
