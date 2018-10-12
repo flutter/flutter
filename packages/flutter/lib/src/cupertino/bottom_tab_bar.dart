@@ -118,14 +118,12 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       child: SizedBox(
         height: _kTabBarHeight + bottomPadding,
-        child: IconTheme.merge(
-          // Default with the inactive state.
+        child: IconTheme.merge( // Default with the inactive state.
           data: IconThemeData(
             color: inactiveColor,
             size: iconSize,
           ),
-          child: DefaultTextStyle(
-            // Default with the inactive state.
+          child: DefaultTextStyle( // Default with the inactive state.
             style: TextStyle(
               fontFamily: '.SF UI Text',
               fontSize: 10.0,
@@ -173,11 +171,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
               hint: 'tab, ${index + 1} of ${items.length}',
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: onTap == null
-                    ? null
-                    : () {
-                        onTap(index);
-                      },
+                onTap: onTap == null ? null : () { onTap(index); },
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),
                   child: Column(

@@ -101,10 +101,7 @@ class BottomNavigationBar extends StatefulWidget {
        ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
-       type = type ??
-           (items.length <= 3
-               ? BottomNavigationBarType.fixed
-               : BottomNavigationBarType.shifting),
+       type = type ?? (items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting),
        super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar where each item has an icon and title.
@@ -311,8 +308,7 @@ class _BottomNavigationTile extends StatelessWidget {
   }
 }
 
-class _BottomNavigationBarState extends State<BottomNavigationBar>
-    with TickerProviderStateMixin {
+class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin {
   List<AnimationController> _controllers = <AnimationController>[];
   List<CurvedAnimation> _animations;
 
@@ -323,8 +319,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
   // animation is complete.
   Color _backgroundColor;
 
-  static final Animatable<double> _flexTween =
-      Tween<double>(begin: 1.0, end: 1.5);
+  static final Animatable<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
 
   void _resetState() {
     for (AnimationController controller in _controllers)
@@ -383,22 +378,22 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
           color: widget.items[index].backgroundColor,
           vsync: this,
         )..controller.addStatusListener(
-            (AnimationStatus status) {
-              switch (status) {
-                case AnimationStatus.completed:
-                  setState(() {
-                    final _Circle circle = _circles.removeFirst();
-                    _backgroundColor = circle.color;
-                    circle.dispose();
-                  });
-                  break;
-                case AnimationStatus.dismissed:
-                case AnimationStatus.forward:
-                case AnimationStatus.reverse:
-                  break;
-              }
-            },
-          ),
+          (AnimationStatus status) {
+            switch (status) {
+              case AnimationStatus.completed:
+                setState(() {
+                  final _Circle circle = _circles.removeFirst();
+                  _backgroundColor = circle.color;
+                  circle.dispose();
+                });
+                break;
+              case AnimationStatus.dismissed:
+              case AnimationStatus.forward:
+              case AnimationStatus.reverse:
+                break;
+            }
+          },
+        ),
       );
     }
   }
@@ -463,8 +458,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
               },
               colorTween: colorTween,
               selected: i == widget.currentIndex,
-              indexLabel: localizations.tabLabel(
-                  tabIndex: i + 1, tabCount: widget.items.length),
+              indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
             ),
           );
         }
@@ -524,16 +518,13 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
       child: Stack(
         children: <Widget>[
           Positioned.fill(
-            child: Material(
-              // Casts shadow.
+            child: Material( // Casts shadow.
               elevation: 8.0,
               color: backgroundColor,
             ),
           ),
           ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: kBottomNavigationBarHeight + additionalBottomPadding,
-            ),
+            constraints: BoxConstraints(minHeight: kBottomNavigationBarHeight + additionalBottomPadding),
             child: Stack(
               children: <Widget>[
                 Positioned.fill(
@@ -544,8 +535,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar>
                     ),
                   ),
                 ),
-                Material(
-                  // Splashes.
+                Material( // Splashes.
                   type: MaterialType.transparency,
                   child: Padding(
                     padding: EdgeInsets.only(bottom: additionalBottomPadding),
@@ -596,9 +586,7 @@ class _Circle {
     double weightSum(Iterable<Animation<double>> animations) {
       // We're adding flex values instead of animation values to produce correct
       // ratios.
-      return animations
-          .map<double>(state._evaluateFlex)
-          .fold<double>(0.0, (double sum, double value) => sum + value);
+      return animations.map<double>(state._evaluateFlex).fold<double>(0.0, (double sum, double value) => sum + value);
     }
 
     final double allWeights = weightSum(state._animations);

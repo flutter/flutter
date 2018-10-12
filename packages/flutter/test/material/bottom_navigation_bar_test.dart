@@ -14,22 +14,27 @@ void main() {
   testWidgets('BottomNavigationBar callback test', (WidgetTester tester) async {
     int mutatedIndex;
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(
+      MaterialApp(
         home: Scaffold(
-            bottomNavigationBar: BottomNavigationBar(
-                items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.ac_unit),
-            title: Text('AC'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.access_alarm),
-            title: Text('Alarm'),
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC')
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm')
+              )
+            ],
+            onTap: (int index) {
+              mutatedIndex = index;
+            }
           )
-        ],
-                onTap: (int index) {
-                  mutatedIndex = index;
-                }))));
+        )
+      )
+    );
 
     await tester.tap(find.text('Alarm'));
 
@@ -37,14 +42,24 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar content test', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(
+      MaterialApp(
         home: Scaffold(
-            bottomNavigationBar:
-                BottomNavigationBar(items: const <BottomNavigationBarItem>[
-      BottomNavigationBarItem(icon: Icon(Icons.ac_unit), title: Text('AC')),
-      BottomNavigationBarItem(
-          icon: Icon(Icons.access_alarm), title: Text('Alarm'))
-    ]))));
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC')
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm')
+              )
+            ]
+          )
+        )
+      )
+    );
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
     expect(box.size.height, kBottomNavigationBarHeight);
@@ -52,56 +67,81 @@ void main() {
     expect(find.text('Alarm'), findsOneWidget);
   });
 
-  testWidgets('BottomNavigationBar adds bottom padding to height',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+  testWidgets('BottomNavigationBar adds bottom padding to height', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
         home: MediaQuery(
-            data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
-            child: Scaffold(
-                bottomNavigationBar:
-                    BottomNavigationBar(items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.ac_unit), title: Text('AC')),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.access_alarm), title: Text('Alarm'))
-            ])))));
+          data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
+          child: Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.ac_unit),
+                  title: Text('AC')
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.access_alarm),
+                  title: Text('Alarm')
+                )
+              ]
+            )
+          )
+        )
+      )
+    );
 
     const double labelBottomMargin = 8.0; // _kBottomMargin in implementation.
     const double additionalPadding = 40.0 - labelBottomMargin;
-    const double expectedHeight =
-        kBottomNavigationBarHeight + additionalPadding;
-    expect(tester.getSize(find.byType(BottomNavigationBar)).height,
-        expectedHeight);
+    const double expectedHeight = kBottomNavigationBarHeight + additionalPadding;
+    expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
   });
 
-  testWidgets('BottomNavigationBar action size test',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+  testWidgets('BottomNavigationBar action size test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
         home: Scaffold(
-            bottomNavigationBar: BottomNavigationBar(
-                type: BottomNavigationBarType.shifting,
-                items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.ac_unit), title: Text('AC')),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.access_alarm), title: Text('Alarm'))
-        ]))));
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC')
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm')
+              )
+            ]
+          )
+        )
+      )
+    );
 
-    Iterable<RenderBox> actions =
-        tester.renderObjectList(find.byType(InkResponse));
+    Iterable<RenderBox> actions = tester.renderObjectList(find.byType(InkResponse));
     expect(actions.length, 2);
     expect(actions.elementAt(0).size.width, 480.0);
     expect(actions.elementAt(1).size.width, 320.0);
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(
+      MaterialApp(
         home: Scaffold(
-            bottomNavigationBar: BottomNavigationBar(
-                currentIndex: 1,
-                type: BottomNavigationBarType.shifting,
-                items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.ac_unit), title: Text('AC')),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.access_alarm), title: Text('Alarm'))
-        ]))));
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: 1,
+            type: BottomNavigationBarType.shifting,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC')
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm')
+              )
+            ]
+          )
+        )
+      )
+    );
 
     await tester.pump(const Duration(milliseconds: 200));
 
@@ -111,107 +151,138 @@ void main() {
     expect(actions.elementAt(1).size.width, 480.0);
   });
 
-  testWidgets('BottomNavigationBar multiple taps test',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+  testWidgets('BottomNavigationBar multiple taps test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
         home: Scaffold(
-            bottomNavigationBar: BottomNavigationBar(
-                type: BottomNavigationBarType.shifting,
-                items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.ac_unit), title: Text('AC')),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.access_alarm), title: Text('Alarm')),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.access_time), title: Text('Time')),
-          BottomNavigationBarItem(icon: Icon(Icons.add), title: Text('Add'))
-        ]))));
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC')
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm')
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_time),
+                title: Text('Time')
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.add),
+                title: Text('Add')
+              )
+            ]
+          )
+        )
+      )
+    );
 
     // We want to make sure that the last label does not get displaced,
     // irrespective of how many taps happen on the first N - 1 labels and how
     // they grow.
 
-    Iterable<RenderBox> actions =
-        tester.renderObjectList(find.byType(InkResponse));
-    final Offset originalOrigin =
-        actions.elementAt(3).localToGlobal(Offset.zero);
+    Iterable<RenderBox> actions = tester.renderObjectList(find.byType(InkResponse));
+    final Offset originalOrigin = actions.elementAt(3).localToGlobal(Offset.zero);
 
     await tester.tap(find.text('AC'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
     actions = tester.renderObjectList(find.byType(InkResponse));
-    expect(actions.elementAt(3).localToGlobal(Offset.zero),
-        equals(originalOrigin));
+    expect(actions.elementAt(3).localToGlobal(Offset.zero), equals(originalOrigin));
 
     await tester.tap(find.text('Alarm'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
     actions = tester.renderObjectList(find.byType(InkResponse));
-    expect(actions.elementAt(3).localToGlobal(Offset.zero),
-        equals(originalOrigin));
+    expect(actions.elementAt(3).localToGlobal(Offset.zero), equals(originalOrigin));
 
     await tester.tap(find.text('Time'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
     actions = tester.renderObjectList(find.byType(InkResponse));
-    expect(actions.elementAt(3).localToGlobal(Offset.zero),
-        equals(originalOrigin));
+    expect(actions.elementAt(3).localToGlobal(Offset.zero), equals(originalOrigin));
   });
 
-  testWidgets(
-      'BottomNavigationBar inherits shadowed app theme for shifting navbar',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+  testWidgets('BottomNavigationBar inherits shadowed app theme for shifting navbar', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
         theme: ThemeData(brightness: Brightness.light),
         home: Theme(
-            data: ThemeData(brightness: Brightness.dark),
-            child: Scaffold(
-                bottomNavigationBar: BottomNavigationBar(
-                    type: BottomNavigationBarType.shifting,
-                    items: const <BottomNavigationBarItem>[
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.ac_unit), title: Text('AC')),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.access_alarm), title: Text('Alarm')),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.access_time), title: Text('Time')),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.add), title: Text('Add'))
-                ])))));
+          data: ThemeData(brightness: Brightness.dark),
+          child: Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.shifting,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.ac_unit),
+                  title: Text('AC')
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.access_alarm),
+                  title: Text('Alarm')
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.access_time),
+                  title: Text('Time')
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.add),
+                  title: Text('Add')
+                )
+              ]
+            )
+          )
+        )
+      )
+    );
 
     await tester.tap(find.text('Alarm'));
     await tester.pump(const Duration(seconds: 1));
-    expect(Theme.of(tester.element(find.text('Alarm'))).brightness,
-        equals(Brightness.dark));
+    expect(Theme.of(tester.element(find.text('Alarm'))).brightness, equals(Brightness.dark));
   });
 
-  testWidgets(
-      'BottomNavigationBar inherits shadowed app theme for fixed navbar',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+  testWidgets('BottomNavigationBar inherits shadowed app theme for fixed navbar', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
         theme: ThemeData(brightness: Brightness.light),
         home: Theme(
-            data: ThemeData(brightness: Brightness.dark),
-            child: Scaffold(
-                bottomNavigationBar: BottomNavigationBar(
-                    type: BottomNavigationBarType.fixed,
-                    items: const <BottomNavigationBarItem>[
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.ac_unit), title: Text('AC')),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.access_alarm), title: Text('Alarm')),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.access_time), title: Text('Time')),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.add), title: Text('Add'))
-                ])))));
+          data: ThemeData(brightness: Brightness.dark),
+          child: Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.ac_unit),
+                  title: Text('AC')
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.access_alarm),
+                  title: Text('Alarm')
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.access_time),
+                  title: Text('Time')
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.add),
+                  title: Text('Add')
+                )
+              ]
+            )
+          )
+        )
+      )
+    );
 
     await tester.tap(find.text('Alarm'));
     await tester.pump(const Duration(seconds: 1));
-    expect(Theme.of(tester.element(find.text('Alarm'))).brightness,
-        equals(Brightness.dark));
+    expect(Theme.of(tester.element(find.text('Alarm'))).brightness, equals(Brightness.dark));
   });
 
   testWidgets('BottomNavigationBar iconSize test', (WidgetTester tester) async {
@@ -250,8 +321,8 @@ void main() {
     expect(builderIconSize, 12.0);
   });
 
-  testWidgets('BottomNavigationBar responds to textScaleFactor',
-      (WidgetTester tester) async {
+
+  testWidgets('BottomNavigationBar responds to textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -272,8 +343,7 @@ void main() {
       ),
     );
 
-    final RenderBox defaultBox =
-        tester.renderObject(find.byType(BottomNavigationBar));
+    final RenderBox defaultBox = tester.renderObject(find.byType(BottomNavigationBar));
     expect(defaultBox.size.height, equals(kBottomNavigationBarHeight));
 
     await tester.pumpWidget(
@@ -296,8 +366,7 @@ void main() {
       ),
     );
 
-    final RenderBox shiftingBox =
-        tester.renderObject(find.byType(BottomNavigationBar));
+    final RenderBox shiftingBox = tester.renderObject(find.byType(BottomNavigationBar));
     expect(shiftingBox.size.height, equals(kBottomNavigationBarHeight));
 
     await tester.pumpWidget(
@@ -326,8 +395,7 @@ void main() {
     expect(box.size.height, equals(68.0));
   });
 
-  testWidgets('BottomNavigationBar limits width of tiles with long titles',
-      (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
     final Text longTextA = Text(''.padLeft(100, 'A'));
     final Text longTextB = Text(''.padLeft(100, 'B'));
 
@@ -359,8 +427,7 @@ void main() {
     expect(itemBoxB.size, equals(const Size(400.0, 14.0)));
   });
 
-  testWidgets('BottomNavigationBar paints circles',
-      (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar paints circles', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
         textDirection: TextDirection.ltr,
@@ -390,12 +457,7 @@ void main() {
     await tester.tap(find.text('B'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
-    expect(
-        box,
-        paints
-          ..circle(x: 200.0)
-          ..translate(x: 400.0)
-          ..circle(x: 200.0));
+    expect(box, paints..circle(x: 200.0)..translate(x: 400.0)..circle(x: 200.0));
 
     // Now we flip the directionality and verify that the circles switch positions.
     await tester.pumpWidget(
@@ -416,15 +478,7 @@ void main() {
       ),
     );
 
-    expect(
-        box,
-        paints
-          ..translate()
-          ..save()
-          ..translate(x: 400.0)
-          ..circle(x: 200.0)
-          ..restore()
-          ..circle(x: 200.0));
+    expect(box, paints..translate()..save()..translate(x: 400.0)..circle(x: 200.0)..restore()..circle(x: 200.0));
 
     await tester.tap(find.text('A'));
     await tester.pump();
@@ -439,11 +493,11 @@ void main() {
           ..restore()
           ..circle(x: 200.0)
           ..translate(x: 400.0)
-          ..circle(x: 200.0));
+          ..circle(x: 200.0)
+    );
   });
 
-  testWidgets('BottomNavigationBar inactiveIcon shown',
-      (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar inactiveIcon shown', (WidgetTester tester) async {
     const Key filled = Key('filled');
     const Key stroked = Key('stroked');
     int selectedItem = 0;
@@ -453,7 +507,7 @@ void main() {
         textDirection: TextDirection.ltr,
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: selectedItem,
-          items: const <BottomNavigationBarItem>[
+          items:  const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               activeIcon: Icon(Icons.favorite, key: filled),
               icon: Icon(Icons.favorite_border, key: stroked),
@@ -477,7 +531,7 @@ void main() {
         textDirection: TextDirection.ltr,
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: selectedItem,
-          items: const <BottomNavigationBarItem>[
+          items:  const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               activeIcon: Icon(Icons.favorite, key: filled),
               icon: Icon(Icons.favorite_border, key: stroked),
@@ -496,8 +550,7 @@ void main() {
     expect(find.byKey(stroked), findsOneWidget);
   });
 
-  testWidgets('BottomNavigationBar.fixed semantics',
-      (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar.fixed semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -559,16 +612,12 @@ void main() {
         ),
       ],
     );
-    expect(
-        semantics,
-        hasSemantics(expected,
-            ignoreId: true, ignoreTransform: true, ignoreRect: true));
+    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
 
     semantics.dispose();
   });
 
-  testWidgets('BottomNavigationBar.shifting semantics',
-      (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar.shifting semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -631,16 +680,12 @@ void main() {
         ),
       ],
     );
-    expect(
-        semantics,
-        hasSemantics(expected,
-            ignoreId: true, ignoreTransform: true, ignoreRect: true));
+    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
 
     semantics.dispose();
   });
 
-  testWidgets('BottomNavigationBar handles items.length changes',
-      (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar handles items.length changes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/10322
 
     Widget buildFrame(int itemCount) {
@@ -649,8 +694,7 @@ void main() {
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
             currentIndex: 0,
-            items: List<BottomNavigationBarItem>.generate(itemCount,
-                (int itemIndex) {
+            items: List<BottomNavigationBarItem>.generate(itemCount, (int itemIndex) {
               return BottomNavigationBarItem(
                 icon: const Icon(Icons.android),
                 title: Text('item $itemIndex'),
@@ -680,8 +724,7 @@ void main() {
     expect(find.text('item 3'), findsNothing);
   });
 
-  testWidgets('BottomNavigationBar change backgroundColor test',
-      (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar change backgroundColor test', (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/19653
 
     Color _backgroundColor = Colors.red;
@@ -738,6 +781,7 @@ void main() {
     expect(_backgroundColor, Colors.green);
     expect(tester.widget<Material>(backgroundMaterial).color, Colors.green);
   });
+
   testWidgets('BottomNavigationBar item title should not be nullable',
       (WidgetTester tester) async {
     expect(() {
@@ -758,8 +802,7 @@ void main() {
   });
 }
 
-Widget boilerplate(
-    {Widget bottomNavigationBar, @required TextDirection textDirection}) {
+Widget boilerplate({ Widget bottomNavigationBar, @required TextDirection textDirection }) {
   assert(textDirection != null);
   return Localizations(
     locale: const Locale('en', 'US'),
