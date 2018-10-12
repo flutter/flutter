@@ -1,8 +1,7 @@
 {
   "scriptCategory": "English-like",
   "@scriptCategory": {
-    "description": "The name of the language's script category (see https://material.io/design/typography/language-support.html#language-categories-reference).",
-    "x-flutter-type": "scriptCategory"
+    "description": "The name of the language's script category (see https://material.io/go/design-typography#typography-language-categories-reference)."
   },
 
   "timeOfDayFormat": "h:mm a",
