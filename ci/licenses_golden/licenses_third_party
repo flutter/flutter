@@ -1,4 +1,4 @@
-Signature: ac08e09569da6bc35a213e80f4f97427
+Signature: d56ae5b92307d86a0b6fd2fa753c2626
 
 UNUSED LICENSES:
 
@@ -4432,6 +4432,7 @@ ORIGIN: ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/.gitconfig
 FILE: ../../../third_party/dart/.mailmap
+FILE: ../../../third_party/dart/.vpython
 FILE: ../../../third_party/dart/client/idea/.idea/.name
 FILE: ../../../third_party/dart/client/idea/.idea/inspectionProfiles/Project_Default.xml
 FILE: ../../../third_party/dart/client/idea/.idea/vcs.xml
@@ -4655,8 +4656,6 @@ FILE: ../../../third_party/dart/runtime/vm/allocation.cc
 FILE: ../../../third_party/dart/runtime/vm/allocation_test.cc
 FILE: ../../../third_party/dart/runtime/vm/assert_test.cc
 FILE: ../../../third_party/dart/runtime/vm/ast.h
-FILE: ../../../third_party/dart/runtime/vm/ast_printer_test.cc
-FILE: ../../../third_party/dart/runtime/vm/ast_test.cc
 FILE: ../../../third_party/dart/runtime/vm/base_isolate.h
 FILE: ../../../third_party/dart/runtime/vm/benchmark_test.cc
 FILE: ../../../third_party/dart/runtime/vm/benchmark_test.h
@@ -4703,7 +4702,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/inliner.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/cha.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/cha.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/cha_test.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/code_generator_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/flow_graph_builder.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/flow_graph_builder.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/intrinsifier.cc
@@ -5274,7 +5272,6 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/sourc
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/target.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/thread.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/timeline_event.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/token_stream.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/type_arguments.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/unknown.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/vm.dart
@@ -5363,7 +5360,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_compiler_
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_elimination.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_elimination.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/flow_graph_builder_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_to_il.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_to_il.h
@@ -5540,17 +5536,12 @@ FILE: ../../../third_party/dart/runtime/lib/object.cc
 FILE: ../../../third_party/dart/runtime/lib/string.cc
 FILE: ../../../third_party/dart/runtime/platform/c99_support_win.h
 FILE: ../../../third_party/dart/runtime/platform/inttypes_support_win.h
-FILE: ../../../third_party/dart/runtime/vm/ast.cc
-FILE: ../../../third_party/dart/runtime/vm/ast_printer.cc
-FILE: ../../../third_party/dart/runtime/vm/ast_printer.h
 FILE: ../../../third_party/dart/runtime/vm/bitfield.h
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_ia32_test.cc
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_x64_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_test.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler_stats.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler_stats.h
 FILE: ../../../third_party/dart/runtime/vm/cpu_ia32.cc
 FILE: ../../../third_party/dart/runtime/vm/custom_isolate_test.cc
 FILE: ../../../third_party/dart/runtime/vm/dart.h
@@ -5587,7 +5578,6 @@ FILE: ../../../third_party/dart/runtime/vm/native_entry_test.cc
 FILE: ../../../third_party/dart/runtime/vm/native_entry_test.h
 FILE: ../../../third_party/dart/runtime/vm/object_store_test.cc
 FILE: ../../../third_party/dart/runtime/vm/os.h
-FILE: ../../../third_party/dart/runtime/vm/parser_test.cc
 FILE: ../../../third_party/dart/runtime/vm/port.h
 FILE: ../../../third_party/dart/runtime/vm/resolver.cc
 FILE: ../../../third_party/dart/runtime/vm/resolver.h
@@ -5887,7 +5877,6 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/sentinel_va
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/sentinel_view.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/source_inset.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/stack_trace_tree_config.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/token_stream_ref.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/type_arguments_ref.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/unknown_ref.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/vm_view.dart
@@ -6192,8 +6181,6 @@ FILE: ../../../third_party/dart/runtime/platform/math.h
 FILE: ../../../third_party/dart/runtime/platform/memory_sanitizer.h
 FILE: ../../../third_party/dart/runtime/platform/safe_stack.h
 FILE: ../../../third_party/dart/runtime/tools/verbose_gc_to_bmu.dart
-FILE: ../../../third_party/dart/runtime/vm/ast_transformer.cc
-FILE: ../../../third_party/dart/runtime/vm/ast_transformer.h
 FILE: ../../../third_party/dart/runtime/vm/bit_set_test.cc
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_arm64_test.cc
