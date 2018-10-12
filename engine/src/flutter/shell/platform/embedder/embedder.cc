@@ -5,6 +5,7 @@
 #define FML_USED_ON_EMBEDDER
 
 #include "flutter/fml/build_config.h"
+#include "flutter/fml/native_library.h"
 
 #if OS_WIN
 #define FLUTTER_EXPORT __declspec(dllexport)
@@ -88,6 +89,13 @@ static bool IsRendererValid(const FlutterRendererConfig* config) {
   return false;
 }
 
+static void* DefaultGLProcResolver(const char* name) {
+  static fml::RefPtr<fml::NativeLibrary> proc_library =
+      fml::NativeLibrary::CreateForCurrentProcess();
+  return static_cast<void*>(
+      const_cast<uint8_t*>(proc_library->ResolveSymbol(name)));
+}
+
 static shell::Shell::CreateCallback<shell::PlatformView>
 InferOpenGLPlatformViewCreationCallback(
     const FlutterRendererConfig* config,
@@ -144,6 +152,10 @@ InferOpenGLPlatformViewCreationCallback(
                         user_data](const char* gl_proc_name) {
       return ptr(user_data, gl_proc_name);
     };
+  } else {
+#if OS_LINUX || OS_WIN
+    gl_proc_resolver = DefaultGLProcResolver;
+#endif
   }
 
   bool fbo_reset_after_present =

@@ -22,6 +22,7 @@
 #define GPU_GL_RGBA8 0x8058
 #define GPU_GL_RGBA4 0x8056
 #define GPU_GL_RGB565 0x8D62
+#define GPU_GL_VERSION 0x1F02
 
 #ifdef ERROR
 #undef ERROR
@@ -35,6 +36,9 @@ static const int kGrCacheMaxCount = 8192;
 // Default maximum number of bytes of GPU memory of budgeted resources in the
 // cache.
 static const size_t kGrCacheMaxByteSize = 512 * (1 << 20);
+
+// Version string prefix that identifies an OpenGL ES implementation.
+static const char kGLESVersionPrefix[] = "OpenGL ES";
 
 GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
     : delegate_(delegate), weak_factory_(this) {
@@ -56,16 +60,24 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
   // ES2 shading language when the ES3 external image extension is missing.
   options.fPreferExternalImagesOverES3 = true;
 
-  auto interface =
-      proc_resolver_
-          ? GrGLMakeAssembledGLESInterface(
-                this /* context */,
-                [](void* context, const char gl_proc_name[]) -> GrGLFuncPtr {
-                  return reinterpret_cast<GrGLFuncPtr>(
-                      reinterpret_cast<GPUSurfaceGL*>(context)->proc_resolver_(
-                          gl_proc_name));
-                })
-          : GrGLMakeNativeInterface();
+  sk_sp<const GrGLInterface> interface;
+
+  if (proc_resolver_ == nullptr) {
+    interface = GrGLMakeNativeInterface();
+  } else {
+    auto gl_get_proc = [](void* context,
+                          const char gl_proc_name[]) -> GrGLFuncPtr {
+      return reinterpret_cast<GrGLFuncPtr>(
+          reinterpret_cast<GPUSurfaceGL*>(context)->proc_resolver_(
+              gl_proc_name));
+    };
+
+    if (IsProcResolverOpenGLES()) {
+      interface = GrGLMakeAssembledGLESInterface(this, gl_get_proc);
+    } else {
+      interface = GrGLMakeAssembledGLInterface(this, gl_get_proc);
+    }
+  }
 
   auto context = GrContext::MakeGL(interface, options);
 
@@ -99,6 +111,20 @@ GPUSurfaceGL::~GPUSurfaceGL() {
   context_ = nullptr;
 
   delegate_->GLContextClearCurrent();
+}
+
+bool GPUSurfaceGL::IsProcResolverOpenGLES() {
+  using GLGetStringProc = const char* (*)(uint32_t);
+  GLGetStringProc gl_get_string =
+      reinterpret_cast<GLGetStringProc>(proc_resolver_("glGetString"));
+  FML_CHECK(gl_get_string)
+      << "The GL proc resolver could not resolve glGetString";
+  const char* gl_version_string = gl_get_string(GPU_GL_VERSION);
+  FML_CHECK(gl_version_string)
+      << "The GL proc resolver's glGetString(GL_VERSION) failed";
+
+  return strncmp(gl_version_string, kGLESVersionPrefix,
+                 strlen(kGLESVersionPrefix)) == 0;
 }
 
 // |shell::Surface|

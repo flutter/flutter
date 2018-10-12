@@ -75,6 +75,8 @@ class GPUSurfaceGL : public Surface {
 
   bool PresentSurface(SkCanvas* canvas);
 
+  bool IsProcResolverOpenGLES();
+
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceGL);
 };
 
