@@ -19,8 +19,8 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
+import 'text_theme.dart';
 import 'theme.dart';
-import 'typography.dart';
 
 // Examples can assume:
 // void _airDress() { }
