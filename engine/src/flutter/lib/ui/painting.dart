@@ -1761,6 +1761,14 @@ enum PathOperation {
   reverseDifference,
 }
 
+/// A handle for the framework to hold and retain an engine layer across frames.
+class EngineLayer extends NativeFieldWrapperClass2 {
+  /// This class is created by the engine, and should not be instantiated
+  /// or extended directly.
+  @pragma('vm:entry-point')
+  EngineLayer._();
+}
+
 /// A complex, one-dimensional subset of a plane.
 ///
 /// A path consists of a number of subpaths, and a _current point_.

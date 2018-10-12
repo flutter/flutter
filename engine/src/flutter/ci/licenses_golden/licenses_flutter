@@ -561,6 +561,8 @@ TYPE: LicenseType.bsd
 FILE: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_locations.dart
 FILE: ../../../flutter/fml/paths_unittests.cc
 FILE: ../../../flutter/lib/ui/isolate_name_server.dart
+FILE: ../../../flutter/lib/ui/painting/engine_layer.cc
+FILE: ../../../flutter/lib/ui/painting/engine_layer.h
 FILE: ../../../flutter/lib/ui/painting/image_encoding.cc
 FILE: ../../../flutter/lib/ui/painting/image_encoding.h
 FILE: ../../../flutter/lib/ui/plugins.dart
