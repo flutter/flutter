@@ -781,6 +781,25 @@ void main() {
     expect(_backgroundColor, Colors.green);
     expect(tester.widget<Material>(backgroundMaterial).color, Colors.green);
   });
+
+  testWidgets('BottomNavigationBar item title should not be nullable',
+      (WidgetTester tester) async {
+    expect(() {
+      MaterialApp(
+          home: Scaffold(
+              bottomNavigationBar: BottomNavigationBar(
+                  type: BottomNavigationBarType.shifting,
+                  items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              title: Text('AC'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.access_alarm),
+            )
+          ])));
+    }, throwsA(isInstanceOf<AssertionError>()));
+  });
 }
 
 Widget boilerplate({ Widget bottomNavigationBar, @required TextDirection textDirection }) {

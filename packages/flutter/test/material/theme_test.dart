@@ -9,8 +9,6 @@ import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const TextTheme defaultGeometryTheme = Typography.englishLike2014;
-
   test('ThemeDataTween control test', () {
     final ThemeData light = ThemeData.light();
     final ThemeData dark = ThemeData.dark();
@@ -57,7 +55,7 @@ void main() {
       )
     );
 
-    expect(Theme.of(capturedContext), equals(ThemeData.localize(ThemeData.fallback(), defaultGeometryTheme)));
+    expect(Theme.of(capturedContext), equals(ThemeData.localize(ThemeData.fallback(), MaterialTextGeometry.englishLike)));
     expect(Theme.of(capturedContext, shadowThemeOnly: true), isNull);
   });
 
@@ -67,20 +65,20 @@ void main() {
 
     // Same input, same output.
     expect(
-      ThemeData.localize(light, defaultGeometryTheme),
-      same(ThemeData.localize(light, defaultGeometryTheme)),
+      ThemeData.localize(light, MaterialTextGeometry.englishLike),
+      same(ThemeData.localize(light, MaterialTextGeometry.englishLike)),
     );
 
     // Different text geometry, different output.
     expect(
-      ThemeData.localize(light, defaultGeometryTheme),
-      isNot(same(ThemeData.localize(light, Typography.tall2014))),
+      ThemeData.localize(light, MaterialTextGeometry.englishLike),
+      isNot(same(ThemeData.localize(light, MaterialTextGeometry.tall))),
     );
 
     // Different base theme, different output.
     expect(
-      ThemeData.localize(light, defaultGeometryTheme),
-      isNot(same(ThemeData.localize(dark, defaultGeometryTheme))),
+      ThemeData.localize(light, MaterialTextGeometry.englishLike),
+      isNot(same(ThemeData.localize(dark, MaterialTextGeometry.englishLike))),
     );
   });
 
@@ -410,7 +408,7 @@ void main() {
       }
     }
 
-    expect(theme.textTheme.display4.debugLabel, '(englishLike display4 2014).merge(blackMountainView display4)');
+    expect(theme.textTheme.display4.debugLabel, '(englishLike display4).merge(blackMountainView display4)');
   });
 }
 
