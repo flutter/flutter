@@ -5553,6 +5553,64 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A widget that annotates the child semantics with an index.
+///
+/// Semantic indexes are used by TalkBack/Voiceover to make announcements about
+/// the current scroll state. Certain widgets like the [ListView] will
+/// automatically provide a child index for building semantics. A user may wish
+/// to manually provide semanitc indexes if not all child of the scrollable
+/// contribute semantics.
+///
+/// ## Sample code
+///
+/// The example below handles spacers in a scrollable that don't contribute
+/// semantics. The automatic indexes would give the spaces a semantic index,
+/// causing scroll announcements to erroneously state that there are four items
+/// visible.
+///
+/// ```dart
+/// ListView(
+///   addSemanticIndexes: false,
+///   semanticChildCount: 2,
+///   children: const <Widget>[
+///     IndexedSemantics(index: 0, child: Text('First')),
+///     Spacer(),
+///     IndexedSemantics(index: 1, child: Text('Second')),
+///     Spacer(),
+///   ],
+/// )
+/// ```
+///
+/// See also:
+///   * [CustomScrollView], for an explaination of index semantics.
+class IndexedSemantics extends SingleChildRenderObjectWidget {
+  /// Creates a widget that annotated the first child semantics node with an index.
+  ///
+  /// [index] must not be null.
+  const IndexedSemantics({
+    Key key,
+    @required this.index,
+    Widget child,
+  }) : assert(index != null),
+       super(key: key, child: child);
+
+  /// The index used to annotate the first child semantics node.
+  final int index;
+
+  @override
+  RenderIndexedSemantics createRenderObject(BuildContext context) => RenderIndexedSemantics(index: index);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderIndexedSemantics renderObject) {
+    renderObject.index = index;
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<int>('index', index));
+  }
+}
+
 /// A widget that builds its child.
 ///
 /// Useful for attaching a key to an existing widget.
@@ -5564,16 +5622,16 @@ class KeyedSubtree extends StatelessWidget {
   }) : assert(child != null),
        super(key: key);
 
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.child}
-  final Widget child;
-
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.
   factory KeyedSubtree.wrap(Widget child, int childIndex) {
     final Key key = child.key != null ? ValueKey<Key>(child.key) : ValueKey<int>(childIndex);
     return KeyedSubtree(key: key, child: child);
   }
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
 
   /// Wrap each item in a KeyedSubtree whose key is based on the item's existing key or
   /// the sum of its list index and `baseIndex`.

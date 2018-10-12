@@ -207,7 +207,7 @@ class TimelineSummary {
 class TimedEvent {
   /// Creates a timed event given begin and end timestamps in microseconds.
   TimedEvent(int beginTimeMicros, int endTimeMicros)
-    : this.duration = Duration(microseconds: endTimeMicros - beginTimeMicros);
+    : duration = Duration(microseconds: endTimeMicros - beginTimeMicros);
 
   /// The duration of the event.
   final Duration duration;

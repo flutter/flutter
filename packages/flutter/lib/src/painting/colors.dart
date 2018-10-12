@@ -194,7 +194,7 @@ class HSVColor {
   /// that will interpolate from a transparent red and cycle through the hues to
   /// match the target color, regardless of what that color's hue is.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   ///
   /// Values outside of the valid range for each channel will be clamped.
   static HSVColor lerp(HSVColor a, HSVColor b, double t) {

@@ -25,7 +25,7 @@ const String kDocRoot = 'dev/docs/doc';
 /// in your path. It requires that 'flutter' has been run previously. It uses
 /// the version of Dart downloaded by the 'flutter' tool in this repository and
 /// will crash if that is absent.
-Future<Null> main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   final ArgParser argParser = _createArgsParser();
   final ArgResults args = argParser.parse(arguments);
   if (args['help']) {
@@ -134,16 +134,8 @@ Future<Null> main(List<String> arguments) async {
   'package:Flutter/temp_doc.dart,package:http/browser_client.dart,package:intl/intl_browser.dart,package:matcher/mirror_matchers.dart,package:quiver/mirrors.dart,package:quiver/io.dart,package:vm_service_client/vm_service_client.dart,package:web_socket_channel/html.dart',
     '--favicon=favicon.ico',
     '--package-order', 'flutter,Dart,flutter_test,flutter_driver',
-    '--show-warnings',
     '--auto-include-dependencies',
   ]);
-
-  // Explicitly list all the packages in //flutter/packages/* that are
-  // not listed 'nodoc' in their pubspec.yaml.
-  for (String libraryRef in libraryRefs(diskPath: true)) {
-    dartdocArgs.add('--include-external');
-    dartdocArgs.add(libraryRef);
-  }
 
   String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
   print('Executing: (cd dev/docs ; $pubExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
@@ -162,7 +154,6 @@ Future<Null> main(List<String> arguments) async {
   );
   printStream(process.stderr, prefix: args['json'] ? '' : 'dartdoc:stderr: ',
     filter: args['verbose'] ? const <Pattern>[] : <Pattern>[
-      RegExp(r'^[ ]+warning: generic type handled as HTML:'), // https://github.com/dart-lang/dartdoc/issues/1475
       RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
     ],
   );
@@ -321,29 +312,19 @@ List<FileSystemEntity> findPackages() {
 }
 
 /// Returns import or on-disk paths for all libraries in the Flutter SDK.
-///
-/// diskPath toggles between import paths vs. disk paths.
-Iterable<String> libraryRefs({ bool diskPath = false }) sync* {
+Iterable<String> libraryRefs() sync* {
   for (Directory dir in findPackages()) {
     final String dirName = path.basename(dir.path);
     for (FileSystemEntity file in Directory('${dir.path}/lib').listSync()) {
       if (file is File && file.path.endsWith('.dart')) {
-        if (diskPath)
-          yield '$dirName/lib/${path.basename(file.path)}';
-        else
-          yield '$dirName/${path.basename(file.path)}';
-       }
+        yield '$dirName/${path.basename(file.path)}';
+      }
     }
   }
 
   // Add a fake package for platform integration APIs.
-  if (diskPath) {
-    yield 'platform_integration/lib/android.dart';
-    yield 'platform_integration/lib/ios.dart';
-  } else {
-    yield 'platform_integration/android.dart';
-    yield 'platform_integration/ios.dart';
-  }
+  yield 'platform_integration/android.dart';
+  yield 'platform_integration/ios.dart';
 }
 
 void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> filter = const <Pattern>[] }) {

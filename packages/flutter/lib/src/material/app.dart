@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -366,6 +367,7 @@ class _MaterialAppState extends State<MaterialApp> {
     if (widget.localizationsDelegates != null)
       yield* widget.localizationsDelegates;
     yield DefaultMaterialLocalizations.delegate;
+    yield DefaultCupertinoLocalizations.delegate;
   }
 
   @override

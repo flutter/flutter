@@ -360,7 +360,7 @@ class ChipThemeData extends Diagnosticable {
   ///
   /// The arguments must not be null.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static ChipThemeData lerp(ChipThemeData a, ChipThemeData b, double t) {
     assert(t != null);
     if (a == null && b == null)

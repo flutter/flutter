@@ -83,19 +83,31 @@ class DevFSFileContent extends DevFSContent {
   void _stat() {
     if (_linkTarget != null) {
       // Stat the cached symlink target.
-      _fileStat = _linkTarget.statSync();
-      return;
+      final FileStat fileStat = _linkTarget.statSync();
+      if (fileStat.type == FileSystemEntityType.notFound) {
+        _linkTarget = null;
+      } else {
+        _fileStat = fileStat;
+        return;
+      }
     }
-    _fileStat = file.statSync();
-    if (_fileStat.type == FileSystemEntityType.link) {
+    final FileStat fileStat = file.statSync();
+    _fileStat = fileStat.type == FileSystemEntityType.notFound ? null : fileStat;
+    if (_fileStat != null && _fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
       final FileSystemEntity linkTarget = fs.file(resolved);
       // Stat the link target.
-      _fileStat = linkTarget.statSync();
-      if (devFSConfig.cacheSymlinks) {
+      final FileStat fileStat = linkTarget.statSync();
+      if (fileStat.type == FileSystemEntityType.notFound) {
+        _fileStat = null;
+        _linkTarget = null;
+      } else if (devFSConfig.cacheSymlinks) {
         _linkTarget = linkTarget;
       }
+    }
+    if (_fileStat == null) {
+      printError('Unable to get status of file "${file.path}": file not found.');
     }
   }
 
@@ -106,21 +118,29 @@ class DevFSFileContent extends DevFSContent {
   bool get isModified {
     final FileStat _oldFileStat = _fileStat;
     _stat();
-    return _oldFileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
+    if (_oldFileStat == null && _fileStat == null)
+      return false;
+    return _oldFileStat == null || _fileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
   }
 
   @override
   bool isModifiedAfter(DateTime time) {
     final FileStat _oldFileStat = _fileStat;
     _stat();
-    return _oldFileStat == null || time == null || _fileStat.modified.isAfter(time);
+    if (_oldFileStat == null && _fileStat == null)
+      return false;
+    return time == null
+        || _oldFileStat == null
+        || _fileStat == null
+        || _fileStat.modified.isAfter(time);
   }
 
   @override
   int get size {
     if (_fileStat == null)
       _stat();
-    return _fileStat.size;
+    // Can still be null if the file wasn't found.
+    return _fileStat?.size ?? 0;
   }
 
   @override
@@ -201,9 +221,9 @@ abstract class DevFSOperations {
 /// An implementation of [DevFSOperations] that speaks to the
 /// vm service.
 class ServiceProtocolDevFSOperations implements DevFSOperations {
-  final VMService vmService;
-
   ServiceProtocolDevFSOperations(this.vmService);
+
+  final VMService vmService;
 
   @override
   Future<Uri> create(String fsName) async {
@@ -264,13 +284,13 @@ class _DevFSHttpWriter {
 
   int _inFlight = 0;
   Map<Uri, DevFSContent> _outstanding;
-  Completer<Null> _completer;
+  Completer<void> _completer;
   HttpClient _client;
 
-  Future<Null> write(Map<Uri, DevFSContent> entries) async {
+  Future<void> write(Map<Uri, DevFSContent> entries) async {
     _client = HttpClient();
     _client.maxConnectionsPerHost = kMaxInFlight;
-    _completer = Completer<Null>();
+    _completer = Completer<void>();
     _outstanding = Map<Uri, DevFSContent>.from(entries);
     _scheduleWrites();
     await _completer.future;
@@ -290,7 +310,7 @@ class _DevFSHttpWriter {
     }
   }
 
-  Future<Null> _scheduleWrite(
+  Future<void> _scheduleWrite(
     Uri deviceUri,
     DevFSContent content, [
     int retry = 0,
@@ -304,7 +324,7 @@ class _DevFSHttpWriter {
       final Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       final HttpClientResponse response = await request.close();
-      await response.drain<Null>();
+      await response.drain<void>();
     } on SocketException catch (socketException, stackTrace) {
       // We have one completer and can get up to kMaxInFlight errors.
       if (!_completer.isCompleted)
@@ -322,7 +342,7 @@ class _DevFSHttpWriter {
     }
     _inFlight--;
     if ((_outstanding.isEmpty) && (_inFlight == 0)) {
-      _completer.complete(null);
+      _completer.complete();
     } else {
       _scheduleWrites();
     }
@@ -392,7 +412,7 @@ class DevFS {
     return _baseUri;
   }
 
-  Future<Null> destroy() async {
+  Future<void> destroy() async {
     printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
     await _operations.destroy(fsName);
     printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
@@ -701,7 +721,7 @@ class DevFS {
     );
   }
 
-  Future<Null> _scanPackages(Set<String> fileFilter) async {
+  Future<void> _scanPackages(Set<String> fileFilter) async {
     StringBuffer sb;
     final PackageMap packageMap = PackageMap(_packagesFilePath);
 

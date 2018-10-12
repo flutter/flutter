@@ -24,7 +24,7 @@ import 'android_sdk.dart';
 import 'android_studio.dart';
 
 const String gradleVersion = '4.4';
-final RegExp _assembleTaskPattern = RegExp(r'assemble([^:]+): task ');
+final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
 
 GradleProject _cachedGradleProject;
 String _cachedGradleExecutable;
@@ -97,18 +97,22 @@ Future<GradleProject> _readGradleProject() async {
   final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
   GradleProject project;
   try {
-    final RunResult runResult = await runCheckedAsync(
+    final RunResult propertiesRunResult = await runCheckedAsync(
       <String>[gradle, 'app:properties'],
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
-    final String properties = runResult.stdout.trim();
-    project = GradleProject.fromAppProperties(properties);
+    final RunResult tasksRunResult = await runCheckedAsync(
+      <String>[gradle, 'app:tasks', '--all'],
+      workingDirectory: flutterProject.android.hostAppGradleRoot.path,
+      environment: _gradleEnv,
+    );
+    project = GradleProject.fromAppProperties(propertiesRunResult.stdout, tasksRunResult.stdout);
   } catch (exception) {
     if (getFlutterPluginVersion(flutterProject.android) == FlutterPluginVersion.managed) {
       status.cancel();
       // Handle known exceptions. This will exit if handled.
-      handleKnownGradleExceptions(exception);
+      handleKnownGradleExceptions(exception.toString());
 
       // Print a general Gradle error and exit.
       printError('* Error running Gradle:\n$exception\n');
@@ -268,7 +272,7 @@ void _exitIfNoAndroidSdk() {
   }
 }
 
-Future<Null> buildGradleProject({
+Future<void> buildGradleProject({
   @required FlutterProject project,
   @required BuildInfo buildInfo,
   @required String target,
@@ -297,7 +301,7 @@ Future<Null> buildGradleProject({
   }
 }
 
-Future<Null> _buildGradleProjectV1(FlutterProject project, String gradle) async {
+Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async {
   // Run 'gradlew build'.
   final Status status = logger.startProgress(
     "Running 'gradlew build'...",
@@ -318,7 +322,7 @@ Future<Null> _buildGradleProjectV1(FlutterProject project, String gradle) async 
   printStatus('Built ${fs.path.relative(project.android.gradleAppOutV1File.path)}.');
 }
 
-Future<Null> _buildGradleProjectV2(
+Future<void> _buildGradleProjectV2(
     FlutterProject flutterProject,
     String gradle,
     BuildInfo buildInfo,
@@ -445,7 +449,7 @@ Map<String, String> get _gradleEnv {
 class GradleProject {
   GradleProject(this.buildTypes, this.productFlavors, this.apkDirectory);
 
-  factory GradleProject.fromAppProperties(String properties) {
+  factory GradleProject.fromAppProperties(String properties, String tasks) {
     // Extract build directory.
     final String buildDir = properties
         .split('\n')
@@ -455,7 +459,7 @@ class GradleProject {
 
     // Extract build types and product flavors.
     final Set<String> variants = Set<String>();
-    for (String s in properties.split('\n')) {
+    for (String s in tasks.split('\n')) {
       final Match match = _assembleTaskPattern.matchAsPrefix(s);
       if (match != null) {
         final String variant = match.group(1).toLowerCase();
@@ -499,8 +503,8 @@ class GradleProject {
   String _productFlavorFor(BuildInfo buildInfo) {
     if (buildInfo.flavor == null)
       return productFlavors.isEmpty ? '' : null;
-    else if (productFlavors.contains(buildInfo.flavor.toLowerCase()))
-      return buildInfo.flavor.toLowerCase();
+    else if (productFlavors.contains(buildInfo.flavor))
+      return buildInfo.flavor;
     else
       return null;
   }

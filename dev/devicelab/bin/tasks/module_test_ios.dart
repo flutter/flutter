@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing iOS app.
-Future<Null> main() async {
+Future<void> main() async {
   await task(() async {
 
     section('Create Flutter module project');
@@ -23,7 +23,7 @@ Future<Null> main() async {
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
-          options: <String>['--org', 'io.flutter.devicelab', '-t', 'module', 'hello'],
+          options: <String>['--org', 'io.flutter.devicelab', '--template=module', 'hello'],
         );
       });
       await prepareProvisioningCertificates(projectDir.path);

@@ -190,7 +190,7 @@ void main() {
 
 enum _InitialResult { crashed, timedOut, connected }
 enum _TestResult { crashed, harnessBailed, testBailed }
-typedef _Finalizer = Future<Null> Function();
+typedef _Finalizer = Future<void> Function();
 
 class _CompilationRequest {
   _CompilationRequest(this.path, this.result);
@@ -238,7 +238,8 @@ class _Compiler {
         packagesPath: PackageMap.globalPackagesPath,
         trackWidgetCreation: trackWidgetCreation,
         compilerMessageConsumer: reportCompilerMessage,
-        initializeFromDill: testFilePath
+        initializeFromDill: testFilePath,
+        unsafePackageSerialization: true,
       );
     }
 

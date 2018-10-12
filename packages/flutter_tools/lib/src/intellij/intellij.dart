@@ -11,11 +11,11 @@ import '../base/version.dart';
 import '../doctor.dart';
 
 class IntelliJPlugins {
-  static final Version kMinFlutterPluginVersion = Version(16, 0, 0);
+  IntelliJPlugins(this.pluginsPath);
 
   final String pluginsPath;
 
-  IntelliJPlugins(this.pluginsPath);
+  static final Version kMinFlutterPluginVersion = Version(16, 0, 0);
 
   void validatePackage(
       List<ValidationMessage> messages, List<String> packageNames, String title,

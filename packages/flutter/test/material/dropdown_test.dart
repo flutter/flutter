@@ -697,7 +697,7 @@ void main() {
     ));
 
     // By default the hint contributes the label.
-    expect(tester.getSemanticsData(find.byKey(key)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
       isButton: true,
       label: 'test',
       hasTapAction: true,
@@ -712,7 +712,7 @@ void main() {
     ));
 
     // Displays label of select item and is no longer tappable.
-    expect(tester.getSemanticsData(find.byKey(key)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
       isButton: true,
       label: 'three',
       hasTapAction: true,
@@ -787,12 +787,15 @@ void main() {
   testWidgets('disabledHint displays on empty items or onChanged', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({List<String> items, ValueChanged<String> onChanged}) => buildFrame(
-      items: items,
-      onChanged: onChanged,
-      buttonKey: buttonKey, value: null,
-      hint: const Text('enabled'),
-      disabledHint: const Text('disabled'));
+    Widget build({List<String> items, ValueChanged<String> onChanged}) =>
+      buildFrame(
+        items: items,
+        onChanged: onChanged,
+        buttonKey: buttonKey,
+        value: null,
+        hint: const Text('enabled'),
+        disabledHint: const Text('disabled'),
+      );
 
     // [disabledHint] should display when [items] is null
     await tester.pumpWidget(build(items: null, onChanged: onChanged));
@@ -818,5 +821,154 @@ void main() {
     final RenderBox enabledHintBox = tester.renderObject(find.byKey(buttonKey));
     expect(enabledHintBox.localToGlobal(Offset.zero), equals(disabledHintBox.localToGlobal(Offset.zero)));
     expect(enabledHintBox.size, equals(disabledHintBox.size));
+  });
+
+  testWidgets('Dropdown in middle showing middle item', (WidgetTester tester) async {
+    final List<DropdownMenuItem<int>> items =
+      List<DropdownMenuItem<int>>.generate(100, (int i) =>
+        DropdownMenuItem<int>(value: i, child: Text('$i')));
+
+    final DropdownButton<int> button = DropdownButton<int>(
+      value: 50,
+      onChanged: (int newValue){},
+      items: items,
+    );
+
+    double getMenuScroll() {
+      double scrollPosition;
+      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ScrollController scrollController = listView.controller;
+      assert(scrollController != null);
+      scrollPosition = scrollController.position.pixels;
+      assert(scrollPosition != null);
+      return scrollPosition;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Align(
+            alignment: Alignment.center,
+            child: button,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('50'));
+    await tester.pumpAndSettle();
+    expect(getMenuScroll(), 2180.0);
+  });
+
+  testWidgets('Dropdown in top showing bottom item', (WidgetTester tester) async {
+    final List<DropdownMenuItem<int>> items =
+      List<DropdownMenuItem<int>>.generate(100, (int i) =>
+        DropdownMenuItem<int>(value: i, child: Text('$i')));
+
+    final DropdownButton<int> button = DropdownButton<int>(
+      value: 99,
+      onChanged: (int newValue){},
+      items: items,
+    );
+
+    double getMenuScroll() {
+      double scrollPosition;
+      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ScrollController scrollController = listView.controller;
+      assert(scrollController != null);
+      scrollPosition = scrollController.position.pixels;
+      assert(scrollPosition != null);
+      return scrollPosition;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: button,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('99'));
+    await tester.pumpAndSettle();
+    expect(getMenuScroll(), 4312.0);
+  });
+
+  testWidgets('Dropdown in bottom showing top item', (WidgetTester tester) async {
+    final List<DropdownMenuItem<int>> items =
+      List<DropdownMenuItem<int>>.generate(100, (int i) =>
+        DropdownMenuItem<int>(value: i, child: Text('$i')));
+
+    final DropdownButton<int> button = DropdownButton<int>(
+      value: 0,
+      onChanged: (int newValue){},
+      items: items,
+    );
+
+    double getMenuScroll() {
+      double scrollPosition;
+      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ScrollController scrollController = listView.controller;
+      assert(scrollController != null);
+      scrollPosition = scrollController.position.pixels;
+      assert(scrollPosition != null);
+      return scrollPosition;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: button,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('0'));
+    await tester.pumpAndSettle();
+    expect(getMenuScroll(), 0.0);
+  });
+
+  testWidgets('Dropdown in center showing bottom item', (WidgetTester tester) async {
+    final List<DropdownMenuItem<int>> items =
+      List<DropdownMenuItem<int>>.generate(100, (int i) =>
+        DropdownMenuItem<int>(value: i, child: Text('$i')));
+
+    final DropdownButton<int> button = DropdownButton<int>(
+      value: 99,
+      onChanged: (int newValue){},
+      items: items,
+    );
+
+    double getMenuScroll() {
+      double scrollPosition;
+      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ScrollController scrollController = listView.controller;
+      assert(scrollController != null);
+      scrollPosition = scrollController.position.pixels;
+      assert(scrollPosition != null);
+      return scrollPosition;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Align(
+            alignment: Alignment.center,
+            child: button,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('99'));
+    await tester.pumpAndSettle();
+    expect(getMenuScroll(), 4312.0);
+>>>>>>> 53de41cac646aaf20406447bd899c88267cbb504
   });
 }

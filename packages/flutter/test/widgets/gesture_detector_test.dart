@@ -126,7 +126,7 @@ void main() {
     bool didReceivePointerDown;
     bool didTap;
 
-    Future<Null> pumpWidgetTree(HitTestBehavior behavior) {
+    Future<void> pumpWidgetTree(HitTestBehavior behavior) {
       return tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

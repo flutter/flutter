@@ -21,10 +21,10 @@ KernelCompiler get kernelCompiler => context[KernelCompiler];
 typedef CompilerMessageConsumer = void Function(String message, {bool emphasis, TerminalColor color});
 
 class CompilerOutput {
+  const CompilerOutput(this.outputFilename, this.errorCount);
+
   final String outputFilename;
   final int errorCount;
-
-  const CompilerOutput(this.outputFilename, this.errorCount);
 }
 
 class _StdoutHandler {
@@ -198,9 +198,9 @@ class KernelCompiler {
 
 /// Class that allows to serialize compilation requests to the compiler.
 abstract class _CompilationRequest {
-  Completer<CompilerOutput> completer;
-
   _CompilationRequest(this.completer);
+
+  Completer<CompilerOutput> completer;
 
   Future<CompilerOutput> _run(ResidentCompiler compiler);
 
@@ -250,7 +250,7 @@ class ResidentCompiler {
   ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation = false,
       String packagesPath, List<String> fileSystemRoots, String fileSystemScheme,
       CompilerMessageConsumer compilerMessageConsumer = printError,
-      String initializeFromDill})
+      String initializeFromDill, bool unsafePackageSerialization})
     : assert(_sdkRoot != null),
       _trackWidgetCreation = trackWidgetCreation,
       _packagesPath = packagesPath,
@@ -258,7 +258,8 @@ class ResidentCompiler {
       _fileSystemScheme = fileSystemScheme,
       _stdoutHandler = _StdoutHandler(consumer: compilerMessageConsumer),
       _controller = StreamController<_CompilationRequest>(),
-      _initializeFromDill = initializeFromDill {
+      _initializeFromDill = initializeFromDill,
+      _unsafePackageSerialization = unsafePackageSerialization {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
@@ -272,6 +273,7 @@ class ResidentCompiler {
   Process _server;
   final _StdoutHandler _stdoutHandler;
   String _initializeFromDill;
+  bool _unsafePackageSerialization;
 
   final StreamController<_CompilationRequest> _controller;
 
@@ -368,6 +370,9 @@ class ResidentCompiler {
     }
     if (_initializeFromDill != null) {
       command.addAll(<String>['--initialize-from-dill', _initializeFromDill]);
+    }
+    if (_unsafePackageSerialization == true) {
+      command.add('--unsafe-package-serialization');
     }
     printTrace(command.join(' '));
     _server = await processManager.start(command);

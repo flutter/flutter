@@ -97,7 +97,7 @@ abstract class CupertinoLocalizations {
   ///
   /// Examples: datePickerHour(1) in:
   ///
-  ///  - US English: 01
+  ///  - US English: 1
   ///  - Arabic: ٠١
   String datePickerHour(int hour);
 
@@ -276,7 +276,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String datePickerDayOfMonth(int dayIndex) => dayIndex.toString();
 
   @override
-  String datePickerHour(int hour) => hour.toString().padLeft(2, '0');
+  String datePickerHour(int hour) => hour.toString();
 
   @override
   String datePickerHourSemanticsLabel(int hour) => hour.toString() + " o'clock";
@@ -295,7 +295,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String datePickerMediumDate(DateTime date) {
     return '${_shortWeekdays[date.weekday - DateTime.monday]} '
       '${_shortMonths[date.month - DateTime.january]} '
-      '${date.day}';
+      '${date.day.toString().padRight(2)}';
   }
 
   @override

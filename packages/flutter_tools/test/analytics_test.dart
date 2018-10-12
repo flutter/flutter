@@ -52,7 +52,7 @@ void main() {
       count = 0;
       flutterUsage.enabled = false;
       final DoctorCommand doctorCommand = DoctorCommand();
-      final CommandRunner<Null>runner = createTestCommandRunner(doctorCommand);
+      final CommandRunner<void>runner = createTestCommandRunner(doctorCommand);
       await runner.run(<String>['doctor']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
@@ -67,7 +67,7 @@ void main() {
 
       flutterUsage.enabled = false;
       final ConfigCommand command = ConfigCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['config']);
       expect(count, 0);
 
@@ -100,7 +100,7 @@ void main() {
       mockTimes = <int>[1000, 2000];
       when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => true);
       final DoctorCommand command = DoctorCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
 
       verify(mockClock.now()).called(2);
@@ -119,7 +119,7 @@ void main() {
       mockTimes = <int>[1000, 2000];
       when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => false);
       final DoctorCommand command = DoctorCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
 
       verify(mockClock.now()).called(2);

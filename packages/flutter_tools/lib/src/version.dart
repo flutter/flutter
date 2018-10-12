@@ -158,7 +158,7 @@ class FlutterVersion {
     }
   }
 
-  static Future<Null> _removeVersionCheckRemoteIfExists() async {
+  static Future<void> _removeVersionCheckRemoteIfExists() async {
     final List<String> remotes = (await _run(<String>['git', 'remote']))
         .split('\n')
         .map<String>((String name) => name.trim()) // to account for OS-specific line-breaks
@@ -234,7 +234,7 @@ class FlutterVersion {
   /// [checkFlutterVersionFreshness] is called after this. This is typically
   /// used when switching channels so that stale information from another
   /// channel doesn't linger.
-  static Future<Null> resetFlutterVersionFreshnessCheck() async {
+  static Future<void> resetFlutterVersionFreshnessCheck() async {
     try {
       await Cache.instance.getStampFileFor(
         VersionCheckStamp.kFlutterVersionCheckStampFile,
@@ -249,7 +249,7 @@ class FlutterVersion {
   ///
   /// This function must run while [Cache.lock] is acquired because it reads and
   /// writes shared cache files.
-  Future<Null> checkFlutterVersionFreshness() async {
+  Future<void> checkFlutterVersionFreshness() async {
     // Don't perform update checks if we're not on an official channel.
     if (!officialChannels.contains(_channel)) {
       return;
@@ -288,11 +288,11 @@ class FlutterVersion {
               ? newVersionAvailableMessage()
               : versionOutOfDateMessage(frameworkAge);
       printStatus(updateMessage, emphasis: true);
-      await Future.wait<Null>(<Future<Null>>[
+      await Future.wait<void>(<Future<void>>[
         stamp.store(
           newTimeWarningWasPrinted: _clock.now(),
         ),
-        Future<Null>.delayed(timeToPauseToLetUserReadTheMessage),
+        Future<void>.delayed(timeToPauseToLetUserReadTheMessage),
       ]);
     }
   }
@@ -368,10 +368,6 @@ class FlutterVersion {
 /// Contains data and load/save logic pertaining to Flutter version checks.
 @visibleForTesting
 class VersionCheckStamp {
-  /// The prefix of the stamp file where we cache Flutter version check data.
-  @visibleForTesting
-  static const String kFlutterVersionCheckStampFile = 'flutter_version_check';
-
   const VersionCheckStamp({
     this.lastTimeVersionWasChecked,
     this.lastKnownRemoteVersion,
@@ -381,6 +377,10 @@ class VersionCheckStamp {
   final DateTime lastTimeVersionWasChecked;
   final DateTime lastKnownRemoteVersion;
   final DateTime lastTimeWarningWasPrinted;
+
+  /// The prefix of the stamp file where we cache Flutter version check data.
+  @visibleForTesting
+  static const String kFlutterVersionCheckStampFile = 'flutter_version_check';
 
   static Future<VersionCheckStamp> load() async {
     final String versionCheckStamp = Cache.instance.getStampFor(kFlutterVersionCheckStampFile);
@@ -418,7 +418,7 @@ class VersionCheckStamp {
     );
   }
 
-  Future<Null> store({
+  Future<void> store({
     DateTime newTimeVersionWasChecked,
     DateTime newKnownRemoteVersion,
     DateTime newTimeWarningWasPrinted,

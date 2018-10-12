@@ -83,9 +83,6 @@ class ColorItem extends StatelessWidget {
 }
 
 class PaletteTabView extends StatelessWidget {
-  static const List<int> primaryKeys = <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
-  static const List<int> accentKeys = <int>[100, 200, 400, 700];
-
   PaletteTabView({
     Key key,
     @required this.colors,
@@ -93,6 +90,9 @@ class PaletteTabView extends StatelessWidget {
        super(key: key);
 
   final Palette colors;
+
+  static const List<int> primaryKeys = <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
+  static const List<int> accentKeys = <int>[100, 200, 400, 700];
 
   @override
   Widget build(BuildContext context) {
