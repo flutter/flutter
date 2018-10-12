@@ -88,15 +88,24 @@ BuildApp() {
 
   RunCommand rm -rf -- "${derived_dir}/App.framework"
 
+  local local_engine_flag=""
+  local flutter_framework="${framework_path}/Flutter.framework"
+  local flutter_podspec="${framework_path}/Flutter.podspec"
+  if [[ -n "$LOCAL_ENGINE" ]]; then
+    local_engine_flag="--local-engine=${LOCAL_ENGINE}"
+    flutter_framework="${LOCAL_ENGINE}/Flutter.framework"
+    flutter_podspec="${LOCAL_ENGINE}/Flutter.podspec"
+  fi
+
   if [[ -e "${project_path}/.ios" ]]; then
     RunCommand rm -rf -- "${derived_dir}/engine"
     mkdir "${derived_dir}/engine"
-    RunCommand cp -r -- "${framework_path}/Flutter.podspec" "${derived_dir}/engine"
-    RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}/engine"
+    RunCommand cp -r -- ${flutter_podspec} "${derived_dir}/engine"
+    RunCommand cp -r -- ${flutter_framework} "${derived_dir}/engine"
     RunCommand find "${derived_dir}/engine/Flutter.framework" -type f -exec chmod a-w "{}" \;
   else
     RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
-    RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
+    RunCommand cp -r -- ${flutter_framework} "${derived_dir}"
     RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
   fi
 
@@ -110,10 +119,6 @@ BuildApp() {
   fi
 
   local build_dir="${FLUTTER_BUILD_DIR:-build}"
-  local local_engine_flag=""
-  if [[ -n "$LOCAL_ENGINE" ]]; then
-    local_engine_flag="--local-engine=$LOCAL_ENGINE"
-  fi
 
   local track_widget_creation_flag=""
   if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
