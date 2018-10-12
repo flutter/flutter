@@ -1001,6 +1001,7 @@ FILE: ../../../flutter/third_party/txt/src/minikin/WordBreaker.cpp
 FILE: ../../../flutter/third_party/txt/src/minikin/WordBreaker.h
 FILE: ../../../flutter/third_party/txt/src/txt/asset_font_manager.cc
 FILE: ../../../flutter/third_party/txt/src/txt/asset_font_manager.h
+FILE: ../../../flutter/third_party/txt/src/txt/font_asset_provider.cc
 FILE: ../../../flutter/third_party/txt/src/txt/font_asset_provider.h
 FILE: ../../../flutter/third_party/txt/src/txt/font_collection.cc
 FILE: ../../../flutter/third_party/txt/src/txt/font_collection.h
