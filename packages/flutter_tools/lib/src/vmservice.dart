@@ -1295,10 +1295,6 @@ class Isolate extends ServiceObjectOwner {
     );
   }
 
-  Future<bool> flutterFrameworkPresent() async {
-    return await invokeFlutterExtensionRpcRaw('ext.flutter.frameworkPresent') != null;
-  }
-
   Future<Map<String, dynamic>> uiWindowScheduleFrame() async {
     return await invokeFlutterExtensionRpcRaw('ext.ui.window.scheduleFrame');
   }
