@@ -268,6 +268,15 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   }
   void _addTexture(double dx, double dy, double width, double height, int textureId, bool freeze) native 'SceneBuilder_addTexture';
 
+  /// Adds a platform view (e.g an iOS UIView) to the scene.
+  ///
+  /// This is work in progress and is not currently supported on any platform.
+  void addPlatformView(int viewId, { Offset offset: Offset.zero, double width: 0.0, double height: 0.0}) {
+    assert(offset != null, 'Offset argument was null');
+    _addPlatformView(offset.dx, offset.dy, width, height, viewId);
+  }
+  void _addPlatformView(double dx, double dy, double width, double height, int viewId) native 'SceneBuilder_addPlatformView';
+
   /// (Fuchsia-only) Adds a scene rendered by another application to the scene
   /// for this application.
   void addChildScene({
