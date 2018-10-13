@@ -301,7 +301,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         scrollOffset < bottomOffset ? bottomOffset : topOffset,
         duration: _scrollAnimationDuration,
         curve: Curves.easeInOut,
-      ).then((void none) {
+      ).then((void value) {
         setState(() {
           _scrolling = false;
         });

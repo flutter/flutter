@@ -30,7 +30,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   @override
   ImageStreamCompleter load(TestImageProvider key) {
     return OneFrameImageStreamCompleter(
-      future.then<ImageInfo>((void _) => ImageInfo(image: image))
+      future.then<ImageInfo>((void value) => ImageInfo(image: image))
     );
   }
 }

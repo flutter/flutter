@@ -332,7 +332,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
         ..sort();
     });
 
-    controller.reverse().then<void>((_) {
+    controller.reverse().then<void>((void value) {
       _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex).controller.dispose();
 
       // Decrement the incoming and outgoing item indices to account

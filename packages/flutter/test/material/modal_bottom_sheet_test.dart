@@ -29,7 +29,7 @@ void main() {
     showModalBottomSheet<void>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet')
-    ).then<void>((void _) {
+    ).then<void>((void value) {
       showBottomSheetThenCalled = true;
     });
 
@@ -50,7 +50,7 @@ void main() {
     showModalBottomSheet<void>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet'),
-    ).then<void>((void _) {
+    ).then<void>((void value) {
       showBottomSheetThenCalled = true;
     });
     await tester.pump(); // bottom sheet show animation starts

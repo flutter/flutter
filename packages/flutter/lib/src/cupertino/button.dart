@@ -189,7 +189,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final TickerFuture ticker = _buttonHeldDown
         ? _animationController.animateTo(1.0, duration: kFadeOutDuration)
         : _animationController.animateTo(0.0, duration: kFadeInDuration);
-    ticker.then<void>((_) {
+    ticker.then<void>((void value) {
       if (mounted && wasHeldDown != _buttonHeldDown)
         _animate();
     });

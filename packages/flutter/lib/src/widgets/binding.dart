@@ -703,7 +703,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
     deferFirstFrameReport();
     if (renderViewElement != null)
       buildOwner.reassemble(renderViewElement);
-    return super.performReassemble().then((void _) {
+    return super.performReassemble().then((void value) {
       allowFirstFrameReport();
     });
   }
