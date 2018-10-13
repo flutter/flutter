@@ -103,6 +103,7 @@ abstract class ServicesBinding extends BindingBase {
             evict(value);
           }
       );
+      return true;
     }());
   }
 
