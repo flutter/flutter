@@ -97,11 +97,11 @@ abstract class ServicesBinding extends BindingBase {
         // the rootBundle cache and cause the entire image cache to be cleared.
         // This is used by hot reload mode to clear out the cache of resources
         // that have changed.
-          name: 'evict',
-          getter: () async => '',
-          setter: (String value) async {
-            evict(value);
-          }
+        name: 'evict',
+        getter: () async => '',
+        setter: (String value) async {
+          evict(value);
+        },
       );
       return true;
     }());

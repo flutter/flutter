@@ -207,8 +207,8 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
 
+    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
     if (!isReleaseMode) {
       registerNumericServiceExtension(
         name: 'timeDilation',
