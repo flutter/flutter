@@ -19,6 +19,7 @@
 #include "flutter/flow/layers/performance_overlay_layer.h"
 #include "flutter/flow/layers/physical_shape_layer.h"
 #include "flutter/flow/layers/picture_layer.h"
+#include "flutter/flow/layers/platform_view_layer.h"
 #include "flutter/flow/layers/shader_mask_layer.h"
 #include "flutter/flow/layers/texture_layer.h"
 #include "flutter/flow/layers/transform_layer.h"
@@ -53,6 +54,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, pushShaderMask)                   \
   V(SceneBuilder, pushPhysicalShape)                \
   V(SceneBuilder, pop)                              \
+  V(SceneBuilder, addPlatformView)                  \
   V(SceneBuilder, addRetained)                      \
   V(SceneBuilder, addPicture)                       \
   V(SceneBuilder, addTexture)                       \
@@ -214,6 +216,21 @@ void SceneBuilder::addTexture(double dx,
   layer->set_size(SkSize::Make(width, height));
   layer->set_texture_id(textureId);
   layer->set_freeze(freeze);
+  current_layer_->Add(std::move(layer));
+}
+
+void SceneBuilder::addPlatformView(double dx,
+                                   double dy,
+                                   double width,
+                                   double height,
+                                   int64_t viewId) {
+  if (!current_layer_) {
+    return;
+  }
+  auto layer = std::make_unique<flow::PlatformViewLayer>();
+  layer->set_offset(SkPoint::Make(dx, dy));
+  layer->set_size(SkSize::Make(width, height));
+  layer->set_view_id(viewId);
   current_layer_->Add(std::move(layer));
 }
 

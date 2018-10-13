@@ -34,6 +34,8 @@ source_set("flow") {
     "layers/physical_shape_layer.h",
     "layers/picture_layer.cc",
     "layers/picture_layer.h",
+    "layers/platform_view_layer.cc",
+    "layers/platform_view_layer.h",
     "layers/shader_mask_layer.cc",
     "layers/shader_mask_layer.h",
     "layers/texture_layer.cc",

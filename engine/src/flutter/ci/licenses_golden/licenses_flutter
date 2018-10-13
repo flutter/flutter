@@ -556,8 +556,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: engine
-ORIGIN: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_locations.dart + ../../../LICENSE
+ORIGIN: ../../../flutter/flow/layers/platform_view_layer.cc + ../../../LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/flow/layers/platform_view_layer.cc
+FILE: ../../../flutter/flow/layers/platform_view_layer.h
 FILE: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_locations.dart
 FILE: ../../../flutter/fml/paths_unittests.cc
 FILE: ../../../flutter/lib/ui/isolate_name_server.dart
