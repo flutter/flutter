@@ -26,10 +26,11 @@ class TestImageInfo implements ImageInfo {
 }
 
 class TestImageProvider extends ImageProvider<int> {
-  const TestImageProvider(this.key, this.imageValue, { this.image });
+  const TestImageProvider(this.key, this.imageValue, { this.image, this.delayCompletion = false });
   final int key;
   final int imageValue;
   final ui.Image image;
+  final bool delayCompletion;
 
   @override
   Future<int> obtainKey(ImageConfiguration configuration) {
@@ -45,6 +46,31 @@ class TestImageProvider extends ImageProvider<int> {
 
   @override
   String toString() => '$runtimeType($key, $imageValue)';
+}
+
+class TestDelayImageProvider extends ImageProvider<int> {
+  TestDelayImageProvider(this.key, this.imageValue, { this.image });
+  final int key;
+  final int imageValue;
+  final ui.Image image;
+  final Completer<TestImageInfo> _completer = Completer<TestImageInfo>();
+
+  @override
+  Future<int> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<int>(key);
+  }
+
+  @override
+  ImageStreamCompleter load(int key) {
+    return OneFrameImageStreamCompleter(_completer.future);
+  }
+
+  @override
+  String toString() => '$runtimeType($key, $imageValue)';
+
+  void complete() {
+    _completer.complete(TestImageInfo(imageValue, image: image));
+  }
 }
 
 Future<ImageInfo> extractOneFrame(ImageStream stream) {
