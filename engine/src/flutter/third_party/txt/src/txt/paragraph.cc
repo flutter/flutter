@@ -34,7 +34,9 @@
 #include "minikin/LayoutUtils.h"
 #include "minikin/LineBreaker.h"
 #include "minikin/MinikinFont.h"
-#include "third_party/icu/source/common/unicode/ubidi.h"
+#include "unicode/ubidi.h"
+#include "unicode/utf16.h"
+
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkPaint.h"

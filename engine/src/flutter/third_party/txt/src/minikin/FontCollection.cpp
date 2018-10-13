@@ -23,6 +23,7 @@
 #include <log/log.h>
 #include "unicode/unistr.h"
 #include "unicode/unorm2.h"
+#include "unicode/utf16.h"
 
 #include <minikin/Emoji.h>
 #include <minikin/FontCollection.h>
