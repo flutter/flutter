@@ -9,7 +9,7 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
 /// End to end tests for Android.
-Future<Null> main() async {
+Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
   await task(runEndToEndTests);
 }

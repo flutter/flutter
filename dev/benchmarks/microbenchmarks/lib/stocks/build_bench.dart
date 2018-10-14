@@ -15,7 +15,7 @@ import '../common.dart';
 
 const Duration kBenchmarkTime = Duration(seconds: 15);
 
-Future<Null> main() async {
+Future<void> main() async {
   assert(false); // don't run this in checked mode! Use --release.
   stock_data.StockData.actuallyFetchData = false;
 
@@ -23,7 +23,7 @@ Future<Null> main() async {
   // the engine, so that the engine does not interfere with our timings.
   final LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
-  final Stopwatch watch = new Stopwatch();
+  final Stopwatch watch = Stopwatch();
   int iterations = 0;
 
   await benchmarkWidgets((WidgetTester tester) async {
@@ -46,7 +46,7 @@ Future<Null> main() async {
       // frames are missed, etc.
       // We use Timer.run to ensure there's a microtask flush in between
       // the two calls below.
-      Timer.run(() { ui.window.onBeginFrame(new Duration(milliseconds: iterations * 16)); });
+      Timer.run(() { ui.window.onBeginFrame(Duration(milliseconds: iterations * 16)); });
       Timer.run(() { ui.window.onDrawFrame(); });
       await tester.idle(); // wait until the frame has run (also uses Timer.run)
       iterations += 1;
@@ -54,7 +54,7 @@ Future<Null> main() async {
     watch.stop();
   });
 
-  final BenchmarkResultPrinter printer = new BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResult(
     description: 'Stock build',
     value: watch.elapsedMicroseconds / iterations,

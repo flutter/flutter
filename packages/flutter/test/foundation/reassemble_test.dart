@@ -17,10 +17,10 @@ class TestFoundationFlutterBinding extends BindingBase {
   }
 }
 
-TestFoundationFlutterBinding binding = new TestFoundationFlutterBinding();
+TestFoundationFlutterBinding binding = TestFoundationFlutterBinding();
 
 void main() {
-  binding ??= new TestFoundationFlutterBinding();
+  binding ??= TestFoundationFlutterBinding();
 
   test('Pointer events are locked during reassemble', () async {
     await binding.reassembleApplication();

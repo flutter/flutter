@@ -32,7 +32,7 @@ class ShrinePage extends StatefulWidget {
   final Map<Product, Order> shoppingCart;
 
   @override
-  ShrinePageState createState() => new ShrinePageState();
+  ShrinePageState createState() => ShrinePageState();
 }
 
 /// Defines the Scaffold, AppBar, etc that the demo pages have in common.
@@ -57,13 +57,13 @@ class ShrinePageState extends State<ShrinePage> {
           child: Text('The shopping cart is empty')
         );
       }
-      return new ListView(
+      return ListView(
         padding: kMaterialListPadding,
         children: widget.shoppingCart.values.map((Order order) {
-          return new ListTile(
-            title: new Text(order.product.name),
-            leading: new Text('${order.quantity}'),
-            subtitle: new Text(order.product.vendor.name)
+          return ListTile(
+            title: Text(order.product.name),
+            leading: Text('${order.quantity}'),
+            subtitle: Text(order.product.vendor.name)
           );
         }).toList(),
       );
@@ -86,29 +86,29 @@ class ShrinePageState extends State<ShrinePage> {
   @override
   Widget build(BuildContext context) {
     final ShrineTheme theme = ShrineTheme.of(context);
-    return new Scaffold(
+    return Scaffold(
       key: widget.scaffoldKey,
-      appBar: new AppBar(
+      appBar: AppBar(
         elevation: _appBarElevation,
         backgroundColor: theme.appBarBackgroundColor,
         iconTheme: Theme.of(context).iconTheme,
         brightness: Brightness.light,
-        flexibleSpace: new Container(
-          decoration: new BoxDecoration(
-            border: new Border(
-              bottom: new BorderSide(color: theme.dividerColor)
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: theme.dividerColor)
             )
           )
         ),
-        title: new Text('SHRINE', style: ShrineTheme.of(context).appBarTitleStyle),
+        title: Text('SHRINE', style: ShrineTheme.of(context).appBarTitleStyle),
         centerTitle: true,
         actions: <Widget>[
-          new IconButton(
+          IconButton(
             icon: const Icon(Icons.shopping_cart),
             tooltip: 'Shopping cart',
             onPressed: _showShoppingCart
           ),
-          new PopupMenuButton<ShrineAction>(
+          PopupMenuButton<ShrineAction>(
             itemBuilder: (BuildContext context) => <PopupMenuItem<ShrineAction>>[
               const PopupMenuItem<ShrineAction>(
                 value: ShrineAction.sortByPrice,
@@ -140,7 +140,7 @@ class ShrinePageState extends State<ShrinePage> {
         ]
       ),
       floatingActionButton: widget.floatingActionButton,
-      body: new NotificationListener<ScrollNotification>(
+      body: NotificationListener<ScrollNotification>(
         onNotification: _handleScrollNotification,
         child: widget.body
       )

@@ -9,7 +9,7 @@ const double _kEpsilon = .00001;
 
 void main() {
   test('Friction simulation positive velocity', () {
-    final FrictionSimulation friction = new FrictionSimulation(0.135, 100.0, 100.0);
+    final FrictionSimulation friction = FrictionSimulation(0.135, 100.0, 100.0);
 
     expect(friction.x(0.0), closeTo(100.0, _kEpsilon));
     expect(friction.dx(0.0), closeTo(100.0, _kEpsilon));
@@ -30,7 +30,7 @@ void main() {
   });
 
   test('Friction simulation negative velocity', () {
-    final FrictionSimulation friction = new FrictionSimulation(0.135, 100.0, -100.0);
+    final FrictionSimulation friction = FrictionSimulation(0.135, 100.0, -100.0);
 
     expect(friction.x(0.0), closeTo(100.0, _kEpsilon));
     expect(friction.dx(0.0), closeTo(-100.0, _kEpsilon));

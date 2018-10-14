@@ -92,7 +92,7 @@ void main() {
     expect(const AlignmentDirectional(0.0, 0.0).resolve(TextDirection.rtl), const Alignment(0.0, 0.0));
     expect(const AlignmentDirectional(1.0, 1.0).resolve(TextDirection.ltr), const Alignment(1.0, 1.0));
     expect(const AlignmentDirectional(1.0, 1.0).resolve(TextDirection.rtl), const Alignment(-1.0, 1.0));
-    expect(new AlignmentDirectional(nonconst(1.0), 2.0), new AlignmentDirectional(nonconst(1.0), 2.0));
+    expect(AlignmentDirectional(nonconst(1.0), 2.0), AlignmentDirectional(nonconst(1.0), 2.0));
     expect(const AlignmentDirectional(1.0, 2.0), isNot(const AlignmentDirectional(2.0, 1.0)));
     expect(const AlignmentDirectional(-1.0, 0.0).resolve(TextDirection.ltr),
            const AlignmentDirectional(1.0, 0.0).resolve(TextDirection.rtl));

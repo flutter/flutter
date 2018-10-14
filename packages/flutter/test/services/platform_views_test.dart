@@ -14,7 +14,7 @@ void main() {
 
   group('Android', () {
     setUp(() {
-      viewsController = new FakePlatformViewsController(TargetPlatform.android);
+      viewsController = FakePlatformViewsController(TargetPlatform.android);
     });
 
     test('create Android view of unregistered type', () async {
@@ -39,8 +39,8 @@ void main() {
       expect(
           viewsController.views,
           unorderedEquals(<FakePlatformView>[
-            new FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
-            new FakePlatformView(1, 'webview', const Size(200.0, 300.0), AndroidViewController.kAndroidLayoutDirectionRtl),
+            FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+            FakePlatformView(1, 'webview', const Size(200.0, 300.0), AndroidViewController.kAndroidLayoutDirectionRtl),
           ]));
     });
 
@@ -69,7 +69,7 @@ void main() {
       expect(
           viewsController.views,
           unorderedEquals(<FakePlatformView>[
-            new FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+            FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
           ]));
     });
 
@@ -95,8 +95,8 @@ void main() {
       expect(
           viewsController.views,
           unorderedEquals(<FakePlatformView>[
-            new FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
-            new FakePlatformView(1, 'webview', const Size(500.0, 500.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+            FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+            FakePlatformView(1, 'webview', const Size(500.0, 500.0), AndroidViewController.kAndroidLayoutDirectionLtr),
           ]));
     });
 
@@ -130,7 +130,7 @@ void main() {
       expect(
           viewsController.views,
           unorderedEquals(<FakePlatformView>[
-            new FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+            FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
           ]));
     });
 
@@ -143,7 +143,7 @@ void main() {
       expect(
           viewsController.views,
           unorderedEquals(<FakePlatformView>[
-            new FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionRtl),
+            FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionRtl),
           ]));
     });
   });

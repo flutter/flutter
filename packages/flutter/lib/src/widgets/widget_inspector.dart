@@ -7,13 +7,26 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
-import 'dart:ui' as ui show window, Picture, SceneBuilder, PictureRecorder;
-import 'dart:ui' show Offset;
+import 'dart:typed_data';
+import 'dart:ui' as ui
+    show
+        window,
+        ClipOp,
+        Image,
+        ImageByteFormat,
+        Paragraph,
+        Picture,
+        PictureRecorder,
+        PointMode,
+        SceneBuilder,
+        Vertices;
+import 'dart:ui' show Canvas, Offset;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'app.dart';
 import 'basic.dart';
@@ -24,12 +37,562 @@ import 'icon_data.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.selectButtonBuilder].
-typedef Widget InspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed);
+typedef InspectorSelectButtonBuilder = Widget Function(BuildContext context, VoidCallback onPressed);
 
-typedef void _RegisterServiceExtensionCallback({
+typedef _RegisterServiceExtensionCallback = void Function({
   @required String name,
   @required ServiceExtensionCallback callback
 });
+
+/// A layer that mimics the behavior of another layer.
+///
+/// A proxy layer is used for cases where a layer needs to be placed into
+/// multiple trees of layers.
+class _ProxyLayer extends Layer {
+  _ProxyLayer(this._layer);
+
+  final Layer _layer;
+
+  @override
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+    _layer.addToScene(builder, layerOffset);
+  }
+
+  @override
+  S find<S>(Offset regionOffset) => _layer.find(regionOffset);
+}
+
+/// A [Canvas] that multicasts all method calls to a main canvas and a
+/// secondary screenshot canvas so that a screenshot can be recorded at the same
+/// time as performing a normal paint.
+class _MulticastCanvas implements Canvas {
+  _MulticastCanvas({
+    @required Canvas main,
+    @required Canvas screenshot,
+  }) : assert(main != null),
+       assert(screenshot != null),
+       _main = main,
+       _screenshot = screenshot;
+
+  final Canvas _main;
+  final Canvas _screenshot;
+
+  @override
+  void clipPath(Path path, {bool doAntiAlias = true}) {
+    _main.clipPath(path, doAntiAlias: doAntiAlias);
+    _screenshot.clipPath(path, doAntiAlias: doAntiAlias);
+  }
+
+  @override
+  void clipRRect(RRect rrect, {bool doAntiAlias = true}) {
+    _main.clipRRect(rrect, doAntiAlias: doAntiAlias);
+    _screenshot.clipRRect(rrect, doAntiAlias: doAntiAlias);
+  }
+
+  @override
+  void clipRect(Rect rect, {ui.ClipOp clipOp = ui.ClipOp.intersect, bool doAntiAlias = true}) {
+    _main.clipRect(rect, clipOp: clipOp, doAntiAlias: doAntiAlias);
+    _screenshot.clipRect(rect, clipOp: clipOp, doAntiAlias: doAntiAlias);
+  }
+
+  @override
+  void drawArc(Rect rect, double startAngle, double sweepAngle, bool useCenter, Paint paint) {
+    _main.drawArc(rect, startAngle, sweepAngle, useCenter, paint);
+    _screenshot.drawArc(rect, startAngle, sweepAngle, useCenter, paint);
+  }
+
+  @override
+  void drawAtlas(ui.Image atlas, List<RSTransform> transforms, List<Rect> rects, List<Color> colors, BlendMode blendMode, Rect cullRect, Paint paint) {
+    _main.drawAtlas(atlas, transforms, rects, colors, blendMode, cullRect, paint);
+    _screenshot.drawAtlas(atlas, transforms, rects, colors, blendMode, cullRect, paint);
+  }
+
+  @override
+  void drawCircle(Offset c, double radius, Paint paint) {
+    _main.drawCircle(c, radius, paint);
+    _screenshot.drawCircle(c, radius, paint);
+  }
+
+  @override
+  void drawColor(Color color, BlendMode blendMode) {
+    _main.drawColor(color, blendMode);
+    _screenshot.drawColor(color, blendMode);
+  }
+
+  @override
+  void drawDRRect(RRect outer, RRect inner, Paint paint) {
+    _main.drawDRRect(outer, inner, paint);
+    _screenshot.drawDRRect(outer, inner, paint);
+  }
+
+  @override
+  void drawImage(ui.Image image, Offset p, Paint paint) {
+    _main.drawImage(image, p, paint);
+    _screenshot.drawImage(image, p, paint);
+  }
+
+  @override
+  void drawImageNine(ui.Image image, Rect center, Rect dst, Paint paint) {
+    _main.drawImageNine(image, center, dst, paint);
+    _screenshot.drawImageNine(image, center, dst, paint);
+  }
+
+  @override
+  void drawImageRect(ui.Image image, Rect src, Rect dst, Paint paint) {
+    _main.drawImageRect(image, src, dst, paint);
+    _screenshot.drawImageRect(image, src, dst, paint);
+  }
+
+  @override
+  void drawLine(Offset p1, Offset p2, Paint paint) {
+    _main.drawLine(p1, p2, paint);
+    _screenshot.drawLine(p1, p2, paint);
+  }
+
+  @override
+  void drawOval(Rect rect, Paint paint) {
+    _main.drawOval(rect, paint);
+    _screenshot.drawOval(rect, paint);
+  }
+
+  @override
+  void drawPaint(Paint paint) {
+    _main.drawPaint(paint);
+    _screenshot.drawPaint(paint);
+  }
+
+  @override
+  void drawParagraph(ui.Paragraph paragraph, Offset offset) {
+    _main.drawParagraph(paragraph, offset);
+    _screenshot.drawParagraph(paragraph, offset);
+  }
+
+  @override
+  void drawPath(Path path, Paint paint) {
+    _main.drawPath(path, paint);
+    _screenshot.drawPath(path, paint);
+  }
+
+  @override
+  void drawPicture(ui.Picture picture) {
+    _main.drawPicture(picture);
+    _screenshot.drawPicture(picture);
+  }
+
+  @override
+  void drawPoints(ui.PointMode pointMode, List<Offset> points, Paint paint) {
+    _main.drawPoints(pointMode, points, paint);
+    _screenshot.drawPoints(pointMode, points, paint);
+  }
+
+  @override
+  void drawRRect(RRect rrect, Paint paint) {
+    _main.drawRRect(rrect, paint);
+    _screenshot.drawRRect(rrect, paint);
+  }
+
+  @override
+  void drawRawAtlas(ui.Image atlas, Float32List rstTransforms, Float32List rects, Int32List colors, BlendMode blendMode, Rect cullRect, Paint paint) {
+    _main.drawRawAtlas(atlas, rstTransforms, rects, colors, blendMode, cullRect, paint);
+    _screenshot.drawRawAtlas(atlas, rstTransforms, rects, colors, blendMode, cullRect, paint);
+  }
+
+  @override
+  void drawRawPoints(ui.PointMode pointMode, Float32List points, Paint paint) {
+    _main.drawRawPoints(pointMode, points, paint);
+    _screenshot.drawRawPoints(pointMode, points, paint);
+  }
+
+  @override
+  void drawRect(Rect rect, Paint paint) {
+    _main.drawRect(rect, paint);
+    _screenshot.drawRect(rect, paint);
+  }
+
+  @override
+  void drawShadow(Path path, Color color, double elevation, bool transparentOccluder) {
+    _main.drawShadow(path, color, elevation, transparentOccluder);
+    _screenshot.drawShadow(path, color, elevation, transparentOccluder);
+  }
+
+  @override
+  void drawVertices(ui.Vertices vertices, BlendMode blendMode, Paint paint) {
+    _main.drawVertices(vertices, blendMode, paint);
+    _screenshot.drawVertices(vertices, blendMode, paint);
+  }
+
+  @override
+  int getSaveCount() {
+    // The main canvas is used instead of the screenshot canvas as the main
+    // canvas is guaranteed to be consistent with the canvas expected by the
+    // normal paint pipeline so any logic depending on getSaveCount() will
+    // behave the same as for the regular paint pipeline.
+    return _main.getSaveCount();
+  }
+
+  @override
+  void restore() {
+    _main.restore();
+    _screenshot.restore();
+  }
+
+  @override
+  void rotate(double radians) {
+    _main.rotate(radians);
+    _screenshot.rotate(radians);
+  }
+
+  @override
+  void save() {
+    _main.save();
+    _screenshot.save();
+  }
+
+  @override
+  void saveLayer(Rect bounds, Paint paint) {
+    _main.saveLayer(bounds, paint);
+    _screenshot.saveLayer(bounds, paint);
+  }
+
+  @override
+  void scale(double sx, [double sy]) {
+    _main.scale(sx, sy);
+    _screenshot.scale(sx, sy);
+  }
+
+  @override
+  void skew(double sx, double sy) {
+    _main.skew(sx, sy);
+    _screenshot.skew(sx, sy);
+  }
+
+  @override
+  void transform(Float64List matrix4) {
+    _main.transform(matrix4);
+    _screenshot.transform(matrix4);
+  }
+
+  @override
+  void translate(double dx, double dy) {
+    _main.translate(dx, dy);
+    _screenshot.translate(dx, dy);
+  }
+}
+
+Rect _calculateSubtreeBoundsHelper(RenderObject object, Matrix4 transform) {
+  Rect bounds = MatrixUtils.transformRect(transform, object.semanticBounds);
+
+  object.visitChildren((RenderObject child) {
+    final Matrix4 childTransform = transform.clone();
+    object.applyPaintTransform(child, childTransform);
+    Rect childBounds = _calculateSubtreeBoundsHelper(child, childTransform);
+    final Rect paintClip = object.describeApproximatePaintClip(child);
+    if (paintClip != null) {
+      final Rect transformedPaintClip = MatrixUtils.transformRect(
+        transform,
+        paintClip,
+      );
+      childBounds = childBounds.intersect(transformedPaintClip);
+    }
+
+    if (childBounds.isFinite && !childBounds.isEmpty) {
+      bounds = bounds.isEmpty ? childBounds : bounds.expandToInclude(childBounds);
+    }
+  });
+
+  return bounds;
+}
+
+/// Calculate bounds for a render object and all of its descendants.
+Rect _calculateSubtreeBounds(RenderObject object) {
+  return _calculateSubtreeBoundsHelper(object, Matrix4.identity());
+}
+
+/// A layer that omits its own offset when adding children to the scene so that
+/// screenshots render to the scene in the local coordinate system of the layer.
+class _ScreenshotContainerLayer extends OffsetLayer {
+  @override
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+    addChildrenToScene(builder, layerOffset);
+  }
+}
+
+/// Data shared between nested [_ScreenshotPaintingContext] objects recording
+/// a screenshot.
+class _ScreenshotData {
+  _ScreenshotData({
+    @required this.target,
+  }) : assert(target != null),
+       containerLayer = _ScreenshotContainerLayer();
+
+  /// Target to take a screenshot of.
+  final RenderObject target;
+
+  /// Root of the layer tree containing the screenshot.
+  final OffsetLayer containerLayer;
+
+  /// Whether the screenshot target has already been found in the render tree.
+  bool foundTarget = false;
+
+  /// Whether paint operations should record to the screenshot.
+  ///
+  /// At least one of [includeInScreenshot] and [includeInRegularContext] must
+  /// be true.
+  bool includeInScreenshot = false;
+
+  /// Whether paint operations should record to the regular context.
+  ///
+  /// This should only be set to false before paint operations that should only
+  /// apply to the screenshot such rendering debug information about the
+  /// [target].
+  ///
+  /// At least one of [includeInScreenshot] and [includeInRegularContext] must
+  /// be true.
+  bool includeInRegularContext = true;
+
+  /// Offset of the screenshot corresponding to the offset [target] was given as
+  /// part of the regular paint.
+  Offset get screenshotOffset {
+    assert(foundTarget);
+    return containerLayer.offset;
+  }
+  set screenshotOffset(Offset offset) {
+    containerLayer.offset = offset;
+  }
+}
+
+/// A place to paint to build screenshots of [RenderObject]s.
+///
+/// Requires that the render objects have already painted successfully as part
+/// of the regular rendering pipeline.
+/// This painting context behaves the same as standard [PaintingContext] with
+/// instrumentation added to compute a screenshot of a specified [RenderObject]
+/// added. To correctly mimic the behavor of the regular rendering pipeline, the
+/// full subtree of the first [RepaintBoundary] ancestor of the specified
+/// [RenderObject] will also be rendered rather than just the subtree of the
+/// render object.
+class _ScreenshotPaintingContext extends PaintingContext {
+  _ScreenshotPaintingContext({
+    @required ContainerLayer containerLayer,
+    @required Rect estimatedBounds,
+    @required _ScreenshotData screenshotData,
+  }) : _data = screenshotData,
+       super(containerLayer, estimatedBounds);
+
+  final _ScreenshotData _data;
+
+  // Recording state
+  PictureLayer _screenshotCurrentLayer;
+  ui.PictureRecorder _screenshotRecorder;
+  Canvas _screenshotCanvas;
+  _MulticastCanvas _multicastCanvas;
+
+  @override
+  Canvas get canvas {
+    if (_data.includeInScreenshot) {
+      if (_screenshotCanvas == null) {
+        _startRecordingScreenshot();
+      }
+      assert(_screenshotCanvas != null);
+      return _data.includeInRegularContext ? _multicastCanvas : _screenshotCanvas;
+    } else {
+      assert(_data.includeInRegularContext);
+      return super.canvas;
+    }
+  }
+
+  bool get _isScreenshotRecording {
+    final bool hasScreenshotCanvas = _screenshotCanvas != null;
+    assert(() {
+      if (hasScreenshotCanvas) {
+        assert(_screenshotCurrentLayer != null);
+        assert(_screenshotRecorder != null);
+        assert(_screenshotCanvas != null);
+      } else {
+        assert(_screenshotCurrentLayer == null);
+        assert(_screenshotRecorder == null);
+        assert(_screenshotCanvas == null);
+      }
+      return true;
+    }());
+    return hasScreenshotCanvas;
+  }
+
+  void _startRecordingScreenshot() {
+    assert(_data.includeInScreenshot);
+    assert(!_isScreenshotRecording);
+    _screenshotCurrentLayer = PictureLayer(estimatedBounds);
+    _screenshotRecorder = ui.PictureRecorder();
+    _screenshotCanvas = Canvas(_screenshotRecorder);
+    _data.containerLayer.append(_screenshotCurrentLayer);
+    if (_data.includeInRegularContext) {
+      _multicastCanvas = _MulticastCanvas(
+        main: super.canvas,
+        screenshot: _screenshotCanvas,
+      );
+    } else {
+      _multicastCanvas = null;
+    }
+  }
+
+  @override
+  void stopRecordingIfNeeded() {
+    super.stopRecordingIfNeeded();
+    _stopRecordingScreenshotIfNeeded();
+  }
+
+  void _stopRecordingScreenshotIfNeeded() {
+    if (!_isScreenshotRecording)
+      return;
+    // There is no need to ever draw repaint rainbows as part of the screenshot.
+    _screenshotCurrentLayer.picture = _screenshotRecorder.endRecording();
+    _screenshotCurrentLayer = null;
+    _screenshotRecorder = null;
+    _multicastCanvas = null;
+    _screenshotCanvas = null;
+  }
+
+  @override
+  void appendLayer(Layer layer) {
+    if (_data.includeInRegularContext) {
+      super.appendLayer(layer);
+      if (_data.includeInScreenshot) {
+        assert(!_isScreenshotRecording);
+        // We must use a proxy layer here as the layer is already attached to
+        // the regular layer tree.
+        _data.containerLayer.append(_ProxyLayer(layer));
+      }
+    } else {
+      // Only record to the screenshot.
+      assert(!_isScreenshotRecording);
+      assert(_data.includeInScreenshot);
+      layer.remove();
+      _data.containerLayer.append(layer);
+      return;
+    }
+  }
+
+  @override
+  PaintingContext createChildContext(ContainerLayer childLayer, Rect bounds) {
+    if (_data.foundTarget) {
+      // We have already found the screenshotTarget in the layer tree
+      // so we can optimize and use a standard PaintingContext.
+      return super.createChildContext(childLayer, bounds);
+    } else {
+      return _ScreenshotPaintingContext(
+        containerLayer: childLayer,
+        estimatedBounds: bounds,
+        screenshotData: _data,
+      );
+    }
+  }
+
+  @override
+  void paintChild(RenderObject child, Offset offset) {
+    final bool isScreenshotTarget = identical(child, _data.target);
+    if (isScreenshotTarget) {
+      assert(!_data.includeInScreenshot);
+      assert(!_data.foundTarget);
+      _data.foundTarget = true;
+      _data.screenshotOffset = offset;
+      _data.includeInScreenshot = true;
+    }
+    super.paintChild(child, offset);
+    if (isScreenshotTarget) {
+      _stopRecordingScreenshotIfNeeded();
+      _data.includeInScreenshot = false;
+    }
+  }
+
+  /// Captures an image of the current state of [renderObject] and its children.
+  ///
+  /// The returned [ui.Image] has uncompressed raw RGBA bytes, will be offset
+  /// by the top-left corner of [renderBounds], and have dimensions equal to the
+  /// size of [renderBounds] multiplied by [pixelRatio].
+  ///
+  /// To use [toImage], the render object must have gone through the paint phase
+  /// (i.e. [debugNeedsPaint] must be false).
+  ///
+  /// The [pixelRatio] describes the scale between the logical pixels and the
+  /// size of the output image. It is independent of the
+  /// [window.devicePixelRatio] for the device, so specifying 1.0 (the default)
+  /// will give you a 1:1 mapping between logical pixels and the output pixels
+  /// in the image.
+  ///
+  /// The [debugPaint] argument specifies whether the image should include the
+  /// output of [RenderObject.debugPaint] for [renderObject] with
+  /// [debugPaintSizeEnabled] set to `true`. Debug paint information is not
+  /// included for the children of [renderObject] so that it is clear precisely
+  /// which object the debug paint information references.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderRepaintBoundary.toImage] for a similar API for [RenderObject]s
+  ///    that are repaint boundaries that can be used outside of the inspector.
+  ///  * [OffsetLayer.toImage] for a similar API at the layer level.
+  ///  * [dart:ui.Scene.toImage] for more information about the image returned.
+  static Future<ui.Image> toImage(
+    RenderObject renderObject,
+    Rect renderBounds, {
+    double pixelRatio = 1.0,
+    bool debugPaint = false,
+  }) {
+    RenderObject repaintBoundary = renderObject;
+    while (repaintBoundary != null && !repaintBoundary.isRepaintBoundary) {
+      repaintBoundary = repaintBoundary.parent;
+    }
+    assert(repaintBoundary != null);
+    final _ScreenshotData data = _ScreenshotData(target: renderObject);
+    final _ScreenshotPaintingContext context = _ScreenshotPaintingContext(
+      containerLayer: repaintBoundary.debugLayer,
+      estimatedBounds: repaintBoundary.paintBounds,
+      screenshotData: data,
+    );
+
+    if (identical(renderObject, repaintBoundary)) {
+      // Painting the existing repaint boundary to the screenshot is sufficient.
+      // We don't just take a direct screenshot of the repaint boundary as we
+      // want to capture debugPaint information as well.
+      data.containerLayer.append(_ProxyLayer(repaintBoundary.layer));
+      data.foundTarget = true;
+      data.screenshotOffset = repaintBoundary.layer.offset;
+    } else {
+      // Repaint everything under the repaint boundary.
+      // We call debugInstrumentRepaintCompositedChild instead of paintChild as
+      // we need to force everything under the repaint boundary to repaint.
+      PaintingContext.debugInstrumentRepaintCompositedChild(
+        repaintBoundary,
+        customContext: context,
+      );
+    }
+
+    // The check that debugPaintSizeEnabled is false exists to ensure we only
+    // call debugPaint when it wasn't already called.
+    if (debugPaint && !debugPaintSizeEnabled) {
+      data.includeInRegularContext = false;
+      // Existing recording may be to a canvas that draws to both the normal and
+      // screenshot canvases.
+      context.stopRecordingIfNeeded();
+      assert(data.foundTarget);
+      data.includeInScreenshot = true;
+
+      debugPaintSizeEnabled = true;
+      try {
+        renderObject.debugPaint(context, data.screenshotOffset);
+      } finally {
+        debugPaintSizeEnabled = false;
+        context.stopRecordingIfNeeded();
+      }
+    }
+
+    // We must build the regular scene before we can build the screenshot
+    // scene as building the screenshot scene assumes addToScene has already
+    // been called successfully for all layers in the regular scene.
+    repaintBoundary.layer.addToScene(ui.SceneBuilder());
+
+    return data.containerLayer.toImage(renderBounds, pixelRatio: pixelRatio);
+  }
+}
 
 /// A class describing a step along a path through a tree of [DiagnosticsNode]
 /// objects.
@@ -76,7 +639,7 @@ List<_DiagnosticsPathNode> _followDiagnosticableChain(List<Diagnosticable> chain
       final DiagnosticsNode child = children[j];
       if (child.value == target) {
         foundMatch = true;
-        path.add(new _DiagnosticsPathNode(
+        path.add(_DiagnosticsPathNode(
           node: diagnostic,
           children: children,
           childIndex: j,
@@ -87,13 +650,13 @@ List<_DiagnosticsPathNode> _followDiagnosticableChain(List<Diagnosticable> chain
     }
     assert(foundMatch);
   }
-  path.add(new _DiagnosticsPathNode(node: diagnostic, children: diagnostic.getChildren()));
+  path.add(_DiagnosticsPathNode(node: diagnostic, children: diagnostic.getChildren()));
   return path;
 }
 
 /// Signature for the selection change callback used by
 /// [WidgetInspectorService.selectionChangedCallback].
-typedef void InspectorSelectionChangedCallback();
+typedef InspectorSelectionChangedCallback = void Function();
 
 /// Structure to help reference count Dart objects referenced by a GUI tool
 /// using [WidgetInspectorService].
@@ -175,16 +738,16 @@ class _WidgetInspectorService extends Object with WidgetInspectorService {
 class WidgetInspectorService {
   // This class is usable as a mixin for test purposes and as a singleton
   // [instance] for production purposes.
-  factory WidgetInspectorService._() => new _WidgetInspectorService();
+  factory WidgetInspectorService._() => _WidgetInspectorService();
 
   /// Ring of cached JSON values to prevent json from being garbage
   /// collected before it can be requested over the Observatory protocol.
-  final List<String> _serializeRing = new List<String>(20);
+  final List<String> _serializeRing = List<String>(20);
   int _serializeRingIndex = 0;
 
   /// The current [WidgetInspectorService].
   static WidgetInspectorService get instance => _instance;
-  static WidgetInspectorService _instance = new WidgetInspectorService._();
+  static WidgetInspectorService _instance = WidgetInspectorService._();
   @protected
   static set instance(WidgetInspectorService instance) {
     _instance = instance;
@@ -195,7 +758,7 @@ class WidgetInspectorService {
   /// Ground truth tracking what object(s) are currently selected used by both
   /// GUI tools such as the Flutter IntelliJ Plugin and the [WidgetInspector]
   /// displayed on the device.
-  final InspectorSelection selection = new InspectorSelection();
+  final InspectorSelection selection = InspectorSelection();
 
   /// Callback typically registered by the [WidgetInspector] to receive
   /// notifications when [selection] changes.
@@ -210,7 +773,7 @@ class WidgetInspectorService {
   /// alive.
   final Map<String, Set<_InspectorReferenceData>> _groups = <String, Set<_InspectorReferenceData>>{};
   final Map<String, _InspectorReferenceData> _idToReferenceData = <String, _InspectorReferenceData>{};
-  final Map<Object, String> _objectToId = new Map<Object, String>.identity();
+  final Map<Object, String> _objectToId = Map<Object, String>.identity();
   int _nextId = 0;
 
   List<String> _pubRootDirectories;
@@ -353,18 +916,16 @@ class WidgetInspectorService {
       binding.buildOwner.reassemble(binding.renderViewElement);
       return binding.endOfFrame;
     }
-    return new Future<Null>.value();
+    return Future<Null>.value();
   }
 
   /// Called to register service extensions.
   ///
-  /// Service extensions are only exposed when the observatory is
-  /// included in the build, which should only happen in checked mode
-  /// and in profile mode.
-  ///
   /// See also:
   ///
   ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
+  ///  * [BindingBase.initServiceExtensions], which explains when service
+  ///    extensions can be used.
   void initServiceExtensions(
       _RegisterServiceExtensionCallback registerServiceExtensionCallback) {
     _registerServiceExtensionCallback = registerServiceExtensionCallback;
@@ -376,7 +937,7 @@ class WidgetInspectorService {
       getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
       setter: (bool value) {
         if (WidgetsApp.debugShowWidgetInspectorOverride == value) {
-          return new Future<Null>.value();
+          return Future<Null>.value();
         }
         WidgetsApp.debugShowWidgetInspectorOverride = value;
         return forceRebuild();
@@ -464,6 +1025,33 @@ class WidgetInspectorService {
       name: 'isWidgetCreationTracked',
       callback: isWidgetCreationTracked,
     );
+    registerServiceExtension(
+      name: 'screenshot',
+      callback: (Map<String, String> parameters) async {
+        assert(parameters.containsKey('id'));
+        assert(parameters.containsKey('width'));
+        assert(parameters.containsKey('height'));
+
+        final ui.Image image = await screenshot(
+          toObject(parameters['id']),
+          width: double.parse(parameters['width']),
+          height: double.parse(parameters['height']),
+          margin: parameters.containsKey('margin') ?
+              double.parse(parameters['margin']) : 0.0,
+          maxPixelRatio: parameters.containsKey('maxPixelRatio') ?
+              double.parse(parameters['maxPixelRatio']) : 1.0,
+          debugPaint: parameters['debugPaint'] == 'true',
+        );
+        if (image == null) {
+          return <String, Object>{'result': null};
+        }
+        final ByteData byteData = await image.toByteData(format:ui.ImageByteFormat.png);
+
+        return <String, Object>{
+          'result': base64.encoder.convert(Uint8List.view(byteData.buffer)),
+        };
+      },
+    );
   }
 
   /// Clear all InspectorService object references.
@@ -508,14 +1096,14 @@ class WidgetInspectorService {
     if (object == null)
       return null;
 
-    final Set<_InspectorReferenceData> group = _groups.putIfAbsent(groupName, () => new Set<_InspectorReferenceData>.identity());
+    final Set<_InspectorReferenceData> group = _groups.putIfAbsent(groupName, () => Set<_InspectorReferenceData>.identity());
     String id = _objectToId[object];
     _InspectorReferenceData referenceData;
     if (id == null) {
       id = 'inspector-$_nextId';
       _nextId += 1;
       _objectToId[object] = id;
-      referenceData = new _InspectorReferenceData(object);
+      referenceData = _InspectorReferenceData(object);
       _idToReferenceData[id] = referenceData;
       group.add(referenceData);
     } else {
@@ -546,7 +1134,7 @@ class WidgetInspectorService {
 
     final _InspectorReferenceData data = _idToReferenceData[id];
     if (data == null) {
-      throw new FlutterError('Id does not exist.');
+      throw FlutterError('Id does not exist.');
     }
     return data.object;
   }
@@ -581,9 +1169,9 @@ class WidgetInspectorService {
 
     final _InspectorReferenceData referenceData = _idToReferenceData[id];
     if (referenceData == null)
-      throw new FlutterError('Id does not exist');
+      throw FlutterError('Id does not exist');
     if (_groups[groupName]?.remove(referenceData) != true)
-      throw new FlutterError('Id is not in group');
+      throw FlutterError('Id is not in group');
     _decrementReferenceCount(referenceData);
   }
 
@@ -667,11 +1255,11 @@ class WidgetInspectorService {
     else if (value is Element)
       path = _getElementParentChain(value, groupName);
     else
-      throw new FlutterError('Cannot get parent chain for node of type ${value.runtimeType}');
+      throw FlutterError('Cannot get parent chain for node of type ${value.runtimeType}');
 
-    return path.map((_DiagnosticsPathNode node) => _pathNodeToJson(
+    return path.map<Object>((_DiagnosticsPathNode node) => _pathNodeToJson(
       node,
-      new _SerializeConfig(groupName: groupName),
+      _SerializeConfig(groupName: groupName),
     )).toList();
   }
 
@@ -752,7 +1340,7 @@ class WidgetInspectorService {
         node.getProperties().where(
           (DiagnosticsNode node) => !node.isFiltered(createdByLocalProject ? DiagnosticLevel.fine : DiagnosticLevel.info),
         ),
-        new _SerializeConfig(groupName: config.groupName, subtreeDepth: 1, expandPropertyValues: true),
+        _SerializeConfig(groupName: config.groupName, subtreeDepth: 1, expandPropertyValues: true),
       );
     }
 
@@ -776,7 +1364,7 @@ class WidgetInspectorService {
           value.toDiagnosticsNode().getProperties().where(
                 (DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info),
           ),
-          new _SerializeConfig(groupName: config.groupName,
+          _SerializeConfig(groupName: config.groupName,
               subtreeDepth: 0,
               expandPropertyValues: false,
           ),
@@ -834,10 +1422,10 @@ class WidgetInspectorService {
           if (config.pathToInclude.first == node.value) {
             return _nodeToJson(
               node,
-              new _SerializeConfig.merge(config, pathToInclude: config.pathToInclude.skip(1)),
+              _SerializeConfig.merge(config, pathToInclude: config.pathToInclude.skip(1)),
             );
           } else {
-            return _nodeToJson(node, new _SerializeConfig.merge(config));
+            return _nodeToJson(node, _SerializeConfig.merge(config));
           }
         }
         // The tricky special case here is that when in the detailsTree,
@@ -848,7 +1436,7 @@ class WidgetInspectorService {
         return _nodeToJson(
           node,
           config.summaryTree || config.subtreeDepth > 1 || _shouldShowInSummaryTree(node) ?
-              new _SerializeConfig.merge(config, subtreeDepth: config.subtreeDepth - 1) : config,
+              _SerializeConfig.merge(config, subtreeDepth: config.subtreeDepth - 1) : config,
         );
       }).toList();
   }
@@ -862,7 +1450,7 @@ class WidgetInspectorService {
 
   List<Object> _getProperties(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), new _SerializeConfig(groupName: groupName));
+    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), _SerializeConfig(groupName: groupName));
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
@@ -873,7 +1461,7 @@ class WidgetInspectorService {
 
   List<Object> _getChildren(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
-    final _SerializeConfig config = new _SerializeConfig(groupName: groupName);
+    final _SerializeConfig config = _SerializeConfig(groupName: groupName);
     return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config);
   }
 
@@ -895,7 +1483,7 @@ class WidgetInspectorService {
 
   List<Object> _getChildrenSummaryTree(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
-    final _SerializeConfig config = new _SerializeConfig(groupName: groupName, summaryTree: true);
+    final _SerializeConfig config = _SerializeConfig(groupName: groupName, summaryTree: true);
     return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config);
   }
 
@@ -912,7 +1500,7 @@ class WidgetInspectorService {
   List<Object> _getChildrenDetailsSubtree(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
     // With this value of minDepth we only expand one extra level of important nodes.
-    final _SerializeConfig config = new _SerializeConfig(groupName: groupName, subtreeDepth: 1,  includeProperties: true);
+    final _SerializeConfig config = _SerializeConfig(groupName: groupName, subtreeDepth: 1,  includeProperties: true);
     return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config);
   }
 
@@ -955,7 +1543,7 @@ class WidgetInspectorService {
   }
 
   Map<String, Object> _getRootWidget(String groupName) {
-    return _nodeToJson(WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(), new _SerializeConfig(groupName: groupName));
+    return _nodeToJson(WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(), _SerializeConfig(groupName: groupName));
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
@@ -967,7 +1555,7 @@ class WidgetInspectorService {
   Map<String, Object> _getRootWidgetSummaryTree(String groupName) {
     return _nodeToJson(
       WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(),
-      new _SerializeConfig(groupName: groupName, subtreeDepth: 1000000, summaryTree: true),
+      _SerializeConfig(groupName: groupName, subtreeDepth: 1000000, summaryTree: true),
     );
   }
 
@@ -979,7 +1567,7 @@ class WidgetInspectorService {
   }
 
   Map<String, Object> _getRootRenderObject(String groupName) {
-    return _nodeToJson(RendererBinding.instance?.renderView?.toDiagnosticsNode(), new _SerializeConfig(groupName: groupName));
+    return _nodeToJson(RendererBinding.instance?.renderView?.toDiagnosticsNode(), _SerializeConfig(groupName: groupName));
   }
 
   /// Returns a JSON representation of the subtree rooted at the
@@ -1000,7 +1588,7 @@ class WidgetInspectorService {
     }
     return _nodeToJson(
       root,
-      new _SerializeConfig(
+      _SerializeConfig(
         groupName: groupName,
         summaryTree: false,
         subtreeDepth: 2,  // TODO(jacobr): make subtreeDepth configurable.
@@ -1023,7 +1611,7 @@ class WidgetInspectorService {
   Map<String, Object> _getSelectedRenderObject(String previousSelectionId, String groupName) {
     final DiagnosticsNode previousSelection = toObject(previousSelectionId);
     final RenderObject current = selection?.current;
-    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), new _SerializeConfig(groupName: groupName));
+    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), _SerializeConfig(groupName: groupName));
   }
 
   /// Returns a [DiagnosticsNode] representing the currently selected [Element].
@@ -1036,10 +1624,81 @@ class WidgetInspectorService {
     return _safeJsonEncode(_getSelectedWidget(previousSelectionId, groupName));
   }
 
+  /// Captures an image of the current state of an [object] that is a
+  /// [RenderObject] or [Element].
+  ///
+  /// The returned [ui.Image] has uncompressed raw RGBA bytes and will be scaled
+  /// to be at most [width] pixels wide and [height] pixels tall. The returned
+  /// image will never have a scale between logical pixels and the
+  /// size of the output image larger than maxPixelRatio.
+  /// [margin] indicates the number of pixels relative to the unscaled size of
+  /// the [object] to include as a margin to include around the bounds of the
+  /// [object] in the screenshot. Including a margin can be useful to capture
+  /// areas that are slightly outside of the normal bounds of an object such as
+  /// some debug paint information.
+  @protected
+  Future<ui.Image> screenshot(
+    Object object, {
+    @required double width,
+    @required double height,
+    double margin = 0.0,
+    double maxPixelRatio = 1.0,
+    bool debugPaint = false,
+  }) async {
+    if (object is! Element && object is! RenderObject) {
+      return null;
+    }
+    final RenderObject renderObject = object is Element ? object.renderObject : object;
+    if (renderObject == null || !renderObject.attached) {
+      return null;
+    }
+
+    if (renderObject.debugNeedsLayout) {
+      final PipelineOwner owner = renderObject.owner;
+      assert(owner != null);
+      assert(!owner.debugDoingLayout);
+      owner
+        ..flushLayout()
+        ..flushCompositingBits()
+        ..flushPaint();
+
+      // If we still need layout, then that means that renderObject was skipped
+      // in the layout phase and therefore can't be painted. It is clearer to
+      // return null indicating that a screenshot is unavailable than to return
+      // an empty image.
+      if (renderObject.debugNeedsLayout) {
+        return null;
+      }
+    }
+
+    Rect renderBounds = _calculateSubtreeBounds(renderObject);
+    if (margin != 0.0) {
+      renderBounds = renderBounds.inflate(margin);
+    }
+    if (renderBounds.isEmpty) {
+      return null;
+    }
+
+    final double pixelRatio = math.min(
+      maxPixelRatio,
+      math.min(
+        width / renderBounds.width,
+        height / renderBounds.height,
+      ),
+    );
+
+    return _ScreenshotPaintingContext.toImage(
+      renderObject,
+      renderBounds,
+      pixelRatio: pixelRatio,
+      debugPaint: debugPaint,
+    );
+  }
+
   Map<String, Object> _getSelectedWidget(String previousSelectionId, String groupName) {
     final DiagnosticsNode previousSelection = toObject(previousSelectionId);
     final Element current = selection?.currentElement;
-    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), new _SerializeConfig(groupName: groupName));
+    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), _SerializeConfig(groupName: groupName));
   }
 
   /// Returns a [DiagnosticsNode] representing the currently selected [Element]
@@ -1070,7 +1729,7 @@ class WidgetInspectorService {
       }
       current = firstLocal;
     }
-    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), new _SerializeConfig(groupName: groupName));
+    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), _SerializeConfig(groupName: groupName));
   }
 
   /// Returns whether [Widget] creation locations are available.
@@ -1081,7 +1740,7 @@ class WidgetInspectorService {
   /// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
   @protected
   bool isWidgetCreationTracked() {
-    _widgetCreationTracked ??= new _WidgetForTypeTests() is _HasCreationLocation;
+    _widgetCreationTracked ??= _WidgetForTypeTests() is _HasCreationLocation;
     return _widgetCreationTracked;
   }
 
@@ -1136,7 +1795,7 @@ class WidgetInspector extends StatefulWidget {
   final InspectorSelectButtonBuilder selectButtonBuilder;
 
   @override
-  _WidgetInspectorState createState() => new _WidgetInspectorState();
+  _WidgetInspectorState createState() => _WidgetInspectorState();
 }
 
 class _WidgetInspectorState extends State<WidgetInspector>
@@ -1155,7 +1814,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
   /// highlighted but the application can be interacted with normally.
   bool isSelectMode = true;
 
-  final GlobalKey _ignorePointerKey = new GlobalKey();
+  final GlobalKey _ignorePointerKey = GlobalKey();
 
   /// Distance from the edge of of the bounding box for an element to consider
   /// as selecting the edge of the bounding box.
@@ -1250,7 +1909,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
       return size == null ? double.maxFinite : size.width * size.height;
     }
     regularHits.sort((RenderObject a, RenderObject b) => _area(a).compareTo(_area(b)));
-    final Set<RenderObject> hits = new LinkedHashSet<RenderObject>();
+    final Set<RenderObject> hits = LinkedHashSet<RenderObject>();
     hits..addAll(edgeHits)..addAll(regularHits);
     return hits.toList();
   }
@@ -1319,14 +1978,14 @@ class _WidgetInspectorState extends State<WidgetInspector>
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
-    children.add(new GestureDetector(
+    children.add(GestureDetector(
       onTap: _handleTap,
       onPanDown: _handlePanDown,
       onPanEnd: _handlePanEnd,
       onPanUpdate: _handlePanUpdate,
       behavior: HitTestBehavior.opaque,
       excludeFromSemantics: true,
-      child: new IgnorePointer(
+      child: IgnorePointer(
         ignoring: isSelectMode,
         key: _ignorePointerKey,
         ignoringSemantics: false,
@@ -1334,14 +1993,14 @@ class _WidgetInspectorState extends State<WidgetInspector>
       ),
     ));
     if (!isSelectMode && widget.selectButtonBuilder != null) {
-      children.add(new Positioned(
+      children.add(Positioned(
         left: _kInspectButtonMargin,
         bottom: _kInspectButtonMargin,
         child: widget.selectButtonBuilder(context, _handleEnableSelect)
       ));
     }
-    children.add(new _InspectorOverlay(selection: selection));
-    return new Stack(children: children);
+    children.add(_InspectorOverlay(selection: selection));
+    return Stack(children: children);
   }
 }
 
@@ -1426,7 +2085,7 @@ class _InspectorOverlay extends LeafRenderObjectWidget {
 
   @override
   _RenderInspectorOverlay createRenderObject(BuildContext context) {
-    return new _RenderInspectorOverlay(selection: selection);
+    return _RenderInspectorOverlay(selection: selection);
   }
 
   @override
@@ -1462,8 +2121,8 @@ class _RenderInspectorOverlay extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(needsCompositing);
-    context.addLayer(new _InspectorOverlayLayer(
-      overlayRect: new Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
+    context.addLayer(_InspectorOverlayLayer(
+      overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       selection: selection,
     ));
   }
@@ -1546,7 +2205,7 @@ class _InspectorOverlayLayer extends Layer {
       return true;
     }());
     if (inDebugMode == false) {
-      throw new FlutterError(
+      throw FlutterError(
         'The inspector should never be used in production mode due to the '
         'negative performance impact.'
       );
@@ -1571,7 +2230,7 @@ class _InspectorOverlayLayer extends Layer {
   double _textPainterMaxWidth;
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     if (!selection.active)
       return;
 
@@ -1580,12 +2239,12 @@ class _InspectorOverlayLayer extends Layer {
     for (RenderObject candidate in selection.candidates) {
       if (candidate == selected || !candidate.attached)
         continue;
-      candidates.add(new _TransformedRect(candidate));
+      candidates.add(_TransformedRect(candidate));
     }
 
-    final _InspectorOverlayRenderState state = new _InspectorOverlayRenderState(
+    final _InspectorOverlayRenderState state = _InspectorOverlayRenderState(
       overlayRect: overlayRect,
-      selected: new _TransformedRect(selected),
+      selected: _TransformedRect(selected),
       tooltip: selection.currentElement.toStringShort(),
       textDirection: TextDirection.ltr,
       candidates: candidates,
@@ -1599,15 +2258,15 @@ class _InspectorOverlayLayer extends Layer {
   }
 
   ui.Picture _buildPicture(_InspectorOverlayRenderState state) {
-    final ui.PictureRecorder recorder = new ui.PictureRecorder();
-    final Canvas canvas = new Canvas(recorder, state.overlayRect);
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder, state.overlayRect);
     final Size size = state.overlayRect.size;
 
-    final Paint fillPaint = new Paint()
+    final Paint fillPaint = Paint()
       ..style = PaintingStyle.fill
       ..color = _kHighlightedRenderObjectFillColor;
 
-    final Paint borderPaint = new Paint()
+    final Paint borderPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0
       ..color = _kHighlightedRenderObjectBorderColor;
@@ -1634,7 +2293,7 @@ class _InspectorOverlayLayer extends Layer {
 
     final Rect targetRect = MatrixUtils.transformRect(
         state.selected.transform, state.selected.rect);
-    final Offset target = new Offset(targetRect.left, targetRect.center.dy);
+    final Offset target = Offset(targetRect.left, targetRect.center.dy);
     const double offsetFromWidget = 9.0;
     final double verticalOffset = (targetRect.height) / 2 + offsetFromWidget;
 
@@ -1658,10 +2317,10 @@ class _InspectorOverlayLayer extends Layer {
     final double maxWidth = size.width - 2 * (_kScreenEdgeMargin + _kTooltipPadding);
     if (_textPainter == null || _textPainter.text.text != message || _textPainterMaxWidth != maxWidth) {
       _textPainterMaxWidth = maxWidth;
-      _textPainter = new TextPainter()
+      _textPainter = TextPainter()
         ..maxLines = _kMaxTooltipLines
         ..ellipsis = '...'
-        ..text = new TextSpan(style: _messageStyle, text: message)
+        ..text = TextSpan(style: _messageStyle, text: message)
         ..textDirection = textDirection
         ..layout(maxWidth: maxWidth);
     }
@@ -1675,11 +2334,11 @@ class _InspectorOverlayLayer extends Layer {
       preferBelow: false,
     );
 
-    final Paint tooltipBackground = new Paint()
+    final Paint tooltipBackground = Paint()
       ..style = PaintingStyle.fill
       ..color = _kTooltipBackgroundColor;
     canvas.drawRect(
-      new Rect.fromPoints(
+      Rect.fromPoints(
         tipOffset,
         tipOffset.translate(tooltipSize.width, tooltipSize.height),
       ),
@@ -1695,11 +2354,11 @@ class _InspectorOverlayLayer extends Layer {
     double wedgeX = math.max(tipOffset.dx, target.dx) + wedgeSize * 2;
     wedgeX = math.min(wedgeX, tipOffset.dx + tooltipSize.width - wedgeSize * 2);
     final List<Offset> wedge = <Offset>[
-      new Offset(wedgeX - wedgeSize, wedgeY),
-      new Offset(wedgeX + wedgeSize, wedgeY),
-      new Offset(wedgeX, wedgeY + (tooltipBelow ? -wedgeSize : wedgeSize)),
+      Offset(wedgeX - wedgeSize, wedgeY),
+      Offset(wedgeX + wedgeSize, wedgeY),
+      Offset(wedgeX, wedgeY + (tooltipBelow ? -wedgeSize : wedgeSize)),
     ];
-    canvas.drawPath(new Path()..addPolygon(wedge, true,), tooltipBackground);
+    canvas.drawPath(Path()..addPolygon(wedge, true,), tooltipBackground);
     _textPainter.paint(canvas, tipOffset + const Offset(_kTooltipPadding, _kTooltipPadding));
     canvas.restore();
   }

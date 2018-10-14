@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(new MaterialApp(
+  runApp(MaterialApp(
     title: 'Hardware Key Demo',
-    home: new Scaffold(
-      appBar: new AppBar(
+    home: Scaffold(
+      appBar: AppBar(
         title: const Text('Hardware Key Demo'),
       ),
       body: const Center(
@@ -23,11 +23,11 @@ class RawKeyboardDemo extends StatefulWidget {
   const RawKeyboardDemo({ Key key }) : super(key: key);
 
   @override
-  _HardwareKeyDemoState createState() => new _HardwareKeyDemoState();
+  _HardwareKeyDemoState createState() => _HardwareKeyDemoState();
 }
 
 class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
-  final FocusNode _focusNode = new FocusNode();
+  final FocusNode _focusNode = FocusNode();
   RawKeyEvent _event;
 
   @override
@@ -45,23 +45,23 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    return new RawKeyboardListener(
+    return RawKeyboardListener(
       focusNode: _focusNode,
       onKey: _handleKeyEvent,
-      child: new AnimatedBuilder(
+      child: AnimatedBuilder(
         animation: _focusNode,
         builder: (BuildContext context, Widget child) {
           if (!_focusNode.hasFocus) {
-            return new GestureDetector(
+            return GestureDetector(
               onTap: () {
                 FocusScope.of(context).requestFocus(_focusNode);
               },
-              child: new Text('Tap to focus', style: textTheme.display1),
+              child: Text('Tap to focus', style: textTheme.display1),
             );
           }
 
           if (_event == null)
-            return new Text('Press a key', style: textTheme.display1);
+            return Text('Press a key', style: textTheme.display1);
 
           int codePoint;
           int keyCode;
@@ -74,13 +74,13 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             codePoint = data.codePoint;
             hidUsage = data.hidUsage;
           }
-          return new Column(
+          return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              new Text('${_event.runtimeType}', style: textTheme.body2),
-              new Text('codePoint: $codePoint', style: textTheme.display4),
-              new Text('keyCode: $keyCode', style: textTheme.display4),
-              new Text('hidUsage: $hidUsage', style: textTheme.display4),
+              Text('${_event.runtimeType}', style: textTheme.body2),
+              Text('codePoint: $codePoint', style: textTheme.display4),
+              Text('keyCode: $keyCode', style: textTheme.display4),
+              Text('hidUsage: $hidUsage', style: textTheme.display4),
             ],
           );
         },

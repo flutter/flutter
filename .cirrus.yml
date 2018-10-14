@@ -2,6 +2,7 @@ container:
   image: gcr.io/flutter-cirrus/build-flutter-image:latest
 
 task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   env:
     # Name the SDK directory to include a space so that we constantly
     # test path names with spaces in them.
@@ -43,10 +44,8 @@ task:
         ANDROID_GALLERY_UPLOAD_KEY: ENCRYPTED[0b3e681b4507aec433ef29c79b715f15f8c75ecd25315ea286b0b2bcb8b28d578634eead5aa2c54086a25e8da1bb219a]
       test_script: ./dev/bots/deploy_gallery.sh
     - name: analyze
-      env:
-        SHARD: analyze
       test_script:
-        - dart ./dev/bots/test.dart
+        - dart ./dev/bots/analyze.dart
     - name: tests-linux
       env:
         SHARD: tests
@@ -63,8 +62,22 @@ task:
       container:
         cpu: 4
         memory: 8G
+    - name: aot_build_tests-linux
+      env:
+        SHARD: aot_build_tests
+      test_script:
+        - dart ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 8G
+    - name: codelabs-build-test
+      env:
+        SHARD: codelabs-build-test
+      build_test_script: ./dev/bots/codelabs_build_test.sh
+
 
 task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   windows_container:
     image: cirrusci/windowsservercore:2016
     os_version: 2016
@@ -99,6 +112,7 @@ task:
         SHARD: tool_tests
 
 task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   name: deploy_gallery-macos
   only_if: $CIRRUS_BRANCH == 'dev'
   pub_cache:
@@ -114,8 +128,10 @@ task:
     SHARD: deploy_gallery
     # Apple Certificates Match Passphrase
     MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
-    # Apple Fastlane Password
+    # Apple Fastlane password, ASP, and Session information.
     FASTLANE_PASSWORD: ENCRYPTED[0bf9bb0cc2cb32a0ed18470cf2c9df0f587cce5f8b04adbd6cff15ca5bde7a74f721ee580227b132ab6b032f08e52ae0]
+    FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ENCRYPTED[b219cc13c757f36cb62bfca5102d6115f1cc283aeb974f20c657bc4991c0cc144e30cf5d8183e41cc1df1668b4d14210]
+    FASTLANE_SESSION: ENCRYPTED[88246e355e55cd5e361a575f5d5b762f5826cb9d5285cb93a263b1cad04ec09bdedb1cbd74df5ec02d6043360fa04acd]
     # Private repo for publishing certificates.
     PUBLISHING_MATCH_CERTIFICATE_REPO: git@github.com:flutter/private_publishing_certificates.git
   osx_instance:
@@ -130,6 +146,7 @@ task:
     - ./dev/bots/deploy_gallery.sh
 
 task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   osx_instance:
     image: high-sierra-xcode-9.4.1
   depends_on:

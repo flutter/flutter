@@ -33,12 +33,12 @@ class AnalyzeOnce extends AnalyzeBase {
   final Directory workingDirectory;
 
   @override
-  Future<Null> analyze() async {
+  Future<void> analyze() async {
     final String currentDirectory =
         (workingDirectory ?? fs.currentDirectory).path;
 
     // find directories from argResults.rest
-    final Set<String> directories = new Set<String>.from(argResults.rest
+    final Set<String> directories = Set<String>.from(argResults.rest
         .map<String>((String path) => fs.path.canonicalize(path)));
     if (directories.isNotEmpty) {
       for (String directory in directories) {
@@ -54,7 +54,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (argResults['flutter-repo']) {
       // check for conflicting dependencies
-      final PackageDependencyTracker dependencies = new PackageDependencyTracker();
+      final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
       directories.addAll(repoRoots);
       if (argResults.wasParsed('current-package') && argResults['current-package'])
@@ -68,15 +68,14 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Nothing to analyze.', exitCode: 0);
 
     // analyze all
-    final Completer<Null> analysisCompleter = new Completer<Null>();
+    final Completer<void> analysisCompleter = Completer<void>();
     final List<AnalysisError> errors = <AnalysisError>[];
 
     final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
 
-    final AnalysisServer server = new AnalysisServer(
+    final AnalysisServer server = AnalysisServer(
       sdkPath,
       directories.toList(),
-      useCfe: argResults.wasParsed('use-cfe') ? argResults['use-cfe'] : null,
     );
 
     StreamSubscription<bool> subscription;
@@ -92,7 +91,8 @@ class AnalyzeOnce extends AnalyzeBase {
     });
 
     await server.start();
-    server.onExit.then((int exitCode) {
+    // Completing the future in the callback can't fail.
+    server.onExit.then<void>((int exitCode) { // ignore: unawaited_futures
       if (!analysisCompleter.isCompleted) {
         analysisCompleter.completeError('analysis server exited: $exitCode');
       }
@@ -101,7 +101,7 @@ class AnalyzeOnce extends AnalyzeBase {
     Cache.releaseLockEarly();
 
     // collect results
-    final Stopwatch timer = new Stopwatch()..start();
+    final Stopwatch timer = Stopwatch()..start();
     final String message = directories.length > 1
         ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
         : fs.path.basename(directories.first);
@@ -132,7 +132,7 @@ class AnalyzeOnce extends AnalyzeBase {
       printStatus('');
     errors.sort();
     for (AnalysisError error in errors)
-      printStatus(error.toString());
+      printStatus(error.toString(), hangingIndent: 7);
 
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 

@@ -31,17 +31,17 @@ void main() {
         // Scroll down
         for (int i = 0; i < 5; i++) {
           await driver.scroll(demoList, 0.0, -300.0, const Duration(milliseconds: 300));
-          await new Future<Null>.delayed(const Duration(milliseconds: 500));
+          await Future<Null>.delayed(const Duration(milliseconds: 500));
         }
 
         // Scroll up
         for (int i = 0; i < 5; i++) {
           await driver.scroll(demoList, 0.0, 300.0, const Duration(milliseconds: 300));
-          await new Future<Null>.delayed(const Duration(milliseconds: 500));
+          await Future<Null>.delayed(const Duration(milliseconds: 500));
         }
       });
 
-      new TimelineSummary.summarize(timeline)
+      TimelineSummary.summarize(timeline)
         ..writeSummaryToFile('home_scroll_perf', pretty: true)
         ..writeTimelineToFile('home_scroll_perf', pretty: true);
     });

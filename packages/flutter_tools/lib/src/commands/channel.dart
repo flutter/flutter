@@ -32,22 +32,24 @@ class ChannelCommand extends FlutterCommand {
   String get invocation => '${runner.executableName} $name [<channel-name>]';
 
   @override
-  Future<Null> runCommand() {
+  Future<FlutterCommandResult> runCommand() async {
     switch (argResults.rest.length) {
       case 0:
-        return _listChannels(showAll: argResults['all']);
+        await _listChannels(showAll: argResults['all']);
+        return null;
       case 1:
-        return _switchChannel(argResults.rest[0]);
+        await _switchChannel(argResults.rest[0]);
+        return null;
       default:
-        throw new ToolExit('Too many arguments.\n$usage');
+        throw ToolExit('Too many arguments.\n$usage');
     }
   }
 
-  Future<Null> _listChannels({ bool showAll }) async {
+  Future<void> _listChannels({ bool showAll }) async {
     // Beware: currentBranch could contain PII. See getBranchName().
     final String currentChannel = FlutterVersion.instance.channel;
     final String currentBranch = FlutterVersion.instance.getBranchName();
-    final Set<String> seenChannels = new Set<String>();
+    final Set<String> seenChannels = Set<String>();
 
     showAll = showAll || currentChannel != currentBranch;
 
@@ -76,7 +78,7 @@ class ChannelCommand extends FlutterCommand {
       throwToolExit('List channels failed: $result', exitCode: result);
   }
 
-  Future<Null> _switchChannel(String branchName) {
+  Future<void> _switchChannel(String branchName) {
     printStatus("Switching to flutter channel '$branchName'...");
     if (FlutterVersion.obsoleteBranches.containsKey(branchName)) {
       final String alternative = FlutterVersion.obsoleteBranches[branchName];
@@ -87,7 +89,7 @@ class ChannelCommand extends FlutterCommand {
     return _checkout(branchName);
   }
 
-  static Future<Null> upgradeChannel() async {
+  static Future<void> upgradeChannel() async {
     final String channel = FlutterVersion.instance.channel;
     if (FlutterVersion.obsoleteBranches.containsKey(channel)) {
       final String alternative = FlutterVersion.obsoleteBranches[channel];
@@ -96,7 +98,7 @@ class ChannelCommand extends FlutterCommand {
     }
   }
 
-  static Future<Null> _checkout(String branchName) async {
+  static Future<void> _checkout(String branchName) async {
     // Get latest refs from upstream.
     int result = await runCommandAndStreamOutput(
       <String>['git', 'fetch'],
@@ -126,7 +128,12 @@ class ChannelCommand extends FlutterCommand {
         );
       }
     }
-    if (result != 0)
+    if (result != 0) {
       throwToolExit('Switching channels failed with error code $result.', exitCode: result);
+    } else {
+      // Remove the version check stamp, since it could contain out-of-date
+      // information that pertains to the previous channel.
+      await FlutterVersion.resetFlutterVersionFreshnessCheck();
+    }
   }
 }

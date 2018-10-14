@@ -12,7 +12,7 @@ class ScrollPositionListener extends StatefulWidget {
   final ValueChanged<String> log;
 
   @override
-  _ScrollPositionListenerState createState() => new _ScrollPositionListenerState();
+  _ScrollPositionListenerState createState() => _ScrollPositionListenerState();
 }
 
 class _ScrollPositionListenerState extends State<ScrollPositionListener> {
@@ -45,16 +45,16 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
 void main() {
   testWidgets('Scrollable.of() dependent rebuilds when Scrollable position changes', (WidgetTester tester) async {
     String logValue;
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
 
     // Changing the SingleChildScrollView's physics causes the
     // ScrollController's ScrollPosition to be rebuilt.
 
     Widget buildFrame(ScrollPhysics physics) {
-      return new SingleChildScrollView(
+      return SingleChildScrollView(
         controller: controller,
         physics: physics,
-        child: new ScrollPositionListener(
+        child: ScrollPositionListener(
           log: (String s) { logValue = s; },
           child: const SizedBox(height: 400.0),
         ),

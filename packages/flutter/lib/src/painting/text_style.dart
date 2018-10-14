@@ -24,9 +24,9 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// [Text] widget.
 ///
 /// ```dart
-/// new Text(
+/// Text(
 ///   'No, we need bold strokes. We need this plan.',
-///   style: new TextStyle(fontWeight: FontWeight.bold),
+///   style: TextStyle(fontWeight: FontWeight.bold),
 /// )
 /// ```
 ///
@@ -36,9 +36,9 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// override which is implicitly mixed with the ambient [DefaultTextStyle].
 ///
 /// ```dart
-/// new Text(
+/// Text(
 ///   'Welcome to the present, we\'re running a real nation.',
-///   style: new TextStyle(fontStyle: FontStyle.italic),
+///   style: TextStyle(fontStyle: FontStyle.italic),
 /// )
 /// ```
 ///
@@ -52,24 +52,24 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// implicitly mixed with the parent [TextSpan]'s [TextSpan.style].
 ///
 /// If [color] is specified, [foreground] must be null and vice versa. [color] is
-/// treated as a shorthand for `new Paint()..color = color`.
+/// treated as a shorthand for `Paint()..color = color`.
 ///
 /// ```dart
-/// new RichText(
-///   text: new TextSpan(
+/// RichText(
+///   text: TextSpan(
 ///     style: DefaultTextStyle.of(context).style,
 ///     children: <TextSpan>[
-///       new TextSpan(
+///       TextSpan(
 ///         text: 'You don\'t have the votes.\n',
-///         style: new TextStyle(color: Colors.black.withOpacity(0.6)),
+///         style: TextStyle(color: Colors.black.withOpacity(0.6)),
 ///       ),
-///       new TextSpan(
+///       TextSpan(
 ///         text: 'You don\'t have the votes!\n',
-///         style: new TextStyle(color: Colors.black.withOpacity(0.8)),
+///         style: TextStyle(color: Colors.black.withOpacity(0.8)),
 ///       ),
-///       new TextSpan(
+///       TextSpan(
 ///         text: 'You\'re gonna need congressional approval and you don\'t have the votes!\n',
-///         style: new TextStyle(color: Colors.black.withOpacity(1.0)),
+///         style: TextStyle(color: Colors.black.withOpacity(1.0)),
 ///       ),
 ///     ],
 ///   ),
@@ -82,7 +82,7 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// obtain a [TextStyle] that doubles the default font size.
 ///
 /// ```dart
-/// new Text(
+/// Text(
 ///   'These are wise words, enterprising men quote \'em.',
 ///   style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
 /// )
@@ -94,9 +94,9 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// height is set to 100 logical pixels, so that the text is very spaced out.
 ///
 /// ```dart
-/// new Text(
+/// Text(
 ///   'Don\'t act surprised, you guys, cuz I wrote \'em!',
-///   style: new TextStyle(height: 100.0),
+///   style: TextStyle(height: 100.0),
 /// )
 /// ```
 ///
@@ -109,20 +109,20 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// does not automatically use the ambient [DefaultTextStyle].)
 ///
 /// ```dart
-/// new RichText(
-///   text: new TextSpan(
+/// RichText(
+///   text: TextSpan(
 ///     text: 'Don\'t tax the South ',
 ///     children: <TextSpan>[
-///       new TextSpan(
+///       TextSpan(
 ///         text: 'cuz',
-///         style: new TextStyle(
+///         style: TextStyle(
 ///           color: Colors.black,
 ///           decoration: TextDecoration.underline,
 ///           decorationColor: Colors.red,
 ///           decorationStyle: TextDecorationStyle.wavy,
 ///         ),
 ///       ),
-///       new TextSpan(
+///       TextSpan(
 ///         text: ' we got it made in the shade',
 ///       ),
 ///     ],
@@ -246,9 +246,7 @@ class TextStyle extends Diagnosticable {
     String package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        assert(inherit != null),
-       // TODO(dnfield): once https://github.com/dart-lang/sdk/issues/33408 is finished, this can be replaced with
-       // assert(color == null || foreground == null, _kColorForegroundWarning);
-       assert(identical(color, null) || identical(foreground, null), _kColorForegroundWarning);
+       assert(color == null || foreground == null, _kColorForegroundWarning);
 
 
   /// Whether null values are replaced with their value in an ancestor text
@@ -262,7 +260,7 @@ class TextStyle extends Diagnosticable {
   /// The color to use when painting the text.
   ///
   /// If [foreground] is specified, this value must be null. The [color] property
-  /// is shorthand for `new Paint()..color = color`.
+  /// is shorthand for `Paint()..color = color`.
   ///
   /// In [merge], [apply], and [lerp], conflicts between [color] and [foreground]
   /// specification are resolved in [foreground]'s favor - i.e. if [foreground] is
@@ -333,7 +331,7 @@ class TextStyle extends Diagnosticable {
   /// updates all the way through the framework.
   ///
   /// If [color] is specified, this value must be null. The [color] property
-  /// is shorthand for `new Paint()..color = color`.
+  /// is shorthand for `Paint()..color = color`.
   ///
   /// In [merge], [apply], and [lerp], conflicts between [color] and [foreground]
   /// specification are resolved in [foreground]'s favor - i.e. if [foreground] is
@@ -400,7 +398,7 @@ class TextStyle extends Diagnosticable {
         newDebugLabel = debugLabel ?? '(${this.debugLabel}).copyWith';
       return true;
     }());
-    return new TextStyle(
+    return TextStyle(
       inherit: inherit,
       color: this.foreground == null && foreground == null ? color ?? this.color : null,
       fontFamily: fontFamily ?? this.fontFamily,
@@ -485,7 +483,7 @@ class TextStyle extends Diagnosticable {
       return true;
     }());
 
-    return new TextStyle(
+    return TextStyle(
       inherit: inherit,
       color: foreground == null ? color ?? this.color : null,
       fontFamily: fontFamily ?? this.fontFamily,
@@ -560,17 +558,7 @@ class TextStyle extends Diagnosticable {
   ///
   /// This will not work well if the styles don't set the same fields.
   ///
-  /// The `t` argument represents position on the timeline, with 0.0 meaning
-  /// that the interpolation has not started, returning `a` (or something
-  /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
-  /// returning `b` (or something equivalent to `b`), and values in between
-  /// meaning that the interpolation is at the relevant point on the timeline
-  /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
-  /// 1.0, so negative values and values greater than 1.0 are valid (and can
-  /// easily be generated by curves such as [Curves.elasticInOut]).
-  ///
-  /// Values for `t` are usually obtained from an [Animation<double>], such as
-  /// an [AnimationController].
+  /// {@macro flutter.painting.gradient.lerp}
   ///
   /// If [foreground] is specified on either of `a` or `b`, both will be treated
   /// as if they have a [foreground] paint (creating a new [Paint] if necessary
@@ -589,7 +577,7 @@ class TextStyle extends Diagnosticable {
     }());
 
     if (a == null) {
-      return new TextStyle(
+      return TextStyle(
         inherit: b.inherit,
         color: Color.lerp(null, b.color, t),
         fontFamily: t < 0.5 ? null : b.fontFamily,
@@ -611,7 +599,7 @@ class TextStyle extends Diagnosticable {
     }
 
     if (b == null) {
-      return new TextStyle(
+      return TextStyle(
         inherit: a.inherit,
         color: Color.lerp(a.color, null, t),
         fontFamily: t < 0.5 ? a.fontFamily : null,
@@ -632,7 +620,7 @@ class TextStyle extends Diagnosticable {
       );
     }
 
-    return new TextStyle(
+    return TextStyle(
       inherit: b.inherit,
       color: a.foreground == null && b.foreground == null ? Color.lerp(a.color, b.color, t) : null,
       fontFamily: t < 0.5 ? a.fontFamily : b.fontFamily,
@@ -646,8 +634,8 @@ class TextStyle extends Diagnosticable {
       locale: t < 0.5 ? a.locale : b.locale,
       foreground: (a.foreground != null || b.foreground != null)
         ? t < 0.5
-          ? a.foreground ?? (new Paint()..color = a.color)
-          : b.foreground ?? (new Paint()..color = b.color)
+          ? a.foreground ?? (Paint()..color = a.color)
+          : b.foreground ?? (Paint()..color = b.color)
         : null,
       background: t < 0.5 ? a.background : b.background,
       decoration: t < 0.5 ? a.decoration : b.decoration,
@@ -659,7 +647,7 @@ class TextStyle extends Diagnosticable {
 
   /// The style information for text runs, encoded for use by `dart:ui`.
   ui.TextStyle getTextStyle({ double textScaleFactor = 1.0 }) {
-    return new ui.TextStyle(
+    return ui.TextStyle(
       color: color,
       decoration: decoration,
       decorationColor: decorationColor,
@@ -696,7 +684,7 @@ class TextStyle extends Diagnosticable {
   }) {
     assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);
-    return new ui.ParagraphStyle(
+    return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
       fontWeight: fontWeight,
@@ -795,11 +783,11 @@ class TextStyle extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
     super.debugFillProperties(properties);
     if (debugLabel != null)
-      properties.add(new MessageProperty('${prefix}debugLabel', debugLabel));
+      properties.add(MessageProperty('${prefix}debugLabel', debugLabel));
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
-    styles.add(new DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
-    styles.add(new StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
-    styles.add(new DoubleProperty('${prefix}size', fontSize, defaultValue: null));
+    styles.add(DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
+    styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
+    styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
     String weightDescription;
     if (fontWeight != null) {
       switch (fontWeight) {
@@ -835,20 +823,20 @@ class TextStyle extends Diagnosticable {
     // TODO(jacobr): switch this to use enumProperty which will either cause the
     // weight description to change to w600 from 600 or require existing
     // enumProperty to handle this special case.
-    styles.add(new DiagnosticsProperty<FontWeight>(
+    styles.add(DiagnosticsProperty<FontWeight>(
       '${prefix}weight',
       fontWeight,
       description: weightDescription,
       defaultValue: null,
     ));
-    styles.add(new EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
-    styles.add(new DoubleProperty('${prefix}letterSpacing', letterSpacing, defaultValue: null));
-    styles.add(new DoubleProperty('${prefix}wordSpacing', wordSpacing, defaultValue: null));
-    styles.add(new EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
-    styles.add(new DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
-    styles.add(new DiagnosticsProperty<Locale>('${prefix}locale', locale, defaultValue: null));
-    styles.add(new DiagnosticsProperty<Paint>('${prefix}foreground', foreground, defaultValue: null));
-    styles.add(new DiagnosticsProperty<Paint>('${prefix}background', background, defaultValue: null));
+    styles.add(EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
+    styles.add(DoubleProperty('${prefix}letterSpacing', letterSpacing, defaultValue: null));
+    styles.add(DoubleProperty('${prefix}wordSpacing', wordSpacing, defaultValue: null));
+    styles.add(EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
+    styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
+    styles.add(DiagnosticsProperty<Locale>('${prefix}locale', locale, defaultValue: null));
+    styles.add(DiagnosticsProperty<Paint>('${prefix}foreground', foreground, defaultValue: null));
+    styles.add(DiagnosticsProperty<Paint>('${prefix}background', background, defaultValue: null));
     if (decoration != null || decorationColor != null || decorationStyle != null) {
       final List<String> decorationDescription = <String>[];
       if (decorationStyle != null)
@@ -856,7 +844,7 @@ class TextStyle extends Diagnosticable {
 
       // Hide decorationColor from the default text view as it is shown in the
       // terse decoration summary as well.
-      styles.add(new DiagnosticsProperty<Color>('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
+      styles.add(DiagnosticsProperty<Color>('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
 
       if (decorationColor != null)
         decorationDescription.add('$decorationColor');
@@ -864,18 +852,18 @@ class TextStyle extends Diagnosticable {
       // Intentionally collide with the property 'decoration' added below.
       // Tools that show hidden properties could choose the first property
       // matching the name to disambiguate.
-      styles.add(new DiagnosticsProperty<TextDecoration>('${prefix}decoration', decoration, defaultValue: null, level: DiagnosticLevel.hidden));
+      styles.add(DiagnosticsProperty<TextDecoration>('${prefix}decoration', decoration, defaultValue: null, level: DiagnosticLevel.hidden));
       if (decoration != null)
         decorationDescription.add('$decoration');
       assert(decorationDescription.isNotEmpty);
-      styles.add(new MessageProperty('${prefix}decoration', decorationDescription.join(' ')));
+      styles.add(MessageProperty('${prefix}decoration', decorationDescription.join(' ')));
     }
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
-    properties.add(new DiagnosticsProperty<bool>('${prefix}inherit', inherit, level: (!styleSpecified && inherit) ? DiagnosticLevel.fine : DiagnosticLevel.info));
+    properties.add(DiagnosticsProperty<bool>('${prefix}inherit', inherit, level: (!styleSpecified && inherit) ? DiagnosticLevel.fine : DiagnosticLevel.info));
     styles.forEach(properties.add);
 
     if (!styleSpecified)
-      properties.add(new FlagProperty('inherit', value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));
+      properties.add(FlagProperty('inherit', value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));
   }
 }

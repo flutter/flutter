@@ -137,7 +137,7 @@ Future<Null> smokeGallery(WidgetTester tester) async {
   bool sendFeedbackButtonPressed = false;
 
   await tester.pumpWidget(
-    new GalleryApp(
+    GalleryApp(
       testMode: true,
       onSendFeedback: () {
         sendFeedbackButtonPressed = true; // see smokeOptionsPage()

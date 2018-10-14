@@ -30,7 +30,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
   void initInstances() {
     super.initInstances();
     _instance = this;
-    _pipelineOwner = new PipelineOwner(
+    _pipelineOwner = PipelineOwner(
       onNeedVisualUpdate: ensureVisualUpdate,
       onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
       onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
@@ -55,60 +55,75 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
     super.initServiceExtensions();
 
     assert(() {
-      // these service extensions only work in checked mode
+      // these service extensions only work in debug mode
       registerBoolServiceExtension(
         name: 'debugPaint',
         getter: () async => debugPaintSizeEnabled,
         setter: (bool value) {
           if (debugPaintSizeEnabled == value)
-            return new Future<Null>.value();
+            return Future<Null>.value();
           debugPaintSizeEnabled = value;
           return _forceRepaint();
-        }
+        },
       );
       registerBoolServiceExtension(
-          name: 'debugPaintBaselinesEnabled',
-          getter: () async => debugPaintBaselinesEnabled,
-          setter: (bool value) {
+        name: 'debugPaintBaselinesEnabled',
+        getter: () async => debugPaintBaselinesEnabled,
+        setter: (bool value) {
           if (debugPaintBaselinesEnabled == value)
-            return new Future<Null>.value();
+            return Future<Null>.value();
           debugPaintBaselinesEnabled = value;
           return _forceRepaint();
-        }
+        },
       );
       registerBoolServiceExtension(
-          name: 'repaintRainbow',
-          getter: () async => debugRepaintRainbowEnabled,
-          setter: (bool value) {
-            final bool repaint = debugRepaintRainbowEnabled && !value;
-            debugRepaintRainbowEnabled = value;
-            if (repaint)
-              return _forceRepaint();
-            return new Future<Null>.value();
-          }
+        name: 'repaintRainbow',
+        getter: () async => debugRepaintRainbowEnabled,
+        setter: (bool value) {
+          final bool repaint = debugRepaintRainbowEnabled && !value;
+          debugRepaintRainbowEnabled = value;
+          if (repaint)
+            return _forceRepaint();
+          return Future<Null>.value();
+        },
+      );
+      registerSignalServiceExtension(
+        name: 'debugDumpLayerTree',
+        callback: () {
+          debugDumpLayerTree();
+          return debugPrintDone;
+        },
       );
       return true;
     }());
 
-    registerSignalServiceExtension(
-      name: 'debugDumpRenderTree',
-      callback: () { debugDumpRenderTree(); return debugPrintDone; }
-    );
+    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
+    if (!isReleaseMode) {
+      // these service extensions work in debug or profile mode
+      registerSignalServiceExtension(
+        name: 'debugDumpRenderTree',
+        callback: () {
+          debugDumpRenderTree();
+          return debugPrintDone;
+        },
+      );
 
-    registerSignalServiceExtension(
-      name: 'debugDumpLayerTree',
-      callback: () { debugDumpLayerTree(); return debugPrintDone; }
-    );
+      registerSignalServiceExtension(
+        name: 'debugDumpSemanticsTreeInTraversalOrder',
+        callback: () {
+          debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
+          return debugPrintDone;
+        },
+      );
 
-    registerSignalServiceExtension(
-      name: 'debugDumpSemanticsTreeInTraversalOrder',
-      callback: () { debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder); return debugPrintDone; }
-    );
-
-    registerSignalServiceExtension(
-      name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
-      callback: () { debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest); return debugPrintDone; }
-    );
+      registerSignalServiceExtension(
+        name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
+        callback: () {
+          debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest);
+          return debugPrintDone;
+        },
+      );
+    }
   }
 
   /// Creates a [RenderView] object to be the root of the
@@ -119,7 +134,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
   /// Called automatically when the binding is created.
   void initRenderView() {
     assert(renderView == null);
-    renderView = new RenderView(configuration: createViewConfiguration());
+    renderView = RenderView(configuration: createViewConfiguration());
     renderView.scheduleInitialFrame();
   }
 
@@ -165,7 +180,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
   /// using `flutter run`.
   ViewConfiguration createViewConfiguration() {
     final double devicePixelRatio = ui.window.devicePixelRatio;
-    return new ViewConfiguration(
+    return ViewConfiguration(
       size: ui.window.physicalSize / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
     );

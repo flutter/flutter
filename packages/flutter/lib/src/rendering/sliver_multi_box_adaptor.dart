@@ -130,8 +130,9 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
   /// Whether to keep the child alive even when it is no longer visible.
   bool keepAlive = false;
 
-  /// Whether the widget is currently in the
-  /// [RenderSliverMultiBoxAdaptor._keepAliveBucket].
+  /// Whether the widget is currently being kept alive, i.e. has [keepAlive] set
+  /// to true and is offscreen.
+  bool get keptAlive => _keptAlive;
   bool _keptAlive = false;
 
   @override
@@ -178,7 +179,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @override
   void setupParentData(RenderObject child) {
     if (child.parentData is! SliverMultiBoxAdaptorParentData)
-      child.parentData = new SliverMultiBoxAdaptorParentData();
+      child.parentData = SliverMultiBoxAdaptorParentData();
   }
 
   /// The delegate that manages the children of this object.
@@ -206,6 +207,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   @override
   void insert(RenderBox child, { RenderBox after }) {
+    assert(!_keepAliveBucket.containsValue(child));
     super.insert(child, after: after);
     assert(firstChild != null);
     assert(() {
@@ -490,7 +492,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       case AxisDirection.up:
         mainAxisUnit = const Offset(0.0, -1.0);
         crossAxisUnit = const Offset(1.0, 0.0);
-        originOffset = offset + new Offset(0.0, geometry.paintExtent);
+        originOffset = offset + Offset(0.0, geometry.paintExtent);
         addExtent = true;
         break;
       case AxisDirection.right:
@@ -508,7 +510,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       case AxisDirection.left:
         mainAxisUnit = const Offset(-1.0, 0.0);
         crossAxisUnit = const Offset(0.0, 1.0);
-        originOffset = offset + new Offset(geometry.paintExtent, 0.0);
+        originOffset = offset + Offset(geometry.paintExtent, 0.0);
         addExtent = true;
         break;
     }
@@ -518,7 +520,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     while (child != null) {
       final double mainAxisDelta = childMainAxisPosition(child);
       final double crossAxisDelta = childCrossAxisPosition(child);
-      Offset childOffset = new Offset(
+      Offset childOffset = Offset(
         originOffset.dx + mainAxisUnit.dx * mainAxisDelta + crossAxisUnit.dx * crossAxisDelta,
         originOffset.dy + mainAxisUnit.dy * mainAxisDelta + crossAxisUnit.dy * crossAxisDelta,
       );
@@ -537,7 +539,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsNode.message(firstChild != null ? 'currently live children: ${indexOf(firstChild)} to ${indexOf(lastChild)}' : 'no children current live'));
+    properties.add(DiagnosticsNode.message(firstChild != null ? 'currently live children: ${indexOf(firstChild)} to ${indexOf(lastChild)}' : 'no children current live'));
   }
 
   /// Asserts that the reified child list is not empty and has a contiguous

@@ -19,7 +19,7 @@ String diffMotionEvents(
   Map<String, dynamic> originalEvent,
   Map<String, dynamic> synthesizedEvent,
 ) {
-  final StringBuffer diff = new StringBuffer();
+  final StringBuffer diff = StringBuffer();
 
   diffMaps(originalEvent, synthesizedEvent, diff, excludeKeys: const <String>[
     'pointerProperties', // Compared separately.

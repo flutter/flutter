@@ -23,7 +23,7 @@ String _homeDirPath;
 /// and no stack trace unless the --verbose option is specified.
 /// For example: network errors
 void throwToolExit(String message, { int exitCode }) {
-  throw new ToolExit(message, exitCode: exitCode);
+  throw ToolExit(message, exitCode: exitCode);
 }
 
 /// Specialized exception for expected situations

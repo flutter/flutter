@@ -13,7 +13,7 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Slider theme is built by ThemeData', (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
     );
@@ -24,20 +24,20 @@ void main() {
   });
 
   testWidgets('Slider uses ThemeData slider theme if present', (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
     Widget buildSlider(SliderThemeData data) {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window),
-          child: new Material(
-            child: new Center(
-              child: new Theme(
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window),
+          child: Material(
+            child: Center(
+              child: Theme(
                 data: theme,
                 child: const Slider(
                   value: 0.5,
@@ -59,7 +59,7 @@ void main() {
   });
 
   testWidgets('Slider overrides ThemeData theme if SliderTheme present', (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
     );
@@ -70,15 +70,15 @@ void main() {
     );
 
     Widget buildSlider(SliderThemeData data) {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window),
-          child: new Material(
-            child: new Center(
-              child: new Theme(
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window),
+          child: Material(
+            child: Center(
+              child: Theme(
                 data: theme,
-                child: new SliderTheme(
+                child: SliderTheme(
                   data: customTheme,
                   child: const Slider(
                     value: 0.5,
@@ -106,11 +106,11 @@ void main() {
     const Color customColor3 = Color(0xdecaface);
     const Color customColor4 = Color(0xfeedcafe);
 
-    final SliderThemeData sliderTheme = new SliderThemeData.fromPrimaryColors(
+    final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
       primaryColor: customColor1,
       primaryColorDark: customColor2,
       primaryColorLight: customColor3,
-      valueIndicatorTextStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor4),
+      valueIndicatorTextStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor4),
     );
 
     expect(sliderTheme.activeTrackColor, equals(customColor1.withAlpha(0xff)));
@@ -132,17 +132,17 @@ void main() {
   });
 
   testWidgets('SliderThemeData lerps correctly', (WidgetTester tester) async {
-    final SliderThemeData sliderThemeBlack = new SliderThemeData.fromPrimaryColors(
+    final SliderThemeData sliderThemeBlack = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
       primaryColorLight: Colors.black,
-      valueIndicatorTextStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.black),
+      valueIndicatorTextStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.black),
     );
-    final SliderThemeData sliderThemeWhite = new SliderThemeData.fromPrimaryColors(
+    final SliderThemeData sliderThemeWhite = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.white,
       primaryColorDark: Colors.white,
       primaryColorLight: Colors.white,
-      valueIndicatorTextStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
+      valueIndicatorTextStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
     );
     final SliderThemeData lerp = SliderThemeData.lerp(sliderThemeBlack, sliderThemeWhite, 0.5);
     const Color middleGrey = Color(0xff7f7f7f);
@@ -162,7 +162,7 @@ void main() {
   });
 
   testWidgets('Default slider thumb shape draws correctly', (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
     );
@@ -173,15 +173,15 @@ void main() {
       bool enabled = true,
     }) {
       final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window),
-          child: new Material(
-            child: new Center(
-              child: new SliderTheme(
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window),
+          child: Material(
+            child: Center(
+              child: SliderTheme(
                 data: sliderTheme,
-                child: new Slider(
+                child: Slider(
                   value: value,
                   label: '$value',
                   divisions: divisions,
@@ -227,23 +227,23 @@ void main() {
   });
 
   testWidgets('Default slider value indicator shape draws correctly', (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500, showValueIndicator: ShowValueIndicator.always);
     Widget buildApp(String value, {double sliderValue = 0.5, double textScale = 1.0}) {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScale),
-          child: new Material(
-            child: new Row(
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScale),
+          child: Material(
+            child: Row(
               children: <Widget>[
-                new Expanded(
-                  child: new SliderTheme(
+                Expanded(
+                  child: SliderTheme(
                     data: sliderTheme,
-                    child: new Slider(
+                    child: Slider(
                       value: sliderValue,
                       label: '$value',
                       divisions: 3,

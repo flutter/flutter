@@ -13,21 +13,21 @@ void main() {
   Widget builderForValueListenable(
     ValueListenable<String> valueListenable,
   ) {
-    return new Directionality(
+    return Directionality(
       textDirection: TextDirection.ltr,
-      child: new ValueListenableBuilder<String>(
+      child: ValueListenableBuilder<String>(
         valueListenable: valueListenable,
         builder: (BuildContext context, String value, Widget child) {
           if (value == null)
             return const Placeholder();
-          return new Text(value);
+          return Text(value);
         },
       ),
     );
   }
 
   setUp(() {
-    valueListenable = new SpyStringValueNotifier(null);
+    valueListenable = SpyStringValueNotifier(null);
     textBuilderUnderTest = builderForValueListenable(valueListenable);
   });
 
@@ -38,7 +38,7 @@ void main() {
   });
 
   testWidgets('Widget builds with initial value', (WidgetTester tester) async {
-    valueListenable = new SpyStringValueNotifier('Bachman');
+    valueListenable = SpyStringValueNotifier('Bachman');
 
     await tester.pumpWidget(builderForValueListenable(valueListenable));
 
@@ -66,7 +66,7 @@ void main() {
     expect(find.text('Gilfoyle'), findsOneWidget);
 
     final ValueListenable<String> differentListenable =
-        new SpyStringValueNotifier('Hendricks');
+        SpyStringValueNotifier('Hendricks');
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));
 
@@ -82,7 +82,7 @@ void main() {
     expect(find.text('Gilfoyle'), findsOneWidget);
 
     final ValueListenable<String> differentListenable =
-       new SpyStringValueNotifier('Hendricks');
+       SpyStringValueNotifier('Hendricks');
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));
 

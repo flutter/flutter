@@ -35,7 +35,7 @@ class TestCommand extends FlutterCommand {
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.\n'
               'You must specify a single test file to run, explicitly.\n'
-              'Instructions for connecting with a debugger and printed to the\n'
+              'Instructions for connecting with a debugger and printed to the '
               'console once the test has started.',
       )
       ..addFlag('coverage',
@@ -64,11 +64,6 @@ class TestCommand extends FlutterCommand {
         help: 'Handle machine structured JSON command input\n'
               'and provide output and progress in machine friendly format.',
       )
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
-      )
       ..addFlag('track-widget-creation',
         negatable: false,
         hide: !verboseHelp,
@@ -77,7 +72,7 @@ class TestCommand extends FlutterCommand {
       )
       ..addFlag('update-goldens',
         negatable: false,
-        help: 'Whether matchesGoldenFile() calls within your test methods should\n'
+        help: 'Whether matchesGoldenFile() calls within your test methods should '
               'update the golden files rather than test for an existing match.',
       )
       ..addOption('concurrency',
@@ -94,13 +89,13 @@ class TestCommand extends FlutterCommand {
   String get description => 'Run Flutter unit tests for the current project.';
 
   @override
-  Future<Null> validateCommand() async {
+  Future<void> validateCommand() async {
     await super.validateCommand();
     if (!fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
-        'Run this command from the root of your project. Test files must be\n'
-        'called *_test.dart and must reside in the package\'s \'test\'\n'
+        'Run this command from the root of your project. Test files must be '
+        'called *_test.dart and must reside in the package\'s \'test\' '
         'directory (or one of its subdirectories).');
     }
   }
@@ -145,7 +140,7 @@ class TestCommand extends FlutterCommand {
 
     CoverageCollector collector;
     if (argResults['coverage'] || argResults['merge-coverage']) {
-      collector = new CoverageCollector();
+      collector = CoverageCollector();
     }
 
     final bool machine = argResults['machine'];
@@ -157,7 +152,7 @@ class TestCommand extends FlutterCommand {
     if (collector != null) {
       watcher = collector;
     } else if (machine) {
-      watcher = new EventPrinter();
+      watcher = EventPrinter();
     }
 
     Cache.releaseLockEarly();
@@ -172,7 +167,6 @@ class TestCommand extends FlutterCommand {
       startPaused: startPaused,
       ipv6: argResults['ipv6'],
       machine: machine,
-      previewDart2: argResults['preview-dart-2'],
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,

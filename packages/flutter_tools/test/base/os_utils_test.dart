@@ -33,7 +33,7 @@ void main() {
         expect(mode.substring(0, 3), endsWith('x'));
       }
     }, overrides: <Type, Generator> {
-      OperatingSystemUtils: () => new OperatingSystemUtils(),
+      OperatingSystemUtils: () => OperatingSystemUtils(),
     });
   });
 }

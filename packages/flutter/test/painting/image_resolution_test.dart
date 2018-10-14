@@ -13,10 +13,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 
 class TestAssetBundle extends CachingAssetBundle {
+  TestAssetBundle(this._assetBundleMap);
 
   Map<String, List<String>> _assetBundleMap;
-
-  TestAssetBundle(this._assetBundleMap);
 
   Map<String, int> loadCallCount = <String, int>{};
 
@@ -27,14 +26,14 @@ class TestAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
     if (key == 'AssetManifest.json')
-      return new ByteData.view(new Uint8List.fromList(
+      return ByteData.view(Uint8List.fromList(
           const Utf8Encoder().convert(_assetBundleContents)).buffer);
 
     loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
     if (key == 'one')
-      return new ByteData(1)
+      return ByteData(1)
         ..setInt8(0, 49);
-    throw new FlutterError('key not found');
+    throw FlutterError('key not found');
   }
 }
 
@@ -45,9 +44,9 @@ void main() {
 
       assetBundleMap[mainAssetPath] = <String>[];
 
-      final AssetImage assetImage = new AssetImage(
+      final AssetImage assetImage = AssetImage(
           mainAssetPath,
-          bundle: new TestAssetBundle(assetBundleMap));
+          bundle: TestAssetBundle(assetBundleMap));
       const ImageConfiguration configuration = ImageConfiguration();
 
       assetImage.obtainKey(configuration)
@@ -111,10 +110,10 @@ void main() {
 
       assetBundleMap[mainAssetPath] = <String>[mainAssetPath, variantPath];
 
-      final TestAssetBundle testAssetBundle = new TestAssetBundle(
+      final TestAssetBundle testAssetBundle = TestAssetBundle(
           assetBundleMap);
 
-      final AssetImage assetImage = new AssetImage(
+      final AssetImage assetImage = AssetImage(
           mainAssetPath,
           bundle: testAssetBundle);
 
@@ -126,7 +125,7 @@ void main() {
       }));
 
       // we also have the exact match for this scale, let's use it
-      assetImage.obtainKey(new ImageConfiguration(
+      assetImage.obtainKey(ImageConfiguration(
           bundle: testAssetBundle,
           devicePixelRatio: 3.0))
           .then(expectAsync1((AssetBundleImageKey bundleKey) {
@@ -144,12 +143,12 @@ void main() {
 
       assetBundleMap[mainAssetPath] = <String>[mainAssetPath];
 
-      final TestAssetBundle testAssetBundle = new TestAssetBundle(
+      final TestAssetBundle testAssetBundle = TestAssetBundle(
           assetBundleMap);
 
-      final AssetImage assetImage = new AssetImage(
+      final AssetImage assetImage = AssetImage(
           mainAssetPath,
-          bundle: new TestAssetBundle(assetBundleMap));
+          bundle: TestAssetBundle(assetBundleMap));
 
 
       assetImage.obtainKey(const ImageConfiguration())
@@ -158,7 +157,7 @@ void main() {
         expect(bundleKey.scale, 1.0);
       }));
 
-      assetImage.obtainKey(new ImageConfiguration(
+      assetImage.obtainKey(ImageConfiguration(
           bundle: testAssetBundle,
           devicePixelRatio: 3.0))
           .then(expectAsync1((AssetBundleImageKey bundleKey) {
@@ -181,15 +180,15 @@ void main() {
 
       assetBundleMap[mainAssetPath] = <String>[mainAssetPath, variantPath];
 
-      final TestAssetBundle testAssetBundle = new TestAssetBundle(
+      final TestAssetBundle testAssetBundle = TestAssetBundle(
           assetBundleMap);
 
-      final AssetImage assetImage = new AssetImage(
+      final AssetImage assetImage = AssetImage(
           mainAssetPath,
           bundle: testAssetBundle);
 
       // we have 1.0 and 3.0, asking for 1.5 should give
-      assetImage.obtainKey(new ImageConfiguration(
+      assetImage.obtainKey(ImageConfiguration(
           bundle: testAssetBundle,
           devicePixelRatio: deviceRatio))
           .then(expectAsync1((AssetBundleImageKey bundleKey) {

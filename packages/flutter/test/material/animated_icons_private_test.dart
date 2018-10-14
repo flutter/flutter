@@ -81,10 +81,10 @@ void main () {
 
   group('_AnimatedIconPainter', () {
     const Size size = Size(48.0, 48.0);
-    final MockCanvas mockCanvas = new MockCanvas();
+    final MockCanvas mockCanvas = MockCanvas();
     List<MockPath> generatedPaths;
     final _UiPathFactory pathFactory = () {
-      final MockPath path = new MockPath();
+      final MockPath path = MockPath();
       generatedPaths.add(path);
       return path;
     };
@@ -94,7 +94,7 @@ void main () {
     });
 
     test('progress 0', () {
-      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
         paths: movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
@@ -116,7 +116,7 @@ void main () {
     });
 
     test('progress 1', () {
-      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
         paths: movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(1.0),
         color: const Color(0xFF00FF00),
@@ -138,7 +138,7 @@ void main () {
     });
 
     test('clamped progress', () {
-      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
         paths: movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(1.5),
         color: const Color(0xFF00FF00),
@@ -160,7 +160,7 @@ void main () {
     });
 
     test('scale', () {
-      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
         paths: movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
@@ -173,7 +173,7 @@ void main () {
     });
 
     test('mirror', () {
-      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
         paths: movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
@@ -189,7 +189,7 @@ void main () {
     });
 
     test('interpolated frame', () {
-      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
         paths: movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.5),
         color: const Color(0xFF00FF00),
@@ -211,7 +211,7 @@ void main () {
     });
 
     test('curved frame', () {
-      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
         paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(1.0),
         color: const Color(0xFF00FF00),
@@ -231,7 +231,7 @@ void main () {
     });
 
     test('interpolated curved frame', () {
-      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
         paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.25),
         color: const Color(0xFF00FF00),
@@ -251,7 +251,7 @@ void main () {
     });
 
     test('should not repaint same values', () {
-      final _AnimatedIconPainter painter1 = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
         paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
@@ -260,7 +260,7 @@ void main () {
         uiPathFactory: pathFactory
       );
 
-      final _AnimatedIconPainter painter2 = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
         paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
@@ -273,7 +273,7 @@ void main () {
     });
 
     test('should repaint on progress change', () {
-      final _AnimatedIconPainter painter1 = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
         paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
@@ -282,7 +282,7 @@ void main () {
         uiPathFactory: pathFactory
       );
 
-      final _AnimatedIconPainter painter2 = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
         paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.1),
         color: const Color(0xFF00FF00),
@@ -295,7 +295,7 @@ void main () {
     });
 
     test('should repaint on color change', () {
-      final _AnimatedIconPainter painter1 = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
         paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
@@ -304,7 +304,7 @@ void main () {
         uiPathFactory: pathFactory
       );
 
-      final _AnimatedIconPainter painter2 = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
         paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFFFF0000),
@@ -317,7 +317,7 @@ void main () {
     });
 
     test('should repaint on paths change', () {
-      final _AnimatedIconPainter painter1 = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
         paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF0000FF),
@@ -326,7 +326,7 @@ void main () {
         uiPathFactory: pathFactory
       );
 
-      final _AnimatedIconPainter painter2 = new _AnimatedIconPainter(
+      final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
         paths: const <_PathFrames> [],
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF0000FF),

@@ -10,8 +10,10 @@ import 'package:flutter/widgets.dart';
 /// Color of the 'magnifier' lens border.
 const Color _kHighlighterBorder = Color(0xFF7F7F7F);
 const Color _kDefaultBackground = Color(0xFFD2D4DB);
-/// Eyeballed value comparing with a native picker.
-const double _kDefaultDiameterRatio = 1.1;
+// Eyeballed values comparing with a native picker.
+// Values closer to PI produces denser flatter lists.
+const double _kDefaultDiameterRatio = 1.35;
+const double _kDefaultPerspective = 0.004;
 /// Opacity fraction value that hides the wheel above and below the 'magnifier'
 /// lens with the same color as the background.
 const double _kForegroundScreenOpacityFraction = 0.7;
@@ -62,8 +64,8 @@ class CupertinoPicker extends StatefulWidget {
        assert(itemExtent != null),
        assert(itemExtent > 0),
        childDelegate = looping
-                       ? new ListWheelChildLoopingListDelegate(children: children)
-                       : new ListWheelChildListDelegate(children: children),
+                       ? ListWheelChildLoopingListDelegate(children: children)
+                       : ListWheelChildListDelegate(children: children),
        super(key: key);
 
   /// Creates a picker from an [IndexedWidgetBuilder] callback where the builder
@@ -101,7 +103,7 @@ class CupertinoPicker extends StatefulWidget {
        assert(magnification > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
-       childDelegate = new ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount),
+       childDelegate = ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount),
        super(key: key);
 
   /// Relative ratio between this picker's height and the simulated cylinder's diameter.
@@ -154,7 +156,7 @@ class CupertinoPicker extends StatefulWidget {
   final ListWheelChildDelegate childDelegate;
 
   @override
-  State<StatefulWidget> createState() => new _CupertinoPickerState();
+  State<StatefulWidget> createState() => _CupertinoPickerState();
 }
 
 class _CupertinoPickerState extends State<CupertinoPicker> {
@@ -176,9 +178,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
   /// Makes the fade to white edge gradients.
   Widget _buildGradientScreen() {
-    return new Positioned.fill(
-      child: new IgnorePointer(
-        child: new Container(
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: <Color>[
@@ -210,27 +212,27 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt()
     );
 
-    return new IgnorePointer(
-      child: new Column(
+    return IgnorePointer(
+      child: Column(
         children: <Widget>[
-          new Expanded(
-            child: new Container(
+          Expanded(
+            child: Container(
               color: foreground,
             ),
           ),
-          new Container(
+          Container(
             decoration: const BoxDecoration(
               border: Border(
                 top: BorderSide(width: 0.0, color: _kHighlighterBorder),
                 bottom: BorderSide(width: 0.0, color: _kHighlighterBorder),
               )
             ),
-            constraints: new BoxConstraints.expand(
+            constraints: BoxConstraints.expand(
                 height: widget.itemExtent * widget.magnification,
             ),
           ),
-          new Expanded(
-            child: new Container(
+          Expanded(
+            child: Container(
               color: foreground,
             ),
           ),
@@ -241,13 +243,14 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
   @override
   Widget build(BuildContext context) {
-    Widget result = new Stack(
+    Widget result = Stack(
       children: <Widget>[
-        new Positioned.fill(
-          child: new ListWheelScrollView.useDelegate(
+        Positioned.fill(
+          child: ListWheelScrollView.useDelegate(
             controller: widget.scrollController,
             physics: const FixedExtentScrollPhysics(),
             diameterRatio: widget.diameterRatio,
+            perspective: _kDefaultPerspective,
             offAxisFraction: widget.offAxisFraction,
             useMagnifier: widget.useMagnifier,
             magnification: widget.magnification,
@@ -261,8 +264,8 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       ],
     );
     if (widget.backgroundColor != null) {
-      result = new DecoratedBox(
-        decoration: new BoxDecoration(
+      result = DecoratedBox(
+        decoration: BoxDecoration(
           color: widget.backgroundColor,
         ),
         child: result,

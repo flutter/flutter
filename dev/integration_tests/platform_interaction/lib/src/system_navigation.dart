@@ -12,7 +12,7 @@ Future<TestStepResult> systemNavigatorPop() {
     StringCodec(),
   );
 
-  final Completer<TestStepResult> completer = new Completer<TestStepResult>();
+  final Completer<TestStepResult> completer = Completer<TestStepResult>();
 
   channel.setMessageHandler((String message) async {
     completer.complete(

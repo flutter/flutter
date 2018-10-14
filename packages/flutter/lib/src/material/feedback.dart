@@ -36,7 +36,7 @@ import 'theme.dart';
 /// class WidgetWithWrappedHandler extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new GestureDetector(
+///     return GestureDetector(
 ///       onTap: Feedback.wrapForTap(_onTapHandler, context),
 ///       onLongPress: Feedback.wrapForLongPress(_onLongPressHandler, context),
 ///       child: const Text('X'),
@@ -60,7 +60,7 @@ import 'theme.dart';
 /// class WidgetWithExplicitCall extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new GestureDetector(
+///     return GestureDetector(
 ///       onTap: () {
 ///         // Do some work (e.g. check if the tap is valid)
 ///         Feedback.forTap(context);
@@ -94,7 +94,7 @@ class Feedback {
       case TargetPlatform.fuchsia:
         return SystemSound.play(SystemSoundType.click);
       default:
-        return new Future<Null>.value();
+        return Future<Null>.value();
     }
   }
 
@@ -133,7 +133,7 @@ class Feedback {
       case TargetPlatform.fuchsia:
         return HapticFeedback.vibrate();
       default:
-        return new Future<Null>.value();
+        return Future<Null>.value();
     }
   }
 

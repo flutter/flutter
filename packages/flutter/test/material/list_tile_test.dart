@@ -14,7 +14,7 @@ class TestIcon extends StatefulWidget {
   const TestIcon({ Key key }) : super(key: key);
 
   @override
-  TestIconState createState() => new TestIconState();
+  TestIconState createState() => TestIconState();
 }
 
 class TestIconState extends State<TestIcon> {
@@ -33,7 +33,7 @@ class TestText extends StatefulWidget {
   final String text;
 
   @override
-  TestTextState createState() => new TestTextState();
+  TestTextState createState() => TestTextState();
 }
 
 class TestTextState extends State<TestText> {
@@ -42,7 +42,7 @@ class TestTextState extends State<TestText> {
   @override
   Widget build(BuildContext context) {
     textStyle = DefaultTextStyle.of(context).style;
-    return new Text(widget.text);
+    return Text(widget.text);
   }
 }
 
@@ -50,8 +50,8 @@ void main() {
   testWidgets('ListTile geometry (LTR)', (WidgetTester tester) async {
     // See https://material.io/go/design-lists
 
-    final Key leadingKey = new GlobalKey();
-    final Key trailingKey = new GlobalKey();
+    final Key leadingKey = GlobalKey();
+    final Key trailingKey = GlobalKey();
     bool hasSubtitle;
 
     const double leftPadding = 10.0;
@@ -59,19 +59,19 @@ void main() {
     Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, double textScaleFactor = 1.0, double subtitleScaleFactor }) {
       hasSubtitle = isTwoLine || isThreeLine;
       subtitleScaleFactor ??= textScaleFactor;
-      return new MaterialApp(
-        home: new MediaQuery(
-          data: new MediaQueryData(
+      return MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(
             padding: const EdgeInsets.only(left: leftPadding, right: rightPadding),
             textScaleFactor: textScaleFactor,
           ),
-          child: new Material(
-            child: new Center(
-              child: new ListTile(
-                leading: new Container(key: leadingKey, width: 24.0, height: 24.0),
+          child: Material(
+            child: Center(
+              child: ListTile(
+                leading: Container(key: leadingKey, width: 24.0, height: 24.0),
                 title: const Text('title'),
-                subtitle: hasSubtitle ? new Text('subtitle', textScaleFactor: subtitleScaleFactor) : null,
-                trailing: new Container(key: trailingKey, width: 24.0, height: 24.0),
+                subtitle: hasSubtitle ? Text('subtitle', textScaleFactor: subtitleScaleFactor) : null,
+                trailing: Container(key: trailingKey, width: 24.0, height: 24.0),
                 dense: dense,
                 isThreeLine: isThreeLine,
               ),
@@ -114,7 +114,7 @@ void main() {
 
     void testVerticalGeometry(double expectedHeight) {
       final Rect tileRect = tester.getRect(find.byType(ListTile));
-      expect(tileRect.size, new Size(800.0, expectedHeight));
+      expect(tileRect.size, Size(800.0, expectedHeight));
       expect(top('title'), greaterThanOrEqualTo(tileRect.top));
       if (hasSubtitle) {
         expect(top('subtitle'), greaterThanOrEqualTo(bottom('title')));
@@ -228,14 +228,14 @@ void main() {
   testWidgets('ListTile.divideTiles', (WidgetTester tester) async {
     final List<String> titles = <String>[ 'first', 'second', 'third' ];
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Material(
-        child: new Builder(
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Builder(
           builder: (BuildContext context) {
-            return new ListView(
+            return ListView(
               children: ListTile.divideTiles(
                 context: context,
-                tiles: titles.map((String title) => new ListTile(title: new Text(title))),
+                tiles: titles.map<Widget>((String title) => ListTile(title: Text(title))),
               ).toList(),
             );
           },
@@ -249,10 +249,10 @@ void main() {
   });
 
   testWidgets('ListTileTheme', (WidgetTester tester) async {
-    final Key titleKey = new UniqueKey();
-    final Key subtitleKey = new UniqueKey();
-    final Key leadingKey = new UniqueKey();
-    final Key trailingKey = new UniqueKey();
+    final Key titleKey = UniqueKey();
+    final Key subtitleKey = UniqueKey();
+    final Key leadingKey = UniqueKey();
+    final Key trailingKey = UniqueKey();
     ThemeData theme;
 
     Widget buildFrame({
@@ -263,24 +263,24 @@ void main() {
       Color iconColor,
       Color textColor,
     }) {
-      return new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new ListTileTheme(
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: ListTileTheme(
               dense: dense,
               selectedColor: selectedColor,
               iconColor: iconColor,
               textColor: textColor,
-              child: new Builder(
+              child: Builder(
                 builder: (BuildContext context) {
                   theme = Theme.of(context);
-                  return new ListTile(
+                  return ListTile(
                     enabled: enabled,
                     selected: selected,
-                    leading: new TestIcon(key: leadingKey),
-                    trailing: new TestIcon(key: trailingKey),
-                    title: new TestText('title', key: titleKey),
-                    subtitle: new TestText('subtitle', key: subtitleKey),
+                    leading: TestIcon(key: leadingKey),
+                    trailing: TestIcon(key: trailingKey),
+                    title: TestText('title', key: titleKey),
+                    subtitle: TestText('subtitle', key: subtitleKey),
                   );
                 }
               ),
@@ -340,15 +340,15 @@ void main() {
   });
 
   testWidgets('ListTile semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      new Material(
-        child: new Directionality(
+      Material(
+        child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new MediaQuery(
+          child: MediaQuery(
             data: const MediaQueryData(),
-            child: new Column(
+            child: Column(
               children: const <Widget>[
                 ListTile(
                   title: Text('one'),
@@ -369,16 +369,16 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             label: 'one',
             flags: <SemanticsFlag>[
               SemanticsFlag.hasEnabledState,
               SemanticsFlag.isEnabled,
             ],
           ),
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             label: 'two',
             flags: <SemanticsFlag>[
               SemanticsFlag.isSelected,
@@ -386,7 +386,7 @@ void main() {
               SemanticsFlag.isEnabled,
             ],
           ),
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             label: 'three',
             flags: <SemanticsFlag>[
               SemanticsFlag.hasEnabledState,
@@ -402,15 +402,15 @@ void main() {
 
   testWidgets('ListTile contentPadding', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection) {
-      return new MediaQuery(
+      return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
           textScaleFactor: 1.0
         ),
-        child: new Directionality(
+        child: Directionality(
           textDirection: textDirection,
-          child: new Material(
-            child: new Container(
+          child: Material(
+            child: Container(
               alignment: Alignment.topLeft,
               child: const ListTile(
                 contentPadding: EdgeInsetsDirectional.only(
@@ -447,15 +447,15 @@ void main() {
 
   testWidgets('ListTile contentPadding', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection) {
-      return new MediaQuery(
+      return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
           textScaleFactor: 1.0
         ),
-        child: new Directionality(
+        child: Directionality(
           textDirection: textDirection,
-          child: new Material(
-            child: new Container(
+          child: Material(
+            child: Container(
               alignment: Alignment.topLeft,
               child: const ListTile(
                 contentPadding: EdgeInsetsDirectional.only(
@@ -494,19 +494,19 @@ void main() {
     const Key leadingKey = ValueKey<String>('L');
 
     Widget buildFrame(double leadingWidth, TextDirection textDirection) {
-      return new MediaQuery(
+      return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
           textScaleFactor: 1.0
         ),
-        child: new Directionality(
+        child: Directionality(
           textDirection: textDirection,
-          child: new Material(
-            child: new Container(
+          child: Material(
+            child: Container(
               alignment: Alignment.topLeft,
-              child: new ListTile(
+              child: ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: new SizedBox(key: leadingKey, width: leadingWidth, height: 32.0),
+                leading: SizedBox(key: leadingKey, width: leadingWidth, height: 32.0),
                 title: const Text('title'),
                 subtitle: const Text('subtitle'),
               ),

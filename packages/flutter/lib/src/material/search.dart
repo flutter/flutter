@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'colors.dart';
+import 'debug.dart';
 import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material_localizations.dart';
@@ -56,7 +57,7 @@ Future<T> showSearch<T>({
   assert(context != null);
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
-  return Navigator.of(context).push(new _SearchPageRoute<T>(
+  return Navigator.of(context).push(_SearchPageRoute<T>(
     delegate: delegate,
   ));
 }
@@ -147,7 +148,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [AppBar.backgroundColor], which is set to [ThemeData.primaryColor].
-  ///  * [Appbar.iconTheme], which is set to [ThemeData.primaryIconTheme].
+  ///  * [AppBar.iconTheme], which is set to [ThemeData.primaryIconTheme].
   ///  * [AppBar.textTheme], which is set to [ThemeData.primaryTextTheme].
   ///  * [AppBar.brightness], which is set to [ThemeData.primaryColorBrightness].
   ThemeData appBarTheme(BuildContext context) {
@@ -162,7 +163,7 @@ abstract class SearchDelegate<T> {
     );
   }
 
-  /// The current query string shown in the [Appbar].
+  /// The current query string shown in the [AppBar].
   ///
   /// The user manipulates this string via the keyboard.
   ///
@@ -194,7 +195,7 @@ abstract class SearchDelegate<T> {
   /// the suggestions returned by [buildSuggestions].
   ///
   /// Calling this method will also put the input focus back into the search
-  /// field of the ApBar.
+  /// field of the [AppBar].
   ///
   /// If the results are currently shown this method can be used to go back
   /// to showing the search suggestions.
@@ -227,13 +228,13 @@ abstract class SearchDelegate<T> {
   /// page.
   Animation<double> get transitionAnimation => _proxyAnimation;
 
-  final FocusNode _focusNode = new FocusNode();
+  final FocusNode _focusNode = FocusNode();
 
-  final TextEditingController _queryTextController = new TextEditingController();
+  final TextEditingController _queryTextController = TextEditingController();
 
-  final ProxyAnimation _proxyAnimation = new ProxyAnimation(kAlwaysDismissedAnimation);
+  final ProxyAnimation _proxyAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
 
-  final ValueNotifier<_SearchBody> _currentBodyNotifier = new ValueNotifier<_SearchBody>(null);
+  final ValueNotifier<_SearchBody> _currentBodyNotifier = ValueNotifier<_SearchBody>(null);
 
   _SearchBody get _currentBody => _currentBodyNotifier.value;
   set _currentBody(_SearchBody value) {
@@ -293,7 +294,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return new FadeTransition(
+    return FadeTransition(
       opacity: animation,
       child: child,
     );
@@ -312,7 +313,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
       Animation<double> animation,
       Animation<double> secondaryAnimation,
       ) {
-    return new _SearchPage<T>(
+    return _SearchPage<T>(
       delegate: delegate,
       animation: animation,
     );
@@ -337,7 +338,7 @@ class _SearchPage<T> extends StatefulWidget {
   final Animation<double> animation;
 
   @override
-  State<StatefulWidget> createState() => new _SearchPageState<T>();
+  State<StatefulWidget> createState() => _SearchPageState<T>();
 }
 
 class _SearchPageState<T> extends State<_SearchPage<T>> {
@@ -389,18 +390,19 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
-        body = new KeyedSubtree(
+        body = KeyedSubtree(
           key: const ValueKey<_SearchBody>(_SearchBody.suggestions),
           child: widget.delegate.buildSuggestions(context),
         );
         break;
       case _SearchBody.results:
-        body = new KeyedSubtree(
+        body = KeyedSubtree(
           key: const ValueKey<_SearchBody>(_SearchBody.results),
           child: widget.delegate.buildResults(context),
         );
@@ -416,19 +418,19 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         routeName = searchFieldLabel;
     }
 
-    return new Semantics(
+    return Semantics(
       explicitChildNodes: true,
       scopesRoute: true,
       namesRoute: true,
       label: routeName,
-      child: new Scaffold(
-        appBar: new AppBar(
+      child: Scaffold(
+        appBar: AppBar(
           backgroundColor: theme.primaryColor,
           iconTheme: theme.primaryIconTheme,
           textTheme: theme.primaryTextTheme,
           brightness: theme.primaryColorBrightness,
           leading: widget.delegate.buildLeading(context),
-          title: new TextField(
+          title: TextField(
             controller: queryTextController,
             focusNode: widget.delegate._focusNode,
             style: theme.textTheme.title,
@@ -436,14 +438,14 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             onSubmitted: (String _) {
               widget.delegate.showResults(context);
             },
-            decoration: new InputDecoration(
+            decoration: InputDecoration(
               border: InputBorder.none,
               hintText: searchFieldLabel,
             ),
           ),
           actions: widget.delegate.buildActions(context),
         ),
-        body: new AnimatedSwitcher(
+        body: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           child: body,
         ),

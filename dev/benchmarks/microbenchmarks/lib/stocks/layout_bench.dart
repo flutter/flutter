@@ -15,14 +15,14 @@ import '../common.dart';
 
 const Duration kBenchmarkTime = Duration(seconds: 15);
 
-Future<Null> main() async {
+Future<void> main() async {
   stock_data.StockData.actuallyFetchData = false;
 
   // We control the framePolicy below to prevent us from scheduling frames in
   // the engine, so that the engine does not interfere with our timings.
   final LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
-  final Stopwatch watch = new Stopwatch();
+  final Stopwatch watch = Stopwatch();
   int iterations = 0;
 
   await benchmarkWidgets((WidgetTester tester) async {
@@ -37,8 +37,8 @@ Future<Null> main() async {
     ui.window.onBeginFrame = null;
     ui.window.onDrawFrame = null;
 
-    final TestViewConfiguration big = new TestViewConfiguration(size: const Size(360.0, 640.0));
-    final TestViewConfiguration small = new TestViewConfiguration(size: const Size(355.0, 635.0));
+    final TestViewConfiguration big = TestViewConfiguration(size: const Size(360.0, 640.0));
+    final TestViewConfiguration small = TestViewConfiguration(size: const Size(355.0, 635.0));
     final RenderView renderView = WidgetsBinding.instance.renderView;
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
@@ -51,7 +51,7 @@ Future<Null> main() async {
       // frames are missed, etc.
       // We use Timer.run to ensure there's a microtask flush in between
       // the two calls below.
-      Timer.run(() { binding.handleBeginFrame(new Duration(milliseconds: iterations * 16)); });
+      Timer.run(() { binding.handleBeginFrame(Duration(milliseconds: iterations * 16)); });
       Timer.run(() { binding.handleDrawFrame(); });
       await tester.idle(); // wait until the frame has run (also uses Timer.run)
       iterations += 1;
@@ -59,7 +59,7 @@ Future<Null> main() async {
     watch.stop();
   });
 
-  final BenchmarkResultPrinter printer = new BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResult(
     description: 'Stock layout',
     value: watch.elapsedMicroseconds / iterations,

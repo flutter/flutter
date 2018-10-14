@@ -8,18 +8,18 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('OverflowBox control test', (WidgetTester tester) async {
-    final GlobalKey inner = new GlobalKey();
-    await tester.pumpWidget(new Align(
+    final GlobalKey inner = GlobalKey();
+    await tester.pumpWidget(Align(
       alignment: const Alignment(1.0, 1.0),
-      child: new SizedBox(
+      child: SizedBox(
         width: 10.0,
         height: 20.0,
-        child: new OverflowBox(
+        child: OverflowBox(
           minWidth: 0.0,
           maxWidth: 100.0,
           minHeight: 0.0,
           maxHeight: 50.0,
-          child: new Container(
+          child: Container(
             key: inner
           )
         )
@@ -31,7 +31,7 @@ void main() {
   });
 
   testWidgets('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = new DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const OverflowBox(
       minWidth: 1.0,
       maxWidth: 2.0,

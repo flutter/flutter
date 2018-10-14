@@ -27,7 +27,7 @@ void main() {
   }
 
   Stream<String> transformToLines(Stream<List<int>> byteStream) {
-    return byteStream.transform(utf8.decoder).transform(const LineSplitter());
+    return byteStream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
   }
 
   task(() async {
@@ -39,7 +39,7 @@ void main() {
     final Directory appDir =
         dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
-      final Completer<Null> ready = new Completer<Null>();
+      final Completer<void> ready = Completer<void>();
       bool ok;
       print('run: starting...');
       final Process run = await startProcess(
@@ -54,7 +54,7 @@ void main() {
         ],
       );
       final StreamController<String> stdout =
-          new StreamController<String>.broadcast();
+          StreamController<String>.broadcast();
       transformToLines(run.stdout).listen((String line) {
         print('run:stdout: $line');
         stdout.add(line);
@@ -64,6 +64,8 @@ void main() {
           print('service protocol connection available at port $vmServicePort');
         } else if (json != null && json['event'] == 'app.started') {
           appId = json['params']['appId'];
+        }
+        if (vmServicePort != null && appId != null && !ready.isCompleted) {
           print('run: ready!');
           ready.complete();
           ok ??= true;
@@ -72,7 +74,7 @@ void main() {
       transformToLines(run.stderr).listen((String line) {
         stderr.writeln('run:stderr: $line');
       });
-      run.exitCode.then((int exitCode) {
+      run.exitCode.then<void>((int exitCode) {
         ok = false;
       });
       await Future.any<dynamic>(<Future<dynamic>>[ready.future, run.exitCode]);
@@ -80,14 +82,14 @@ void main() {
         throw 'Failed to run test app.';
 
       final VMServiceClient client =
-          new VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
+          VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
 
       int id = 1;
       Future<Map<String, dynamic>> sendRequest(
           String method, dynamic params) async {
         final int requestId = id++;
         final Completer<Map<String, dynamic>> response =
-            new Completer<Map<String, dynamic>>();
+            Completer<Map<String, dynamic>>();
         final StreamSubscription<String> responseSubscription =
             stdout.stream.listen((String line) {
           final Map<String, dynamic> json = parseFlutterResponse(line);
@@ -150,6 +152,6 @@ void main() {
       print('test: validating that the app has in fact closed...');
       await client.done.timeout(const Duration(seconds: 5));
     });
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   });
 }

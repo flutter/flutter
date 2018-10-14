@@ -12,12 +12,12 @@ void main() {
   test('RenderBaseline', () {
     RenderBaseline parent;
     RenderSizedBox child;
-    final RenderBox root = new RenderPositionedBox(
+    final RenderBox root = RenderPositionedBox(
       alignment: Alignment.topLeft,
-      child: parent = new RenderBaseline(
+      child: parent = RenderBaseline(
         baseline: 0.0,
         baselineType: TextBaseline.alphabetic,
-        child: child = new RenderSizedBox(const Size(100.0, 100.0))
+        child: child = RenderSizedBox(const Size(100.0, 100.0))
       )
     );
     final BoxParentData childParentData = child.parentData;

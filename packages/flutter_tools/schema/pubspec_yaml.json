@@ -47,7 +47,8 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
-                        "androidPackage": { "type": "string" }
+                        "androidPackage": { "type": "string" },
+                        "iosBundleIdentifier": { "type": "string" }
                     }
                 },
                 "plugin": {

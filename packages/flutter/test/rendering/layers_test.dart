@@ -10,9 +10,9 @@ import 'rendering_tester.dart';
 void main() {
   test('non-painted layers are detached', () {
     RenderObject boundary, inner;
-    final RenderOpacity root = new RenderOpacity(
-      child: boundary = new RenderRepaintBoundary(
-        child: inner = new RenderDecoratedBox(
+    final RenderOpacity root = RenderOpacity(
+      child: boundary = RenderRepaintBoundary(
+        child: inner = RenderDecoratedBox(
           decoration: const BoxDecoration(),
         ),
       ),

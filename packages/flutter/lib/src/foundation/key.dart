@@ -77,7 +77,7 @@ class ValueKey<T> extends LocalKey {
     final String valueString = T == String ? '<\'$value\'>' : '<$value>';
     // The crazy on the next line is a workaround for
     // https://github.com/dart-lang/sdk/issues/33297
-    if (runtimeType == new _TypeLiteral<ValueKey<T>>().type)
+    if (runtimeType == _TypeLiteral<ValueKey<T>>().type)
       return '[$valueString]';
     return '[$T $valueString]';
   }

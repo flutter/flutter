@@ -121,7 +121,7 @@ class IdeConfigCommand extends FlutterCommand {
       return;
     }
 
-    final Set<String> manifest = new Set<String>();
+    final Set<String> manifest = Set<String>();
     final List<FileSystemEntity> flutterFiles = _flutterRoot.listSync(recursive: true);
     for (FileSystemEntity entity in flutterFiles) {
       final String relativePath = fs.path.relative(entity.path, from: _flutterRoot.absolute.path);
@@ -139,7 +139,7 @@ class IdeConfigCommand extends FlutterCommand {
       }
 
       // Skip files we aren't interested in.
-      final RegExp _trackedIdeaFileRegExp = new RegExp(
+      final RegExp _trackedIdeaFileRegExp = RegExp(
         r'(\.name|modules.xml|vcs.xml)$',
       );
       final bool isATrackedIdeaFile = _hasDirectoryInPath(srcFile, '.idea') &&
@@ -218,7 +218,7 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     if (argResults.rest.isNotEmpty) {
       throwToolExit('Currently, the only supported IDE is IntelliJ\n$usage', exitCode: 2);
     }
@@ -227,7 +227,7 @@ class IdeConfigCommand extends FlutterCommand {
 
     if (argResults['update-templates']) {
       _handleTemplateUpdate();
-      return;
+      return null;
     }
 
     final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
@@ -250,10 +250,12 @@ class IdeConfigCommand extends FlutterCommand {
     printStatus('');
     printStatus('Your IntelliJ configuration is now up to date. It is prudent to '
         'restart IntelliJ, if running.');
+
+    return null;
   }
 
   int _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) {
-    final Template template = new Template(_templateDirectory, _templateDirectory);
+    final Template template = Template(_templateDirectory, _templateDirectory);
     return template.render(
       fs.directory(dirPath),
       context,

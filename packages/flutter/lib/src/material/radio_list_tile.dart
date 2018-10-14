@@ -50,15 +50,15 @@ import 'theme_data.dart';
 /// SingingCharacter _character = SingingCharacter.lafayette;
 ///
 /// // In the build function of that State:
-/// new Column(
+/// Column(
 ///   children: <Widget>[
-///     new RadioListTile<SingingCharacter>(
+///     RadioListTile<SingingCharacter>(
 ///       title: const Text('Lafayette'),
 ///       value: SingingCharacter.lafayette,
 ///       groupValue: _character,
 ///       onChanged: (SingingCharacter value) { setState(() { _character = value; }); },
 ///     ),
-///     new RadioListTile<SingingCharacter>(
+///     RadioListTile<SingingCharacter>(
 ///       title: const Text('Thomas Jefferson'),
 ///       value: SingingCharacter.jefferson,
 ///       groupValue: _character,
@@ -130,7 +130,7 @@ class RadioListTile<T> extends StatelessWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new RadioListTile<SingingCharacter>(
+  /// RadioListTile<SingingCharacter>(
   ///   title: const Text('Lafayette'),
   ///   value: SingingCharacter.lafayette,
   ///   groupValue: _character,
@@ -194,7 +194,7 @@ class RadioListTile<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget control = new Radio<T>(
+    final Widget control = Radio<T>(
       value: value,
       groupValue: groupValue,
       onChanged: onChanged,
@@ -213,10 +213,10 @@ class RadioListTile<T> extends StatelessWidget {
         trailing = control;
         break;
     }
-    return new MergeSemantics(
+    return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
-        child: new ListTile(
+        child: ListTile(
           leading: leading,
           title: title,
           subtitle: subtitle,

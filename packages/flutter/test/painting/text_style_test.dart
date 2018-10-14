@@ -162,27 +162,27 @@ void main() {
     expect(s9.color, isNull);
 
     final ui.TextStyle ts5 = s5.getTextStyle();
-    expect(ts5, equals(new ui.TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
+    expect(ts5, equals(ui.TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
     expect(ts5.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontSize: 12.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 123.0x, locale: unspecified, background: unspecified, foreground: unspecified)');
     final ui.TextStyle ts2 = s2.getTextStyle();
-    expect(ts2, equals(new ui.TextStyle(color: const Color(0xFF00FF00), fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
+    expect(ts2, equals(ui.TextStyle(color: const Color(0xFF00FF00), fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
     expect(ts2.toString(), 'TextStyle(color: Color(0xff00ff00), decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontSize: 10.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 100.0x, locale: unspecified, background: unspecified, foreground: unspecified)');
 
     final ui.ParagraphStyle ps2 = s2.getParagraphStyle(textAlign: TextAlign.center);
-    expect(ps2, equals(new ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, lineHeight: 100.0)));
+    expect(ps2, equals(ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, lineHeight: 100.0)));
     expect(ps2.toString(), 'ParagraphStyle(textAlign: TextAlign.center, textDirection: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 10.0, lineHeight: 100.0x, ellipsis: unspecified, locale: unspecified)');
     final ui.ParagraphStyle ps5 = s5.getParagraphStyle();
-    expect(ps5, equals(new ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, lineHeight: 123.0)));
+    expect(ps5, equals(ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, lineHeight: 123.0)));
     expect(ps5.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 12.0, lineHeight: 123.0x, ellipsis: unspecified, locale: unspecified)');
   });
 
   test('TextStyle with text direction', () {
     final ui.ParagraphStyle ps6 = const TextStyle().getParagraphStyle(textDirection: TextDirection.ltr);
-    expect(ps6, equals(new ui.ParagraphStyle(textDirection: TextDirection.ltr, fontSize: 14.0)));
+    expect(ps6, equals(ui.ParagraphStyle(textDirection: TextDirection.ltr, fontSize: 14.0)));
     expect(ps6.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.ltr, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 14.0, lineHeight: unspecified, ellipsis: unspecified, locale: unspecified)');
 
     final ui.ParagraphStyle ps7 = const TextStyle().getParagraphStyle(textDirection: TextDirection.rtl);
-    expect(ps7, equals(new ui.ParagraphStyle(textDirection: TextDirection.rtl, fontSize: 14.0)));
+    expect(ps7, equals(ui.ParagraphStyle(textDirection: TextDirection.rtl, fontSize: 14.0)));
     expect(ps7.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.rtl, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 14.0, lineHeight: unspecified, ellipsis: unspecified, locale: unspecified)');
   });
 
@@ -222,8 +222,8 @@ void main() {
     const Color blue = Color.fromARGB(255, 0, 0, 255);
     const TextStyle redTextStyle = TextStyle(color: red);
     const TextStyle blueTextStyle = TextStyle(color: blue);
-    final TextStyle redPaintTextStyle = new TextStyle(foreground: new Paint()..color = red);
-    final TextStyle bluePaintTextStyle = new TextStyle(foreground: new Paint()..color = blue);
+    final TextStyle redPaintTextStyle = TextStyle(foreground: Paint()..color = red);
+    final TextStyle bluePaintTextStyle = TextStyle(foreground: Paint()..color = blue);
 
     // merge/copyWith
     final TextStyle redBlueBothForegroundMerged = redTextStyle.merge(blueTextStyle);

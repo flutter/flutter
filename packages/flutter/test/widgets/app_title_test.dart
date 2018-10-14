@@ -10,7 +10,7 @@ const String kTitleString = 'Hello World';
 
 Future<Null> pumpApp(WidgetTester tester, { GenerateAppTitle onGenerateTitle }) async {
   await tester.pumpWidget(
-    new WidgetsApp(
+    WidgetsApp(
       supportedLocales: const <Locale>[
         Locale('en', 'US'),
         Locale('en', 'GB'),
@@ -19,9 +19,9 @@ Future<Null> pumpApp(WidgetTester tester, { GenerateAppTitle onGenerateTitle }) 
       color: kTitleColor,
       onGenerateTitle: onGenerateTitle,
       onGenerateRoute: (RouteSettings settings) {
-        return new PageRouteBuilder<void>(
+        return PageRouteBuilder<void>(
           pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-            return new Container();
+            return Container();
           }
         );
       },

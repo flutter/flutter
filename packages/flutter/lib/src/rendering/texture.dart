@@ -72,8 +72,8 @@ class TextureBox extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     if (_textureId == null)
       return;
-    context.addLayer(new TextureLayer(
-      rect: new Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
+    context.addLayer(TextureLayer(
+      rect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       textureId: _textureId,
     ));
   }

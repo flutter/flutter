@@ -19,8 +19,8 @@ import '../cache.dart';
 import '../globals.dart';
 import '../project.dart';
 
-final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
-final RegExp _varExpr = new RegExp(r'\$\((.*)\)');
+final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
+final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
@@ -34,9 +34,8 @@ Future<void> updateGeneratedXcodeProperties({
   @required FlutterProject project,
   @required BuildInfo buildInfo,
   String targetOverride,
-  @required bool previewDart2,
 }) async {
-  final StringBuffer localsBuffer = new StringBuffer();
+  final StringBuffer localsBuffer = StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
 
@@ -89,10 +88,6 @@ Future<void> updateGeneratedXcodeProperties({
     localsBuffer.writeln('ARCHS=$arch');
   }
 
-  if (previewDart2) {
-    localsBuffer.writeln('PREVIEW_DART_2=true');
-  }
-
   if (buildInfo.trackWidgetCreation) {
     localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
   }
@@ -107,7 +102,7 @@ XcodeProjectInterpreter get xcodeProjectInterpreter => context[XcodeProjectInter
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
   static const String _executable = '/usr/bin/xcodebuild';
-  static final RegExp _versionRegex = new RegExp(r'Xcode ([0-9.]+)');
+  static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
 
   void _updateVersion() {
     if (!platform.isMacOS || !fs.file(_executable).existsSync()) {
@@ -170,13 +165,13 @@ class XcodeProjectInterpreter {
     final String out = runCheckedSync(<String>[
       _executable, '-list',
     ], workingDirectory: projectPath);
-    return new XcodeProjectInfo.fromXcodeBuildOutput(out);
+    return XcodeProjectInfo.fromXcodeBuildOutput(out);
   }
 }
 
 Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
   final Map<String, String> settings = <String, String>{};
-  for (Match match in showBuildSettingsOutput.split('\n').map(_settingExpr.firstMatch)) {
+  for (Match match in showBuildSettingsOutput.split('\n').map<Match>(_settingExpr.firstMatch)) {
     if (match != null) {
       settings[match[1]] = match[2];
     }
@@ -223,7 +218,7 @@ class XcodeProjectInfo {
     }
     if (schemes.isEmpty)
       schemes.add('Runner');
-    return new XcodeProjectInfo(targets, buildConfigurations, schemes);
+    return XcodeProjectInfo(targets, buildConfigurations, schemes);
   }
 
   final List<String> targets;

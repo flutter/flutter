@@ -14,6 +14,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'app.dart';
+import 'debug.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'widget_inspector.dart';
@@ -40,7 +41,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///   const AppLifecycleReactor({ Key key }) : super(key: key);
 ///
 ///   @override
-///   _AppLifecycleReactorState createState() => new _AppLifecycleReactorState();
+///   _AppLifecycleReactorState createState() => _AppLifecycleReactorState();
 /// }
 ///
 /// class _AppLifecycleReactorState extends State<AppLifecycleReactor> with WidgetsBindingObserver {
@@ -65,7 +66,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new Text('Last notification: $_notification');
+///     return Text('Last notification: $_notification');
 ///   }
 /// }
 /// ```
@@ -88,7 +89,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes the `popRoute` notification from
   /// [SystemChannels.navigation].
-  Future<bool> didPopRoute() => new Future<bool>.value(false);
+  Future<bool> didPopRoute() => Future<bool>.value(false);
 
   /// Called when the host tells the app to push a new route onto the
   /// navigator.
@@ -99,7 +100,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes the `pushRoute` notification from
   /// [SystemChannels.navigation].
-  Future<bool> didPushRoute(String route) => new Future<bool>.value(false);
+  Future<bool> didPushRoute(String route) => Future<bool>.value(false);
 
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
@@ -117,7 +118,7 @@ abstract class WidgetsBindingObserver {
   ///   const MetricsReactor({ Key key }) : super(key: key);
   ///
   ///   @override
-  ///   _MetricsReactorState createState() => new _MetricsReactorState();
+  ///   _MetricsReactorState createState() => _MetricsReactorState();
   /// }
   ///
   /// class _MetricsReactorState extends State<MetricsReactor> with WidgetsBindingObserver {
@@ -142,7 +143,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new Text('Current size: $_lastSize');
+  ///     return Text('Current size: $_lastSize');
   ///   }
   /// }
   /// ```
@@ -172,7 +173,7 @@ abstract class WidgetsBindingObserver {
   ///   const TextScaleFactorReactor({ Key key }) : super(key: key);
   ///
   ///   @override
-  ///   _TextScaleFactorReactorState createState() => new _TextScaleFactorReactorState();
+  ///   _TextScaleFactorReactorState createState() => _TextScaleFactorReactorState();
   /// }
   ///
   /// class _TextScaleFactorReactorState extends State<TextScaleFactorReactor> with WidgetsBindingObserver {
@@ -197,7 +198,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new Text('Current scale factor: $_lastTextScaleFactor');
+  ///     return Text('Current scale factor: $_lastTextScaleFactor');
   ///   }
   /// }
   /// ```
@@ -266,47 +267,55 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   void initServiceExtensions() {
     super.initServiceExtensions();
 
-    registerSignalServiceExtension(
-      name: 'debugDumpApp',
-      callback: () { debugDumpApp(); return debugPrintDone; }
-    );
+    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
+    if (!isReleaseMode) {
+      registerSignalServiceExtension(
+        name: 'debugDumpApp',
+        callback: () {
+          debugDumpApp();
+          return debugPrintDone;
+        },
+      );
 
-    registerBoolServiceExtension(
-      name: 'showPerformanceOverlay',
-      getter: () => new Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
-      setter: (bool value) {
-        if (WidgetsApp.showPerformanceOverlayOverride == value)
-          return new Future<Null>.value();
-        WidgetsApp.showPerformanceOverlayOverride = value;
-        return _forceRebuild();
-      }
-    );
-
-    registerBoolServiceExtension(
-      name: 'debugAllowBanner',
-      getter: () => new Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
-      setter: (bool value) {
-        if (WidgetsApp.debugAllowBannerOverride == value)
-          return new Future<Null>.value();
-        WidgetsApp.debugAllowBannerOverride = value;
-        return _forceRebuild();
-      }
-    );
-
-    // This service extension is deprecated and will be removed by 7/1/2018.
-    // Use ext.flutter.inspector.show instead.
-    registerBoolServiceExtension(
-        name: 'debugWidgetInspector',
-        getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
+      registerBoolServiceExtension(
+        name: 'showPerformanceOverlay',
+        getter: () =>
+        Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
         setter: (bool value) {
-          if (WidgetsApp.debugShowWidgetInspectorOverride == value)
-            return new Future<Null>.value();
-          WidgetsApp.debugShowWidgetInspectorOverride = value;
+          if (WidgetsApp.showPerformanceOverlayOverride == value)
+            return Future<Null>.value();
+          WidgetsApp.showPerformanceOverlayOverride = value;
           return _forceRebuild();
-        }
-    );
+        },
+      );
+    }
 
-    WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
+    assert(() {
+      registerBoolServiceExtension(
+        name: 'debugAllowBanner',
+        getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
+        setter: (bool value) {
+          if (WidgetsApp.debugAllowBannerOverride == value)
+            return Future<Null>.value();
+          WidgetsApp.debugAllowBannerOverride = value;
+          return _forceRebuild();
+        },
+      );
+
+      // Expose the ability to send Widget rebuilds as [Timeline] events.
+      registerBoolServiceExtension(
+        name: 'profileWidgetBuilds',
+        getter: () async => debugProfileBuildsEnabled,
+        setter: (bool value) async {
+          if (debugProfileBuildsEnabled != value)
+            debugProfileBuildsEnabled = value;
+        },
+      );
+
+      WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
+
+      return true;
+    }());
   }
 
   Future<Null> _forceRebuild() {
@@ -314,13 +323,13 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       buildOwner.reassemble(renderViewElement);
       return endOfFrame;
     }
-    return new Future<Null>.value();
+    return Future<Null>.value();
   }
 
   /// The [BuildOwner] in charge of executing the build pipeline for the
   /// widget tree rooted at this binding.
   BuildOwner get buildOwner => _buildOwner;
-  final BuildOwner _buildOwner = new BuildOwner();
+  final BuildOwner _buildOwner = BuildOwner();
 
   /// The object in charge of the focus tree.
   ///
@@ -435,7 +444,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   /// [SystemChannels.navigation].
   @protected
   Future<Null> handlePopRoute() async {
-    for (WidgetsBindingObserver observer in new List<WidgetsBindingObserver>.from(_observers)) {
+    for (WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPopRoute())
         return;
     }
@@ -455,7 +464,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   @protected
   @mustCallSuper
   Future<Null> handlePushRoute(String route) async {
-    for (WidgetsBindingObserver observer in new List<WidgetsBindingObserver>.from(_observers)) {
+    for (WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPushRoute(route))
         return;
     }
@@ -468,7 +477,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       case 'pushRoute':
         return handlePushRoute(methodCall.arguments);
     }
-    return new Future<Null>.value();
+    return Future<Null>.value();
   }
 
   @override
@@ -545,7 +554,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
     // should not trigger a new frame.
     assert(() {
       if (debugBuildingDirtyElements) {
-        throw new FlutterError(
+        throw FlutterError(
           'Build scheduled during frame.\n'
           'While the widget tree was being built, laid out, and painted, '
           'a new frame was scheduled to rebuild the widget tree. '
@@ -682,7 +691,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   ///
   /// See also [RenderObjectToWidgetAdapter.attachToRenderTree].
   void attachRootWidget(Widget rootWidget) {
-    _renderViewElement = new RenderObjectToWidgetAdapter<RenderBox>(
+    _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
       child: rootWidget
@@ -758,7 +767,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
     this.child,
     this.container,
     this.debugShortDescription
-  }) : super(key: new GlobalObjectKey(container));
+  }) : super(key: GlobalObjectKey(container));
 
   /// The widget below this widget in the tree.
   ///
@@ -772,7 +781,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   final String debugShortDescription;
 
   @override
-  RenderObjectToWidgetElement<T> createElement() => new RenderObjectToWidgetElement<T>(this);
+  RenderObjectToWidgetElement<T> createElement() => RenderObjectToWidgetElement<T>(this);
 
   @override
   RenderObjectWithChildMixin<T> createRenderObject(BuildContext context) => container;
@@ -881,7 +890,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
       _child = updateChild(_child, widget.child, _rootChildSlot);
       assert(_child != null);
     } catch (exception, stack) {
-      final FlutterErrorDetails details = new FlutterErrorDetails(
+      final FlutterErrorDetails details = FlutterErrorDetails(
         exception: exception,
         stack: stack,
         library: 'widgets library',
@@ -932,7 +941,7 @@ class WidgetsFlutterBinding extends BindingBase with GestureBinding, ServicesBin
   /// [WidgetsFlutterBinding].
   static WidgetsBinding ensureInitialized() {
     if (WidgetsBinding.instance == null)
-      new WidgetsFlutterBinding();
+      WidgetsFlutterBinding();
     return WidgetsBinding.instance;
   }
 }

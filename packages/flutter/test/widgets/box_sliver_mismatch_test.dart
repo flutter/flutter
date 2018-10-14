@@ -20,7 +20,7 @@ void main() {
     expect(tester.takeException(), isFlutterError);
 
     await tester.pumpWidget(
-      new Row(
+      Row(
         children: const <Widget>[
           SliverList(
             delegate: SliverChildListDelegate(<Widget>[]),
@@ -34,9 +34,9 @@ void main() {
 
   testWidgets('Box in a sliver', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Viewport(
+      Viewport(
         crossAxisDirection: AxisDirection.right,
-        offset: new ViewportOffset.zero(),
+        offset: ViewportOffset.zero(),
         slivers: const <Widget>[
           SizedBox(),
         ],
@@ -46,9 +46,9 @@ void main() {
     expect(tester.takeException(), isFlutterError);
 
     await tester.pumpWidget(
-      new Viewport(
+      Viewport(
         crossAxisDirection: AxisDirection.right,
-        offset: new ViewportOffset.zero(),
+        offset: ViewportOffset.zero(),
         slivers: const <Widget>[
           SliverPadding(
             padding: EdgeInsets.zero,

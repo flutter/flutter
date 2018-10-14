@@ -19,11 +19,11 @@ void main() {
     expect(c.width, 10.0);
     expect(c.height, 20.0);
 
-    final SizedBox d = new SizedBox.fromSize();
+    final SizedBox d = SizedBox.fromSize();
     expect(d.width, isNull);
     expect(d.height, isNull);
 
-    final SizedBox e = new SizedBox.fromSize(size: const Size(1.0, 2.0));
+    final SizedBox e = SizedBox.fromSize(size: const Size(1.0, 2.0));
     expect(e.width, 1.0);
     expect(e.height, 2.0);
 
@@ -37,11 +37,11 @@ void main() {
   });
 
   testWidgets('SizedBox - no child', (WidgetTester tester) async {
-    final GlobalKey patient = new GlobalKey();
+    final GlobalKey patient = GlobalKey();
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      Center(
+        child: SizedBox(
           key: patient,
         )
       )
@@ -49,8 +49,8 @@ void main() {
     expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      Center(
+        child: SizedBox(
           key: patient,
           height: 0.0,
         )
@@ -59,8 +59,8 @@ void main() {
     expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      Center(
+        child: SizedBox(
           key: patient,
           width: 0.0,
           height: 0.0,
@@ -70,8 +70,8 @@ void main() {
     expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      Center(
+        child: SizedBox(
           key: patient,
           width: 100.0,
           height: 100.0,
@@ -81,8 +81,8 @@ void main() {
     expect(patient.currentContext.size, equals(const Size(100.0, 100.0)));
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      Center(
+        child: SizedBox(
           key: patient,
           width: 1000.0,
           height: 1000.0,
@@ -92,8 +92,8 @@ void main() {
     expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox.expand(
+      Center(
+        child: SizedBox.expand(
           key: patient,
         )
       )
@@ -101,8 +101,8 @@ void main() {
     expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox.shrink(
+      Center(
+        child: SizedBox.shrink(
           key: patient,
         )
       )
@@ -111,80 +111,80 @@ void main() {
   });
 
   testWidgets('SizedBox - container child', (WidgetTester tester) async {
-    final GlobalKey patient = new GlobalKey();
+    final GlobalKey patient = GlobalKey();
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      Center(
+        child: SizedBox(
           key: patient,
-          child: new Container(),
+          child: Container(),
         )
       )
     );
     expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      Center(
+        child: SizedBox(
           key: patient,
           height: 0.0,
-          child: new Container(),
+          child: Container(),
         )
       )
     );
     expect(patient.currentContext.size, equals(const Size(800.0, 0.0)));
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      Center(
+        child: SizedBox(
           key: patient,
           width: 0.0,
           height: 0.0,
-          child: new Container(),
+          child: Container(),
         )
       )
     );
     expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      Center(
+        child: SizedBox(
           key: patient,
           width: 100.0,
           height: 100.0,
-          child: new Container(),
+          child: Container(),
         )
       )
     );
     expect(patient.currentContext.size, equals(const Size(100.0, 100.0)));
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      Center(
+        child: SizedBox(
           key: patient,
           width: 1000.0,
           height: 1000.0,
-          child: new Container(),
+          child: Container(),
         )
       )
     );
     expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox.expand(
+      Center(
+        child: SizedBox.expand(
           key: patient,
-          child: new Container(),
+          child: Container(),
         )
       )
     );
     expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox.shrink(
+      Center(
+        child: SizedBox.shrink(
           key: patient,
-          child: new Container(),
+          child: Container(),
         )
       )
     );

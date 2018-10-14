@@ -61,7 +61,7 @@ bool debugAssertAllSchedulerVarsUnset(String reason) {
   assert(() {
     if (debugPrintBeginFrameBanner ||
         debugPrintEndFrameBanner) {
-      throw new FlutterError(reason);
+      throw FlutterError(reason);
     }
     return true;
   }());

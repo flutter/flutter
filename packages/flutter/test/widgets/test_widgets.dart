@@ -36,7 +36,7 @@ class FlipWidget extends StatefulWidget {
   final Widget right;
 
   @override
-  FlipWidgetState createState() => new FlipWidgetState();
+  FlipWidgetState createState() => FlipWidgetState();
 }
 
 class FlipWidgetState extends State<FlipWidget> {

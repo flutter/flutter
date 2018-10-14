@@ -38,7 +38,7 @@ class ScrollBehavior {
         return child;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        return new GlowingOverscrollIndicator(
+        return GlowingOverscrollIndicator(
           child: child,
           axisDirection: axisDirection,
           color: _kDefaultGlowColor,
@@ -114,6 +114,6 @@ class ScrollConfiguration extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<ScrollBehavior>('behavior', behavior));
+    properties.add(DiagnosticsProperty<ScrollBehavior>('behavior', behavior));
   }
 }

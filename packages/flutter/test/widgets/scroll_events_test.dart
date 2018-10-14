@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
 Widget _buildScroller({ List<String> log }) {
-  return new NotificationListener<ScrollNotification>(
+  return NotificationListener<ScrollNotification>(
     onNotification: (ScrollNotification notification) {
       if (notification is ScrollStartNotification) {
         log.add('scroll-start');
@@ -20,15 +20,15 @@ Widget _buildScroller({ List<String> log }) {
       }
       return false;
     },
-    child: new SingleChildScrollView(
-      child: new Container(width: 1000.0, height: 1000.0),
+    child: SingleChildScrollView(
+      child: Container(width: 1000.0, height: 1000.0),
     ),
   );
 }
 
 void main() {
   Completer<Null> animateTo(WidgetTester tester, double newScrollOffset, { @required Duration duration }) {
-    final Completer<Null> completer = new Completer<Null>();
+    final Completer<Null> completer = Completer<Null>();
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.animateTo(newScrollOffset, duration: duration, curve: Curves.linear).whenComplete(completer.complete);
     return completer;

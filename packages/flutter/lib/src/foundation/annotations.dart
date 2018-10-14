@@ -18,8 +18,8 @@
 /// ```dart
 /// /// A copper coffee pot, as desired by Ben Turpin.
 /// /// ...documentation...
-/// @Category(const <String>['Pots', 'Coffee'])
-/// @Category(const <String>['Copper', 'Cookware'])
+/// @Category(<String>['Pots', 'Coffee'])
+/// @Category(<String>['Copper', 'Cookware'])
 /// @DocumentationIcon('https://example.com/images/coffee.png')
 /// @Summary('A proper cup of coffee is made in a proper copper coffee pot.')
 /// class CopperCoffeePot {
@@ -55,7 +55,7 @@ class Category {
 /// ```dart
 /// /// Utility class for beginning a dream-sharing sequence.
 /// /// ...documentation...
-/// @Category(const <String>['Military Technology', 'Experimental'])
+/// @Category(<String>['Military Technology', 'Experimental'])
 /// @DocumentationIcon('https://docs.example.org/icons/top.png')
 /// class DreamSharing {
 ///   // ...code...
@@ -89,8 +89,8 @@ class DocumentationIcon {
 /// ///
 /// /// Instances of this class can hunt small animals.
 /// /// This cat has three legs.
-/// @Category(const <String>['Animals', 'Cats'])
-/// @Category(const <String>['Cute', 'Pets'])
+/// @Category(<String>['Animals', 'Cats'])
+/// @Category(<String>['Cute', 'Pets'])
 /// @DocumentationIcon('https://www.examples.net/docs/images/icons/pillar.jpeg')
 /// @Summary('A famous three-legged cat.')
 /// class Pillar extends Cat {

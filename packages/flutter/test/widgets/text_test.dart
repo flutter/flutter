@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 
 import 'semantics_tester.dart';
 
@@ -113,13 +115,13 @@ void main() {
   });
 
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       const Text('\$\$', semanticsLabel: 'Double dollars', textDirection: TextDirection.ltr)
     );
-    final TestSemantics expectedSemantics = new TestSemantics.root(
+    final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           label: 'Double dollars',
           textDirection: TextDirection.ltr,
         ),
@@ -136,4 +138,112 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
     semantics.dispose();
   });
+
+  testWidgets('recognizers split semantic node', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      Text.rich(
+        TextSpan(
+          children: <TextSpan>[
+            const TextSpan(text: 'hello '),
+            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () {}),
+            const TextSpan(text: ' this is a '),
+            const TextSpan(text: 'cat-astrophe'),
+          ],
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              label: 'hello ',
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              label: 'world',
+              textDirection: TextDirection.ltr,
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+            TestSemantics(
+              label: ' this is a cat-astrophe',
+              textDirection: TextDirection.ltr,
+            )
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    semantics.dispose();
+  });
+
+  testWidgets('recognizers split semantic node - bidi', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      RichText(
+        text: TextSpan(
+          style: textStyle,
+          children: <TextSpan>[
+            const TextSpan(text: 'hello world${Unicode.RLE}${Unicode.RLO} '),
+            TextSpan(text: 'BOY', recognizer: LongPressGestureRecognizer()..onLongPress = () {}),
+            const TextSpan(text: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO '),
+            TextSpan(text: 'SIR', recognizer: TapGestureRecognizer()..onTap = () {}),
+            const TextSpan(text: '${Unicode.PDF}${Unicode.PDF} good bye'),
+          ],
+        ),
+        textDirection: TextDirection.ltr,
+      )
+    );
+    // The expected visual order of the text is:
+    //   hello world RIS OD you OD WOH YOB good bye
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+          children: <TestSemantics>[
+            TestSemantics(
+              rect: Rect.fromLTRB(-4.0, -4.0, 480.0, 18.0),
+              label: 'hello world ',
+              textDirection: TextDirection.ltr, // text direction is declared as LTR.
+            ),
+            TestSemantics(
+              rect: Rect.fromLTRB(150.0, -4.0, 200.0, 18.0),
+              label: 'RIS',
+              textDirection: TextDirection.rtl,  // in the last string we switched to RTL using RLE.
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+            TestSemantics(
+              rect: Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
+              label: ' OD you OD WOH ', // Still RTL.
+              textDirection: TextDirection.rtl,
+            ),
+            TestSemantics(
+              rect: Rect.fromLTRB(416.0, -4.0, 466.0, 18.0),
+              label: 'YOB',
+              textDirection: TextDirection.rtl, // Still RTL.
+              actions: <SemanticsAction>[
+                SemanticsAction.longPress,
+              ],
+            ),
+            TestSemantics(
+              rect: Rect.fromLTRB(472.0, -4.0, 606.0, 18.0),
+              label: ' good bye',
+              textDirection: TextDirection.rtl, // Begin as RTL but pop to LTR.
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true));
+    semantics.dispose();
+  }, skip: true); // TODO(jonahwilliams): correct once https://github.com/flutter/flutter/issues/20891 is resolved.
 }

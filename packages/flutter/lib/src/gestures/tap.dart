@@ -36,7 +36,7 @@ class TapDownDetails {
 ///
 ///  * [GestureDetector.onTapDown], which matches this signature.
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
-typedef void GestureTapDownCallback(TapDownDetails details);
+typedef GestureTapDownCallback = void Function(TapDownDetails details);
 
 /// Details for [GestureTapUpCallback], such as position.
 ///
@@ -65,7 +65,7 @@ class TapUpDetails {
 ///
 ///  * [GestureDetector.onTapUp], which matches this signature.
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
-typedef void GestureTapUpCallback(TapUpDetails details);
+typedef GestureTapUpCallback = void Function(TapUpDetails details);
 
 /// Signature for when a tap has occurred.
 ///
@@ -73,7 +73,7 @@ typedef void GestureTapUpCallback(TapUpDetails details);
 ///
 ///  * [GestureDetector.onTap], which matches this signature.
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
-typedef void GestureTapCallback();
+typedef GestureTapCallback = void Function();
 
 /// Signature for when the pointer that previously triggered a
 /// [GestureTapDownCallback] will not end up causing a tap.
@@ -82,7 +82,7 @@ typedef void GestureTapCallback();
 ///
 ///  * [GestureDetector.onTapCancel], which matches this signature.
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
-typedef void GestureTapCancelCallback();
+typedef GestureTapCancelCallback = void Function();
 
 /// Recognizes taps.
 ///
@@ -220,7 +220,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkDown() {
     if (!_sentTapDown) {
       if (onTapDown != null)
-        invokeCallback<void>('onTapDown', () { onTapDown(new TapDownDetails(globalPosition: initialPosition)); });
+        invokeCallback<void>('onTapDown', () { onTapDown(TapDownDetails(globalPosition: initialPosition)); });
       _sentTapDown = true;
     }
   }
@@ -237,7 +237,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
         return;
       }
       if (onTapUp != null)
-        invokeCallback<void>('onTapUp', () { onTapUp(new TapUpDetails(globalPosition: _finalPosition)); });
+        invokeCallback<void>('onTapUp', () { onTapUp(TapUpDetails(globalPosition: _finalPosition)); });
       if (onTap != null)
         invokeCallback<void>('onTap', onTap);
       _reset();
@@ -256,8 +256,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new FlagProperty('wonArenaForPrimaryPointer', value: _wonArenaForPrimaryPointer, ifTrue: 'won arena'));
-    properties.add(new DiagnosticsProperty<Offset>('finalPosition', _finalPosition, defaultValue: null));
-    properties.add(new FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
+    properties.add(FlagProperty('wonArenaForPrimaryPointer', value: _wonArenaForPrimaryPointer, ifTrue: 'won arena'));
+    properties.add(DiagnosticsProperty<Offset>('finalPosition', _finalPosition, defaultValue: null));
+    properties.add(FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
   }
 }

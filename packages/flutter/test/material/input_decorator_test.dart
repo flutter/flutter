@@ -22,19 +22,19 @@ Widget buildInputDecorator({
     style: TextStyle(fontFamily: 'Ahem', fontSize: 16.0),
   ),
 }) {
-  return new MaterialApp(
-    home: new Material(
-      child: new Builder(
+  return MaterialApp(
+    home: Material(
+      child: Builder(
         builder: (BuildContext context) {
-          return new Theme(
+          return Theme(
             data: Theme.of(context).copyWith(
               inputDecorationTheme: inputDecorationTheme,
             ),
-            child: new Align(
+            child: Align(
               alignment: Alignment.topLeft,
-              child: new Directionality(
+              child: Directionality(
                 textDirection: textDirection,
-                child: new InputDecorator(
+                child: InputDecorator(
                   decoration: decoration,
                   isEmpty: isEmpty,
                   isFocused: isFocused,
@@ -1344,7 +1344,7 @@ void main() {
       buildInputDecorator(
         isEmpty: true, // label appears, vertically centered
         // isFocused: false (default)
-        inputDecorationTheme: new InputDecorationTheme(
+        inputDecorationTheme: InputDecorationTheme(
           labelStyle: labelStyle,
           hintStyle: hintStyle,
           prefixStyle: prefixStyle,
@@ -1448,7 +1448,7 @@ void main() {
       'suffixIcon',
     ]));
 
-    final Set<Object> nodeValues = new Set<Object>.from(
+    final Set<Object> nodeValues = Set<Object>.from(
       renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value)
     );
     expect(nodeValues.length, 11);
@@ -1562,11 +1562,11 @@ void main() {
       buildInputDecorator(
         // isEmpty: false (default)
         // isFocused: false (default)
-        decoration: new InputDecoration(
+        decoration: InputDecoration(
           filled: true,
           fillColor: const Color(0xFF00FF00),
-          border: new OutlineInputBorder(
-            borderRadius: new BorderRadius.circular(12.0),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
           ),
         ),
       ),
@@ -1591,7 +1591,7 @@ void main() {
     expect(box, paints..rrect(
       style: PaintingStyle.stroke,
       strokeWidth: 1.0,
-      rrect: new RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
+      rrect: RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
     ));
   });
 
@@ -1630,11 +1630,11 @@ void main() {
   testWidgets('InputDecorator constrained to 0x0', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17710
     await tester.pumpWidget(
-      new Material(
-        child: new Directionality(
+      Material(
+        child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new UnconstrainedBox(child: new ConstrainedBox(
-            constraints: new BoxConstraints.tight(Size.zero),
+          child: UnconstrainedBox(child: ConstrainedBox(
+            constraints: BoxConstraints.tight(Size.zero),
             child: const InputDecorator(
               decoration: InputDecoration(
                 labelText: 'XP',
@@ -1653,12 +1653,12 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/18111
 
       Widget buildFrame(TextDirection textDirection) {
-        return new MaterialApp(
-          home: new Scaffold(
-            body: new Container(
+        return MaterialApp(
+          home: Scaffold(
+            body: Container(
               padding: const EdgeInsets.all(16.0),
               alignment: Alignment.center,
-              child: new Directionality(
+              child: Directionality(
                 textDirection: textDirection,
                 child: const RepaintBoundary(
                   child: InputDecorator(

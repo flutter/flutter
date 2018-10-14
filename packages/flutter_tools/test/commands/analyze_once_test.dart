@@ -40,11 +40,11 @@ void main() {
     // Create a project to be analyzed
     testUsingContext('flutter create', () async {
       await runCommand(
-        command: new CreateCommand(),
-        arguments: <String>['create', projectPath],
+        command: CreateCommand(),
+        arguments: <String>['--no-wrap', 'create', projectPath],
         statusTextContains: <String>[
           'All done!',
-          'Your main program file is lib/main.dart',
+          'Your application code is in ${fs.path.normalize(fs.path.join(fs.path.relative(projectPath), 'lib', 'main.dart'))}',
         ],
       );
       expect(libMain.existsSync(), isTrue);
@@ -53,7 +53,7 @@ void main() {
     // Analyze in the current directory - no arguments
     testUsingContext('working directory', () async {
       await runCommand(
-        command: new AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
+        command: AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
         arguments: <String>['analyze'],
         statusTextContains: <String>['No issues found!'],
       );
@@ -62,7 +62,7 @@ void main() {
     // Analyze a specific file outside the current directory
     testUsingContext('passing one file throws', () async {
       await runCommand(
-        command: new AnalyzeCommand(),
+        command: AnalyzeCommand(),
         arguments: <String>['analyze', libMain.path],
         toolExit: true,
         exitMessageContains: 'is not a directory',
@@ -89,7 +89,7 @@ void main() {
 
       // Analyze in the current directory - no arguments
       await runCommand(
-        command: new AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
+        command: AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
         arguments: <String>['analyze'],
         statusTextContains: <String>[
           'Analyzing',
@@ -115,7 +115,7 @@ void main() {
 
       // Analyze in the current directory - no arguments
       await runCommand(
-        command: new AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
+        command: AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
         arguments: <String>['analyze'],
         statusTextContains: <String>[
           'Analyzing',
@@ -149,7 +149,7 @@ void bar() {
 
         // Analyze in the current directory - no arguments
         await runCommand(
-          command: new AnalyzeCommand(workingDirectory: tempDir),
+          command: AnalyzeCommand(workingDirectory: tempDir),
           arguments: <String>['analyze'],
           statusTextContains: <String>[
             'Analyzing',
@@ -162,7 +162,7 @@ void bar() {
       }
     });
 
-    testUsingContext('analyze', () async {
+    testUsingContext('returns no issues when source is error-free', () async {
       const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
@@ -170,29 +170,12 @@ StringBuffer bar = StringBuffer('baz');
       tempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(
-          command: new AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
+          command: AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
           arguments: <String>['analyze'],
           statusTextContains: <String>['No issues found!'],
         );
       } finally {
         tryToDelete(tempDir);
-      }
-    });
-
-    testUsingContext('use-cfe flag is recognized', () async {
-      const String contents = '''
-StringBuffer bar = StringBuffer('baz');
-''';
-      final Directory tempDir = fs.systemTempDirectory.createTempSync();
-      tempDir.childFile('main.dart').writeAsStringSync(contents);
-      try {
-        await runCommand(
-          command: new AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
-          arguments: <String>['analyze', '--no-use-cfe'],
-          statusTextContains: <String>['No issues found!'],
-        );
-      } finally {
-        tempDir.deleteSync(recursive: true);
       }
     });
   });
@@ -208,7 +191,7 @@ void assertContains(String text, List<String> patterns) {
   }
 }
 
-Future<Null> runCommand({
+Future<void> runCommand({
   FlutterCommand command,
   List<String> arguments,
   List<String> statusTextContains,

@@ -13,12 +13,12 @@ void main() {
       '../../bin/cache/dart-sdk/bin/dart',
       <String>['analyze-sample-code.dart', 'test/analyze-sample-code-test-input'],
     );
-    final List<String> stdout = await process.stdout.transform(utf8.decoder).transform(const LineSplitter()).toList();
-    final List<String> stderr = await process.stderr.transform(utf8.decoder).transform(const LineSplitter()).toList();
-    final Match line = new RegExp(r'^(.+)/main\.dart:[0-9]+:[0-9]+: .+$').matchAsPrefix(stdout[1]);
+    final List<String> stdout = await process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList();
+    final List<String> stderr = await process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList();
+    final Match line = RegExp(r'^(.+)/main\.dart:[0-9]+:[0-9]+: .+$').matchAsPrefix(stdout[1]);
     expect(line, isNot(isNull));
     final String directory = line.group(1);
-    new Directory(directory).deleteSync(recursive: true);
+    Directory(directory).deleteSync(recursive: true);
     expect(await process.exitCode, 1);
     expect(stderr, isEmpty);
     expect(stdout, <String>[
@@ -30,8 +30,10 @@ void main() {
       "$directory/main.dart:5:8: Unused import: 'dart:ui'",
       "$directory/main.dart:6:8: Unused import: 'package:flutter_test/flutter_test.dart'",
       "$directory/main.dart:9:8: Target of URI doesn't exist: 'package:flutter/known_broken_documentation.dart'",
+      'test/analyze-sample-code-test-input/known_broken_documentation.dart:27:5: Unnecessary new keyword (unnecessary_new)',
       "test/analyze-sample-code-test-input/known_broken_documentation.dart:27:9: Undefined class 'Opacity' (undefined_class)",
       "test/analyze-sample-code-test-input/known_broken_documentation.dart:29:20: Undefined class 'Text' (undefined_class)",
+      'test/analyze-sample-code-test-input/known_broken_documentation.dart:39:5: Unnecessary new keyword (unnecessary_new)',
       "test/analyze-sample-code-test-input/known_broken_documentation.dart:39:9: Undefined class 'Opacity' (undefined_class)",
       "test/analyze-sample-code-test-input/known_broken_documentation.dart:41:20: Undefined class 'Text' (undefined_class)",
       'test/analyze-sample-code-test-input/known_broken_documentation.dart:42:5: unexpected comma at end of sample code',

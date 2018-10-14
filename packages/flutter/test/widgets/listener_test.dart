@@ -10,17 +10,17 @@ void main() {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
-      new Listener(
+      Listener(
         onPointerDown: (_) {
           log.add('top');
         },
-        child: new Listener(
+        child: Listener(
           onPointerDown: (_) {
             log.add('middle');
           },
-          child: new DecoratedBox(
+          child: DecoratedBox(
             decoration: const BoxDecoration(),
-            child: new Listener(
+            child: Listener(
               onPointerDown: (_) {
                 log.add('bottom');
               },

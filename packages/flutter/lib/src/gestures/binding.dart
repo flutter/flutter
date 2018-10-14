@@ -38,7 +38,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
   static GestureBinding get instance => _instance;
   static GestureBinding _instance;
 
-  final Queue<PointerEvent> _pendingPointerEvents = new Queue<PointerEvent>();
+  final Queue<PointerEvent> _pendingPointerEvents = Queue<PointerEvent>();
 
   void _handlePointerDataPacket(ui.PointerDataPacket packet) {
     // We convert pointer data to logical pixels so that e.g. the touch slop can be
@@ -55,7 +55,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
   void cancelPointer(int pointer) {
     if (_pendingPointerEvents.isEmpty && !locked)
       scheduleMicrotask(_flushPointerEventQueue);
-    _pendingPointerEvents.addFirst(new PointerCancelEvent(pointer: pointer));
+    _pendingPointerEvents.addFirst(PointerCancelEvent(pointer: pointer));
   }
 
   void _flushPointerEventQueue() {
@@ -65,11 +65,11 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
   }
 
   /// A router that routes all pointer events received from the engine.
-  final PointerRouter pointerRouter = new PointerRouter();
+  final PointerRouter pointerRouter = PointerRouter();
 
   /// The gesture arenas used for disambiguating the meaning of sequences of
   /// pointer events.
-  final GestureArenaManager gestureArena = new GestureArenaManager();
+  final GestureArenaManager gestureArena = GestureArenaManager();
 
   /// State for all pointers which are currently down.
   ///
@@ -82,7 +82,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
     HitTestResult result;
     if (event is PointerDownEvent) {
       assert(!_hitTests.containsKey(event.pointer));
-      result = new HitTestResult();
+      result = HitTestResult();
       hitTest(result, event.position);
       _hitTests[event.pointer] = result;
       assert(() {
@@ -104,7 +104,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
   /// Determine which [HitTestTarget] objects are located at a given position.
   @override // from HitTestable
   void hitTest(HitTestResult result, Offset position) {
-    result.add(new HitTestEntry(this));
+    result.add(HitTestEntry(this));
   }
 
   /// Dispatch an event to a hit test result's path.
@@ -120,7 +120,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
       try {
         entry.target.handleEvent(event, entry);
       } catch (exception, stack) {
-        FlutterError.reportError(new FlutterErrorDetailsForPointerEventDispatcher(
+        FlutterError.reportError(FlutterErrorDetailsForPointerEventDispatcher(
           exception: exception,
           stack: stack,
           library: 'gesture library',

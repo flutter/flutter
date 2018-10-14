@@ -9,7 +9,7 @@ import '../common.dart';
 void main() {
   group('Timeline', () {
     test('parses JSON', () {
-      final Timeline timeline = new Timeline.fromJson(<String, dynamic>{
+      final Timeline timeline = Timeline.fromJson(<String, dynamic>{
         'traceEvents': <Map<String, dynamic>>[
           <String, dynamic>{
             'name': 'test event',
