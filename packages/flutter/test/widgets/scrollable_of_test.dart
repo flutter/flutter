@@ -88,8 +88,7 @@ void main() {
 
     await tester.pumpWidget(new NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification value) {
-        if (value is ScrollStartNotification || value is ScrollUpdateNotification || value is ScrollEndNotification)
-          notification = value;
+        notification = value;
         return false;
       },
       child: new SingleChildScrollView(
