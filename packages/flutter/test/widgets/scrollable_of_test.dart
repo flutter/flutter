@@ -82,4 +82,25 @@ void main() {
     controller.jumpTo(400.0);
     expect(logValue, 'listener 400.0');
   });
+
+  testWidgets('Scrollable.of() is possible using ScrollNotification context', (WidgetTester tester) async {
+    ScrollNotification notification;
+
+    await tester.pumpWidget(new NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification value) {
+        if (value is ScrollStartNotification || value is ScrollUpdateNotification || value is ScrollEndNotification)
+          notification = value;
+        return false;
+      },
+      child: new SingleChildScrollView(
+        child: const SizedBox(height: 1200.0)
+      )
+    ));
+
+    await tester.startGesture(const Offset(100.0, 100.0));
+    await tester.pump(const Duration(seconds: 1));
+
+    final StatefulElement scrollableElement = find.byType(Scrollable).evaluate().first;
+    expect(Scrollable.of(notification.context), equals(scrollableElement.state));
+  });
 }

@@ -482,21 +482,24 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     assert(position != null);
-    // TODO(ianh): Having all these global keys is sad.
-    Widget result = new RawGestureDetector(
-      key: _gestureDetectorKey,
-      gestures: _gestureRecognizers,
-      behavior: HitTestBehavior.opaque,
-      excludeFromSemantics: widget.excludeFromSemantics,
-      child: new Semantics(
-        explicitChildNodes: !widget.excludeFromSemantics,
-        child: new IgnorePointer(
-          key: _ignorePointerKey,
-          ignoring: _shouldIgnorePointer,
-          ignoringSemantics: false,
-          child: new _ScrollableScope(
-            scrollable: this,
-            position: position,
+    /// [_ScrollableScope] is voluntarily placed above [RawGestureDetector]
+    /// so that it is possible to obtain the [ScrollableState]
+    /// from [ScrollNotifications] using [Scrollable.of]
+    Widget result = new _ScrollableScope(
+      scrollable: this,
+      position: position,
+      // TODO(ianh): Having all these global keys is sad.
+      child: new RawGestureDetector(
+        key: _gestureDetectorKey,
+        gestures: _gestureRecognizers,
+        behavior: HitTestBehavior.opaque,
+        excludeFromSemantics: widget.excludeFromSemantics,
+        child: new Semantics(
+          explicitChildNodes: !widget.excludeFromSemantics,
+          child: new IgnorePointer(
+            key: _ignorePointerKey,
+            ignoring: _shouldIgnorePointer,
+            ignoringSemantics: false,
             child: widget.viewportBuilder(context, position),
           ),
         ),
