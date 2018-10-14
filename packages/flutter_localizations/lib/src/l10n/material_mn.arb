@@ -1,0 +1,210 @@
+{
+  "scriptCategory": "English-like",
+  "@scriptCategory": {
+    "description": "The name of the language's script category (see https://material.io/design/typography/language-support.html#language-categories-reference).",
+    "x-flutter-type": "scriptCategory"
+  },
+  "timeOfDayFormat": "HH:mm",
+  "@timeOfDayFormat": {
+    "description": "The ICU 'Short Time' pattern, such as 'HH:mm', 'h:mm a', 'H:mm'. See: http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US",
+    "x-flutter-type": "icuShortTimePattern"
+  },
+  "openAppDrawerTooltip": "Цэс нээх",
+  "@openAppDrawerTooltip": {
+    "description": "The tooltip for the leading app bar menu (aka 'hamburger') button."
+  },
+  "backButtonTooltip": "Буцах",
+  "@backButtonTooltip": {
+    "description": "The tooltip for the back button, which closes the current page and returns to the previous one."
+  },
+  "closeButtonTooltip": "Хаах",
+  "@closeButtonTooltip": {
+    "description": "The tooltip for the close button, which closes the current page and returns to the previous one."
+  },
+  "deleteButtonTooltip": "Устгах",
+  "@deleteButtonTooltip": {
+    "description": "The tooltip for the delete button of chips."
+  },
+  "nextMonthTooltip": "Дараа сар",
+  "@nextMonthTooltip": {
+    "description": "The tooltip for the month picker's 'next month' button."
+  },
+  "previousMonthTooltip": "Өмнөх сар",
+  "@previousMonthTooltip": {
+    "description": "The tooltip for the month picker's 'previous month' button."
+  },
+  "nextPageTooltip": "Дараагийн хуудас",
+  "@nextPageTooltip": {
+    "description": "The tooltip for the button that sends the user to the next page of a paginated data table."
+  },
+  "previousPageTooltip": "Өмнөх хуудас",
+  "@previousPageTooltip": {
+    "description": "The tooltip for the button that sends the user to the previous page of a paginated data table."
+  },
+  "showMenuTooltip": "Цэсийг харуулах",
+  "@showMenuTooltip": {
+    "description": "The tooltip for the button that shows a popup menu."
+  },
+  "aboutListTileTitle": "$ ApplicationName тухай",
+  "@aboutListTileTitle": {
+    "description": "The default title for the drawer item that shows an about page for the application. The value of $applicationName is the name of the application, like GMail or Chrome.",
+    "parameters": "applicationName"
+  },
+  "licensesPageTitle": "Лицензүүд",
+  "@licensesPageTitle": {
+    "description": "The title for the Flutter licenses page."
+  },
+  "pageRowsInfoTitle": "$rowCount-н $firstRow-с $lastRow",
+  "@pageRowsInfoTitle": {
+    "description": "The text shown in the footer of a paginated data table when the exact overall row count is known. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
+    "parameters": "firstRow, lastRow, rowCount"
+  },
+  "pageRowsInfoTitleApproximate": "Нийт $rowCount-н $firstRow-с $lastRow харуулж байна",
+  "@pageRowsInfoTitleApproximate": {
+    "description": "The text shown in the footer of a paginated data table when the exact overall row count is unknown. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
+    "parameters": "firstRow, lastRow, rowCount"
+  },
+  "rowsPerPageTitle": "Нэг хуудсанд:",
+  "@rowsPerPageTitle": {
+    "description": "The caption for the drop-down button on a paginated data table's footer that allows the user to control the number of rows of data per page of the table."
+  },
+  "tabLabel": "$tabCount-н $tabIndex дахь нь",
+  "@tabLabel": {
+    "description": "The accessibility label used on a tab. This message describes the index of the selected tab and how many tabs there are, e.g. 'Tab 1 of 2'. All values are greater than or equal to one.",
+    "parameters": "tabIndex, tabCount"
+  },
+  "selectedRowCountTitleZero": "Бичлэг сонгоогүй байна",
+  "selectedRowCountTitleOne": "1 бичлэг сонгогдсон",
+  "selectedRowCountTitleOther": "$selectedRowCount бичлэг сонгосон байна",
+  "@selectedRowCountTitle": {
+    "description": "The title for the header of a paginated data table when the user is selecting rows. The value of $selectedRowCount is an integer which indicates the number of data table row elements that have been selected.",
+    "plural": "selectedRowCount"
+  },
+  "cancelButtonLabel": "ЦУЦЛАХ",
+  "@cancelButtonLabel": {
+    "description": "The label for cancel buttons and menu items."
+  },
+  "closeButtonLabel": "ХААХ",
+  "@closeButtonLabel": {
+    "description": "The label for close buttons and menu items."
+  },
+  "continueButtonLabel": "ҮРГЭЖЛҮҮЛЭХ",
+  "@continueButtonLabel": {
+    "description": "The label for continue buttons and menu items."
+  },
+  "copyButtonLabel": "ХУУЛАХ",
+  "@copyButtonLabel": {
+    "description": "The label for copy buttons and menu items."
+  },
+  "cutButtonLabel": "ТАСДАХ",
+  "@cutButtonLabel": {
+    "description": "The label for cut buttons and menu items."
+  },
+  "okButtonLabel": "OK",
+  "@okButtonLabel": {
+    "description": "The label for OK buttons and menu items."
+  },
+  "pasteButtonLabel": "ХУУЛАХ",
+  "@pasteButtonLabel": {
+    "description": "The label for paste buttons and menu items."
+  },
+  "selectAllButtonLabel": "БҮГДИЙГ СОНГОХ",
+  "@selectAllButtonLabel": {
+    "description": "The label for select-all buttons and menu items."
+  },
+  "viewLicensesButtonLabel": "ЛИЦЕНЗҮҮДИЙГ ХАРАХ",
+  "@viewLicensesButtonLabel": {
+    "description": "The label for the button in the about box that leads the user to a list of all licenses that apply to the application."
+  },
+  "anteMeridiemAbbreviation": "AM",
+  "@anteMeridiemAbbreviation": {
+    "description": "The abbreviation for ante meridiem (before noon) shown in the time picker. Translations for this abbreviation will only be provided for locales that support it."
+  },
+  "postMeridiemAbbreviation": "PM",
+  "@postMeridiemAbbreviation": {
+    "description": "The abbreviation for post meridiem (after noon) shown in the time picker. Translations for this abbreviation will only be provided for locales that support it."
+  },
+  "timePickerHourModeAnnouncement": "Цаг сонгох",
+  "@timePickerHourModeAnnouncement": {
+    "description": "The audio announcement made when the time picker dialog is set to hour mode."
+  },
+  "timePickerMinuteModeAnnouncement": "Минут сонгох",
+  "@timePickerMinuteModeAnnouncement": {
+    "description": "The audio announcement made when the time picker dialog is set to minute mode."
+  },
+  "modalBarrierDismissLabel": "Дуусгах",
+  "@modalBarrierDismissLabel": {
+    "description": "Label read out by accessibility tools (TalkBack or VocieOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can for example be found behind a alert or popup to block user interaction with elements behind it."
+  },
+  "signedInLabel": "Нэвтэрсэн",
+  "@signedInLabel": {
+    "description": "The accessibility label used to indicate which account is signed in, in a UserAccountsDrawerHeader, when the accessibility user navigates the UI. This phrase serves as an adjective with respect to the user. The phrase indicates that the user is currently signed in."
+  },
+  "hideAccountsLabel": "Хэрэглэгчдийг нуух",
+  "@hideAccountsLabel": {
+    "description": "The accessibility label used for the button on a UserAccountsDrawerHeader that hides the list of accounts."
+  },
+  "showAccountsLabel": "Хэрэглэгчдийг харуулах",
+  "@showAccountsLabel": {
+    "description": "The accessibility label used for the button on a UserAccountsDrawerHeader that shows the list of accounts."
+  },
+  "drawerLabel": "Хөтөч цэс",
+  "@drawerLabel": {
+    "description": "The audio announcement made when the Drawer is opened."
+  },
+  "popupMenuLabel": "Нэмэлт цэс",
+  "@popupMenuLabel": {
+    "description": "The audio announcement made when a PopupMenu is opened."
+  },
+  "dialogLabel": "Диалог",
+  "@dialogLabel": {
+    "description": "The audio announcement made when a Dialog is opened."
+  },
+  "alertDialogLabel": "Анхааруулга",
+  "@alertDialogLabel": {
+    "description": "The audio announcement made when an AlertDialog is opened."
+  },
+  "searchFieldLabel": "Хайлт",
+  "@searchFieldLabel": {
+    "description": "Label indicating that a text field is a search field. This will be used as a hint text in the text field."
+  },
+  "reorderItemToStart": "Эхлэлд нь очих",
+  "@reorderItemToStart": {
+    "description": "The audio announcement to move an item in a Reorderable List to the start of the list."
+  },
+  "reorderItemToEnd": "Төгсгөлд нь очих",
+  "@reorderItemToEnd": {
+    "description": "The audio announcement to move an item in a Reorderable List to the end of the list."
+  },
+  "reorderItemUp": "Дээшлүүлэх",
+  "@reorderItemUp": {
+    "description": "The audio announcement to move an item in a Reorderable List up in the list when it is oriented vertically."
+  },
+  "reorderItemDown": "Доошлуулах",
+  "@reorderItemDown": {
+    "description": "The audio announcement to move an item in a Reorderable List down in the list when it is oriented vertically."
+  },
+  "reorderItemLeft": "Зүүн тийш",
+  "@reorderItemLeft": {
+    "description": "The audio announcement to move an item in a Reorderable List left in the list when it is oriented horizontally."
+  },
+  "reorderItemRight": "Баруун тийш",
+  "@reorderItemRight": {
+    "description": "The audio announcement to move an item in a Reorderable List right in the list when it is oriented horizontally."
+  },
+  "expandedIconTapHint": "Хуурах",
+  "@expandedIconTapHint": {
+    "description": "The verb which describes what happens when an expanded ExpandIcon toggle button is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to collapse.' The exact phrasing of the hint will vary based on locale"
+  },
+  "collapsedIconTapHint": "Задлах",
+  "@collapsedIconTapHint": {
+    "description": "The verb which describes what happens when a collapsed ExpandIcon toggle button is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to expand.' The exact phrasing of the hint will vary based on locale"
+  },
+  "remainingTextFieldCharacterCountZero": "Тэмдэгтийн хэмжээ дууссан",
+  "remainingTextFieldCharacterCountOne": "1 тэмдэгт үлдсэн",
+  "remainingTextFieldCharacterCountOther": "$remainingCount тэмдэгт үлдсэн байна",
+  "@remainingTextFieldCharacterCount": {
+    "description": "The label for the TextField's character counter. remainingCharacters is a integer representing how many more characters the user can type into the text field before using up a given budget. All values are greater than or equal to zero.",
+    "plural": "remainingCount"
+  }
+}
