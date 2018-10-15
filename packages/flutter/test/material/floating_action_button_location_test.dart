@@ -85,8 +85,8 @@ void main() {
 
       // The maximum amounts we expect the fab width and height to change
       // during one step of a transition.
-      const double maxDeltaWidth = 33.0;
-      const double maxDeltaHeight = 33.0;
+      const double maxDeltaWidth = 12.5;
+      const double maxDeltaHeight = 12.5;
 
       // The maximum amounts we expect the fab icon to rotate during one step
       // of a transition.
@@ -189,20 +189,20 @@ void main() {
 
         // Moving the fab to the top start after creating the fab.
         await tester.pumpWidget(buildFrame(location: const _StartTopFloatingActionButtonLocation(), listener: geometryListener));
-        await tester.pump(kFloatingActionButtonSegue ~/ 4);
+        await tester.pump(kFloatingActionButtonSegue ~/ 2);
 
         // Interrupting motion to move to the end float
         await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
         await tester.pumpAndSettle();
       });
 
-      testWidgets('interrupting motion to remove the fab.', (WidgetTester tester) async {
+      testWidgets('interrupting entrance to remove the fab.', (WidgetTester tester) async {
         await tester.pumpWidget(buildFrame(fab: null, location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         setupListener(tester);
 
         // Animate the fab in.
         await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
-        await tester.pump(kFloatingActionButtonSegue ~/ 2 * 3);
+        await tester.pump(kFloatingActionButtonSegue ~/ 2);
 
         // Remove the fab.
         await tester.pumpWidget(
