@@ -695,6 +695,7 @@ class OffsetLayer extends ContainerLayer {
     );
     transform.scale(pixelRatio, pixelRatio);
     builder.pushTransform(transform.storage);
+    updateSubtreeDirtiness();
     addToScene(builder);
     final ui.Scene scene = builder.build();
     try {
