@@ -368,7 +368,7 @@ class TextTheme extends Diagnosticable {
         fontSizeDelta: fontSizeDelta,
       ),
       headline: headline.apply(
-        color: displayColor,
+        color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
@@ -377,7 +377,7 @@ class TextTheme extends Diagnosticable {
         fontSizeDelta: fontSizeDelta,
       ),
       title: title.apply(
-        color: displayColor,
+        color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
@@ -386,7 +386,7 @@ class TextTheme extends Diagnosticable {
         fontSizeDelta: fontSizeDelta,
       ),
       subhead: subhead.apply(
-        color: displayColor,
+        color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
@@ -395,7 +395,7 @@ class TextTheme extends Diagnosticable {
         fontSizeDelta: fontSizeDelta,
       ),
       body2: body2.apply(
-        color: displayColor,
+        color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
@@ -404,7 +404,7 @@ class TextTheme extends Diagnosticable {
         fontSizeDelta: fontSizeDelta,
       ),
       body1: body1.apply(
-        color: displayColor,
+        color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
