@@ -212,7 +212,7 @@ class Typography extends Diagnosticable {
 
   /// Linearly interpolate between two [Typography] objects.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static Typography lerp(Typography a, Typography b, double t) {
     return Typography(
       black: TextTheme.lerp(a.black, b.black, t),
