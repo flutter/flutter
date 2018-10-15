@@ -65,10 +65,10 @@ void main() {
     // The `displayColor` is applied to [display4], [display3], [display2],
     // [display1], and [caption]. The `bodyColor` is applied to the remaining
     // text styles.
-    const Color displayColor = const Color(1);
-    const Color bodyColor = const Color(2);
+    const Color displayColor = Color(1);
+    const Color bodyColor = Color(2);
     const String fontFamily = 'fontFamily';
-    const Color decorationColor = const Color(3);
+    const Color decorationColor = Color(3);
     const TextDecorationStyle decorationStyle = TextDecorationStyle.dashed;
     final TextDecoration decoration = TextDecoration.combine(<TextDecoration>[
       TextDecoration.underline,
