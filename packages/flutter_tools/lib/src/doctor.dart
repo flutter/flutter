@@ -440,7 +440,7 @@ class _FlutterValidator extends DoctorValidator {
       if (platform.isLinux) {
         buf.writeln('On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6');
         buf.writeln('On Fedora: dnf install libstdc++.i686');
-        buf.writeln('On Arch: pacman -S lib32-libstdc++5');
+        buf.writeln('On Arch: pacman -S lib32-libstdc++5 (you need to enable multilib: https://wiki.archlinux.org/index.php/Official_repositories#multilib)');
       }
       messages.add(ValidationMessage.error(buf.toString()));
       valid = ValidationType.partial;
