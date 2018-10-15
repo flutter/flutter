@@ -16,10 +16,10 @@ import 'dialog.dart';
 import 'feedback.dart';
 import 'flat_button.dart';
 import 'material_localizations.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'time.dart';
-import 'typography.dart';
 
 const Duration _kDialAnimateDuration = Duration(milliseconds: 200);
 const double _kTwoPi = 2 * math.pi;
