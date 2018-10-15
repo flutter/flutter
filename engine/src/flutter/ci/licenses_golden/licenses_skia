@@ -1,4 +1,4 @@
-Signature: e5ce4475f43e5b88cbbddc19f9a46b31
+Signature: 34a318a5a1174afe381aa7e505a9474c
 
 UNUSED LICENSES:
 
@@ -1488,6 +1488,9 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStrokeGeometry.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStrokeGeometry.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStroker.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStroker.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrAlphaThresholdFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAlphaThresholdFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAlphaThresholdFragmentProcessor.h
