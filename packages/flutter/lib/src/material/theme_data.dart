@@ -787,7 +787,7 @@ class ThemeData extends Diagnosticable {
   ///
   /// The arguments must not be null.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static ThemeData lerp(ThemeData a, ThemeData b, double t) {
     assert(a != null);
     assert(b != null);
