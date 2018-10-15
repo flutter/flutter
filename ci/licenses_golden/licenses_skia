@@ -1,4 +1,4 @@
-Signature: 35cde079d4f1dc7f0262a6e9a6f4c59d
+Signature: e5ce4475f43e5b88cbbddc19f9a46b31
 
 UNUSED LICENSES:
 
@@ -5131,6 +5131,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/include/docs/SkPDFDocument.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/docs/SkPDFDocument.h
+FILE: ../../../third_party/skia/src/gpu/GrPathRendering_none.cpp
 FILE: ../../../third_party/skia/src/utils/SkUTF.cpp
 FILE: ../../../third_party/skia/src/utils/SkUTF.h
 ----------------------------------------------------------------------------------------------------
