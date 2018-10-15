@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -79,16 +81,16 @@ void main() {
       ScaffoldGeometry geometry;
       _GeometryListenerState listenerState;
       Size previousRect;
-      double previousRotation;
-      
+      Iterable<double> previousRotations;
+
       // The maximum amounts we expect the fab width and height to change
       // during one step of a transition.
-      const double maxDeltaWidth = 12.0;
-      const double maxDeltaHeight = 12.0;
+      const double maxDeltaWidth = 33.0;
+      const double maxDeltaHeight = 33.0;
 
       // The maximum amounts we expect the fab icon to rotate during one step
       // of a transition.
-      const double maxDeltaRotation = 0.1;
+      const double maxDeltaRotation = 0.09;
 
       // We'll listen to the Scaffold's geometry for any 'jumps' to detect
       // changes in the size and rotation of the fab.
@@ -98,13 +100,25 @@ void main() {
         void check() {
           geometry = listenerState.cache.value;
           final Size currentRect = geometry.floatingActionButtonArea?.size;
-          // Measure the delta in width and height of the rect, and check that it never grows
-          // by more than a safe amount.
+          // Measure the delta in width and height of the rect, and check that
+          // it never grows by more than a safe amount.
           if (previousRect != null && currentRect != null) {
             final double deltaWidth = currentRect.width - previousRect.width;
             final double deltaHeight = currentRect.height - previousRect.height;
-            expect(deltaWidth.abs(), lessThanOrEqualTo(maxDeltaWidth), reason: "The Floating Action Button's width should not change faster than $maxDeltaWidth per animation step.");
-            expect(deltaHeight.abs(), lessThanOrEqualTo(maxDeltaHeight), reason: "The Floating Action Button's width should not change faster than $maxDeltaHeight per animation step.");
+            expect(
+              deltaWidth.abs(),
+              lessThanOrEqualTo(maxDeltaWidth),
+              reason: "The Floating Action Button's width should not change "
+                  'faster than $maxDeltaWidth per animation step.\n'
+                  'Prevous rect: $previousRect, current rect: $currentRect',
+            );
+            expect(
+              deltaHeight.abs(),
+              lessThanOrEqualTo(maxDeltaHeight),
+              reason: "The Floating Action Button's width should not change "
+                  'faster than $maxDeltaHeight per animation step.\n'
+                  'Prevous rect: $previousRect, current rect: $currentRect',
+            );
           }
           previousRect = currentRect;
 
@@ -116,29 +130,32 @@ void main() {
           final Iterable<RotationTransition> rotationTransitions = tester.widgetList(
             find.byType(RotationTransition),
           );
+          final Iterable<double> currentRotations = rotationTransitions.map(
+              (RotationTransition t) => t.turns.value);
 
-          double getTransitionDelta(RotationTransition transition) => 
-              (transition.turns.value - previousRotation).abs();
+          if (previousRotations != null && previousRotations.isNotEmpty
+              && currentRotations != null && currentRotations.isNotEmpty
+              && previousRect != null && currentRect != null) {
+            final List<double> deltas = <double>[];
+            for (double currentRotation in currentRotations) {
+              double minDelta;
+              for (double previousRotation in previousRotations) {
+                final double delta = (previousRotation - currentRotation).abs();
+                minDelta ??= delta;
+                minDelta = min(delta, minDelta);
+              }
+              deltas.add(minDelta);
+            }
 
-          if (rotationTransitions.isEmpty || previousRect == null || previousRect.width == 0 || previousRect.height == 0) {
-            previousRotation = null;
-          }
-          if (previousRotation == null && rotationTransitions.isNotEmpty) {
-            previousRotation = rotationTransitions.first.turns.value;
-          }
-          if (rotationTransitions.isNotEmpty) {
-            RotationTransition closestTransition = rotationTransitions.firstWhere(
-              (RotationTransition t) => getTransitionDelta(t) <= maxDeltaRotation,
-              orElse: () => null,
-            );
-            if (closestTransition == null) {
-              Iterable<double> transitionDeltas = rotationTransitions.map(getTransitionDelta);
+            if (deltas.where((double delta) => delta < maxDeltaRotation).isEmpty) {
               fail("The Floating Action Button's rotation should not change "
                   'faster than $maxDeltaRotation per animation step.\n'
-                  'Detected deltas were: $transitionDeltas');
+                  'Detected deltas were: $deltas\n'
+                  'Previous values: $previousRotations, current values: $currentRotations\n'
+                  'Prevous rect: $previousRect, current rect: $currentRect',);
             }
-            previousRotation = closestTransition.turns.value;
           }
+          previousRotations = currentRotations;
         }
 
         listenerState = tester.state(find.byType(_GeometryListener));
@@ -150,6 +167,10 @@ void main() {
         // after it is pumped into the widget tree and a tester is
         // available.
         geometryListener = new _GeometryListener();
+        geometry = null;
+        listenerState = null;
+        previousRect = null;
+        previousRotations = null;
       });
 
       testWidgets('moving the fab to centerFloat', (WidgetTester tester) async {
@@ -166,24 +187,24 @@ void main() {
         await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         setupListener(tester);
 
-        // Moving the fab to the top start after finishing the previous motion
+        // Moving the fab to the top start after creating the fab.
         await tester.pumpWidget(buildFrame(location: const _StartTopFloatingActionButtonLocation(), listener: geometryListener));
-        await tester.pump(kFloatingActionButtonSegue ~/ 2);
+        await tester.pump(kFloatingActionButtonSegue ~/ 4);
 
         // Interrupting motion to move to the end float
         await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
         await tester.pumpAndSettle();
       });
 
-      testWidgets('Interrupting motion to remove the fab.', (WidgetTester tester) async {
-        await tester.pumpWidget(buildFrame(location: const _StartTopFloatingActionButtonLocation(), listener: geometryListener));
+      testWidgets('interrupting motion to remove the fab.', (WidgetTester tester) async {
+        await tester.pumpWidget(buildFrame(fab: null, location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         setupListener(tester);
 
-        // Interrupting motion to move to the end float
+        // Animate the fab in.
         await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
-        await tester.pump(kFloatingActionButtonSegue ~/ 2);
-        
-        // Interrupting motion to remove the fab.
+        await tester.pump(kFloatingActionButtonSegue ~/ 2 * 3);
+
+        // Remove the fab.
         await tester.pumpWidget(
           buildFrame(
             fab: null,
@@ -194,7 +215,7 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-      testWidgets('Interrupting entrance of a new fab.', (WidgetTester tester) async {
+      testWidgets('interrupting entrance of a new fab.', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildFrame(
             fab: null,
