@@ -16,15 +16,15 @@ source_set("embedder") {
   sources = [
     "embedder.cc",
     "embedder.h",
+    "embedder_engine.cc",
+    "embedder_engine.h",
+    "embedder_include.c",
     "embedder_surface.cc",
     "embedder_surface.h",
     "embedder_surface_gl.cc",
     "embedder_surface_gl.h",
     "embedder_surface_software.cc",
     "embedder_surface_software.h",
-    "embedder_engine.cc",
-    "embedder_engine.h",
-    "embedder_include.c",
     "platform_view_embedder.cc",
     "platform_view_embedder.h",
   ]
@@ -92,7 +92,7 @@ copy("copy_headers") {
   ]
 }
 
-if (is_mac) {
+if (is_mac && !embedder_for_target) {
   _flutter_embedder_framework_dir = "$root_out_dir/FlutterEmbedder.framework"
 
   copy("copy_dylib") {
@@ -225,7 +225,7 @@ group("flutter_engine") {
     ]
 
     # For the Mac, the dylib is packaged in a framework with the appropriate headers.
-    if (is_mac) {
+    if (is_mac && !embedder_for_target) {
       deps += [ ":flutter_embedder_framework" ]
     }
   }

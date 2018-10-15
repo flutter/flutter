@@ -110,6 +110,8 @@ def to_gn_args(args):
         gn_args['use_ios_simulator'] = args.simulator
         if not args.simulator:
           aot = True
+    elif args.target_os is not None:
+        gn_args['target_os'] = args.target_os
     else:
       aot = False
 
@@ -179,6 +181,13 @@ def to_gn_args(args):
 
     if args.target_sysroot:
       gn_args['target_sysroot'] = args.target_sysroot
+      gn_args['custom_sysroot'] = args.target_sysroot
+
+    if args.target_toolchain:
+      gn_args['custom_toolchain'] = args.target_toolchain
+
+    if args.target_triple:
+      gn_args['custom_target_triple'] = args.target_triple
 
     if args.toolchain_prefix:
       gn_args['toolchain_prefix'] = args.toolchain_prefix
@@ -206,6 +215,9 @@ def to_gn_args(args):
     # even with -fPIC everywhere.
     # gn_args['enable_profiling'] = args.runtime_mode != 'release' and args.android_cpu != 'x86'
 
+    if args.arm_float_abi:
+      gn_args['arm_float_abi'] = args.arm_float_abi
+
     return gn_args
 
 def parse_args(args):
@@ -225,7 +237,8 @@ def parse_args(args):
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
   parser.add_argument('--ios-cpu', type=str, choices=['arm', 'arm64'], default='arm64')
   parser.add_argument('--simulator', action='store_true', default=False)
-  parser.add_argument('--linux-cpu', type=str, choices=['x64', 'x86', 'arm64'])
+  parser.add_argument('--linux-cpu', type=str, choices=['x64', 'x86', 'arm64', 'arm'])
+  parser.add_argument('--arm-float-abi', type=str, choices=['hard', 'soft', 'softfp'])
 
   parser.add_argument('--goma', default=True, action='store_true')
   parser.add_argument('--no-goma', dest='goma', action='store_false')
@@ -237,6 +250,8 @@ def parse_args(args):
   parser.add_argument('--no-clang', dest='clang', action='store_false')
 
   parser.add_argument('--target-sysroot', type=str)
+  parser.add_argument('--target-toolchain', type=str)
+  parser.add_argument('--target-triple', type=str)
   parser.add_argument('--toolchain-prefix', type=str)
 
   parser.add_argument('--enable-vulkan', action='store_true', default=False)
