@@ -82,12 +82,9 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget result = Semantics(
-      scopesRoute: true,
-      explicitChildNodes: true,
-      child: builder(context),
-    );
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
+    final Widget result = builder(context);
     assert(() {
       if (result == null) {
         throw FlutterError(
@@ -97,7 +94,11 @@ class MaterialPageRoute<T> extends PageRoute<T> {
       }
       return true;
     }());
-    return result;
+    return Semantics(
+      scopesRoute: true,
+      explicitChildNodes: true,
+      child: result,
+    );
   }
 
   @override
