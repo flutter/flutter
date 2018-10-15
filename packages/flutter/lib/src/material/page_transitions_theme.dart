@@ -38,6 +38,10 @@ class _FadeUpwardsPageTransition extends StatelessWidget {
       position: _positionAnimation,
       // TODO(ianh): tell the transform to be un-transformed for hit testing
       child: RepaintBoundary(
+        // The above RepaintBoundary separates slide animation from fade
+        // animation so we can apply retained rendering optimization to the fade
+        // animation. Otherwise, the offset change from slide will mix with the
+        // opacity change and our optimization won't be applied.
         child: FadeTransition(
           opacity: _opacityAnimation,
           child: child,
