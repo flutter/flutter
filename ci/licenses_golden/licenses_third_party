@@ -1,4 +1,4 @@
-Signature: d56ae5b92307d86a0b6fd2fa753c2626
+Signature: 7c3937f9c7241377fd191ec55d536a6a
 
 UNUSED LICENSES:
 
@@ -4432,7 +4432,6 @@ ORIGIN: ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/.gitconfig
 FILE: ../../../third_party/dart/.mailmap
-FILE: ../../../third_party/dart/.vpython
 FILE: ../../../third_party/dart/client/idea/.idea/.name
 FILE: ../../../third_party/dart/client/idea/.idea/inspectionProfiles/Project_Default.xml
 FILE: ../../../third_party/dart/client/idea/.idea/vcs.xml
@@ -5272,6 +5271,7 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/sourc
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/target.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/thread.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/timeline_event.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/token_stream.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/type_arguments.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/unknown.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/vm.dart
@@ -5542,6 +5542,8 @@ FILE: ../../../third_party/dart/runtime/vm/code_patcher_x64_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_test.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler_stats.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler_stats.h
 FILE: ../../../third_party/dart/runtime/vm/cpu_ia32.cc
 FILE: ../../../third_party/dart/runtime/vm/custom_isolate_test.cc
 FILE: ../../../third_party/dart/runtime/vm/dart.h
@@ -5877,6 +5879,7 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/sentinel_va
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/sentinel_view.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/source_inset.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/stack_trace_tree_config.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/token_stream_ref.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/type_arguments_ref.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/unknown_ref.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/vm_view.dart
