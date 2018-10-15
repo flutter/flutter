@@ -568,8 +568,14 @@ set_defaults("test") {
 # which will identify the toolchain corresponding to the local system when
 # doing cross-compiles. When not cross-compiling, this will be the same as the
 # default toolchain.
+import("//build/toolchain/custom/custom.gni")
 
-if (is_win) {
+if (custom_toolchain != "") {
+  assert(custom_sysroot != "")
+  assert(custom_target_triple != "")
+  host_toolchain = "//build/toolchain/linux:clang_$host_cpu"
+  set_default_toolchain("//build/toolchain/custom")
+} else if (is_win) {
   # On windows we use the same toolchain for host and target by default.
   host_toolchain = "//build/toolchain/win:$current_cpu"
   set_default_toolchain("$host_toolchain")
