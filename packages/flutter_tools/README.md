@@ -18,6 +18,14 @@ but using the downloaded version of Dart:
 ../../bin/cache/dart-sdk/bin/pub get
 ```
 
+Finally, download the dependencies for the `asset_test` project, that is used in the tests:
+
+```shell
+# inside flutter_tools
+cd test/data/asset_test/main
+../../bin/cache/dart-sdk/bin/pub get
+```
+
 ## Tests
 
 To run the tests, ensure that no devices are connected,
