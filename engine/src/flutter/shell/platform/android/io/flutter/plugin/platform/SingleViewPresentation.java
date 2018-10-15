@@ -232,7 +232,8 @@ class SingleViewPresentation extends Presentation {
      * (see: https://github.com/flutter/flutter/issues/20714). This was triggered when selecting text in an embedded
      * WebView (as the selection handles are implemented as popup windows).
      *
-     * This dynamic proxy overrides the addView, removeView, and updateViewLayout methods to prevent these crashes.
+     * This dynamic proxy overrides the addView, removeView, removeViewImmediate, and updateViewLayout methods
+     * to prevent these crashes.
      *
      * This will be more efficient as a static proxy that's not using reflection, but as the engine is currently
      * not being built against the latest Android SDK we cannot override all relevant method.
@@ -266,6 +267,9 @@ class SingleViewPresentation extends Presentation {
                 case "removeView":
                     removeView(args);
                     return null;
+                case "removeViewImmediate":
+                    removeViewImmediate(args);
+                    return null;
                 case "updateViewLayout":
                     updateViewLayout(args);
                     return null;
@@ -293,6 +297,16 @@ class SingleViewPresentation extends Presentation {
                 return;
             }
             View view = (View) args[0];
+            mFakeWindowRootView.removeView(view);
+        }
+
+        private void removeViewImmediate(Object[] args) {
+            if (mFakeWindowRootView == null) {
+                Log.w(TAG, "Embedded view called removeViewImmediate while detached from presentation");
+                return;
+            }
+            View view = (View) args[0];
+            view.clearAnimation();
             mFakeWindowRootView.removeView(view);
         }
 
