@@ -122,7 +122,6 @@ class AndroidView extends StatefulWidget {
   ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>> [
   ///         new Factory<OneSequenceGestureRecognizer>(
   ///           () => new EagerGestureRecognizer(),
-  ///           type: VerticalDragGestureRecognizer,
   ///         ),
   ///       ].toSet(),
   ///     ),
@@ -131,9 +130,14 @@ class AndroidView extends StatefulWidget {
   /// ```
   ///
   /// An [AndroidView] can be configured to consume all pointers that were put down in its bounds
-  /// by passing a factory fo an [EagerGestureRecognizer] in [gestureRecognizers].
+  /// by passing a factory for an [EagerGestureRecognizer] in [gestureRecognizers].
   /// [EagerGestureRecognizer] is a special gesture recognizer that immediately claims the gesture
   /// after a pointer down event.
+  ///
+  /// `gestureRecognizers` must not contain more than one factory with the same [Factory.type].
+  ///
+  /// Changing `gestureRecognizers` results in rejection of any active gesture arenas (if the
+  /// Android view is actively participating in an arena).
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
   // TODO(amirh): get a list of GestureRecognizers here.
   // https://github.com/flutter/flutter/issues/20953

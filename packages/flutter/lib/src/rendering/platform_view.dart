@@ -101,14 +101,38 @@ class RenderAndroidView extends RenderBox {
   /// pointer that was put down on the render box. If any of the recognizers on this list wins the
   /// gesture arena, the entire pointer event sequence starting from the pointer down event
   /// will be dispatched to the Android view.
+  ///
+  /// `gestureRecognizers` must not contain more than one factory with the same [Factory.type].
+  ///
+  /// Setting a new set of gesture recognizer factories with the same [Factory.type]s as the current
+  /// set is ignored.
+  ///
+  /// Setting a new set of gesture recognizer factories with different [Factory.type]s
+  /// (e.g `gestureRecognizers.map((f) => f.type).toSet()` is different, will reject any active
+  /// gesture arena.
   void setGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
     assert(gestureRecognizers != null);
-    if (setEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
+    assert(_factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length);
+    if (_factoryTypesSetEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
       return;
     }
     _gestureRecognizer?.dispose();
     _gestureRecognizer = _AndroidViewGestureRecognizer(_motionEventsDispatcher, gestureRecognizers);
   }
+
+  static bool _factoryTypesSetEquals<T>(Set<Factory<T>> a, Set<Factory<T>> b) {
+    if (a == b) {
+      return true;
+    }
+    if (a == null ||  b == null) {
+      return false;
+    }
+    return setEquals(_factoriesTypeSet(a), _factoriesTypeSet(b));
+  }
+
+  static Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) =>
+      factories.map<Type>((Factory<T> factory) => factory.type).toSet();
+
 
   @override
   bool get sizedByParent => true;

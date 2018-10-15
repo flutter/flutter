@@ -282,8 +282,6 @@ class _LazyListIterator<E> implements Iterator<E> {
 }
 
 /// A factory interface that also reports the type of the created objects.
-///
-/// The equality of [Factory] object is determined solely by [Factory.type].
 class Factory<T> {
   /// Creates a new factory.
   ///
@@ -295,18 +293,6 @@ class Factory<T> {
 
   /// The type of the objects created by this factory.
   Type get type => T;
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! Factory<T>) {
-      return false;
-    }
-    final Factory<T> typedOther = other;
-    return type == typedOther.type;
-  }
-
-  @override
-  int get hashCode => T.hashCode;
 
   @override
   String toString() {
