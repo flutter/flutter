@@ -11,7 +11,7 @@ import 'basic_types.dart';
 import 'debug.dart';
 
 /// A shadow cast by a box.
-/// 
+///
 /// Inherits from [Shadow]
 ///
 /// [BoxShadow] can cast non-rectangular shadows if the box is non-rectangular
@@ -45,6 +45,7 @@ class BoxShadow extends ui.Shadow {
   /// To honor those as well, the shape should be inflated by [spreadRadius] pixels
   /// in every direction and then translated by [offset] before being filled using
   /// this [Paint].
+  @override
   Paint toPaint() {
     final Paint result = Paint()
       ..color = color

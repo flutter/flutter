@@ -370,10 +370,10 @@ class TextStyle extends Diagnosticable {
   final String debugLabel;
 
   /// A list of [Shadow]s that will be painted underneath the text.
-  /// 
+  ///
   /// Multiple shadows are supported to replicate lighting from multiple light
   /// sources.
-  /// 
+  ///
   /// Shadows must be in the same order for [TextStyle] to be considered as
   /// equivalent as order produces differing transparency.
   final List<ui.Shadow> shadows;
@@ -494,7 +494,7 @@ class TextStyle extends Diagnosticable {
         modifiedDebugLabel = '($debugLabel).apply';
       return true;
     }());
-    
+
     return TextStyle(
       inherit: inherit,
       color: foreground == null ? color ?? this.color : null,
