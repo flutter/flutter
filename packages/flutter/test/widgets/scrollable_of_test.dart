@@ -86,12 +86,12 @@ void main() {
   testWidgets('Scrollable.of() is possible using ScrollNotification context', (WidgetTester tester) async {
     ScrollNotification notification;
 
-    await tester.pumpWidget(new NotificationListener<ScrollNotification>(
+    await tester.pumpWidget(NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification value) {
         notification = value;
         return false;
       },
-      child: new SingleChildScrollView(
+      child: SingleChildScrollView(
         child: const SizedBox(height: 1200.0)
       )
     ));
