@@ -133,6 +133,8 @@ void main() {
           final Iterable<double> currentRotations = rotationTransitions.map(
               (RotationTransition t) => t.turns.value);
 
+          print('$previousRotations, $currentRotations, $previousRect, $currentRect');
+
           if (previousRotations != null && previousRotations.isNotEmpty
               && currentRotations != null && currentRotations.isNotEmpty
               && previousRect != null && currentRect != null) {
@@ -174,11 +176,11 @@ void main() {
       });
 
       testWidgets('moving the fab to centerFloat', (WidgetTester tester) async {
-        // Creating a scaffold with the fab at endFloat
+        // Create a scaffold with the fab at endFloat
         await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
         setupListener(tester);
 
-        // Moving the fab to centerFloat'
+        // Move the fab to centerFloat'
         await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         await tester.pumpAndSettle();
       });
@@ -187,11 +189,11 @@ void main() {
         await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         setupListener(tester);
 
-        // Moving the fab to the top start after creating the fab.
+        // Move the fab to the top start after creating the fab.
         await tester.pumpWidget(buildFrame(location: const _StartTopFloatingActionButtonLocation(), listener: geometryListener));
         await tester.pump(kFloatingActionButtonSegue ~/ 2);
 
-        // Interrupting motion to move to the end float
+        // Interrupt motion to move to the end float
         await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
         await tester.pumpAndSettle();
       });
@@ -225,38 +227,14 @@ void main() {
         );
         setupListener(tester);
 
-        // Bringing in a new fab.
+        // Bring in a new fab.
         await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         await tester.pump(kFloatingActionButtonSegue ~/ 2);
 
-        // Interrupting motion to move the fab.
+        // Interrupt motion to move the fab.
         await tester.pumpWidget(
           buildFrame(
             location: FloatingActionButtonLocation.endFloat,
-            listener: geometryListener,
-          ),
-        );
-        await tester.pumpAndSettle();
-      });
-
-      testWidgets('Interrupting the exit of the fab.', (WidgetTester tester) async {
-        await tester.pumpWidget(buildFrame(fab: null, location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
-        setupListener(tester);
-
-        // Removing the fab.
-        await tester.pumpWidget(
-          buildFrame(
-            fab: null,
-            location: FloatingActionButtonLocation.endFloat,
-            listener: geometryListener,
-          ),
-        );
-        await tester.pump(kFloatingActionButtonSegue ~/ 2);
-
-        // Interrupting motion to move the fab.
-        await tester.pumpWidget(
-          buildFrame(
-            location: FloatingActionButtonLocation.centerFloat,
             listener: geometryListener,
           ),
         );
