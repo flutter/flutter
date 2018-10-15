@@ -1422,4 +1422,26 @@ void main() {
       statusBarIconBrightness: Brightness.dark,
     ));
   });
+
+  testWidgets('AppBar with shape', (WidgetTester tester) async {
+    const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AppBar(
+          leading: const Text('L'),
+          title: const Text('No Scaffold'),
+          shape: roundedRectangleBorder,
+          actions: const <Widget>[Text('A1'), Text('A2')],
+        ),
+      ),
+    );
+
+    final Finder appBarFinder = find.byType(AppBar);
+
+    AppBar getAppBarWidget() {
+      return tester.widget<AppBar>(appBarFinder);
+    }
+
+    expect(getAppBarWidget().shape, roundedRectangleBorder);
+  });
 }
