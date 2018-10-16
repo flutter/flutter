@@ -1,4 +1,4 @@
-Signature: ce18e7798023262e66ae52b3b1582080
+Signature: d66f991916ba8345f92a7949251d756d
 
 UNUSED LICENSES:
 
@@ -2010,12 +2010,13 @@ FILE: ../../../third_party/skia/docs/overview.bmh
 FILE: ../../../third_party/skia/docs/status.json
 FILE: ../../../third_party/skia/docs/undocumented.bmh
 FILE: ../../../third_party/skia/docs/usingBookmaker.bmh
-FILE: ../../../third_party/skia/experimental/canvaskit/canvas-kit/cpu_example.html
-FILE: ../../../third_party/skia/experimental/canvaskit/canvas-kit/example.html
-FILE: ../../../third_party/skia/experimental/canvaskit/canvas-kit/package.json
+FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/cpu_example.html
+FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/example.html
+FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/package.json
 FILE: ../../../third_party/skia/experimental/canvaskit/externs.js
 FILE: ../../../third_party/skia/experimental/canvaskit/helper.js
 FILE: ../../../third_party/skia/experimental/canvaskit/interface.js
+FILE: ../../../third_party/skia/experimental/canvaskit/karma.conf.js
 FILE: ../../../third_party/skia/experimental/canvaskit/package.json
 FILE: ../../../third_party/skia/experimental/docs/animationCommon.js
 FILE: ../../../third_party/skia/experimental/docs/backend.js
@@ -2095,7 +2096,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-asmjs-Release-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-wasm-Debug-CanvasKit.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-wasm-Debug-PathKit.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-wasm-Release-CanvasKit.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-wasm-Release-CanvasKit_CPU.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-wasm-Release-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-GCC-arm-Release-Chromecast.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-GCC-loongson3a-Release.json
@@ -2275,7 +2276,10 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_get_hash
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_pull.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_push.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/internal_bot_2.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/internal_bot_5.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test_canvaskit.expected/Test-Debian9-EMCC-GCE-GPU-WEBGL1-wasm-Debug-All-CanvasKit.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test_canvaskit.expected/canvaskit_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_lottie_web.expected/Test-Debian9-none-GCE-CPU-AVX2-x86_64-Debug-All-LottieWeb.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_lottie_web.expected/lottie_web_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-Debian9-EMCC-GCE-CPU-AVX2-asmjs-Debug-All-PathKit.json
@@ -5269,8 +5273,8 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/gpu/GrDriverBugWorkaroundsAutogen.h
 FILE: ../../../third_party/skia/include/utils/SkTraceEventPhase.h
 FILE: ../../../third_party/skia/infra/lottiecap/gold/lottie-web-aggregator.go
-FILE: ../../../third_party/skia/infra/pathkit/gold/pathkit_gold_aggregator.go
-FILE: ../../../third_party/skia/infra/pathkit/perf/pathkit_perf_aggregator.go
+FILE: ../../../third_party/skia/infra/pathkit/gold/wasm_gold_aggregator.go
+FILE: ../../../third_party/skia/infra/pathkit/perf/wasm_perf_aggregator.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Chromium Authors. All rights reserved.
 
