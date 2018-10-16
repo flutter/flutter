@@ -215,7 +215,7 @@ class BoxDecoration extends Decoration {
   /// unmodified. Otherwise, the values are computed by interpolating the
   /// properties appropriately.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   ///
   /// See also:
   ///

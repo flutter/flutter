@@ -64,7 +64,7 @@ void main() {
       when(mockIsolate.pauseEvent).thenReturn(MockVMPauseStartEvent());
       when(mockIsolate.resume()).thenAnswer((Invocation invocation) {
         connectionLog.add('resume');
-        return Future<Null>.value();
+        return Future<dynamic>.value(null);
       });
       when(mockIsolate.onExtensionAdded).thenAnswer((Invocation invocation) {
         connectionLog.add('onExtensionAdded');
@@ -79,7 +79,7 @@ void main() {
 
     test('connects to isolate paused mid-flight', () async {
       when(mockIsolate.pauseEvent).thenReturn(MockVMPauseBreakpointEvent());
-      when(mockIsolate.resume()).thenAnswer((Invocation invocation) => Future<Null>.value());
+      when(mockIsolate.resume()).thenAnswer((Invocation invocation) => Future<dynamic>.value(null));
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
@@ -95,7 +95,7 @@ void main() {
       when(mockIsolate.resume()).thenAnswer((Invocation invocation) {
         // This needs to be wrapped in a closure to not be considered uncaught
         // by package:test
-        return Future<Null>.error(rpc.RpcException(101, ''));
+        return Future<dynamic>.error(rpc.RpcException(101, ''));
       });
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
@@ -132,7 +132,7 @@ void main() {
     });
 
     test('closes connection', () async {
-      when(mockClient.close()).thenAnswer((Invocation invocation) => Future<Null>.value());
+      when(mockClient.close()).thenAnswer((Invocation invocation) => Future<dynamic>.value(null));
       await driver.close();
     });
 

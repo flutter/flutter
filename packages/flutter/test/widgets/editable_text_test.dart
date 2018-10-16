@@ -30,7 +30,7 @@ void main() {
   // More technically, when an EditableText is given a particular [action], Flutter
   // requests [serializedActionName] when attaching to the platform's input
   // system.
-  Future<Null> _desiredKeyboardActionIsRequested({
+  Future<void> _desiredKeyboardActionIsRequested({
     WidgetTester tester,
     TextInputAction action,
     String serializedActionName,

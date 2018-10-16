@@ -427,7 +427,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin, WidgetsBindingObserver implements TextInputClient, TextSelectionDelegate {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver implements TextInputClient, TextSelectionDelegate {
   Timer _cursorTimer;
   final ValueNotifier<bool> _showCursor = ValueNotifier<bool>(false);
   final GlobalKey _editableKey = GlobalKey();

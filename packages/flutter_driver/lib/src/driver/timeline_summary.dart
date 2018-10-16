@@ -107,7 +107,7 @@ class TimelineSummary {
   }
 
   /// Writes all of the recorded timeline data to a file.
-  Future<Null> writeTimelineToFile(
+  Future<void> writeTimelineToFile(
     String traceName, {
     String destinationDirectory,
     bool pretty = false,
@@ -119,7 +119,7 @@ class TimelineSummary {
   }
 
   /// Writes [summaryJson] to a file.
-  Future<Null> writeSummaryToFile(
+  Future<void> writeSummaryToFile(
     String traceName, {
     String destinationDirectory,
     bool pretty = false,
