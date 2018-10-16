@@ -176,7 +176,7 @@ enum AnimationBehavior {
 /// controllers using Dart's asynchronous syntax for awaiting [Future] objects:
 ///
 /// ```dart
-/// Future<Null> fadeOutAndUpdateState() async {
+/// Future<void> fadeOutAndUpdateState() async {
 ///   try {
 ///     await fadeAnimationController.forward().orCancel;
 ///     await sizeAnimationController.forward().orCancel;

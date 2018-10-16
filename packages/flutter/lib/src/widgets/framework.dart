@@ -1076,14 +1076,13 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// the increment is wrapped in the `setState`:
   ///
   /// ```dart
-  /// Future<Null> _incrementCounter() async {
+  /// Future<void> _incrementCounter() async {
   ///   setState(() {
   ///     _counter++;
   ///   });
   ///   Directory directory = await getApplicationDocumentsDirectory();
   ///   final String dirName = directory.path;
   ///   await File('$dir/counter.txt').writeAsString('$_counter');
-  ///   return null;
   /// }
   /// ```
   ///
