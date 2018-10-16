@@ -6,7 +6,9 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
+import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
@@ -14,6 +16,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../context_runner.dart';
 import '../device.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
@@ -43,6 +46,9 @@ final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 class FuchsiaReloadCommand extends FlutterCommand {
   FuchsiaReloadCommand() {
     addBuildModeFlags(defaultToRelease: false);
+    argParser.addOption('frontend-server',
+      abbr: 'f',
+      help: 'The frontend server location');
     argParser.addOption('address',
       abbr: 'a',
       help: 'Fuchsia device network name or address.');
@@ -98,79 +104,75 @@ class FuchsiaReloadCommand extends FlutterCommand {
   String _address;
   String _dotPackagesPath;
   String _sshConfig;
+  File _frontendServerSnapshot;
 
   bool _list;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
-
     await _validateArguments();
+    await runInContext<void>(() async {
+      // Find the network ports used on the device by VM service instances.
+      final List<int> deviceServicePorts = await _getServicePorts();
+      if (deviceServicePorts.isEmpty)
+        throwToolExit('Couldn\'t find any running Observatory instances.');
+      for (int port in deviceServicePorts)
+        printTrace('Fuchsia service port: $port');
 
-    // Find the network ports used on the device by VM service instances.
-    final List<int> deviceServicePorts = await _getServicePorts();
-    if (deviceServicePorts.isEmpty)
-      throwToolExit('Couldn\'t find any running Observatory instances.');
-    for (int port in deviceServicePorts)
-      printTrace('Fuchsia service port: $port');
+      // Set up ssh tunnels to forward the device ports to local ports.
+      final List<_PortForwarder> forwardedPorts = await _forwardPorts(deviceServicePorts);
+      // Wrap everything in try/finally to make sure we kill the ssh processes
+      // doing the port forwarding.
+      try {
+        final List<int> servicePorts = forwardedPorts.map<int>((_PortForwarder pf) => pf.port).toList();
 
-    // Set up ssh tunnels to forward the device ports to local ports.
-    final List<_PortForwarder> forwardedPorts = await _forwardPorts(
-        deviceServicePorts);
-    // Wrap everything in try/finally to make sure we kill the ssh processes
-    // doing the port forwarding.
-    try {
-      final List<int> servicePorts = forwardedPorts.map<int>(
-          (_PortForwarder pf) => pf.port).toList();
+        if (_list) {
+          await _listVMs(servicePorts);
+          // Port forwarding stops when the command ends. Keep the program running
+          // until directed by the user so that Observatory URLs that we print
+          // continue to work.
+          printStatus('Press Enter to exit.');
+          await stdin.first;
+          return null;
+        }
 
-      if (_list) {
-        await _listVMs(servicePorts);
-        // Port forwarding stops when the command ends. Keep the program running
-        // until directed by the user so that Observatory URLs that we print
-        // continue to work.
-        printStatus('Press Enter to exit.');
-        await stdin.first;
-        return null;
+        // Check that there are running VM services on the returned
+        // ports, and find the Isolates that are running the target app.
+        final String isolateName = '$_modName\$main$_isolateNumber';
+        final List<int> targetPorts = await _filterPorts(servicePorts, isolateName);
+        if (targetPorts.isEmpty)
+          throwToolExit('No VMs found running $_modName.');
+        for (int port in targetPorts)
+          printTrace('Found $_modName at $port');
+
+        // Set up a device and hot runner and attach the hot runner to the first
+        // vm service we found.
+        final List<String> fullAddresses =
+            targetPorts.map<String>((int p) => '$ipv4Loopback:$p').toList();
+        final List<Uri> observatoryUris = fullAddresses
+            .map<Uri>((String a) => Uri.parse('http://$a'))
+            .toList();
+        final FuchsiaDevice device =
+            FuchsiaDevice(fullAddresses[0], name: _address);
+        final FlutterDevice flutterDevice = FlutterDevice(
+          device,
+          trackWidgetCreation: false,
+        );
+        flutterDevice.observatoryUris = observatoryUris;
+          final HotRunner hotRunner = HotRunner(<FlutterDevice>[flutterDevice],
+          debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
+          target: _target,
+          projectRootPath: _fuchsiaProjectPath,
+              packagesFilePath: _dotPackagesPath);
+        printStatus('Connecting to $_modName');
+        await hotRunner.attach(viewFilter: isolateName);
+      } finally {
+        await Future.wait<void>(forwardedPorts.map<Future<void>>((_PortForwarder pf) => pf.stop()));
       }
-
-      // Check that there are running VM services on the returned
-      // ports, and find the Isolates that are running the target app.
-      final String isolateName = '$_modName\$main$_isolateNumber';
-      final List<int> targetPorts = await _filterPorts(
-          servicePorts, isolateName);
-      if (targetPorts.isEmpty)
-        throwToolExit('No VMs found running $_modName.');
-      for (int port in targetPorts)
-        printTrace('Found $_modName at $port');
-
-      // Set up a device and hot runner and attach the hot runner to the first
-      // vm service we found.
-      final List<String> fullAddresses = targetPorts.map<String>(
-        (int p) => '$ipv4Loopback:$p'
-      ).toList();
-      final List<Uri> observatoryUris = fullAddresses.map<Uri>(
-        (String a) => Uri.parse('http://$a')
-      ).toList();
-      final FuchsiaDevice device = FuchsiaDevice(
-          fullAddresses[0], name: _address);
-      final FlutterDevice flutterDevice = FlutterDevice(
-        device,
-        trackWidgetCreation: false,
-      );
-      flutterDevice.observatoryUris = observatoryUris;
-      final HotRunner hotRunner = HotRunner(
-        <FlutterDevice>[flutterDevice],
-        debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
-        target: _target,
-        projectRootPath: _fuchsiaProjectPath,
-        packagesFilePath: _dotPackagesPath
-      );
-      printStatus('Connecting to $_modName');
-      await hotRunner.attach(viewFilter: isolateName);
-    } finally {
-      await Future.wait<void>(forwardedPorts.map<Future<void>>((_PortForwarder pf) => pf.stop()));
-    }
-
+    }, overrides: <Type, Generator>{
+      Artifacts: () => OverrideArtifacts(parent: artifacts, frontendServer: _frontendServerSnapshot),
+    });
     return null;
   }
 
@@ -300,6 +302,11 @@ class FuchsiaReloadCommand extends FlutterCommand {
   Future<void> _validateArguments() async {
     final String fuchsiaBuildDir = argResults['build-dir'];
     final String gnTarget = argResults['gn-target'];
+    _frontendServerSnapshot = fs.file(argResults['frontend-server']);
+
+    if (!_frontendServerSnapshot.existsSync()) {
+      throwToolExit('Must provide a frontend-server snapshot');
+    }
 
     if (fuchsiaBuildDir != null) {
       if (gnTarget == null)

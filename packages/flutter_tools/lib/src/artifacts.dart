@@ -299,3 +299,31 @@ class LocalEngineArtifacts extends Artifacts {
     throw Exception('Unsupported platform $platform.');
   }
 }
+
+/// An implementation of [Artifacts] that provides individual overrides.
+///
+/// If an artifact is not provided, the lookup delegates to the parent.
+/// Currently only allows overriding the location of the [frontendServer].
+class OverrideArtifacts implements Artifacts {
+  /// Creates a new [OverrideArtifacts].
+  ///
+  /// [parent] must be provided.
+  OverrideArtifacts({
+    @required this.parent,
+    this.frontendServer,
+  }) : assert(parent != null);
+
+  final Artifacts parent;
+  final File frontendServer;
+
+  @override
+  String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
+    if (artifact == Artifact.frontendServerSnapshotForEngineDartSdk && frontendServer != null) {
+      return frontendServer.path;
+    }
+    return parent.getArtifactPath(artifact, platform, mode);
+  }
+
+  @override
+  String getEngineType(TargetPlatform platform, [BuildMode mode]) => parent.getEngineType(platform, mode);
+}
