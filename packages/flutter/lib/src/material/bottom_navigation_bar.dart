@@ -417,6 +417,53 @@ class _ShiftingLabel extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    // In order to use the flex container to grow the tile during animation, we
+    // need to divide the changes in flex allotment into smaller pieces to
+    // produce smooth animation. We do this by multiplying the flex value
+    // (which is an integer) by a large number.
+    int size;
+    Widget label;
+    switch (type) {
+      case BottomNavigationBarType.fixed:
+        size = 1;
+        label = item.showLabel ? _buildFixedLabel() : Container();
+        break;
+      case BottomNavigationBarType.shifting:
+        size = (flex * 1000.0).round();
+        label = item.showLabel ? _buildShiftingLabel() : Container();
+        break;
+    }
+    return Expanded(
+      flex: size,
+      child: Semantics(
+        container: true,
+        header: true,
+        selected: selected,
+        child: Stack(
+          children: <Widget>[
+            InkResponse(
+              onTap: onTap,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _buildIcon(),
+                  label,
+                ],
+              ),
+            ),
+            Semantics(
+              label: indexLabel,
+            )
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin {
