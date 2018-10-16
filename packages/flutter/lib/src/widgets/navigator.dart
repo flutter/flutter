@@ -1553,6 +1553,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void _afterNavigation() {
     const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
     if (!isReleaseMode) {
+      // This event is used by performance tools that show stats for the
+      // time interval since the last navigation event occurred ensuring that
+      // stats only reflect the current page.
+      // These tools do not need to know exactly what the new route is so no
+      // attempt is made to describe the current route as part of the event.
       developer.postEvent('Flutter.Navigation', <String, dynamic>{});
     }
     _cancelActivePointers();
