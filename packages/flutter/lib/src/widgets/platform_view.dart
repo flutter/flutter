@@ -119,7 +119,7 @@ class AndroidView extends StatefulWidget {
   ///     height: 100.0,
   ///     child: AndroidView(
   ///       viewType: 'webview',
-  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>> [
+  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
   ///         new Factory<OneSequenceGestureRecognizer>(
   ///           () => new EagerGestureRecognizer(),
   ///         ),
@@ -134,7 +134,7 @@ class AndroidView extends StatefulWidget {
   /// [EagerGestureRecognizer] is a special gesture recognizer that immediately claims the gesture
   /// after a pointer down event.
   ///
-  /// `gestureRecognizers` must not contain more than one factory with the same [Factory.type].
+  /// The `gestureRecognizers` property must not contain more than one factory with the same [Factory.type].
   ///
   /// Changing `gestureRecognizers` results in rejection of any active gesture arenas (if the
   /// Android view is actively participating in an arena).
@@ -166,12 +166,15 @@ class _AndroidViewState extends State<AndroidView> {
   TextDirection _layoutDirection;
   bool _initialized = false;
 
+  static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
+    Set<Factory<OneSequenceGestureRecognizer>>();
+
   @override
   Widget build(BuildContext context) {
     return _AndroidPlatformView(
         controller: _controller,
         hitTestBehavior: widget.hitTestBehavior,
-        gestureRecognizers: widget.gestureRecognizers ?? Set<Factory<OneSequenceGestureRecognizer>>(),
+        gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
     );
   }
 
@@ -270,6 +273,6 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderAndroidView renderObject) {
     renderObject.viewController = controller;
     renderObject.hitTestBehavior = hitTestBehavior;
-    renderObject.setGestureRecognizers(gestureRecognizers);
+    renderObject.updateGestureRecognizers(gestureRecognizers);
   }
 }
