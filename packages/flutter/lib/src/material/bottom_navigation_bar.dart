@@ -77,7 +77,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// Creates a bottom navigation bar, typically used in a [Scaffold] where it
   /// is provided as the [Scaffold.bottomNavigationBar] argument.
   ///
-  /// The length of [items] must be at least two.
+  /// The length of [items] must be at least two and each item's icon and title must be not null.
   ///
   /// If [type] is null then [BottomNavigationBarType.fixed] is used when there
   /// are two or three [items], [BottomNavigationBarType.shifting] otherwise.
@@ -95,12 +95,16 @@ class BottomNavigationBar extends StatefulWidget {
     this.iconSize = 24.0,
   }) : assert(items != null),
        assert(items.length >= 2),
+       assert(
+        items.every((BottomNavigationBarItem item) => item.title != null) == true,
+        'Every item must have a non-null title',
+       ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
        type = type ?? (items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting),
        super(key: key);
 
-  /// The interactive items laid out within the bottom navigation bar.
+  /// The interactive items laid out within the bottom navigation bar where each item has an icon and title.
   final List<BottomNavigationBarItem> items;
 
   /// The callback that is called when a item is tapped.
@@ -149,8 +153,7 @@ class _BottomNavigationTile extends StatelessWidget {
     this.flex,
     this.selected = false,
     this.indexLabel,
-    }
-  ): assert(selected != null);
+  }) : assert(selected != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -335,7 +338,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       return CurvedAnimation(
         parent: _controllers[index],
         curve: Curves.fastOutSlowIn,
-        reverseCurve: Curves.fastOutSlowIn.flipped
+        reverseCurve: Curves.fastOutSlowIn.flipped,
       );
     });
     _controllers[widget.currentIndex].value = 1.0;
@@ -475,7 +478,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
               flex: _evaluateFlex(_animations[i]),
               selected: i == widget.currentIndex,
               indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
-            )
+            ),
           );
         }
         break;
@@ -567,7 +570,7 @@ class _Circle {
     );
     animation = CurvedAnimation(
       parent: controller,
-      curve: Curves.fastOutSlowIn
+      curve: Curves.fastOutSlowIn,
     );
     controller.forward();
   }

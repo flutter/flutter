@@ -4,12 +4,14 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import '../base/file_system.dart' hide IOSink;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../globals.dart';
 
@@ -145,13 +147,20 @@ class AnalysisServer {
   }
 }
 
+enum _AnalysisSeverity {
+  error,
+  warning,
+  info,
+  none,
+}
+
 class AnalysisError implements Comparable<AnalysisError> {
   AnalysisError(this.json);
 
-  static final Map<String, int> _severityMap = <String, int>{
-    'ERROR': 3,
-    'WARNING': 2,
-    'INFO': 1
+  static final Map<String, _AnalysisSeverity> _severityMap = <String, _AnalysisSeverity>{
+    'INFO': _AnalysisSeverity.info,
+    'WARNING': _AnalysisSeverity.warning,
+    'ERROR': _AnalysisSeverity.error,
   };
 
   static final String _separator = platform.isWindows ? '-' : '•';
@@ -162,7 +171,19 @@ class AnalysisError implements Comparable<AnalysisError> {
   Map<String, dynamic> json;
 
   String get severity => json['severity'];
-  int get severityLevel => _severityMap[severity] ?? 0;
+  String get colorSeverity {
+    switch(_severityLevel) {
+      case _AnalysisSeverity.error:
+        return terminal.color(severity, TerminalColor.red);
+      case _AnalysisSeverity.warning:
+        return terminal.color(severity, TerminalColor.yellow);
+      case _AnalysisSeverity.info:
+      case _AnalysisSeverity.none:
+        return severity;
+    }
+    return null;
+  }
+  _AnalysisSeverity get _severityLevel => _severityMap[severity] ?? _AnalysisSeverity.none;
   String get type => json['type'];
   String get message => json['message'];
   String get code => json['code'];
@@ -189,7 +210,7 @@ class AnalysisError implements Comparable<AnalysisError> {
     if (offset != other.offset)
       return offset - other.offset;
 
-    final int diff = other.severityLevel - severityLevel;
+    final int diff = other._severityLevel.index - _severityLevel.index;
     if (diff != 0)
       return diff;
 
@@ -198,7 +219,10 @@ class AnalysisError implements Comparable<AnalysisError> {
 
   @override
   String toString() {
-    return '${severity.toLowerCase().padLeft(7)} $_separator '
+    // Can't use "padLeft" because of ANSI color sequences in the colorized
+    // severity.
+    final String padding = ' ' * math.max(0, 7 - severity.length);
+    return '$padding${colorSeverity.toLowerCase()} $_separator '
         '$messageSentenceFragment $_separator '
         '${fs.path.relative(file)}:$startLine:$startColumn $_separator '
         '$code';

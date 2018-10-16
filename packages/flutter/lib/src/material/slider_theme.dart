@@ -391,7 +391,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// The arguments must not be null.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static SliderThemeData lerp(SliderThemeData a, SliderThemeData b, double t) {
     assert(a != null);
     assert(b != null);
