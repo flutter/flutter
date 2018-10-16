@@ -766,7 +766,6 @@ void main() {
         onEditingComplete: () {
           onEditingCompleteCalled = true;
           assert(!onSubmittedCalled);
-
         },
         onSubmitted: (String value) {
           onSubmittedCalled = true;
