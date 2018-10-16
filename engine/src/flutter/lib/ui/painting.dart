@@ -879,7 +879,7 @@ enum StrokeCap {
 enum StrokeJoin {
   /// Joins between line segments form sharp corners.
   ///
-  /// {@animation joinMiterEnum 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/miter_4_join.mp4}
+  /// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/miter_4_join.mp4}
   ///
   /// The center of the line segment is colored in the diagram above to
   /// highlight the join, but in normal usage the join is the same color as the
@@ -895,7 +895,7 @@ enum StrokeJoin {
 
   /// Joins between line segments are semi-circular.
   ///
-  /// {@animation joinRoundEnum 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/round_join.mp4}
+  /// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/round_join.mp4}
   ///
   /// The center of the line segment is colored in the diagram above to
   /// highlight the join, but in normal usage the join is the same color as the
@@ -910,7 +910,7 @@ enum StrokeJoin {
   /// Joins between line segments connect the corners of the butt ends of the
   /// line segments to give a beveled appearance.
   ///
-  /// {@animation joinBevelEnum 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/bevel_join.mp4}
+  /// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/bevel_join.mp4}
   ///
   /// The center of the line segment is colored in the diagram above to
   /// highlight the join, but in normal usage the join is the same color as the
@@ -1209,11 +1209,11 @@ class Paint {
   ///
   /// Some examples of joins:
   ///
-  /// {@animation joinMiterStrokeJoin 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/miter_4_join.mp4}
+  /// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/miter_4_join.mp4}
   ///
-  /// {@animation joinRoundStrokeJoin 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/round_join.mp4}
+  /// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/round_join.mp4}
   ///
-  /// {@animation joinBevelStrokeJoin 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/bevel_join.mp4}
+  /// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/bevel_join.mp4}
   ///
   /// The centers of the line segments are colored in the diagrams above to
   /// highlight the joins, but in normal usage the join is the same color as the
@@ -1248,11 +1248,11 @@ class Paint {
   /// Defaults to 4.0.  Using zero as a limit will cause a [StrokeJoin.bevel]
   /// join to be used all the time.
   ///
-  /// {@animation joinMiter0Limit 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/miter_0_join.mp4}
+  /// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/miter_0_join.mp4}
   ///
-  /// {@animation joinMiter4Limit 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/miter_4_join.mp4}
+  /// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/miter_4_join.mp4}
   ///
-  /// {@animation joinMiter6Limit 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/miter_6_join.mp4}
+  /// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/dart-ui/miter_6_join.mp4}
   ///
   /// The centers of the line segments are colored in the diagrams above to
   /// highlight the joins, but in normal usage the join is the same color as the
