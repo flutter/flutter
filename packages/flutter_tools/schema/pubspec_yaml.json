@@ -49,7 +49,9 @@
                     "properties": {
                         "androidPackage": { "type": "string" },
                         "iosBundleIdentifier": { "type": "string" }
-                    }
+                    },
+                    "android": { "$ref": "pubspec_yaml_android.json#/androidApp" },
+                    "iOS": {}
                 },
                 "plugin": {
                     "type": "object",

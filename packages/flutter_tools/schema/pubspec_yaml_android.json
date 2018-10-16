@@ -1,0 +1,214 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "definitions": {
+    "androidApp": {
+      "appTitle": { "type": "string" },
+      "appVersionName": { "type": "string" },
+      "appVersionCode": { "type": "string" },
+      // packageName is same as androidPackage, but seems like the answer now is
+      // to break up Android and iOS into own groups
+      "packageName": { "type": "string" },
+      "targetSdkVersion": { "type": "string" },
+      "minSdkVersion": { "type": "string" },
+      "maxSdkVersion": { "type": "string" },
+      "lockOrientation": { "enum": ["portrait", "landscape"] },
+      "fullscreen": { "type": "boolean" },
+      "usesPermissions": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "maxSdkVersion": { "type": "string" }
+          }
+        }
+      },
+      "usesFeatures": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "required": { "type": "boolean" }
+          }
+        }
+      },
+      "launcherIcons": {
+        "type": "object",
+        "oneOf": [{
+          "properties": {
+            // densities: https://developer.android.com/training/multiscreen/screendensities
+            "xxxhdpi": { "type": "string" },
+            "xxhdpi": { "type": "string" },
+            "xhdpi": { "type": "string" },
+            "hdpi": { "type": "string" },
+            "mhdpi": { "type": "string" },
+            "lhdpi": { "type": "string" }
+          }
+        }, {
+          "properties": {
+            "svgIcon": { "type": "string" }
+          }
+        }]
+      },
+      // https://developer.android.com/guide/topics/ui/look-and-feel/themes
+      "theme": {
+        "type": "object",
+        "properties": {
+          "colorPrimary": { "type": "string" },
+          "colorPrimaryDark": { "type": "string" },
+          "colorAccent": { "type": "string" }
+        }
+      },
+      "splash": {
+        "type": "object",
+        "oneOf": [{
+          "properties": {
+            "color": { "type": "string" }
+          }
+        },{
+          "properties": {
+            "bitmap": { "type": "string" }
+          }
+        },{
+          "properties": {
+            "drawableResource": { "type": "string" }
+          }
+        }]
+      },
+      // https://developer.android.com/guide/topics/manifest/meta-data-element
+      "metadata": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/metadata" }
+      },
+      "stringResources": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "value": { "type": "string" }
+          }
+        }
+      },
+      "activities": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/activity" }
+      }
+    },
+    "activity": {
+      "type": "object",
+      "properties": {
+        "allowEmbedded": { "type": "boolean" },
+        "allowTaskReparenting": { "type": "boolean" },
+        "alwaysRetainTaskState": { "type": "boolean" },
+        "autoRemoveFromRecents": { "type": "boolean" },
+        "banner": { "type": "string" },
+        "clearTaskOnLaunch": { "type": "boolean" },
+        "colorMode": { "enum": ["hrd", "wideColorGamut"] },
+        "configChanges": {
+          "enum": ["mcc", "mnc", "locale", "touchscreen", "keyboard", "keyboardHidden", "navigation", "screenLayout", "fontScale", "uiMode", "orientation", "density", "screenSize", "smallestScreenSize"]
+        },
+        "directBootAware": { "type": "boolean" },
+        "documentLaunchMode": { "enum": ["intoExisting", "always", "none", "never"]},
+        "enabled": { "type": "boolean" },
+        "excludeFromRecent": { "type": "boolean" },
+        "exported": { "type": "boolean" },
+        "finishOnTaskLaunch": { "type": "boolean" },
+        "hardwareAccelerated": { "type": "boolean" },
+        "icon": { "type": "string" },
+        "immersive": { "type": "boolean" },
+        "label": { "label": "string" },
+        "launchMode": { "enum": ["standard", "singleTop", "singleTask", "singleInstance"] },
+        "maxRecents": { "type": "number" },
+        "maxAspectRatio": { "type": "number" },
+        "multiprocess": { "type": "boolean" },
+        "name": { "type": "string" },
+        "noHistory": { "type": "boolean" },
+        "parentActivityName": { "type": "string" },
+        "persistableMode": { "enum": ["persistRootOnly", "persistAcrossReboots", "persistNever"] },
+        "permission": { "type": "string" },
+        "process": { "type": "string" },
+        "relinquishTaskIdentity": { "type": "boolean" },
+        "resizeableActivity": { "type": "boolean" },
+        "screenOrientation": { "enum": ["unspecified", "behind", "landscape", "portrait", "reverseLandscape", "reversePortrait", "sensorLandscape", "sensorPortrait", "userLandscape", "userPortrait", "sensor", "fullSensor", "nosensor", "user", "fullUser", "locked"] },
+        "showForAllUsers": { "type": "boolean" },
+        "stateNotNeeded": { "type": "boolean" },
+        "supportsPictureInPicture": { "type": "boolean" },
+        "taskAffinity": { "type": "string" },
+        "theme": { "type": "string" },
+        "uiOptions": { "enum": ["none", "splitActionBarWhenNarrow"] },
+        "windowSoftInputMode": { "enum": ["stateUnspecified", "stateUnchanged", "stateHidden", "stateAlwaysHidden", "stateVisible", "stateAlwaysVisible", "adjustUnspecified", "adjustResize", "adjustPan"] },
+        "intentFilters": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/intentFilter" }
+        },
+        "metadata": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/metadata" }
+        },
+        // https://developer.android.com/guide/topics/ui/multi-window#layout
+        "layout": {
+          "type": "object",
+          "properties": {
+            "defaultWidth": { "type": "string" },
+            "minWidth": { "type": "string" },
+            "defaultHeight": { "type": "string" },
+            "minHeight": { "type": "string" },
+            "gravity": { "type": "string" }
+          }
+        }
+      }
+    },
+    // https://developer.android.com/guide/topics/manifest/intent-filter-element
+    "intentFilter": {
+      "type": "object",
+      "properties": {
+        "icon": { "type": "string" },
+        "label": { "type": "string" },
+        "priority": { "type": "number" },
+        // https://developer.android.com/guide/topics/manifest/action-element
+        "action": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" }
+          }
+        },
+        // https://developer.android.com/guide/topics/manifest/category-element
+        "category": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" }
+          }
+        },
+        // https://developer.android.com/guide/topics/manifest/data-element
+        "data": {
+          "type": "object",
+          "properties": {
+            "scheme": { "type": "string" },
+            "host": { "type": "string" },
+            "port": { "type": "string" },
+            "path": { "type": "string" },
+            "pathPattern": { "type": "string" },
+            "pathPrefix": { "type": "string" },
+            "mimeType": { "type": "string" }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "oneOf": [{
+        "properties": {
+          "name": { "type": "string" },
+          "value": { "type": "string" }
+        }
+      },{
+        "properties": {
+          "name": { "type": "string" },
+          "resource": { "type": "string" }
+        }
+      }]
+    }
+  }
+}
