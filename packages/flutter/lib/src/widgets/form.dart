@@ -227,6 +227,7 @@ class FormField<T> extends StatefulWidget {
     this.validator,
     this.initialValue,
     this.autovalidate = false,
+    this.enabled = true,
   }) : assert(builder != null),
        super(key: key);
 
@@ -256,6 +257,13 @@ class FormField<T> extends StatefulWidget {
   /// autovalidates, this value will be ignored.
   final bool autovalidate;
 
+  /// If true, indicates that the widget is enabled.
+  ///
+  /// Unless enabled, the widged is greyed out, does not accept focus,
+  /// performs no validation, does not save the value when the form
+  /// containing it is submitted.
+  final bool enabled;
+
   @override
   FormFieldState<T> createState() => FormFieldState<T>();
 }
@@ -278,8 +286,9 @@ class FormFieldState<T> extends State<FormField<T>> {
   bool get hasError => _errorText != null;
 
   /// Calls the [FormField]'s onSaved method with the current value.
+  /// If the [FormField]'s enabled is false, the method does nothing.
   void save() {
-    if (widget.onSaved != null)
+    if (widget.onSaved != null && widget.enabled)
       widget.onSaved(value);
   }
 
@@ -291,18 +300,23 @@ class FormFieldState<T> extends State<FormField<T>> {
     });
   }
 
-  /// Calls [FormField.validator] to set the [errorText]. Returns true if there
-  /// were no errors.
+  /// If [FormField.enabled] is true, calls [FormField.validator] to set the [errorText].
+  ///
+  /// Returns true if there were no errors.
   bool validate() {
-    setState(() {
-      _validate();
-    });
-    return !hasError;
+    if (widget.enabled) {
+      setState(() {
+        _validate();
+      });
+      return !hasError;
+    }
+    return true;
   }
 
   bool _validate() {
-    if (widget.validator != null)
+    if (widget.validator != null) {
       _errorText = widget.validator(_value);
+    }
     return !hasError;
   }
 
@@ -344,8 +358,9 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.autovalidate)
-      _validate();
+    if (widget.autovalidate) {
+      validate();
+    }
     Form.of(context)?._register(this);
     return widget.builder(this);
   }
