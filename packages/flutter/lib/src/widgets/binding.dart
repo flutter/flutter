@@ -283,7 +283,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
         Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
         setter: (bool value) {
           if (WidgetsApp.showPerformanceOverlayOverride == value)
-            return Future<Null>.value();
+            return Future<void>.value();
           WidgetsApp.showPerformanceOverlayOverride = value;
           return _forceRebuild();
         },
@@ -296,7 +296,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
         getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
         setter: (bool value) {
           if (WidgetsApp.debugAllowBannerOverride == value)
-            return Future<Null>.value();
+            return Future<void>.value();
           WidgetsApp.debugAllowBannerOverride = value;
           return _forceRebuild();
         },
@@ -318,12 +318,12 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
     }());
   }
 
-  Future<Null> _forceRebuild() {
+  Future<void> _forceRebuild() {
     if (renderViewElement != null) {
       buildOwner.reassemble(renderViewElement);
       return endOfFrame;
     }
-    return Future<Null>.value();
+    return Future<void>.value();
   }
 
   /// The [BuildOwner] in charge of executing the build pipeline for the
@@ -443,7 +443,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   /// This method exposes the `popRoute` notification from
   /// [SystemChannels.navigation].
   @protected
-  Future<Null> handlePopRoute() async {
+  Future<void> handlePopRoute() async {
     for (WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPopRoute())
         return;
@@ -463,7 +463,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   /// [SystemChannels.navigation].
   @protected
   @mustCallSuper
-  Future<Null> handlePushRoute(String route) async {
+  Future<void> handlePushRoute(String route) async {
     for (WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPushRoute(route))
         return;
@@ -477,7 +477,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       case 'pushRoute':
         return handlePushRoute(methodCall.arguments);
     }
-    return Future<Null>.value();
+    return Future<dynamic>.value();
   }
 
   @override
@@ -500,7 +500,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       observer.didHaveMemoryPressure();
   }
 
-  Future<Null> _handleSystemMessage(Object systemMessage) async {
+  Future<void> _handleSystemMessage(Object systemMessage) async {
     final Map<String, dynamic> message = systemMessage;
     final String type = message['type'];
     switch (type) {
@@ -508,7 +508,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
         handleMemoryPressure();
         break;
     }
-    return null;
+    return;
   }
 
   bool _needToReportFirstFrame = true;
@@ -699,11 +699,11 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   }
 
   @override
-  Future<Null> performReassemble() {
+  Future<void> performReassemble() {
     deferFirstFrameReport();
     if (renderViewElement != null)
       buildOwner.reassemble(renderViewElement);
-    return super.performReassemble().then((Null value) {
+    return super.performReassemble().then((void value) {
       allowFirstFrameReport();
     });
   }

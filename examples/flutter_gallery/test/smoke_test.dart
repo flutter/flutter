@@ -46,7 +46,7 @@ void verifyToStringOutput(String name, String route, String testString) {
   }
 }
 
-Future<Null> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
+Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
   // Don't use pumpUntilNoTransientCallbacks in this function, because some of
   // the smoketests have infinitely-running animations (e.g. the progress
   // indicators demo).
@@ -94,7 +94,7 @@ Future<Null> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
   await tester.pump(const Duration(milliseconds: 400)); // Wait until it has finished.
 }
 
-Future<Null> smokeOptionsPage(WidgetTester tester) async {
+Future<void> smokeOptionsPage(WidgetTester tester) async {
   final Finder showOptionsPageButton = find.byTooltip('Toggle options page');
 
   // Show the options page
@@ -133,7 +133,7 @@ Future<Null> smokeOptionsPage(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-Future<Null> smokeGallery(WidgetTester tester) async {
+Future<void> smokeGallery(WidgetTester tester) async {
   bool sendFeedbackButtonPressed = false;
 
   await tester.pumpWidget(

@@ -425,7 +425,7 @@ void main() {
                       actionPressed = true;
                     }
                   ),
-                )).closed.then<Null>((SnackBarClosedReason reason) {
+                )).closed.then<void>((SnackBarClosedReason reason) {
                   closedReason = reason;
                 });
               },

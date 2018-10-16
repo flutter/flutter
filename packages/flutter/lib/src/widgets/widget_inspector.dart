@@ -910,13 +910,13 @@ class WidgetInspectorService {
   ///
   /// This is expensive and should not be called except during development.
   @protected
-  Future<Null> forceRebuild() {
+  Future<void> forceRebuild() {
     final WidgetsBinding binding = WidgetsBinding.instance;
     if (binding.renderViewElement != null) {
       binding.buildOwner.reassemble(binding.renderViewElement);
       return binding.endOfFrame;
     }
-    return Future<Null>.value();
+    return Future<void>.value();
   }
 
   /// Called to register service extensions.
@@ -937,7 +937,7 @@ class WidgetInspectorService {
       getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
       setter: (bool value) {
         if (WidgetsApp.debugShowWidgetInspectorOverride == value) {
-          return Future<Null>.value();
+          return Future<void>.value();
         }
         WidgetsApp.debugShowWidgetInspectorOverride = value;
         return forceRebuild();

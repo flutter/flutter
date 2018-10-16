@@ -300,7 +300,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         await binding.pump(duration, phase);
         count += 1;
       } while (binding.hasScheduledFrame);
-    }).then<int>((void _) => count);
+    }).then<int>((_) => count);
   }
 
   /// Runs a [callback] that performs real asynchronous work.

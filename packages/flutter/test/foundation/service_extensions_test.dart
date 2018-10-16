@@ -43,7 +43,7 @@ class TestServiceExtensionsBinding extends BindingBase
   int reassembled = 0;
   bool pendingReassemble = false;
   @override
-  Future<Null> performReassemble() {
+  Future<void> performReassemble() {
     reassembled += 1;
     pendingReassemble = true;
     return super.performReassemble();
@@ -54,7 +54,7 @@ class TestServiceExtensionsBinding extends BindingBase
   void scheduleFrame() {
     frameScheduled = true;
   }
-  Future<Null> doFrame() async {
+  Future<void> doFrame() async {
     frameScheduled = false;
     if (ui.window.onBeginFrame != null)
       ui.window.onBeginFrame(Duration.zero);
@@ -74,8 +74,8 @@ class TestServiceExtensionsBinding extends BindingBase
     pendingReassemble = false;
   }
 
-  Future<Null> flushMicrotasks() {
-    final Completer<Null> completer = Completer<Null>();
+  Future<void> flushMicrotasks() {
+    final Completer<void> completer = Completer<void>();
     Timer.run(completer.complete);
     return completer.future;
   }

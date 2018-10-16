@@ -12,7 +12,7 @@ import '../rendering/mock_canvas.dart';
 
 final Matcher doesNotOverscroll = isNot(paints..circle());
 
-Future<Null> slowDrag(WidgetTester tester, Offset start, Offset offset) async {
+Future<void> slowDrag(WidgetTester tester, Offset start, Offset offset) async {
   final TestGesture gesture = await tester.startGesture(start);
   for (int index = 0; index < 10; index += 1) {
     await gesture.moveBy(offset);

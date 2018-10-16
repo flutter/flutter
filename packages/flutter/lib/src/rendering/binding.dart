@@ -61,7 +61,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
         getter: () async => debugPaintSizeEnabled,
         setter: (bool value) {
           if (debugPaintSizeEnabled == value)
-            return Future<Null>.value();
+            return Future<void>.value();
           debugPaintSizeEnabled = value;
           return _forceRepaint();
         },
@@ -71,7 +71,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
         getter: () async => debugPaintBaselinesEnabled,
         setter: (bool value) {
           if (debugPaintBaselinesEnabled == value)
-            return Future<Null>.value();
+            return Future<void>.value();
           debugPaintBaselinesEnabled = value;
           return _forceRepaint();
         },
@@ -84,7 +84,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
           debugRepaintRainbowEnabled = value;
           if (repaint)
             return _forceRepaint();
-          return Future<Null>.value();
+          return Future<void>.value();
         },
       );
       registerSignalServiceExtension(
@@ -290,7 +290,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
   }
 
   @override
-  Future<Null> performReassemble() async {
+  Future<void> performReassemble() async {
     await super.performReassemble();
     Timeline.startSync('Dirty Render Tree', arguments: timelineWhitelistArguments);
     try {
@@ -310,7 +310,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
     super.hitTest(result, position); // ignore: abstract_super_member_reference
   }
 
-  Future<Null> _forceRepaint() {
+  Future<void> _forceRepaint() {
     RenderObjectVisitor visitor;
     visitor = (RenderObject child) {
       child.markNeedsPaint();
