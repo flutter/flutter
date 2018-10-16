@@ -118,17 +118,11 @@ void main() {
     expect(localizations.selectedRowCountTitle(123456789), '123.456.789 de articole selectate');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('km', ''));
-    expect(localizations.selectedRowCountTitle(0), 'បានជ្រើស 0 ធាតុ');
-    expect(localizations.selectedRowCountTitle(1), 'បានជ្រើស 1 ធាតុ');
-    expect(localizations.selectedRowCountTitle(2), 'បានជ្រើស 2 ធាតុ');
-    expect(localizations.selectedRowCountTitle(3), 'បានជ្រើស 3 ធាតុ');
-    expect(localizations.selectedRowCountTitle(5), 'បានជ្រើស 5 ធាតុ');
-    expect(localizations.selectedRowCountTitle(10), 'បានជ្រើស 10 ធាតុ');
-    expect(localizations.selectedRowCountTitle(15), 'បានជ្រើស 15 ធាតុ');
-    expect(localizations.selectedRowCountTitle(29), 'បានជ្រើស 29 ធាតុ');
-    expect(localizations.selectedRowCountTitle(10000), 'បានជ្រើស 10.000 ធាតុ');
-    expect(localizations.selectedRowCountTitle(10019), 'បានជ្រើស 10.019 ធាតុ');
-    expect(localizations.selectedRowCountTitle(123456789), 'បានជ្រើស 123.456.789 ធាតុ');
+    expect(localizations.selectedRowCountTitle(0), 'បាន​ជ្រើស​រើស​ធាតុ 0');
+    expect(localizations.selectedRowCountTitle(1), 'បាន​ជ្រើស​រើស​ធាតុ 1');
+    expect(localizations.selectedRowCountTitle(2), 'បាន​ជ្រើស​រើស​ធាតុ 2');
+    expect(localizations.selectedRowCountTitle(10000), 'បាន​ជ្រើស​រើស​ធាតុ 10.000');
+    expect(localizations.selectedRowCountTitle(123456789), 'បាន​ជ្រើស​រើស​ធាតុ 123.456.789');
   });
 
   testWidgets('spot check formatMediumDate(), formatFullDate() translations', (WidgetTester tester) async {
