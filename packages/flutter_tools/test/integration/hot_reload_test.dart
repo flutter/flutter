@@ -46,6 +46,5 @@ void main() {
           _project.breakpointLine);
       expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
     });
-    // https://github.com/flutter/flutter/issues/23109
-  }, timeout: const Timeout.factor(6), skip: true);
+  }, timeout: const Timeout.factor(6));
 }
