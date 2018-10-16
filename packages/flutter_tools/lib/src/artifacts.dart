@@ -311,11 +311,10 @@ class OverrideArtifacts implements Artifacts {
   OverrideArtifacts({
     @required this.parent,
     this.frontendServer,
-  });
+  }) : assert(parent != null);
 
   final Artifacts parent;
   final File frontendServer;
-
 
   @override
   String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
