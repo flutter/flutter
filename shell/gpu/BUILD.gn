@@ -1,0 +1,46 @@
+# Copyright 2018 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("$flutter_root/shell/config.gni")
+
+gpu_dir = "$flutter_root/shell/gpu"
+
+gpu_common_deps = [
+  "$flutter_root/common",
+  "$flutter_root/flow",
+  "$flutter_root/fml",
+  "$flutter_root/shell/common",
+  "$flutter_root/synchronization",
+  "//third_party/skia",
+]
+
+source_set("gpu_surface_software") {
+  sources = [
+    "$gpu_dir/gpu_surface_software.cc",
+    "$gpu_dir/gpu_surface_software.h",
+  ]
+
+  deps = gpu_common_deps
+}
+
+source_set("gpu_surface_gl") {
+  sources = [
+    "$gpu_dir/gpu_surface_gl.cc",
+    "$gpu_dir/gpu_surface_gl.h",
+  ]
+
+  deps = gpu_common_deps + [ "//third_party/skia:gpu" ]
+}
+
+source_set("gpu_surface_vulkan") {
+  sources = [
+    "$gpu_dir/gpu_surface_vulkan.cc",
+    "$gpu_dir/gpu_surface_vulkan.h",
+  ]
+
+  deps = gpu_common_deps + [
+           "//third_party/skia:gpu",
+           "$flutter_root/vulkan",
+         ]
+}

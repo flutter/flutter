@@ -12,51 +12,19 @@ template("shell_gpu_configuration") {
   assert(defined(invoker.enable_gl),
          "Caller must declare if the Open GL backend must be enabled.")
 
-  source_set(target_name) {
-    # vulkan_backend_enabled = shell_enable_vulkan
-    # gl_backend_enabled = !is_fuchsia
-    # software_backend_enabled = true
-
-    sources = []
-
-    gpu_dir = "$flutter_root/shell/gpu"
+  group(target_name) {
+    public_deps = []
 
     if (invoker.enable_software) {
-      sources += [
-        "$gpu_dir/gpu_surface_software.cc",
-        "$gpu_dir/gpu_surface_software.h",
-      ]
+      public_deps += [ "$flutter_root/shell/gpu:gpu_surface_software" ]
     }
 
     if (invoker.enable_gl) {
-      sources += [
-        "$gpu_dir/gpu_surface_gl.cc",
-        "$gpu_dir/gpu_surface_gl.h",
-      ]
+      public_deps += [ "$flutter_root/shell/gpu:gpu_surface_gl" ]
     }
 
     if (invoker.enable_vulkan) {
-      sources += [
-        "$gpu_dir/gpu_surface_vulkan.cc",
-        "$gpu_dir/gpu_surface_vulkan.h",
-      ]
-    }
-
-    deps = [
-      "$flutter_root/common",
-      "$flutter_root/flow",
-      "$flutter_root/fml",
-      "$flutter_root/shell/common",
-      "$flutter_root/synchronization",
-      "//third_party/skia",
-    ]
-
-    if (invoker.enable_vulkan || invoker.enable_gl) {
-      deps += [ "//third_party/skia:gpu" ]
-    }
-
-    if (invoker.enable_vulkan) {
-      deps += [ "$flutter_root/vulkan" ]
+      public_deps += [ "$flutter_root/shell/gpu:gpu_surface_vulkan" ]
     }
   }
 }
