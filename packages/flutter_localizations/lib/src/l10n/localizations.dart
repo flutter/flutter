@@ -7431,6 +7431,207 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'SKATĪT LICENCES';
 }
 
+/// The translations for Mongolian (`mn`).
+class MaterialLocalizationMn extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Mongolian.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationMn({
+    String localeName = 'mn',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName тухай';
+
+  @override
+  String get alertDialogLabel => r'Анхааруулга';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'Буцах';
+
+  @override
+  String get cancelButtonLabel => r'ЦУЦЛАХ';
+
+  @override
+  String get closeButtonLabel => r'ХААХ';
+
+  @override
+  String get closeButtonTooltip => r'Хаах';
+
+  @override
+  String get collapsedIconTapHint => r'Expand';
+
+  @override
+  String get continueButtonLabel => r'ҮРГЭЖЛҮҮЛЭХ';
+
+  @override
+  String get copyButtonLabel => r'ХУУЛАХ';
+
+  @override
+  String get cutButtonLabel => r'ТАСДАХ';
+
+  @override
+  String get deleteButtonTooltip => r'Устгах';
+
+  @override
+  String get dialogLabel => r'Диалог';
+
+  @override
+  String get drawerLabel => r'Хөтөч цэс';
+
+  @override
+  String get expandedIconTapHint => r'Collapse';
+
+  @override
+  String get hideAccountsLabel => r'Хэрэглэгчдийг нуух';
+
+  @override
+  String get licensesPageTitle => r'Лицензүүд';
+
+  @override
+  String get modalBarrierDismissLabel => r'Дуусгах';
+
+  @override
+  String get nextMonthTooltip => r'Дараа сар';
+
+  @override
+  String get nextPageTooltip => r'Дараагийн хуудас';
+
+  @override
+  String get okButtonLabel => r'OK';
+
+  @override
+  String get openAppDrawerTooltip => r'Цэс нээх';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$rowCount-н $firstRow-с $lastRow';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'Нийт $rowCount-н $firstRow-с $lastRow харуулж байна';
+
+  @override
+  String get pasteButtonLabel => r'ХУУЛАХ';
+
+  @override
+  String get popupMenuLabel => r'Нэмэлт цэс';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'Өмнөх сар';
+
+  @override
+  String get previousPageTooltip => r'Өмнөх хуудас';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 character remaining';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount characters remaining';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'No characters remaining';
+
+  @override
+  String get reorderItemDown => r'Move down';
+
+  @override
+  String get reorderItemLeft => r'Move to the left';
+
+  @override
+  String get reorderItemRight => r'Move to the right';
+
+  @override
+  String get reorderItemToEnd => r'Move to the end';
+
+  @override
+  String get reorderItemToStart => r'Move to the start';
+
+  @override
+  String get reorderItemUp => r'Move up';
+
+  @override
+  String get rowsPerPageTitle => r'Нэг хуудсанд:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Хайлт';
+
+  @override
+  String get selectAllButtonLabel => r'БҮГДИЙГ СОНГОХ';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 бичлэг сонгогдсон';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount бичлэг сонгосон байна';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => r'Бичлэг сонгоогүй байна';
+
+  @override
+  String get showAccountsLabel => r'Хэрэглэгчдийг харуулах';
+
+  @override
+  String get showMenuTooltip => r'Цэсийг харуулах';
+
+  @override
+  String get signedInLabel => r'Нэвтэрсэн';
+
+  @override
+  String get tabLabelRaw => r'$tabCount-н $tabIndex дахь нь';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Цаг сонгох';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Минут сонгох';
+
+  @override
+  String get viewLicensesButtonLabel => r'ЛИЦЕНЗҮҮДИЙГ ХАРАХ';
+}
+
 /// The translations for Malay (`ms`).
 class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Malay.
@@ -11868,6 +12069,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
   'ko', // Korean
   'lt', // Lithuanian
   'lv', // Latvian
+  'mn', // Mongolian
   'ms', // Malay
   'nb', // Norwegian Bokmål
   'nl', // Dutch Flemish
@@ -11926,6 +12128,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `ko` - Korean
 ///  * `lt` - Lithuanian
 ///  * `lv` - Latvian
+///  * `mn` - Mongolian
 ///  * `ms` - Malay
 ///  * `nb` - Norwegian Bokmål
 ///  * `nl` - Dutch Flemish
@@ -12083,6 +12286,8 @@ GlobalMaterialLocalizations getTranslation(
       return MaterialLocalizationLt(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'lv':
       return MaterialLocalizationLv(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'mn':
+      return MaterialLocalizationMn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ms':
       return MaterialLocalizationMs(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'nb':
