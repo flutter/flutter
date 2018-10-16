@@ -314,4 +314,33 @@ void main() {
     expect(tap, 0);
     expect(longPress, 1);
   });
+
+  testWidgets('Long Press Up Callback called after long press', (WidgetTester tester) async {
+    int longPressUp = 0;
+
+    await tester.pumpWidget(
+      Container(
+        alignment: Alignment.topLeft,
+        child: Container(
+          alignment: Alignment.center,
+          height: 100.0,
+          color: const Color(0xFF00FF00),
+          child: GestureDetector(
+            onLongPressUp: () {
+              longPressUp += 1;
+            },
+          ),
+        ),
+      ),
+    );
+
+    Future<Null> longPress(Duration timeout) async {
+      final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
+      await tester.pump(timeout);
+      await gesture.up();
+    }
+
+    await longPress(kLongPressTimeout + Duration(seconds: 1)); // To make sure the time for long press has occured
+    expect(longPressUp, 1);
+  });
 }
