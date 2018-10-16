@@ -86,6 +86,7 @@ executable("runtime_unittests") {
 
   sources = [
     "dart_isolate_unittests.cc",
+    "dart_service_isolate_unittests.cc",
     "dart_vm_unittests.cc",
   ]
 
