@@ -6654,7 +6654,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'អំពី $applicationName';
 
   @override
-  String get alertDialogLabel => r'ការជូនដំណឹង';
+  String get alertDialogLabel => r'ជូនដំណឹង';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
@@ -6672,7 +6672,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'បិទ';
 
   @override
-  String get collapsedIconTapHint => r'TBD';
+  String get collapsedIconTapHint => r'ពង្រីក';
 
   @override
   String get continueButtonLabel => r'បន្ត';
@@ -6684,7 +6684,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get cutButtonLabel => r'កាត់';
 
   @override
-  String get deleteButtonTooltip => r'យកចេញ';
+  String get deleteButtonTooltip => r'លុប';
 
   @override
   String get dialogLabel => r'ប្រអប់';
@@ -6693,19 +6693,19 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get drawerLabel => r'ម៉ឺនុយរុករក';
 
   @override
-  String get expandedIconTapHint => r'TBD';
+  String get expandedIconTapHint => r'បង្រួម';
 
   @override
   String get hideAccountsLabel => r'លាក់គណនី';
 
   @override
-  String get licensesPageTitle => r'អាជ្ញាប័ណ្ណ';
+  String get licensesPageTitle => r'អាជ្ញាបណ្ណ';
 
   @override
-  String get modalBarrierDismissLabel => r'បិទ';
+  String get modalBarrierDismissLabel => r'ច្រាន​ចោល';
 
   @override
-  String get nextMonthTooltip => r'ខែក្រោយ';
+  String get nextMonthTooltip => r'ខែ​​ក្រោយ';
 
   @override
   String get nextPageTooltip => r'ទំព័របន្ទាប់';
@@ -6714,25 +6714,25 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get okButtonLabel => r'យល់ព្រម';
 
   @override
-  String get openAppDrawerTooltip => r'បើកម៉ឺនុយរុករក';
+  String get openAppDrawerTooltip => r'បើក​ម៉ឺនុយរុករក';
 
   @override
-  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow ពី $rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow ក្នុង​ចំណោម​ $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ពីប្រហែល $rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ក្នុង​ចំណោម​ប្រហែល $rowCount';
 
   @override
-  String get pasteButtonLabel => r'ដាក់';
+  String get pasteButtonLabel => r'ដាក់​ចូល';
 
   @override
-  String get popupMenuLabel => r'ម៉ឺនុយលេចឡើង';
+  String get popupMenuLabel => r'​ម៉ឺនុយ​លោត​ឡើង';
 
   @override
   String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get previousMonthTooltip => r'កាលពីខែមុន';
+  String get previousMonthTooltip => r'ខែមុន';
 
   @override
   String get previousPageTooltip => r'ទំព័រមុន';
@@ -6744,10 +6744,10 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'TBD';
+  String get remainingTextFieldCharacterCountOne => r'នៅសល់​ 1 តួ​ទៀត';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'TBD';
+  String get remainingTextFieldCharacterCountOther => r'នៅសល់ $remainingCount តួ​ទៀត';
 
   @override
   String get remainingTextFieldCharacterCountTwo => null;
@@ -6756,25 +6756,25 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'TBD';
+  String get reorderItemDown => r'ផ្លាស់ទី​ចុះ​ក្រោម';
 
   @override
-  String get reorderItemLeft => r'TBD';
+  String get reorderItemLeft => r'ផ្លាស់ទី​ទៅ​ឆ្វេង';
 
   @override
-  String get reorderItemRight => r'TBD';
+  String get reorderItemRight => r'ផ្លាស់ទីទៅ​ស្តាំ';
 
   @override
-  String get reorderItemToEnd => r'TBD';
+  String get reorderItemToEnd => r'ផ្លាស់ទីទៅ​ចំណុចបញ្ចប់';
 
   @override
-  String get reorderItemToStart => r'TBD';
+  String get reorderItemToStart => r'ផ្លាស់ទីទៅ​ចំណុច​ចាប់ផ្ដើម';
 
   @override
-  String get reorderItemUp => r'TBD';
+  String get reorderItemUp => r'ផ្លាស់ទី​ឡើង​លើ';
 
   @override
-  String get rowsPerPageTitle => r'ជួរមុខ:';
+  String get rowsPerPageTitle => r'ជួរ​ដេក​ក្នុង​មួយ​ទំព័រ៖';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
@@ -6783,7 +6783,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get searchFieldLabel => r'ស្វែងរក';
 
   @override
-  String get selectAllButtonLabel => r'ជ្រើសទាំងអស់';
+  String get selectAllButtonLabel => r'ជ្រើសរើស​ទាំង​អស់';
 
   @override
   String get selectedRowCountTitleFew => null;
@@ -6792,10 +6792,10 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => r'បានជ្រើស 1 ធាតុ';
+  String get selectedRowCountTitleOne => r'បាន​ជ្រើស​រើស​ធាតុ 1';
 
   @override
-  String get selectedRowCountTitleOther => r'បានជ្រើស $selectedRowCount ធាតុ';
+  String get selectedRowCountTitleOther => r'បាន​ជ្រើស​រើស​ធាតុ $selectedRowCount';
 
   @override
   String get selectedRowCountTitleTwo => null;
@@ -6807,25 +6807,25 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get showAccountsLabel => r'បង្ហាញគណនី';
 
   @override
-  String get showMenuTooltip => r'បង្ហាញម៉ឺនុយ';
+  String get showMenuTooltip => r'បង្ហាញ​ម៉ឺនុយ';
 
   @override
-  String get signedInLabel => r'ចូល';
+  String get signedInLabel => r'បានចូល​គណនី';
 
   @override
-  String get tabLabelRaw => r'ថេប $tabIndex ពី $tabCount';
+  String get tabLabelRaw => r'ផ្ទាំង $tabIndex ក្នុង​ចំណោម​ $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
-  String get timePickerHourModeAnnouncement => r'ជ្រើសរើសមួយម៉ោង';
+  String get timePickerHourModeAnnouncement => r'ជ្រើសរើស​ម៉ោង';
 
   @override
-  String get timePickerMinuteModeAnnouncement => r'ជ្រើសនាទី';
+  String get timePickerMinuteModeAnnouncement => r'ជ្រើសរើស​នាទី';
 
   @override
-  String get viewLicensesButtonLabel => r'មើលអាជ្ញាប័ណ្ណ';
+  String get viewLicensesButtonLabel => r'មើលអាជ្ញាបណ្ណ';
 }
 
 /// The translations for Korean (`ko`).
@@ -10704,7 +10704,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => r'Dakikayı seçin';
 
   @override
-  String get viewLicensesButtonLabel => r'LİSANLARI GÖSTER';
+  String get viewLicensesButtonLabel => r'LİSANSLARI GÖSTER';
 }
 
 /// The translations for Ukrainian (`uk`).
