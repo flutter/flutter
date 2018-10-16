@@ -10,8 +10,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart' as test_package;
-import 'package:test/src/frontend/async_matcher.dart' show AsyncMatcher;
+import 'package:test_core/test.dart' as test_package;
+import 'package:test_core/src/frontend/async_matcher.dart' show AsyncMatcher;
 
 const List<Widget> fooBarTexts = <Text>[
   Text('foo', textDirection: TextDirection.ltr),
