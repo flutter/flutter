@@ -78,4 +78,19 @@ class BottomNavigationBarItem {
   ///  * [Icon.color] and [ImageIcon.color] to control the foreground color of
   ///     the icons themselves.
   final Color backgroundColor;
+
+  /// The optional parameter for whether to show label in [BottomNavigationBarItem].
+  ///
+  /// If the value is set to [false], [BottomNavigationBar] won't have
+  /// extra spacing for label which stays below the icon.
+  ///
+  /// The default value is true since [BottomNavigationBarItem] as in material design
+  /// has its label primarily.
+  final bool showLabel;
+
+  /// Used to provide semantic even when showLabel is false
+  ///
+  /// This label is always necessary not to break the support of semantic
+  /// when TextWidget is not rendered when showLabel is false.
+  final String label;
 }
