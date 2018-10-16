@@ -89,4 +89,19 @@ void main() {
     await tester.pump();
     expect(scrollable.position.pixels, equals(50.0));
   });
+
+  testWidgets('ClampingScrollPhysics handles out of bounds ScrollPosition', (WidgetTester tester) async {
+    Future<void> testOutOfBounds(ScrollPhysics physics, double initialOffset, double expectedOffset) async {
+      final ScrollController scrollController = ScrollController(initialScrollOffset: initialOffset);
+      await tester.pumpWidget(buildFrame(physics, scrollController: scrollController));
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+
+      expect(scrollable.position.pixels, equals(initialOffset));
+      await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
+      expect(scrollable.position.pixels, equals(expectedOffset));
+    }
+
+    await testOutOfBounds(const ClampingScrollPhysics(), -400.0, 0.0);
+    await testOutOfBounds(const ClampingScrollPhysics(), 800.0, 50.0);
+  });
 }
