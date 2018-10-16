@@ -511,42 +511,41 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void performAction(TextInputAction action) {
     switch (action) {
       case TextInputAction.newline:
-        // Do nothing for a "newline" action: the newline is already inserted.
+        // If this is a multiline EditableText, do nothing for a "newline"
+        // action; The newline is already inserted. Otherwise, finalize
+        // editing.
+        if (widget.maxLines == 1)
+          _finalizeEditing(true);
         break;
       case TextInputAction.done:
       case TextInputAction.go:
       case TextInputAction.send:
       case TextInputAction.search:
-        // Take any actions necessary now that the user has completed editing.
-        if (widget.onEditingComplete != null) {
-          widget.onEditingComplete();
-        } else {
-          // Default behavior if the developer did not provide an
-          // onEditingComplete callback: Finalize editing and remove focus.
-          widget.controller.clearComposing();
-          widget.focusNode.unfocus();
-        }
-
-        // Invoke optional callback with the user's submitted content.
-        if (widget.onSubmitted != null)
-          widget.onSubmitted(_value.text);
+        _finalizeEditing(true);
         break;
       default:
-        if (widget.onEditingComplete != null) {
-          widget.onEditingComplete();
-        } else {
-          // Default behavior if the developer did not provide an
-          // onEditingComplete callback: Finalize editing, but don't give up
-          // focus because this keyboard action does not imply the user is done
-          // inputting information.
-          widget.controller.clearComposing();
-        }
-
-        // Invoke optional callback with the user's submitted content.
-        if (widget.onSubmitted != null)
-          widget.onSubmitted(_value.text);
+        // Finalize editing, but don't give up focus because this keyboard
+        //  action does not imply the user is done inputting information.
+        _finalizeEditing(false);
         break;
     }
+  }
+
+  void _finalizeEditing(bool shouldUnfocus) {
+    // Take any actions necessary now that the user has completed editing.
+    if (widget.onEditingComplete != null) {
+      widget.onEditingComplete();
+    } else {
+      // Default behavior if the developer did not provide an
+      // onEditingComplete callback: Finalize editing and remove focus.
+      widget.controller.clearComposing();
+      if (shouldUnfocus)
+        widget.focusNode.unfocus();
+    }
+
+    // Invoke optional callback with the user's submitted content.
+    if (widget.onSubmitted != null)
+      widget.onSubmitted(_value.text);
   }
 
   void _updateRemoteEditingValueIfNeeded() {
