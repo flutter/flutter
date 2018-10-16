@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 
 import 'package:vm_service_client/vm_service_client.dart';
 
@@ -110,6 +111,5 @@ void main() {
     // TODO(dantup): Unskip after flutter-tester is fixed on Windows:
     // https://github.com/flutter/flutter/issues/17833.
     // https://github.com/flutter/flutter/issues/21348.
-    // https://github.com/flutter/flutter/issues/23109
-  }, timeout: const Timeout.factor(6), skip: true);
+  }, timeout: const Timeout.factor(6), skip: platform.isWindows);
 }
