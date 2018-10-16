@@ -48,7 +48,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
   FuchsiaReloadCommand() {
     addBuildModeFlags(defaultToRelease: false);
     argParser.addOption('frontend-server',
-      abbr: 'fe',
+      abbr: 'f',
       help: 'The frontend server location');
     argParser.addOption('address',
       abbr: 'a',
