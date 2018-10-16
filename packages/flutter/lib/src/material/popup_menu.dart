@@ -106,7 +106,7 @@ class PopupMenuDivider extends PopupMenuEntry<Null> {
   final double height;
 
   @override
-  bool represents(dynamic value) => false;
+  bool represents(Null value) => false;
 
   @override
   _PopupMenuDividerState createState() => _PopupMenuDividerState();

@@ -55,7 +55,7 @@ List<String> _allDemos = <String>[];
 
 /// Extracts event data from [events] recorded by timeline, validates it, turns
 /// it into a histogram, and saves to a JSON file.
-Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
+Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
   final Map<String, List<int>> durations = <String, List<int>>{};
   Map<String, dynamic> startEvent;
 
@@ -121,7 +121,7 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
 
 /// Scrolls each demo menu item into view, launches it, then returns to the
 /// home screen twice.
-Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
+Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
   String currentDemoCategory;
 

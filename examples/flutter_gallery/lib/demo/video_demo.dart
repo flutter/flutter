@@ -66,7 +66,7 @@ class VideoCard extends StatelessWidget {
         pageBuilder: fullScreenRoutePageBuilder,
       );
 
-      route.completed.then((void result) {
+      route.completed.then((void value) {
         controller.setVolume(0.0);
       });
 
@@ -272,7 +272,7 @@ class ConnectivityOverlay extends StatefulWidget {
   });
 
   final Widget child;
-  final Completer<Null> connectedCompleter;
+  final Completer<void> connectedCompleter;
   final GlobalKey<ScaffoldState> scaffoldKey;
 
   @override
@@ -362,14 +362,14 @@ class _VideoDemoState extends State<VideoDemo>
   );
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  final Completer<Null> connectedCompleter = Completer<Null>();
+  final Completer<void> connectedCompleter = Completer<void>();
   bool isSupported = true;
 
   @override
   void initState() {
     super.initState();
 
-    Future<Null> initController(VideoPlayerController controller) async {
+    Future<void> initController(VideoPlayerController controller) async {
       controller.setLooping(true);
       controller.setVolume(0.0);
       controller.play();

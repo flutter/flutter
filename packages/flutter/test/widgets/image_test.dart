@@ -601,7 +601,7 @@ void main() {
 
   testWidgets('Precache', (WidgetTester tester) async {
     final TestImageProvider provider = TestImageProvider();
-    Future<Null> precache;
+    Future<void> precache;
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
@@ -632,7 +632,7 @@ void main() {
     final Exception testException = Exception('cannot resolve host');
     final StackTrace testStack = StackTrace.current;
     final TestImageProvider imageProvider = TestImageProvider();
-    Future<Null> precache;
+    Future<void> precache;
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {

@@ -38,7 +38,7 @@ Future<StackTrace> getSampleStack() async {
   return await Future<StackTrace>.sync(() => StackTrace.current);
 }
 
-Future<Null> main() async {
+Future<void> main() async {
   final List<String> console = <String>[];
 
   final StackTrace sampleStack = await getSampleStack();

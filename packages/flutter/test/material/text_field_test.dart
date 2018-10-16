@@ -100,7 +100,7 @@ Widget boilerplate({ Widget child }) {
   );
 }
 
-Future<Null> skipPastScrollingAnimation(WidgetTester tester) async {
+Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 200));
 }
@@ -212,7 +212,7 @@ void main() {
     final RenderBox inputBox = findTextFieldBox();
     final Size emptyInputSize = inputBox.size;
 
-    Future<Null> checkText(String testValue) async {
+    Future<void> checkText(String testValue) async {
       return TestAsyncUtils.guard(() async {
         await tester.enterText(find.byType(TextField), testValue);
         // Check that the onChanged event handler fired.
@@ -246,7 +246,7 @@ void main() {
     final EditableTextState editableText = tester.state(find.byType(EditableText));
 
     // Check that the cursor visibility toggles after each blink interval.
-    Future<Null> checkCursorToggle() async {
+    Future<void> checkCursorToggle() async {
       final bool initialShowCursor = editableText.cursorCurrentlyVisible;
       await tester.pump(editableText.cursorBlinkInterval);
       expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
@@ -840,7 +840,7 @@ void main() {
       ),
     );
 
-    Future<Null> checkText(String testValue) {
+    Future<void> checkText(String testValue) {
       return TestAsyncUtils.guard(() async {
         await tester.enterText(find.byType(TextField), testValue);
 
@@ -870,7 +870,7 @@ void main() {
       ),
     );
 
-    Future<Null> checkText(String testValue) async {
+    Future<void> checkText(String testValue) async {
       return TestAsyncUtils.guard(() async {
         await tester.enterText(find.byType(TextField), testValue);
 

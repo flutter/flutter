@@ -664,7 +664,7 @@ abstract class DiagnosticsNode {
   }) {
     assert(style != null);
     assert(level != null);
-    return DiagnosticsProperty<Null>(
+    return DiagnosticsProperty<void>(
       '',
       null,
       description: message,
@@ -1033,7 +1033,7 @@ abstract class DiagnosticsNode {
 ///  * [DiagnosticsNode.message], which serves the same role for messages
 ///    without a clear property name.
 ///  * [StringProperty], which is a better fit for properties with string values.
-class MessageProperty extends DiagnosticsProperty<Null> {
+class MessageProperty extends DiagnosticsProperty<void> {
   /// Create a diagnostics property that displays a message.
   ///
   /// Messages have no concrete [value] (so [value] will return null). The

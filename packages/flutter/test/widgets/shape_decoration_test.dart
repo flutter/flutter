@@ -12,7 +12,7 @@ import '../painting/image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/mock_canvas.dart';
 
-Future<Null> main() async {
+Future<void> main() async {
   final ui.Image rawImage = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
   final ImageProvider image = TestImageProvider(0, 0, image: rawImage);
   testWidgets('ShapeDecoration.image', (WidgetTester tester) async {

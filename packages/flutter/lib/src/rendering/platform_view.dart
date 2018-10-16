@@ -151,7 +151,7 @@ class RenderAndroidView extends RenderBox {
 
   Size _currentAndroidViewSize;
 
-  Future<Null> _sizePlatformView() async {
+  Future<void> _sizePlatformView() async {
     // Android virtual displays cannot have a zero size.
     // Trying to size it to 0 crashes the app, which was happening when starting the app
     // with a locked screen (see: https://github.com/flutter/flutter/issues/20456).
