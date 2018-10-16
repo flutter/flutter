@@ -40,7 +40,5 @@
   "popupMenuLabel": "Нэмэлт цэс",
   "dialogLabel": "Диалог",
   "alertDialogLabel": "Анхааруулга",
-  "searchFieldLabel": "Хайлт",
-  "remainingTextFieldCharacterCountZero": "Тэмдэгтийн хэмжээ дууссан",
-  "remainingTextFieldCharacterCountOne": "1 тэмдэгт үлдсэн"
+  "searchFieldLabel": "Хайлт"
 }
