@@ -48,6 +48,5 @@ void main() {
       await _flutterAttach.attach(_flutterRun.vmServicePort);
       await _flutterAttach.hotReload();
     });
-    // https://github.com/flutter/flutter/issues/23109
-  }, timeout: const Timeout.factor(6), skip: true);
+  }, timeout: const Timeout.factor(6));
 }
