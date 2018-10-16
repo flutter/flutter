@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_driver/flutter_driver.dart';
 
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_core/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('FlutterDriver', () {
