@@ -127,7 +127,7 @@ void _tests() {
     await tester.pump(const Duration(seconds: 5));
   });
 
-  Future<Null> preparePicker(WidgetTester tester, Future<Null> callback(Future<DateTime> date)) async {
+  Future<void> preparePicker(WidgetTester tester, Future<void> callback(Future<DateTime> date)) async {
     BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
       home: Material(

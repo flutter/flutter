@@ -224,8 +224,8 @@ void main() {
           || widgetType == '_PopupMenu'; // for old versions of Dart that don't reify method type arguments
     };
 
-    Future<Null> openMenu(TextDirection textDirection, Alignment alignment) async {
-      return TestAsyncUtils.guard(() async {
+    Future<void> openMenu(TextDirection textDirection, Alignment alignment) async {
+      return TestAsyncUtils.guard<void>(() async {
         await tester.pumpWidget(Container()); // reset in case we had a menu up already
         await tester.pumpWidget(TestApp(
           textDirection: textDirection,
@@ -239,14 +239,14 @@ void main() {
       });
     }
 
-    Future<Null> testPositioningDown(
+    Future<void> testPositioningDown(
       WidgetTester tester,
       TextDirection textDirection,
       Alignment alignment,
       TextDirection growthDirection,
       Rect startRect,
     ) {
-      return TestAsyncUtils.guard(() async {
+      return TestAsyncUtils.guard<void>(() async {
         await openMenu(textDirection, alignment);
         Rect rect = tester.getRect(find.byWidgetPredicate(popupMenu));
         expect(rect, startRect);
@@ -296,14 +296,14 @@ void main() {
       });
     }
 
-    Future<Null> testPositioningDownThenUp(
+    Future<void> testPositioningDownThenUp(
       WidgetTester tester,
       TextDirection textDirection,
       Alignment alignment,
       TextDirection growthDirection,
       Rect startRect,
     ) {
-      return TestAsyncUtils.guard(() async {
+      return TestAsyncUtils.guard<void>(() async {
         await openMenu(textDirection, alignment);
         Rect rect = tester.getRect(find.byWidgetPredicate(popupMenu));
         expect(rect, startRect);

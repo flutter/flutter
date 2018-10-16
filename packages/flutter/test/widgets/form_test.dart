@@ -30,7 +30,7 @@ void main() {
 
     expect(fieldValue, isNull);
 
-    Future<Null> checkText(String testValue) async {
+    Future<void> checkText(String testValue) async {
       await tester.enterText(find.byType(TextFormField), testValue);
       formKey.currentState.save();
       // pump'ing is unnecessary because callback happens regardless of frames
@@ -63,7 +63,7 @@ void main() {
 
     expect(fieldValue, isNull);
 
-    Future<Null> checkText(String testValue) async {
+    Future<void> checkText(String testValue) async {
       await tester.enterText(find.byType(TextField), testValue);
       // pump'ing is unnecessary because callback happens regardless of frames
       expect(fieldValue, equals(testValue));
@@ -97,7 +97,7 @@ void main() {
     // Start off not autovalidating.
     await tester.pumpWidget(builder(false));
 
-    Future<Null> checkErrorText(String testValue) async {
+    Future<void> checkErrorText(String testValue) async {
       formKey.currentState.reset();
       await tester.pumpWidget(builder(false));
       await tester.enterText(find.byType(TextFormField), testValue);
@@ -154,13 +154,13 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    Future<Null> checkErrorText(String testValue) async {
+    Future<void> checkErrorText(String testValue) async {
       await tester.enterText(find.byType(TextFormField).first, testValue);
       await tester.pump();
 
       // Check for a new Text widget with our error text.
       expect(find.text(testValue + '/error'), findsOneWidget);
-      return null;
+      return;
     }
 
     await checkErrorText('Test');

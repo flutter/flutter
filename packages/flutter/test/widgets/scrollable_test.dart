@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-Future<Null> pumpTest(WidgetTester tester, TargetPlatform platform) async {
+Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
   await tester.pumpWidget(MaterialApp(
     theme: ThemeData(
       platform: platform,
@@ -18,7 +18,6 @@ Future<Null> pumpTest(WidgetTester tester, TargetPlatform platform) async {
     ),
   ));
   await tester.pump(const Duration(seconds: 5)); // to let the theme animate
-  return null;
 }
 
 const double dragOffset = 200.0;

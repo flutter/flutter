@@ -585,7 +585,7 @@ void main() {
     Rect buttonRect;
     Rect menuRect;
 
-    Future<Null> popUpAndDown(Widget frame) async {
+    Future<void> popUpAndDown(Widget frame) async {
       await tester.pumpWidget(frame);
       await tester.tap(find.byType(dropdownButtonType));
       await tester.pumpAndSettle();

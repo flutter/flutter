@@ -176,7 +176,7 @@ void main() {
   });
 
   testWidgets('ListView large scroll jump and keepAlive first child not keepAlive', (WidgetTester tester) async {
-    Future<Null> checkAndScroll([String zero = '0:false']) async {
+    Future<void> checkAndScroll([String zero = '0:false']) async {
       expect(find.text(zero), findsOneWidget);
       expect(find.text('1:false'), findsOneWidget);
       expect(find.text('2:false'), findsOneWidget);

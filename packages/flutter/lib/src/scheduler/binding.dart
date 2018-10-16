@@ -579,7 +579,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
     _postFrameCallbacks.add(callback);
   }
 
-  Completer<Null> _nextFrameCompleter;
+  Completer<void> _nextFrameCompleter;
 
   /// Returns a Future that completes after the frame completes.
   ///
@@ -590,11 +590,11 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   /// If the device's screen is currently turned off, this may wait a very long
   /// time, since frames are not scheduled while the device's screen is turned
   /// off.
-  Future<Null> get endOfFrame {
+  Future<void> get endOfFrame {
     if (_nextFrameCompleter == null) {
       if (schedulerPhase == SchedulerPhase.idle)
         scheduleFrame();
-      _nextFrameCompleter = Completer<Null>();
+      _nextFrameCompleter = Completer<void>();
       addPostFrameCallback((Duration timeStamp) {
         _nextFrameCompleter.complete();
         _nextFrameCompleter = null;
