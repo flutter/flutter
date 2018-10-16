@@ -41,6 +41,7 @@ HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig];
 
 const bool kHotReloadDefault = true;
 
+// TODO(flutter/flutter#23031): Test this.
 class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {

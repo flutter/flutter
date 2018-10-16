@@ -12,6 +12,7 @@ import 'globals.dart';
 import 'resident_runner.dart';
 import 'tracing.dart';
 
+// TODO(flutter/flutter#23031): Test this.
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     List<FlutterDevice> devices, {
