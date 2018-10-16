@@ -3,24 +3,6 @@
 // found in the LICENSE file.
 
 class Version implements Comparable<Version> {
-  static final RegExp versionPattern =
-      RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?');
-
-  /// The major version number: "1" in "1.2.3".
-  final int major;
-
-  /// The minor version number: "2" in "1.2.3".
-  final int minor;
-
-  /// The patch version number: "3" in "1.2.3".
-  final int patch;
-
-  /// The original string representation of the version number.
-  ///
-  /// This preserves textual artifacts like leading zeros that may be left out
-  /// of the parsed version.
-  final String _text;
-
   /// Creates a new [Version] object.
   factory Version(int major, int minor, int patch, {String text}) {
     if (text == null) {
@@ -75,6 +57,24 @@ class Version implements Comparable<Version> {
 
 
   static Version get unknown => Version(0, 0, 0, text: 'unknown');
+
+  /// The major version number: "1" in "1.2.3".
+  final int major;
+
+  /// The minor version number: "2" in "1.2.3".
+  final int minor;
+
+  /// The patch version number: "3" in "1.2.3".
+  final int patch;
+
+  /// The original string representation of the version number.
+  ///
+  /// This preserves textual artifacts like leading zeros that may be left out
+  /// of the parsed version.
+  final String _text;
+
+  static final RegExp versionPattern =
+      RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?');
 
   /// Two [Version]s are equal if their version numbers are. The version text
   /// is ignored.

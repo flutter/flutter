@@ -25,11 +25,12 @@ enum TargetPlatform {
 ///
 /// This is the default value of [ThemeData.platform] (hence the name). Widgets
 /// from the material library should use [Theme.of] to determine the current
-/// platform, rather than using [defaultTargetPlatform]. However, if there is
-/// widget behavior that depends on the actual underlying platform (e.g. because
-/// it is controlling data being sent to the platform APIs, not just trying to
-/// follow the platform's conventions) then depending on [defaultTargetPlatform]
-/// makes sense.
+/// platform for styling purposes, rather than using [defaultTargetPlatform].
+/// However, if there is widget behavior that depends on the actual underlying
+/// platform, then depending on [defaultTargetPlatform] makes sense.
+/// [dart.io.Platform.environment] should be used directly only when it's
+/// critical to actually know the current platform, without any overrides
+/// possible (for example, when a system API is about to be called).
 ///
 /// In a test environment, the platform returned is [TargetPlatform.android]
 /// regardless of the host platform. (Android was chosen because the tests were

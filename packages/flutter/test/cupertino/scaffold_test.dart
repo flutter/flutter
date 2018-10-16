@@ -11,8 +11,8 @@ import '../painting/mocks_for_image_cache.dart';
 void main() {
   testWidgets('Contents are behind translucent bar', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
-        home: const CupertinoPageScaffold(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
           // Default nav bar is translucent.
           navigationBar: CupertinoNavigationBar(
             middle: Text('Title'),
@@ -276,8 +276,8 @@ void main() {
 
   testWidgets('Decorated with white background by default', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
-        home: const CupertinoPageScaffold(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
           child: Center(),
         ),
       ),
@@ -292,8 +292,8 @@ void main() {
 
   testWidgets('Overrides background color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
-        home: const CupertinoPageScaffold(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
           child: Center(),
           backgroundColor: Color(0xFF010203),
         ),

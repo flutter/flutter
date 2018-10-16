@@ -323,12 +323,14 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
   void _updateMoveAnimation() {
     final double end = _dragExtent.sign;
-    _moveAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: _directionIsXAxis
-          ? Offset(end, widget.crossAxisEndOffset)
-          : Offset(widget.crossAxisEndOffset, end),
-    ).animate(_moveController);
+    _moveAnimation = _moveController.drive(
+      Tween<Offset>(
+        begin: Offset.zero,
+        end: _directionIsXAxis
+               ? Offset(end, widget.crossAxisEndOffset)
+               : Offset(widget.crossAxisEndOffset, end),
+      ),
+    );
   }
 
   _FlingGestureKind _describeFlingGesture(Velocity velocity) {
@@ -424,13 +426,16 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       _resizeController.forward();
       setState(() {
         _sizePriorToCollapse = context.size;
-        _resizeAnimation = Tween<double>(
-          begin: 1.0,
-          end: 0.0
-        ).animate(CurvedAnimation(
-          parent: _resizeController,
-          curve: _kResizeTimeCurve
-        ));
+        _resizeAnimation = _resizeController.drive(
+          CurveTween(
+            curve: _kResizeTimeCurve
+          ),
+        ).drive(
+          Tween<double>(
+            begin: 1.0,
+            end: 0.0
+          ),
+        );
       });
     }
   }

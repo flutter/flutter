@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 
 import '../src/common.dart';
@@ -16,13 +17,13 @@ import '../src/mocks.dart';
 void main() {
   final String red = RegExp.escape(AnsiTerminal.red);
   final String bold = RegExp.escape(AnsiTerminal.bold);
-  final String reset = RegExp.escape(AnsiTerminal.reset);
+  final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
+  final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
 
   group('AppContext', () {
-    test('error', () async {
+    testUsingContext('error', () async {
       final BufferLogger mockLogger = BufferLogger();
       final VerboseLogger verboseLogger = VerboseLogger(mockLogger);
-      verboseLogger.supportsColor = false;
 
       verboseLogger.printStatus('Hey Hey Hey Hey');
       verboseLogger.printTrace('Oooh, I do I do I do');
@@ -32,12 +33,14 @@ void main() {
                                              r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Oooh, I do I do I do\n$'));
       expect(mockLogger.traceText, '');
       expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Helpless!\n$'));
+    }, overrides: <Type, Generator> {
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Platform: () => FakePlatform()..stdoutSupportsAnsi = false,
     });
 
-    test('ANSI colored errors', () async {
+    testUsingContext('ANSI colored errors', () async {
       final BufferLogger mockLogger = BufferLogger();
       final VerboseLogger verboseLogger = VerboseLogger(mockLogger);
-      verboseLogger.supportsColor = true;
 
       verboseLogger.printStatus('Hey Hey Hey Hey');
       verboseLogger.printTrace('Oooh, I do I do I do');
@@ -45,12 +48,15 @@ void main() {
 
       expect(
           mockLogger.statusText,
-          matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Hey Hey Hey Hey$reset'
+          matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Hey Hey Hey Hey$resetBold'
                   r'\n\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Oooh, I do I do I do\n$'));
       expect(mockLogger.traceText, '');
       expect(
           mockLogger.errorText,
-          matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Helpless!$reset$reset' r'\n$'));
+          matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Helpless!$resetBold$resetColor' r'\n$'));
+    }, overrides: <Type, Generator> {
+      OutputPreferences: () => OutputPreferences(showColor: true),
+      Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
     });
   });
 
@@ -58,8 +64,8 @@ void main() {
     MockStdio mockStdio;
     AnsiSpinner ansiSpinner;
     AnsiStatus ansiStatus;
-    SummaryStatus summaryStatus;
     int called;
+    const List<String> testPlatforms = <String>['linux', 'macos', 'windows', 'fuchsia'];
     final RegExp secondDigits = RegExp(r'[^\b]\b\b\b\b\b[0-9]+[.][0-9]+(?:s|ms)');
 
     setUp(() {
@@ -67,12 +73,6 @@ void main() {
       ansiSpinner = AnsiSpinner();
       called = 0;
       ansiStatus = AnsiStatus(
-        message: 'Hello world',
-        expectSlowOperation: true,
-        padding: 20,
-        onFinish: () => called++,
-      );
-      summaryStatus = SummaryStatus(
         message: 'Hello world',
         expectSlowOperation: true,
         padding: 20,
@@ -91,32 +91,278 @@ void main() {
       });
     }
 
-    testUsingContext('AnsiSpinner works', () async {
-      ansiSpinner.start();
-      await doWhileAsync(() => ansiSpinner.ticks < 10);
-      List<String> lines = outputStdout();
-      expect(lines[0], startsWith(' \b-\b\\\b|\b/\b-\b\\\b|\b/'));
-      expect(lines[0].endsWith('\n'), isFalse);
-      expect(lines.length, equals(1));
-      ansiSpinner.stop();
-      lines = outputStdout();
-      expect(lines[0], endsWith('\b \b'));
-      expect(lines.length, equals(1));
+    for (String testOs in testPlatforms) {
+      testUsingContext('AnsiSpinner works for $testOs', () async {
+        ansiSpinner.start();
+        await doWhileAsync(() => ansiSpinner.ticks < 10);
+        List<String> lines = outputStdout();
+        expect(lines[0], startsWith(platform.isWindows
+            ? ' \b-\b\\\b|\b/\b-\b\\\b|\b/'
+            : ' \b⣾\b⣽\b⣻\b⢿\b⡿\b⣟\b⣯\b⣷\b⣾\b⣽'));
+        expect(lines[0].endsWith('\n'), isFalse);
+        expect(lines.length, equals(1));
+        ansiSpinner.stop();
+        lines = outputStdout();
+        expect(lines[0], endsWith('\b \b'));
+        expect(lines.length, equals(1));
 
-      // Verify that stopping or canceling multiple times throws.
-      expect(() { ansiSpinner.stop(); }, throwsA(isInstanceOf<AssertionError>()));
-      expect(() { ansiSpinner.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+        // Verify that stopping or canceling multiple times throws.
+        expect(() {
+          ansiSpinner.stop();
+        }, throwsA(isInstanceOf<AssertionError>()));
+        expect(() {
+          ansiSpinner.cancel();
+        }, throwsA(isInstanceOf<AssertionError>()));
+      }, overrides: <Type, Generator>{
+        Platform: () => FakePlatform(operatingSystem: testOs),
+        Stdio: () => mockStdio,
+      });
+
+      testUsingContext('Stdout startProgress handle null inputs on colored terminal for $testOs', () async {
+        context[Logger].startProgress(
+          null,
+          progressId: null,
+          expectSlowOperation: null,
+          progressIndicatorPadding: null,
+        );
+        final List<String> lines = outputStdout();
+        expect(outputStderr().length, equals(1));
+        expect(outputStderr().first, isEmpty);
+        expect(lines[0], matches(platform.isWindows ? r'[ ]{64} [\b]-' : r'[ ]{64} [\b]⣾'));
+      }, overrides: <Type, Generator>{
+        Logger: () => StdoutLogger(),
+        OutputPreferences: () => OutputPreferences(showColor: true),
+        Platform: () => FakePlatform(operatingSystem: testOs)..stdoutSupportsAnsi = true,
+        Stdio: () => mockStdio,
+      });
+
+      testUsingContext('AnsiStatus works when cancelled for $testOs', () async {
+        ansiStatus.start();
+        await doWhileAsync(() => ansiStatus.ticks < 10);
+        List<String> lines = outputStdout();
+        expect(lines[0], startsWith(platform.isWindows
+            ? 'Hello world               \b-\b\\\b|\b/\b-\b\\\b|\b/'
+            : 'Hello world               \b⣾\b⣽\b⣻\b⢿\b⡿\b⣟\b⣯\b⣷\b⣾\b⣽'));
+        expect(lines.length, equals(1));
+        expect(lines[0].endsWith('\n'), isFalse);
+
+        // Verify a cancel does _not_ print the time and prints a newline.
+        ansiStatus.cancel();
+        lines = outputStdout();
+        final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
+        expect(matches, isEmpty);
+        expect(lines[0], endsWith('\b \b'));
+        expect(called, equals(1));
+        expect(lines.length, equals(2));
+        expect(lines[1], equals(''));
+
+        // Verify that stopping or canceling multiple times throws.
+        expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
+        expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
+      }, overrides: <Type, Generator>{
+        Platform: () => FakePlatform(operatingSystem: testOs),
+        Stdio: () => mockStdio,
+      });
+
+      testUsingContext('AnsiStatus works when stopped for $testOs', () async {
+        ansiStatus.start();
+        await doWhileAsync(() => ansiStatus.ticks < 10);
+        List<String> lines = outputStdout();
+        expect(lines[0], startsWith(platform.isWindows
+            ? 'Hello world               \b-\b\\\b|\b/\b-\b\\\b|\b/'
+            : 'Hello world               \b⣾\b⣽\b⣻\b⢿\b⡿\b⣟\b⣯\b⣷\b⣾\b⣽'));
+        expect(lines.length, equals(1));
+
+        // Verify a stop prints the time.
+        ansiStatus.stop();
+        lines = outputStdout();
+        final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
+        expect(matches, isNotNull);
+        expect(matches, hasLength(1));
+        final Match match = matches.first;
+        expect(lines[0], endsWith(match.group(0)));
+        expect(called, equals(1));
+        expect(lines.length, equals(2));
+        expect(lines[1], equals(''));
+
+        // Verify that stopping or canceling multiple times throws.
+        expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
+        expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
+      }, overrides: <Type, Generator>{
+        Platform: () => FakePlatform(operatingSystem: testOs),
+        Stdio: () => mockStdio,
+      });
+    }
+  });
+  group('Output format', () {
+    MockStdio mockStdio;
+    SummaryStatus summaryStatus;
+    int called;
+    final RegExp secondDigits = RegExp(r'[^\b]\b\b\b\b\b[0-9]+[.][0-9]+(?:s|ms)');
+
+    setUp(() {
+      mockStdio = MockStdio();
+      called = 0;
+      summaryStatus = SummaryStatus(
+        message: 'Hello world',
+        expectSlowOperation: true,
+        padding: 20,
+        onFinish: () => called++,
+      );
+    });
+
+    List<String> outputStdout() => mockStdio.writtenToStdout.join('').split('\n');
+    List<String> outputStderr() => mockStdio.writtenToStderr.join('').split('\n');
+
+    testUsingContext('Error logs are wrapped', () async {
+      context[Logger].printError('0123456789' * 15);
+      final List<String> lines = outputStderr();
+      expect(outputStdout().length, equals(1));
+      expect(outputStdout().first, isEmpty);
+      expect(lines[0], equals('0123456789' * 4));
+      expect(lines[1], equals('0123456789' * 4));
+      expect(lines[2], equals('0123456789' * 4));
+      expect(lines[3], equals('0123456789' * 3));
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
+      Stdio: () => mockStdio,
+    });
+
+    testUsingContext('Error logs are wrapped and can be indented.', () async {
+      context[Logger].printError('0123456789' * 15, indent: 5);
+      final List<String> lines = outputStderr();
+      expect(outputStdout().length, equals(1));
+      expect(outputStdout().first, isEmpty);
+      expect(lines.length, equals(6));
+      expect(lines[0], equals('     01234567890123456789012345678901234'));
+      expect(lines[1], equals('     56789012345678901234567890123456789'));
+      expect(lines[2], equals('     01234567890123456789012345678901234'));
+      expect(lines[3], equals('     56789012345678901234567890123456789'));
+      expect(lines[4], equals('     0123456789'));
+      expect(lines[5], isEmpty);
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
+      Stdio: () => mockStdio,
+    });
+
+    testUsingContext('Error logs are wrapped and can have hanging indent.', () async {
+      context[Logger].printError('0123456789' * 15, hangingIndent: 5);
+      final List<String> lines = outputStderr();
+      expect(outputStdout().length, equals(1));
+      expect(outputStdout().first, isEmpty);
+      expect(lines.length, equals(6));
+      expect(lines[0], equals('0123456789012345678901234567890123456789'));
+      expect(lines[1], equals('     01234567890123456789012345678901234'));
+      expect(lines[2], equals('     56789012345678901234567890123456789'));
+      expect(lines[3], equals('     01234567890123456789012345678901234'));
+      expect(lines[4], equals('     56789'));
+      expect(lines[5], isEmpty);
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
+      Stdio: () => mockStdio,
+    });
+
+    testUsingContext('Error logs are wrapped, indented, and can have hanging indent.', () async {
+      context[Logger].printError('0123456789' * 15, indent: 4, hangingIndent: 5);
+      final List<String> lines = outputStderr();
+      expect(outputStdout().length, equals(1));
+      expect(outputStdout().first, isEmpty);
+      expect(lines.length, equals(6));
+      expect(lines[0], equals('    012345678901234567890123456789012345'));
+      expect(lines[1], equals('         6789012345678901234567890123456'));
+      expect(lines[2], equals('         7890123456789012345678901234567'));
+      expect(lines[3], equals('         8901234567890123456789012345678'));
+      expect(lines[4], equals('         901234567890123456789'));
+      expect(lines[5], isEmpty);
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
+      Stdio: () => mockStdio,
+    });
+
+    testUsingContext('Stdout logs are wrapped', () async {
+      context[Logger].printStatus('0123456789' * 15);
+      final List<String> lines = outputStdout();
+      expect(outputStderr().length, equals(1));
+      expect(outputStderr().first, isEmpty);
+      expect(lines[0], equals('0123456789' * 4));
+      expect(lines[1], equals('0123456789' * 4));
+      expect(lines[2], equals('0123456789' * 4));
+      expect(lines[3], equals('0123456789' * 3));
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
+      Stdio: () => mockStdio,
+    });
+
+    testUsingContext('Stdout logs are wrapped and can be indented.', () async {
+      context[Logger].printStatus('0123456789' * 15, indent: 5);
+      final List<String> lines = outputStdout();
+      expect(outputStderr().length, equals(1));
+      expect(outputStderr().first, isEmpty);
+      expect(lines.length, equals(6));
+      expect(lines[0], equals('     01234567890123456789012345678901234'));
+      expect(lines[1], equals('     56789012345678901234567890123456789'));
+      expect(lines[2], equals('     01234567890123456789012345678901234'));
+      expect(lines[3], equals('     56789012345678901234567890123456789'));
+      expect(lines[4], equals('     0123456789'));
+      expect(lines[5], isEmpty);
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
+      Stdio: () => mockStdio,
+    });
+
+    testUsingContext('Stdout logs are wrapped and can have hanging indent.', () async {
+      context[Logger].printStatus('0123456789' * 15, hangingIndent: 5);
+      final List<String> lines = outputStdout();
+      expect(outputStderr().length, equals(1));
+      expect(outputStderr().first, isEmpty);
+      expect(lines.length, equals(6));
+      expect(lines[0], equals('0123456789012345678901234567890123456789'));
+      expect(lines[1], equals('     01234567890123456789012345678901234'));
+      expect(lines[2], equals('     56789012345678901234567890123456789'));
+      expect(lines[3], equals('     01234567890123456789012345678901234'));
+      expect(lines[4], equals('     56789'));
+      expect(lines[5], isEmpty);
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
+      Stdio: () => mockStdio,
+    });
+
+    testUsingContext('Stdout logs are wrapped, indented, and can have hanging indent.', () async {
+      context[Logger].printStatus('0123456789' * 15, indent: 4, hangingIndent: 5);
+      final List<String> lines = outputStdout();
+      expect(outputStderr().length, equals(1));
+      expect(outputStderr().first, isEmpty);
+      expect(lines.length, equals(6));
+      expect(lines[0], equals('    012345678901234567890123456789012345'));
+      expect(lines[1], equals('         6789012345678901234567890123456'));
+      expect(lines[2], equals('         7890123456789012345678901234567'));
+      expect(lines[3], equals('         8901234567890123456789012345678'));
+      expect(lines[4], equals('         901234567890123456789'));
+      expect(lines[5], isEmpty);
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
+      Stdio: () => mockStdio,
+    });
 
     testUsingContext('Error logs are red', () async {
       context[Logger].printError('Pants on fire!');
       final List<String> lines = outputStderr();
       expect(outputStdout().length, equals(1));
       expect(outputStdout().first, isEmpty);
-      expect(lines[0], equals('${AnsiTerminal.red}Pants on fire!${AnsiTerminal.reset}'));
+      expect(lines[0], equals('${AnsiTerminal.red}Pants on fire!${AnsiTerminal.resetColor}'));
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(showColor: true),
+      Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
       Stdio: () => mockStdio,
-      Logger: () => StdoutLogger()..supportsColor = true,
     });
 
     testUsingContext('Stdout logs are not colored', () async {
@@ -126,112 +372,51 @@ void main() {
       expect(outputStderr().first, isEmpty);
       expect(lines[0], equals('All good.'));
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(showColor: true),
       Stdio: () => mockStdio,
-      Logger: () => StdoutLogger()..supportsColor = true,
     });
 
     testUsingContext('Stdout printStatus handle null inputs on colored terminal', () async {
-      context[Logger].printStatus(null, emphasis: null,
-        color: null,
-        newline: null,
-        indent: null);
+      context[Logger].printStatus(null, emphasis: null, color: null, newline: null, indent: null);
       final List<String> lines = outputStdout();
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
       expect(lines[0], equals(''));
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(showColor: true),
       Stdio: () => mockStdio,
-      Logger: () => StdoutLogger()..supportsColor = true,
-    });
-
-    testUsingContext('Stdout startProgress handle null inputs on colored terminal', () async {
-      context[Logger].startProgress(null, progressId: null,
-        expectSlowOperation: null,
-        progressIndicatorPadding: null,
-      );
-      final List<String> lines = outputStdout();
-      expect(outputStderr().length, equals(1));
-      expect(outputStderr().first, isEmpty);
-      expect(lines[0], equals('                                                                 \b-'));
-    }, overrides: <Type, Generator>{
-      Stdio: () => mockStdio,
-      Logger: () => StdoutLogger()..supportsColor = true,
     });
 
     testUsingContext('Stdout printStatus handle null inputs on regular terminal', () async {
-      context[Logger].printStatus(null, emphasis: null,
-          color: null,
-          newline: null,
-          indent: null);
+      context[Logger].printStatus(null, emphasis: null, color: null, newline: null, indent: null);
       final List<String> lines = outputStdout();
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
       expect(lines[0], equals(''));
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(showColor: false),
       Stdio: () => mockStdio,
-      Logger: () => StdoutLogger()..supportsColor = false,
     });
 
     testUsingContext('Stdout startProgress handle null inputs on regular terminal', () async {
-      context[Logger].startProgress(null, progressId: null,
+      context[Logger].startProgress(
+        null,
+        progressId: null,
         expectSlowOperation: null,
         progressIndicatorPadding: null,
       );
       final List<String> lines = outputStdout();
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
-      expect(lines[0], equals('                                                                '));
+      expect(lines[0], matches('[ ]{64}'));
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(showColor: false),
       Stdio: () => mockStdio,
-      Logger: () => StdoutLogger()..supportsColor = false,
     });
-
-    testUsingContext('AnsiStatus works when cancelled', () async {
-      ansiStatus.start();
-      await doWhileAsync(() => ansiStatus.ticks < 10);
-      List<String> lines = outputStdout();
-      expect(lines[0], startsWith('Hello world               \b-\b\\\b|\b/\b-\b\\\b|\b/\b-'));
-      expect(lines.length, equals(1));
-      expect(lines[0].endsWith('\n'), isFalse);
-
-      // Verify a cancel does _not_ print the time and prints a newline.
-      ansiStatus.cancel();
-      lines = outputStdout();
-      final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
-      expect(matches, isEmpty);
-      expect(lines[0], endsWith('\b \b'));
-      expect(called, equals(1));
-      expect(lines.length, equals(2));
-      expect(lines[1], equals(''));
-
-      // Verify that stopping or canceling multiple times throws.
-      expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
-      expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
-
-    testUsingContext('AnsiStatus works when stopped', () async {
-      ansiStatus.start();
-      await doWhileAsync(() => ansiStatus.ticks < 10);
-      List<String> lines = outputStdout();
-      expect(lines[0], startsWith('Hello world               \b-\b\\\b|\b/\b-\b\\\b|\b/\b-'));
-      expect(lines.length, equals(1));
-
-      // Verify a stop prints the time.
-      ansiStatus.stop();
-      lines = outputStdout();
-      final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
-      expect(matches, isNotNull);
-      expect(matches, hasLength(1));
-      final Match match = matches.first;
-      expect(lines[0], endsWith(match.group(0)));
-      expect(called, equals(1));
-      expect(lines.length, equals(2));
-      expect(lines[1], equals(''));
-
-      // Verify that stopping or canceling multiple times throws.
-      expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
-      expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
     testUsingContext('SummaryStatus works when cancelled', () async {
       summaryStatus.start();
@@ -281,14 +466,13 @@ void main() {
     testUsingContext('sequential startProgress calls with StdoutLogger', () async {
       context[Logger].startProgress('AAA')..stop();
       context[Logger].startProgress('BBB')..stop();
-      expect(outputStdout(), <String>[
-        'AAA                                                               0ms',
-        'BBB                                                               0ms',
-        '',
-      ]);
+      expect(outputStdout().length, equals(3));
+      expect(outputStdout()[0], matches(RegExp(r'AAA[ ]{60}[\d ]{3}[\d]ms')));
+      expect(outputStdout()[1], matches(RegExp(r'BBB[ ]{60}[\d ]{3}[\d]ms')));
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(showColor: false),
       Stdio: () => mockStdio,
-      Logger: () => StdoutLogger()..supportsColor = false,
     });
 
     testUsingContext('sequential startProgress calls with VerboseLogger and StdoutLogger', () async {
@@ -302,8 +486,8 @@ void main() {
         matches(r'^$'),
       ]);
     }, overrides: <Type, Generator>{
-      Stdio: () => mockStdio,
       Logger: () => VerboseLogger(StdoutLogger()),
+      Stdio: () => mockStdio,
     });
 
     testUsingContext('sequential startProgress calls with BufferLogger', () async {

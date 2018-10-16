@@ -494,7 +494,7 @@ class ItemGalleryBox extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: TabBarView(
-                children: tabNames.map((String tabName) {
+                children: tabNames.map<Widget>((String tabName) {
                   return Container(
                     key: PageStorageKey<String>(tabName),
                     child: Padding(

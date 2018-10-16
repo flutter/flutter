@@ -65,7 +65,7 @@ class FlutterOptions {
   static const String kFileSystemScheme = 'filesystem-scheme';
 }
 
-abstract class FlutterCommand extends Command<Null> {
+abstract class FlutterCommand extends Command<void> {
   /// The currently executing command (or sub-command).
   ///
   /// Will be `null` until the top-most command has begun execution.
@@ -100,7 +100,7 @@ abstract class FlutterCommand extends Command<Null> {
       abbr: 't',
       defaultsTo: bundle.defaultMainPath,
       help: 'The main entry-point file of the application, as run on the device.\n'
-            'If the --target option is omitted, but a file name is provided on\n'
+            'If the --target option is omitted, but a file name is provided on '
             'the command line, then that is used instead.',
       valueHelp: 'path');
     _usesTargetOption = true;
@@ -243,6 +243,9 @@ abstract class FlutterCommand extends Command<Null> {
       compilationTraceFilePath: argParser.options.containsKey('precompile')
           ? argResults['precompile']
           : null,
+      buildHotUpdate: argParser.options.containsKey('hotupdate')
+          ? argResults['hotupdate']
+          : false,
       extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
           ? argResults[FlutterOptions.kExtraFrontEndOptions]
           : null,
@@ -291,10 +294,10 @@ abstract class FlutterCommand extends Command<Null> {
   /// and [runCommand] to execute the command
   /// so that this method can record and report the overall time to analytics.
   @override
-  Future<Null> run() {
+  Future<void> run() {
     final DateTime startTime = clock.now();
 
-    return context.run<Null>(
+    return context.run<void>(
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
@@ -310,7 +313,7 @@ abstract class FlutterCommand extends Command<Null> {
         } finally {
           final DateTime endTime = clock.now();
           printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
-          // Note that this is checking the result of the call to 'usagePath'
+          // This is checking the result of the call to 'usagePath'
           // (a Future<String>), and not the result of evaluating the Future.
           if (usagePath != null) {
             final List<String> labels = <String>[];
@@ -448,7 +451,7 @@ abstract class FlutterCommand extends Command<Null> {
 
   @protected
   @mustCallSuper
-  Future<Null> validateCommand() async {
+  Future<void> validateCommand() async {
     if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {
@@ -495,10 +498,15 @@ abstract class FlutterCommand extends Command<Null> {
         ? argResults['dynamic'] : false;
     final String compilationTraceFilePath = argParser.options.containsKey('precompile')
         ? argResults['precompile'] : null;
+    final bool buildHotUpdate = argParser.options.containsKey('hotupdate')
+        ? argResults['hotupdate'] : false;
+
     if (compilationTraceFilePath != null && getBuildMode() == BuildMode.debug)
       throw ToolExit('Error: --precompile is not allowed when --debug is specified.');
     if (compilationTraceFilePath != null && !dynamicFlag)
       throw ToolExit('Error: --precompile is allowed only when --dynamic is specified.');
+    if (buildHotUpdate && compilationTraceFilePath == null)
+      throw ToolExit('Error: --hotupdate is allowed only when --precompile is specified.');
   }
 
   ApplicationPackageStore applicationPackages;

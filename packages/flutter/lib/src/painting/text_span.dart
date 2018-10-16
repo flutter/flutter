@@ -355,7 +355,7 @@ class TextSpan extends DiagnosticableTree {
   List<DiagnosticsNode> debugDescribeChildren() {
     if (children == null)
       return const <DiagnosticsNode>[];
-    return children.map((TextSpan child) {
+    return children.map<DiagnosticsNode>((TextSpan child) {
       if (child != null) {
         return child.toDiagnosticsNode();
       } else {

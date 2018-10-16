@@ -2,7 +2,7 @@
 
 ## common
 
-Written to root of Flutter module.
+Written to root of Flutter application.
 
 Adds Dart project files including `pubspec.yaml`.
 
@@ -80,7 +80,7 @@ suitable only when the Flutter part declares no plugin dependencies.
 #### host_app_ephemeral_cocoapods
 
 Written to `.ios/` on top of `host_app_ephemeral`.
- 
+
 Adds CocoaPods support.
 
 Combined contents define an ephemeral host app suitable for when the

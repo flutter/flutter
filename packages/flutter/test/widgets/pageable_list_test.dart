@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 
 Size pageSize = const Size(600.0, 300.0);
 const List<int> defaultPages = <int>[0, 1, 2, 3, 4, 5];
-final List<GlobalKey> globalKeys = defaultPages.map((_) => GlobalKey()).toList();
+final List<GlobalKey> globalKeys = defaultPages.map<GlobalKey>((_) => GlobalKey()).toList();
 int currentPage;
 
 Widget buildPage(int page) {
@@ -30,7 +30,7 @@ Widget buildFrame({
     scrollDirection: Axis.horizontal,
     reverse: reverse,
     onPageChanged: (int page) { currentPage = page; },
-    children: pages.map(buildPage).toList(),
+    children: pages.map<Widget>(buildPage).toList(),
   );
 
   // The test framework forces the frame to be 800x600, so we need to create

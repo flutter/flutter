@@ -77,10 +77,6 @@ const int kMaxUnsignedSMI = 0x3FFFFFFFFFFFFFFF;
 /// A BitField over an enum (or other class whose values implement "index").
 /// Only the first 62 values of the enum can be used as indices.
 class BitField<T extends dynamic> {
-  static const int _smiBits = 62; // see https://www.dartlang.org/articles/numeric-computation/#smis-and-mints
-  static const int _allZeros = 0;
-  static const int _allOnes = kMaxUnsignedSMI; // 2^(_kSMIBits+1)-1
-
   /// Creates a bit field of all zeros.
   ///
   /// The given length must be at most 62.
@@ -100,6 +96,10 @@ class BitField<T extends dynamic> {
 
   final int _length;
   int _bits;
+
+  static const int _smiBits = 62; // see https://www.dartlang.org/articles/numeric-computation/#smis-and-mints
+  static const int _allZeros = 0;
+  static const int _allOnes = kMaxUnsignedSMI; // 2^(_kSMIBits+1)-1
 
   /// Returns whether the bit with the given index is set to one.
   bool operator [](T index) {
@@ -280,3 +280,23 @@ class _LazyListIterator<E> implements Iterator<E> {
     return true;
   }
 }
+
+/// A factory interface that also reports the type of the created objects.
+class Factory<T> {
+  /// Creates a new factory.
+  ///
+  /// The `constructor` parameter must not be null.
+  const Factory(this.constructor) : assert(constructor != null);
+
+  /// Creates a new object of type T.
+  final ValueGetter<T> constructor;
+
+  /// The type of the objects created by this factory.
+  Type get type => T;
+
+  @override
+  String toString() {
+    return 'Factory(type: $type)';
+  }
+}
+

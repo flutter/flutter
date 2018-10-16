@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show LineSplitter;
 
 import 'package:meta/meta.dart';
 
 import 'io.dart';
+import 'platform.dart';
 import 'terminal.dart';
 import 'utils.dart';
 
@@ -21,30 +21,60 @@ abstract class Logger {
   bool quiet = false;
 
   bool get supportsColor => terminal.supportsColor;
-  set supportsColor(bool value) {
-    terminal.supportsColor = value;
-  }
 
-  /// Display an error level message to the user. Commands should use this if they
+  bool get hasTerminal => stdio.hasTerminal;
+
+  /// Display an error [message] to the user. Commands should use this if they
   /// fail in some way.
+  ///
+  /// The [message] argument is printed to the stderr in red by default.
+  /// The [stackTrace] argument is the stack trace that will be printed if
+  /// supplied.
+  /// The [emphasis] argument will cause the output message be printed in bold text.
+  /// The [color] argument will print the message in the supplied color instead
+  /// of the default of red. Colors will not be printed if the output terminal
+  /// doesn't support them.
+  /// The [indent] argument specifies the number of spaces to indent the overall
+  /// message. If wrapping is enabled in [outputPreferences], then the wrapped
+  /// lines will be indented as well.
+  /// If [hangingIndent] is specified, then any wrapped lines will be indented
+  /// by this much more than the first line, if wrapping is enabled in
+  /// [outputPreferences].
   void printError(
     String message, {
     StackTrace stackTrace,
     bool emphasis,
     TerminalColor color,
+    int indent,
+    int hangingIndent,
   });
 
   /// Display normal output of the command. This should be used for things like
   /// progress messages, success messages, or just normal command output.
   ///
-  /// If [newline] is null, then it defaults to "true".  If [emphasis] is null,
-  /// then it defaults to "false".
+  /// The [message] argument is printed to the stderr in red by default.
+  /// The [stackTrace] argument is the stack trace that will be printed if
+  /// supplied.
+  /// If the [emphasis] argument is true, it will cause the output message be
+  /// printed in bold text. Defaults to false.
+  /// The [color] argument will print the message in the supplied color instead
+  /// of the default of red. Colors will not be printed if the output terminal
+  /// doesn't support them.
+  /// If [newline] is true, then a newline will be added after printing the
+  /// status. Defaults to true.
+  /// The [indent] argument specifies the number of spaces to indent the overall
+  /// message. If wrapping is enabled in [outputPreferences], then the wrapped
+  /// lines will be indented as well.
+  /// If [hangingIndent] is specified, then any wrapped lines will be indented
+  /// by this much more than the first line, if wrapping is enabled in
+  /// [outputPreferences].
   void printStatus(
     String message, {
     bool emphasis,
     TerminalColor color,
     bool newline,
     int indent,
+    int hangingIndent,
   });
 
   /// Use this for verbose tracing output. Users can turn this output on in order
@@ -62,6 +92,7 @@ abstract class Logger {
     String message, {
     String progressId,
     bool expectSlowOperation,
+    bool multilineOutput,
     int progressIndicatorPadding,
   });
 }
@@ -78,8 +109,11 @@ class StdoutLogger extends Logger {
     StackTrace stackTrace,
     bool emphasis,
     TerminalColor color,
+    int indent,
+    int hangingIndent,
   }) {
     message ??= '';
+    message = wrapText(message, indent: indent, hangingIndent: hangingIndent);
     _status?.cancel();
     _status = null;
     if (emphasis == true)
@@ -98,19 +132,16 @@ class StdoutLogger extends Logger {
     TerminalColor color,
     bool newline,
     int indent,
+    int hangingIndent,
   }) {
     message ??= '';
+    message = wrapText(message, indent: indent, hangingIndent: hangingIndent);
     _status?.cancel();
     _status = null;
     if (emphasis == true)
       message = terminal.bolden(message);
     if (color != null)
       message = terminal.color(message, color);
-    if (indent != null && indent > 0) {
-      message = LineSplitter.split(message)
-          .map((String line) => ' ' * indent + line)
-          .join('\n');
-    }
     if (newline != false)
       message = '$message\n';
     writeToStdOut(message);
@@ -129,6 +160,7 @@ class StdoutLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation,
+    bool multilineOutput,
     int progressIndicatorPadding,
   }) {
     expectSlowOperation ??= false;
@@ -141,6 +173,7 @@ class StdoutLogger extends Logger {
       _status = AnsiStatus(
         message: message,
         expectSlowOperation: expectSlowOperation,
+        multilineOutput: multilineOutput,
         padding: progressIndicatorPadding,
         onFinish: _clearStatus,
       )..start();
@@ -197,8 +230,13 @@ class BufferLogger extends Logger {
     StackTrace stackTrace,
     bool emphasis,
     TerminalColor color,
+    int indent,
+    int hangingIndent,
   }) {
-    _error.writeln(terminal.color(message, color ?? TerminalColor.red));
+    _error.writeln(terminal.color(
+      wrapText(message, indent: indent, hangingIndent: hangingIndent),
+      color ?? TerminalColor.red,
+    ));
   }
 
   @override
@@ -208,11 +246,12 @@ class BufferLogger extends Logger {
     TerminalColor color,
     bool newline,
     int indent,
+    int hangingIndent,
   }) {
     if (newline != false)
-      _status.writeln(message);
+      _status.writeln(wrapText(message, indent: indent, hangingIndent: hangingIndent));
     else
-      _status.write(message);
+      _status.write(wrapText(message, indent: indent, hangingIndent: hangingIndent));
   }
 
   @override
@@ -223,6 +262,7 @@ class BufferLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation,
+    bool multilineOutput,
     int progressIndicatorPadding,
   }) {
     printStatus(message);
@@ -255,8 +295,14 @@ class VerboseLogger extends Logger {
     StackTrace stackTrace,
     bool emphasis,
     TerminalColor color,
+    int indent,
+    int hangingIndent,
   }) {
-    _emit(_LogType.error, message, stackTrace);
+    _emit(
+      _LogType.error,
+      wrapText(message, indent: indent, hangingIndent: hangingIndent),
+      stackTrace,
+    );
   }
 
   @override
@@ -266,8 +312,9 @@ class VerboseLogger extends Logger {
     TerminalColor color,
     bool newline,
     int indent,
+    int hangingIndent,
   }) {
-    _emit(_LogType.status, message);
+    _emit(_LogType.status, wrapText(message, indent: indent, hangingIndent: hangingIndent));
   }
 
   @override
@@ -280,6 +327,7 @@ class VerboseLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation,
+    bool multilineOutput,
     int progressIndicatorPadding,
   }) {
     printStatus(message);
@@ -366,7 +414,7 @@ class Status {
       onFinish();
   }
 
-  /// Call to cancel the spinner after failure or cancelation.
+  /// Call to cancel the spinner after failure or cancellation.
   void cancel() {
     assert(_isStarted);
     _isStarted = false;
@@ -375,18 +423,25 @@ class Status {
   }
 }
 
-/// An [AnsiSpinner] is a simple animation that does nothing but implement an
-/// ASCII spinner. When stopped or canceled, the animation erases itself.
+/// An [AnsiSpinner] is a simple animation that does nothing but implement a
+/// ASCII/Unicode spinner. When stopped or canceled, the animation erases
+/// itself.
 class AnsiSpinner extends Status {
   AnsiSpinner({VoidCallback onFinish}) : super(onFinish: onFinish);
 
   int ticks = 0;
   Timer timer;
 
-  static final List<String> _progress = <String>[r'-', r'\', r'|', r'/'];
+  // Windows console font has a limited set of Unicode characters.
+  List<String> get _animation => platform.isWindows
+      ? <String>[r'-', r'\', r'|', r'/']
+      : <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
+
+  String get _backspace => '\b' * _animation[0].length;
+  String get _clear => ' ' *  _animation[0].length;
 
   void _callback(Timer timer) {
-    stdout.write('\b${_progress[ticks++ % _progress.length]}');
+    stdout.write('$_backspace${_animation[ticks++ % _animation.length]}');
   }
 
   @override
@@ -402,7 +457,7 @@ class AnsiSpinner extends Status {
   void stop() {
     assert(timer.isActive);
     timer.cancel();
-    stdout.write('\b \b');
+    stdout.write('$_backspace$_clear$_backspace');
     super.stop();
   }
 
@@ -410,7 +465,7 @@ class AnsiSpinner extends Status {
   void cancel() {
     assert(timer.isActive);
     timer.cancel();
-    stdout.write('\b \b');
+    stdout.write('$_backspace$_clear$_backspace');
     super.cancel();
   }
 }
@@ -423,23 +478,29 @@ class AnsiStatus extends AnsiSpinner {
   AnsiStatus({
     String message,
     bool expectSlowOperation,
+    bool multilineOutput,
     int padding,
     VoidCallback onFinish,
   })  : message = message ?? '',
         padding = padding ?? 0,
         expectSlowOperation = expectSlowOperation ?? false,
+        multilineOutput = multilineOutput ?? false,
         super(onFinish: onFinish);
 
   final String message;
   final bool expectSlowOperation;
+  final bool multilineOutput;
   final int padding;
 
   Stopwatch stopwatch;
 
+  static const String _margin = '     ';
+
   @override
   void start() {
+    assert(stopwatch == null || !stopwatch.isRunning);
     stopwatch = Stopwatch()..start();
-    stdout.write('${message.padRight(padding)}     ');
+    stdout.write('${message.padRight(padding)}$_margin');
     super.start();
   }
 
@@ -456,17 +517,23 @@ class AnsiStatus extends AnsiSpinner {
     stdout.write('\n');
   }
 
-  /// Backs up 4 characters and prints a (minimum) 5 character padded time.  If
-  /// [expectSlowOperation] is true, the time is in seconds; otherwise,
-  /// milliseconds.  Only backs up 4 characters because [super.cancel] backs
-  /// up one.
+  /// Print summary information when a task is done.
   ///
-  /// Example: '\b\b\b\b 0.5s', '\b\b\b\b150ms', '\b\b\b\b1600ms'
+  /// If [multilineOutput] is false, backs up 4 characters and prints a
+  /// (minimum) 5 character padded time. If [expectSlowOperation] is true, the
+  /// time is in seconds; otherwise, milliseconds. Only backs up 4 characters
+  /// because [super.cancel] backs up one.
+  ///
+  /// If [multilineOutput] is true, then it prints the message again on a new
+  /// line before writing the elapsed time, and doesn't back up at all.
   void writeSummaryInformation() {
+    final String prefix = multilineOutput
+        ? '\n${'$message Done'.padRight(padding - 4)}$_margin'
+        : '\b\b\b\b';
     if (expectSlowOperation) {
-      stdout.write('\b\b\b\b${getElapsedAsSeconds(stopwatch.elapsed).padLeft(5)}');
+      stdout.write('$prefix${getElapsedAsSeconds(stopwatch.elapsed).padLeft(5)}');
     } else {
-      stdout.write('\b\b\b\b${getElapsedAsMilliseconds(stopwatch.elapsed).padLeft(5)}');
+      stdout.write('$prefix${getElapsedAsMilliseconds(stopwatch.elapsed).padLeft(5)}');
     }
   }
 }

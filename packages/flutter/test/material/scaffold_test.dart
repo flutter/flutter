@@ -124,7 +124,7 @@ void main() {
   });
 
   testWidgets('Floating action entrance/exit animation', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: const Scaffold(
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(
       floatingActionButton: FloatingActionButton(
         key: Key('one'),
         onPressed: null,
@@ -134,7 +134,7 @@ void main() {
 
     expect(tester.binding.transientCallbackCount, 0);
 
-    await tester.pumpWidget(MaterialApp(home: const Scaffold(
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(
       floatingActionButton: FloatingActionButton(
         key: Key('two'),
         onPressed: null,
@@ -146,11 +146,11 @@ void main() {
     await tester.pumpWidget(Container());
     expect(tester.binding.transientCallbackCount, 0);
 
-    await tester.pumpWidget(MaterialApp(home: const Scaffold()));
+    await tester.pumpWidget(const MaterialApp(home: Scaffold()));
 
     expect(tester.binding.transientCallbackCount, 0);
 
-    await tester.pumpWidget(MaterialApp(home: const Scaffold(
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(
       floatingActionButton: FloatingActionButton(
         key: Key('one'),
         onPressed: null,
@@ -569,7 +569,7 @@ void main() {
     const String drawerLabel = 'I am the reason for this test';
 
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(MaterialApp(home: const Scaffold(
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(
       body: Text(bodyLabel),
       persistentFooterButtons: <Widget>[Text(persistentFooterButtonLabel)],
       bottomNavigationBar: Text(bottomNavigationBarLabel),
@@ -970,7 +970,7 @@ void main() {
       const String endDrawerLabel = 'I am the label on end side';
 
       final SemanticsTester semantics = SemanticsTester(tester);
-      await tester.pumpWidget(MaterialApp(home: const Scaffold(
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(
         body: Text(bodyLabel),
         drawer: Drawer(child: Text(drawerLabel)),
         endDrawer: Drawer(child: Text(endDrawerLabel)),

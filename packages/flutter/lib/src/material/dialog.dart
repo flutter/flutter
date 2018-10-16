@@ -101,9 +101,13 @@ class Dialog extends StatelessWidget {
 /// displayed below the content.
 ///
 /// If the content is too large to fit on the screen vertically, the dialog will
-/// display the title and the actions and let the content overflow. Consider
-/// using a scrolling widget, such as [ListView], for [content] to avoid
-/// overflow.
+/// display the title and the actions and let the content overflow, which is
+/// rarely desired. Consider using a scrolling widget for [content], such as
+/// [SingleChildScrollView], to avoid overflow. (However, be aware that since
+/// [AlertDialog] tries to size itself using the intrinsic dimensions of its
+/// children, widgets such as [ListView], [GridView], and [CustomScrollView],
+/// which use lazy viewports, will not work. If this is a problem, consider
+/// using [Dialog] directly.)
 ///
 /// For dialogs that offer the user a choice between several options, consider
 /// using a [SimpleDialog].

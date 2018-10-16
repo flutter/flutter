@@ -21,10 +21,10 @@ KernelCompiler get kernelCompiler => context[KernelCompiler];
 typedef CompilerMessageConsumer = void Function(String message, {bool emphasis, TerminalColor color});
 
 class CompilerOutput {
+  const CompilerOutput(this.outputFilename, this.errorCount);
+
   final String outputFilename;
   final int errorCount;
-
-  const CompilerOutput(this.outputFilename, this.errorCount);
 }
 
 class _StdoutHandler {
@@ -32,30 +32,35 @@ class _StdoutHandler {
     reset();
   }
 
+  bool compilerMessageReceived = false;
   final CompilerMessageConsumer consumer;
   String boundaryKey;
   Completer<CompilerOutput> compilerOutput;
 
   bool _suppressCompilerMessages;
 
-  void handler(String string) {
+  void handler(String message) {
     const String kResultPrefix = 'result ';
     if (boundaryKey == null) {
-      if (string.startsWith(kResultPrefix))
-        boundaryKey = string.substring(kResultPrefix.length);
-    } else if (string.startsWith(boundaryKey)) {
-      if (string.length <= boundaryKey.length) {
+      if (message.startsWith(kResultPrefix))
+        boundaryKey = message.substring(kResultPrefix.length);
+    } else if (message.startsWith(boundaryKey)) {
+      if (message.length <= boundaryKey.length) {
         compilerOutput.complete(null);
         return;
       }
-      final int spaceDelimiter = string.lastIndexOf(' ');
+      final int spaceDelimiter = message.lastIndexOf(' ');
       compilerOutput.complete(
         CompilerOutput(
-          string.substring(boundaryKey.length + 1, spaceDelimiter),
-          int.parse(string.substring(spaceDelimiter + 1).trim())));
+          message.substring(boundaryKey.length + 1, spaceDelimiter),
+          int.parse(message.substring(spaceDelimiter + 1).trim())));
     }
     else if (!_suppressCompilerMessages) {
-      consumer('compiler message: $string');
+      if (compilerMessageReceived == false) {
+        consumer('\nCompiler message:');
+        compilerMessageReceived = true;
+      }
+      consumer(message);
     }
   }
 
@@ -63,6 +68,7 @@ class _StdoutHandler {
   // with its own boundary key and new completer.
   void reset({bool suppressCompilerMessages = false}) {
     boundaryKey = null;
+    compilerMessageReceived = false;
     compilerOutput = Completer<CompilerOutput>();
     _suppressCompilerMessages = suppressCompilerMessages;
   }
@@ -78,7 +84,6 @@ class KernelCompiler {
     String depFilePath,
     bool linkPlatformKernelIn = false,
     bool aot = false,
-    List<String> entryPointsJsonFiles,
     bool trackWidgetCreation = false,
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath,
@@ -140,11 +145,6 @@ class KernelCompiler {
     if (targetProductVm) {
       command.add('-Ddart.vm.product=true');
     }
-    if (entryPointsJsonFiles != null) {
-      for (String entryPointsJson in entryPointsJsonFiles) {
-        command.addAll(<String>['--entry-points', entryPointsJson]);
-      }
-    }
     if (incrementalCompilerByteStorePath != null) {
       command.add('--incremental');
     }
@@ -179,11 +179,11 @@ class KernelCompiler {
     final _StdoutHandler _stdoutHandler = _StdoutHandler();
 
     server.stderr
-      .transform(utf8.decoder)
-      .listen((String s) { printError('compiler message: $s'); });
+      .transform<String>(utf8.decoder)
+      .listen((String message) { printError(message); });
     server.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
@@ -198,9 +198,9 @@ class KernelCompiler {
 
 /// Class that allows to serialize compilation requests to the compiler.
 abstract class _CompilationRequest {
-  Completer<CompilerOutput> completer;
-
   _CompilationRequest(this.completer);
+
+  Completer<CompilerOutput> completer;
 
   Future<CompilerOutput> _run(ResidentCompiler compiler);
 
@@ -248,9 +248,9 @@ class _CompileExpressionRequest extends _CompilationRequest {
 /// restarts the Flutter app.
 class ResidentCompiler {
   ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation = false,
-      String packagesPath, List<String> fileSystemRoots, String fileSystemScheme ,
+      String packagesPath, List<String> fileSystemRoots, String fileSystemScheme,
       CompilerMessageConsumer compilerMessageConsumer = printError,
-      String initializeFromDill})
+      String initializeFromDill, bool unsafePackageSerialization})
     : assert(_sdkRoot != null),
       _trackWidgetCreation = trackWidgetCreation,
       _packagesPath = packagesPath,
@@ -258,7 +258,8 @@ class ResidentCompiler {
       _fileSystemScheme = fileSystemScheme,
       _stdoutHandler = _StdoutHandler(consumer: compilerMessageConsumer),
       _controller = StreamController<_CompilationRequest>(),
-      _initializeFromDill = initializeFromDill {
+      _initializeFromDill = initializeFromDill,
+      _unsafePackageSerialization = unsafePackageSerialization {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
@@ -272,6 +273,7 @@ class ResidentCompiler {
   Process _server;
   final _StdoutHandler _stdoutHandler;
   String _initializeFromDill;
+  bool _unsafePackageSerialization;
 
   final StreamController<_CompilationRequest> _controller;
 
@@ -369,11 +371,14 @@ class ResidentCompiler {
     if (_initializeFromDill != null) {
       command.addAll(<String>['--initialize-from-dill', _initializeFromDill]);
     }
+    if (_unsafePackageSerialization == true) {
+      command.add('--unsafe-package-serialization');
+    }
     printTrace(command.join(' '));
     _server = await processManager.start(command);
     _server.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen(
         _stdoutHandler.handler,
         onDone: () {
@@ -385,9 +390,9 @@ class ResidentCompiler {
         });
 
     _server.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen((String s) { printError('compiler message: $s'); });
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen((String message) { printError(message); });
 
     _server.stdin.writeln('compile $scriptFilename');
 

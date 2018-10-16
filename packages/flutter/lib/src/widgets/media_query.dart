@@ -315,8 +315,8 @@ class MediaQueryData {
   String toString() {
     return '$runtimeType('
              'size: $size, '
-             'devicePixelRatio: $devicePixelRatio, '
-             'textScaleFactor: $textScaleFactor, '
+             'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}, '
+             'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}, '
              'padding: $padding, '
              'viewInsets: $viewInsets, '
              'alwaysUse24HourFormat: $alwaysUse24HourFormat, '

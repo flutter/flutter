@@ -6,6 +6,8 @@ import 'dart:math' show Random;
 
 import 'package:flutter/cupertino.dart';
 
+import '../../gallery/demo.dart';
+
 class CupertinoRefreshControlDemo extends StatefulWidget {
   static const String routeName = '/cupertino/refresh';
 
@@ -48,14 +50,15 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
           decoration: const BoxDecoration(color: Color(0xFFEFEFF4)),
           child: CustomScrollView(
             slivers: <Widget>[
-              const CupertinoSliverNavigationBar(
-                largeTitle: Text('Cupertino Refresh'),
+              CupertinoSliverNavigationBar(
+                largeTitle: const Text('Cupertino Refresh'),
                 previousPageTitle: 'Cupertino',
+                trailing: CupertinoDemoDocumentationButton(CupertinoRefreshControlDemo.routeName),
               ),
               CupertinoSliverRefreshControl(
                 onRefresh: () {
                   return Future<void>.delayed(const Duration(seconds: 2))
-                      ..then((_) {
+                      ..then<void>((_) {
                         if (mounted) {
                           setState(() => repopulateList());
                         }

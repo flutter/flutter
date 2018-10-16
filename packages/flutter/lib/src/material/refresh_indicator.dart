@@ -150,36 +150,32 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   bool _isIndicatorAtTop;
   double _dragOffset;
 
+  static final Animatable<double> _threeQuarterTween = Tween<double>(begin: 0.0, end: 0.75);
+  static final Animatable<double> _kDragSizeFactorLimitTween = Tween<double>(begin: 0.0, end: _kDragSizeFactorLimit);
+  static final Animatable<double> _oneToZeroTween = Tween<double>(begin: 1.0, end: 0.0);
+
   @override
   void initState() {
     super.initState();
     _positionController = AnimationController(vsync: this);
-    _positionFactor = Tween<double>(
-      begin: 0.0,
-      end: _kDragSizeFactorLimit,
-    ).animate(_positionController);
-    _value = Tween<double>( // The "value" of the circular progress indicator during a drag.
-      begin: 0.0,
-      end: 0.75,
-    ).animate(_positionController);
+    _positionFactor = _positionController.drive(_kDragSizeFactorLimitTween);
+    _value = _positionController.drive(_threeQuarterTween); // The "value" of the circular progress indicator during a drag.
 
     _scaleController = AnimationController(vsync: this);
-    _scaleFactor = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(_scaleController);
+    _scaleFactor = _scaleController.drive(_oneToZeroTween);
   }
 
   @override
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
-    _valueColor = ColorTween(
-      begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
-      end: (widget.color ?? theme.accentColor).withOpacity(1.0)
-    ).animate(CurvedAnimation(
-      parent: _positionController,
-      curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
-    ));
+    _valueColor = _positionController.drive(
+      ColorTween(
+        begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
+        end: (widget.color ?? theme.accentColor).withOpacity(1.0)
+      ).chain(CurveTween(
+        curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
+      )),
+    );
     super.didChangeDependencies();
   }
 

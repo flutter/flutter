@@ -80,6 +80,9 @@ BuildApp() {
   AssertExists "${project_path}"
 
   local derived_dir="${SOURCE_ROOT}/Flutter"
+  if [[ -e "${project_path}/.ios" ]]; then
+    derived_dir="${project_path}/.ios/Flutter"
+  fi
   RunCommand mkdir -p -- "$derived_dir"
   AssertExists "$derived_dir"
 
@@ -138,7 +141,32 @@ BuildApp() {
     fi
     StreamOutput "done"
 
-    RunCommand cp -r -- "${build_dir}/aot/App.framework" "${derived_dir}"
+    local app_framework="${build_dir}/aot/App.framework"
+
+    RunCommand cp -r -- "${app_framework}" "${derived_dir}"
+
+    StreamOutput " ├─Generating dSYM file..."
+    # Xcode calls `symbols` during app store upload, which uses Spotlight to
+    # find dSYM files for embedded frameworks. When it finds the dSYM file for
+    # `App.framework` it throws an error, which aborts the app store upload.
+    # To avoid this, we place the dSYM files in a folder ending with ".noindex",
+    # which hides it from Spotlight, https://github.com/flutter/flutter/issues/22560.
+    RunCommand mkdir -p -- "${build_dir}/dSYMs.noindex"
+    RunCommand xcrun dsymutil -o "${build_dir}/dSYMs.noindex/App.framework.dSYM" "${app_framework}/App"
+    if [[ $? -ne 0 ]]; then
+      EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
+      exit -1
+    fi
+    StreamOutput "done"
+
+    StreamOutput " ├─Stripping debug symbols..."
+    RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
+    if [[ $? -ne 0 ]]; then
+      EchoError "Failed to strip ${derived_dir}/App.framework/App."
+      exit -1
+    fi
+    StreamOutput "done"
+
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
 
@@ -176,7 +204,6 @@ BuildApp() {
     build bundle                                                            \
     --target-platform=ios                                                   \
     --target="${target_path}"                                               \
-    --snapshot="${build_dir}/snapshot_blob.bin"                             \
     --${build_mode}                                                         \
     --depfile="${build_dir}/snapshot_blob.bin.d"                            \
     --asset-dir="${derived_dir}/flutter_assets"                             \

@@ -44,5 +44,6 @@ void main() {
       await Future<void>.delayed(requiredLifespan);
       expect(_flutter.hasExited, equals(false));
     });
-  }, timeout: const Timeout.factor(6));
+    // https://github.com/flutter/flutter/issues/23109
+  }, timeout: const Timeout.factor(6), skip: true);
 }

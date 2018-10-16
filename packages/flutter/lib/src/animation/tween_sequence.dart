@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
-import 'animations.dart';
 import 'tween.dart';
 
 /// Enables creating an [Animation] whose value is defined by a
@@ -67,12 +66,11 @@ class TweenSequence<T> extends Animatable<T> {
   T _evaluateAt(double t, int index) {
     final TweenSequenceItem<T> element = _items[index];
     final double tInterval = _intervals[index].value(t);
-    return element.tween.evaluate(AlwaysStoppedAnimation<double>(tInterval));
+    return element.tween.transform(tInterval);
   }
 
   @override
-  T evaluate(Animation<double> animation) {
-    final double t = animation.value;
+  T transform(double t) {
     assert(t >= 0.0 && t <= 1.0);
     if (t == 1.0)
       return _evaluateAt(t, _items.length - 1);
@@ -99,6 +97,8 @@ class TweenSequenceItem<T> {
   /// Defines the value of the [TweenSequence] for the interval within the
   /// animation's duration indicated by [weight] and this item's position
   /// in the list of items.
+  ///
+  /// ## Sample code
   ///
   /// The value of this item can be "curved" by chaining it to a [CurveTween].
   /// For example to create a tween that eases from 0.0 to 10.0:

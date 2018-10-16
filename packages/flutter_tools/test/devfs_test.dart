@@ -62,6 +62,36 @@ void main() {
       expect(content.isModified, isTrue);
       expect(content.isModified, isFalse);
     });
+    testUsingContext('file', () async {
+      final File file = fs.file(filePath);
+      final DevFSFileContent content = DevFSFileContent(file);
+      expect(content.isModified, isFalse);
+      expect(content.isModified, isFalse);
+
+      file.parent.createSync(recursive: true);
+      file.writeAsBytesSync(<int>[1, 2, 3]);
+
+      final DateTime fiveSecondsAgo = DateTime.now().subtract(Duration(seconds:5));
+      expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
+      expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
+      expect(content.isModifiedAfter(null), isTrue);
+
+      file.writeAsBytesSync(<int>[2, 3, 4]);
+      expect(content.fileDependencies, <String>[filePath]);
+      expect(content.isModified, isTrue);
+      expect(content.isModified, isFalse);
+      expect(await content.contentsAsBytes(), <int>[2, 3, 4]);
+      updateFileModificationTime(file.path, fiveSecondsAgo, 0);
+      expect(content.isModified, isFalse);
+      expect(content.isModified, isFalse);
+
+      file.deleteSync();
+      expect(content.isModified, isTrue);
+      expect(content.isModified, isFalse);
+      expect(content.isModified, isFalse);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
   });
 
   group('devfs local', () {
@@ -424,13 +454,13 @@ void main() {
 }
 
 class MockVMService extends BasicMock implements VMService {
-  Uri _httpAddress;
-  HttpServer _server;
-  MockVM _vm;
-
   MockVMService() {
     _vm = MockVM(this);
   }
+
+  Uri _httpAddress;
+  HttpServer _server;
+  MockVM _vm;
 
   @override
   Uri get httpAddress => _httpAddress;
@@ -438,7 +468,7 @@ class MockVMService extends BasicMock implements VMService {
   @override
   VM get vm => _vm;
 
-  Future<Null> setUp() async {
+  Future<void> setUp() async {
     try {
       _server = await HttpServer.bind(InternetAddress.loopbackIPv6, 0);
       _httpAddress = Uri.parse('http://[::1]:${_server.port}');
@@ -451,7 +481,7 @@ class MockVMService extends BasicMock implements VMService {
       final String fsName = request.headers.value('dev_fs_name');
       final String devicePath = utf8.decode(base64.decode(request.headers.value('dev_fs_uri_b64')));
       messages.add('writeFile $fsName $devicePath');
-      request.drain<List<int>>().then<Null>((List<int> value) {
+      request.drain<List<int>>().then<void>((List<int> value) {
         request.response
           ..write('Got it')
           ..close();
@@ -459,7 +489,7 @@ class MockVMService extends BasicMock implements VMService {
     });
   }
 
-  Future<Null> tearDown() async {
+  Future<void> tearDown() async {
     await _server?.close();
   }
 
@@ -468,13 +498,13 @@ class MockVMService extends BasicMock implements VMService {
 }
 
 class MockVM implements VM {
+  MockVM(this._service);
+
   final MockVMService _service;
   final Uri _baseUri = Uri.parse('file:///tmp/devfs/test');
   bool _devFSExists = false;
 
   static const int kFileSystemAlreadyExists = 1001;
-
-  MockVM(this._service);
 
   @override
   Future<Map<String, dynamic>> createDevFS(String fsName) async {
@@ -522,7 +552,7 @@ void _cleanupTempDirs() {
     tryToDelete(_tempDirs.removeLast());
 }
 
-Future<Null> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash = false }) async {
+Future<void> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash = false }) async {
   final Directory pkgTempDir = _newTempDir(fs);
   String pkgFilePath = fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName);
   if (doubleSlash) {

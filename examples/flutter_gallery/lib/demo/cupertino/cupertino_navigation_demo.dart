@@ -8,6 +8,8 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 const List<Color> coolColors = <Color>[
@@ -27,6 +29,8 @@ const List<String> coolColorNames = <String>[
   'Banan', 'Falu', 'Gingerline', 'Incarnadine', 'Labrador', 'Nattier',
   'Pervenche', 'Sinoper', 'Verditer', 'Watchet', 'Zaffre',
 ];
+
+const int _kChildCount = 50;
 
 class CupertinoNavigationDemo extends StatelessWidget {
   CupertinoNavigationDemo()
@@ -125,6 +129,15 @@ class ExitButton extends StatelessWidget {
   }
 }
 
+final Widget trailingButtons = Row(
+  mainAxisSize: MainAxisSize.min,
+  children: <Widget>[
+    CupertinoDemoDocumentationButton(CupertinoNavigationDemo.routeName),
+    const Padding(padding: EdgeInsets.only(left: 8.0)),
+    const ExitButton(),
+  ],
+);
+
 class CupertinoDemoTab1 extends StatelessWidget {
   const CupertinoDemoTab1({this.colorItems, this.colorNameItems});
 
@@ -135,9 +148,10 @@ class CupertinoDemoTab1 extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       child: CustomScrollView(
+        semanticChildCount: _kChildCount,
         slivers: <Widget>[
-          const CupertinoSliverNavigationBar(
-            trailing: ExitButton(),
+          CupertinoSliverNavigationBar(
+            trailing: trailingButtons,
           ),
           SliverPadding(
             // Top media padding consumed by CupertinoSliverNavigationBar.
@@ -152,12 +166,12 @@ class CupertinoDemoTab1 extends StatelessWidget {
                 (BuildContext context, int index) {
                   return Tab1RowItem(
                     index: index,
-                    lastItem: index == 49,
+                    lastItem: index == _kChildCount - 1,
                     color: colorItems[index],
                     colorName: colorNameItems[index],
                   );
                 },
-                childCount: 50,
+                childCount: _kChildCount,
               ),
             ),
           ),
@@ -421,8 +435,8 @@ class CupertinoDemoTab2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        trailing: ExitButton(),
+      navigationBar: CupertinoNavigationBar(
+        trailing: trailingButtons,
       ),
       child: ListView(
         children: <Widget>[
@@ -704,8 +718,8 @@ class CupertinoDemoTab3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        trailing: ExitButton(),
+      navigationBar: CupertinoNavigationBar(
+        trailing: trailingButtons,
       ),
       child: DecoratedBox(
         decoration: const BoxDecoration(color: Color(0xFFEFEFF4)),

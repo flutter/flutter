@@ -145,7 +145,7 @@ void main() {
   }
 
   List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
-    return points.map((TextSelectionPoint point) {
+    return points.map<TextSelectionPoint>((TextSelectionPoint point) {
       return TextSelectionPoint(
         box.localToGlobal(point.point),
         point.direction,
@@ -915,7 +915,7 @@ void main() {
     );
     final Text helperText = tester.widget(find.text('helper text'));
     expect(helperText.style.color, themeData.hintColor);
-    expect(helperText.style.fontSize, MaterialTextGeometry.englishLike.caption.fontSize);
+    expect(helperText.style.fontSize, Typography.englishLike2014.caption.fontSize);
   });
 
   testWidgets('TextField with specified helperStyle', (WidgetTester tester) async {
@@ -1721,8 +1721,8 @@ void main() {
   });
 
   testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: const Material(
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
         child: DefaultTextStyle(
           style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
           child: Center(
@@ -1746,8 +1746,8 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: DefaultTextStyle(
             style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
             child: Center(

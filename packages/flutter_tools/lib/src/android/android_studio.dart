@@ -32,19 +32,9 @@ String get javaPath => androidStudio?.javaPath;
 class AndroidStudio implements Comparable<AndroidStudio> {
   AndroidStudio(this.directory,
       {Version version, this.configured, this.studioAppName = 'AndroidStudio'})
-      : this.version = version ?? Version.unknown {
+      : version = version ?? Version.unknown {
     _init();
   }
-
-  final String directory;
-  final String studioAppName;
-  final Version version;
-  final String configured;
-
-  String _pluginsPath;
-  String _javaPath;
-  bool _isValid = false;
-  final List<String> _validationMessages = <String>[];
 
   factory AndroidStudio.fromMacOSBundle(String bundlePath) {
     final String studioPath = fs.path.join(bundlePath, 'Contents');
@@ -88,6 +78,16 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
     return null;
   }
+
+  final String directory;
+  final String studioAppName;
+  final Version version;
+  final String configured;
+
+  String _pluginsPath;
+  String _javaPath;
+  bool _isValid = false;
+  final List<String> _validationMessages = <String>[];
 
   String get javaPath => _javaPath;
 
@@ -188,7 +188,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     return candidatePaths
-        .map((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
+        .map<AndroidStudio>((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
         .where((AndroidStudio s) => s != null)
         .toList();
   }

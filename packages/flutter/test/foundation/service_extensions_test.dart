@@ -298,6 +298,35 @@ void main() {
     expect(binding.frameScheduled, isFalse);
   });
 
+  test('Service extensions - profileWidgetBuilds', () async {
+    Map<String, dynamic> result;
+
+    expect(binding.frameScheduled, isFalse);
+    expect(debugProfileBuildsEnabled, false);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(debugProfileBuildsEnabled, false);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{ 'enabled': 'true' });
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(debugProfileBuildsEnabled, true);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(debugProfileBuildsEnabled, true);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{ 'enabled': 'false' });
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(debugProfileBuildsEnabled, false);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(debugProfileBuildsEnabled, false);
+
+    expect(binding.frameScheduled, isFalse);
+  });
+
   test('Service extensions - evict', () async {
     Map<String, dynamic> result;
     bool completed;
@@ -328,13 +357,6 @@ void main() {
   test('Service extensions - exit', () async {
     // no test for _calling_ 'exit', because that should terminate the process!
     expect(binding.extensions.containsKey('exit'), isTrue);
-  });
-
-  test('Service extensions - frameworkPresent', () async {
-    Map<String, dynamic> result;
-
-    result = await binding.testExtension('frameworkPresent', <String, String>{});
-    expect(result, <String, String>{});
   });
 
   test('Service extensions - platformOverride', () async {
@@ -460,29 +482,6 @@ void main() {
     expect(binding.frameScheduled, isFalse);
   });
 
-  test('Service extensions - debugWidgetInspector', () async {
-    Map<String, dynamic> result;
-
-    expect(binding.frameScheduled, isFalse);
-    expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
-    result = await binding.testExtension('debugWidgetInspector', <String, String>{});
-    expect(result, <String, String>{ 'enabled': 'false' });
-    expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
-    result = await binding.testExtension('debugWidgetInspector', <String, String>{ 'enabled': 'true' });
-    expect(result, <String, String>{ 'enabled': 'true' });
-    expect(WidgetsApp.debugShowWidgetInspectorOverride, true);
-    result = await binding.testExtension('debugWidgetInspector', <String, String>{});
-    expect(result, <String, String>{ 'enabled': 'true' });
-    expect(WidgetsApp.debugShowWidgetInspectorOverride, true);
-    result = await binding.testExtension('debugWidgetInspector', <String, String>{ 'enabled': 'false' });
-    expect(result, <String, String>{ 'enabled': 'false' });
-    expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
-    result = await binding.testExtension('debugWidgetInspector', <String, String>{});
-    expect(result, <String, String>{ 'enabled': 'false' });
-    expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
-    expect(binding.frameScheduled, isFalse);
-  });
-
   test('Service extensions - timeDilation', () async {
     Map<String, dynamic> result;
 
@@ -512,7 +511,7 @@ void main() {
 
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 38);
+    expect(binding.extensions.length, 37);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;

@@ -27,7 +27,7 @@ void main() {
   }
 
   Stream<String> transformToLines(Stream<List<int>> byteStream) {
-    return byteStream.transform(utf8.decoder).transform(const LineSplitter());
+    return byteStream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
   }
 
   task(() async {
@@ -39,7 +39,7 @@ void main() {
     final Directory appDir =
         dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
-      final Completer<Null> ready = Completer<Null>();
+      final Completer<void> ready = Completer<void>();
       bool ok;
       print('run: starting...');
       final Process run = await startProcess(
@@ -64,6 +64,8 @@ void main() {
           print('service protocol connection available at port $vmServicePort');
         } else if (json != null && json['event'] == 'app.started') {
           appId = json['params']['appId'];
+        }
+        if (vmServicePort != null && appId != null && !ready.isCompleted) {
           print('run: ready!');
           ready.complete();
           ok ??= true;
@@ -72,7 +74,7 @@ void main() {
       transformToLines(run.stderr).listen((String line) {
         stderr.writeln('run:stderr: $line');
       });
-      run.exitCode.then((int exitCode) {
+      run.exitCode.then<void>((int exitCode) {
         ok = false;
       });
       await Future.any<dynamic>(<Future<dynamic>>[ready.future, run.exitCode]);

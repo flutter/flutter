@@ -41,10 +41,10 @@ void main() {
     testUsingContext('flutter create', () async {
       await runCommand(
         command: CreateCommand(),
-        arguments: <String>['create', projectPath],
+        arguments: <String>['--no-wrap', 'create', projectPath],
         statusTextContains: <String>[
           'All done!',
-          'Your main program file is lib/main.dart',
+          'Your application code is in ${fs.path.normalize(fs.path.join(fs.path.relative(projectPath), 'lib', 'main.dart'))}',
         ],
       );
       expect(libMain.existsSync(), isTrue);
@@ -191,7 +191,7 @@ void assertContains(String text, List<String> patterns) {
   }
 }
 
-Future<Null> runCommand({
+Future<void> runCommand({
   FlutterCommand command,
   List<String> arguments,
   List<String> statusTextContains,

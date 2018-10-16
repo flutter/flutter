@@ -68,6 +68,39 @@ void main() {
     expect(actualActive.text.style.color, const Color(0xFF123456));
   });
 
+  testWidgets('Use active icon', (WidgetTester tester) async {
+    const TestImageProvider activeIcon = TestImageProvider(16, 16);
+    const TestImageProvider inactiveIcon = TestImageProvider(24, 24);
+
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoTabBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            title: Text('Tab 1'),
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(inactiveIcon),
+            activeIcon: ImageIcon(activeIcon),
+            title: Text('Tab 2'),
+          ),
+        ],
+        currentIndex: 1,
+        activeColor: const Color(0xFF123456),
+        inactiveColor: const Color(0xFF654321),
+      ),
+    ));
+
+    final Image image = tester.widget(find.descendant(
+      of: find.widgetWithText(GestureDetector, 'Tab 2'),
+      matching: find.byType(Image)
+    ));
+
+    expect(image.color, const Color(0xFF123456));
+    expect(image.image, activeIcon);
+  });
+
   testWidgets('Adjusts height to account for bottom padding', (WidgetTester tester) async {
     final CupertinoTabBar tabBar = CupertinoTabBar(
       items: const <BottomNavigationBarItem>[
@@ -204,5 +237,99 @@ void main() {
     ));
 
     semantics.dispose();
+  });
+
+  testWidgets('Title of items should be nullable', (WidgetTester tester) async {
+    const TestImageProvider iconProvider = TestImageProvider(16, 16);
+    final List<int> itemsTapped = <int>[];
+
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoTabBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                  TestImageProvider(24, 24),
+                ),
+                title: Text('Tab 1'),
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                  iconProvider,
+                ),
+              ),
+            ],
+            onTap: (int index) => itemsTapped.add(index),
+          ),
+        ));
+
+    expect(find.text('Tab 1'), findsOneWidget);
+
+    final Finder finder = find.byWidgetPredicate(
+        (Widget widget) => widget is Image && widget.image == iconProvider);
+
+    await tester.tap(finder);
+    expect(itemsTapped, <int>[1]);
+  });
+
+  testWidgets('Hide border hides the top border of the tabBar',
+      (WidgetTester tester) async {
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoTabBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                  TestImageProvider(24, 24),
+                ),
+                title: Text('Tab 1'),
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                  TestImageProvider(24, 24),
+                ),
+                title: Text('Tab 2'),
+              ),
+            ],
+          ),
+        ));
+
+    final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox));
+    final BoxDecoration boxDecoration = decoratedBox.decoration;
+    expect(boxDecoration.border, isNotNull);
+
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoTabBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                  TestImageProvider(24, 24),
+                ),
+                title: Text('Tab 1'),
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                  TestImageProvider(24, 24),
+                ),
+                title: Text('Tab 2'),
+              ),
+            ],
+            backgroundColor: const Color(0xFFFFFFFF), // Opaque white.
+            border: null,
+          ),
+        ));
+
+    final DecoratedBox decoratedBoxHiddenBorder =
+        tester.widget(find.byType(DecoratedBox));
+    final BoxDecoration boxDecorationHiddenBorder =
+        decoratedBoxHiddenBorder.decoration;
+    expect(boxDecorationHiddenBorder.border, isNull);
   });
 }

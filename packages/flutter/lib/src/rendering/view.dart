@@ -192,7 +192,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     Timeline.startSync('Compositing', arguments: timelineWhitelistArguments);
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
-      layer.addToScene(builder, Offset.zero);
+      layer.addToScene(builder);
       final ui.Scene scene = builder.build();
       if (automaticSystemUiAdjustment)
         _updateSystemChrome();

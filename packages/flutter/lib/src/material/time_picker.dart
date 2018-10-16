@@ -16,10 +16,10 @@ import 'dialog.dart';
 import 'feedback.dart';
 import 'flat_button.dart';
 import 'material_localizations.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'time.dart';
-import 'typography.dart';
 
 const Duration _kDialAnimateDuration = Duration(milliseconds: 200);
 const double _kTwoPi = 2 * math.pi;
@@ -1010,10 +1010,10 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       vsync: this,
     );
     _thetaTween = Tween<double>(begin: _getThetaForTime(widget.selectedTime));
-    _theta = _thetaTween.animate(CurvedAnimation(
-      parent: _thetaController,
-      curve: Curves.fastOutSlowIn
-    ))..addListener(() => setState(() { }));
+    _theta = _thetaController
+      .drive(CurveTween(curve: Curves.fastOutSlowIn))
+      .drive(_thetaTween)
+      ..addListener(() => setState(() { /* _theta.value has changed */ }));
   }
 
   ThemeData themeData;

@@ -214,7 +214,7 @@ abstract class MultiChildLayoutDelegate {
           if (_debugChildrenNeedingLayout.length > 1) {
             throw FlutterError(
               'The $this custom multichild layout delegate forgot to lay out the following children:\n'
-              '  ${_debugChildrenNeedingLayout.map(_debugDescribeChild).join("\n  ")}\n'
+              '  ${_debugChildrenNeedingLayout.map<String>(_debugDescribeChild).join("\n  ")}\n'
               'Each child must be laid out exactly once.'
             );
           } else {

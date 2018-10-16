@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class PersistentBottomSheetDemo extends StatefulWidget {
   static const String routeName = '/material/persistent-bottom-sheet';
 
@@ -76,7 +78,12 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(title: const Text('Persistent bottom sheet')),
+      appBar: AppBar(
+        title: const Text('Persistent bottom sheet'),
+        actions: <Widget>[
+          MaterialDemoDocumentationButton(PersistentBottomSheetDemo.routeName),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showMessage,
         backgroundColor: Colors.redAccent,

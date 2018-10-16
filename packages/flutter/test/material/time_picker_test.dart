@@ -513,13 +513,13 @@ final Finder findDialPaint = find.descendant(
 );
 
 class _SemanticsNodeExpectation {
+  _SemanticsNodeExpectation(this.label, this.left, this.top, this.right, this.bottom);
+
   final String label;
   final double left;
   final double top;
   final double right;
   final double bottom;
-
-  _SemanticsNodeExpectation(this.label, this.left, this.top, this.right, this.bottom);
 }
 
 class _CustomPainterSemanticsTester {

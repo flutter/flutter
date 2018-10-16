@@ -92,10 +92,6 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
 ///  * [InkHighlight], which is an ink feature that emphasizes a part of a
 ///    [Material].
 class InkRipple extends InteractiveInkFeature {
-  /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
-  /// or material [Theme].
-  static const InteractiveInkFeatureFactory splashFactory = _InkRippleFactory();
-
   /// Begin a ripple, centered at [position] relative to [referenceBox].
   ///
   /// The [controller] argument is typically obtained via
@@ -140,10 +136,10 @@ class InkRipple extends InteractiveInkFeature {
     _fadeInController = AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
-    _fadeIn = IntTween(
+    _fadeIn = _fadeInController.drive(IntTween(
       begin: 0,
       end: color.alpha,
-    ).animate(_fadeInController);
+    ));
 
     // Controls the splash radius and its center. Starts upon confirm.
     _radiusController = AnimationController(duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
@@ -151,14 +147,11 @@ class InkRipple extends InteractiveInkFeature {
       ..forward();
      // Initial splash diameter is 60% of the target diameter, final
      // diameter is 10dps larger than the target diameter.
-    _radius = Tween<double>(
-      begin: _targetRadius * 0.30,
-      end: _targetRadius + 5.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _radiusController,
-        curve: Curves.ease,
-      )
+    _radius = _radiusController.drive(
+      Tween<double>(
+        begin: _targetRadius * 0.30,
+        end: _targetRadius + 5.0,
+      ).chain(_easeCurveTween),
     );
 
     // Controls the splash radius and its center. Starts upon confirm however its
@@ -166,14 +159,11 @@ class InkRipple extends InteractiveInkFeature {
     _fadeOutController = AnimationController(duration: _kFadeOutDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged);
-    _fadeOut = IntTween(
-      begin: color.alpha,
-      end: 0,
-    ).animate(
-      CurvedAnimation(
-        parent: _fadeOutController,
-        curve: const Interval(_kFadeOutIntervalStart, 1.0)
-      ),
+    _fadeOut = _fadeOutController.drive(
+      IntTween(
+        begin: color.alpha,
+        end: 0,
+      ).chain(_fadeOutIntervalTween),
     );
 
     controller.addInkFeature(this);
@@ -194,6 +184,13 @@ class InkRipple extends InteractiveInkFeature {
 
   Animation<int> _fadeOut;
   AnimationController _fadeOutController;
+
+  /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
+  /// or material [Theme].
+  static const InteractiveInkFeatureFactory splashFactory = _InkRippleFactory();
+
+  static final Animatable<double> _easeCurveTween = CurveTween(curve: Curves.ease);
+  static final Animatable<double> _fadeOutIntervalTween = CurveTween(curve: const Interval(_kFadeOutIntervalStart, 1.0));
 
   @override
   void confirm() {

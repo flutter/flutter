@@ -4,13 +4,18 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class TwoLevelListDemo extends StatelessWidget {
   static const String routeName = '/material/two-level-list';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Expand/collapse list control')),
+      appBar: AppBar(
+        title: const Text('Expand/collapse list control'),
+        actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
+      ),
       body: ListView(
         children: <Widget>[
           const ListTile(title: Text('Top')),

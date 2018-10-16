@@ -1,0 +1,6 @@
+platform :ios, '9.0'
+
+target 'Host' do
+  flutter_application_path = '../hello'
+  eval(File.read("#{flutter_application_path}/.ios/Flutter/podhelper.rb"))
+end

@@ -8,24 +8,26 @@ import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
 
-abstract class _ListenerMixin {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory _ListenerMixin._() => null;
-
-  void didRegisterListener();
-  void didUnregisterListener();
-}
-
 /// A mixin that helps listen to another object only when this object has registered listeners.
-abstract class AnimationLazyListenerMixin extends _ListenerMixin {
+///
+/// This mixin provides implementations of [didRegisterListener] and [didUnregisterListener],
+/// and therefore can be used in conjunction with mixins that require these methods,
+/// [AnimationLocalListenersMixin] and [AnimationLocalStatusListenersMixin].
+abstract class AnimationLazyListenerMixin {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory AnimationLazyListenerMixin._() => null;
 
   int _listenerCounter = 0;
 
-  @override
+  /// Calls [didStartListening] every time a registration of a listener causes
+  /// an empty list of listeners to become non-empty.
+  ///
+  /// See also:
+  ///
+  ///  * [didUnregisterListener], which may cause the listener list to
+  ///    become empty again, and in turn cause this method to call
+  ///    [didStartListening] again.
   void didRegisterListener() {
     assert(_listenerCounter >= 0);
     if (_listenerCounter == 0)
@@ -33,7 +35,12 @@ abstract class AnimationLazyListenerMixin extends _ListenerMixin {
     _listenerCounter += 1;
   }
 
-  @override
+  /// Calls [didStopListening] when an only remaining listener is unregistered,
+  /// thus making the list empty.
+  ///
+  /// See also:
+  ///
+  ///  * [didRegisterListener], which causes the listener list to become non-empty.
   void didUnregisterListener() {
     assert(_listenerCounter >= 1);
     _listenerCounter -= 1;
@@ -53,17 +60,21 @@ abstract class AnimationLazyListenerMixin extends _ListenerMixin {
   bool get isListening => _listenerCounter > 0;
 }
 
-/// A mixin that replaces the didRegisterListener/didUnregisterListener contract
+/// A mixin that replaces the [didRegisterListener]/[didUnregisterListener] contract
 /// with a dispose contract.
-abstract class AnimationEagerListenerMixin extends _ListenerMixin {
+///
+/// This mixin provides implementations of [didRegisterListener] and [didUnregisterListener],
+/// and therefore can be used in conjunction with mixins that require these methods,
+/// [AnimationLocalListenersMixin] and [AnimationLocalStatusListenersMixin].
+abstract class AnimationEagerListenerMixin {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory AnimationEagerListenerMixin._() => null;
 
-  @override
+  /// This implementation ignores listener registrations.
   void didRegisterListener() { }
 
-  @override
+  /// This implementation ignores listener registrations.
   void didUnregisterListener() { }
 
   /// Release the resources used by this object. The object is no longer usable
@@ -74,12 +85,28 @@ abstract class AnimationEagerListenerMixin extends _ListenerMixin {
 
 /// A mixin that implements the [addListener]/[removeListener] protocol and notifies
 /// all the registered listeners when [notifyListeners] is called.
-abstract class AnimationLocalListenersMixin extends _ListenerMixin {
+///
+/// This mixin requires that the mixing class provide methods [didRegisterListener]
+/// and [didUnregisterListener]. Implementations of these methods can be obtained
+/// by mixing in another mixin from this library, such as [AnimationLazyListenerMixin].
+abstract class AnimationLocalListenersMixin {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory AnimationLocalListenersMixin._() => null;
 
   final ObserverList<VoidCallback> _listeners = ObserverList<VoidCallback>();
+
+  /// Called immediately before a listener is added via [addListener].
+  ///
+  /// At the time this method is called the registered listener is not yet
+  /// notified by [notifyListeners].
+  void didRegisterListener();
+
+  /// Called immediately after a listener is removed via [removeListener].
+  ///
+  /// At the time this method is called the removed listener is no longer
+  /// notified by [notifyListeners].
+  void didUnregisterListener();
 
   /// Calls the listener every time the value of the animation changes.
   ///
@@ -126,12 +153,28 @@ abstract class AnimationLocalListenersMixin extends _ListenerMixin {
 /// A mixin that implements the addStatusListener/removeStatusListener protocol
 /// and notifies all the registered listeners when notifyStatusListeners is
 /// called.
-abstract class AnimationLocalStatusListenersMixin extends _ListenerMixin {
+///
+/// This mixin requires that the mixing class provide methods [didRegisterListener]
+/// and [didUnregisterListener]. Implementations of these methods can be obtained
+/// by mixing in another mixin from this library, such as [AnimationLazyListenerMixin].
+abstract class AnimationLocalStatusListenersMixin {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory AnimationLocalStatusListenersMixin._() => null;
 
   final ObserverList<AnimationStatusListener> _statusListeners = ObserverList<AnimationStatusListener>();
+
+  /// Called immediately before a status listener is added via [addStatusListener].
+  ///
+  /// At the time this method is called the registered listener is not yet
+  /// notified by [notifyStatusListeners].
+  void didRegisterListener();
+
+  /// Called immediately after a status listener is removed via [removeStatusListener].
+  ///
+  /// At the time this method is called the removed listener is no longer
+  /// notified by [notifyStatusListeners].
+  void didUnregisterListener();
 
   /// Calls listener every time the status of the animation changes.
   ///

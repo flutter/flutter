@@ -10,8 +10,10 @@ import 'package:flutter/widgets.dart';
 /// Color of the 'magnifier' lens border.
 const Color _kHighlighterBorder = Color(0xFF7F7F7F);
 const Color _kDefaultBackground = Color(0xFFD2D4DB);
-/// Eyeballed value comparing with a native picker.
-const double _kDefaultDiameterRatio = 1.1;
+// Eyeballed values comparing with a native picker.
+// Values closer to PI produces denser flatter lists.
+const double _kDefaultDiameterRatio = 1.35;
+const double _kDefaultPerspective = 0.004;
 /// Opacity fraction value that hides the wheel above and below the 'magnifier'
 /// lens with the same color as the background.
 const double _kForegroundScreenOpacityFraction = 0.7;
@@ -248,6 +250,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             controller: widget.scrollController,
             physics: const FixedExtentScrollPhysics(),
             diameterRatio: widget.diameterRatio,
+            perspective: _kDefaultPerspective,
             offAxisFraction: widget.offAxisFraction,
             useMagnifier: widget.useMagnifier,
             magnification: widget.magnification,

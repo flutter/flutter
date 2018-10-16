@@ -43,7 +43,7 @@ void main() {
 
     testUsingContext('list', () async {
       final ChannelCommand command = ChannelCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel']);
       expect(testLogger.errorText, hasLength(0));
       // The bots may return an empty list of channels (network hiccup?)
@@ -65,7 +65,7 @@ void main() {
       )).thenAnswer((_) => Future<Process>.value(process));
 
       final ChannelCommand command = ChannelCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel']);
 
       verify(mockProcessManager.start(
@@ -106,7 +106,7 @@ void main() {
       )).thenAnswer((_) => Future<Process>.value(createMockProcess()));
 
       final ChannelCommand command = ChannelCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel', 'beta']);
 
       verify(mockProcessManager.start(
@@ -166,7 +166,7 @@ void main() {
       ''');
 
       final ChannelCommand command = ChannelCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel', 'beta']);
 
       verify(mockProcessManager.start(

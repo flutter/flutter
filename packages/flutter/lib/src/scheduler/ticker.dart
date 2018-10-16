@@ -389,7 +389,7 @@ class TickerFuture implements Future<Null> {
       callback();
       return null;
     }
-    orCancel.then(thunk, onError: thunk);
+    orCancel.then<Null>(thunk, onError: thunk);
   }
 
   /// A future that resolves when this future resolves or throws when the ticker

@@ -133,7 +133,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         return 0.0;
       case CollapseMode.parallax:
         final double deltaExtent = settings.maxExtent - settings.minExtent;
-        return -Tween<double>(begin: 0.0, end: deltaExtent / 4.0).lerp(t);
+        return -Tween<double>(begin: 0.0, end: deltaExtent / 4.0).transform(t);
     }
     return null;
   }
@@ -193,7 +193,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           color: titleStyle.color.withOpacity(opacity)
         );
         final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
-        final double scaleValue = Tween<double>(begin: 1.5, end: 1.0).lerp(t);
+        final double scaleValue = Tween<double>(begin: 1.5, end: 1.0).transform(t);
         final Matrix4 scaleTransform = Matrix4.identity()
           ..scale(scaleValue, scaleValue, 1.0);
         final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);

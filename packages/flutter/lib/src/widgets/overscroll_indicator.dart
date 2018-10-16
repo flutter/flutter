@@ -259,8 +259,8 @@ class _GlowController extends ChangeNotifier {
       parent: _glowController,
       curve: Curves.decelerate,
     )..addListener(notifyListeners);
-    _glowOpacity = _glowOpacityTween.animate(decelerator);
-    _glowSize = _glowSizeTween.animate(decelerator);
+    _glowOpacity = decelerator.drive(_glowOpacityTween);
+    _glowSize = decelerator.drive(_glowSizeTween);
     _displacementTicker = vsync.createTicker(_tickDisplacement);
   }
 

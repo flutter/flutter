@@ -1105,7 +1105,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 
   @override
   void didUpdateTweens() {
-    _opacityAnimation = _opacity.animate(animation);
+    _opacityAnimation = animation.drive(_opacity);
   }
 
   @override

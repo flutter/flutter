@@ -32,7 +32,7 @@ DebugPrintCallback debugPrint = debugPrintThrottled;
 /// Used by tests.
 void debugPrintSynchronously(String message, { int wrapWidth }) {
   if (wrapWidth != null) {
-    print(message.split('\n').expand((String line) => debugWordWrap(line, wrapWidth)).join('\n'));
+    print(message.split('\n').expand<String>((String line) => debugWordWrap(line, wrapWidth)).join('\n'));
   } else {
     print(message);
   }
@@ -42,7 +42,7 @@ void debugPrintSynchronously(String message, { int wrapWidth }) {
 /// messages on platforms that rate-limit their logging (for example, Android).
 void debugPrintThrottled(String message, { int wrapWidth }) {
   if (wrapWidth != null) {
-    _debugPrintBuffer.addAll(message.split('\n').expand((String line) => debugWordWrap(line, wrapWidth)));
+    _debugPrintBuffer.addAll(message.split('\n').expand<String>((String line) => debugWordWrap(line, wrapWidth)));
   } else {
     _debugPrintBuffer.addAll(message.split('\n'));
   }

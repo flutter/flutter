@@ -20,7 +20,7 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
 // [["Dave", "Open the pod bay..."] ...]
 final List<List<String>> _kNameLines = _kDialogText
   .split('\n')
-  .map((String line) => line.split(':'))
+  .map<List<String>>((String line) => line.split(':'))
   .toList();
 
 final TextStyle _kDaveStyle = TextStyle(color: Colors.indigo.shade400, height: 1.8);

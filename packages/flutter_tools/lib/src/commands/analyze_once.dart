@@ -33,7 +33,7 @@ class AnalyzeOnce extends AnalyzeBase {
   final Directory workingDirectory;
 
   @override
-  Future<Null> analyze() async {
+  Future<void> analyze() async {
     final String currentDirectory =
         (workingDirectory ?? fs.currentDirectory).path;
 
@@ -68,7 +68,7 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Nothing to analyze.', exitCode: 0);
 
     // analyze all
-    final Completer<Null> analysisCompleter = Completer<Null>();
+    final Completer<void> analysisCompleter = Completer<void>();
     final List<AnalysisError> errors = <AnalysisError>[];
 
     final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
@@ -92,7 +92,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     await server.start();
     // Completing the future in the callback can't fail.
-    server.onExit.then((int exitCode) { // ignore: unawaited_futures
+    server.onExit.then<void>((int exitCode) { // ignore: unawaited_futures
       if (!analysisCompleter.isCompleted) {
         analysisCompleter.completeError('analysis server exited: $exitCode');
       }
@@ -132,7 +132,7 @@ class AnalyzeOnce extends AnalyzeBase {
       printStatus('');
     errors.sort();
     for (AnalysisError error in errors)
-      printStatus(error.toString());
+      printStatus(error.toString(), hangingIndent: 7);
 
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 
