@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("$flutter_root/testing/testing.gni")
+import("$flutter_root/shell/gpu/gpu.gni")
 
 # Template to generate a dart embedder resource.cc file.
 # Required invoker inputs:
@@ -107,8 +108,8 @@ source_set("common") {
   public_deps = [
     "$flutter_root/shell/version",
     "$flutter_root/third_party/txt",
-    "//third_party/tonic",
     "//third_party/rapidjson",
+    "//third_party/tonic",
   ]
 
   public_configs = [ "$flutter_root:config" ]
@@ -139,12 +140,20 @@ template("shell_host_executable") {
   }
 }
 
+shell_gpu_configuration("shell_unittests_gpu_configuration") {
+  enable_software = true
+  enable_vulkan = false
+  enable_gl = false
+}
+
 shell_host_executable("shell_unittests") {
   sources = [
     "shell_unittests.cc",
   ]
 
   deps = [
+    ":shell_unittests_gpu_configuration",
+    "$flutter_root/shell/",
     "$flutter_root/testing",
   ]
 }
