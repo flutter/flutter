@@ -257,9 +257,11 @@ class FormField<T> extends StatefulWidget {
   /// autovalidates, this value will be ignored.
   final bool autovalidate;
 
-  /// If true, indicates that the widget is enabled and if autovalidation is true
-  /// the field will be validated. Likewise, if this field is false, the widget
-  /// will not be validated even if autovalidate is true.
+  /// Whether the form is able to receive user input.
+  ///
+  /// Defaults to true. If [autovalidate] is true, the field will be validated.
+  /// Likewise, if this field is false, the widget will not be validated
+  /// regardless of [autovalidate].
   final bool enabled;
 
   @override
