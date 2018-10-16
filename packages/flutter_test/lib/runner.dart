@@ -272,7 +272,7 @@ class RemoteListener {
     });
 
     runZoned(() {
-      liveTest.run().then((void _) => channel.sink.add(<String, String>{"type": "complete"}));
+      liveTest.run().then((void _) => channel.sink.add(<String, String>{'type': 'complete'}));
     }, zoneValues: <Object, Object>{#test.runner.test_channel: channel});
   }
 }
@@ -312,7 +312,7 @@ class SuiteChannelManager {
       throw StateError('Duplicate suiteChannel() connection "$name".');
     } else {
       _names.add(name);
-      var completer = StreamChannelCompleter<Object>();
+      final StreamChannelCompleter<Object> completer = StreamChannelCompleter<Object>();
       _outgoingConnections[name] = completer;
       return completer.channel;
     }
