@@ -14,6 +14,7 @@
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterObservatoryPublisher.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
@@ -57,6 +58,8 @@
   blink::ViewportMetrics _viewportMetrics;
   int64_t _nextTextureId;
   BOOL _initialized;
+
+  fml::scoped_nsobject<FlutterObservatoryPublisher> _publisher;
 }
 
 #pragma mark - Manage and override all designated initializers
@@ -97,6 +100,8 @@
     return;
 
   _initialized = YES;
+
+  _publisher.reset([[FlutterObservatoryPublisher alloc] init]);
 
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;

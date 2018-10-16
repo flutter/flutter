@@ -53,6 +53,8 @@ shared_library("create_flutter_framework_dylib") {
     "framework/Source/FlutterDartProject_Internal.h",
     "framework/Source/FlutterHeadlessDartRunner.mm",
     "framework/Source/FlutterNavigationController.mm",
+    "framework/Source/FlutterObservatoryPublisher.h",
+    "framework/Source/FlutterObservatoryPublisher.mm",
     "framework/Source/FlutterPlatformPlugin.h",
     "framework/Source/FlutterPlatformPlugin.mm",
     "framework/Source/FlutterPluginAppLifeCycleDelegate.mm",
