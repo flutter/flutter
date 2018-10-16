@@ -10,7 +10,7 @@
   "nextPageTooltip": "Дараагийн хуудас",
   "previousPageTooltip": "Өмнөх хуудас",
   "showMenuTooltip": "Цэсийг харуулах",
-  "aboutListTileTitle": "$ ApplicationName тухай",
+  "aboutListTileTitle": "$ApplicationName тухай",
   "licensesPageTitle": "Лицензүүд",
   "pageRowsInfoTitle": "$rowCount-н $firstRow-с $lastRow",
   "pageRowsInfoTitleApproximate": "Нийт $rowCount-н $firstRow-с $lastRow харуулж байна",

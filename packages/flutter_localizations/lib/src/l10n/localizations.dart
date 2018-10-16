@@ -7455,7 +7455,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => r'$ ApplicationName тухай';
+  String get aboutListTileTitleRaw => r'$ApplicationName тухай';
 
   @override
   String get alertDialogLabel => r'Анхааруулга';
