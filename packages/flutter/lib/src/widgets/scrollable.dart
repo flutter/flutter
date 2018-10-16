@@ -507,8 +507,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     /// ScrollNotification notification;
     /// Scrollable.of(notification.context)
     /// ```
-    /// [notificationContext] pointing to [_gestureDetectorKey.context], [_ScrollableScope] must be
-    /// placed about the widget using it: [RawGestureDetector]
+    /// Since [notificationContext] is pointing to [_gestureDetectorKey.context], [_ScrollableScope]
+    /// must be placed above the widget using it: [RawGestureDetector]
     Widget result = _ScrollableScope(
       scrollable: this,
       position: position,
