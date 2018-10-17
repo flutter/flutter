@@ -16,7 +16,7 @@ class {{pluginClass}}(): MethodCallHandler {
   }
 
   override fun onMethodCall(call: MethodCall, result: Result): Unit {
-    if (call.method.equals("getPlatformVersion")) {
+    if (call.method == "getPlatformVersion") {
       result.success("Android ${android.os.Build.VERSION.RELEASE}")
     } else {
       result.notImplemented()
