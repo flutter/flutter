@@ -87,7 +87,7 @@ class CrashReportSender {
   }) async {
     try {
       if (_usage.suppressAnalytics)
-        return null;
+        return;
 
       printStatus('Sending crash report to Google.');
 

@@ -418,7 +418,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     String[] fileSystemRoots
     @Optional @Input
     String fileSystemScheme
-    @Optional @Input
+    @Input
     Boolean trackWidgetCreation
     @Optional @Input
     String compilationTraceFilePath

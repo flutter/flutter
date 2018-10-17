@@ -100,7 +100,7 @@ and access native features and SDKs on Android and iOS.
 Accessing platform features is easy. Here is a snippet from our <a href="https://github.com/flutter/flutter/tree/master/examples/platform_channel">interop example</a>:
 
 ```dart
-Future<Null> getBatteryLevel() async {
+Future<void> getBatteryLevel() async {
   var batteryLevel = 'unknown';
   try {
     int result = await methodChannel.invokeMethod('getBatteryLevel');

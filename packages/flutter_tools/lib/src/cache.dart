@@ -72,7 +72,7 @@ class Cache {
   /// calling [Cache.releaseLockEarly] once they are no longer touching the cache.
   static Future<void> lock() async {
     if (!_lockEnabled)
-      return null;
+      return;
     assert(_lock == null);
     _lock = await fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile')).open(mode: FileMode.write);
     bool locked = false;
@@ -201,7 +201,7 @@ class Cache {
 
   Future<void> updateAll() async {
     if (!_lockEnabled)
-      return null;
+      return;
     try {
       for (CachedArtifact artifact in _artifacts) {
         if (!artifact.isUpToDate())

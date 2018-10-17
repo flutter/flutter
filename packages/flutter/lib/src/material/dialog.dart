@@ -121,8 +121,8 @@ class Dialog extends StatelessWidget {
 /// and returns a [Future] that completes when the dialog is dismissed.
 ///
 /// ```dart
-/// Future<Null> _neverSatisfied() async {
-///   return showDialog<Null>(
+/// Future<void> _neverSatisfied() async {
+///   return showDialog<void>(
 ///     context: context,
 ///     barrierDismissible: false, // user must tap button!
 ///     builder: (BuildContext context) {
@@ -390,7 +390,7 @@ class SimpleDialogOption extends StatelessWidget {
 /// that doesn't mention every value in the enum.
 ///
 /// ```dart
-/// Future<Null> _askedToLead() async {
+/// Future<void> _askedToLead() async {
 ///   switch (await showDialog<Department>(
 ///     context: context,
 ///     builder: (BuildContext context) {
