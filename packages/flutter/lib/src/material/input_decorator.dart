@@ -738,10 +738,7 @@ class _RenderDecoration extends RenderBox {
     if (prefixIcon != null)
       visitor(prefixIcon);
     if (isFocused && hint != null) {
-      // Bypass opacity to always read hint when focused. This prevents the
-      // label from changing when text is entered.
-      final RenderProxyBox typedHint = hint;
-      visitor(typedHint.child);
+      visitor(hint);
     } else if (!isFocused && label != null)
       visitor(label);
     if (input != null)
