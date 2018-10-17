@@ -334,7 +334,7 @@ void main() {
       ),
     );
 
-    Future<Null> longPress(Duration timeout) async {
+    Future<void> longPress(Duration timeout) async {
       final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
       await tester.pump(timeout);
       await gesture.up();

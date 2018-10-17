@@ -93,6 +93,7 @@ abstract class PopupMenuEntry<T> extends StatefulWidget {
 ///  * [showMenu], a method to dynamically show a popup menu at a given location.
 ///  * [PopupMenuButton], an [IconButton] that automatically shows a menu when
 ///    it is tapped.
+// ignore: prefer_void_to_null, https://github.com/dart-lang/sdk/issues/34416
 class PopupMenuDivider extends PopupMenuEntry<Null> {
   /// Creates a horizontal divider for a popup menu.
   ///
@@ -106,6 +107,7 @@ class PopupMenuDivider extends PopupMenuEntry<Null> {
   final double height;
 
   @override
+  // ignore: prefer_void_to_null, https://github.com/dart-lang/sdk/issues/34416
   bool represents(Null value) => false;
 
   @override
