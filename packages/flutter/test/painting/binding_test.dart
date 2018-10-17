@@ -5,10 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 import '../painting/image_data.dart';
 
-class PaintingBindingSpy extends BindingBase with PaintingBinding {
+class PaintingBindingSpy extends BindingBase with ServicesBinding, PaintingBinding {
   int counter = 0;
   int get instantiateImageCodecCalledCount => counter;
 

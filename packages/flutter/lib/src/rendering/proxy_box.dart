@@ -49,16 +49,12 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
 
 /// Implementation of [RenderProxyBox].
 ///
-/// This class can be used as a mixin for situations where the proxying behavior
+/// Use this mixin in situations where the proxying behavior
 /// of [RenderProxyBox] is desired but inheriting from [RenderProxyBox] is
 /// impractical (e.g. because you want to mix in other classes as well).
 // TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/31543 is fixed
 @optionalTypeArgs
-abstract class RenderProxyBoxMixin<T extends RenderBox> extends RenderBox with RenderObjectWithChildMixin<T> {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory RenderProxyBoxMixin._() => null;
-
+mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChildMixin<T> {
   @override
   void setupParentData(RenderObject child) {
     // We don't actually use the offset argument in BoxParentData, so let's
