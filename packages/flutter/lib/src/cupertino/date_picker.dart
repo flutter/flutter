@@ -958,13 +958,13 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// positive integer factor of 60.
   CupertinoTimerPicker({
     this.mode = CupertinoTimerPickerMode.hms,
-    this.initialTimerDuration = const Duration(),
+    this.initialTimerDuration = Duration.zero,
     this.minuteInterval = 1,
     this.secondInterval = 1,
     @required this.onTimerDurationChanged,
   }) : assert(mode != null),
        assert(onTimerDurationChanged != null),
-       assert(initialTimerDuration >= const Duration(seconds: 0)),
+       assert(initialTimerDuration >= Duration.zero),
        assert(initialTimerDuration < const Duration(days: 1)),
        assert(minuteInterval > 0 && 60 % minuteInterval == 0),
        assert(secondInterval > 0 && 60 % secondInterval == 0),
