@@ -37,6 +37,7 @@ final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
     addBuildModeFlags(defaultToRelease: false);
+    usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     argParser
@@ -122,6 +123,7 @@ class AttachCommand extends FlutterCommand {
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
+        viewFilter: argResults['isolate-filter'],
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = hotRunnerFactory.build(
