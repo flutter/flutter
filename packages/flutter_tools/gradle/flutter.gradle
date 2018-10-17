@@ -191,6 +191,13 @@ class FlutterPlugin implements Plugin<Project> {
                         compile pluginProject
                     }
                 }
+		pluginProject.afterEvaluate {
+                    pluginProject.android.buildTypes {
+                        profile {
+                            initWith debug
+                        }
+                    }
+		}
                 pluginProject.afterEvaluate this.&addFlutterJarCompileOnlyDependency
             } else {
                 project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
@@ -212,9 +219,11 @@ class FlutterPlugin implements Plugin<Project> {
             } else {
                 if (project.getConfigurations().findByName("debugCompileOnly")) {
                     debugCompileOnly project.files(debugFlutterJar)
+                    profileCompileOnly project.files(profileFlutterJar)
                     releaseCompileOnly project.files(releaseFlutterJar)
                 } else {
                     debugProvided project.files(debugFlutterJar)
+                    profileProvided project.files(profileFlutterJar)
                     releaseProvided project.files(releaseFlutterJar)
                 }
             }
@@ -362,14 +371,25 @@ class FlutterPlugin implements Plugin<Project> {
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
             }
 
+            // We know that the flutter app is a subproject in another Android app when these tasks exist.
+            Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
+            Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
             Task copyFlutterAssetsTask = project.tasks.create(name: "copyFlutterAssets${variant.name.capitalize()}", type: Copy) {
                 dependsOn flutterTask
-                dependsOn variant.mergeAssets
-                dependsOn "clean${variant.mergeAssets.name.capitalize()}"
-                into variant.mergeAssets.outputDir
+                dependsOn packageAssets ? packageAssets : variant.mergeAssets
+                dependsOn cleanPackageAssets ? cleanPackageAssets : "clean${variant.mergeAssets.name.capitalize()}"
+                into packageAssets ? packageAssets.outputDir : variant.mergeAssets.outputDir
                 with flutterTask.assets
             }
-            variant.outputs[0].processResources.dependsOn(copyFlutterAssetsTask)
+            if (packageAssets) {
+                // Only include configurations that exist in parent project.
+                Task mergeAssets = project.tasks.findByPath(":app:merge${variant.name.capitalize()}Assets")
+                if (mergeAssets) {
+                    mergeAssets.dependsOn(copyFlutterAssetsTask)
+                }
+            } else {
+                variant.outputs[0].processResources.dependsOn(copyFlutterAssetsTask)
+            }
         }
         if (project.android.hasProperty("applicationVariants")) {
             project.android.applicationVariants.all addFlutterDeps
@@ -544,7 +564,7 @@ class FlutterTask extends BaseFlutterTask {
 
             include "flutter_assets/**" // the working dir and its files
 
-            if (buildMode != 'debug' || compilationTraceFilePath) {
+            if (buildMode == 'release' || buildMode == 'profile') {
                 if (buildSharedLibrary) {
                     include "app.so"
                 } else {

@@ -124,6 +124,41 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
   String get description => 'Tappable objects should be at least $size';
 }
 
+/// A guideline which enforces that all nodes with a tap or long press action
+/// also have a label.
+@visibleForTesting
+class LabeledTapTargetGuideline extends AccessibilityGuideline {
+  const LabeledTapTargetGuideline._();
+
+  @override
+  String get description => 'Tappable widgets should have a semantic label';
+
+  @override
+  FutureOr<Evaluation> evaluate(WidgetTester tester) {
+   final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
+    Evaluation traverse(SemanticsNode node) {
+      Evaluation result = const Evaluation.pass();
+      node.visitChildren((SemanticsNode child) {
+        result += traverse(child);
+        return true;
+      });
+      if (node.isMergedIntoParent)
+        return result;
+      final SemanticsData data = node.getSemanticsData();
+      // Skip node if it has no actions, or is marked as hidden.
+      if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap))
+        return result;
+      if (data.label == null || data.label.isEmpty) {
+        result += Evaluation.fail(
+          '$node: expected tappable node to have semantic label, but none was found\n',
+        );
+      }
+      return result;
+    }
+    return traverse(root);
+  }
+}
+
 /// A guideline which verifies that all nodes that contribute semantics via text
 /// meet minimum contrast levels.
 ///
@@ -403,3 +438,7 @@ const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline._
 /// foreground and background colors. The contrast ratio is calculated from
 /// these colors according to the [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef)
 const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuideline._();
+
+/// A guideline which enforces that all nodes with a tap or long press action
+/// also have a label.
+const AccessibilityGuideline labeledTapTargetGuideline = LabeledTapTargetGuideline._();

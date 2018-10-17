@@ -71,14 +71,14 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// See also:
 ///
 ///   * [ImageCache], which holds images that may be reused.
-Future<Null> precacheImage(
+Future<void> precacheImage(
   ImageProvider provider,
   BuildContext context, {
   Size size,
   ImageErrorListener onError,
 }) {
   final ImageConfiguration config = createLocalImageConfiguration(context, size: size);
-  final Completer<Null> completer = Completer<Null>();
+  final Completer<void> completer = Completer<void>();
   final ImageStream stream = provider.resolve(config);
   void listener(ImageInfo image, bool sync) {
     completer.complete();
@@ -98,7 +98,7 @@ Future<Null> precacheImage(
     }
   }
   stream.addListener(listener, onError: errorListener);
-  completer.future.then<void>((Null _) { stream.removeListener(listener); });
+  completer.future.then<void>((void value) { stream.removeListener(listener); });
   return completer.future;
 }
 

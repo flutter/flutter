@@ -30,6 +30,8 @@ const List<String> coolColorNames = <String>[
   'Pervenche', 'Sinoper', 'Verditer', 'Watchet', 'Zaffre',
 ];
 
+const int _kChildCount = 50;
+
 class CupertinoNavigationDemo extends StatelessWidget {
   CupertinoNavigationDemo()
       : colorItems = List<Color>.generate(50, (int index) {
@@ -146,6 +148,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       child: CustomScrollView(
+        semanticChildCount: _kChildCount,
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
             trailing: trailingButtons,
@@ -163,12 +166,12 @@ class CupertinoDemoTab1 extends StatelessWidget {
                 (BuildContext context, int index) {
                   return Tab1RowItem(
                     index: index,
-                    lastItem: index == 49,
+                    lastItem: index == _kChildCount - 1,
                     color: colorItems[index],
                     colorName: colorNameItems[index],
                   );
                 },
-                childCount: 50,
+                childCount: _kChildCount,
               ),
             ),
           ),

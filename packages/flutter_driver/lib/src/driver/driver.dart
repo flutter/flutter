@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart' as f;
+import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart' as fuchsia;
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
@@ -17,6 +18,7 @@ import 'package:web_socket_channel/io.dart';
 import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';
+import '../common/fuchsia_compat.dart';
 import '../common/gesture.dart';
 import '../common/health.dart';
 import '../common/message.dart';
@@ -64,6 +66,9 @@ const Duration _kShortTimeout = Duration(seconds: 5);
 
 /// Default timeout for awaiting an Isolate to become runnable.
 const Duration _kIsolateLoadRunnableTimeout = Duration(minutes: 1);
+
+/// Time to delay before driving a Fuchsia module.
+const Duration _kFuchsiaDriveDelay = Duration(milliseconds: 500);
 
 /// Default timeout for long-running RPCs.
 final Duration _kLongTimeout = _kShortTimeout * 6;
@@ -155,13 +160,47 @@ class FlutterDriver {
   ///
   /// [isolateReadyTimeout] determines how long after we connect to the VM
   /// service we will wait for the first isolate to become runnable.
+  ///
+  /// [fuchsiaModuleTarget] (optional) If running on a Fuchsia Device, either
+  /// this or the environment variable `FUCHSIA_MODULE_TARGET` must be set. This
+  /// field will be ignored if [isolateNumber] is set, as this is already
+  /// enough information to connect to an Isolate.
   static Future<FlutterDriver> connect({
     String dartVmServiceUrl,
     bool printCommunication = false,
     bool logCommunicationToFile = true,
     int isolateNumber,
     Duration isolateReadyTimeout = _kIsolateLoadRunnableTimeout,
+    Pattern fuchsiaModuleTarget,
   }) async {
+    // If running on a Fuchsia device, connect to the first Isolate whose name
+    // matches FUCHSIA_MODULE_TARGET.
+    //
+    // If the user has already supplied an isolate number/URL to the Dart VM
+    // service, then this won't be run as it is unnecessary.
+    if (Platform.isFuchsia && isolateNumber == null) {
+      fuchsiaModuleTarget ??= Platform.environment['FUCHSIA_MODULE_TARGET'];
+      if (fuchsiaModuleTarget == null) {
+        throw DriverError('No Fuchsia module target has been specified.\n'
+            'Please make sure to specify the FUCHSIA_MODULE_TARGET\n'
+            'environment variable.');
+      }
+      final fuchsia.FuchsiaRemoteConnection fuchsiaConnection =
+          await FuchsiaCompat.connect();
+      final List<fuchsia.IsolateRef> refs =
+          await fuchsiaConnection.getMainIsolatesByPattern(fuchsiaModuleTarget);
+      final fuchsia.IsolateRef ref = refs.first;
+      await Future<void>.delayed(_kFuchsiaDriveDelay);
+      isolateNumber = ref.number;
+      dartVmServiceUrl = ref.dartVm.uri.toString();
+      await fuchsiaConnection.stop();
+      FuchsiaCompat.cleanup();
+
+      // TODO(awdavies): Use something other than print. On fuchsia
+      // `stderr`/`stdout` appear to have issues working correctly.
+      flutterDriverLog.listen(print);
+    }
+
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
 
     if (dartVmServiceUrl == null) {
@@ -203,7 +242,7 @@ class FlutterDriver {
         isolate.pauseEvent is! VMPauseExceptionEvent &&
         isolate.pauseEvent is! VMPauseInterruptedEvent &&
         isolate.pauseEvent is! VMResumeEvent) {
-      await Future<Null>.delayed(_kShortTimeout ~/ 10);
+      await Future<void>.delayed(_kShortTimeout ~/ 10);
       isolate = await isolateRef.loadRunnable();
     }
 
@@ -249,7 +288,7 @@ class FlutterDriver {
     /// results in lost events.
     ///
     /// Details: https://github.com/dart-lang/vm_service_client/issues/17
-    Future<Null> enableIsolateStreams() async {
+    Future<void> enableIsolateStreams() async {
       await connection.peer.sendRequest('streamListen', <String, String>{
         'streamId': 'Isolate',
       });
@@ -388,30 +427,26 @@ class FlutterDriver {
   }
 
   /// Taps at the center of the widget located by [finder].
-  Future<Null> tap(SerializableFinder finder, {Duration timeout}) async {
+  Future<void> tap(SerializableFinder finder, {Duration timeout}) async {
     await _sendCommand(Tap(finder, timeout: timeout));
-    return null;
   }
 
   /// Waits until [finder] locates the target.
-  Future<Null> waitFor(SerializableFinder finder, {Duration timeout}) async {
+  Future<void> waitFor(SerializableFinder finder, {Duration timeout}) async {
     await _sendCommand(WaitFor(finder, timeout: timeout));
-    return null;
   }
 
   /// Waits until [finder] can no longer locate the target.
-  Future<Null> waitForAbsent(SerializableFinder finder, {Duration timeout}) async {
+  Future<void> waitForAbsent(SerializableFinder finder, {Duration timeout}) async {
     await _sendCommand(WaitForAbsent(finder, timeout: timeout));
-    return null;
   }
 
   /// Waits until there are no more transient callbacks in the queue.
   ///
   /// Use this method when you need to wait for the moment when the application
   /// becomes "stable", for example, prior to taking a [screenshot].
-  Future<Null> waitUntilNoTransientCallbacks({Duration timeout}) async {
+  Future<void> waitUntilNoTransientCallbacks({Duration timeout}) async {
     await _sendCommand(WaitUntilNoTransientCallbacks(timeout: timeout));
-    return null;
   }
 
   /// Tell the driver to perform a scrolling action.
@@ -427,8 +462,8 @@ class FlutterDriver {
   ///
   /// The move events are generated at a given [frequency] in Hz (or events per
   /// second). It defaults to 60Hz.
-  Future<Null> scroll(SerializableFinder finder, double dx, double dy, Duration duration, { int frequency = 60, Duration timeout }) async {
-    return await _sendCommand(Scroll(finder, dx, dy, duration, frequency, timeout: timeout)).then<Null>((Map<String, dynamic> _) => null);
+  Future<void> scroll(SerializableFinder finder, double dx, double dy, Duration duration, { int frequency = 60, Duration timeout }) async {
+    await _sendCommand(Scroll(finder, dx, dy, duration, frequency, timeout: timeout));
   }
 
   /// Scrolls the Scrollable ancestor of the widget located by [finder]
@@ -438,8 +473,8 @@ class FlutterDriver {
   /// that lazily creates its children, like [ListView] or [CustomScrollView],
   /// then this method may fail because [finder] doesn't actually exist.
   /// The [scrollUntilVisible] method can be used in this case.
-  Future<Null> scrollIntoView(SerializableFinder finder, { double alignment = 0.0, Duration timeout }) async {
-    return await _sendCommand(ScrollIntoView(finder, alignment: alignment, timeout: timeout)).then<Null>((Map<String, dynamic> _) => null);
+  Future<void> scrollIntoView(SerializableFinder finder, { double alignment = 0.0, Duration timeout }) async {
+    await _sendCommand(ScrollIntoView(finder, alignment: alignment, timeout: timeout));
   }
 
   /// Repeatedly [scroll] the widget located by [scrollable] by [dxScroll] and
@@ -464,7 +499,7 @@ class FlutterDriver {
   ///
   /// The [timeout] value should be long enough to accommodate as many scrolls
   /// as needed to bring an item into view. The default is 10 seconds.
-  Future<Null> scrollUntilVisible(SerializableFinder scrollable, SerializableFinder item, {
+  Future<void> scrollUntilVisible(SerializableFinder scrollable, SerializableFinder item, {
     double alignment = 0.0,
     double dxScroll = 0.0,
     double dyScroll = 0.0,
@@ -483,11 +518,11 @@ class FlutterDriver {
     // the chance to complete if the item is already onscreen; if not, scroll
     // repeatedly until we either find the item or time out.
     bool isVisible = false;
-    waitFor(item, timeout: timeout).then<void>((Null value) { isVisible = true; });
-    await Future<Null>.delayed(const Duration(milliseconds: 500));
+    waitFor(item, timeout: timeout).then<void>((_) { isVisible = true; });
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     while (!isVisible) {
       await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));
-      await Future<Null>.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
     }
 
     return scrollIntoView(item, alignment: alignment);
@@ -530,7 +565,7 @@ class FlutterDriver {
   ///  await driver.waitFor(find.text('World!'));  // verify new text appears
   /// });
   /// ```
-  Future<Null> enterText(String text, { Duration timeout }) async {
+  Future<void> enterText(String text, { Duration timeout }) async {
     await _sendCommand(EnterText(text, timeout: timeout));
   }
 
@@ -547,7 +582,7 @@ class FlutterDriver {
   /// When enabled, the operating system's configured keyboard will not be
   /// invoked when the widget is focused, as the [SystemChannels.textInput]
   /// channel will be mocked out.
-  Future<Null> setTextEntryEmulation({ @required bool enabled, Duration timeout }) async {
+  Future<void> setTextEntryEmulation({ @required bool enabled, Duration timeout }) async {
     assert(enabled != null);
     await _sendCommand(SetTextEntryEmulation(enabled, timeout: timeout));
   }
@@ -622,7 +657,7 @@ class FlutterDriver {
     //       The two-second gap should be long enough for the GPU thread to
     //       finish rasterizing the frame, but not longer than necessary to keep
     //       driver tests as fast a possible.
-    await Future<Null>.delayed(const Duration(seconds: 2));
+    await Future<void>.delayed(const Duration(seconds: 2));
 
     final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot').timeout(timeout);
     return base64.decode(result['screenshot']);
@@ -653,7 +688,7 @@ class FlutterDriver {
   }
 
   /// Starts recording performance traces.
-  Future<Null> startTracing({
+  Future<void> startTracing({
     List<TimelineStream> streams = _defaultStreams,
     Duration timeout = _kShortTimeout,
   }) async {
@@ -662,7 +697,6 @@ class FlutterDriver {
       await _peer.sendRequest(_setVMTimelineFlagsMethodName, <String, String>{
         'recordedStreams': _timelineStreamsToString(streams)
       }).timeout(timeout);
-      return null;
     } catch (error, stackTrace) {
       throw DriverError(
         'Failed to start tracing due to remote error',
@@ -716,7 +750,7 @@ class FlutterDriver {
   }
 
   /// Clears all timeline events recorded up until now.
-  Future<Null> clearTimeline({ Duration timeout = _kShortTimeout }) async {
+  Future<void> clearTimeline({ Duration timeout = _kShortTimeout }) async {
     try {
       await _peer
           .sendRequest(_clearVMTimelineMethodName, <String, String>{})
@@ -760,7 +794,7 @@ class FlutterDriver {
   /// Closes the underlying connection to the VM service.
   ///
   /// Returns a [Future] that fires once the connection has been closed.
-  Future<Null> close() async {
+  Future<void> close() async {
     // Don't leak vm_service_client-specific objects, if any
     await _serviceClient.close();
     await _peer.close();
@@ -824,7 +858,7 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
 
       if (timer.elapsed < _kLongTimeout * 2) {
         _log.info('Waiting for application to start');
-        await Future<Null>.delayed(_kPauseBetweenReconnectAttempts);
+        await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
         return attemptConnection();
       } else {
         _log.critical(

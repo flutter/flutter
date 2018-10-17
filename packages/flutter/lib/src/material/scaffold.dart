@@ -1192,7 +1192,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _snackBarController.value = 0.0;
       completer.complete(reason);
     } else {
-      _snackBarController.reverse().then<void>((Null _) {
+      _snackBarController.reverse().then<void>((void value) {
         assert(mounted);
         if (!completer.isCompleted)
           completer.complete(reason);

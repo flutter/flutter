@@ -480,7 +480,6 @@ class _FlutterPlatform extends PlatformPlugin {
         packages: PackageMap.globalPackagesPath,
         enableObservatory: enableObservatory,
         startPaused: startPaused,
-        bundlePath: _getBundlePath(finalizers, ourTestCount),
         observatoryPort: explicitObservatoryPort,
         serverPort: server.port,
       );
@@ -712,37 +711,6 @@ class _FlutterPlatform extends PlatformPlugin {
     return listenerFile.path;
   }
 
-  String _getBundlePath(List<_Finalizer> finalizers, int ourTestCount) {
-    if (precompiledDillPath != null) {
-      return artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
-    }
-
-    // bundlePath needs to point to a folder with `platform.dill` file.
-    final Directory tempBundleDirectory = fs.systemTempDirectory
-        .createTempSync('flutter_test_bundle.');
-    finalizers.add(() async {
-      printTrace(
-          'test $ourTestCount: deleting temporary bundle directory');
-      tempBundleDirectory.deleteSync(recursive: true);
-    });
-
-    // copy 'vm_platform_strong.dill' into 'platform_strong.dill'
-    final File vmPlatformStrongDill = fs.file(
-      artifacts.getArtifactPath(Artifact.platformKernelDill),
-    );
-    printTrace('Copying platform_strong.dill file from ${vmPlatformStrongDill.path}');
-    final File platformDill = vmPlatformStrongDill.copySync(
-      tempBundleDirectory
-          .childFile('platform_strong.dill')
-          .path,
-    );
-    if (!platformDill.existsSync()) {
-      printError('unexpected error copying platform kernel file');
-    }
-
-    return tempBundleDirectory.path;
-  }
-
   String _generateTestMain({
     Uri testUrl,
   }) {
@@ -813,7 +781,6 @@ class _FlutterPlatform extends PlatformPlugin {
     String executable,
     String testPath, {
     String packages,
-    String bundlePath,
     bool enableObservatory = false,
     bool startPaused = false,
     int observatoryPort,
@@ -841,9 +808,7 @@ class _FlutterPlatform extends PlatformPlugin {
     }
     if (host.type == InternetAddressType.IPv6)
       command.add('--ipv6');
-    if (bundlePath != null) {
-      command.add('--flutter-assets-dir=$bundlePath');
-    }
+
     command.add('--enable-checked-mode');
     command.addAll(<String>[
       '--enable-software-rendering',

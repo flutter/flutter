@@ -306,7 +306,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context).showBottomSheet<Null>((BuildContext context) {
+                  Scaffold.of(context).showBottomSheet<void>((BuildContext context) {
                     return Container(
                       key: sheetKey,
                       color: Colors.blue[500],
@@ -390,7 +390,7 @@ void main() {
   });
 
   group('back arrow', () {
-    Future<Null> expectBackIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon) async {
+    Future<void> expectBackIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon) async {
       final GlobalKey rootKey = GlobalKey();
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (_) => Container(key: rootKey, child: const Text('Home')),
@@ -425,7 +425,7 @@ void main() {
   });
 
   group('close button', () {
-    Future<Null> expectCloseIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon, PageRoute<void> routeBuilder()) async {
+    Future<void> expectCloseIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon, PageRoute<void> routeBuilder()) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: platform),

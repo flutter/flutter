@@ -180,7 +180,7 @@ class DialogDemoState extends State<DialogDemo> {
                 context: context,
                 initialTime: _selectedTime
               )
-              .then<Null>((TimeOfDay value) {
+              .then<void>((TimeOfDay value) {
                 if (value != null && value != _selectedTime) {
                   _selectedTime = value;
                   _scaffoldKey.currentState.showSnackBar(SnackBar(

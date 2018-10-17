@@ -351,7 +351,7 @@ class _DemoBottomAppBar extends StatelessWidget {
       IconButton(
         icon: const Icon(Icons.menu),
         onPressed: () {
-          showModalBottomSheet<Null>(
+          showModalBottomSheet<void>(
             context: context,
             builder: (BuildContext context) => const _DemoDrawer(),
           );

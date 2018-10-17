@@ -23,23 +23,23 @@ void main() {
     testWidgets('completes when matcher completes', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       final Future<void> future = expectLater(null, FakeMatcher(completer));
-      String value;
-      future.then<void>((void _) {
-        value = '123';
+      String result;
+      future.then<void>((void value) {
+        result = '123';
       });
-      test_package.expect(value, isNull);
+      test_package.expect(result, isNull);
       completer.complete();
-      test_package.expect(value, isNull);
+      test_package.expect(result, isNull);
       await future;
       await tester.pump();
-      test_package.expect(value, '123');
+      test_package.expect(result, '123');
     });
 
     testWidgets('respects the skip flag', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       final Future<void> future = expectLater(null, FakeMatcher(completer), skip: 'testing skip');
       bool completed = false;
-      future.then<void>((void _) {
+      future.then<void>((_) {
         completed = true;
       });
       test_package.expect(completed, isFalse);
@@ -625,7 +625,7 @@ class FakeMatcher extends AsyncMatcher {
 
   @override
   Future<String> matchAsync(dynamic object) {
-    return completer.future.then<String>((void _) {
+    return completer.future.then<String>((void value) {
       return object?.toString();
     });
   }

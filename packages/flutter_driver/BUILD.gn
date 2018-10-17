@@ -15,6 +15,7 @@ dart_library("flutter_driver") {
   deps = [
     "//third_party/dart-pkg/git/flutter/packages/flutter",
     "//third_party/dart-pkg/git/flutter/packages/flutter_test",
+    "//third_party/dart-pkg/git/flutter/packages/fuchsia_remote_debug_protocol",
     "//third_party/dart-pkg/pub/file",
     "//third_party/dart-pkg/pub/json_rpc_2",
     "//third_party/dart-pkg/pub/meta",

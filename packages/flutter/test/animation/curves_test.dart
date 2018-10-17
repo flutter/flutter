@@ -34,6 +34,29 @@ void main() {
     expect(step.transform(1.0), 1.0);
   });
 
+  void assertMaximumSlope(Curve curve, double maximumSlope) {
+    const double delta = 0.005;
+    for (double x = 0.0; x < 1.0 - delta; x += delta) {
+      final double deltaY = curve.transform(x) - curve.transform(x + delta);
+      assert(deltaY.abs() < delta * maximumSlope, '${curve.toString()} discontinuous at $x');
+    }
+  }
+
+  test('Curve is continuous', () {
+    assertMaximumSlope(Curves.linear, 20.0);
+    assertMaximumSlope(Curves.decelerate, 20.0);
+    assertMaximumSlope(Curves.bounceIn, 20.0);
+    assertMaximumSlope(Curves.bounceOut, 20.0);
+    assertMaximumSlope(Curves.bounceInOut, 20.0);
+    assertMaximumSlope(Curves.elasticOut, 20.0);
+    assertMaximumSlope(Curves.elasticInOut, 20.0);
+    assertMaximumSlope(Curves.ease, 20.0);
+    assertMaximumSlope(Curves.easeIn, 20.0);
+    assertMaximumSlope(Curves.easeOut, 20.0);
+    assertMaximumSlope(Curves.easeInOut, 20.0);
+    assertMaximumSlope(Curves.fastOutSlowIn, 20.0);
+  });
+
   void expectStaysInBounds(Curve curve) {
     expect(curve.transform(0.0), inInclusiveRange(0.0, 1.0));
     expect(curve.transform(0.1), inInclusiveRange(0.0, 1.0));

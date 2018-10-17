@@ -71,7 +71,7 @@ class TextFormField extends FormField<String> {
     FormFieldSetter<String> onSaved,
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
-    bool enabled,
+    bool enabled = true,
     Brightness keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(initialValue == null || controller == null),
@@ -90,6 +90,7 @@ class TextFormField extends FormField<String> {
     onSaved: onSaved,
     validator: validator,
     autovalidate: autovalidate,
+    enabled: enabled,
     builder: (FormFieldState<String> field) {
       final _TextFormFieldState state = field;
       final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
