@@ -1,4 +1,4 @@
-Signature: 5f0b01ef6ac7133d1b12a717a72b37d1
+Signature: d415818a3e6066fd705442d468c5a79a
 
 UNUSED LICENSES:
 
@@ -2010,10 +2010,12 @@ FILE: ../../../third_party/skia/docs/overview.bmh
 FILE: ../../../third_party/skia/docs/status.json
 FILE: ../../../third_party/skia/docs/undocumented.bmh
 FILE: ../../../third_party/skia/docs/usingBookmaker.bmh
-FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/cpu_example.html
 FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/example.html
+FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/node.example.js
 FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/package.json
+FILE: ../../../third_party/skia/experimental/canvaskit/cpu.js
 FILE: ../../../third_party/skia/experimental/canvaskit/externs.js
+FILE: ../../../third_party/skia/experimental/canvaskit/gpu.js
 FILE: ../../../third_party/skia/experimental/canvaskit/helper.js
 FILE: ../../../third_party/skia/experimental/canvaskit/interface.js
 FILE: ../../../third_party/skia/experimental/canvaskit/karma.conf.js
@@ -4695,10 +4697,12 @@ ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPIImageFilter.cpp + ../../.
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/fuzz/FuzzCommon.h
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPIImageFilter.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAndroidCodec.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAnimatedImage.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzDrawFunctions.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzGradients.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzImage.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzIncrementalImage.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzJPEGEncoder.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzJSON.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzMockGPUCanvas.cpp
