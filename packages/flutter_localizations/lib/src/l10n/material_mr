@@ -1,0 +1,209 @@
+{
+  "scriptCategory": "इंग्रजी सारखे",
+  "@scriptCategory": {
+    "description": "The name of the language's script category (see https://material.io/go/design-typography#typography-language-categories-reference)."
+  },
+  "timeOfDayFormat": "h:mm a\n",
+  "@timeOfDayFormat": {
+    "description": "The ICU 'Short Time' pattern, such as 'HH:mm', 'h:mm a', 'H:mm'. See: http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US",
+    "x-flutter-type": "icuShortTimePattern"
+  },
+  "openAppDrawerTooltip": "नेव्हिगेशन मेनू उघडा",
+  "@openAppDrawerTooltip": {
+    "description": "The tooltip for the leading app bar menu (aka 'hamburger') button."
+  },
+  "backButtonTooltip": "मागे",
+  "@backButtonTooltip": {
+    "description": "The tooltip for the back button, which closes the current page and returns to the previous one."
+  },
+  "closeButtonTooltip": "बंद",
+  "@closeButtonTooltip": {
+    "description": "The tooltip for the close button, which closes the current page and returns to the previous one."
+  },
+  "deleteButtonTooltip": "हटवा",
+  "@deleteButtonTooltip": {
+    "description": "The tooltip for the delete button of chips."
+  },
+  "nextMonthTooltip": "पुढील महिना",
+  "@nextMonthTooltip": {
+    "description": "The tooltip for the month picker's 'next month' button."
+  },
+  "previousMonthTooltip": "मागील महिना",
+  "@previousMonthTooltip": {
+    "description": "The tooltip for the month picker's 'previous month' button."
+  },
+  "nextPageTooltip": "पुढील पृष्ठ",
+  "@nextPageTooltip": {
+    "description": "The tooltip for the button that sends the user to the next page of a paginated data table."
+  },
+  "previousPageTooltip": "मागील पान",
+  "@previousPageTooltip": {
+    "description": "The tooltip for the button that sends the user to the previous page of a paginated data table."
+  },
+  "showMenuTooltip": "मेनू दर्शवा",
+  "@showMenuTooltip": {
+    "description": "The tooltip for the button that shows a popup menu."
+  },
+  "aboutListTileTitle": "$applicationName बद्दल",
+  "@aboutListTileTitle": {
+    "description": "The default title for the drawer item that shows an about page for the application. The value of $applicationName is the name of the application, like GMail or Chrome.",
+    "parameters": "applicationName"
+  },
+  "licensesPageTitle": "परवाने",
+  "@licensesPageTitle": {
+    "description": "The title for the Flutter licenses page."
+  },
+  "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount\n",
+  "@pageRowsInfoTitle": {
+    "description": "The text shown in the footer of a paginated data table when the exact overall row count is known. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
+    "parameters": "firstRow, lastRow, rowCount"
+  },
+  "pageRowsInfoTitleApproximate": "$firstRow–$lastRow of about $rowCount\n",
+  "@pageRowsInfoTitleApproximate": {
+    "description": "The text shown in the footer of a paginated data table when the exact overall row count is unknown. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
+    "parameters": "firstRow, lastRow, rowCount"
+  },
+  "rowsPerPageTitle": " पंक्ती प्रति पृष्ठ :",
+  "@rowsPerPageTitle": {
+    "description": "The caption for the drop-down button on a paginated data table's footer that allows the user to control the number of rows of data per page of the table."
+  },
+  "tabLabel": "Tab $tabIndex of $tabCount",
+  "@tabLabel": {
+    "description": "The accessibility label used on a tab. This message describes the index of the selected tab and how many tabs there are, e.g. 'Tab 1 of 2'. All values are greater than or equal to one.",
+    "parameters": "tabIndex, tabCount"
+  },
+  "selectedRowCountTitleZero": "कोणतेही आयटम निवडलेले नाहीत",
+  "selectedRowCountTitleOne": "१ आयटम निवडला",
+  "selectedRowCountTitleOther": "$selectedRowCount निवडलेले ",
+  "@selectedRowCountTitle": {
+    "description": "The title for the header of a paginated data table when the user is selecting rows. The value of $selectedRowCount is an integer which indicates the number of data table row elements that have been selected.",
+    "plural": "selectedRowCount"
+  },
+  "cancelButtonLabel": "कॅन्सेल",
+  "@cancelButtonLabel": {
+    "description": "The label for cancel buttons and menu items."
+  },
+  "closeButtonLabel": "बंद",
+  "@closeButtonLabel": {
+    "description": "The label for close buttons and menu items."
+  },
+  "continueButtonLabel": "सुरू",
+  "@continueButtonLabel": {
+    "description": "The label for continue buttons and menu items."
+  },
+  "copyButtonLabel": "कॉपी करा",
+  "@copyButtonLabel": {
+    "description": "The label for copy buttons and menu items."
+  },
+  "cutButtonLabel": "कट",
+  "@cutButtonLabel": {
+    "description": "The label for cut buttons and menu items."
+  },
+  "okButtonLabel": "ठीक आहे",
+  "@okButtonLabel": {
+    "description": "The label for OK buttons and menu items."
+  },
+  "pasteButtonLabel": "पेस्ट",
+  "@pasteButtonLabel": {
+    "description": "The label for paste buttons and menu items."
+  },
+  "selectAllButtonLabel": "सर्व निवडा",
+  "@selectAllButtonLabel": {
+    "description": "The label for select-all buttons and menu items."
+  },
+  "viewLicensesButtonLabel": "परवाना पहा",
+  "@viewLicensesButtonLabel": {
+    "description": "The label for the button in the about box that leads the user to a list of all licenses that apply to the application."
+  },
+  "anteMeridiemAbbreviation": "AM",
+  "@anteMeridiemAbbreviation": {
+    "description": "The abbreviation for ante meridiem (before noon) shown in the time picker. Translations for this abbreviation will only be provided for locales that support it."
+  },
+  "postMeridiemAbbreviation": "PM",
+  "@postMeridiemAbbreviation": {
+    "description": "The abbreviation for post meridiem (after noon) shown in the time picker. Translations for this abbreviation will only be provided for locales that support it."
+  },
+  "timePickerHourModeAnnouncement": "तास निवडा",
+  "@timePickerHourModeAnnouncement": {
+    "description": "The audio announcement made when the time picker dialog is set to hour mode."
+  },
+  "timePickerMinuteModeAnnouncement": "मिनिटे निवडा",
+  "@timePickerMinuteModeAnnouncement": {
+    "description": "The audio announcement made when the time picker dialog is set to minute mode."
+  },
+  "modalBarrierDismissLabel": "डिसमिस",
+  "@modalBarrierDismissLabel": {
+    "description": "Label read out by accessibility tools (TalkBack or VocieOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can for example be found behind a alert or popup to block user interaction with elements behind it."
+  },
+  "signedInLabel": "साइन इन",
+  "@signedInLabel": {
+    "description": "The accessibility label used to indicate which account is signed in, in a UserAccountsDrawerHeader, when the accessibility user navigates the UI. This phrase serves as an adjective with respect to the user. The phrase indicates that the user is currently signed in."
+  },
+  "hideAccountsLabel": "खाती लपवा",
+  "@hideAccountsLabel": {
+    "description": "The accessibility label used for the button on a UserAccountsDrawerHeader that hides the list of accounts."
+  },
+  "showAccountsLabel": "खाती दाखवा",
+  "@showAccountsLabel": {
+    "description": "The accessibility label used for the button on a UserAccountsDrawerHeader that shows the list of accounts."
+  },
+  "drawerLabel": "नेव्हिगेशन मेनू",
+  "@drawerLabel": {
+    "description": "The audio announcement made when the Drawer is opened."
+  },
+  "popupMenuLabel": "पॉपअप मेनू",
+  "@popupMenuLabel": {
+    "description": "The audio announcement made when a PopupMenu is opened."
+  },
+  "dialogLabel": "संवाद",
+  "@dialogLabel": {
+    "description": "The audio announcement made when a Dialog is opened."
+  },
+  "alertDialogLabel": "अलर्ट",
+  "@alertDialogLabel": {
+    "description": "The audio announcement made when an AlertDialog is opened."
+  },
+  "searchFieldLabel": "शोध",
+  "@searchFieldLabel": {
+    "description": "Label indicating that a text field is a search field. This will be used as a hint text in the text field."
+  },
+  "reorderItemToStart": "सुरूवातीस हलवा",
+  "@reorderItemToStart": {
+    "description": "The audio announcement to move an item in a Reorderable List to the start of the list."
+  },
+  "reorderItemToEnd": "शेवटी हलवा",
+  "@reorderItemToEnd": {
+    "description": "The audio announcement to move an item in a Reorderable List to the end of the list."
+  },
+  "reorderItemUp": "पुढे जा",
+  "@reorderItemUp": {
+    "description": "The audio announcement to move an item in a Reorderable List up in the list when it is oriented vertically."
+  },
+  "reorderItemDown": "खाली सरका",
+  "@reorderItemDown": {
+    "description": "The audio announcement to move an item in a Reorderable List down in the list when it is oriented vertically."
+  },
+  "reorderItemLeft": "डावीकडे वळा",
+  "@reorderItemLeft": {
+    "description": "The audio announcement to move an item in a Reorderable List left in the list when it is oriented horizontally."
+  },
+  "reorderItemRight": "उजवीकडे हलवा",
+  "@reorderItemRight": {
+    "description": "The audio announcement to move an item in a Reorderable List right in the list when it is oriented horizontally."
+  },
+  "expandedIconTapHint": "संकुचित करा",
+  "@expandedIconTapHint": {
+    "description": "The verb which describes what happens when an expanded ExpandIcon toggle button is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to collapse.' The exact phrasing of the hint will vary based on locale"
+  },
+  "collapsedIconTapHint": "विस्तृत करा",
+  "@collapsedIconTapHint": {
+    "description": "The verb which describes what happens when a collapsed ExpandIcon toggle button is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to expand.' The exact phrasing of the hint will vary based on locale"
+  },
+  "remainingTextFieldCharacterCountZero": "कोणतेही वर्ण शिल्लक नाहीत",
+  "remainingTextFieldCharacterCountOne": "उर्वरित 1 वर्ण",
+  "remainingTextFieldCharacterCountOther": "$remainingCount उर्वरित वर्ण",
+  "@remainingTextFieldCharacterCount": {
+    "description": "The label for the TextField's character counter. remainingCharacters is a integer representing how many more characters the user can type into the text field before using up a given budget. All values are greater than or equal to zero.",
+    "plural": "remainingCount"
+  }
+}
