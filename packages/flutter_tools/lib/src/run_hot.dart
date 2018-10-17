@@ -41,6 +41,7 @@ HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig];
 
 const bool kHotReloadDefault = true;
 
+// TODO(flutter/flutter#23031): Test this.
 class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {
@@ -152,13 +153,10 @@ class HotRunner extends ResidentRunner {
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
-    String viewFilter,
   }) async {
     _didAttach = true;
     try {
-      await connectToServiceProtocol(viewFilter: viewFilter,
-          reloadSources: _reloadSourcesService,
-          compileExpression: _compileExpressionService);
+      await connectToServiceProtocol(reloadSources: _reloadSourcesService, compileExpression: _compileExpressionService);
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
       return 2;
@@ -284,6 +282,12 @@ class HotRunner extends ResidentRunner {
         // TODO(johnmccutchan): Attempt to determine the number of errors that
         // occurred and tighten this message.
         printStatus('Try again after fixing the above error(s).', emphasis: true);
+      }
+    } else if (lower == 'l') {
+      final List<FlutterView> views = flutterDevices.expand((FlutterDevice d) => d.views).toList();
+      printStatus('Connected ${pluralize('view', views.length)}:');
+      for (FlutterView v in views) {
+        printStatus('${v.uiIsolate.name} (${v.uiIsolate.id})', indent: 2);
       }
     }
   }

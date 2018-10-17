@@ -34,6 +34,7 @@ class FlutterDevice {
     this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
+    this.viewFilter,
     ResidentCompiler generator,
   }) : generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
@@ -51,7 +52,7 @@ class FlutterDevice {
   List<String> fileSystemRoots;
   String fileSystemScheme;
   StreamSubscription<String> _loggingSubscription;
-  String viewFilter;
+  final String viewFilter;
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered.
@@ -618,14 +619,12 @@ abstract class ResidentRunner {
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered
-  Future<void> connectToServiceProtocol({String viewFilter,
-      ReloadSources reloadSources, CompileExpression compileExpression}) async {
+  Future<void> connectToServiceProtocol({ReloadSources reloadSources, CompileExpression compileExpression}) async {
     if (!debuggingOptions.debuggingEnabled)
       return Future<void>.error('Error the service protocol is not enabled.');
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
-      device.viewFilter = viewFilter;
       await device._connect(reloadSources: reloadSources,
           compileExpression: compileExpression);
       await device.getVMs();
