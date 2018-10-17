@@ -41,7 +41,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @override
   ContainerLayer get parent => super.parent;
 
-  // Whether this layer has any changes since it's last added to the engine
+  // Whether this layer has any changes since it was last sent to the engine
   // using [addToScene]. Initialized to true as a new layer has never called
   // [addToScene].
   bool _isDirty = true;
