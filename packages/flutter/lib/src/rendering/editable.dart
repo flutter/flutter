@@ -697,6 +697,10 @@ class RenderEditable extends RenderBox {
     markNeedsPaint();
   }
 
+  /// If false, [describeSemanticsConfiguration] will not set the
+  /// configuration's cursor motion or set selection callbacks.
+  ///
+  /// True by default.
   bool get enableInteractiveSelection => _enableInteractiveSelection;
   bool _enableInteractiveSelection;
   set enableInteractiveSelection(bool value) {

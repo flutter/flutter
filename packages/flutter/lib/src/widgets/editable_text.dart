@@ -408,7 +408,7 @@ class EditableText extends StatefulWidget {
   ///
   /// True by default.
   ///
-  /// If false, most of the accesibility support for selecting text, copy
+  /// If false, most of the accessibility support for selecting text, copy
   /// and paste, and moving the caret will be disabled.
   ///
   /// If false, the caret will remain at the end of the [controller]'s text.
