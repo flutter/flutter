@@ -50,22 +50,26 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// engine using [addToScene].
   void markDirty() { _isDirty = true; }
 
+  /// Mark that [addToScene] is called and this layer is in sync with engine.
+  ///
+  /// This would enable the retained rendering of this layer if it stays clean
+  /// for future frames.
+  ///
+  /// For some special layers such as [FollowerLayer] and [LeaderLayer], we'll
+  /// override this method to disable the retained rendering.
+  @protected
+  void markClean() { _isDirty = false; }
+
   // Whether any layer in the subtree of this layer is dirty ([_isDirty]).
   bool _isSubtreeDirty;
 
   ui.EngineLayer _engineLayer;
 
   /// Traverse the layer tree and compute if any subtree has a dirty layer (by
-  /// calling [markDirty]).
+  /// calling [markDirty]). The [ContainerLayer] will override this to respect
+  /// its children.
   void updateSubtreeDirtiness() {
     _isSubtreeDirty = _isDirty;
-    if (this is ContainerLayer) {
-      final ContainerLayer container = this;
-      for (Layer child = container.firstChild; child != null; child = child.nextSibling) {
-        child.updateSubtreeDirtiness();
-        _isSubtreeDirty = _isSubtreeDirty || child._isSubtreeDirty;
-      }
-    }
   }
 
   /// This layer's next sibling in the parent layer's child list.
@@ -406,6 +410,16 @@ class ContainerLayer extends Layer {
     return child == equals;
   }
 
+  // TODO(liyuqian): add unit tests for this.
+  @override
+  void updateSubtreeDirtiness() {
+    _isSubtreeDirty = _isDirty;
+    for (Layer child = firstChild; child != null; child = child.nextSibling) {
+      child.updateSubtreeDirtiness();
+      _isSubtreeDirty = _isSubtreeDirty || child._isSubtreeDirty;
+    }
+  }
+
   @override
   S find<S>(Offset regionOffset) {
     Layer current = lastChild;
@@ -648,7 +662,7 @@ class OffsetLayer extends ContainerLayer {
     final ui.EngineLayer engineLayer = builder.pushOffset(layerOffset.dx + offset.dx, layerOffset.dy + offset.dy);
     addChildrenToScene(builder);
     builder.pop();
-    return engineLayer; // this does not return an engine layer yet.
+    return engineLayer;
   }
 
   @override
@@ -1201,6 +1215,10 @@ class LeaderLayer extends ContainerLayer {
   /// pipeline.
   Offset offset;
 
+  /// {@macro flutter.clipper.clipBehavior}
+  @override
+  void markClean() {}
+
   @override
   void attach(Object owner) {
     super.attach(owner);
@@ -1434,6 +1452,17 @@ class FollowerLayer extends ContainerLayer {
     _inverseDirty = true;
   }
 
+  /// {@template flutter.leaderFollower.markClean}
+  /// We intentionally make this method do nothing so LeaderLayer and
+  /// FollowerLayer will always be in dirty state and we won't apply retained
+  /// rendering to those layers. We have to do this because they break the
+  /// assumption of retained rendering: even if no layer in a subtree is dirty,
+  /// the subtree may still be dirty because the FollowerLayer copies change
+  /// from a LeaderLayer that could be anywhere in the Layer tree.
+  /// {@endtemplate}
+  @override
+  void markClean() {}
+
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     assert(link != null);
@@ -1442,7 +1471,7 @@ class FollowerLayer extends ContainerLayer {
       _lastTransform = null;
       _lastOffset = null;
       _inverseDirty = true;
-      return null;
+      return null; // this does not have an engine layer.
     }
     _establishTransform();
     if (_lastTransform != null) {
