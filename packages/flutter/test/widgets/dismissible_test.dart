@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 
 const double itemExtent = 100.0;
 Axis scrollDirection = Axis.vertical;
@@ -43,6 +44,7 @@ Widget buildTest({ double startToEndThreshold, TextDirection textDirection = Tex
               height: itemExtent,
               child: Text(item.toString()),
             ),
+            dragStartBehavior: DragStartBehavior.down,
           );
         }
 
@@ -92,8 +94,10 @@ Future<Null> dismissElement(WidgetTester tester, Finder finder, { @required Axis
     default:
       fail('unsupported gestureDirection');
   }
+  print('error');
 
   final TestGesture gesture = await tester.startGesture(downLocation);
+
   await gesture.moveTo(upLocation);
   await gesture.up();
 }
@@ -204,6 +208,7 @@ class Test1215DismissibleWidget extends StatelessWidget {
         aspectRatio: 1.0,
         child: Text(text),
       ),
+      dragStartBehavior: DragStartBehavior.down,
     );
   }
 }
@@ -237,13 +242,15 @@ void main() {
     dismissDirection = DismissDirection.horizontal;
 
     await tester.pumpWidget(buildTest());
-    expect(dismissedItems, isEmpty);
+    debugPrint('before expect');
 
+    expect(dismissedItems, isEmpty);
+debugPrint('before dismiss');
     await dismissItem(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
     expect(find.text('0'), findsNothing);
     expect(dismissedItems, equals(<int>[0]));
     expect(reportedDismissDirection, DismissDirection.startToEnd);
-
+debugPrint('after');
     await dismissItem(tester, 1, gestureDirection: AxisDirection.left, mechanism: flingElement);
     expect(find.text('1'), findsNothing);
     expect(dismissedItems, equals(<int>[0, 1]));

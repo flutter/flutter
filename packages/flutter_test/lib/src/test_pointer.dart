@@ -49,6 +49,7 @@ class TestPointer {
   /// can give a specific time stamp by passing the `timeStamp`
   /// argument.
   PointerDownEvent down(Offset newLocation, { Duration timeStamp = Duration.zero }) {
+    print('here2.4');
     assert(!isDown);
     _isDown = true;
     _location = newLocation;
@@ -142,16 +143,21 @@ class TestGesture {
     assert(hitTester != null);
     assert(dispatcher != null);
     TestGesture result;
+    print('here2');
     return TestAsyncUtils.guard(() async {
       // dispatch down event
+      print('here2.1');
       final HitTestResult hitTestResult = hitTester(downLocation);
+      print('here2.2');
       final TestPointer testPointer = TestPointer(pointer);
+      print('here2.3');
       await dispatcher(testPointer.down(downLocation), hitTestResult);
-
+print('here2.5');
       // create a TestGesture
       result = TestGesture._(dispatcher, hitTestResult, testPointer);
       return null;
     }).then<TestGesture>((Null value) {
+      print('here3');
       return result;
     }, onError: (dynamic error, StackTrace stack) {
       return Future<TestGesture>.error(error, stack);

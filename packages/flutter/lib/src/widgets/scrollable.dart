@@ -358,6 +358,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     if (!canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
     } else {
+      debugPrint('in herer');
       switch (widget.axis) {
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
@@ -372,7 +373,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                   ..onCancel = _handleDragCancel
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
-                  ..maxFlingVelocity = _physics?.maxFlingVelocity;
+                  ..maxFlingVelocity = _physics?.maxFlingVelocity
+                  ..dragStartBehavior = DragStartBehavior.down;
               },
             ),
           };
@@ -390,7 +392,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                   ..onCancel = _handleDragCancel
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
-                  ..maxFlingVelocity = _physics?.maxFlingVelocity;
+                  ..maxFlingVelocity = _physics?.maxFlingVelocity
+                  ..dragStartBehavior = DragStartBehavior.down;
+
               },
             ),
           };
