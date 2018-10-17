@@ -141,7 +141,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     //
     // Proof by contradiction:
     // If we introduce a loop, this retained layer must be appended to one of
-    // its descendent layer, say A. However, that means the children structure
+    // its descendent layers, say A. However, that means the child structure
     // of A has changed so A is dirty. This contradicts that this layer's
     // subtree is not dirty.
     if (!_isSubtreeDirty && _engineLayer != null) {
