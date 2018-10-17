@@ -178,7 +178,7 @@ abstract class BindingBase {
     assert(callback != null);
     _lockCount += 1;
     final Future<void> future = callback();
-    assert(future != null, 'The lockEvents() callback returned null; it should return a Future<Null> that completes when the lock is to expire.');
+    assert(future != null, 'The lockEvents() callback returned null; it should return a Future<void> that completes when the lock is to expire.');
     future.whenComplete(() {
       _lockCount -= 1;
       if (!locked) {
