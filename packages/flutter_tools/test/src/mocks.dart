@@ -278,10 +278,10 @@ class MemoryIOSink implements IOSink {
   Future<void> get done => close();
 
   @override
-  Future<void> close() async => null;
+  Future<void> close() async { }
 
   @override
-  Future<void> flush() async => null;
+  Future<void> flush() async { }
 }
 
 /// A Stdio that collects stdout and supports simulated stdin.
