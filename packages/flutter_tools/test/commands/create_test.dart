@@ -298,6 +298,31 @@ void main() {
     );
   }, timeout: allowForCreateFlutterProject);
 
+  testUsingContext('plugin project with valid custom project name', () async {
+    return _createProject(
+      projectDir,
+      <String>['--no-pub', '--template=plugin', '--project-name', 'xyz'],
+      <String>[
+        'android/src/main/java/com/example/xyz/XyzPlugin.java',
+        'example/android/app/src/main/java/com/example/xyzexample/MainActivity.java',
+      ],
+      unexpectedPaths: <String>[
+        'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
+      ],
+    );
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('plugin project with invalid custom project name', () async {
+    expect(
+      () => _createProject(projectDir,
+        <String>['--no-pub', '--template=plugin', '--project-name', 'xyz.xyz'],
+        <String>[],
+      ),
+      throwsToolExit(message: '"xyz.xyz" is not a valid Dart package name.'),
+    );
+  }, timeout: allowForCreateFlutterProject);
+
   testUsingContext('legacy app project with-driver-test', () async {
     return _createAndAnalyzeProject(
       projectDir,
