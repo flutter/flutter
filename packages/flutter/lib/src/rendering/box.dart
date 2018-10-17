@@ -1989,6 +1989,9 @@ abstract class RenderBox extends RenderObject {
   /// Convert the given point from the global coordinate system in logical pixels
   /// to the local coordinate system for this box.
   ///
+  /// This method will un-project the point from the screen onto the widget,
+  /// which makes it different from [MatrixUtils.transformPoint].
+  ///
   /// If the transform from global coordinates to local coordinates is
   /// degenerate, this function returns [Offset.zero].
   ///
