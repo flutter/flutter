@@ -404,14 +404,14 @@ void main() {
     expect(controller.selection.extentOffset, tapIndex);
   });
 
-  testWidgets('enableInteractiveCaret = false', (WidgetTester tester) async {
+  testWidgets('enableInteractiveSelection = false, tap', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
     await tester.pumpWidget(
       overlay(
         child: TextField(
           controller: controller,
-          enableInteractiveCaret: false,
+          enableInteractiveSelection: false,
         ),
       )
     );
@@ -462,7 +462,7 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('f')+1);
   });
 
-  testWidgets('enableInteractiveSelection = false', (WidgetTester tester) async {
+  testWidgets('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
     await tester.pumpWidget(
@@ -2577,6 +2577,48 @@ void main() {
             SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
             SemanticsAction.paste,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+            SemanticsFlag.isFocused,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('TextField semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          enableInteractiveSelection: false,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 1,
+          textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            // Absent the following because enableInteractiveSelection: false
+            // SemanticsAction.moveCursorBackwardByCharacter,
+            // SemanticsAction.moveCursorBackwardByWord,
+            // SemanticsAction.setSelection,
+            // SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,

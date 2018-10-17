@@ -90,8 +90,7 @@ class TextField extends StatefulWidget {
   ///
   /// The [textAlign], [autofocus], [obscureText], [autocorrect],
   /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
-  /// [enableInteractiveCaret], and [enableInteractiveSelection] arguments
-  /// must not be null.
+  /// and [enableInteractiveSelection] arguments must not be null.
   ///
   /// See also:
   ///
@@ -123,7 +122,6 @@ class TextField extends StatefulWidget {
     this.cursorColor,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
-    this.enableInteractiveCaret = true,
     this.enableInteractiveSelection = true,
   }) : assert(textAlign != null),
        assert(autofocus != null),
@@ -134,7 +132,6 @@ class TextField extends StatefulWidget {
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       assert(enableInteractiveCaret != null),
        assert(enableInteractiveSelection != null),
        super(key: key);
 
@@ -349,21 +346,7 @@ class TextField extends StatefulWidget {
   /// Defaults to EdgeInserts.all(20.0).
   final EdgeInsets scrollPadding;
 
-  /// If true, then tapping this TextField will move the text caret.
-  ///
-  /// True by default.
-  ///
-  /// If both [enableInteractiveSelection] and [enableInteractiveCaret] are
-  /// false the caret will remain at the end of the [controller]'s text.
-  final bool enableInteractiveCaret;
-
-  /// If true, then long-pressing this TextField will select text and show the
-  /// cut/copy/paste menu.
-  ///
-  /// True by default.
-  ///
-  /// If both [enableInteractiveSelection] and [enableInteractiveCaret] are
-  /// false the caret will remain at the end of the [controller]'s text.
+  /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
 
   @override
@@ -510,7 +493,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleTap() {
-    if (widget.enableInteractiveCaret)
+    if (widget.enableInteractiveSelection)
       _renderEditable.handleTap();
     _requestKeyboard();
     _confirmCurrentSplash();
@@ -608,6 +591,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
+        enableInteractiveSelection: widget.enableInteractiveSelection,
       ),
     );
 
