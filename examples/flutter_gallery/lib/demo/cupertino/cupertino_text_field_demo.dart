@@ -15,11 +15,13 @@ class CupertinoTextFieldDemo extends StatefulWidget {
 
 class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
   TextEditingController _chatTextController;
+  TextEditingController _locationTextController;
 
   @override
   void initState() {
     super.initState();
     _chatTextController = TextEditingController();
+    _locationTextController = TextEditingController(text: 'Montreal, Canada');
   }
 
   Widget _buildChatTextField() {
@@ -36,8 +38,8 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       ),
       maxLines: null,
       keyboardType: TextInputType.multiline,
-      leading: const Padding(padding: EdgeInsets.symmetric(horizontal: 4.0)),
-      trailing: Padding(
+      prefix: const Padding(padding: EdgeInsets.symmetric(horizontal: 4.0)),
+      suffix: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
         child: CupertinoButton(
           color: CupertinoColors.activeGreen,
@@ -53,14 +55,14 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
         ),
       ),
       autofocus: true,
-      trailingMode: OverlayVisibilityMode.editing,
+      suffixMode: OverlayVisibilityMode.editing,
       onSubmitted: (String text)=> setState(()=> _chatTextController.clear()),
     );
   }
 
   Widget _buildNameField() {
     return const CupertinoTextField(
-      leading: Icon(
+      prefix: Icon(
         CupertinoIcons.person_solid,
         color: CupertinoColors.lightBackgroundGray,
         size: 28.0,
@@ -78,7 +80,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
 
   Widget _buildEmailField() {
     return const CupertinoTextField(
-      leading: Icon(
+      prefix: Icon(
         CupertinoIcons.mail_solid,
         color: CupertinoColors.lightBackgroundGray,
         size: 28.0,
@@ -96,8 +98,8 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
 
   Widget _buildLocationField() {
     return CupertinoTextField(
-      controller: TextEditingController(text: 'Montreal, Canada'),
-      leading: const Icon(
+      controller: _locationTextController,
+      prefix: const Icon(
         CupertinoIcons.location_solid,
         color: CupertinoColors.lightBackgroundGray,
         size: 28.0,
@@ -114,13 +116,14 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
 
   Widget _buildPinField() {
     return const CupertinoTextField(
-      leading: Icon(
+      prefix: Icon(
         CupertinoIcons.padlock_solid,
         color: CupertinoColors.lightBackgroundGray,
         size: 28.0,
       ),
       padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
       clearButtonMode: OverlayVisibilityMode.editing,
+      keyboardType: TextInputType.number,
       autocorrect: false,
       obscureText: true,
       decoration: BoxDecoration(
@@ -133,7 +136,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
   Widget _buildTagsField() {
     return CupertinoTextField(
       controller: TextEditingController(text: 'colleague, reading club'),
-      leading: const Icon(
+      prefix: const Icon(
         CupertinoIcons.tags_solid,
         color: CupertinoColors.lightBackgroundGray,
         size: 28.0,
@@ -148,36 +151,39 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(
-      // We don't want a new navigator but we want the CupertinoApp's defaults.
-      builder: (BuildContext context, Widget navigator) {
-        return CupertinoPageScaffold(
-          navigationBar: const CupertinoNavigationBar(
-            previousPageTitle: 'Cupertino',
-            middle: Text('Text Fields'),
-          ),
-          child: ListView(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
-                child: Column(
-                  children: <Widget>[
-                    _buildNameField(),
-                    _buildEmailField(),
-                    _buildLocationField(),
-                    _buildPinField(),
-                    _buildTagsField(),
-                  ],
-                ),
+    return DefaultTextStyle(
+      style: const TextStyle(
+        fontFamily: '.SF UI Text',
+        inherit: false,
+        fontSize: 17.0,
+        color: CupertinoColors.black,
+      ),
+      child: CupertinoPageScaffold(
+        navigationBar: const CupertinoNavigationBar(
+          previousPageTitle: 'Cupertino',
+          middle: Text('Text Fields'),
+        ),
+        child: ListView(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+              child: Column(
+                children: <Widget>[
+                  _buildNameField(),
+                  _buildEmailField(),
+                  _buildLocationField(),
+                  _buildPinField(),
+                  _buildTagsField(),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
-                child: _buildChatTextField(),
-              ),
-            ],
-          ),
-        );
-      },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+              child: _buildChatTextField(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

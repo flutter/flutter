@@ -114,10 +114,10 @@ class CupertinoTextField extends StatefulWidget {
     this.decoration = _kDefaultRoundedBorderDecoration,
     this.padding = const EdgeInsets.all(6.0),
     this.placeholder,
-    this.leading,
-    this.leadingMode = OverlayVisibilityMode.always,
-    this.trailing,
-    this.trailingMode = OverlayVisibilityMode.always,
+    this.prefix,
+    this.prefixMode = OverlayVisibilityMode.always,
+    this.suffix,
+    this.suffixMode = OverlayVisibilityMode.always,
     this.clearButtonMode = OverlayVisibilityMode.never,
     TextInputType keyboardType,
     this.textInputAction,
@@ -149,8 +149,8 @@ class CupertinoTextField extends StatefulWidget {
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
        assert(clearButtonMode != null),
-       assert(leadingMode != null),
-       assert(trailingMode != null),
+       assert(prefixMode != null),
+       assert(suffixMode != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        super(key: key);
 
@@ -170,7 +170,7 @@ class CupertinoTextField extends StatefulWidget {
   /// no box decoration.
   final BoxDecoration decoration;
 
-  /// Padding around the text entry area between the [leading] and [trailing]
+  /// Padding around the text entry area between the [prefix] and [suffix]
   /// or the clear button when [clearButtonMode] is not never.
   ///
   /// Defaults to a padding of 6 pixels on all sides and can be null.
@@ -186,33 +186,33 @@ class CupertinoTextField extends StatefulWidget {
   final String placeholder;
 
   /// An optional [Widget] to display before the text.
-  final Widget leading;
+  final Widget prefix;
 
-  /// Controls the visibility of the [leading] widget based on the state of
-  /// text entry when the [leading] argument is not null.
+  /// Controls the visibility of the [prefix] widget based on the state of
+  /// text entry when the [prefix] argument is not null.
   ///
   /// Defaults to [OverlayVisibilityMode.always] and cannot be null.
   ///
-  /// Has no effect when [leading] is null.
-  final OverlayVisibilityMode leadingMode;
+  /// Has no effect when [prefix] is null.
+  final OverlayVisibilityMode prefixMode;
 
   /// An optional [Widget] to display after the text.
-  final Widget trailing;
+  final Widget suffix;
 
-  /// Controls the visibility of the [trailing] widget based on the state of
-  /// text entry when the [trailing] argument is not null.
+  /// Controls the visibility of the [suffix] widget based on the state of
+  /// text entry when the [suffix] argument is not null.
   ///
   /// Defaults to [OverlayVisibilityMode.always] and cannot be null.
   ///
-  /// Has no effect when [trailing] is null.
-  final OverlayVisibilityMode trailingMode;
+  /// Has no effect when [suffix] is null.
+  final OverlayVisibilityMode suffixMode;
 
   /// Show an iOS-style clear button to clear the current text entry.
   ///
   /// Can be made to appear depending on various text states of the
   /// [TextEditingController].
   ///
-  /// Will only appear if no [trailing] widget is appearing.
+  /// Will only appear if no [suffix] widget is appearing.
   ///
   /// Defaults to never appearing and cannot be null.
   final OverlayVisibilityMode clearButtonMode;
@@ -322,7 +322,7 @@ class CupertinoTextField extends StatefulWidget {
   /// Disables the text field when false.
   ///
   /// Text fields in disabled states have a light grey background and don't
-  /// respond to touch events including the [leading], [trailing] and the clear
+  /// respond to touch events including the [prefix], [suffix] and the clear
   /// button.
   final bool enabled;
 
@@ -359,11 +359,11 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<BoxDecoration>('decoration', decoration));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
     properties.add(StringProperty('placeholder', placeholder));
-    if (leading != null) {
-      properties.add(DiagnosticsProperty<OverlayVisibilityMode>('leading', leadingMode));
+    if (prefix != null) {
+      properties.add(DiagnosticsProperty<OverlayVisibilityMode>('prefix', prefixMode));
     }
-    if (trailing != null) {
-      properties.add(DiagnosticsProperty<OverlayVisibilityMode>('trailing', trailingMode));
+    if (suffix != null) {
+      properties.add(DiagnosticsProperty<OverlayVisibilityMode>('suffix', suffixMode));
     }
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('clearButtonMode', clearButtonMode));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
@@ -509,16 +509,16 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
     if (widget.placeholder != null ||
         widget.clearButtonMode != OverlayVisibilityMode.never ||
-        widget.leading != null ||
-        widget.trailing != null) {
+        widget.prefix != null ||
+        widget.suffix != null) {
       child = ValueListenableBuilder<TextEditingValue>(
         valueListenable: controller,
         builder: (BuildContext context, TextEditingValue text, Widget child) {
           final List<Widget> rowChildren = <Widget>[];
 
-          if (widget.leading != null &&
-              _shouldAppearForModeAndText(widget.leadingMode, text.text.isNotEmpty)) {
-            rowChildren.add(widget.leading);
+          if (widget.prefix != null &&
+              _shouldAppearForModeAndText(widget.prefixMode, text.text.isNotEmpty)) {
+            rowChildren.add(widget.prefix);
           }
 
           final List<Widget> stackChildren = <Widget>[];
@@ -543,14 +543,14 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
           rowChildren.add(Expanded(child: Stack(children: stackChildren..add(child))));
 
-          if (widget.trailing != null &&
-              _shouldAppearForModeAndText(widget.trailingMode, text.text.isNotEmpty)) {
-            rowChildren.add(widget.trailing);
+          if (widget.suffix != null &&
+              _shouldAppearForModeAndText(widget.suffixMode, text.text.isNotEmpty)) {
+            rowChildren.add(widget.suffix);
           } else if (_shouldAppearForModeAndText(widget.clearButtonMode, text.text.isNotEmpty)) {
             rowChildren.add(
               GestureDetector(
                 onTap: enabled
-                    ? () => _controller.clear()
+                    ? () => controller.clear()
                     : null,
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6.0),
