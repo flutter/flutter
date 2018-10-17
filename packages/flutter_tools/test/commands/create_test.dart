@@ -297,6 +297,7 @@ void main() {
       ],
     );
   }, timeout: allowForCreateFlutterProject);
+
   testUsingContext('plugin project with valid custom project name', () async {
     return _createProject(
       projectDir,
@@ -311,10 +312,11 @@ void main() {
       ],
     );
   }, timeout: allowForCreateFlutterProject);
+
   testUsingContext('plugin project with invalid custom project name', () async {
     expect(
-      () => _createProject(projectDir, 
-        <String>['--no-pub', '--template=plugin', '--project-name', 'xyz.xyz'], 
+      () => _createProject(projectDir,
+        <String>['--no-pub', '--template=plugin', '--project-name', 'xyz.xyz'],
         <String>[],
       ),
       throwsToolExit(message: '"xyz.xyz" is not a valid Dart package name.'),
