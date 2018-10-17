@@ -41,7 +41,11 @@ class _FadeUpwardsPageTransition extends StatelessWidget {
         // The above RepaintBoundary separates slide animation from fade
         // animation so we can apply retained rendering optimization to the fade
         // animation. Otherwise, the offset change from slide will mix with the
-        // opacity change and our optimization won't be applied.
+        // This RepaintBoundary separates the slide animation from the fade
+        // animation so that the retained rendering optimization maintains the
+        // identity of the opacity layer from the fade animation. Without this
+        // boundary, the offset change from the slide animation would be applied
+        // to the opacity layer and the layer would not be retained.
         child: FadeTransition(
           opacity: _opacityAnimation,
           child: child,
