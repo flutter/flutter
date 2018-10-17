@@ -6,11 +6,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('TextTheme copyWith apply, merge basics', () {
+  test('TextTheme copyWith apply, merge basics with const TextTheme()', () {
+    expect(const TextTheme(), equals(const TextTheme().copyWith()));
+    expect(const TextTheme(), equals(const TextTheme().apply()));
+    expect(const TextTheme(), equals(const TextTheme().merge(null)));
+    expect(const TextTheme().hashCode, equals(const TextTheme().copyWith().hashCode));
+    expect(const TextTheme(), equals(const TextTheme().copyWith()));
+  });
+
+  test('TextTheme copyWith apply, merge basics with Typography.black', () {
     final Typography typography = Typography(platform: TargetPlatform.android);
     expect(typography.black, equals(typography.black.copyWith()));
     expect(typography.black, equals(typography.black.apply()));
     expect(typography.black, equals(typography.black.merge(null)));
+    expect(typography.black, equals(const TextTheme().merge(typography.black)));
     expect(typography.black, equals(typography.black.merge(typography.black)));
     expect(typography.white, equals(typography.black.merge(typography.white)));
     expect(typography.black.hashCode, equals(typography.black.copyWith().hashCode));
