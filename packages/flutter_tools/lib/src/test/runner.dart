@@ -80,6 +80,7 @@ Future<int> runTests(
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
     projectRootDirectory: fs.currentDirectory.uri,
+    concurrency: concurrency,
   );
 
   // Make the global packages path absolute.
