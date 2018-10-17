@@ -477,6 +477,7 @@ bool DartIsolate::Shutdown() {
     // the isolate to shutdown as a parameter.
     FML_DCHECK(Dart_CurrentIsolate() == nullptr);
     Dart_EnterIsolate(vm_isolate);
+    shutdown_callbacks_.clear();
     Dart_ShutdownIsolate();
     FML_DCHECK(Dart_CurrentIsolate() == nullptr);
   }
