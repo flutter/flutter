@@ -42,14 +42,20 @@ void _updateWindowMetrics(double devicePixelRatio,
 
 typedef _LocaleClosure = String Function();
 
-String _localeClosure() => window._locale.toString();
+String _localeClosure() => window.locale.toString();
 
 @pragma('vm:entry-point')
 _LocaleClosure _getLocaleClosure() => _localeClosure;
 
 @pragma('vm:entry-point')
-void _updateLocale(String languageCode, String countryCode, String scriptCode, String variantCode) {
-  window._locale = new Locale(languageCode, countryCode);
+void _updateLocales(List<String> locales) {
+  const int stringsPerLocale = 4;
+  final int numLocales = locales.length ~/ stringsPerLocale;
+  window._locales = new List<Locale>(numLocales);
+  for (int localeIndex = 0; localeIndex < numLocales; localeIndex++) {
+    window._locales[localeIndex] = new Locale(locales[localeIndex * stringsPerLocale],
+                                   locales[localeIndex * stringsPerLocale + 1]);
+  }
   _invoke(window.onLocaleChanged, window._onLocaleChangedZone);
 }
 

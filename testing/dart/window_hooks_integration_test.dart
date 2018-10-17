@@ -100,7 +100,7 @@ void main() {
         };
       });
 
-      _updateLocale('en', 'US', '', '');
+      _updateLocales(<String>['en', 'US', '', '']);
       expect(runZone, isNotNull);
       expect(runZone, same(innerZone));
       expect(locale, equals(const Locale('en', 'US')));
