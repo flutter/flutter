@@ -5,7 +5,9 @@
 #ifndef FLUTTER_LIB_UI_WINDOW_WINDOW_H_
 #define FLUTTER_LIB_UI_WINDOW_WINDOW_H_
 
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "flutter/fml/time/time_point.h"
 #include "flutter/lib/ui/semantics/semantics_update.h"
@@ -59,10 +61,7 @@ class Window final {
 
   void DidCreateIsolate();
   void UpdateWindowMetrics(const ViewportMetrics& metrics);
-  void UpdateLocale(const std::string& language_code,
-                    const std::string& country_code,
-                    const std::string& script_code,
-                    const std::string& variant_code);
+  void UpdateLocales(const std::vector<std::string>& locales);
   void UpdateUserSettingsData(const std::string& data);
   void UpdateSemanticsEnabled(bool enabled);
   void UpdateAccessibilityFeatures(int32_t flags);

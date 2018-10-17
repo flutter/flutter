@@ -37,6 +37,7 @@ import io.flutter.plugin.platform.PlatformPlugin;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -170,7 +171,8 @@ public class FlutterView extends SurfaceView
         mImm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         mTextInputPlugin = new TextInputPlugin(this);
 
-        setLocale(getResources().getConfiguration().locale);
+
+        setLocales(getResources().getConfiguration());
         setUserSettings();
     }
 
@@ -316,14 +318,43 @@ public class FlutterView extends SurfaceView
         mFlutterSettingsChannel.send(message);
     }
 
-    private void setLocale(Locale locale) {
+    private void setLocales(Configuration config) {
+        if (Build.VERSION.SDK_INT >= 24) {
+            try {
+                // Passes the full list of locales for android API >= 24 with reflection.
+                Object localeList = config.getClass().getDeclaredMethod("getLocales").invoke(config);
+                Method localeListGet = localeList.getClass().getDeclaredMethod("get", int.class);
+                Method localeListSize = localeList.getClass().getDeclaredMethod("size");
+                int localeCount = (int)localeListSize.invoke(localeList);
+                List<String> data = new ArrayList<String>();
+                for (int index = 0; index < localeCount; ++index) {
+                    Locale locale = (Locale)localeListGet.invoke(localeList, index);
+                    data.add(locale.getLanguage());
+                    data.add(locale.getCountry());
+                    data.add(locale.getScript());
+                    data.add(locale.getVariant());
+                }
+                mFlutterLocalizationChannel.invokeMethod("setLocale", data);
+                return;
+            } catch (Exception exception) {
+                // Any exception is a failure. Resort to fallback of sending only one locale.
+            }
+        }
+        // Fallback single locale passing for android API < 24. Should work always.
+        Locale locale = config.locale;
+        List<String> data = new ArrayList<String>();
+        data.add(locale.getLanguage());
+        data.add(locale.getCountry());
+        data.add(locale.getScript());
+        data.add(locale.getVariant());
         mFlutterLocalizationChannel.invokeMethod("setLocale", Arrays.asList(locale.getLanguage(), locale.getCountry(), locale.getScript(), locale.getVariant()));
+        
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        setLocale(newConfig.locale);
+        setLocales(newConfig);
         setUserSettings();
     }
 

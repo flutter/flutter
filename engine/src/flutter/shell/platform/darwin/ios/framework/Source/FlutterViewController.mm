@@ -905,19 +905,26 @@ static blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) {
 #pragma mark - Locale updates
 
 - (void)onLocaleUpdated:(NSNotification*)notification {
-  NSLocale* currentLocale = [NSLocale currentLocale];
-  NSString* languageCode = [currentLocale objectForKey:NSLocaleLanguageCode];
-  NSString* countryCode = [currentLocale objectForKey:NSLocaleCountryCode];
-  NSString* scriptCode = [currentLocale objectForKey:NSLocaleScriptCode];
-  NSString* variantCode = [currentLocale objectForKey:NSLocaleVariantCode];
-  if (languageCode && countryCode)
-    // We pass empty strings for undefined scripts and variants to ensure the JSON encoder/decoder
-    // functions properly.
-    [_localizationChannel.get() invokeMethod:@"setLocale"
-                                   arguments:@[
-                                     languageCode, countryCode, scriptCode ? scriptCode : @"",
-                                     variantCode ? variantCode : @""
-                                   ]];
+  NSArray<NSString*>* preferredLocales = [NSLocale preferredLanguages];
+  NSMutableArray<NSString*>* data = [NSMutableArray new];
+  for (NSString* localeID in preferredLocales) {
+    NSLocale* currentLocale = [[NSLocale alloc] initWithLocaleIdentifier:localeID];
+    NSString* languageCode = [currentLocale objectForKey:NSLocaleLanguageCode];
+    NSString* countryCode = [currentLocale objectForKey:NSLocaleCountryCode];
+    NSString* scriptCode = [currentLocale objectForKey:NSLocaleScriptCode];
+    NSString* variantCode = [currentLocale objectForKey:NSLocaleVariantCode];
+    if (!languageCode || !countryCode) {
+      continue;
+    }
+    [data addObject:languageCode];
+    [data addObject:countryCode];
+    [data addObject:(scriptCode ? scriptCode : @"")];
+    [data addObject:(variantCode ? variantCode : @"")];
+  }
+  if (data.count == 0) {
+    return;
+  }
+  [_localizationChannel.get() invokeMethod:@"setLocale" arguments:data];
 }
 
 #pragma mark - Set user settings

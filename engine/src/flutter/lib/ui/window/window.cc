@@ -162,21 +162,14 @@ void Window::UpdateWindowMetrics(const ViewportMetrics& metrics) {
                   });
 }
 
-void Window::UpdateLocale(const std::string& language_code,
-                          const std::string& country_code,
-                          const std::string& script_code,
-                          const std::string& variant_code) {
+void Window::UpdateLocales(const std::vector<std::string>& locales) {
   std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
   if (!dart_state)
     return;
   tonic::DartState::Scope scope(dart_state);
-
-  DartInvokeField(library_.value(), "_updateLocale",
+  DartInvokeField(library_.value(), "_updateLocales",
                   {
-                      StdStringToDart(language_code),
-                      StdStringToDart(country_code),
-                      StdStringToDart(script_code),
-                      StdStringToDart(variant_code),
+                      tonic::ToDart<std::vector<std::string>>(locales),
                   });
 }
 
