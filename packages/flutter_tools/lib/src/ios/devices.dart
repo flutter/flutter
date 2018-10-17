@@ -579,7 +579,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
   Future<void> unforward(ForwardedPort forwardedPort) async {
     if (!_forwardedPorts.remove(forwardedPort)) {
       // Not in list. Nothing to remove.
-      return null;
+      return;
     }
 
     printTrace('Unforwarding port $forwardedPort');
@@ -591,7 +591,5 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     } else {
       printError('Forwarded port did not have a valid process');
     }
-
-    return null;
   }
 }
