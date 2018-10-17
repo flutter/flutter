@@ -365,8 +365,8 @@ Future<void> _buildGradleProjectV2(
   if (target != null) {
     command.add('-Ptarget=$target');
   }
-  if (buildInfo.trackWidgetCreation)
-    command.add('-Ptrack-widget-creation=true');
+  assert(buildInfo.trackWidgetCreation != null);
+  command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
   if (buildInfo.compilationTraceFilePath != null)
     command.add('-Pprecompile=${buildInfo.compilationTraceFilePath}');
   if (buildInfo.buildHotUpdate)
