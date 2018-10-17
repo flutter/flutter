@@ -198,6 +198,7 @@ class PaintingContext extends ClipContext {
         return true;
       }());
     }
+    assert(child._layer != null);
     if (child._layer.offset != offset) {
       child._layer.markDirty();
     }
