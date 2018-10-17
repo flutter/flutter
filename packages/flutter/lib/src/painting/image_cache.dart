@@ -120,7 +120,7 @@ class ImageCache {
     }
     final _PendingImage pending = _pendingImages.remove(key);
     if (pending != null) {
-      pending.completer.removeListener(pending.listener);
+      pending.removeListener();
       return true;
     }
     return false;
@@ -164,8 +164,7 @@ class ImageCache {
     }
     if (maximumSize > 0 && maximumSizeBytes > 0) {
       _pendingImages[key] = result;
-      result.completer.addListener(listener);
-      result.listener = listener;
+      result.addListener(listener);
     }
     return result.completer;
   }
@@ -196,5 +195,16 @@ class _PendingImage {
   _PendingImage(this.completer);
 
   final ImageStreamCompleter completer;
-  ImageListener listener;
+  ImageListener _listener;
+
+  void addListener(ImageListener listener) {
+    assert(_listener == null);
+    _listener = listener;
+    completer.addListener(listener);
+  }
+
+  void removeListener() {
+    completer.removeListener(_listener);
+    _listener = null;
+  }
 }
