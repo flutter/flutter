@@ -49,6 +49,7 @@ class CupertinoPicker extends StatefulWidget {
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor = _kDefaultBackground,
+    this.highlighterBorder = _kHighlighterBorder,
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
     this.magnification = 1.0,
@@ -60,6 +61,7 @@ class CupertinoPicker extends StatefulWidget {
   }) : assert(children != null),
        assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(highlighterBorder != null),
        assert(magnification > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
@@ -89,6 +91,7 @@ class CupertinoPicker extends StatefulWidget {
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor = _kDefaultBackground,
+    this.highlighterBorder = _kHighlighterBorder,
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
     this.magnification = 1.0,
@@ -100,6 +103,7 @@ class CupertinoPicker extends StatefulWidget {
   }) : assert(itemBuilder != null),
        assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(highlighterBorder != null),
        assert(magnification > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
@@ -122,6 +126,11 @@ class CupertinoPicker extends StatefulWidget {
   /// This can be set to null to disable the background painting entirely; this
   /// is mildly more efficient than using [Colors.transparent].
   final Color backgroundColor;
+
+  /// Highlight color for border of picker magnifier lens
+  ///
+  /// This color cannot be null
+  final Color highlighterBorder;
 
   /// {@macro flutter.rendering.wheelList.offAxisFraction}
   final double offAxisFraction;
@@ -221,11 +230,11 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             ),
           ),
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
-                top: BorderSide(width: 0.0, color: _kHighlighterBorder),
-                bottom: BorderSide(width: 0.0, color: _kHighlighterBorder),
-              )
+                top: BorderSide(width: 0.0, color: widget.highlighterBorder),
+                bottom: BorderSide(width: 0.0, color: widget.highlighterBorder),
+              ),
             ),
             constraints: BoxConstraints.expand(
                 height: widget.itemExtent * widget.magnification,
