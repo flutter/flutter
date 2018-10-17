@@ -1,4 +1,4 @@
-Signature: 05d6cc24418c9f1966eefe7da840487f
+Signature: 213dc7cd39cc912c07a5c48a0e57f619
 
 UNUSED LICENSES:
 
@@ -2018,8 +2018,14 @@ FILE: ../../../third_party/skia/experimental/canvaskit/externs.js
 FILE: ../../../third_party/skia/experimental/canvaskit/gpu.js
 FILE: ../../../third_party/skia/experimental/canvaskit/helper.js
 FILE: ../../../third_party/skia/experimental/canvaskit/interface.js
+FILE: ../../../third_party/skia/experimental/canvaskit/karma.bench.conf.js
 FILE: ../../../third_party/skia/experimental/canvaskit/karma.conf.js
 FILE: ../../../third_party/skia/experimental/canvaskit/package.json
+FILE: ../../../third_party/skia/experimental/canvaskit/perf/animation.bench.js
+FILE: ../../../third_party/skia/experimental/canvaskit/perf/assets/confetti.json
+FILE: ../../../third_party/skia/experimental/canvaskit/perf/assets/drinks.json
+FILE: ../../../third_party/skia/experimental/canvaskit/perf/assets/lego_loader.json
+FILE: ../../../third_party/skia/experimental/canvaskit/perf/assets/onboarding.json
 FILE: ../../../third_party/skia/experimental/docs/animationCommon.js
 FILE: ../../../third_party/skia/experimental/docs/backend.js
 FILE: ../../../third_party/skia/experimental/docs/canvasBackend.js
@@ -2211,6 +2217,8 @@ FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clan
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-NUC6i5SYK-GPU-IntelIris540-x86_64-Release-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-iOS-Clang-iPadPro-GPU-PowerVRGT7800-arm64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf_canvaskit.expected/Perf-Debian9-EMCC-GCE-CPU-AVX2-wasm-Release-All-CanvasKit.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf_canvaskit.expected/pathkit_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_pathkit.expected/Perf-Debian9-EMCC-GCE-CPU-AVX2-asmjs-Release-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_pathkit.expected/Perf-Debian9-EMCC-GCE-CPU-AVX2-wasm-Release-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_pathkit.expected/pathkit_trybot.json
