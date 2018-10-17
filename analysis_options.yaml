@@ -136,7 +136,7 @@ linter:
     - prefer_iterable_whereType
     - prefer_single_quotes
     - prefer_typing_uninitialized_variables
-    # - prefer_void_to_null # not yet tested
+    - prefer_void_to_null
     # - public_member_api_docs # enabled on a case-by-case basis; see e.g. packages/analysis_options.yaml
     - recursive_getters
     - slash_for_doc_comments
