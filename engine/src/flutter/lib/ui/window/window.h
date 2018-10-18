@@ -43,6 +43,7 @@ class WindowClient {
   virtual void Render(Scene* scene) = 0;
   virtual void UpdateSemantics(SemanticsUpdate* update) = 0;
   virtual void HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) = 0;
+  virtual void SetIsolateDebugName(const std::string isolateName) = 0;
   virtual FontCollection& GetFontCollection() = 0;
 
  protected:
