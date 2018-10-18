@@ -345,7 +345,11 @@ public class FlutterView extends SurfaceView
         List<String> data = new ArrayList<String>();
         data.add(locale.getLanguage());
         data.add(locale.getCountry());
-        data.add(locale.getScript());
+        if (Build.VERSION.SDK_INT >= 21) {
+            data.add(locale.getScript());
+        } else {
+            data.add("");
+        }
         data.add(locale.getVariant());
         mFlutterLocalizationChannel.invokeMethod("setLocale", Arrays.asList(locale.getLanguage(), locale.getCountry(), locale.getScript(), locale.getVariant()));
         
