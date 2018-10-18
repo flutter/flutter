@@ -140,7 +140,7 @@ class InkRipple extends InteractiveInkFeature {
     // Interval delays changes until the radius expansion has completed.
     _fadeOutController = AnimationController(duration: fadeOutDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
-      ..addStatusListener(_handleAlphaStatusChanged);
+      ..addStatusListener(_handleFadeStatusChanged);
     _fadeOut = _fadeOutController.drive(getFadeOutTween(color));
 
     controller.addInkFeature(this);
@@ -155,10 +155,10 @@ class InkRipple extends InteractiveInkFeature {
   Animation<double> _radius;
   AnimationController _radiusController;
 
-  Animation<int> _fadeIn;
+  Animation<double> _fadeIn;
   AnimationController _fadeInController;
 
-  Animation<int> _fadeOut;
+  Animation<double> _fadeOut;
   AnimationController _fadeOutController;
 
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
@@ -220,10 +220,10 @@ class InkRipple extends InteractiveInkFeature {
   /// animation defined by [getRadiusTween].
   ///
   /// Returns a linear [Tween] that begins at `0.0` and ends at `color.opacity`.
-  Animatable<int> getFadeInTween(Color color) {
-    return IntTween(
+  Animatable<double> getFadeInTween(Color color) {
+    return Tween<double>(
       begin: 0,
-      end: color.alpha,
+      end: color.opacity,
     );
   }
 
@@ -240,11 +240,11 @@ class InkRipple extends InteractiveInkFeature {
   ///
   /// Returns a linear [Tween] that begins at `color.opacity` and ends
   /// at `0.0`.
-  Animatable<int> getFadeOutTween(Color color) {
+  Animatable<double> getFadeOutTween(Color color) {
     final double fadeTime = fadeOutDuration.inMilliseconds.toDouble();
     final double radiusTime = confirmedRadiusDuration.inMilliseconds.toDouble();
-    return IntTween(
-      begin: color.alpha,
+    return Tween<double>(
+      begin: color.opacity,
       end: 0,
     ).chain(
       // The fade out typically begins 225ms after the _fadeOutController starts
@@ -272,7 +272,7 @@ class InkRipple extends InteractiveInkFeature {
   void cancel() {
     _fadeInController.stop();
     // Watch out: setting _fadeOutController's value to 1.0 will
-    // trigger a call to _handleAlphaStatusChanged() which will
+    // trigger a call to _handleFadeStatusChanged() which will
     // dispose _fadeOutController.
     final double fadeOutValue = 1.0 - _fadeInController.value;
     _fadeOutController.value = fadeOutValue;
@@ -280,7 +280,7 @@ class InkRipple extends InteractiveInkFeature {
       _fadeOutController.animateTo(1.0, duration: cancelDuration);
   }
 
-  void _handleAlphaStatusChanged(AnimationStatus status) {
+  void _handleFadeStatusChanged(AnimationStatus status) {
     if (status == AnimationStatus.completed)
       dispose();
   }
@@ -295,8 +295,8 @@ class InkRipple extends InteractiveInkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    final int alpha = _fadeInController.isAnimating ? _fadeIn.value : _fadeOut.value;
-    final Paint paint = Paint()..color = color.withAlpha(alpha);
+    final double opacity = _fadeInController.isAnimating ? _fadeIn.value : _fadeOut.value;
+    final Paint paint = Paint()..color = color.withOpacity(opacity);
     // Splash moves to the center of the reference box.
     final Offset center = Offset.lerp(
       _position,
