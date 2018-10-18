@@ -10,15 +10,6 @@ import 'package:flutter/widgets.dart';
 import 'ink_well.dart';
 import 'material.dart';
 
-const Duration _kUnconfirmedRippleDuration = Duration(seconds: 1);
-const Duration _kFadeInDuration = Duration(milliseconds: 75);
-const Duration _kRadiusDuration = Duration(milliseconds: 225);
-const Duration _kFadeOutDuration = Duration(milliseconds: 375);
-const Duration _kCancelDuration = Duration(milliseconds: 75);
-
-// The fade out begins 225ms after the _fadeOutController starts. See confirm().
-const double _kFadeOutIntervalStart = 225.0 / 375.0;
-
 RectCallback _getClipCallback(RenderBox referenceBox, bool containedInkWell, RectCallback rectCallback) {
   if (rectCallback != null) {
     assert(containedInkWell);
@@ -126,45 +117,31 @@ class InkRipple extends InteractiveInkFeature {
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
        _textDirection = textDirection,
-       _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved)
   {
     assert(_borderRadius != null);
 
     // Immediately begin fading-in the initial splash.
-    _fadeInController = AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
+    _fadeInController = AnimationController(duration: fadeInDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
-    _fadeIn = _fadeInController.drive(IntTween(
-      begin: 0,
-      end: color.alpha,
-    ));
+    _fadeIn = _fadeInController.drive(getFadeInTween(color));
 
     // Controls the splash radius and its center. Starts upon confirm.
-    _radiusController = AnimationController(duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
+    _radiusController = AnimationController(duration: unconfirmedRadiusDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
-     // Initial splash diameter is 60% of the target diameter, final
-     // diameter is 10dps larger than the target diameter.
     _radius = _radiusController.drive(
-      Tween<double>(
-        begin: _targetRadius * 0.30,
-        end: _targetRadius + 5.0,
-      ).chain(_easeCurveTween),
+      getRadiusTween(radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position))
     );
 
     // Controls the splash radius and its center. Starts upon confirm however its
     // Interval delays changes until the radius expansion has completed.
-    _fadeOutController = AnimationController(duration: _kFadeOutDuration, vsync: controller.vsync)
+    _fadeOutController = AnimationController(duration: fadeOutDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged);
-    _fadeOut = _fadeOutController.drive(
-      IntTween(
-        begin: color.alpha,
-        end: 0,
-      ).chain(_fadeOutIntervalTween),
-    );
+    _fadeOut = _fadeOutController.drive(getFadeOutTween(color));
 
     controller.addInkFeature(this);
   }
@@ -172,7 +149,6 @@ class InkRipple extends InteractiveInkFeature {
   final Offset _position;
   final BorderRadius _borderRadius;
   final ShapeBorder _customBorder;
-  final double _targetRadius;
   final RectCallback _clipCallback;
   final TextDirection _textDirection;
 
@@ -189,18 +165,107 @@ class InkRipple extends InteractiveInkFeature {
   /// or material [Theme].
   static const InteractiveInkFeatureFactory splashFactory = _InkRippleFactory();
 
-  static final Animatable<double> _easeCurveTween = CurveTween(curve: Curves.ease);
-  static final Animatable<double> _fadeOutIntervalTween = CurveTween(curve: const Interval(_kFadeOutIntervalStart, 1.0));
+  /// Duration of the radius animation that begins when this [InkRipple]
+  /// is constructed.
+  ///
+  /// See also:
+  ///
+  /// * [confirmedRadiusDuration], the duration of the radius animation
+  ///   is changed to this value upon [confirm].
+  /// * [getRadiusTween], which defines the radius animation.
+  @protected
+  Duration get unconfirmedRadiusDuration => const Duration(seconds: 1);
+
+  /// Update to [unconfirmedRadiusDuration] that's applied upon [confirm].
+  ///
+  /// See also:
+  ///
+  /// * [unconfirmedRadiusDuration], which is the initial duration of the
+  ///   radius animation.
+  /// * [getRadiusTween], which defines the radius animation.
+  @protected
+  Duration get confirmedRadiusDuration => const Duration(milliseconds: 225);
+
+  /// Returns a [Tween] that defines how the ripple's radius changes
+  /// over [unconfirmedRadiusDuration] upon tap down and
+  /// [confirmedRadiusDuration] upon tap up.
+  ///
+  /// The [targetRadius] is either the `radius` constructor parameter or
+  /// a computed value that's large enough to cover the [InkWell] based
+  /// on `referenceBox`, `rectCallback`, and `containedInkWell`.
+  ///
+  /// By default the initial splash diameter is 60% of the target
+  /// diameter, final diameter is 10dps larger than the target diameter.
+  @protected
+  Animatable<double> getRadiusTween(double targetRadius) {
+    return Tween<double>(
+      begin: targetRadius * 0.30,
+      end: targetRadius + 5.0,
+    ).chain(CurveTween(curve: Curves.ease));
+  }
+
+  /// The duration of the ripple fade-in animation defined by [getFadeInTween].
+  ///
+  /// The fade-in starts when this [InkRipple] is constructed; at the same
+  /// time as the ripple radius animation defined by [getRadiusTween]
+  /// and [unconfirmedRadiusDuration].
+  @protected
+  Duration get fadeInDuration => const Duration(milliseconds: 75);
+
+  /// Defines the animated opacity value for the ripple's [color] when
+  /// the animation fades in.
+  ///
+  /// The fade-in animation's duration is [fadeInDuration]. The fade-in starts
+  /// when this [InkRipple] is constructed. It starts at the same as the
+  /// animation defined by [getRadiusTween].
+  ///
+  /// Returns a linear [Tween] that begins at `0.0` and ends at `color.opacity`.
+  Animatable<int> getFadeInTween(Color color) {
+    return IntTween(
+      begin: 0,
+      end: color.alpha,
+    );
+  }
+
+  /// The duration of the ripple fade-out animation defined by [getFadeOutTween].
+  ///
+  /// The fade-out starts when [confirm] is called.
+  Duration get fadeOutDuration => const Duration(milliseconds: 375);
+
+  /// Defines the animated opacity value for the ripple's [color] when
+  /// the animation fades out.
+  ///
+  /// The fade-out animation's duration is [fadeOutDuration]. The fade-out starts
+  /// when [confirm] is called.
+  ///
+  /// Returns a linear [Tween] that begins at `color.opacity` and ends
+  /// at `0.0`.
+  Animatable<int> getFadeOutTween(Color color) {
+    final double fadeTime = fadeOutDuration.inMilliseconds.toDouble();
+    final double radiusTime = confirmedRadiusDuration.inMilliseconds.toDouble();
+    return IntTween(
+      begin: color.alpha,
+      end: 0,
+    ).chain(
+      // The fade out typically begins 225ms after the _fadeOutController starts
+      // to ensure that the radius animation has completed. See confirm().
+      CurveTween(curve: Interval(math.min(1.0, radiusTime / fadeTime), 1.0))
+    );
+  }
+
+  /// The new duration of the [getFadeOutTween] if [cancel] is called before
+  /// the fade-out animation has completed.
+  Duration get cancelDuration => const Duration(milliseconds: 75);
 
   @override
   void confirm() {
     _radiusController
-      ..duration = _kRadiusDuration
+      ..duration = confirmedRadiusDuration
       ..forward();
     // This confirm may have been preceded by a cancel.
     _fadeInController.forward();
     _fadeOutController
-      ..animateTo(1.0, duration: _kFadeOutDuration);
+      ..animateTo(1.0, duration: fadeOutDuration);
   }
 
   @override
@@ -212,7 +277,7 @@ class InkRipple extends InteractiveInkFeature {
     final double fadeOutValue = 1.0 - _fadeInController.value;
     _fadeOutController.value = fadeOutValue;
     if (fadeOutValue < 1.0)
-      _fadeOutController.animateTo(1.0, duration: _kCancelDuration);
+      _fadeOutController.animateTo(1.0, duration: cancelDuration);
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
