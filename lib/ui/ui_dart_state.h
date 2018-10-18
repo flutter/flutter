@@ -31,6 +31,8 @@ class UIDartState : public tonic::DartState {
 
   Dart_Port main_port() const { return main_port_; }
 
+  void set_debug_name(const std::string name) { debug_name_ = name; }
+
   const std::string& debug_name() const { return debug_name_; }
 
   const std::string& logger_prefix() const { return logger_prefix_; }

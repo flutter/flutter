@@ -714,6 +714,16 @@ class Window {
   /// semantics update cannot be used further.
   void updateSemantics(SemanticsUpdate update) native 'Window_updateSemantics';
 
+  /// Set the debug name associated with this window's root isolate.
+  ///
+  /// Normally debug names are automatically generated from the Dart port, entry
+  /// point, and source file. For example: `main.dart$main-1234`.
+  ///
+  /// This can be combined with flutter tools `--isolate-filter` flag to debug
+  /// specific root isolates. For example: `flutter attach --isolate-filter=[name]`.
+  /// Note that this does not rename any child isolates of the root.
+  void setIsolateDebugName(String name) native 'Window_setIsolateDebugName';
+
   /// Sends a message to a platform-specific plugin.
   ///
   /// The `name` parameter determines which plugin receives the message. The

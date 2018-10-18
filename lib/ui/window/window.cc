@@ -54,6 +54,17 @@ void UpdateSemantics(Dart_NativeArguments args) {
   UIDartState::Current()->window()->client()->UpdateSemantics(update);
 }
 
+void SetIsolateDebugName(Dart_NativeArguments args) {
+  Dart_Handle exception = nullptr;
+  const std::string name =
+      tonic::DartConverter<std::string>::FromArguments(args, 1, exception);
+  if (exception) {
+    Dart_ThrowException(exception);
+    return;
+  }
+  UIDartState::Current()->window()->client()->SetIsolateDebugName(name);
+}
+
 Dart_Handle SendPlatformMessage(Dart_Handle window,
                                 const std::string& name,
                                 Dart_Handle callback,
@@ -306,6 +317,7 @@ void Window::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Window_respondToPlatformMessage", _RespondToPlatformMessage, 3, true},
       {"Window_render", Render, 2, true},
       {"Window_updateSemantics", UpdateSemantics, 2, true},
+      {"Window_setIsolateDebugName", SetIsolateDebugName, 2, true},
   });
 }
 

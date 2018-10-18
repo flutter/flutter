@@ -264,6 +264,14 @@ void RuntimeController::HandlePlatformMessage(
   client_.HandlePlatformMessage(std::move(message));
 }
 
+void RuntimeController::SetIsolateDebugName(const std::string name) {
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  if (!root_isolate) {
+    return;
+  }
+  root_isolate->set_debug_name(name);
+}
+
 FontCollection& RuntimeController::GetFontCollection() {
   return client_.GetFontCollection();
 }
