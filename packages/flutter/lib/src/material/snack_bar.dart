@@ -81,11 +81,19 @@ class SnackBarAction extends StatefulWidget {
   /// The [label] and [onPressed] arguments must be non-null.
   const SnackBarAction({
     Key key,
+    this.labelColor,
+    this.disabledLabelColor,
     @required this.label,
     @required this.onPressed,
   }) : assert(label != null),
        assert(onPressed != null),
        super(key: key);
+
+  /// The button label color. If not provided, defaults to accentColor.
+  final Color labelColor;
+
+  /// The button disabled label color.
+  final Color disabledLabelColor;
 
   /// The button label.
   final String label;
@@ -118,6 +126,8 @@ class _SnackBarActionState extends State<SnackBarAction> {
     return FlatButton(
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
+      textColor: widget.labelColor,
+      disabledTextColor: widget.disabledLabelColor,
     );
   }
 }
