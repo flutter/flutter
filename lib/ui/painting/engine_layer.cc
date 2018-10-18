@@ -17,6 +17,13 @@ namespace blink {
 
 EngineLayer::~EngineLayer() = default;
 
+size_t EngineLayer::GetAllocationSize() {
+  // Provide an approximation of the total memory impact of this object to the
+  // Dart GC.  The ContainerLayer may hold references to a tree of other layers,
+  // which in turn may contain Skia objects.
+  return 3000;
+};
+
 IMPLEMENT_WRAPPERTYPEINFO(ui, EngineLayer);
 
 #define FOR_EACH_BINDING(V)  // nothing to bind
