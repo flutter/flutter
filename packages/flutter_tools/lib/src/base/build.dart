@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../build_info.dart';
+import '../bundle.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
@@ -293,6 +294,7 @@ class AOTSnapshotter {
     @required String mainPath,
     @required String packagesPath,
     @required String outputPath,
+    @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions = const <String>[],
   }) async {
     final Directory outputDir = fs.directory(outputPath);
@@ -308,12 +310,15 @@ class AOTSnapshotter {
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
       packagesPath: packagesPath,
-      outputFilePath: fs.path.join(outputPath, 'app.dill'),
+      outputFilePath: getKernelPathForTransformerOptions(
+        fs.path.join(outputPath, 'app.dill'),
+        trackWidgetCreation: trackWidgetCreation,
+      ),
       depFilePath: depfilePath,
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn: true,
       aot: true,
-      trackWidgetCreation: false,
+      trackWidgetCreation: trackWidgetCreation,
       targetProductVm: buildMode == BuildMode.release,
     );
 

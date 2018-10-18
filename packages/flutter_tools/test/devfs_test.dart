@@ -123,6 +123,7 @@ void main() {
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
         'writeFile test lib/foo.txt.dill',
@@ -142,6 +143,7 @@ void main() {
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
         'writeFile test lib/foo.txt.dill',
@@ -157,6 +159,7 @@ void main() {
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
         'writeFile test lib/foo.txt.dill',
@@ -171,6 +174,7 @@ void main() {
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
         'writeFile test lib/foo.txt.dill',
@@ -183,6 +187,7 @@ void main() {
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
         'writeFile test lib/foo.txt.dill',
@@ -200,6 +205,7 @@ void main() {
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
         'deleteFile test lib/foo.txt',
@@ -217,6 +223,7 @@ void main() {
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
         'writeFile test lib/foo.txt.dill',
@@ -248,6 +255,7 @@ void main() {
         fileFilter: fileFilter,
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
         'writeFile test lib/foo.txt.dill',
@@ -266,6 +274,7 @@ void main() {
         bundleDirty: true,
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
         'writeFile test ${_inAssetBuildDirectory(fs, 'a.txt')}',
@@ -286,6 +295,7 @@ void main() {
         bundleDirty: true,
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
       );
       // Expect entire asset bundle written because bundleDirty is true
       devFSOperations.expectMessages(<String>[
@@ -308,6 +318,7 @@ void main() {
         bundle: assetBundle,
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
         'writeFile test ${_inAssetBuildDirectory(fs, 'c.txt')}',
@@ -328,6 +339,7 @@ void main() {
         bundle: assetBundle,
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
         'deleteFile test ${_inAssetBuildDirectory(fs, 'c.txt')}',
@@ -348,6 +360,7 @@ void main() {
         bundleDirty: true,
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
         'deleteFile test ${_inAssetBuildDirectory(fs, 'a.txt')}',
@@ -405,6 +418,7 @@ void main() {
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
       );
       vmService.expectMessages(<String>[
         'writeFile test lib/foo.txt.dill',
