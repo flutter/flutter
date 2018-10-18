@@ -92,7 +92,8 @@ class SnackBarAction extends StatefulWidget {
   /// The button label color. If not provided, defaults to accentColor.
   final Color labelColor;
 
-  /// The button disabled label color.
+  /// The button disabled label color. This color is shown after the
+  /// snackBarAction is dismissed.
   final Color disabledLabelColor;
 
   /// The button label.

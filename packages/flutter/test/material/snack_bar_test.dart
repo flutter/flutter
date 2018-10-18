@@ -4,8 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import '../rendering/mock_canvas.dart';
-
 
 void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
