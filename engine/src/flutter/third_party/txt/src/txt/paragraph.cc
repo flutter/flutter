@@ -732,9 +732,9 @@ void Paragraph::Layout(double width, bool force) {
     auto update_line_metrics = [&](const SkPaint::FontMetrics& metrics,
                                    const TextStyle& style) {
       double line_spacing =
-          (line_number == 0) ? -metrics.fAscent * style.height
-                             : (-metrics.fAscent + metrics.fLeading) *
-                                   style.height * paragraph_style_.line_height;
+          (line_number == 0)
+              ? -metrics.fAscent * style.height
+              : (-metrics.fAscent + metrics.fLeading) * style.height;
       if (line_spacing > max_line_spacing) {
         max_line_spacing = line_spacing;
         if (line_number == 0) {
