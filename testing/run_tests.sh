@@ -2,8 +2,13 @@
 
 set -o pipefail -e;
 
-out/host_debug_unopt/fml_unittests
+out/host_debug_unopt/embedder_unittests
+out/host_debug_unopt/flow_unittests
+out/host_debug_unopt/fml_unittests --gtest_filter="-*TimeSensitiveTest*"
+out/host_debug_unopt/runtime_unittests
+out/host_debug_unopt/shell_unittests
 out/host_debug_unopt/synchronization_unittests
+out/host_debug_unopt/txt_unittests  --font-directory=flutter/third_party/txt/third_party/fonts
 
 pushd flutter/testing/dart
 pub get
