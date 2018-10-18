@@ -96,7 +96,7 @@ config("compiler") {
     cflags_objcc += common_flags
 
     # Stack protection.
-    if (is_mac) {
+    if (is_mac || is_android) {
       cflags += [ "-fstack-protector-all" ]
     } else if (is_linux) {
       cflags += [
@@ -338,12 +338,10 @@ config("compiler") {
   # ---------------------------------
   if (is_linux || is_android) {
     cflags += [
-      "-fPIC",
       "-pipe",  # Use pipes for communicating between sub-processes. Faster.
     ]
 
     ldflags += [
-      "-fPIC",
       "-Wl,-z,noexecstack",
       "-Wl,-z,now",
       "-Wl,-z,relro",
@@ -356,8 +354,14 @@ config("compiler") {
   # Linux-specific compiler flags setup.
   # ------------------------------------
   if (is_linux) {
-    cflags += [ "-pthread" ]
-    ldflags += [ "-pthread" ]
+    cflags += [
+      "-pthread",
+      "-fPIC"
+    ]
+    ldflags += [
+      "-pthread",
+      "-fPIC"
+    ]
 
     if (current_cpu == "arm64") {
       cflags += [ "--target=aarch64-linux-gnu" ]
@@ -391,14 +395,29 @@ config("compiler") {
   cflags_cc += cc_std
   cflags_objcc += cc_std
 
+  # iOS-specific flags setup.
+  # -----------------------------
+  if (is_ios) {
+    cflags += [
+      "-fPIE"
+    ]
+    ldflags += [
+      "-pie"
+    ]
+  }
+
   # Android-specific flags setup.
   # -----------------------------
   if (is_android) {
     cflags += [
+      "-fPIE",
       "-ffunction-sections",
       "-funwind-tables",
       "-fno-short-enums",
-      "-nostdinc++"
+      "-nostdinc++",
+      "-Wa,--noexecstack",
+      "-Wformat",
+      "-Wformat-security"
     ]
     if (!is_clang) {
       # Clang doesn't support these flags.
@@ -425,9 +444,11 @@ config("compiler") {
     }
 
     ldflags += [
+      "-pie",
       "-Wl,--no-undefined",
       "-Wl,--exclude-libs,ALL",
-      "-fuse-ld=lld",
+      "-Wl,-z,relro,-z,now",
+      "-fuse-ld=lld"
       # Enable identical code folding to reduce size.
       "-Wl,--icf=all",
     ]
@@ -649,7 +670,7 @@ config("chromium_code") {
       "__STDC_FORMAT_MACROS",
     ]
 
-    if (!using_sanitizer && (!is_linux || !is_clang)) {
+    if (is_ios || is_android || (!using_sanitizer && (!is_linux || !is_clang))) {
       # _FORTIFY_SOURCE isn't really supported by Clang now, see
       # http://llvm.org/bugs/show_bug.cgi?id=16821.
       # It seems to work fine with Ubuntu 12 headers though, so use it in
