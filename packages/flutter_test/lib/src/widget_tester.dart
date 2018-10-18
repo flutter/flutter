@@ -678,8 +678,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     return binding.pipelineOwner.ensureSemantics();
   }
 
-  /// Given a [Scrollable] widget specified by [finder], scrolls the widget
-  /// so as to make it visible
+  /// Given a widget `W` specified by [finder] and a [Scrollable] widget `S` in
+  /// its ancestry tree, this scrolls `S` so as to make `W` visible.
   ///
   /// Shorthand for `Scrollable.ensureVisible(tester.element(finder))`
   Future<Null> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
