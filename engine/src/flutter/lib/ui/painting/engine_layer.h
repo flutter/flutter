@@ -22,6 +22,9 @@ class EngineLayer : public RefCountedDartWrappable<EngineLayer> {
 
  public:
   ~EngineLayer() override;
+
+  size_t GetAllocationSize() override;
+
   static fml::RefPtr<EngineLayer> MakeRetained(
       std::shared_ptr<flow::ContainerLayer> layer) {
     return fml::MakeRefCounted<EngineLayer>(layer);
