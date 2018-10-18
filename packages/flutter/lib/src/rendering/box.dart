@@ -1989,6 +1989,9 @@ abstract class RenderBox extends RenderObject {
   /// Convert the given point from the global coordinate system in logical pixels
   /// to the local coordinate system for this box.
   ///
+  /// This method will un-project the point from the screen onto the widget,
+  /// which makes it different from [MatrixUtils.transformPoint].
+  ///
   /// If the transform from global coordinates to local coordinates is
   /// degenerate, this function returns [Offset.zero].
   ///
@@ -1998,11 +2001,28 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This method is implemented in terms of [getTransformTo].
   Offset globalToLocal(Offset point, { RenderObject ancestor }) {
+    // We want to find point (p) that corresponds to a given point on the
+    // screen (s), but that also physically resides on the local render plane,
+    // so that it is useful for visually accurate gesture processing in the
+    // local space. For that, we can't simply transform 2D screen point to
+    // the 3D local space since the screen space lacks the depth component |z|,
+    // and so there are many 3D points that correspond to the screen point.
+    // We must first unproject the screen point onto the render plane to find
+    // the true 3D point that corresponds to the screen point.
+    // We do orthogonal unprojection after undoing perspective, in local space.
+    // The render plane is specified by renderBox offset (o) and Z axis (n).
+    // Unprojection is done by finding the intersection of the view vector (d)
+    // with the local X-Y plane: (o-s).dot(n) == (p-s).dot(n), (p-s) == |z|*d.
     final Matrix4 transform = getTransformTo(ancestor);
     final double det = transform.invert();
     if (det == 0.0)
       return Offset.zero;
-    return MatrixUtils.transformPoint(transform, point);
+    final Vector3 n = Vector3(0.0, 0.0, 1.0);
+    final Vector3 i = transform.perspectiveTransform(Vector3(0.0, 0.0, 0.0));
+    final Vector3 d = transform.perspectiveTransform(Vector3(0.0, 0.0, 1.0)) - i;
+    final Vector3 s = transform.perspectiveTransform(Vector3(point.dx, point.dy, 0.0));
+    final Vector3 p = s - d * (n.dot(s) / n.dot(d));
+    return Offset(p.x, p.y);
   }
 
   /// Convert the given point from the local coordinate system for this box to
