@@ -51,16 +51,19 @@ const Color _kDisabledBackground = Color(0xFFFAFAFA);
 enum OverlayVisibilityMode {
   /// Overlay will never appear regardless of the text entry state.
   never,
+
   /// Overlay will only appear when the current text entry is not empty.
   ///
   /// This includes pre-filled text that the user did not type in manually. But
   /// does not include text in placeholders.
   editing,
+
   /// Overlay will only appear when the current text entry is empty.
   ///
   /// This also includes not having pre-filled text that the user did not type
   /// in manually. Texts in placeholders are ignored.
   notEditing,
+
   /// Always show the overlay regardless of the text entry state.
   always,
 }
@@ -70,7 +73,7 @@ enum OverlayVisibilityMode {
 /// A text field lets the user enter text, either with a hardware keyboard or with
 /// an onscreen keyboard.
 ///
-/// This widget corresponds to both a [UITextField] and an editable [UITextView]
+/// This widget corresponds to both a `UITextField` and an editable `UITextView`
 /// on iOS.
 ///
 /// The text field calls the [onChanged] callback whenever the user changes the
@@ -81,6 +84,8 @@ enum OverlayVisibilityMode {
 /// To control the text that is displayed in the text field, use the
 /// [controller]. For example, to set the initial value of the text field, use
 /// a [controller] that already contains some text such as:
+///
+/// ## Sample code
 ///
 /// ```dart
 /// class _MyWidgetState extends State<MyWidget> {
@@ -384,12 +389,8 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<BoxDecoration>('decoration', decoration));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
     properties.add(StringProperty('placeholder', placeholder));
-    if (prefix != null) {
-      properties.add(DiagnosticsProperty<OverlayVisibilityMode>('prefix', prefixMode));
-    }
-    if (suffix != null) {
-      properties.add(DiagnosticsProperty<OverlayVisibilityMode>('suffix', suffixMode));
-    }
+    properties.add(DiagnosticsProperty<OverlayVisibilityMode>('prefix', prefix == null ? null : prefixMode));
+    properties.add(DiagnosticsProperty<OverlayVisibilityMode>('suffix', suffix == null ? null : suffixMode));
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('clearButtonMode', clearButtonMode));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
@@ -426,9 +427,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     if (widget.controller == null && oldWidget.controller != null) {
       _controller = TextEditingController.fromValue(oldWidget.controller.value);
       _controller.addListener(updateKeepAlive);
-    }
-    else if (widget.controller != null && oldWidget.controller == null)
+    } else if (widget.controller != null && oldWidget.controller == null) {
       _controller = null;
+    }
     final bool isEnabled = widget.enabled ?? true;
     final bool wasEnabled = oldWidget.enabled ?? true;
     if (wasEnabled && !isEnabled) {
@@ -458,20 +459,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     _requestKeyboard();
   }
 
-  void _handleTapCancel() {
-  }
-
   void _handleLongPress() {
     _renderEditable.handleLongPress();
   }
 
   @override
   bool get wantKeepAlive => _controller?.text?.isNotEmpty == true;
-
-  @override
-  void deactivate() {
-    super.deactivate();
-  }
 
   bool _shouldShowAttachment({
     OverlayVisibilityMode attachment,
@@ -489,6 +482,27 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     }
     assert(false);
     return null;
+  }
+
+  bool _showPrefixWidget(TextEditingValue text) {
+    return widget.prefix != null && _shouldShowAttachment(
+      attachment: widget.prefixMode,
+      hasText: text.text.isNotEmpty,
+    );
+  }
+
+  bool _showSuffixWidget(TextEditingValue text) {
+    return widget.suffix != null && _shouldShowAttachment(
+      attachment: widget.suffixMode,
+      hasText: text.text.isNotEmpty,
+    );
+  }
+
+  bool _showClearButton(TextEditingValue text) {
+    return _shouldShowAttachment(
+      attachment: widget.clearButtonMode,
+      hasText: text.text.isNotEmpty,
+    );
   }
 
   Widget _addTextDependentAttachments(Widget editableText) {
@@ -510,12 +524,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
         // Insert a prefix at the front if the prefix visibility mode matches
         // the current text state.
-        if (widget.prefix != null &&
-            _shouldShowAttachment(
-              attachment: widget.prefixMode,
-              hasText: text.text.isNotEmpty,
-            )
-        ) {
+        if (_showPrefixWidget(text)) {
           rowChildren.add(widget.prefix);
         }
 
@@ -545,20 +554,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         rowChildren.add(Expanded(child: Stack(children: stackChildren..add(child))));
 
         // First add the explicit suffix if the suffix visibility mode matches.
-        if (widget.suffix != null &&
-            _shouldShowAttachment(
-              attachment: widget.suffixMode,
-              hasText: text.text.isNotEmpty,
-            )
-        ) {
+        if (_showSuffixWidget(text)) {
           rowChildren.add(widget.suffix);
         // Otherwise, try to show a clear button if its visibility mode matches.
-        } else if (
-          _shouldShowAttachment(
-            attachment: widget.clearButtonMode,
-            hasText: text.text.isNotEmpty,
-          )
-        ) {
+        } else if (_showClearButton(text)) {
           rowChildren.add(
             GestureDetector(
               onTap: widget.enabled ?? true
@@ -644,7 +643,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
               behavior: HitTestBehavior.translucent,
               onTapDown: _handleTapDown,
               onTap: _handleTap,
-              onTapCancel: _handleTapCancel,
               onLongPress: _handleLongPress,
               excludeFromSemantics: true,
               child: _addTextDependentAttachments(paddedEditable),
