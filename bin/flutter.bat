@@ -86,12 +86,8 @@ GOTO :after_subroutine
   IF NOT EXIST "%stamp_path%" GOTO do_snapshot
   SET /P stamp_value=<"%stamp_path%"
   IF !stamp_value! NEQ !revision! GOTO do_snapshot
-  REM Compare "last modified" timestamps
   SET pubspec_yaml_path=%flutter_tools_dir%\pubspec.yaml
   SET pubspec_lock_path=%flutter_tools_dir%\pubspec.lock
-  FOR %%i IN ("%pubspec_yaml_path%") DO SET yaml_timestamp=%%~ti
-  FOR %%i IN ("%pubspec_lock_path%") DO SET lock_timestamp=%%~ti
-  IF !yaml_timestamp! EQU !lock_timestamp! GOTO do_snapshot
   FOR /F %%i IN ('DIR /B /O:D "%pubspec_yaml_path%" "%pubspec_lock_path%"') DO SET newer_file=%%i
   IF "%newer_file%" EQU "pubspec.yaml" GOTO do_snapshot
 
