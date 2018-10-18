@@ -1,4 +1,4 @@
-Signature: 213dc7cd39cc912c07a5c48a0e57f619
+Signature: 369d80f412063db92fbfb04a5a0dd7c0
 
 UNUSED LICENSES:
 
@@ -709,7 +709,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/AndroidCodecBench.cpp
 FILE: ../../../third_party/skia/bench/AndroidCodecBench.h
 FILE: ../../../third_party/skia/bench/DrawLatticeBench.cpp
-FILE: ../../../third_party/skia/bench/EncoderBench.cpp
+FILE: ../../../third_party/skia/bench/EncodeBench.cpp
 FILE: ../../../third_party/skia/bench/GrMipMapBench.cpp
 FILE: ../../../third_party/skia/bench/HardStopGradientBench_ScaleNumColors.cpp
 FILE: ../../../third_party/skia/bench/HardStopGradientBench_ScaleNumHardStops.cpp
