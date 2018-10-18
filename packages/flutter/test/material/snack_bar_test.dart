@@ -309,8 +309,8 @@ void main() {
                       content: const Text('I am a snack bar.'),
                       duration: const Duration(seconds: 2),
                       action: SnackBarAction(
-                        labelColor: Colors.lightBlue,
-                        disabledLabelColor: Colors.red,
+                        textColor: Colors.lightBlue,
+                        disabledTextColor: Colors.red,
                         label: 'ACTION',
                         onPressed: () {},
                       ),
@@ -324,7 +324,7 @@ void main() {
         ),
       ),
     );
-    
+
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
