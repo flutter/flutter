@@ -773,7 +773,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   Future<void> idle() {
     final Future<void> result = super.idle();
-    _currentFakeAsync.elapse(const Duration());
+    _currentFakeAsync.elapse(Duration.zero);
     return result;
   }
 
