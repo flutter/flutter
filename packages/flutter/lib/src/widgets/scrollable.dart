@@ -501,14 +501,14 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     assert(position != null);
-    /// [_ScrollableScope] must be placed above the [BuildContext] returned by [notificationContext]
-    /// so that we can get this [ScrollableState] by doing the following:
-    /// ```dart
-    /// ScrollNotification notification;
-    /// Scrollable.of(notification.context)
-    /// ```
-    /// Since [notificationContext] is pointing to [_gestureDetectorKey.context], [_ScrollableScope]
-    /// must be placed above the widget using it: [RawGestureDetector]
+    // _ScrollableScope must be placed above the BuildContext returned by notificationContext
+    // so that we can get this ScrollableState by doing the following:
+    //
+    // ScrollNotification notification;
+    // Scrollable.of(notification.context)
+    //
+    // Since notificationContext is pointing to _gestureDetectorKey.context, _ScrollableScope
+    // must be placed above the widget using it: RawGestureDetector
     Widget result = _ScrollableScope(
       scrollable: this,
       position: position,
