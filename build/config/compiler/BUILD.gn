@@ -810,6 +810,7 @@ if (is_win) {
 # Default "optimization on" config. On Windows, this favors size over speed.
 config("optimize") {
   lto_flags = []
+  ld_lto_flags = []
   if (is_win) {
     # Favor size over speed, /O1 must be before the common flags. The GYP
     # build also specifies /Os and /GF but these are implied by /O1.
@@ -819,12 +820,13 @@ config("optimize") {
   } else if (is_android) {
     cflags = [ "-Oz" ] + common_optimize_on_cflags  # Favor size over speed.
     if (enable_lto) {
-      lto_flags += [ "-flto" ]
+      lto_flags += [ "-flto=thin" ]
+      ld_lto_flags += [ "-Wl,--lto-O0" ]  # Favor size over speed.
     }
   } else {
     cflags = [ "-O2" ] + common_optimize_on_cflags
   }
-  ldflags = common_optimize_on_ldflags + lto_flags
+  ldflags = common_optimize_on_ldflags + lto_flags + ld_lto_flags
   cflags += lto_flags
 }
 
