@@ -299,7 +299,7 @@ class Ticker {
       // We intentionally don't null out _startTime. This means that if start()
       // was ever called, the object is now in a bogus state. This weakly helps
       // catch cases of use-after-dispose.
-      _startTime = const Duration();
+      _startTime = Duration.zero;
       return true;
     }());
   }
