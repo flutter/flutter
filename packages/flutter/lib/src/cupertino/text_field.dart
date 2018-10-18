@@ -12,6 +12,7 @@ import 'text_selection.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
 
+// Value extracted via color reader from iOS simulator.
 const BorderSide _kDefaultRoundedBorderSide = BorderSide(
   color: CupertinoColors.lightBackgroundGray,
   style: BorderStyle.solid,
@@ -23,11 +24,13 @@ const Border _kDefaultRoundedBorder = Border(
   left: _kDefaultRoundedBorderSide,
   right: _kDefaultRoundedBorderSide,
 );
+// Counted manually on magnified simulator.
 const BoxDecoration _kDefaultRoundedBorderDecoration = BoxDecoration(
   border: _kDefaultRoundedBorder,
   borderRadius: BorderRadius.all(Radius.circular(4.0)),
 );
 
+// Default iOS style from HIG specs with larger font.
 const TextStyle _kDefaultTextStyle = TextStyle(
   fontFamily: '.SF Pro Text',
   fontSize: 17.0,
@@ -36,11 +39,15 @@ const TextStyle _kDefaultTextStyle = TextStyle(
   decoration: TextDecoration.none,
 );
 
+// Value extracted via color reader from iOS simulator.
 const Color _kSelectionHighlightColor = Color(0x667FAACF);
 const Color _kInactiveTextColor = Color(0xFFC2C2C2);
 const Color _kDisabledBackground = Color(0xFFFAFAFA);
 
 /// Visibility of text field overlays based on the state of the current text entry.
+///
+/// Used to toggle the visibility behavior of the optional decorating widgets
+/// surrounding the [EditableText] such as the clear text button.
 enum OverlayVisibilityMode {
   /// Overlay will never appear regardless of the text entry state.
   never,
@@ -60,7 +67,7 @@ enum OverlayVisibilityMode {
 
 /// An iOS-style text field.
 ///
-/// A text field lets the user enter text, either with hardware keyboard or with
+/// A text field lets the user enter text, either with a hardware keyboard or with
 /// an onscreen keyboard.
 ///
 /// This widget corresponds to both a [UITextField] and an editable [UITextView]
@@ -73,9 +80,27 @@ enum OverlayVisibilityMode {
 ///
 /// To control the text that is displayed in the text field, use the
 /// [controller]. For example, to set the initial value of the text field, use
-/// a [controller] that already contains some text. The [controller] can also
-/// control the selection and composing region (and to observe changes to the
-/// text, selection, and composing region).
+/// a [controller] that already contains some text such as:
+///
+/// ```dart
+/// class _MyWidgetState extends State<MyWidget> {
+///   TextEditingController _textController;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _textController = TextEditingController(text: 'initial text');
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return CupertinoTextField(controller: _textController);
+///   }
+/// }
+/// ```
+///
+/// The [controller] can also control the selection and composing region (and to
+/// observe changes to the text, selection, and composing region).
 ///
 /// The text field has an overridable [decoration] that, by default, draws a
 /// rounded rectangle border around the text field. If you set the [decoration]
@@ -448,8 +473,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     super.deactivate();
   }
 
-  bool _shouldAppearForModeAndText(OverlayVisibilityMode mode, bool hasText) {
-    switch (mode) {
+  bool _shouldShowAttachment({
+    OverlayVisibilityMode attachment,
+    bool hasText,
+  }) {
+    switch (attachment) {
       case OverlayVisibilityMode.never:
         return false;
       case OverlayVisibilityMode.always:
@@ -463,6 +491,96 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     return null;
   }
 
+  Widget _addTextDependentAttachments(Widget editableText) {
+    // If there are no surrounding widgets, just return the core editable text
+    // part.
+    if (widget.placeholder == null &&
+        widget.clearButtonMode == OverlayVisibilityMode.never &&
+        widget.prefix == null &&
+        widget.suffix == null) {
+      return editableText;
+    }
+
+    // Otherwise, listen to the current state of the text entry.
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: _effectiveController,
+      child: editableText,
+      builder: (BuildContext context, TextEditingValue text, Widget child) {
+        final List<Widget> rowChildren = <Widget>[];
+
+        // Insert a prefix at the front if the prefix visibility mode matches
+        // the current text state.
+        if (widget.prefix != null &&
+            _shouldShowAttachment(
+              attachment: widget.prefixMode,
+              hasText: text.text.isNotEmpty,
+            )
+        ) {
+          rowChildren.add(widget.prefix);
+        }
+
+        final List<Widget> stackChildren = <Widget>[];
+
+        // In the middle part, stack the placeholder on top of the main EditableText
+        // if needed.
+        if (widget.placeholder != null && text.text.isEmpty) {
+          stackChildren.add(
+            Padding(
+              padding: widget.padding,
+              child: Text(
+                widget.placeholder,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: widget.style.merge(
+                  const TextStyle(
+                    color: _kInactiveTextColor,
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        rowChildren.add(Expanded(child: Stack(children: stackChildren..add(child))));
+
+        // First add the explicit suffix if the suffix visibility mode matches.
+        if (widget.suffix != null &&
+            _shouldShowAttachment(
+              attachment: widget.suffixMode,
+              hasText: text.text.isNotEmpty,
+            )
+        ) {
+          rowChildren.add(widget.suffix);
+        // Otherwise, try to show a clear button if its visibility mode matches.
+        } else if (
+          _shouldShowAttachment(
+            attachment: widget.clearButtonMode,
+            hasText: text.text.isNotEmpty,
+          )
+        ) {
+          rowChildren.add(
+            GestureDetector(
+              onTap: widget.enabled ?? true
+                  ? () => _effectiveController.clear()
+                  : null,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 6.0),
+                child: Icon(
+                  CupertinoIcons.clear_thick_circled,
+                  size: 18.0,
+                  color: _kInactiveTextColor,
+                ),
+              ),
+            ),
+          );
+        }
+
+        return Row(children: rowChildren);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
@@ -472,10 +590,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     final bool enabled = widget.enabled ?? true;
-    if (widget.maxLength != null && widget.maxLengthEnforced)
+    if (widget.maxLength != null && widget.maxLengthEnforced) {
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
+    }
 
-    Widget child = Padding(
+    final Widget paddedEditable = Padding(
       padding: widget.padding,
       child: RepaintBoundary(
         child: EditableText(
@@ -507,73 +626,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       ),
     );
 
-    if (widget.placeholder != null ||
-        widget.clearButtonMode != OverlayVisibilityMode.never ||
-        widget.prefix != null ||
-        widget.suffix != null) {
-      child = ValueListenableBuilder<TextEditingValue>(
-        valueListenable: controller,
-        builder: (BuildContext context, TextEditingValue text, Widget child) {
-          final List<Widget> rowChildren = <Widget>[];
-
-          if (widget.prefix != null &&
-              _shouldAppearForModeAndText(widget.prefixMode, text.text.isNotEmpty)) {
-            rowChildren.add(widget.prefix);
-          }
-
-          final List<Widget> stackChildren = <Widget>[];
-
-          if (widget.placeholder != null && text.text.isEmpty) {
-            stackChildren.add(
-              Padding(
-                padding: widget.padding,
-                child: Text(
-                  widget.placeholder,
-                  maxLines: 1,
-                  style: widget.style.merge(
-                    const TextStyle(
-                      color: _kInactiveTextColor,
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }
-
-          rowChildren.add(Expanded(child: Stack(children: stackChildren..add(child))));
-
-          if (widget.suffix != null &&
-              _shouldAppearForModeAndText(widget.suffixMode, text.text.isNotEmpty)) {
-            rowChildren.add(widget.suffix);
-          } else if (_shouldAppearForModeAndText(widget.clearButtonMode, text.text.isNotEmpty)) {
-            rowChildren.add(
-              GestureDetector(
-                onTap: enabled
-                    ? () => controller.clear()
-                    : null,
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 6.0),
-                  child: Icon(
-                    CupertinoIcons.clear_thick_circled,
-                    size: 18.0,
-                    color: _kInactiveTextColor,
-                  ),
-                ),
-              ),
-            );
-          }
-
-          return Row(children: rowChildren);
-        },
-        child: child,
-      );
-    }
-
     return Semantics(
       onTap: () {
-        if (!_effectiveController.selection.isValid)
-          _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+        if (!controller.selection.isValid) {
+          controller.selection = TextSelection.collapsed(offset: controller.text.length);
+        }
         _requestKeyboard();
       },
       child: IgnorePointer(
@@ -590,7 +647,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
               onTapCancel: _handleTapCancel,
               onLongPress: _handleLongPress,
               excludeFromSemantics: true,
-              child: child,
+              child: _addTextDependentAttachments(paddedEditable),
             ),
           ),
         ),
