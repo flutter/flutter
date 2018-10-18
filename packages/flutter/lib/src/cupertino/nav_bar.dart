@@ -1617,8 +1617,8 @@ class _NavigationBarComponentsTransition {
         ) & fromBox.size; // Keep the from render object's size.
 
     if (forwardDirection < 0) {
-      // If RTL, move the upper right corner to upper right corner instead of
-      // matching the upper left corners.
+      // If RTL, move the center right to the center right instead of matching
+      // the center lefts.
       toRect = toRect.translate(- fromBox.size.width + toBox.size.width, 0.0);
     }
 
