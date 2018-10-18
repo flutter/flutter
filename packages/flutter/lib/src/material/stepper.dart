@@ -123,7 +123,7 @@ class Step {
 /// See also:
 ///
 ///  * [Step]
-///  * <https://material.google.com/components/steppers.html>
+///  * <https://material.io/archive/guidelines/components/steppers.html>
 class Stepper extends StatefulWidget {
   /// Creates a stepper from a list of steps.
   ///
