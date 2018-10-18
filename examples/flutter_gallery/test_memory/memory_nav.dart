@@ -79,6 +79,7 @@ Future<void> main() async {
     debugPrint('Backing out...');
     await controller.tap(find.byTooltip('Back'));
     await endOfAnimation();
+    await Future<void>.delayed(const Duration(milliseconds: 50));
   }
 
   debugPrint('==== MEMORY BENCHMARK ==== DONE ====');
