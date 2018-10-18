@@ -410,8 +410,6 @@ class EditableText extends StatefulWidget {
   ///
   /// If false, most of the accessibility support for selecting text, copy
   /// and paste, and moving the caret will be disabled.
-  ///
-  /// If false, the caret will remain at the end of the [controller]'s text.
   /// {@endtemplate}
   final bool enableInteractiveSelection;
 
