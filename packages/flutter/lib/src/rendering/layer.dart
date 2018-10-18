@@ -68,6 +68,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Traverse the layer tree and compute if any subtree has a dirty layer (by
   /// calling [markDirty]). The [ContainerLayer] will override this to respect
   /// its children.
+  @protected
   void updateSubtreeDirtiness() {
     _isSubtreeDirty = _isDirty;
   }
@@ -138,6 +139,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Return the engine layer for retained rendering. When there's no
   /// corresponding engine layer, null is returned.
+  @protected
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]);
 
   void _addToSceneWithRetainedRendering(ui.SceneBuilder builder) {
@@ -652,6 +654,14 @@ class OffsetLayer extends ContainerLayer {
     transform.multiply(Matrix4.translationValues(offset.dx, offset.dy, 0.0));
   }
 
+  /// Consider this layer as the root and build a scene (a tree of layers)
+  /// in the engine.
+  ui.Scene buildScene(ui.SceneBuilder builder) {
+    updateSubtreeDirtiness();
+    addToScene(builder);
+    return builder.build();
+  }
+
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     // Skia has a fast path for concatenating scale/translation only matrices.
@@ -698,9 +708,7 @@ class OffsetLayer extends ContainerLayer {
     );
     transform.scale(pixelRatio, pixelRatio);
     builder.pushTransform(transform.storage);
-    updateSubtreeDirtiness();
-    addToScene(builder);
-    final ui.Scene scene = builder.build();
+    final ui.Scene scene = buildScene(builder);
     try {
       // Size is rounded up to the next pixel to make sure we don't clip off
       // anything.

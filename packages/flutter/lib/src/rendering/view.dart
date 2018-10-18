@@ -192,12 +192,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     Timeline.startSync('Compositing', arguments: timelineWhitelistArguments);
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
-      layer.updateSubtreeDirtiness();
-      // Do not call layer.addToSceneWithRetainedRendering here as a new root
-      // engine layer has to be created for each frame. A retained layer cannot
-      // be a root layer as it has to be added to a container engine layer.
-      layer.addToScene(builder);
-      final ui.Scene scene = builder.build();
+      final ui.Scene scene = layer.buildScene(builder);
       if (automaticSystemUiAdjustment)
         _updateSystemChrome();
       ui.window.render(scene);
