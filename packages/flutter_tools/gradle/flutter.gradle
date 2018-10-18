@@ -581,13 +581,9 @@ class FlutterTask extends BaseFlutterTask {
         if (dependenciesFile.exists()) {
             try {
                 // Dependencies file has Makefile syntax:
-                //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
+                //   <target> <files>: <source> <files> <separated> <by> <space>
                 String depText = dependenciesFile.text
-                // So we split list of files by non-escaped(by backslash) space,
-                def matcher = depText.split(': ')[1] =~ /(\\ |[^\s])+/
-                // then we remove all backslashes
-                def depList = matcher.collect{it[0].replaceAll("\\\\", "")}
-                return project.files(depList)
+                return project.files(depText.split(': ')[1].split())
             } catch (Exception e) {
                 logger.error("Error reading dependency file ${dependenciesFile}: ${e}")
             }
