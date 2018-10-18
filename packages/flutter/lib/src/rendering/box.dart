@@ -2021,7 +2021,7 @@ abstract class RenderBox extends RenderObject {
     final Vector3 i = transform.perspectiveTransform(Vector3(0.0, 0.0, 0.0));
     final Vector3 d = transform.perspectiveTransform(Vector3(0.0, 0.0, 1.0)) - i;
     final Vector3 s = transform.perspectiveTransform(Vector3(point.dx, point.dy, 0.0));
-    final Vector3 p = s - d * n.dot(s) / n.dot(d);
+    final Vector3 p = s - d * (n.dot(s) / n.dot(d));
     return Offset(p.x, p.y);
   }
 
