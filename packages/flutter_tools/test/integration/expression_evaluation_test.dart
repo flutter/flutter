@@ -6,13 +6,13 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 
 import 'package:vm_service_client/vm_service_client.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
+import 'test_utils.dart';
 
 void main() {
   group('expression evaluation', () {
@@ -21,7 +21,7 @@ void main() {
     FlutterTestDriver _flutter;
 
     setUp(() async {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_expression_test.');
+      tempDir = createResolvedTempDirectorySync();
       await _project.setUpIn(tempDir);
       _flutter = FlutterTestDriver(tempDir);
     });
@@ -33,13 +33,13 @@ void main() {
 
     Future<VMIsolate> breakInBuildMethod(FlutterTestDriver flutter) async {
       return _flutter.breakAt(
-          _project.buildMethodBreakpointFile,
+          Uri.file(_project.buildMethodBreakpointFile),
           _project.buildMethodBreakpointLine);
     }
 
     Future<VMIsolate> breakInTopLevelFunction(FlutterTestDriver flutter) async {
       return _flutter.breakAt(
-          _project.topLevelFunctionBreakpointFile,
+          Uri.file(_project.topLevelFunctionBreakpointFile),
           _project.topLevelFunctionBreakpointLine);
     }
 
@@ -108,8 +108,5 @@ void main() {
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions();
     });
-    // TODO(dantup): Unskip after flutter-tester is fixed on Windows:
-    // https://github.com/flutter/flutter/issues/17833.
-    // https://github.com/flutter/flutter/issues/21348.
-  }, timeout: const Timeout.factor(6), skip: platform.isWindows);
+  }, timeout: const Timeout.factor(6));
 }

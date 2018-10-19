@@ -237,10 +237,10 @@ class FlutterTestDriver {
     return await vm.isolates.single.load();
   }
 
-  Future<void> addBreakpoint(String path, int line) async {
+  Future<void> addBreakpoint(Uri uri, int line) async {
     final VMIsolate isolate = await getFlutterIsolate();
-    _debugPrint('Sending breakpoint for $path:$line');
-    await isolate.addBreakpoint(path, line);
+    _debugPrint('Sending breakpoint for $uri:$line');
+    await isolate.addBreakpoint(uri, line);
   }
 
   Future<VMIsolate> waitForPause() async {
@@ -266,15 +266,15 @@ class FlutterTestDriver {
     return wait ? waitForPause() : null;
   }
 
-  Future<VMIsolate> breakAt(String path, int line, { bool restart = false }) async {
+  Future<VMIsolate> breakAt(Uri uri, int line, { bool restart = false }) async {
     if (restart) {
       // For a hot restart, we need to send the breakpoints after the restart
       // so we need to pause during the restart to avoid races.
       await hotRestart(pause: true);
-      await addBreakpoint(path, line);
+      await addBreakpoint(uri, line);
       return resume();
     } else {
-      await addBreakpoint(path, line);
+      await addBreakpoint(uri, line);
       await hotReload();
       return waitForPause();
     }
