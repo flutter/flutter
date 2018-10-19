@@ -1911,15 +1911,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void didStartUserGesture() {
     _userGesturesInProgress += 1;
     if (_userGesturesInProgress == 1) {
-      final Route<dynamic> currentRoute = _history.last;
-      final Route<dynamic> nextRoute = currentRoute.willHandlePopInternally
+      final Route<dynamic> route = _history.last;
+      final Route<dynamic> previousRoute = route.willHandlePopInternally
           ? null
           : _history.length > 1
               ? _history[_history.length - 2]
               : null;
+      // Don't operate the _history list since the gesture may be cancelled.
+      // In case of a back swipe, the gesture controller will call .pop() itself.
 
       for (NavigatorObserver observer in widget.observers)
-        observer.didStartUserGesture(currentRoute, nextRoute);
+        observer.didStartUserGesture(route, previousRoute);
     }
   }
 

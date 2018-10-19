@@ -808,4 +808,34 @@ void main() {
     expect(bottomBuildTimes, 2);
     expect(topBuildTimes, 3);
   });
+
+  testWidgets('Back swipe gesture transitions',
+      (WidgetTester tester) async {
+    await startTransitionBetween(
+      tester,
+      fromTitle: 'Page 1',
+      toTitle: 'Page 2',
+    );
+
+    // Go to the next page.
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Start the gesture at the edge of the screen.
+    final TestGesture gesture =  await tester.startGesture(const Offset(5.0, 200.0));
+    // Trigger the swipe.
+    await gesture.moveBy(const Offset(100.0, 0.0));
+
+    // Back gestures should trigger and draw the hero transition in the very same
+    // frame (since the "from" route has already moved to reveal the "to" route).
+    await tester.pump();
+
+    // Page 2, which is the middle of the top route, start to fly back to the right.
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Page 2'))),
+      const Offset(352.5802058875561, 13.5),
+    );
+
+    debugDumpApp();
+    expect(find.text('Page 1'), findsNWidgets(2));
+  });
 }

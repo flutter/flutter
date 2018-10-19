@@ -123,9 +123,10 @@ class Hero extends StatefulWidget {
     this.createRectTween,
     this.flightShuttleBuilder,
     this.placeholderBuilder,
-    this.userGestureTransitions = false,
+    this.transitionForUserGestures = false,
     @required this.child,
   }) : assert(tag != null),
+       assert(transitionForUserGestures != null),
        assert(child != null),
        super(key: key);
 
@@ -177,7 +178,20 @@ class Hero extends StatefulWidget {
   /// left in place once the Hero shuttle has taken flight.
   final TransitionBuilder placeholderBuilder;
 
-  final bool userGestureTransitions;
+  /// Whether to perform the hero transition if the [PageRoute] transition was
+  /// triggered by a user gesture such as a back swipe on iOS.
+  ///
+  /// If [Hero]s with the same [tag] on both the from and the to routes have
+  /// [transitionForUserGestures] set to true, a back swipe gesture will
+  /// trigger the same hero animation as a programmatically triggered push or
+  /// pop.
+  ///
+  /// The route being popped to or the bottom route must also have
+  /// [PageRoute.maintainState] set to true for a gesture triggered hero
+  /// transition to work.
+  ///
+  /// Defaults to false and cannot be null.
+  final bool transitionForUserGestures;
 
   // Returns a map of all of the heroes in context, indexed by hero tag.
   static Map<Object, _HeroState> _allHeroesFor(BuildContext context, bool fromGesture) {
@@ -187,7 +201,7 @@ class Hero extends StatefulWidget {
       if (element.widget is Hero) {
         final StatefulElement hero = element;
         final Hero heroWidget = element.widget;
-        if (!fromGesture || heroWidget.userGestureTransitions) {
+        if (!fromGesture || heroWidget.transitionForUserGestures) {
           final Object tag = heroWidget.tag;
           assert(tag != null);
           assert(() {
@@ -415,7 +429,9 @@ class _HeroFlight {
       assert(type != null);
       switch (type) {
         case HeroFlightDirection.pop:
-          return initial.value == 1.0;// && initial.status == AnimationStatus.reverse;
+          // Pops may be driven by a user gesture that manually drives the
+          // AnimationController without being in any particular animation states.
+          return initial.value == 1.0;
         case HeroFlightDirection.push:
           return initial.value == 0.0 && initial.status == AnimationStatus.forward;
       }
@@ -542,9 +558,6 @@ class HeroController extends NavigatorObserver {
   /// If null, the controller uses a linear [RectTween].
   final CreateRectTween createRectTween;
 
-  // Disable Hero animations while a user gesture is controlling the navigation.
-  // bool _questsEnabled = true;
-
   // All of the heroes that are currently in the overlay and in motion.
   // Indexed by the hero tag.
   final Map<Object, _HeroFlight> _flights = <Object, _HeroFlight>{};
@@ -568,12 +581,6 @@ class HeroController extends NavigatorObserver {
     assert(navigator != null);
     assert(route != null);
     _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, true);
-    // _questsEnabled = false;
-  }
-
-  @override
-  void didStopUserGesture() {
-    // _questsEnabled = true;
   }
 
   // If we're transitioning between different page routes, start a hero transition
@@ -584,27 +591,30 @@ class HeroController extends NavigatorObserver {
     HeroFlightDirection flightType,
     [bool fromGesture = false]
   ) {
-    print('maybe start');
     if (toRoute != fromRoute && toRoute is PageRoute<dynamic> && fromRoute is PageRoute<dynamic>) {
       final PageRoute<dynamic> from = fromRoute;
       final PageRoute<dynamic> to = toRoute;
       final Animation<double> animation = (flightType == HeroFlightDirection.push) ? to.animation : from.animation;
 
-      print('${fromRoute.animation} ${fromRoute.animation.status} to ${toRoute.animation} ${toRoute.animation.status}');
       // A user gesture may have already completed the pop.
       if (flightType == HeroFlightDirection.pop && animation.status == AnimationStatus.dismissed) {
-        print('redundant');
         return;
       }
 
-      // Putting a route offstage changes its animation value to 1.0. Once this
-      // frame completes, we'll know where the heroes in the `to` route are
-      // going to end up, and the `to` route will go back onstage.
-      to.offstage = to.animation.value == 0.0;
-
-      if (fromGesture && flightType == HeroFlightDirection.pop) {
+      // For gesture driven pops into a page that maintainState, let the
+      // heros be measured and the overlay built right away since the previous
+      // both routes' render objects are already present and laid out.
+      if (fromGesture && flightType == HeroFlightDirection.pop && to.maintainState) {
         _startHeroTransition(from, to, animation, flightType, fromGesture);
       } else {
+        // Otherwise, delay measuring until the end of the next frame to allow
+        // the 'to' route to build and layout.
+
+        // Putting a route offstage changes its animation value to 1.0. Once this
+        // frame completes, we'll know where the heroes in the `to` route are
+        // going to end up, and the `to` route will go back onstage.
+        to.offstage = to.animation.value == 0.0;
+
         WidgetsBinding.instance.addPostFrameCallback((Duration value) {
           _startHeroTransition(from, to, animation, flightType, fromGesture);
         });
@@ -622,8 +632,6 @@ class HeroController extends NavigatorObserver {
     HeroFlightDirection flightType,
     bool fromGesture,
   ) {
-    print('start');
-    print('${from.animation} ${from.animation.status} to ${to.animation} ${to.animation.status}');
     // If the navigator or one of the routes subtrees was removed before this
     // end-of-frame callback was called, then don't actually start a transition.
     if (navigator == null || from.subtreeContext == null || to.subtreeContext == null) {

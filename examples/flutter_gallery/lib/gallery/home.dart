@@ -7,7 +7,6 @@ import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'backdrop.dart';
@@ -321,8 +320,6 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    debugPrintBeginFrameBanner = true;
-    debugPrintEndFrameBanner = true;
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
     final MediaQueryData media = MediaQuery.of(context);
