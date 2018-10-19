@@ -15,6 +15,7 @@ FuchsiaWorkflow get fuchsiaWorkflow => context[FuchsiaWorkflow];
 /// This workflow assumes development within the fuchsia source tree,
 /// including a working fx command-line tool in the user's PATH.
 class FuchsiaWorkflow implements Workflow {
+
   @override
   bool get appliesToHostPlatform => platform.isLinux || platform.isMacOS;
 

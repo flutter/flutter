@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../device.dart';
 
@@ -37,7 +36,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   FuchsiaDevices() : super('Fuchsia devices');
 
   @override
-  bool get supportsPlatform => platform.isLinux || platform.isMacOS;
+  bool get supportsPlatform => true;//platform.isLinux || platform.isMacOS;
 
   @override
   bool get canListAnything => fuchsiaWorkflow.canListDevices;
@@ -47,7 +46,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     if (!fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final String text = fuchsiaSdk.netls();
+    final String text = await fuchsiaSdk.netls();
     return parseFuchsiaDeviceOutput(text);
   }
 
