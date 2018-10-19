@@ -118,9 +118,10 @@ void SceneBuilder::pushClipPath(const CanvasPath* path, int clipBehavior) {
   PushLayer(std::move(layer));
 }
 
-void SceneBuilder::pushOpacity(int alpha) {
+void SceneBuilder::pushOpacity(int alpha, double dx, double dy) {
   auto layer = std::make_unique<flow::OpacityLayer>();
   layer->set_alpha(alpha);
+  layer->set_offset(SkPoint::Make(dx, dy));
   PushLayer(std::move(layer));
 }
 

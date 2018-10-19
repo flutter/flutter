@@ -15,6 +15,7 @@ class OpacityLayer : public ContainerLayer {
   ~OpacityLayer() override;
 
   void set_alpha(int alpha) { alpha_ = alpha; }
+  void set_offset(const SkPoint& offset) { offset_ = offset; }
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
 
@@ -25,6 +26,7 @@ class OpacityLayer : public ContainerLayer {
 
  private:
   int alpha_;
+  SkPoint offset_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(OpacityLayer);
 };

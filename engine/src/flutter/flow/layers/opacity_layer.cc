@@ -11,10 +11,12 @@ OpacityLayer::OpacityLayer() = default;
 OpacityLayer::~OpacityLayer() = default;
 
 void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
-  ContainerLayer::Preroll(context, matrix);
+  SkMatrix child_matrix = matrix;
+  child_matrix.postTranslate(offset_.fX, offset_.fY);
+  ContainerLayer::Preroll(context, child_matrix);
   if (context->raster_cache && layers().size() == 1) {
     Layer* child = layers()[0].get();
-    SkMatrix ctm = matrix;
+    SkMatrix ctm = child_matrix;
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
     ctm = RasterCache::GetIntegralTransCTM(ctm);
 #endif
@@ -30,6 +32,7 @@ void OpacityLayer::Paint(PaintContext& context) const {
   paint.setAlpha(alpha_);
 
   SkAutoCanvasRestore save(&context.canvas, true);
+  context.canvas.translate(offset_.fX, offset_.fY);
 
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
   context.canvas.setMatrix(
