@@ -36,7 +36,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   FuchsiaDevices() : super('Fuchsia devices');
 
   @override
-  bool get supportsPlatform => true;//platform.isLinux || platform.isMacOS;
+  bool get supportsPlatform => platform.isLinux || platform.isMacOS;
 
   @override
   bool get canListAnything => fuchsiaWorkflow.canListDevices;
