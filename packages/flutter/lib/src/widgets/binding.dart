@@ -265,41 +265,37 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   void initServiceExtensions() {
     super.initServiceExtensions();
 
-    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
-    if (!isReleaseMode) {
-      registerSignalServiceExtension(
-        name: 'debugDumpApp',
-        callback: () {
-          debugDumpApp();
-          return debugPrintDone;
-        },
-      );
+    registerSignalServiceExtension(
+      name: 'debugDumpApp',
+      callback: () {
+        debugDumpApp();
+        return debugPrintDone;
+      }
+    );
 
-      registerBoolServiceExtension(
-        name: 'showPerformanceOverlay',
-        getter: () =>
-        Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
-        setter: (bool value) {
-          if (WidgetsApp.showPerformanceOverlayOverride == value)
-            return Future<void>.value();
-          WidgetsApp.showPerformanceOverlayOverride = value;
-          return _forceRebuild();
-        },
-      );
-    }
+    registerBoolServiceExtension(
+      name: 'showPerformanceOverlay',
+      getter: () => Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
+      setter: (bool value) {
+        if (WidgetsApp.showPerformanceOverlayOverride == value)
+          return Future<void>.value();
+        WidgetsApp.showPerformanceOverlayOverride = value;
+        return _forceRebuild();
+      }
+    );
+
+    registerBoolServiceExtension(
+      name: 'debugAllowBanner',
+      getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
+      setter: (bool value) {
+        if (WidgetsApp.debugAllowBannerOverride == value)
+          return Future<void>.value();
+        WidgetsApp.debugAllowBannerOverride = value;
+        return _forceRebuild();
+      }
+    );
 
     assert(() {
-      registerBoolServiceExtension(
-        name: 'debugAllowBanner',
-        getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
-        setter: (bool value) {
-          if (WidgetsApp.debugAllowBannerOverride == value)
-            return Future<void>.value();
-          WidgetsApp.debugAllowBannerOverride = value;
-          return _forceRebuild();
-        },
-      );
-
       // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
         name: 'profileWidgetBuilds',
@@ -307,13 +303,25 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
         setter: (bool value) async {
           if (debugProfileBuildsEnabled != value)
             debugProfileBuildsEnabled = value;
-        },
+        }
       );
-
-      WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
-
       return true;
     }());
+
+    // This service extension is deprecated and will be removed by 7/1/2018.
+    // Use ext.flutter.inspector.show instead.
+    registerBoolServiceExtension(
+        name: 'debugWidgetInspector',
+        getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
+        setter: (bool value) {
+          if (WidgetsApp.debugShowWidgetInspectorOverride == value)
+            return Future<void>.value();
+          WidgetsApp.debugShowWidgetInspectorOverride = value;
+          return _forceRebuild();
+        }
+    );
+
+    WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
   }
 
   Future<void> _forceRebuild() {
