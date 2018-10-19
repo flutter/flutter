@@ -12,9 +12,9 @@ dependencies:
   intl: 0.15.7
   connectivity: 0.3.2
   string_scanner: 1.0.4
-  url_launcher: 3.0.3
+  url_launcher: 4.0.1
   cupertino_icons: 0.1.2
-  video_player: 0.6.5
+  video_player: 0.7.2
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets: 0.1.6
@@ -196,4 +196,4 @@ flutter:
         - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSansDisplay-Regular.ttf
           weight: 400
 
-# PUBSPEC CHECKSUM: 3ed5
+# PUBSPEC CHECKSUM: 0fd2
