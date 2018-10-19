@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../device.dart';
 
@@ -36,7 +37,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   FuchsiaDevices() : super('Fuchsia devices');
 
   @override
-  bool get supportsPlatform => true;
+  bool get supportsPlatform => platform.isLinux || platform.isMacOS;
 
   @override
   bool get canListAnything => fuchsiaWorkflow.canListDevices;
@@ -47,9 +48,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
       return <Device>[];
     }
     final String text = fuchsiaSdk.netls();
-    final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
-    parseFuchsiaDeviceOutput(text, devices: devices);
-    return devices;
+    return parseFuchsiaDeviceOutput(text);
   }
 
   @override
@@ -59,10 +58,11 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 /// Parses output from the netls tool into fuchsia devices.
 ///
 /// Example output:
-/// $ ./netls
-/// > device liliac-shore-only-last (fe80::82e4:da4d:fe81:227d/3)
+///     $ ./netls
+///     > device liliac-shore-only-last (fe80::82e4:da4d:fe81:227d/3)
 @visibleForTesting
-void parseFuchsiaDeviceOutput(String text, {@required List<FuchsiaDevice> devices}) {
+List<FuchsiaDevice> parseFuchsiaDeviceOutput(String text) {
+  final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
   for (String rawLine in text.trim().split('\n')) {
     final String line = rawLine.trim();
     if (!line.startsWith('device'))
@@ -73,6 +73,7 @@ void parseFuchsiaDeviceOutput(String text, {@required List<FuchsiaDevice> device
     final String id = words[2].substring(1, words[2].length - 1);
     devices.add(FuchsiaDevice(id, name: name));
   }
+  return devices;
 }
 
 class FuchsiaDevice extends Device {

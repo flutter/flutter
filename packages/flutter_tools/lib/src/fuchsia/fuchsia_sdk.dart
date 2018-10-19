@@ -6,15 +6,15 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/process.dart';
 
-/// The fuchsia SDK.
+/// The [FuchsiaSdk] instance.
 FuchsiaSdk get fuchsiaSdk => context[FuchsiaSdk];
 
-/// The fuchsia SDK shell commands.
+/// The Fuchsia SDK shell commands.
 ///
-/// This workflow assumes development within the fuchsia source tree, providing
-/// the `fx` command-line tool.
+/// This workflow assumes development within the fuchsia source tree,
+/// including a working fx command-line tool in the user's PATH.
 class FuchsiaSdk {
-  /// Invokes the `netaddr` command and return the output.
+  /// Invokes the `netaddr` command.
   ///
   /// This returns the network address of an attached fuchsia device.
   String netaddr() {

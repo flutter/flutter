@@ -4,18 +4,19 @@
 
 import '../base/context.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../doctor.dart';
 
-/// The workflow for fuchsia development.
+/// The [FuchsiaWorkflow] instance.
 FuchsiaWorkflow get fuchsiaWorkflow => context[FuchsiaWorkflow];
 
 /// The Fuchsia-specific implementation of a [Workflow].
 ///
-/// This workflow assumes development within the fuchsia source tree, providing
-/// the `fx` command-line tool.
+/// This workflow assumes development within the fuchsia source tree,
+/// including a working fx command-line tool in the user's PATH.
 class FuchsiaWorkflow implements Workflow {
   @override
-  bool get appliesToHostPlatform => true;
+  bool get appliesToHostPlatform => platform.isLinux || platform.isMacOS;
 
   @override
   bool get canListDevices {
@@ -28,7 +29,5 @@ class FuchsiaWorkflow implements Workflow {
   }
 
   @override
-  bool get canListEmulators  {
-     return false;
-  }
+  bool get canListEmulators => false;
 }
