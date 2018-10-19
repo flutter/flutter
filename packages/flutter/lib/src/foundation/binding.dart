@@ -114,7 +114,7 @@ abstract class BindingBase {
     );
     registerSignalServiceExtension(
       name: 'frameworkPresent',
-      callback: () => Future<Null>.value(),
+      callback: () => Future<void>.value(),
     );
     assert(() {
       registerServiceExtension(
