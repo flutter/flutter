@@ -72,30 +72,30 @@ void main() {
     c.append(g);
     g.append(j);
 
-    a.markClean();
+    a.markClean();  // ignore: invalid_use_of_protected_member
     b.markDirty();
-    c.markClean();
-    d.markClean();
-    e.markClean();
-    f.markClean();
-    g.markClean();
-    h.markClean();
-    i.markClean();
+    c.markClean();  // ignore: invalid_use_of_protected_member
+    d.markClean();  // ignore: invalid_use_of_protected_member
+    e.markClean();  // ignore: invalid_use_of_protected_member
+    f.markClean();  // ignore: invalid_use_of_protected_member
+    g.markClean();  // ignore: invalid_use_of_protected_member
+    h.markClean();  // ignore: invalid_use_of_protected_member
+    i.markClean();  // ignore: invalid_use_of_protected_member
     j.markDirty();
 
     a.updateSubtreeDirtiness();
 
-    expect(a.isSubtreeDirty, true);
-    expect(b.isSubtreeDirty, true);
-    expect(c.isSubtreeDirty, true);
-    expect(g.isSubtreeDirty, true);
-    expect(j.isSubtreeDirty, true);
+    expect(a.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
+    expect(b.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
+    expect(c.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
+    expect(g.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
+    expect(j.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
 
-    expect(d.isSubtreeDirty, false);
-    expect(e.isSubtreeDirty, false);
-    expect(f.isSubtreeDirty, false);
-    expect(h.isSubtreeDirty, false);
-    expect(i.isSubtreeDirty, false);
+    expect(d.isSubtreeDirty, false);  // ignore: invalid_use_of_protected_member
+    expect(e.isSubtreeDirty, false);  // ignore: invalid_use_of_protected_member
+    expect(f.isSubtreeDirty, false);  // ignore: invalid_use_of_protected_member
+    expect(h.isSubtreeDirty, false);  // ignore: invalid_use_of_protected_member
+    expect(i.isSubtreeDirty, false);  // ignore: invalid_use_of_protected_member
   });
 
   test('leader and follower layers are always dirty', () {
@@ -106,7 +106,7 @@ void main() {
     followerLayer.markClean();
     leaderLayer.updateSubtreeDirtiness();
     followerLayer.updateSubtreeDirtiness();
-    expect(leaderLayer.isSubtreeDirty, true);
-    expect(followerLayer.isSubtreeDirty, true);
+    expect(leaderLayer.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
+    expect(followerLayer.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
   });
 }
