@@ -15,8 +15,9 @@ group("platform") {
     deps = [
       "embedder",
     ]
-  } else if (is_win) {
-    # There is no platform target on windows. Instead, only a tester is used.
+  } else if (is_win || is_fuchsia) {
+    # There is no platform target on Windows. Fuchsia has its own runner
+    # implementation.
     deps = []
   } else {
     assert(false, "Unknown/Unsupported platform.")
