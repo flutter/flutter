@@ -25,7 +25,7 @@ class FuchsiaSdk {
   ///     > fe80::9aaa:fcff:fe60:d3af%eth1
   Future<String> netaddr() async {
     try {
-      final RunResult process = await runAsync(<String>['third_party/unsupported_toolchains/fuchsia/sdk/tools/netaddr', '--fuchsia']);
+      final RunResult process = await runAsync(<String>['fx', 'netaddr', '--fuchsia']);
       return process.stdout;
     } on ArgumentError catch (exception) {
       throwToolExit('$exception');
@@ -44,7 +44,7 @@ class FuchsiaSdk {
   Future<String> netls() async {
     try {
       final RunResult process = await runAsync(
-        <String>['third_party/unsupported_toolchains/fuchsia/sdk/tools/netls']);
+        <String>['fx', 'netls']);
       return process.stdout;
     } on ArgumentError catch (exception) {
       throwToolExit('$exception');
