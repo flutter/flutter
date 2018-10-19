@@ -122,7 +122,10 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// opacity).
   ///
   /// See [pop] for details about the operation stack.
-  void pushOpacity(int alpha) native 'SceneBuilder_pushOpacity';
+  void pushOpacity(int alpha, {Offset offset = Offset.zero}) {
+    _pushOpacity(alpha, offset.dx, offset.dy);
+  }
+  void _pushOpacity(int alpha, double dx, double dy) native 'SceneBuilder_pushOpacity';
 
   /// Pushes a color filter operation onto the operation stack.
   ///
