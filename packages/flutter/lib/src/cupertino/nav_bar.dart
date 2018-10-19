@@ -398,6 +398,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       createRectTween: _linearTranslateWithLargestRectSizeTween,
       placeholderBuilder: _navBarHeroLaunchPadBuilder,
       flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
+      userGestureTransitions: true,
       child: _TransitionableNavigationBar(
         componentsKeys: keys,
         backgroundColor: widget.backgroundColor,
@@ -732,6 +733,7 @@ class _LargeTitleNavigationBarSliverDelegate
       createRectTween: _linearTranslateWithLargestRectSizeTween,
       flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
       placeholderBuilder: _navBarHeroLaunchPadBuilder,
+      userGestureTransitions: true,
       // This is all the way down here instead of being at the top level of
       // CupertinoSliverNavigationBar like CupertinoNavigationBar because it
       // needs to wrap the top level RenderBox rather than a RenderSliver.
@@ -1439,6 +1441,7 @@ class _NavigationBarTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('builds transition nav bar');
     final List<Widget> children = <Widget>[
       // Draw an empty navigation bar box with changing shape behind all the
       // moving components without any components inside it itself.

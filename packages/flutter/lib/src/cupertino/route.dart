@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 const double _kBackGestureWidth = 20.0;
@@ -476,12 +477,14 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   void _handleDragStart(DragStartDetails details) {
     assert(mounted);
     assert(_backGestureController == null);
+    print('gesture start');
     _backGestureController = widget.onStartPopGesture();
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(mounted);
     assert(_backGestureController != null);
+    print('move');
     _backGestureController.dragUpdate(_convertToLogical(details.primaryDelta / context.size.width));
   }
 
@@ -501,6 +504,7 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   }
 
   void _handlePointerDown(PointerDownEvent event) {
+    print('pointer down');
     if (widget.enabledCallback())
       _recognizer.addPointer(event);
   }
@@ -560,6 +564,12 @@ class _CupertinoBackGestureController<T> {
   }) : assert(navigator != null),
        assert(controller != null),
        assert(onEnded != null) {
+    print('tell navigator');
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      print('first back gesture controller detected frame');
+      _drewOneFrame = true;
+    });
+    SchedulerBinding.instance.scheduleFrame();
     navigator.didStartUserGesture();
   }
 
@@ -574,10 +584,15 @@ class _CupertinoBackGestureController<T> {
 
   bool _animating = false;
 
+  bool _drewOneFrame = false;
+
   /// The drag gesture has changed by [fractionalDelta]. The total range of the
   /// drag should be 0.0 to 1.0.
   void dragUpdate(double delta) {
-    controller.value -= delta;
+    // if (_drewOneFrame) {
+      controller.value -= delta;
+      print('controller update animation value to ${controller.value}');
+    // }
   }
 
   /// The drag gesture has ended with a horizontal motion of

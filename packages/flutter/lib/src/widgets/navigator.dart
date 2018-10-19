@@ -352,7 +352,7 @@ class NavigatorObserver {
   ///
   /// For example, this is called when an iOS back gesture starts, and is used
   /// to disabled hero animations during such interactions.
-  void didStartUserGesture() { }
+  void didStartUserGesture(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
   /// User gesture is no longer controlling the [Navigator].
   ///
@@ -1911,8 +1911,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void didStartUserGesture() {
     _userGesturesInProgress += 1;
     if (_userGesturesInProgress == 1) {
+      final Route<dynamic> currentRoute = _history.last;
+      final Route<dynamic> nextRoute = currentRoute.willHandlePopInternally
+          ? null
+          : _history.length > 1
+              ? _history[_history.length - 2]
+              : null;
+
       for (NavigatorObserver observer in widget.observers)
-        observer.didStartUserGesture();
+        observer.didStartUserGesture(currentRoute, nextRoute);
     }
   }
 
