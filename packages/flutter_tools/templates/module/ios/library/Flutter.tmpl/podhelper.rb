@@ -69,6 +69,9 @@ post_install do |installer|
             xcconfig_path = config.base_configuration_reference.real_path
             File.open(xcconfig_path, 'a+') do |file|
                 file.puts "#include \"#{File.join(framework_dir, 'Generated.xcconfig')}\""
+                if config.name == 'Release'
+                    file.puts "FLUTTER_BUILD_MODE=release"
+                end
             end
         end
     end
