@@ -342,16 +342,8 @@ public class FlutterView extends SurfaceView
         }
         // Fallback single locale passing for android API < 24. Should work always.
         Locale locale = config.locale;
-        List<String> data = new ArrayList<String>();
-        data.add(locale.getLanguage());
-        data.add(locale.getCountry());
-        if (Build.VERSION.SDK_INT >= 21) {
-            data.add(locale.getScript());
-        } else {
-            data.add("");
-        }
-        data.add(locale.getVariant());
-        mFlutterLocalizationChannel.invokeMethod("setLocale", Arrays.asList(locale.getLanguage(), locale.getCountry(), locale.getScript(), locale.getVariant()));
+        // getScript() is gated because it is added in API 21.
+        mFlutterLocalizationChannel.invokeMethod("setLocale", Arrays.asList(locale.getLanguage(), locale.getCountry(), Build.VERSION.SDK_INT >= 21 ? locale.getScript() : "", locale.getVariant()));
         
     }
 
