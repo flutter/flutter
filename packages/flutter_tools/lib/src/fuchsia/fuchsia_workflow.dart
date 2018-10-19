@@ -19,12 +19,12 @@ class FuchsiaWorkflow implements Workflow {
 
   @override
   bool get canListDevices {
-    return os.which('fx')?.path != null;
+    return os.which('fx') != null;
   }
 
   @override
   bool get canLaunchDevices {
-    return os.which('fx')?.path != null;
+    return os.which('fx') != null;
   }
 
   @override

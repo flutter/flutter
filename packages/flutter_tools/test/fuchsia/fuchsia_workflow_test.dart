@@ -17,7 +17,6 @@ void main() {
   bool fxPresent = false;
   final MockOperatingSystemUtils utils = MockOperatingSystemUtils();
   final MockFile file = MockFile();
-  when(file.path).thenReturn('/something/foobar/fx');
   when(utils.which('fx')).thenAnswer((Invocation _) => fxPresent ? file : null);
 
   group('android workflow', () {
