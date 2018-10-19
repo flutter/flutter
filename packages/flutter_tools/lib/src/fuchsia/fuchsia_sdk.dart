@@ -2,30 +2,45 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../base/common.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
+import '../base/process.dart';
 
 /// The fuchsia SDK.
 FuchsiaSdk get fuchsiaSdk => context[FuchsiaSdk];
 
-/// The fuchsia SDK.
+/// The fuchsia SDK shell commands.
+///
+/// This workflow assumes development within the fuchsia source tree, providing
+/// the `fx` command-line tool.
 class FuchsiaSdk {
-  FuchsiaSdk(this.location);
-
-  factory FuchsiaSdk.locateFuchsiaSdk() {
-    // TODO?
-    // It's either in a third_party directory or else it doesn't exist.
-    final Directory location = fs.directory('third_party/unsupported_toolchains/fuchsia/sdk');
-    return FuchsiaSdk(location);
+  /// Invokes the `netaddr` command and return the output.
+  ///
+  /// This returns the network address of an attached fuchsia device.
+  String netaddr() {
+    String text;
+    try {
+      text = runSync(<String>['fx', 'netaddr', '--fuchsia']);
+    } on ArgumentError catch (exception) {
+      throwToolExit('Unable to run "netaddr": ${exception.message}');
+    }
+    return text;
   }
 
-  /// The location of the fuchsia SDK.
-  final Directory location;
-
-  /// The path to the netls tool.
+  /// Invokes the `netls` command.
   ///
-  /// This is used to discover fuchsia devices.
-  String get netlsPath {
-    return '${location.path}/tools/netls';
+  /// This lists attached fuchsia devices with their name and address.
+  ///
+  /// Example output:
+  ///     $ fx netls
+  ///     > device liliac-shore-only-last (fe80::82e4:da4d:fe81:227d/3)
+  String netls() {
+    String text;
+    try {
+      text = runSync(<String>['fx', 'netls']);
+    } on ArgumentError catch (exception) {
+      throwToolExit('Unable to run "netls": ${exception.message}');
+    }
+    return text;
   }
 }

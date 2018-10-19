@@ -3,24 +3,28 @@
 // found in the LICENSE file.
 
 import '../base/context.dart';
+import '../base/os.dart';
 import '../doctor.dart';
 
 /// The workflow for fuchsia development.
 FuchsiaWorkflow get fuchsiaWorkflow => context[FuchsiaWorkflow];
 
 /// The Fuchsia-specific implementation of a [Workflow].
+///
+/// This workflow assumes development within the fuchsia source tree, providing
+/// the `fx` command-line tool.
 class FuchsiaWorkflow implements Workflow {
   @override
   bool get appliesToHostPlatform => true;
 
   @override
   bool get canListDevices {
-    return true;
+    return os.which('fx')?.path != null;
   }
 
   @override
   bool get canLaunchDevices {
-    return true;
+    return os.which('fx')?.path != null;
   }
 
   @override

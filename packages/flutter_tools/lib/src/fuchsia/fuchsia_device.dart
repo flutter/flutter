@@ -7,8 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
-import '../base/common.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../device.dart';
 
@@ -44,26 +42,15 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   bool get canListAnything => fuchsiaWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async => getNetlsDevices();
+  Future<List<Device>> pollingGetDevices() async {
+    final String text = fuchsiaSdk.netls();
+    final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
+    parseFuchsiaDeviceOutput(text, devices: devices);
+    return devices;
+  }
 
   @override
   Future<List<String>> getDiagnostics() async => const <String>[];
-}
-
-/// Return the list of connected ADB devices.
-List<FuchsiaDevice> getNetlsDevices() {
-  final String netlsPath = fuchsiaSdk.netlsPath;
-  if (netlsPath == null)
-    return <FuchsiaDevice>[];
-  String text;
-  try {
-    text = runSync(<String>[netlsPath]);
-  } on ArgumentError catch (exception) {
-    throwToolExit('Unable to run "netls": ${exception.message}');
-  }
-  final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
-  parseFuchsiaDeviceOutput(text, devices: devices);
-  return devices;
 }
 
 /// Parses output from the netls tool into fuchsia devices.
@@ -80,7 +67,7 @@ void parseFuchsiaDeviceOutput(String text, {@required List<FuchsiaDevice> device
     // ['device', 'device name', '(id)']
     final List<String> words = line.split(' ');
     final String name = words[1];
-    final String id = words[2].substring(1, words[2].length - 2);
+    final String id = words[2].substring(1, words[2].length - 1);
     devices.add(FuchsiaDevice(id, name: name));
   }
 }
