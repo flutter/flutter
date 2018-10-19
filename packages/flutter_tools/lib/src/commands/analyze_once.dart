@@ -87,8 +87,7 @@ class AnalyzeOnce extends AnalyzeBase {
       }
     });
     server.onErrors.listen((FileAnalysisErrors fileErrors) {
-      // Record the issues found (but filter out to do comments).
-      errors.addAll(fileErrors.errors.where((AnalysisError error) => error.type != 'TODO'));
+      errors.addAll(fileErrors.errors);
     });
 
     await server.start();
@@ -149,9 +148,9 @@ class AnalyzeOnce extends AnalyzeBase {
       final int errorCount = errors.length;
       printStatus('');
       if (undocumentedMembers > 0) {
-        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found (ran in ${seconds}s; $dartdocMessage).');
+        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartdocMessage)');
       } else {
-        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found (ran in ${seconds}s).');
+        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s)');
       }
     }
 
