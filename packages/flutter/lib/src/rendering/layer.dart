@@ -978,7 +978,7 @@ class OpacityLayer extends ContainerLayer {
   ///
   /// The [alpha] property must be non-null before the compositing phase of
   /// the pipeline.
-  OpacityLayer({ this.alpha });
+  OpacityLayer({ this.alpha, this.offset = Offset.zero });
 
   /// The amount to multiply into the alpha channel.
   ///
@@ -989,6 +989,9 @@ class OpacityLayer extends ContainerLayer {
   /// (as described at [Layer]).
   int alpha;
 
+  /// Offset from parent in the parent's coordinate system.
+  Offset offset;
+
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     bool enabled = true;
@@ -997,8 +1000,8 @@ class OpacityLayer extends ContainerLayer {
       return true;
     }());
     if (enabled)
-      builder.pushOpacity(alpha);
-    addChildrenToScene(builder, layerOffset);
+      builder.pushOpacity(alpha, offset: offset + layerOffset);
+    addChildrenToScene(builder);
     if (enabled)
       builder.pop();
     return null; // this does not return an engine layer yet.
