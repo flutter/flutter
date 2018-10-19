@@ -912,6 +912,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
       controller: _scrollController,
       physics: const ClampingScrollPhysics(),
+      dragStartBehavior: widget.dragStartBehavior,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return CompositedTransformTarget(
           link: _layerLink,

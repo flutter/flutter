@@ -195,7 +195,10 @@ class GestureDetector extends StatelessWidget {
          }
          return true;
        }()),
-       super(key: key);
+       super(key: key) {
+    if (startBehavior == DragStartBehavior.start)
+      debugPrintStack();
+  }
 
   /// The widget below this widget in the tree.
   ///
