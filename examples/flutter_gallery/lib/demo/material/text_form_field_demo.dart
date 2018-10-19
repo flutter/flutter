@@ -233,6 +233,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 TextFormField(
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
+                    hasFloatingPlaceholder: false,
                     hintText: 'Tell us about yourself',
                     helperText: 'Keep it short, this is just a demo.',
                     labelText: 'Life story',
@@ -243,7 +244,10 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 TextFormField(
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(borderSide: BorderSide.none),
+                    filled: true,
+                      hasFloatingPlaceholder: false,
+
                     labelText: 'Salary',
                     prefixText: '\$',
                     suffixText: 'USD',

@@ -35,7 +35,7 @@ abstract class InputBorder extends ShapeBorder {
   /// substitutes its own, using [copyWith], based on the current theme and
   /// [InputDecorator.isFocused].
   const InputBorder({
-    this.borderSide = BorderSide.none,
+    this.borderSide = const BorderSide(),
   }) : assert(borderSide != null);
 
   /// No input border.
@@ -116,91 +116,6 @@ class _NoInputBorder extends InputBorder {
   }
 }
 
-/// Clips an [InputDecorator]'s [InputDecoration.filled] background to a rounded
-/// rectangle.
-///
-/// This class is similar to [OutlineBorder] except that no outline is drawn.
-///
-/// See also:
-///
-///  * [UnderlineInputBorder], the default [InputDecorator] border which
-///    draws a horizontal line at the bottom of the input decorator's container.
-///  * [OutlineInputBorder], an [InputDecorator] border which draws a
-///    rounded rectangle around the input decorator's container.
-///  * [InputDecoration], which is used to configure an [InputDecorator].
-class FilledInputBorder extends InputBorder {
-  /// Clips the [InputDecoration.filled] background of an [InputDecorator] to a
-  /// rounded rectangle.
-  ///
-  /// The [borderRadius] parameter defaults to a value where all corners have a
-  /// circular radius of 4.0. The [borderRadius] parameter must not be null.
-  const FilledInputBorder({
-    this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
-  }) : assert(borderRadius != null),
-        super(borderSide: BorderSide.none);
-
-  /// The radii of the border's rounded rectangle corners.
-  ///
-  /// When this border is used with a filled input decorator, see
-  /// [InputDecoration.filled], the border radius defines the shape
-  /// of the background fill.
-  ///
-  /// By default all corners have a circular radius of 4.0.
-  final BorderRadius borderRadius;
-
-  @override
-  bool get isOutline => false;
-
-  @override
-  InputBorder copyWith({BorderSide borderSide, BorderRadius borderRadius}) {
-    return FilledInputBorder(
-      borderRadius: borderRadius ?? this.borderRadius,
-    );
-  }
-
-  @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
-
-  @override
-  FilledInputBorder scale(double t) {
-    return FilledInputBorder(borderRadius: borderRadius);
-  }
-
-  @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
-    return Path()
-      ..addRect(rect);
-  }
-
-  @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
-    return Path()..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
-  }
-
-  @override
-  void paint(Canvas canvas, Rect rect, {
-    double gapStart,
-    double gapExtent = 0.0,
-    double gapPercentage = 0.0,
-    TextDirection textDirection,
-  }) {
-    // Do not paint.
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (runtimeType != other.runtimeType)
-      return false;
-    final FilledInputBorder typedOther = other;
-    return typedOther.borderRadius == borderRadius;
-  }
-
-  @override
-  int get hashCode => borderRadius.hashCode;
-}
-
 /// Draws a horizontal line at the bottom of an [InputDecorator]'s container and
 /// defines the container's shape.
 ///
@@ -226,7 +141,7 @@ class UnderlineInputBorder extends InputBorder {
   /// and right corners have a circular radius of 4.0. The [borderRadius]
   /// parameter must not be null.
   const UnderlineInputBorder({
-    BorderSide borderSide = BorderSide.none,
+    BorderSide borderSide = const BorderSide(),
     this.borderRadius = const BorderRadius.only(
       topLeft: Radius.circular(4.0),
       topRight: Radius.circular(4.0),
@@ -355,7 +270,7 @@ class OutlineInputBorder extends InputBorder {
   /// must not be null and the corner radii must be circular, i.e. their
   /// [Radius.x] and [Radius.y] values must be the same.
   const OutlineInputBorder({
-    BorderSide borderSide = BorderSide.none,
+    BorderSide borderSide = const BorderSide(),
     this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
     this.gapPadding = 4.0,
   }) : assert(borderRadius != null),
