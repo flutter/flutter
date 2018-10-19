@@ -3632,6 +3632,11 @@ typedef IndexedWidgetBuilder = Widget Function(BuildContext context, int index);
 /// [MaterialApp.builder].
 typedef TransitionBuilder = Widget Function(BuildContext context, Widget child);
 
+/// A builder that builds a widget given a two void callbacks.
+///
+/// Used by [Stepper.builder].
+typedef ControlsWidgetBuilder = Widget Function(BuildContext context, VoidCallback firstFunction, VoidCallback secondFunction);
+
 /// An [Element] that composes other [Element]s.
 ///
 /// Rather than creating a [RenderObject] directly, a [ComponentElement] creates
