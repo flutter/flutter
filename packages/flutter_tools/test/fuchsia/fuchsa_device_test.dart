@@ -27,5 +27,4 @@ void main() {
       expect(devices.first.name, 'lilia-shore-only-last');
     });
   });
-
 }
