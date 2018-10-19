@@ -152,9 +152,6 @@ class Locale {
   /// the region subtag should be uppercase.
   const Locale(this._languageCode, [ this._countryCode ]) : assert(_languageCode != null);
 
-  /// Empty locale constant. This is an invalid locale.
-  static const Locale none = const Locale('', '');
-
   /// The primary language subtag for the locale.
   ///
   /// This must not be null.
@@ -443,7 +440,7 @@ class Window {
     if (_locales != null && _locales.isNotEmpty) {
       return _locales.first;
     }
-    return Locale.none;
+    return null;
   }
 
   /// The full system-reported supported locales of the device.
