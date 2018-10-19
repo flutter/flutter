@@ -96,7 +96,7 @@ void main() {
           'warning $analyzerSeparator The parameter \'onPressed\' is required',
           'info $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
         ],
-        exitMessageContains: '2 issues found.',
+        exitMessageContains: '2 issues found',
         toolExit: true,
       );
     }, timeout: allowForSlowAnalyzeTests);
@@ -123,7 +123,7 @@ void main() {
           'info $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
           'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
         ],
-        exitMessageContains: '3 issues found.',
+        exitMessageContains: '3 issues found',
         toolExit: true,
       );
     }, timeout: allowForSlowAnalyzeTests);
@@ -154,7 +154,7 @@ void bar() {
           statusTextContains: <String>[
             'Analyzing',
           ],
-          exitMessageContains: '1 issue found.',
+          exitMessageContains: '1 issue found',
           toolExit: true,
         );
       } finally {
@@ -167,6 +167,24 @@ void bar() {
 StringBuffer bar = StringBuffer('baz');
 ''';
       final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_3.');
+      tempDir.childFile('main.dart').writeAsStringSync(contents);
+      try {
+        await runCommand(
+          command: AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
+          arguments: <String>['analyze'],
+          statusTextContains: <String>['No issues found!'],
+        );
+      } finally {
+        tryToDelete(tempDir);
+      }
+    });
+
+    testUsingContext('returns no issues for todo comments', () async {
+      const String contents = '''
+// TODO(foobar):
+StringBuffer bar = StringBuffer('baz');
+''';
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_4.');
       tempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(
