@@ -83,13 +83,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
           return Future<void>.value();
         },
       );
-      registerSignalServiceExtension(
-        name: 'debugDumpLayerTree',
-        callback: () {
-          debugDumpLayerTree();
-          return debugPrintDone;
-        },
-      );
       return true;
     }());
 
