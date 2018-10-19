@@ -389,7 +389,8 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet>
   // only be relevant for Android).
   Future<bool> _onWillPop() async {
     if (!_isOpen) {
-      return SystemNavigator.pop();
+      await SystemNavigator.pop();
+      return true;
     }
 
     close();
