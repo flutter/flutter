@@ -355,7 +355,9 @@ class FlutterTestDriver {
 
     return f().timeout(timeout ?? defaultTimeout, onTimeout: () {
       logMessage('<timed out>');
-      throw '$message\nReceived:\n${messages.toString()}';
+      throw '$message';
+    }).catchError((dynamic error) {
+      throw '$error\nReceived:\n${messages.toString()}';
     }).whenComplete(() => sub.cancel());
   }
 
