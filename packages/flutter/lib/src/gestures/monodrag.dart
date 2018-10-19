@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'arena.dart';
 import 'constants.dart';
 import 'drag_details.dart';
@@ -13,6 +15,15 @@ enum _DragState {
   ready,
   possible,
   accepted,
+}
+
+/// Configuration of offset passed to [DragStartDetails].
+enum DragStartBehavior {
+  /// Send the initial offset, as when we first detected a down event.
+  down,
+
+  /// Send the offset at the time we detected a drag start.
+  start,
 }
 
 /// Signature for when a pointer that was previously in contact with the screen
@@ -48,7 +59,14 @@ typedef GestureDragCancelCallback = void Function();
 ///  * [PanGestureRecognizer], for drags that are not locked to a single axis.
 abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
-  DragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  DragGestureRecognizer({
+    this.dragStartBehavior = DragStartBehavior.start,
+    Object debugOwner,
+  })  : assert(dragStartBehavior != null),
+        super(debugOwner: debugOwner);
+
+  /// Configure the behavior of offsets sent to [onStart].
+  DragStartBehavior dragStartBehavior;
 
   /// A pointer has contacted the screen and might begin to move.
   ///
@@ -163,6 +181,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _state = _DragState.accepted;
       final Offset delta = _pendingDragOffset;
       final Duration timestamp = _lastPendingEventTimestamp;
+      Offset updateDelta;
+      switch (dragStartBehavior) {
+        case DragStartBehavior.start:
+          _initialPosition = _initialPosition + delta;
+          updateDelta = Offset.zero;
+          break;
+        case DragStartBehavior.down:
+          updateDelta = _getDeltaForDetails(delta);
+          break;
+      }
       _pendingDragOffset = Offset.zero;
       _lastPendingEventTimestamp = null;
       if (onStart != null) {
@@ -171,13 +199,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           globalPosition: _initialPosition,
         )));
       }
-      if (delta != Offset.zero && onUpdate != null) {
-        final Offset deltaForDetails = _getDeltaForDetails(delta);
+      if (updateDelta != Offset.zero && onUpdate != null) {
         invokeCallback<void>('onUpdate', () => onUpdate(DragUpdateDetails(
           sourceTimeStamp: timestamp,
-          delta: deltaForDetails,
-          primaryDelta: _getPrimaryValueFromOffset(delta),
-          globalPosition: _initialPosition + deltaForDetails,
+          delta: updateDelta,
+          primaryDelta: _getPrimaryValueFromOffset(updateDelta),
+          globalPosition: _initialPosition + updateDelta, // Only adds delta for down behaviour
         )));
       }
     }
@@ -246,7 +273,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 ///    track each touch point independently.
 class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the vertical axis.
-  VerticalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  VerticalDragGestureRecognizer({
+    Object debugOwner,
+  }) : super(debugOwner: debugOwner);
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
@@ -266,6 +295,10 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 
   @override
   String get debugDescription => 'vertical drag';
+
+  @override
+  DragStartBehavior dragStartBehavor;
+
 }
 
 /// Recognizes movement in the horizontal direction.
@@ -280,7 +313,9 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 ///    track each touch point independently.
 class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the horizontal axis.
-  HorizontalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  HorizontalDragGestureRecognizer({
+    Object debugOwner,
+  }) : super(debugOwner: debugOwner);
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
@@ -313,7 +348,9 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
 ///    some time has passed.
 class PanGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for tracking movement on a plane.
-  PanGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  PanGestureRecognizer({
+    Object debugOwner,
+  }) : super(debugOwner: debugOwner);
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {

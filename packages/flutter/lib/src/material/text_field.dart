@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart';
 
 import 'debug.dart';
 import 'feedback.dart';
@@ -123,6 +124,7 @@ class TextField extends StatefulWidget {
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.enableInteractiveSelection = true,
+    this.dragStartBehavior,
   }) : assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
@@ -348,6 +350,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
+
+  ///asdfasdf
+  final DragStartBehavior dragStartBehavior;
 
   @override
   _TextFieldState createState() => _TextFieldState();

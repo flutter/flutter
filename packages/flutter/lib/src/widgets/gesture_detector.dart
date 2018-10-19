@@ -150,7 +150,6 @@ class GestureDetector extends StatelessWidget {
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
-    this.onLongPressUp,
     this.onVerticalDragDown,
     this.onVerticalDragStart,
     this.onVerticalDragUpdate,
@@ -170,7 +169,8 @@ class GestureDetector extends StatelessWidget {
     this.onScaleUpdate,
     this.onScaleEnd,
     this.behavior,
-    this.excludeFromSemantics = false
+    this.excludeFromSemantics = false,
+    this.startBehavior,
   }) : assert(excludeFromSemantics != null),
        assert(() {
          final bool haveVerticalDrag = onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null;
@@ -242,9 +242,6 @@ class GestureDetector extends StatelessWidget {
   /// A pointer has remained in contact with the screen at the same location for
   /// a long period of time.
   final GestureLongPressCallback onLongPress;
-
-  /// A pointer that has triggered a long-press has stopped contacting the screen.
-  final GestureLongPressUpCallback onLongPressUp;
 
   /// A pointer has contacted the screen and might begin to move vertically.
   final GestureDragDownCallback onVerticalDragDown;
@@ -325,6 +322,9 @@ class GestureDetector extends StatelessWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
+  /// The start behaviour of the drag.
+  final DragStartBehavior startBehavior;
+
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
@@ -352,13 +352,12 @@ class GestureDetector extends StatelessWidget {
       );
     }
 
-    if (onLongPress != null || onLongPressUp !=null) {
+    if (onLongPress != null) {
       gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
         () => LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
-            ..onLongPress = onLongPress
-            ..onLongPressUp = onLongPressUp;
+            ..onLongPress = onLongPress;
         },
       );
     }
@@ -376,7 +375,8 @@ class GestureDetector extends StatelessWidget {
             ..onStart = onVerticalDragStart
             ..onUpdate = onVerticalDragUpdate
             ..onEnd = onVerticalDragEnd
-            ..onCancel = onVerticalDragCancel;
+            ..onCancel = onVerticalDragCancel
+            ..dragStartBehavior = startBehavior;
         },
       );
     }
@@ -394,7 +394,8 @@ class GestureDetector extends StatelessWidget {
             ..onStart = onHorizontalDragStart
             ..onUpdate = onHorizontalDragUpdate
             ..onEnd = onHorizontalDragEnd
-            ..onCancel = onHorizontalDragCancel;
+            ..onCancel = onHorizontalDragCancel
+            ..dragStartBehavior = startBehavior;
         },
       );
     }

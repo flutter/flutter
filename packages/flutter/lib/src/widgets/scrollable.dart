@@ -81,6 +81,7 @@ class Scrollable extends StatefulWidget {
     @required this.viewportBuilder,
     this.excludeFromSemantics = false,
     this.semanticChildCount,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(axisDirection != null),
        assert(viewportBuilder != null),
        assert(excludeFromSemantics != null),
@@ -179,6 +180,9 @@ class Scrollable extends StatefulWidget {
   ///  * [CustomScrollView], for an explanation of scroll semantics.
   ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
   final int semanticChildCount;
+
+  /// drag
+  final DragStartBehavior dragStartBehavior;
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -391,7 +395,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                   ..onCancel = _handleDragCancel
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
-                  ..maxFlingVelocity = _physics?.maxFlingVelocity;
+                  ..maxFlingVelocity = _physics?.maxFlingVelocity
+                  ..dragStartBehavior = widget.dragStartBehavior;
               },
             ),
           };
@@ -409,7 +414,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                   ..onCancel = _handleDragCancel
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
-                  ..maxFlingVelocity = _physics?.maxFlingVelocity;
+                  ..maxFlingVelocity = _physics?.maxFlingVelocity
+                  ..dragStartBehavior = widget.dragStartBehavior;
               },
             ),
           };

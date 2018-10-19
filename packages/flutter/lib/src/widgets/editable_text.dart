@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -215,6 +216,7 @@ class EditableText extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
     this.enableInteractiveSelection = true,
+    this.dragStartBehavior,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -418,6 +420,9 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to false, resulting in a typical blinking cursor.
   static bool debugDeterministicCursor = false;
+
+  ///
+  final DragStartBehavior dragStartBehavior;
 
   @override
   EditableTextState createState() => EditableTextState();
@@ -1002,6 +1007,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.cursorRadius,
     this.enableInteractiveSelection = true,
     this.textSelectionDelegate,
+    this.dragStartBehavior,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        assert(enableInteractiveSelection != null),
@@ -1028,6 +1034,7 @@ class _Editable extends LeafRenderObjectWidget {
   final Radius cursorRadius;
   final bool enableInteractiveSelection;
   final TextSelectionDelegate textSelectionDelegate;
+  final DragStartBehavior dragStartBehavior;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {

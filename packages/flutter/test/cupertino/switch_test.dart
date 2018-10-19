@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 
 void main() {
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
@@ -18,6 +19,7 @@ void main() {
               child: CupertinoSwitch(
                 key: switchKey,
                 value: value,
+                dragStartBehavior: DragStartBehavior.down,
                 onChanged: (bool newValue) {
                   setState(() {
                     value = newValue;
@@ -46,6 +48,7 @@ void main() {
             return Center(
               child: CupertinoSwitch(
                 value: value,
+                dragStartBehavior: DragStartBehavior.down,
                 onChanged: (bool newValue) {
                   setState(() {
                     value = newValue;
@@ -90,6 +93,7 @@ void main() {
             return Center(
               child: CupertinoSwitch(
                 value: value,
+                dragStartBehavior: DragStartBehavior.down,
                 onChanged: (bool newValue) {
                   setState(() {
                     value = newValue;

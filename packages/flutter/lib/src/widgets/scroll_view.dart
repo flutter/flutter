@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -61,6 +62,7 @@ abstract class ScrollView extends StatelessWidget {
     this.shrinkWrap = false,
     this.cacheExtent,
     this.semanticChildCount,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(reverse != null),
        assert(shrinkWrap != null),
        assert(!(controller != null && primary == true),
@@ -188,6 +190,9 @@ abstract class ScrollView extends StatelessWidget {
   ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
   final int semanticChildCount;
 
+  /// yuuuuuup, it's draaaagggg startttt!
+  final DragStartBehavior dragStartBehavior;
+
   /// Returns the [AxisDirection] in which the scroll view scrolls.
   ///
   /// Combines the [scrollDirection] with the [reverse] boolean to obtain the
@@ -247,6 +252,7 @@ abstract class ScrollView extends StatelessWidget {
       ? PrimaryScrollController.of(context)
       : controller;
     final Scrollable scrollable = Scrollable(
+      dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,
@@ -439,6 +445,7 @@ abstract class BoxScrollView extends ScrollView {
     this.padding,
     double cacheExtent,
     int semanticChildCount,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -449,6 +456,7 @@ abstract class BoxScrollView extends ScrollView {
     shrinkWrap: shrinkWrap,
     cacheExtent: cacheExtent,
     semanticChildCount: semanticChildCount,
+    dragStartBehavior: dragStartBehavior,
   );
 
   /// The amount of space by which to inset the children.
@@ -733,6 +741,7 @@ class ListView extends BoxScrollView {
     double cacheExtent,
     List<Widget> children = const <Widget>[],
     int semanticChildCount,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -749,6 +758,7 @@ class ListView extends BoxScrollView {
     padding: padding,
     cacheExtent: cacheExtent,
     semanticChildCount: semanticChildCount ?? children.length,
+    dragStartBehavior: dragStartBehavior,
   );
 
   /// Creates a scrollable, linear array of widgets that are created on demand.

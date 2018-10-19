@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
+
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'debug.dart';
@@ -82,6 +84,7 @@ class Dismissible extends StatefulWidget {
     this.dismissThresholds = const <DismissDirection, double>{},
     this.movementDuration = const Duration(milliseconds: 200),
     this.crossAxisEndOffset = 0.0,
+    this.startBehavior = DragStartBehavior.start,
   }) : assert(key != null),
        assert(secondaryBackground != null ? background != null : true),
        super(key: key);
@@ -141,6 +144,8 @@ class Dismissible extends StatefulWidget {
   /// If non-zero value is given then widget moves in cross direction depending on whether
   /// it is positive or negative.
   final double crossAxisEndOffset;
+
+  final DragStartBehavior startBehavior;
 
   @override
   _DismissibleState createState() => _DismissibleState();
@@ -323,14 +328,12 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
   void _updateMoveAnimation() {
     final double end = _dragExtent.sign;
-    _moveAnimation = _moveController.drive(
-      Tween<Offset>(
-        begin: Offset.zero,
-        end: _directionIsXAxis
-               ? Offset(end, widget.crossAxisEndOffset)
-               : Offset(widget.crossAxisEndOffset, end),
-      ),
-    );
+    _moveAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: _directionIsXAxis
+          ? Offset(end, widget.crossAxisEndOffset)
+          : Offset(widget.crossAxisEndOffset, end),
+    ).animate(_moveController);
   }
 
   _FlingGestureKind _describeFlingGesture(Velocity velocity) {
@@ -426,16 +429,13 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       _resizeController.forward();
       setState(() {
         _sizePriorToCollapse = context.size;
-        _resizeAnimation = _resizeController.drive(
-          CurveTween(
-            curve: _kResizeTimeCurve
-          ),
-        ).drive(
-          Tween<double>(
-            begin: 1.0,
-            end: 0.0
-          ),
-        );
+        _resizeAnimation = Tween<double>(
+          begin: 1.0,
+          end: 0.0
+        ).animate(CurvedAnimation(
+          parent: _resizeController,
+          curve: _kResizeTimeCurve
+        ));
       });
     }
   }
@@ -514,7 +514,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       children.add(content);
       content = Stack(children: children);
     }
-
+//    debugPrint('dismisable ' + widget.dragStartBehavior.toString());
     // We are not resizing but we may be being dragging in widget.direction.
     return GestureDetector(
       onHorizontalDragStart: _directionIsXAxis ? _handleDragStart : null,
@@ -524,7 +524,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
       onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
       behavior: HitTestBehavior.opaque,
-      child: content
+      child: content,
+      startBehavior: widget.startBehavior,
     );
   }
 }

@@ -52,6 +52,7 @@ class CupertinoSwitch extends StatefulWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
+    this.dragStartBehavior,
   }) : super(key: key);
 
   /// Whether this switch is on or off.
@@ -86,6 +87,8 @@ class CupertinoSwitch extends StatefulWidget {
   /// Defaults to [CupertinoColors.activeGreen].
   final Color activeColor;
 
+  final DragStartBehavior dragStartBehavior;
+
   @override
   _CupertinoSwitchState createState() => _CupertinoSwitchState();
 
@@ -105,6 +108,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       activeColor: widget.activeColor ?? CupertinoColors.activeGreen,
       onChanged: widget.onChanged,
       vsync: this,
+      dragStartBehavior: widget.dragStartBehavior,
     );
   }
 }
@@ -116,12 +120,14 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.activeColor,
     this.onChanged,
     this.vsync,
+    this.dragStartBehavior,
   }) : super(key: key);
 
   final bool value;
   final Color activeColor;
   final ValueChanged<bool> onChanged;
   final TickerProvider vsync;
+  final DragStartBehavior dragStartBehavior;
 
   @override
   _RenderCupertinoSwitch createRenderObject(BuildContext context) {
@@ -131,6 +137,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       onChanged: onChanged,
       textDirection: Directionality.of(context),
       vsync: vsync,
+      dragStartBehavior: dragStartBehavior
     );
   }
 
@@ -165,6 +172,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     ValueChanged<bool> onChanged,
     @required TextDirection textDirection,
     @required TickerProvider vsync,
+    DragStartBehavior dragStartBehavior,
   }) : assert(value != null),
        assert(activeColor != null),
        assert(vsync != null),
@@ -182,7 +190,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     _drag = HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
-      ..onEnd = _handleDragEnd;
+      ..onEnd = _handleDragEnd
+      ..dragStartBehavior  = dragStartBehavior;
     _positionController = AnimationController(
       duration: _kToggleDuration,
       value: value ? 1.0 : 0.0,
