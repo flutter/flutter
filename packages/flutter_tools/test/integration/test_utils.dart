@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/process_manager.dart';
 
 import '../src/common.dart';
 
-/// Creates a etmporary directory but resolves any symlinks to return the real
+/// Creates a temporary directory but resolves any symlinks to return the real
 /// underlying path to avoid issues with breakpoints/hot reload.
 /// https://github.com/flutter/flutter/pull/21741
 Directory createResolvedTempDirectorySync() {
