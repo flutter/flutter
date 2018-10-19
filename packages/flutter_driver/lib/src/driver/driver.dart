@@ -797,7 +797,7 @@ class FlutterDriver {
     try {
       await _peer
           .sendRequest(_collectAllGarbageMethodName, <String, String>{
-            'isolateId': _appIsolate.numberAsString,
+            'isolateId': 'isolates/${_appIsolate.numberAsString}',
           })
           .timeout(timeout);
     } catch (error, stackTrace) {
