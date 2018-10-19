@@ -43,6 +43,9 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<Device>> pollingGetDevices() async {
+    if (!fuchsiaWorkflow.canListDevices) {
+      return <Device>[];
+    }
     final String text = fuchsiaSdk.netls();
     final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
     parseFuchsiaDeviceOutput(text, devices: devices);
