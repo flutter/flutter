@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
 
@@ -223,6 +224,8 @@ Future<void> _pubRunTest(
   bool enableFlutterToolAsserts = false
 }) {
   final List<String> args = <String>['run', 'test', '-rcompact'];
+  final int concurrency = math.max(1, Platform.numberOfProcessors - 1);
+  args.add('-j$concurrency');
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null)
