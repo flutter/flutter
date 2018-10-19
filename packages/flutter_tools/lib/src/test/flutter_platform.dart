@@ -239,7 +239,7 @@ class _Compiler {
         trackWidgetCreation: trackWidgetCreation,
         compilerMessageConsumer: reportCompilerMessage,
         initializeFromDill: testFilePath,
-        unsafePackageSerialization: true,
+        unsafePackageSerialization: false,
       );
     }
 
