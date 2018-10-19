@@ -462,7 +462,6 @@ void main() {
       ),
     );
 
-    // 2 because stepper creates a set of controls for each step
     expect(find.text('Let us continue!'), findsNothing);
     expect(find.text('Cancel This!'), findsNothing);
   });
