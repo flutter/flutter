@@ -6,41 +6,6 @@ import("//third_party/dart/runtime/bin/vmservice/vmservice_sources.gni")
 import("$flutter_root/common/config.gni")
 import("$flutter_root/testing/testing.gni")
 
-action("gen_embedded_resources_cc") {
-  script = "//third_party/dart/runtime/tools/create_resources.py"
-  output_file = "$target_gen_dir/embedded_resources.cc"
-  outputs = [
-    output_file,
-  ]
-
-  inputs = rebase_path(vmservice_sources,
-                       "",
-                       "//third_party/dart/runtime/bin/vmservice")
-
-  args = [
-           "--output",
-           rebase_path(output_file),
-           "--outer_namespace",
-           "flutter",
-           "--inner_namespace",
-           "runtime",
-           "--table_name",
-           "flutter_embedded_service_isolate",
-           "--root_prefix",
-           rebase_path("//third_party/dart/runtime/bin/"),
-         ] + rebase_path(inputs)
-}
-
-source_set("embedded_resources_cc") {
-  sources = [
-    "$target_gen_dir/embedded_resources.cc",
-  ]
-  deps = [
-    ":gen_embedded_resources_cc",
-  ]
-  public_configs = [ "$flutter_root:config" ]
-}
-
 source_set("test_font") {
   sources = [
     "test_font_data.cc",
@@ -84,7 +49,6 @@ source_set("runtime") {
   ]
 
   deps = [
-    ":embedded_resources_cc",
     ":test_font",
     "$flutter_root/assets",
     "$flutter_root/common",
