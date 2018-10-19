@@ -179,7 +179,7 @@ StringBuffer bar = StringBuffer('baz');
       }
     });
 
-    testUsingContext('returns no issues for todos', () async {
+    testUsingContext('returns no issues for todo comments', () async {
       const String contents = '''
 // TODO(foobar):
 StringBuffer bar = StringBuffer('baz');
