@@ -231,7 +231,7 @@ linter:
     errors.add(null);
     errors.addAll(await process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList());
     // top is stderr
-    if (errors.isNotEmpty && (errors.first.contains(' issues found. (ran in ') || errors.first.contains(' issue found. (ran in '))) {
+    if (errors.isNotEmpty && (errors.first.contains(' issues found (ran in ') || errors.first.contains(' issue found (ran in '))) {
       errors.removeAt(0); // the "23 issues found" message goes onto stderr, which is concatenated first
       if (errors.isNotEmpty && errors.last.isEmpty)
         errors.removeLast(); // if there's an "issues found" message, we put a blank line on stdout before it
