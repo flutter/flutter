@@ -62,6 +62,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   // Whether any layer in the subtree of this layer is dirty ([_isDirty]).
   bool _isSubtreeDirty;
+  /// For unit tests only
+  @protected
+  bool get isSubtreeDirty => _isSubtreeDirty;
 
   ui.EngineLayer _engineLayer;
 
