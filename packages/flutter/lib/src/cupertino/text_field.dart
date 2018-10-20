@@ -88,7 +88,12 @@ enum OverlayVisibilityMode {
 /// ## Sample code
 ///
 /// ```dart
-/// class _MyWidgetState extends State<MyWidget> {
+/// class MyPrefilledText extends StatefulWidget {
+///   @override
+///   _MyPrefilledTextState createState() => _MyPrefilledTextState();
+/// }
+///
+/// class _MyPrefilledTextState extends State<MyPrefilledText> {
 ///   TextEditingController _textController;
 ///
 ///   @override
