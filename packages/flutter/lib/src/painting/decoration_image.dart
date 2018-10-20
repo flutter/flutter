@@ -249,6 +249,7 @@ class DecorationImagePainter {
       canvas.save();
       canvas.clipPath(clipPath);
     }
+
     paintImage(
       canvas: canvas,
       rect: rect,
