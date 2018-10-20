@@ -56,7 +56,7 @@ class RenderImage extends RenderBox {
        _matchTextDirection = matchTextDirection,
        _invertColors = invertColors,
        _textDirection = textDirection,
-       _filterQuality = filterQuality{
+       _filterQuality = filterQuality {
     _updateColorFilter();
   }
 
