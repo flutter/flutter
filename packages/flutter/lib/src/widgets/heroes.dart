@@ -202,10 +202,6 @@ class Hero extends StatefulWidget {
         final _HeroState heroState = hero.state;
         result[tag] = heroState;
       }
-      // Don't perform transitions across different Navigators.
-      if (element.widget is Navigator) {
-        return;
-      }
       element.visitChildren(visitor);
     }
     context.visitChildElements(visitor);
