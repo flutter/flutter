@@ -163,7 +163,8 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
   }) : assert(image != null),
        assert(alignment != null),
-       assert(repeat != null),
+        assert(repeat != null),
+        assert(filterQuality != null),
        assert(matchTextDirection != null),
        super(key: key);
 
