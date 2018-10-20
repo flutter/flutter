@@ -237,7 +237,8 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
   }) : image = FileImage(file, scale: scale),
        assert(alignment != null),
-       assert(repeat != null),
+        assert(repeat != null),
+        assert(filterQuality != null),
        assert(matchTextDirection != null),
        super(key: key);
 
