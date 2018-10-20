@@ -41,7 +41,8 @@ class RenderImage extends RenderBox {
     FilterQuality filterQuality = FilterQuality.low
   }) : assert(scale != null),
        assert(repeat != null),
-       assert(alignment != null),
+        assert(alignment != null),
+        assert(filterQuality != null),
        assert(matchTextDirection != null),
        _image = image,
        _width = width,
