@@ -429,7 +429,7 @@ class _HeroFlight {
       assert(type != null);
       switch (type) {
         case HeroFlightDirection.pop:
-          // Pops may be driven by a user gesture that manually drives the
+          // Pops may be initiated by a user gesture that manually drives the
           // AnimationController without being in any particular animation states.
           return initial.value == 1.0;
         case HeroFlightDirection.push:
@@ -553,7 +553,7 @@ class HeroController extends NavigatorObserver {
   /// linear [Tween<Rect>].
   HeroController({ this.createRectTween });
 
-  /// Used to create [RectTween]s that interpolate the position of heros in flight.
+  /// Used to create [RectTween]s that interpolate the position of heroes in flight.
   ///
   /// If null, the controller uses a linear [RectTween].
   final CreateRectTween createRectTween;
@@ -602,7 +602,7 @@ class HeroController extends NavigatorObserver {
       }
 
       // For gesture driven pops into a page that maintainState, let the
-      // heros be measured and the overlay built right away since the previous
+      // heroes be measured and the overlay built right away since the previous
       // both routes' render objects are already present and laid out.
       if (fromGesture && flightType == HeroFlightDirection.pop && to.maintainState) {
         _startHeroTransition(from, to, animation, flightType, fromGesture);
@@ -623,7 +623,7 @@ class HeroController extends NavigatorObserver {
     }
   }
 
-  // Find the matching pairs of heros in from and to and either start or a new
+  // Find the matching pairs of heroes in from and to and either start or a new
   // hero flight, or divert an existing one.
   void _startHeroTransition(
     PageRoute<dynamic> from,

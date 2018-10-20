@@ -348,10 +348,13 @@ class NavigatorObserver {
   /// The [Navigator] replaced `oldRoute` with `newRoute`.
   void didReplace({ Route<dynamic> newRoute, Route<dynamic> oldRoute }) { }
 
-  /// The [Navigator]'s routes are being moved by a user gesture.
+  /// The [Navigator]'s route `route` is being moved by a user gesture.
   ///
-  /// For example, this is called when an iOS back gesture starts, and is used
-  /// to disabled hero animations during such interactions.
+  /// For example, this is called when an iOS back gesture starts.
+  ///
+  /// If present, the route immediately below `route` is `previousRoute`.
+  /// Though the gesture may not necessarily conclude at `previousRoute` if
+  /// canceled.
   void didStartUserGesture(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
   /// User gesture is no longer controlling the [Navigator].
