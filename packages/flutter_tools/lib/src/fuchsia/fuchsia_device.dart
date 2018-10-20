@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../device.dart';
 
