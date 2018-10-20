@@ -21,6 +21,7 @@ export 'package:flutter/painting.dart' show
   AssetImage,
   ExactAssetImage,
   FileImage,
+  FilterQuality,
   ImageConfiguration,
   ImageInfo,
   ImageStream,
@@ -159,6 +160,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.filterQuality = FilterQuality.low,
   }) : assert(image != null),
        assert(alignment != null),
        assert(repeat != null),
@@ -195,6 +197,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.filterQuality = FilterQuality.low,
     Map<String, String> headers,
   }) : image = NetworkImage(src, scale: scale, headers: headers),
        assert(alignment != null),
@@ -230,6 +233,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.filterQuality = FilterQuality.low,
   }) : image = FileImage(file, scale: scale),
        assert(alignment != null),
        assert(repeat != null),
@@ -370,6 +374,7 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     String package,
+    this.filterQuality = FilterQuality.low,
   }) : image = scale != null
          ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
          : AssetImage(name, bundle: bundle, package: package),
@@ -403,6 +408,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.filterQuality = FilterQuality.low,
   }) : image = MemoryImage(bytes, scale: scale),
        assert(alignment != null),
        assert(repeat != null),
@@ -438,6 +444,12 @@ class Image extends StatefulWidget {
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color color;
+
+  /// Used to set the filterQuality of the image
+  /// Use the "low" quality setting to scale the image, which corresponds to
+  /// bilinear interpolation, rather than the default "none" which corresponds
+  /// to nearest-neighbor.
+  final FilterQuality filterQuality;
 
   /// Used to combine [color] with this image.
   ///
@@ -545,6 +557,7 @@ class Image extends StatefulWidget {
     properties.add(FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
     properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('this.excludeFromSemantics', excludeFromSemantics));
+    properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
   }
 }
 
@@ -651,6 +664,7 @@ class _ImageState extends State<Image> {
       centerSlice: widget.centerSlice,
       matchTextDirection: widget.matchTextDirection,
       invertColors: _invertColors,
+      filterQuality: widget.filterQuality,
     );
     if (widget.excludeFromSemantics)
       return image;

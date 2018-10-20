@@ -249,7 +249,6 @@ class DecorationImagePainter {
       canvas.save();
       canvas.clipPath(clipPath);
     }
-
     paintImage(
       canvas: canvas,
       rect: rect,
@@ -261,6 +260,7 @@ class DecorationImagePainter {
       centerSlice: _details.centerSlice,
       repeat: _details.repeat,
       flipHorizontally: flipHorizontally,
+      filterQuality: FilterQuality.low
     );
 
     if (clipPath != null)
@@ -367,6 +367,7 @@ void paintImage({
   ImageRepeat repeat = ImageRepeat.noRepeat,
   bool flipHorizontally = false,
   bool invertColors = false,
+  FilterQuality filterQuality = FilterQuality.low
 }) {
   assert(canvas != null);
   assert(image != null);
@@ -410,7 +411,7 @@ void paintImage({
     // Use the "low" quality setting to scale the image, which corresponds to
     // bilinear interpolation, rather than the default "none" which corresponds
     // to nearest-neighbor.
-    paint.filterQuality = FilterQuality.low;
+    paint.filterQuality = filterQuality;
   }
   paint.invertColors = invertColors;
   final double halfWidthDelta = (outputSize.width - destinationSize.width) / 2.0;

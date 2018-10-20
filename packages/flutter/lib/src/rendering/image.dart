@@ -37,7 +37,8 @@ class RenderImage extends RenderBox {
     Rect centerSlice,
     bool matchTextDirection = false,
     TextDirection textDirection,
-    bool invertColors = false
+    bool invertColors = false,
+    FilterQuality filterQuality = FilterQuality.low
   }) : assert(scale != null),
        assert(repeat != null),
        assert(alignment != null),
@@ -54,7 +55,8 @@ class RenderImage extends RenderBox {
        _centerSlice = centerSlice,
        _matchTextDirection = matchTextDirection,
        _invertColors = invertColors,
-       _textDirection = textDirection {
+       _textDirection = textDirection,
+       _filterQuality = filterQuality{
     _updateColorFilter();
   }
 
@@ -144,6 +146,20 @@ class RenderImage extends RenderBox {
     _updateColorFilter();
     markNeedsPaint();
   }
+
+  /// Used to set the filterQuality of the image
+  /// Use the "low" quality setting to scale the image, which corresponds to
+  /// bilinear interpolation, rather than the default "none" which corresponds
+  /// to nearest-neighbor.
+  FilterQuality get filterQuality => _filterQuality;
+  FilterQuality _filterQuality;
+  set filterQuality(FilterQuality value) {
+    if(value == _filterQuality)
+      return;
+    _filterQuality = value;
+    markNeedsPaint();
+  }
+
 
   /// Used to combine [color] with this image.
   ///
@@ -348,6 +364,7 @@ class RenderImage extends RenderBox {
       repeat: _repeat,
       flipHorizontally: _flipHorizontally,
       invertColors: invertColors,
+      filterQuality: _filterQuality
     );
   }
 
@@ -367,5 +384,6 @@ class RenderImage extends RenderBox {
     properties.add(FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
+    properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
   }
 }
