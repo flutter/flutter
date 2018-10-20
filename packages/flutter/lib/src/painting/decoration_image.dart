@@ -348,7 +348,12 @@ class DecorationImagePainter {
 ///    invert will be applied after it. This is primarily used for implementing
 ///    smart invert on iOS.
 ///
-/// The `canvas`, `rect`, `image`, `scale`, `alignment`, `repeat`, and `flipHorizontally`
+///  * `filterQuality`: Use this to change the quality when scaling an image.
+///     Use the [FilterQuality.low] quality setting to scale the image, which corresponds to
+///     bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
+///     to nearest-neighbor.
+///
+/// The `canvas`, `rect`, `image`, `scale`, `alignment`, `repeat`, `flipHorizontally` and `filterQuality`
 /// arguments must not be null.
 ///
 /// See also:
@@ -409,9 +414,6 @@ void paintImage({
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
   if (sourceSize != destinationSize) {
-    // Use the "low" quality setting to scale the image, which corresponds to
-    // bilinear interpolation, rather than the default "none" which corresponds
-    // to nearest-neighbor.
     paint.filterQuality = filterQuality;
   }
   paint.invertColors = invertColors;

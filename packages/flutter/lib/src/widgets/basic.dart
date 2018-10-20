@@ -4498,7 +4498,7 @@ class RichText extends LeafRenderObjectWidget {
 class RawImage extends LeafRenderObjectWidget {
   /// Creates a widget that displays an image.
   ///
-  /// The [scale], [alignment], [repeat], and [matchTextDirection] arguments must
+  /// The [scale], [alignment], [repeat], [matchTextDirection] and [filterQuality] arguments must
   /// not be null.
   const RawImage({
     Key key,

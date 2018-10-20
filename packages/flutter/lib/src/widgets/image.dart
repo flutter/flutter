@@ -144,6 +144,11 @@ class Image extends StatefulWidget {
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
   ///
+  /// Use [filterQuality] to change the quality when scaling an image.
+  /// Use the [FilterQuality.low] quality setting to scale the image,
+  /// which corresponds to bilinear interpolation, rather than the default
+  /// [FilterQuality.none] which corresponds to nearest-neighbor.
+  ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   const Image({
     Key key,
@@ -163,8 +168,8 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
   }) : assert(image != null),
        assert(alignment != null),
-        assert(repeat != null),
-        assert(filterQuality != null),
+       assert(repeat != null),
+       assert(filterQuality != null),
        assert(matchTextDirection != null),
        super(key: key);
 
@@ -181,6 +186,11 @@ class Image extends StatefulWidget {
   ///
   /// An optional [headers] argument can be used to send custom HTTP headers
   /// with the image request.
+  ///
+  /// Use [filterQuality] to change the quality when scaling an image.
+  /// Use the [FilterQuality.low] quality setting to scale the image,
+  /// which corresponds to bilinear interpolation, rather than the default
+  /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.network(String src, {
@@ -218,6 +228,11 @@ class Image extends StatefulWidget {
   /// On Android, this may require the
   /// `android.permission.READ_EXTERNAL_STORAGE` permission.
   ///
+  /// Use [filterQuality] to change the quality when scaling an image.
+  /// Use the [FilterQuality.low] quality setting to scale the image,
+  /// which corresponds to bilinear interpolation, rather than the default
+  /// [FilterQuality.none] which corresponds to nearest-neighbor.
+  ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.file(File file, {
     Key key,
@@ -237,8 +252,8 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
   }) : image = FileImage(file, scale: scale),
        assert(alignment != null),
-        assert(repeat != null),
-        assert(filterQuality != null),
+       assert(repeat != null),
+       assert(filterQuality != null),
        assert(matchTextDirection != null),
        super(key: key);
 
@@ -277,6 +292,11 @@ class Image extends StatefulWidget {
   /// widget should be placed in a context that sets tight layout constraints.
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
+  ///
+  /// Use [filterQuality] to change the quality when scaling an image.
+  /// Use the [FilterQuality.low] quality setting to scale the image,
+  /// which corresponds to bilinear interpolation, rather than the default
+  /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// ## Sample code
   ///
@@ -393,6 +413,11 @@ class Image extends StatefulWidget {
   /// widget should be placed in a context that sets tight layout constraints.
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
+  ///
+  /// Use [filterQuality] to change the quality when scaling an image.
+  /// Use the [FilterQuality.low] quality setting to scale the image,
+  /// which corresponds to bilinear interpolation, rather than the default
+  /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.memory(Uint8List bytes, {
