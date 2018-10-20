@@ -150,7 +150,7 @@ class RenderImage extends RenderBox {
 
   /// Used to set the filterQuality of the image
   /// Use the [FilterQuality.low] quality setting to scale the image, which corresponds to
-  /// bilinear interpolation, rather than the default "none" which corresponds
+  /// bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
   /// to nearest-neighbor.
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
