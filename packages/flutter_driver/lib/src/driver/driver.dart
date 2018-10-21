@@ -793,13 +793,12 @@ class FlutterDriver {
   }
 
   /// Force a garbage collection run in the VM.
-  Future<void> forceGC({ Duration timeout = _kShortTimeout }) async {
+  Future<void> forceGC() async {
     try {
       await _peer
           .sendRequest(_collectAllGarbageMethodName, <String, String>{
             'isolateId': 'isolates/${_appIsolate.numberAsString}',
-          })
-          .timeout(timeout);
+          });
     } catch (error, stackTrace) {
       throw DriverError(
         'Failed to force a GC due to remote error',
