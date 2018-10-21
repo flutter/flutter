@@ -181,15 +181,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _state = _DragState.accepted;
       final Offset delta = _pendingDragOffset;
       final Duration timestamp = _lastPendingEventTimestamp;
-      Offset startPosition;
       Offset updateDelta;
       switch (dragStartBehavior) {
         case DragStartBehavior.start:
-          startPosition = _initialPosition + delta;
+          _initialPosition += delta;
           updateDelta = Offset.zero;
           break;
         case DragStartBehavior.down:
-          startPosition = _initialPosition;
           updateDelta = _getDeltaForDetails(delta);
           break;
       }
@@ -198,7 +196,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       if (onStart != null) {
         invokeCallback<void>('onStart', () => onStart(DragStartDetails(
           sourceTimeStamp: timestamp,
-          globalPosition: startPosition,
+          globalPosition: _initialPosition,
         )));
       }
       if (updateDelta != Offset.zero && onUpdate != null) {
@@ -206,7 +204,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           sourceTimeStamp: timestamp,
           delta: updateDelta,
           primaryDelta: _getPrimaryValueFromOffset(updateDelta),
-          globalPosition: startPosition + delta,
+          globalPosition: _initialPosition + delta,
         )));
       }
     }
