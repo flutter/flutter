@@ -45,5 +45,5 @@ void main() {
           _project.breakpointLine);
       expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
     });
-  }, timeout: const Timeout.factor(6));
+  }, timeout: const Timeout.factor(10));
 }

@@ -108,5 +108,5 @@ void main() {
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions();
     });
-  }, timeout: const Timeout.factor(6));
+  }, timeout: const Timeout.factor(10));
 }
