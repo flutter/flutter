@@ -473,7 +473,7 @@ class Image extends StatefulWidget {
   final Color color;
 
   /// Used to set the [FilterQuality] of the image.
-  /// 
+  ///
   /// Use the [FilterQuality.low] quality setting to scale the image with
   /// bilinear interpolation, or the [FilterQuality.none] which corresponds
   /// to nearest-neighbor.
