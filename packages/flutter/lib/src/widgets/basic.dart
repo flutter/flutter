@@ -4498,7 +4498,7 @@ class RichText extends LeafRenderObjectWidget {
 class RawImage extends LeafRenderObjectWidget {
   /// Creates a widget that displays an image.
   ///
-  /// The [scale], [alignment], [repeat], and [matchTextDirection] arguments must
+  /// The [scale], [alignment], [repeat], [matchTextDirection] and [filterQuality] arguments must
   /// not be null.
   const RawImage({
     Key key,
@@ -4514,6 +4514,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.invertColors = false,
+    this.filterQuality = FilterQuality.low,
   }) : assert(scale != null),
        assert(alignment != null),
        assert(repeat != null),
@@ -4542,6 +4543,12 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color color;
+
+  /// Used to set the filterQuality of the image
+  /// Use the "low" quality setting to scale the image, which corresponds to
+  /// bilinear interpolation, rather than the default "none" which corresponds
+  /// to nearest-neighbor.
+  final FilterQuality filterQuality;
 
   /// Used to combine [color] with this image.
   ///
@@ -4643,6 +4650,7 @@ class RawImage extends LeafRenderObjectWidget {
       matchTextDirection: matchTextDirection,
       textDirection: matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null,
       invertColors: invertColors,
+      filterQuality: filterQuality,
     );
   }
 
@@ -4661,7 +4669,8 @@ class RawImage extends LeafRenderObjectWidget {
       ..centerSlice = centerSlice
       ..matchTextDirection = matchTextDirection
       ..textDirection = matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null
-      ..invertColors = invertColors;
+      ..invertColors = invertColors
+      ..filterQuality = filterQuality;
   }
 
   @override
@@ -4679,6 +4688,7 @@ class RawImage extends LeafRenderObjectWidget {
     properties.add(DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
     properties.add(FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
+    properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
   }
 }
 
