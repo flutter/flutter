@@ -95,11 +95,12 @@ BuildApp() {
   local local_engine_flag=""
   local flutter_framework="${framework_path}/Flutter.framework"
   local flutter_podspec="${framework_path}/Flutter.podspec"
+
   if [[ -n "$LOCAL_ENGINE" ]]; then
-    if [[ $LOCAL_ENGINE == .*$build_mode.* ]]; then
+    if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
       EchoError "========================================================================"
-      EchoError "ERROR: Requested build with Flutter local engine at ${LOCAL_ENGINE}"
-      EchoError "This engine is not compatible with FLUTTER_BUILD_MODE ${build_mode}."
+      EchoError "ERROR: Requested build with Flutter local engine at '${LOCAL_ENGINE}'"
+      EchoError "This engine is not compatible with FLUTTER_BUILD_MODE: '${build_mode}'."
       EchoError "You can fix this by updating the LOCAL_ENGINE environment variable, or"
       EchoError "by running flutter build ios --local-engine=..."
       EchoError "========================================================================"
