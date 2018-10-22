@@ -472,9 +472,10 @@ class Image extends StatefulWidget {
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color color;
 
-  /// Used to set the filterQuality of the image
-  /// Use the "low" quality setting to scale the image, which corresponds to
-  /// bilinear interpolation, rather than the default "none" which corresponds
+  /// Used to set the [FilterQuality] of the image.
+  ///
+  /// Use the [FilterQuality.low] quality setting to scale the image with
+  /// bilinear interpolation, or the [FilterQuality.none] which corresponds
   /// to nearest-neighbor.
   final FilterQuality filterQuality;
 
