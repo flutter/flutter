@@ -4,6 +4,7 @@
 
 import 'dart:io' hide Platform;
 
+import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:path/path.dart' as path;
 
@@ -32,6 +33,7 @@ class Configuration {
 
   /// This is the configuration directory for the snippets system, containing
   /// the skeletons and templates.
+  @visibleForTesting
   Directory getConfigDirectory(String kind) {
     final String platformScriptPath = path.dirname(platform.script.toFilePath());
     final String configPath =

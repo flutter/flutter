@@ -40,3 +40,18 @@ To do this, there is a [config/templates](config/templates) directory that
 contains a list of templates. These templates represent an entire app that the
 snippet can be placed into, basically a replacement for `lib/main.dart` in a
 flutter app package.
+
+## Skeletons
+
+A skeleton (in relation to this tool, in the [config/skeletons](config/skeletons)
+directory) is an HTML template into which the snippet Dart code and description
+are interpolated, in order to display it nicely.
+
+There is currently one skeleton for
+[application](config/skeletons/application.html) snippets and one for
+[sample](config/skeletons/sample.html)
+snippets, but there could be more. It uses moustache notation (e.g. `{{code}}`)
+to mark where the components to be interpolated into the template should go.
+
+(It doesn't actually use the moustache package, since the only things that need
+substituting are simple strings, but it uses the same syntax). 

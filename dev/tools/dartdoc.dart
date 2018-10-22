@@ -134,9 +134,46 @@ Future<void> main(List<String> arguments) async {
     '--header', 'snippets.html',
     '--footer-text', 'lib/footer.html',
     '--exclude-packages',
-'analyzer,args,barback,cli_util,csslib,flutter_goldens,front_end,fuchsia_remote_debug_protocol,glob,html,http_multi_server,io,isolate,js,kernel,logging,mime,mockito,node_preamble,plugin,shelf,shelf_packages_handler,shelf_static,shelf_web_socket,utf,watcher,yaml',
+    <String>[
+      'analyzer',
+      'args',
+      'barback',
+      'cli_util',
+      'csslib',
+      'flutter_goldens',
+      'front_end',
+      'fuchsia_remote_debug_protocol',
+      'glob',
+      'html',
+      'http_multi_server',
+      'io',
+      'isolate',
+      'js',
+      'kernel',
+      'logging',
+      'mime',
+      'mockito',
+      'node_preamble',
+      'plugin',
+      'shelf',
+      'shelf_packages_handler',
+      'shelf_static',
+      'shelf_web_socket',
+      'utf',
+      'watcher',
+      'yaml',
+    ].join(','),
     '--exclude',
-  'package:Flutter/temp_doc.dart,package:http/browser_client.dart,package:intl/intl_browser.dart,package:matcher/mirror_matchers.dart,package:quiver/mirrors.dart,package:quiver/io.dart,package:vm_service_client/vm_service_client.dart,package:web_socket_channel/html.dart',
+    <String>[
+      'package:Flutter/temp_doc.dart',
+      'package:http/browser_client.dart',
+      'package:intl/intl_browser.dart',
+      'package:matcher/mirror_matchers.dart',
+      'package:quiver/io.dart',
+      'package:quiver/mirrors.dart',
+      'package:vm_service_client/vm_service_client.dart',
+      'package:web_socket_channel/html.dart',
+    ].join(','),
     '--favicon=favicon.ico',
     '--package-order', 'flutter,Dart,flutter_test,flutter_driver',
     '--auto-include-dependencies',
@@ -216,8 +253,8 @@ void createFooter(String footerPath) {
     gitBranchOut].join(' '));
 }
 
-/// Recursively copies `srcDir` to `destDir`, invoking [onFileCopied] if
-/// specified for each source/destination file pair.
+/// Recursively copies `srcDir` to `destDir`, invoking [onFileCopied], if
+/// specified, for each source/destination file pair.
 ///
 /// Creates `destDir` if needed.
 void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(File srcFile, File destFile)]) {
@@ -247,11 +284,11 @@ void copyAssets() {
     assetsDir.deleteSync(recursive: true);
   }
   copyDirectorySync(
-    Directory(path.join(kDocsRoot, 'assets')), Directory(path.join(kPublishRoot, 'assets')),
-      (File src, File dest) {
-      print('Copying ${src.path} to ${dest.path}');
-    });
+      Directory(path.join(kDocsRoot, 'assets')),
+      Directory(path.join(kPublishRoot, 'assets')),
+          (File src, File dest) => print('Copied ${src.path} to ${dest.path}'));
 }
+
 
 void cleanOutSnippets() {
   final Directory snippetsDir = Directory(path.join(kPublishRoot, 'snippets'));
@@ -264,6 +301,7 @@ void cleanOutSnippets() {
 
 void sanityCheckDocs() {
   final List<String> canaries = <String>[
+    '$kPublishRoot/assets/overrides.css',
     '$kPublishRoot/api/dart-io/File-class.html',
     '$kPublishRoot/api/dart-ui/Canvas-class.html',
     '$kPublishRoot/api/dart-ui/Canvas/drawRect.html',

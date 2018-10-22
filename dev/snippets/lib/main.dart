@@ -10,6 +10,13 @@ import 'package:platform/platform.dart';
 import 'configuration.dart';
 import 'snippets.dart';
 
+const String _kElementOption = 'element';
+const String _kInputOption = 'input';
+const String _kLibraryOption = 'library';
+const String _kPackageOption = 'package';
+const String _kTemplateOption = 'template';
+const String _kTypeOption = 'type';
+
 /// Generates snippet dartdoc output for a given input, and creates any sample
 /// applications needed by the snippet.
 void main(List<String> argList) {
@@ -19,8 +26,8 @@ void main(List<String> argList) {
   final List<String> snippetTypes =
       SnippetType.values.map<String>((SnippetType type) => getEnumName(type)).toList();
   parser.addOption(
-    'type',
-    defaultsTo: 'application',
+    _kTypeOption,
+    defaultsTo: getEnumName(SnippetType.application),
     allowed: snippetTypes,
     allowedHelp: <String, String>{
       getEnumName(SnippetType.application):
@@ -33,44 +40,40 @@ void main(List<String> argList) {
     help: 'The type of snippet to produce.',
   );
   parser.addOption(
-    'template',
+    _kTemplateOption,
     defaultsTo: null,
     help: 'The name of the template to inject the code into.',
   );
   parser.addOption(
-    'input',
+    _kInputOption,
     defaultsTo: environment['INPUT'],
     help: 'The input file containing the snippet code to inject.',
   );
   parser.addOption(
-    'package',
+    _kPackageOption,
     defaultsTo: environment['PACKAGE_NAME'],
     help: 'The name of the package that this snippet belongs to.',
   );
   parser.addOption(
-    'library',
+    _kLibraryOption,
     defaultsTo: environment['LIBRARY_NAME'],
     help: 'The name of the library that this snippet belongs to.',
   );
   parser.addOption(
-    'element',
+    _kElementOption,
     defaultsTo: environment['ELEMENT_NAME'],
     help: 'The name of the element that this snippet belongs to.',
   );
 
   final ArgResults args = parser.parse(argList);
 
-  SnippetType snippetType;
-  for (SnippetType type in SnippetType.values) {
-    if (getEnumName(type) == args['type']) {
-      snippetType = type;
-    }
-  }
-  assert(snippetType != null, "Unable to find '${args['type']}' in SnippetType enum.");
+  final SnippetType snippetType = SnippetType.values
+      .firstWhere((SnippetType type) => getEnumName(type) == args[_kTypeOption], orElse: () => null);
+  assert(snippetType != null, "Unable to find '${args[_kTypeOption]}' in SnippetType enum.");
 
-  if (args['input'] == null) {
+  if (args[_kInputOption] == null) {
     stderr.writeln(parser.usage);
-    errorExit('The --input option must be specified, either on the command '
+    errorExit('The --$_kInputOption option must be specified, either on the command '
         'line, or in the INPUT environment variable.');
   }
 
@@ -81,29 +84,31 @@ void main(List<String> argList) {
 
   String template;
   if (snippetType == SnippetType.application) {
-    if (args['template'] == null || args['template'].isEmpty) {
+    if (args[_kTemplateOption] == null || args[_kTemplateOption].isEmpty) {
       stderr.writeln(parser.usage);
-      errorExit(
-          'The --template option must be specified on the command line for application snippets.');
+      errorExit('The --$_kTemplateOption option must be specified on the command '
+          'line for application snippets.');
     }
-    template = args['template'].toString().replaceAll(RegExp(r'.tmpl$'), '');
+    template = args[_kTemplateOption].toString().replaceAll(RegExp(r'.tmpl$'), '');
   }
 
   final List<String> id = <String>[];
-  if (args['package'] != null && args['package'].isNotEmpty && args['package'] != 'flutter') {
-    id.add(args['package']);
+  if (args[_kPackageOption] != null &&
+      args[_kPackageOption].isNotEmpty &&
+      args[_kPackageOption] != 'flutter') {
+    id.add(args[_kPackageOption]);
   }
-  if (args['library'] != null && args['library'].isNotEmpty) {
-    id.add(args['library']);
+  if (args[_kLibraryOption] != null && args[_kLibraryOption].isNotEmpty) {
+    id.add(args[_kLibraryOption]);
   }
-  if (args['element'] != null && args['element'].isNotEmpty) {
-    id.add(args['element']);
+  if (args[_kElementOption] != null && args[_kElementOption].isNotEmpty) {
+    id.add(args[_kElementOption]);
   }
 
   if (id.isEmpty) {
-    errorExit('Unable to determine ID. At least one of --package, --library, '
-        '--element, or the environment variables PACKAGE_NAME, LIBRARY_NAME, or '
-        'ELEMENT_NAME must be non-empty.');
+    errorExit('Unable to determine ID. At least one of --$_kPackageOption, '
+        '--$_kLibraryOption, --$_kElementOption, or the environment variables '
+        'PACKAGE_NAME, LIBRARY_NAME, or ELEMENT_NAME must be non-empty.');
   }
 
   final SnippetGenerator generator = SnippetGenerator();

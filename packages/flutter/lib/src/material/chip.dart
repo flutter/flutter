@@ -257,7 +257,7 @@ abstract class SelectableChipAttributes {
   /// The [onSelected] and [TappableChipAttributes.onPressed] callbacks must not
   /// both be specified at the same time.
   ///
-  /// {@tool snippet --type=sample}
+  /// {@tool sample}
   ///
   /// A [StatefulWidget] that illustrates use of onSelected in an [InputChip].
   ///
