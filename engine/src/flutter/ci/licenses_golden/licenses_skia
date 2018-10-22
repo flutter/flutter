@@ -1,4 +1,4 @@
-Signature: f7bbd4a07f225efa0742cd84427ff2b8
+Signature: 787b1c3dd9f97adb3814cded8066eb57
 
 UNUSED LICENSES:
 
@@ -2021,6 +2021,7 @@ FILE: ../../../third_party/skia/experimental/canvaskit/cpu.js
 FILE: ../../../third_party/skia/experimental/canvaskit/externs.js
 FILE: ../../../third_party/skia/experimental/canvaskit/gpu.js
 FILE: ../../../third_party/skia/experimental/canvaskit/helper.js
+FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/canvas2d.js
 FILE: ../../../third_party/skia/experimental/canvaskit/interface.js
 FILE: ../../../third_party/skia/experimental/canvaskit/karma.bench.conf.js
 FILE: ../../../third_party/skia/experimental/canvaskit/karma.conf.js
@@ -5153,6 +5154,7 @@ ORIGIN: ../../../third_party/skia/include/docs/SkPDFDocument.h + ../../../third_
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/docs/SkPDFDocument.h
 FILE: ../../../third_party/skia/src/gpu/GrPathRendering_none.cpp
+FILE: ../../../third_party/skia/src/pdf/SkPDFGlyphUse.h
 FILE: ../../../third_party/skia/src/utils/SkUTF.cpp
 FILE: ../../../third_party/skia/src/utils/SkUTF.h
 ----------------------------------------------------------------------------------------------------
