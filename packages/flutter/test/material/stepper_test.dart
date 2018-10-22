@@ -369,6 +369,16 @@ void main() {
   });
 
   testWidgets('Stepper custom controls test', (WidgetTester tester) async {
+    bool continuePressed = false;
+    void setContinue() {
+      continuePressed = true;
+    }
+
+    bool canceledPressed = false;
+    void setCanceled() {
+      canceledPressed = true;
+    }
+
     final ControlsWidgetBuilder builder =
       (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
         return Container(
@@ -405,6 +415,8 @@ void main() {
           child: Material(
             child: Stepper(
               controlsBuilder: builder,
+              onStepCancel: setCanceled,
+              onStepContinue: setContinue,
               steps: const <Step>[
                 Step(
                   title: Text('A'),
@@ -431,41 +443,16 @@ void main() {
     // 2 because stepper creates a set of controls for each step
     expect(find.text('Let us continue!'), findsNWidgets(2));
     expect(find.text('Cancel This!'), findsNWidgets(2));
+
+    await tester.tap(find.text('Cancel This!').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Let us continue!').first);
+    await tester.pumpAndSettle();
+
+    expect(canceledPressed, isTrue);
+    expect(continuePressed, isTrue);
   });
 
-  testWidgets('Stepper custom builder test 2', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: Material(
-            child: Stepper(
-              steps: const <Step>[
-                Step(
-                  title: Text('A'),
-                  state: StepState.complete,
-                  content: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
-                ),
-                Step(
-                  title: Text('B'),
-                  content: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(find.text('Let us continue!'), findsNothing);
-    expect(find.text('Cancel This!'), findsNothing);
-  });
-  
   testWidgets('Stepper error test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
