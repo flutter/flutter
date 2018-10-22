@@ -300,7 +300,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
   if (!projectInfo.buildConfigurations.contains(buildInfo.modeName)) {
     printError('The Xcode project does not define a build configuration "${buildInfo.modeName}",');
-    printError('which is needed by Flutter tooling to run "${buildInfo.buildName} from the command line.');
+    printError('which is needed by Flutter tooling to run "--${buildInfo.modeName}" from the command line.');
     printError('');
     printError('Open Xcode to fix the problem:');
     printError('  open ios/Runner.xcodeproj');
@@ -315,10 +315,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     printError('   If this option is disabled, it is likely you have the target selected instead');
     printError('     of the project; see:');
     printError('     https://stackoverflow.com/questions/19842746/adding-a-build-configuration-in-xcode');
-    printError('   If you have created a completely custom set of build configurations in an iOS');
-    printError('     host app, you can set the FLUTTER_BUILD_MODE=${buildInfo.modeName.toLowerCase()}');
+    printError('   If you have created a completely custom set of build configurations,');
+    printError('     you can set the FLUTTER_BUILD_MODE=${buildInfo.modeName.toLowerCase()}');
     printError('     in the .xcconfig file for that configuration and run from Xcode.');
-    printError('4. Name the newly created configuration Profile.');
+    printError('4. Name the newly created configuration ${buildInfo.modeName}.');
     return XcodeBuildResult(success: false);
   }
   final String scheme = projectInfo.schemeFor(buildInfo);
