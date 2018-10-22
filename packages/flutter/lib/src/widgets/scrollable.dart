@@ -376,10 +376,14 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   @override
   @protected
   void setCanDrag(bool canDrag) {
+    debugPrint('scrollable ' + widget.dragStartBehavior.toString() + 'a d ' + canDrag.toString());
+
     if (canDrag == _lastCanDrag && (!canDrag || widget.axis == _lastAxisDirection))
       return;
     if (!canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
+      for (GestureRecognizerFactory recognizer in _gestureRecognizers.values)
+        recognizer.
     } else {
       switch (widget.axis) {
         case Axis.vertical:
@@ -513,6 +517,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       gestures: _gestureRecognizers,
       behavior: HitTestBehavior.opaque,
       excludeFromSemantics: widget.excludeFromSemantics,
+      dragStartBehavior: widget.dragStartBehavior,
       child: Semantics(
         explicitChildNodes: !widget.excludeFromSemantics,
         child: IgnorePointer(

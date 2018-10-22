@@ -216,7 +216,7 @@ class EditableText extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
     this.enableInteractiveSelection = true,
-    this.dragStartBehavior,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -905,7 +905,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Widget build(BuildContext context) {
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
     super.build(context); // See AutomaticKeepAliveClientMixin.
-
+    debugPrint(widget.dragStartBehavior.toString());
     final TextSelectionControls controls = widget.selectionControls;
     return Scrollable(
       excludeFromSemantics: true,

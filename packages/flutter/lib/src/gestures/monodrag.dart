@@ -17,15 +17,6 @@ enum _DragState {
   accepted,
 }
 
-/// Configuration of offset passed to [DragStartDetails].
-enum DragStartBehavior {
-  /// Send the initial offset, as when we first detected a down event.
-  down,
-
-  /// Send the offset at the time we detected a drag start.
-  start,
-}
-
 /// Signature for when a pointer that was previously in contact with the screen
 /// and moving is no longer in contact with the screen.
 ///
@@ -60,13 +51,8 @@ typedef GestureDragCancelCallback = void Function();
 abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
   DragGestureRecognizer({
-    this.dragStartBehavior = DragStartBehavior.start,
     Object debugOwner,
-  })  : assert(dragStartBehavior != null),
-        super(debugOwner: debugOwner);
-
-  /// Configure the behavior of offsets sent to [onStart].
-  DragStartBehavior dragStartBehavior;
+  })  : super(debugOwner: debugOwner);
 
   /// A pointer has contacted the screen and might begin to move.
   ///
@@ -130,6 +116,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addPointer(PointerEvent event) {
+    debugPrint('mono drag' + dragStartBehavior.toString());
     startTrackingPointer(event.pointer);
     _velocityTrackers[event.pointer] = VelocityTracker();
     if (_state == _DragState.ready) {
@@ -295,10 +282,6 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 
   @override
   String get debugDescription => 'vertical drag';
-
-  @override
-  DragStartBehavior dragStartBehavor;
-
 }
 
 /// Recognizes movement in the horizontal direction.

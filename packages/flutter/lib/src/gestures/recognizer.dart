@@ -24,6 +24,15 @@ export 'pointer_router.dart' show PointerRouter;
 /// anonymous functions that return objects of particular types.
 typedef RecognizerCallback<T> = T Function();
 
+/// Configuration of offset passed to [DragStartDetails].
+enum DragStartBehavior {
+  /// Send the initial offset, as when we first detected a down event.
+  down,
+
+  /// Send the offset at the time we detected a drag start.
+  start,
+}
+
 /// The base class that all gesture recognizers inherit from.
 ///
 /// Provides a basic API that can be used by classes that work with
@@ -40,7 +49,14 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   ///
   /// The argument is optional and is only used for debug purposes (e.g. in the
   /// [toString] serialization).
-  GestureRecognizer({ this.debugOwner });
+  GestureRecognizer({
+    this.debugOwner,
+    this.dragStartBehavior = DragStartBehavior.start,
+  }) : assert(dragStartBehavior != null)
+  {
+    if (dragStartBehavior == DragStartBehavior.start)
+      print('wtf');
+  }
 
   /// The recognizer's owner.
   ///
@@ -74,6 +90,9 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// Returns a very short pretty description of the gesture that the
   /// recognizer looks for, like 'tap' or 'horizontal drag'.
   String get debugDescription;
+
+  /// Configure the behavior of offsets sent to [onStart].
+  DragStartBehavior dragStartBehavior;
 
   /// Invoke a callback provided by the application, catching and logging any
   /// exceptions.

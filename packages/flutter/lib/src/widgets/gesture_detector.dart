@@ -195,10 +195,7 @@ class GestureDetector extends StatelessWidget {
          }
          return true;
        }()),
-       super(key: key) {
-    if (startBehavior == DragStartBehavior.start)
-      debugPrintStack();
-  }
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -492,7 +489,8 @@ class RawGestureDetector extends StatefulWidget {
     this.child,
     this.gestures = const <Type, GestureRecognizerFactory>{},
     this.behavior,
-    this.excludeFromSemantics = false
+    this.excludeFromSemantics = false,
+    this.dragStartBehavior = DragStartBehavior.start
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
        super(key: key);
@@ -523,6 +521,9 @@ class RawGestureDetector extends StatefulWidget {
   /// tree directly and so having a gesture to show it would result in
   /// duplication of information.
   final bool excludeFromSemantics;
+
+  ///
+  final DragStartBehavior dragStartBehavior;
 
   @override
   RawGestureDetectorState createState() => RawGestureDetectorState();
@@ -620,6 +621,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     assert(_recognizers != null);
     final Map<Type, GestureRecognizer> oldRecognizers = _recognizers;
     _recognizers = <Type, GestureRecognizer>{};
+    for (GestureRecognizer recognizer in _recognizers.values)
+      recognizer.dragStartBehavior = widget.dragStartBehavior;
     for (Type type in gestures.keys) {
       assert(gestures[type] != null);
       assert(gestures[type]._debugAssertTypeMatches(type));
@@ -632,6 +635,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       if (!_recognizers.containsKey(type))
         oldRecognizers[type].dispose();
     }
+
   }
 
   void _handlePointerDown(PointerDownEvent event) {

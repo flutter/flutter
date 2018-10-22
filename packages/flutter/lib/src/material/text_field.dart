@@ -124,7 +124,7 @@ class TextField extends StatefulWidget {
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.enableInteractiveSelection = true,
-    this.dragStartBehavior,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
@@ -564,7 +564,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     if (widget.maxLength != null && widget.maxLengthEnforced)
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
-
+    debugPrint(widget.dragStartBehavior.toString());
     Widget child = RepaintBoundary(
       child: EditableText(
         key: _editableTextKey,
@@ -597,6 +597,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: widget.enableInteractiveSelection,
+        dragStartBehavior: widget.dragStartBehavior,
       ),
     );
 
