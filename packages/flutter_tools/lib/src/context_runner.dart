@@ -26,6 +26,8 @@ import 'devfs.dart';
 import 'device.dart';
 import 'doctor.dart';
 import 'emulator.dart';
+import 'fuchsia/fuchsia_sdk.dart';
+import 'fuchsia/fuchsia_workflow.dart';
 import 'ios/cocoapods.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
@@ -62,6 +64,8 @@ Future<T> runInContext<T>(
       Doctor: () => const Doctor(),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(),
+      FuchsiaSdk: () => FuchsiaSdk(),
+      FuchsiaWorkflow: () => FuchsiaWorkflow(),
       Flags: () => const EmptyFlags(),
       FlutterVersion: () => FlutterVersion(const Clock()),
       GenSnapshot: () => const GenSnapshot(),
