@@ -44,7 +44,7 @@ class FuchsiaSdk {
   Future<String> netls() async {
     try {
       final RunResult process = await runAsync(
-        <String>['fx', 'netls'. '--nowait']);
+        <String>['fx', 'netls', '--nowait']);
       return process.stdout;
     } on ArgumentError catch (exception) {
       throwToolExit('$exception');
