@@ -289,6 +289,13 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
   }
 }
 
+- (id)insertDictationResultPlaceholder {
+  return @"";
+}
+
+- (void)removeDictationResultPlaceholder:(id)placeholder willInsertResult:(BOOL)willInsertResult {
+}
+
 - (NSString*)textInRange:(UITextRange*)range {
   NSRange textRange = ((FlutterTextRange*)range).range;
   return [self.text substringWithRange:textRange];
@@ -297,7 +304,6 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
 - (void)replaceRange:(UITextRange*)range withText:(NSString*)text {
   NSRange replaceRange = ((FlutterTextRange*)range).range;
   NSRange selectedRange = _selectedTextRange.range;
-
   // Adjust the text selection:
   // * reduce the length by the intersection length
   // * adjust the location by newLength - oldLength + intersectionLength
