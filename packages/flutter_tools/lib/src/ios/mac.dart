@@ -299,6 +299,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
   if (!projectInfo.buildConfigurations.contains(buildInfo.modeName)) {
+    // This error will occur with previous versions of the generated Xcode project, where a "Profile"
+    // build configuration did not exist.  It may also occur if a user manually removes or renames
+    // configurations from Runner.xcodeproj.
     printError('The Xcode project does not define a build configuration "${buildInfo.modeName}",');
     printError('which is needed by Flutter tooling to run "--${buildInfo.modeName}" from the command line.');
     printError('');
