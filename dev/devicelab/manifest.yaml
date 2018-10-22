@@ -283,6 +283,27 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  flutter_create_offline_test_linux:
+    description: >
+      Tests the `flutter create --offline` command.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
+  flutter_create_offline_test_windows:
+    description: >
+      Tests the `flutter create --offline` command.
+    stage: devicelab
+    required_agent_capabilities: ["windows/android"]
+    flaky: true
+
+  flutter_create_offline_test_mac:
+    description: >
+      Tests the `flutter create --offline` command.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true
+
   # iOS on-device tests
 
   flavors_test_ios:
