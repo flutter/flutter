@@ -368,7 +368,7 @@ void main() {
     expect(find.text('2'), findsOneWidget);
   });
 
-  testWidgets('Stepper custom builder test', (WidgetTester tester) async {
+  testWidgets('Stepper custom contorls test', (WidgetTester tester) async {
     final ControlsWidgetBuilder builder =
       (BuildContext context, VoidCallback onStepContinue, VoidCallback onStepCancel) {
         return Container(

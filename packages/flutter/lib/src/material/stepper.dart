@@ -182,7 +182,7 @@ class Stepper extends StatefulWidget {
   /// This callback which takes in a context and two functions,[onStepContinue]
   /// and [onStepCancel]. These can be used to control the stepper.
   ///
-  /// ##Sample Code:
+  /// ## Sample Code:
   /// Creates a stepper control with custom buttons.
   ///
   /// ```dart
@@ -374,9 +374,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     }
   }
 
-  Widget _buildVerticalControls(ControlsWidgetBuilder builder) {
-    if(builder != null)
-      return builder(context, widget.onStepContinue, widget.onStepContinue);
+  Widget _buildVerticalControls() {
+    if (widget.controlsBuilder != null)
+      return widget.controlsBuilder(context, widget.onStepContinue, widget.onStepContinue);
 
     Color cancelColor;
 
@@ -519,7 +519,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildVerticalBody(int index, ControlsWidgetBuilder controlsBuilder) {
+  Widget _buildVerticalBody(int index) {
     return Stack(
       children: <Widget>[
         PositionedDirectional(
@@ -549,7 +549,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             child: Column(
               children: <Widget>[
                 widget.steps[index].content,
-                _buildVerticalControls(controlsBuilder),
+                _buildVerticalControls(),
               ],
             ),
           ),
@@ -563,7 +563,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildVertical(ControlsWidgetBuilder controlsBuilder) {
+  Widget _buildVertical() {
     final List<Widget> children = <Widget>[];
 
     for (int i = 0; i < widget.steps.length; i += 1) {
@@ -586,7 +586,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               } : null,
               child: _buildVerticalHeader(i)
             ),
-            _buildVerticalBody(i, controlsBuilder)
+            _buildVerticalBody(i)
           ]
         )
       );
@@ -598,7 +598,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildHorizontal(ControlsWidgetBuilder controlsBuilder) {
+  Widget _buildHorizontal() {
     final List<Widget> children = <Widget>[];
 
     for (int i = 0; i < widget.steps.length; i += 1) {
@@ -659,7 +659,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 vsync: this,
                 child: widget.steps[widget.currentStep].content,
               ),
-              _buildVerticalControls(controlsBuilder),
+              _buildVerticalControls(),
             ],
           ),
         ),
@@ -682,9 +682,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     assert(widget.type != null);
     switch (widget.type) {
       case StepperType.vertical:
-        return _buildVertical(widget.controlsBuilder);
+        return _buildVertical();
       case StepperType.horizontal:
-        return _buildHorizontal(widget.controlsBuilder);
+        return _buildHorizontal();
     }
     return null;
   }
