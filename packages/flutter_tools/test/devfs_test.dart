@@ -119,14 +119,25 @@ void main() {
       devFSOperations.expectMessages(<String>['create test']);
       expect(devFS.assetPathsToEvict, isEmpty);
 
-      final int bytes = await devFS.update(
+      int bytes = await devFS.update(
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
         trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
-        'writeFile test lib/foo.txt.dill',
+        'writeFile test lib/foo.txt.dill build/app.dill',
+      ]);
+      expect(devFS.assetPathsToEvict, isEmpty);
+
+      bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: true,
+      );
+      devFSOperations.expectMessages(<String>[
+        'writeFile test lib/foo.txt.dill build/app.dill.track.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
 
@@ -146,7 +157,7 @@ void main() {
         trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
-        'writeFile test lib/foo.txt.dill',
+        'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 22);
@@ -162,7 +173,7 @@ void main() {
         trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
-        'writeFile test lib/foo.txt.dill',
+        'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 22);
@@ -177,7 +188,7 @@ void main() {
         trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
-        'writeFile test lib/foo.txt.dill',
+        'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 22);
@@ -190,10 +201,38 @@ void main() {
         trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
-        'writeFile test lib/foo.txt.dill',
+        'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 22);
+
+      // Set the last modified time to 5 seconds in the past.
+      updateFileModificationTime(file.path, DateTime.now(), -5);
+      bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: true,
+      );
+      devFSOperations.expectMessages(<String>[
+        'writeFile test lib/foo.txt.dill build/app.dill.track.dill',
+      ]);
+      expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 22);
+
+      await file.writeAsBytes(<int>[1, 2, 3, 4, 5, 6]);
+      bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: true,
+      );
+      devFSOperations.expectMessages(<String>[
+        'writeFile test lib/foo.txt.dill build/app.dill.track.dill',
+      ]);
+      expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 22);
+
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -209,7 +248,7 @@ void main() {
       );
       devFSOperations.expectMessages(<String>[
         'deleteFile test lib/foo.txt',
-        'writeFile test lib/foo.txt.dill',
+        'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 22);
@@ -219,17 +258,30 @@ void main() {
 
     testUsingContext('add new package', () async {
       await _createPackage(fs, 'newpkg', 'anotherfile.txt');
-      final int bytes = await devFS.update(
+      int bytes = await devFS.update(
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
         trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
-        'writeFile test lib/foo.txt.dill',
+        'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 22);
+
+      bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: true,
+      );
+      devFSOperations.expectMessages(<String>[
+        'writeFile test lib/foo.txt.dill build/app.dill.track.dill',
+      ]);
+      expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 22);
+
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -258,7 +310,7 @@ void main() {
         trackWidgetCreation: false,
       );
       devFSOperations.expectMessages(<String>[
-        'writeFile test lib/foo.txt.dill',
+        'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 22);
@@ -278,7 +330,7 @@ void main() {
       );
       devFSOperations.expectMessages(<String>[
         'writeFile test ${_inAssetBuildDirectory(fs, 'a.txt')}',
-        'writeFile test lib/foo.txt.dill',
+        'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>['a.txt']));
       devFS.assetPathsToEvict.clear();
@@ -301,7 +353,7 @@ void main() {
       devFSOperations.expectMessages(<String>[
         'writeFile test ${_inAssetBuildDirectory(fs, 'a.txt')}',
         'writeFile test ${_inAssetBuildDirectory(fs, 'b.txt')}',
-        'writeFile test lib/foo.txt.dill',
+        'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'a.txt', 'b.txt']));
@@ -322,7 +374,7 @@ void main() {
       );
       devFSOperations.expectMessages(<String>[
         'writeFile test ${_inAssetBuildDirectory(fs, 'c.txt')}',
-        'writeFile test lib/foo.txt.dill',
+        'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'c.txt']));
@@ -343,7 +395,7 @@ void main() {
       );
       devFSOperations.expectMessages(<String>[
         'deleteFile test ${_inAssetBuildDirectory(fs, 'c.txt')}',
-        'writeFile test lib/foo.txt.dill',
+        'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>['c.txt']));
       devFS.assetPathsToEvict.clear();
@@ -365,7 +417,7 @@ void main() {
       devFSOperations.expectMessages(<String>[
         'deleteFile test ${_inAssetBuildDirectory(fs, 'a.txt')}',
         'deleteFile test ${_inAssetBuildDirectory(fs, 'b.txt')}',
-        'writeFile test lib/foo.txt.dill',
+        'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'a.txt', 'b.txt'
