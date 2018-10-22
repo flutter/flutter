@@ -33,13 +33,13 @@ void main() {
 
     Future<VMIsolate> breakInBuildMethod(FlutterTestDriver flutter) async {
       return _flutter.breakAt(
-          Uri.file(_project.buildMethodBreakpointFile),
+          Uri.parse("package:test/main.dart"),
           _project.buildMethodBreakpointLine);
     }
 
     Future<VMIsolate> breakInTopLevelFunction(FlutterTestDriver flutter) async {
       return _flutter.breakAt(
-          Uri.file(_project.topLevelFunctionBreakpointFile),
+          Uri.parse("package:test/main.dart"),
           _project.topLevelFunctionBreakpointLine);
     }
 
@@ -108,5 +108,5 @@ void main() {
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions();
     });
-  }, timeout: const Timeout.factor(10));
+  }, timeout: const Timeout.factor(6));
 }
