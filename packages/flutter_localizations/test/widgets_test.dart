@@ -537,7 +537,7 @@ void main() {
       )
     );
 
-    // Startup time. Default test locale is const Locale('', ''), so
+    // Startup time. Default test locale is null, so
     // no supported matches. Use the first locale.
     await tester.pumpAndSettle();
     expect(find.text('zh_CN'), findsOneWidget);
@@ -581,7 +581,8 @@ void main() {
       )
     );
 
-    // Initial WidgetTester locale is new Locale('', '')
+    // Initial WidgetTester locale is null due to no platform intitializing it.
+    await tester.binding.setLocale('', '');
     await tester.pumpAndSettle();
     expect(find.text('_ TextDirection.ltr'), findsOneWidget);
 
@@ -622,7 +623,8 @@ void main() {
       )
     );
 
-    // Initial WidgetTester locale is new Locale('', '')
+    // Initial WidgetTester locale is null due to no platform intitializing it.
+    await tester.binding.setLocale('', '');
     await tester.pumpAndSettle();
     expect(find.text('_ TextDirection.rtl'), findsOneWidget);
 
@@ -655,7 +657,8 @@ void main() {
       )
     );
 
-    // Initial WidgetTester locale is new Locale('', '')
+    // Initial WidgetTester locale is null due to no platform intitializing it.
+    await tester.binding.setLocale('', '');
     await tester.pumpAndSettle();
     expect(find.text('_ TextDirection.rtl'), findsOneWidget);
 
