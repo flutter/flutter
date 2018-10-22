@@ -202,12 +202,6 @@ class IosProject {
   /// The '.pbxproj' file of the host app.
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
-  /// The 'xcshareddata' directory in the host app project directory.
-  Directory get xcodeProjectSharedData => xcodeProject.childDirectory('xcshareddata');
-
-  /// The '.xcscheme' file in the project's 'xcshareddata/xcschemes' directory.
-  File get xcodeSharedSchemes => xcodeProjectSharedData.childDirectory('xcschemes').childFile('$_hostAppBundleName.xcscheme');
-
   /// Xcode workspace directory of the host app.
   Directory get xcodeWorkspace => hostAppRoot.childDirectory('$_hostAppBundleName.xcworkspace');
 
