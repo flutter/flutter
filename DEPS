@@ -104,7 +104,7 @@ vars = {
   # Build bot tooling for iOS
   'ios_tools_revision': '69b7c1b160e7107a6a98d948363772dc9caea46f',
 
-  'buildtools_revision': 'c1408453246f0475547b6fe634c2f3dad71c6457',
+  'buildtools_revision': '5a9e1b3a0b84a2871f20f85fde665e54a894ba72',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.
