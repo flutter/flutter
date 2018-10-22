@@ -11,6 +11,8 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'fuchsia/fuchsia_device.dart';
+
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
@@ -27,6 +29,7 @@ class DeviceManager {
     _deviceDiscoverers.add(AndroidDevices());
     _deviceDiscoverers.add(IOSDevices());
     _deviceDiscoverers.add(IOSSimulators());
+    _deviceDiscoverers.add(FuchsiaDevices());
     _deviceDiscoverers.add(FlutterTesterDevices());
   }
 
