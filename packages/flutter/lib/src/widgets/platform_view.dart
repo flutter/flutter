@@ -21,8 +21,10 @@ import 'framework.dart';
 /// The embedded Android view is painted just like any other Flutter widget and transformations
 /// apply to it as well.
 ///
-/// The widget fill all available space, the parent of this object must provide bounded layout
+/// {@template platform_view_layout}
+/// The widget fills all available space, the parent of this object must provide bounded layout
 /// constraints.
+/// {@endtemplate}
 ///
 /// AndroidView participates in Flutter's [GestureArena]s, and dispatches touch events to the
 /// Android view iff it won the arena. Specific gestures that should be dispatched to the Android
@@ -41,16 +43,20 @@ import 'framework.dart';
 ///   }
 /// ```
 ///
-/// The Android view's lifetime is the same as the lifetime of the [State] object for this widget.
+/// {@template platform_view_lifetime}
+/// The platform view's lifetime is the same as the lifetime of the [State] object for this widget.
 /// When the [State] is disposed the platform view (and auxiliary resources) are lazily
 /// released (some resources are immediately released and some by platform garbage collector).
 /// A stateful widget's state is disposed when the widget is removed from the tree or when it is
 /// moved within the tree. If the stateful widget has a key and it's only moved relative to its siblings,
 /// or it has a [GlobalKey] and it's moved within the tree, it will not be disposed.
+/// {@endtemplate}
 class AndroidView extends StatefulWidget {
   /// Creates a widget that embeds an Android view.
   ///
+  /// {@template platform_view_constructor_params}
   /// The `viewType` and `hitTestBehavior` parameters must not be null.
+  /// {@endtemplate}
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
   AndroidView({ // ignore: prefer_const_constructors_in_immutables
                 // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
@@ -68,25 +74,32 @@ class AndroidView extends StatefulWidget {
        super(key: key);
 
   /// The unique identifier for Android view type to be embedded by this widget.
+  ///
   /// A [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html)
   /// for this type must have been registered.
   ///
   /// See also: [AndroidView] for an example of registering a platform view factory.
   final String viewType;
 
-  /// Callback to invoke after the Android view has been created.
+  /// {@template platform_view_created_param}
+  /// Callback to invoke after the platform view has been created.
   ///
   /// May be null.
+  /// {@endtemplate}
   final PlatformViewCreatedCallback onPlatformViewCreated;
 
+  /// {@template platform_view_hittest_param}
   /// How this widget should behave during hit testing.
   ///
   /// This defaults to [PlatformViewHitTestBehavior.opaque].
+  /// {@endtemplate}
   final PlatformViewHitTestBehavior hitTestBehavior;
 
+  /// {@template platform_view_direction_param}
   /// The text direction to use for the embedded view.
   ///
   /// If this is null, the ambient [Directionality] is used instead.
+  /// {@endtemplate}
   final TextDirection layoutDirection;
 
   /// Which gestures should be forwarded to the Android view.
@@ -149,7 +162,7 @@ class AndroidView extends StatefulWidget {
   final dynamic creationParams;
 
   /// The codec used to encode `creationParams` before sending it to the
-  /// platform side. It should match the codec passed to the constructor of [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#PlatformViewFactory-io.flutter.plugin.common.MessageCodec-).
+  /// platform side.It should match the codec passed to the constructor of [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#PlatformViewFactory-io.flutter.plugin.common.MessageCodec-).
   ///
   /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec], [StringCodec], or [BinaryCodec].
   ///
@@ -158,6 +171,48 @@ class AndroidView extends StatefulWidget {
 
   @override
   State createState() => _AndroidViewState();
+}
+
+/// Embeds an iOS view in the Widget hierarchy.
+///
+/// Embedding iOS views is an expensive operation and should be avoided when a Flutter
+/// equivalent is possible.
+///
+/// {@macro platform_view_layout}
+///
+/// {@macro platform_view_lifetime}
+class UiKitView extends StatefulWidget {
+  /// Creates a widget that embeds an iOS view.
+  ///
+  /// {@macro platform_view_constructor_params}
+  UiKitView({ // ignore: prefer_const_constructors_in_immutables
+    // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
+    Key key,
+    @required this.viewType,
+    this.onPlatformViewCreated,
+    this.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
+    this.layoutDirection,
+  }) : assert(viewType != null),
+        assert(hitTestBehavior != null),
+        super(key: key);
+
+  // TODO(amirh): reference the iOS API doc once avaliable.
+  /// The unique identifier for iOS view type to be embedded by this widget.
+  ///
+  /// A PlatformViewFactory for this type must have been registered.
+  final String viewType;
+
+  /// {@macro platform_view_created_param}
+  final PlatformViewCreatedCallback onPlatformViewCreated;
+
+  /// {@macro platform_view_hittest_param}
+  final PlatformViewHitTestBehavior hitTestBehavior;
+
+  /// {@macro platform_view_direction_param}
+  final TextDirection layoutDirection;
+
+  @override
+  State createState() => _UiKitViewState();
 }
 
 class _AndroidViewState extends State<AndroidView> {
@@ -246,6 +301,95 @@ class _AndroidViewState extends State<AndroidView> {
   }
 }
 
+class _UiKitViewState extends State<UiKitView> {
+  int _id;
+  UiKitViewController _controller;
+  TextDirection _layoutDirection;
+  bool _initialized = false;
+
+  static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
+  Set<Factory<OneSequenceGestureRecognizer>>();
+
+  @override
+  Widget build(BuildContext context) {
+    if (_controller == null) {
+      return const SizedBox.expand();
+    }
+    return _UiKitPlatformView(
+      viewId: _id,
+      hitTestBehavior: widget.hitTestBehavior,
+    );
+  }
+
+  void _initializeOnce() {
+    if (_initialized) {
+      return;
+    }
+    _initialized = true;
+    _layoutDirection = _findLayoutDirection();
+    _createNewUiKitView();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initializeOnce();
+
+    final TextDirection newLayoutDirection = _findLayoutDirection();
+    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    _layoutDirection = newLayoutDirection;
+
+    if (didChangeLayoutDirection) {
+      // The native view will update asynchronously, in the meantime we don't want
+      // to block the framework. (so this is intentionally not awaiting).
+      _controller.setLayoutDirection(_layoutDirection);
+    }
+  }
+
+  @override
+  void didUpdateWidget(UiKitView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final TextDirection newLayoutDirection = _findLayoutDirection();
+    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    _layoutDirection = newLayoutDirection;
+
+    if (widget.viewType != oldWidget.viewType) {
+      _controller.dispose();
+      _createNewUiKitView();
+      return;
+    }
+
+    if (didChangeLayoutDirection) {
+      _controller.setLayoutDirection(_layoutDirection);
+    }
+  }
+
+  TextDirection _findLayoutDirection() {
+    assert(widget.layoutDirection != null || debugCheckHasDirectionality(context));
+    return widget.layoutDirection ?? Directionality.of(context);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _createNewUiKitView() async {
+    _id = platformViewsRegistry.getNextPlatformViewId();
+    _controller = await PlatformViewsService.initUiKitView(
+      id: _id,
+      viewType: widget.viewType,
+      layoutDirection: _layoutDirection,
+    );
+    if (widget.onPlatformViewCreated != null) {
+      widget.onPlatformViewCreated(_id);
+    }
+    setState(() {});
+  }
+}
+
 class _AndroidPlatformView extends LeafRenderObjectWidget {
   const _AndroidPlatformView({
     Key key,
@@ -274,5 +418,31 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
     renderObject.viewController = controller;
     renderObject.hitTestBehavior = hitTestBehavior;
     renderObject.updateGestureRecognizers(gestureRecognizers);
+  }
+}
+
+class _UiKitPlatformView extends LeafRenderObjectWidget {
+  const _UiKitPlatformView({
+    Key key,
+    @required this.viewId,
+    @required this.hitTestBehavior,
+  }) : assert(viewId != null),
+       assert(hitTestBehavior != null),
+       super(key: key);
+
+  final int viewId;
+  final PlatformViewHitTestBehavior hitTestBehavior;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      RenderUiKitView(
+        viewId: viewId,
+        hitTestBehavior: hitTestBehavior,
+      );
+
+  @override
+  void updateRenderObject(BuildContext context, RenderUiKitView renderObject) {
+    renderObject.viewId = viewId;
+    renderObject.hitTestBehavior = hitTestBehavior;
   }
 }

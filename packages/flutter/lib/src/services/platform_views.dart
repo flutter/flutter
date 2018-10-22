@@ -91,6 +91,46 @@ class PlatformViewsService {
       onPlatformViewCreated,
     );
   }
+
+  // TODO(amirh): reference the iOS plugin API for registering a UIView factory once it lands.
+  /// Creates a controller for a new iOS UIView.
+  ///
+  /// `id` is an unused unique identifier generated with [platformViewsRegistry].
+  ///
+  /// `viewType` is the identifier of the iOS view type to be created, a
+  /// factory for this view type must have been registered on the platform side.
+  /// Platform view factories are typically registered by plugin code.
+  ///
+  /// The `id, `viewType, and `layoutDirection` parameters must not be null.
+  /// If `creationParams` is non null then `cretaionParamsCodec` must not be null.
+  static Future<UiKitViewController> initUiKitView({
+    @required int id,
+    @required String viewType,
+    @required TextDirection layoutDirection,
+    dynamic creationParams,
+    MessageCodec<dynamic> creationParamsCodec,
+  }) async {
+    assert(id != null);
+    assert(viewType != null);
+    assert(layoutDirection != null);
+    assert(creationParams == null || creationParamsCodec != null);
+
+      // TODO(amirh): pass layoutDirection once the system channel supports it.
+      final Map<String, dynamic> args = <String, dynamic> {
+        'id': id,
+        'viewType': viewType,
+      };
+      if (creationParams != null) {
+        final ByteData paramsByteData = creationParamsCodec.encodeMessage(creationParams);
+        args['params'] = Uint8List.view(
+          paramsByteData.buffer,
+          0,
+          paramsByteData.lengthInBytes,
+        );
+      }
+      await SystemChannels.platform_views.invokeMethod('create', args);
+      return UiKitViewController._(id, layoutDirection);
+  }
 }
 
 /// Properties of an Android pointer.
@@ -542,5 +582,49 @@ class AndroidViewController {
     if (_onPlatformViewCreated != null)
       _onPlatformViewCreated(id);
     _state = _AndroidViewState.created;
+  }
+}
+
+/// Controls an iOS UIView.
+///
+/// Typically created with [PlatformViewsService.initUiKitView].
+class UiKitViewController {
+  UiKitViewController._(
+    this.id,
+    TextDirection layoutDirection,
+  ) : assert(id != null),
+      assert(layoutDirection != null),
+      _layoutDirection = layoutDirection;
+
+
+  /// The unique identifier of the iOS view controlled by this controller.
+  final int id;
+
+  bool _disposed = false;
+
+  TextDirection _layoutDirection;
+
+  /// Sets the layout direction for the Android view.
+  Future<void> setLayoutDirection(TextDirection layoutDirection) async {
+    if (_disposed)
+      throw FlutterError('trying to set a layout direction for a disposed Android View. View id: $id');
+
+    if (layoutDirection == _layoutDirection)
+      return;
+
+    assert(layoutDirection != null);
+    _layoutDirection = layoutDirection;
+
+    // TODO(amirh): invoke the iOS platform views channel direction method once available.
+  }
+
+  /// Disposes the view.
+  ///
+  /// The [UiKitViewController] object is unusable after calling this.
+  /// The identifier of the platform view cannot be reused after the view is
+  /// disposed.
+  Future<void> dispose() async {
+    _disposed = true;
+    await SystemChannels.platform_views.invokeMethod('dispose', id);
   }
 }
