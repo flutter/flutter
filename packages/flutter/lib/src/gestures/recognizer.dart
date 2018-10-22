@@ -52,11 +52,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   GestureRecognizer({
     this.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(dragStartBehavior != null)
-  {
-    if (dragStartBehavior == DragStartBehavior.start)
-      print('wtf');
-  }
+  }) : assert(dragStartBehavior != null);
 
   /// The recognizer's owner.
   ///
