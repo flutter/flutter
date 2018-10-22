@@ -1,4 +1,4 @@
-Signature: bd69c07fc708fecdda910a0509344e4d
+Signature: f7bbd4a07f225efa0742cd84427ff2b8
 
 UNUSED LICENSES:
 
@@ -4368,7 +4368,6 @@ FILE: ../../../third_party/skia/src/core/SkDrawShadowInfo.cpp
 FILE: ../../../third_party/skia/src/core/SkDrawShadowInfo.h
 FILE: ../../../third_party/skia/src/core/SkDraw_vertices.cpp
 FILE: ../../../third_party/skia/src/core/SkExecutor.cpp
-FILE: ../../../third_party/skia/src/core/SkFDot6Constants.cpp
 FILE: ../../../third_party/skia/src/core/SkFontMgrPriv.h
 FILE: ../../../third_party/skia/src/core/SkGaussFilter.cpp
 FILE: ../../../third_party/skia/src/core/SkGaussFilter.h
@@ -4873,7 +4872,6 @@ FILE: ../../../third_party/skia/src/core/SkEdge.cpp
 FILE: ../../../third_party/skia/src/core/SkEdge.h
 FILE: ../../../third_party/skia/src/core/SkEndian.h
 FILE: ../../../third_party/skia/src/core/SkFDot6.h
-FILE: ../../../third_party/skia/src/core/SkFDot6Constants.h
 FILE: ../../../third_party/skia/src/core/SkGeometry.cpp
 FILE: ../../../third_party/skia/src/core/SkGeometry.h
 FILE: ../../../third_party/skia/src/core/SkGlyph.h
