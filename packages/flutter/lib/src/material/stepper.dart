@@ -188,7 +188,7 @@ class Stepper extends StatefulWidget {
   /// ```dart
   /// Stepper(
   ///   controlsBuilder:
-  ///     (BuildContext context, VoidCallback onStepContinue, VoidCallback onStepCancel) {
+  ///     (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
   ///        return Row(
   ///          children: <Widget>[
   ///            FlatButton(

@@ -3632,10 +3632,10 @@ typedef IndexedWidgetBuilder = Widget Function(BuildContext context, int index);
 /// [MaterialApp.builder].
 typedef TransitionBuilder = Widget Function(BuildContext context, Widget child);
 
-/// A Signiture for a function that creates a widget given two void callbacks.
+/// A Signiture for a function that creates a widget given [onStepContinue] and [onStepCancel].
 ///
 /// Used by [Stepper.builder].
-typedef ControlsWidgetBuilder = Widget Function(BuildContext context, VoidCallback onStepContinue, VoidCallback onStepCancel);
+typedef ControlsWidgetBuilder = Widget Function(BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel});
 
 /// An [Element] that composes other [Element]s.
 ///

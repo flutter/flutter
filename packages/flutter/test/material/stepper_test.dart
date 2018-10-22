@@ -368,9 +368,9 @@ void main() {
     expect(find.text('2'), findsOneWidget);
   });
 
-  testWidgets('Stepper custom contorls test', (WidgetTester tester) async {
+  testWidgets('Stepper custom controls test', (WidgetTester tester) async {
     final ControlsWidgetBuilder builder =
-      (BuildContext context, VoidCallback onStepContinue, VoidCallback onStepCancel) {
+      (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
         return Container(
           margin: const EdgeInsets.only(top: 16.0),
           child: ConstrainedBox(
