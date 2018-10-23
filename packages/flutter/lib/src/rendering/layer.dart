@@ -41,9 +41,11 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @override
   ContainerLayer get parent => super.parent;
 
-  // Whether this layer has any changes since it was last sent to the engine
-  // using [addToScene]. Initialized to true as a new layer has never called
-  // [addToScene].
+  /// Whether this layer has any changes since it was last sent to the engine
+  /// using [addToScene]. Initialized to true as a new layer has never called
+  /// [addToScene].
+  @protected
+  bool get isDirty => _isDirty;
   bool _isDirty = true;
 
   /// Mark that this layer has changed and we need to upload changes to the
@@ -74,7 +76,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// its children.
   @protected
   void updateSubtreeDirtiness() {
-    _isSubtreeDirty = _isDirty;
+    _isSubtreeDirty = isDirty;
   }
 
   /// This layer's next sibling in the parent layer's child list.
@@ -414,7 +416,7 @@ class ContainerLayer extends Layer {
 
   @override
   void updateSubtreeDirtiness() {
-    _isSubtreeDirty = _isDirty;
+    _isSubtreeDirty = isDirty;
     for (Layer child = firstChild; child != null; child = child.nextSibling) {
       child.updateSubtreeDirtiness();
       _isSubtreeDirty = _isSubtreeDirty || child._isSubtreeDirty;
@@ -1222,9 +1224,9 @@ class LeaderLayer extends ContainerLayer {
   /// pipeline.
   Offset offset;
 
-  /// {@macro flutter.leaderFollower.markClean}
+  /// {@macro flutter.leaderFollower.isDirty}
   @override
-  void markClean() {}
+  bool get isDirty => true;
 
   @override
   void attach(Object owner) {
@@ -1459,16 +1461,17 @@ class FollowerLayer extends ContainerLayer {
     _inverseDirty = true;
   }
 
-  /// {@template flutter.leaderFollower.markClean}
-  /// We intentionally make this method do nothing so LeaderLayer and
-  /// FollowerLayer will always be in dirty state and we won't apply retained
-  /// rendering to those layers. We have to do this because they break the
-  /// assumption of retained rendering: even if no layer in a subtree is dirty,
-  /// the subtree may still be dirty because the FollowerLayer copies change
-  /// from a LeaderLayer that could be anywhere in the Layer tree.
+  /// {@template flutter.leaderFollower.isDirty}
+  /// LeaderLayer and FollowerLayer are always dirty for retained rendering.
+  ///
+  /// This override makes sure that retained rendering isn't applied to those
+  /// layers because they break the assumption of retained rendering: even if no
+  /// layer in a subtree is dirty, the subtree may still be dirty because the
+  /// FollowerLayer copies change from a LeaderLayer that could be anywhere in
+  /// the Layer tree.
   /// {@endtemplate}
   @override
-  void markClean() {}
+  bool get isDirty => true;
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {

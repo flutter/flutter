@@ -102,10 +102,10 @@ void main() {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer = LeaderLayer(link: link);
     final FollowerLayer followerLayer = FollowerLayer(link: link);
-    leaderLayer.markClean();
-    followerLayer.markClean();
-    leaderLayer.updateSubtreeDirtiness();
-    followerLayer.updateSubtreeDirtiness();
+    leaderLayer.markClean();  // ignore: invalid_use_of_protected_member
+    followerLayer.markClean(); // ignore: invalid_use_of_protected_member
+    leaderLayer.updateSubtreeDirtiness();  // ignore: invalid_use_of_protected_member
+    followerLayer.updateSubtreeDirtiness();  // ignore: invalid_use_of_protected_member
     expect(leaderLayer.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
     expect(followerLayer.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
   });
