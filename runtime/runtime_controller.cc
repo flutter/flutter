@@ -24,6 +24,7 @@ RuntimeController::RuntimeController(
     fml::RefPtr<DartSnapshot> p_isolate_snapshot,
     fml::RefPtr<DartSnapshot> p_shared_snapshot,
     TaskRunners p_task_runners,
+    fml::WeakPtr<SnapshotDelegate> p_snapshot_delegate,
     fml::WeakPtr<GrContext> p_resource_context,
     fml::RefPtr<flow::SkiaUnrefQueue> p_unref_queue,
     std::string p_advisory_script_uri,
@@ -33,6 +34,7 @@ RuntimeController::RuntimeController(
                         std::move(p_isolate_snapshot),
                         std::move(p_shared_snapshot),
                         std::move(p_task_runners),
+                        std::move(p_snapshot_delegate),
                         std::move(p_resource_context),
                         std::move(p_unref_queue),
                         std::move(p_advisory_script_uri),
@@ -45,6 +47,7 @@ RuntimeController::RuntimeController(
     fml::RefPtr<DartSnapshot> p_isolate_snapshot,
     fml::RefPtr<DartSnapshot> p_shared_snapshot,
     TaskRunners p_task_runners,
+    fml::WeakPtr<SnapshotDelegate> p_snapshot_delegate,
     fml::WeakPtr<GrContext> p_resource_context,
     fml::RefPtr<flow::SkiaUnrefQueue> p_unref_queue,
     std::string p_advisory_script_uri,
@@ -55,6 +58,7 @@ RuntimeController::RuntimeController(
       isolate_snapshot_(std::move(p_isolate_snapshot)),
       shared_snapshot_(std::move(p_shared_snapshot)),
       task_runners_(p_task_runners),
+      snapshot_delegate_(p_snapshot_delegate),
       resource_context_(p_resource_context),
       unref_queue_(p_unref_queue),
       advisory_script_uri_(p_advisory_script_uri),
@@ -66,6 +70,7 @@ RuntimeController::RuntimeController(
                                          shared_snapshot_,
                                          task_runners_,
                                          std::make_unique<Window>(this),
+                                         snapshot_delegate_,
                                          resource_context_,
                                          unref_queue_,
                                          p_advisory_script_uri,
@@ -114,6 +119,7 @@ std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
       isolate_snapshot_,            //
       shared_snapshot_,             //
       task_runners_,                //
+      snapshot_delegate_,           //
       resource_context_,            //
       unref_queue_,                 //
       advisory_script_uri_,         //
