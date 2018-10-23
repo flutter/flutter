@@ -6,14 +6,18 @@ const String _kFirstIsolateName = 'first isolate name';
 const String _kSecondIsolateName = 'second isolate name';
 
 void first() {
-  main(_kFirstIsolateName);
+  _run(_kFirstIsolateName);
 }
 
 void second() {
-  main(_kSecondIsolateName);
+  _run(_kSecondIsolateName);
 }
 
-void main(String name) {
+void _run(String name) {
   ui.window.setIsolateDebugName(name);
   runApp(Center(child: Text(name, textDirection: TextDirection.ltr)));
 }
+
+// `first` and `second` are the actual entrypoints to this app, but dart specs
+// require a main function.
+void main() { }
