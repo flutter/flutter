@@ -70,7 +70,7 @@ BuildApp() {
     EchoError "========================================================================"
     EchoError "ERROR: Flutter archive builds must be run in Release mode."
     EchoError ""
-    EchoError "To correct, ensure FLUTTER_BUILD_MODE to release or run:"
+    EchoError "To correct, ensure FLUTTER_BUILD_MODE is set to release or run:"
     EchoError "flutter build ios --release"
     EchoError ""
     EchoError "then re-run Archive from Xcode."
