@@ -548,10 +548,12 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.labelPadding,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
+    this.elevation = 0.0,
   }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(indicator != null || (indicatorWeight != null && indicatorWeight > 0.0)),
        assert(indicator != null || (indicatorPadding != null)),
+       assert(elevation != null),
        super(key: key);
 
   /// Typically a list of two or more [Tab] widgets.
@@ -659,6 +661,12 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this property is null then the [labelStyle] value is used. If [labelStyle]
   /// is null then the text style of the theme's body2 definition is used.
   final TextStyle unselectedLabelStyle;
+
+  /// The z-coordinate at which to place this tab bar when it is above other
+  /// content. This controls the size of the shadow below the app bar.
+  ///
+  /// Defaults to 0, the appropriate elevation for tab bars.
+  final double elevation;
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
@@ -1000,7 +1008,10 @@ class _TabBarState extends State<TabBar> {
       );
     }
 
-    return tabBar;
+    return Material(
+      elevation: widget.elevation,
+      child: tabBar,
+    );
   }
 }
 
