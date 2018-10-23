@@ -53,7 +53,7 @@ const int kForwardMouseButton = 0x10;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth mouse button.
 ///
-/// The number argument can be at most 62.
+/// The `number` argument can be at most 62.
 ///
 /// See [kPrimaryMouseButton], [kSecondaryMouseButton], [kMiddleMouseButton],
 /// [kBackMouseButton], and [kForwardMouseButton] for semantic names for some
@@ -62,7 +62,7 @@ int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUn
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth stylus button.
 ///
-/// The number argument can be at most 62.
+/// The `number` argument can be at most 62.
 ///
 /// See [kPrimaryStylusButton] and [kSecondaryStylusButton] for semantic names
 /// for some stylus buttons.
@@ -122,7 +122,8 @@ abstract class PointerEvent {
   /// Time of event dispatch, relative to an arbitrary timeline.
   final Duration timeStamp;
 
-  /// Unique identifier for the pointer, not reused.
+  /// Unique identifier for the pointer, not reused. Changes for each new
+  /// pointer down event.
   final int pointer;
 
   /// The kind of input device for which the event was generated.
@@ -327,7 +328,7 @@ abstract class PointerEvent {
 class PointerAddedEvent extends PointerEvent {
   /// Creates a pointer added event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerAddedEvent({
     Duration timeStamp = Duration.zero,
     PointerDeviceKind kind = PointerDeviceKind.touch,
@@ -368,7 +369,7 @@ class PointerAddedEvent extends PointerEvent {
 class PointerRemovedEvent extends PointerEvent {
   /// Creates a pointer removed event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerRemovedEvent({
     Duration timeStamp = Duration.zero,
     PointerDeviceKind kind = PointerDeviceKind.touch,
@@ -405,7 +406,7 @@ class PointerRemovedEvent extends PointerEvent {
 class PointerHoverEvent extends PointerEvent {
   /// Creates a pointer hover event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerHoverEvent({
     Duration timeStamp = Duration.zero,
     PointerDeviceKind kind = PointerDeviceKind.touch,
@@ -456,7 +457,7 @@ class PointerHoverEvent extends PointerEvent {
 class PointerDownEvent extends PointerEvent {
   /// Creates a pointer down event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerDownEvent({
     Duration timeStamp = Duration.zero,
     int pointer = 0,
@@ -510,7 +511,7 @@ class PointerDownEvent extends PointerEvent {
 class PointerMoveEvent extends PointerEvent {
   /// Creates a pointer move event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerMoveEvent({
     Duration timeStamp = Duration.zero,
     int pointer = 0,
@@ -564,7 +565,7 @@ class PointerMoveEvent extends PointerEvent {
 class PointerUpEvent extends PointerEvent {
   /// Creates a pointer up event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerUpEvent({
     Duration timeStamp = Duration.zero,
     int pointer = 0,
@@ -613,7 +614,7 @@ class PointerUpEvent extends PointerEvent {
 class PointerCancelEvent extends PointerEvent {
   /// Creates a pointer cancel event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerCancelEvent({
     Duration timeStamp = Duration.zero,
     int pointer = 0,

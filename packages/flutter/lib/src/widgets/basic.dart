@@ -5004,6 +5004,7 @@ class Listener extends SingleChildRenderObjectWidget {
     Key key,
     this.onPointerDown,
     this.onPointerMove,
+    this.onPointerHover,
     this.onPointerUp,
     this.onPointerCancel,
     this.behavior = HitTestBehavior.deferToChild,
@@ -5017,10 +5018,16 @@ class Listener extends SingleChildRenderObjectWidget {
   /// Called when a pointer that triggered an [onPointerDown] changes position.
   final PointerMoveEventListener onPointerMove;
 
-  /// Called when a pointer that triggered an [onPointerDown] is no longer in contact with the screen.
+  /// Called when a pointer that has not triggered an [onPointerDown] changes
+  /// position. Typically only fired for mouse pointers.
+  final PointerHoverEventListener onPointerHover;
+
+  /// Called when a pointer that triggered an [onPointerDown] is no longer in
+  /// contact with the screen.
   final PointerUpEventListener onPointerUp;
 
-  /// Called when the input from a pointer that triggered an [onPointerDown] is no longer directed towards this receiver.
+  /// Called when the input from a pointer that triggered an [onPointerDown] is
+  /// no longer directed towards this receiver.
   final PointerCancelEventListener onPointerCancel;
 
   /// How to behave during hit testing.
@@ -5031,6 +5038,7 @@ class Listener extends SingleChildRenderObjectWidget {
     return RenderPointerListener(
       onPointerDown: onPointerDown,
       onPointerMove: onPointerMove,
+      onPointerHover: onPointerHover,
       onPointerUp: onPointerUp,
       onPointerCancel: onPointerCancel,
       behavior: behavior
@@ -5042,6 +5050,7 @@ class Listener extends SingleChildRenderObjectWidget {
     renderObject
       ..onPointerDown = onPointerDown
       ..onPointerMove = onPointerMove
+      ..onPointerHover = onPointerHover
       ..onPointerUp = onPointerUp
       ..onPointerCancel = onPointerCancel
       ..behavior = behavior;
@@ -5055,6 +5064,8 @@ class Listener extends SingleChildRenderObjectWidget {
       listeners.add('down');
     if (onPointerMove != null)
       listeners.add('move');
+    if (onPointerHover != null)
+      listeners.add('hover');
     if (onPointerUp != null)
       listeners.add('up');
     if (onPointerCancel != null)

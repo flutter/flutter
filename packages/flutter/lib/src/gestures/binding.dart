@@ -130,12 +130,21 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
       result = _hitTests.remove(event.pointer);
     } else if (event.down) {
+      // In addition to PointerDownEvents, this block also handles
+      // PointerMoveEvents. Because PointerMoveEvents should be dispatched to
+      // the same place that their initial PointerDownEvent was, we want to
+      // re-use the path we found when the pointer went down, rather than do hit
+      // detection each time we get a PointerMoveEvent.
       result = _hitTests[event.pointer];
-    } else {
-      return; // We currently ignore add, remove, and hover move events.
     }
-    if (result != null)
+    assert(() {
+      if (debugPrintMouseHoverEvents && event is PointerHoverEvent)
+        debugPrint('$event');
+      return true;
+    }());
+    if (result != null || event is PointerHoverEvent || event is PointerAddedEvent || event is PointerRemovedEvent) {
       dispatchEvent(event, result);
+    }
   }
 
   /// Determine which [HitTestTarget] objects are located at a given position.
@@ -152,7 +161,27 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   @override // from HitTestDispatcher
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     assert(!locked);
-    assert(result != null);
+    // No hit test information implies that this is a hover or pointer
+    // add/remove event.
+    if (result == null) {
+      try {
+        pointerRouter.route(event);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetailsForPointerEventDispatcher(
+          exception: exception,
+          stack: stack,
+          library: 'gesture library',
+          context: 'while dispatching a non-hit-tested pointer event',
+          event: event,
+          hitTestEntry: null,
+          informationCollector: (StringBuffer information) {
+            information.writeln('Event:');
+            information.writeln('  $event');
+          },
+        ));
+      }
+      return;
+    }
     for (HitTestEntry entry in result.path) {
       try {
         entry.target.handleEvent(event, entry);
@@ -169,7 +198,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
             information.writeln('  $event');
             information.writeln('Target:');
             information.write('  ${entry.target}');
-          }
+          },
         ));
       }
     }
@@ -219,7 +248,8 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
   final PointerEvent event;
 
   /// The hit test result entry for the object whose handleEvent method threw
-  /// the exception.
+  /// the exception. May be null if no hit test entry is associated with the
+  /// event (e.g. hover and pointer add/remove events).
   ///
   /// The target object itself is given by the [HitTestEntry.target] property of
   /// the hitTestEntry object.

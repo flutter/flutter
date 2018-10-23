@@ -2471,6 +2471,11 @@ typedef PointerDownEventListener = void Function(PointerDownEvent event);
 /// Used by [Listener] and [RenderPointerListener].
 typedef PointerMoveEventListener = void Function(PointerMoveEvent event);
 
+/// Signature for listening to [PointerHoverEvent] events.
+///
+/// Used by [Listener] and [RenderPointerListener].
+typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
+
 /// Signature for listening to [PointerUpEvent] events.
 ///
 /// Used by [Listener] and [RenderPointerListener].
@@ -2487,12 +2492,13 @@ typedef PointerCancelEventListener = void Function(PointerCancelEvent event);
 ///
 /// If it does not have a child, grows to fit the parent-provided constraints.
 class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
-  /// Creates a render object that forwards point events to callbacks.
+  /// Creates a render object that forwards pointer events to callbacks.
   ///
   /// The [behavior] argument defaults to [HitTestBehavior.deferToChild].
   RenderPointerListener({
     this.onPointerDown,
     this.onPointerMove,
+    this.onPointerHover,
     this.onPointerUp,
     this.onPointerCancel,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
@@ -2504,6 +2510,10 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 
   /// Called when a pointer that triggered an [onPointerDown] changes position.
   PointerMoveEventListener onPointerMove;
+
+  /// Called when a pointer that has not triggered an [onPointerDown] changes
+  /// position. Typically only triggered for mouse pointers.
+  PointerHoverEventListener onPointerHover;
 
   /// Called when a pointer that triggered an [onPointerDown] is no longer in
   /// contact with the screen.
@@ -2525,6 +2535,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       return onPointerDown(event);
     if (onPointerMove != null && event is PointerMoveEvent)
       return onPointerMove(event);
+    if (onPointerHover != null && event is PointerHoverEvent)
+      return onPointerHover(event);
     if (onPointerUp != null && event is PointerUpEvent)
       return onPointerUp(event);
     if (onPointerCancel != null && event is PointerCancelEvent)
@@ -2539,6 +2551,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       listeners.add('down');
     if (onPointerMove != null)
       listeners.add('move');
+    if (onPointerHover != null)
+      listeners.add('hover');
     if (onPointerUp != null)
       listeners.add('up');
     if (onPointerCancel != null)
@@ -4647,7 +4661,11 @@ class RenderAnnotatedRegion<T> extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final AnnotatedRegionLayer<T> layer = AnnotatedRegionLayer<T>(value, size: sized ? size : null);
+    final AnnotatedRegionLayer<T> layer = AnnotatedRegionLayer<T>(
+      value,
+      size: sized ? size : null,
+      offset: sized ? offset : null,
+    );
     context.pushLayer(layer, super.paint, offset);
   }
 }
