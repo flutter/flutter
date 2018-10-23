@@ -543,16 +543,6 @@ class ContainerLayer extends Layer {
   /// their children using [addChildrenToScene], then reverse the aforementioned
   /// effects before returning from [addToScene].
   void addChildrenToScene(ui.SceneBuilder builder, [Offset childOffset = Offset.zero]) {
-    assert((){
-      if (childOffset != Offset.zero) {
-        debugPrint(
-          'WARNING: please use OffsetLayer to handle offset and do not '
-          'pass offsets down to children as it disables our retained '
-          'rendering optimization.'
-        );
-      }
-      return true;
-    }());
     Layer child = firstChild;
     while (child != null) {
       if (childOffset == Offset.zero) {
