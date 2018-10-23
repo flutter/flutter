@@ -20,6 +20,7 @@ import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
+import '../bundle.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
@@ -230,7 +231,10 @@ class _Compiler {
       printError('$message');
     }
 
-    final String testFilePath = fs.path.join(fs.path.fromUri(projectRootDirectory), getBuildDirectory(), 'testfile.dill');
+    final String testFilePath = getKernelPathForTransformerOptions(
+      fs.path.join(fs.path.fromUri(projectRootDirectory), getBuildDirectory(), 'testfile.dill'),
+      trackWidgetCreation: trackWidgetCreation,
+    );
 
     ResidentCompiler createCompiler() {
       return ResidentCompiler(
