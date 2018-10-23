@@ -9,6 +9,7 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
+import 'test_utils.dart';
 
 void main() {
   group('flutter_run', () {
@@ -16,7 +17,7 @@ void main() {
     final BasicProject _project = BasicProject();
 
     setUp(() async {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_run_integration_test.');
+      tempDir = createResolvedTempDirectorySync();
       await _project.setUpIn(tempDir);
     });
 

@@ -58,12 +58,12 @@ class FuchsiaSdk {
   /// not currently support multiple attached devices.
   ///
   /// Example output:
-  ///     $ fx netls
+  ///     $ fx netls --nowait
   ///     > device liliac-shore-only-last (fe80::82e4:da4d:fe81:227d/3)
   Future<String> netls() async {
     try {
       final RunResult process = await runAsync(
-        <String>['fx', 'netls']);
+        <String>['fx', 'netls', '--nowait']);
       return process.stdout;
     } on ArgumentError catch (exception) {
       throwToolExit('$exception');

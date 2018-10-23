@@ -82,7 +82,7 @@ ENV PATH="$GRADLE_ROOT/bin:$PATH"
 ENV PATH="/usr/bin:${PATH}"
 RUN dpkg-query -L nodejs
 # Install Firebase
-RUN /usr/bin/npm install -g firebase-tools
+RUN /usr/bin/npm install -g git://github.com/firebase/firebase-tools.git
 
 # Set locale to en_US
 RUN locale-gen en_US "en_US.UTF-8" && dpkg-reconfigure locales

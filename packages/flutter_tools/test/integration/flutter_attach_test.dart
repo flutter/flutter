@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
+import 'test_utils.dart';
 
 void main() {
   FlutterTestDriver _flutterRun, _flutterAttach;
@@ -15,7 +16,7 @@ void main() {
   Directory tempDir;
 
   setUp(() async {
-    tempDir = fs.systemTempDirectory.createTempSync('flutter_attach_test.');
+    tempDir = createResolvedTempDirectorySync();
     await _project.setUpIn(tempDir);
     _flutterRun = FlutterTestDriver(tempDir, logPrefix: 'RUN');
     _flutterAttach = FlutterTestDriver(tempDir, logPrefix: 'ATTACH');
