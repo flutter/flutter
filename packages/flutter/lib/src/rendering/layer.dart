@@ -57,17 +57,15 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// This would enable the retained rendering of this layer if it stays clean
   /// for future frames.
-  ///
-  /// For some special layers such as [FollowerLayer] and [LeaderLayer], we'll
-  /// override this method to disable the retained rendering.
   @protected
   void markClean() => _isDirty = false;
 
-  // Whether any layer in the subtree of this layer is dirty ([_isDirty]).
-  bool _isSubtreeDirty;
-  /// For unit tests only
+  /// Whether any layer in the subtree of this layer is dirty ([isDirty]).
+  ///
+  /// (This is valid after calling [updateSubtreeDirtiness].)
   @protected
   bool get isSubtreeDirty => _isSubtreeDirty;
+  bool _isSubtreeDirty;
 
   ui.EngineLayer _engineLayer;
 
@@ -1462,13 +1460,14 @@ class FollowerLayer extends ContainerLayer {
   }
 
   /// {@template flutter.leaderFollower.isDirty}
-  /// LeaderLayer and FollowerLayer are always dirty for retained rendering.
+  /// Leader/FollowerLayer is always dirty to disable retained rendering.
   ///
-  /// This override makes sure that retained rendering isn't applied to those
-  /// layers because they break the assumption of retained rendering: even if no
-  /// layer in a subtree is dirty, the subtree may still be dirty because the
-  /// FollowerLayer copies change from a LeaderLayer that could be anywhere in
-  /// the Layer tree.
+  /// A FollowerLayer copies changes from a LeaderLayer that could be anywhere
+  /// in the Layer tree, and that LeaderLayer could change without notifying the
+  /// FollowerLayer. Therefore we have to always treat a FollowerLayer as dirty
+  /// and call its [addToScene]. In order to call FollowerLayer's [addToScene],
+  /// LeaderLayer's [addToScene] must be called first so LeaderLayer must also
+  /// be always considered as dirty.
   /// {@endtemplate}
   @override
   bool get isDirty => true;
