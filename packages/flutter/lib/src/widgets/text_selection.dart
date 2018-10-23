@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'basic.dart';
 import 'container.dart';
@@ -228,6 +229,7 @@ class TextSelectionOverlay {
     @required this.renderObject,
     this.selectionControls,
     this.selectionDelegate,
+    this.dragStartBehavior = DragStartBehavior.start,
   }): assert(value != null),
       assert(context != null),
       _value = value {
@@ -261,6 +263,9 @@ class TextSelectionOverlay {
   /// The delegate for manipulating the current selection in the owning
   /// text field.
   final TextSelectionDelegate selectionDelegate;
+
+  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
 
   /// Controls the fade-in animations.
   static const Duration _fadeDuration = Duration(milliseconds: 150);
@@ -377,6 +382,7 @@ class TextSelectionOverlay {
         selection: _selection,
         selectionControls: selectionControls,
         position: position,
+        dragStartBehavior: dragStartBehavior,
       )
     );
   }
@@ -446,7 +452,8 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     @required this.renderObject,
     @required this.onSelectionHandleChanged,
     @required this.onSelectionHandleTapped,
-    @required this.selectionControls
+    @required this.selectionControls,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
   final TextSelection selection;
@@ -456,6 +463,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final ValueChanged<TextSelection> onSelectionHandleChanged;
   final VoidCallback onSelectionHandleTapped;
   final TextSelectionControls selectionControls;
+  final DragStartBehavior dragStartBehavior;
 
   @override
   _TextSelectionHandleOverlayState createState() => _TextSelectionHandleOverlayState();
@@ -527,6 +535,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
       link: widget.layerLink,
       showWhenUnlinked: false,
       child: GestureDetector(
+        startBehavior: widget.dragStartBehavior,
         onPanStart: _handleDragStart,
         onPanUpdate: _handleDragUpdate,
         onTap: _handleTap,

@@ -495,10 +495,10 @@ class RawGestureDetector extends StatefulWidget {
     this.gestures = const <Type, GestureRecognizerFactory>{},
     this.behavior,
     this.excludeFromSemantics = false,
-    this.dragStartBehavior = DragStartBehavior.start
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
-       super(key: key);
+       super(key: key) ;
 
   /// The widget below this widget in the tree.
   ///
@@ -540,6 +540,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   @override
   void initState() {
+    debugPrint('gesture_detector ' + widget.dragStartBehavior.toString());
+    debugPrint('name ' + this.toString());
     super.initState();
     _syncAll(widget.gestures);
   }
@@ -633,6 +635,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       assert(gestures[type]._debugAssertTypeMatches(type));
       assert(!_recognizers.containsKey(type));
       _recognizers[type] = oldRecognizers[type] ?? gestures[type].constructor();
+      debugPrint('before asign ' + widget.dragStartBehavior.toString());
       _recognizers[type].dragStartBehavior = widget.dragStartBehavior;
       assert(_recognizers[type].runtimeType == type, 'GestureRecognizerFactory of type $type created a GestureRecognizer of type ${_recognizers[type].runtimeType}. The GestureRecognizerFactory must be specialized with the type of the class that it returns from its constructor method.');
       gestures[type].initializer(_recognizers[type]);

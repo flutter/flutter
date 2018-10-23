@@ -8,7 +8,7 @@ import 'drag_details.dart';
 import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
-
+import 'package:flutter/foundation.dart';
 enum _DragState {
   ready,
   possible,
@@ -49,6 +49,7 @@ typedef GestureDragCancelCallback = void Function();
 abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
   DragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+
   /// A pointer has contacted the screen and might begin to move.
   ///
   /// The position of the pointer is provided in the callback's `details`

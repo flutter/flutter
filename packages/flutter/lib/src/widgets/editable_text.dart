@@ -733,6 +733,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         renderObject: renderObject,
         selectionControls: widget.selectionControls,
         selectionDelegate: this,
+        dragStartBehavior: widget.dragStartBehavior,
       );
       final bool longPress = cause == SelectionChangedCause.longPress;
       if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))

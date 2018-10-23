@@ -507,6 +507,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     assert(position != null);
+    debugPrint('scrollable ' + widget.dragStartBehavior.toString());
     // TODO(ianh): Having all these global keys is sad.
     Widget result = RawGestureDetector(
       key: _gestureDetectorKey,

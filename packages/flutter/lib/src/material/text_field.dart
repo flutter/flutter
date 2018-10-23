@@ -565,6 +565,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       child: IgnorePointer(
         ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
         child: GestureDetector(
+          startBehavior: widget.dragStartBehavior,
           behavior: HitTestBehavior.translucent,
           onTapDown: _handleTapDown,
           onTap: _handleTap,
