@@ -73,7 +73,7 @@ void main() {
     g.append(j);
 
     a.markClean();  // ignore: invalid_use_of_protected_member
-    b.markDirty();
+    b.markDirty();  // ignore: invalid_use_of_protected_member
     c.markClean();  // ignore: invalid_use_of_protected_member
     d.markClean();  // ignore: invalid_use_of_protected_member
     e.markClean();  // ignore: invalid_use_of_protected_member
@@ -81,7 +81,7 @@ void main() {
     g.markClean();  // ignore: invalid_use_of_protected_member
     h.markClean();  // ignore: invalid_use_of_protected_member
     i.markClean();  // ignore: invalid_use_of_protected_member
-    j.markDirty();
+    j.markDirty();  // ignore: invalid_use_of_protected_member
 
     a.updateSubtreeDirtiness();
 

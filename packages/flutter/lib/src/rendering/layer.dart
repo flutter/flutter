@@ -48,6 +48,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Mark that this layer has changed and we need to upload changes to the
   /// engine using [addToScene].
+  @protected
   void markDirty() { _isDirty = true; }
 
   /// Mark that [addToScene] is called and this layer is in sync with engine.
@@ -158,7 +159,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       return;
     }
     _engineLayer = addToScene(builder);
-    _isDirty = false;
+    markClean();
   }
 
   /// The object responsible for creating this layer.
@@ -199,7 +200,12 @@ class PictureLayer extends Layer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  ui.Picture picture;
+  ui.Picture get picture => _picture;
+  set picture(ui.Picture picture) {
+    markDirty();
+    _picture = picture;
+  }
+  ui.Picture _picture;
 
   /// Hints that the painting in this layer is complex and would benefit from
   /// caching.
@@ -614,7 +620,7 @@ class OffsetLayer extends ContainerLayer {
   ///
   /// By default, [offset] is zero. It must be non-null before the compositing
   /// phase of the pipeline.
-  OffsetLayer({ this.offset = Offset.zero });
+  OffsetLayer({ Offset offset = Offset.zero }) : _offset = offset;
 
   /// Offset from parent in the parent's coordinate system.
   ///
@@ -623,7 +629,14 @@ class OffsetLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  Offset offset;
+  Offset get offset => _offset;
+  set offset(Offset offset) {
+    if (offset != _offset) {
+      markDirty();
+    }
+    _offset = offset;
+  }
+  Offset _offset;
 
   @override
   S find<S>(Offset regionOffset) {
