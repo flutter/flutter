@@ -266,6 +266,7 @@ Future<void> _verifyNoTestPackageImports(String workingDirectory) async {
         if (path.split(file.path).contains('test_driver') ||
             name.startsWith('dev/missing_dependency_tests/') ||
             name.startsWith('dev/automated_tests/') ||
+            name.startsWith('dev/snippets/') ||
             name.startsWith('packages/flutter/test/engine/') ||
             name.startsWith('examples/layers/test/smoketests/raw/') ||
             name.startsWith('examples/layers/test/smoketests/rendering/') ||
