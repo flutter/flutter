@@ -519,7 +519,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       itemCount: widget.steps.length,
       itemBuilder: (BuildContext context, int i){
 
-        i < _keys.length ? _keys[i] : _keys.add(GlobalKey());
+        if(i >= _keys.length){
+          _keys.add(GlobalKey());
+        }
+        
         return Column(
           key: _keys[i],
           children: <Widget>[
