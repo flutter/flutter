@@ -315,12 +315,15 @@ Future<XcodeBuildResult> buildXcodeProject({
     } else {
       printError('3. Click the Editor->Add Configuration->Duplicate "Release" Configuration.');
     }
+    printError('');
     printError('   If this option is disabled, it is likely you have the target selected instead');
-    printError('     of the project; see:');
-    printError('     https://stackoverflow.com/questions/19842746/adding-a-build-configuration-in-xcode');
+    printError('   of the project; see:');
+    printError('   https://stackoverflow.com/questions/19842746/adding-a-build-configuration-in-xcode');
+    printError('');
     printError('   If you have created a completely custom set of build configurations,');
-    printError('     you can set the FLUTTER_BUILD_MODE=${buildInfo.modeName.toLowerCase()}');
-    printError('     in the .xcconfig file for that configuration and run from Xcode.');
+    printError('   you can set the FLUTTER_BUILD_MODE=${buildInfo.modeName.toLowerCase()}');
+    printError('   in the .xcconfig file for that configuration and run from Xcode.');
+    printError('');
     printError('4. Name the newly created configuration ${buildInfo.modeName}.');
     return XcodeBuildResult(success: false);
   }
