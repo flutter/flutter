@@ -45,6 +45,7 @@ Engine::Engine(Delegate& delegate,
                blink::TaskRunners task_runners,
                blink::Settings settings,
                std::unique_ptr<Animator> animator,
+               fml::WeakPtr<blink::SnapshotDelegate> snapshot_delegate,
                fml::WeakPtr<GrContext> resource_context,
                fml::RefPtr<flow::SkiaUnrefQueue> unref_queue)
     : delegate_(delegate),
@@ -62,6 +63,7 @@ Engine::Engine(Delegate& delegate,
       std::move(isolate_snapshot),          // isolate snapshot
       std::move(shared_snapshot),           // shared snapshot
       std::move(task_runners),              // task runners
+      std::move(snapshot_delegate),         // snapshot delegate
       std::move(resource_context),          // resource context
       std::move(unref_queue),               // skia unref queue
       settings_.advisory_script_uri,        // advisory script uri

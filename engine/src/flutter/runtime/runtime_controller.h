@@ -32,6 +32,7 @@ class RuntimeController final : public WindowClient {
                     fml::RefPtr<DartSnapshot> isolate_snapshot,
                     fml::RefPtr<DartSnapshot> shared_snapshot,
                     TaskRunners task_runners,
+                    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
                     fml::WeakPtr<GrContext> resource_context,
                     fml::RefPtr<flow::SkiaUnrefQueue> unref_queue,
                     std::string advisory_script_uri,
@@ -112,6 +113,7 @@ class RuntimeController final : public WindowClient {
   fml::RefPtr<DartSnapshot> isolate_snapshot_;
   fml::RefPtr<DartSnapshot> shared_snapshot_;
   TaskRunners task_runners_;
+  fml::WeakPtr<SnapshotDelegate> snapshot_delegate_;
   fml::WeakPtr<GrContext> resource_context_;
   fml::RefPtr<flow::SkiaUnrefQueue> unref_queue_;
   std::string advisory_script_uri_;
@@ -125,6 +127,7 @@ class RuntimeController final : public WindowClient {
                     fml::RefPtr<DartSnapshot> isolate_snapshot,
                     fml::RefPtr<DartSnapshot> shared_snapshot,
                     TaskRunners task_runners,
+                    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
                     fml::WeakPtr<GrContext> resource_context,
                     fml::RefPtr<flow::SkiaUnrefQueue> unref_queue,
                     std::string advisory_script_uri,

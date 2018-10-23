@@ -35,6 +35,7 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
       vm->GetSharedSnapshot(),   // shared snapshot
       std::move(task_runners),   // task runners
       nullptr,                   // window
+      {},                        // snapshot delegate
       {},                        // resource context
       nullptr,                   // unref qeueue
       "main.dart",               // advisory uri
@@ -64,6 +65,7 @@ TEST_F(DartIsolateTest, IsolateShutdownCallbackIsInIsolateScope) {
       vm->GetSharedSnapshot(),   // shared snapshot
       std::move(task_runners),   // task runners
       nullptr,                   // window
+      {},                        // snapshot delegate
       {},                        // resource context
       nullptr,                   // unref qeueue
       "main.dart",               // advisory uri

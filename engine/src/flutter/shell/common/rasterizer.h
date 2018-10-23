@@ -13,12 +13,13 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/shell/common/surface.h"
 #include "flutter/synchronization/pipeline.h"
 
 namespace shell {
 
-class Rasterizer final {
+class Rasterizer final : public blink::SnapshotDelegate {
  public:
   Rasterizer(blink::TaskRunners task_runners);
 
@@ -32,6 +33,8 @@ class Rasterizer final {
   void Teardown();
 
   fml::WeakPtr<Rasterizer> GetWeakPtr() const;
+
+  fml::WeakPtr<blink::SnapshotDelegate> GetSnapshotDelegate() const;
 
   flow::LayerTree* GetLastLayerTree();
 
@@ -74,6 +77,10 @@ class Rasterizer final {
   std::unique_ptr<flow::LayerTree> last_layer_tree_;
   fml::closure next_frame_callback_;
   fml::WeakPtrFactory<Rasterizer> weak_factory_;
+
+  // |blink::SnapshotDelegate|
+  sk_sp<SkImage> MakeRasterSnapshot(sk_sp<SkPicture> picture,
+                                    SkISize picture_size) override;
 
   void DoDraw(std::unique_ptr<flow::LayerTree> layer_tree);
 
