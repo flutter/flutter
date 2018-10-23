@@ -59,19 +59,36 @@ class Paragraph {
 
   // Options for various types of bounding boxes provided by
   // GetRectsForRange(...).
-  // These options can be individually enabled, for example:
-  //
-  //   (RectStyle::kTight | RectStyle::kExtendEndOfLine)
-  //
-  // provides tight bounding boxes and extends the last box per line to the end
-  // of the layout area.
-  enum RectStyle {
-    kNone = 0x0,  // kNone cannot be combined with |.
+  enum class RectHeightStyle {
+    // Provide tight bounding boxes that fit heights per run.
+    kTight,
 
-    // Provide tight bounding boxes that fit heights per span. Otherwise, the
-    // heights of spans are the max of the heights of the line the span belongs
-    // in.
-    kTight = 0x1
+    // The height of the boxes will be the maximum height of all runs in the
+    // line. All rects in the same line will be the same height.
+    kMax,
+
+    // Extends the top and/or bottom edge of the bounds to fully cover any line
+    // spacing. The top edge of each line should be the same as the bottom edge
+    // of the line above. There should be no gaps in vertical coverage given any
+    // ParagraphStyle line_height.
+    //
+    // The top and bottom of each rect will cover half of the
+    // space above and half of the space below the line.
+    kIncludeLineSpacingMiddle,
+    // The line spacing will be added to the top of the rect.
+    kIncludeLineSpacingTop,
+    // The line spacing will be added to the bottom of the rect.
+    kIncludeLineSpacingBottom
+  };
+
+  enum class RectWidthStyle {
+    // Provide tight bounding boxes that fit widths to the runs of each line
+    // independently.
+    kTight,
+
+    // Extends the width of the last rect of each line to match the position of
+    // the widest rect over all the lines.
+    kMax
   };
 
   struct PositionWithAffinity {
@@ -158,7 +175,8 @@ class Paragraph {
   // end glyph indexes, including start and excluding end.
   std::vector<TextBox> GetRectsForRange(size_t start,
                                         size_t end,
-                                        RectStyle rect_style) const;
+                                        RectHeightStyle rect_height_style,
+                                        RectWidthStyle rect_width_style) const;
 
   // Returns the index of the glyph that corresponds to the provided coordinate,
   // with the top left corner as the origin, and +y direction as down.
@@ -239,6 +257,15 @@ class Paragraph {
   std::vector<double> line_heights_;
   std::vector<double> line_baselines_;
   bool did_exceed_max_lines_;
+
+  // Metrics for use in GetRectsForRange(...);
+  // Per-line max metrics over all runs in a given line.
+  std::vector<SkScalar> line_max_spacings_;
+  std::vector<SkScalar> line_max_descent_;
+  std::vector<SkScalar> line_max_ascent_;
+  // Overall left and right extremes over all lines.
+  double max_right_;
+  double min_left_;
 
   class BidiRun {
    public:

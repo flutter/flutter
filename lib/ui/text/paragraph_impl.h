@@ -36,7 +36,8 @@ class ParagraphImpl {
   virtual std::vector<TextBox> getRectsForRange(
       unsigned start,
       unsigned end,
-      txt::Paragraph::RectStyle rect_style) = 0;
+      txt::Paragraph::RectHeightStyle rect_height_style,
+      txt::Paragraph::RectWidthStyle rect_width_style) = 0;
 
   virtual Dart_Handle getPositionForOffset(double dx, double dy) = 0;
 
