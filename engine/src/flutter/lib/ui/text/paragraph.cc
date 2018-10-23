@@ -85,8 +85,9 @@ void Paragraph::paint(Canvas* canvas, double x, double y) {
 }
 
 std::vector<TextBox> Paragraph::getRectsForRange(unsigned start, unsigned end) {
-  return m_paragraphImpl->getRectsForRange(start, end,
-                                           txt::Paragraph::RectStyle::kTight);
+  return m_paragraphImpl->getRectsForRange(
+      start, end, txt::Paragraph::RectHeightStyle::kTight,
+      txt::Paragraph::RectWidthStyle::kTight);
 }
 
 Dart_Handle Paragraph::getPositionForOffset(double dx, double dy) {

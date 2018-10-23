@@ -446,6 +446,11 @@ void Paragraph::Layout(double width, bool force) {
   line_baselines_.clear();
   glyph_lines_.clear();
   code_unit_runs_.clear();
+  line_max_spacings_.clear();
+  line_max_descent_.clear();
+  line_max_ascent_.clear();
+  max_right_ = FLT_MIN;
+  min_left_ = FLT_MAX;
 
   minikin::Layout layout;
   SkTextBlobBuilder builder;
@@ -703,6 +708,9 @@ void Paragraph::Layout(double width, bool force) {
             Range<double>(glyph_positions.front().x_pos.start,
                           glyph_positions.back().x_pos.end),
             line_number, metrics, run.direction());
+
+        min_left_ = std::min(min_left_, glyph_positions.front().x_pos.start);
+        max_right_ = std::max(max_right_, glyph_positions.back().x_pos.end);
       }  // for each in glyph_blobs
 
       run_x_offset += layout.getAdvance();
@@ -729,8 +737,12 @@ void Paragraph::Layout(double width, bool force) {
 
     double max_line_spacing = 0;
     double max_descent = 0;
+    SkScalar max_unscaled_ascent = 0;
     auto update_line_metrics = [&](const SkPaint::FontMetrics& metrics,
                                    const TextStyle& style) {
+      // TODO(garyq): Multipling in the style.height on the first line is
+      // probably wrong. Figure out how paragraph and line heights are supposed
+      // to work and fix it.
       double line_spacing =
           (line_number == 0)
               ? -metrics.fAscent * style.height
@@ -747,6 +759,8 @@ void Paragraph::Layout(double width, bool force) {
 
       double descent = metrics.fDescent * style.height;
       max_descent = std::max(descent, max_descent);
+
+      max_unscaled_ascent = std::max(-metrics.fAscent, max_unscaled_ascent);
     };
     for (const PaintRecord& paint_record : paint_records) {
       update_line_metrics(paint_record.metrics(), paint_record.style());
@@ -762,11 +776,19 @@ void Paragraph::Layout(double width, bool force) {
       update_line_metrics(metrics, style);
     }
 
+    // TODO(garyq): Remove rounding of line heights because it is irrelevant in
+    // a world of high DPI devices.
     line_heights_.push_back((line_heights_.empty() ? 0 : line_heights_.back()) +
                             round(max_line_spacing + max_descent));
     line_baselines_.push_back(line_heights_.back() - max_descent);
     y_offset += round(max_line_spacing + prev_max_descent);
     prev_max_descent = max_descent;
+
+    // The max line spacing and ascent have been multiplied by -1 to make math
+    // in GetRectsForRange more logical/readable.
+    line_max_spacings_.push_back(max_line_spacing);
+    line_max_descent_.push_back(max_descent);
+    line_max_ascent_.push_back(max_unscaled_ascent);
 
     for (PaintRecord& paint_record : paint_records) {
       paint_record.SetOffset(
@@ -1093,10 +1115,30 @@ void Paragraph::PaintShadow(SkCanvas* canvas,
 std::vector<Paragraph::TextBox> Paragraph::GetRectsForRange(
     size_t start,
     size_t end,
-    RectStyle rect_style) const {
-  std::map<size_t, std::vector<Paragraph::TextBox>> line_boxes;
+    RectHeightStyle rect_height_style,
+    RectWidthStyle rect_width_style) const {
+  // Struct that holds calculated metrics for each line.
+  struct LineBoxMetrics {
+    std::vector<Paragraph::TextBox> boxes;
+    // Per-line metrics for max and min coordinates for left and right boxes.
+    // These metrics cannot be calculated in layout generically because of
+    // selections that do not cover the whole line.
+    SkScalar max_right = FLT_MIN;
+    SkScalar min_left = FLT_MAX;
+  };
 
+  std::map<size_t, LineBoxMetrics> line_metrics;
+  // Text direction of the first line so we can extend the correct side for
+  // RectWidthStyle::kMax.
+  TextDirection first_line_dir = TextDirection::ltr;
+
+  // Lines that are actually in the requested range.
+  size_t max_line = 0;
+  size_t min_line = INT_MAX;
+
+  // Generate initial boxes and calculate metrics.
   for (const CodeUnitRun& run : code_unit_runs_) {
+    // Check to see if we are finished.
     if (run.code_units.start >= end)
       break;
     if (run.code_units.end <= start)
@@ -1106,6 +1148,10 @@ std::vector<Paragraph::TextBox> Paragraph::GetRectsForRange(
     SkScalar top = baseline + run.font_metrics.fAscent;
     SkScalar bottom = baseline + run.font_metrics.fDescent;
 
+    max_line = std::max(run.line_number, max_line);
+    min_line = std::min(run.line_number, min_line);
+
+    // Calculate left and right.
     SkScalar left, right;
     if (run.code_units.start >= start && run.code_units.end <= end) {
       left = run.x_pos.start;
@@ -1122,7 +1168,18 @@ std::vector<Paragraph::TextBox> Paragraph::GetRectsForRange(
       if (left == SK_ScalarMax || right == SK_ScalarMin)
         continue;
     }
-    line_boxes[run.line_number].emplace_back(
+    // Keep track of the min and max horizontal coordinates over all lines. Not
+    // needed for kTight.
+    if (rect_width_style == RectWidthStyle::kMax) {
+      line_metrics[run.line_number].max_right =
+          std::max(line_metrics[run.line_number].max_right, right);
+      line_metrics[run.line_number].min_left =
+          std::min(line_metrics[run.line_number].min_left, left);
+      if (min_line == run.line_number) {
+        first_line_dir = run.direction;
+      }
+    }
+    line_metrics[run.line_number].boxes.emplace_back(
         SkRect::MakeLTRB(left, top, right, bottom), run.direction);
   }
 
@@ -1135,34 +1192,105 @@ std::vector<Paragraph::TextBox> Paragraph::GetRectsForRange(
       break;
     if (line.end_including_newline <= start)
       continue;
-    if (line_boxes.find(line_number) == line_boxes.end()) {
+    if (line_metrics.find(line_number) == line_metrics.end()) {
       if (line.end != line.end_including_newline && line.end >= start &&
           line.end_including_newline <= end) {
         SkScalar x = line_widths_[line_number];
         SkScalar top = (line_number > 0) ? line_heights_[line_number - 1] : 0;
         SkScalar bottom = line_heights_[line_number];
-        line_boxes[line_number].emplace_back(
+        line_metrics[line_number].boxes.emplace_back(
             SkRect::MakeLTRB(x, top, x, bottom), TextDirection::ltr);
       }
     }
   }
 
+  // "Post-process" metrics and aggregate final rects to return.
   std::vector<Paragraph::TextBox> boxes;
-  for (const auto& kv : line_boxes) {
-    if (rect_style & RectStyle::kTight) {
-      // Ignore line max height and width and generate tight bounds.
-      boxes.insert(boxes.end(), kv.second.begin(), kv.second.end());
-    } else {
-      // Set each box to the max height of each line to ensure continuity.
-      float min_top = DBL_MAX;
-      float max_bottom = 0;
-      for (const Paragraph::TextBox& box : kv.second) {
-        min_top = std::min(box.rect.fTop, min_top);
-        max_bottom = std::max(box.rect.fBottom, max_bottom);
+  for (const auto& kv : line_metrics) {
+    // Handle rect_width_styles. We skip the last line because not everything is
+    // selected.
+    if (rect_width_style == RectWidthStyle::kMax && kv.first != max_line) {
+      if (line_metrics[kv.first].min_left > min_left_ &&
+          (kv.first != min_line || first_line_dir == TextDirection::rtl)) {
+        line_metrics[kv.first].boxes.emplace_back(
+            SkRect::MakeLTRB(
+                min_left_,
+                line_baselines_[kv.first] - line_max_ascent_[kv.first],
+                line_metrics[kv.first].min_left,
+                line_baselines_[kv.first] + line_max_descent_[kv.first]),
+            TextDirection::rtl);
       }
-      for (const Paragraph::TextBox& box : kv.second) {
-        boxes.emplace_back(SkRect::MakeLTRB(box.rect.fLeft, min_top,
-                                            box.rect.fRight, max_bottom),
+      if (line_metrics[kv.first].max_right < max_right_ &&
+          (kv.first != min_line || first_line_dir == TextDirection::ltr)) {
+        line_metrics[kv.first].boxes.emplace_back(
+            SkRect::MakeLTRB(
+                line_metrics[kv.first].max_right,
+                line_baselines_[kv.first] - line_max_ascent_[kv.first],
+                max_right_,
+                line_baselines_[kv.first] + line_max_descent_[kv.first]),
+            TextDirection::ltr);
+      }
+    }
+
+    // Handle rect_height_styles. The height metrics used are all positive to
+    // make the signage clear here.
+    if (rect_height_style == RectHeightStyle::kTight) {
+      // Ignore line max height and width and generate tight bounds.
+      boxes.insert(boxes.end(), kv.second.boxes.begin(), kv.second.boxes.end());
+    } else if (rect_height_style == RectHeightStyle::kMax) {
+      for (const Paragraph::TextBox& box : kv.second.boxes) {
+        boxes.emplace_back(
+            SkRect::MakeLTRB(
+                box.rect.fLeft,
+                line_baselines_[kv.first] - line_max_ascent_[kv.first],
+                box.rect.fRight,
+                line_baselines_[kv.first] + line_max_descent_[kv.first]),
+            box.direction);
+      }
+    } else if (rect_height_style ==
+               RectHeightStyle::kIncludeLineSpacingMiddle) {
+      SkScalar adjusted_bottom =
+          line_baselines_[kv.first] + line_max_descent_[kv.first];
+      if (kv.first < line_ranges_.size() - 1) {
+        adjusted_bottom += (line_max_spacings_[kv.first + 1] -
+                            line_max_ascent_[kv.first + 1]) /
+                           2;
+      }
+      SkScalar adjusted_top =
+          line_baselines_[kv.first] - line_max_ascent_[kv.first];
+      if (kv.first != 0) {
+        adjusted_top -=
+            (line_max_spacings_[kv.first] - line_max_ascent_[kv.first]) / 2;
+      }
+      for (const Paragraph::TextBox& box : kv.second.boxes) {
+        boxes.emplace_back(SkRect::MakeLTRB(box.rect.fLeft, adjusted_top,
+                                            box.rect.fRight, adjusted_bottom),
+                           box.direction);
+      }
+    } else if (rect_height_style == RectHeightStyle::kIncludeLineSpacingTop) {
+      for (const Paragraph::TextBox& box : kv.second.boxes) {
+        SkScalar adjusted_top =
+            kv.first == 0
+                ? line_baselines_[kv.first] - line_max_ascent_[kv.first]
+                : line_baselines_[kv.first] - line_max_spacings_[kv.first];
+        boxes.emplace_back(
+            SkRect::MakeLTRB(
+                box.rect.fLeft, adjusted_top, box.rect.fRight,
+                line_baselines_[kv.first] + line_max_descent_[kv.first]),
+            box.direction);
+      }
+    } else {  // kIncludeLineSpacingBottom
+      for (const Paragraph::TextBox& box : kv.second.boxes) {
+        SkScalar adjusted_bottom =
+            line_baselines_[kv.first] + line_max_descent_[kv.first];
+        if (kv.first < line_ranges_.size() - 1) {
+          adjusted_bottom +=
+              -line_max_ascent_[kv.first] + line_max_spacings_[kv.first];
+        }
+        boxes.emplace_back(SkRect::MakeLTRB(box.rect.fLeft,
+                                            line_baselines_[kv.first] -
+                                                line_max_ascent_[kv.first],
+                                            box.rect.fRight, adjusted_bottom),
                            box.direction);
       }
     }
