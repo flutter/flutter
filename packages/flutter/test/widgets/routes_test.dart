@@ -12,7 +12,7 @@ final List<String> results = <String>[];
 
 Set<TestRoute> routes = HashSet<TestRoute>();
 
-class TestRoute extends Route<String> with LocalHistoryRoute<String> {
+class TestRoute extends LocalHistoryRoute<String> {
   TestRoute(this.name);
   final String name;
 
