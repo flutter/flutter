@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'arena.dart';
 import 'constants.dart';
 import 'drag_details.dart';
@@ -52,11 +50,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
   DragGestureRecognizer({
     Object debugOwner,
-  })  : super(debugOwner: debugOwner) {
-//    if (dragStartBehavior == DragStartBehavior.start)
-//      debugPrintStack();
-  }
-
+  })  : super(debugOwner: debugOwner);
   /// A pointer has contacted the screen and might begin to move.
   ///
   /// The position of the pointer is provided in the callback's `details`

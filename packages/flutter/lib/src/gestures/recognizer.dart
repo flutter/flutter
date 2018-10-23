@@ -26,10 +26,11 @@ typedef RecognizerCallback<T> = T Function();
 
 /// Configuration of offset passed to [DragStartDetails].
 enum DragStartBehavior {
-  /// Send the initial offset, as when we first detected a down event.
+  /// Set the initial offset, at the position where we first detected a down
+  /// event.
   down,
 
-  /// Send the offset at the time we detected a drag start.
+  /// Set the initial position at the position we detected a drag start event.
   start,
 }
 
@@ -88,6 +89,20 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   String get debugDescription;
 
   /// Configure the behavior of offsets sent to [onStart].
+  ///
+  /// If set to [DragStartBehavior.start], the [onStart] callback will be called at the time and
+  /// position when the gesture detector wins the arena. If [DragStartBehavior.down ],
+  /// [onStart] will be called when at the time and position when a down event
+  /// was first detected.
+  ///
+  /// For example:
+  /// A finger presses down at on the screen with offset (500.0, 500.0),
+  /// and then moves to position (510.0, 500.0) before winning the arena.
+  /// With [dragStartBehavior] set to [DragStartBehavior.down], the [onStart]
+  /// callback will be called at the time corresponding to the touch's position
+  /// at (500.0, 500.0). If it is instead set to [DragStartBehavior.start],
+  /// onStart will be called at the time corresponding to the touch's position
+  /// at (510.0, 500.0).
   DragStartBehavior dragStartBehavior;
 
   /// Invoke a callback provided by the application, catching and logging any

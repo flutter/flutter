@@ -52,7 +52,7 @@ class CupertinoSwitch extends StatefulWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
-    this.dragStartBehavior,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
   /// Whether this switch is on or off.
@@ -87,6 +87,10 @@ class CupertinoSwitch extends StatefulWidget {
   /// Defaults to [CupertinoColors.activeGreen].
   final Color activeColor;
 
+  /// Determines where the drag starts from and what location.
+  ///
+  /// If [start], the drag will start from the position where the given gesture
+  /// wins in the arena. If [down], i
   final DragStartBehavior dragStartBehavior;
 
   @override
