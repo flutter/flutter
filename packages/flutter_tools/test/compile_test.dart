@@ -48,7 +48,8 @@ void main() {
             ))
           ));
       final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
-        mainPath: '/path/to/main.dart'
+        mainPath: '/path/to/main.dart',
+        trackWidgetCreation: false,
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
@@ -70,7 +71,8 @@ void main() {
           ));
 
       final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
-        mainPath: '/path/to/main.dart'
+        mainPath: '/path/to/main.dart',
+        trackWidgetCreation: false,
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
@@ -93,8 +95,10 @@ void main() {
           ))
       ));
 
-      final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
-          mainPath: '/path/to/main.dart'
+      final CompilerOutput output = await kernelCompiler.compile(
+        sdkRoot: '/path/to/sdkroot',
+        mainPath: '/path/to/main.dart',
+        trackWidgetCreation: false,
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
@@ -149,7 +153,9 @@ void main() {
           ));
 
       final CompilerOutput output = await generator.recompile(
-        '/path/to/main.dart', null /* invalidatedFiles */
+        '/path/to/main.dart',
+          null /* invalidatedFiles */,
+        outputPath: '/build/',
       );
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
       verifyNoMoreInteractions(mockFrontendServerStdIn);
@@ -167,7 +173,9 @@ void main() {
       );
 
       final CompilerOutput output = await generator.recompile(
-          '/path/to/main.dart', null /* invalidatedFiles */
+        '/path/to/main.dart',
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
       );
       expect(output, equals(null));
     }, overrides: <Type, Generator>{
@@ -183,7 +191,11 @@ void main() {
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => streamController.stream);
       streamController.add(utf8.encode('result abc\nline0\nline1\nabc /path/to/main.dart.dill 0\n'));
-      await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */);
+      await generator.recompile(
+        '/path/to/main.dart',
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
+      );
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
       await _recompile(streamController, generator, mockFrontendServerStdIn,
@@ -210,7 +222,7 @@ void main() {
       streamController.add(utf8.encode(
         'result abc\nline0\nline1\nabc /path/to/main.dart.dill 0\n'
       ));
-      await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */);
+      await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */, outputPath: '/build/');
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
       await _recompile(streamController, generator, mockFrontendServerStdIn,
@@ -292,7 +304,9 @@ void main() {
       )));
 
       await generator.recompile(
-          '/path/to/main.dart', null /* invalidatedFiles */
+        '/path/to/main.dart',
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
       ).then((CompilerOutput output) {
         expect(mockFrontendServerStdIn.getAndClear(),
             'compile /path/to/main.dart\n');
@@ -339,7 +353,9 @@ void main() {
 
       // The test manages timing via completers.
       generator.recompile( // ignore: unawaited_futures
-          '/path/to/main.dart', null /* invalidatedFiles */
+        '/path/to/main.dart',
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
       ).then((CompilerOutput outputCompile) {
         expect(logger.errorText,
             equals('\nCompiler message:\nline1\nline2\n'));
@@ -394,7 +410,11 @@ Future<void> _recompile(StreamController<List<int>> streamController,
   scheduleMicrotask(() {
     streamController.add(utf8.encode(mockCompilerOutput));
   });
-  final CompilerOutput output = await generator.recompile(null /* mainPath */, <String>['/path/to/main.dart']);
+  final CompilerOutput output = await generator.recompile(
+    null /* mainPath */,
+    <String>['/path/to/main.dart'],
+    outputPath: '/build/',
+  );
   expect(output.outputFilename, equals('/path/to/main.dart.dill'));
   final String commands = mockFrontendServerStdIn.getAndClear();
   final RegExp re = RegExp('^recompile (.*)\\n/path/to/main.dart\\n(.*)\\n\$');

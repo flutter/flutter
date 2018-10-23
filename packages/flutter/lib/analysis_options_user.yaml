@@ -24,8 +24,6 @@ analyzer:
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
-    # allow having TODOs in the code
-    todo: ignore
 
 linter:
   rules:

@@ -178,6 +178,24 @@ StringBuffer bar = StringBuffer('baz');
         tryToDelete(tempDir);
       }
     });
+
+    testUsingContext('returns no issues for todo comments', () async {
+      const String contents = '''
+// TODO(foobar):
+StringBuffer bar = StringBuffer('baz');
+''';
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_4.');
+      tempDir.childFile('main.dart').writeAsStringSync(contents);
+      try {
+        await runCommand(
+          command: AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
+          arguments: <String>['analyze'],
+          statusTextContains: <String>['No issues found!'],
+        );
+      } finally {
+        tryToDelete(tempDir);
+      }
+    });
   });
 }
 
