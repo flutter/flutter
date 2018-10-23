@@ -84,6 +84,7 @@ class BuildAotCommand extends BuildSubCommand {
         platform: platform,
         buildMode: buildMode,
         mainPath: mainPath,
+        packagesPath: PackageMap.globalPackagesPath,
         outputPath: outputPath,
         extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       );
