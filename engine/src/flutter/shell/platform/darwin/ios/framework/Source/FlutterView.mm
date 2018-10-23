@@ -12,8 +12,6 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
-#include "flutter/shell/common/shell.h"
-#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
@@ -24,28 +22,42 @@
 
 @implementation FlutterView
 
-- (FlutterViewController*)flutterViewController {
-  // Find the first view controller in the responder chain and see if it is a FlutterViewController.
-  for (UIResponder* responder = self.nextResponder; responder != nil;
-       responder = responder.nextResponder) {
-    if ([responder isKindOfClass:[UIViewController class]]) {
-      if ([responder isKindOfClass:[FlutterViewController class]]) {
-        return reinterpret_cast<FlutterViewController*>(responder);
-      } else {
-        // Should only happen if a non-FlutterViewController tries to somehow (via dynamic class
-        // resolution or reparenting) set a FlutterView as its view.
-        return nil;
-      }
-    }
+id<FlutterScreenshotDelegate> _delegate;
+
+- (instancetype)init {
+  @throw([NSException exceptionWithName:@"FlutterView must initWithDelegate"
+                                 reason:nil
+                               userInfo:nil]);
+}
+
+- (instancetype)initWithFrame:(CGRect)frame {
+  @throw([NSException exceptionWithName:@"FlutterView must initWithDelegate"
+                                 reason:nil
+                               userInfo:nil]);
+}
+
+- (instancetype)initWithCoder:(NSCoder*)aDecoder {
+  @throw([NSException exceptionWithName:@"FlutterView must initWithDelegate"
+                                 reason:nil
+                               userInfo:nil]);
+}
+
+- (instancetype)initWithDelegate:(id<FlutterScreenshotDelegate>)delegate opaque:(BOOL)opaque {
+  FML_DCHECK(delegate) << "Delegate must not be nil.";
+  self = [super initWithFrame:CGRectNull];
+
+  if (self) {
+    _delegate = delegate;
+    self.layer.opaque = opaque;
   }
-  return nil;
+
+  return self;
 }
 
 - (void)layoutSubviews {
   if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
     CAEAGLLayer* layer = reinterpret_cast<CAEAGLLayer*>(self.layer);
     layer.allowsGroupOpacity = YES;
-    layer.opaque = YES;
     CGFloat screenScale = [UIScreen mainScreen].scale;
     layer.contentsScale = screenScale;
     layer.rasterizationScale = screenScale;
@@ -84,16 +96,8 @@
     return;
   }
 
-  FlutterViewController* controller = [self flutterViewController];
-
-  if (controller == nil) {
-    return;
-  }
-
-  auto& shell = [controller shell];
-
-  auto screenshot = shell.Screenshot(shell::Rasterizer::ScreenshotType::UncompressedImage,
-                                     false /* base64 encode */);
+  auto screenshot = [_delegate takeScreenshot:shell::Rasterizer::ScreenshotType::UncompressedImage
+                              asBase64Encoded:NO];
 
   if (!screenshot.data || screenshot.data->isEmpty() || screenshot.frame_size.isEmpty()) {
     return;
