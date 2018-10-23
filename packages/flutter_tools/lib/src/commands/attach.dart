@@ -4,14 +4,13 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
 import '../device.dart';
+import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
 import '../resident_runner.dart';
@@ -182,7 +181,8 @@ class AttachCommand extends FlutterCommand {
         'attach to a Fuchsia device.');
     }
     final String isolateName = '$moduleName\$main-$isolateNumber';
-    final int port = await device.servicePort(isolateName);
+    // Maybe this works?
+    final int port = await device.portForwarder.forward(await device.servicePort(isolateName));
     final Uri observatoryUri = Uri.parse('http://$ipv4Loopback:$port');
     try {
       final FlutterDevice flutterDevice = FlutterDevice(

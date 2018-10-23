@@ -21,6 +21,7 @@ FuchsiaSdk get fuchsiaSdk => context[FuchsiaSdk];
 /// This workflow assumes development within the fuchsia source tree,
 /// including a working fx command-line tool in the user's PATH.
 class FuchsiaSdk {
+
   /// The location of the SSH configuration file used to interact with a
   /// fuchsia device.
   ///
