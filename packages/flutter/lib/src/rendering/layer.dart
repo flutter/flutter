@@ -158,15 +158,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       return;
     }
     _engineLayer = addToScene(builder);
-    if (this is FollowerLayer || this is LeaderLayer) {
-      // Always keep LeaderLayer and FollowerLayer in dirty state so we won't
-      // apply retained rendering to those layers. We have to do this because
-      // they break the assumption of retained rendering: even if no layer in a
-      // subtree is dirty, the subtree may still be dirty because the
-      // FollowerLayer copies change from a LeaderLayer that could be anywhere
-      // in the Layer tree.
-      return;
-    }
     _isDirty = false;
   }
 
@@ -415,7 +406,6 @@ class ContainerLayer extends Layer {
     return child == equals;
   }
 
-  // TODO(liyuqian): add unit tests for this.
   @override
   void updateSubtreeDirtiness() {
     _isSubtreeDirty = _isDirty;
@@ -1219,7 +1209,7 @@ class LeaderLayer extends ContainerLayer {
   /// pipeline.
   Offset offset;
 
-  /// {@macro flutter.clipper.clipBehavior}
+  /// {@macro flutter.leaderFollower.markClean}
   @override
   void markClean() {}
 
