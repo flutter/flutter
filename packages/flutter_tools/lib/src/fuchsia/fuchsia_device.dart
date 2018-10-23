@@ -57,7 +57,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     final String text = await fuchsiaSdk.netls();
     final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
     for (String name in parseFuchsiaDeviceOutput(text)) {
-      final String id = await fuchsiaSdk.netaddr(name);
+      final String id = await fuchsiaSdk.netaddr();
       devices.add(FuchsiaDevice(id, name: name));
     }
     return devices;
@@ -164,32 +164,37 @@ class FuchsiaDevice extends Device {
   /// Run `command` on the fuchsia device.
   Future<String> run(String command) => fuchsiaSdk.run(this, command);
 
-  /// Finds the first port running a VM matching `isolateName` on `device`.
+  /// Finds the first port running a VM matching `isolateName` given `ports`.
   ///
   /// TODO(jonahwilliams): replacing this with the hub will require an update
   /// to the flutter_runner.
-  Future<int> servicePort(String isolateName) => fuchsiaSdk.servicePort(this, isolateName);
+  Future<int> findIsolatePort(String isolateName, List<int> ports) => fuchsiaSdk.findIsolatePort(this, isolateName, ports);
+
+  /// List the ports currently running a dart observatory.
+  Future<List<int>> servicePorts() async {
+    final String lsOutput = await run('ls /tmp/dart.services');
+    return parseFuchsiaDartPortOutput(lsOutput);
+  }
 }
 
 class _FuchsiaPortForwarder extends DevicePortForwarder {
   _FuchsiaPortForwarder(this.device);
 
   final FuchsiaDevice device;
-  Process _process;
 
   @override
   Future<int> forward(int devicePort, {int hostPort}) async {
     hostPort ??= 0;
     final List<String> command = <String>[
       'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
-      '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'date',
+      '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'ls',
     ];
-    _process = await processManager.start(command);
-    _process.stderr
+    final Process process = await processManager.start(command, runInShell: true);
+    process.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen(printTrace);
-    _process.exitCode.then<void>((int exitCode) { // ignore: unawaited_futures
+    await process.exitCode.then<void>((int exitCode) {
       printTrace('exited with exit code $exitCode');
     });
     _forwardedPorts.add(ForwardedPort(hostPort, devicePort));
@@ -203,7 +208,6 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async {
     _forwardedPorts.remove(forwardedPort);
-    _process.kill();
     final List<String> command = <String>[
         'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, '-O', 'cancel', '-vvv',
         '-L', '${forwardedPort.hostPort}:$_ipv4Loopback:${forwardedPort.devicePort}', device.id];
@@ -212,4 +216,29 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       throwToolExit(result.stderr);
     }
   }
+}
+
+/// Parses output from `dart.services` output on a fuchsia device.
+///
+/// Example output:
+///     $ ls /tmp/dart.services
+///     > d  2          0 .
+///     > -  1          0 36780
+@visibleForTesting
+List<int> parseFuchsiaDartPortOutput(String text) {
+  final List<int> ports = <int>[];
+  if (text == null)
+    return ports;
+  for (String line in text.split('\n')) {
+    final String trimmed = line.trim();
+    final int lastSpace = trimmed.lastIndexOf(' ');
+    final String lastWord = trimmed.substring(lastSpace + 1);
+    if ((lastWord != '.') && (lastWord != '..')) {
+      final int value = int.tryParse(lastWord);
+      if (value != null) {
+        ports.add(value);
+      }
+    }
+  }
+  return ports;
 }

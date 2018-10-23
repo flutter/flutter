@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -28,7 +26,7 @@ class FuchsiaSdk {
   /// Requires the env variable `build-dir` to be set.
   File get sshConfig {
     if (_sshConfig == null) {
-      final String buildDirectory = platform.environment['build-dir'];
+      final String buildDirectory = platform.environment['BUILD_DIR'];
       _sshConfig = fs.file('$buildDirectory/ssh-keys/ssh_config');
     }
     return _sshConfig;
@@ -43,10 +41,10 @@ class FuchsiaSdk {
   /// Example output:
   ///     $ fx netaddr --fuchsia -d liliac-shore-only-last
   ///     > fe80::9aaa:fcff:fe60:d3af%eth1
-  Future<String> netaddr(String name) async {
+  Future<String> netaddr() async {
     try {
-      final RunResult process = await runAsync(<String>['fx', 'netaddr', '--fuchsia', '-d', name]);
-      return process.stdout;
+      final RunResult process = await runAsync(<String>['fx', 'netaddr', '--fuchsia', '--nowait']);
+      return process.stdout.trim();
     } on ArgumentError catch (exception) {
       throwToolExit('$exception');
     }
@@ -83,56 +81,33 @@ class FuchsiaSdk {
     return result.stdout;
   }
 
-  /// Finds the first port running a VM matching `isolateName` on `device`.
+  /// Finds the first port running a VM matching `isolateName` on `device` from `ports`.
   ///
   /// TODO(jonahwilliams): replacing this with the hub will require an update
   /// to the flutter_runner.
-  Future<int> servicePort(FuchsiaDevice device, String isolateName) async {
-    final String lsOutput = await run(device, 'ls /tmp/dart.services');
-    final List<int> ports =  parseFuchsiaDartPortOutput(lsOutput);
-
+  Future<int> findIsolatePort(FuchsiaDevice device, String isolateName, List<int> ports) async {
     for (int port in ports) {
-      final String addr = 'http://${InternetAddress.loopbackIPv4.address}:$port';
-      final Uri uri = Uri.parse(addr);
-      final VMService vmService = await VMService.connect(uri);
-      await vmService.getVM();
-      await vmService.refreshViews();
-      for (FlutterView flutterView in vmService.vm.views) {
-        if (flutterView.uiIsolate == null) {
-          continue;
+      try {
+        final String addr = 'http://${InternetAddress.loopbackIPv4.address}:$port';
+        final Uri uri = Uri.parse(addr);
+        final VMService vmService = await VMService.connect(uri);
+        await vmService.getVM();
+        await vmService.refreshViews();
+        for (FlutterView flutterView in vmService.vm.views) {
+          if (flutterView.uiIsolate == null) {
+            continue;
+          }
+          final Uri address = flutterView.owner.vmService.httpAddress;
+          print(flutterView.uiIsolate.name);
+          if (flutterView.uiIsolate.name.contains(isolateName)) {
+            return address.port;
+          }
         }
-        final Uri address = flutterView.owner.vmService.httpAddress;
-        if (flutterView.uiIsolate.name.contains(isolateName)) {
-          return address.port;
-        }
+      } on SocketException catch (err) {
+        print('Failed to connect to $port: $err');
       }
     }
     throwToolExit('No ports found running $isolateName');
     return null;
   }
-}
-
-/// Parses output from `dart.services` output on a fuchsia device.
-///
-/// Example output:
-///     $ ls /tmp/dart.services
-///     > d  2          0 .
-///     > -  1          0 36780
-@visibleForTesting
-List<int> parseFuchsiaDartPortOutput(String text) {
-  final List<int> ports = <int>[];
-  if (text == null)
-    return ports;
-  for (String line in text.split('\n')) {
-    final String trimmed = line.trim();
-    final int lastSpace = trimmed.lastIndexOf(' ');
-    final String lastWord = trimmed.substring(lastSpace + 1);
-    if ((lastWord != '.') && (lastWord != '..')) {
-      final int value = int.tryParse(lastWord);
-      if (value != null) {
-        ports.add(value);
-      }
-    }
-  }
-  return ports;
 }

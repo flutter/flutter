@@ -60,10 +60,10 @@ class AttachCommand extends FlutterCommand {
         hide: !verboseHelp,
         help: 'The isolate number of module if attaching to a fuchsia device'
       )..addFlag('machine',
-          hide: !verboseHelp,
-          negatable: false,
-          help: 'Handle machine structured JSON command input and provide output '
-                'and progress in machine friendly format.',
+        hide: !verboseHelp,
+        negatable: false,
+        help: 'Handle machine structured JSON command input and provide output '
+              'and progress in machine friendly format.',
       );
     hotRunnerFactory ??= HotRunnerFactory();
   }
@@ -102,17 +102,7 @@ class AttachCommand extends FlutterCommand {
     await _validateArguments();
 
     final Device device = await findTargetDevice();
-    int devicePort = observatoryPort;
-    if (devicePort == null && device is FuchsiaDevice) {
-      final String moduleName = argResults['module-name'];
-      final String isolateNumber = argResults['isolate-number'];
-      if (moduleName == null || isolateNumber == null) {
-        throwToolExit('both module-name and isolate-number must be provided to'
-          'attach to a Fuchsia device.');
-      }
-      final String isolateName = '$moduleName\$main-$isolateNumber';
-      devicePort = await device.servicePort(isolateName);
-    }
+    final int devicePort = observatoryPort;
 
     final Daemon daemon = argResults['machine']
       ? Daemon(stdinCommandStream, stdoutCommandResponse,
@@ -120,7 +110,7 @@ class AttachCommand extends FlutterCommand {
       : null;
 
     Uri observatoryUri;
-    if (devicePort == null) {
+    if (devicePort == null  && device is! FuchsiaDevice) {
       ProtocolDiscovery observatoryDiscovery;
       try {
         observatoryDiscovery = ProtocolDiscovery.observatory(
@@ -133,6 +123,25 @@ class AttachCommand extends FlutterCommand {
       } finally {
         await observatoryDiscovery?.cancel();
       }
+    } else if (devicePort == null && device is FuchsiaDevice) {
+      final String moduleName = argResults['module-name'];
+      final String isolateNumber = argResults['isolate-number'];
+      // if (moduleName == null || isolateNumber == null) {
+      //   throwToolExit('both module-name and isolate-number must be provided to'
+      //     ' attach to a Fuchsia device.');
+      // }
+      final List<int> ports = await device.servicePorts();
+      final List<int> localPorts = <int>[];
+      for (int port in ports) {
+        final ServerSocket socket = await ServerSocket.bind(ipv4Loopback, 0);
+        localPorts.add(socket.port);
+        print(socket.port);
+        await device.portForwarder.forward(port, hostPort: socket.port);
+      }
+      final String isolateName = '$moduleName\$main-$isolateNumber';
+      final int devicePort = await device.findIsolatePort(isolateName, localPorts);
+      observatoryUri = Uri.parse('http://$ipv4Loopback:$devicePort/');
+      printStatus('Connecting to $observatoryUri');
     } else {
       final int localPort = await device.portForwarder.forward(devicePort);
       observatoryUri = Uri.parse('http://$ipv4Loopback:$localPort/');
