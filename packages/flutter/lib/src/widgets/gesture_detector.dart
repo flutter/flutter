@@ -326,7 +326,7 @@ class GestureDetector extends StatelessWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
-  /// The start behaviour of the drag.
+  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
   final DragStartBehavior startBehavior;
 
   @override
@@ -527,7 +527,7 @@ class RawGestureDetector extends StatefulWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
-  ///
+  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   @override
@@ -633,7 +633,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       assert(gestures[type]._debugAssertTypeMatches(type));
       assert(!_recognizers.containsKey(type));
       _recognizers[type] = oldRecognizers[type] ?? gestures[type].constructor();
-      _recognizers[type].dragStartBehavior = DragStartBehavior.down;
+      _recognizers[type].dragStartBehavior = widget.dragStartBehavior;
       assert(_recognizers[type].runtimeType == type, 'GestureRecognizerFactory of type $type created a GestureRecognizer of type ${_recognizers[type].runtimeType}. The GestureRecognizerFactory must be specialized with the type of the class that it returns from its constructor method.');
       gestures[type].initializer(_recognizers[type]);
     }
@@ -641,7 +641,6 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       if (!_recognizers.containsKey(type))
         oldRecognizers[type].dispose();
     }
-
   }
 
   void _handlePointerDown(PointerDownEvent event) {

@@ -88,6 +88,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// recognizer looks for, like 'tap' or 'horizontal drag'.
   String get debugDescription;
 
+  /// {@template flutter.gestures.recognizer.dragStartBehavior}
   /// Configure the behavior of offsets sent to [onStart].
   ///
   /// If set to [DragStartBehavior.start], the [onStart] callback will be called at the time and
@@ -103,6 +104,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// at (500.0, 500.0). If it is instead set to [DragStartBehavior.start],
   /// onStart will be called at the time corresponding to the touch's position
   /// at (510.0, 500.0).
+  /// {@endtemplate}
   DragStartBehavior dragStartBehavior;
 
   /// Invoke a callback provided by the application, catching and logging any

@@ -190,7 +190,7 @@ abstract class ScrollView extends StatelessWidget {
   ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
   final int semanticChildCount;
 
-  /// yuuuuuup, it's draaaagggg startttt!
+  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   /// Returns the [AxisDirection] in which the scroll view scrolls.
@@ -804,7 +804,7 @@ class ListView extends BoxScrollView {
     bool addSemanticIndexes = true,
     double cacheExtent,
     int semanticChildCount,
-    DragStartBehavior dragStartBehavior,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          childCount: itemCount,

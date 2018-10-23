@@ -87,10 +87,7 @@ class CupertinoSwitch extends StatefulWidget {
   /// Defaults to [CupertinoColors.activeGreen].
   final Color activeColor;
 
-  /// Determines where the drag starts from and what location.
-  ///
-  /// If [start], the drag will start from the position where the given gesture
-  /// wins in the arena. If [down], i
+  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   @override
@@ -124,7 +121,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.activeColor,
     this.onChanged,
     this.vsync,
-    this.dragStartBehavior,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
   final bool value;
@@ -176,7 +173,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     ValueChanged<bool> onChanged,
     @required TextDirection textDirection,
     @required TickerProvider vsync,
-    DragStartBehavior dragStartBehavior,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : assert(value != null),
        assert(activeColor != null),
        assert(vsync != null),

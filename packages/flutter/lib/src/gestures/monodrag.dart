@@ -48,9 +48,7 @@ typedef GestureDragCancelCallback = void Function();
 ///  * [PanGestureRecognizer], for drags that are not locked to a single axis.
 abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
-  DragGestureRecognizer({
-    Object debugOwner,
-  })  : super(debugOwner: debugOwner);
+  DragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
   /// A pointer has contacted the screen and might begin to move.
   ///
   /// The position of the pointer is provided in the callback's `details`
@@ -256,9 +254,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 ///    track each touch point independently.
 class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the vertical axis.
-  VerticalDragGestureRecognizer({
-    Object debugOwner,
-  }) : super(debugOwner: debugOwner);
+  VerticalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
@@ -292,9 +288,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 ///    track each touch point independently.
 class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the horizontal axis.
-  HorizontalDragGestureRecognizer({
-    Object debugOwner,
-  }) : super(debugOwner: debugOwner);
+  HorizontalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
@@ -327,9 +321,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
 ///    some time has passed.
 class PanGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for tracking movement on a plane.
-  PanGestureRecognizer({
-    Object debugOwner,
-  }) : super(debugOwner: debugOwner);
+  PanGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {

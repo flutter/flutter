@@ -662,8 +662,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// is null then the text style of the theme's body2 definition is used.
   final TextStyle unselectedLabelStyle;
 
-  ///
-  ///
+  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   /// A size whose height depends on if the tabs have both icons and text.
@@ -1048,7 +1047,7 @@ class TabBarView extends StatefulWidget {
   /// Defaults to matching platform conventions.
   final ScrollPhysics physics;
 
-  ///
+  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   @override

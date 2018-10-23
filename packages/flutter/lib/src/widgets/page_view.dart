@@ -520,7 +520,7 @@ class PageView extends StatefulWidget {
   /// respectively.
   final SliverChildDelegate childrenDelegate;
 
-  ///
+  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   @override

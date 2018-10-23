@@ -145,6 +145,7 @@ class Dismissible extends StatefulWidget {
   /// it is positive or negative.
   final double crossAxisEndOffset;
 
+  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
   final DragStartBehavior startBehavior;
 
   @override
@@ -328,12 +329,14 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
   void _updateMoveAnimation() {
     final double end = _dragExtent.sign;
-    _moveAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: _directionIsXAxis
-          ? Offset(end, widget.crossAxisEndOffset)
-          : Offset(widget.crossAxisEndOffset, end),
-    ).animate(_moveController);
+    _moveAnimation = _moveController.drive(
+      Tween<Offset>(
+        begin: Offset.zero,
+        end: _directionIsXAxis
+            ? Offset(end, widget.crossAxisEndOffset)
+            : Offset(widget.crossAxisEndOffset, end),
+      ),
+    );
   }
 
   _FlingGestureKind _describeFlingGesture(Velocity velocity) {
@@ -429,13 +432,16 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       _resizeController.forward();
       setState(() {
         _sizePriorToCollapse = context.size;
-        _resizeAnimation = Tween<double>(
-          begin: 1.0,
-          end: 0.0
-        ).animate(CurvedAnimation(
-          parent: _resizeController,
-          curve: _kResizeTimeCurve
-        ));
+        _resizeAnimation = _resizeController.drive(
+          CurveTween(
+              curve: _kResizeTimeCurve
+          ),
+        ).drive(
+          Tween<double>(
+              begin: 1.0,
+              end: 0.0
+          ),
+        );
       });
     }
   }
@@ -514,7 +520,6 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       children.add(content);
       content = Stack(children: children);
     }
-//    debugPrint('dismisable ' + widget.dragStartBehavior.toString());
     // We are not resizing but we may be being dragging in widget.direction.
     return GestureDetector(
       onHorizontalDragStart: _directionIsXAxis ? _handleDragStart : null,

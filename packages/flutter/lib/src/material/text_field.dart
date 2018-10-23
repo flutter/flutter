@@ -289,7 +289,7 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
 
-  ///asdfasdf
+  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   @override
@@ -502,6 +502,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     if (widget.maxLength != null && widget.maxLengthEnforced)
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
+
     Widget child = RepaintBoundary(
       child: EditableText(
         key: _editableTextKey,

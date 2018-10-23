@@ -181,7 +181,7 @@ class Scrollable extends StatefulWidget {
   ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
   final int semanticChildCount;
 
-  /// drag
+  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   /// The axis along which the scroll view scrolls.
@@ -376,9 +376,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   @override
   @protected
   void setCanDrag(bool canDrag) {
-    if (canDrag == _lastCanDrag && (!canDrag || widget.axis == _lastAxisDirection)) {
+    if (canDrag == _lastCanDrag && (!canDrag || widget.axis == _lastAxisDirection))
       return;
-    }
     if (!canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
     } else {

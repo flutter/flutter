@@ -68,7 +68,7 @@ class Switch extends StatefulWidget {
     this.activeThumbImage,
     this.inactiveThumbImage,
     this.materialTapTargetSize,
-    this.dragStartBehavior,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : _switchType = _SwitchType.material,
        super(key: key);
 
@@ -91,7 +91,7 @@ class Switch extends StatefulWidget {
     this.activeThumbImage,
     this.inactiveThumbImage,
     this.materialTapTargetSize,
-    this.dragStartBehavior,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : _switchType = _SwitchType.adaptive,
        super(key: key);
 
@@ -171,7 +171,7 @@ class Switch extends StatefulWidget {
 
   final _SwitchType _switchType;
 
-  ///
+  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   @override

@@ -463,7 +463,7 @@ class EditableText extends StatefulWidget {
   /// Defaults to false, resulting in a typical blinking cursor.
   static bool debugDeterministicCursor = false;
 
-  ///
+  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   @override
@@ -947,6 +947,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Widget build(BuildContext context) {
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
     super.build(context); // See AutomaticKeepAliveClientMixin.
+
     final TextSelectionControls controls = widget.selectionControls;
     return Scrollable(
       excludeFromSemantics: true,
@@ -1049,7 +1050,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.cursorRadius,
     this.enableInteractiveSelection = true,
     this.textSelectionDelegate,
-    this.dragStartBehavior,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        assert(enableInteractiveSelection != null),
