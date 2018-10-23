@@ -154,7 +154,10 @@ class TextField extends StatefulWidget {
   /// extra padding introduced by the decoration to save space for the labels).
   final InputDecoration decoration;
 
-  /// {@macro flutter.widgets.editableText.keyboardType}
+  /// The type of keyboard to use for editing the text.
+  ///
+  /// Defaults to [TextInputType.text] if [maxLines] is one and
+  /// [TextInputType.multiline] otherwise.
   final TextInputType keyboardType;
 
   /// The type of action button to use for the keyboard.
@@ -163,7 +166,17 @@ class TextField extends StatefulWidget {
   /// [TextInputType.multiline] and [TextInputAction.done] otherwise.
   final TextInputAction textInputAction;
 
-  /// {@macro flutter.widgets.editableText.textCapitalization}
+  /// Configures how the platform keyboard will select an uppercase or
+  /// lowercase keyboard.
+  ///
+  /// Only supports text keyboards, other keyboard types will ignore this
+  /// configuration. Capitalization is locale-aware.
+  ///
+  /// Defaults to [TextCapitalization.none]. Must not be null.
+  ///
+  /// See also:
+  ///
+  ///   * [TextCapitalization], for a description of each capitalization behavior.
   final TextCapitalization textCapitalization;
 
   /// The style to use for the text being edited.
@@ -173,19 +186,42 @@ class TextField extends StatefulWidget {
   /// If null, defaults to the `subhead` text style from the current [Theme].
   final TextStyle style;
 
-  /// {@macro flutter.widgets.editableText.textAlign}
+  /// How the text being edited should be aligned horizontally.
+  ///
+  /// Defaults to [TextAlign.start].
   final TextAlign textAlign;
 
-  /// {@macro flutter.widgets.editableText.autofocus}
+  /// Whether this text field should focus itself if nothing else is already
+  /// focused.
+  ///
+  /// If true, the keyboard will open as soon as this text field obtains focus.
+  /// Otherwise, the keyboard is only shown after the user taps the text field.
+  ///
+  /// Defaults to false. Cannot be null.
+  // See https://github.com/flutter/flutter/issues/7035 for the rationale for this
+  // keyboard behavior.
   final bool autofocus;
 
-  /// {@macro flutter.widgets.editableText.obscureText}
+  /// Whether to hide the text being edited (e.g., for passwords).
+  ///
+  /// When this is set to true, all the characters in the text field are
+  /// replaced by U+2022 BULLET characters (•).
+  ///
+  /// Defaults to false. Cannot be null.
   final bool obscureText;
 
-  /// {@macro flutter.widgets.editableText.autocorrect}
+  /// Whether to enable autocorrection.
+  ///
+  /// Defaults to true. Cannot be null.
   final bool autocorrect;
 
-  /// {@macro flutter.widgets.editableText.maxLines}
+  /// The maximum number of lines for the text to span, wrapping if necessary.
+  ///
+  /// If this is 1 (the default), the text will not wrap, but will scroll
+  /// horizontally instead.
+  ///
+  /// If this is null, there is no limit to the number of lines. If it is not
+  /// null, the value must be greater than zero.
   final int maxLines;
 
   /// The maximum number of characters (Unicode scalar values) to allow in the
@@ -244,16 +280,34 @@ class TextField extends StatefulWidget {
   /// [maxLength] is exceeded.
   final bool maxLengthEnforced;
 
-  /// {@macro flutter.widgets.editableText.onChanged}
+  /// Called when the text being edited changes.
   final ValueChanged<String> onChanged;
 
-  /// {@macro flutter.widgets.editableText.onEditingComplete}
+  /// Called when the user submits editable content (e.g., user presses the "done"
+  /// button on the keyboard).
+  ///
+  /// The default implementation of [onEditingComplete] executes 2 different
+  /// behaviors based on the situation:
+  ///
+  ///  - When a completion action is pressed, such as "done", "go", "send", or
+  ///    "search", the user's content is submitted to the [controller] and then
+  ///    focus is given up.
+  ///
+  ///  - When a non-completion action is pressed, such as "next" or "previous",
+  ///    the user's content is submitted to the [controller], but focus is not
+  ///    given up because developers may want to immediately move focus to
+  ///    another input widget within [onSubmitted].
+  ///
+  /// Providing [onEditingComplete] prevents the aforementioned default behavior.
   final VoidCallback onEditingComplete;
 
-  /// {@macro flutter.widgets.editableText.onSubmitted}
+  /// Called when the user indicates that they are done editing the text in the
+  /// field.
   final ValueChanged<String> onSubmitted;
 
-  /// {@macro flutter.widgets.editableText.inputFormatters}
+  /// Optional input validation and formatting overrides.
+  ///
+  /// Formatters are run in the provided order when the text input changes.
   final List<TextInputFormatter> inputFormatters;
 
   /// If false the textfield is "disabled": it ignores taps and its
@@ -263,15 +317,16 @@ class TextField extends StatefulWidget {
   /// [Decoration.enabled] property.
   final bool enabled;
 
-  /// {@macro flutter.widgets.editableText.cursorWidth}
+  /// How thick the cursor will be.
+  ///
+  /// Defaults to 2.0.
   final double cursorWidth;
 
-  /// {@macro flutter.widgets.editableText.cursorRadius}
+  /// How rounded the corners of the cursor should be.
+  /// By default, the cursor has a null Radius
   final Radius cursorRadius;
 
   /// The color to use when painting the cursor.
-  ///
-  /// Defaults to the theme's `cursorColor` when null.
   final Color cursorColor;
 
   /// The appearance of the keyboard.
@@ -281,7 +336,14 @@ class TextField extends StatefulWidget {
   /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
   final Brightness keyboardAppearance;
 
-  /// {@macro flutter.widgets.editableText.scrollPadding}
+  /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view.
+  ///
+  /// When this widget receives focus and is not completely visible (for example scrolled partially
+  /// off the screen or overlapped by the keyboard)
+  /// then it will attempt to make itself visible by scrolling a surrounding [Scrollable], if one is present.
+  /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
+  ///
+  /// Defaults to EdgeInserts.all(20.0).
   final EdgeInsets scrollPadding;
 
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}

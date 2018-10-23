@@ -500,13 +500,6 @@ List<GalleryDemo> _buildGalleryDemos() {
       documentationUrl: 'https://docs.flutter.io/flutter/cupertino/CupertinoSwitch-class.html',
       buildRoute: (BuildContext context) => CupertinoSwitchDemo(),
     ),
-    GalleryDemo(
-      title: 'Text Fields',
-      icon: GalleryIcons.text_fields_alt,
-      category: _kCupertinoComponents,
-      routeName: CupertinoTextFieldDemo.routeName,
-      buildRoute: (BuildContext context) => CupertinoTextFieldDemo(),
-    ),
 
     // Media
     GalleryDemo(
