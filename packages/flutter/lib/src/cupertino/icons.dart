@@ -721,4 +721,44 @@ class CupertinoIcons {
   ///  * [group], which is similar, but not filled in.
   ///  * [person_solid], which is just a single person.
   static const IconData group_solid = IconData(0xf47c, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outline of a closed mail envelope.
+  static const IconData mail = IconData(0xf422, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A closed mail envelope. This icon is filled in.
+  static const IconData mail_solid = IconData(0xf423, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outline of a location pin.
+  static const IconData location = IconData(0xf455, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A location pin. This icon is filled in.
+  static const IconData location_solid = IconData(0xf456, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outline of a sticker tag.
+  ///
+  /// See also:
+  ///
+  ///  * [tags], similar but with 2 overlapping tags.
+  static const IconData tag = IconData(0xf48c, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A sticker tag. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [tags_solid], similar but with 2 overlapping tags.
+  static const IconData tag_solid = IconData(0xf48d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outlines of 2 overlapping sticker tags.
+  ///
+  /// See also:
+  ///
+  ///  * [tag], similar but with only one tag.
+  static const IconData tags = IconData(0xf48e, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// 2 overlapping sticker tags. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [tag_solid], similar but with only one tag.
+  static const IconData tags_solid = IconData(0xf48f, fontFamily: iconFont, fontPackage: iconFontPackage);
 }

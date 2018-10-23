@@ -531,6 +531,9 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
         onPanUpdate: _handleDragUpdate,
         onTap: _handleTap,
         child: Stack(
+          // Always let the selection handles draw outside of the conceptual
+          // box where (0,0) is the top left corner of the RenderEditable.
+          overflow: Overflow.visible,
           children: <Widget>[
             Positioned(
               left: point.dx,

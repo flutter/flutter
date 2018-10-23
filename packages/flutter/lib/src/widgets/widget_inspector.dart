@@ -917,13 +917,11 @@ mixin WidgetInspectorService {
 
   /// Called to register service extensions.
   ///
-  /// Service extensions are only exposed when the observatory is
-  /// included in the build, which should only happen in checked mode
-  /// and in profile mode.
-  ///
   /// See also:
   ///
   ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
+  ///  * [BindingBase.initServiceExtensions], which explains when service
+  ///    extensions can be used.
   void initServiceExtensions(
       _RegisterServiceExtensionCallback registerServiceExtensionCallback) {
     _registerServiceExtensionCallback = registerServiceExtensionCallback;
@@ -1023,36 +1021,33 @@ mixin WidgetInspectorService {
       name: 'isWidgetCreationTracked',
       callback: isWidgetCreationTracked,
     );
-    assert(() {
-      registerServiceExtension(
-        name: 'screenshot',
-        callback: (Map<String, String> parameters) async {
-          assert(parameters.containsKey('id'));
-          assert(parameters.containsKey('width'));
-          assert(parameters.containsKey('height'));
+    registerServiceExtension(
+      name: 'screenshot',
+      callback: (Map<String, String> parameters) async {
+        assert(parameters.containsKey('id'));
+        assert(parameters.containsKey('width'));
+        assert(parameters.containsKey('height'));
 
-          final ui.Image image = await screenshot(
-            toObject(parameters['id']),
-            width: double.parse(parameters['width']),
-            height: double.parse(parameters['height']),
-            margin: parameters.containsKey('margin') ?
-                double.parse(parameters['margin']) : 0.0,
-            maxPixelRatio: parameters.containsKey('maxPixelRatio') ?
-                double.parse(parameters['maxPixelRatio']) : 1.0,
-            debugPaint: parameters['debugPaint'] == 'true',
-          );
-          if (image == null) {
-            return <String, Object>{'result': null};
-          }
-          final ByteData byteData = await image.toByteData(format:ui.ImageByteFormat.png);
+        final ui.Image image = await screenshot(
+          toObject(parameters['id']),
+          width: double.parse(parameters['width']),
+          height: double.parse(parameters['height']),
+          margin: parameters.containsKey('margin') ?
+              double.parse(parameters['margin']) : 0.0,
+          maxPixelRatio: parameters.containsKey('maxPixelRatio') ?
+              double.parse(parameters['maxPixelRatio']) : 1.0,
+          debugPaint: parameters['debugPaint'] == 'true',
+        );
+        if (image == null) {
+          return <String, Object>{'result': null};
+        }
+        final ByteData byteData = await image.toByteData(format:ui.ImageByteFormat.png);
 
-          return <String, Object>{
-            'result': base64.encoder.convert(Uint8List.view(byteData.buffer)),
-          };
-        },
-      );
-      return true;
-    }());
+        return <String, Object>{
+          'result': base64.encoder.convert(Uint8List.view(byteData.buffer)),
+        };
+      },
+    );
   }
 
   /// Clear all InspectorService object references.
