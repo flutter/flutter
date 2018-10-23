@@ -61,6 +61,10 @@ BuildApp() {
       EchoError "Valid values are 'Debug', 'Profile', or 'Release' (case insensitive)."
       EchoError "This is controlled by the FLUTTER_BUILD_MODE environment varaible."
       EchoError "If that is not set, the CONFIGURATION environment variable is used."
+      EchoError ""
+      EchoError "You can fix this by either adding an appropriately named build"
+      EchoError "configuration, or adding an appriate value for FLUTTER_BUILD_MODE to the"
+      EchoError ".xcconfig file for the current build configuration (${CONFIGURATION})."
       EchoError "========================================================================"
       exit -1;;
   esac
@@ -102,7 +106,10 @@ BuildApp() {
       EchoError "ERROR: Requested build with Flutter local engine at '${LOCAL_ENGINE}'"
       EchoError "This engine is not compatible with FLUTTER_BUILD_MODE: '${build_mode}'."
       EchoError "You can fix this by updating the LOCAL_ENGINE environment variable, or"
-      EchoError "by running flutter build ios --local-engine=..."
+      EchoError "by running:"
+      EchoError "  flutter build ios --local-engine=ios_${build_mode}"
+      EchoError "or"
+      EchoError "  flutter build ios --local-engine=ios_${build_mode}_unopt"
       EchoError "========================================================================"
       exit -1
     fi
@@ -148,7 +155,8 @@ BuildApp() {
       EchoError "ERROR: Flutter does not support running in profile or release mode on"
       EchoError "the Simulator (this build was: '$build_mode')."
       EchoError "You can ensure Flutter runs in Debug mode with your host app in release"
-      EchoError "mode by setting FLUTTER_BUILD_MODE=debug in your .xcconfig"
+      EchoError "mode by setting FLUTTER_BUILD_MODE=debug in the .xcconfig associated"
+      EchoError "with the ${CONFIGURATION} build configuration."
       EchoError "========================================================================"
       exit -1
     fi

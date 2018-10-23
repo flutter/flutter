@@ -324,7 +324,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     printError('   you can set the FLUTTER_BUILD_MODE=${buildInfo.modeName.toLowerCase()}');
     printError('   in the .xcconfig file for that configuration and run from Xcode.');
     printError('');
-    printError('4. Name the newly created configuration ${buildInfo.modeName}.');
+    printError('4. If you are not using completely custom build configurations, name the newly created configuration ${buildInfo.modeName}.');
     return XcodeBuildResult(success: false);
   }
   final String scheme = projectInfo.schemeFor(buildInfo);
