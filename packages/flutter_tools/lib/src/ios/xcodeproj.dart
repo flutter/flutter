@@ -264,10 +264,10 @@ class XcodeProjectInfo {
     });
   }
 
-  static String _baseConfigurationFor(BuildInfo buildInfo) =>  buildInfo.isDebug 
-      ? 'Debug' 
-      : buildInfo.isProfile 
-        ? 'Profile' 
+  static String _baseConfigurationFor(BuildInfo buildInfo) =>  buildInfo.isDebug
+      ? 'Debug'
+      : buildInfo.isProfile
+        ? 'Profile'
         : 'Release';
 
   static String _uniqueMatch(Iterable<String> strings, bool matches(String s)) {
