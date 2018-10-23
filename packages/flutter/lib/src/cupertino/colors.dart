@@ -18,6 +18,10 @@ class CupertinoColors {
   /// and Apple Map's 'Go' button.
   static const Color activeGreen = Color(0xFF4CD964);
 
+  /// iOS 12's default dark mode color. Used in place of the [activeBlue] color
+  /// as the default active elements' color when the theme's brightness is dark.
+  static const Color activeOrange = Color(0xFFFF9500);
+
   /// Opaque white color. Used for backgrounds and fonts against dark backgrounds.
   ///
   /// See also:
