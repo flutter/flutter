@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 typedef InspectorServiceExtensionCallback = FutureOr<Map<String, Object>> Function(Map<String, String> parameters);
 
@@ -281,6 +282,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
             key: inspectorKey,
             selectButtonBuilder: selectButtonBuilder,
             child: ListView(
+              dragStartBehavior: DragStartBehavior.down,
               children: <Widget>[
                 Container(
                   key: childKey,

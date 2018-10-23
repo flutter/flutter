@@ -52,7 +52,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
   DragGestureRecognizer({
     Object debugOwner,
-  })  : super(debugOwner: debugOwner);
+  })  : super(debugOwner: debugOwner) {
+//    if (dragStartBehavior == DragStartBehavior.start)
+//      debugPrintStack();
+  }
 
   /// A pointer has contacted the screen and might begin to move.
   ///

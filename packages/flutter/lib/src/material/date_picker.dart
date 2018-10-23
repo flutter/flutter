@@ -675,6 +675,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
                   return false;
                 },
                 child: PageView.builder(
+                  dragStartBehavior: widget.dragStartBehavior,
                   key: ValueKey<DateTime>(widget.selectedDate),
                   controller: _dayPickerController,
                   scrollDirection: Axis.horizontal,

@@ -10,6 +10,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -187,6 +188,7 @@ class NestedScrollView extends StatefulWidget {
     this.physics,
     @required this.headerSliverBuilder,
     @required this.body,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(headerSliverBuilder != null),
@@ -250,6 +252,9 @@ class NestedScrollView extends StatefulWidget {
   /// given an explicit [ScrollController], instead allowing it to default to
   /// the [PrimaryScrollController] provided by the [NestedScrollView].
   final Widget body;
+
+  ///
+  final DragStartBehavior dragStartBehavior;
 
   /// Returns the [SliverOverlapAbsorberHandle] of the nearest ancestor
   /// [NestedScrollView].
@@ -337,6 +342,7 @@ class _NestedScrollViewState extends State<NestedScrollView> {
         builder: (BuildContext context) {
           _lastHasScrolledBody = _coordinator.hasScrolledBody;
           return _NestedScrollViewCustomScrollView(
+            dragStartBehavior: widget.dragStartBehavior,
             scrollDirection: widget.scrollDirection,
             reverse: widget.reverse,
             physics: widget.physics != null
@@ -364,12 +370,14 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
     @required ScrollController controller,
     @required List<Widget> slivers,
     @required this.handle,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : super(
          scrollDirection: scrollDirection,
          reverse: reverse,
          physics: physics,
          controller: controller,
          slivers: slivers,
+         dragStartBehavior: dragStartBehavior,
        );
 
   final SliverOverlapAbsorberHandle handle;

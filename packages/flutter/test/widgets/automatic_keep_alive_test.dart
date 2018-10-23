@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 class Leaf extends StatefulWidget {
   const Leaf({ Key key, this.child }) : super(key: key);
@@ -475,6 +476,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
+        dragStartBehavior: DragStartBehavior.down,
         addSemanticIndexes: false,
         itemCount: 50,
         itemBuilder: (BuildContext context, int index){

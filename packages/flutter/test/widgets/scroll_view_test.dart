@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'states.dart';
 
@@ -15,6 +16,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
+          dragStartBehavior: DragStartBehavior.down,
           children: kStates.map<Widget>((String state) {
             return GestureDetector(
               onTap: () {
@@ -25,6 +27,7 @@ void main() {
                 color: const Color(0xFF0000FF),
                 child: Text(state),
               ),
+              startBehavior: DragStartBehavior.down,
             );
           }).toList(),
         ),
@@ -53,6 +56,7 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
+          dragStartBehavior: DragStartBehavior.down,
           children: kStates.take(n).map<Widget>((String state) {
             return Container(
               height: 200.0,
@@ -84,11 +88,13 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
+          dragStartBehavior: DragStartBehavior.down,
           slivers: <Widget>[
             SliverList(
               delegate: SliverChildListDelegate(
                 kStates.map<Widget>((String state) {
                   return GestureDetector(
+                    startBehavior: DragStartBehavior.down,
                     onTap: () {
                       log.add(state);
                     },

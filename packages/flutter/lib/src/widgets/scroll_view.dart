@@ -403,6 +403,7 @@ class CustomScrollView extends ScrollView {
     double cacheExtent,
     this.slivers = const <Widget>[],
     int semanticChildCount,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -413,6 +414,7 @@ class CustomScrollView extends ScrollView {
     shrinkWrap: shrinkWrap,
     cacheExtent: cacheExtent,
     semanticChildCount: semanticChildCount,
+    dragStartBehavior: dragStartBehavior,
   );
 
   /// The slivers to place inside the viewport.
@@ -1238,6 +1240,7 @@ class GridView extends BoxScrollView {
     @required this.childrenDelegate,
     double cacheExtent,
     int semanticChildCount,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : assert(gridDelegate != null),
        assert(childrenDelegate != null),
        super(
@@ -1251,6 +1254,7 @@ class GridView extends BoxScrollView {
          padding: padding,
          cacheExtent: cacheExtent,
          semanticChildCount: semanticChildCount,
+         dragStartBehavior: dragStartBehavior,
        );
 
   /// Creates a scrollable, 2D array of widgets with a fixed number of tiles in
@@ -1286,6 +1290,7 @@ class GridView extends BoxScrollView {
     double cacheExtent,
     List<Widget> children = const <Widget>[],
     int semanticChildCount,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
          crossAxisCount: crossAxisCount,
          mainAxisSpacing: mainAxisSpacing,
@@ -1308,6 +1313,7 @@ class GridView extends BoxScrollView {
     padding: padding,
     cacheExtent: cacheExtent,
     semanticChildCount: semanticChildCount ?? children.length,
+    dragStartBehavior: dragStartBehavior,
   );
 
   /// Creates a scrollable, 2D array of widgets with tiles that each have a
@@ -1342,6 +1348,7 @@ class GridView extends BoxScrollView {
     bool addSemanticIndexes = true,
     List<Widget> children = const <Widget>[],
     int semanticChildCount,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
          maxCrossAxisExtent: maxCrossAxisExtent,
          mainAxisSpacing: mainAxisSpacing,
@@ -1363,6 +1370,7 @@ class GridView extends BoxScrollView {
     shrinkWrap: shrinkWrap,
     padding: padding,
     semanticChildCount: semanticChildCount ?? children.length,
+    dragStartBehavior: dragStartBehavior,
   );
 
   /// A delegate that controls the layout of the children within the [GridView].
