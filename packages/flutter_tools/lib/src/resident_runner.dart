@@ -30,13 +30,14 @@ import 'vmservice.dart';
 
 class FlutterDevice {
   FlutterDevice(this.device, {
-    @required bool trackWidgetCreation,
+    @required this.trackWidgetCreation,
     this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.viewFilter,
     ResidentCompiler generator,
-  }) : generator = generator ?? ResidentCompiler(
+  }) : assert(trackWidgetCreation != null),
+       generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
@@ -53,6 +54,7 @@ class FlutterDevice {
   String fileSystemScheme;
   StreamSubscription<String> _loggingSubscription;
   final String viewFilter;
+  final bool trackWidgetCreation;
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered.
@@ -390,6 +392,7 @@ class FlutterDevice {
         generator: generator,
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
+        trackWidgetCreation: trackWidgetCreation,
         projectRootPath: projectRootPath,
         pathToReload: pathToReload
       );
@@ -443,6 +446,7 @@ abstract class ResidentRunner {
   String _mainPath;
   String get mainPath => _mainPath;
   String getReloadPath({bool fullRestart}) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
+
   AssetBundle _assetBundle;
   AssetBundle get assetBundle => _assetBundle;
 

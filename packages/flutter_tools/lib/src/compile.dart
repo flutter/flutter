@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
 import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
@@ -123,7 +124,7 @@ class KernelCompiler {
     String depFilePath,
     bool linkPlatformKernelIn = false,
     bool aot = false,
-    bool trackWidgetCreation = false,
+    @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath,
     String packagesPath,
@@ -331,7 +332,8 @@ class ResidentCompiler {
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
   Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles,
-      {String outputPath, String packagesFilePath}) async {
+      {@required String outputPath, String packagesFilePath}) async {
+    assert (outputPath != null);
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
