@@ -27,10 +27,13 @@ void main() {
     });
 
     test('parse ls tmp/dart.servies output', () {
-      const String example = '';
+      const String example = '''
+d  2          0 .
+'-  1          0 36780
+''';
       final List<int> ports = parseFuchsiaDartPortOutput(example);
-
-      expect(ports.length, 0);
+      expect(ports.length, 1);
+      expect(ports.single, 36780);
     });
   });
 }

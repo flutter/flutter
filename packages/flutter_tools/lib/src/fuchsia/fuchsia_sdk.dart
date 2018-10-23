@@ -115,8 +115,9 @@ class FuchsiaSdk {
 /// Parses output from `dart.services` output on a fuchsia device.
 ///
 /// Example output:
-///     $ ls dart.services
-///     > ...
+///     $ ls /tmp/dart.services
+///     > d  2          0 .
+///     > -  1          0 36780
 @visibleForTesting
 List<int> parseFuchsiaDartPortOutput(String text) {
   final List<int> ports = <int>[];
