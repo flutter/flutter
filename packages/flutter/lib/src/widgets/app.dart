@@ -678,13 +678,15 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   Locale _locale;
 
   Locale _resolveLocale(Locale newLocale, Iterable<Locale> supportedLocales) {
-    if (newLocale == null) {
-      return supportedLocales.first;
-    }
     if (widget.localeResolutionCallback != null) {
       final Locale locale = widget.localeResolutionCallback(newLocale, widget.supportedLocales);
       if (locale != null)
         return locale;
+    }
+    // newLocale can be null when called before the platform has had a chance to
+    // initialize the locales. We default to the first supported locale.
+    if (newLocale == null) {
+      return supportedLocales.first;
     }
 
     Locale matchesLanguageCode;
