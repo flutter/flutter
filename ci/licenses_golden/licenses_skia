@@ -1,4 +1,4 @@
-Signature: 2eaadab5c99a9d8080acce23726ed195
+Signature: 347c3d27687b63de5c16b1956003b84c
 
 UNUSED LICENSES:
 
@@ -2755,8 +2755,6 @@ FILE: ../../../third_party/skia/gm/texteffects.cpp
 FILE: ../../../third_party/skia/gm/tilemodes.cpp
 FILE: ../../../third_party/skia/gm/tilemodes_scaled.cpp
 FILE: ../../../third_party/skia/gm/tinybitmap.cpp
-FILE: ../../../third_party/skia/gm/verttext.cpp
-FILE: ../../../third_party/skia/gm/verttext2.cpp
 FILE: ../../../third_party/skia/gm/xfermodes.cpp
 FILE: ../../../third_party/skia/include/core/SkData.h
 FILE: ../../../third_party/skia/include/core/SkImageEncoder.h
