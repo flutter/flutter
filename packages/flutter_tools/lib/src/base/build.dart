@@ -291,6 +291,7 @@ class AOTSnapshotter {
     @required TargetPlatform platform,
     @required BuildMode buildMode,
     @required String mainPath,
+    @required String packagesPath,
     @required String outputPath,
     List<String> extraFrontEndOptions = const <String>[],
   }) async {
@@ -306,6 +307,7 @@ class AOTSnapshotter {
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
+      packagesPath: packagesPath,
       outputFilePath: fs.path.join(outputPath, 'app.dill'),
       depFilePath: depfilePath,
       extraFrontEndOptions: extraFrontEndOptions,
