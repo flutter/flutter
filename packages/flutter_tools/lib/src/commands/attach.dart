@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -48,6 +50,16 @@ class AttachCommand extends FlutterCommand {
         'project-root',
         hide: !verboseHelp,
         help: 'Normally used only in run target',
+      )..addOption(
+        'module-name',
+        abbr: 'm',
+        hide: !verboseHelp,
+        help: 'The name of the module if attaching to a fuchsia device'
+      )..addOption(
+        'isolate-number',
+        abbr: 'i',
+        hide: !verboseHelp,
+        help: 'The isolate number of module if attaching to a fuchsia device'
       )..addFlag('machine',
           hide: !verboseHelp,
           negatable: false,
@@ -91,6 +103,10 @@ class AttachCommand extends FlutterCommand {
     await _validateArguments();
 
     final Device device = await findTargetDevice();
+    // TODO(jonahwilliams): unify this with the normal attach pattern.
+    if (device is FuchsiaDevice) {
+      return _runCommand(device);
+    }
     final int devicePort = observatoryPort;
 
     final Daemon daemon = argResults['machine']
@@ -150,6 +166,40 @@ class AttachCommand extends FlutterCommand {
       } else {
         await hotRunner.attach();
       }
+    } finally {
+      final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
+      ports.forEach(device.portForwarder.unforward);
+    }
+    return null;
+  }
+
+  // The fuchsia module version of the command.
+  Future<FlutterCommandResult> _runCommand(FuchsiaDevice device) async {
+    final String moduleName = argResults['module-name'];
+    final String isolateNumber = argResults['isolate-number'];
+    if (moduleName == null || isolateNumber == null) {
+      throwToolExit('both module-name and isolate-number must be provided to'
+        'attach to a Fuchsia device.');
+    }
+    final String isolateName = '$moduleName\$main-$isolateNumber';
+    final int port = await device.servicePort(isolateName);
+    final Uri observatoryUri = Uri.parse('http://$ipv4Loopback:$port');
+    try {
+      final FlutterDevice flutterDevice = FlutterDevice(
+        device,
+        trackWidgetCreation: false,
+        viewFilter: isolateName,
+      );
+      flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
+      final HotRunner hotRunner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
+        target: targetFile,
+        projectRootPath: argResults['project-root'],
+        packagesFilePath: globalResults['packages'],
+        dillOutputPath: argResults['output-dill'],
+      );
+      await hotRunner.attach();
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
       ports.forEach(device.portForwarder.unforward);

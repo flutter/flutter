@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
+import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -24,6 +25,13 @@ void main() {
       expect(devices.length, 1);
       expect(devices.first.id, 'fe80::0000:a00a:f00f:2002/3');
       expect(devices.first.name, 'lilia-shore-only-last');
+    });
+
+    test('parse ls tmp/dart.servies output', () {
+      const String example = '';
+      final List<int> ports = parseFuchsiaDartPortOutput(example);
+
+      expect(ports.length, 0);
     });
   });
 }

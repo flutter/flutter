@@ -3,15 +3,23 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../base/common.dart';
+import '../base/io.dart';
+import '../base/platform.dart';
+import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../globals.dart';
 
 import 'fuchsia_sdk.dart';
 import 'fuchsia_workflow.dart';
+
+final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
 
 /// Read the log for a particular device.
 class _FuchsiaLogReader extends DeviceLogReader {
@@ -130,15 +138,17 @@ class FuchsiaDevice extends Device {
   @override
   Future<String> get sdkNameAndVersion async => 'Fuchsia';
 
-  _FuchsiaLogReader _logReader;
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {
-    _logReader ??= _FuchsiaLogReader(this);
-    return _logReader;
+    return _logReader ??= _FuchsiaLogReader(this);
   }
+  _FuchsiaLogReader _logReader;
 
   @override
-  DevicePortForwarder get portForwarder => null;
+  DevicePortForwarder get portForwarder {
+    return _portForwarder ??= _FuchsiaPortForwarder(this);
+  }
+  _FuchsiaPortForwarder _portForwarder;
 
   @override
   void clearLogs() {
@@ -146,4 +156,56 @@ class FuchsiaDevice extends Device {
 
   @override
   bool get supportsScreenshot => false;
+
+  /// Run `command` on the fuchsia device.
+  Future<String> run(String command) => fuchsiaSdk.run(this, command);
+
+  /// Finds the first port running a VM matching `isolateName` on `device`.
+  ///
+  /// TODO(jonahwilliams): replacing this with the hub will require an update
+  /// to the flutter_runner.
+  Future<int> servicePort(String isolateName) => fuchsiaSdk.servicePort(this, isolateName);
+}
+
+class _FuchsiaPortForwarder extends DevicePortForwarder {
+  _FuchsiaPortForwarder(this.device);
+
+  final FuchsiaDevice device;
+  Process _process;
+
+  @override
+  Future<int> forward(int devicePort, {int hostPort}) async {
+    hostPort ??= 0;
+    final List<String> command = <String>[
+      'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
+      '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'date',
+    ];
+    _process = await processManager.start(command);
+    _process.stderr
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen(printTrace);
+    _process.exitCode.then<void>((int exitCode) { // ignore: unawaited_futures
+      printTrace('exited with exit code $exitCode');
+    });
+    _forwardedPorts.add(ForwardedPort(hostPort, devicePort));
+    return hostPort;
+  }
+
+  @override
+  List<ForwardedPort> get forwardedPorts => _forwardedPorts;
+  final List<ForwardedPort> _forwardedPorts = <ForwardedPort>[];
+
+  @override
+  Future<void> unforward(ForwardedPort forwardedPort) async {
+    _forwardedPorts.remove(forwardedPort);
+    _process.kill();
+    final List<String> command = <String>[
+        'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, '-O', 'cancel', '-vvv',
+        '-L', '${forwardedPort.hostPort}:$_ipv4Loopback:${forwardedPort.devicePort}', device.id];
+    final ProcessResult result = await processManager.run(command);
+    if (result.exitCode != 0) {
+      throwToolExit(result.stderr);
+    }
+  }
 }
