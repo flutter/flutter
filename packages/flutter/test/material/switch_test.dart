@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -25,6 +26,7 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
+                  dragStartBehavior: DragStartBehavior.down,
                   key: switchKey,
                   value: value,
                   onChanged: (bool newValue) {
@@ -54,6 +56,7 @@ void main() {
           child: Material(
             child: Center(
               child: Switch(
+                dragStartBehavior: DragStartBehavior.down,
                 value: true,
                 onChanged: (bool newValue) {},
               ),
@@ -73,6 +76,7 @@ void main() {
           child: Material(
             child: Center(
               child: Switch(
+                dragStartBehavior: DragStartBehavior.down,
                 value: true,
                 onChanged: (bool newValue) {},
               ),
@@ -96,6 +100,7 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
+                  dragStartBehavior: DragStartBehavior.down,
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
@@ -142,6 +147,7 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
+                  dragStartBehavior: DragStartBehavior.down,
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
@@ -185,6 +191,7 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
+                  dragStartBehavior: DragStartBehavior.down,
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
@@ -306,6 +313,7 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
+                  dragStartBehavior: DragStartBehavior.down,
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
@@ -365,6 +373,7 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
+                  dragStartBehavior: DragStartBehavior.down,
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {

@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -193,6 +194,7 @@ class SingleChildScrollView extends StatelessWidget {
     this.physics,
     this.controller,
     this.child,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(scrollDirection != null),
        assert(!(controller != null && primary == true),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
@@ -260,6 +262,9 @@ class SingleChildScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  ///
+  final DragStartBehavior dragStartBehavior;
+
   AxisDirection _getDirection(BuildContext context) {
     return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
   }
@@ -274,6 +279,7 @@ class SingleChildScrollView extends StatelessWidget {
         ? PrimaryScrollController.of(context)
         : controller;
     final Scrollable scrollable = Scrollable(
+      dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,

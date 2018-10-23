@@ -802,6 +802,7 @@ class ListView extends BoxScrollView {
     bool addSemanticIndexes = true,
     double cacheExtent,
     int semanticChildCount,
+    DragStartBehavior dragStartBehavior,
   }) : childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          childCount: itemCount,
@@ -819,6 +820,7 @@ class ListView extends BoxScrollView {
     padding: padding,
     cacheExtent: cacheExtent,
     semanticChildCount: semanticChildCount ?? itemCount,
+    dragStartBehavior: dragStartBehavior,
   );
 
   /// Creates a fixed-length scrollable linear array of list "items" separated

@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
@@ -729,6 +730,7 @@ class Scaffold extends StatefulWidget {
     this.backgroundColor,
     this.resizeToAvoidBottomPadding = true,
     this.primary = true,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(primary != null), super(key: key);
 
   /// An app bar to display at the top of the scaffold.
@@ -865,6 +867,9 @@ class Scaffold extends StatefulWidget {
   /// The default value of this property, like the default value of
   /// [AppBar.primary], is true.
   final bool primary;
+
+  ///
+  final DragStartBehavior dragStartBehavior;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -1484,6 +1489,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           alignment: DrawerAlignment.end,
           child: widget.endDrawer,
           drawerCallback: _endDrawerOpenedCallback,
+          dragStartBehavior: widget.dragStartBehavior,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -1505,6 +1511,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           alignment: DrawerAlignment.start,
           child: widget.drawer,
           drawerCallback: _drawerOpenedCallback,
+          dragStartBehavior: widget.dragStartBehavior,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
@@ -1678,6 +1685,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           onTap: _handleStatusBarTap,
           // iOS accessibility automatically adds scroll-to-top to the clock in the status bar
           excludeFromSemantics: true,
+          startBehavior: widget.dragStartBehavior,
         ),
         _ScaffoldSlot.statusBar,
         removeLeftPadding: false,

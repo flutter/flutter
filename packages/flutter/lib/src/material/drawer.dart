@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'colors.dart';
 import 'debug.dart';
@@ -172,6 +173,7 @@ class DrawerController extends StatefulWidget {
     @required this.child,
     @required this.alignment,
     this.drawerCallback,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(child != null),
        assert(alignment != null),
        super(key: key);
@@ -189,6 +191,9 @@ class DrawerController extends StatefulWidget {
 
   /// Optional callback that is called when a [Drawer] is opened or closed.
   final DrawerCallback drawerCallback;
+
+  ///
+  final DragStartBehavior dragStartBehavior;
 
   @override
   DrawerControllerState createState() => DrawerControllerState();
@@ -384,7 +389,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           onHorizontalDragEnd: _settle,
           behavior: HitTestBehavior.translucent,
           excludeFromSemantics: true,
-          child: Container(width: _kEdgeDragWidth)
+          child: Container(width: _kEdgeDragWidth),
+          startBehavior: widget.dragStartBehavior,
         ),
       );
     } else {
@@ -395,6 +401,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         onHorizontalDragEnd: _settle,
         onHorizontalDragCancel: _handleDragCancel,
         excludeFromSemantics: true,
+        startBehavior: widget.dragStartBehavior,
         child: RepaintBoundary(
           child: Stack(
             children: <Widget>[
