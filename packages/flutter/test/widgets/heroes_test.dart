@@ -24,7 +24,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         Container(height: 100.0, width: 100.0),
         Card(child: Hero(
           tag: 'a',
-          transitionForUserGestures: transitionFromUserGestures,
+          transitionOnUserGestures: transitionFromUserGestures,
           child: Container(height: 100.0, width: 100.0, key: firstKey),
         )),
         Container(height: 100.0, width: 100.0),
@@ -50,7 +50,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         Container(height: 150.0, width: 150.0),
         Card(child: Hero(
           tag: 'a',
-          transitionForUserGestures: transitionFromUserGestures,
+          transitionOnUserGestures: transitionFromUserGestures,
           child: Container(height: 150.0, width: 150.0, key: secondKey),
         )),
         Container(height: 150.0, width: 150.0),
@@ -79,7 +79,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
             padding: const EdgeInsets.only(left: 50.0),
             child: Hero(
               tag: 'a',
-              transitionForUserGestures: transitionFromUserGestures,
+              transitionOnUserGestures: transitionFromUserGestures,
               child: Container(height: 150.0, width: 150.0, key: secondKey),
             )
           ),

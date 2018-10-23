@@ -352,9 +352,13 @@ class NavigatorObserver {
   ///
   /// For example, this is called when an iOS back gesture starts.
   ///
+  /// Paired with a call to [didStopUserGesture] when the route is no longer
+  /// being manipulated via user gesture.
+  ///
   /// If present, the route immediately below `route` is `previousRoute`.
   /// Though the gesture may not necessarily conclude at `previousRoute` if
-  /// canceled.
+  /// the gesture is canceled. In that case, [didStopUserGesture] is still
+  /// called but a follow-up [didPop] is not.
   void didStartUserGesture(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
   /// User gesture is no longer controlling the [Navigator].
@@ -1915,11 +1919,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     _userGesturesInProgress += 1;
     if (_userGesturesInProgress == 1) {
       final Route<dynamic> route = _history.last;
-      final Route<dynamic> previousRoute = route.willHandlePopInternally
-          ? null
-          : _history.length > 1
-              ? _history[_history.length - 2]
-              : null;
+      final Route<dynamic> previousRoute = !route.willHandlePopInternally && _history.length > 1
+          ? _history[_history.length - 2]
+          : null;
       // Don't operate the _history list since the gesture may be cancelled.
       // In case of a back swipe, the gesture controller will call .pop() itself.
 
