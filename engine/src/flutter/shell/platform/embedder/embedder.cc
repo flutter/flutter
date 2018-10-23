@@ -89,6 +89,7 @@ static bool IsRendererValid(const FlutterRendererConfig* config) {
   return false;
 }
 
+#if OS_LINUX || OS_WIN
 static void* DefaultGLProcResolver(const char* name) {
   static fml::RefPtr<fml::NativeLibrary> proc_library =
 #if OS_LINUX
@@ -99,6 +100,7 @@ static void* DefaultGLProcResolver(const char* name) {
   return static_cast<void*>(
       const_cast<uint8_t*>(proc_library->ResolveSymbol(name)));
 }
+#endif  // OS_LINUX || OS_WIN
 
 static shell::Shell::CreateCallback<shell::PlatformView>
 InferOpenGLPlatformViewCreationCallback(
