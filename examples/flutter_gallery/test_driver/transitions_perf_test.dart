@@ -35,6 +35,14 @@ const List<String> kProfiledDemos = <String>[
   'Pickers@Material',
 ];
 
+// There are 3 places where the Gallery demos are traversed.
+// 1- In widget tests such as examples/flutter_gallery/test/smoke_test.dart
+// 2- In driver tests such as examples/flutter_gallery/test_driver/transitions_perf_test.dart
+// 3- In on-device instrumentation tests such as examples/flutter_gallery/test/live_smoketest.dart
+//
+// If you change navigation behavior in the Gallery or in the framework, make
+// sure all 3 are covered.
+
 // Demos that will be backed out of within FlutterDriver.runUnsynchronized();
 //
 // These names must match GalleryItem titles from kAllGalleryDemos
