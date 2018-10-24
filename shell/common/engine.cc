@@ -78,7 +78,7 @@ fml::WeakPtr<Engine> Engine::GetWeakPtr() const {
 }
 
 bool Engine::UpdateAssetManager(
-    fml::RefPtr<blink::AssetManager> new_asset_manager) {
+    std::shared_ptr<blink::AssetManager> new_asset_manager) {
   if (asset_manager_ == new_asset_manager) {
     return false;
   }

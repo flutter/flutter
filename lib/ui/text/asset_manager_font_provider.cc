@@ -21,7 +21,7 @@ void MappingReleaseProc(const void* ptr, void* context) {
 }  // anonymous namespace
 
 AssetManagerFontProvider::AssetManagerFontProvider(
-    fml::RefPtr<blink::AssetManager> asset_manager)
+    std::shared_ptr<blink::AssetManager> asset_manager)
     : asset_manager_(asset_manager) {}
 
 AssetManagerFontProvider::~AssetManagerFontProvider() = default;
@@ -65,7 +65,7 @@ void AssetManagerFontProvider::RegisterAsset(std::string family_name,
 }
 
 AssetManagerFontStyleSet::AssetManagerFontStyleSet(
-    fml::RefPtr<blink::AssetManager> asset_manager)
+    std::shared_ptr<blink::AssetManager> asset_manager)
     : asset_manager_(asset_manager) {}
 
 AssetManagerFontStyleSet::~AssetManagerFontStyleSet() = default;

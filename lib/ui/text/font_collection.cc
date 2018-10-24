@@ -67,7 +67,8 @@ std::shared_ptr<txt::FontCollection> FontCollection::GetFontCollection() const {
   return collection_;
 }
 
-void FontCollection::RegisterFonts(fml::RefPtr<AssetManager> asset_manager) {
+void FontCollection::RegisterFonts(
+    std::shared_ptr<AssetManager> asset_manager) {
   std::unique_ptr<fml::Mapping> manifest_mapping =
       asset_manager->GetAsMapping("FontManifest.json");
   if (manifest_mapping == nullptr) {

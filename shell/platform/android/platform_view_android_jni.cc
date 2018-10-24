@@ -241,7 +241,7 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
                                             jstring jEntrypoint,
                                             jstring jLibraryUrl,
                                             jobject jAssetManager) {
-  auto asset_manager = fml::MakeRefCounted<blink::AssetManager>();
+  auto asset_manager = std::make_shared<blink::AssetManager>();
 
   const auto bundlepath = fml::jni::JavaStringToString(env, jbundlepath);
   if (bundlepath.size() > 0) {
