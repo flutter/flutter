@@ -521,6 +521,8 @@ FILE: ../../../flutter/shell/platform/android/platform_message_response_android.
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterObservatoryPublisher.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterObservatoryPublisher.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.mm
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface.cc
@@ -590,6 +592,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/Virtual
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterCallbackInformation.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterRunArguments.java
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterCallbackCache.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache_Internal.h

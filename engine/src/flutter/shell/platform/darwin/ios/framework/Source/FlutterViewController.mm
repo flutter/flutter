@@ -4,6 +4,7 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 
 #include <memory>
@@ -53,6 +54,7 @@
   fml::scoped_nsobject<FlutterView> _flutterView;
   fml::scoped_nsobject<UIView> _splashScreenView;
   fml::ScopedBlock<void (^)(void)> _flutterViewRenderedCallback;
+  std::unique_ptr<shell::FlutterPlatformViewsController> _platformViewsController;
   UIInterfaceOrientationMask _orientationPreferences;
   UIStatusBarStyle _statusBarStyle;
   blink::ViewportMetrics _viewportMetrics;
@@ -113,6 +115,7 @@
     [self setupChannels];
     [self setupNotificationCenterObservers];
 
+    _platformViewsController.reset(new shell::FlutterPlatformViewsController(self));
     _pluginPublications = [NSMutableDictionary new];
   }
 }
@@ -1091,6 +1094,12 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
   });
 }
 
+#pragma mark - Platform views
+
+- (shell::FlutterPlatformViewsController*)platformViewsController {
+  return _platformViewsController.get();
+}
+
 #pragma mark - FlutterBinaryMessenger
 
 - (void)sendOnChannel:(NSString*)channel message:(NSData*)message {
@@ -1195,6 +1204,11 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
 
 - (NSObject<FlutterTextureRegistry>*)textures {
   return _flutterViewController;
+}
+
+- (void)registerViewFactory:(NSObject<FlutterPlatformViewFactory>*)factory
+                     withId:(NSString*)factoryId {
+  [_flutterViewController platformViewsController] -> RegisterViewFactory(factory, factoryId);
 }
 
 - (void)publish:(NSObject*)value {

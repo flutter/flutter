@@ -10,6 +10,7 @@
 #include "FlutterBinaryMessenger.h"
 #include "FlutterChannels.h"
 #include "FlutterCodecs.h"
+#include "FlutterPlatformViews.h"
 #include "FlutterTexture.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -202,6 +203,18 @@ NS_ASSUME_NONNULL_BEGIN
  - Returns: The texture registry.
  */
 - (NSObject<FlutterTextureRegistry>*)textures;
+
+/**
+ * Registers a `FlutterPlatformViewFactory` for creation of platfrom views.
+ *
+ * Plugins expose `UIView` for embedding in Flutter apps by registering a view factory.
+ *
+ * @param factory The view factory that will be registered.
+ * @param factoryId:: A unique identifier for the factory, the Dart code of the Flutter app can use
+ *   this identifier to request creation of a `UIView` by the registered factory.
+ */
+- (void)registerViewFactory:(NSObject<FlutterPlatformViewFactory>*)factory
+                     withId:(NSString*)factoryId;
 
 /**
  Publishes a value for external use of the plugin.
