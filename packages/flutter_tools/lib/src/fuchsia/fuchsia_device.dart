@@ -185,11 +185,12 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
   @override
   Future<int> forward(int devicePort, {int hostPort}) async {
     hostPort ??= 0;
+    // Note: the provided command works around a bug in -N, but the solution is flaky.
     final List<String> command = <String>[
       'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
-      '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'ls',
+      '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true'
     ];
-    final Process process = await processManager.start(command, runInShell: true);
+    final Process process = await processManager.start(command);
     process.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())

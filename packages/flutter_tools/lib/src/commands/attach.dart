@@ -110,7 +110,7 @@ class AttachCommand extends FlutterCommand {
       : null;
 
     Uri observatoryUri;
-    if (devicePort == null  && device is! FuchsiaDevice) {
+    if (devicePort == null && device is! FuchsiaDevice) {
       ProtocolDiscovery observatoryDiscovery;
       try {
         observatoryDiscovery = ProtocolDiscovery.observatory(
@@ -126,10 +126,10 @@ class AttachCommand extends FlutterCommand {
     } else if (devicePort == null && device is FuchsiaDevice) {
       final String moduleName = argResults['module-name'];
       final String isolateNumber = argResults['isolate-number'];
-      // if (moduleName == null || isolateNumber == null) {
-      //   throwToolExit('both module-name and isolate-number must be provided to'
-      //     ' attach to a Fuchsia device.');
-      // }
+      if (moduleName == null || isolateNumber == null) {
+        throwToolExit('both module-name and isolate-number must be provided to'
+          ' attach to a Fuchsia device.');
+      }
       final List<int> ports = await device.servicePorts();
       final List<int> localPorts = <int>[];
       for (int port in ports) {
