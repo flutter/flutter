@@ -29,6 +29,15 @@ void main() {
   });
 
   group('attached process', () {
+    test('writes pid-file', () async {
+      final File pidFile = tempDir.childFile('test.pid');
+      await _flutterRun.run(withDebugger: true);
+      await _flutterAttach.attach(
+        _flutterRun.vmServicePort,
+        pidFile: pidFile,
+      );
+      expect(pidFile.existsSync(), isTrue);
+    });
     test('can hot reload', () async {
       await _flutterRun.run(withDebugger: true);
       await _flutterAttach.attach(_flutterRun.vmServicePort);
