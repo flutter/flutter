@@ -294,6 +294,7 @@ class _HeroFlightManifest {
     @required this.toHero,
     @required this.createRectTween,
     @required this.shuttleBuilder,
+    @required this.isUserGestureTransition,
   }) : assert(fromHero.widget.tag == toHero.widget.tag);
 
   final HeroFlightDirection type;
@@ -305,6 +306,7 @@ class _HeroFlightManifest {
   final _HeroState toHero;
   final CreateRectTween createRectTween;
   final HeroFlightShuttleBuilder shuttleBuilder;
+  final bool isUserGestureTransition;
 
   Object get tag => fromHero.widget.tag;
 
@@ -430,9 +432,12 @@ class _HeroFlight {
       assert(type != null);
       switch (type) {
         case HeroFlightDirection.pop:
-          // Pops may be initiated by a user gesture that manually drives the
-          // AnimationController without being in any particular animation states.
-          return initial.value == 1.0;
+          return initial.value == 1.0 && initialManifest.isUserGestureTransition
+              // During user gesture transitions, the animation controller isn't
+              // driving the reverse transition, but should still be in a previously
+              // completed stage with the initial value at 1.0.
+              ? initial.status == AnimationStatus.completed
+              : initial.status == AnimationStatus.reverse;
         case HeroFlightDirection.push:
           return initial.value == 0.0 && initial.status == AnimationStatus.forward;
       }
@@ -665,6 +670,7 @@ class HeroController extends NavigatorObserver {
           createRectTween: createRectTween,
           shuttleBuilder:
               toShuttleBuilder ?? fromShuttleBuilder ?? _defaultHeroFlightShuttleBuilder,
+          isUserGestureTransition: isUserGestureTransition,
         );
 
         if (_flights[tag] != null)
