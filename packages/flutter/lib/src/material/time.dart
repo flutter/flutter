@@ -21,7 +21,7 @@ enum DayPeriod {
 ///
 /// The time is represented by [hour] and [minute] pair. Once created, both
 /// values can not be changed.
-/// 
+///
 /// You can create TimeOfDay using the constructor which requires both hour and
 /// minute or using [DateTime] object.
 /// Note that hours are specified between 0 and 23, as in a 24-hour clock.
@@ -30,9 +30,9 @@ enum DayPeriod {
 /// ```
 /// var now = TimeOfDay.now();
 /// var releaseTime = TimeOfDay(hour: 15, minute: 0); // 3:00pm
-/// var roomBooked = TimeOfDay.fromDateTime(DateTime.parse('2018-10-20 16:30:04Z'));  // 4:30pm
+/// var roomBooked = TimeOfDay.fromDateTime(DateTime.parse('2018-10-20 16:30:04Z')); // 4:30pm
 /// ```
-/// 
+///
 /// You can use properties to get
 /// the individual units of a [TimeOfDay] object.
 /// ```
