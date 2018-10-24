@@ -533,10 +533,12 @@ class HotRunner extends ResidentRunner {
       } finally {
         status.cancel();
       }
-      if (result.isOk)
+      if (result.isOk) {
         printStatus('  ${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-      if (result.hintMessage != null)
+      }
+      if (result.hintMessage != null) {
         printStatus('\n  ${result.hintMessage}');
+      }
       printStatus('Hot reload completed.');
       return result;
     }
