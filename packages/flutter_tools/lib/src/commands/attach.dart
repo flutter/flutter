@@ -135,7 +135,6 @@ class AttachCommand extends FlutterCommand {
       for (int port in ports) {
         final ServerSocket socket = await ServerSocket.bind(ipv4Loopback, 0);
         localPorts.add(socket.port);
-        print(socket.port);
         await device.portForwarder.forward(port, hostPort: socket.port);
       }
       final String isolateName = '$moduleName\$main-$isolateNumber';
