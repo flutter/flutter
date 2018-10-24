@@ -517,8 +517,7 @@ class HotRunner extends ResidentRunner {
       } finally {
         status.cancel();
       }
-      printStatus('  Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-      printStatus('Hot restart completed.');
+      printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
       return OperationResult.ok;
     } else {
       final bool reloadOnTopOfSnapshot = _runningFromSnapshot;
@@ -533,13 +532,10 @@ class HotRunner extends ResidentRunner {
       } finally {
         status.cancel();
       }
-      if (result.isOk) {
-        printStatus('  ${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-      }
-      if (result.hintMessage != null) {
-        printStatus('\n  ${result.hintMessage}');
-      }
-      printStatus('Hot reload completed.');
+      if (result.isOk)
+        printStatus('${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+      if (result.hintMessage != null)
+        printStatus('\n${result.hintMessage}');
       return result;
     }
   }
