@@ -13,8 +13,9 @@
 namespace shell {
 
 RunConfiguration RunConfiguration::InferFromSettings(
-    const blink::Settings& settings) {
-  auto asset_manager = fml::MakeRefCounted<blink::AssetManager>();
+    const blink::Settings& settings,
+    fml::RefPtr<fml::TaskRunner> io_worker) {
+  auto asset_manager = std::make_shared<blink::AssetManager>();
 
   asset_manager->PushBack(std::make_unique<blink::DirectoryAssetBundle>(
       fml::Duplicate(settings.assets_dir)));
@@ -23,18 +24,19 @@ RunConfiguration RunConfiguration::InferFromSettings(
       std::make_unique<blink::DirectoryAssetBundle>(fml::OpenDirectory(
           settings.assets_path.c_str(), false, fml::FilePermission::kRead)));
 
-  return {IsolateConfiguration::InferFromSettings(settings, asset_manager),
+  return {IsolateConfiguration::InferFromSettings(settings, asset_manager,
+                                                  io_worker),
           asset_manager};
 }
 
 RunConfiguration::RunConfiguration(
     std::unique_ptr<IsolateConfiguration> configuration)
     : RunConfiguration(std::move(configuration),
-                       fml::MakeRefCounted<blink::AssetManager>()) {}
+                       std::make_shared<blink::AssetManager>()) {}
 
 RunConfiguration::RunConfiguration(
     std::unique_ptr<IsolateConfiguration> configuration,
-    fml::RefPtr<blink::AssetManager> asset_manager)
+    std::shared_ptr<blink::AssetManager> asset_manager)
     : isolate_configuration_(std::move(configuration)),
       asset_manager_(std::move(asset_manager)) {}
 
@@ -66,7 +68,7 @@ void RunConfiguration::SetEntrypointAndLibrary(std::string entrypoint,
   entrypoint_library_ = std::move(library);
 }
 
-fml::RefPtr<blink::AssetManager> RunConfiguration::GetAssetManager() const {
+std::shared_ptr<blink::AssetManager> RunConfiguration::GetAssetManager() const {
   return asset_manager_;
 }
 

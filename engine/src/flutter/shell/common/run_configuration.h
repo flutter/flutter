@@ -20,12 +20,14 @@ namespace shell {
 
 class RunConfiguration {
  public:
-  static RunConfiguration InferFromSettings(const blink::Settings& settings);
+  static RunConfiguration InferFromSettings(
+      const blink::Settings& settings,
+      fml::RefPtr<fml::TaskRunner> io_worker = nullptr);
 
   RunConfiguration(std::unique_ptr<IsolateConfiguration> configuration);
 
   RunConfiguration(std::unique_ptr<IsolateConfiguration> configuration,
-                   fml::RefPtr<blink::AssetManager> asset_manager);
+                   std::shared_ptr<blink::AssetManager> asset_manager);
 
   RunConfiguration(RunConfiguration&&);
 
@@ -39,7 +41,7 @@ class RunConfiguration {
 
   void SetEntrypointAndLibrary(std::string entrypoint, std::string library);
 
-  fml::RefPtr<blink::AssetManager> GetAssetManager() const;
+  std::shared_ptr<blink::AssetManager> GetAssetManager() const;
 
   const std::string& GetEntrypoint() const;
 
@@ -49,7 +51,7 @@ class RunConfiguration {
 
  private:
   std::unique_ptr<IsolateConfiguration> isolate_configuration_;
-  fml::RefPtr<blink::AssetManager> asset_manager_;
+  std::shared_ptr<blink::AssetManager> asset_manager_;
   std::string entrypoint_ = "main";
   std::string entrypoint_library_ = "";
 

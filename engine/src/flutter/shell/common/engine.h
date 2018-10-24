@@ -75,7 +75,7 @@ class Engine final : public blink::RuntimeDelegate {
   FML_WARN_UNUSED_RESULT
   bool Restart(RunConfiguration configuration);
 
-  bool UpdateAssetManager(fml::RefPtr<blink::AssetManager> asset_manager);
+  bool UpdateAssetManager(std::shared_ptr<blink::AssetManager> asset_manager);
 
   void BeginFrame(fml::TimePoint frame_time);
 
@@ -121,7 +121,7 @@ class Engine final : public blink::RuntimeDelegate {
   std::unique_ptr<blink::RuntimeController> runtime_controller_;
   std::string initial_route_;
   blink::ViewportMetrics viewport_metrics_;
-  fml::RefPtr<blink::AssetManager> asset_manager_;
+  std::shared_ptr<blink::AssetManager> asset_manager_;
   bool activity_running_;
   bool have_surface_;
   blink::FontCollection font_collection_;
