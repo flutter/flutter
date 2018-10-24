@@ -21,7 +21,7 @@ import 'framework.dart';
 /// The embedded Android view is painted just like any other Flutter widget and transformations
 /// apply to it as well.
 ///
-/// {@template platform_view_layout}
+/// {@template flutter.widgets.platformViews.layout}
 /// The widget fills all available space, the parent of this object must provide bounded layout
 /// constraints.
 /// {@endtemplate}
@@ -43,7 +43,7 @@ import 'framework.dart';
 ///   }
 /// ```
 ///
-/// {@template platform_view_lifetime}
+/// {@template flutter.widgets.platformViews.lifetime}
 /// The platform view's lifetime is the same as the lifetime of the [State] object for this widget.
 /// When the [State] is disposed the platform view (and auxiliary resources) are lazily
 /// released (some resources are immediately released and some by platform garbage collector).
@@ -54,7 +54,7 @@ import 'framework.dart';
 class AndroidView extends StatefulWidget {
   /// Creates a widget that embeds an Android view.
   ///
-  /// {@template platform_view_constructor_params}
+  /// {@template flutter.widgets.platformViews.constructorParams}
   /// The `viewType` and `hitTestBehavior` parameters must not be null.
   /// {@endtemplate}
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
@@ -81,21 +81,21 @@ class AndroidView extends StatefulWidget {
   /// See also: [AndroidView] for an example of registering a platform view factory.
   final String viewType;
 
-  /// {@template platform_view_created_param}
+  /// {@template flutter.widgets.platformViews.createdParam}
   /// Callback to invoke after the platform view has been created.
   ///
   /// May be null.
   /// {@endtemplate}
   final PlatformViewCreatedCallback onPlatformViewCreated;
 
-  /// {@template platform_view_hittest_param}
+  /// {@template flutter.widgets.platformViews.hittestParam}
   /// How this widget should behave during hit testing.
   ///
   /// This defaults to [PlatformViewHitTestBehavior.opaque].
   /// {@endtemplate}
   final PlatformViewHitTestBehavior hitTestBehavior;
 
-  /// {@template platform_view_direction_param}
+  /// {@template flutter.widgets.platformViews.directionParam}
   /// The text direction to use for the embedded view.
   ///
   /// If this is null, the ambient [Directionality] is used instead.
@@ -162,7 +162,7 @@ class AndroidView extends StatefulWidget {
   final dynamic creationParams;
 
   /// The codec used to encode `creationParams` before sending it to the
-  /// platform side.It should match the codec passed to the constructor of [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#PlatformViewFactory-io.flutter.plugin.common.MessageCodec-).
+  /// platform side. It should match the codec passed to the constructor of [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#PlatformViewFactory-io.flutter.plugin.common.MessageCodec-).
   ///
   /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec], [StringCodec], or [BinaryCodec].
   ///
@@ -173,18 +173,19 @@ class AndroidView extends StatefulWidget {
   State createState() => _AndroidViewState();
 }
 
+// TODO(amirh): describe the embedding mechanism.
 /// Embeds an iOS view in the Widget hierarchy.
 ///
 /// Embedding iOS views is an expensive operation and should be avoided when a Flutter
 /// equivalent is possible.
 ///
-/// {@macro platform_view_layout}
+/// {@macro flutter.widgets.platformViews.layout}
 ///
-/// {@macro platform_view_lifetime}
+/// {@macro flutter.widgets.platformViews.lifetime}
 class UiKitView extends StatefulWidget {
   /// Creates a widget that embeds an iOS view.
   ///
-  /// {@macro platform_view_constructor_params}
+  /// {@macro flutter.widgets.platformViews.constructorParams}
   UiKitView({ // ignore: prefer_const_constructors_in_immutables
     // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
     Key key,
@@ -202,13 +203,13 @@ class UiKitView extends StatefulWidget {
   /// A PlatformViewFactory for this type must have been registered.
   final String viewType;
 
-  /// {@macro platform_view_created_param}
+  /// {@macro flutter.widgets.platformViews.createdParam}
   final PlatformViewCreatedCallback onPlatformViewCreated;
 
-  /// {@macro platform_view_hittest_param}
+  /// {@macro flutter.widgets.platformViews.hittestParam}
   final PlatformViewHitTestBehavior hitTestBehavior;
 
-  /// {@macro platform_view_direction_param}
+  /// {@macro flutter.widgets.platformViews.directionParam}
   final TextDirection layoutDirection;
 
   @override
@@ -308,7 +309,7 @@ class _UiKitViewState extends State<UiKitView> {
   bool _initialized = false;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
-  Set<Factory<OneSequenceGestureRecognizer>>();
+    Set<Factory<OneSequenceGestureRecognizer>>();
 
   @override
   Widget build(BuildContext context) {
@@ -378,7 +379,7 @@ class _UiKitViewState extends State<UiKitView> {
 
   Future<void> _createNewUiKitView() async {
     _id = platformViewsRegistry.getNextPlatformViewId();
-    _controller = await PlatformViewsService.initUiKitView(
+    final UiKitViewController controller = await PlatformViewsService.initUiKitView(
       id: _id,
       viewType: widget.viewType,
       layoutDirection: _layoutDirection,
@@ -386,7 +387,7 @@ class _UiKitViewState extends State<UiKitView> {
     if (widget.onPlatformViewCreated != null) {
       widget.onPlatformViewCreated(_id);
     }
-    setState(() {});
+    setState(() { _controller = controller; });
   }
 }
 

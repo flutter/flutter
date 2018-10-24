@@ -260,7 +260,7 @@ class PlatformViewLayer extends Layer {
     @required this.viewId,
   }): assert(rect != null), assert(viewId != null);
 
-  /// Bounding rectangle of this layer.
+  /// Bounding rectangle of this layer in the global coordinate space.
   final Rect rect;
 
   /// The unique identifier of the UIView displayed on this layer.
