@@ -102,7 +102,7 @@ void main() {
     expect(materialWidget.type, MaterialType.card);
     expect(materialWidget.elevation, 24);
     expect(materialWidget.color, Colors.grey[800]);
-    expect(materialWidget.shape, RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))));
+    expect(materialWidget.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))));
   });
 
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
