@@ -102,6 +102,53 @@ void main() {
     expect(materialWidget.type, MaterialType.card);
     expect(materialWidget.elevation, 24);
     expect(materialWidget.color, Colors.grey[800]);
+    expect(materialWidget.shape, RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))));
+  });
+
+  testWidgets('Custom dialog shape', (WidgetTester tester) async {
+    const RoundedRectangleBorder customBorder =
+      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(brightness: Brightness.dark),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showDialog<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const AlertDialog(
+                          title: Text('Title'),
+                          content: Text('Y'),
+                          actions: <Widget>[ ],
+                          shape: customBorder,
+                        );
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1));
+
+    final StatefulElement widget = tester.element(find.byType(Material).last);
+    final Material materialWidget = widget.state.widget;
+    //first and second expect check that the material is the dialog's one
+    expect(materialWidget.type, MaterialType.card);
+    expect(materialWidget.elevation, 24);
+    expect(materialWidget.shape, customBorder);
   });
 
   testWidgets('Simple dialog control test', (WidgetTester tester) async {
