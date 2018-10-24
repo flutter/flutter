@@ -28,7 +28,7 @@ class FormatCommand extends FlutterCommand {
       defaultsTo: false,
       negatable: false,
     );
-    argParser.addOption('wrap-column',
+    argParser.addOption('line-length',
       abbr: 'l',
       help: 'Reformats code to produce lines shorter than this length.',
     );
