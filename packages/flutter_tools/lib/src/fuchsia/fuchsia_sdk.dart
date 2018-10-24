@@ -36,7 +36,7 @@ class FuchsiaSdk {
   /// not currently support multiple attached devices.
   ///
   /// Example output:
-  ///     $ fx netaddr --fuchsia -d liliac-shore-only-last
+  ///     $ fx netaddr --fuchsia --nowait
   ///     > fe80::9aaa:fcff:fe60:d3af%eth1
   Future<String> netaddr() async {
     try {
