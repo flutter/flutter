@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
+
+import 'package:multicast_dns/multicast_dns.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -18,6 +21,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 
 final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
+const String _kDartObservatoryName = '_dartobservatory._tcp.local';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -37,6 +41,7 @@ final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 /// enables hot reloading.
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
+    requiresPubspecYaml();
     addBuildModeFlags(defaultToRelease: false);
     usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
@@ -89,6 +94,66 @@ class AttachCommand extends FlutterCommand {
     observatoryPort;
   }
 
+
+  Future<int> mdnsQueryDartObservatoryPort() async {
+    final MDnsClient client = MDnsClient();
+    try {
+      await client.start();
+      final List<PtrResourceRecord> pointerRecords = await client
+          .lookup<PtrResourceRecord>(
+            ResourceRecordQuery.ptr(_kDartObservatoryName),
+          )
+          .toList();
+      if (pointerRecords.isEmpty) {
+        return null;
+      }
+      // We have no guarantee that we won't get multiple hits from the same
+      // service on this.
+      final List<String> uniqueDomainNames = pointerRecords
+          .map<String>((PtrResourceRecord record) => record.domainName)
+          .toSet()
+          .toList();
+      String domainName;
+      if (uniqueDomainNames.length > 1) {
+        print('There are multiple observatory ports available:');
+        print('');
+        for (int i = 0; i < uniqueDomainNames.length; i++) {
+          print('  ${i + 1}) '
+              '${uniqueDomainNames[i].replaceAll('.$_kDartObservatoryName', '')}');
+        }
+        print('');
+        int selection;
+        while (selection == null) {
+          stdout.write('Selection [1-${uniqueDomainNames.length}]: ');
+          final String selectionString = io.stdin.readLineSync();
+          selection = int.tryParse(selectionString);
+          if (selection == null ||
+              selection < 1 ||
+              selection > pointerRecords.length) {
+            print('Please enter a valid integer value between '
+                '1 and ${uniqueDomainNames.length}.\n');
+            selection = null;
+          }
+        }
+        domainName = uniqueDomainNames[selection - 1];
+      } else {
+        domainName = pointerRecords[0].domainName;
+      }
+      // Here, if we get more than one, it should just be a duplicate.
+      final List<SrvResourceRecord> srv = await client
+          .lookup<SrvResourceRecord>(
+            ResourceRecordQuery.srv(domainName),
+          )
+          .toList();
+      if (srv.isEmpty) {
+        return null;
+      }
+      return srv.first.port;
+    } finally {
+      client.stop();
+    }
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
@@ -98,7 +163,7 @@ class AttachCommand extends FlutterCommand {
     writePidFile(argResults['pid-file']);
 
     final Device device = await findTargetDevice();
-    final int devicePort = observatoryPort;
+    final int devicePort = observatoryPort ?? await mdnsQueryDartObservatoryPort();
 
     final Daemon daemon = argResults['machine']
       ? Daemon(stdinCommandStream, stdoutCommandResponse,
