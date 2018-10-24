@@ -18,6 +18,7 @@ import org.gradle.api.tasks.bundling.Jar
 
 buildscript {
     repositories {
+        google()
         jcenter()
         maven {
             url 'https://dl.google.com/dl/android/maven2'
