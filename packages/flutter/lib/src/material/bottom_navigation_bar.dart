@@ -499,7 +499,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(debugCheckHasMaterialLocalizations(context));
 
     // Labels apply up to _bottomMargin padding. Remainder is media padding.
-    final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - _kBottomMargin, 0.0);
+    final double additionalVerticalPadding = math.max(MediaQuery.of(context).padding.bottom - _kBottomMargin, 0.0);
     Color backgroundColor;
     switch (widget.type) {
       case BottomNavigationBarType.fixed:
@@ -520,7 +520,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ),
           ),
           ConstrainedBox(
-            constraints: BoxConstraints(minHeight: kBottomNavigationBarHeight + additionalBottomPadding * 2),
+            constraints: BoxConstraints(minHeight: kBottomNavigationBarHeight + additionalVerticalPadding * 2),
             child: Stack(
               children: <Widget>[
                 Positioned.fill(
@@ -534,7 +534,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                 Material( // Splashes.
                   type: MaterialType.transparency,
                   child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: additionalBottomPadding),
+                    padding: EdgeInsets.symmetric(vertical: additionalVerticalPadding),
                     child: MediaQuery.removePadding(
                       context: context,
                       removeBottom: true,
