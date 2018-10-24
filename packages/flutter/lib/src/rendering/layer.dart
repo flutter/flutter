@@ -41,40 +41,55 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @override
   ContainerLayer get parent => super.parent;
 
-  /// Whether this layer has any changes since it was last sent to the engine
-  /// using [addToScene]. Initialized to true as a new layer has never called
-  /// [addToScene].
-  @protected
-  bool get isDirty => _isDirty;
-  bool _isDirty = true;
+  // Whether this layer has any changes since its last call to [addToScene].
+  //
+  // Initialized to true as a new layer has never called [addToScene].
+  bool _needsAddToScene = true;
 
-  /// Mark that this layer has changed and we need to upload changes to the
-  /// engine using [addToScene].
+  /// Mark that this layer has changed and [addToScene] needs to be called.
   @protected
-  void markDirty() => _isDirty = true;
+  void markNeedsAddToScene() => _needsAddToScene = true;
 
-  /// Mark that [addToScene] is called and this layer is in sync with engine.
+  /// Mark that this layer is in sync with engine.
   ///
-  /// This would enable the retained rendering of this layer if it stays clean
-  /// for future frames.
-  @protected
-  void markClean() => _isDirty = false;
+  /// This is only for debug mode and test purpose only.
+  @visibleForTesting
+  void debugMarkClean() {
+    assert((){
+      _needsAddToScene = false;
+      return true;
+    }());
+  }
 
-  /// Whether any layer in the subtree of this layer is dirty ([isDirty]).
-  ///
-  /// (This is valid after calling [updateSubtreeDirtiness].)
+  /// Subclass may override this to true to disable retained rendering.
   @protected
-  bool get isSubtreeDirty => _isSubtreeDirty;
-  bool _isSubtreeDirty;
+  bool get alwaysNeedsAddToScene => false;
+
+  bool _subtreeNeedsAddToScene;
+
+  /// Whether any layer in the subtree needs [addToScene].
+  ///
+  /// This is for debug and test purpose only and it only becomes valid after
+  /// calling [updateSubtreeNeedsAddToScene].
+  @visibleForTesting
+  bool get debugSubtreeNeedsAddToScene {
+    bool result;
+    assert((){
+      result = _subtreeNeedsAddToScene;
+      return true;
+    }());
+    return result;
+  }
 
   ui.EngineLayer _engineLayer;
 
-  /// Traverse the layer tree and compute if any subtree has a dirty layer (by
-  /// calling [markDirty]). The [ContainerLayer] will override this to respect
-  /// its children.
+  /// Traverse the layer tree and compute if any subtree needs [addToScene].
+  ///
+  /// A subtree needs [addToScene] if any of its layer needs [addToScene].
+  /// The [ContainerLayer] will override this to respect its children.
   @protected
-  void updateSubtreeDirtiness() {
-    _isSubtreeDirty = isDirty;
+  void updateSubtreeNeedsAddToScene() {
+    _subtreeNeedsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
   }
 
   /// This layer's next sibling in the parent layer's child list.
@@ -154,12 +169,12 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     // its descendent layers, say A. However, that means the child structure
     // of A has changed so A is dirty. This contradicts that this layer's
     // subtree is not dirty.
-    if (!_isSubtreeDirty && _engineLayer != null) {
+    if (!_subtreeNeedsAddToScene && _engineLayer != null) {
       builder.addRetained(_engineLayer);
       return;
     }
     _engineLayer = addToScene(builder);
-    markClean();
+    _needsAddToScene = false;
   }
 
   /// The object responsible for creating this layer.
@@ -202,7 +217,7 @@ class PictureLayer extends Layer {
   /// (as described at [Layer]).
   ui.Picture get picture => _picture;
   set picture(ui.Picture picture) {
-    markDirty();
+    _needsAddToScene = true;
     _picture = picture;
   }
   ui.Picture _picture;
@@ -413,11 +428,13 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  void updateSubtreeDirtiness() {
-    _isSubtreeDirty = isDirty;
-    for (Layer child = firstChild; child != null; child = child.nextSibling) {
-      child.updateSubtreeDirtiness();
-      _isSubtreeDirty = _isSubtreeDirty || child._isSubtreeDirty;
+  void updateSubtreeNeedsAddToScene() {
+    _subtreeNeedsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
+    Layer child = firstChild;
+    while (child != null) {
+      child.updateSubtreeNeedsAddToScene();
+      _subtreeNeedsAddToScene = _subtreeNeedsAddToScene || child._subtreeNeedsAddToScene;
+      child = child.nextSibling;
     }
   }
 
@@ -470,7 +487,6 @@ class ContainerLayer extends Layer {
       assert(node != child); // indicates we are about to create a cycle
       return true;
     }());
-    markDirty();
     adoptChild(child);
     child._previousSibling = lastChild;
     if (lastChild != null)
@@ -486,7 +502,6 @@ class ContainerLayer extends Layer {
     assert(child.attached == attached);
     assert(_debugUltimatePreviousSiblingOf(child, equals: firstChild));
     assert(_debugUltimateNextSiblingOf(child, equals: lastChild));
-    markDirty();
     if (child._previousSibling == null) {
       assert(_firstChild == child);
       _firstChild = child._nextSibling;
@@ -508,6 +523,18 @@ class ContainerLayer extends Layer {
     child._nextSibling = null;
     dropChild(child);
     assert(!child.attached);
+  }
+
+  @override
+  void dropChild(AbstractNode child) {
+    markNeedsAddToScene();
+    super.dropChild(child);
+  }
+
+  @override
+  void adoptChild(AbstractNode child) {
+    markNeedsAddToScene();
+    super.adoptChild(child);
   }
 
   /// Removes all of this layer's children from its child list.
@@ -630,11 +657,11 @@ class OffsetLayer extends ContainerLayer {
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
   Offset get offset => _offset;
-  set offset(Offset offset) {
-    if (offset != _offset) {
-      markDirty();
+  set offset(Offset value) {
+    if (value != _offset) {
+      markNeedsAddToScene();
     }
-    _offset = offset;
+    _offset = value;
   }
   Offset _offset;
 
@@ -653,7 +680,7 @@ class OffsetLayer extends ContainerLayer {
   /// Consider this layer as the root and build a scene (a tree of layers)
   /// in the engine.
   ui.Scene buildScene(ui.SceneBuilder builder) {
-    updateSubtreeDirtiness();
+    updateSubtreeNeedsAddToScene();
     addToScene(builder);
     return builder.build();
   }
@@ -1222,9 +1249,9 @@ class LeaderLayer extends ContainerLayer {
   /// pipeline.
   Offset offset;
 
-  /// {@macro flutter.leaderFollower.isDirty}
+  /// {@macro flutter.leaderFollower.alwaysNeedsAddToScene}
   @override
-  bool get isDirty => true;
+  bool get alwaysNeedsAddToScene => true;
 
   @override
   void attach(Object owner) {
@@ -1459,18 +1486,18 @@ class FollowerLayer extends ContainerLayer {
     _inverseDirty = true;
   }
 
-  /// {@template flutter.leaderFollower.isDirty}
-  /// Leader/FollowerLayer is always dirty to disable retained rendering.
+  /// {@template flutter.leaderFollower.alwaysNeedsAddToScene}
+  /// This disables retained rendering for Leader/FollowerLayer.
   ///
   /// A FollowerLayer copies changes from a LeaderLayer that could be anywhere
   /// in the Layer tree, and that LeaderLayer could change without notifying the
-  /// FollowerLayer. Therefore we have to always treat a FollowerLayer as dirty
-  /// and call its [addToScene]. In order to call FollowerLayer's [addToScene],
-  /// LeaderLayer's [addToScene] must be called first so LeaderLayer must also
-  /// be always considered as dirty.
+  /// FollowerLayer. Therefore we have to always call a FollowerLayer's
+  /// [addToScene]. In order to call FollowerLayer's [addToScene], LeaderLayer's
+  /// [addToScene] must be called first so LeaderLayer must also be considered
+  /// as [alwaysNeedsAddToScene].
   /// {@endtemplate}
   @override
-  bool get isDirty => true;
+  bool get alwaysNeedsAddToScene => true;
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {

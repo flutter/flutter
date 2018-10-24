@@ -72,41 +72,41 @@ void main() {
     c.append(g);
     g.append(j);
 
-    a.markClean();  // ignore: invalid_use_of_protected_member
-    b.markDirty();  // ignore: invalid_use_of_protected_member
-    c.markClean();  // ignore: invalid_use_of_protected_member
-    d.markClean();  // ignore: invalid_use_of_protected_member
-    e.markClean();  // ignore: invalid_use_of_protected_member
-    f.markClean();  // ignore: invalid_use_of_protected_member
-    g.markClean();  // ignore: invalid_use_of_protected_member
-    h.markClean();  // ignore: invalid_use_of_protected_member
-    i.markClean();  // ignore: invalid_use_of_protected_member
-    j.markDirty();  // ignore: invalid_use_of_protected_member
+    a.debugMarkClean();
+    b.markNeedsAddToScene();  // ignore: invalid_use_of_protected_member
+    c.debugMarkClean();
+    d.debugMarkClean();
+    e.debugMarkClean();
+    f.debugMarkClean();
+    g.debugMarkClean();
+    h.debugMarkClean();
+    i.debugMarkClean();
+    j.markNeedsAddToScene();  // ignore: invalid_use_of_protected_member
 
-    a.updateSubtreeDirtiness();
+    a.updateSubtreeNeedsAddToScene();
 
-    expect(a.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
-    expect(b.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
-    expect(c.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
-    expect(g.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
-    expect(j.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
+    expect(a.debugSubtreeNeedsAddToScene, true);
+    expect(b.debugSubtreeNeedsAddToScene, true);
+    expect(c.debugSubtreeNeedsAddToScene, true);
+    expect(g.debugSubtreeNeedsAddToScene, true);
+    expect(j.debugSubtreeNeedsAddToScene, true);
 
-    expect(d.isSubtreeDirty, false);  // ignore: invalid_use_of_protected_member
-    expect(e.isSubtreeDirty, false);  // ignore: invalid_use_of_protected_member
-    expect(f.isSubtreeDirty, false);  // ignore: invalid_use_of_protected_member
-    expect(h.isSubtreeDirty, false);  // ignore: invalid_use_of_protected_member
-    expect(i.isSubtreeDirty, false);  // ignore: invalid_use_of_protected_member
+    expect(d.debugSubtreeNeedsAddToScene, false);
+    expect(e.debugSubtreeNeedsAddToScene, false);
+    expect(f.debugSubtreeNeedsAddToScene, false);
+    expect(h.debugSubtreeNeedsAddToScene, false);
+    expect(i.debugSubtreeNeedsAddToScene, false);
   });
 
   test('leader and follower layers are always dirty', () {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer = LeaderLayer(link: link);
     final FollowerLayer followerLayer = FollowerLayer(link: link);
-    leaderLayer.markClean();  // ignore: invalid_use_of_protected_member
-    followerLayer.markClean(); // ignore: invalid_use_of_protected_member
-    leaderLayer.updateSubtreeDirtiness();  // ignore: invalid_use_of_protected_member
-    followerLayer.updateSubtreeDirtiness();  // ignore: invalid_use_of_protected_member
-    expect(leaderLayer.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
-    expect(followerLayer.isSubtreeDirty, true);  // ignore: invalid_use_of_protected_member
+    leaderLayer.debugMarkClean();
+    followerLayer.debugMarkClean();
+    leaderLayer.updateSubtreeNeedsAddToScene();
+    followerLayer.updateSubtreeNeedsAddToScene();
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
+    expect(followerLayer.debugSubtreeNeedsAddToScene, true);
   });
 }
