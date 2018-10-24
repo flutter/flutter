@@ -947,6 +947,67 @@ class ParagraphConstraints {
   String toString() => '$runtimeType(width: $width)';
 }
 
+/// Defines various ways to vertically bound the boxes returned by
+/// [Paragraph.getBoxesForRange].
+enum BoxHeightStyle {
+    /// Provide tight bounding boxes that fit heights per run. This style may result
+    /// in uneven bounding boxes that do not nicely connect with adjacent boxes.
+    tight,
+
+    /// The height of the boxes will be the maximum height of all runs in the
+    /// line. All boxes in the same line will be the same height. This does not
+    /// guarantee that the boxes will cover the entire vertical height of the line
+    /// when there is additional line spacing.
+    ///
+    /// See [RectHeightStyle.includeLineSpacingTop], [RectHeightStyle.includeLineSpacingMiddle],
+    /// and [RectHeightStyle.includeLineSpacingBottom] for styles that will cover
+    /// the entire line.
+    max,
+
+    /// Extends the top and bottom edge of the bounds to fully cover any line
+    /// spacing.
+    ///
+    /// The top and bottom of each box will cover half of the
+    /// space above and half of the space below the line.
+    ///
+    /// {@template flutter.dart:ui.boxHeightStyle.includeLineSpacing}
+    /// The top edge of each line should be the same as the bottom edge
+    /// of the line above. There should be no gaps in vertical coverage given any
+    /// amount of line spacing. Line spacing is not included above the first line
+    /// and below the last line due to no additional space present there.
+    /// {@endtemplate}
+    includeLineSpacingMiddle,
+
+    /// Extends the top edge of the bounds to fully cover any line spacing.
+    ///
+    /// The line spacing will be added to the top of the box.
+    ///
+    /// {@macro flutter.dart:ui.rectHeightStyle.includeLineSpacing}
+    includeLineSpacingTop,
+
+    /// Extends the bottom edge of the bounds to fully cover any line spacing.
+    ///
+    /// The line spacing will be added to the bottom of the box.
+    ///
+    /// {@macro flutter.dart:ui.boxHeightStyle.includeLineSpacing}
+    includeLineSpacingBottom,
+}
+
+/// Defines various ways to horizontally bound the boxes returned by
+/// [Paragraph.getBoxesForRange].
+enum BoxWidthStyle {
+    // Provide tight bounding boxes that fit widths to the runs of each line
+    // independently.
+    tight,
+
+    /// Adds up to two additional boxes as needed at the beginning and/or end
+    /// of each line so that the widths of the boxes in line are the same width
+    /// as the widest line in the paragraph. The additional boxes on each line
+    /// are only added when the relevant box at the relevant edge of that line
+    /// does not span the maximum width of the paragraph.
+    max,
+}
+
 /// A paragraph of text.
 ///
 /// A paragraph retains the size and position of each glyph in the text and can
@@ -1010,7 +1071,22 @@ class Paragraph extends NativeFieldWrapperClass2 {
   void _layout(double width) native 'Paragraph_layout';
 
   /// Returns a list of text boxes that enclose the given text range.
-  List<TextBox> getBoxesForRange(int start, int end) native 'Paragraph_getRectsForRange';
+  ///
+  /// The [boxHeightStyle] and [boxWidthStyle] parameters allow customization
+  /// of how the boxes are bound vertically and horizontally. Both style
+  /// parameters default to the tight option, which will provide close-fitting
+  /// boxes and will not account for any line spacing.
+  ///
+  /// The [boxHeightStyle] and [boxWidthStyle] parameters must not be null.
+  ///
+  /// See [BoxHeightStyle] and [BoxWidthStyle] for full descriptions of each option.
+  List<TextBox> getBoxesForRange(int start, int end, {BoxHeightStyle boxHeightStyle = BoxHeightStyle.tight, BoxWidthStyle boxWidthStyle = BoxWidthStyle.tight}) {
+    assert(boxHeightStyle != null);
+    assert(boxWidthStyle != null);
+    return _getBoxesForRange(start, end, boxHeightStyle.index, boxWidthStyle.index);
+  }
+
+  List<TextBox> _getBoxesForRange(int start, int end, int boxHeightStyle, int boxWidthStyle) native 'Paragraph_getRectsForRange';
 
   /// Returns the text position closest to the given offset.
   TextPosition getPositionForOffset(Offset offset) {
