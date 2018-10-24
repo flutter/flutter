@@ -62,11 +62,13 @@ class Dialog extends StatelessWidget {
   /// Defaults to [Curves.fastOutSlowIn].
   final Curve insetAnimationCurve;
 
+  /// {@template flutter.material.dialog.shape}
   /// The shape of this dialog's border.
   ///
   /// Defines the dialog's [Material.shape].
   ///
   /// The default shape is a [RoundedRectangleBorder] with a radius of 2.0.
+  /// {@endtemplate}
   final ShapeBorder shape;
 
   Color _getColor(BuildContext context) {
@@ -249,13 +251,7 @@ class AlertDialog extends StatelessWidget {
   ///    value is used.
   final String semanticLabel;
 
-  /// The shape of this [AlertDialog]'s border.
-  ///
-  /// Defines the dialog's [Material.shape].
-  ///
-  /// The default shape is a [RoundedRectangleBorder] with a radius of 2.0.
-  ///
-  /// See [dialog.shape].
+  /// {@template flutter.material.dialog.shape}
   final ShapeBorder shape;
 
   @override
@@ -518,13 +514,7 @@ class SimpleDialog extends StatelessWidget {
   ///    value is used.
   final String semanticLabel;
 
-  /// The shape of this [AlertDialog]'s border.
-  ///
-  /// Defines the dialog's [Material.shape].
-  ///
-  /// The default shape is a [RoundedRectangleBorder] with a radius of 2.0.
-  ///
-  /// See [dialog.shape].
+  /// {@template flutter.material.dialog.shape}
   final ShapeBorder shape;
 
   @override
