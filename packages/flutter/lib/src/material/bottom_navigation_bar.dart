@@ -520,7 +520,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ),
           ),
           ConstrainedBox(
-            constraints: BoxConstraints(minHeight: kBottomNavigationBarHeight + additionalBottomPadding),
+            constraints: BoxConstraints(minHeight: kBottomNavigationBarHeight + additionalBottomPadding * 2),
             child: Stack(
               children: <Widget>[
                 Positioned.fill(
