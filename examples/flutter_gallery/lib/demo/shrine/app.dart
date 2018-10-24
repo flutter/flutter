@@ -27,8 +27,7 @@ class ShrineApp extends StatefulWidget {
   _ShrineAppState createState() => _ShrineAppState();
 }
 
-class _ShrineAppState extends State<ShrineApp>
-    with SingleTickerProviderStateMixin {
+class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMixin {
   // Controller to coordinate both the opening/closing of backdrop and sliding
   // of expanding bottom sheet
   AnimationController _controller;
@@ -38,7 +37,7 @@ class _ShrineAppState extends State<ShrineApp>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 450),
+      duration: const Duration(milliseconds: 450),
       value: 1.0,
     );
   }
@@ -97,7 +96,7 @@ ThemeData _buildShrineTheme() {
       colorScheme: kShrineColorScheme,
       textTheme: ButtonTextTheme.normal,
     ),
-    primaryIconTheme: base.iconTheme.copyWith(color: kShrineBrown900),
+    primaryIconTheme: _customIconTheme(base.iconTheme),
     inputDecorationTheme: const InputDecorationTheme(border: CutCornersBorder()),
     textTheme: _buildShrineTextTheme(base.textTheme),
     primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),

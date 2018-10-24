@@ -121,7 +121,9 @@ class ShoppingCartSummary extends StatelessWidget {
     final TextStyle smallAmountStyle = Theme.of(context).textTheme.body1.copyWith(color: kShrineBrown600);
     final TextStyle largeAmountStyle = Theme.of(context).textTheme.display1;
     final NumberFormat formatter = NumberFormat.simpleCurrency(
-        decimalDigits: 2, locale: Localizations.localeOf(context).toString());
+      decimalDigits: 2,
+      locale: Localizations.localeOf(context).toString(),
+    );
 
     return Row(
       children: <Widget>[
@@ -202,7 +204,9 @@ class ShoppingCartRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final NumberFormat formatter = NumberFormat.simpleCurrency(
-        decimalDigits: 0, locale: Localizations.localeOf(context).toString());
+      decimalDigits: 0,
+      locale: Localizations.localeOf(context).toString(),
+    );
     final ThemeData localTheme = Theme.of(context);
 
     return Padding(

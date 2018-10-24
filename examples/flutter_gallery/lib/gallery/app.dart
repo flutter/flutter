@@ -117,11 +117,9 @@ class _GalleryAppState extends State<GalleryApp> {
       optionsPage: GalleryOptionsPage(
         options: _options,
         onOptionsChanged: _handleOptionsChanged,
-        onSendFeedback: widget.onSendFeedback ??
-            () {
-              launch('https://github.com/flutter/flutter/issues/new',
-                  forceSafariVC: false);
-            },
+        onSendFeedback: widget.onSendFeedback ?? () {
+          launch('https://github.com/flutter/flutter/issues/new', forceSafariVC: false);
+        },
       ),
     );
 
@@ -139,8 +137,7 @@ class _GalleryAppState extends State<GalleryApp> {
         color: Colors.grey,
         showPerformanceOverlay: _options.showPerformanceOverlay,
         checkerboardOffscreenLayers: _options.showOffscreenLayersCheckerboard,
-        checkerboardRasterCacheImages:
-            _options.showRasterCacheImagesCheckerboard,
+        checkerboardRasterCacheImages: _options.showRasterCacheImagesCheckerboard,
         routes: _buildRoutes(),
         builder: (BuildContext context, Widget child) {
           return Directionality(

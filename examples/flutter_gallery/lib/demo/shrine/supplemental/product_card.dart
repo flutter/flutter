@@ -20,7 +20,7 @@ import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
 import 'package:flutter_gallery/demo/shrine/model/product.dart';
 
 class ProductCard extends StatelessWidget {
-  const ProductCard({this.imageAspectRatio = 33 / 49, this.product})
+  const ProductCard({ this.imageAspectRatio = 33 / 49, this.product })
       : assert(imageAspectRatio == null || imageAspectRatio > 0);
 
   final double imageAspectRatio;
@@ -44,14 +44,15 @@ class ProductCard extends StatelessWidget {
     );
 
     return ScopedModelDescendant<AppStateModel>(
-      builder: (BuildContext context, Widget child, AppStateModel model) =>
-          GestureDetector(
-            onTap: () {
-              model.addProductToCart(product.id);
-              // TODO: Add Snackbar
-            },
-            child: child,
-          ),
+      builder: (BuildContext context, Widget child, AppStateModel model) {
+        return GestureDetector(
+          onTap: () {
+            model.addProductToCart(product.id);
+            // TODO: Add Snackbar
+          },
+          child: child,
+        );
+      },
       child: Stack(
         children: <Widget>[
           Column(

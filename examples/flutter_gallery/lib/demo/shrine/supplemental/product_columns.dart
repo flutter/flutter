@@ -33,21 +33,21 @@ class TwoProductCardColumn extends StatelessWidget {
       final double heightOfCards = (constraints.biggest.height - spacerHeight) / 2.0;
       final double heightOfImages = heightOfCards - ProductCard.kTextBoxHeight;
       final double imageAspectRatio = (heightOfImages >= 0.0 && constraints.biggest.width > heightOfImages)
-          ? constraints.biggest.width / heightOfImages
-          : 33 / 49;
+        ? constraints.biggest.width / heightOfImages
+        : 33 / 49;
 
       return ListView(
         children: <Widget>[
           Padding(
             padding: const EdgeInsetsDirectional.only(start: 28.0),
             child: top != null
-                ? ProductCard(
-                    imageAspectRatio: imageAspectRatio,
-                    product: top,
-                  )
-                : SizedBox(
-                    height: heightOfCards > 0 ? heightOfCards : spacerHeight,
-                  ),
+              ? ProductCard(
+                  imageAspectRatio: imageAspectRatio,
+                  product: top,
+                )
+              : SizedBox(
+                  height: heightOfCards > 0 ? heightOfCards : spacerHeight,
+                ),
           ),
           const SizedBox(height: spacerHeight),
           Padding(

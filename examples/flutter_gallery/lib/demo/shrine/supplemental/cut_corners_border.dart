@@ -24,9 +24,10 @@ class CutCornersBorder extends OutlineInputBorder {
     this.cut = 7.0,
     double gapPadding = 2.0,
   }) : super(
-            borderSide: borderSide,
-            borderRadius: borderRadius,
-            gapPadding: gapPadding);
+    borderSide: borderSide,
+    borderRadius: borderRadius,
+    gapPadding: gapPadding,
+  );
 
   @override
   CutCornersBorder copyWith({
@@ -36,10 +37,10 @@ class CutCornersBorder extends OutlineInputBorder {
     double cut,
   }) {
     return CutCornersBorder(
-      borderRadius: borderRadius ?? this.borderRadius,
       borderSide: borderSide ?? this.borderSide,
-      cut: cut ?? this.cut,
+      borderRadius: borderRadius ?? this.borderRadius,
       gapPadding: gapPadding ?? this.gapPadding,
+      cut: cut ?? this.cut,
     );
   }
 

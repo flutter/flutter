@@ -44,8 +44,8 @@ class AsymmetricView extends StatelessWidget {
         column = TwoProductCardColumn(
           bottom: products[bottom],
           top: products.length - 1 >= bottom + 1
-              ? products[bottom + 1]
-              : null,
+            ? products[bottom + 1]
+            : null,
         );
         width += 32.0;
       } else {
@@ -78,11 +78,9 @@ class AsymmetricView extends StatelessWidget {
   }
 
   int _listItemCount(int totalItems) {
-    if (totalItems % 3 == 0) {
-      return totalItems ~/ 3 * 2;
-    } else {
-      return (totalItems / 3).ceil() * 2 - 1;
-    }
+    return (totalItems % 3 == 0)
+      ? totalItems ~/ 3 * 2
+      : (totalItems / 3).ceil() * 2 - 1;
   }
 
   @override

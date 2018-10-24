@@ -38,14 +38,16 @@ class AppStateModel extends Model {
   Category get selectedCategory => _selectedCategory;
 
   // Totaled prices of the items in the cart.
-  double get subtotalCost => _productsInCart.keys
+  double get subtotalCost {
+    return _productsInCart.keys
       .map((int id) => _availableProducts[id].price * _productsInCart[id])
       .fold(0.0, (double sum, int e) => sum + e);
+  }
 
   // Total shipping cost for the items in the cart.
-  double get shippingCost =>
-      _shippingCostPerItem *
-      _productsInCart.values.fold(0.0, (num sum, int e) => sum + e);
+  double get shippingCost {
+    return _shippingCostPerItem * _productsInCart.values.fold(0.0, (num sum, int e) => sum + e);
+  }
 
   // Sales tax for the items in the cart
   double get tax => subtotalCost * _salesTaxRate;
@@ -63,8 +65,8 @@ class AppStateModel extends Model {
       return List<Product>.from(_availableProducts);
     } else {
       return _availableProducts
-          .where((Product p) => p.category == _selectedCategory)
-          .toList();
+        .where((Product p) => p.category == _selectedCategory)
+        .toList();
     }
   }
 

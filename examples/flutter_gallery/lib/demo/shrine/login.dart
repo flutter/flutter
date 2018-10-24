@@ -68,9 +68,7 @@ class _LoginPageState extends State<LoginPage> {
                 Tooltip(
                   message: 'Back',
                   child: FlatButton(
-                    child: const Text(
-                      'EXIT',
-                    ),
+                    child: const Text('EXIT'),
                     shape: const BeveledRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(7.0)),
                     ),
@@ -109,8 +107,7 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 class PrimaryColorOverride extends StatelessWidget {
-  const PrimaryColorOverride({Key key, this.color, this.child})
-      : super(key: key);
+  const PrimaryColorOverride({Key key, this.color, this.child}) : super(key: key);
 
   final Color color;
   final Widget child;

@@ -40,31 +40,32 @@ class CategoryMenuPage extends StatelessWidget {
               }
             },
             child: model.selectedCategory == category
-                ? Column(
-                    children: <Widget>[
-                      const SizedBox(height: 16.0),
-                      Text(
-                        categoryString,
-                        style: theme.textTheme.body2,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 14.0),
-                      Container(
-                        width: 70.0,
-                        height: 2.0,
-                        color: kShrinePink400,
-                      ),
-                    ],
-                  )
-                : Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: Text(
+              ? Column(
+                  children: <Widget>[
+                    const SizedBox(height: 16.0),
+                    Text(
                       categoryString,
-                      style: theme.textTheme.body2
-                          .copyWith(color: kShrineBrown900.withAlpha(153)),
+                      style: theme.textTheme.body2,
                       textAlign: TextAlign.center,
                     ),
+                    const SizedBox(height: 14.0),
+                    Container(
+                      width: 70.0,
+                      height: 2.0,
+                      color: kShrinePink400,
+                    ),
+                  ],
+                )
+              : Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Text(
+                    categoryString,
+                    style: theme.textTheme.body2.copyWith(
+                      color: kShrineBrown900.withAlpha(153)
+                    ),
+                    textAlign: TextAlign.center,
                   ),
+                ),
           ),
     );
   }
