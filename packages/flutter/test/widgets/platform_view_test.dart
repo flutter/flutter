@@ -828,8 +828,8 @@ void main() {
 
       expect(
         viewsController.views,
-        unorderedEquals(<FakeIosPlatformView>[
-          FakeIosPlatformView(currentViewId + 1, 'webview')
+        unorderedEquals(<FakeUiKitView>[
+          FakeUiKitView(currentViewId + 1, 'webview')
         ]),
       );
     });
@@ -861,8 +861,8 @@ void main() {
 
       expect(
         viewsController.views,
-        unorderedEquals(<FakeIosPlatformView>[
-          FakeIosPlatformView(currentViewId + 2, 'maps')
+        unorderedEquals(<FakeUiKitView>[
+          FakeUiKitView(currentViewId + 2, 'maps')
         ]),
       );
     });
@@ -888,6 +888,37 @@ void main() {
           ),
         ),
       );
+
+      expect(
+        viewsController.views,
+        isEmpty,
+      );
+    });
+
+    testWidgets('Dispose UIView before creation completed ', (WidgetTester tester) async {
+      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      viewsController.registerViewType('webview');
+      viewsController.creationDelay = Completer<void>();
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+          ),
+        ),
+      );
+
+      viewsController.creationDelay.complete();
 
       expect(
         viewsController.views,
@@ -924,8 +955,8 @@ void main() {
 
       expect(
         viewsController.views,
-        unorderedEquals(<FakeIosPlatformView>[
-          FakeIosPlatformView(currentViewId + 1, 'webview')
+        unorderedEquals(<FakeUiKitView>[
+          FakeUiKitView(currentViewId + 1, 'webview')
         ]),
       );
     });

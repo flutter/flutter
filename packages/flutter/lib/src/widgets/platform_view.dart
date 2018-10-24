@@ -59,7 +59,7 @@ class AndroidView extends StatefulWidget {
   /// {@endtemplate}
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
   AndroidView({ // ignore: prefer_const_constructors_in_immutables
-                // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
+                // TODO(aam): Remove lint ignore above once https://dartbug.com/34297 is fixed
     Key key,
     @required this.viewType,
     this.onPlatformViewCreated,
@@ -170,7 +170,7 @@ class AndroidView extends StatefulWidget {
   final MessageCodec<dynamic> creationParamsCodec;
 
   @override
-  State createState() => _AndroidViewState();
+  State<AndroidView> createState() => _AndroidViewState();
 }
 
 // TODO(amirh): describe the embedding mechanism.
@@ -187,7 +187,7 @@ class UiKitView extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.platformViews.constructorParams}
   UiKitView({ // ignore: prefer_const_constructors_in_immutables
-    // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
+    // TODO(aam): Remove lint ignore above once https://dartbug.com/34297 is fixed
     Key key,
     @required this.viewType,
     this.onPlatformViewCreated,
@@ -213,7 +213,7 @@ class UiKitView extends StatefulWidget {
   final TextDirection layoutDirection;
 
   @override
-  State createState() => _UiKitViewState();
+  State<UiKitView> createState() => _UiKitViewState();
 }
 
 class _AndroidViewState extends State<AndroidView> {
@@ -343,7 +343,7 @@ class _UiKitViewState extends State<UiKitView> {
     if (didChangeLayoutDirection) {
       // The native view will update asynchronously, in the meantime we don't want
       // to block the framework. (so this is intentionally not awaiting).
-      _controller.setLayoutDirection(_layoutDirection);
+      _controller?.setLayoutDirection(_layoutDirection);
     }
   }
 
@@ -356,13 +356,13 @@ class _UiKitViewState extends State<UiKitView> {
     _layoutDirection = newLayoutDirection;
 
     if (widget.viewType != oldWidget.viewType) {
-      _controller.dispose();
+      _controller?.dispose();
       _createNewUiKitView();
       return;
     }
 
     if (didChangeLayoutDirection) {
-      _controller.setLayoutDirection(_layoutDirection);
+      _controller?.setLayoutDirection(_layoutDirection);
     }
   }
 
@@ -373,7 +373,7 @@ class _UiKitViewState extends State<UiKitView> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -384,6 +384,10 @@ class _UiKitViewState extends State<UiKitView> {
       viewType: widget.viewType,
       layoutDirection: _layoutDirection,
     );
+    if (!mounted) {
+      controller.dispose();
+      return;
+    }
     if (widget.onPlatformViewCreated != null) {
       widget.onPlatformViewCreated(_id);
     }
@@ -435,11 +439,12 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
   final PlatformViewHitTestBehavior hitTestBehavior;
 
   @override
-  RenderObject createRenderObject(BuildContext context) =>
-      RenderUiKitView(
-        viewId: viewId,
-        hitTestBehavior: hitTestBehavior,
-      );
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderUiKitView(
+      viewId: viewId,
+      hitTestBehavior: hitTestBehavior,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderUiKitView renderObject) {

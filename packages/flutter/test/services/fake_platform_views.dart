@@ -150,10 +150,14 @@ class FakeIosPlatformViewsController {
   }
 
 
-  Iterable<FakeIosPlatformView> get views => _views.values;
-  final Map<int, FakeIosPlatformView> _views = <int, FakeIosPlatformView>{};
+  Iterable<FakeUiKitView> get views => _views.values;
+  final Map<int, FakeUiKitView> _views = <int, FakeUiKitView>{};
 
   final Set<String> _registeredViewTypes = Set<String>();
+
+  // When this completer is non null, the 'create' method channel call will be
+  // delayed until it completes.
+  Completer<void> creationDelay;
 
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
@@ -169,7 +173,9 @@ class FakeIosPlatformViewsController {
     return Future<dynamic>.sync(() => null);
     }
 
-  Future<dynamic> _create(MethodCall call) {
+  Future<dynamic> _create(MethodCall call) async {
+    if (creationDelay != null)
+      await creationDelay.future;
     final Map<dynamic, dynamic> args = call.arguments;
     final int id = args['id'];
     final String viewType = args['viewType'];
@@ -188,7 +194,7 @@ class FakeIosPlatformViewsController {
       );
     }
 
-    _views[id] = FakeIosPlatformView(id, viewType);
+    _views[id] = FakeUiKitView(id, viewType);
     return Future<int>.sync(() => null);
   }
 
@@ -219,7 +225,7 @@ class FakeAndroidPlatformView {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! FakeAndroidPlatformView)
+    if (other.runtimeType != FakeAndroidPlatformView)
       return false;
     final FakeAndroidPlatformView typedOther = other;
     return id == typedOther.id &&
@@ -266,20 +272,20 @@ class FakeAndroidMotionEvent {
   }
 }
 
-class FakeIosPlatformView {
+class FakeUiKitView {
 
-  FakeIosPlatformView(this.id, this.type);
+  FakeUiKitView(this.id, this.type);
 
   final int id;
   final String type;
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! FakeIosPlatformView)
+    if (other.runtimeType != FakeUiKitView)
       return false;
-    final FakeIosPlatformView typedOther = other;
+    final FakeUiKitView typedOther = other;
     return id == typedOther.id &&
-        type == typedOther.type;
+      type == typedOther.type;
   }
 
   @override

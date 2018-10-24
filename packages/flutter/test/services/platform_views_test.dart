@@ -175,9 +175,9 @@ void main() {
           id: 1, viewType: 'webview', layoutDirection: TextDirection.rtl);
       expect(
           viewsController.views,
-          unorderedEquals(<FakeIosPlatformView>[
-            FakeIosPlatformView(0, 'webview'),
-            FakeIosPlatformView(1, 'webview'),
+          unorderedEquals(<FakeUiKitView>[
+            FakeUiKitView(0, 'webview'),
+            FakeUiKitView(1, 'webview'),
           ]));
     });
 
@@ -205,8 +205,8 @@ void main() {
       viewController.dispose();
       expect(
           viewsController.views,
-          unorderedEquals(<FakeIosPlatformView>[
-            FakeIosPlatformView(0, 'webview'),
+          unorderedEquals(<FakeUiKitView>[
+            FakeUiKitView(0, 'webview'),
           ]));
     });
 
