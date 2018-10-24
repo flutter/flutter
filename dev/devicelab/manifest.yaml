@@ -283,6 +283,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  named_isolates_test:
+    description: >
+      Tests naming and attaching to specific isolates.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   flutter_create_offline_test_linux:
     description: >
       Tests the `flutter create --offline` command.
