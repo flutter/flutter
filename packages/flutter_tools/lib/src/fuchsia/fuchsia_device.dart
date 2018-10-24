@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
@@ -161,19 +163,50 @@ class FuchsiaDevice extends Device {
   @override
   bool get supportsScreenshot => false;
 
-  /// Run `command` on the fuchsia device.
-  Future<String> run(String command) => fuchsiaSdk.run(this, command);
+  /// List the ports currently running a dart observatory.
+  Future<List<int>> servicePorts() async {
+    final String lsOutput = await shell('ls /tmp/dart.services');
+    return parseFuchsiaDartPortOutput(lsOutput);
+  }
 
-  /// Finds the first port running a VM matching `isolateName` given `ports`.
+  /// Run `command` on the Fuchsia device shell.
+  Future<String> shell(String command) async {
+    final RunResult result = await runAsync(<String>[
+      'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, id, command]);
+    if (result.exitCode != 0) {
+      throwToolExit('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
+      return null;
+    }
+    return result.stdout;
+  }
+
+  /// Finds the first port running a VM matching `isolateName` from the
+  /// provided set of `ports`.
   ///
   /// TODO(jonahwilliams): replacing this with the hub will require an update
   /// to the flutter_runner.
-  Future<int> findIsolatePort(String isolateName, List<int> ports) => fuchsiaSdk.findIsolatePort(this, isolateName, ports);
-
-  /// List the ports currently running a dart observatory.
-  Future<List<int>> servicePorts() async {
-    final String lsOutput = await run('ls /tmp/dart.services');
-    return parseFuchsiaDartPortOutput(lsOutput);
+  Future<int> findIsolatePort(String isolateName, List<int> ports) async {
+    for (int port in ports) {
+      try {
+        final Uri uri = Uri.parse('http://${InternetAddress.loopbackIPv4.address}:$port');
+        final VMService vmService = await VMService.connect(uri);
+        await vmService.getVM();
+        await vmService.refreshViews();
+        for (FlutterView flutterView in vmService.vm.views) {
+          if (flutterView.uiIsolate == null) {
+            continue;
+          }
+          final Uri address = flutterView.owner.vmService.httpAddress;
+          if (flutterView.uiIsolate.name.contains(isolateName)) {
+            return address.port;
+          }
+        }
+      } on SocketException catch (err) {
+        printTrace('Failed to connect to $port: $err');
+      }
+    }
+    throwToolExit('No ports found running $isolateName');
+    return null;
   }
 }
 

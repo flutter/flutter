@@ -5,11 +5,8 @@
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../fuchsia/fuchsia_device.dart';
-import '../vmservice.dart';
 
 /// The [FuchsiaSdk] instance.
 FuchsiaSdk get fuchsiaSdk => context[FuchsiaSdk];
@@ -67,47 +64,6 @@ class FuchsiaSdk {
     } on ArgumentError catch (exception) {
       throwToolExit('$exception');
     }
-    return null;
-  }
-
-  /// Run `command` on the Fuchsia `device`.
-  Future<String> run(FuchsiaDevice device, String command) async {
-    final RunResult result = await runAsync(<String>[
-      'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, device.id, command]);
-    if (result.exitCode != 0) {
-      throwToolExit('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
-      return null;
-    }
-    return result.stdout;
-  }
-
-  /// Finds the first port running a VM matching `isolateName` on `device` from `ports`.
-  ///
-  /// TODO(jonahwilliams): replacing this with the hub will require an update
-  /// to the flutter_runner.
-  Future<int> findIsolatePort(FuchsiaDevice device, String isolateName, List<int> ports) async {
-    for (int port in ports) {
-      try {
-        final String addr = 'http://${InternetAddress.loopbackIPv4.address}:$port';
-        final Uri uri = Uri.parse(addr);
-        final VMService vmService = await VMService.connect(uri);
-        await vmService.getVM();
-        await vmService.refreshViews();
-        for (FlutterView flutterView in vmService.vm.views) {
-          if (flutterView.uiIsolate == null) {
-            continue;
-          }
-          final Uri address = flutterView.owner.vmService.httpAddress;
-          print(flutterView.uiIsolate.name);
-          if (flutterView.uiIsolate.name.contains(isolateName)) {
-            return address.port;
-          }
-        }
-      } on SocketException catch (err) {
-        print('Failed to connect to $port: $err');
-      }
-    }
-    throwToolExit('No ports found running $isolateName');
     return null;
   }
 }
