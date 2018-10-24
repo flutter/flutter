@@ -7,6 +7,7 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
 import '../device.dart';
@@ -44,6 +45,10 @@ class AttachCommand extends FlutterCommand {
       ..addOption(
         'debug-port',
         help: 'Local port where the observatory is listening.',
+      )..addOption('pid-file',
+        help: 'Specify a file to write the process id to. '
+              'You can send SIGUSR1 to trigger a hot reload '
+              'and SIGUSR2 to trigger a hot restart.',
       )..addOption(
         'project-root',
         hide: !verboseHelp,
@@ -89,6 +94,8 @@ class AttachCommand extends FlutterCommand {
     Cache.releaseLockEarly();
 
     await _validateArguments();
+
+    writePidFile(argResults['pid-file']);
 
     final Device device = await findTargetDevice();
     final int devicePort = observatoryPort;
