@@ -56,16 +56,25 @@ class FlutterTestDriver {
     return msg;
   }
 
-  Future<void> run({bool withDebugger = false, bool pauseOnExceptions = false}) async {
+  Future<void> run({
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    File pidFile,
+  }) async {
     await _setupProcess(<String>[
         'run',
         '--machine',
         '-d',
         'flutter-tester',
-    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions);
+    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile);
   }
 
-  Future<void> attach(int port, {bool withDebugger = false, bool pauseOnExceptions = false}) async {
+  Future<void> attach(
+    int port, {
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    File pidFile,
+  }) async {
     await _setupProcess(<String>[
         'attach',
         '--machine',
@@ -73,20 +82,28 @@ class FlutterTestDriver {
         'flutter-tester',
         '--debug-port',
         '$port',
-    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions);
+    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile);
   }
 
-  Future<void> _setupProcess(List<String> args, {bool withDebugger = false, bool pauseOnExceptions = false}) async {
+  Future<void> _setupProcess(
+    List<String> args, {
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    File pidFile,
+  }) async {
     final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final List<String> flutterArgs = withDebugger
-        ? args.followedBy(<String>['--start-paused']).toList()
-        : args;
-    _debugPrint('Spawning flutter $flutterArgs in ${_projectFolder.path}');
+    if (withDebugger) {
+        args.add('--start-paused');
+    }
+    if (pidFile != null) {
+        args.addAll(<String>['--pid-file', pidFile.path]);
+    }
+    _debugPrint('Spawning flutter $args in ${_projectFolder.path}');
 
     const ProcessManager _processManager = LocalProcessManager();
     _proc = await _processManager.start(
         <String>[flutterBin]
-            .followedBy(flutterArgs)
+            .followedBy(args)
             .toList(),
         workingDirectory: _projectFolder.path,
         environment: <String, String>{'FLUTTER_TEST': 'true'});
