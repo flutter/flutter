@@ -49,7 +49,7 @@ TaskFunction createHotModeTest() {
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
-            if (line.contains('\] Reloaded ')) {
+            if (line.contains('\]   Reloaded ')) {
               if (hotReloadCount == 0) {
                 // Update the file and reload again.
                 final File appDartSource = file(path.join(
@@ -102,7 +102,7 @@ TaskFunction createHotModeTest() {
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
-            if (line.contains('\] Reloaded ')) {
+            if (line.contains('\]   Reloaded ')) {
               process.stdin.writeln('q');
             }
             print('stdout: $line');
