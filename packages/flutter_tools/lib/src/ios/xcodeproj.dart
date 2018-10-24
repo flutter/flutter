@@ -237,6 +237,17 @@ class XcodeProjectInfo {
       return baseConfiguration + '-$scheme';
   }
 
+  /// Checks whether the [buildConfigurations] contains the specified string, without
+  /// regard to case.
+  bool hasBuildConfiguratinForBuildMode(String buildMode) {
+    buildMode = buildMode.toLowerCase();
+    for (String name in buildConfigurations) {
+      if (name.toLowerCase() == buildMode) {
+        return true;
+      }
+    }
+    return false;
+  }
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
   String schemeFor(BuildInfo buildInfo) {

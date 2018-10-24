@@ -298,7 +298,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     printError('  open ios/Runner.xcworkspace');
     return XcodeBuildResult(success: false);
   }
-  if (!projectInfo.buildConfigurations.contains(buildInfo.modeName)) {
+  if (!projectInfo.hasBuildConfiguratinForBuildMode(buildInfo.modeName)) {
     // This error will occur with previous versions of the generated Xcode project, where a "Profile"
     // build configuration did not exist.  It may also occur if a user manually removes or renames
     // configurations from Runner.xcodeproj.
