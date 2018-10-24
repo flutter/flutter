@@ -6,6 +6,7 @@ import 'dart:ui' show Color, hashValues;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/material/dialog_theme.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -151,6 +152,7 @@ class ThemeData extends Diagnosticable {
     PageTransitionsTheme pageTransitionsTheme,
     ColorScheme colorScheme,
     Typography typography,
+    DialogTheme dialogTheme,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -243,6 +245,7 @@ class ThemeData extends Diagnosticable {
       brightness: brightness,
       labelStyle: textTheme.body2,
     );
+    dialogTheme ??= const DialogTheme();
 
     return ThemeData.raw(
       brightness: brightness,
@@ -290,6 +293,7 @@ class ThemeData extends Diagnosticable {
       pageTransitionsTheme: pageTransitionsTheme,
       colorScheme: colorScheme,
       typography: typography,
+      dialogTheme: dialogTheme,
     );
   }
 
@@ -348,6 +352,7 @@ class ThemeData extends Diagnosticable {
     @required this.pageTransitionsTheme,
     @required this.colorScheme,
     @required this.typography,
+    @required this.dialogTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -391,7 +396,8 @@ class ThemeData extends Diagnosticable {
        assert(materialTapTargetSize != null),
        assert(pageTransitionsTheme != null),
        assert(colorScheme != null),
-       assert(typography != null);
+       assert(typography != null),
+       assert(dialogTheme != null);
 
   // Warning: make sure these properties are in the exact same order as in
   // hashValues() and in the raw constructor and in the order of fields in
@@ -621,6 +627,9 @@ class ThemeData extends Diagnosticable {
   /// [primaryTextTheme], and [accentTextTheme].
   final Typography typography;
 
+  /// A theme for customizing the shape of a dialog.
+  final DialogTheme dialogTheme;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -668,6 +677,7 @@ class ThemeData extends Diagnosticable {
     PageTransitionsTheme pageTransitionsTheme,
     ColorScheme colorScheme,
     Typography typography,
+    DialogTheme dialogTheme,
   }) {
     return ThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -715,6 +725,7 @@ class ThemeData extends Diagnosticable {
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       colorScheme: colorScheme ?? this.colorScheme,
       typography: typography ?? this.typography,
+      dialogTheme: dialogTheme ?? this.dialogTheme,
     );
   }
 
@@ -841,6 +852,7 @@ class ThemeData extends Diagnosticable {
       pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       typography: Typography.lerp(a.typography, b.typography, t),
+      dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
     );
   }
 
@@ -896,7 +908,8 @@ class ThemeData extends Diagnosticable {
            (otherData.materialTapTargetSize == materialTapTargetSize) &&
            (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
            (otherData.colorScheme == colorScheme) &&
-           (otherData.typography == typography);
+           (otherData.typography == typography) &&
+           (otherData.dialogTheme == dialogTheme);
   }
 
   @override
@@ -953,6 +966,7 @@ class ThemeData extends Diagnosticable {
           pageTransitionsTheme,
           colorScheme,
           typography,
+          dialogTheme,
         ),
       ),
     );
@@ -1004,6 +1018,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography));
+    properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme));
   }
 }
 
