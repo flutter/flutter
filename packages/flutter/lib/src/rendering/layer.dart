@@ -1010,10 +1010,11 @@ class OpacityLayer extends ContainerLayer {
   ///
   /// The [alpha] property must be non-null before the compositing phase of
   /// the pipeline.
-  OpacityLayer({ int alpha, Offset offset = Offset.zero })
-      : _alpha = alpha,
-        _offset = offset,
-        assert(alpha != null);
+  OpacityLayer({
+    @required
+    int alpha,
+    Offset offset = Offset.zero
+  }) : _alpha = alpha, _offset = offset;
 
   /// The amount to multiply into the alpha channel.
   ///
