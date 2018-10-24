@@ -187,7 +187,7 @@
   return _viewOpaque;
 }
 
-- (void)viewOpaque:(BOOL)value {
+- (void)setViewOpaque:(BOOL)value {
   _viewOpaque = value;
   if (_flutterView.get().layer.opaque != value) {
     _flutterView.get().layer.opaque = value;
