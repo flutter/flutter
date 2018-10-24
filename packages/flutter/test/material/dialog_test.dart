@@ -124,6 +124,10 @@ void main() {
   testWidgets('Rectangular dialog shape', (WidgetTester tester) async {
     const ShapeBorder customBorder = Border();
     const AlertDialog dialog = AlertDialog(
+=======
+      title: Text('Title'),
+      content: Text('Y'),
+>>>>>>> Address Hans' first round comments.
       actions: <Widget>[ ],
       shape: customBorder,
     );
@@ -137,6 +141,27 @@ void main() {
         find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
     final Material materialWidget = widget.state.widget;
     expect(materialWidget.shape, customBorder);
+  });
+
+  testWidgets('Null dialog shape', (WidgetTester tester) async {
+    const RoundedRectangleBorder customBorder =
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
+    const AlertDialog dialog = AlertDialog(
+      title: Text('Title'),
+      content: Text('Y'),
+      actions: <Widget>[ ],
+      shape: null,
+    );
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1));
+
+    final StatefulElement widget = tester.element(
+        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
+    final Material materialWidget = widget.state.widget;
+    expect(materialWidget.shape, _defaultDialogShape);
   });
 
   testWidgets('Simple dialog control test', (WidgetTester tester) async {
