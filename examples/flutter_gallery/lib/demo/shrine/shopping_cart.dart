@@ -31,14 +31,13 @@ class ShoppingCartPage extends StatefulWidget {
 class _ShoppingCartPageState extends State<ShoppingCartPage> {
   List<Widget> _createShoppingCartRows(AppStateModel model) {
     return model.productsInCart.keys
-        .map(
-          (int id) => ShoppingCartRow(
-                product: model.getProductById(id),
-                quantity: model.productsInCart[id],
-                onPressed: () {
-                  model.removeItemFromCart(id);
-                },
-              ),
+        .map((int id) => ShoppingCartRow(
+            product: model.getProductById(id),
+            quantity: model.productsInCart[id],
+            onPressed: () {
+              model.removeItemFromCart(id);
+            },
+          ),
         )
         .toList();
   }
@@ -62,14 +61,13 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                           SizedBox(
                             width: _leftColumnWidth,
                             child: IconButton(
-                                icon: const Icon(Icons.keyboard_arrow_down),
-                                onPressed: () =>
-                                    ExpandingBottomSheet.of(context).close()),
+                              icon: const Icon(Icons.keyboard_arrow_down),
+                              onPressed: () => ExpandingBottomSheet.of(context).close(),
+                            ),
                           ),
                           Text(
                             'CART',
-                            style: localTheme.textTheme.subhead
-                                .copyWith(fontWeight: FontWeight.w600),
+                            style: localTheme.textTheme.subhead.copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(width: 16.0),
                           Text('${model.totalCartQuantity} ITEMS'),
@@ -120,8 +118,7 @@ class ShoppingCartSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle smallAmountStyle =
-        Theme.of(context).textTheme.body1.copyWith(color: kShrineBrown600);
+    final TextStyle smallAmountStyle = Theme.of(context).textTheme.body1.copyWith(color: kShrineBrown600);
     final TextStyle largeAmountStyle = Theme.of(context).textTheme.display1;
     final NumberFormat formatter = NumberFormat.simpleCurrency(
         decimalDigits: 2, locale: Localizations.localeOf(context).toString());
@@ -192,8 +189,11 @@ class ShoppingCartSummary extends StatelessWidget {
 }
 
 class ShoppingCartRow extends StatelessWidget {
-  const ShoppingCartRow(
-      {@required this.product, @required this.quantity, this.onPressed});
+  const ShoppingCartRow({
+    @required this.product,
+    @required this.quantity,
+    this.onPressed,
+  });
 
   final Product product;
   final int quantity;
@@ -248,8 +248,7 @@ class ShoppingCartRow extends StatelessWidget {
                             ),
                             Text(
                               product.name,
-                              style: localTheme.textTheme.subhead
-                                  .copyWith(fontWeight: FontWeight.w600),
+                              style: localTheme.textTheme.subhead.copyWith(fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),

@@ -28,8 +28,7 @@ class CategoryMenuPage extends StatelessWidget {
   final VoidCallback onCategoryTap;
 
   Widget _buildCategory(Category category, BuildContext context) {
-    final String categoryString =
-        category.toString().replaceAll('Category.', '').toUpperCase();
+    final String categoryString = category.toString().replaceAll('Category.', '').toUpperCase();
     final ThemeData theme = Theme.of(context);
     return ScopedModelDescendant<AppStateModel>(
       builder: (BuildContext context, Widget child, AppStateModel model) =>
@@ -77,9 +76,8 @@ class CategoryMenuPage extends StatelessWidget {
         padding: const EdgeInsets.only(top: 40.0),
         color: kShrinePink100,
         child: ListView(
-            children: Category.values
-                .map((Category c) => _buildCategory(c, context))
-                .toList()),
+          children: Category.values.map((Category c) => _buildCategory(c, context)).toList(),
+        ),
       ),
     );
   }
