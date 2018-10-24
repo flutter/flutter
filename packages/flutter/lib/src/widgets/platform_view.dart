@@ -239,19 +239,17 @@ class _AndroidViewState extends State<AndroidView> {
       return;
     }
     _initialized = true;
-    _layoutDirection = _findLayoutDirection();
     _createNewAndroidView();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initializeOnce();
-
     final TextDirection newLayoutDirection = _findLayoutDirection();
     final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
     _layoutDirection = newLayoutDirection;
 
+    _initializeOnce();
     if (didChangeLayoutDirection) {
       // The native view will update asynchronously, in the meantime we don't want
       // to block the framework. (so this is intentionally not awaiting).
@@ -327,19 +325,17 @@ class _UiKitViewState extends State<UiKitView> {
       return;
     }
     _initialized = true;
-    _layoutDirection = _findLayoutDirection();
     _createNewUiKitView();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initializeOnce();
-
     final TextDirection newLayoutDirection = _findLayoutDirection();
     final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
     _layoutDirection = newLayoutDirection;
 
+    _initializeOnce();
     if (didChangeLayoutDirection) {
       // The native view will update asynchronously, in the meantime we don't want
       // to block the framework. (so this is intentionally not awaiting).

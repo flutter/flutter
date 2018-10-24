@@ -214,7 +214,6 @@ class FakeIosPlatformViewsController {
 }
 
 class FakeAndroidPlatformView {
-
   FakeAndroidPlatformView(this.id, this.type, this.size, this.layoutDirection, [this.creationParams]);
 
   final int id;
@@ -273,7 +272,6 @@ class FakeAndroidMotionEvent {
 }
 
 class FakeUiKitView {
-
   FakeUiKitView(this.id, this.type);
 
   final int id;

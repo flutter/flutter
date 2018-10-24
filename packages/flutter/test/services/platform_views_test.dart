@@ -174,11 +174,12 @@ void main() {
       await PlatformViewsService.initUiKitView(
           id: 1, viewType: 'webview', layoutDirection: TextDirection.rtl);
       expect(
-          viewsController.views,
-          unorderedEquals(<FakeUiKitView>[
-            FakeUiKitView(0, 'webview'),
-            FakeUiKitView(1, 'webview'),
-          ]));
+        viewsController.views,
+        unorderedEquals(<FakeUiKitView>[
+          FakeUiKitView(0, 'webview'),
+          FakeUiKitView(1, 'webview'),
+        ]),
+      );
     });
 
     test('reuse iOS view id', () async {
@@ -189,10 +190,10 @@ void main() {
         layoutDirection: TextDirection.ltr,
       );
       expect(
-              () =>
-              PlatformViewsService.initUiKitView(
-                  id: 0, viewType: 'web', layoutDirection: TextDirection.ltr),
-          throwsA(isInstanceOf<PlatformException>()));
+            () => PlatformViewsService.initUiKitView(
+            id: 0, viewType: 'web', layoutDirection: TextDirection.ltr),
+        throwsA(isInstanceOf<PlatformException>()),
+      );
     });
 
     test('dispose iOS view', () async {
