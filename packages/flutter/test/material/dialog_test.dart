@@ -107,8 +107,6 @@ void main() {
   });
 
   testWidgets('Null dialog shape', (WidgetTester tester) async {
-    const RoundedRectangleBorder customBorder =
-    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
       content: Text('Y'),
