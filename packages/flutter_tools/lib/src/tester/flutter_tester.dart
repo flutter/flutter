@@ -127,8 +127,10 @@ class FlutterTesterDevice extends Device {
 
     // Build assets and perform initial compilation.
     final String assetDirPath = getAssetBuildDirectory();
-    final String applicationKernelFilePath =
-        fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill');
+    final String applicationKernelFilePath = bundle.getKernelPathForTransformerOptions(
+      fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill'),
+      trackWidgetCreation: buildInfo.trackWidgetCreation,
+    );
     await bundle.build(
       mainPath: mainPath,
       assetDirPath: assetDirPath,
@@ -138,10 +140,7 @@ class FlutterTesterDevice extends Device {
     );
     command.add('--flutter-assets-dir=$assetDirPath');
 
-    // TODO(scheglov): Either remove the check, or make it fail earlier.
-    if (applicationKernelFilePath != null) {
-      command.add(applicationKernelFilePath);
-    }
+    command.add(applicationKernelFilePath);
 
     try {
       printTrace(command.join(' '));

@@ -165,7 +165,8 @@ class FuchsiaReloadCommand extends FlutterCommand {
           debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
           target: _target,
           projectRootPath: _fuchsiaProjectPath,
-              packagesFilePath: _dotPackagesPath);
+          packagesFilePath: _dotPackagesPath,
+        );
         printStatus('Connecting to $_modName');
         await hotRunner.attach();
       } finally {

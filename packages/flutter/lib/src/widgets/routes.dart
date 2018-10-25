@@ -306,16 +306,14 @@ class LocalHistoryEntry {
   }
 }
 
-/// A route that can handle back navigations internally by popping a list.
+/// A mixin used by routes to handle back navigations internally by popping a list.
 ///
 /// When a [Navigator] is instructed to pop, the current route is given an
-/// opportunity to handle the pop internally. A LocalHistoryRoute handles the
+/// opportunity to handle the pop internally. A `LocalHistoryRoute` handles the
 /// pop internally if its list of local history entries is non-empty. Rather
 /// than being removed as the current route, the most recent [LocalHistoryEntry]
 /// is removed from the list and its [LocalHistoryEntry.onRemove] is called.
-///
-/// This class is typically used as a mixin.
-abstract class LocalHistoryRoute<T> extends Route<T> {
+mixin LocalHistoryRoute<T> on Route<T> {
   List<LocalHistoryEntry> _localHistory;
 
   /// Adds a local history entry to this route.

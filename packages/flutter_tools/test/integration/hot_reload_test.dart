@@ -41,7 +41,7 @@ void main() {
     test('reload hits breakpoints after reload', () async {
       await _flutter.run(withDebugger: true);
       final VMIsolate isolate = await _flutter.breakAt(
-          Uri.parse('package:test/main.dart'),
+          _project.breakpointUri,
           _project.breakpointLine);
       expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
     });

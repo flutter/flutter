@@ -183,6 +183,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     try {
       if (platform.script.scheme == 'data')
         return '../..'; // we're running as a test
+
+      if (platform.script.scheme == 'package') {
+        final String packageConfigPath = Uri.parse(platform.packageConfig).toFilePath();
+        return fs.path.dirname(fs.path.dirname(fs.path.dirname(packageConfigPath)));
+      }
+
       final String script = platform.script.toFilePath();
       if (fs.path.basename(script) == kSnapshotFileName)
         return fs.path.dirname(fs.path.dirname(fs.path.dirname(script)));
