@@ -19,7 +19,7 @@ import 'globals.dart';
 
 class FlutterVersion {
   @visibleForTesting
-  FlutterVersion(this._clock) {
+  FlutterVersion([this._clock = const Clock()]) {
     _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
     final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
     _branch = branch == 'HEAD' ? _channel : branch;
