@@ -167,10 +167,10 @@ class AccessibilityBridge
                 if (object.textSelectionBase != -1 && object.textSelectionExtent != -1) {
                     result.setTextSelection(object.textSelectionBase, object.textSelectionExtent);
                 }
-                // Text fields will always be created as a live region, so that updates to
-                // the label trigger polite announcements. This makes it easy to follow a11y
-                // guidelines for text fields on Android.
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                // Text fields will always be created as a live region when they have input focus,
+                // so that updates to the label trigger polite announcements. This makes it easy to
+                // follow a11y guidelines for text fields on Android.
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2 && mA11yFocusedObject != null && mA11yFocusedObject.id == virtualViewId) {
                     result.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
                 }
             }
