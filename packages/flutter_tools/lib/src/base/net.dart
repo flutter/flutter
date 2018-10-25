@@ -29,6 +29,33 @@ Future<List<int>> fetchUrl(Uri url) async {
   }
 }
 
+Future<bool> doesRemoteFileExist(Uri url) async {
+  printTrace('Checking file exists at: $url');
+  HttpClient httpClient;
+  if (context[HttpClientFactory] != null) {
+    httpClient = context[HttpClientFactory]();
+  } else {
+    httpClient = HttpClient();
+  }
+  HttpClientRequest request;
+  try {
+    request = await httpClient.headUrl(url);
+  } on HandshakeException catch (error) {
+    printTrace(error.toString());
+    throwToolExit(
+      'Could not authenticate download server. You may be experiencing a man-in-the-middle attack,\n'
+      'your network may be compromised, or you may have malware installed on your computer.\n'
+      'URL: $url',
+      exitCode: kNetworkProblemExitCode,
+    );
+  } on SocketException catch (error) {
+    printTrace('Request error: $error');
+    return null;
+  }
+  final HttpClientResponse response = await request.close();
+  return (response.statusCode == 200);
+}
+
 Future<List<int>> _attempt(Uri url) async {
   printTrace('Downloading: $url');
   HttpClient httpClient;
