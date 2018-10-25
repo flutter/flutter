@@ -19,6 +19,8 @@ import '../runner/flutter_command.dart';
 
 final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 
+final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
+
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
 ///
@@ -50,15 +52,10 @@ class AttachCommand extends FlutterCommand {
         hide: !verboseHelp,
         help: 'Normally used only in run target',
       )..addOption(
-        'module-name',
+        'module',
         abbr: 'm',
         hide: !verboseHelp,
-        help: 'The name of the module if attaching to a fuchsia device'
-      )..addOption(
-        'isolate-number',
-        abbr: 'i',
-        hide: !verboseHelp,
-        help: 'The isolate number of module if attaching to a fuchsia device'
+        help: 'The name of the module (required if attaching to a fuchsia device)'
       )..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
@@ -110,6 +107,7 @@ class AttachCommand extends FlutterCommand {
       : null;
 
     Uri observatoryUri;
+    bool ipv6 = false;
     if (devicePort == null && device is! FuchsiaDevice) {
       ProtocolDiscovery observatoryDiscovery;
       try {
@@ -124,12 +122,11 @@ class AttachCommand extends FlutterCommand {
         await observatoryDiscovery?.cancel();
       }
     } else if (devicePort == null && device is FuchsiaDevice) {
-      final String moduleName = argResults['module-name'];
-      final String isolateNumber = argResults['isolate-number'];
-      if (moduleName == null || isolateNumber == null) {
-        throwToolExit('both module-name and isolate-number must be provided to'
-          ' attach to a Fuchsia device.');
+      final String module = argResults['module'];
+      if (module == null) {
+        throwToolExit('\'-module\' is requried for attaching to a fuchsia device');
       }
+      hotRunnerConfig.computeDartDependencies = false;
       final List<int> ports = await device.servicePorts();
       final List<int> localPorts = <int>[];
       for (int port in ports) {
@@ -137,10 +134,9 @@ class AttachCommand extends FlutterCommand {
         localPorts.add(socket.port);
         await device.portForwarder.forward(port, hostPort: socket.port);
       }
-      final String isolateName = '$moduleName\$main-$isolateNumber';
-      final int devicePort = await device.findIsolatePort(isolateName, localPorts);
-      observatoryUri = Uri.parse('http://$ipv4Loopback:$devicePort/');
-      printStatus('Connecting to $observatoryUri');
+      final int localPort = await device.findIsolatePort(module, localPorts);
+      observatoryUri = Uri.parse('http://[$ipv6Loopback]:$localPort/');
+      ipv6 = true;
     } else {
       final int localPort = await device.portForwarder.forward(devicePort);
       observatoryUri = Uri.parse('http://$ipv4Loopback:$localPort/');
@@ -163,6 +159,7 @@ class AttachCommand extends FlutterCommand {
         usesTerminalUI: daemon == null,
         projectRootPath: argResults['project-root'],
         dillOutputPath: argResults['output-dill'],
+        ipv6: ipv6,
       );
 
       if (daemon != null) {

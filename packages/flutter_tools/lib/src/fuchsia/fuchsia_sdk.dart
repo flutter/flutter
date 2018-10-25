@@ -20,7 +20,7 @@ class FuchsiaSdk {
   /// The location of the SSH configuration file used to interact with a
   /// fuchsia device.
   ///
-  /// Requires the env variable `build-dir` to be set.
+  /// Requires the env variable `BUILD_DIR` to be set.
   File get sshConfig {
     if (_sshConfig == null) {
       final String buildDirectory = platform.environment['BUILD_DIR'];

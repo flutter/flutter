@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -22,6 +21,7 @@ import 'fuchsia_sdk.dart';
 import 'fuchsia_workflow.dart';
 
 final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
+final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 
 /// Read the log for a particular device.
 class _FuchsiaLogReader extends DeviceLogReader {
@@ -188,7 +188,12 @@ class FuchsiaDevice extends Device {
   Future<int> findIsolatePort(String isolateName, List<int> ports) async {
     for (int port in ports) {
       try {
-        final Uri uri = Uri.parse('http://${InternetAddress.loopbackIPv4.address}:$port');
+        // TODO(awdavies): The square-bracket enclosure for using the IPv6 loopback
+        // didn't appear to work, but when assigning to the IPv4 loopback device,
+        // netstat shows that the local port is actually being used on the IPv6
+        // loopback (::1). While this can be used for forwarding to the destination
+        // IPv6 interface, it cannot be used to connect to a websocket.
+        final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$port');
         final VMService vmService = await VMService.connect(uri);
         await vmService.getVM();
         await vmService.refreshViews();
@@ -220,17 +225,13 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     hostPort ??= 0;
     // Note: the provided command works around a bug in -N, but the solution is flaky.
     final List<String> command = <String>[
-      'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
+      'ssh', '-6', '-F', fuchsiaSdk.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
       '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true'
     ];
-    final Process process = await processManager.start(command);
-    process.stderr
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen(printTrace);
-    await process.exitCode.then<void>((int exitCode) {
-      printTrace('exited with exit code $exitCode');
-    });
+    final ProcessResult result = await processManager.run(command);
+    if (result.exitCode != 0) {
+      throwToolExit('Failed to forward port:$devicePort');
+    }
     _forwardedPorts.add(ForwardedPort(hostPort, devicePort));
     return hostPort;
   }
