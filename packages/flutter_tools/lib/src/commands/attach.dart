@@ -56,7 +56,8 @@ class AttachCommand extends FlutterCommand {
               'This can be specified to avoid being prompted if multiple observatory ports '
               'are advertised.\n'
               'If you have multiple devices or emulators running, you should include the '
-              'device hostname as well, e.g. "com.example.myApp@my-iphone".',
+              'device hostname as well, e.g. "com.example.myApp@my-iphone".\n'
+              'This parameter is case-insensitive.',
       )..addOption(
         'pid-file',
         help: 'Specify a file to write the process id to. '
@@ -129,7 +130,7 @@ class AttachCommand extends FlutterCommand {
       String domainName;
       if (appId != null) {
         for (String name in uniqueDomainNames) {
-          if (name.startsWith(appId)) {
+          if (name.toLowerCase().startsWith(appId.toLowerCase())) {
             domainName = name;
             break;
           }
