@@ -302,7 +302,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// builder callback.
   ///
   /// The [builder], [addAutomaticKeepAlives], [addRepaintBoundaries],
-  /// [addSemanticIndexes], and [semanticIndexCallback], arguments must not be
+  /// [addSemanticIndexes], and [semanticIndexCallback] arguments must not be
   /// null.
   const SliverChildBuilderDelegate(
     this.builder, {
@@ -468,7 +468,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// list.
   ///
   /// The [children], [addAutomaticKeepAlives], [addRepaintBoundaries],
-  /// [addSemanticIndexes], and [semanticIndexCallback], arguments must not be
+  /// [addSemanticIndexes], and [semanticIndexCallback] arguments must not be
   /// null.
   const SliverChildListDelegate(
     this.children, {
