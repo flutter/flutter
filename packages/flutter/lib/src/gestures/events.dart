@@ -114,7 +114,6 @@ abstract class PointerEvent {
     this.radiusMax = 0.0,
     this.orientation = 0.0,
     this.tilt = 0.0,
-    this.scrollDelta = Offset.zero,
     this.synthesized = false,
   });
 
@@ -237,11 +236,6 @@ abstract class PointerEvent {
   /// the stylus is flat on that surface).
   final double tilt;
 
-  /// For PointerChange.scroll:
-  ///
-  /// The amount to scroll in the x direction, in logical pixels.
-  final Offset scrollDelta;
-
   /// We occasionally synthesize PointerEvents that aren't exact translations
   /// of [ui.PointerData] from the engine to cover small cross-OS discrepancies
   /// in pointer behaviors.
@@ -259,6 +253,10 @@ abstract class PointerEvent {
 
   /// Returns a complete textual description of this event.
   String toStringFull() {
+    String extraDescription = _extraDescription();
+    if (extraDescription.isNotEmpty) {
+      extraDescription = ', ' + extraDescription;
+    }
     return '$runtimeType('
              'timeStamp: $timeStamp, '
              'pointer: $pointer, '
@@ -281,10 +279,15 @@ abstract class PointerEvent {
              'radiusMax: $radiusMax, '
              'orientation: $orientation, '
              'tilt: $tilt, '
-             'scrollDelta: $scrollDelta, '
              'synthesized: $synthesized'
+             '$extraDescription'
            ')';
   }
+
+  /// Extra information about the event to dispaly in [toStringFull].
+  ///
+  /// To be overridden by subclasses that have extra data.
+  String _extraDescription() => '';
 }
 
 /// The device has started tracking the pointer.
@@ -573,15 +576,22 @@ class PointerScrollEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
-    Offset scrollDelta = Offset.zero
+    this.scrollDelta = Offset.zero,
   }) : super(
     timeStamp: timeStamp,
     pointer: pointer,
     kind: kind,
     device: device,
     position: position,
-    scrollDelta: scrollDelta
   );
+
+  /// The amount to scroll, in logical pixels.
+  final Offset scrollDelta;
+
+  @override
+  String _extraDescription() {
+    return 'scrollDelta: $scrollDelta';
+  }
 }
 
 /// The input from the pointer is no longer directed towards this receiver.
