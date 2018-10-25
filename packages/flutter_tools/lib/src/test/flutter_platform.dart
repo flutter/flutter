@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 
@@ -25,6 +24,7 @@ import '../bundle.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../vmservice.dart';
 import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
@@ -419,7 +419,7 @@ class _FlutterPlatform extends PlatformPlugin {
       String libraryUri, String klass, bool isStatic,
       ) async {
     if (compiler == null || compiler.compiler == null) {
-      throw "Compiler is not set up properly to compile $expression";
+      throw 'Compiler is not set up properly to compile $expression';
     }
     final CompilerOutput compilerOutput =
       await compiler.compiler.compileExpression(expression, definitions,
@@ -546,8 +546,8 @@ class _FlutterPlatform extends PlatformPlugin {
 
           {
             printTrace('Connecting to service protocol: $processObservatoryUri');
-            Future<VMService> localVmService = VMService.connect(processObservatoryUri,
-                compileExpression: _compileExpressionService);
+            final Future<VMService> localVmService = VMService.connect(processObservatoryUri,
+              compileExpression: _compileExpressionService);
             localVmService.then((VMService vmservice) {
               printTrace('Successfully connected to service protocol: $processObservatoryUri');
             });
