@@ -715,8 +715,10 @@ class ListView extends BoxScrollView {
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
-  /// [SliverChildListDelegate.addRepaintBoundaries] property. Both must not be
-  /// null.
+  /// [SliverChildListDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildListDelegate.addSemanticIndexes] property. None
+  /// may be null.
   ListView({
     Key key,
     Axis scrollDirection = Axis.vertical,
@@ -773,8 +775,10 @@ class ListView extends BoxScrollView {
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
-  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. Both must not
-  /// be null.
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property. None may be
+  /// null.
   ListView.builder({
     Key key,
     Axis scrollDirection = Axis.vertical,
@@ -853,8 +857,10 @@ class ListView extends BoxScrollView {
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
-  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. Both must not
-  /// be null.
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property. None may be
+  /// null.
   ListView.separated({
     Key key,
     Axis scrollDirection = Axis.vertical,
