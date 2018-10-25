@@ -334,18 +334,25 @@ class TextureLayer extends Layer {
 class PerformanceOverlayLayer extends Layer {
   /// Creates a layer that displays a performance overlay.
   PerformanceOverlayLayer({
-    @required this.overlayRect,
+    @required Rect overlayRect,
     @required this.optionsMask,
     @required this.rasterizerThreshold,
     @required this.checkerboardRasterCacheImages,
     @required this.checkerboardOffscreenLayers,
-  });
+  }) : _overlayRect = overlayRect;
 
   /// The rectangle in this layer's coordinate system that the overlay should occupy.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  final Rect overlayRect;
+  Rect get overlayRect => _overlayRect;
+  set overlayRect(Rect value) {
+    if (value != _overlayRect) {
+      _overlayRect = value;
+      markNeedsAddToScene();
+    }
+  }
+  Rect _overlayRect;
 
   /// The mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.
@@ -755,14 +762,24 @@ class ClipRectLayer extends ContainerLayer {
   ///
   /// The [clipRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRectLayer({ this.clipRect, Clip clipBehavior = Clip.hardEdge }) :
-        _clipBehavior = clipBehavior, assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipRectLayer({ @required Rect clipRect, Clip clipBehavior = Clip.hardEdge }) :
+        _clipRect = clipRect, _clipBehavior = clipBehavior,
+        assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  final Rect clipRect;
+  Rect get clipRect => _clipRect;
+  set clipRect(Rect value) {
+    if (value != _clipRect) {
+      _clipRect = value;
+      markNeedsAddToScene();
+    }
+  }
+  Rect _clipRect;
+
+
 
   /// {@template flutter.clipper.clipBehavior}
   /// Controls how to clip (default to [Clip.antiAlias]).
@@ -819,14 +836,22 @@ class ClipRRectLayer extends ContainerLayer {
   ///
   /// The [clipRRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRRectLayer({ this.clipRRect, Clip clipBehavior = Clip.antiAlias }) :
-        _clipBehavior = clipBehavior, assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipRRectLayer({ @required RRect clipRRect, Clip clipBehavior = Clip.antiAlias }) :
+        _clipRRect = clipRRect, _clipBehavior = clipBehavior,
+        assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  final RRect clipRRect;
+  RRect get clipRRect => _clipRRect;
+  set clipRRect(RRect value) {
+    if (value != _clipRRect) {
+      _clipRRect = value;
+      markNeedsAddToScene();
+    }
+  }
+  RRect _clipRRect;
 
   /// {@macro flutter.clipper.clipBehavior}
   Clip get clipBehavior => _clipBehavior;
@@ -879,14 +904,22 @@ class ClipPathLayer extends ContainerLayer {
   ///
   /// The [clipPath] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipPathLayer({ this.clipPath, Clip clipBehavior = Clip.antiAlias }) :
-        _clipBehavior = clipBehavior, assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipPathLayer({ @required Path clipPath, Clip clipBehavior = Clip.antiAlias }) :
+        _clipPath = clipPath, _clipBehavior = clipBehavior,
+        assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The path to clip in the parent's coordinate system.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  final Path clipPath;
+  Path get clipPath => _clipPath;
+  set clipPath(Path value) {
+    if (value != _clipPath) {
+      _clipPath = value;
+      markNeedsAddToScene();
+    }
+  }
+  Path _clipPath;
 
   /// {@macro flutter.clipper.clipBehavior}
   Clip get clipBehavior => _clipBehavior;
@@ -1010,11 +1043,8 @@ class OpacityLayer extends ContainerLayer {
   ///
   /// The [alpha] property must be non-null before the compositing phase of
   /// the pipeline.
-  OpacityLayer({
-    @required
-    int alpha,
-    Offset offset = Offset.zero
-  }) : _alpha = alpha, _offset = offset;
+  OpacityLayer({ @required int alpha, Offset offset = Offset.zero })
+      : _alpha = alpha, _offset = offset;
 
   /// The amount to multiply into the alpha channel.
   ///
@@ -1070,25 +1100,47 @@ class ShaderMaskLayer extends ContainerLayer {
   ///
   /// The [shader], [maskRect], and [blendMode] properties must be non-null
   /// before the compositing phase of the pipeline.
-  ShaderMaskLayer({ this.shader, this.maskRect, this.blendMode });
+  ShaderMaskLayer({ @required Shader shader, @required Rect maskRect, @required BlendMode blendMode })
+      : _shader = shader, _maskRect = maskRect, _blendMode = blendMode;
 
   /// The shader to apply to the children.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  final Shader shader;
+  Shader get shader => _shader;
+  set shader(Shader value) {
+    if (value != _shader) {
+      _shader = value;
+      markNeedsAddToScene();
+    }
+  }
+  Shader _shader;
 
   /// The size of the shader.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  final Rect maskRect;
+  Rect get maskRect => _maskRect;
+  set maskRect(Rect value) {
+    if (value != _maskRect) {
+      _maskRect = value;
+      markNeedsAddToScene();
+    }
+  }
+  Rect _maskRect;
 
   /// The blend mode to apply when blending the shader with the children.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  final BlendMode blendMode;
+  BlendMode get blendMode => _blendMode;
+  set blendMode(BlendMode value) {
+    if (value != _blendMode) {
+      _blendMode = value;
+      markNeedsAddToScene();
+    }
+  }
+  BlendMode _blendMode;
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
@@ -1113,13 +1165,20 @@ class BackdropFilterLayer extends ContainerLayer {
   ///
   /// The [filter] property must be non-null before the compositing phase of the
   /// pipeline.
-  BackdropFilterLayer({ this.filter });
+  BackdropFilterLayer({ @required ui.ImageFilter filter }) : _filter = filter;
 
   /// The filter to apply to the existing contents of the scene.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  final ui.ImageFilter filter;
+  ui.ImageFilter get filter => _filter;
+  set filter(ui.ImageFilter value) {
+    if (value != _filter) {
+      _filter = value;
+      markNeedsAddToScene();
+    }
+  }
+  ui.ImageFilter _filter;
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
@@ -1145,25 +1204,44 @@ class PhysicalModelLayer extends ContainerLayer {
   ///
   /// The [clipPath], [elevation], and [color] arguments must not be null.
   PhysicalModelLayer({
-    @required this.clipPath,
-    this.clipBehavior = Clip.none,
-    @required this.elevation,
-    @required this.color,
-    @required this.shadowColor,
+    @required Path clipPath,
+    Clip clipBehavior = Clip.none,
+    @required double elevation,
+    @required Color color,
+    @required Color shadowColor,
   }) : assert(clipPath != null),
        assert(clipBehavior != null),
        assert(elevation != null),
        assert(color != null),
-       assert(shadowColor != null);
+       assert(shadowColor != null),
+       _clipPath = clipPath,
+       _clipBehavior = clipBehavior,
+       _elevation = elevation,
+       _color = color,
+       _shadowColor = shadowColor;
 
   /// The path to clip in the parent's coordinate system.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  final Path clipPath;
+  Path get clipPath => _clipPath;
+  set clipPath(Path value) {
+    if (value != _clipPath) {
+      _clipPath = value;
+      markNeedsAddToScene();
+    }
+  }
+  Path _clipPath;
 
   /// {@macro flutter.widgets.Clip}
-  final Clip clipBehavior;
+  Clip get clipBehavior => _clipBehavior;
+  set clipBehavior(Clip value) {
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsAddToScene();
+    }
+  }
+  Clip _clipBehavior;
 
   /// The z-coordinate at which to place this physical object.
   ///
@@ -1175,16 +1253,37 @@ class PhysicalModelLayer extends ContainerLayer {
   /// flag is set. For this reason, this property will often be set to zero in
   /// tests even if the layer should be raised. To verify the actual value,
   /// consider setting [debugDisableShadows] to false in your test.
-  final double elevation;
+  double get elevation => _elevation;
+  set elevation(double value) {
+    if (value != _elevation) {
+      _elevation = value;
+      markNeedsAddToScene();
+    }
+  }
+  double _elevation;
 
   /// The background color.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  final Color color;
+  Color get color => _color;
+  set color(Color value) {
+    if (value != _color) {
+      _color = value;
+      markNeedsAddToScene();
+    }
+  }
+  Color _color;
 
   /// The shadow color.
-  final Color shadowColor;
+  Color get shadowColor => _shadowColor;
+  set shadowColor(Color value) {
+    if (value != _shadowColor) {
+      _shadowColor = value;
+      markNeedsAddToScene();
+    }
+  }
+  Color _shadowColor;
 
   @override
   S find<S>(Offset regionOffset) {
@@ -1274,7 +1373,7 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  final Offset offset;
+  Offset offset;
 
   /// {@macro flutter.leaderFollower.alwaysNeedsAddToScene}
   @override
