@@ -197,7 +197,7 @@ class _SliderDemoState extends State<SliderDemo> {
                   ],
                 ),
                 Container(height: 5),
-                const Text('Continuous with editable numerial value'),
+                const Text('Continuous with editable numerical value'),
               ],
             ),
             Column(
