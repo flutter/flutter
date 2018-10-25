@@ -80,6 +80,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       absorb(oldPosition);
     if (keepScrollOffset)
       restoreScrollOffset();
+    _pixels ??= 0.0;
   }
 
   /// How the scroll position should respond to user input.
