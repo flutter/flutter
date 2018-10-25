@@ -50,7 +50,15 @@ class AttachCommand extends FlutterCommand {
       ..addOption(
         'debug-port',
         help: 'Local port where the observatory is listening.',
-      )..addOption('pid-file',
+      )..addOption(
+        'app-id',
+        help: 'The package name (Android) or bundle identifier (iOS) for the application. '
+              'This can be specified to avoid being prompted if multiple observatory ports '
+              'are advertised.\n'
+              'If you have multiple devices or emulators running, you should include the '
+              'device hostname as well, e.g. "com.example.myApp@my-iphone".',
+      )..addOption(
+        'pid-file',
         help: 'Specify a file to write the process id to. '
               'You can send SIGUSR1 to trigger a hot reload '
               'and SIGUSR2 to trigger a hot restart.',
@@ -86,6 +94,10 @@ class AttachCommand extends FlutterCommand {
     return null;
   }
 
+  String get appId {
+    return argResults['app-id'];
+  }
+
   @override
   Future<void> validateCommand() async {
     await super.validateCommand();
@@ -113,8 +125,17 @@ class AttachCommand extends FlutterCommand {
           .map<String>((PtrResourceRecord record) => record.domainName)
           .toSet()
           .toList();
+
       String domainName;
-      if (uniqueDomainNames.length > 1) {
+      if (appId != null) {
+        for (String name in uniqueDomainNames) {
+          if (name.startsWith(appId)) {
+            domainName = name;
+            break;
+          }
+        }
+        throwToolExit('Did not find a observatory port advertised for $appId.');
+      } else if (uniqueDomainNames.length > 1) {
         print('There are multiple observatory ports available:');
         print('');
         for (int i = 0; i < uniqueDomainNames.length; i++) {
