@@ -1,4 +1,4 @@
-Signature: 6191721212cb6d278c3d6d4d1716dd88
+Signature: a9bc8633cae3b1c27947b4be511d34f4
 
 UNUSED LICENSES:
 
@@ -1289,6 +1289,7 @@ LIBRARY: skcms
 LIBRARY: skia
 LIBRARY: vulkan
 LIBRARY: vulkanmemoryallocator
+LIBRARY: wuffs
 ORIGIN: ../../../third_party/skia/bench/ClearBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/ClearBench.cpp
@@ -1399,6 +1400,8 @@ FILE: ../../../third_party/skia/samplecode/SampleNimaActor.h
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
 FILE: ../../../third_party/skia/src/c/sk_imageinfo.cpp
 FILE: ../../../third_party/skia/src/codec/SkEncodedInfo.cpp
+FILE: ../../../third_party/skia/src/codec/SkWuffsCodec.cpp
+FILE: ../../../third_party/skia/src/codec/SkWuffsCodec.h
 FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.c
 FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.h
 FILE: ../../../third_party/skia/src/compute/common/vk/cache_vk.c
@@ -1634,6 +1637,7 @@ FILE: ../../../third_party/skia/third_party/skcms/src/Transform_inl.h
 FILE: ../../../third_party/skia/third_party/vulkan/SkiaVulkan.h
 FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.cpp
 FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.h
+FILE: ../../../third_party/skia/third_party/wuffs/wuffs.c
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 Google Inc.
 
