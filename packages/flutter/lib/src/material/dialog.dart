@@ -251,7 +251,7 @@ class AlertDialog extends StatelessWidget {
   ///    value is used.
   final String semanticLabel;
 
-  /// {@template flutter.material.dialog.shape}
+  /// {@macro flutter.material.dialog.shape}
   final ShapeBorder shape;
 
   @override
@@ -514,7 +514,7 @@ class SimpleDialog extends StatelessWidget {
   ///    value is used.
   final String semanticLabel;
 
-  /// {@template flutter.material.dialog.shape}
+  /// {@macro flutter.material.dialog.shape}
   final ShapeBorder shape;
 
   @override
