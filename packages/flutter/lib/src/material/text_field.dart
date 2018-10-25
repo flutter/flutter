@@ -555,7 +555,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         child: child,
       );
     }
-
+debugPrint(widget.dragStartBehavior.toString());
     return Semantics(
       onTap: () {
         if (!_effectiveController.selection.isValid)

@@ -986,6 +986,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               cursorRadius: widget.cursorRadius,
               enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
+              dragStartBehavior: widget.dragStartBehavior,
             ),
           ),
         );
@@ -1103,6 +1104,7 @@ class _Editable extends LeafRenderObjectWidget {
       cursorRadius: cursorRadius,
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
+      dragStartBehavior: dragStartBehavior,
     );
   }
 
@@ -1127,6 +1129,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..obscureText = obscureText
       ..cursorWidth = cursorWidth
       ..cursorRadius = cursorRadius
-      ..textSelectionDelegate = textSelectionDelegate;
+      ..textSelectionDelegate = textSelectionDelegate
+      ..dragStartBehavior = dragStartBehavior;
   }
 }

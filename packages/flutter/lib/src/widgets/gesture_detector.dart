@@ -540,7 +540,15 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   @override
   void initState() {
+//    debugPrint(widget.dragStartBehavior.toString());
+    if(widget.dragStartBehavior == DragStartBehavior.start) {
+      debugPrintStack();
+//      widget.gestures.forEach((Type key, GestureRecognizerFactory value) => debugPrint(key.toString()));
+//      debugPrint(widget.child.toString());
+//      debugPrint('------------------');
+    }
     super.initState();
+
     _syncAll(widget.gestures);
   }
 

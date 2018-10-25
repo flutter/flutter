@@ -141,6 +141,7 @@ class RenderEditable extends RenderBox {
     Radius cursorRadius,
     bool enableInteractiveSelection = true,
     @required this.textSelectionDelegate,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
@@ -172,9 +173,11 @@ class RenderEditable extends RenderBox {
     assert(!_showCursor.value || cursorColor != null);
     _tap = TapGestureRecognizer(debugOwner: this)
       ..onTapDown = _handleTapDown
-      ..onTap = _handleTap;
+      ..onTap = _handleTap
+      ..dragStartBehavior = dragStartBehavior;
     _longPress = LongPressGestureRecognizer(debugOwner: this)
-      ..onLongPress = _handleLongPress;
+      ..onLongPress = _handleLongPress
+      ..dragStartBehavior = dragStartBehavior;
   }
 
   /// Character used to obscure text if [obscureText] is true.
@@ -211,6 +214,9 @@ class RenderEditable extends RenderBox {
   /// It must not be null. It will make cut, copy and paste functionality work
   /// with the most recently set [TextSelectionDelegate].
   TextSelectionDelegate textSelectionDelegate;
+
+  ///
+  DragStartBehavior dragStartBehavior;
 
   Rect _lastCaretRect;
 
