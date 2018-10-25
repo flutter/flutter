@@ -110,6 +110,7 @@ class AttachCommand extends FlutterCommand {
 
   Future<int> mdnsQueryDartObservatoryPort() async {
     final MDnsClient client = MDnsClient();
+    printStatus('Checking for advertised Dart observatories...');
     try {
       await client.start();
       final List<PtrResourceRecord> pointerRecords = await client
@@ -137,22 +138,24 @@ class AttachCommand extends FlutterCommand {
         }
         throwToolExit('Did not find a observatory port advertised for $appId.');
       } else if (uniqueDomainNames.length > 1) {
-        print('There are multiple observatory ports available:');
-        print('');
+        printStatus('There are multiple observatory ports available:');
+        printStatus('');
         for (int i = 0; i < uniqueDomainNames.length; i++) {
-          print('  ${i + 1}) '
-              '${uniqueDomainNames[i].replaceAll('.$_kDartObservatoryName', '')}');
+          printStatus(
+            '${i + 1}) ${uniqueDomainNames[i].replaceAll('.$_kDartObservatoryName', '')}',
+            indent: 2,
+          );
         }
-        print('');
+        printStatus('');
         int selection;
         while (selection == null) {
-          stdout.write('Selection [1-${uniqueDomainNames.length}]: ');
+          printStatus('Selection [1-${uniqueDomainNames.length}]: ', newline: false);
           final String selectionString = io.stdin.readLineSync();
           selection = int.tryParse(selectionString);
           if (selection == null ||
               selection < 1 ||
               selection > pointerRecords.length) {
-            print('Please enter a valid integer value between '
+            printStatus('Please enter a valid integer value between '
                 '1 and ${uniqueDomainNames.length}.\n');
             selection = null;
           }
@@ -161,6 +164,7 @@ class AttachCommand extends FlutterCommand {
       } else {
         domainName = pointerRecords[0].domainName;
       }
+      printStatus('Checking for available port on $domainName');
       // Here, if we get more than one, it should just be a duplicate.
       final List<SrvResourceRecord> srv = await client
           .lookup<SrvResourceRecord>(
