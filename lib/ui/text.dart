@@ -1017,6 +1017,7 @@ enum BoxWidthStyle {
 ///
 /// Paragraphs can be displayed on a [Canvas] using the [Canvas.drawParagraph]
 /// method.
+@pragma('vm:entry-point')
 class Paragraph extends NativeFieldWrapperClass2 {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.

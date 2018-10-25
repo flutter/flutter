@@ -10,6 +10,7 @@ part of dart.ui;
 ///
 /// Scene objects can be displayed on the screen using the
 /// [Window.render] method.
+@pragma('vm:entry-point')
 class Scene extends NativeFieldWrapperClass2 {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
