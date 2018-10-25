@@ -49,20 +49,10 @@ Future<void> updateGeneratedXcodeProperties({
   if (targetOverride != null)
     localsBuffer.writeln('FLUTTER_TARGET=$targetOverride');
 
-  // The runtime mode for the current build.
-  localsBuffer.writeln('FLUTTER_BUILD_MODE=${buildInfo.modeName}');
-
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
   localsBuffer.writeln('FLUTTER_BUILD_DIR=${getBuildDirectory()}');
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
-
-  if (!project.isModule) {
-    // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
-    // explicitly. Rather we rely on the xcode backend script and the Podfile
-    // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
-    localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
-  }
 
   final String buildName = buildInfo?.buildName ?? project.manifest.buildName;
   if (buildName != null) {
@@ -247,6 +237,17 @@ class XcodeProjectInfo {
       return baseConfiguration + '-$scheme';
   }
 
+  /// Checks whether the [buildConfigurations] contains the specified string, without
+  /// regard to case.
+  bool hasBuildConfiguratinForBuildMode(String buildMode) {
+    buildMode = buildMode.toLowerCase();
+    for (String name in buildConfigurations) {
+      if (name.toLowerCase() == buildMode) {
+        return true;
+      }
+    }
+    return false;
+  }
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
   String schemeFor(BuildInfo buildInfo) {
@@ -274,7 +275,13 @@ class XcodeProjectInfo {
     });
   }
 
-  static String _baseConfigurationFor(BuildInfo buildInfo) => buildInfo.isDebug ? 'Debug' : 'Release';
+  static String _baseConfigurationFor(BuildInfo buildInfo) {
+    if (buildInfo.isDebug)
+      return 'Debug';
+    if (buildInfo.isProfile)
+      return 'Profile';
+    return 'Release';
+  }
 
   static String _uniqueMatch(Iterable<String> strings, bool matches(String s)) {
     final List<String> options = strings.where(matches).toList();

@@ -298,6 +298,35 @@ Future<XcodeBuildResult> buildXcodeProject({
     printError('  open ios/Runner.xcworkspace');
     return XcodeBuildResult(success: false);
   }
+  if (!projectInfo.hasBuildConfiguratinForBuildMode(buildInfo.modeName)) {
+    // This error will occur with previous versions of the generated Xcode project, where a "Profile"
+    // build configuration did not exist.  It may also occur if a user manually removes or renames
+    // configurations from Runner.xcodeproj.
+    printError('The Xcode project does not define a build configuration "${buildInfo.modeName}",');
+    printError('which is needed by Flutter tooling to run "--${buildInfo.modeName}" from the command line.');
+    printError('');
+    printError('Open Xcode to fix the problem:');
+    printError('  open ios/Runner.xcodeproj');
+    printError('');
+    printError('1. Click on "Runner" in the project navigator.');
+    printError('2. Ensure the Runner PROJECT is selected, not the Runner TARGET.');
+    if (buildInfo.isDebug) {
+      printError('3. Click the Editor->Add Configuration->Duplicate "Debug" Configuration.');
+    } else {
+      printError('3. Click the Editor->Add Configuration->Duplicate "Release" Configuration.');
+    }
+    printError('');
+    printError('   If this option is disabled, it is likely you have the target selected instead');
+    printError('   of the project; see:');
+    printError('   https://stackoverflow.com/questions/19842746/adding-a-build-configuration-in-xcode');
+    printError('');
+    printError('   If you have created a completely custom set of build configurations,');
+    printError('   you can set the FLUTTER_BUILD_MODE=${buildInfo.modeName.toLowerCase()}');
+    printError('   in the .xcconfig file for that configuration and run from Xcode.');
+    printError('');
+    printError('4. If you are not using completely custom build configurations, name the newly created configuration ${buildInfo.modeName}.');
+    return XcodeBuildResult(success: false);
+  }
   final String scheme = projectInfo.schemeFor(buildInfo);
   if (scheme == null) {
     printError('');
