@@ -52,7 +52,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Mark that this layer is in sync with engine.
   ///
-  /// This is only for debug mode and test purpose only.
+  /// This is only for debug and test purpose only.
   @visibleForTesting
   void debugMarkClean() {
     assert((){
@@ -69,7 +69,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Whether any layer in the subtree needs [addToScene].
   ///
-  /// This is for debug and test purpose only and it only becomes valid after
+  /// This is for debug and test purpose only. It only becomes valid after
   /// calling [updateSubtreeNeedsAddToScene].
   @visibleForTesting
   bool get debugSubtreeNeedsAddToScene {
@@ -162,13 +162,15 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]);
 
   void _addToSceneWithRetainedRendering(ui.SceneBuilder builder) {
-    // We won't have a loop by adding a retained layer subtree that's not dirty.
+    // There can't be a loop by adding a retained layer subtree whose
+    // _subtreeNeedsAddToScene is false.
     //
     // Proof by contradiction:
+    //
     // If we introduce a loop, this retained layer must be appended to one of
-    // its descendent layers, say A. However, that means the child structure
-    // of A has changed so A is dirty. This contradicts that this layer's
-    // subtree is not dirty.
+    // its descendent layers, say A. That means the child structure of A has
+    // changed so A's _needsAddToScene is true. This contradicts
+    // _subtreeNeedsAddToScene being false.
     if (!_subtreeNeedsAddToScene && _engineLayer != null) {
       builder.addRetained(_engineLayer);
       return;
@@ -230,7 +232,14 @@ class PictureLayer extends Layer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  bool isComplexHint = false;
+  bool get isComplexHint => _isComplexHint;
+  set isComplexHint(bool value) {
+    if (value != _isComplexHint) {
+      _isComplexHint = value;
+      markNeedsAddToScene();
+    }
+  }
+  bool _isComplexHint = false;
 
   /// Hints that the painting in this layer is likely to change next frame.
   ///
@@ -241,7 +250,14 @@ class PictureLayer extends Layer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  bool willChangeHint = false;
+  bool get willChangeHint => _willChangeHint;
+  set willChangeHint(bool value) {
+    if (value != _willChangeHint) {
+      _willChangeHint = value;
+      markNeedsAddToScene();
+    }
+  }
+  bool _willChangeHint = false;
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
