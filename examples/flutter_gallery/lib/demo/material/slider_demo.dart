@@ -161,6 +161,47 @@ class _SliderDemoState extends State<SliderDemo> {
             ),
             Column(
               mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                        child: Slider(
+                            value: _value,
+                            min: 0.0,
+                            max: 100.0,
+                            onChanged: (double value) {
+                              setState(() {
+                                _value = value;
+                              });
+                            }),
+                    ),
+                    Container(
+                        width: 50,
+                        child: TextField(
+                          onSubmitted: (String value) {
+                            final double myDouble = double.tryParse(value);
+                            if (myDouble != null &&
+                                myDouble >= 0 &&
+                                myDouble <= 100) {
+                              setState(() {
+                                _value = myDouble;
+                              });
+                            }
+                          },
+                          keyboardType: TextInputType.number,
+                          controller: TextEditingController(
+                              text: _value.toStringAsFixed(1),
+                          ),
+                        ),
+                    ),
+                  ],
+                ),
+                Container(height: 5),
+                const Text('Continuous with editable numerial value'),
+              ],
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
               children: const <Widget>[
                 Slider(value: 0.25, onChanged: null),
                 Text('Disabled'),
