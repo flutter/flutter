@@ -143,7 +143,7 @@ class Directionality extends InheritedWidget {
 /// This is more efficient than adding and removing the child widget from the
 /// tree on demand.
 ///
-/// ## Performance considerations for opacity animation
+/// ## Opacity animation
 ///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using
