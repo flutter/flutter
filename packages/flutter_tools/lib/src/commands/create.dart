@@ -24,32 +24,6 @@ import '../runner/flutter_command.dart';
 import '../template.dart';
 import '../version.dart';
 
-enum _ProjectType {
-  /// This is the default project with the user-managed host code.
-  /// It is different than the "module" template in that it exposes and doesn't
-  /// manage the platform code.
-  app,
-  /// The is a project that has managed platform host code. It is an application with
-  /// ephemeral .ios and .android directories that can be updated automatically.
-  module,
-  /// This is a Flutter Dart package project. It doesn't have any native
-  /// components, only Dart.
-  package,
-  /// This is a native plugin project.
-  plugin,
-}
-
-_ProjectType _stringToProjectType(String value) {
-  _ProjectType result;
-  for (_ProjectType type in _ProjectType.values) {
-    if (value == getEnumName(type)) {
-      result = type;
-      break;
-    }
-  }
-  return result;
-}
-
 class CreateCommand extends FlutterCommand {
   CreateCommand() {
     argParser.addFlag('pub',
@@ -113,8 +87,7 @@ class CreateCommand extends FlutterCommand {
   final String name = 'create';
 
   @override
-  final String description = 'Create a new Flutter project.\n\n'
-    'If run on a project that already exists, this will repair the project, recreating any files that are missing.';
+  final String description = 'Create a new Flutter project.';
 
   @override
   String get invocation => '${runner.executableName} $name <output directory>';
@@ -150,7 +123,10 @@ class CreateCommand extends FlutterCommand {
     if (exists(<String>['android', 'app'])
         || exists(<String>['ios', 'Runner'])
         || exists(<String>['ios', 'Flutter'])) {
-      return _ProjectType.app;
+      return _ProjectType.legacy_app_v1;
+    } else if (exists(<String>['.android'])
+        || exists(<String>['.ios'])) {
+      return _ProjectType.module;
     }
     // Since we can't really be definitive on nearly-empty directories, err on
     // the side of prudence and just say we don't know.
@@ -254,19 +230,29 @@ class CreateCommand extends FlutterCommand {
       withPluginHook: generatePlugin,
       androidLanguage: argResults['android-language'],
       iosLanguage: argResults['ios-language'],
+      offline: argResults['offline'],
+      pub: argResults['pub'],
     );
 
     final String relativeDirPath = fs.path.relative(projectDirPath);
-    if (!projectDir.existsSync()) {
-      printStatus('Creating project $relativeDirPath...');
-    } else {
-      printStatus('Recreating project $relativeDirPath...');
+
+    // If a project already exists at the desired path then error out because
+    // project recreation is not supported with the "create" command.
+    if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
+      throwToolExit(
+        'Could not create project, a project already exists at $projectDirPath\n'
+        'To regenerate any missing files in a project, use "flutter recreate"'
+      );
     }
+
     final Directory relativeDir = fs.directory(projectDirPath);
     int generatedFileCount = 0;
     switch (template) {
       case _ProjectType.app:
         generatedFileCount += await _generateApp(relativeDir, templateContext);
+        break;
+      case _ProjectType.legacy_app_v1:
+        generatedFileCount += await _generateLegacyAppV1(relativeDir, templateContext);
         break;
       case _ProjectType.module:
         generatedFileCount += await _generateModule(relativeDir, templateContext);
@@ -289,9 +275,9 @@ class CreateCommand extends FlutterCommand {
       printStatus('Your package code is in $relativeMainPath');
     } else if (generateModule) {
       final String relativeMainPath = fs.path.normalize(fs.path.join(
-          relativeDirPath,
-          'lib',
-          'main.dart',
+        relativeDirPath,
+        'lib',
+        'main.dart',
       ));
       printStatus('Your module code is in $relativeMainPath.');
     } else {
@@ -340,154 +326,223 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
 
     return null;
   }
+}
 
-  Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext) async {
-    int generatedCount = 0;
-    final String description = argResults.wasParsed('description')
-        ? argResults['description']
-        : 'A new flutter module project.';
-    templateContext['description'] = description;
-    generatedCount += _renderTemplate(fs.path.join('module', 'common'), directory, templateContext);
-    if (argResults['pub']) {
-      await pubGet(
-        context: PubContext.create,
-        directory: directory.path,
-        offline: argResults['offline'],
-      );
-      final FlutterProject project = await FlutterProject.fromDirectory(directory);
-      await project.ensureReadyForPlatformSpecificTooling();
+enum _ProjectType {
+  /// This is the default project.
+  /// The app project has user-managed host app directories and auto-generated
+  /// module directories.
+  app,
+  /// The original Flutter project structure that has user-managed host app
+  /// directories and no capability to link to existing Android/iOS projects.
+  legacy_app_v1,
+  /// This is a project that has managed platform host code. It is an application with
+  /// ephemeral .ios and .android directories that can be updated automatically.
+  module,
+  /// This is a Flutter Dart package project. It doesn't have any native
+  /// components, only Dart.
+  package,
+  /// This is a native plugin project.
+  plugin,
+}
+
+_ProjectType _stringToProjectType(String value) {
+  _ProjectType result;
+  for (_ProjectType type in _ProjectType.values) {
+    if (value == getEnumName(type)) {
+      result = type;
+      break;
     }
-    return generatedCount;
   }
+  return result;
+}
 
-  Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext) async {
-    int generatedCount = 0;
-    final String description = argResults.wasParsed('description')
-        ? argResults['description']
-        : 'A new Flutter package project.';
-    templateContext['description'] = description;
-    generatedCount += _renderTemplate('package', directory, templateContext);
-    if (argResults['pub']) {
-      await pubGet(
-        context: PubContext.createPackage,
-        directory: directory.path,
-        offline: argResults['offline'],
-      );
-    }
-    return generatedCount;
-  }
+Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext) async {
+  print('Incoming templateContext language: ${templateContext['androidLanguage']}');
+  // Generate a linkable project.
+  final String description = templateContext['description'] ?? 'A new flutter app project.';
+  int generatedCount = await _generateLinkableProject(directory, templateContext, description, runPubGet: false);
+  final FlutterProject project = await FlutterProject.fromDirectory(directory);
 
-  Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext) async {
-    int generatedCount = 0;
-    final String description = argResults.wasParsed('description')
-        ? argResults['description']
-        : 'A new flutter plugin project.';
-    templateContext['description'] = description;
-    generatedCount += _renderTemplate('plugin', directory, templateContext);
-    if (argResults['pub']) {
-      await pubGet(
-        context: PubContext.createPlugin,
-        directory: directory.path,
-        offline: argResults['offline'],
-      );
-    }
-    final FlutterProject project = await FlutterProject.fromDirectory(directory);
-    gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+  // Run pub get to update packages.
+  await pubGet(
+    context: PubContext.create,
+    directory: directory.path,
+    offline: templateContext['offline'],
+  );
 
-    final String projectName = templateContext['projectName'];
-    final String organization = templateContext['organization'];
-    final String androidPluginIdentifier = templateContext['androidIdentifier'];
-    final String exampleProjectName = projectName + '_example';
-    templateContext['projectName'] = exampleProjectName;
-    templateContext['androidIdentifier'] = _createAndroidIdentifier(organization, exampleProjectName);
-    templateContext['iosIdentifier'] = _createUTIIdentifier(organization, exampleProjectName);
-    templateContext['description'] = 'Demonstrates how to use the $projectName plugin.';
-    templateContext['pluginProjectName'] = projectName;
-    templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
+  print('\n\n');
+  print('Now making host apps editable.');
+  // Make the host apps editable.
+  await project.ensureReadyForPlatformSpecificTooling();
+  print('Android host app:');
+  generatedCount += await project.android.makeHostAppEditable(templateContext: templateContext);
+  print('\n\niOS host app:');
+  generatedCount += await project.ios.makeHostAppEditable();
 
-    generatedCount += await _generateApp(project.example.directory, templateContext);
-    return generatedCount;
-  }
+  return generatedCount;
+}
 
-  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext) async {
-    int generatedCount = 0;
-    generatedCount += _renderTemplate('app', directory, templateContext);
-    final FlutterProject project = await FlutterProject.fromDirectory(directory);
-    generatedCount += _injectGradleWrapper(project);
+Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext) async {
+  final String description = templateContext['description'] ?? 'A new flutter module project.';
+  final bool runPubGet = templateContext['pub'];
+  return _generateLinkableProject(directory, templateContext, description, runPubGet: runPubGet);
+}
 
-    if (argResults['with-driver-test']) {
-      final Directory testDirectory = directory.childDirectory('test_driver');
-      generatedCount += _renderTemplate('driver', testDirectory, templateContext);
-    }
-
-    if (argResults['pub']) {
-      await pubGet(context: PubContext.create, directory: directory.path, offline: argResults['offline']);
-      await project.ensureReadyForPlatformSpecificTooling();
-    }
-
-    gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
-
-    return generatedCount;
-  }
-
-  Map<String, dynamic> _templateContext({
-    String organization,
-    String projectName,
-    String projectDescription,
-    String androidLanguage,
-    String iosLanguage,
-    String flutterRoot,
-    bool renderDriverTest = false,
-    bool withPluginHook = false,
-  }) {
-    flutterRoot = fs.path.normalize(flutterRoot);
-
-    final String pluginDartClass = _createPluginClassName(projectName);
-    final String pluginClass = pluginDartClass.endsWith('Plugin')
-        ? pluginDartClass
-        : pluginDartClass + 'Plugin';
-
-    return <String, dynamic>{
-      'organization': organization,
-      'projectName': projectName,
-      'androidIdentifier': _createAndroidIdentifier(organization, projectName),
-      'iosIdentifier': _createUTIIdentifier(organization, projectName),
-      'description': projectDescription,
-      'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
-      'androidMinApiLevel': android.minApiLevel,
-      'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
-      'androidFlutterJar': '$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar',
-      'withDriverTest': renderDriverTest,
-      'pluginClass': pluginClass,
-      'pluginDartClass': pluginDartClass,
-      'withPluginHook': withPluginHook,
-      'androidLanguage': androidLanguage,
-      'iosLanguage': iosLanguage,
-      'flutterRevision': FlutterVersion.instance.frameworkRevision,
-      'flutterChannel': FlutterVersion.instance.channel,
-    };
-  }
-
-  int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context) {
-    final Template template = Template.fromName(templateName);
-    return template.render(directory, context, overwriteExisting: false);
-  }
-
-  int _injectGradleWrapper(FlutterProject project) {
-    int filesCreated = 0;
-    copyDirectorySync(
-      cache.getArtifactDirectory('gradle_wrapper'),
-      project.android.hostAppGradleRoot,
-      (File sourceFile, File destinationFile) {
-        filesCreated++;
-        final String modes = sourceFile.statSync().modeString();
-        if (modes != null && modes.contains('x')) {
-          os.makeExecutable(destinationFile);
-        }
-      },
+Future<int> _generateLinkableProject(Directory directory, Map<String, dynamic> templateContext, String description, {bool runPubGet = false}) async {
+  int generatedCount = 0;
+  templateContext['description'] = description;
+  generatedCount += await _renderTemplate(fs.path.join('module', 'common'), directory, templateContext);
+  if (runPubGet) {
+    await pubGet(
+      context: PubContext.create,
+      directory: directory.path,
+      offline: templateContext['offline'],
     );
-    return filesCreated;
+    final FlutterProject project = await FlutterProject.fromDirectory(directory);
+    await project.ensureReadyForPlatformSpecificTooling();
   }
+  return generatedCount;
+}
+
+Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext) async {
+  int generatedCount = 0;
+  final String description = templateContext['description'] ?? 'A new Flutter package project.';
+  templateContext['description'] = description;
+  generatedCount += await _renderTemplate('package', directory, templateContext);
+  if (templateContext['pub']) {
+    await pubGet(
+      context: PubContext.createPackage,
+      directory: directory.path,
+      offline: templateContext['offline'],
+    );
+  }
+  return generatedCount;
+}
+
+Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext) async {
+  int generatedCount = 0;
+  final String description = templateContext['description'] ?? 'A new flutter plugin project.';
+  templateContext['description'] = description;
+  generatedCount += await _renderTemplate('plugin', directory, templateContext);
+  if (templateContext['pub']) {
+    await pubGet(
+      context: PubContext.createPlugin,
+      directory: directory.path,
+      offline: templateContext['offline'],
+    );
+  }
+  final FlutterProject project = await FlutterProject.fromDirectory(directory);
+  gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+
+  final String projectName = templateContext['projectName'];
+  final String organization = templateContext['organization'];
+  final String androidPluginIdentifier = templateContext['androidIdentifier'];
+  final String exampleProjectName = projectName + '_example';
+  templateContext['projectName'] = exampleProjectName;
+  templateContext['androidIdentifier'] = _createAndroidIdentifier(organization, exampleProjectName);
+  templateContext['iosIdentifier'] = _createUTIIdentifier(organization, exampleProjectName);
+  templateContext['description'] = 'Demonstrates how to use the $projectName plugin.';
+  templateContext['pluginProjectName'] = projectName;
+  templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
+
+  generatedCount += await _generateLegacyAppV1(project.example.directory, templateContext);
+  return generatedCount;
+}
+
+Future<int> _generateLegacyAppV1(Directory directory, Map<String, dynamic> templateContext) async {
+  int generatedCount = 0;
+  generatedCount += await _renderTemplate('app', directory, templateContext);
+  final FlutterProject project = await FlutterProject.fromDirectory(directory);
+  generatedCount += _injectGradleWrapper(project);
+
+  if (templateContext['withDriverTest']) {
+    final Directory testDirectory = directory.childDirectory('test_driver');
+    generatedCount += await _renderTemplate('driver', testDirectory, templateContext);
+  }
+
+  if (templateContext['pub']) {
+    await pubGet(context: PubContext.create, directory: directory.path, offline: templateContext['offline']);
+    await project.ensureReadyForPlatformSpecificTooling();
+  }
+
+  gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+
+  return generatedCount;
+}
+
+// TODO(mattcarroll): Create a dedicated TemplateContext object that is aware of
+//                    all configuration options. Then create that TemplateContext
+//                    as early in the execution process as possible so that command
+//                    line args are not used by any business logic. Finally,
+//                    consider a name like TemplateConfiguration or TemplateOptions
+//                    that better illustrates the purpose than "context".
+Map<String, dynamic> _templateContext({
+  String organization,
+  String projectName,
+  String projectDescription,
+  String androidLanguage,
+  String iosLanguage,
+  String flutterRoot,
+  bool renderDriverTest = false,
+  bool withPluginHook = false,
+  bool offline = false,
+  bool pub = false,
+}) {
+  flutterRoot = fs.path.normalize(flutterRoot);
+
+  final String pluginDartClass = _createPluginClassName(projectName);
+  final String pluginClass = pluginDartClass.endsWith('Plugin')
+      ? pluginDartClass
+      : pluginDartClass + 'Plugin';
+
+  return <String, dynamic>{
+    'organization': organization,
+    'projectName': projectName,
+    'androidIdentifier': _createAndroidIdentifier(organization, projectName),
+    'iosIdentifier': _createUTIIdentifier(organization, projectName),
+    'description': projectDescription,
+    'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
+    'androidMinApiLevel': android.minApiLevel,
+    'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
+    'androidFlutterJar': '$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar',
+    'withDriverTest': renderDriverTest,
+    'pluginClass': pluginClass,
+    'pluginDartClass': pluginDartClass,
+    'withPluginHook': withPluginHook,
+    'androidLanguage': androidLanguage,
+    'iosLanguage': iosLanguage,
+    'flutterRevision': FlutterVersion.instance.frameworkRevision,
+    'flutterChannel': FlutterVersion.instance.channel,
+    'pub': pub,
+    'offline': offline,
+  };
+}
+
+Future<int> _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context) async {
+  final Template template = Template(printDebug: true);
+  return await template.render(
+    Template.directoryByTemplateName(templateName),
+    directory,
+    context,
+    overwriteExisting: false,
+  );
+}
+
+int _injectGradleWrapper(FlutterProject project) {
+  int filesCreated = 0;
+  copyDirectorySync(
+    cache.getArtifactDirectory('gradle_wrapper'),
+    project.android.hostAppGradleRoot,
+        (File sourceFile, File destinationFile) {
+      filesCreated++;
+      final String modes = sourceFile.statSync().modeString();
+      if (modes != null && modes.contains('x')) {
+        os.makeExecutable(destinationFile);
+      }
+    },
+  );
+  return filesCreated;
 }
 
 String _createAndroidIdentifier(String organization, String name) {

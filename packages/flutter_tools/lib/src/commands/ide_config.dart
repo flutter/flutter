@@ -242,7 +242,7 @@ class IdeConfigCommand extends FlutterCommand {
 
     printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
     int generatedCount = 0;
-    generatedCount += _renderTemplate(_ideName, dirPath, <String, dynamic>{
+    generatedCount += await _renderTemplate(_ideName, dirPath, <String, dynamic>{
       'withRootModule': argResults['with-root-module'],
     });
 
@@ -254,9 +254,10 @@ class IdeConfigCommand extends FlutterCommand {
     return null;
   }
 
-  int _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) {
-    final Template template = Template(_templateDirectory, _templateDirectory);
-    return template.render(
+  Future<int> _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) async {
+    final Template template = Template();
+    return await template.render(
+      _templateDirectory,
       fs.directory(dirPath),
       context,
       overwriteExisting: argResults['overwrite'],

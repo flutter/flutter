@@ -281,17 +281,21 @@ class IosProject {
     }
   }
 
-  Future<void> makeHostAppEditable() async {
+  Future<int> makeHostAppEditable() async {
     assert(isModule);
     if (_editableDirectory.existsSync())
       throwToolExit('iOS host app is already editable. To start fresh, delete the ios/ folder.');
+
+    int fileCount = 0;
     _deleteIfExistsSync(_ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), _ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), _editableDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _editableDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_editable_cocoapods'), _editableDirectory);
+    fileCount += await _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), _ephemeralDirectory, printStatusWhenWriting: true);
+    fileCount += await _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), _editableDirectory, printStatusWhenWriting: true);
+    fileCount += await _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _editableDirectory, printStatusWhenWriting: true);
+    fileCount += await _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_editable_cocoapods'), _editableDirectory, printStatusWhenWriting: true);
     await _updateGeneratedXcodeConfigIfNeeded();
     await injectPlugins(parent);
+
+    return fileCount;
   }
 
   File get generatedXcodePropertiesFile => _flutterLibRoot.childDirectory('Flutter').childFile('Generated.xcconfig');
@@ -302,15 +306,16 @@ class IosProject {
         : hostAppRoot.childDirectory(_hostAppBundleName);
   }
 
-  void _overwriteFromTemplate(String path, Directory target) {
-    final Template template = Template.fromName(path);
-    template.render(
+  Future<int> _overwriteFromTemplate(String relativeTemplatePath, Directory target, {bool printStatusWhenWriting = false}) async {
+    final Template template = Template(printDebug: true);
+    return await template.render(
+      Template.directoryByRelativePath(relativeTemplatePath),
       target,
       <String, dynamic>{
         'projectName': parent.manifest.appName,
         'iosIdentifier': parent.manifest.iosBundleIdentifier
       },
-      printStatusWhenWriting: false,
+      printStatusWhenWriting: printStatusWhenWriting,
       overwriteExisting: true,
     );
   }
@@ -377,11 +382,13 @@ class AndroidProject {
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (isModule && _shouldRegenerateFromTemplate()) {
-      _regenerateLibrary();
+      await _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
       if (!_editableHostAppDirectory.existsSync()) {
-        _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _ephemeralDirectory);
-        _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_ephemeral'), _ephemeralDirectory);
+        print('Generating host_app_common template for Android');
+        await _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _ephemeralDirectory);
+        print('Generating host_app_ephemeral template for Android');
+        await _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_ephemeral'), _ephemeralDirectory);
       }
     }
     if (!hostAppGradleRoot.existsSync()) {
@@ -395,39 +402,52 @@ class AndroidProject {
         || Cache.instance.isOlderThanToolsStamp(_ephemeralDirectory);
   }
 
-  Future<void> makeHostAppEditable() async {
+  Future<int> makeHostAppEditable({Map<String, dynamic> templateContext}) async {
     assert(isModule);
     if (_editableHostAppDirectory.existsSync())
       throwToolExit('Android host app is already editable. To start fresh, delete the android/ folder.');
-    _regenerateLibrary();
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
+
+    print('Editable host app directory: ${_editableHostAppDirectory.path}');
+    print('Template context: $templateContext');
+    int fileCount = 0;
+    fileCount += await _regenerateLibrary(templateContext: templateContext);
+//    fileCount += _overwriteFromTemplate(fs.path.join('module', 'android'), _editableHostAppDirectory, templateContext: templateContext, printStatusWhenWriting: true);
+    fileCount += await _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory, templateContext: templateContext, printStatusWhenWriting: true);
+    print('Writing language level android dir...');
+    fileCount += await _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory, templateContext: templateContext, printStatusWhenWriting: true);
+    print('Done writing language level android dir.');
+    fileCount += await _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory, templateContext: templateContext, printStatusWhenWriting: true);
     gradle.injectGradleWrapper(_editableHostAppDirectory);
     gradle.writeLocalProperties(_editableHostAppDirectory.childFile('local.properties'));
     await injectPlugins(parent);
+
+    return fileCount;
   }
 
   File get localPropertiesFile => _flutterLibGradleRoot.childFile('local.properties');
 
   Directory get pluginRegistrantHost => _flutterLibGradleRoot.childDirectory(isModule ? 'Flutter' : 'app');
 
-  void _regenerateLibrary() {
+  Future<int> _regenerateLibrary({Map<String, dynamic> templateContext}) async {
+    int fileCount = 0;
     _deleteIfExistsSync(_ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'library'), _ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _ephemeralDirectory);
+    fileCount += await _overwriteFromTemplate(fs.path.join('module', 'android', 'library'), _ephemeralDirectory, templateContext: templateContext);
+    fileCount += await _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _ephemeralDirectory, templateContext: templateContext);
     gradle.injectGradleWrapper(_ephemeralDirectory);
+    return fileCount;
   }
 
-  void _overwriteFromTemplate(String path, Directory target) {
-    final Template template = Template.fromName(path);
-    template.render(
+  Future<int> _overwriteFromTemplate(String relativeTemplatePath, Directory target, {Map<String, dynamic> templateContext, bool printStatusWhenWriting = false}) async {
+    print('Overwrite from template, source dir: $relativeTemplatePath, context: $templateContext');
+    final Template template = Template(printDebug: true);
+    return await template.render(
+      Template.directoryByRelativePath(relativeTemplatePath),
       target,
       <String, dynamic>{
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,
-      },
-      printStatusWhenWriting: false,
+      }..addAll(templateContext ?? <String, dynamic>{}),
+      printStatusWhenWriting: printStatusWhenWriting,
       overwriteExisting: true,
     );
   }
