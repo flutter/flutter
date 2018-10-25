@@ -48,7 +48,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Mark that this layer has changed and [addToScene] needs to be called.
   @protected
-  void markNeedsAddToScene() => _needsAddToScene = true;
+  void markNeedsAddToScene() {
+    _needsAddToScene = true;
+  }
 
   /// Mark that this layer is in sync with engine.
   ///
@@ -61,7 +63,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     }());
   }
 
-  /// Subclass may override this to true to disable retained rendering.
+  /// Subclasses may override this to true to disable retained rendering.
   @protected
   bool get alwaysNeedsAddToScene => false;
 
@@ -99,6 +101,18 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// This layer's previous sibling in the parent layer's child list.
   Layer get previousSibling => _previousSibling;
   Layer _previousSibling;
+
+  @override
+  void dropChild(AbstractNode child) {
+    markNeedsAddToScene();
+    super.dropChild(child);
+  }
+
+  @override
+  void adoptChild(AbstractNode child) {
+    markNeedsAddToScene();
+    super.adoptChild(child);
+  }
 
   /// Removes this layer from its parent layer's child list.
   ///
@@ -218,11 +232,11 @@ class PictureLayer extends Layer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   ui.Picture get picture => _picture;
+  ui.Picture _picture;
   set picture(ui.Picture picture) {
     _needsAddToScene = true;
     _picture = picture;
   }
-  ui.Picture _picture;
 
   /// Hints that the painting in this layer is complex and would benefit from
   /// caching.
@@ -233,13 +247,13 @@ class PictureLayer extends Layer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   bool get isComplexHint => _isComplexHint;
+  bool _isComplexHint = false;
   set isComplexHint(bool value) {
     if (value != _isComplexHint) {
       _isComplexHint = value;
       markNeedsAddToScene();
     }
   }
-  bool _isComplexHint = false;
 
   /// Hints that the painting in this layer is likely to change next frame.
   ///
@@ -251,13 +265,13 @@ class PictureLayer extends Layer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   bool get willChangeHint => _willChangeHint;
+  bool _willChangeHint = false;
   set willChangeHint(bool value) {
     if (value != _willChangeHint) {
       _willChangeHint = value;
       markNeedsAddToScene();
     }
   }
-  bool _willChangeHint = false;
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
@@ -362,13 +376,13 @@ class PerformanceOverlayLayer extends Layer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Rect get overlayRect => _overlayRect;
+  Rect _overlayRect;
   set overlayRect(Rect value) {
     if (value != _overlayRect) {
       _overlayRect = value;
       markNeedsAddToScene();
     }
   }
-  Rect _overlayRect;
 
   /// The mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.
@@ -452,7 +466,7 @@ class ContainerLayer extends Layer {
 
   @override
   void updateSubtreeNeedsAddToScene() {
-    _subtreeNeedsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
+    super.updateSubtreeNeedsAddToScene();
     Layer child = firstChild;
     while (child != null) {
       child.updateSubtreeNeedsAddToScene();
@@ -546,18 +560,6 @@ class ContainerLayer extends Layer {
     child._nextSibling = null;
     dropChild(child);
     assert(!child.attached);
-  }
-
-  @override
-  void dropChild(AbstractNode child) {
-    markNeedsAddToScene();
-    super.dropChild(child);
-  }
-
-  @override
-  void adoptChild(AbstractNode child) {
-    markNeedsAddToScene();
-    super.adoptChild(child);
   }
 
   /// Removes all of this layer's children from its child list.
@@ -680,13 +682,13 @@ class OffsetLayer extends ContainerLayer {
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
   Offset get offset => _offset;
+  Offset _offset;
   set offset(Offset value) {
     if (value != _offset) {
       markNeedsAddToScene();
     }
     _offset = value;
   }
-  Offset _offset;
 
   @override
   S find<S>(Offset regionOffset) {
@@ -787,15 +789,13 @@ class ClipRectLayer extends ContainerLayer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Rect get clipRect => _clipRect;
+  Rect _clipRect;
   set clipRect(Rect value) {
     if (value != _clipRect) {
       _clipRect = value;
       markNeedsAddToScene();
     }
   }
-  Rect _clipRect;
-
-
 
   /// {@template flutter.clipper.clipBehavior}
   /// Controls how to clip (default to [Clip.antiAlias]).
@@ -861,13 +861,13 @@ class ClipRRectLayer extends ContainerLayer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   RRect get clipRRect => _clipRRect;
+  RRect _clipRRect;
   set clipRRect(RRect value) {
     if (value != _clipRRect) {
       _clipRRect = value;
       markNeedsAddToScene();
     }
   }
-  RRect _clipRRect;
 
   /// {@macro flutter.clipper.clipBehavior}
   Clip get clipBehavior => _clipBehavior;
@@ -929,13 +929,13 @@ class ClipPathLayer extends ContainerLayer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Path get clipPath => _clipPath;
+  Path _clipPath;
   set clipPath(Path value) {
     if (value != _clipPath) {
       _clipPath = value;
       markNeedsAddToScene();
     }
   }
-  Path _clipPath;
 
   /// {@macro flutter.clipper.clipBehavior}
   Clip get clipBehavior => _clipBehavior;
@@ -1070,23 +1070,23 @@ class OpacityLayer extends ContainerLayer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   int get alpha => _alpha;
+  int _alpha;
   set alpha(int value) {
     if (value != _alpha) {
       _alpha = value;
       markNeedsAddToScene();
     }
   }
-  int _alpha;
 
   /// Offset from parent in the parent's coordinate system.
   Offset get offset => _offset;
+  Offset _offset;
   set offset(Offset value) {
     if (value != _offset) {
       _offset = value;
       markNeedsAddToScene();
     }
   }
-  Offset _offset;
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
@@ -1124,39 +1124,39 @@ class ShaderMaskLayer extends ContainerLayer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Shader get shader => _shader;
+  Shader _shader;
   set shader(Shader value) {
     if (value != _shader) {
       _shader = value;
       markNeedsAddToScene();
     }
   }
-  Shader _shader;
 
   /// The size of the shader.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Rect get maskRect => _maskRect;
+  Rect _maskRect;
   set maskRect(Rect value) {
     if (value != _maskRect) {
       _maskRect = value;
       markNeedsAddToScene();
     }
   }
-  Rect _maskRect;
 
   /// The blend mode to apply when blending the shader with the children.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   BlendMode get blendMode => _blendMode;
+  BlendMode _blendMode;
   set blendMode(BlendMode value) {
     if (value != _blendMode) {
       _blendMode = value;
       markNeedsAddToScene();
     }
   }
-  BlendMode _blendMode;
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
@@ -1188,13 +1188,13 @@ class BackdropFilterLayer extends ContainerLayer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   ui.ImageFilter get filter => _filter;
+  ui.ImageFilter _filter;
   set filter(ui.ImageFilter value) {
     if (value != _filter) {
       _filter = value;
       markNeedsAddToScene();
     }
   }
-  ui.ImageFilter _filter;
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
@@ -1241,23 +1241,23 @@ class PhysicalModelLayer extends ContainerLayer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Path get clipPath => _clipPath;
+  Path _clipPath;
   set clipPath(Path value) {
     if (value != _clipPath) {
       _clipPath = value;
       markNeedsAddToScene();
     }
   }
-  Path _clipPath;
 
   /// {@macro flutter.widgets.Clip}
   Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior;
   set clipBehavior(Clip value) {
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsAddToScene();
     }
   }
-  Clip _clipBehavior;
 
   /// The z-coordinate at which to place this physical object.
   ///
@@ -1270,36 +1270,36 @@ class PhysicalModelLayer extends ContainerLayer {
   /// tests even if the layer should be raised. To verify the actual value,
   /// consider setting [debugDisableShadows] to false in your test.
   double get elevation => _elevation;
+  double _elevation;
   set elevation(double value) {
     if (value != _elevation) {
       _elevation = value;
       markNeedsAddToScene();
     }
   }
-  double _elevation;
 
   /// The background color.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Color get color => _color;
+  Color _color;
   set color(Color value) {
     if (value != _color) {
       _color = value;
       markNeedsAddToScene();
     }
   }
-  Color _color;
 
   /// The shadow color.
   Color get shadowColor => _shadowColor;
+  Color _shadowColor;
   set shadowColor(Color value) {
     if (value != _shadowColor) {
       _shadowColor = value;
       markNeedsAddToScene();
     }
   }
-  Color _shadowColor;
 
   @override
   S find<S>(Offset regionOffset) {
