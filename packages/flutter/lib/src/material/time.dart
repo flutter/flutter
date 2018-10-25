@@ -24,20 +24,14 @@ enum DayPeriod {
 ///
 /// You can create TimeOfDay using the constructor which requires both hour and
 /// minute or using [DateTime] object.
-/// Note that hours are specified between 0 and 23, as in a 24-hour clock.
-/// For example:
+/// Hours are specified between 0 and 23, as in a 24-hour clock.
 ///
-/// ```
-/// var now = TimeOfDay.now();
-/// var releaseTime = TimeOfDay(hour: 15, minute: 0); // 3:00pm
-/// var roomBooked = TimeOfDay.fromDateTime(DateTime.parse('2018-10-20 16:30:04Z')); // 4:30pm
-/// ```
+/// ### Sample code
 ///
-/// You can use properties to get
-/// the individual units of a [TimeOfDay] object.
-/// ```
-/// assert(releaseTime.hour == 15);
-/// assert(roomBooked.minute == 30);
+/// ```dart
+/// TimeOfDay now = TimeOfDay.now();
+/// TimeOfDay releaseTime = TimeOfDay(hour: 15, minute: 0); // 3:00pm
+/// TimeOfDay roomBooked = TimeOfDay.fromDateTime(DateTime.parse('2018-10-20 16:30:04Z')); // 4:30pm
 /// ```
 ///
 /// See also:
