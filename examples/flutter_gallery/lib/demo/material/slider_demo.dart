@@ -176,7 +176,8 @@ class _SliderDemoState extends State<SliderDemo> {
                             }),
                     ),
                     Container(
-                        width: 50,
+                        width: 48,
+                        height: 48,
                         child: TextField(
                           onSubmitted: (String value) {
                             final double myDouble = double.tryParse(value);
