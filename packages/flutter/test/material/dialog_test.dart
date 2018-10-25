@@ -124,12 +124,6 @@ void main() {
   testWidgets('Rectangular dialog shape', (WidgetTester tester) async {
     const ShapeBorder customBorder = Border();
     const AlertDialog dialog = AlertDialog(
-=======
-      title: Text('Title'),
-      content: Text('Y'),
->>>>>>> Address Hans' first round comments.
-=======
->>>>>>> Address Hans' Second round comments.
       actions: <Widget>[ ],
       shape: customBorder,
     );
