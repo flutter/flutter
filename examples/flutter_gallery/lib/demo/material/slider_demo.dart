@@ -165,17 +165,19 @@ class _SliderDemoState extends State<SliderDemo> {
                 Row(
                   children: <Widget>[
                     Expanded(
-                        child: Slider(
-                            value: _value,
-                            min: 0.0,
-                            max: 100.0,
-                            onChanged: (double value) {
-                              setState(() {
-                                _value = value;
-                              });
-                            }),
+                      child: Slider(
+                          value: _value,
+                          min: 0.0,
+                          max: 100.0,
+                          onChanged: (double value) {
+                            setState(() {
+                              _value = value;
+                            });
+                          }),
                     ),
-                    Container(
+                    Semantics(
+                      label: 'Editable numerical value',
+                      child: Container(
                         width: 48,
                         height: 48,
                         child: TextField(
@@ -191,9 +193,10 @@ class _SliderDemoState extends State<SliderDemo> {
                           },
                           keyboardType: TextInputType.number,
                           controller: TextEditingController(
-                              text: _value.toStringAsFixed(1),
+                            text: _value.toStringAsFixed(1),
                           ),
                         ),
+                      ),
                     ),
                   ],
                 ),
