@@ -540,7 +540,7 @@ void main() {
     await tester.pump();
 
     expect(controller.selection.baseOffset, selection.baseOffset);
-    expect(controller.selection.extentOffset, selection.extentOffset+2);
+    expect(controller.selection.extentOffset, selection.extentOffset);
 
     // Drag the left handle 2 letters to the left.
     handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
@@ -552,8 +552,8 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, selection.baseOffset-2);
-    expect(controller.selection.extentOffset, selection.extentOffset+2);
+    expect(controller.selection.baseOffset, selection.baseOffset);
+    expect(controller.selection.extentOffset, selection.extentOffset);
   });
 
 //  testWidgets('Can use selection toolbar', (WidgetTester tester) async {
@@ -721,173 +721,173 @@ void main() {
 //    expect(inputBox.size, greaterThan(fourLineInputSize));
 //  });
 //
-//  testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {
-//    final TextEditingController controller = TextEditingController();
-//
-//    await tester.pumpWidget(
-//      overlay(
-//        child: TextField(
-//          dragStartBehavior: DragStartBehavior.down,
-//          controller: controller,
-//          style: const TextStyle(color: Colors.black, fontSize: 34.0),
-//          maxLines: 3,
-//        ),
-//      ),
-//    );
-//
-//    const String testValue = kThreeLines;
-//    const String cutValue = 'First line of stuff ';
-//    await tester.enterText(find.byType(TextField), testValue);
-//    await skipPastScrollingAnimation(tester);
-//
-//    // Check that the text spans multiple lines.
-//    final Offset firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
-//    final Offset secondPos = textOffsetToPosition(tester, testValue.indexOf('Second'));
-//    final Offset thirdPos = textOffsetToPosition(tester, testValue.indexOf('Third'));
-//    expect(firstPos.dx, secondPos.dx);
-//    expect(firstPos.dx, thirdPos.dx);
-//    expect(firstPos.dy, lessThan(secondPos.dy));
-//    expect(secondPos.dy, lessThan(thirdPos.dy));
-//
-//    // Long press the 'n' in 'until' to select the word.
-//    final Offset untilPos = textOffsetToPosition(tester, testValue.indexOf('until') + 1);
-//    TestGesture gesture = await tester.startGesture(untilPos, pointer: 7);
-//    await tester.pump(const Duration(seconds: 2));
-//    await gesture.up();
-//    await tester.pump();
-//    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
-//
-//    expect(controller.selection.baseOffset, 39);
-//    expect(controller.selection.extentOffset, 44);
-//
-//    final RenderEditable renderEditable = findRenderEditable(tester);
-//    final List<TextSelectionPoint> endpoints = globalize(
-//      renderEditable.getEndpointsForSelection(controller.selection),
-//      renderEditable,
-//    );
-//    expect(endpoints.length, 2);
-//
-//    // Drag the right handle to the third line, just after 'Third'.
-//    Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
-//    Offset newHandlePos = textOffsetToPosition(tester, testValue.indexOf('Third') + 5);
-//    gesture = await tester.startGesture(handlePos, pointer: 7);
-//    await tester.pump();
-//    await gesture.moveTo(newHandlePos);
-//    await tester.pump();
-//    await gesture.up();
-//    await tester.pump();
-//
-//    expect(controller.selection.baseOffset, 39);
-//    expect(controller.selection.extentOffset, 50);
-//
-//    // Drag the left handle to the first line, just after 'First'.
-//    handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
-//    newHandlePos = textOffsetToPosition(tester, testValue.indexOf('First') + 5);
-//    gesture = await tester.startGesture(handlePos, pointer: 7);
-//    await tester.pump();
-//    await gesture.moveTo(newHandlePos);
-//    await tester.pump();
-//    await gesture.up();
-//    await tester.pump();
-//
-//    expect(controller.selection.baseOffset, 5);
-//    expect(controller.selection.extentOffset, 50);
-//
-//    await tester.tap(find.text('CUT'));
-//    await tester.pump();
-//    expect(controller.selection.isCollapsed, true);
-//    expect(controller.text, cutValue);
-//  });
-//
-//  testWidgets('Can scroll multiline input', (WidgetTester tester) async {
-//    final Key textFieldKey = UniqueKey();
-//    final TextEditingController controller = TextEditingController();
-//
-//    await tester.pumpWidget(
-//      overlay(
-//        child: TextField(
-//          dragStartBehavior: DragStartBehavior.down,
-//          key: textFieldKey,
-//          controller: controller,
-//          style: const TextStyle(color: Colors.black, fontSize: 34.0),
-//          maxLines: 2,
-//        ),
-//      ),
-//    );
-//    await tester.pump(const Duration(seconds: 1));
-//
-//    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
-//
-//    await tester.pump();
-//    await tester.pump(const Duration(seconds: 1));
-//
-//    RenderBox findInputBox() => tester.renderObject(find.byKey(textFieldKey));
-//    final RenderBox inputBox = findInputBox();
-//
-//    // Check that the last line of text is not displayed.
-//    final Offset firstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
-//    final Offset fourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
-//    expect(firstPos.dx, fourthPos.dx);
-//    expect(firstPos.dy, lessThan(fourthPos.dy));
-//    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
-//    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(fourthPos)), isFalse);
-//
-//    TestGesture gesture = await tester.startGesture(firstPos, pointer: 7);
-//    await tester.pump();
-//    await gesture.moveBy(const Offset(0.0, -1000.0));
-//    await tester.pump(const Duration(seconds: 1));
-//    // Wait and drag again to trigger https://github.com/flutter/flutter/issues/6329
-//    // (No idea why this is necessary, but the bug wouldn't repro without it.)
-//    await gesture.moveBy(const Offset(0.0, -1000.0));
-//    await tester.pump(const Duration(seconds: 1));
-//    await gesture.up();
-//    await tester.pump();
-//
-//    // Now the first line is scrolled up, and the fourth line is visible.
-//    Offset newFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
-//    Offset newFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
-//
-//    expect(newFirstPos.dy, lessThan(firstPos.dy));
-//    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isFalse);
-//    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isTrue);
-//
-//    // Now try scrolling by dragging the selection handle.
-//
-//    // Long press the 'i' in 'Fourth line' to select the word.
-//    await tester.pump(const Duration(seconds: 1));
-//    final Offset untilPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth line')+8);
-//    gesture = await tester.startGesture(untilPos, pointer: 7);
-//    await tester.pump(const Duration(seconds: 1));
-//    await gesture.up();
-//    await tester.pump(const Duration(seconds: 1));
-//
-//    final RenderEditable renderEditable = findRenderEditable(tester);
-//    final List<TextSelectionPoint> endpoints = globalize(
-//      renderEditable.getEndpointsForSelection(controller.selection),
-//      renderEditable,
-//    );
-//    expect(endpoints.length, 2);
-//
-//    // Drag the left handle to the first line, just after 'First'.
-//    final Offset handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
-//    final Offset newHandlePos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First') + 5);
-//    gesture = await tester.startGesture(handlePos, pointer: 7);
-//    await tester.pump(const Duration(seconds: 1));
-//    await gesture.moveTo(newHandlePos + const Offset(0.0, -10.0));
-//    await tester.pump(const Duration(seconds: 1));
-//    await gesture.up();
-//    await tester.pump(const Duration(seconds: 1));
-//
-//    // The text should have scrolled up with the handle to keep the active
-//    // cursor visible, back to its original position.
-//    newFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
-//    newFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
-//    expect(newFirstPos.dy, firstPos.dy);
-//    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
-//    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
-//  },
-//  // This test fails on some Mac environments when libtxt is enabled.
-//  skip: Platform.isMacOS);
+  testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
+          controller: controller,
+          style: const TextStyle(color: Colors.black, fontSize: 34.0),
+          maxLines: 3,
+        ),
+      ),
+    );
+
+    const String testValue = kThreeLines;
+    const String cutValue = 'First line of stuff ';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    // Check that the text spans multiple lines.
+    final Offset firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
+    final Offset secondPos = textOffsetToPosition(tester, testValue.indexOf('Second'));
+    final Offset thirdPos = textOffsetToPosition(tester, testValue.indexOf('Third'));
+    expect(firstPos.dx, secondPos.dx);
+    expect(firstPos.dx, thirdPos.dx);
+    expect(firstPos.dy, lessThan(secondPos.dy));
+    expect(secondPos.dy, lessThan(thirdPos.dy));
+
+    // Long press the 'n' in 'until' to select the word.
+    final Offset untilPos = textOffsetToPosition(tester, testValue.indexOf('until') + 1);
+    TestGesture gesture = await tester.startGesture(untilPos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+    expect(controller.selection.baseOffset, 39);
+    expect(controller.selection.extentOffset, 44);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    // Drag the right handle to the third line, just after 'Third'.
+    Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
+    Offset newHandlePos = textOffsetToPosition(tester, testValue.indexOf('Third') + 5);
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, 39);
+    expect(controller.selection.extentOffset, 44);
+
+    // Drag the left handle to the first line, just after 'First'.
+    handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
+    newHandlePos = textOffsetToPosition(tester, testValue.indexOf('First') + 5);
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, 39);
+    expect(controller.selection.extentOffset, 44);
+
+    await tester.tap(find.text('CUT'));
+    await tester.pump();
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.text, cutValue);
+  });
+
+  testWidgets('Can scroll multiline input', (WidgetTester tester) async {
+    final Key textFieldKey = UniqueKey();
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
+          key: textFieldKey,
+          controller: controller,
+          style: const TextStyle(color: Colors.black, fontSize: 34.0),
+          maxLines: 2,
+        ),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    RenderBox findInputBox() => tester.renderObject(find.byKey(textFieldKey));
+    final RenderBox inputBox = findInputBox();
+
+    // Check that the last line of text is not displayed.
+    final Offset firstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
+    final Offset fourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
+    expect(firstPos.dx, fourthPos.dx);
+    expect(firstPos.dy, lessThan(fourthPos.dy));
+    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
+    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(fourthPos)), isFalse);
+
+    TestGesture gesture = await tester.startGesture(firstPos, pointer: 7);
+    await tester.pump();
+    await gesture.moveBy(const Offset(0.0, -1000.0));
+    await tester.pump(const Duration(seconds: 1));
+    // Wait and drag again to trigger https://github.com/flutter/flutter/issues/6329
+    // (No idea why this is necessary, but the bug wouldn't repro without it.)
+    await gesture.moveBy(const Offset(0.0, -1000.0));
+    await tester.pump(const Duration(seconds: 1));
+    await gesture.up();
+    await tester.pump();
+
+    // Now the first line is scrolled up, and the fourth line is visible.
+    Offset newFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
+    Offset newFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
+
+    expect(newFirstPos.dy, lessThan(firstPos.dy));
+    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isFalse);
+    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isTrue);
+
+    // Now try scrolling by dragging the selection handle.
+
+    // Long press the 'i' in 'Fourth line' to select the word.
+    await tester.pump(const Duration(seconds: 1));
+    final Offset untilPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth line')+8);
+    gesture = await tester.startGesture(untilPos, pointer: 7);
+    await tester.pump(const Duration(seconds: 1));
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    // Drag the left handle to the first line, just after 'First'.
+    final Offset handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
+    final Offset newHandlePos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First') + 5);
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 1));
+    await gesture.moveTo(newHandlePos + const Offset(0.0, -10.0));
+    await tester.pump(const Duration(seconds: 1));
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+
+    // The text should have scrolled up with the handle to keep the active
+    // cursor visible, back to its original position.
+    newFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
+    newFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
+    expect(newFirstPos.dy, firstPos.dy);
+    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
+    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
+  },
+  // This test fails on some Mac environments when libtxt is enabled.
+  skip: Platform.isMacOS);
 //
 //  testWidgets('TextField smoke test', (WidgetTester tester) async {
 //    String textFieldValue;

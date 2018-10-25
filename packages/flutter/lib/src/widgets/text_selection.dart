@@ -369,9 +369,8 @@ class TextSelectionOverlay {
 
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
-        selectionControls == null)
+         selectionControls == null)
       return Container(); // hide the second handle when collapsed
-
     return FadeTransition(
       opacity: _handleOpacity,
       child: _TextSelectionHandleOverlay(
