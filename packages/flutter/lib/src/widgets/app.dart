@@ -29,10 +29,46 @@ export 'dart:ui' show Locale;
 /// [Localizations] object when the app starts and when user changes the default
 /// locale for the device.
 ///
-/// The `locale` is the device's locale when the app started, or the device
-/// locale the user selected after the app was started. The `supportedLocales`
+/// The `locale` is the device's default locale when the app started, or the
+/// device locale the user selected after the app was started. The default locale
+/// is the first locale in the list of preferred locales. The `supportedLocales`
 /// parameter is just the value of [WidgetsApp.supportedLocales].
+///
+/// When a `LocaleResolutionCallback` is provided, `LocaleResolutionCallback` will
+/// be called after failure to resolve locale with [LocaleListResolutionCallback].
+/// If both `LocaleResolutionCallback` and [LocaleListResolutionCallback] may be left
+/// null or fail to resolve (return null), the fallback algorithm will be used.
+///
+/// The priority of each available fallback is:
+///
+///  * [LocaleListResolutionCallback] is attempted first.
+///  * `LocaleResolutionCallback` is attempted second.
+///  * Flutter's fallback algorithm is attempted last.
 typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Locale> supportedLocales);
+
+/// The signature of [WidgetsApp.localeListResolutionCallback].
+///
+/// A `LocaleListResolutionCallback` is responsible for computing the locale of the app's
+/// [Localizations] object when the app starts and when user changes the list of
+/// locales for the device.
+///
+/// The `locales` list is the device's preferred locales when the app started, or the
+/// device's preferred locales the user selected after the app was started. This list
+/// is in order of preference The `supportedLocales` parameter is just the value of
+/// [WidgetsApp.supportedLocales].
+///
+/// When a `LocaleListResolutionCallback` is provided, Flutter will first attempt to
+/// resolve the locale with the provided `LocaleListResolutionCallback`, and if the
+/// callback or result is null, will fallback to trying the [LocaleResolutionCallback].
+/// If both [LocaleResolutionCallback] and 'LocaleListResolutionCallback' may be left
+/// null or fail to resolve (return null), the fallback algorithm will be used.
+///
+/// The priority of each available fallback is:
+///
+///  * [LocaleListResolutionCallback] is attempted first.
+///  * `LocaleResolutionCallback` is attempted second.
+///  * Flutter's fallback algorithm is attempted last.
+typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
 ///
@@ -677,6 +713,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   Locale _locale;
 
+  // Resolve against only the default locale.
   Locale _resolveLocale(Locale newLocale, Iterable<Locale> supportedLocales) {
     if (widget.localeResolutionCallback != null) {
       final Locale locale = widget.localeResolutionCallback(newLocale, widget.supportedLocales);
@@ -690,13 +727,44 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     }
 
     Locale matchesLanguageCode;
+    Locale matchesLanguageAndScriptCode;
     for (Locale locale in supportedLocales) {
       if (locale == newLocale)
         return newLocale;
       if (locale.languageCode == newLocale.languageCode)
         matchesLanguageCode ??= locale;
+      if (locale.languageCode == newLocale.languageCode &&
+        locale.scriptCode == newLocale.scriptCode)
+        matchesLanguageAndScriptCode ??= locale;
     }
-    return matchesLanguageCode ?? supportedLocales.first;
+    return matchesLanguageAndScriptCode ?? matchesLanguageCode ?? supportedLocales.first;
+  }
+
+  // Resolve against only the default locale.
+  Locale _resolveLocales(List<Locale> newLocales, Iterable<Locale> supportedLocales) {
+    if (widget.localeResolutionCallback != null) {
+      final Locale locale = widget.localeResolutionCallback(newLocale, widget.supportedLocales);
+      if (locale != null)
+        return locale;
+    }
+    // newLocale can be null when called before the platform has had a chance to
+    // initialize the locales. We default to the first supported locale.
+    if (newLocale == null) {
+      return supportedLocales.first;
+    }
+
+    Locale matchesLanguageCode;
+    Locale matchesLanguageAndScriptCode;
+    for (Locale locale in supportedLocales) {
+      if (locale == newLocale)
+        return newLocale;
+      if (locale.languageCode == newLocale.languageCode)
+        matchesLanguageCode ??= locale;
+      if (locale.languageCode == newLocale.languageCode &&
+        locale.scriptCode == newLocale.scriptCode)
+        matchesLanguageAndScriptCode ??= locale;
+    }
+    return matchesLanguageAndScriptCode ?? matchesLanguageCode ?? supportedLocales.first;
   }
 
   @override
