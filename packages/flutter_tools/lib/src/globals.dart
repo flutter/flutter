@@ -27,6 +27,7 @@ void printError(
   TerminalColor color,
   int indent,
   int hangingIndent,
+  bool wrap,
 }) {
   logger.printError(
     message,
@@ -35,6 +36,7 @@ void printError(
     color: color,
     indent: indent,
     hangingIndent: hangingIndent,
+    wrap: wrap,
   );
 }
 
@@ -54,6 +56,7 @@ void printStatus(
   TerminalColor color,
   int indent,
   int hangingIndent,
+  bool wrap,
 }) {
   logger.printStatus(
     message,
@@ -62,6 +65,7 @@ void printStatus(
     newline: newline ?? true,
     indent: indent,
     hangingIndent: hangingIndent,
+    wrap: wrap,
   );
 }
 

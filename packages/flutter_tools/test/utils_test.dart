@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -165,7 +166,8 @@ baz=qux
         await Future<void>.delayed(kShortDelay);
       }, kShortDelay);
       final Duration duration = await completer.future;
-      expect(duration, greaterThanOrEqualTo(Duration(milliseconds: kShortDelay.inMilliseconds * 2)));
+      expect(
+          duration, greaterThanOrEqualTo(Duration(milliseconds: kShortDelay.inMilliseconds * 2)));
     });
   });
 
@@ -200,20 +202,30 @@ baz=qux
     const String _shortLine = 'Short line.';
     const String _indentedLongLine = '    This is an indented long line that needs to be '
         'wrapped and indentation preserved.';
+    final FakeStdio fakeStdio = FakeStdio();
 
-    void testWrap(String description,  Function body) {
-      testUsingContext(description, body, overrides: <Type, Generator> {
+    void testWrap(String description, Function body) {
+      testUsingContext(description, body, overrides: <Type, Generator>{
         OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: _lineLength),
       });
     }
-    void testNoWrap(String description,  Function body) {
-      testUsingContext(description, body, overrides: <Type, Generator> {
+
+    void testNoWrap(String description, Function body) {
+      testUsingContext(description, body, overrides: <Type, Generator>{
         OutputPreferences: () => OutputPreferences(wrapText: false),
       });
     }
 
     test('does not wrap by default in tests', () {
       expect(wrapText(_longLine), equals(_longLine));
+    });
+    testNoWrap('can override wrap preference if preference is off', () {
+      expect(wrapText(_longLine, columnWidth: _lineLength, shouldWrap: true), equals('''
+This is a long line that needs to be
+wrapped.'''));
+    });
+    testWrap('can override wrap preference if preference is on', () {
+      expect(wrapText(_longLine, shouldWrap: false), equals(_longLine));
     });
     testNoWrap('does not wrap at all if not told to wrap', () {
       expect(wrapText(_longLine), equals(_longLine));
@@ -225,6 +237,20 @@ baz=qux
       expect(wrapText(_longLine, columnWidth: _lineLength), equals('''
 This is a long line that needs to be
 wrapped.'''));
+    });
+    testUsingContext('able to handle dynamically changing terminal column size', () {
+      fakeStdio.currentColumnSize = 20;
+      expect(wrapText(_longLine), equals('''
+This is a long line
+that needs to be
+wrapped.'''));
+      fakeStdio.currentColumnSize = _lineLength;
+      expect(wrapText(_longLine), equals('''
+This is a long line that needs to be
+wrapped.'''));
+    }, overrides: <Type, Generator>{
+      OutputPreferences: () => OutputPreferences(wrapText: true),
+      Stdio: () => fakeStdio,
     });
     testWrap('wrap long lines with no whitespace', () {
       expect(wrapText('0123456789' * 5, columnWidth: _lineLength), equals('''
@@ -334,4 +360,13 @@ needs to be wrapped.
         890123456789'''));
     });
   });
+}
+
+class FakeStdio extends Stdio {
+  FakeStdio();
+
+  int currentColumnSize = 20;
+
+  @override
+  int get terminalColumns => currentColumnSize;
 }
