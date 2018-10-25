@@ -422,8 +422,6 @@ class _MotionEventsDispatcher {
     return AndroidPointerCoords(
         orientation: event.orientation,
         pressure: event.pressure,
-        // Currently the engine omits the pointer size, for now I'm fixing this to 0.33 which is roughly
-        // what I typically see on Android.
         size: event.size,
         toolMajor: event.radiusMajor,
         toolMinor: event.radiusMinor,
