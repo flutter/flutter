@@ -347,10 +347,13 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// Tag for the navigation bar's Hero widget if [transitionBetweenRoutes] is true.
   ///
   /// Defaults to a common tag between all [CupertinoNavigationBar] and
-  /// [CupertinoSliverNavigationBar] instances of the same [Navigator] so they
-  /// can all transition between each other as long as there's only one per
-  /// route. Use this tag override with different tags to have multiple
-  /// navigation bars per route or to transition between multiple [Navigator]s.
+  /// [CupertinoSliverNavigationBar] instances of the same [Navigator]. With the
+  /// default tag, all navigation bars of the same navigator can transition
+  /// between each other as long as there's only one navigation bar per route.
+  ///
+  /// This [heroTag] can be overridden to manually handle having multiple
+  /// navigation bars per route or to transition between multiple
+  /// [Navigator]s.
   ///
   /// Cannot be null. To disable Hero transitions for this navigation bar,
   /// set [transitionBetweenRoutes] to false.
