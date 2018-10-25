@@ -20,7 +20,7 @@ enum DayPeriod {
 /// day might fall on or the time zone.
 ///
 /// The time is represented by [hour] and [minute] pair. Once created, both
-/// values can not be changed.
+/// values cannot be changed.
 ///
 /// You can create TimeOfDay using the constructor which requires both hour and
 /// minute or using [DateTime] object.
