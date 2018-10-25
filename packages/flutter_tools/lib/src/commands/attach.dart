@@ -7,6 +7,7 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
 import '../device.dart';
@@ -37,12 +38,17 @@ final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
     addBuildModeFlags(defaultToRelease: false);
+    usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
         help: 'Local port where the observatory is listening.',
+      )..addOption('pid-file',
+        help: 'Specify a file to write the process id to. '
+              'You can send SIGUSR1 to trigger a hot reload '
+              'and SIGUSR2 to trigger a hot restart.',
       )..addOption(
         'project-root',
         hide: !verboseHelp,
@@ -89,6 +95,8 @@ class AttachCommand extends FlutterCommand {
 
     await _validateArguments();
 
+    writePidFile(argResults['pid-file']);
+
     final Device device = await findTargetDevice();
     final int devicePort = observatoryPort;
 
@@ -122,6 +130,7 @@ class AttachCommand extends FlutterCommand {
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
+        viewFilter: argResults['isolate-filter'],
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = hotRunnerFactory.build(

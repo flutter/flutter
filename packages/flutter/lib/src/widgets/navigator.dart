@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -1545,8 +1546,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     for (NavigatorObserver observer in widget.observers)
       observer.didPush(route, oldRoute);
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
     return route.popped;
+  }
+
+  void _afterNavigation() {
+    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
+    if (!isReleaseMode) {
+      // This event is used by performance tools that show stats for the
+      // time interval since the last navigation event occurred ensuring that
+      // stats only reflect the current page.
+      // These tools do not need to know exactly what the new route is so no
+      // attempt is made to describe the current route as part of the event.
+      developer.postEvent('Flutter.Navigation', <String, dynamic>{});
+    }
+    _cancelActivePointers();
   }
 
   /// Replace the current route of the navigator by pushing the given route and
@@ -1597,7 +1611,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     for (NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
     return newRoute.popped;
   }
 
@@ -1650,7 +1664,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         observer.didRemove(removedRoute, oldRoute);
     }
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
     return newRoute.popped;
   }
 
@@ -1800,7 +1814,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       assert(!debugPredictedWouldPop);
     }
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
     return true;
   }
 
@@ -1841,7 +1855,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       observer.didRemove(route, previousRoute);
     route.dispose();
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
   }
 
   /// Immediately remove a route from the navigator, and [Route.dispose] it. The

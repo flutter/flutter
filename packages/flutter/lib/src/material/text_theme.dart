@@ -331,7 +331,7 @@ class TextTheme extends Diagnosticable {
     TextDecorationStyle decorationStyle,
   }) {
     return TextTheme(
-      display4: display4.apply(
+      display4: display4?.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -340,7 +340,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      display3: display3.apply(
+      display3: display3?.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -349,7 +349,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      display2: display2.apply(
+      display2: display2?.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -358,7 +358,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      display1: display1.apply(
+      display1: display1?.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -367,61 +367,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      headline: headline.apply(
-        color: displayColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
-      title: title.apply(
-        color: displayColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
-      subhead: subhead.apply(
-        color: displayColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
-      body2: body2.apply(
-        color: displayColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
-      body1: body1.apply(
-        color: displayColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
-      caption: caption.apply(
-        color: displayColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
-      button: button.apply(
+      headline: headline?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -430,7 +376,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      subtitle: subtitle.apply(
+      title: title?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -439,7 +385,61 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      overline: overline.apply(
+      subhead: subhead?.apply(
+        color: bodyColor,
+        decoration: decoration,
+        decorationColor: decorationColor,
+        decorationStyle: decorationStyle,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta,
+      ),
+      body2: body2?.apply(
+        color: bodyColor,
+        decoration: decoration,
+        decorationColor: decorationColor,
+        decorationStyle: decorationStyle,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta,
+      ),
+      body1: body1?.apply(
+        color: bodyColor,
+        decoration: decoration,
+        decorationColor: decorationColor,
+        decorationStyle: decorationStyle,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta,
+      ),
+      caption: caption?.apply(
+        color: displayColor,
+        decoration: decoration,
+        decorationColor: decorationColor,
+        decorationStyle: decorationStyle,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta,
+      ),
+      button: button?.apply(
+        color: bodyColor,
+        decoration: decoration,
+        decorationColor: decorationColor,
+        decorationStyle: decorationStyle,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta,
+      ),
+      subtitle: subtitle?.apply(
+        color: bodyColor,
+        decoration: decoration,
+        decorationColor: decorationColor,
+        decorationStyle: decorationStyle,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta,
+      ),
+      overline: overline?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,

@@ -126,7 +126,7 @@ void main() {
     bool didReceivePointerDown;
     bool didTap;
 
-    Future<Null> pumpWidgetTree(HitTestBehavior behavior) {
+    Future<void> pumpWidgetTree(HitTestBehavior behavior) {
       return tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -286,7 +286,7 @@ void main() {
     // Pointer is dragged from the center of the 800x100 gesture detector
     // to a point (400,300) below it. This always causes onTapCancel to be
     // called; onTap should never be called.
-    Future<Null> dragOut(Duration timeout) async {
+    Future<void> dragOut(Duration timeout) async {
       final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
       // If the timeout is less than kPressTimeout the recognizer will just trigger
       // the onTapCancel callback. If the timeout is greater than kLongPressTimeout
@@ -313,5 +313,34 @@ void main() {
     expect(tapCancel, 3);
     expect(tap, 0);
     expect(longPress, 1);
+  });
+
+  testWidgets('Long Press Up Callback called after long press', (WidgetTester tester) async {
+    int longPressUp = 0;
+
+    await tester.pumpWidget(
+      Container(
+        alignment: Alignment.topLeft,
+        child: Container(
+          alignment: Alignment.center,
+          height: 100.0,
+          color: const Color(0xFF00FF00),
+          child: GestureDetector(
+            onLongPressUp: () {
+              longPressUp += 1;
+            },
+          ),
+        ),
+      ),
+    );
+
+    Future<void> longPress(Duration timeout) async {
+      final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
+      await tester.pump(timeout);
+      await gesture.up();
+    }
+
+    await longPress(kLongPressTimeout + Duration(seconds: 1)); // To make sure the time for long press has occured
+    expect(longPressUp, 1);
   });
 }

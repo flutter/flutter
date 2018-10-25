@@ -683,6 +683,11 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       if (locale != null)
         return locale;
     }
+    // newLocale can be null when called before the platform has had a chance to
+    // initialize the locales. We default to the first supported locale.
+    if (newLocale == null) {
+      return supportedLocales.first;
+    }
 
     Locale matchesLanguageCode;
     for (Locale locale in supportedLocales) {

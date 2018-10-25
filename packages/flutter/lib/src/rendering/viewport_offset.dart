@@ -176,7 +176,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
-  Future<Null> animateTo(double to, {
+  Future<void> animateTo(double to, {
     @required Duration duration,
     @required Curve curve,
   });
@@ -252,10 +252,10 @@ class _FixedViewportOffset extends ViewportOffset {
   }
 
   @override
-  Future<Null> animateTo(double to, {
+  Future<void> animateTo(double to, {
     @required Duration duration,
     @required Curve curve,
-  }) async => null;
+  }) async { }
 
   @override
   ScrollDirection get userScrollDirection => ScrollDirection.idle;

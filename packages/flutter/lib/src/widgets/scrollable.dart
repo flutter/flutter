@@ -209,12 +209,12 @@ class Scrollable extends StatefulWidget {
 
   /// Scrolls the scrollables that enclose the given context so as to make the
   /// given context visible.
-  static Future<Null> ensureVisible(BuildContext context, {
+  static Future<void> ensureVisible(BuildContext context, {
     double alignment = 0.0,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
-    final List<Future<Null>> futures = <Future<Null>>[];
+    final List<Future<void>> futures = <Future<void>>[];
 
     ScrollableState scrollable = Scrollable.of(context);
     while (scrollable != null) {
@@ -229,10 +229,10 @@ class Scrollable extends StatefulWidget {
     }
 
     if (futures.isEmpty || duration == Duration.zero)
-      return Future<Null>.value();
+      return Future<void>.value();
     if (futures.length == 1)
       return futures.single;
-    return Future.wait<Null>(futures).then<Null>((List<Null> _) => null);
+    return Future.wait<void>(futures).then<void>((List<void> _) => null);
   }
 }
 

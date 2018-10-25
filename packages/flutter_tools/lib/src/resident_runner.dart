@@ -30,12 +30,14 @@ import 'vmservice.dart';
 
 class FlutterDevice {
   FlutterDevice(this.device, {
-    @required bool trackWidgetCreation,
+    @required this.trackWidgetCreation,
     this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
+    this.viewFilter,
     ResidentCompiler generator,
-  }) : generator = generator ?? ResidentCompiler(
+  }) : assert(trackWidgetCreation != null),
+       generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
@@ -51,7 +53,8 @@ class FlutterDevice {
   List<String> fileSystemRoots;
   String fileSystemScheme;
   StreamSubscription<String> _loggingSubscription;
-  String viewFilter;
+  final String viewFilter;
+  final bool trackWidgetCreation;
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered.
@@ -393,6 +396,7 @@ class FlutterDevice {
         generator: generator,
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
+        trackWidgetCreation: trackWidgetCreation,
         projectRootPath: projectRootPath,
         pathToReload: pathToReload
       );
@@ -446,6 +450,7 @@ abstract class ResidentRunner {
   String _mainPath;
   String get mainPath => _mainPath;
   String getReloadPath({bool fullRestart}) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
+
   AssetBundle _assetBundle;
   AssetBundle get assetBundle => _assetBundle;
 
@@ -622,14 +627,12 @@ abstract class ResidentRunner {
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered
-  Future<void> connectToServiceProtocol({String viewFilter,
-      ReloadSources reloadSources, CompileExpression compileExpression}) async {
+  Future<void> connectToServiceProtocol({ReloadSources reloadSources, CompileExpression compileExpression}) async {
     if (!debuggingOptions.debuggingEnabled)
       return Future<void>.error('Error the service protocol is not enabled.');
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
-      device.viewFilter = viewFilter;
       await device._connect(reloadSources: reloadSources,
           compileExpression: compileExpression);
       await device.getVMs();

@@ -69,8 +69,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
         defaultsTo: true);
     argParser.addOption('wrap-column',
         hide: !verboseHelp,
-        help: 'Sets the output wrap column. If not set, uses the width of the terminal, or 100 if '
-            'the output is not a terminal. Use --no-wrap to turn off wrapping entirely.',
+        help: 'Sets the output wrap column. If not set, uses the width of the terminal. No '
+            'wrapping occurs if not writing to a terminal. Use --no-wrap to turn off wrapping '
+            'when connected to a terminal.',
         defaultsTo: null);
     argParser.addOption('device-id',
         abbr: 'd',
@@ -182,6 +183,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     try {
       if (platform.script.scheme == 'data')
         return '../..'; // we're running as a test
+
+      if (platform.script.scheme == 'package') {
+        final String packageConfigPath = Uri.parse(platform.packageConfig).toFilePath();
+        return fs.path.dirname(fs.path.dirname(fs.path.dirname(packageConfigPath)));
+      }
+
       final String script = platform.script.toFilePath();
       if (fs.path.basename(script) == kSnapshotFileName)
         return fs.path.dirname(fs.path.dirname(fs.path.dirname(script)));

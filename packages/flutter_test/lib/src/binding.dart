@@ -84,11 +84,11 @@ const Size _kDefaultTestViewportSize = Size(800.0, 600.0);
 /// When using these bindings, certain features are disabled. For
 /// example, [timeDilation] is reset to 1.0 on initialization.
 abstract class TestWidgetsFlutterBinding extends BindingBase
-  with SchedulerBinding,
+  with ServicesBinding,
+       SchedulerBinding,
        GestureBinding,
        SemanticsBinding,
        RendererBinding,
-       ServicesBinding,
        PaintingBinding,
        WidgetsBinding {
 
@@ -197,7 +197,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
-  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]);
+  Future<void> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]);
 
   /// Runs a `callback` that performs real asynchronous work.
   ///
@@ -227,12 +227,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   /// Artificially calls dispatchLocaleChanged on the Widget binding,
   /// then flushes microtasks.
-  Future<Null> setLocale(String languageCode, String countryCode) {
-    return TestAsyncUtils.guard<Null>(() async {
+  Future<void> setLocale(String languageCode, String countryCode) {
+    return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
       final Locale locale = Locale(languageCode, countryCode);
       dispatchLocaleChanged(locale);
-      return null;
     });
   }
 
@@ -242,14 +241,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// then flushes microtasks.
   ///
   /// Set to null to use the default surface size.
-  Future<Null> setSurfaceSize(Size size) {
-    return TestAsyncUtils.guard<Null>(() async {
+  Future<void> setSurfaceSize(Size size) {
+    return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
       if (_surfaceSize == size)
-        return null;
+        return;
       _surfaceSize = size;
       handleMetricsChanged();
-      return null;
     });
   }
 
@@ -272,11 +270,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// May result in an infinite loop or run out of memory if microtasks continue
   /// to recursively schedule new microtasks. Will not run any timers scheduled
   /// after this method was invoked, even if they are zero-time timers.
-  Future<Null> idle() {
-    return TestAsyncUtils.guard<Null>(() {
-      final Completer<Null> completer = Completer<Null>();
+  Future<void> idle() {
+    return TestAsyncUtils.guard<void>(() {
+      final Completer<void> completer = Completer<void>();
       Timer.run(() {
-        completer.complete(null);
+        completer.complete();
       });
       return completer.future;
     });
@@ -386,7 +384,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The `description` is used by the [LiveTestWidgetsFlutterBinding] to
   /// show a label on the screen during the test. The description comes from
   /// the value passed to [testWidgets]. It must not be null.
-  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description = '' });
+  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '' });
 
   /// This is called during test execution before and after the body has been
   /// executed.
@@ -399,7 +397,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   Zone _parentZone;
 
-  VoidCallback _createTestCompletionHandler(String testDescription, Completer<Null> completer) {
+  VoidCallback _createTestCompletionHandler(String testDescription, Completer<void> completer) {
     return () {
       // This can get called twice, in the case of a Future without listeners failing, and then
       // our main future completing.
@@ -410,7 +408,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         _pendingExceptionDetails = null;
       }
       if (!completer.isCompleted)
-        completer.complete(null);
+        completer.complete();
     };
   }
 
@@ -426,8 +424,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // The LiveTestWidgetsFlutterBinding overrides this to report the exception to the console.
   }
 
-  Future<Null> _runTest(Future<Null> testBody(), VoidCallback invariantTester, String description, {
-    Future<Null> timeout,
+  Future<void> _runTest(Future<void> testBody(), VoidCallback invariantTester, String description, {
+    Future<void> timeout,
   }) {
     assert(description != null);
     assert(inTest);
@@ -452,7 +450,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         _pendingExceptionDetails = details;
       }
     };
-    final Completer<Null> testCompleter = Completer<Null>();
+    final Completer<void> testCompleter = Completer<void>();
     final VoidCallback testCompletionHandler = _createTestCompletionHandler(description, testCompleter);
     void handleUncaughtError(dynamic exception, StackTrace stack) {
       if (testCompleter.isCompleted) {
@@ -537,13 +535,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     );
     _parentZone = Zone.current;
     final Zone testZone = _parentZone.fork(specification: errorHandlingZoneSpecification);
-    testZone.runBinary<Future<Null>, Future<Null> Function(), VoidCallback>(_runTestBody, testBody, invariantTester)
+    testZone.runBinary<Future<void>, Future<void> Function(), VoidCallback>(_runTestBody, testBody, invariantTester)
       .whenComplete(testCompletionHandler);
     timeout?.catchError(handleUncaughtError);
     return testCompleter.future;
   }
 
-  Future<Null> _runTestBody(Future<Null> testBody(), VoidCallback invariantTester) async {
+  Future<void> _runTestBody(Future<void> testBody(), VoidCallback invariantTester) async {
     assert(inTest);
 
     runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
@@ -570,7 +568,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
     assert(inTest);
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
-    return null;
   }
 
   void _verifyInvariants() {
@@ -688,8 +685,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   int get microtaskCount => _currentFakeAsync.microtaskCount;
 
   @override
-  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
-    return TestAsyncUtils.guard<Null>(() {
+  Future<void> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
+    return TestAsyncUtils.guard<void>(() {
       assert(inTest);
       assert(_clock != null);
       if (duration != null)
@@ -705,7 +702,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         handleDrawFrame();
       }
       _currentFakeAsync.flushMicrotasks();
-      return Future<Null>.value();
+      return Future<void>.value();
     });
   }
 
@@ -774,9 +771,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<Null> idle() {
-    final Future<Null> result = super.idle();
-    _currentFakeAsync.elapse(const Duration());
+  Future<void> idle() {
+    final Future<void> result = super.idle();
+    _currentFakeAsync.elapse(Duration.zero);
     return result;
   }
 
@@ -816,7 +813,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   Duration _timeout;
   Stopwatch _timeoutStopwatch;
   Timer _timeoutTimer;
-  Completer<Null> _timeoutCompleter;
+  Completer<void> _timeoutCompleter;
 
   void _checkTimeout(Timer timer) {
     assert(_timeoutTimer == timer);
@@ -860,7 +857,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, {
+  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, {
     String description = '',
     Duration timeout = const Duration(seconds: 2),
   }) {
@@ -872,12 +869,12 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     _timeout = timeout;
     _timeoutStopwatch = Stopwatch()..start();
     _timeoutTimer = Timer.periodic(const Duration(seconds: 1), _checkTimeout);
-    _timeoutCompleter = Completer<Null>();
+    _timeoutCompleter = Completer<void>();
 
     final FakeAsync fakeAsync = FakeAsync();
     _currentFakeAsync = fakeAsync; // reset in postTest
     _clock = fakeAsync.getClock(DateTime.utc(2015, 1, 1));
-    Future<Null> testBodyResult;
+    Future<void> testBodyResult;
     fakeAsync.run((FakeAsync localFakeAsync) {
       assert(fakeAsync == _currentFakeAsync);
       assert(fakeAsync == localFakeAsync);
@@ -885,14 +882,14 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       assert(inTest);
     });
 
-    return Future<Null>.microtask(() async {
+    return Future<void>.microtask(() async {
       // testBodyResult is a Future that was created in the Zone of the
       // fakeAsync. This means that if we await it here, it will register a
       // microtask to handle the future _in the fake async zone_. We avoid this
       // by calling '.then' in the current zone. While flushing the microtasks
       // of the fake-zone below, the new future will be completed and can then
       // be used without fakeAsync.
-      final Future<Null> resultFuture = testBodyResult.then<Null>((_) {
+      final Future<void> resultFuture = testBodyResult.then<void>((_) {
         // Do nothing.
       });
 
@@ -1038,7 +1035,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   test_package.Timeout get defaultTestTimeout => test_package.Timeout.none;
 
-  Completer<Null> _pendingFrame;
+  Completer<void> _pendingFrame;
   bool _expectingFrame = false;
   bool _viewNeedsPaint = false;
   bool _runningAsyncTasks = false;
@@ -1192,12 +1189,12 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
+  Future<void> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
     assert(newPhase == EnginePhase.sendSemanticsUpdate);
     assert(inTest);
     assert(!_expectingFrame);
     assert(_pendingFrame == null);
-    return TestAsyncUtils.guard<Null>(() {
+    return TestAsyncUtils.guard<void>(() {
       if (duration != null) {
         Timer(duration, () {
           _expectingFrame = true;
@@ -1207,7 +1204,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         _expectingFrame = true;
         scheduleFrame();
       }
-      _pendingFrame = Completer<Null>();
+      _pendingFrame = Completer<void>();
       return _pendingFrame.future;
     });
   }
@@ -1244,7 +1241,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description = '' }) async {
+  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '' }) async {
     assert(description != null);
     assert(!inTest);
     _inTest = true;
@@ -1587,8 +1584,8 @@ class _MockHttpRequest extends HttpClientRequest {
   void addError(Object error, [StackTrace stackTrace]) {}
 
   @override
-  Future<Null> addStream(Stream<List<int>> stream) {
-    return Future<Null>.value(null);
+  Future<void> addStream(Stream<List<int>> stream) {
+    return Future<void>.value();
   }
 
   @override
@@ -1606,8 +1603,8 @@ class _MockHttpRequest extends HttpClientRequest {
   Future<HttpClientResponse> get done => null;
 
   @override
-  Future<Null> flush() {
-    return Future<Null>.value(null);
+  Future<void> flush() {
+    return Future<void>.value();
   }
 
   @override
