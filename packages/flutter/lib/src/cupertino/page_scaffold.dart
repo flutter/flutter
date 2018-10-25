@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
+import 'theme.dart';
 
 /// Implements a single iOS application page's layout.
 ///
@@ -21,7 +21,7 @@ class CupertinoPageScaffold extends StatelessWidget {
   const CupertinoPageScaffold({
     Key key,
     this.navigationBar,
-    this.backgroundColor = CupertinoColors.white,
+    this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
     @required this.child,
   }) : assert(child != null),
@@ -48,7 +48,7 @@ class CupertinoPageScaffold extends StatelessWidget {
 
   /// The color of the widget that underlies the entire scaffold.
   ///
-  /// By default uses [CupertinoColors.white] color.
+  /// By default uses [CupertinoTheme]'s `scaffoldBackgroundColor` when null.
   final Color backgroundColor;
 
   /// Whether the [child] should size itself to avoid the window's bottom inset.
@@ -114,7 +114,9 @@ class CupertinoPageScaffold extends StatelessWidget {
     }
 
     return DecoratedBox(
-      decoration: BoxDecoration(color: backgroundColor),
+      decoration: BoxDecoration(
+        color: backgroundColor ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
+      ),
       child: Stack(
         children: stacked,
       ),

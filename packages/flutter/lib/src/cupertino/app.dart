@@ -10,6 +10,7 @@ import 'colors.dart';
 import 'icons.dart';
 import 'localizations.dart';
 import 'route.dart';
+import 'theme.dart';
 
 // Based on specs from https://developer.apple.com/design/resources/ for
 // iOS 12.
@@ -79,6 +80,7 @@ class CupertinoApp extends StatefulWidget {
     Key key,
     this.navigatorKey,
     this.home,
+    this.theme,
     this.routes = const <String, WidgetBuilder>{},
     this.initialRoute,
     this.onGenerateRoute,
@@ -113,6 +115,8 @@ class CupertinoApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.home}
   final Widget home;
+
+  final CupertinoThemeData theme;
 
   /// The application's top-level routing table.
   ///
@@ -218,11 +222,13 @@ class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
 
 class _CupertinoAppState extends State<CupertinoApp> {
   HeroController _heroController;
+  CupertinoThemeData _themeData;
 
   @override
   void initState() {
     super.initState();
     _heroController = CupertinoApp.createCupertinoHeroController();
+    _themeData = widget.theme ?? CupertinoThemeData();
     _updateNavigator();
   }
 
@@ -235,6 +241,9 @@ class _CupertinoAppState extends State<CupertinoApp> {
       // observers) until after the new one has been created (because the
       // Navigator has a GlobalKey).
       _heroController = CupertinoApp.createCupertinoHeroController();
+    }
+    if (widget.theme != oldWidget.theme && widget.theme != null) {
+      _themeData = widget.theme;
     }
     _updateNavigator();
   }
@@ -268,46 +277,49 @@ class _CupertinoAppState extends State<CupertinoApp> {
   Widget build(BuildContext context) {
     return ScrollConfiguration(
       behavior: _AlwaysCupertinoScrollBehavior(),
-      child: WidgetsApp(
-        key: GlobalObjectKey(this),
-        navigatorKey: widget.navigatorKey,
-        navigatorObservers: _navigatorObservers,
-        // TODO(dnfield): when https://github.com/dart-lang/sdk/issues/34572 is resolved
-        // this can use type arguments again
-        pageRouteBuilder: (RouteSettings settings, WidgetBuilder builder) =>
-          CupertinoPageRoute<dynamic>(settings: settings, builder: builder),
-        home: widget.home,
-        routes: widget.routes,
-        initialRoute: widget.initialRoute,
-        onGenerateRoute: widget.onGenerateRoute,
-        onUnknownRoute: widget.onUnknownRoute,
-        builder: widget.builder,
-        title: widget.title,
-        onGenerateTitle: widget.onGenerateTitle,
-        textStyle: _kDefaultTextStyle,
-        color: widget.color ?? CupertinoColors.activeBlue,
-        locale: widget.locale,
-        localizationsDelegates: _localizationsDelegates,
-        localeResolutionCallback: widget.localeResolutionCallback,
-        localeListResolutionCallback: widget.localeListResolutionCallback,
-        supportedLocales: widget.supportedLocales,
-        showPerformanceOverlay: widget.showPerformanceOverlay,
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-        showSemanticsDebugger: widget.showSemanticsDebugger,
-        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-          return CupertinoButton(
-            child: const Icon(
-              CupertinoIcons.search,
-              size: 28.0,
-              color: CupertinoColors.white,
-            ),
-            color: CupertinoColors.activeBlue,
-            padding: EdgeInsets.zero,
-            onPressed: onPressed,
-          );
-        },
+      child: CupertinoTheme(
+        data: _themeData,
+        child: WidgetsApp(
+          key: GlobalObjectKey(this),
+          navigatorKey: widget.navigatorKey,
+          navigatorObservers: _navigatorObservers,
+          // TODO(dnfield): when https://github.com/dart-lang/sdk/issues/34572 is resolved
+          // this can use type arguments again
+          pageRouteBuilder: (RouteSettings settings, WidgetBuilder builder) =>
+            CupertinoPageRoute<dynamic>(settings: settings, builder: builder),
+          home: widget.home,
+          routes: widget.routes,
+          initialRoute: widget.initialRoute,
+          onGenerateRoute: widget.onGenerateRoute,
+          onUnknownRoute: widget.onUnknownRoute,
+          builder: widget.builder,
+          title: widget.title,
+          onGenerateTitle: widget.onGenerateTitle,
+          textStyle: _kDefaultTextStyle,
+          color: widget.color ?? CupertinoColors.activeBlue,
+          locale: widget.locale,
+          localizationsDelegates: _localizationsDelegates,
+          localeResolutionCallback: widget.localeResolutionCallback,
+          localeListResolutionCallback: widget.localeListResolutionCallback,
+          supportedLocales: widget.supportedLocales,
+          showPerformanceOverlay: widget.showPerformanceOverlay,
+          checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+          checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+          showSemanticsDebugger: widget.showSemanticsDebugger,
+          debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+          inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
+            return CupertinoButton(
+              child: const Icon(
+                CupertinoIcons.search,
+                size: 28.0,
+                color: CupertinoColors.white,
+              ),
+              color: CupertinoColors.activeBlue,
+              padding: EdgeInsets.zero,
+              onPressed: onPressed,
+            );
+          },
+        ),
       ),
     );
   }

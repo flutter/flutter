@@ -38,13 +38,10 @@ class CupertinoTheme extends StatelessWidget {
     );
   }
 
-  static CupertinoThemeData of(BuildContext context) {
-    final _InheritedCupertinoTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedCupertinoTheme);
-    return inheritedTheme.data;
-  }
+  static CupertinoThemeData of(BuildContext context) => _CupertinoThemeInheritedData(context);
 }
 
-class _InheritedCupertinoTheme extends InheritedWidget {
+class _InheritedCupertinoTheme extends InheritedModel<_ThemeDataProperties> {
   const _InheritedCupertinoTheme({
     Key key,
     @required this.data,
@@ -56,9 +53,54 @@ class _InheritedCupertinoTheme extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_InheritedCupertinoTheme old) => data != old.data;
+
+  @override
+  bool updateShouldNotifyDependent(_InheritedCupertinoTheme oldWidget, Set<_ThemeDataProperties> dependencies) {
+    return (data.barBackgroundColor != oldWidget.data.barBackgroundColor && dependencies.contains(_ThemeDataProperties.barBackgroundColor))
+        || (data.barBorderColor != oldWidget.data.barBorderColor && dependencies.contains(_ThemeDataProperties.barBorderColor))
+        || (data.primaryColor != oldWidget.data.primaryColor && dependencies.contains(_ThemeDataProperties.primaryColor))
+        || (data.scaffoldBackgroundColor != oldWidget.data.scaffoldBackgroundColor && dependencies.contains(_ThemeDataProperties.scaffoldBackgroundColor))
+        || (data.textTheme != oldWidget.data.textTheme && dependencies.contains(_ThemeDataProperties.textTheme));
+  }
 }
 
-class CupertinoThemeData extends Diagnosticable {
+enum _ThemeDataProperties {
+  barBackgroundColor,
+  barBorderColor,
+  primaryColor,
+  scaffoldBackgroundColor,
+  textTheme,
+}
+
+class _CupertinoThemeInheritedData implements CupertinoThemeData {
+  _CupertinoThemeInheritedData(this.context);
+
+  BuildContext context;
+
+  @override
+  Color get barBackgroundColor => getData(_ThemeDataProperties.barBackgroundColor).barBackgroundColor;
+
+  @override
+  Color get barBorderColor => getData(_ThemeDataProperties.barBorderColor).barBorderColor;
+
+  @override
+  Brightness brightness;
+
+  @override
+  Color get primaryColor => getData(_ThemeDataProperties.primaryColor).primaryColor;
+
+  @override
+  Color get scaffoldBackgroundColor => getData(_ThemeDataProperties.scaffoldBackgroundColor).scaffoldBackgroundColor;
+
+  @override
+  CupertinoTextTheme get textTheme => getData(_ThemeDataProperties.textTheme).textTheme;
+
+  CupertinoThemeData getData(_ThemeDataProperties property) {
+    return InheritedModel.inheritFrom<_InheritedCupertinoTheme>(context, aspect: property).data;
+  }
+}
+
+class CupertinoThemeData {
   factory CupertinoThemeData({
     Brightness brightness,
     Color primaryColor,
@@ -77,12 +119,29 @@ class CupertinoThemeData extends Diagnosticable {
     barBackgroundColor ??= isLight ? _kDefaultBarLightBackgroundColor : _kDefaultBarDarkBackgroundColor;
     barBorderColor ??= _kDefaultBarBorderColor;
     scaffoldBackgroundColor ??= isLight ? CupertinoColors.white : CupertinoColors.black;
+    return CupertinoThemeData._(
+      brightness,
+      primaryColor,
+      textTheme,
+      barBackgroundColor,
+      barBorderColor,
+      scaffoldBackgroundColor,
+    );
   }
 
-  Brightness brightness;
-  Color primaryColor;
-  CupertinoTextTheme textTheme;
-  Color barBackgroundColor;
-  Color barBorderColor;
-  Color scaffoldBackgroundColor;
+  const CupertinoThemeData._(
+    this.brightness,
+    this.primaryColor,
+    this.textTheme,
+    this.barBackgroundColor,
+    this.barBorderColor,
+    this.scaffoldBackgroundColor,
+  );
+
+  final Brightness brightness;
+  final Color primaryColor;
+  final CupertinoTextTheme textTheme;
+  final Color barBackgroundColor;
+  final Color barBorderColor;
+  final Color scaffoldBackgroundColor;
 }

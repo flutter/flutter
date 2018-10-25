@@ -41,12 +41,12 @@ const TextStyle _kDefaultActionSheetTextContentStyle = TextStyle(
   fontSize: 13.0,
   letterSpacing: -0.08,
   color: Color(0xFF8F8F8F),
-  fontWeight: FontWeight.w600,
 );
 
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultTabLabelTextStyle = TextStyle(
   fontFamily: '.SF Pro Text',
+  inherit: false,
   fontSize: 10.0,
   letterSpacing: -0.24,
   color: CupertinoColors.inactiveGray,
@@ -60,6 +60,7 @@ class CupertinoTextTheme extends Diagnosticable {
     TextStyle textStyle,
     TextStyle actionTextStyle,
     TextStyle actionSheetActionTextStyle,
+    TextStyle actionSheetContentTextStyle,
     TextStyle tabLabelTextStyle,
   }) {
     textStyle ??= isDark ? _kDefaultDarkTextStyle : _kDefaultLightTextStyle;
@@ -69,12 +70,50 @@ class CupertinoTextTheme extends Diagnosticable {
     actionSheetActionTextStyle ??= _kDefaultActionSheetTextActionStyle.copyWith(
       color: primaryColor,
     );
+    actionSheetContentTextStyle ??= _kDefaultActionSheetTextContentStyle;
     tabLabelTextStyle ??= _kDefaultTabLabelTextStyle;
+    return CupertinoTextTheme._(textStyle, actionTextStyle, actionSheetContentTextStyle, actionSheetActionTextStyle, tabLabelTextStyle);
   }
+
+  CupertinoTextTheme._(
+    this.textStyle,
+    this.actionTextStyle,
+    this.actionSheetContentTextStyle,
+    this.actionSheetActionTextStyle,
+    this.tabLabelTextStyle,
+  );
 
   final TextStyle textStyle;
   final TextStyle actionTextStyle;
   final TextStyle actionSheetContentTextStyle;
   final TextStyle actionSheetActionTextStyle;
   final TextStyle tabLabelTextStyle;
+
+  CupertinoTextTheme copyWith({
+    TextStyle textStyle,
+    TextStyle actionTextStyle,
+    TextStyle actionSheetActionTextStyle,
+    TextStyle actionSheetContentTextStyle,
+    TextStyle tabLabelTextStyle,
+  }) {
+    return CupertinoTextTheme._(
+      textStyle ?? this.textStyle,
+      actionTextStyle ?? this.actionTextStyle,
+      actionSheetContentTextStyle ?? this.actionSheetContentTextStyle,
+      actionSheetActionTextStyle ?? this.actionSheetContentTextStyle,
+      tabLabelTextStyle ?? this.tabLabelTextStyle,
+    );
+  }
+
+  CupertinoTextTheme merge(CupertinoTextTheme other) {
+    if (other == null)
+      return this;
+    return copyWith(
+      textStyle: textStyle?.merge(other.textStyle) ?? other.textStyle,
+      actionTextStyle: actionTextStyle?.merge(other.actionTextStyle) ?? other.actionTextStyle,
+      actionSheetContentTextStyle: actionSheetContentTextStyle?.merge(other.actionSheetContentTextStyle) ?? other.actionSheetContentTextStyle,
+      actionSheetActionTextStyle: actionSheetActionTextStyle?.merge(other.actionSheetActionTextStyle) ?? other.actionSheetContentTextStyle,
+      tabLabelTextStyle: tabLabelTextStyle?.merge(other.tabLabelTextStyle) ?? other.tabLabelTextStyle,
+    );
+  }
 }
