@@ -53,7 +53,7 @@ Future<bool> doesRemoteFileExist(Uri url) async {
     return null;
   }
   final HttpClientResponse response = await request.close();
-  return (response.statusCode == 200);
+  return response.statusCode == 200;
 }
 
 Future<List<int>> _attempt(Uri url) async {

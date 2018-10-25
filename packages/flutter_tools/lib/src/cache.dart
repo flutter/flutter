@@ -506,18 +506,16 @@ class FlutterEngine extends CachedArtifact {
   }
 
   Future<bool> areRemoteArtifactsAvailable({String engineVersion,
-                                            bool includeAllPlatforms: true}) async {
+                                            bool includeAllPlatforms = true}) async {
     final bool includeAllPlatformsState = cache.includeAllPlatforms;
     cache.includeAllPlatforms = includeAllPlatforms;
-    bool result = await _areRemoteArtifactsAvailableHelper(engineVersion);
+    final bool result = await _areRemoteArtifactsAvailableHelper(engineVersion);
     cache.includeAllPlatforms = includeAllPlatformsState;
     return result;
   }
 
   Future<bool> _areRemoteArtifactsAvailableHelper(String engineVersion) async {
-    if (engineVersion == null) {
-      engineVersion = version;
-    }
+    engineVersion ??= version;
     final String url = '$_storageBaseUrl/flutter_infra/flutter/$engineVersion/';
 
     bool exists = false;
@@ -608,7 +606,7 @@ Future<void> _downloadFile(Uri url, File location) async {
 
 Future<bool> _doesRemoteExist(String message, Uri url) async {
   final Status status = logger.startProgress(message, expectSlowOperation: true);
-  bool exists = await doesRemoteFileExist(url);
+  final bool exists = await doesRemoteFileExist(url);
   status.stop();
   return exists;
 }
