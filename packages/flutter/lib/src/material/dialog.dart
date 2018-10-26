@@ -42,6 +42,7 @@ class Dialog extends StatelessWidget {
     this.child,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
+    this.shape,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -61,9 +62,22 @@ class Dialog extends StatelessWidget {
   /// Defaults to [Curves.fastOutSlowIn].
   final Curve insetAnimationCurve;
 
+  /// {@template flutter.material.dialog.shape}
+  /// The shape of this dialog's border.
+  ///
+  /// Defines the dialog's [Material.shape].
+  ///
+  /// The default shape is a [RoundedRectangleBorder] with a radius of 2.0.
+  /// {@endtemplate}
+  final ShapeBorder shape;
+
   Color _getColor(BuildContext context) {
     return Theme.of(context).dialogBackgroundColor;
   }
+
+  // TODO(johnsonmh): Update default dialog border radius to 4.0 to match material spec.
+  static const RoundedRectangleBorder _defaultDialogShape =
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +99,7 @@ class Dialog extends StatelessWidget {
               color: _getColor(context),
               type: MaterialType.card,
               child: child,
+              shape: shape ?? _defaultDialogShape,
             ),
           ),
         ),
@@ -172,6 +187,7 @@ class AlertDialog extends StatelessWidget {
     this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
     this.actions,
     this.semanticLabel,
+    this.shape,
   }) : assert(contentPadding != null),
        super(key: key);
 
@@ -235,6 +251,9 @@ class AlertDialog extends StatelessWidget {
   ///    value is used.
   final String semanticLabel;
 
+  /// {@macro flutter.material.dialog.shape}
+  final ShapeBorder shape;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -295,7 +314,7 @@ class AlertDialog extends StatelessWidget {
         child: dialogChild
       );
 
-    return Dialog(child: dialogChild);
+    return Dialog(child: dialogChild, shape: shape);
   }
 }
 
@@ -440,6 +459,7 @@ class SimpleDialog extends StatelessWidget {
     this.children,
     this.contentPadding = const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
     this.semanticLabel,
+    this.shape,
   }) : assert(titlePadding != null),
        assert(contentPadding != null),
        super(key: key);
@@ -494,6 +514,9 @@ class SimpleDialog extends StatelessWidget {
   ///    value is used.
   final String semanticLabel;
 
+  /// {@macro flutter.material.dialog.shape}
+  final ShapeBorder shape;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -546,7 +569,7 @@ class SimpleDialog extends StatelessWidget {
         label: label,
         child: dialogChild,
       );
-    return Dialog(child: dialogChild);
+    return Dialog(child: dialogChild, shape: shape);
   }
 }
 
