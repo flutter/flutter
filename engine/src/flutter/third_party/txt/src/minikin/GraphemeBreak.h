@@ -17,6 +17,9 @@
 #ifndef MINIKIN_GRAPHEME_BREAK_H
 #define MINIKIN_GRAPHEME_BREAK_H
 
+#include <stddef.h>
+#include <unicode/utf16.h>
+
 namespace minikin {
 
 class GraphemeBreak {

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_ISOLATE_NAME_SERVER_NATIVES_H_
 #define FLUTTER_LIB_UI_ISOLATE_NAME_SERVER_NATIVES_H_
 
+#include <string>
 #include "third_party/dart/runtime/include/dart_api.h"
 
 namespace tonic {
