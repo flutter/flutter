@@ -63,8 +63,32 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            ButtonBar(
+            Wrap(
               children: <Widget>[
+                ButtonBar(
+                  children: <Widget>[
+                    FlatButton(
+                      child: const Text('CANCEL'),
+                      shape: const BeveledRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                      ),
+                      onPressed: () {
+                        _usernameController.clear();
+                        _passwordController.clear();
+                      },
+                    ),
+                    RaisedButton(
+                      child: const Text('NEXT'),
+                      elevation: 8.0,
+                      shape: const BeveledRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                ),
                 Tooltip(
                   message: 'Back',
                   child: FlatButton(
@@ -76,26 +100,6 @@ class _LoginPageState extends State<LoginPage> {
                       Navigator.of(context, rootNavigator: true).pop();
                     },
                   ),
-                ),
-                FlatButton(
-                  child: const Text('CANCEL'),
-                  shape: const BeveledRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(7.0)),
-                  ),
-                  onPressed: () {
-                    _usernameController.clear();
-                    _passwordController.clear();
-                  },
-                ),
-                RaisedButton(
-                  child: const Text('NEXT'),
-                  elevation: 8.0,
-                  shape: const BeveledRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(7.0)),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
                 ),
               ],
             ),
