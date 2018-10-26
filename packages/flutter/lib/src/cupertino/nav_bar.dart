@@ -316,6 +316,10 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// to also has a [CupertinoNavigationBar] or a [CupertinoSliverNavigationBar]
   /// with [transitionBetweenRoutes] set to true.
   ///
+  /// This transition will also occur on edge back swipe gestures like on iOS
+  /// but only if the previous page below has `maintainState` set to true on the
+  /// [PageRoute].
+  ///
   /// When set to true, only one navigation bar can be present per route unless
   /// [heroTag] is also set.
   ///
@@ -398,6 +402,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       createRectTween: _linearTranslateWithLargestRectSizeTween,
       placeholderBuilder: _navBarHeroLaunchPadBuilder,
       flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
+      transitionOnUserGestures: true,
       child: _TransitionableNavigationBar(
         componentsKeys: keys,
         backgroundColor: widget.backgroundColor,
@@ -732,6 +737,7 @@ class _LargeTitleNavigationBarSliverDelegate
       createRectTween: _linearTranslateWithLargestRectSizeTween,
       flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
       placeholderBuilder: _navBarHeroLaunchPadBuilder,
+      transitionOnUserGestures: true,
       // This is all the way down here instead of being at the top level of
       // CupertinoSliverNavigationBar like CupertinoNavigationBar because it
       // needs to wrap the top level RenderBox rather than a RenderSliver.

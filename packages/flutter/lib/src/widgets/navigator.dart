@@ -348,11 +348,18 @@ class NavigatorObserver {
   /// The [Navigator] replaced `oldRoute` with `newRoute`.
   void didReplace({ Route<dynamic> newRoute, Route<dynamic> oldRoute }) { }
 
-  /// The [Navigator]'s routes are being moved by a user gesture.
+  /// The [Navigator]'s route `route` is being moved by a user gesture.
   ///
-  /// For example, this is called when an iOS back gesture starts, and is used
-  /// to disabled hero animations during such interactions.
-  void didStartUserGesture() { }
+  /// For example, this is called when an iOS back gesture starts.
+  ///
+  /// Paired with a call to [didStopUserGesture] when the route is no longer
+  /// being manipulated via user gesture.
+  ///
+  /// If present, the route immediately below `route` is `previousRoute`.
+  /// Though the gesture may not necessarily conclude at `previousRoute` if
+  /// the gesture is canceled. In that case, [didStopUserGesture] is still
+  /// called but a follow-up [didPop] is not.
+  void didStartUserGesture(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
   /// User gesture is no longer controlling the [Navigator].
   ///
@@ -1911,8 +1918,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void didStartUserGesture() {
     _userGesturesInProgress += 1;
     if (_userGesturesInProgress == 1) {
+      final Route<dynamic> route = _history.last;
+      final Route<dynamic> previousRoute = !route.willHandlePopInternally && _history.length > 1
+          ? _history[_history.length - 2]
+          : null;
+      // Don't operate the _history list since the gesture may be cancelled.
+      // In case of a back swipe, the gesture controller will call .pop() itself.
+
       for (NavigatorObserver observer in widget.observers)
-        observer.didStartUserGesture();
+        observer.didStartUserGesture(route, previousRoute);
     }
   }
 
