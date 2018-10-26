@@ -1,4 +1,4 @@
-Signature: bde06884d55ea0e9a302f2c44ee13732
+Signature: ae7ffdd1abacf6ba5359005187a0e034
 
 UNUSED LICENSES:
 
@@ -718,7 +718,6 @@ FILE: ../../../third_party/skia/bench/ImageCacheBudgetBench.cpp
 FILE: ../../../third_party/skia/bench/PDFBench.cpp
 FILE: ../../../third_party/skia/bench/QuickRejectBench.cpp
 FILE: ../../../third_party/skia/bench/ShapesBench.cpp
-FILE: ../../../third_party/skia/bench/SkRasterPipelineBench.cpp
 FILE: ../../../third_party/skia/bench/StreamBench.cpp
 FILE: ../../../third_party/skia/bench/SwizzleBench.cpp
 FILE: ../../../third_party/skia/bench/TileImageFilterBench.cpp
@@ -993,7 +992,6 @@ FILE: ../../../third_party/skia/src/core/SkNormalSource.cpp
 FILE: ../../../third_party/skia/src/core/SkNormalSource.h
 FILE: ../../../third_party/skia/src/core/SkOverdrawCanvas.cpp
 FILE: ../../../third_party/skia/src/core/SkPM4f.h
-FILE: ../../../third_party/skia/src/core/SkPM4fPriv.h
 FILE: ../../../third_party/skia/src/core/SkPathMeasurePriv.h
 FILE: ../../../third_party/skia/src/core/SkRasterPipeline.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterPipeline.h
@@ -1592,6 +1590,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrClearStencilClipOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDebugMarkerOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.h
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.cpp
