@@ -448,7 +448,8 @@ config("compiler") {
       "-Wl,--no-undefined",
       "-Wl,--exclude-libs,ALL",
       "-Wl,-z,relro,-z,now",
-      "-fuse-ld=lld"
+      "-fuse-ld=lld",
+
       # Enable identical code folding to reduce size.
       "-Wl,--icf=all",
     ]
