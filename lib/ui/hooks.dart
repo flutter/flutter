@@ -196,7 +196,7 @@ void _invoke3<A1, A2, A3>(void callback(A1 a1, A2 a2, A3 a3), Zone zone, A1 arg1
 //
 //  * pointer_data.cc
 //  * FlutterView.java
-const int _kPointerDataFieldCount = 19;
+const int _kPointerDataFieldCount = 20;
 
 PointerDataPacket _unpackPointerDataPacket(ByteData packet) {
   const int kStride = Int64List.bytesPerElement;
@@ -220,6 +220,7 @@ PointerDataPacket _unpackPointerDataPacket(ByteData packet) {
       pressureMax: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       distance: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       distanceMax: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      size: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       radiusMajor: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       radiusMinor: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       radiusMin: packet.getFloat64(kStride * offset++, _kFakeHostEndian),

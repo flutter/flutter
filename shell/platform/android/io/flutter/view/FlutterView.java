@@ -488,6 +488,8 @@ public class FlutterView extends SurfaceView
             packet.putDouble(0.0); // distance_max
         }
 
+        packet.putDouble(event.getSize(pointerIndex)); // size
+
         packet.putDouble(event.getToolMajor(pointerIndex)); // radius_major
         packet.putDouble(event.getToolMinor(pointerIndex)); // radius_minor
 
@@ -519,7 +521,7 @@ public class FlutterView extends SurfaceView
         }
 
         // These values must match the unpacking code in hooks.dart.
-        final int kPointerDataFieldCount = 19;
+        final int kPointerDataFieldCount = 20;
         final int kBytePerField = 8;
 
         int pointerCount = event.getPointerCount();
