@@ -26,10 +26,6 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
-#ifdef ERROR
-#undef ERROR
-#endif
-
 namespace shell {
 
 static constexpr char kAssetChannel[] = "flutter/assets";

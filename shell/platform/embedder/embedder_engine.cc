@@ -6,10 +6,6 @@
 
 #include "flutter/fml/make_copyable.h"
 
-#ifdef ERROR
-#undef ERROR
-#endif
-
 namespace shell {
 
 EmbedderEngine::EmbedderEngine(

@@ -12,10 +12,6 @@
 #include "flutter/runtime/runtime_delegate.h"
 #include "third_party/tonic/dart_message_handler.h"
 
-#ifdef ERROR
-#undef ERROR
-#endif
-
 namespace blink {
 
 RuntimeController::RuntimeController(

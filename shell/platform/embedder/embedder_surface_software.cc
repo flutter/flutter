@@ -7,10 +7,6 @@
 #include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
-#ifdef ERROR
-#undef ERROR
-#endif
-
 namespace shell {
 
 EmbedderSurfaceSoftware::EmbedderSurfaceSoftware(
