@@ -510,7 +510,7 @@ class FlutterEngine extends CachedArtifact {
     final bool includeAllPlatformsState = cache.includeAllPlatforms;
     cache.includeAllPlatforms = includeAllPlatforms;
 
-    Future<bool> _areRemoteArtifactsAvailableHelper(String engineVersion) async {
+    Future<bool> checkForArtifacts(String engineVersion) async {
       engineVersion ??= version;
       final String url = '$_storageBaseUrl/flutter_infra/flutter/$engineVersion/';
 
@@ -536,7 +536,7 @@ class FlutterEngine extends CachedArtifact {
       return true;
     }
 
-    final bool result = await _areRemoteArtifactsAvailableHelper(engineVersion);
+    final bool result = await checkForArtifacts(engineVersion);
     cache.includeAllPlatforms = includeAllPlatformsState;
     return result;
   }

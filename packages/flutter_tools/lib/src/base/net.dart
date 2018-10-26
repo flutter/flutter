@@ -31,9 +31,9 @@ Future<List<int>> fetchUrl(Uri url) async {
 
 /// Check if the given URL points to a valid endpoint.
 Future<bool> doesRemoteFileExist(Uri url) async =>
-  (await _attempt(url, true)) as bool;
+  (await _attempt(url, true)) != null;
 
-Future<dynamic> _attempt(Uri url, bool onlyHeaders) async {
+Future<List<int>> _attempt(Uri url, bool onlyHeaders) async {
   printTrace('Downloading: $url');
   HttpClient httpClient;
   if (context[HttpClientFactory] != null) {
@@ -64,7 +64,7 @@ Future<dynamic> _attempt(Uri url, bool onlyHeaders) async {
   // If we're making a HEAD request, we're only checking to see if the URL is
   // valid.
   if (onlyHeaders) {
-    return response.statusCode == 200;
+    return (response.statusCode == 200) ? <int>[] : null;
   }
   if (response.statusCode != 200) {
     if (response.statusCode > 0 && response.statusCode < 500) {
