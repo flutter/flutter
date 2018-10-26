@@ -389,7 +389,9 @@ class _MaterialAppState extends State<MaterialApp> {
 
   void _createCupertinoThemeData() {
     assert(_themeData != null, 'Material theme must be created first');
-    _cupertinoThemeData = widget.cupertinoTheme ?? CupertinoThemeData();
+    _cupertinoThemeData = widget.cupertinoTheme ?? CupertinoThemeData(
+      brightness: Brightness.dark,
+    );
   }
 
   List<NavigatorObserver> _navigatorObservers;

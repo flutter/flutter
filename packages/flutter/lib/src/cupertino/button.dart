@@ -11,11 +11,11 @@ const Color _kDisabledBackground = Color(0xFFA9A9A9);
 const Color _kDisabledForeground = Color(0xFFC4C4C4);
 
 const TextStyle _kButtonTextStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: '.SF Pro Text',
   inherit: false,
-  fontSize: 17.5,
-  letterSpacing: -0.24,
-  fontWeight: FontWeight.w400,
+  fontSize: 17.0,
+  letterSpacing: -0.41,
+  fontWeight: FontWeight.normal,
   color: CupertinoColors.activeBlue,
   textBaseline: TextBaseline.alphabetic,
 );

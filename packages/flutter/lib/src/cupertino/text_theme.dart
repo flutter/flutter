@@ -52,6 +52,38 @@ const TextStyle _kDefaultTabLabelTextStyle = TextStyle(
   color: CupertinoColors.inactiveGray,
 );
 
+const TextStyle _kDefaultMiddleTitleLightTextStyle = TextStyle(
+  fontFamily: '.SF Pro Text',
+  fontSize: 17.0,
+  fontWeight: FontWeight.w600,
+  letterSpacing: -0.41,
+  color: CupertinoColors.black,
+);
+
+const TextStyle _kDefaultMiddleTitleDarkTextStyle = TextStyle(
+  fontFamily: '.SF Pro Text',
+  fontSize: 17.0,
+  fontWeight: FontWeight.w600,
+  letterSpacing: -0.41,
+  color: CupertinoColors.white,
+);
+
+const TextStyle _kDefaultLargeTitleLightTextStyle = TextStyle(
+  fontFamily: '.SF Pro Display',
+  fontSize: 34.0,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 0.41,
+  color: CupertinoColors.black,
+);
+
+const TextStyle _kDefaultLargeTitleDarkTextStyle = TextStyle(
+  fontFamily: '.SF Pro Display',
+  fontSize: 34.0,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 0.41,
+  color: CupertinoColors.white,
+);
+
 @immutable
 class CupertinoTextTheme extends Diagnosticable {
   factory CupertinoTextTheme({
@@ -62,6 +94,9 @@ class CupertinoTextTheme extends Diagnosticable {
     TextStyle actionSheetActionTextStyle,
     TextStyle actionSheetContentTextStyle,
     TextStyle tabLabelTextStyle,
+    TextStyle navTitleTextStyle,
+    TextStyle navLargeTitleTextStyle,
+    TextStyle navActionTextStyle,
   }) {
     textStyle ??= isDark ? _kDefaultDarkTextStyle : _kDefaultLightTextStyle;
     actionTextStyle ??= _kDefaultLightTextStyle.copyWith(
@@ -72,7 +107,21 @@ class CupertinoTextTheme extends Diagnosticable {
     );
     actionSheetContentTextStyle ??= _kDefaultActionSheetTextContentStyle;
     tabLabelTextStyle ??= _kDefaultTabLabelTextStyle;
-    return CupertinoTextTheme._(textStyle, actionTextStyle, actionSheetContentTextStyle, actionSheetActionTextStyle, tabLabelTextStyle);
+    navTitleTextStyle ??= isDark ? _kDefaultMiddleTitleDarkTextStyle : _kDefaultMiddleTitleLightTextStyle;
+    navLargeTitleTextStyle ??= isDark ? _kDefaultLargeTitleDarkTextStyle : _kDefaultLargeTitleLightTextStyle;
+    navActionTextStyle ??= _kDefaultLightTextStyle.copyWith(
+      color: primaryColor,
+    );
+    return CupertinoTextTheme._(
+      textStyle,
+      actionTextStyle,
+      actionSheetContentTextStyle,
+      actionSheetActionTextStyle,
+      tabLabelTextStyle,
+      navTitleTextStyle,
+      navLargeTitleTextStyle,
+      navActionTextStyle,
+    );
   }
 
   CupertinoTextTheme._(
@@ -81,6 +130,9 @@ class CupertinoTextTheme extends Diagnosticable {
     this.actionSheetContentTextStyle,
     this.actionSheetActionTextStyle,
     this.tabLabelTextStyle,
+    this.navTitleTextStyle,
+    this.navLargeTitleTextStyle,
+    this.navActionTextStyle,
   );
 
   final TextStyle textStyle;
@@ -88,6 +140,9 @@ class CupertinoTextTheme extends Diagnosticable {
   final TextStyle actionSheetContentTextStyle;
   final TextStyle actionSheetActionTextStyle;
   final TextStyle tabLabelTextStyle;
+  final TextStyle navTitleTextStyle;
+  final TextStyle navLargeTitleTextStyle;
+  final TextStyle navActionTextStyle;
 
   CupertinoTextTheme copyWith({
     TextStyle textStyle,
@@ -95,6 +150,9 @@ class CupertinoTextTheme extends Diagnosticable {
     TextStyle actionSheetActionTextStyle,
     TextStyle actionSheetContentTextStyle,
     TextStyle tabLabelTextStyle,
+    TextStyle navTitleTextStyle,
+    TextStyle navLargeTitleTextStyle,
+    TextStyle navActionTextStyle,
   }) {
     return CupertinoTextTheme._(
       textStyle ?? this.textStyle,
@@ -102,6 +160,9 @@ class CupertinoTextTheme extends Diagnosticable {
       actionSheetContentTextStyle ?? this.actionSheetContentTextStyle,
       actionSheetActionTextStyle ?? this.actionSheetContentTextStyle,
       tabLabelTextStyle ?? this.tabLabelTextStyle,
+      navTitleTextStyle ?? this.navTitleTextStyle,
+      navLargeTitleTextStyle ?? this.navLargeTitleTextStyle,
+      navActionTextStyle ?? this.navActionTextStyle,
     );
   }
 
@@ -114,6 +175,9 @@ class CupertinoTextTheme extends Diagnosticable {
       actionSheetContentTextStyle: actionSheetContentTextStyle?.merge(other.actionSheetContentTextStyle) ?? other.actionSheetContentTextStyle,
       actionSheetActionTextStyle: actionSheetActionTextStyle?.merge(other.actionSheetActionTextStyle) ?? other.actionSheetContentTextStyle,
       tabLabelTextStyle: tabLabelTextStyle?.merge(other.tabLabelTextStyle) ?? other.tabLabelTextStyle,
+      navTitleTextStyle: navTitleTextStyle?.merge(other.navTitleTextStyle) ?? other.navTitleTextStyle,
+      navLargeTitleTextStyle: navLargeTitleTextStyle?.merge(other.navLargeTitleTextStyle) ?? other.navLargeTitleTextStyle,
+      navActionTextStyle: navActionTextStyle?.merge(other.navActionTextStyle) ?? other.navActionTextStyle,
     );
   }
 }

@@ -78,10 +78,13 @@ class CupertinoPageScaffold extends StatelessWidget {
           ? existingMediaQuery.viewInsets.bottom
           : 0.0;
 
+      final bool fullObstruction =
+        navigationBar.fullObstruction ?? CupertinoTheme.of(context).barBackgroundColor.alpha == 0xFF;
+
       // If navigation bar is opaquely obstructing, directly shift the main content
       // down. If translucent, let main content draw behind navigation bar but hint the
       // obstructed area.
-      if (navigationBar.fullObstruction) {
+      if (fullObstruction) {
         paddedContent = Padding(
           padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
           child: child,
