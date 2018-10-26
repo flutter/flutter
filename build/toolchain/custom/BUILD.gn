@@ -16,6 +16,7 @@ toolchain("custom") {
   ld = "${toolchain_bin}/clang++"
   readelf = "${toolchain_bin}/${custom_target_triple}-readelf"
   nm = "${toolchain_bin}/${custom_target_triple}-nm"
+  strip = "${toolchain_bin}/${custom_target_triple}-strip"
 
   target_triple_flags = "--target=${custom_target_triple}"
   sysroot_flags = "--sysroot ${custom_sysroot}"
@@ -71,6 +72,7 @@ toolchain("custom") {
   tool("solink") {
     soname = "{{target_output_name}}{{output_extension}}"  # e.g. "libfoo.so".
     sofile = "{{root_out_dir}}/$soname"  # Possibly including toolchain dir.
+    unstripped_sofile = "{{root_out_dir}}/so.unstripped/$soname"  # Possibly including toolchain dir.
     rspfile = sofile + ".rsp"
 
     # These variables are not built into GN but are helpers that implement
@@ -79,18 +81,17 @@ toolchain("custom") {
     # existing .TOC file, overwrite it, otherwise, don't change it.
     tocfile = sofile + ".TOC"
     temporary_tocname = sofile + ".tmp"
-    link_command = "$ld $target_triple_flags $sysroot_flags -shared {{ldflags}} -o $sofile $custom_lib_flags -Wl,--build-id -Wl,-soname=$soname @$rspfile"
-    toc_command = "{ $readelf -d $sofile | grep SONAME ; $nm -gD -f p $sofile | cut -f1-2 -d' '; } > $temporary_tocname"
+    link_command = "$ld $target_triple_flags $sysroot_flags -shared {{ldflags}} -o $unstripped_sofile $custom_lib_flags -Wl,--build-id -Wl,-soname=$soname @$rspfile"
+    toc_command = "{ $readelf -d $unstripped_sofile | grep SONAME ; $nm -gD -f p $unstripped_sofile | cut -f1-2 -d' '; } > $temporary_tocname"
     replace_command = "if ! cmp -s $temporary_tocname $tocfile; then mv $temporary_tocname $tocfile; fi"
+    strip_command = "$strip -o $sofile $unstripped_sofile"
 
-    command = "$link_command && $toc_command && $replace_command"
+    command =
+        "$link_command && $toc_command && $replace_command && $strip_command"
     rspfile_content = "-Wl,--whole-archive {{inputs}} {{solibs}} -Wl,--no-whole-archive {{libs}}"
 
     description = "SOLINK $sofile"
 
-    # Use this for {{output_extension}} expansions unless a target manually
-    # overrides it (in which case {{output_extension}} will be what the target
-    # specifies).
     default_output_extension = ".so"
 
     output_prefix = "lib"
@@ -104,6 +105,7 @@ toolchain("custom") {
     # tocfile for dependency management.
     outputs = [
       sofile,
+      unstripped_sofile,
       tocfile,
     ]
 
@@ -115,16 +117,14 @@ toolchain("custom") {
     exename = "{{target_output_name}}{{output_extension}}"
     outfile = "{{root_out_dir}}/$exename"
     rspfile = "$outfile.rsp"
-    unstripped_outfile = outfile
-    command = "$ld $target_triple_flags $sysroot_flags {{ldflags}} -o $unstripped_outfile $custom_lib_flags -Wl,--build-id -Wl,--start-group @$rspfile {{solibs}} -Wl,--end-group {{libs}}"
+    unstripped_outfile = "{{root_out_dir}}/exe.unstripped/$exename"
+    command = "$ld $target_triple_flags $sysroot_flags {{ldflags}} -o $unstripped_outfile $custom_lib_flags -Wl,--build-id -Wl,--start-group @$rspfile {{solibs}} -Wl,--end-group {{libs}} && ${strip} -o $outfile $unstripped_outfile"
     description = "LINK $outfile"
     rspfile_content = "{{inputs}}"
     outputs = [
+      unstripped_outfile,
       outfile,
     ]
-    if (outfile != unstripped_outfile) {
-      outputs += [ unstripped_outfile ]
-    }
   }
 
   tool("stamp") {
