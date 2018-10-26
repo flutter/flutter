@@ -12,7 +12,7 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
 
-  Future<Null> _dragSlider(WidgetTester tester, Key sliderKey) {
+  Future<void> _dragSlider(WidgetTester tester, Key sliderKey) {
     final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
     const double unit = CupertinoThumbPainter.radius;
     const double delta = 3.0 * unit;
@@ -20,16 +20,16 @@ void main() {
   }
 
   testWidgets('Slider does not move when tapped (LTR)', (WidgetTester tester) async {
-    final Key sliderKey = new UniqueKey();
+    final Key sliderKey = UniqueKey();
     double value = 0.0;
 
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new StatefulBuilder(
+      child: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-          return new Material(
-            child: new Center(
-              child: new CupertinoSlider(
+          return Material(
+            child: Center(
+              child: CupertinoSlider(
                 key: sliderKey,
                 value: value,
                 onChanged: (double newValue) {
@@ -54,16 +54,16 @@ void main() {
   });
 
   testWidgets('Slider does not move when tapped (RTL)', (WidgetTester tester) async {
-    final Key sliderKey = new UniqueKey();
+    final Key sliderKey = UniqueKey();
     double value = 0.0;
 
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.rtl,
-      child: new StatefulBuilder(
+      child: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-          return new Material(
-            child: new Center(
-              child: new CupertinoSlider(
+          return Material(
+            child: Center(
+              child: CupertinoSlider(
                 key: sliderKey,
                 value: value,
                 onChanged: (double newValue) {
@@ -88,17 +88,17 @@ void main() {
   });
 
   testWidgets('Slider calls onChangeStart once when interaction begins', (WidgetTester tester) async {
-    final Key sliderKey = new UniqueKey();
+    final Key sliderKey = UniqueKey();
     double value = 0.0;
     int numberOfTimesOnChangeStartIsCalled = 0;
 
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new StatefulBuilder(
+      child: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-          return new Material(
-            child: new Center(
-              child: new CupertinoSlider(
+          return Material(
+            child: Center(
+              child: CupertinoSlider(
                 key: sliderKey,
                 value: value,
                 onChanged: (double newValue) {
@@ -127,17 +127,17 @@ void main() {
   });
 
   testWidgets('Slider calls onChangeEnd once after interaction has ended', (WidgetTester tester) async {
-    final Key sliderKey = new UniqueKey();
+    final Key sliderKey = UniqueKey();
     double value = 0.0;
     int numberOfTimesOnChangeEndIsCalled = 0;
 
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new StatefulBuilder(
+      child: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-          return new Material(
-            child: new Center(
-              child: new CupertinoSlider(
+          return Material(
+            child: Center(
+              child: CupertinoSlider(
                 key: sliderKey,
                 value: value,
                 onChanged: (double newValue) {
@@ -166,18 +166,18 @@ void main() {
   });
 
   testWidgets('Slider moves when dragged (LTR)', (WidgetTester tester) async {
-    final Key sliderKey = new UniqueKey();
+    final Key sliderKey = UniqueKey();
     double value = 0.0;
     double startValue;
     double endValue;
 
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new StatefulBuilder(
+      child: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-          return new Material(
-            child: new Center(
-              child: new CupertinoSlider(
+          return Material(
+            child: Center(
+              child: CupertinoSlider(
                 key: sliderKey,
                 value: value,
                 onChanged: (double newValue) {
@@ -218,18 +218,18 @@ void main() {
   });
 
   testWidgets('Slider moves when dragged (RTL)', (WidgetTester tester) async {
-    final Key sliderKey = new UniqueKey();
+    final Key sliderKey = UniqueKey();
     double value = 0.0;
     double startValue;
     double endValue;
 
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.rtl,
-      child: new StatefulBuilder(
+      child: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-          return new Material(
-            child: new Center(
-              child: new CupertinoSlider(
+          return Material(
+            child: Center(
+              child: CupertinoSlider(
                 key: sliderKey,
                 value: value,
                 onChanged: (double newValue) {
@@ -274,20 +274,20 @@ void main() {
   });
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new CupertinoSlider(
+      child: CupertinoSlider(
         value: 0.5,
         onChanged: (double v) {},
       ),
     ));
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             id: 1,
             value: '50%',
             increasedValue: '60%',
@@ -311,7 +311,7 @@ void main() {
     ));
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(),
+      TestSemantics.root(),
       ignoreRect: true,
       ignoreTransform: true,
     ));
@@ -322,15 +322,15 @@ void main() {
   testWidgets('Slider Semantics can be updated', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     double value = 0.5;
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new CupertinoSlider(
+      child: CupertinoSlider(
         value: value,
         onChanged: (double v) { },
       ),
     ));
 
-    expect(tester.getSemanticsData(find.byType(CupertinoSlider)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(CupertinoSlider)), matchesSemantics(
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       value: '50%',
@@ -340,15 +340,15 @@ void main() {
     ));
 
     value = 0.6;
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new CupertinoSlider(
+      child: CupertinoSlider(
         value: value,
         onChanged: (double v) { },
       ),
     ));
 
-    expect(tester.getSemanticsData(find.byType(CupertinoSlider)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(CupertinoSlider)), matchesSemantics(
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       value: '60%',

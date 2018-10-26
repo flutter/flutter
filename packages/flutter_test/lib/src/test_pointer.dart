@@ -52,7 +52,7 @@ class TestPointer {
     assert(!isDown);
     _isDown = true;
     _location = newLocation;
-    return new PointerDownEvent(
+    return PointerDownEvent(
       timeStamp: timeStamp,
       pointer: pointer,
       position: location
@@ -68,7 +68,7 @@ class TestPointer {
     assert(isDown);
     final Offset delta = newLocation - location;
     _location = newLocation;
-    return new PointerMoveEvent(
+    return PointerMoveEvent(
       timeStamp: timeStamp,
       pointer: pointer,
       position: newLocation,
@@ -86,7 +86,7 @@ class TestPointer {
   PointerUpEvent up({ Duration timeStamp = Duration.zero }) {
     assert(isDown);
     _isDown = false;
-    return new PointerUpEvent(
+    return PointerUpEvent(
       timeStamp: timeStamp,
       pointer: pointer,
       position: location
@@ -103,7 +103,7 @@ class TestPointer {
   PointerCancelEvent cancel({ Duration timeStamp = Duration.zero }) {
     assert(isDown);
     _isDown = false;
-    return new PointerCancelEvent(
+    return PointerCancelEvent(
       timeStamp: timeStamp,
       pointer: pointer,
       position: location
@@ -113,10 +113,10 @@ class TestPointer {
 
 /// Signature for a callback that can dispatch events and returns a future that
 /// completes when the event dispatch is complete.
-typedef Future<Null> EventDispatcher(PointerEvent event, HitTestResult result);
+typedef EventDispatcher = Future<void> Function(PointerEvent event, HitTestResult result);
 
 /// Signature for callbacks that perform hit-testing at a given location.
-typedef HitTestResult HitTester(Offset location);
+typedef HitTester = HitTestResult Function(Offset location);
 
 /// A class for performing gestures in tests.
 ///
@@ -142,19 +142,18 @@ class TestGesture {
     assert(hitTester != null);
     assert(dispatcher != null);
     TestGesture result;
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<void>(() async {
       // dispatch down event
       final HitTestResult hitTestResult = hitTester(downLocation);
-      final TestPointer testPointer = new TestPointer(pointer);
+      final TestPointer testPointer = TestPointer(pointer);
       await dispatcher(testPointer.down(downLocation), hitTestResult);
 
       // create a TestGesture
-      result = new TestGesture._(dispatcher, hitTestResult, testPointer);
-      return null;
-    }).then<TestGesture>((Null value) {
+      result = TestGesture._(dispatcher, hitTestResult, testPointer);
+    }).then<TestGesture>((void value) {
       return result;
     }, onError: (dynamic error, StackTrace stack) {
-      return new Future<TestGesture>.error(error, stack);
+      return Future<TestGesture>.error(error, stack);
     });
   }
 
@@ -163,14 +162,14 @@ class TestGesture {
   final TestPointer _pointer;
 
   /// Send a move event moving the pointer by the given offset.
-  Future<Null> moveBy(Offset offset, { Duration timeStamp = Duration.zero }) {
+  Future<void> moveBy(Offset offset, { Duration timeStamp = Duration.zero }) {
     assert(_pointer._isDown);
     return moveTo(_pointer.location + offset, timeStamp: timeStamp);
   }
 
   /// Send a move event moving the pointer to the given location.
-  Future<Null> moveTo(Offset location, { Duration timeStamp = Duration.zero }) {
-    return TestAsyncUtils.guard(() {
+  Future<void> moveTo(Offset location, { Duration timeStamp = Duration.zero }) {
+    return TestAsyncUtils.guard<void>(() {
       assert(_pointer._isDown);
       return _dispatcher(_pointer.move(location, timeStamp: timeStamp), _result);
     });
@@ -179,12 +178,11 @@ class TestGesture {
   /// End the gesture by releasing the pointer.
   ///
   /// The object is no longer usable after this method has been called.
-  Future<Null> up() {
-    return TestAsyncUtils.guard(() async {
+  Future<void> up() {
+    return TestAsyncUtils.guard<void>(() async {
       assert(_pointer._isDown);
       await _dispatcher(_pointer.up(), _result);
       assert(!_pointer._isDown);
-      return null;
     });
   }
 
@@ -193,12 +191,11 @@ class TestGesture {
   /// for instance).
   ///
   /// The object is no longer usable after this method has been called.
-  Future<Null> cancel() {
-    return TestAsyncUtils.guard(() async {
+  Future<void> cancel() {
+    return TestAsyncUtils.guard<void>(() async {
       assert(_pointer._isDown);
       await _dispatcher(_pointer.cancel(), _result);
       assert(!_pointer._isDown);
-      return null;
     });
   }
 }

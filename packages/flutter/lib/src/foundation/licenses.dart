@@ -5,7 +5,7 @@
 import 'dart:async';
 
 /// Signature for callbacks passed to [LicenseRegistry.addLicense].
-typedef Stream<LicenseEntry> LicenseEntryCollector();
+typedef LicenseEntryCollector = Stream<LicenseEntry> Function();
 
 /// A string that represents one paragraph in a [LicenseEntry].
 ///
@@ -70,7 +70,7 @@ enum _LicenseEntryWithLineBreaksParserState {
 /// ```dart
 /// void initMyLibrary() {
 ///   LicenseRegistry.addLicense(() async* {
-///     yield new LicenseEntryWithLineBreaks(<String>['my_library'], '''
+///     yield LicenseEntryWithLineBreaks(<String>['my_library'], '''
 /// Copyright 2016 The Sample Authors. All rights reserved.
 ///
 /// Redistribution and use in source and binary forms, with or without
@@ -154,7 +154,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     LicenseParagraph getParagraph() {
       assert(lines.isNotEmpty);
       assert(currentParagraphIndentation != null);
-      final LicenseParagraph result = new LicenseParagraph(lines.join(' '), currentParagraphIndentation);
+      final LicenseParagraph result = LicenseParagraph(lines.join(' '), currentParagraphIndentation);
       assert(result.text.trimLeft() == result.text);
       assert(result.text.isNotEmpty);
       lines.clear();

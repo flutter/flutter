@@ -16,11 +16,48 @@ import 'hit_test.dart';
 import 'pointer_router.dart';
 
 /// A binding for the gesture subsystem.
-abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispatcher, HitTestTarget {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory GestureBinding._() => null;
-
+///
+/// ## Lifecycle of pointer events and the gesture arena
+///
+/// ### [PointerDownEvent]
+///
+/// When a [PointerDownEvent] is received by the [GestureBinding] (from
+/// [Window.onPointerDataPacket], as interpreted by the
+/// [PointerEventConverter]), a [hitTest] is performed to determine which
+/// [HitTestTarget] nodes are affected. (Other bindings are expected to
+/// implement [hitTest] to defer to [HitTestable] objects. For example, the
+/// rendering layer defers to the [RenderView] and the rest of the render object
+/// hierarchy.)
+///
+/// The affected nodes then are given the event to handle ([dispatchEvent] calls
+/// [HitTestTarget.handleEvent] for each affected node). If any have relevant
+/// [GestureRecognizer]s, they provide the event to them using
+/// [GestureRecognizer.addPointer]. This typically causes the recognizer to
+/// register with the [PointerRouter] to receive notifications regarding the
+/// pointer in question.
+///
+/// Once the hit test and dispatching logic is complete, the event is then
+/// passed to the aforementioned [PointerRouter], which passes it to any objects
+/// that have registered interest in that event.
+///
+/// Finally, the [gestureArena] is closed for the given pointer
+/// ([GestureArenaManager.close]), which begins the process of selecting a
+/// gesture to win that pointer.
+///
+/// ### Other events
+///
+/// A pointer that is [PointerEvent.down] may send further events, such as
+/// [PointerMoveEvent], [PointerUpEvent], or [PointerCancelEvent]. These are
+/// sent to the same [HitTestTarget] nodes as were found when the down event was
+/// received (even if they have since been disposed; it is the responsibility of
+/// those objects to be aware of that possibility).
+///
+/// Then, the events are routed to any still-registered entrants in the
+/// [PointerRouter]'s table for that pointer.
+///
+/// When a [PointerUpEvent] is received, the [GestureArenaManager.sweep] method
+/// is invoked to force the gesture arena logic to terminate if necessary.
+mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, HitTestTarget {
   @override
   void initInstances() {
     super.initInstances();
@@ -38,7 +75,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
   static GestureBinding get instance => _instance;
   static GestureBinding _instance;
 
-  final Queue<PointerEvent> _pendingPointerEvents = new Queue<PointerEvent>();
+  final Queue<PointerEvent> _pendingPointerEvents = Queue<PointerEvent>();
 
   void _handlePointerDataPacket(ui.PointerDataPacket packet) {
     // We convert pointer data to logical pixels so that e.g. the touch slop can be
@@ -55,7 +92,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
   void cancelPointer(int pointer) {
     if (_pendingPointerEvents.isEmpty && !locked)
       scheduleMicrotask(_flushPointerEventQueue);
-    _pendingPointerEvents.addFirst(new PointerCancelEvent(pointer: pointer));
+    _pendingPointerEvents.addFirst(PointerCancelEvent(pointer: pointer));
   }
 
   void _flushPointerEventQueue() {
@@ -65,11 +102,11 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
   }
 
   /// A router that routes all pointer events received from the engine.
-  final PointerRouter pointerRouter = new PointerRouter();
+  final PointerRouter pointerRouter = PointerRouter();
 
   /// The gesture arenas used for disambiguating the meaning of sequences of
   /// pointer events.
-  final GestureArenaManager gestureArena = new GestureArenaManager();
+  final GestureArenaManager gestureArena = GestureArenaManager();
 
   /// State for all pointers which are currently down.
   ///
@@ -82,7 +119,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
     HitTestResult result;
     if (event is PointerDownEvent) {
       assert(!_hitTests.containsKey(event.pointer));
-      result = new HitTestResult();
+      result = HitTestResult();
       hitTest(result, event.position);
       _hitTests[event.pointer] = result;
       assert(() {
@@ -104,7 +141,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
   /// Determine which [HitTestTarget] objects are located at a given position.
   @override // from HitTestable
   void hitTest(HitTestResult result, Offset position) {
-    result.add(new HitTestEntry(this));
+    result.add(HitTestEntry(this));
   }
 
   /// Dispatch an event to a hit test result's path.
@@ -120,7 +157,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
       try {
         entry.target.handleEvent(event, entry);
       } catch (exception, stack) {
-        FlutterError.reportError(new FlutterErrorDetailsForPointerEventDispatcher(
+        FlutterError.reportError(FlutterErrorDetailsForPointerEventDispatcher(
           exception: exception,
           stack: stack,
           library: 'gesture library',

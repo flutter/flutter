@@ -39,7 +39,7 @@ class PlatformViewsRegistry {
 /// Callback signature for when a platform view was created.
 ///
 /// `id` is the platform view's unique identifier.
-typedef void PlatformViewCreatedCallback(int id);
+typedef PlatformViewCreatedCallback = void Function(int id);
 
 /// Provides access to the platform views service.
 ///
@@ -82,7 +82,7 @@ class PlatformViewsService {
     assert(viewType != null);
     assert(layoutDirection != null);
     assert(creationParams == null || creationParamsCodec != null);
-    return new AndroidViewController._(
+    return AndroidViewController._(
       id,
       viewType,
       creationParams,
@@ -97,21 +97,6 @@ class PlatformViewsService {
 ///
 /// A Dart version of Android's [MotionEvent.PointerProperties](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties).
 class AndroidPointerProperties {
-  /// Value for `toolType` when the tool type is unknown.
-  static const int kToolTypeUnknown = 0;
-
-  /// Value for `toolType` when the tool type is a finger.
-  static const int kToolTypeFinger = 1;
-
-  /// Value for `toolType` when the tool type is a stylus.
-  static const int kToolTypeStylus = 2;
-
-  /// Value for `toolType` when the tool type is a mouse.
-  static const int kToolTypeMouse = 3;
-
-  /// Value for `toolType` when the tool type is an eraser.
-  static const int kToolTypeEraser = 4;
-
   /// Creates an AndroidPointerProperties.
   ///
   /// All parameters must not be null.
@@ -127,6 +112,21 @@ class AndroidPointerProperties {
   /// The type of tool used to make contact such as a finger or stylus, if known.
   /// See Android's [MotionEvent.PointerProperties#toolType](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties.html#toolType).
   final int toolType;
+
+  /// Value for `toolType` when the tool type is unknown.
+  static const int kToolTypeUnknown = 0;
+
+  /// Value for `toolType` when the tool type is a finger.
+  static const int kToolTypeFinger = 1;
+
+  /// Value for `toolType` when the tool type is a stylus.
+  static const int kToolTypeStylus = 2;
+
+  /// Value for `toolType` when the tool type is a mouse.
+  static const int kToolTypeMouse = 3;
+
+  /// Value for `toolType` when the tool type is an eraser.
+  static const int kToolTypeEraser = 4;
 
   List<int> _asList() => <int>[id, toolType];
 
@@ -328,8 +328,8 @@ class AndroidMotionEvent {
       eventTime,
       action,
       pointerCount,
-      pointerProperties.map((AndroidPointerProperties p) => p._asList()).toList(),
-      pointerCoords.map((AndroidPointerCoords p) => p._asList()).toList(),
+      pointerProperties.map<List<int>>((AndroidPointerProperties p) => p._asList()).toList(),
+      pointerCoords.map<List<double>>((AndroidPointerCoords p) => p._asList()).toList(),
       metaState,
       buttonState,
       xPrecision,
@@ -456,7 +456,7 @@ class AndroidViewController {
   /// The first time a size is set triggers the creation of the Android view.
   Future<void> setSize(Size size) async {
     if (_state == _AndroidViewState.disposed)
-      throw new FlutterError('trying to size a disposed Android View. View id: $id');
+      throw FlutterError('trying to size a disposed Android View. View id: $id');
 
     assert(size != null);
     assert(!size.isEmpty);
@@ -474,7 +474,7 @@ class AndroidViewController {
   /// Sets the layout direction for the Android view.
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
     if (_state == _AndroidViewState.disposed)
-      throw new FlutterError('trying to set a layout direction for a disposed Android View. View id: $id');
+      throw FlutterError('trying to set a layout direction for a disposed Android View. View id: $id');
 
     if (layoutDirection == _layoutDirection)
       return;

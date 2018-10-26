@@ -32,13 +32,13 @@ void main() {
   test('HSVColor hue sweep test', () {
     final List<Color> output = <Color>[];
     for (double hue = 0.0; hue <= 360.0; hue += 36.0) {
-      final HSVColor hsvColor = new HSVColor.fromAHSV(1.0, hue, 1.0, 1.0);
+      final HSVColor hsvColor = HSVColor.fromAHSV(1.0, hue, 1.0, 1.0);
       final Color color = hsvColor.toColor();
       output.add(color);
       if (hue != 360.0) {
         // Check that it's reversible.
         expect(
-          new HSVColor.fromColor(color),
+          HSVColor.fromColor(color),
           within<HSVColor>(distance: _doubleColorPrecision, from: hsvColor),
         );
       }
@@ -62,12 +62,12 @@ void main() {
   test('HSVColor saturation sweep test', () {
     final List<Color> output = <Color>[];
     for (double saturation = 0.0; saturation < 1.0; saturation += 0.1) {
-      final HSVColor hslColor = new HSVColor.fromAHSV(1.0, 0.0, saturation, 1.0);
+      final HSVColor hslColor = HSVColor.fromAHSV(1.0, 0.0, saturation, 1.0);
       final Color color = hslColor.toColor();
       output.add(color);
       // Check that it's reversible.
       expect(
-        new HSVColor.fromColor(color),
+        HSVColor.fromColor(color),
         within<HSVColor>(distance: _doubleColorPrecision, from: hslColor),
       );
     }
@@ -90,14 +90,14 @@ void main() {
   test('HSVColor value sweep test', () {
     final List<Color> output = <Color>[];
     for (double value = 0.0; value < 1.0; value += 0.1) {
-      final HSVColor hsvColor = new HSVColor.fromAHSV(1.0, 0.0, 1.0, value);
+      final HSVColor hsvColor = HSVColor.fromAHSV(1.0, 0.0, 1.0, value);
       final Color color = hsvColor.toColor();
       output.add(color);
       // Check that it's reversible. Discontinuities at the ends for saturation,
       // so we skip those.
       if (value >= _doubleColorPrecision && value <= (1.0 - _doubleColorPrecision)) {
         expect(
-          new HSVColor.fromColor(color),
+          HSVColor.fromColor(color),
           within<HSVColor>(distance: _doubleColorPrecision, from: hsvColor),
         );
       }
@@ -228,13 +228,13 @@ void main() {
   test('HSLColor hue sweep test', () {
     final List<Color> output = <Color>[];
     for (double hue = 0.0; hue <= 360.0; hue += 36.0) {
-      final HSLColor hslColor = new HSLColor.fromAHSL(1.0, hue, 0.5, 0.5);
+      final HSLColor hslColor = HSLColor.fromAHSL(1.0, hue, 0.5, 0.5);
       final Color color = hslColor.toColor();
       output.add(color);
       if (hue != 360.0) {
         // Check that it's reversible.
         expect(
-          new HSLColor.fromColor(color),
+          HSLColor.fromColor(color),
           within<HSLColor>(distance: _doubleColorPrecision, from: hslColor),
         );
       }
@@ -258,12 +258,12 @@ void main() {
   test('HSLColor saturation sweep test', () {
     final List<Color> output = <Color>[];
     for (double saturation = 0.0; saturation < 1.0; saturation += 0.1) {
-      final HSLColor hslColor = new HSLColor.fromAHSL(1.0, 0.0, saturation, 0.5);
+      final HSLColor hslColor = HSLColor.fromAHSL(1.0, 0.0, saturation, 0.5);
       final Color color = hslColor.toColor();
       output.add(color);
       // Check that it's reversible.
       expect(
-        new HSLColor.fromColor(color),
+        HSLColor.fromColor(color),
         within<HSLColor>(distance: _doubleColorPrecision, from: hslColor),
       );
     }
@@ -286,14 +286,14 @@ void main() {
   test('HSLColor lightness sweep test', () {
     final List<Color> output = <Color>[];
     for (double lightness = 0.0; lightness < 1.0; lightness += 0.1) {
-      final HSLColor hslColor = new HSLColor.fromAHSL(1.0, 0.0, 0.5, lightness);
+      final HSLColor hslColor = HSLColor.fromAHSL(1.0, 0.0, 0.5, lightness);
       final Color color = hslColor.toColor();
       output.add(color);
       // Check that it's reversible. Discontinuities at the ends for saturation,
       // so we skip those.
       if (lightness >= _doubleColorPrecision && lightness <= (1.0 - _doubleColorPrecision)) {
         expect(
-          new HSLColor.fromColor(color),
+          HSLColor.fromColor(color),
           within<HSLColor>(distance: _doubleColorPrecision, from: hslColor),
         );
       }
@@ -401,7 +401,7 @@ void main() {
 
   test('ColorSwatch test', () {
     final int color = nonconst(0xFF027223);
-    final ColorSwatch<String> greens1 = new ColorSwatch<String>(
+    final ColorSwatch<String> greens1 = ColorSwatch<String>(
       color,
       const <String, Color>{
         '2259 C': Color(0xFF027223),
@@ -410,7 +410,7 @@ void main() {
         '7732 XGC': Color(0xFF007940),
       },
     );
-    final ColorSwatch<String> greens2 = new ColorSwatch<String>(
+    final ColorSwatch<String> greens2 = ColorSwatch<String>(
       color,
       const <String, Color>{
         '2259 C': Color(0xFF027223),

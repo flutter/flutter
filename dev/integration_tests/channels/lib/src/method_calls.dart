@@ -89,7 +89,7 @@ Future<TestStepResult> _methodCallErrorHandshake(
   final List<dynamic> received = <dynamic>[];
   channel.setMethodCallHandler((MethodCall call) async {
     received.add(call.arguments);
-    throw new PlatformException(
+    throw PlatformException(
         code: 'error', message: null, details: arguments);
   });
   dynamic errorDetails = nothing;
@@ -118,7 +118,7 @@ Future<TestStepResult> _methodCallNotImplementedHandshake(
   final List<dynamic> received = <dynamic>[];
   channel.setMethodCallHandler((MethodCall call) async {
     received.add(call.arguments);
-    throw new MissingPluginException();
+    throw MissingPluginException();
   });
   dynamic result = nothing;
   dynamic error = nothing;

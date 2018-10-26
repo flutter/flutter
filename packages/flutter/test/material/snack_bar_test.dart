@@ -9,11 +9,11 @@ void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
     const String helloSnackBar = 'Hello SnackBar';
     const Key tapTarget = Key('tap-target');
-    await tester.pumpWidget(new MaterialApp(
-      home: new Scaffold(
-        body: new Builder(
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
           builder: (BuildContext context) {
-            return new GestureDetector(
+            return GestureDetector(
               onTap: () {
                 Scaffold.of(context).showSnackBar(const SnackBar(
                   content: Text(helloSnackBar),
@@ -21,7 +21,7 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: new Container(
+              child: Container(
                 height: 100.0,
                 width: 100.0,
                 key: tapTarget
@@ -54,20 +54,20 @@ void main() {
   testWidgets('SnackBar twice test', (WidgetTester tester) async {
     int snackBarCount = 0;
     const Key tapTarget = Key('tap-target');
-    await tester.pumpWidget(new MaterialApp(
-      home: new Scaffold(
-        body: new Builder(
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
           builder: (BuildContext context) {
-            return new GestureDetector(
+            return GestureDetector(
               onTap: () {
                 snackBarCount += 1;
-                Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text('bar$snackBarCount'),
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Text('bar$snackBarCount'),
                   duration: const Duration(seconds: 2)
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: new Container(
+              child: Container(
                 height: 100.0,
                 width: 100.0,
                 key: tapTarget
@@ -131,20 +131,20 @@ void main() {
     const Key tapTarget = Key('tap-target');
     int time;
     ScaffoldFeatureController<SnackBar, SnackBarClosedReason> lastController;
-    await tester.pumpWidget(new MaterialApp(
-      home: new Scaffold(
-        body: new Builder(
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
           builder: (BuildContext context) {
-            return new GestureDetector(
+            return GestureDetector(
               onTap: () {
                 snackBarCount += 1;
-                lastController = Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text('bar$snackBarCount'),
-                  duration: new Duration(seconds: time)
+                lastController = Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Text('bar$snackBarCount'),
+                  duration: Duration(seconds: time)
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: new Container(
+              child: Container(
                 height: 100.0,
                 width: 100.0,
                 key: tapTarget
@@ -215,20 +215,20 @@ void main() {
   testWidgets('SnackBar dismiss test', (WidgetTester tester) async {
     int snackBarCount = 0;
     const Key tapTarget = Key('tap-target');
-    await tester.pumpWidget(new MaterialApp(
-      home: new Scaffold(
-        body: new Builder(
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
           builder: (BuildContext context) {
-            return new GestureDetector(
+            return GestureDetector(
               onTap: () {
                 snackBarCount += 1;
-                Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text('bar$snackBarCount'),
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Text('bar$snackBarCount'),
                   duration: const Duration(seconds: 2)
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: new Container(
+              child: Container(
                 height: 100.0,
                 width: 100.0,
                 key: tapTarget
@@ -259,16 +259,16 @@ void main() {
 
   testWidgets('SnackBar cannot be tapped twice', (WidgetTester tester) async {
     int tapCount = 0;
-    await tester.pumpWidget(new MaterialApp(
-      home: new Scaffold(
-        body: new Builder(
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
           builder: (BuildContext context) {
-            return new GestureDetector(
+            return GestureDetector(
               onTap: () {
-                Scaffold.of(context).showSnackBar(new SnackBar(
+                Scaffold.of(context).showSnackBar(SnackBar(
                   content: const Text('I am a snack bar.'),
                   duration: const Duration(seconds: 2),
-                  action: new SnackBarAction(
+                  action: SnackBarAction(
                     label: 'ACTION',
                     onPressed: () {
                       ++tapCount;
@@ -296,9 +296,53 @@ void main() {
     expect(tapCount, equals(1));
   });
 
+  testWidgets('Snackbar labels can be colored', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('I am a snack bar.'),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                        textColor: Colors.lightBlue,
+                        disabledTextColor: Colors.red,
+                        label: 'ACTION',
+                        onPressed: () {},
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('X')
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final Element actionTextBox = tester.element(find.text('ACTION'));
+    final Widget textWidget = actionTextBox.widget;
+    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
+    if (textWidget is Text) {
+      TextStyle effectiveStyle = textWidget.style;
+      effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
+      expect(effectiveStyle.color, Colors.lightBlue);
+    } else
+      expect(false, true);
+  });
+
   testWidgets('SnackBar button text alignment', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
-      home: new MediaQuery(
+    await tester.pumpWidget(MaterialApp(
+      home: MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.only(
             left: 10.0,
@@ -307,15 +351,15 @@ void main() {
             bottom: 40.0,
           ),
         ),
-        child: new Scaffold(
-          body: new Builder(
+        child: Scaffold(
+          body: Builder(
             builder: (BuildContext context) {
-              return new GestureDetector(
+              return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context).showSnackBar(new SnackBar(
+                  Scaffold.of(context).showSnackBar(SnackBar(
                     content: const Text('I am a snack bar.'),
                     duration: const Duration(seconds: 2),
-                    action: new SnackBarAction(label: 'ACTION', onPressed: () {})
+                    action: SnackBarAction(label: 'ACTION', onPressed: () {})
                   ));
                 },
                 child: const Text('X')
@@ -348,8 +392,8 @@ void main() {
   });
 
   testWidgets('SnackBar is positioned above BottomNavigationBar', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
-      home: new MediaQuery(
+    await tester.pumpWidget(MaterialApp(
+      home: MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.only(
             left: 10.0,
@@ -358,21 +402,21 @@ void main() {
             bottom: 40.0,
           ),
         ),
-        child: new Scaffold(
-          bottomNavigationBar: new BottomNavigationBar(
+        child: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(icon: Icon(Icons.favorite), title: Text('Animutation')),
               BottomNavigationBarItem(icon: Icon(Icons.block), title: Text('Zombo.com')),
             ],
           ),
-          body: new Builder(
+          body: Builder(
             builder: (BuildContext context) {
-              return new GestureDetector(
+              return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context).showSnackBar(new SnackBar(
+                  Scaffold.of(context).showSnackBar(SnackBar(
                     content: const Text('I am a snack bar.'),
                     duration: const Duration(seconds: 2),
-                    action: new SnackBarAction(label: 'ACTION', onPressed: () {})
+                    action: SnackBarAction(label: 'ACTION', onPressed: () {})
                   ));
                 },
                 child: const Text('X')
@@ -405,27 +449,27 @@ void main() {
   });
 
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool actionPressed = false;
     SnackBarClosedReason closedReason;
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
         key: scaffoldKey,
-        body: new Builder(
+        body: Builder(
           builder: (BuildContext context) {
-            return new GestureDetector(
+            return GestureDetector(
               onTap: () {
-                Scaffold.of(context).showSnackBar(new SnackBar(
+                Scaffold.of(context).showSnackBar(SnackBar(
                   content: const Text('snack'),
                   duration: const Duration(seconds: 2),
-                  action: new SnackBarAction(
+                  action: SnackBarAction(
                     label: 'ACTION',
                     onPressed: () {
                       actionPressed = true;
                     }
                   ),
-                )).closed.then<Null>((SnackBarClosedReason reason) {
+                )).closed.then<void>((SnackBarClosedReason reason) {
                   closedReason = reason;
                 });
               },
@@ -483,21 +527,21 @@ void main() {
   });
 
   testWidgets('accessible navigation behavior with action', (WidgetTester tester) async {
-      final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-      await tester.pumpWidget(new MaterialApp(
-        home: new MediaQuery(
+      await tester.pumpWidget(MaterialApp(
+        home: MediaQuery(
           data: const MediaQueryData(accessibleNavigation: true),
           child: Scaffold(
             key: scaffoldKey,
-            body: new Builder(
+            body: Builder(
               builder: (BuildContext context) {
-                return new GestureDetector(
+                return GestureDetector(
                   onTap: () {
-                    Scaffold.of(context).showSnackBar(new SnackBar(
+                    Scaffold.of(context).showSnackBar(SnackBar(
                       content: const Text('snack'),
                       duration: const Duration(seconds: 1),
-                      action: new SnackBarAction(
+                      action: SnackBarAction(
                         label: 'ACTION',
                         onPressed: () {}
                       ),
@@ -525,21 +569,21 @@ void main() {
 
   testWidgets('contributes dismiss semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-    await tester.pumpWidget(new MaterialApp(
-        home: new MediaQuery(
+    await tester.pumpWidget(MaterialApp(
+        home: MediaQuery(
             data: const MediaQueryData(accessibleNavigation: true),
             child: Scaffold(
                 key: scaffoldKey,
-                body: new Builder(
+                body: Builder(
                   builder: (BuildContext context) {
-                    return new GestureDetector(
+                    return GestureDetector(
                         onTap: () {
-                          Scaffold.of(context).showSnackBar(new SnackBar(
+                          Scaffold.of(context).showSnackBar(SnackBar(
                             content: const Text('snack'),
                             duration: const Duration(seconds: 1),
-                            action: new SnackBarAction(
+                            action: SnackBarAction(
                                 label: 'ACTION',
                                 onPressed: () {}
                             ),
@@ -555,7 +599,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    expect(tester.getSemanticsData(find.text('snack')), matchesSemanticsData(
+    expect(tester.getSemantics(find.text('snack')), matchesSemantics(
       isLiveRegion: true,
       hasDismissAction: true,
       hasScrollDownAction: true,
@@ -569,18 +613,18 @@ void main() {
   testWidgets('SnackBar default display duration test', (WidgetTester tester) async {
     const String helloSnackBar = 'Hello SnackBar';
     const Key tapTarget = Key('tap-target');
-    await tester.pumpWidget(new MaterialApp(
-        home: new Scaffold(
-            body: new Builder(
+    await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+            body: Builder(
                 builder: (BuildContext context) {
-                  return new GestureDetector(
+                  return GestureDetector(
                       onTap: () {
                         Scaffold.of(context).showSnackBar(const SnackBar(
                             content: Text(helloSnackBar)
                         ));
                       },
                       behavior: HitTestBehavior.opaque,
-                      child: new Container(
+                      child: Container(
                           height: 100.0,
                           width: 100.0,
                           key: tapTarget
@@ -616,17 +660,17 @@ void main() {
 
   testWidgets('SnackBar handles updates to accessibleNavigation', (WidgetTester tester) async {
     Future<void> boilerplate({bool accessibleNavigation}) {
-      return tester.pumpWidget(new MaterialApp(
-          home: new MediaQuery(
-              data: new MediaQueryData(accessibleNavigation: accessibleNavigation),
-              child: new Scaffold(
-                  body: new Builder(
+      return tester.pumpWidget(MaterialApp(
+          home: MediaQuery(
+              data: MediaQueryData(accessibleNavigation: accessibleNavigation),
+              child: Scaffold(
+                  body: Builder(
                       builder: (BuildContext context) {
-                        return new GestureDetector(
+                        return GestureDetector(
                             onTap: () {
-                              Scaffold.of(context).showSnackBar(new SnackBar(
+                              Scaffold.of(context).showSnackBar(SnackBar(
                                   content: const Text('test'),
-                                  action: new SnackBarAction(label: 'foo', onPressed: () {}),
+                                  action: SnackBarAction(label: 'foo', onPressed: () {}),
                               ));
                             },
                             behavior: HitTestBehavior.opaque,
@@ -662,4 +706,32 @@ void main() {
     expect(find.text('test'), findsNothing);
   });
 
+  testWidgets('Snackbar asserts if passed a null duration', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Text(nonconst('hello')),
+                  duration: null,
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+                key: tapTarget
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byKey(tapTarget));
+    expect(tester.takeException(), isNotNull);
+  });
 }

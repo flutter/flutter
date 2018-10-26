@@ -9,7 +9,7 @@ import '../rendering/rendering_tester.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
-  new TestRenderingFlutterBinding(); // initializes the imageCache
+  TestRenderingFlutterBinding(); // initializes the imageCache
   group(ImageCache, () {
     tearDown(() {
       imageCache.clear();

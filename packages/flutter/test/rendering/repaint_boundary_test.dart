@@ -10,13 +10,13 @@ import 'rendering_tester.dart';
 void main() {
   test('nested repaint boundaries - smoke test', () {
     RenderOpacity a, b, c;
-    a = new RenderOpacity(
+    a = RenderOpacity(
       opacity: 1.0,
-      child: new RenderRepaintBoundary(
-        child: b = new RenderOpacity(
+      child: RenderRepaintBoundary(
+        child: b = RenderOpacity(
           opacity: 1.0,
-          child: new RenderRepaintBoundary(
-            child: c = new RenderOpacity(
+          child: RenderRepaintBoundary(
+            child: c = RenderOpacity(
               opacity: 1.0
             )
           )

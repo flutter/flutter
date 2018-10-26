@@ -21,7 +21,7 @@ void main() {
   setUp(ensureGestureBinding);
 
   testGesture('Should recognize long press', (GestureTester tester) {
-    final LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
 
     bool longPressRecognized = false;
     longPress.onLongPress = () {
@@ -42,7 +42,7 @@ void main() {
   });
 
   testGesture('Up cancels long press', (GestureTester tester) {
-    final LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
 
     bool longPressRecognized = false;
     longPress.onLongPress = () {
@@ -65,8 +65,8 @@ void main() {
   });
 
   testGesture('Should recognize both tap down and long press', (GestureTester tester) {
-    final LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
-    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
 
     bool tapDownRecognized = false;
     tap.onTapDown = (_) {
@@ -98,8 +98,8 @@ void main() {
   });
 
   testGesture('Drag start delayed by microtask', (GestureTester tester) {
-    final LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
-    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
 
     bool isDangerousStack = false;
 
@@ -137,4 +137,25 @@ void main() {
     drag.dispose();
   });
 
+  testGesture('Should recognize long press up', (GestureTester tester) {
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
+
+    bool longPressUpRecognized = false;
+    longPress.onLongPressUp = () {
+      longPressUpRecognized = true;
+    };
+
+    longPress.addPointer(down);
+    tester.closeArena(5);
+    expect(longPressUpRecognized, isFalse);
+    tester.route(down); // kLongPressTimeout = 500;
+    expect(longPressUpRecognized, isFalse);
+    tester.async.elapse(const Duration(milliseconds: 300));
+    expect(longPressUpRecognized, isFalse);
+    tester.async.elapse(const Duration(milliseconds: 700));
+    tester.route(up);
+    expect(longPressUpRecognized, isTrue);
+
+    longPress.dispose();
+  });
 }

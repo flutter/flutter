@@ -58,7 +58,7 @@ class Line {
   Line operator +(int count) {
     if (count == 0)
       return this;
-    return new Line(filename, line + count, indent);
+    return Line(filename, line + count, indent);
   }
   @override
   String toString([int column]) {
@@ -87,7 +87,7 @@ class Section {
     }
   }
   List<Line> get lines {
-    final List<Line> result = new List<Line>.generate(code.length, (int index) => start + index);
+    final List<Line> result = List<Line>.generate(code.length, (int index) => start + index);
     if (preamble != null)
       result.insert(0, null);
     if (postamble != null)
@@ -99,20 +99,21 @@ class Section {
 const String kDartDocPrefix = '///';
 const String kDartDocPrefixWithSpace = '$kDartDocPrefix ';
 
-Future<Null> main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   final Directory tempDir = Directory.systemTemp.createTempSync('flutter_analyze_sample_code.');
   int exitCode = 1;
   bool keepMain = false;
   final List<String> buffer = <String>[];
   try {
-    final File mainDart = new File(path.join(tempDir.path, 'main.dart'));
-    final File pubSpec = new File(path.join(tempDir.path, 'pubspec.yaml'));
+    final File mainDart = File(path.join(tempDir.path, 'main.dart'));
+    final File pubSpec = File(path.join(tempDir.path, 'pubspec.yaml'));
+    final File analysisOptions = File(path.join(tempDir.path, 'analysis_options.yaml'));
     Directory flutterPackage;
     if (arguments.length == 1) {
       // Used for testing.
-      flutterPackage = new Directory(arguments.single);
+      flutterPackage = Directory(arguments.single);
     } else {
-      flutterPackage = new Directory(path.join(_flutterRoot, 'packages', 'flutter', 'lib'));
+      flutterPackage = Directory(path.join(_flutterRoot, 'packages', 'flutter', 'lib'));
     }
     final List<Section> sections = <Section>[];
     int sampleCodeSections = 0;
@@ -160,7 +161,7 @@ Future<Null> main(List<String> arguments) async {
                 }
               } else if (trimmedLine == '/// ```dart') {
                 assert(block.isEmpty);
-                startLine = new Line(file.path, lineNumber + 1, line.indexOf(kDartDocPrefixWithSpace) + kDartDocPrefixWithSpace.length);
+                startLine = Line(file.path, lineNumber + 1, line.indexOf(kDartDocPrefixWithSpace) + kDartDocPrefixWithSpace.length);
                 inDart = true;
                 foundDart = true;
               }
@@ -169,7 +170,7 @@ Future<Null> main(List<String> arguments) async {
           if (!inSampleSection) {
             if (line == '// Examples can assume:') {
               assert(block.isEmpty);
-              startLine = new Line(file.path, lineNumber + 1, 3);
+              startLine = Line(file.path, lineNumber + 1, 3);
               inPreamble = true;
             } else if (trimmedLine == '/// ## Sample code' ||
                        trimmedLine.startsWith('/// ## Sample code:') ||
@@ -198,7 +199,7 @@ Future<Null> main(List<String> arguments) async {
       }
     }
     buffer.add('');
-    final List<Line> lines = new List<Line>.filled(buffer.length, null, growable: true);
+    final List<Line> lines = List<Line>.filled(buffer.length, null, growable: true);
     for (Section section in sections) {
       buffer.addAll(section.strings);
       lines.addAll(section.lines);
@@ -213,10 +214,16 @@ dependencies:
   flutter_test:
     sdk: flutter
 ''');
+    analysisOptions.writeAsStringSync('''
+linter:
+  rules:
+    - unnecessary_const
+    - unnecessary_new
+''');
     print('Found $sampleCodeSections sample code sections.');
     final Process process = await Process.start(
       _flutter,
-      <String>['analyze', '--no-preamble', '--no-congratulate', mainDart.parent.path],
+      <String>['--no-wrap', 'analyze', '--no-preamble', '--no-congratulate', mainDart.parent.path],
       workingDirectory: tempDir.path,
     );
     final List<String> errors = <String>[];
@@ -240,7 +247,7 @@ dependencies:
       errors.removeAt(0);
     int errorCount = 0;
     final String kBullet = Platform.isWindows ? ' - ' : ' • ';
-    final RegExp errorPattern = new RegExp('^ +([a-z]+)$kBullet(.+)$kBullet(.+):([0-9]+):([0-9]+)$kBullet([-a-z_]+)\$', caseSensitive: false);
+    final RegExp errorPattern = RegExp('^ +([a-z]+)$kBullet(.+)$kBullet(.+):([0-9]+):([0-9]+)$kBullet([-a-z_]+)\$', caseSensitive: false);
     for (String error in errors) {
       final Match parts = errorPattern.matchAsPrefix(error);
       if (parts != null) {
@@ -260,7 +267,7 @@ dependencies:
           throw 'failed to parse error message (read line number as $lineNumber; total number of lines is ${lines.length}): $error';
         }
         final Line actualLine = lines[lineNumber - 1];
-        if (errorCode == 'unused_element') {
+        if (errorCode == 'unused_element' || errorCode == 'unused_local_variable') {
           // We don't really care if sample code isn't used!
         } else if (actualLine == null) {
           if (errorCode == 'missing_identifier' && lineNumber > 1 && buffer[lineNumber - 2].endsWith(',')) {
@@ -308,19 +315,24 @@ dependencies:
   exit(exitCode);
 }
 
+final RegExp _constructorRegExp = RegExp(r'[A-Z][a-zA-Z0-9<>.]*\(');
+
 int _expressionId = 0;
 
 void processBlock(Line line, List<String> block, List<Section> sections) {
   if (block.isEmpty)
     throw '$line: Empty ```dart block in sample code.';
-  if (block.first.startsWith('new ') || block.first.startsWith('const ')) {
+  if (block.first.startsWith('new ') || block.first.startsWith('const ') || block.first.startsWith(_constructorRegExp)) {
     _expressionId += 1;
-    sections.add(new Section(line, 'dynamic expression$_expressionId = ', block.toList(), ';'));
+    sections.add(Section(line, 'dynamic expression$_expressionId = ', block.toList(), ';'));
   } else if (block.first.startsWith('await ')) {
     _expressionId += 1;
-    sections.add(new Section(line, 'Future<Null> expression$_expressionId() async { ', block.toList(), ' }'));
-  } else if (block.first.startsWith('class ')) {
-    sections.add(new Section(line, null, block.toList(), null));
+    sections.add(Section(line, 'Future<void> expression$_expressionId() async { ', block.toList(), ' }'));
+  } else if (block.first.startsWith('class ') || block.first.startsWith('enum ')) {
+    sections.add(Section(line, null, block.toList(), null));
+  } else if ((block.first.startsWith('_') || block.first.startsWith('final ')) && block.first.contains(' = ')) {
+    _expressionId += 1;
+    sections.add(Section(line, 'void expression$_expressionId() { ', block.toList(), ' }'));
   } else {
     final List<String> buffer = <String>[];
     int subblocks = 0;
@@ -345,7 +357,7 @@ void processBlock(Line line, List<String> block, List<Section> sections) {
       if (subline != null)
         processBlock(subline, buffer, sections);
     } else {
-      sections.add(new Section(line, null, block.toList(), null));
+      sections.add(Section(line, null, block.toList(), null));
     }
   }
   block.clear();

@@ -38,6 +38,8 @@ enum _PlatformViewState {
 
 /// A render object for an Android view.
 ///
+/// Requires Android API level 20 or greater.
+///
 /// [RenderAndroidView] is responsible for sizing, displaying and passing touch events to an
 /// Android [View](https://developer.android.com/reference/android/view/View).
 ///
@@ -46,7 +48,7 @@ enum _PlatformViewState {
 ///
 /// RenderAndroidView participates in Flutter's [GestureArena]s, and dispatches touch events to the
 /// Android view iff it won the arena. Specific gestures that should be dispatched to the Android
-/// view can be specified in [RenderAndroidView.gestureRecognizers]. If
+/// view can be specified with factories in [RenderAndroidView.gestureRecognizers]. If
 /// [RenderAndroidView.gestureRecognizers] is empty, the gesture will be dispatched to the Android
 /// view iff it was not claimed by any other gesture recognizer.
 ///
@@ -59,14 +61,14 @@ class RenderAndroidView extends RenderBox {
   RenderAndroidView({
     @required AndroidViewController viewController,
     @required this.hitTestBehavior,
-    List<OneSequenceGestureRecognizer> gestureRecognizers = const <OneSequenceGestureRecognizer> [],
+    @required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
   }) : assert(viewController != null),
        assert(hitTestBehavior != null),
        assert(gestureRecognizers != null),
        _viewController = viewController
   {
-    _motionEventsDispatcher = new _MotionEventsDispatcher(globalToLocal, viewController);
-    this.gestureRecognizers = gestureRecognizers;
+    _motionEventsDispatcher = _MotionEventsDispatcher(globalToLocal, viewController);
+    updateGestureRecognizers(gestureRecognizers);
   }
 
   _PlatformViewState _state = _PlatformViewState.uninitialized;
@@ -92,17 +94,40 @@ class RenderAndroidView extends RenderBox {
 
   /// Which gestures should be forwarded to the Android view.
   ///
-  /// The gesture recognizers on this list participate in the gesture arena for each pointer
-  /// that was put down on the render box. If any of the recognizers on this list wins the
+  /// Gesture recognizers created by factories in this set participate in the gesture arena for each
+  /// pointer that was put down on the render box. If any of the recognizers on this list wins the
   /// gesture arena, the entire pointer event sequence starting from the pointer down event
   /// will be dispatched to the Android view.
-  set gestureRecognizers(List<OneSequenceGestureRecognizer> recognizers) {
-    assert(recognizers != null);
-    if (recognizers == _gestureRecognizer?.gestureRecognizers) {
+  ///
+  /// The `gestureRecognizers` property must not contain more than one factory with the same [Factory.type].
+  ///
+  /// Setting a new set of gesture recognizer factories with the same [Factory.type]s as the current
+  /// set has no effect, because the factories' constructors would have already been called with the previous set.
+  ///
+  /// Any active gesture arena the Android view participates in is rejected when the
+  /// set of gesture recognizers is changed.
+  void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
+    assert(gestureRecognizers != null);
+    assert(_factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length);
+    if (_factoryTypesSetEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
       return;
     }
     _gestureRecognizer?.dispose();
-    _gestureRecognizer = new _AndroidViewGestureRecognizer(_motionEventsDispatcher, recognizers);
+    _gestureRecognizer = _AndroidViewGestureRecognizer(_motionEventsDispatcher, gestureRecognizers);
+  }
+
+  static bool _factoryTypesSetEquals<T>(Set<Factory<T>> a, Set<Factory<T>> b) {
+    if (a == b) {
+      return true;
+    }
+    if (a == null ||  b == null) {
+      return false;
+    }
+    return setEquals(_factoriesTypeSet(a), _factoriesTypeSet(b));
+  }
+
+  static Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) {
+    return factories.map<Type>((Factory<T> factory) => factory.type).toSet();
   }
 
   @override
@@ -126,7 +151,7 @@ class RenderAndroidView extends RenderBox {
 
   Size _currentAndroidViewSize;
 
-  Future<Null> _sizePlatformView() async {
+  Future<void> _sizePlatformView() async {
     // Android virtual displays cannot have a zero size.
     // Trying to size it to 0 crashes the app, which was happening when starting the app
     // with a locked screen (see: https://github.com/flutter/flutter/issues/20456).
@@ -176,7 +201,7 @@ class RenderAndroidView extends RenderBox {
     // we know that a frame with the new size is in the buffer.
     // This guarantees that the size of the texture frame we're painting is always
     // _currentAndroidViewSize.
-    context.addLayer(new TextureLayer(
+    context.addLayer(TextureLayer(
       rect: offset & _currentAndroidViewSize,
       textureId: _viewController.textureId,
       freeze: _state == _PlatformViewState.resizing,
@@ -187,7 +212,7 @@ class RenderAndroidView extends RenderBox {
   bool hitTest(HitTestResult result, { Offset position }) {
     if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position))
       return false;
-    result.add(new BoxHitTestEntry(this, position));
+    result.add(BoxHitTestEntry(this, position));
     return hitTestBehavior == PlatformViewHitTestBehavior.opaque;
   }
 
@@ -209,8 +234,14 @@ class RenderAndroidView extends RenderBox {
 }
 
 class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
-  _AndroidViewGestureRecognizer(this.dispatcher, List<OneSequenceGestureRecognizer> gestureRecognizers) {
-    this.gestureRecognizers = gestureRecognizers;
+  _AndroidViewGestureRecognizer(this.dispatcher, this.gestureRecognizerFactories) {
+    team = GestureArenaTeam();
+    team.captain = this;
+    _gestureRecognizers = gestureRecognizerFactories.map(
+      (Factory<OneSequenceGestureRecognizer> factory) {
+        return factory.constructor()..team = team;
+      }
+    ).toSet();
   }
 
   final _MotionEventsDispatcher dispatcher;
@@ -223,21 +254,13 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   // Pointer for which we have already won the arena, events for pointers in this set are
   // immediately dispatched to the Android view.
-  final Set<int> forwardedPointers = new Set<int>();
+  final Set<int> forwardedPointers = Set<int>();
 
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
   // TODO(amirh): get a list of GestureRecognizers here.
   // https://github.com/flutter/flutter/issues/20953
-  List<OneSequenceGestureRecognizer> _gestureRecognizers;
-  List<OneSequenceGestureRecognizer> get gestureRecognizers => _gestureRecognizers;
-  set gestureRecognizers(List<OneSequenceGestureRecognizer> recognizers) {
-    _gestureRecognizers = recognizers;
-    team = new GestureArenaTeam();
-    team.captain = this;
-    for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
-      recognizer.team = team;
-    }
-  }
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizerFactories;
+  Set<OneSequenceGestureRecognizer> _gestureRecognizers;
 
   @override
   void addPointer(PointerDownEvent event) {
@@ -251,9 +274,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'Android view';
 
   @override
-  void didStopTrackingLastPointer(int pointer) {
-    resolve(GestureDisposition.rejected);
-  }
+  void didStopTrackingLastPointer(int pointer) {}
 
   @override
   void handleEvent(PointerEvent event) {
@@ -303,7 +324,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 }
 
-typedef Offset _GlobalToLocal(Offset point);
+typedef _GlobalToLocal = Offset Function(Offset point);
 
 // Composes a stream of PointerEvent objects into AndroidMotionEvent objects
 // and dispatches them to the associated embedded Android view.
@@ -377,13 +398,13 @@ class _MotionEventsDispatcher {
         return;
     }
 
-    final AndroidMotionEvent androidMotionEvent = new AndroidMotionEvent(
+    final AndroidMotionEvent androidMotionEvent = AndroidMotionEvent(
         downTime: downTimeMillis,
         eventTime: event.timeStamp.inMilliseconds,
         action: action,
         pointerCount: pointerPositions.length,
-        pointerProperties: pointers.map((int i) => pointerProperties[i]).toList(),
-        pointerCoords: pointers.map((int i) => pointerPositions[i]).toList(),
+        pointerProperties: pointers.map<AndroidPointerProperties>((int i) => pointerProperties[i]).toList(),
+        pointerCoords: pointers.map<AndroidPointerCoords>((int i) => pointerPositions[i]).toList(),
         metaState: 0,
         buttonState: 0,
         xPrecision: 1.0,
@@ -398,7 +419,7 @@ class _MotionEventsDispatcher {
 
   AndroidPointerCoords coordsFor(PointerEvent event) {
     final Offset position = globalToLocal(event.position);
-    return new AndroidPointerCoords(
+    return AndroidPointerCoords(
         orientation: event.orientation,
         pressure: event.pressure,
         // Currently the engine omits the pointer size, for now I'm fixing this to 0.33 which is roughly
@@ -435,7 +456,7 @@ class _MotionEventsDispatcher {
         toolType = AndroidPointerProperties.kToolTypeUnknown;
         break;
     }
-    return new AndroidPointerProperties(id: pointerId, toolType: toolType);
+    return AndroidPointerProperties(id: pointerId, toolType: toolType);
   }
 
   bool isSinglePointerAction(PointerEvent event) =>

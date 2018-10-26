@@ -28,7 +28,7 @@ class ProtocolDiscovery {
     bool ipv6 = false,
   }) {
     const String kObservatoryService = 'Observatory';
-    return new ProtocolDiscovery._(
+    return ProtocolDiscovery._(
       logReader,
       kObservatoryService,
       portForwarder: portForwarder,
@@ -43,16 +43,16 @@ class ProtocolDiscovery {
   final int hostPort;
   final bool ipv6;
 
-  final Completer<Uri> _completer = new Completer<Uri>();
+  final Completer<Uri> _completer = Completer<Uri>();
 
   StreamSubscription<String> _deviceLogSubscription;
 
   /// The discovered service URI.
   Future<Uri> get uri => _completer.future;
 
-  Future<Null> cancel() => _stopScrapingLogs();
+  Future<void> cancel() => _stopScrapingLogs();
 
-  Future<Null> _stopScrapingLogs() async {
+  Future<void> _stopScrapingLogs() async {
     await _deviceLogSubscription?.cancel();
     _deviceLogSubscription = null;
   }
@@ -60,7 +60,7 @@ class ProtocolDiscovery {
   void _handleLine(String line) {
     Uri uri;
 
-    final RegExp r = new RegExp('${RegExp.escape(serviceName)} listening on (http://[^ \n]+)');
+    final RegExp r = RegExp('${RegExp.escape(serviceName)} listening on ((http|\/\/)[a-zA-Z0-9:/=\.\\[\\]]+)');
     final Match match = r.firstMatch(line);
 
     if (match != null) {
@@ -91,7 +91,7 @@ class ProtocolDiscovery {
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 
-    assert(new InternetAddress(hostUri.host).isLoopback);
+    assert(InternetAddress(hostUri.host).isLoopback);
     if (ipv6) {
       hostUri = hostUri.replace(host: InternetAddress.loopbackIPv6.host);
     }

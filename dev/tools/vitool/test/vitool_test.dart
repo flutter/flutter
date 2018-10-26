@@ -224,7 +224,7 @@ void main() {
           ],
         ),
       ];
-      expect(new PathAnimation.fromFrameData(frameData, 0),
+      expect(PathAnimation.fromFrameData(frameData, 0),
           const PathAnimationMatcher(PathAnimation(
               <PathCommandAnimation>[
                 PathCommandAnimation('M', <List<Point<double>>>[
@@ -259,7 +259,7 @@ void main() {
           ],
         ),
       ];
-      expect(new PathAnimation.fromFrameData(frameData, 0),
+      expect(PathAnimation.fromFrameData(frameData, 0),
           const PathAnimationMatcher(PathAnimation(
               <PathCommandAnimation>[
                 PathCommandAnimation('M', <List<Point<double>>>[
@@ -270,7 +270,7 @@ void main() {
           ))
       );
 
-      expect(new PathAnimation.fromFrameData(frameData, 1),
+      expect(PathAnimation.fromFrameData(frameData, 1),
           const PathAnimationMatcher(PathAnimation(
               <PathCommandAnimation>[
                 PathCommandAnimation('M', <List<Point<double>>>[
@@ -308,7 +308,7 @@ void main() {
           ],
         ),
       ];
-      expect(new PathAnimation.fromFrameData(frameData, 0),
+      expect(PathAnimation.fromFrameData(frameData, 0),
           const PathAnimationMatcher(PathAnimation(
               <PathCommandAnimation>[
                 PathCommandAnimation('M', <List<Point<double>>>[
@@ -345,7 +345,7 @@ void main() {
           ],
         ),
       ];
-      final Animation animation = new Animation.fromFrameData(frameData);
+      final Animation animation = Animation.fromFrameData(frameData);
       expect(animation.paths[0],
           const PathAnimationMatcher(PathAnimation(
               <PathCommandAnimation>[

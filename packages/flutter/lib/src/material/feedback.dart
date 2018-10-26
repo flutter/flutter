@@ -36,7 +36,7 @@ import 'theme.dart';
 /// class WidgetWithWrappedHandler extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new GestureDetector(
+///     return GestureDetector(
 ///       onTap: Feedback.wrapForTap(_onTapHandler, context),
 ///       onLongPress: Feedback.wrapForLongPress(_onLongPressHandler, context),
 ///       child: const Text('X'),
@@ -60,7 +60,7 @@ import 'theme.dart';
 /// class WidgetWithExplicitCall extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new GestureDetector(
+///     return GestureDetector(
 ///       onTap: () {
 ///         // Do some work (e.g. check if the tap is valid)
 ///         Feedback.forTap(context);
@@ -87,14 +87,14 @@ class Feedback {
   ///
   ///  * [wrapForTap] to trigger platform-specific feedback before executing a
   ///    [GestureTapCallback].
-  static Future<Null> forTap(BuildContext context) async {
+  static Future<void> forTap(BuildContext context) async {
     context.findRenderObject().sendSemanticsEvent(const TapSemanticEvent());
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return SystemSound.play(SystemSoundType.click);
       default:
-        return new Future<Null>.value();
+        return Future<void>.value();
     }
   }
 
@@ -126,14 +126,14 @@ class Feedback {
   ///
   ///  * [wrapForLongPress] to trigger platform-specific feedback before
   ///    executing a [GestureLongPressCallback].
-  static Future<Null> forLongPress(BuildContext context) {
+  static Future<void> forLongPress(BuildContext context) {
     context.findRenderObject().sendSemanticsEvent(const LongPressSemanticsEvent());
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return HapticFeedback.vibrate();
       default:
-        return new Future<Null>.value();
+        return Future<void>.value();
     }
   }
 

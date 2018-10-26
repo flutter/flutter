@@ -23,14 +23,14 @@ const String clock = '🕐';
 const Duration _kLongTimeout = Duration(minutes: 45);
 
 String elapsedTime(DateTime start) {
-  return new DateTime.now().difference(start).toString();
+  return DateTime.now().difference(start).toString();
 }
 
 void printProgress(String action, String workingDir, String command) {
   print('$arrow $action: cd $cyan$workingDir$reset; $yellow$command$reset');
 }
 
-Future<Null> runCommand(String executable, List<String> arguments, {
+Future<void> runCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
   bool expectNonZeroExit = false,
@@ -44,11 +44,11 @@ Future<Null> runCommand(String executable, List<String> arguments, {
   final String relativeWorkingDir = path.relative(workingDirectory);
   if (skip) {
     printProgress('SKIPPING', relativeWorkingDir, commandDescription);
-    return null;
+    return;
   }
   printProgress('RUNNING', relativeWorkingDir, commandDescription);
 
-  final DateTime start = new DateTime.now();
+  final DateTime start = DateTime.now();
   final Process process = await Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
@@ -56,7 +56,7 @@ Future<Null> runCommand(String executable, List<String> arguments, {
 
   Future<List<List<int>>> savedStdout, savedStderr;
   if (printOutput) {
-    await Future.wait(<Future<void>>[
+    await Future.wait<void>(<Future<void>>[
       stdout.addStream(process.stdout),
       stderr.addStream(process.stderr)
     ]);
@@ -75,8 +75,8 @@ Future<Null> runCommand(String executable, List<String> arguments, {
       print(failureMessage);
     }
     if (!printOutput) {
-      stdout.writeln(utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
-      stderr.writeln(utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
+      stdout.writeln(utf8.decode((await savedStdout).expand<int>((List<int> ints) => ints).toList()));
+      stderr.writeln(utf8.decode((await savedStderr).expand<int>((List<int> ints) => ints).toList()));
     }
     print(
         '$redLine\n'

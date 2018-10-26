@@ -9,19 +9,19 @@ import 'package:flutter_test/flutter_test.dart';
 const List<int> items = <int>[0, 1, 2, 3, 4, 5];
 
 Widget buildFrame({ bool reverse = false, @required TextDirection textDirection }) {
-  return new Directionality(
+  return Directionality(
     textDirection: textDirection,
-    child: new Center(
-      child: new Container(
+    child: Center(
+      child: Container(
         height: 50.0,
-        child: new ListView(
+        child: ListView(
           itemExtent: 290.0,
           scrollDirection: Axis.horizontal,
           reverse: reverse,
           physics: const BouncingScrollPhysics(),
-          children: items.map((int item) {
-            return new Container(
-              child: new Text('$item')
+          children: items.map<Widget>((int item) {
+            return Container(
+              child: Text('$item')
             );
           }).toList(),
         ),
@@ -119,7 +119,7 @@ void main() {
     expect(find.text('4'), findsOneWidget);
     expect(find.text('5'), findsOneWidget);
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     await tester.pumpWidget(buildFrame(textDirection: TextDirection.ltr), const Duration(seconds: 1));
     await tester.drag(find.text('2'), const Offset(-280.0, 0.0));
     await tester.pump(const Duration(seconds: 1));
@@ -438,7 +438,7 @@ void main() {
     expect(find.text('4'), findsOneWidget);
     expect(find.text('5'), findsOneWidget);
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     await tester.pumpWidget(buildFrame(reverse: true, textDirection: TextDirection.rtl), const Duration(seconds: 1));
     await tester.drag(find.text('2'), const Offset(-280.0, 0.0));
     await tester.pump(const Duration(seconds: 1));

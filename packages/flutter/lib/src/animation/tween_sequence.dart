@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
-import 'animations.dart';
 import 'tween.dart';
 
 /// Enables creating an [Animation] whose value is defined by a
@@ -16,21 +15,21 @@ import 'tween.dart';
 /// animation, remain at 10.0 for the next 20%, and then return to
 /// 10.0 for the final 40%:
 ///
-/// ```
-/// final Animation<double> = new TweenSequence(
+/// ```dart
+/// final Animation<double> = TweenSequence(
 ///   <TweenSequenceItem<double>>[
-///     new TweenSequenceItem<double>(
-///       tween: new Tween<double>(begin: 5.0, end: 10.0)
-///         .chain(new CurveTween(curve: Curves.ease)),
+///     TweenSequenceItem<double>(
+///       tween: Tween<double>(begin: 5.0, end: 10.0)
+///         .chain(CurveTween(curve: Curves.ease)),
 ///       weight: 40.0,
 ///     ),
-///     new TweenSequenceItem<double>(
-///       tween: new ConstantTween<double>(10.0),
+///     TweenSequenceItem<double>(
+///       tween: ConstantTween<double>(10.0),
 ///       weight: 20.0,
 ///     ),
-///     new TweenSequenceItem<double>(
-///       tween: new Tween<double>(begin: 10.0, end: 5.0)
-///         .chain(new CurveTween(curve: Curves.ease)),
+///     TweenSequenceItem<double>(
+///       tween: Tween<double>(begin: 10.0, end: 5.0)
+///         .chain(CurveTween(curve: Curves.ease)),
 ///       weight: 40.0,
 ///     ),
 ///   ],
@@ -56,7 +55,7 @@ class TweenSequence<T> extends Animatable<T> {
     double start = 0.0;
     for (int i = 0; i < _items.length; i += 1) {
       final double end = i == _items.length - 1 ? 1.0 : start + _items[i].weight / totalWeight;
-      _intervals.add(new _Interval(start, end));
+      _intervals.add(_Interval(start, end));
       start = end;
     }
   }
@@ -67,12 +66,11 @@ class TweenSequence<T> extends Animatable<T> {
   T _evaluateAt(double t, int index) {
     final TweenSequenceItem<T> element = _items[index];
     final double tInterval = _intervals[index].value(t);
-    return element.tween.evaluate(new AlwaysStoppedAnimation<double>(tInterval));
+    return element.tween.transform(tInterval);
   }
 
   @override
-  T evaluate(Animation<double> animation) {
-    final double t = animation.value;
+  T transform(double t) {
     assert(t >= 0.0 && t <= 1.0);
     if (t == 1.0)
       return _evaluateAt(t, _items.length - 1);
@@ -100,11 +98,14 @@ class TweenSequenceItem<T> {
   /// animation's duration indicated by [weight] and this item's position
   /// in the list of items.
   ///
+  /// ## Sample code
+  ///
   /// The value of this item can be "curved" by chaining it to a [CurveTween].
   /// For example to create a tween that eases from 0.0 to 10.0:
-  /// ```
-  /// new Tween<double>(begin: 0.0, end: 10.0)
-  ///   .chain(new CurveTween(curve: Curves.ease))
+  ///
+  /// ```dart
+  /// Tween<double>(begin: 0.0, end: 10.0)
+  ///   .chain(CurveTween(curve: Curves.ease))
   /// ```
   final Animatable<T> tween;
 

@@ -8,13 +8,13 @@ import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
   enableFlutterDriverExtension();
-  runApp(new DriverTestApp());
+  runApp(DriverTestApp());
 }
 
 class DriverTestApp extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return new DriverTestAppState();
+    return DriverTestAppState();
   }
 }
 
@@ -24,20 +24,20 @@ class DriverTestAppState extends State<DriverTestApp> {
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-      home: new Scaffold(
-        appBar: new AppBar(
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
           title: const Text('FlutterDriver test'),
         ),
-        body: new ListView(
+        body: ListView(
           padding: const EdgeInsets.all(5.0),
           children: <Widget>[
-            new Row(
+            Row(
               children: <Widget>[
-                new Expanded(
-                  child: new Text(present ? 'present' : 'absent'),
+                Expanded(
+                  child: Text(present ? 'present' : 'absent'),
                 ),
-                new RaisedButton(
+                RaisedButton(
                   child: const Text(
                     'toggle',
                     key: ValueKey<String>('togglePresent'),
@@ -50,12 +50,12 @@ class DriverTestAppState extends State<DriverTestApp> {
                 ),
               ],
             ),
-            new Row(
+            Row(
               children: <Widget>[
                 const Expanded(
                   child: Text('hit testability'),
                 ),
-                new DropdownButton<Letter>(
+                DropdownButton<Letter>(
                   key: const ValueKey<String>('dropdown'),
                   value: _selectedValue,
                   onChanged: (Letter newValue) {

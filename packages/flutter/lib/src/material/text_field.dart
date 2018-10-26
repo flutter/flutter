@@ -88,8 +88,9 @@ class TextField extends StatefulWidget {
   /// characters may be entered, and the error counter and divider will
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
-  /// The [textAlign], [autofocus], [obscureText], and [autocorrect] arguments
-  /// must not be null.
+  /// The [textAlign], [autofocus], [obscureText], [autocorrect],
+  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
+  /// and [enableInteractiveSelection] arguments must not be null.
   ///
   /// See also:
   ///
@@ -121,6 +122,7 @@ class TextField extends StatefulWidget {
     this.cursorColor,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
+    this.enableInteractiveSelection = true,
   }) : assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
@@ -130,6 +132,7 @@ class TextField extends StatefulWidget {
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+       assert(enableInteractiveSelection != null),
        super(key: key);
 
   /// Controls the text being edited.
@@ -151,10 +154,7 @@ class TextField extends StatefulWidget {
   /// extra padding introduced by the decoration to save space for the labels).
   final InputDecoration decoration;
 
-  /// The type of keyboard to use for editing the text.
-  ///
-  /// Defaults to [TextInputType.text] if [maxLines] is one and
-  /// [TextInputType.multiline] otherwise.
+  /// {@macro flutter.widgets.editableText.keyboardType}
   final TextInputType keyboardType;
 
   /// The type of action button to use for the keyboard.
@@ -163,17 +163,7 @@ class TextField extends StatefulWidget {
   /// [TextInputType.multiline] and [TextInputAction.done] otherwise.
   final TextInputAction textInputAction;
 
-  /// Configures how the platform keyboard will select an uppercase or
-  /// lowercase keyboard.
-  ///
-  /// Only supports text keyboards, other keyboard types will ignore this
-  /// configuration. Capitalization is locale-aware.
-  ///
-  /// Defaults to [TextCapitalization.none]. Must not be null.
-  ///
-  /// See also:
-  ///
-  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization textCapitalization;
 
   /// The style to use for the text being edited.
@@ -183,42 +173,19 @@ class TextField extends StatefulWidget {
   /// If null, defaults to the `subhead` text style from the current [Theme].
   final TextStyle style;
 
-  /// How the text being edited should be aligned horizontally.
-  ///
-  /// Defaults to [TextAlign.start].
+  /// {@macro flutter.widgets.editableText.textAlign}
   final TextAlign textAlign;
 
-  /// Whether this text field should focus itself if nothing else is already
-  /// focused.
-  ///
-  /// If true, the keyboard will open as soon as this text field obtains focus.
-  /// Otherwise, the keyboard is only shown after the user taps the text field.
-  ///
-  /// Defaults to false. Cannot be null.
-  // See https://github.com/flutter/flutter/issues/7035 for the rationale for this
-  // keyboard behavior.
+  /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
 
-  /// Whether to hide the text being edited (e.g., for passwords).
-  ///
-  /// When this is set to true, all the characters in the text field are
-  /// replaced by U+2022 BULLET characters (•).
-  ///
-  /// Defaults to false. Cannot be null.
+  /// {@macro flutter.widgets.editableText.obscureText}
   final bool obscureText;
 
-  /// Whether to enable autocorrection.
-  ///
-  /// Defaults to true. Cannot be null.
+  /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
 
-  /// The maximum number of lines for the text to span, wrapping if necessary.
-  ///
-  /// If this is 1 (the default), the text will not wrap, but will scroll
-  /// horizontally instead.
-  ///
-  /// If this is null, there is no limit to the number of lines. If it is not
-  /// null, the value must be greater than zero.
+  /// {@macro flutter.widgets.editableText.maxLines}
   final int maxLines;
 
   /// The maximum number of characters (Unicode scalar values) to allow in the
@@ -277,34 +244,16 @@ class TextField extends StatefulWidget {
   /// [maxLength] is exceeded.
   final bool maxLengthEnforced;
 
-  /// Called when the text being edited changes.
+  /// {@macro flutter.widgets.editableText.onChanged}
   final ValueChanged<String> onChanged;
 
-  /// Called when the user submits editable content (e.g., user presses the "done"
-  /// button on the keyboard).
-  ///
-  /// The default implementation of [onEditingComplete] executes 2 different
-  /// behaviors based on the situation:
-  ///
-  ///  - When a completion action is pressed, such as "done", "go", "send", or
-  ///    "search", the user's content is submitted to the [controller] and then
-  ///    focus is given up.
-  ///
-  ///  - When a non-completion action is pressed, such as "next" or "previous",
-  ///    the user's content is submitted to the [controller], but focus is not
-  ///    given up because developers may want to immediately move focus to
-  ///    another input widget within [onSubmitted].
-  ///
-  /// Providing [onEditingComplete] prevents the aforementioned default behavior.
+  /// {@macro flutter.widgets.editableText.onEditingComplete}
   final VoidCallback onEditingComplete;
 
-  /// Called when the user indicates that they are done editing the text in the
-  /// field.
+  /// {@macro flutter.widgets.editableText.onSubmitted}
   final ValueChanged<String> onSubmitted;
 
-  /// Optional input validation and formatting overrides.
-  ///
-  /// Formatters are run in the provided order when the text input changes.
+  /// {@macro flutter.widgets.editableText.inputFormatters}
   final List<TextInputFormatter> inputFormatters;
 
   /// If false the textfield is "disabled": it ignores taps and its
@@ -314,16 +263,15 @@ class TextField extends StatefulWidget {
   /// [Decoration.enabled] property.
   final bool enabled;
 
-  /// How thick the cursor will be.
-  ///
-  /// Defaults to 2.0.
+  /// {@macro flutter.widgets.editableText.cursorWidth}
   final double cursorWidth;
 
-  /// How rounded the corners of the cursor should be.
-  /// By default, the cursor has a null Radius
+  /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius cursorRadius;
 
   /// The color to use when painting the cursor.
+  ///
+  /// Defaults to the theme's `cursorColor` when null.
   final Color cursorColor;
 
   /// The appearance of the keyboard.
@@ -333,38 +281,34 @@ class TextField extends StatefulWidget {
   /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
   final Brightness keyboardAppearance;
 
-  /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view.
-  ///
-  /// When this widget receives focus and is not completely visible (for example scrolled partially
-  /// off the screen or overlapped by the keyboard)
-  /// then it will attempt to make itself visible by scrolling a surrounding [Scrollable], if one is present.
-  /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
-  ///
-  /// Defaults to EdgeInserts.all(20.0).
+  /// {@macro flutter.widgets.editableText.scrollPadding}
   final EdgeInsets scrollPadding;
 
+  /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
+  final bool enableInteractiveSelection;
+
   @override
-  _TextFieldState createState() => new _TextFieldState();
+  _TextFieldState createState() => _TextFieldState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
-    properties.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
-    properties.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
-    properties.add(new DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
-    properties.add(new DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-    properties.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-    properties.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    properties.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
-    properties.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
-    properties.add(new IntProperty('maxLength', maxLength, defaultValue: null));
-    properties.add(new FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
+    properties.add(DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<InputDecoration>('decoration', decoration));
+    properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
+    properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
+    properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
+    properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
+    properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
   }
 }
 
 class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixin {
-  final GlobalKey<EditableTextState> _editableTextKey = new GlobalKey<EditableTextState>();
+  final GlobalKey<EditableTextState> _editableTextKey = GlobalKey<EditableTextState>();
 
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
@@ -373,7 +317,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   TextEditingController get _effectiveController => widget.controller ?? _controller;
 
   FocusNode _focusNode;
-  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= new FocusNode());
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
   bool get needsCounter => widget.maxLength != null
     && widget.decoration != null
@@ -414,14 +358,14 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   void initState() {
     super.initState();
     if (widget.controller == null)
-      _controller = new TextEditingController();
+      _controller = TextEditingController();
   }
 
   @override
   void didUpdateWidget(TextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller == null && oldWidget.controller != null)
-      _controller = new TextEditingController.fromValue(oldWidget.controller.value);
+      _controller = TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
     final bool isEnabled = widget.enabled ?? widget.decoration?.enabled ?? true;
@@ -473,6 +417,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       // TODO(hansmuller): splash clip borderRadius should match the input decorator's border.
       borderRadius: BorderRadius.zero,
       onRemoved: handleRemoved,
+      textDirection: Directionality.of(context),
     );
 
     return splash;
@@ -486,7 +431,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleTap() {
-    _renderEditable.handleTap();
+    if (widget.enableInteractiveSelection)
+      _renderEditable.handleTap();
     _requestKeyboard();
     _confirmCurrentSplash();
   }
@@ -496,7 +442,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleLongPress() {
-    _renderEditable.handleLongPress();
+    if (widget.enableInteractiveSelection)
+      _renderEditable.handleLongPress();
     _confirmCurrentSplash();
   }
 
@@ -504,7 +451,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (_effectiveFocusNode.hasFocus)
       return;
     final InteractiveInkFeature splash = _createInkFeature(details);
-    _splashes ??= new HashSet<InteractiveInkFeature>();
+    _splashes ??= HashSet<InteractiveInkFeature>();
     _splashes.add(splash);
     _currentSplash = splash;
     updateKeepAlive();
@@ -539,6 +486,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasMaterial(context));
+    // TODO(jonahwilliams): uncomment out this check once we have migrated tests.
+    // assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasDirectionality(context));
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.primaryColorBrightness;
@@ -546,10 +496,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     if (widget.maxLength != null && widget.maxLengthEnforced)
-      formatters.add(new LengthLimitingTextInputFormatter(widget.maxLength));
+      formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
 
-    Widget child = new RepaintBoundary(
-      child: new EditableText(
+    Widget child = RepaintBoundary(
+      child: EditableText(
         key: _editableTextKey,
         controller: controller,
         focusNode: focusNode,
@@ -563,9 +513,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
         selectionColor: themeData.textSelectionColor,
-        selectionControls: themeData.platform == TargetPlatform.iOS
-            ? cupertinoTextSelectionControls
-            : materialTextSelectionControls,
+        selectionControls: widget.enableInteractiveSelection
+          ? (themeData.platform == TargetPlatform.iOS
+             ? cupertinoTextSelectionControls
+             : materialTextSelectionControls)
+          : null,
         onChanged: widget.onChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
@@ -577,14 +529,15 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
+        enableInteractiveSelection: widget.enableInteractiveSelection,
       ),
     );
 
     if (widget.decoration != null) {
-      child = new AnimatedBuilder(
-        animation: new Listenable.merge(<Listenable>[ focusNode, controller ]),
+      child = AnimatedBuilder(
+        animation: Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget child) {
-          return new InputDecorator(
+          return InputDecorator(
             decoration: _getEffectiveDecoration(),
             baseStyle: widget.style,
             textAlign: widget.textAlign,
@@ -597,15 +550,15 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       );
     }
 
-    return new Semantics(
+    return Semantics(
       onTap: () {
         if (!_effectiveController.selection.isValid)
-          _effectiveController.selection = new TextSelection.collapsed(offset: _effectiveController.text.length);
+          _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
         _requestKeyboard();
       },
-      child: new IgnorePointer(
+      child: IgnorePointer(
         ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
-        child: new GestureDetector(
+        child: GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTapDown: _handleTapDown,
           onTap: _handleTap,

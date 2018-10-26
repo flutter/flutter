@@ -6,15 +6,13 @@ import 'dart:ui' as ui show AccessibilityFeatures, window;
 
 import 'package:flutter/foundation.dart';
 
+import 'debug.dart';
+
 export 'dart:ui' show AccessibilityFeatures;
 
 /// The glue between the semantics layer and the Flutter engine.
 // TODO(jonahwilliams): move the remaining semantic related bindings here.
-class SemanticsBinding extends BindingBase {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory SemanticsBinding._() => null;
-
+mixin SemanticsBinding on BindingBase {
   /// The current [SemanticsBinding], if one has been created.
   static SemanticsBinding get instance => _instance;
   static SemanticsBinding _instance;
@@ -23,7 +21,7 @@ class SemanticsBinding extends BindingBase {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    _accessibilityFeatures = new ValueNotifier<ui.AccessibilityFeatures>(ui.window.accessibilityFeatures);
+    _accessibilityFeatures = ui.window.accessibilityFeatures;
   }
 
   /// Called when the platform accessibility features change.
@@ -31,7 +29,7 @@ class SemanticsBinding extends BindingBase {
   /// See [Window.onAccessibilityFeaturesChanged].
   @protected
   void handleAccessibilityFeaturesChanged() {
-    _accessibilityFeatures.value = ui.window.accessibilityFeatures;
+    _accessibilityFeatures = ui.window.accessibilityFeatures;
   }
 
   /// The currently active set of [AccessibilityFeatures].
@@ -41,6 +39,20 @@ class SemanticsBinding extends BindingBase {
   ///
   /// To listen to changes to accessibility features, create a
   /// [WidgetsBindingObserver] and listen to [didChangeAccessibilityFeatures].
-  ValueListenable<ui.AccessibilityFeatures> get accessibilityFeatures => _accessibilityFeatures;
-  ValueNotifier<ui.AccessibilityFeatures> _accessibilityFeatures;
+  ui.AccessibilityFeatures get accessibilityFeatures => _accessibilityFeatures;
+  ui.AccessibilityFeatures _accessibilityFeatures;
+
+  /// The platform is requesting that animations be disabled or simplified.
+  ///
+  /// This setting can be overriden for testing or debugging by setting
+  /// [debugSemanticsDisableAnimations].
+  bool get disableAnimations {
+    bool value = _accessibilityFeatures.disableAnimations;
+    assert(() {
+      if (debugSemanticsDisableAnimations != null)
+          value = debugSemanticsDisableAnimations;
+      return true;
+    }());
+    return value;
+  }
 }

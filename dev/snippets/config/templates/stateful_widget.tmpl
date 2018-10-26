@@ -1,0 +1,32 @@
+{{description}}
+
+import 'package:flutter/material.dart';
+
+void main() => runApp(new MyApp());
+
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      title: 'Flutter Code Sample for {{id}}',
+      theme: new ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: new MyHomePage(title: '{{id}} Sample'),
+    );
+  }
+}
+
+{{code-preamble}}
+
+class MyHomePage extends StatelessWidget {
+  MyHomePage({Key key}) : super(key: key);
+
+  @override
+  _MyHomePageState createState() => new _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  {{code}}
+}

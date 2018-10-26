@@ -9,7 +9,7 @@ bool willPopValue = false;
 
 class SamplePage extends StatefulWidget {
   @override
-  SamplePageState createState() => new SamplePageState();
+  SamplePageState createState() => SamplePageState();
 }
 
 class SamplePageState extends State<SamplePage> {
@@ -33,8 +33,8 @@ class SamplePageState extends State<SamplePage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(title: const Text('Sample Page')),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Sample Page')),
     );
   }
 }
@@ -48,10 +48,10 @@ class SampleForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(title: const Text('Sample Form')),
-      body: new SizedBox.expand(
-        child: new Form(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Sample Form')),
+      body: SizedBox.expand(
+        child: Form(
           onWillPop: () {
             willPopCount += 1;
             return callback();
@@ -75,18 +75,18 @@ class TestPageRoute<T> extends MaterialPageRoute<T> {
 void main() {
   testWidgets('ModalRoute scopedWillPopupCallback can inhibit back button', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          appBar: new AppBar(title: const Text('Home')),
-          body: new Builder(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Home')),
+          body: Builder(
             builder: (BuildContext context) {
-              return new Center(
-                child: new FlatButton(
+              return Center(
+                child: FlatButton(
                   child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(
                       context: context,
-                      builder: (BuildContext context) => new SamplePage(),
+                      builder: (BuildContext context) => SamplePage(),
                     );
                   },
                 ),
@@ -129,19 +129,19 @@ void main() {
 
   testWidgets('Form.willPop can inhibit back button', (WidgetTester tester) async {
     Widget buildFrame() {
-      return new MaterialApp(
-        home: new Scaffold(
-          appBar: new AppBar(title: const Text('Home')),
-          body: new Builder(
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Home')),
+          body: Builder(
             builder: (BuildContext context) {
-              return new Center(
-                child: new FlatButton(
+              return Center(
+                child: FlatButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context).push(new MaterialPageRoute<void>(
+                    Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (BuildContext context) {
-                        return new SampleForm(
-                          callback: () => new Future<bool>.value(willPopValue),
+                        return SampleForm(
+                          callback: () => Future<bool>.value(willPopValue),
                         );
                       },
                     ));
@@ -186,13 +186,13 @@ void main() {
       return showDialog<bool>(
         context: context,
         builder: (BuildContext context) {
-          return new AlertDialog(
+          return AlertDialog(
             actions: <Widget> [
-              new FlatButton(
+              FlatButton(
                 child: const Text('YES'),
                 onPressed: () { Navigator.of(context).pop(true); },
               ),
-              new FlatButton(
+              FlatButton(
                 child: const Text('NO'),
                 onPressed: () { Navigator.of(context).pop(false); },
               ),
@@ -203,18 +203,18 @@ void main() {
     }
 
     Widget buildFrame() {
-      return new MaterialApp(
-        home: new Scaffold(
-          appBar: new AppBar(title: const Text('Home')),
-          body: new Builder(
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Home')),
+          body: Builder(
             builder: (BuildContext context) {
-              return new Center(
-                child: new FlatButton(
+              return Center(
+                child: FlatButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context).push(new MaterialPageRoute<void>(
+                    Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (BuildContext context) {
-                        return new SampleForm(
+                        return SampleForm(
                           callback: () => showYesNoAlert(context),
                         );
                       }
@@ -248,10 +248,10 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
     expect(find.text('Sample Form'), findsOneWidget);
 
-    // Do it again. Note that each time the Alert is shown and dismissed
-    // the FormState's didChangeDependencies() method runs. We're making sure
-    // that the didChangeDependencies() method doesn't add an extra willPop
-    // callback.
+    // Do it again.
+    // Each time the Alert is shown and dismissed the FormState's
+    // didChangeDependencies() method runs. We're making sure that the
+    // didChangeDependencies() method doesn't add an extra willPop callback.
     await tester.tap(find.byTooltip('Back'));
     await tester.pump(); // Start the pop "back" operation.
     await tester.pump(); // Call willPop which will show an Alert.
@@ -277,25 +277,25 @@ void main() {
     StateSetter contentsSetState; // call this to rebuild the route's SampleForm contents
     bool contentsEmpty = false; // when true, don't include the SampleForm in the route
 
-    final TestPageRoute<Null> route = new TestPageRoute<Null>(
+    final TestPageRoute<void> route = TestPageRoute<void>(
       builder: (BuildContext context) {
-        return new StatefulBuilder(
+        return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             contentsSetState = setState;
-            return contentsEmpty ? new Container() : new SampleForm(key: new UniqueKey());
+            return contentsEmpty ? Container() : SampleForm(key: UniqueKey());
           }
         );
       },
     );
 
     Widget buildFrame() {
-      return new MaterialApp(
-        home: new Scaffold(
-          appBar: new AppBar(title: const Text('Home')),
-          body: new Builder(
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Home')),
+          body: Builder(
             builder: (BuildContext context) {
-              return new Center(
-                child: new FlatButton(
+              return Center(
+                child: FlatButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(route);

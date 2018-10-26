@@ -9,7 +9,7 @@ class TestOverlayRoute extends OverlayRoute<void> {
   TestOverlayRoute({ RouteSettings settings }) : super(settings: settings);
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
-    yield new OverlayEntry(builder: _build);
+    yield OverlayEntry(builder: _build);
   }
   Widget _build(BuildContext context) => const Text('Overlay');
 }
@@ -18,16 +18,16 @@ class PersistentBottomSheetTest extends StatefulWidget {
   const PersistentBottomSheetTest({ Key key }) : super(key: key);
 
   @override
-  PersistentBottomSheetTestState createState() => new PersistentBottomSheetTestState();
+  PersistentBottomSheetTestState createState() => PersistentBottomSheetTestState();
 }
 
 class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool setStateCalled = false;
 
   void showBottomSheet() {
-    _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
+    _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
       return const Text('bottomSheet');
     })
     .closed.whenComplete(() {
@@ -39,7 +39,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       key: _scaffoldKey,
       body: const Text('Sheet')
     );
@@ -48,14 +48,14 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
 
 void main() {
   testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
-    final GlobalKey containerKey1 = new GlobalKey();
-    final GlobalKey containerKey2 = new GlobalKey();
+    final GlobalKey containerKey1 = GlobalKey();
+    final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Container(key: containerKey1, child: const Text('Home')),
-      '/settings': (_) => new Container(key: containerKey2, child: const Text('Settings')),
+      '/': (_) => Container(key: containerKey1, child: const Text('Home')),
+      '/settings': (_) => Container(key: containerKey2, child: const Text('Settings')),
     };
 
-    await tester.pumpWidget(new MaterialApp(routes: routes));
+    await tester.pumpWidget(MaterialApp(routes: routes));
 
     expect(find.text('Home'), isOnstage);
     expect(find.text('Settings'), findsNothing);
@@ -83,7 +83,7 @@ void main() {
     expect(find.text('Settings'), isOnstage);
     expect(find.text('Overlay'), findsNothing);
 
-    Navigator.push(containerKey2.currentContext, new TestOverlayRoute());
+    Navigator.push(containerKey2.currentContext, TestOverlayRoute());
 
     await tester.pump();
 
@@ -130,13 +130,13 @@ void main() {
   });
 
   testWidgets('Check back gesture disables Heroes', (WidgetTester tester) async {
-    final GlobalKey containerKey1 = new GlobalKey();
-    final GlobalKey containerKey2 = new GlobalKey();
+    final GlobalKey containerKey1 = GlobalKey();
+    final GlobalKey containerKey2 = GlobalKey();
     const String kHeroTag = 'hero';
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Scaffold(
+      '/': (_) => Scaffold(
         key: containerKey1,
-        body: new Container(
+        body: Container(
           color: const Color(0xff00ffff),
           child: const Hero(
             tag: kHeroTag,
@@ -144,9 +144,9 @@ void main() {
           )
         )
       ),
-      '/settings': (_) => new Scaffold(
+      '/settings': (_) => Scaffold(
         key: containerKey2,
-        body: new Container(
+        body: Container(
           padding: const EdgeInsets.all(100.0),
           color: const Color(0xffff00ff),
           child: const Hero(
@@ -157,9 +157,9 @@ void main() {
       ),
     };
 
-    await tester.pumpWidget(new MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       routes: routes,
-      theme: new ThemeData(platform: TargetPlatform.iOS),
+      theme: ThemeData(platform: TargetPlatform.iOS),
     ));
 
     Navigator.pushNamed(containerKey1.currentContext, '/settings');
@@ -202,16 +202,16 @@ void main() {
   });
 
   testWidgets('Check back gesture doesn\'t start during transitions', (WidgetTester tester) async {
-    final GlobalKey containerKey1 = new GlobalKey();
-    final GlobalKey containerKey2 = new GlobalKey();
+    final GlobalKey containerKey1 = GlobalKey();
+    final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Scaffold(key: containerKey1, body: const Text('Home')),
-      '/settings': (_) => new Scaffold(key: containerKey2, body: const Text('Settings')),
+      '/': (_) => Scaffold(key: containerKey1, body: const Text('Home')),
+      '/settings': (_) => Scaffold(key: containerKey2, body: const Text('Settings')),
     };
 
-    await tester.pumpWidget(new MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       routes: routes,
-      theme: new ThemeData(platform: TargetPlatform.iOS),
+      theme: ThemeData(platform: TargetPlatform.iOS),
     ));
 
     Navigator.pushNamed(containerKey1.currentContext, '/settings');
@@ -249,16 +249,16 @@ void main() {
 
   // Tests bug https://github.com/flutter/flutter/issues/6451
   testWidgets('Check back gesture with a persistent bottom sheet showing', (WidgetTester tester) async {
-    final GlobalKey containerKey1 = new GlobalKey();
-    final GlobalKey containerKey2 = new GlobalKey();
+    final GlobalKey containerKey1 = GlobalKey();
+    final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Scaffold(key: containerKey1, body: const Text('Home')),
-      '/sheet': (_) => new PersistentBottomSheetTest(key: containerKey2),
+      '/': (_) => Scaffold(key: containerKey1, body: const Text('Home')),
+      '/sheet': (_) => PersistentBottomSheetTest(key: containerKey2),
     };
 
-    await tester.pumpWidget(new MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       routes: routes,
-      theme: new ThemeData(platform: TargetPlatform.iOS),
+      theme: ThemeData(platform: TargetPlatform.iOS),
     ));
 
     Navigator.pushNamed(containerKey1.currentContext, '/sheet');
@@ -310,9 +310,9 @@ void main() {
       '/next': (_) => const Center(child: Text('next')),
     };
 
-    await tester.pumpWidget(new MaterialApp(routes: routes));
+    await tester.pumpWidget(MaterialApp(routes: routes));
 
-    final PageRoute<void> route = new MaterialPageRoute<void>(
+    final PageRoute<void> route = MaterialPageRoute<void>(
       settings: const RouteSettings(name: '/page'),
       builder: (BuildContext context) => const Center(child: Text('page')),
     );

@@ -53,7 +53,7 @@ void main() {
   testWidgets('Action sheet destructive text style', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
-        new CupertinoActionSheetAction(
+        CupertinoActionSheetAction(
           isDestructiveAction: true,
           child: const Text('Ok'),
           onPressed: () {},
@@ -69,7 +69,7 @@ void main() {
   testWidgets('Action sheet default text style', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
-        new CupertinoActionSheetAction(
+        CupertinoActionSheetAction(
           isDefaultAction: true,
           child: const Text('Ok'),
           onPressed: () {},
@@ -144,10 +144,10 @@ void main() {
   });
 
   testWidgets('Content section but no actions', (WidgetTester tester) async {
-    final ScrollController scrollController = new ScrollController();
+    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new CupertinoActionSheet(
+        CupertinoActionSheet(
           title: const Text('The title'),
           message: const Text('The message.'),
           messageScrollController: scrollController,
@@ -179,16 +179,16 @@ void main() {
   });
 
   testWidgets('Actions but no content section', (WidgetTester tester) async {
-    final ScrollController actionScrollController = new ScrollController();
+    final ScrollController actionScrollController = ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new CupertinoActionSheet(
+        CupertinoActionSheet(
           actions: <Widget>[
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('One'),
               onPressed: () {},
             ),
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('Two'),
               onPressed: () {},
             ),
@@ -221,33 +221,33 @@ void main() {
   });
 
   testWidgets('Action section is scrollable', (WidgetTester tester) async {
-    final ScrollController actionScrollController = new ScrollController();
+    final ScrollController actionScrollController = ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new Builder(builder: (BuildContext context) {
-          return new MediaQuery(
+        Builder(builder: (BuildContext context) {
+          return MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
-            child: new CupertinoActionSheet(
+            child: CupertinoActionSheet(
               title: const Text('The title'),
               message: const Text('The message.'),
               actions: <Widget>[
-                new CupertinoActionSheetAction(
+                CupertinoActionSheetAction(
                   child: const Text('One'),
                   onPressed: () {},
                 ),
-                new CupertinoActionSheetAction(
+                CupertinoActionSheetAction(
                   child: const Text('Two'),
                   onPressed: () {},
                 ),
-                new CupertinoActionSheetAction(
+                CupertinoActionSheetAction(
                   child: const Text('Three'),
                   onPressed: () {},
                 ),
-                new CupertinoActionSheetAction(
+                CupertinoActionSheetAction(
                   child: const Text('Four'),
                   onPressed: () {},
                 ),
-                new CupertinoActionSheetAction(
+                CupertinoActionSheetAction(
                   child: const Text('Five'),
                   onPressed: () {},
                 ),
@@ -286,23 +286,23 @@ void main() {
   });
 
   testWidgets('Content section is scrollable', (WidgetTester tester) async {
-    final ScrollController messageScrollController = new ScrollController();
+    final ScrollController messageScrollController = ScrollController();
     double screenHeight;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new Builder(builder: (BuildContext context) {
+        Builder(builder: (BuildContext context) {
           screenHeight = MediaQuery.of(context).size.height;
-          return new MediaQuery(
+          return MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
-            child: new CupertinoActionSheet(
+            child: CupertinoActionSheet(
               title: const Text('The title'),
-              message: new Text('Very long content' * 200),
+              message: Text('Very long content' * 200),
               actions: <Widget>[
-                new CupertinoActionSheetAction(
+                CupertinoActionSheetAction(
                   child: const Text('One'),
                   onPressed: () {},
                 ),
-                new CupertinoActionSheetAction(
+                CupertinoActionSheetAction(
                   child: const Text('Two'),
                   onPressed: () {},
                 ),
@@ -331,10 +331,10 @@ void main() {
     bool wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new Builder(builder: (BuildContext context) {
-          return new CupertinoActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
             actions: <Widget>[
-              new CupertinoActionSheetAction(
+              CupertinoActionSheetAction(
                 child: const Text('One'),
                 onPressed: () {
                   wasPressed = true;
@@ -368,15 +368,15 @@ void main() {
           (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new Row(
+        Row(
           children: <Widget>[
-            new CupertinoActionSheet(
+            CupertinoActionSheet(
               actions: <Widget>[
-                new CupertinoActionSheetAction(
+                CupertinoActionSheetAction(
                   child: const Text('One'),
                   onPressed: () {},
                 ),
-                new CupertinoActionSheetAction(
+                CupertinoActionSheetAction(
                   child: const Text('Two'),
                   onPressed: () {},
                 ),
@@ -397,15 +397,15 @@ void main() {
           (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new Column(
+        Column(
           children: <Widget>[
-            new CupertinoActionSheet(
+            CupertinoActionSheet(
               actions: <Widget>[
-                new CupertinoActionSheetAction(
+                CupertinoActionSheetAction(
                   child: const Text('One'),
                   onPressed: () {},
                 ),
-                new CupertinoActionSheetAction(
+                CupertinoActionSheetAction(
                   child: const Text('Two'),
                   onPressed: () {},
                 ),
@@ -426,16 +426,16 @@ void main() {
   testWidgets('1 action button with cancel button', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new CupertinoActionSheet(
+        CupertinoActionSheet(
           title: const Text('The title'),
-          message: new Text('Very long content' * 200),
+          message: Text('Very long content' * 200),
           actions: <Widget>[
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('One'),
               onPressed: () {},
             ),
           ],
-          cancelButton: new CupertinoActionSheetAction(
+          cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
             onPressed: () {},
           ),
@@ -453,20 +453,20 @@ void main() {
   testWidgets('2 action buttons with cancel button', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new CupertinoActionSheet(
+        CupertinoActionSheet(
           title: const Text('The title'),
-          message: new Text('Very long content' * 200),
+          message: Text('Very long content' * 200),
           actions: <Widget>[
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('One'),
               onPressed: () {},
             ),
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('Two'),
               onPressed: () {},
             ),
           ],
-          cancelButton: new CupertinoActionSheetAction(
+          cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
             onPressed: () {},
           ),
@@ -484,24 +484,24 @@ void main() {
   testWidgets('3 action buttons with cancel button', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new CupertinoActionSheet(
+        CupertinoActionSheet(
           title: const Text('The title'),
-          message: new Text('Very long content' * 200),
+          message: Text('Very long content' * 200),
           actions: <Widget>[
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('One'),
               onPressed: () {},
             ),
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('Two'),
               onPressed: () {},
             ),
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('Three'),
               onPressed: () {},
             ),
           ],
-          cancelButton: new CupertinoActionSheetAction(
+          cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
             onPressed: () {},
           ),
@@ -519,28 +519,28 @@ void main() {
   testWidgets('4+ action buttons with cancel button', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new CupertinoActionSheet(
+        CupertinoActionSheet(
           title: const Text('The title'),
-          message: new Text('Very long content' * 200),
+          message: Text('Very long content' * 200),
           actions: <Widget>[
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('One'),
               onPressed: () {},
             ),
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('Two'),
               onPressed: () {},
             ),
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('Three'),
               onPressed: () {},
             ),
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('Four'),
               onPressed: () {},
             ),
           ],
-          cancelButton: new CupertinoActionSheetAction(
+          cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
             onPressed: () {},
           ),
@@ -558,11 +558,11 @@ void main() {
   testWidgets('1 action button without cancel button', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new CupertinoActionSheet(
+        CupertinoActionSheet(
           title: const Text('The title'),
-          message: new Text('Very long content' * 200),
+          message: Text('Very long content' * 200),
           actions: <Widget>[
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('One'),
               onPressed: () {},
             ),
@@ -580,15 +580,15 @@ void main() {
   testWidgets('2+ action buttons without cancel button', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new CupertinoActionSheet(
+        CupertinoActionSheet(
           title: const Text('The title'),
-          message: new Text('Very long content' * 200),
+          message: Text('Very long content' * 200),
           actions: <Widget>[
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('One'),
               onPressed: () {},
             ),
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('Two'),
               onPressed: () {},
             ),
@@ -607,8 +607,8 @@ void main() {
   testWidgets('Action sheet with just cancel button is correct', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new CupertinoActionSheet(
-          cancelButton: new CupertinoActionSheetAction(
+        CupertinoActionSheet(
+          cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
             onPressed: (){},
           ),
@@ -628,9 +628,9 @@ void main() {
     bool wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new Builder(builder: (BuildContext context) {
-          return new CupertinoActionSheet(
-            cancelButton: new CupertinoActionSheetAction(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            cancelButton: CupertinoActionSheetAction(
               child: const Text('Cancel'),
               onPressed: () {
                 wasPressed = true;
@@ -662,20 +662,20 @@ void main() {
   testWidgets('Layout is correct when cancel button is present', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new CupertinoActionSheet(
+        CupertinoActionSheet(
           title: const Text('The title'),
           message: const Text('The message'),
           actions: <Widget>[
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('One'),
               onPressed: () {},
             ),
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('Two'),
               onPressed: () {},
             ),
           ],
-          cancelButton: new CupertinoActionSheetAction(
+          cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
             onPressed: () {},
           ),
@@ -697,20 +697,20 @@ void main() {
   testWidgets('Enter/exit animation is correct', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new CupertinoActionSheet(
+        CupertinoActionSheet(
           title: const Text('The title'),
           message: const Text('The message'),
           actions: <Widget>[
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('One'),
               onPressed: () {},
             ),
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('Two'),
               onPressed: () {},
             ),
           ],
-          cancelButton: new CupertinoActionSheetAction(
+          cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
             onPressed: () {},
           ),
@@ -774,20 +774,20 @@ void main() {
   testWidgets('Modal barrier is pressed during transition', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new CupertinoActionSheet(
+        CupertinoActionSheet(
           title: const Text('The title'),
           message: const Text('The message'),
           actions: <Widget>[
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('One'),
               onPressed: () {},
             ),
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('Two'),
               onPressed: () {},
             ),
           ],
-          cancelButton: new CupertinoActionSheetAction(
+          cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
             onPressed: () {},
           ),
@@ -830,24 +830,24 @@ void main() {
 
 
   testWidgets('Action sheet semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        new CupertinoActionSheet(
+        CupertinoActionSheet(
           title: const Text('The title'),
           message: const Text('The message'),
           actions: <Widget>[
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('One'),
               onPressed: () {},
             ),
-            new CupertinoActionSheetAction(
+            CupertinoActionSheetAction(
               child: const Text('Two'),
               onPressed: () {},
             ),
           ],
-          cancelButton: new CupertinoActionSheetAction(
+          cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
             onPressed: () {},
           ),
@@ -861,30 +861,30 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-        new TestSemantics.root(
+        TestSemantics.root(
           children: <TestSemantics>[
-            new TestSemantics(
+            TestSemantics(
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   flags: <SemanticsFlag>[
                     SemanticsFlag.scopesRoute,
                     SemanticsFlag.namesRoute,
                   ],
                   label: 'Alert',
                   children: <TestSemantics>[
-                    new TestSemantics(
+                    TestSemantics(
                       children: <TestSemantics>[
-                        new TestSemantics(
+                        TestSemantics(
                           label: 'The title',
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           label: 'The message',
                         ),
                       ],
                     ),
-                    new TestSemantics(
+                    TestSemantics(
                       children: <TestSemantics>[
-                        new TestSemantics(
+                        TestSemantics(
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isButton,
                           ],
@@ -893,7 +893,7 @@ void main() {
                           ],
                           label: 'One',
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isButton,
                           ],
@@ -904,7 +904,7 @@ void main() {
                         ),
                       ],
                     ),
-                    new TestSemantics(
+                    TestSemantics(
                       flags: <SemanticsFlag>[
                         SemanticsFlag.isButton,
                       ],
@@ -940,10 +940,10 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
 }
 
 Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {
-  return new CupertinoApp(
-    home: new Center(
-      child: new Builder(builder: (BuildContext context) {
-        return new CupertinoButton(
+  return CupertinoApp(
+    home: Center(
+      child: Builder(builder: (BuildContext context) {
+        return CupertinoButton(
           onPressed: () {
             showCupertinoModalPopup<void>(
               context: context,
@@ -960,7 +960,7 @@ Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {
 }
 
 Widget boilerplate(Widget child) {
-  return new Directionality(
+  return Directionality(
     textDirection: TextDirection.ltr,
     child: child,
   );

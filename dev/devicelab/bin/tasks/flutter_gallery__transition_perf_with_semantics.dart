@@ -8,7 +8,7 @@ import 'package:flutter_devicelab/tasks/gallery.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
-Future<Null> main() async {
+Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
   await task(() async {
     final TaskResult withoutSemantics = await createGalleryTransitionTest()();
@@ -24,6 +24,6 @@ Future<Null> main() async {
       benchmarkScoreKeys.add(deltaKey);
     }
 
-    return new TaskResult.success(data, benchmarkScoreKeys: benchmarkScoreKeys);
+    return TaskResult.success(data, benchmarkScoreKeys: benchmarkScoreKeys);
   });
 }

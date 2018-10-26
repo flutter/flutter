@@ -11,10 +11,10 @@ void main() {
   testWidgets('AbsorbPointers do not block siblings', (WidgetTester tester) async {
     bool tapped = false;
     await tester.pumpWidget(
-      new Column(
+      Column(
         children: <Widget>[
-          new Expanded(
-            child: new GestureDetector(
+          Expanded(
+            child: GestureDetector(
               onTap: () => tapped = true,
             ),
           ),
@@ -32,23 +32,23 @@ void main() {
   });
 
   testWidgets('AbsorbPointers semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      new AbsorbPointer(
+      AbsorbPointer(
         absorbing: true,
-        child: new Semantics(
+        child: Semantics(
           label: 'test',
           textDirection: TextDirection.ltr,
         ),
       ),
     );
     expect(semantics, hasSemantics(
-      new TestSemantics.root(), ignoreId: true, ignoreRect: true, ignoreTransform: true));
+      TestSemantics.root(), ignoreId: true, ignoreRect: true, ignoreTransform: true));
 
     await tester.pumpWidget(
-      new AbsorbPointer(
+      AbsorbPointer(
         absorbing: false,
-        child: new Semantics(
+        child: Semantics(
           label: 'test',
           textDirection: TextDirection.ltr,
         ),
@@ -56,9 +56,9 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             label: 'test',
             textDirection: TextDirection.ltr,
           ),

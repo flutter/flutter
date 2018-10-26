@@ -19,31 +19,31 @@ import 'src/common.dart';
 import 'src/context.dart';
 
 Process createMockProcess({int exitCode = 0, String stdout = '', String stderr = ''}) {
-  final Stream<List<int>> stdoutStream = new Stream<List<int>>.fromIterable(<List<int>>[
+  final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[
     utf8.encode(stdout),
   ]);
-  final Stream<List<int>> stderrStream = new Stream<List<int>>.fromIterable(<List<int>>[
+  final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(<List<int>>[
     utf8.encode(stderr),
   ]);
-  final Process process = new MockProcess();
+  final Process process = MockProcess();
 
   when(process.stdout).thenAnswer((_) => stdoutStream);
   when(process.stderr).thenAnswer((_) => stderrStream);
-  when(process.exitCode).thenAnswer((_) => new Future<int>.value(exitCode));
+  when(process.exitCode).thenAnswer((_) => Future<int>.value(exitCode));
   return process;
 }
 
 void main() {
   group('channel', () {
-    final MockProcessManager mockProcessManager = new MockProcessManager();
+    final MockProcessManager mockProcessManager = MockProcessManager();
 
     setUpAll(() {
       Cache.disableLocking();
     });
 
     testUsingContext('list', () async {
-      final ChannelCommand command = new ChannelCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final ChannelCommand command = ChannelCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel']);
       expect(testLogger.errorText, hasLength(0));
       // The bots may return an empty list of channels (network hiccup?)
@@ -62,10 +62,10 @@ void main() {
         <String>['git', 'branch', '-r'],
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
-      )).thenAnswer((_) => new Future<Process>.value(process));
+      )).thenAnswer((_) => Future<Process>.value(process));
 
-      final ChannelCommand command = new ChannelCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final ChannelCommand command = ChannelCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel']);
 
       verify(mockProcessManager.start(
@@ -93,20 +93,20 @@ void main() {
         <String>['git', 'fetch'],
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
-      )).thenAnswer((_) => new Future<Process>.value(createMockProcess()));
+      )).thenAnswer((_) => Future<Process>.value(createMockProcess()));
       when(mockProcessManager.start(
         <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
-      )).thenAnswer((_) => new Future<Process>.value(createMockProcess()));
+      )).thenAnswer((_) => Future<Process>.value(createMockProcess()));
       when(mockProcessManager.start(
         <String>['git', 'checkout', 'beta', '--'],
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
-      )).thenAnswer((_) => new Future<Process>.value(createMockProcess()));
+      )).thenAnswer((_) => Future<Process>.value(createMockProcess()));
 
-      final ChannelCommand command = new ChannelCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final ChannelCommand command = ChannelCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel', 'beta']);
 
       verify(mockProcessManager.start(
@@ -129,7 +129,7 @@ void main() {
       expect(testLogger.errorText, hasLength(0));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      FileSystem: () => new MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem(),
     });
 
     // This verifies that bug https://github.com/flutter/flutter/issues/21134
@@ -139,17 +139,17 @@ void main() {
         <String>['git', 'fetch'],
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
-      )).thenAnswer((_) => new Future<Process>.value(createMockProcess()));
+      )).thenAnswer((_) => Future<Process>.value(createMockProcess()));
       when(mockProcessManager.start(
         <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
-      )).thenAnswer((_) => new Future<Process>.value(createMockProcess()));
+      )).thenAnswer((_) => Future<Process>.value(createMockProcess()));
       when(mockProcessManager.start(
         <String>['git', 'checkout', 'beta', '--'],
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
-      )).thenAnswer((_) => new Future<Process>.value(createMockProcess()));
+      )).thenAnswer((_) => Future<Process>.value(createMockProcess()));
 
       final File versionCheckFile = Cache.instance.getStampFileFor(
         VersionCheckStamp.kFlutterVersionCheckStampFile,
@@ -165,8 +165,8 @@ void main() {
         }
       ''');
 
-      final ChannelCommand command = new ChannelCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final ChannelCommand command = ChannelCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel', 'beta']);
 
       verify(mockProcessManager.start(
@@ -190,7 +190,7 @@ void main() {
       expect(versionCheckFile.existsSync(), isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      FileSystem: () => new MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem(),
     });
   });
 }

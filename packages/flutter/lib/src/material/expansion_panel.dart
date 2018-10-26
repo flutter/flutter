@@ -43,11 +43,11 @@ class _SaltedKey<S, V> extends LocalKey {
 ///
 /// The position of the panel within an [ExpansionPanelList] is given by
 /// [panelIndex].
-typedef void ExpansionPanelCallback(int panelIndex, bool isExpanded);
+typedef ExpansionPanelCallback = void Function(int panelIndex, bool isExpanded);
 
 /// Signature for the callback that's called when the header of the
 /// [ExpansionPanel] needs to rebuild.
-typedef Widget ExpansionPanelHeaderBuilder(BuildContext context, bool isExpanded);
+typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool isExpanded);
 
 /// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
@@ -128,7 +128,7 @@ class ExpansionPanelList extends StatefulWidget {
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
-       this.initialOpenPanelValue = null,
+       initialOpenPanelValue = null,
        super(key: key);
 
   /// Creates a radio expansion panel list widget.
@@ -175,7 +175,7 @@ class ExpansionPanelList extends StatefulWidget {
   final Object initialOpenPanelValue;
 
   @override
-  State<StatefulWidget> createState() => new _ExpansionPanelListState();
+  State<StatefulWidget> createState() => _ExpansionPanelListState();
 }
 
 class _ExpansionPanelListState extends State<ExpansionPanelList> {
@@ -253,17 +253,17 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
     for (int index = 0; index < widget.children.length; index += 1) {
       if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1))
-        items.add(new MaterialGap(key: new _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
+        items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
 
       final ExpansionPanel child = widget.children[index];
-      final Row header = new Row(
+      final Row header = Row(
         children: <Widget>[
-          new Expanded(
-            child: new AnimatedContainer(
+          Expanded(
+            child: AnimatedContainer(
               duration: widget.animationDuration,
               curve: Curves.fastOutSlowIn,
               margin: _isChildExpanded(index) ? kExpandedEdgeInsets : EdgeInsets.zero,
-              child: new ConstrainedBox(
+              child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: _kPanelHeaderCollapsedHeight),
                 child: child.headerBuilder(
                   context,
@@ -272,9 +272,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               ),
             ),
           ),
-          new Container(
+          Container(
             margin: const EdgeInsetsDirectional.only(end: 8.0),
-            child: new ExpandIcon(
+            child: ExpandIcon(
               isExpanded: _isChildExpanded(index),
               padding: const EdgeInsets.all(16.0),
               onPressed: (bool isExpanded) => _handlePressed(isExpanded, index),
@@ -284,13 +284,13 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       );
 
       items.add(
-        new MaterialSlice(
-          key: new _SaltedKey<BuildContext, int>(context, index * 2),
-          child: new Column(
+        MaterialSlice(
+          key: _SaltedKey<BuildContext, int>(context, index * 2),
+          child: Column(
             children: <Widget>[
-              new MergeSemantics(child: header),
-              new AnimatedCrossFade(
-                firstChild: new Container(height: 0.0),
+              MergeSemantics(child: header),
+              AnimatedCrossFade(
+                firstChild: Container(height: 0.0),
                 secondChild: child.body,
                 firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
                 secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
@@ -304,10 +304,10 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       );
 
       if (_isChildExpanded(index) && index != widget.children.length - 1)
-        items.add(new MaterialGap(key: new _SaltedKey<BuildContext, int>(context, index * 2 + 1)));
+        items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 + 1)));
     }
 
-    return new MergeableMaterial(
+    return MergeableMaterial(
       hasDividers: true,
       children: items,
     );

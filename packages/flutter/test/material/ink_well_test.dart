@@ -14,27 +14,32 @@ void main() {
   testWidgets('InkWell gestures control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    await tester.pumpWidget(new Material(
-      child: new Center(
-        child: new InkWell(
-          onTap: () {
-            log.add('tap');
-          },
-          onDoubleTap: () {
-            log.add('double-tap');
-          },
-          onLongPress: () {
-            log.add('long-press');
-          },
-          onTapDown: (TapDownDetails details) {
-            log.add('tap-down');
-          },
-          onTapCancel: () {
-            log.add('tap-cancel');
-          },
-        ),
-      ),
-    ));
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Center(
+            child: InkWell(
+              onTap: () {
+                log.add('tap');
+              },
+              onDoubleTap: () {
+                log.add('double-tap');
+              },
+              onLongPress: () {
+                log.add('long-press');
+              },
+              onTapDown: (TapDownDetails details) {
+                log.add('tap-down');
+              },
+              onTapCancel: () {
+                log.add('tap-cancel');
+              },
+            ),
+          ),
+        )
+      )
+    );
 
     await tester.tap(find.byType(InkWell), pointer: 1);
 
@@ -72,9 +77,12 @@ void main() {
 
   testWidgets('long-press and tap on disabled should not throw', (WidgetTester tester) async {
     await tester.pumpWidget(const Material(
-      child: Center(
-        child: InkWell(),
-      ),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: InkWell(),
+        ),
+      )
     ));
     await tester.tap(find.byType(InkWell), pointer: 1);
     await tester.pump(const Duration(seconds: 1));
@@ -86,7 +94,7 @@ void main() {
     FeedbackTester feedback;
 
     setUp(() {
-      feedback = new FeedbackTester();
+      feedback = FeedbackTester();
     });
 
     tearDown(() {
@@ -94,11 +102,14 @@ void main() {
     });
 
     testWidgets('enabled (default)', (WidgetTester tester) async {
-      await tester.pumpWidget(new Material(
-        child: new Center(
-          child: new InkWell(
-            onTap: () {},
-            onLongPress: () {},
+      await tester.pumpWidget(Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: InkWell(
+              onTap: () {},
+              onLongPress: () {},
+            ),
           ),
         ),
       ));
@@ -119,14 +130,17 @@ void main() {
     });
 
     testWidgets('disabled', (WidgetTester tester) async {
-      await tester.pumpWidget(new Material(
-        child: new Center(
-          child: new InkWell(
-            onTap: () {},
-            onLongPress: () {},
-            enableFeedback: false,
+      await tester.pumpWidget(Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: InkWell(
+              onTap: () {},
+              onLongPress: () {},
+              enableFeedback: false,
+            ),
           ),
-        ),
+        )
       ));
       await tester.tap(find.byType(InkWell), pointer: 1);
       await tester.pump(const Duration(seconds: 1));
@@ -141,19 +155,19 @@ void main() {
   });
 
   testWidgets('splashing survives scrolling when keep-alive is enabled', (WidgetTester tester) async {
-    Future<Null> runTest(bool keepAlive) async {
+    Future<void> runTest(bool keepAlive) async {
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Material(
-            child: new CompositedTransformFollower( // forces a layer, which makes the paints easier to separate out
-              link: new LayerLink(),
-              child: new ListView(
+          child: Material(
+            child: CompositedTransformFollower( // forces a layer, which makes the paints easier to separate out
+              link: LayerLink(),
+              child: ListView(
                 addAutomaticKeepAlives: keepAlive,
                 children: <Widget>[
-                  new Container(height: 500.0, child: new InkWell(onTap: () { }, child: const Placeholder())),
-                  new Container(height: 500.0),
-                  new Container(height: 500.0),
+                  Container(height: 500.0, child: InkWell(onTap: () { }, child: const Placeholder())),
+                  Container(height: 500.0),
+                  Container(height: 500.0),
                 ],
               ),
             ),
@@ -179,12 +193,12 @@ void main() {
   });
 
   testWidgets('excludeFromSemantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new Material(
-        child: new InkWell(
+      child: Material(
+        child: InkWell(
           onTap: () { },
           child: const Text('Button'),
         ),
@@ -192,10 +206,10 @@ void main() {
     ));
     expect(semantics, includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap]));
 
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new Material(
-        child: new InkWell(
+      child: Material(
+        child: InkWell(
           onTap: () { },
           child: const Text('Button'),
           excludeFromSemantics: true,

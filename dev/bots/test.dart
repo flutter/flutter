@@ -4,12 +4,13 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
 
 import 'run_command.dart';
 
-typedef Future<Null> ShardRunner();
+typedef ShardRunner = Future<void> Function();
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
@@ -21,6 +22,7 @@ final List<String> flutterTestArgs = <String>[];
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'tool_tests': _runToolTests,
+  'aot_build_tests': _runAotBuildTests,
   'coverage': _runCoverage,
 };
 
@@ -37,7 +39,7 @@ const Duration _kShortTimeout = Duration(minutes: 5);
 /// For example:
 /// SHARD=tool_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 /// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
-Future<Null> main(List<String> args) async {
+Future<void> main(List<String> args) async {
   flutterTestArgs.addAll(args);
 
   final String shard = Platform.environment['SHARD'];
@@ -58,7 +60,7 @@ Future<Null> main(List<String> args) async {
   }
 }
 
-Future<Null> _runSmokeTests() async {
+Future<void> _runSmokeTests() async {
   // Verify that the tests actually return failure on failure and success on
   // success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
@@ -138,28 +140,54 @@ Future<Null> _runSmokeTests() async {
   await _verifyVersion(path.join(flutterRoot, 'version'));
 }
 
-Future<Null> _runToolTests() async {
+Future<void> _runToolTests() async {
   await _runSmokeTests();
 
   await _pubRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     enableFlutterToolAsserts: true,
-    runConcurrently: false,
   );
 
   print('${bold}DONE: All tests successful.$reset');
 }
 
-Future<Null> _runTests() async {
+/// Verifies that AOT builds of some examples apps finish
+/// without crashing. It does not actually launch the AOT-built
+/// apps. That happens later in the devicelab. This is just
+/// a smoke-test.
+Future<void> _runAotBuildTests() async {
+  await _flutterBuildAot(path.join('examples', 'hello_world'));
+  await _flutterBuildAot(path.join('examples', 'flutter_gallery'));
+  await _flutterBuildAot(path.join('examples', 'flutter_view'));
+
+  print('${bold}DONE: All AOT build tests successful.$reset');
+}
+
+Future<void> _flutterBuildAot(String relativePathToApplication) {
+  return runCommand(flutter,
+    <String>['build', 'aot'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+}
+
+Future<void> _runTests() async {
   await _runSmokeTests();
 
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
+  // Only packages/flutter/test/widgets/widget_inspector_test.dart really
+  // needs to be run with --track-widget-creation but it is nice to run
+  // all of the tests in package:flutter with the flag to ensure that
+  // the Dart kernel transformer triggered by the flag does not break anything.
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: <String>['--track-widget-creation']);
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'));
+  await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
@@ -167,13 +195,16 @@ Future<Null> _runTests() async {
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'));
+  // Regression test to ensure that code outside of package:flutter can run
+  // with --track-widget-creation.
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation']);
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'));
 
   print('${bold}DONE: All tests successful.$reset');
 }
 
-Future<Null> _runCoverage() async {
-  final File coverageFile = new File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
+Future<void> _runCoverage() async {
+  final File coverageFile = File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
   if (!coverageFile.existsSync()) {
     print('${red}Coverage file not found.$reset');
     print('Expected to find: ${coverageFile.absolute}');
@@ -194,22 +225,20 @@ Future<Null> _runCoverage() async {
   print('${bold}DONE: Coverage collection successful.$reset');
 }
 
-Future<Null> _pubRunTest(
+Future<void> _pubRunTest(
   String workingDirectory, {
   String testPath,
-  bool runConcurrently = true,
   bool enableFlutterToolAsserts = false
 }) {
   final List<String> args = <String>['run', 'test', '-rcompact'];
-  if (!runConcurrently) {
-    args.add('-j1');
-  }
+  final int concurrency = math.max(1, Platform.numberOfProcessors - 1);
+  args.add('-j$concurrency');
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null)
     args.add(testPath);
   final Map<String, String> pubEnvironment = <String, String>{};
-  if (new Directory(pubCache).existsSync()) {
+  if (Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;
   }
   if (enableFlutterToolAsserts) {
@@ -239,7 +268,7 @@ class EvalResult {
   final int exitCode;
 }
 
-Future<Null> _runFlutterTest(String workingDirectory, {
+Future<void> _runFlutterTest(String workingDirectory, {
   String script,
   bool expectFailure = false,
   bool printOutput = true,
@@ -273,21 +302,21 @@ Future<Null> _runFlutterTest(String workingDirectory, {
   );
 }
 
-Future<Null> _verifyVersion(String filename) async {
-  if (!new File(filename).existsSync()) {
+Future<void> _verifyVersion(String filename) async {
+  if (!File(filename).existsSync()) {
     print('$redLine');
     print('The version logic failed to create the Flutter version file.');
     print('$redLine');
     exit(1);
   }
-  final String version = await new File(filename).readAsString();
+  final String version = await File(filename).readAsString();
   if (version == '0.0.0-unknown') {
     print('$redLine');
     print('The version logic failed to determine the Flutter version.');
     print('$redLine');
     exit(1);
   }
-  final RegExp pattern = new RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
+  final RegExp pattern = RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
   if (!version.contains(pattern)) {
     print('$redLine');
     print('The version logic generated an invalid version string.');

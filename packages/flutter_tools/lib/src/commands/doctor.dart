@@ -27,6 +27,6 @@ class DoctorCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final bool success = await doctor.diagnose(androidLicenses: argResults['android-licenses'], verbose: verbose);
-    return new FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
+    return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
 }

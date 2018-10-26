@@ -8,21 +8,21 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('OverflowEntries context contains Overlay',
       (WidgetTester tester) async {
-    final GlobalKey overlayKey = new GlobalKey();
+    final GlobalKey overlayKey = GlobalKey();
     bool didBuild = false;
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Overlay(
+        child: Overlay(
           key: overlayKey,
           initialEntries: <OverlayEntry>[
-            new OverlayEntry(
+            OverlayEntry(
               builder: (BuildContext context) {
                 didBuild = true;
                 final Overlay overlay = context.ancestorWidgetOfExactType(Overlay);
                 expect(overlay, isNotNull);
                 expect(overlay.key, equals(overlayKey));
-                return new Container();
+                return Container();
               },
             ),
           ],
@@ -71,27 +71,27 @@ void main() {
   });
 
   testWidgets('Offstage overlay', (WidgetTester tester) async {
-    final GlobalKey overlayKey = new GlobalKey();
+    final GlobalKey overlayKey = GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Overlay(
+        child: Overlay(
           key: overlayKey,
           initialEntries: <OverlayEntry>[
-            new OverlayEntry(
+            OverlayEntry(
               opaque: true,
               maintainState: true,
-              builder: (BuildContext context) => new Container(),
+              builder: (BuildContext context) => Container(),
             ),
-            new OverlayEntry(
+            OverlayEntry(
               opaque: true,
               maintainState: true,
-              builder: (BuildContext context) => new Container(),
+              builder: (BuildContext context) => Container(),
             ),
-            new OverlayEntry(
+            OverlayEntry(
               opaque: true,
               maintainState: true,
-              builder: (BuildContext context) => new Container(),
+              builder: (BuildContext context) => Container(),
             ),
           ],
         ),

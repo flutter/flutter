@@ -18,36 +18,36 @@ import '../rendering/mock_canvas.dart';
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   TestImageProvider(this.future);
 
-  final Future<Null> future;
+  final Future<void> future;
 
   static ui.Image image;
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
-    return new SynchronousFuture<TestImageProvider>(this);
+    return SynchronousFuture<TestImageProvider>(this);
   }
 
   @override
   ImageStreamCompleter load(TestImageProvider key) {
-    return new OneFrameImageStreamCompleter(
-      future.then<ImageInfo>((Null value) => new ImageInfo(image: image))
+    return OneFrameImageStreamCompleter(
+      future.then<ImageInfo>((void value) => ImageInfo(image: image))
     );
   }
 }
 
-Future<Null> main() async {
-  TestImageProvider.image = await decodeImageFromList(new Uint8List.fromList(kTransparentImage));
+Future<void> main() async {
+  TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
 
   testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {
-    final GlobalKey key = new GlobalKey();
-    final Completer<Null> completer = new Completer<Null>();
+    final GlobalKey key = GlobalKey();
+    final Completer<void> completer = Completer<void>();
     await tester.pumpWidget(
-      new KeyedSubtree(
+      KeyedSubtree(
         key: key,
-        child: new DecoratedBox(
-          decoration: new BoxDecoration(
-            image: new DecorationImage(
-              image: new TestImageProvider(completer.future),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: TestImageProvider(completer.future),
             ),
           ),
         ),
@@ -62,14 +62,14 @@ Future<Null> main() async {
   });
 
   testWidgets('Moving a DecoratedBox', (WidgetTester tester) async {
-    final Completer<Null> completer = new Completer<Null>();
-    final Widget subtree = new KeyedSubtree(
-      key: new GlobalKey(),
-      child: new RepaintBoundary(
-        child: new DecoratedBox(
-          decoration: new BoxDecoration(
-            image: new DecorationImage(
-              image: new TestImageProvider(completer.future),
+    final Completer<void> completer = Completer<void>();
+    final Widget subtree = KeyedSubtree(
+      key: GlobalKey(),
+      child: RepaintBoundary(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: TestImageProvider(completer.future),
             ),
           ),
         ),
@@ -78,7 +78,7 @@ Future<Null> main() async {
     await tester.pumpWidget(subtree);
     await tester.idle();
     expect(tester.binding.hasScheduledFrame, isFalse);
-    await tester.pumpWidget(new Container(child: subtree));
+    await tester.pumpWidget(Container(child: subtree));
     await tester.idle();
     expect(tester.binding.hasScheduledFrame, isFalse);
     completer.complete(); // schedules microtask, does not run it
@@ -92,11 +92,11 @@ Future<Null> main() async {
 
   testWidgets('Circles can have uniform borders', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Container(
+      Container(
         padding: const EdgeInsets.all(50.0),
-        decoration: new BoxDecoration(
+        decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: new Border.all(width: 10.0, color: const Color(0x80FF00FF)),
+          border: Border.all(width: 10.0, color: const Color(0x80FF00FF)),
           color: Colors.teal[600]
         )
       )
@@ -106,11 +106,11 @@ Future<Null> main() async {
   testWidgets('Bordered Container insets its child', (WidgetTester tester) async {
     const Key key = Key('outerContainer');
     await tester.pumpWidget(
-      new Center(
-        child: new Container(
+      Center(
+        child: Container(
           key: key,
-          decoration: new BoxDecoration(border: new Border.all(width: 10.0)),
-          child: new Container(
+          decoration: BoxDecoration(border: Border.all(width: 10.0)),
+          child: Container(
             width: 25.0,
             height: 25.0
           )
@@ -125,23 +125,23 @@ Future<Null> main() async {
 
     const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
-      return new Center(
-        child: new Container(
+      return Center(
+        child: Container(
           key: key,
           width: 100.0,
           height: 50.0,
-          decoration: new BoxDecoration(border: border),
+          decoration: BoxDecoration(border: border),
         ),
       );
     }
 
     const Color black = Color(0xFF000000);
 
-    await tester.pumpWidget(buildFrame(new Border.all()));
+    await tester.pumpWidget(buildFrame(Border.all()));
     expect(find.byKey(key), paints
       ..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 1.0));
 
-    await tester.pumpWidget(buildFrame(new Border.all(width: 0.0)));
+    await tester.pumpWidget(buildFrame(Border.all(width: 0.0)));
     expect(find.byKey(key), paints
       ..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 0.0));
 
@@ -173,9 +173,9 @@ Future<Null> main() async {
   testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12165
     await tester.pumpWidget(
-      new Column(
+      Column(
         children: <Widget>[
-          new Container(
+          Container(
             // There's not currently a way to verify that this paints the same size as the others,
             // so the pattern below just asserts that there's four paths but doesn't check the geometry.
             width: 100.0,
@@ -201,21 +201,21 @@ Future<Null> main() async {
               ),
             ),
           ),
-          new Container(
+          Container(
             width: 100.0,
             height: 100.0,
-            decoration: new BoxDecoration(
-              border: new Border.all(
+            decoration: BoxDecoration(
+              border: Border.all(
                 width: 10.0,
                 color: const Color(0xFFFFFFFF),
               ),
             ),
           ),
-          new Container(
+          Container(
             width: 100.0,
             height: 100.0,
-            decoration: new BoxDecoration(
-              border: new Border.all(
+            decoration: BoxDecoration(
+              border: Border.all(
                 width: 10.0,
                 color: const Color(0xFFFFFFFF),
               ),
@@ -224,11 +224,11 @@ Future<Null> main() async {
               ),
             ),
           ),
-          new Container(
+          Container(
             width: 100.0,
             height: 100.0,
-            decoration: new BoxDecoration(
-              border: new Border.all(
+            decoration: BoxDecoration(
+              border: Border.all(
                 width: 10.0,
                 color: const Color(0xFFFFFFFF),
               ),
@@ -243,16 +243,16 @@ Future<Null> main() async {
       ..path()
       ..path()
       ..path()
-      ..rect(rect: new Rect.fromLTRB(355.0, 105.0, 445.0, 195.0))
+      ..rect(rect: Rect.fromLTRB(355.0, 105.0, 445.0, 195.0))
       ..drrect(
-        outer: new RRect.fromLTRBAndCorners(
+        outer: RRect.fromLTRBAndCorners(
           350.0, 200.0, 450.0, 300.0,
           topLeft: Radius.zero,
           topRight: const Radius.circular(10.0),
           bottomRight: Radius.zero,
           bottomLeft: Radius.zero,
         ),
-        inner: new RRect.fromLTRBAndCorners(
+        inner: RRect.fromLTRBAndCorners(
           360.0, 210.0, 440.0, 290.0,
           topLeft: const Radius.circular(-10.0),
           topRight: Radius.zero,
@@ -271,14 +271,14 @@ Future<Null> main() async {
     const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
-      return new Center(
-        child: new GestureDetector(
+      return Center(
+        child: GestureDetector(
           behavior: HitTestBehavior.deferToChild,
-          child: new Container(
+          child: Container(
             key: key,
             width: 100.0,
             height: 50.0,
-            decoration: new BoxDecoration(border: border),
+            decoration: BoxDecoration(border: border),
           ),
           onTap: () {
             itemsTapped.add(1);
@@ -287,7 +287,7 @@ Future<Null> main() async {
       );
     }
 
-    await tester.pumpWidget(buildFrame(new Border.all()));
+    await tester.pumpWidget(buildFrame(Border.all()));
     expect(itemsTapped, isEmpty);
 
     await tester.tap(find.byKey(key));
@@ -308,14 +308,14 @@ Future<Null> main() async {
     const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
-      return new Center(
-        child: new GestureDetector(
+      return Center(
+        child: GestureDetector(
             behavior: HitTestBehavior.deferToChild,
-            child: new Container(
+            child: Container(
             key: key,
             width: 100.0,
             height: 50.0,
-            decoration: new BoxDecoration(border: border, shape: BoxShape.circle),
+            decoration: BoxDecoration(border: border, shape: BoxShape.circle),
           ),
           onTap: () {
             itemsTapped.add(1);
@@ -324,7 +324,7 @@ Future<Null> main() async {
       );
     }
 
-    await tester.pumpWidget(buildFrame(new Border.all()));
+    await tester.pumpWidget(buildFrame(Border.all()));
     expect(itemsTapped, isEmpty);
 
     await tester.tapAt(const Offset(0.0, 0.0));

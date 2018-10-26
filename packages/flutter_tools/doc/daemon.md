@@ -82,6 +82,7 @@ The `restart()` restarts the given application. It returns a Map of `{ int code,
 
 - `appId`: the id of a previously started app; this is required.
 - `fullRestart`: optional; whether to do a full (rather than an incremental) restart of the application
+- `reason`: optional; the reason for the full restart (eg. `save`, `manual`) for reporting purposes
 - `pause`: optional; when doing a hot restart the isolate should enter a paused mode
 
 #### app.callServiceExtension
@@ -91,6 +92,12 @@ The `callServiceExtension()` allows clients to make arbitrary calls to service p
 - `appId`: the id of a previously started app; this is required.
 - `methodName`: the name of the service protocol extension to invoke; this is required.
 - `params`: an optional Map of parameters to pass to the service protocol extension.
+
+#### app.detach
+
+The `detach()` command takes one parameter, `appId`. It returns a `bool` to indicate success or failure in detaching from an app without stopping it.
+
+- `appId`: the id of a previously started app; this is required.
 
 #### app.stop
 
@@ -110,7 +117,7 @@ This is sent when an observatory port is available for a started app. The `param
 
 #### app.started
 
-This is sent once the application launch process is complete and the app is either paused before main() (if `startPaused` is true) or main() has begun running. The `params` field will be a map containing the field `appId`.
+This is sent once the application launch process is complete and the app is either paused before main() (if `startPaused` is true) or main() has begun running. When attaching, this even will be fired once attached. The `params` field will be a map containing the field `appId`.
 
 #### app.log
 
@@ -122,7 +129,7 @@ This is sent when an operation starts and again when it stops. When an operation
 
 #### app.stop
 
-This is sent when an app is stopped. The `params` field will be a map with the field `appId`.
+This is sent when an app is stopped or detached from. The `params` field will be a map with the field `appId`.
 
 ### device domain
 
@@ -182,7 +189,7 @@ The returned `params` will contain:
 - `emulatorName` - the name of the emulator created; this will have been auto-generated if you did not supply one
 - `error` - when `success`=`false`, a message explaining why the creation of the emulator failed
 
-## 'flutter run --machine' and 'flutter attach --machine' 
+## 'flutter run --machine' and 'flutter attach --machine'
 
 When running `flutter run --machine` or `flutter attach --machine` the following subset of the daemon is available:
 
@@ -204,6 +211,7 @@ The following subset of the app domain is available in `flutter run --machine`. 
 - Commands
   - [`restart`](#apprestart)
   - [`callServiceExtension`](#appcallserviceextension)
+  - [`detach`](#appdetach)
   - [`stop`](#appstop)
 - Events
   - [`start`](#appstart)
@@ -219,6 +227,7 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
+- 0.4.2: Added `app.detach` command
 - 0.4.1: Added `flutter attach --machine`
 - 0.4.0: Added `emulator.create` command
 - 0.3.0: Added `daemon.connected` event at startup

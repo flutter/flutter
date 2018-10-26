@@ -40,7 +40,7 @@ class Texture extends LeafRenderObjectWidget {
   final int textureId;
 
   @override
-  TextureBox createRenderObject(BuildContext context) => new TextureBox(textureId: textureId);
+  TextureBox createRenderObject(BuildContext context) => TextureBox(textureId: textureId);
 
   @override
   void updateRenderObject(BuildContext context, TextureBox renderObject) {

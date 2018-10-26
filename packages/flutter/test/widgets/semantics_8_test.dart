@@ -10,21 +10,21 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 8 - Merging with reset', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      new MergeSemantics(
-        child: new Semantics(
+      MergeSemantics(
+        child: Semantics(
           container: true,
-          child: new Semantics(
+          child: Semantics(
             container: true,
-            child: new Stack(
+            child: Stack(
               textDirection: TextDirection.ltr,
               children: <Widget>[
-                new Semantics(
+                Semantics(
                   checked: true,
                 ),
-                new Semantics(
+                Semantics(
                   label: 'label',
                   textDirection: TextDirection.ltr,
                 )
@@ -36,9 +36,9 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             id: 1,
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: 'label',
@@ -51,19 +51,19 @@ void main() {
 
     // switch the order of the inner Semantics node to trigger a reset
     await tester.pumpWidget(
-      new MergeSemantics(
-        child: new Semantics(
+      MergeSemantics(
+        child: Semantics(
           container: true,
-          child: new Semantics(
+          child: Semantics(
             container: true,
-            child: new Stack(
+            child: Stack(
               textDirection: TextDirection.ltr,
               children: <Widget>[
-                new Semantics(
+                Semantics(
                   label: 'label',
                   textDirection: TextDirection.ltr,
                 ),
-                new Semantics(
+                Semantics(
                   checked: true
                 )
               ]
@@ -74,9 +74,9 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             id: 1,
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: 'label',

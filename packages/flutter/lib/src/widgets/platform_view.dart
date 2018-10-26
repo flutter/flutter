@@ -13,6 +13,8 @@ import 'framework.dart';
 
 /// Embeds an Android view in the Widget hierarchy.
 ///
+/// Requires Android API level 20 or greater.
+///
 /// Embedding Android views is an expensive operation and should be avoided when a Flutter
 /// equivalent is possible.
 ///
@@ -35,20 +37,20 @@ import 'framework.dart';
 ///
 /// ```java
 ///   public static void registerWith(Registrar registrar) {
-///     registrar.platformViewRegistry().registerViewFactory("webview", new WebViewFactory(registrar.messenger()));
+///     registrar.platformViewRegistry().registerViewFactory("webview", WebViewFactory(registrar.messenger()));
 ///   }
 /// ```
 ///
 /// The Android view's lifetime is the same as the lifetime of the [State] object for this widget.
 /// When the [State] is disposed the platform view (and auxiliary resources) are lazily
 /// released (some resources are immediately released and some by platform garbage collector).
-/// A stateful widget's state is disposed the the widget is removed from the tree or when it is
+/// A stateful widget's state is disposed when the widget is removed from the tree or when it is
 /// moved within the tree. If the stateful widget has a key and it's only moved relative to its siblings,
 /// or it has a [GlobalKey] and it's moved within the tree, it will not be disposed.
 class AndroidView extends StatefulWidget {
   /// Creates a widget that embeds an Android view.
   ///
-  /// The `viewType`, `hitTestBehavior`, and `gestureRecognizers` parameters must not be null.
+  /// The `viewType` and `hitTestBehavior` parameters must not be null.
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
   AndroidView({ // ignore: prefer_const_constructors_in_immutables
                 // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
@@ -57,12 +59,11 @@ class AndroidView extends StatefulWidget {
     this.onPlatformViewCreated,
     this.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
     this.layoutDirection,
-    this.gestureRecognizers = const <OneSequenceGestureRecognizer> [],
+    this.gestureRecognizers,
     this.creationParams,
-    this.creationParamsCodec
+    this.creationParamsCodec,
   }) : assert(viewType != null),
        assert(hitTestBehavior != null),
-        assert(gestureRecognizers != null),
        assert(creationParams == null || creationParamsCodec != null),
        super(key: key);
 
@@ -90,14 +91,57 @@ class AndroidView extends StatefulWidget {
 
   /// Which gestures should be forwarded to the Android view.
   ///
-  /// The gesture recognizers on this list participate in the gesture arena for each pointer
-  /// that was put down on the widget. If any of the recognizers on this list wins the
+  /// The gesture recognizers built by factories in this set participate in the gesture arena for
+  /// each pointer that was put down on the widget. If any of these recognizers win the
   /// gesture arena, the entire pointer event sequence starting from the pointer down event
   /// will be dispatched to the Android view.
+  ///
+  /// When null, an empty set of gesture recognizer factories is used, in which case a pointer event sequence
+  /// will only be dispatched to the Android view if no other member of the arena claimed it.
+  ///
+  /// For example, with the following setup vertical drags will not be dispatched to the Android
+  /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails d) {},
+  ///   child: AndroidView(
+  ///     viewType: 'webview',
+  ///   ),
+  /// )
+  /// ```
+  /// To get the [AndroidView] to claim the vertical drag gestures we can pass a vertical drag
+  /// gesture recognizer factory in [gestureRecognizers] e.g:
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails d) {},
+  ///   child: SizedBox(
+  ///     width: 200.0,
+  ///     height: 100.0,
+  ///     child: AndroidView(
+  ///       viewType: 'webview',
+  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+  ///         new Factory<OneSequenceGestureRecognizer>(
+  ///           () => new EagerGestureRecognizer(),
+  ///         ),
+  ///       ].toSet(),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// An [AndroidView] can be configured to consume all pointers that were put down in its bounds
+  /// by passing a factory for an [EagerGestureRecognizer] in [gestureRecognizers].
+  /// [EagerGestureRecognizer] is a special gesture recognizer that immediately claims the gesture
+  /// after a pointer down event.
+  ///
+  /// The `gestureRecognizers` property must not contain more than one factory with the same [Factory.type].
+  ///
+  /// Changing `gestureRecognizers` results in rejection of any active gesture arenas (if the
+  /// Android view is actively participating in an arena).
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
   // TODO(amirh): get a list of GestureRecognizers here.
   // https://github.com/flutter/flutter/issues/20953
-  final List<OneSequenceGestureRecognizer> gestureRecognizers;
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
 
   /// Passed as the args argument of [PlatformViewFactory#create](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#create-android.content.Context-int-java.lang.Object-)
   ///
@@ -113,7 +157,7 @@ class AndroidView extends StatefulWidget {
   final MessageCodec<dynamic> creationParamsCodec;
 
   @override
-  State createState() => new _AndroidViewState();
+  State createState() => _AndroidViewState();
 }
 
 class _AndroidViewState extends State<AndroidView> {
@@ -122,12 +166,15 @@ class _AndroidViewState extends State<AndroidView> {
   TextDirection _layoutDirection;
   bool _initialized = false;
 
+  static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
+    Set<Factory<OneSequenceGestureRecognizer>>();
+
   @override
   Widget build(BuildContext context) {
-    return new _AndroidPlatformView(
+    return _AndroidPlatformView(
         controller: _controller,
         hitTestBehavior: widget.hitTestBehavior,
-        gestureRecognizers: widget.gestureRecognizers,
+        gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
     );
   }
 
@@ -212,11 +259,11 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
 
   final AndroidViewController controller;
   final PlatformViewHitTestBehavior hitTestBehavior;
-  final List<OneSequenceGestureRecognizer> gestureRecognizers;
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
-      new RenderAndroidView(
+      RenderAndroidView(
         viewController: controller,
         hitTestBehavior: hitTestBehavior,
         gestureRecognizers: gestureRecognizers,
@@ -226,6 +273,6 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderAndroidView renderObject) {
     renderObject.viewController = controller;
     renderObject.hitTestBehavior = hitTestBehavior;
-    renderObject.gestureRecognizers = gestureRecognizers;
+    renderObject.updateGestureRecognizers(gestureRecognizers);
   }
 }

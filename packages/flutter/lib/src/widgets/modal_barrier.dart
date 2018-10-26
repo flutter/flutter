@@ -75,24 +75,24 @@ class ModalBarrier extends StatelessWidget {
     assert(!dismissible || semanticsLabel == null || debugCheckHasDirectionality(context));
     final bool semanticsDismissible = dismissible && defaultTargetPlatform != TargetPlatform.android;
     final bool modalBarrierSemanticsDismissible = barrierSemanticsDismissible ?? semanticsDismissible;
-    return new BlockSemantics(
-      child: new ExcludeSemantics(
+    return BlockSemantics(
+      child: ExcludeSemantics(
         // On Android, the back button is used to dismiss a modal. On iOS, some
         // modal barriers are not dismissible in accessibility mode.
         excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
-        child: new GestureDetector(
+        child: GestureDetector(
           onTapDown: (TapDownDetails details) {
             if (dismissible)
               Navigator.pop(context);
           },
           behavior: HitTestBehavior.opaque,
-          child: new Semantics(
+          child: Semantics(
             label: semanticsDismissible ? semanticsLabel : null,
             textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
-            child: new ConstrainedBox(
+            child: ConstrainedBox(
               constraints: const BoxConstraints.expand(),
-              child: color == null ? null : new DecoratedBox(
-                decoration: new BoxDecoration(
+              child: color == null ? null : DecoratedBox(
+                decoration: BoxDecoration(
                   color: color,
                 )
               )
@@ -165,7 +165,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ModalBarrier(
+    return ModalBarrier(
       color: color?.value,
       dismissible: dismissible,
       semanticsLabel: semanticsLabel,

@@ -18,13 +18,13 @@ void main() {
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // Default is MainAxisAlignment.start so children so the children's
     // top edges should be at 0, 100, 500, child2's height should be 400.
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: columnKey,
         children: <Widget>[
-          new Container(key: child0Key, width: 100.0, height: 100.0),
-          new Expanded(child: new Container(key: child1Key, width: 100.0, height: 100.0)),
-          new Container(key: child2Key, width: 100.0, height: 100.0),
+          Container(key: child0Key, width: 100.0, height: 100.0),
+          Expanded(child: Container(key: child1Key, width: 100.0, height: 100.0)),
+          Container(key: child2Key, width: 100.0, height: 100.0),
         ]
       )
     ));
@@ -64,13 +64,13 @@ void main() {
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // Default is MainAxisAlignment.start so children so the children's
     // top edges should be at 0, 100, 200
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: columnKey,
         children: <Widget>[
-          new Container(key: child0Key, width: 100.0, height: 100.0),
-          new Container(key: child1Key, width: 100.0, height: 100.0),
-          new Container(key: child2Key, width: 100.0, height: 100.0),
+          Container(key: child0Key, width: 100.0, height: 100.0),
+          Container(key: child1Key, width: 100.0, height: 100.0),
+          Container(key: child2Key, width: 100.0, height: 100.0),
         ]
       )
     ));
@@ -108,13 +108,13 @@ void main() {
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x100 children's top edges should be at 200, 300
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          new Container(key: child0Key, width: 100.0, height: 100.0),
-          new Container(key: child1Key, width: 100.0, height: 100.0),
+          Container(key: child0Key, width: 100.0, height: 100.0),
+          Container(key: child1Key, width: 100.0, height: 100.0),
         ]
       )
     ));
@@ -147,14 +147,14 @@ void main() {
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x100 children's top edges should be at 300, 400, 500.
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          new Container(key: child0Key, width: 100.0, height: 100.0),
-          new Container(key: child1Key, width: 100.0, height: 100.0),
-          new Container(key: child2Key, width: 100.0, height: 100.0),
+          Container(key: child0Key, width: 100.0, height: 100.0),
+          Container(key: child1Key, width: 100.0, height: 100.0),
+          Container(key: child2Key, width: 100.0, height: 100.0),
         ]
       )
     ));
@@ -193,14 +193,14 @@ void main() {
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x100 children's top edges should be at 0, 250, 500
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          new Container(key: child0Key, width: 100.0, height: 100.0),
-          new Container(key: child1Key, width: 100.0, height: 100.0),
-          new Container(key: child2Key, width: 100.0, height: 100.0),
+          Container(key: child0Key, width: 100.0, height: 100.0),
+          Container(key: child1Key, width: 100.0, height: 100.0),
+          Container(key: child2Key, width: 100.0, height: 100.0),
         ]
       )
     ));
@@ -240,15 +240,15 @@ void main() {
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x100 children's top edges should be at 25, 175, 325, 475
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
-          new Container(key: child0Key, width: 100.0, height: 100.0),
-          new Container(key: child1Key, width: 100.0, height: 100.0),
-          new Container(key: child2Key, width: 100.0, height: 100.0),
-          new Container(key: child3Key, width: 100.0, height: 100.0),
+          Container(key: child0Key, width: 100.0, height: 100.0),
+          Container(key: child1Key, width: 100.0, height: 100.0),
+          Container(key: child2Key, width: 100.0, height: 100.0),
+          Container(key: child3Key, width: 100.0, height: 100.0),
         ]
       )
     ));
@@ -293,14 +293,14 @@ void main() {
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x20 children's top edges should be at 135, 290, 445
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          new Container(key: child0Key, width: 100.0, height: 20.0),
-          new Container(key: child1Key, width: 100.0, height: 20.0),
-          new Container(key: child2Key, width: 100.0, height: 20.0),
+          Container(key: child0Key, width: 100.0, height: 20.0),
+          Container(key: child1Key, width: 100.0, height: 20.0),
+          Container(key: child2Key, width: 100.0, height: 20.0),
         ]
       )
     ));
@@ -335,12 +335,12 @@ void main() {
     const Key flexKey = Key('flexKey');
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: flexKey,
         children: <Widget>[
-          new Container(width: 100.0, height: 100.0),
-          new Container(width: 100.0, height: 150.0)
+          Container(width: 100.0, height: 100.0),
+          Container(width: 100.0, height: 150.0)
         ]
       )
     ));
@@ -349,13 +349,13 @@ void main() {
     expect(renderBox.size.height, equals(600.0));
 
     // Column with MainAxisSize.min without flexible children shrink wraps.
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: flexKey,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          new Container(width: 100.0, height: 100.0),
-          new Container(width: 100.0, height: 150.0)
+          Container(width: 100.0, height: 100.0),
+          Container(width: 100.0, height: 150.0)
         ]
       )
     ));
@@ -367,14 +367,14 @@ void main() {
   testWidgets('Column MainAxisSize.min layout at zero size', (WidgetTester tester) async {
     const Key childKey = Key('childKey');
 
-    await tester.pumpWidget(new Center(
-      child: new Container(
+    await tester.pumpWidget(Center(
+      child: Container(
         width: 0.0,
         height: 0.0,
-        child: new Column(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            new Container(
+            Container(
               key: childKey,
               width: 100.0,
               height: 100.0
@@ -401,14 +401,14 @@ void main() {
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // Default is MainAxisAlignment.start so children so the children's
     // bottom edges should be at 0, 100, 500 from bottom, child2's height should be 400.
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: columnKey,
         verticalDirection: VerticalDirection.up,
         children: <Widget>[
-          new Container(key: child0Key, width: 100.0, height: 100.0),
-          new Expanded(child: new Container(key: child1Key, width: 100.0, height: 100.0)),
-          new Container(key: child2Key, width: 100.0, height: 100.0),
+          Container(key: child0Key, width: 100.0, height: 100.0),
+          Expanded(child: Container(key: child1Key, width: 100.0, height: 100.0)),
+          Container(key: child2Key, width: 100.0, height: 100.0),
         ]
       )
     ));
@@ -448,14 +448,14 @@ void main() {
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // Default is MainAxisAlignment.start so children so the children's
     // bottom edges should be at 0, 100, 200 from bottom
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: columnKey,
         verticalDirection: VerticalDirection.up,
         children: <Widget>[
-          new Container(key: child0Key, width: 100.0, height: 100.0),
-          new Container(key: child1Key, width: 100.0, height: 100.0),
-          new Container(key: child2Key, width: 100.0, height: 100.0),
+          Container(key: child0Key, width: 100.0, height: 100.0),
+          Container(key: child1Key, width: 100.0, height: 100.0),
+          Container(key: child2Key, width: 100.0, height: 100.0),
         ]
       )
     ));
@@ -493,14 +493,14 @@ void main() {
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x100 children's bottom edges should be at 200, 300 from bottom
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.center,
         verticalDirection: VerticalDirection.up,
         children: <Widget>[
-          new Container(key: child0Key, width: 100.0, height: 100.0),
-          new Container(key: child1Key, width: 100.0, height: 100.0),
+          Container(key: child0Key, width: 100.0, height: 100.0),
+          Container(key: child1Key, width: 100.0, height: 100.0),
         ]
       )
     ));
@@ -533,15 +533,15 @@ void main() {
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x100 children's bottom edges should be at 300, 400, 500 from bottom.
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.end,
         verticalDirection: VerticalDirection.up,
         children: <Widget>[
-          new Container(key: child0Key, width: 100.0, height: 100.0),
-          new Container(key: child1Key, width: 100.0, height: 100.0),
-          new Container(key: child2Key, width: 100.0, height: 100.0),
+          Container(key: child0Key, width: 100.0, height: 100.0),
+          Container(key: child1Key, width: 100.0, height: 100.0),
+          Container(key: child2Key, width: 100.0, height: 100.0),
         ]
       )
     ));
@@ -580,15 +580,15 @@ void main() {
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x100 children's bottom edges should be at 0, 250, 500 from bottom
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         verticalDirection: VerticalDirection.up,
         children: <Widget>[
-          new Container(key: child0Key, width: 100.0, height: 100.0),
-          new Container(key: child1Key, width: 100.0, height: 100.0),
-          new Container(key: child2Key, width: 100.0, height: 100.0),
+          Container(key: child0Key, width: 100.0, height: 100.0),
+          Container(key: child1Key, width: 100.0, height: 100.0),
+          Container(key: child2Key, width: 100.0, height: 100.0),
         ]
       )
     ));
@@ -628,16 +628,16 @@ void main() {
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x100 children's bottom edges should be at 25, 175, 325, 475 from bottom
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         verticalDirection: VerticalDirection.up,
         children: <Widget>[
-          new Container(key: child0Key, width: 100.0, height: 100.0),
-          new Container(key: child1Key, width: 100.0, height: 100.0),
-          new Container(key: child2Key, width: 100.0, height: 100.0),
-          new Container(key: child3Key, width: 100.0, height: 100.0),
+          Container(key: child0Key, width: 100.0, height: 100.0),
+          Container(key: child1Key, width: 100.0, height: 100.0),
+          Container(key: child2Key, width: 100.0, height: 100.0),
+          Container(key: child3Key, width: 100.0, height: 100.0),
         ]
       )
     ));
@@ -682,15 +682,15 @@ void main() {
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x20 children's bottom edges should be at 135, 290, 445 from bottom
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         verticalDirection: VerticalDirection.up,
         children: <Widget>[
-          new Container(key: child0Key, width: 100.0, height: 20.0),
-          new Container(key: child1Key, width: 100.0, height: 20.0),
-          new Container(key: child2Key, width: 100.0, height: 20.0),
+          Container(key: child0Key, width: 100.0, height: 20.0),
+          Container(key: child1Key, width: 100.0, height: 20.0),
+          Container(key: child2Key, width: 100.0, height: 20.0),
         ]
       )
     ));
@@ -725,13 +725,13 @@ void main() {
     const Key flexKey = Key('flexKey');
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: flexKey,
         verticalDirection: VerticalDirection.up,
         children: <Widget>[
-          new Container(width: 100.0, height: 100.0),
-          new Container(width: 100.0, height: 150.0)
+          Container(width: 100.0, height: 100.0),
+          Container(width: 100.0, height: 150.0)
         ]
       )
     ));
@@ -740,14 +740,14 @@ void main() {
     expect(renderBox.size.height, equals(600.0));
 
     // Column with MainAxisSize.min without flexible children shrink wraps.
-    await tester.pumpWidget(new Center(
-      child: new Column(
+    await tester.pumpWidget(Center(
+      child: Column(
         key: flexKey,
         mainAxisSize: MainAxisSize.min,
         verticalDirection: VerticalDirection.up,
         children: <Widget>[
-          new Container(width: 100.0, height: 100.0),
-          new Container(width: 100.0, height: 150.0)
+          Container(width: 100.0, height: 100.0),
+          Container(width: 100.0, height: 150.0)
         ]
       )
     ));
@@ -759,15 +759,15 @@ void main() {
   testWidgets('Column MainAxisSize.min layout at zero size', (WidgetTester tester) async {
     const Key childKey = Key('childKey');
 
-    await tester.pumpWidget(new Center(
-      child: new Container(
+    await tester.pumpWidget(Center(
+      child: Container(
         width: 0.0,
         height: 0.0,
-        child: new Column(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           verticalDirection: VerticalDirection.up,
           children: <Widget>[
-            new Container(
+            Container(
               key: childKey,
               width: 100.0,
               height: 100.0

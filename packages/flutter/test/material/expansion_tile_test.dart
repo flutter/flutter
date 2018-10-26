@@ -10,41 +10,41 @@ void main() {
   const Color _dividerColor = Color(0x1f333333);
 
   testWidgets('ExpansionTile initial state', (WidgetTester tester) async {
-    final Key topKey = new UniqueKey();
+    final Key topKey = UniqueKey();
     const Key expandedKey = PageStorageKey<String>('expanded');
     const Key collapsedKey = PageStorageKey<String>('collapsed');
     const Key defaultKey = PageStorageKey<String>('default');
 
-    final Key tileKey = new UniqueKey();
+    final Key tileKey = UniqueKey();
 
-    await tester.pumpWidget(new MaterialApp(
-      theme: new ThemeData(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
         platform: TargetPlatform.iOS,
         dividerColor: _dividerColor,
       ),
-      home: new Material(
-        child: new SingleChildScrollView(
-          child: new Column(
+      home: Material(
+        child: SingleChildScrollView(
+          child: Column(
             children: <Widget>[
-              new ListTile(title: const Text('Top'), key: topKey),
-              new ExpansionTile(
+              ListTile(title: const Text('Top'), key: topKey),
+              ExpansionTile(
                 key: expandedKey,
                 initiallyExpanded: true,
                 title: const Text('Expanded'),
                 backgroundColor: Colors.red,
                 children: <Widget>[
-                  new ListTile(
+                  ListTile(
                     key: tileKey,
                     title: const Text('0')
                   )
                 ]
               ),
-              new ExpansionTile(
+              ExpansionTile(
                 key: collapsedKey,
                 initiallyExpanded: false,
                 title: const Text('Collapsed'),
                 children: <Widget>[
-                  new ListTile(
+                  ListTile(
                     key: tileKey,
                     title: const Text('0')
                   )
