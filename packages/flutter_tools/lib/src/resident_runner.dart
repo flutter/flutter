@@ -79,7 +79,7 @@ class FlutterDevice {
     vmServices = localVmServices;
   }
 
-  Future<void> refreshViews() async {
+  Future<void> refreshViews() {
     if (vmServices == null || vmServices.isEmpty)
       return Future<void>.value(null);
     final List<Future<void>> futures = <Future<void>>[];

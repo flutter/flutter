@@ -949,7 +949,7 @@ class VM extends ServiceObjectOwner {
     return invokeRpcRaw('_getVMTimeline', timeout: kLongRequestTimeout);
   }
 
-  Future<void> refreshViews() async {
+  Future<void> refreshViews() {
     if (!isFlutterEngine)
       return Future<void>.value(null);
     _viewCache.clear();
@@ -1292,7 +1292,7 @@ class Isolate extends ServiceObjectOwner {
   }
 
   // Reload related extension methods.
-  Future<Map<String, dynamic>> flutterReassemble() async {
+  Future<Map<String, dynamic>> flutterReassemble() {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.reassemble',
       timeout: kShortRequestTimeout,

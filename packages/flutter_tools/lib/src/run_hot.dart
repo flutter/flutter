@@ -342,6 +342,7 @@ class HotRunner extends ResidentRunner {
         pathToReload: getReloadPath(fullRestart: fullRestart),
       ));
     }
+    // If there any failures reported, bail out.
     if (results.any((bool result) => !result)) {
       return false;
     }
@@ -353,7 +354,7 @@ class HotRunner extends ResidentRunner {
     return true;
   }
 
-  Future<void> _evictDirtyAssets() async {
+  Future<void> _evictDirtyAssets() {
     final List<Future<Map<String, dynamic>>> futures = <Future<Map<String, dynamic>>>[];
     for (FlutterDevice device in flutterDevices) {
       if (device.devFS.assetPathsToEvict.isEmpty)
@@ -374,7 +375,7 @@ class HotRunner extends ResidentRunner {
       device.devFS.assetPathsToEvict.clear();
   }
 
-  Future<void> _cleanupDevFS() async {
+  Future<void> _cleanupDevFS() {
     final List<Future<void>> futures = <Future<void>>[];
     for (FlutterDevice device in flutterDevices) {
       if (device.devFS != null) {
@@ -395,7 +396,7 @@ class HotRunner extends ResidentRunner {
   Future<void> _launchInView(FlutterDevice device,
                              Uri entryUri,
                              Uri packagesUri,
-                             Uri assetsDirectoryUri) async {
+                             Uri assetsDirectoryUri) {
     final List<Future<void>> futures = <Future<void>>[];
     for (FlutterView view in device.views)
       futures.add(view.runFromSource(entryUri, packagesUri, assetsDirectoryUri));
@@ -466,15 +467,13 @@ class HotRunner extends ResidentRunner {
           // Reload the isolate.
           final Completer<void> completer = Completer<void>();
           futures.add(completer.future);
-          view.uiIsolate.reload().whenComplete(() { // ignore: unawaited_futures
+          view.uiIsolate.reload().then((ServiceObject _) { // ignore: unawaited_futures
             final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
             if ((pauseEvent != null) && pauseEvent.isPauseEvent) {
               // Resume the isolate so that it can be killed by the embedder.
-              view.uiIsolate.resume().whenComplete(() { completer.complete(null); });
-            } else {
-              completer.complete(null);
+              return view.uiIsolate.resume();
             }
-          });
+          }).whenComplete(() { completer.complete(null); });
         }
       }
     }
