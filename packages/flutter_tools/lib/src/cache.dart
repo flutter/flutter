@@ -112,7 +112,18 @@ class Cache {
 
   String _dartSdkVersion;
 
-  String get dartSdkVersion => _dartSdkVersion ??= platform.version;
+  String get dartSdkVersion {
+    if (_dartSdkVersion == null) {
+      // Make the version string more customer-friendly.
+      // Changes '2.1.0-dev.8.0.flutter-4312ae32' to '2.1.0 (build 2.1.0-dev.8.0 4312ae32)'
+      final String justVersion = platform.version.split(' ')[0];
+      _dartSdkVersion = justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
+        final String noFlutter = match[2].replaceAll('.flutter-', ' ');
+        return '${match[1]} (build ${match[1]}$noFlutter)';
+      });
+    }
+    return _dartSdkVersion;
+  }
 
   String _engineRevision;
 
