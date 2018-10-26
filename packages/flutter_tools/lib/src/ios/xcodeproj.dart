@@ -263,7 +263,7 @@ class XcodeProjectInfo {
   /// null, if there is no unique best match.
   String buildConfigurationFor(BuildInfo buildInfo, String scheme) {
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
-    if (buildConfigurations.contains(expectedConfiguration))
+    if (hasBuildConfiguratinForBuildMode(expectedConfiguration))
       return expectedConfiguration;
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
     return _uniqueMatch(buildConfigurations, (String candidate) {
