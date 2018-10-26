@@ -11,7 +11,7 @@
  *
  * This class is used by `TextInputSemanticsObject`.
  */
-@interface FlutterInactiveTextInput : UIView<UITextInput>
+@interface FlutterInactiveTextInput : UIView <UITextInput>
 
 @property(nonatomic, copy) NSString* text;
 @property(nonatomic, readonly) NSMutableString* markedText;
@@ -30,7 +30,7 @@
  * field that currently owns input focus. Delegates to
  * `FlutterInactiveTextInput` otherwise.
  */
-@interface TextInputSemanticsObject : SemanticsObject<UITextInput>
+@interface TextInputSemanticsObject : SemanticsObject <UITextInput>
 @end
 
 #endif  // SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_ACCESSIBILITY_TEXT_ENTRY_H_

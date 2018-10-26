@@ -16,37 +16,40 @@
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
-#include "flutter/shell/platform/darwin/ios/headless_platform_view_ios.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
+
+@class FlutterViewController;
 
 namespace shell {
 
-class PlatformViewIOS final : public HeadlessPlatformViewIOS {
+class PlatformViewIOS final : public PlatformView {
  public:
-  explicit PlatformViewIOS(PlatformView::Delegate& delegate,
-                           blink::TaskRunners task_runners,
-                           FlutterViewController* owner_controller_,
-                           FlutterView* owner_view_);
+  explicit PlatformViewIOS(PlatformView::Delegate& delegate, blink::TaskRunners task_runners);
 
-  ~PlatformViewIOS() override;
+  ~PlatformViewIOS();
 
-  FlutterViewController* GetOwnerViewController() const;
+  PlatformMessageRouter& GetPlatformMessageRouter();
+
+  fml::WeakPtr<FlutterViewController> GetOwnerViewController() const;
+  void SetOwnerViewController(fml::WeakPtr<FlutterViewController> owner_controller);
 
   void RegisterExternalTexture(int64_t id, NSObject<FlutterTexture>* texture);
 
   fml::scoped_nsprotocol<FlutterTextInputPlugin*> GetTextInputPlugin() const;
 
-  void SetTextInputPlugin(
-      fml::scoped_nsprotocol<FlutterTextInputPlugin*> plugin);
+  void SetTextInputPlugin(fml::scoped_nsprotocol<FlutterTextInputPlugin*> plugin);
 
  private:
-  FlutterViewController* owner_controller_;  // weak reference.
-  FlutterView* owner_view_;                  // weak reference.
+  fml::WeakPtr<FlutterViewController> owner_controller_;
   std::unique_ptr<IOSSurface> ios_surface_;
   PlatformMessageRouter platform_message_router_;
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
   fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin_;
   fml::closure firstFrameCallback_;
+
+  // |shell::PlatformView|
+  void HandlePlatformMessage(fml::RefPtr<blink::PlatformMessage> message) override;
 
   // |shell::PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;
@@ -61,9 +64,8 @@ class PlatformViewIOS final : public HeadlessPlatformViewIOS {
   void SetAccessibilityFeatures(int32_t flags) override;
 
   // |shell::PlatformView|
-  void UpdateSemantics(
-      blink::SemanticsNodeUpdates update,
-      blink::CustomAccessibilityActionUpdates actions) override;
+  void UpdateSemantics(blink::SemanticsNodeUpdates update,
+                       blink::CustomAccessibilityActionUpdates actions) override;
 
   // |shell::PlatformView|
   std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;

@@ -5,12 +5,17 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLER_INTERNAL_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLER_INTERNAL_H_
 
-#include "flutter/shell/common/shell.h"
+#include "flutter/fml/memory/weak_ptr.h"
+#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 
 @interface FlutterViewController ()
 
-- (shell::Shell&)shell;
+- (fml::WeakPtr<FlutterViewController>)getWeakPtr;
+- (shell::FlutterPlatformViewsController*)platformViewsController;
+
+@property(readonly) fml::scoped_nsobject<FlutterEngine> engine;
 
 @end
 

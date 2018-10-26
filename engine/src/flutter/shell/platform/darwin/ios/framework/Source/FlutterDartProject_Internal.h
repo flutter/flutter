@@ -14,6 +14,9 @@
 - (const blink::Settings&)settings;
 
 - (shell::RunConfiguration)runConfiguration;
+- (shell::RunConfiguration)runConfigurationForEntrypoint:(NSString*)entrypointOrNil;
+- (shell::RunConfiguration)runConfigurationForEntrypoint:(NSString*)entrypointOrNil
+                                            libraryOrNil:(NSString*)dartLibraryOrNil;
 
 + (NSString*)flutterAssetsName:(NSBundle*)bundle;
 

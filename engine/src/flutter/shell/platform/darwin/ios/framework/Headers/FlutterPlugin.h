@@ -210,7 +210,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Plugins expose `UIView` for embedding in Flutter apps by registering a view factory.
  *
  * @param factory The view factory that will be registered.
- * @param factoryId:: A unique identifier for the factory, the Dart code of the Flutter app can use
+ * @param factoryId A unique identifier for the factory, the Dart code of the Flutter app can use
  *   this identifier to request creation of a `UIView` by the registered factory.
  */
 - (void)registerViewFactory:(NSObject<FlutterPlatformViewFactory>*)factory

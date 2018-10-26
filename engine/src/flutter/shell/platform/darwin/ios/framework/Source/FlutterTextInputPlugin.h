@@ -36,7 +36,7 @@
 @end
 
 /** A range of text in the buffer of a Flutter text editing widget. */
-@interface FlutterTextRange : UITextRange<NSCopying>
+@interface FlutterTextRange : UITextRange <NSCopying>
 
 @property(nonatomic, readonly) NSRange range;
 

@@ -193,7 +193,24 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
 }
 
 - (shell::RunConfiguration)runConfiguration {
-  return shell::RunConfiguration::InferFromSettings(_settings);
+  return [self runConfigurationForEntrypoint:nil];
+}
+
+- (shell::RunConfiguration)runConfigurationForEntrypoint:(NSString*)entrypointOrNil {
+  return [self runConfigurationForEntrypoint:entrypointOrNil libraryOrNil:nil];
+}
+
+- (shell::RunConfiguration)runConfigurationForEntrypoint:(NSString*)entrypointOrNil
+                                            libraryOrNil:(NSString*)dartLibraryOrNil {
+  shell::RunConfiguration config = shell::RunConfiguration::InferFromSettings(_settings);
+  if (dartLibraryOrNil && entrypointOrNil) {
+    config.SetEntrypointAndLibrary(std::string([entrypointOrNil UTF8String]),
+                                   std::string([dartLibraryOrNil UTF8String]));
+
+  } else if (entrypointOrNil) {
+    config.SetEntrypoint(std::string([entrypointOrNil UTF8String]));
+  }
+  return config;
 }
 
 #pragma mark - Assets-related utilities
