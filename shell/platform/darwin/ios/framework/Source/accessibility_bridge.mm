@@ -257,7 +257,7 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   // `rect` is in the physical pixel coordinate system. iOS expects the accessibility frame in
   // the logical pixel coordinate system. Therefore, we divide by the `scale` (pixel ratio) to
   // convert.
-  CGFloat scale = [[[self bridge] -> view() window] screen].scale;
+  CGFloat scale = [[[self bridge]->view() window] screen].scale;
   auto result =
       CGRectMake(rect.x() / scale, rect.y() / scale, rect.width() / scale, rect.height() / scale);
   return UIAccessibilityConvertFrameToScreenCoordinates(result, [self bridge] -> view());
@@ -268,8 +268,8 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 - (id)accessibilityContainer {
   if ([self hasChildren] || [self uid] == kRootNodeId) {
     if (_container == nil)
-      _container =
-          [[SemanticsObjectContainer alloc] initWithSemanticsObject:self bridge:[self bridge]];
+      _container = [[SemanticsObjectContainer alloc] initWithSemanticsObject:self
+                                                                      bridge:[self bridge]];
     return _container;
   }
   if ([self parent] == nil) {
@@ -498,7 +498,7 @@ AccessibilityBridge::AccessibilityBridge(UIView* view, PlatformViewIOS* platform
       previous_routes_({}) {
   accessibility_channel_.reset([[FlutterBasicMessageChannel alloc]
          initWithName:@"flutter/accessibility"
-      binaryMessenger:platform_view->GetOwnerViewController()
+      binaryMessenger:platform_view->GetOwnerViewController().get()
                 codec:[FlutterStandardMessageCodec sharedInstance]]);
   [accessibility_channel_.get() setMessageHandler:^(id message, FlutterReply reply) {
     HandleEvent((NSDictionary*)message);
@@ -654,11 +654,11 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
         [objects_ removeObjectForKey:@(node.id)];
         if (isTextField) {
           // Text fields are backed by objects that implement UITextInput.
-          object =
-              [[[TextInputSemanticsObject alloc] initWithBridge:GetWeakPtr() uid:uid] autorelease];
+          object = [[[TextInputSemanticsObject alloc] initWithBridge:GetWeakPtr()
+                                                                 uid:uid] autorelease];
         } else {
-          object =
-              [[[FlutterSemanticsObject alloc] initWithBridge:GetWeakPtr() uid:uid] autorelease];
+          object = [[[FlutterSemanticsObject alloc] initWithBridge:GetWeakPtr()
+                                                               uid:uid] autorelease];
         }
         [object.parent.children replaceObjectAtIndex:positionInChildlist withObject:object];
         objects_.get()[@(node.id)] = object;

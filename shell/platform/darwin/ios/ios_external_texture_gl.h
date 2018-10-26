@@ -13,15 +13,12 @@ namespace shell {
 
 class IOSExternalTextureGL : public flow::Texture {
  public:
-  IOSExternalTextureGL(int64_t textureId,
-                       NSObject<FlutterTexture>* externalTexture);
+  IOSExternalTextureGL(int64_t textureId, NSObject<FlutterTexture>* externalTexture);
 
   ~IOSExternalTextureGL() override;
 
   // Called from GPU thread.
-  virtual void Paint(SkCanvas& canvas,
-                     const SkRect& bounds,
-                     bool freeze) override;
+  virtual void Paint(SkCanvas& canvas, const SkRect& bounds, bool freeze) override;
 
   virtual void OnGrContextCreated() override;
 

@@ -17,23 +17,44 @@
 
 namespace shell {
 
-PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
-                                 blink::TaskRunners task_runners,
-                                 FlutterViewController* owner_controller,
-                                 FlutterView* owner_view)
-    : HeadlessPlatformViewIOS(delegate, std::move(task_runners)),
-      owner_controller_(owner_controller),
-      owner_view_(owner_view),
-      ios_surface_(owner_view_.createSurface) {
-  FML_DCHECK(ios_surface_ != nullptr);
-  FML_DCHECK(owner_controller_ != nullptr);
-  FML_DCHECK(owner_view_ != nullptr);
-}
+PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate, blink::TaskRunners task_runners)
+    : PlatformView(delegate, std::move(task_runners)) {}
 
 PlatformViewIOS::~PlatformViewIOS() = default;
 
-FlutterViewController* PlatformViewIOS::GetOwnerViewController() const {
+PlatformMessageRouter& PlatformViewIOS::GetPlatformMessageRouter() {
+  return platform_message_router_;
+}
+
+// |shell::PlatformView|
+void PlatformViewIOS::HandlePlatformMessage(fml::RefPtr<blink::PlatformMessage> message) {
+  platform_message_router_.HandlePlatformMessage(std::move(message));
+}
+
+fml::WeakPtr<FlutterViewController> PlatformViewIOS::GetOwnerViewController() const {
   return owner_controller_;
+}
+
+void PlatformViewIOS::SetOwnerViewController(fml::WeakPtr<FlutterViewController> owner_controller) {
+  if (ios_surface_ || !owner_controller) {
+    NotifyDestroyed();
+    ios_surface_.reset();
+    accessibility_bridge_.reset();
+  }
+  owner_controller_ = owner_controller;
+  if (owner_controller_) {
+    ios_surface_ = static_cast<FlutterView*>(owner_controller.get().view).createSurface;
+    FML_DCHECK(ios_surface_ != nullptr);
+
+    if (accessibility_bridge_) {
+      accessibility_bridge_.reset(
+          new AccessibilityBridge(static_cast<FlutterView*>(owner_controller_.get().view), this));
+    }
+    // Do not call `NotifyCreated()` here - let FlutterViewController take care
+    // of that when its Viewport is sized.  If `NotifyCreated()` is called here,
+    // it can occasionally get invoked before the viewport is sized resulting in
+    // a framebuffer that will not be able to completely attach.
+  }
 }
 
 void PlatformViewIOS::RegisterExternalTexture(int64_t texture_id,
@@ -43,13 +64,19 @@ void PlatformViewIOS::RegisterExternalTexture(int64_t texture_id,
 
 // |shell::PlatformView|
 std::unique_ptr<Surface> PlatformViewIOS::CreateRenderingSurface() {
+  if (!ios_surface_) {
+    FML_DLOG(INFO) << "Could not CreateRenderingSurface, this PlatformViewIOS "
+                      "has no ViewController.";
+    return nullptr;
+  }
   return ios_surface_->CreateGPUSurface();
 }
 
 // |shell::PlatformView|
 sk_sp<GrContext> PlatformViewIOS::CreateResourceContext() const {
-  if (!ios_surface_->ResourceContextMakeCurrent()) {
-    FML_DLOG(INFO) << "Could not make resource context current on IO thread. Async texture uploads "
+  if (!ios_surface_ || !ios_surface_->ResourceContextMakeCurrent()) {
+    FML_DLOG(INFO) << "Could not make resource context current on IO thread. "
+                      "Async texture uploads "
                       "will be disabled.";
     return nullptr;
   }
@@ -59,8 +86,14 @@ sk_sp<GrContext> PlatformViewIOS::CreateResourceContext() const {
 
 // |shell::PlatformView|
 void PlatformViewIOS::SetSemanticsEnabled(bool enabled) {
+  if (!owner_controller_) {
+    FML_DLOG(WARNING) << "Could not set semantics to enabled, this "
+                         "PlatformViewIOS has no ViewController.";
+    return;
+  }
   if (enabled && !accessibility_bridge_) {
-    accessibility_bridge_ = std::make_unique<AccessibilityBridge>(owner_view_, this);
+    accessibility_bridge_ = std::make_unique<AccessibilityBridge>(
+        static_cast<FlutterView*>(owner_controller_.get().view), this);
   } else if (!enabled && accessibility_bridge_) {
     accessibility_bridge_.reset();
   }

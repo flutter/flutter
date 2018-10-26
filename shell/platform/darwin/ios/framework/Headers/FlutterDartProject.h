@@ -9,43 +9,58 @@
 
 #include "FlutterMacros.h"
 
+/**
+ * A set of Flutter and Dart assets used by a `FlutterEngine` to initialize execution.
+ */
 FLUTTER_EXPORT
 @interface FlutterDartProject : NSObject
 
+/**
+ * Initializes with a specific
+ */
 - (instancetype)initWithPrecompiledDartBundle:(NSBundle*)bundle NS_DESIGNATED_INITIALIZER;
 
+/**
+ * Initializes with a specific set of Flutter Assets, with a specified location of
+ * main() and Dart packages.
+ */
 - (instancetype)initWithFlutterAssets:(NSURL*)flutterAssetsURL
                              dartMain:(NSURL*)dartMainURL
                              packages:(NSURL*)dartPackages NS_DESIGNATED_INITIALIZER;
 
+/**
+ * Initializes from a specific set of Flutter Assets.
+ */
 - (instancetype)initWithFlutterAssetsWithScriptSnapshot:(NSURL*)flutterAssetsURL
     NS_DESIGNATED_INITIALIZER;
 
+/**
+ * Unavailable - use `init` instead.
+ */
 - (instancetype)initFromDefaultSourceForConfiguration FLUTTER_UNAVAILABLE("Use -init instead.");
 
 /**
- Returns the file name for the given asset.
- The returned file name can be used to access the asset in the application's main bundle.
-
- - Parameter asset: The name of the asset. The name can be hierarchical.
- - Returns: the file name to be used for lookup in the main bundle.
+ * Returns the file name for the given asset.
+ * The returned file name can be used to access the asset in the application's main bundle.
+ *
+ * @param asset The name of the asset. The name can be hierarchical.
+ * @return the file name to be used for lookup in the main bundle.
  */
 + (NSString*)lookupKeyForAsset:(NSString*)asset;
 
 /**
- Returns the file name for the given asset which originates from the specified package.
- The returned file name can be used to access the asset in the application's main bundle.
-
- - Parameters:
-   - asset: The name of the asset. The name can be hierarchical.
-   - package: The name of the package from which the asset originates.
- - Returns: the file name to be used for lookup in the main bundle.
+ * Returns the file name for the given asset which originates from the specified package.
+ * The returned file name can be used to access the asset in the application's main bundle.
+ *
+ * @param asset The name of the asset. The name can be hierarchical.
+ * @param package The name of the package from which the asset originates.
+ * @return the file name to be used for lookup in the main bundle.
  */
 + (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package;
 
 /**
- Returns the default identifier for the bundle where we expect to find the Flutter Dart
- application.
+ * Returns the default identifier for the bundle where we expect to find the Flutter Dart
+ * application.
  */
 + (NSString*)defaultBundleIdentifier;
 

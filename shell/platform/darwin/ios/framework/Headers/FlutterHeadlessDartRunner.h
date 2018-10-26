@@ -9,44 +9,51 @@
 
 #include "FlutterBinaryMessenger.h"
 #include "FlutterDartProject.h"
+#include "FlutterEngine.h"
 #include "FlutterMacros.h"
 
 /**
-A callback for when FlutterHeadlessDartRunner has attempted to start a Dart
-Isolate in the background.
-
-- Parameter success: YES if the Isolate was started and run successfully, NO
-  otherwise.
-*/
+ * A callback for when FlutterHeadlessDartRunner has attempted to start a Dart
+ * Isolate in the background.
+ *
+ * @param success YES if the Isolate was started and run successfully, NO
+ *   otherwise.
+ */
 typedef void (^FlutterHeadlessDartRunnerCallback)(BOOL success);
 
 /**
- The FlutterHeadlessDartRunner runs Flutter Dart code with a null rasterizer,
- and no native drawing surface. It is appropriate for use in running Dart
- code e.g. in the background from a plugin.
-*/
+ * The FlutterHeadlessDartRunner runs Flutter Dart code with a null rasterizer,
+ * and no native drawing surface. It is appropriate for use in running Dart
+ * code e.g. in the background from a plugin.
+ *
+ * Most callers should prefer using `FlutterEngine` directly; this interface exists
+ * for legacy support.
+ */
 FLUTTER_EXPORT
-@interface FlutterHeadlessDartRunner : NSObject <FlutterBinaryMessenger>
+FLUTTER_DEPRECATED("FlutterEngine should be used rather than FlutterHeadlessDartRunner")
+@interface FlutterHeadlessDartRunner : FlutterEngine
 
 /**
- Runs a Dart function on an Isolate that is not the main application's Isolate.
- The first call will create a new Isolate. Subsequent calls will return
- immediately.
-
- - Parameter entrypoint: The name of a top-level function from the same Dart
-   library that contains the app's main() function.
-*/
-- (void)runWithEntrypoint:(NSString*)entrypoint;
+ * Iniitalize this FlutterHeadlessDartRunner with a `FlutterDartProject`.
+ *
+ * If the FlutterDartProject is not specified, the FlutterHeadlessDartRunner will attempt to locate
+ * the project in a default location.
+ *
+ * A newly initialized engine will not run the `FlutterDartProject` until either
+ * `-runWithEntrypoint:` or `-runWithEntrypoint:libraryURI` is called.
+ *
+ * @param labelPrefix The label prefix used to identify threads for this instance. Should
+ * be unique across FlutterEngine instances
+ * @param projectOrNil The `FlutterDartProject` to run.
+ */
+- (instancetype)initWithName:(NSString*)labelPrefix
+                     project:(FlutterDartProject*)projectOrNil NS_DESIGNATED_INITIALIZER;
 
 /**
- Runs a Dart function on an Isolate that is not the main application's Isolate.
- The first call will create a new Isolate. Subsequent calls will return
- immediately.
-
- - Parameter entrypoint: The name of a top-level function from a Dart library.
- - Parameter uri: The URI of the Dart library which contains entrypoint.
-*/
-- (void)runWithEntrypointAndLibraryUri:(NSString*)entrypoint libraryUri:(NSString*)uri;
+ * Not recommended for use - will initialize with a default label ("io.flutter.headless")
+ * and the default FlutterDartProject.
+ */
+- (instancetype)init;
 
 @end
 

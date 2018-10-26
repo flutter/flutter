@@ -118,13 +118,11 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterBinary
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterCodecs.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterHeadlessDartRunner.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterNavigationController.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterTexture.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterChannels.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCodecs.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterHeadlessDartRunner.mm
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterNavigationController.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterStandardCodec.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterStandardCodec_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterUmbrellaImport.m
@@ -203,7 +201,6 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONUtil.
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Flutter.podspec
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/module.modulemap
-FILE: ../../../flutter/shell/platform/darwin/ios/headless_platform_view_ios.mm
 FILE: ../../../flutter/shell/platform/embedder/assets/EmbedderInfo.plist
 FILE: ../../../flutter/shell/platform/embedder/assets/embedder.modulemap
 FILE: ../../../flutter/shell/platform/embedder/fixtures/simple_main.dart
@@ -518,7 +515,10 @@ FILE: ../../../flutter/shell/platform/android/android_shell_holder.cc
 FILE: ../../../flutter/shell/platform/android/android_shell_holder.h
 FILE: ../../../flutter/shell/platform/android/platform_message_response_android.cc
 FILE: ../../../flutter/shell/platform/android/platform_message_response_android.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterObservatoryPublisher.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterObservatoryPublisher.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews.mm
@@ -599,7 +599,6 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbac
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.mm
-FILE: ../../../flutter/shell/platform/darwin/ios/headless_platform_view_ios.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Chromium Authors. All rights reserved.
 

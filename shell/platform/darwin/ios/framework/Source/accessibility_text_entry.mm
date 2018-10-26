@@ -343,8 +343,9 @@
 - (UITextPosition*)positionFromPosition:(UITextPosition*)position
                             inDirection:(UITextLayoutDirection)direction
                                  offset:(NSInteger)offset {
-  return
-      [[self textInputSurrogate] positionFromPosition:position inDirection:direction offset:offset];
+  return [[self textInputSurrogate] positionFromPosition:position
+                                             inDirection:direction
+                                                  offset:offset];
 }
 
 - (NSComparisonResult)comparePosition:(UITextPosition*)position toPosition:(UITextPosition*)other {
@@ -362,8 +363,8 @@
 
 - (UITextRange*)characterRangeByExtendingPosition:(UITextPosition*)position
                                       inDirection:(UITextLayoutDirection)direction {
-  return
-      [[self textInputSurrogate] characterRangeByExtendingPosition:position inDirection:direction];
+  return [[self textInputSurrogate] characterRangeByExtendingPosition:position
+                                                          inDirection:direction];
 }
 
 - (UITextWritingDirection)baseWritingDirectionForPosition:(UITextPosition*)position

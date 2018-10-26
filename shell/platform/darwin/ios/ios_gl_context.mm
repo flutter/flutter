@@ -127,6 +127,8 @@ bool IOSGLContext::UpdateStorageSizeIfNecessary() {
   TRACE_EVENT_INSTANT0("flutter", "IOSGLContext::UpdateStorageSizeIfNecessary");
   FML_DLOG(INFO) << "Updating render buffer storage size.";
 
+  FML_DCHECK(glGetError() == GL_NO_ERROR);
+
   if (![EAGLContext setCurrentContext:context_]) {
     return false;
   }

@@ -14,8 +14,7 @@
 
 namespace shell {
 
-class IOSSurfaceSoftware final : public IOSSurface,
-                                 public GPUSurfaceSoftwareDelegate {
+class IOSSurfaceSoftware final : public IOSSurface, public GPUSurfaceSoftwareDelegate {
  public:
   IOSSurfaceSoftware(fml::scoped_nsobject<CALayer> layer);
 
