@@ -71,11 +71,14 @@
   [_lifeCycleDelegate applicationWillTerminate:application];
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 - (void)application:(UIApplication*)application
     didRegisterUserNotificationSettings:(UIUserNotificationSettings*)notificationSettings {
   [_lifeCycleDelegate application:application
       didRegisterUserNotificationSettings:notificationSettings];
 }
+#pragma GCC diagnostic pop
 
 - (void)application:(UIApplication*)application
     didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken {

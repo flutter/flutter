@@ -158,6 +158,8 @@ static BOOL isPowerOfTwo(NSUInteger x) {
   }
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 - (void)application:(UIApplication*)application
     didRegisterUserNotificationSettings:(UIUserNotificationSettings*)notificationSettings {
   for (id<FlutterPlugin> plugin in _pluginDelegates) {
@@ -169,6 +171,7 @@ static BOOL isPowerOfTwo(NSUInteger x) {
     }
   }
 }
+#pragma GCC diagnostic pop
 
 - (void)application:(UIApplication*)application
     didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken {
