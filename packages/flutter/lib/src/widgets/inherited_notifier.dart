@@ -10,7 +10,7 @@ import 'framework.dart';
 /// dependencies when the [notifier] is triggered.
 ///
 /// This is a variant of [InheritedWidget], specialised for subclasses of
-/// [Listenable], such as [ChangeNotified] or [ValueNotifier].
+/// [Listenable], such as [ChangeNotifier] or [ValueNotifier].
 ///
 /// Dependents are notified whenever the [notifier] sends notifications, or
 /// whenever the identity of the [notifier] changes.
@@ -43,14 +43,25 @@ abstract class InheritedNotifier<T extends Listenable> extends InheritedWidget {
   /// sends notifications.
   ///
   /// The [child] argument must not be null.
-  const InheritedNotifier({ Key key, this.notifier, Widget child }) : super(key: key, child: child);
+  const InheritedNotifier({
+    Key key,
+    this.notifier,
+    @required Widget child,
+  }) : assert(child != null),
+       super(key: key, child: child);
 
   /// The [Listenable] object to which to listen.
   ///
   /// Whenever this object sends change notifications, the dependents of this
   /// widget are triggered.
   ///
-  /// While the [notifier] is null, no notifications are sent.
+  /// By default, whenever the [notifier] is changed (including when changing to
+  /// or from null), if the old notifier is not equal to the new notifier (as
+  /// determined by the `==` operator), notifications are sent. This behavior
+  /// can be overridden by overriding [updateShouldNotify].
+  ///
+  /// While the [notifier] is null, no notifications are sent, since the null
+  /// object cannot itself send notifications.
   final T notifier;
 
   @override
