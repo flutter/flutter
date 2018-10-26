@@ -1,4 +1,4 @@
-Signature: 859828e89ddf69532259a86e307faa7a
+Signature: bde06884d55ea0e9a302f2c44ee13732
 
 UNUSED LICENSES:
 
@@ -1289,6 +1289,7 @@ LIBRARY: skcms
 LIBRARY: skia
 LIBRARY: vulkan
 LIBRARY: vulkanmemoryallocator
+LIBRARY: wuffs
 ORIGIN: ../../../third_party/skia/bench/ClearBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/ClearBench.cpp
@@ -1400,6 +1401,8 @@ FILE: ../../../third_party/skia/samplecode/SampleNimaActor.h
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
 FILE: ../../../third_party/skia/src/c/sk_imageinfo.cpp
 FILE: ../../../third_party/skia/src/codec/SkEncodedInfo.cpp
+FILE: ../../../third_party/skia/src/codec/SkWuffsCodec.cpp
+FILE: ../../../third_party/skia/src/codec/SkWuffsCodec.h
 FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.c
 FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.h
 FILE: ../../../third_party/skia/src/compute/common/vk/cache_vk.c
@@ -1636,6 +1639,7 @@ FILE: ../../../third_party/skia/third_party/skcms/src/Transform_inl.h
 FILE: ../../../third_party/skia/third_party/vulkan/SkiaVulkan.h
 FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.cpp
 FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.h
+FILE: ../../../third_party/skia/third_party/wuffs/wuffs.c
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 Google Inc.
 
@@ -3828,7 +3832,6 @@ FILE: ../../../third_party/skia/src/opts/SkBlitMask_opts_arm_neon.cpp
 FILE: ../../../third_party/skia/src/opts/SkBlitMask_opts_arm_neon.h
 FILE: ../../../third_party/skia/src/opts/SkBlitRow_opts.h
 FILE: ../../../third_party/skia/src/opts/SkColor_opts_neon.h
-FILE: ../../../third_party/skia/src/opts/SkMorphologyImageFilter_opts.h
 FILE: ../../../third_party/skia/src/opts/SkNx_neon.h
 FILE: ../../../third_party/skia/src/opts/SkNx_sse.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_sse41.cpp
