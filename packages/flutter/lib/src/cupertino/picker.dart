@@ -286,7 +286,11 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 }
 
 // Turns the scroll semantics of the ListView into a single adjustable semantics
-// node.
+// node. This is done by removing all of the child semantics of the scroll
+// wheel and using the scroll indexes to loop up the current, previous, and
+// next semantic label. This label is then turned into the value of a new
+// adjustable semantic node, with adjustment callbacks wired to move the
+// scroll controller.
 class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
   const _CupertinoPickerSemantics({
     Key key,
