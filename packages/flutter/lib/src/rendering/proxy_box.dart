@@ -4368,41 +4368,6 @@ class RenderIndexedSemantics extends RenderProxyBox {
   }
 }
 
-/// A render objects that annotates semantics with an index.
-///
-/// The index is used by certain widgets such as the [CupertinoPicker] that have
-/// specific strategies for assembling semantics nodes.
-class RenderIndexedChildSemantics extends RenderProxyBox {
-  /// Creates a render object that annotates the child semantics with an index.
-  RenderIndexedChildSemantics({
-    RenderBox child,
-    @required int index,
-  }) : assert(index != null),
-       _index = index,
-       super(child);
-
-  /// The index used to annotated child semantics.
-  int get index => _index;
-  int _index;
-  set index(int value) {
-    if (value == index)
-      return;
-    _index = value;
-  }
-
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    config.indexInParent = index;
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<int>('index', index));
-  }
-}
-
 /// Provides an anchor for a [RenderFollowerLayer].
 ///
 /// See also:
