@@ -7,10 +7,6 @@
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/fml/trace_event.h"
 
-#ifdef ERROR
-#undef ERROR
-#endif
-
 namespace blink {
 
 AssetManager::AssetManager() = default;

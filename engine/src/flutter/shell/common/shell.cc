@@ -31,10 +31,6 @@
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/tonic/common/log.h"
 
-#ifdef ERROR
-#undef ERROR
-#endif
-
 namespace shell {
 
 std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(

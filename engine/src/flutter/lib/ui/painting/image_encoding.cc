@@ -25,10 +25,6 @@ using tonic::DartInvoke;
 using tonic::DartPersistentValue;
 using tonic::ToDart;
 
-#ifdef ERROR
-#undef ERROR
-#endif
-
 namespace blink {
 namespace {
 

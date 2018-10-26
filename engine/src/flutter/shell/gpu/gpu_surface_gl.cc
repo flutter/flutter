@@ -24,10 +24,6 @@
 #define GPU_GL_RGB565 0x8D62
 #define GPU_GL_VERSION 0x1F02
 
-#ifdef ERROR
-#undef ERROR
-#endif
-
 namespace shell {
 
 // Default maximum number of budgeted resources in the cache.

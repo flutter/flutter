@@ -33,10 +33,6 @@
 #include "third_party/tonic/scopes/dart_api_scope.h"
 #include "third_party/tonic/typed_data/uint8_list.h"
 
-#ifdef ERROR
-#undef ERROR
-#endif
-
 namespace dart {
 namespace observatory {
 

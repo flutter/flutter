@@ -21,10 +21,6 @@
 #include "flutter/shell/common/thread_host.h"
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
 
-#ifdef ERROR
-#undef ERROR
-#endif
-
 namespace shell {
 
 // Checks whether the engine's main Dart isolate has no pending work.  If so,

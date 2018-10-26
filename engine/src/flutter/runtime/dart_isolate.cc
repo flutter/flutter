@@ -26,10 +26,6 @@
 #include "third_party/tonic/scopes/dart_api_scope.h"
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
 
-#ifdef ERROR
-#undef ERROR
-#endif
-
 namespace blink {
 
 std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(

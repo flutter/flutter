@@ -6,10 +6,6 @@
 
 #include "flutter/shell/common/io_manager.h"
 
-#ifdef ERROR
-#undef ERROR
-#endif
-
 namespace shell {
 
 EmbedderSurfaceGL::EmbedderSurfaceGL(GLDispatchTable gl_dispatch_table,

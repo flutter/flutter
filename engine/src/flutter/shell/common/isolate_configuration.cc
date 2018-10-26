@@ -7,10 +7,6 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/runtime/dart_vm.h"
 
-#ifdef ERROR
-#undef ERROR
-#endif
-
 namespace shell {
 
 IsolateConfiguration::IsolateConfiguration() = default;
