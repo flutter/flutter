@@ -16,6 +16,13 @@ void PlatformViewLayer::Preroll(PrerollContext* context,
                                     size_.height()));
 }
 
-void PlatformViewLayer::Paint(PaintContext& context) const {}
-
+void PlatformViewLayer::Paint(PaintContext& context) const {
+  if (context.view_embedder == nullptr) {
+    FML_LOG(ERROR) << "Trying to embed a platform view but the PaintContext "
+                      "does not support embedding";
+    return;
+  }
+  EmbeddedViewParams params;
+  context.view_embedder->CompositeEmbeddedView(view_id_, params);
+}
 }  // namespace flow

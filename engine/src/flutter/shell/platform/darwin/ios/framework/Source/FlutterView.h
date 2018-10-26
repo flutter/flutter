@@ -9,6 +9,7 @@
 
 #include <memory>
 
+#include "flutter/flow/embedded_views.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"

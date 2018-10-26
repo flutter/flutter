@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWS_INTERNAL_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWS_INTERNAL_H_
 
+#include "flutter/flow/embedded_views.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterBinaryMessenger.h"
@@ -13,11 +14,13 @@
 
 namespace shell {
 
-class FlutterPlatformViewsController {
+class FlutterPlatformViewsController : public flow::ExternalViewEmbedder {
  public:
   FlutterPlatformViewsController(NSObject<FlutterBinaryMessenger>* messenger);
 
   void RegisterViewFactory(NSObject<FlutterPlatformViewFactory>* factory, NSString* factoryId);
+
+  void CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params);
 
  private:
   fml::scoped_nsobject<FlutterMethodChannel> channel_;

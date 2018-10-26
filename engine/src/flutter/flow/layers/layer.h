@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 
+#include "flutter/flow/embedded_views.h"
 #include "flutter/flow/instrumentation.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/texture.h"
@@ -64,6 +65,7 @@ class Layer {
 
   struct PaintContext {
     SkCanvas& canvas;
+    ExternalViewEmbedder* view_embedder;
     const Stopwatch& frame_time;
     const Stopwatch& engine_time;
     TextureRegistry& texture_registry;

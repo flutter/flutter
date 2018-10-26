@@ -158,6 +158,7 @@ void RasterCache::Prepare(PrerollContext* context,
                             [layer, context](SkCanvas* canvas) {
                               Layer::PaintContext paintContext = {
                                   *canvas,
+                                  nullptr,
                                   context->frame_time,
                                   context->engine_time,
                                   context->texture_registry,
