@@ -19,7 +19,7 @@ Future<List<int>> fetchUrl(Uri url) async {
   int duration = 1;
   while (true) {
     attempts += 1;
-    final List<int> result = await _attempt(url);
+    final List<int> result = await _attempt(url, false);
     if (result != null)
       return result;
     printStatus('Download failed -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
@@ -29,34 +29,11 @@ Future<List<int>> fetchUrl(Uri url) async {
   }
 }
 
-Future<bool> doesRemoteFileExist(Uri url) async {
-  printTrace('Checking file exists at: $url');
-  HttpClient httpClient;
-  if (context[HttpClientFactory] != null) {
-    httpClient = context[HttpClientFactory]();
-  } else {
-    httpClient = HttpClient();
-  }
-  HttpClientRequest request;
-  try {
-    request = await httpClient.headUrl(url);
-  } on HandshakeException catch (error) {
-    printTrace(error.toString());
-    throwToolExit(
-      'Could not authenticate download server. You may be experiencing a man-in-the-middle attack,\n'
-      'your network may be compromised, or you may have malware installed on your computer.\n'
-      'URL: $url',
-      exitCode: kNetworkProblemExitCode,
-    );
-  } on SocketException catch (error) {
-    printTrace('Request error: $error');
-    return null;
-  }
-  final HttpClientResponse response = await request.close();
-  return response.statusCode == 200;
-}
+/// Check if the given URL points to a valid endpoint.
+Future<bool> doesRemoteFileExist(Uri url) async =>
+  (await _attempt(url, true)) as bool;
 
-Future<List<int>> _attempt(Uri url) async {
+Future<dynamic> _attempt(Uri url, bool onlyHeaders) async {
   printTrace('Downloading: $url');
   HttpClient httpClient;
   if (context[HttpClientFactory] != null) {
@@ -66,7 +43,11 @@ Future<List<int>> _attempt(Uri url) async {
   }
   HttpClientRequest request;
   try {
-    request = await httpClient.getUrl(url);
+    if (onlyHeaders) {
+      request = await httpClient.headUrl(url);
+    } else {
+      request = await httpClient.getUrl(url);
+    }
   } on HandshakeException catch (error) {
     printTrace(error.toString());
     throwToolExit(
@@ -80,6 +61,11 @@ Future<List<int>> _attempt(Uri url) async {
     return null;
   }
   final HttpClientResponse response = await request.close();
+  // If we're making a HEAD request, we're only checking to see if the URL is
+  // valid.
+  if (onlyHeaders) {
+    return response.statusCode == 200;
+  }
   if (response.statusCode != 200) {
     if (response.statusCode > 0 && response.statusCode < 500) {
       throwToolExit(

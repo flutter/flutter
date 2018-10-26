@@ -509,34 +509,38 @@ class FlutterEngine extends CachedArtifact {
                                             bool includeAllPlatforms = true}) async {
     final bool includeAllPlatformsState = cache.includeAllPlatforms;
     cache.includeAllPlatforms = includeAllPlatforms;
+
+    Future<bool> _areRemoteArtifactsAvailableHelper(String engineVersion) async {
+      engineVersion ??= version;
+      final String url = '$_storageBaseUrl/flutter_infra/flutter/$engineVersion/';
+
+      bool exists = false;
+      for (String pkgName in _getPackageDirs()) {
+        exists = await _doesRemoteExist('Checking package $pkgName is available...',
+            Uri.parse(url + pkgName + '.zip'));
+        if (!exists) {
+          return false;
+        }
+      }
+
+      for (List<String> toolsDir in _getBinaryDirs()) {
+        final String cacheDir = toolsDir[0];
+        final String urlPath = toolsDir[1];
+        exists = await _doesRemoteExist('Checking $cacheDir tools are available...',
+            Uri.parse(url + urlPath));
+        if (!exists) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
     final bool result = await _areRemoteArtifactsAvailableHelper(engineVersion);
     cache.includeAllPlatforms = includeAllPlatformsState;
     return result;
   }
 
-  Future<bool> _areRemoteArtifactsAvailableHelper(String engineVersion) async {
-    engineVersion ??= version;
-    final String url = '$_storageBaseUrl/flutter_infra/flutter/$engineVersion/';
-
-    bool exists = false;
-    for (String pkgName in _getPackageDirs()) {
-      exists = await _doesRemoteExist('Checking package $pkgName is available...', Uri.parse(url + pkgName + '.zip'));
-      if (!exists) {
-        return false;
-      }
-    }
-
-    for (List<String> toolsDir in _getBinaryDirs()) {
-      final String cacheDir = toolsDir[0];
-      final String urlPath = toolsDir[1];
-      exists = await _doesRemoteExist('Checking $cacheDir tools are available...', Uri.parse(url + urlPath));
-      if (!exists) {
-        return false;
-      }
-    }
-
-    return true;
-  }
 
   void _makeFilesExecutable(Directory dir) {
     for (FileSystemEntity entity in dir.listSync()) {
