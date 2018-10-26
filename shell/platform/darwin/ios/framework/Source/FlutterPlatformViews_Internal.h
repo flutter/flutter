@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWS_INTERNAL_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWS_INTERNAL_H_
 
+#include "FlutterView.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/shell.h"
@@ -16,7 +17,8 @@ namespace shell {
 
 class FlutterPlatformViewsController : public flow::ExternalViewEmbedder {
  public:
-  FlutterPlatformViewsController(NSObject<FlutterBinaryMessenger>* messenger);
+  FlutterPlatformViewsController(NSObject<FlutterBinaryMessenger>* messenger,
+                                 FlutterView* flutter_view);
 
   void RegisterViewFactory(NSObject<FlutterPlatformViewFactory>* factory, NSString* factoryId);
 
@@ -24,6 +26,7 @@ class FlutterPlatformViewsController : public flow::ExternalViewEmbedder {
 
  private:
   fml::scoped_nsobject<FlutterMethodChannel> channel_;
+  fml::scoped_nsobject<FlutterView> flutter_view_;
   std::map<std::string, fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>> factories_;
   std::map<int64_t, fml::scoped_nsobject<UIView>> views_;
 
