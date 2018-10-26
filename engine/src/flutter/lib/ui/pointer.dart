@@ -71,6 +71,7 @@ class PointerData {
     this.pressureMax: 0.0,
     this.distance: 0.0,
     this.distanceMax: 0.0,
+    this.size: 0.0,
     this.radiusMajor: 0.0,
     this.radiusMinor: 0.0,
     this.radiusMin: 0.0,
@@ -136,6 +137,14 @@ class PointerData {
   /// input device cannot detect "hover touch" input events, then this will be
   /// 0.0.
   final double distanceMax;
+
+  /// The area of the screen being pressed, scaled to a value between 0 and 1.
+  /// The value of size can be used to determine fat touch events. This value
+  /// is only set on Android, and is a device specific approximation within
+  /// the range of detectable values. So, for example, the value of 0.1 could
+  /// mean a touch with the tip of the finger, 0.2 a touch with full finger,
+  /// and 0.3 the full palm.
+  final double size;
 
   /// The radius of the contact ellipse along the major axis, in logical pixels.
   final double radiusMajor;
@@ -208,6 +217,7 @@ class PointerData {
              'pressureMax: $pressureMax, '
              'distance: $distance, '
              'distanceMax: $distanceMax, '
+             'size: $size, '
              'radiusMajor: $radiusMajor, '
              'radiusMinor: $radiusMinor, '
              'radiusMin: $radiusMin, '

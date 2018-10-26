@@ -43,6 +43,7 @@ struct alignas(8) PointerData {
   double pressure_max;
   double distance;
   double distance_max;
+  double size;
   double radius_major;
   double radius_minor;
   double radius_min;
