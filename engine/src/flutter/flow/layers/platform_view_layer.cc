@@ -4,6 +4,10 @@
 
 #include "flutter/flow/layers/platform_view_layer.h"
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 namespace flow {
 
 PlatformViewLayer::PlatformViewLayer() = default;
