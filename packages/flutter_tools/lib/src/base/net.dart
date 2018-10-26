@@ -19,7 +19,7 @@ Future<List<int>> fetchUrl(Uri url) async {
   int duration = 1;
   while (true) {
     attempts += 1;
-    final List<int> result = await _attempt(url, false);
+    final List<int> result = await _attempt(url);
     if (result != null)
       return result;
     printStatus('Download failed -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
