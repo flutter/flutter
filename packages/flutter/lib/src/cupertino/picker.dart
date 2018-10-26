@@ -161,6 +161,13 @@ class CupertinoPicker extends StatefulWidget {
 
 class _CupertinoPickerState extends State<CupertinoPicker> {
   int _lastHapticIndex;
+  FixedExtentScrollController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.scrollController ?? FixedExtentScrollController();
+  }
 
   void _handleSelectedItemChanged(int index) {
     // Only the haptic engine hardware on iOS devices would produce the
@@ -247,9 +254,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       children: <Widget>[
         Positioned.fill(
           child: _CupertinoPickerSemantics(
-            scrollController: widget.scrollController,
+            scrollController: _controller,
             child: ListWheelScrollView.useDelegate(
-              controller: widget.scrollController,
+              controller: _controller,
               physics: const FixedExtentScrollPhysics(),
               diameterRatio: widget.diameterRatio,
               perspective: _kDefaultPerspective,
@@ -363,8 +370,9 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
       indexedChildren[child.indexInParent] = child;
       return true;
     });
-    if (indexedChildren[_currentIndex] == null)
+    if (indexedChildren[_currentIndex] == null) {
       return node.updateWith(config: config);
+    }
     config.value = indexedChildren[_currentIndex].label;
     final SemanticsNode previousChild = indexedChildren[_currentIndex - 1];
     final SemanticsNode nextChild = indexedChildren[_currentIndex + 1];
@@ -377,5 +385,5 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
       config.onDecrease = _handleDecrease;
     }
     node.updateWith(config: config);
-  } 
+  }
 }

@@ -606,22 +606,30 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byType(CupertinoPicker)), matchesSemantics(
-      hasIncreaseAction: true,
-      hasDecreaseAction: false,
-      increasedValue: '1',
-      value: '0',
-      textDirection: TextDirection.ltr,
+      children: <Matcher>[
+        matchesSemantics(
+          hasIncreaseAction: true,
+          hasDecreaseAction: false,
+          increasedValue: '1',
+          value: '0',
+          textDirection: TextDirection.ltr,
+        ),
+      ],
     ));
     tester.binding.pipelineOwner.semanticsOwner.performAction(1, SemanticsAction.increase);
     await tester.pumpAndSettle();
 
     expect(tester.getSemantics(find.byType(CupertinoPicker)), matchesSemantics(
-      hasIncreaseAction: true,
-      hasDecreaseAction: true,
-      increasedValue: '2',
-      decreasedValue: '0',
-      value: '1',
-      textDirection: TextDirection.ltr,
+      children: <Matcher>[
+        matchesSemantics(
+          hasIncreaseAction: true,
+          hasDecreaseAction: true,
+          increasedValue: '2',
+          decreasedValue: '0',
+          value: '1',
+          textDirection: TextDirection.ltr,
+        ),
+      ],
     ));
     handle.dispose();
   });
