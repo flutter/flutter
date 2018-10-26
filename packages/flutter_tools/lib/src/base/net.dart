@@ -31,7 +31,7 @@ Future<List<int>> fetchUrl(Uri url) async {
 
 /// Check if the given URL points to a valid endpoint.
 Future<bool> doesRemoteFileExist(Uri url) async =>
-  (await _attempt(url, true)) != null;
+  (await _attempt(url, onlyHeaders: true)) != null;
 
 Future<List<int>> _attempt(Uri url, {bool onlyHeaders = false}) async {
   printTrace('Downloading: $url');
