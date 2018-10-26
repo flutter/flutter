@@ -359,13 +359,6 @@ void main() {
     expect(binding.extensions.containsKey('exit'), isTrue);
   });
 
-  test('Service extensions - frameworkPresent', () async {
-    Map<String, dynamic> result;
-
-    result = await binding.testExtension('frameworkPresent', <String, String>{});
-    expect(result, <String, String>{});
-  });
-
   test('Service extensions - platformOverride', () async {
     Map<String, dynamic> result;
 
@@ -491,7 +484,6 @@ void main() {
 
   test('Service extensions - debugWidgetInspector', () async {
     Map<String, dynamic> result;
-
     expect(binding.frameScheduled, isFalse);
     expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
     result = await binding.testExtension('debugWidgetInspector', <String, String>{});
@@ -541,7 +533,7 @@ void main() {
 
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 39);
+    expect(binding.extensions.length, 38);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;

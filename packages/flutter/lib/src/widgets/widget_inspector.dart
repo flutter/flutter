@@ -12,6 +12,7 @@ import 'dart:ui' as ui
     show
         window,
         ClipOp,
+        EngineLayer,
         Image,
         ImageByteFormat,
         Paragraph,
@@ -54,8 +55,8 @@ class _ProxyLayer extends Layer {
   final Layer _layer;
 
   @override
-  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
-    _layer.addToScene(builder, layerOffset);
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+    return _layer.addToScene(builder, layerOffset);
   }
 
   @override
@@ -312,8 +313,9 @@ Rect _calculateSubtreeBounds(RenderObject object) {
 /// screenshots render to the scene in the local coordinate system of the layer.
 class _ScreenshotContainerLayer extends OffsetLayer {
   @override
-  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     addChildrenToScene(builder, layerOffset);
+    return null; // this does not have an engine layer.
   }
 }
 
@@ -588,7 +590,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
     // We must build the regular scene before we can build the screenshot
     // scene as building the screenshot scene assumes addToScene has already
     // been called successfully for all layers in the regular scene.
-    repaintBoundary.layer.addToScene(ui.SceneBuilder());
+    repaintBoundary.layer.buildScene(ui.SceneBuilder());
 
     return data.containerLayer.toImage(renderBounds, pixelRatio: pixelRatio);
   }
@@ -917,13 +919,11 @@ mixin WidgetInspectorService {
 
   /// Called to register service extensions.
   ///
-  /// Service extensions are only exposed when the observatory is
-  /// included in the build, which should only happen in checked mode
-  /// and in profile mode.
-  ///
   /// See also:
   ///
   ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
+  ///  * [BindingBase.initServiceExtensions], which explains when service
+  ///    extensions can be used.
   void initServiceExtensions(
       _RegisterServiceExtensionCallback registerServiceExtensionCallback) {
     _registerServiceExtensionCallback = registerServiceExtensionCallback;
@@ -1023,36 +1023,33 @@ mixin WidgetInspectorService {
       name: 'isWidgetCreationTracked',
       callback: isWidgetCreationTracked,
     );
-    assert(() {
-      registerServiceExtension(
-        name: 'screenshot',
-        callback: (Map<String, String> parameters) async {
-          assert(parameters.containsKey('id'));
-          assert(parameters.containsKey('width'));
-          assert(parameters.containsKey('height'));
+    registerServiceExtension(
+      name: 'screenshot',
+      callback: (Map<String, String> parameters) async {
+        assert(parameters.containsKey('id'));
+        assert(parameters.containsKey('width'));
+        assert(parameters.containsKey('height'));
 
-          final ui.Image image = await screenshot(
-            toObject(parameters['id']),
-            width: double.parse(parameters['width']),
-            height: double.parse(parameters['height']),
-            margin: parameters.containsKey('margin') ?
-                double.parse(parameters['margin']) : 0.0,
-            maxPixelRatio: parameters.containsKey('maxPixelRatio') ?
-                double.parse(parameters['maxPixelRatio']) : 1.0,
-            debugPaint: parameters['debugPaint'] == 'true',
-          );
-          if (image == null) {
-            return <String, Object>{'result': null};
-          }
-          final ByteData byteData = await image.toByteData(format:ui.ImageByteFormat.png);
+        final ui.Image image = await screenshot(
+          toObject(parameters['id']),
+          width: double.parse(parameters['width']),
+          height: double.parse(parameters['height']),
+          margin: parameters.containsKey('margin') ?
+              double.parse(parameters['margin']) : 0.0,
+          maxPixelRatio: parameters.containsKey('maxPixelRatio') ?
+              double.parse(parameters['maxPixelRatio']) : 1.0,
+          debugPaint: parameters['debugPaint'] == 'true',
+        );
+        if (image == null) {
+          return <String, Object>{'result': null};
+        }
+        final ByteData byteData = await image.toByteData(format:ui.ImageByteFormat.png);
 
-          return <String, Object>{
-            'result': base64.encoder.convert(Uint8List.view(byteData.buffer)),
-          };
-        },
-      );
-      return true;
-    }());
+        return <String, Object>{
+          'result': base64.encoder.convert(Uint8List.view(byteData.buffer)),
+        };
+      },
+    );
   }
 
   /// Clear all InspectorService object references.
@@ -2231,9 +2228,9 @@ class _InspectorOverlayLayer extends Layer {
   double _textPainterMaxWidth;
 
   @override
-  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     if (!selection.active)
-      return;
+      return null;
 
     final RenderObject selected = selection.current;
     final List<_TransformedRect> candidates = <_TransformedRect>[];
@@ -2256,6 +2253,7 @@ class _InspectorOverlayLayer extends Layer {
       _picture = _buildPicture(state);
     }
     builder.addPicture(layerOffset, _picture);
+    return null; // this does not have an engine layer.
   }
 
   ui.Picture _buildPicture(_InspectorOverlayRenderState state) {

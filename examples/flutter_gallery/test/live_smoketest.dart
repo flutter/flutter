@@ -10,10 +10,11 @@
 
 import 'dart:async';
 
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gallery/gallery/demos.dart';
@@ -33,11 +34,18 @@ const List<String> _kUnsynchronizedDemoTitles = <String>[
 // These demos can't be backed out of by tapping a button whose
 // tooltip is 'Back'.
 const List<String> _kSkippedDemoTitles = <String>[
-  'Pull to refresh',
   'Progress indicators',
   'Activity Indicator',
   'Video',
 ];
+
+// There are 3 places where the Gallery demos are traversed.
+// 1- In widget tests such as examples/flutter_gallery/test/smoke_test.dart
+// 2- In driver tests such as examples/flutter_gallery/test_driver/transitions_perf_test.dart
+// 3- In on-device instrumentation tests such as examples/flutter_gallery/test/live_smoketest.dart
+//
+// If you change navigation behavior in the Gallery or in the framework, make
+// sure all 3 are covered.
 
 Future<void> main() async {
   try {
@@ -66,7 +74,7 @@ Future<void> main() async {
           await controller.tap(demoItem); // Launch the demo
           controller.frameSync = !_kUnsynchronizedDemoTitles.contains(demo.title);
           print('Going back to demo list...');
-          await controller.tap(find.byTooltip('Back'));
+          await controller.tap(backFinder);
           controller.frameSync = true;
         }
       }
@@ -80,6 +88,18 @@ Future<void> main() async {
     _kTestChannel.invokeMethod('failure');
   }
 }
+
+final Finder backFinder = find.byElementPredicate(
+  (Element element) {
+    final Widget widget = element.widget;
+    if (widget is Tooltip)
+      return widget.message == 'Back';
+    if (widget is CupertinoNavigationBarBackButton)
+      return true;
+    return false;
+  },
+  description: 'Material or Cupertino back button',
+);
 
 class _LiveWidgetController extends LiveWidgetController {
   _LiveWidgetController(WidgetsBinding binding) : super(binding);

@@ -20,9 +20,11 @@ import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
+import '../bundle.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../vmservice.dart';
 import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
@@ -230,7 +232,10 @@ class _Compiler {
       printError('$message');
     }
 
-    final String testFilePath = fs.path.join(fs.path.fromUri(projectRootDirectory), getBuildDirectory(), 'testfile.dill');
+    final String testFilePath = getKernelPathForTransformerOptions(
+      fs.path.join(fs.path.fromUri(projectRootDirectory), getBuildDirectory(), 'testfile.dill'),
+      trackWidgetCreation: trackWidgetCreation,
+    );
 
     ResidentCompiler createCompiler() {
       return ResidentCompiler(
@@ -409,6 +414,22 @@ class _FlutterPlatform extends PlatformPlugin {
     return remoteChannel;
   }
 
+  Future<String> _compileExpressionService(String isolateId, String expression,
+      List<String> definitions, List<String> typeDefinitions,
+      String libraryUri, String klass, bool isStatic,
+      ) async {
+    if (compiler == null || compiler.compiler == null) {
+      throw 'Compiler is not set up properly to compile $expression';
+    }
+    final CompilerOutput compilerOutput =
+      await compiler.compiler.compileExpression(expression, definitions,
+        typeDefinitions, libraryUri, klass, isStatic);
+    if (compilerOutput != null && compilerOutput.outputFilename != null) {
+      return base64.encode(fs.file(compilerOutput.outputFilename).readAsBytesSync());
+    }
+    throw 'Failed to compile $expression';
+  }
+
   Future<_AsyncError> _startTest(
     String testPath,
     StreamChannel<dynamic> controller,
@@ -522,6 +543,16 @@ class _FlutterPlatform extends PlatformPlugin {
             printTrace('test $ourTestCount: using observatory uri $detectedUri from pid ${process.pid}');
           }
           processObservatoryUri = detectedUri;
+
+          {
+            printTrace('Connecting to service protocol: $processObservatoryUri');
+            final Future<VMService> localVmService = VMService.connect(processObservatoryUri,
+              compileExpression: _compileExpressionService);
+            localVmService.then((VMService vmservice) {
+              printTrace('Successfully connected to service protocol: $processObservatoryUri');
+            });
+          }
+
           gotProcessObservatoryUri.complete();
           watcher?.handleStartedProcess(ProcessEvent(ourTestCount, process, processObservatoryUri));
         },

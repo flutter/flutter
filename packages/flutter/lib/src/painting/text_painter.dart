@@ -421,7 +421,7 @@ class TextPainter {
       return null;
     final TextBox box = boxes[0];
     final double caretEnd = box.end;
-    final double dx = box.direction == TextDirection.rtl ? caretEnd : caretEnd - caretPrototype.width;
+    final double dx = box.direction == TextDirection.rtl ? caretEnd - caretPrototype.width : caretEnd;
     return Offset(dx, box.top);
   }
 

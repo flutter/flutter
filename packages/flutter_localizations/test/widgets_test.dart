@@ -537,7 +537,7 @@ void main() {
       )
     );
 
-    // Startup time. Default test locale is const Locale('', ''), so
+    // Startup time. Default test locale is null, so
     // no supported matches. Use the first locale.
     await tester.pumpAndSettle();
     expect(find.text('zh_CN'), findsOneWidget);
@@ -581,9 +581,10 @@ void main() {
       )
     );
 
-    // Initial WidgetTester locale is new Locale('', '')
+    // Initial WidgetTester locale is null due to no platform intitializing it.
+    // The locale gets resolved to "en_US", which is the first supported locale.
     await tester.pumpAndSettle();
-    expect(find.text('_ TextDirection.ltr'), findsOneWidget);
+    expect(find.text('en_US TextDirection.ltr'), findsOneWidget);
 
     await tester.binding.setLocale('en', 'CA');
     await tester.pumpAndSettle();
@@ -622,9 +623,10 @@ void main() {
       )
     );
 
-    // Initial WidgetTester locale is new Locale('', '')
+    // Initial WidgetTester locale is null due to no platform intitializing it.
+    // The locale gets resolved to "en_US", which is the first supported locale.
     await tester.pumpAndSettle();
-    expect(find.text('_ TextDirection.rtl'), findsOneWidget);
+    expect(find.text('en_US TextDirection.rtl'), findsOneWidget);
 
     await tester.binding.setLocale('en', 'CA');
     await tester.pumpAndSettle();
@@ -655,9 +657,10 @@ void main() {
       )
     );
 
-    // Initial WidgetTester locale is new Locale('', '')
+    // Initial WidgetTester locale is null due to no platform intitializing it.
+    // The locale gets resolved to "en_US", which is the first supported locale.
     await tester.pumpAndSettle();
-    expect(find.text('_ TextDirection.rtl'), findsOneWidget);
+    expect(find.text('en_US TextDirection.rtl'), findsOneWidget);
 
     await tester.binding.setLocale('en', 'CA');
     await tester.pumpAndSettle();

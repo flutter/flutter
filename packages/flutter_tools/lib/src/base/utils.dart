@@ -398,6 +398,13 @@ String wrapText(String text, {int columnWidth, int hangingIndent, int indent}) {
   return result.join('\n');
 }
 
+void writePidFile(String pidFile) {
+  if (pidFile != null) {
+    // Write our pid to the file.
+    fs.file(pidFile).writeAsStringSync(io.pid.toString());
+  }
+}
+
 // Used to represent a run of ANSI control sequences next to a visible
 // character.
 class _AnsiRun {

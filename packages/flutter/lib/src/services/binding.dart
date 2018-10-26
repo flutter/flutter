@@ -86,17 +86,21 @@ mixin ServicesBinding on BindingBase {
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    registerStringServiceExtension(
-      // ext.flutter.evict value=foo.png will cause foo.png to be evicted from
-      // the rootBundle cache and cause the entire image cache to be cleared.
-      // This is used by hot reload mode to clear out the cache of resources
-      // that have changed.
-      name: 'evict',
-      getter: () async => '',
-      setter: (String value) async {
-        evict(value);
-      }
-    );
+
+    assert(() {
+      registerStringServiceExtension(
+        // ext.flutter.evict value=foo.png will cause foo.png to be evicted from
+        // the rootBundle cache and cause the entire image cache to be cleared.
+        // This is used by hot reload mode to clear out the cache of resources
+        // that have changed.
+        name: 'evict',
+        getter: () async => '',
+        setter: (String value) async {
+          evict(value);
+        },
+      );
+      return true;
+    }());
   }
 
   /// Called in response to the `ext.flutter.evict` service extension.
