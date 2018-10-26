@@ -290,91 +290,92 @@ class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
   final FixedExtentScrollController scrollController;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderCupertinoPickerSemantics(Directionality.of(context), scrollController);
+  RenderObject createRenderObject(BuildContext context) => _RenderCupertinoPickerSemantics(scrollController, Directionality.of(context));
 
   @override
   void updateRenderObject(BuildContext context, covariant _RenderCupertinoPickerSemantics renderObject) {
     renderObject
       ..textDirection = Directionality.of(context)
-      ..scrollController = scrollController;
+      ..controller = scrollController;
   }
 }
 
 class _RenderCupertinoPickerSemantics extends RenderProxyBox {
-  _RenderCupertinoPickerSemantics(this._textDirection, FixedExtentScrollController scrollController) {
-    this.scrollController = scrollController;
+  _RenderCupertinoPickerSemantics(FixedExtentScrollController controller, this._textDirection) {
+    this.controller = controller;
   }
 
-  FixedExtentScrollController get scrollController => _scrollController;
-  FixedExtentScrollController _scrollController;
-  set scrollController(FixedExtentScrollController value) {
-    if (value == _scrollController)
+  FixedExtentScrollController get controller => _controller;
+  FixedExtentScrollController _controller;
+  set controller(FixedExtentScrollController value) {
+    if (value == _controller)
       return;
-    _scrollController?.removeListener(_handleScrollUpdate);
-    _scrollController = value;
-    _scrollController.addListener(_handleScrollUpdate);
-    markNeedsSemanticsUpdate();
+    if (_controller != null)
+      _controller.removeListener(_handleScrollUpdate);
+    else
+      _currentIndex = value.initialItem ?? 0;
+    value.addListener(_handleScrollUpdate);
+    _controller = value;
   }
 
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    if (value == textDirection)
+    if (textDirection == value)
       return;
     _textDirection = value;
     markNeedsSemanticsUpdate();
   }
 
-  void _handleScrollUpdate() {
-    markNeedsSemanticsUpdate();
+  int _currentIndex = 0;
+
+  void _handleIncrease() {
+    controller.jumpToItem(_currentIndex + 1);
   }
 
   void _handleDecrease() {
-    scrollController.jumpToItem(scrollController.selectedItem - 1);
-  }
+    if (_currentIndex == 0)
+      return;
+    controller.jumpToItem(_currentIndex - 1);
+   }
 
-  void _handleIncrease() {
-    scrollController.jumpToItem(scrollController.selectedItem + 1);
+  void _handleScrollUpdate() {
+    if (controller.selectedItem == _currentIndex)
+      return;
+    _currentIndex = controller.selectedItem;
+    markNeedsSemanticsUpdate();
   }
-
-  @override
+   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
-    config.explicitChildNodes = true;
+    config.textDirection = textDirection;
   }
 
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
-    final int index = scrollController.selectedItem;
-    final SemanticsNode scrollRoot = children.first;
-    final List<SemanticsNode> scrollChildren = <SemanticsNode>[];
-    scrollRoot.visitChildren((SemanticsNode child) {
-      scrollChildren.add(child);
+    if (children.isEmpty)
+      return super.assembleSemanticsNode(node, config, children);
+    final SemanticsNode scrollable = children.first;
+    final Map<int, SemanticsNode> indexedChildren = <int, SemanticsNode>{};
+    scrollable.visitChildren((SemanticsNode child) {
+      assert(child.indexInParent != null);
+      indexedChildren[child.indexInParent] = child;
       return true;
     });
-    String previous;
-    String current;
-    String next;
-    for (SemanticsNode node in scrollChildren) {
-      assert(node.indexInParent != null);
-      if (node.indexInParent == index - 1)
-        previous = node.label;
-      else if (node.indexInParent == index)
-        current = node.label;
-      else if (node.indexInParent == index + 1)
-        next = node.label;
-    }
-    config.value = current;
-    config.textDirection = textDirection;
-    if (previous != null) {
-      config.decreasedValue = previous;
-      config.onDecrease = _handleDecrease;
-    }
-    if (current != null) {
-      config.increasedValue = next;
+    if (indexedChildren[_currentIndex] == null)
+      return node.updateWith(config: config);
+    config.value = indexedChildren[_currentIndex].label;
+    final SemanticsNode previousChild = indexedChildren[_currentIndex - 1];
+    final SemanticsNode nextChild = indexedChildren[_currentIndex + 1];
+    if (nextChild != null) {
+      config.increasedValue = nextChild.label;
       config.onIncrease = _handleIncrease;
     }
-    super.assembleSemanticsNode(node, config, const <SemanticsNode>[]);
-  }
+    if (previousChild != null) {
+      config.decreasedValue = previousChild.label;
+      config.onDecrease = _handleDecrease;
+    }
+    node.updateWith(config: config);
+  } 
 }

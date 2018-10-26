@@ -1,6 +1,8 @@
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -580,5 +582,47 @@ void main() {
 
       expect(date, DateTime(2018, 1, 1, 15, 59));
     });
+  });
+
+  testWidgets('CupertinoPicker exports semantics', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CupertinoPicker(
+          itemExtent: 100.0,
+          onSelectedItemChanged: (int index) {},
+          children: List<Widget>.generate(100, (int index) {
+            return Center(
+              child: Container(
+                width: 400.0,
+                height: 100.0,
+                child: Text(index.toString()),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byType(CupertinoPicker)), matchesSemantics(
+      hasIncreaseAction: true,
+      hasDecreaseAction: false,
+      increasedValue: '1',
+      value: '0',
+      textDirection: TextDirection.ltr,
+    ));
+    tester.binding.pipelineOwner.semanticsOwner.performAction(1, SemanticsAction.increase);
+    await tester.pumpAndSettle();
+
+    expect(tester.getSemantics(find.byType(CupertinoPicker)), matchesSemantics(
+      hasIncreaseAction: true,
+      hasDecreaseAction: true,
+      increasedValue: '2',
+      decreasedValue: '0',
+      value: '1',
+      textDirection: TextDirection.ltr,
+    ));
+    handle.dispose();
   });
 }

@@ -179,8 +179,10 @@ class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
 
   @override
   Widget build(BuildContext context, int index) {
-    if (childCount == null)
-      return IndexedSemantics(child: builder(context, index), index: index);
+    if (childCount == null) {
+      final Widget child = builder(context, index);
+      return child == null ? null : IndexedSemantics(child: child, index: index);
+    }
     if (index < 0 || index >= childCount)
       return null;
     return IndexedSemantics(child: builder(context, index), index: index);
