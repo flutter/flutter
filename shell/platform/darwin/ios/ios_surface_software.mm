@@ -15,8 +15,9 @@
 
 namespace shell {
 
-IOSSurfaceSoftware::IOSSurfaceSoftware(fml::scoped_nsobject<CALayer> layer)
-    : layer_(std::move(layer)) {
+IOSSurfaceSoftware::IOSSurfaceSoftware(fml::scoped_nsobject<CALayer> layer,
+                                       ::shell::GetExternalViewEmbedder get_view_embedder)
+    : layer_(std::move(layer)), get_view_embedder_([get_view_embedder retain]) {
   UpdateStorageSizeIfNecessary();
 }
 
@@ -123,6 +124,10 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
   layer_.get().contents = reinterpret_cast<id>(static_cast<CGImageRef>(pixmap_image));
 
   return true;
+}
+
+flow::ExternalViewEmbedder* IOSSurfaceSoftware::GetExternalViewEmbedder() {
+  return get_view_embedder_.get()();
 }
 
 }  // namespace shell

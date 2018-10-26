@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_GPU_GPU_SURFACE_SOFTWARE_H_
 #define FLUTTER_SHELL_GPU_GPU_SURFACE_SOFTWARE_H_
 
+#include "flutter/flow/embedded_views.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/surface.h"
@@ -17,6 +18,8 @@ class GPUSurfaceSoftwareDelegate {
   virtual sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) = 0;
 
   virtual bool PresentBackingStore(sk_sp<SkSurface> backing_store) = 0;
+
+  virtual flow::ExternalViewEmbedder* GetExternalViewEmbedder();
 };
 
 class GPUSurfaceSoftware : public Surface {
@@ -36,6 +39,9 @@ class GPUSurfaceSoftware : public Surface {
 
   // |shell::Surface|
   GrContext* GetContext() override;
+
+  // |shell::Surface|
+  flow::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
  private:
   GPUSurfaceSoftwareDelegate* delegate_;

@@ -68,6 +68,7 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
   TRACE_EVENT0("flutter", "LayerTree::Paint");
   Layer::PaintContext context = {
       *frame.canvas(),
+      frame.view_embedder(),
       frame.context().frame_time(),
       frame.context().engine_time(),
       frame.context().texture_registry(),
@@ -106,7 +107,8 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
   };
 
   Layer::PaintContext paint_context = {
-      *canvas,                  // canvas
+      *canvas,  // canvas
+      nullptr,
       unused_stopwatch,         // frame time (dont care)
       unused_stopwatch,         // engine time (dont care)
       unused_texture_registry,  // texture registry (not supported)

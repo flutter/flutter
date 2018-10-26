@@ -85,4 +85,9 @@ void FlutterPlatformViewsController::RegisterViewFactory(
       fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>([factory retain]);
 }
 
+void FlutterPlatformViewsController::CompositeEmbeddedView(int view_id,
+                                                           const flow::EmbeddedViewParams& params) {
+  // TODO(amirh): implement this.
+}
+
 }  // namespace shell

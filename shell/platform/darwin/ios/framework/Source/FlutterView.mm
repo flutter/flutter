@@ -12,6 +12,7 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
@@ -54,6 +55,23 @@ id<FlutterScreenshotDelegate> _delegate;
   return self;
 }
 
+- (FlutterViewController*)flutterViewController {
+  // Find the first view controller in the responder chain and see if it is a FlutterViewController.
+  for (UIResponder* responder = self.nextResponder; responder != nil;
+       responder = responder.nextResponder) {
+    if ([responder isKindOfClass:[UIViewController class]]) {
+      if ([responder isKindOfClass:[FlutterViewController class]]) {
+        return reinterpret_cast<FlutterViewController*>(responder);
+      } else {
+        // Should only happen if a non-FlutterViewController tries to somehow (via dynamic class
+        // resolution or reparenting) set a FlutterView as its view.
+        return nil;
+      }
+    }
+  }
+  return nil;
+}
+
 - (void)layoutSubviews {
   if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
     CAEAGLLayer* layer = reinterpret_cast<CAEAGLLayer*>(self.layer);
@@ -75,13 +93,16 @@ id<FlutterScreenshotDelegate> _delegate;
 }
 
 - (std::unique_ptr<shell::IOSSurface>)createSurface {
+  ::shell::GetExternalViewEmbedder get_view_embedder = [[^() {
+    return [[self flutterViewController] viewEmbedder];
+  } copy] autorelease];
   if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
     fml::scoped_nsobject<CAEAGLLayer> eagl_layer(
         reinterpret_cast<CAEAGLLayer*>([self.layer retain]));
-    return std::make_unique<shell::IOSSurfaceGL>(std::move(eagl_layer));
+    return std::make_unique<shell::IOSSurfaceGL>(std::move(eagl_layer), get_view_embedder);
   } else {
     fml::scoped_nsobject<CALayer> layer(reinterpret_cast<CALayer*>([self.layer retain]));
-    return std::make_unique<shell::IOSSurfaceSoftware>(std::move(layer));
+    return std::make_unique<shell::IOSSurfaceSoftware>(std::move(layer), get_view_embedder);
   }
 }
 

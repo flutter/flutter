@@ -8,6 +8,7 @@ source_set("flow") {
     "compositor_context.h",
     "debug_print.cc",
     "debug_print.h",
+    "embedded_views.h",
     "instrumentation.cc",
     "instrumentation.h",
     "layers/backdrop_filter_layer.cc",

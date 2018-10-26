@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "flutter/flow/compositor_context.h"
+#include "flutter/flow/embedded_views.h"
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
@@ -54,6 +55,8 @@ class Surface {
   virtual SkMatrix GetRootTransformation() const = 0;
 
   virtual GrContext* GetContext() = 0;
+
+  virtual flow::ExternalViewEmbedder* GetExternalViewEmbedder();
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(Surface);

@@ -11,6 +11,7 @@ ORIGIN: ../../../flutter/flow/layers/physical_shape_layer.cc + ../../../LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/flow/debug_print.cc
 FILE: ../../../flutter/flow/debug_print.h
+FILE: ../../../flutter/flow/embedded_views.h
 FILE: ../../../flutter/flow/export_node.h
 FILE: ../../../flutter/flow/layers/physical_shape_layer.cc
 FILE: ../../../flutter/flow/layers/physical_shape_layer.h

@@ -124,6 +124,10 @@
   return _weakFactory->GetWeakPtr();
 }
 
+- (flow::ExternalViewEmbedder*)viewEmbedder {
+  return _platformViewsController.get();
+}
+
 - (void)setupNotificationCenterObservers {
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
   [center addObserver:self
