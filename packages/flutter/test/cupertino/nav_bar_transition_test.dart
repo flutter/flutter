@@ -385,6 +385,82 @@ void main() {
     );
   });
 
+  testWidgets('Multiple nav bars tags do not conflict if in different navigators',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.search),
+                title: Text('Tab 1'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.settings),
+                title: Text('Tab 2'),
+              ),
+            ],
+          ),
+          tabBuilder: (BuildContext context, int tab) {
+            return CupertinoTabView(
+              builder: (BuildContext context) {
+                return CupertinoPageScaffold(
+                  navigationBar: CupertinoNavigationBar(
+                    middle: Text('Tab ${tab + 1} Page 1'),
+                  ),
+                  child: Center(
+                    child: CupertinoButton(
+                      child: const Text('Next'),
+                      onPressed: () {
+                        Navigator.push<void>(context, CupertinoPageRoute<void>(
+                          title: 'Tab ${tab + 1} Page 2',
+                          builder: (BuildContext context) {
+                            return const CupertinoPageScaffold(
+                              navigationBar: CupertinoNavigationBar(),
+                              child: Placeholder(),
+                            );
+                          }
+                        ));
+                      },
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pump();
+
+    expect(find.text('Tab 1 Page 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Tab 2 Page 1'), findsOneWidget);
+
+    // At this point, there are 2 nav bars seeded with the same _defaultHeroTag.
+    // But they're inside different navigators.
+
+    await tester.tap(find.text('Next'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // One is inside the flight shuttle and another is invisible in the
+    // incoming route in case a new flight needs to be created midflight.
+    expect(find.text('Tab 2 Page 2'), findsNWidgets(2));
+
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Tab 2 Page 2'), findsOneWidget);
+    // Offstaged by tab 2's navigator.
+    expect(find.text('Tab 2 Page 1', skipOffstage: false), findsOneWidget);
+    // Offstaged by the CupertinoTabScaffold.
+    expect(find.text('Tab 1 Page 1', skipOffstage: false), findsOneWidget);
+    // Never navigated to tab 1 page 2.
+    expect(find.text('Tab 1 Page 2', skipOffstage: false), findsNothing);
+  });
+
   testWidgets('Transition box grows to large title size',
       (WidgetTester tester) async {
     await startTransitionBetween(
