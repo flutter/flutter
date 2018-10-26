@@ -113,7 +113,8 @@
   _statusBarStyle = UIStatusBarStyleDefault;
 
   [self setupNotificationCenterObservers];
-  _platformViewsController.reset(new shell::FlutterPlatformViewsController(_engine.get()));
+  _platformViewsController.reset(
+      new shell::FlutterPlatformViewsController(_engine.get(), _flutterView.get()));
 }
 
 - (fml::scoped_nsobject<FlutterEngine>)engine {

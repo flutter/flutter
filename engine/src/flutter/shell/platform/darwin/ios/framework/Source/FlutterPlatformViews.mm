@@ -13,7 +13,9 @@
 namespace shell {
 
 FlutterPlatformViewsController::FlutterPlatformViewsController(
-    NSObject<FlutterBinaryMessenger>* messenger) {
+    NSObject<FlutterBinaryMessenger>* messenger,
+    FlutterView* flutter_view)
+    : flutter_view_([flutter_view retain]) {
   channel_.reset([[FlutterMethodChannel alloc]
          initWithName:@"flutter/platform_views"
       binaryMessenger:messenger
@@ -58,6 +60,9 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
   views_[viewId] = fml::scoped_nsobject<UIView>([[factory createWithFrame:CGRectZero
                                                            viewIdentifier:viewId
                                                                 arguments:nil] retain]);
+
+  FlutterView* flutter_view = flutter_view_.get();
+  [flutter_view addSubview:views_[viewId].get()];
   result(nil);
 }
 
@@ -72,6 +77,8 @@ void FlutterPlatformViewsController::OnDispose(FlutterMethodCall* call, FlutterR
     return;
   }
 
+  UIView* view = views_[viewId].get();
+  [view removeFromSuperview];
   views_.erase(viewId);
   result(nil);
 }
@@ -87,7 +94,16 @@ void FlutterPlatformViewsController::RegisterViewFactory(
 
 void FlutterPlatformViewsController::CompositeEmbeddedView(int view_id,
                                                            const flow::EmbeddedViewParams& params) {
-  // TODO(amirh): implement this.
+  // TODO(amirh): assert that this is running on the platform thread once we support the iOS
+  // embedded views thread configuration.
+  // TODO(amirh): do nothing if the params didn't change.
+  CGFloat screenScale = [[UIScreen mainScreen] scale];
+  CGRect rect =
+      CGRectMake(params.offsetPixels.x() / screenScale, params.offsetPixels.y() / screenScale,
+                 params.sizePoints.width(), params.sizePoints.height());
+
+  UIView* view = views_[view_id];
+  [view setFrame:rect];
 }
 
 }  // namespace shell
