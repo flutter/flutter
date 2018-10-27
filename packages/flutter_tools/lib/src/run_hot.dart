@@ -156,7 +156,10 @@ class HotRunner extends ResidentRunner {
   }) async {
     _didAttach = true;
     try {
-      await connectToServiceProtocol(reloadSources: _reloadSourcesService, compileExpression: _compileExpressionService);
+      await connectToServiceProtocol(
+        reloadSources: _reloadSourcesService,
+        compileExpression: _compileExpressionService,
+      );
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
       return 2;
@@ -182,8 +185,10 @@ class HotRunner extends ResidentRunner {
     }
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final bool devfsResult = await _updateDevFS(fullRestart: true);
-    _addBenchmarkData('hotReloadInitialDevFSSyncMilliseconds',
-        initialUpdateDevFSsTimer.elapsed.inMilliseconds);
+    _addBenchmarkData(
+      'hotReloadInitialDevFSSyncMilliseconds',
+      initialUpdateDevFSsTimer.elapsed.inMilliseconds,
+    );
     if (!devfsResult)
       return 3;
 
@@ -269,7 +274,7 @@ class HotRunner extends ResidentRunner {
 
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
-      appStartedCompleter: appStartedCompleter
+      appStartedCompleter: appStartedCompleter,
     );
   }
 

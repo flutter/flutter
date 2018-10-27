@@ -82,8 +82,10 @@ class FlutterDevice {
   Future<void> refreshViews() async {
     if (vmServices == null || vmServices.isEmpty)
       return;
+    final List<Future<void>> futures = <Future<void>>[];
     for (VMService service in vmServices)
-      await service.vm.refreshViews();
+      futures.add(service.vm.refreshViews(waitForViews: true));
+    await Future.wait(futures);
   }
 
   List<FlutterView> get views {
@@ -483,8 +485,10 @@ abstract class ResidentRunner {
   }
 
   Future<void> refreshViews() async {
+    final List<Future<void>> futures = <Future<void>>[];
     for (FlutterDevice device in flutterDevices)
-      await device.refreshViews();
+      futures.add(device.refreshViews());
+    await Future.wait(futures);
   }
 
   Future<void> _debugDumpApp() async {
