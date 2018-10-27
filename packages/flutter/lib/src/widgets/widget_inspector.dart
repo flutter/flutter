@@ -522,7 +522,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
   ///
   /// The [debugPaint] argument specifies whether the image should include the
   /// output of [RenderObject.debugPaint] for [renderObject] with
-  /// [debugPaintSizeEnabled] set to `true`. Debug paint information is not
+  /// [debugPaintSizeEnabled] set to true. Debug paint information is not
   /// included for the children of [renderObject] so that it is clear precisely
   /// which object the debug paint information references.
   ///
@@ -620,7 +620,7 @@ class _DiagnosticsPathNode {
 
   /// Index of the child that the path continues on.
   ///
-  /// Equal to `null` if the path does not continue.
+  /// Equal to null if the path does not continue.
   final int childIndex;
 }
 
@@ -696,7 +696,7 @@ class _SerializeConfig {
   /// references in the returned JSON.
   ///
   /// A call to `ext.flutter.inspector.disposeGroup` is required before objects
-  /// in the tree are garbage collected unless [groupName] is `null` in
+  /// in the tree are garbage collected unless [groupName] is null in
   /// which case no object references are included in the JSON payload.
   final String groupName;
 
@@ -721,7 +721,7 @@ class _SerializeConfig {
   /// Whether to include object references to the [DiagnosticsNode] and
   /// [DiagnosticsNode.value] objects in the JSON payload.
   ///
-  /// If [interactive] is `true`, a call to `ext.flutter.inspector.disposeGroup`
+  /// If [interactive] is true, a call to `ext.flutter.inspector.disposeGroup`
   /// is required before objects in the tree will ever be garbage collected.
   bool get interactive => groupName != null;
 }
@@ -946,7 +946,7 @@ mixin WidgetInspectorService {
     assert(!_debugServiceExtensionsRegistered);
     assert(() { _debugServiceExtensionsRegistered = true; return true; }());
 
-    WidgetsBinding.instance.addPersistentFrameCallback(_onFrameStart);
+    SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
 
     _registerBoolServiceExtension(
       name: 'show',
@@ -1003,7 +1003,7 @@ mixin WidgetInspectorService {
               renderObject.markNeedsPaint();
               renderObject.visitChildren(markTreeNeedsPaint);
             }
-            final RenderObject root = WidgetsBinding.instance.renderViewElement?.renderObject;
+            final RenderObject root = RendererBinding.instance.renderView;
             if (root != null) {
               markTreeNeedsPaint(root);
             }
@@ -1264,7 +1264,7 @@ mixin WidgetInspectorService {
   /// Set the [WidgetInspector] selection to the object matching the specified
   /// id if the object is valid object to set as the inspector selection.
   ///
-  /// Returns `true` if the selection was changed.
+  /// Returns true if the selection was changed.
   ///
   /// The `groupName` parameter is not required by is added to regularize the
   /// API surface of methods called from the Flutter IntelliJ Plugin.
@@ -1276,7 +1276,7 @@ mixin WidgetInspectorService {
   /// Set the [WidgetInspector] selection to the specified `object` if it is
   /// a valid object to set as the inspector selection.
   ///
-  /// Returns `true` if the selection was changed.
+  /// Returns true if the selection was changed.
   ///
   /// The `groupName` parameter is not needed but is specified to regularize the
   /// API surface of methods called from the Flutter IntelliJ Plugin.
@@ -1295,7 +1295,7 @@ mixin WidgetInspectorService {
         selection.current = object;
       }
       if (selectionChangedCallback != null) {
-        if (WidgetsBinding.instance.schedulerPhase == SchedulerPhase.idle) {
+        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
           selectionChangedCallback();
         } else {
           // It isn't safe to trigger the selection change callback if we are in
@@ -1660,6 +1660,7 @@ mixin WidgetInspectorService {
   /// information needed for the details subtree view.
   ///
   /// See also:
+  ///
   ///  * [getChildrenDetailsSubtree], a method to get children of a node
   ///    in the details subtree.
   String getDetailsSubtree(String id, String groupName) {
@@ -1834,7 +1835,7 @@ mixin WidgetInspectorService {
 
   void _onFrameStart(Duration timeStamp) {
     _frameStart = timeStamp;
-    WidgetsBinding.instance.addPostFrameCallback(_onFrameEnd);
+    SchedulerBinding.instance.addPostFrameCallback(_onFrameEnd);
   }
 
   void _onFrameEnd(Duration timeStamp) {
@@ -1953,7 +1954,7 @@ class _ElementLocationStatsTracker {
   // representation is more efficient as all location ids from 0 to n are
   // typically present.
   //
-  // All logic in this class assumes that if `_stats[i]` is not `null`
+  // All logic in this class assumes that if `_stats[i]` is not null
   // `_stats[i].id` equals `i`.
   final List<_LocationCount> _stats = <_LocationCount>[];
 

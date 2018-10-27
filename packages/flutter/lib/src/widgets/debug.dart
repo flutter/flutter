@@ -38,6 +38,7 @@ typedef RebuildDirtyWidgetCallback = void Function(Element e, bool builtOnce);
 /// This callback is only invoked in debug builds.
 ///
 /// See also:
+///
 ///  * [debugPrintRebuildDirtyWidgets], which does something similar but logs
 ///    to the console instead of invoking a callback.
 ///  * [debugOnProfilePaint], which does something similar for [RenderObject]
