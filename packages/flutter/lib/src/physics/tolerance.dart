@@ -10,15 +10,15 @@ class Tolerance {
   ///
   /// The arguments should all be positive values.
   const Tolerance({
-    this.distance: _kEpsilonDefault,
-    this.time: _kEpsilonDefault,
-    this.velocity: _kEpsilonDefault
+    this.distance = _epsilonDefault,
+    this.time = _epsilonDefault,
+    this.velocity = _epsilonDefault
   });
 
-  static const double _kEpsilonDefault = 1e-3;
+  static const double _epsilonDefault = 1e-3;
 
   /// A default tolerance of 0.001 for all three values.
-  static const Tolerance defaultTolerance = const Tolerance();
+  static const Tolerance defaultTolerance = Tolerance();
 
   /// The magnitude of the maximum distance between two points for them to be
   /// considered within tolerance.

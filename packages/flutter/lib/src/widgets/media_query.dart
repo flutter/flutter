@@ -37,12 +37,16 @@ class MediaQueryData {
   /// Consider using [MediaQueryData.fromWindow] to create data based on a
   /// [Window].
   const MediaQueryData({
-    this.size: Size.zero,
-    this.devicePixelRatio: 1.0,
-    this.textScaleFactor: 1.0,
-    this.padding: EdgeInsets.zero,
-    this.viewInsets: EdgeInsets.zero,
-    this.alwaysUse24HourFormat: false,
+    this.size = Size.zero,
+    this.devicePixelRatio = 1.0,
+    this.textScaleFactor = 1.0,
+    this.padding = EdgeInsets.zero,
+    this.viewInsets = EdgeInsets.zero,
+    this.alwaysUse24HourFormat = false,
+    this.accessibleNavigation = false,
+    this.invertColors = false,
+    this.disableAnimations = false,
+    this.boldText = false,
   });
 
   /// Creates data for a media query based on the given window.
@@ -55,8 +59,12 @@ class MediaQueryData {
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = window.textScaleFactor,
-      padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
-      viewInsets = new EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
+      padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
+      viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
+      accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
+      invertColors = window.accessibilityFeatures.invertColors,
+      disableAnimations = window.accessibilityFeatures.disableAnimations,
+      boldText = window.accessibilityFeatures.boldText,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixel (e.g, the size of the screen).
@@ -76,6 +84,11 @@ class MediaQueryData {
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.textScaleFactorOf], a convenience method which returns the
+  ///    textScaleFactor defined for a [BuildContext].
   final double textScaleFactor;
 
   /// The number of physical pixels on each side of the display rectangle into
@@ -93,7 +106,7 @@ class MediaQueryData {
   /// If you consumed this padding (e.g. by building a widget that envelops or
   /// accounts for this padding in its layout in such a way that children are
   /// no longer exposed to this padding), you should remove this padding
-  /// for subsequent descendents in the widget tree by inserting a new
+  /// for subsequent descendants in the widget tree by inserting a new
   /// [MediaQuery] widget using the [MediaQuery.removePadding] factory.
   ///
   /// See also:
@@ -115,6 +128,43 @@ class MediaQueryData {
   ///   formatting.
   final bool alwaysUse24HourFormat;
 
+  /// Whether the user is using an accessibility service like TalkBack or
+  /// VoiceOver to interact with the application.
+  ///
+  /// When this setting is true, features such as timeouts should be disabled or
+  /// have minimum durations increased.
+  ///
+  /// See also:
+  ///
+  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  final bool accessibleNavigation;
+
+  /// Whether the device is inverting the colors of the platform.
+  ///
+  /// This flag is currently only updated on iOS devices.
+  ///
+  /// See also:
+  ///
+  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  final bool invertColors;
+
+  /// Whether the platform is requesting that animations be disabled or reduced
+  /// as much as possible.
+  ///
+  /// See also:
+  ///
+  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///
+  final bool disableAnimations;
+
+  /// Whether the platform is requesting that text be drawn with a bold font
+  /// weight.
+  ///
+  /// See also:
+  ///
+  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  final bool boldText;
+
   /// The orientation of the media (e.g., whether the device is in landscape or portrait mode).
   Orientation get orientation {
     return size.width > size.height ? Orientation.landscape : Orientation.portrait;
@@ -129,14 +179,22 @@ class MediaQueryData {
     EdgeInsets padding,
     EdgeInsets viewInsets,
     bool alwaysUse24HourFormat,
+    bool disableAnimations,
+    bool invertColors,
+    bool accessibleNavigation,
+    bool boldText,
   }) {
-    return new MediaQueryData(
+    return MediaQueryData(
       size: size ?? this.size,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       padding: padding ?? this.padding,
       viewInsets: viewInsets ?? this.viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
+      invertColors: invertColors ?? this.invertColors,
+      disableAnimations: disableAnimations ?? this.disableAnimations,
+      accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
+      boldText: boldText ?? this.boldText,
     );
   }
 
@@ -155,14 +213,14 @@ class MediaQueryData {
   ///    adds a [Padding] widget.
   ///  * [removeViewInsets], the same thing but for [viewInsets].
   MediaQueryData removePadding({
-    bool removeLeft: false,
-    bool removeTop: false,
-    bool removeRight: false,
-    bool removeBottom: false,
+    bool removeLeft = false,
+    bool removeTop = false,
+    bool removeRight = false,
+    bool removeBottom = false,
   }) {
     if (!(removeLeft || removeTop || removeRight || removeBottom))
       return this;
-    return new MediaQueryData(
+    return MediaQueryData(
       size: size,
       devicePixelRatio: devicePixelRatio,
       textScaleFactor: textScaleFactor,
@@ -174,6 +232,10 @@ class MediaQueryData {
       ),
       viewInsets: viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      disableAnimations: disableAnimations,
+      invertColors: invertColors,
+      accessibleNavigation: accessibleNavigation,
+      boldText: boldText,
     );
   }
 
@@ -190,14 +252,14 @@ class MediaQueryData {
   ///    padding from the ambient [MediaQuery].
   ///  * [removePadding], the same thing but for [padding].
   MediaQueryData removeViewInsets({
-    bool removeLeft: false,
-    bool removeTop: false,
-    bool removeRight: false,
-    bool removeBottom: false,
+    bool removeLeft = false,
+    bool removeTop = false,
+    bool removeRight = false,
+    bool removeBottom = false,
   }) {
     if (!(removeLeft || removeTop || removeRight || removeBottom))
       return this;
-    return new MediaQueryData(
+    return MediaQueryData(
       size: size,
       devicePixelRatio: devicePixelRatio,
       textScaleFactor: textScaleFactor,
@@ -209,6 +271,10 @@ class MediaQueryData {
         bottom: removeBottom ? 0.0 : null,
       ),
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      disableAnimations: disableAnimations,
+      invertColors: invertColors,
+      accessibleNavigation: accessibleNavigation,
+      boldText: boldText,
     );
   }
 
@@ -222,21 +288,42 @@ class MediaQueryData {
         && typedOther.textScaleFactor == textScaleFactor
         && typedOther.padding == padding
         && typedOther.viewInsets == viewInsets
-        && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat;
+        && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
+        && typedOther.disableAnimations == disableAnimations
+        && typedOther.invertColors == invertColors
+        && typedOther.accessibleNavigation == accessibleNavigation
+        && typedOther.boldText == boldText;
   }
 
   @override
-  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding, viewInsets, alwaysUse24HourFormat);
+  int get hashCode {
+    return hashValues(
+      size,
+      devicePixelRatio,
+      textScaleFactor,
+      padding,
+      viewInsets,
+      alwaysUse24HourFormat,
+      disableAnimations,
+      invertColors,
+      accessibleNavigation,
+      boldText,
+    );
+  }
 
   @override
   String toString() {
     return '$runtimeType('
              'size: $size, '
-             'devicePixelRatio: $devicePixelRatio, '
-             'textScaleFactor: $textScaleFactor, '
+             'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}, '
+             'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}, '
              'padding: $padding, '
              'viewInsets: $viewInsets, '
-             'alwaysUse24HourFormat: $alwaysUse24HourFormat'
+             'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
+             'accessibleNavigation: $accessibleNavigation'
+             'disableAnimations: $disableAnimations'
+             'invertColors: $invertColors'
+             'boldText: $boldText'
            ')';
   }
 }
@@ -278,7 +365,7 @@ class MediaQuery extends InheritedWidget {
   ///
   /// This should be inserted into the widget tree when the [MediaQuery] padding
   /// is consumed by a widget in such a way that the padding is no longer
-  /// exposed to the widget's descendents or siblings.
+  /// exposed to the widget's descendants or siblings.
   ///
   /// The [context] argument is required, must not be null, and must have a
   /// [MediaQuery] in scope.
@@ -299,13 +386,13 @@ class MediaQuery extends InheritedWidget {
   factory MediaQuery.removePadding({
     Key key,
     @required BuildContext context,
-    bool removeLeft: false,
-    bool removeTop: false,
-    bool removeRight: false,
-    bool removeBottom: false,
+    bool removeLeft = false,
+    bool removeTop = false,
+    bool removeRight = false,
+    bool removeBottom = false,
     @required Widget child,
   }) {
-    return new MediaQuery(
+    return MediaQuery(
       key: key,
       data: MediaQuery.of(context).removePadding(
         removeLeft: removeLeft,
@@ -322,7 +409,7 @@ class MediaQuery extends InheritedWidget {
   ///
   /// This should be inserted into the widget tree when the [MediaQuery] view
   /// insets are consumed by a widget in such a way that the view insets are no
-  /// longer exposed to the widget's descendents or siblings.
+  /// longer exposed to the widget's descendants or siblings.
   ///
   /// The [context] argument is required, must not be null, and must have a
   /// [MediaQuery] in scope.
@@ -341,13 +428,13 @@ class MediaQuery extends InheritedWidget {
   factory MediaQuery.removeViewInsets({
     Key key,
     @required BuildContext context,
-    bool removeLeft: false,
-    bool removeTop: false,
-    bool removeRight: false,
-    bool removeBottom: false,
+    bool removeLeft = false,
+    bool removeTop = false,
+    bool removeRight = false,
+    bool removeBottom = false,
     @required Widget child,
   }) {
-    return new MediaQuery(
+    return MediaQuery(
       key: key,
       data: MediaQuery.of(context).removeViewInsets(
         removeLeft: removeLeft,
@@ -383,7 +470,7 @@ class MediaQuery extends InheritedWidget {
   ///
   /// If you use this from a widget (e.g. in its build function), consider
   /// calling [debugCheckHasMediaQuery].
-  static MediaQueryData of(BuildContext context, { bool nullOk: false }) {
+  static MediaQueryData of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
     final MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
@@ -391,7 +478,7 @@ class MediaQuery extends InheritedWidget {
       return query.data;
     if (nullOk)
       return null;
-    throw new FlutterError(
+    throw FlutterError(
       'MediaQuery.of() called with a context that does not contain a MediaQuery.\n'
       'No MediaQuery ancestor could be found starting from the context that was passed '
       'to MediaQuery.of(). This can happen because you do not have a WidgetsApp or '
@@ -402,12 +489,24 @@ class MediaQuery extends InheritedWidget {
     );
   }
 
+  /// Returns textScaleFactor for the nearest MediaQuery ancestor or 1.0, if
+  /// no such ancestor exists.
+  static double textScaleFactorOf(BuildContext context) {
+    return MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
+  }
+
+  /// Returns the boldText accessibility setting for the nearest MediaQuery
+  /// ancestor, or false if no such ancestor exists.
+  static bool boldTextOverride(BuildContext context) {
+    return MediaQuery.of(context, nullOk: true)?.boldText ?? false;
+  }
+
   @override
   bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
+    properties.add(DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
   }
 }

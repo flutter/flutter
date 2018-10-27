@@ -1,7 +1,6 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -13,7 +12,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   /// Creates a modal route that replaces the entire screen.
   PageRoute({
     RouteSettings settings,
-    this.fullscreenDialog: false,
+    this.fullscreenDialog = false,
   }) : super(settings: settings);
 
   /// Whether this page route is a full-screen dialog.
@@ -45,18 +44,6 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   }
 }
 
-/// Signature for the [PageRouteBuilder] function that builds the route's
-/// primary contents.
-///
-/// See [ModalRoute.buildPage] for complete definition of the parameters.
-typedef Widget RoutePageBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation);
-
-/// Signature for the [PageRouteBuilder] function that builds the route's
-/// transitions.
-///
-/// See [ModalRoute.buildTransitions] for complete definition of the parameters.
-typedef Widget RouteTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
-
 Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
   return child;
 }
@@ -73,13 +60,13 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   PageRouteBuilder({
     RouteSettings settings,
     @required this.pageBuilder,
-    this.transitionsBuilder: _defaultTransitionsBuilder,
-    this.transitionDuration: const Duration(milliseconds: 300),
-    this.opaque: true,
-    this.barrierDismissible: false,
+    this.transitionsBuilder = _defaultTransitionsBuilder,
+    this.transitionDuration = const Duration(milliseconds: 300),
+    this.opaque = true,
+    this.barrierDismissible = false,
     this.barrierColor,
     this.barrierLabel,
-    this.maintainState: true,
+    this.maintainState = true,
   }) : assert(pageBuilder != null),
        assert(transitionsBuilder != null),
        assert(barrierDismissible != null),

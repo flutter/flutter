@@ -20,7 +20,7 @@ class DragDownDetails {
   /// Creates details for a [GestureDragDownCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  DragDownDetails({ this.globalPosition: Offset.zero })
+  DragDownDetails({ this.globalPosition = Offset.zero })
     : assert(globalPosition != null);
 
   /// The global position at which the pointer contacted the screen.
@@ -38,7 +38,7 @@ class DragDownDetails {
 /// The `details` object provides the position of the touch.
 ///
 /// See [DragGestureRecognizer.onDown].
-typedef void GestureDragDownCallback(DragDownDetails details);
+typedef GestureDragDownCallback = void Function(DragDownDetails details);
 
 /// Details object for callbacks that use [GestureDragStartCallback].
 ///
@@ -52,7 +52,7 @@ class DragStartDetails {
   /// Creates details for a [GestureDragStartCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  DragStartDetails({ this.sourceTimeStamp, this.globalPosition: Offset.zero })
+  DragStartDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
     : assert(globalPosition != null);
 
   /// Recorded timestamp of the source pointer event that triggered the drag
@@ -80,7 +80,7 @@ class DragStartDetails {
 /// touched the surface.
 ///
 /// See [DragGestureRecognizer.onStart].
-typedef void GestureDragStartCallback(DragStartDetails details);
+typedef GestureDragStartCallback = void Function(DragStartDetails details);
 
 /// Details object for callbacks that use [GestureDragUpdateCallback].
 ///
@@ -101,7 +101,7 @@ class DragUpdateDetails {
   /// The [globalPosition] argument must be provided and must not be null.
   DragUpdateDetails({
     this.sourceTimeStamp,
-    this.delta: Offset.zero,
+    this.delta = Offset.zero,
     this.primaryDelta,
     @required this.globalPosition
   }) : assert(delta != null),
@@ -150,7 +150,7 @@ class DragUpdateDetails {
 /// has travelled since the last update.
 ///
 /// See [DragGestureRecognizer.onUpdate].
-typedef void GestureDragUpdateCallback(DragUpdateDetails details);
+typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);
 
 /// Details object for callbacks that use [GestureDragEndCallback].
 ///
@@ -165,7 +165,7 @@ class DragEndDetails {
   ///
   /// The [velocity] argument must not be null.
   DragEndDetails({
-    this.velocity: Velocity.zero,
+    this.velocity = Velocity.zero,
     this.primaryVelocity,
   }) : assert(velocity != null),
        assert(primaryVelocity == null

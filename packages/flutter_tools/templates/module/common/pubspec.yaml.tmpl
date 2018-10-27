@@ -1,0 +1,25 @@
+name: {{projectName}}
+description: {{description}}
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+{{#withDriverTest}}
+  flutter_driver:
+    sdk: flutter
+{{/withDriverTest}}
+
+
+flutter:
+  uses-material-design: true
+  module:
+    androidPackage: {{androidIdentifier}}
+    iosBundleIdentifier: {{iosIdentifier}}

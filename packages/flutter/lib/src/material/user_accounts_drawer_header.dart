@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -25,30 +24,33 @@ class _AccountPictures extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Stack(
+    return Stack(
       children: <Widget>[
-        new PositionedDirectional(
+        PositionedDirectional(
           top: 0.0,
           end: 0.0,
-          child: new Row(
-            children: (otherAccountsPictures ?? <Widget>[]).take(3).map((Widget picture) {
-              return new Semantics(
-                explicitChildNodes: true,
-                child: new Container(
-                  margin: const EdgeInsetsDirectional.only(start: 16.0),
-                  width: 40.0,
-                  height: 40.0,
-                  child: picture
-                ),
+          child: Row(
+            children: (otherAccountsPictures ?? <Widget>[]).take(3).map<Widget>((Widget picture) {
+              return Padding(
+                padding: const EdgeInsetsDirectional.only(start: 8.0),
+                child: Semantics(
+                  container: true,
+                  child: Container(
+                  padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                    width: 48.0,
+                    height: 48.0,
+                    child: picture,
+                 ),
+                )
               );
             }).toList(),
           ),
         ),
-        new Positioned(
+        Positioned(
           top: 0.0,
-          child: new Semantics(
+          child: Semantics(
             explicitChildNodes: true,
-            child: new SizedBox(
+            child: SizedBox(
               width: 72.0,
               height: 72.0,
               child: currentAccountPicture
@@ -77,16 +79,17 @@ class _AccountDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
+    assert(debugCheckHasMaterialLocalizations(context));
 
     final ThemeData theme = Theme.of(context);
     final List<Widget> children = <Widget>[];
 
     if (accountName != null) {
-      final Widget accountNameLine = new LayoutId(
+      final Widget accountNameLine = LayoutId(
         id: _AccountDetailsLayout.accountName,
-        child: new Padding(
+        child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 2.0),
-          child: new DefaultTextStyle(
+          child: DefaultTextStyle(
             style: theme.primaryTextTheme.body2,
             overflow: TextOverflow.ellipsis,
             child: accountName,
@@ -97,11 +100,11 @@ class _AccountDetails extends StatelessWidget {
     }
 
     if (accountEmail != null) {
-      final Widget accountEmailLine = new LayoutId(
+      final Widget accountEmailLine = LayoutId(
         id: _AccountDetailsLayout.accountEmail,
-        child: new Padding(
+        child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 2.0),
-          child: new DefaultTextStyle(
+          child: DefaultTextStyle(
             style: theme.primaryTextTheme.body1,
             overflow: TextOverflow.ellipsis,
             child: accountEmail,
@@ -113,17 +116,17 @@ class _AccountDetails extends StatelessWidget {
 
     if (onTap != null) {
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-      final Widget dropDownIcon = new LayoutId(
+      final Widget dropDownIcon = LayoutId(
         id: _AccountDetailsLayout.dropdownIcon,
-        child: new Semantics(
+        child: Semantics(
           container: true,
           button: true,
           onTap: onTap,
-          child: new SizedBox(
+          child: SizedBox(
             height: _kAccountDetailsHeight,
             width: _kAccountDetailsHeight,
-            child: new Center(
-              child: new Icon(
+            child: Center(
+              child: Icon(
                 isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
                 color: Colors.white,
                 semanticLabel: isOpen
@@ -137,22 +140,22 @@ class _AccountDetails extends StatelessWidget {
       children.add(dropDownIcon);
     }
 
-    Widget accountDetails = new CustomMultiChildLayout(
-      delegate: new _AccountDetailsLayout(
+    Widget accountDetails = CustomMultiChildLayout(
+      delegate: _AccountDetailsLayout(
         textDirection: Directionality.of(context),
       ),
       children: children,
     );
 
     if (onTap != null) {
-      accountDetails = new InkWell(
+      accountDetails = InkWell(
         onTap: onTap,
         child: accountDetails,
         excludeFromSemantics: true,
       );
     }
 
-    return new SizedBox(
+    return SizedBox(
       height: _kAccountDetailsHeight,
       child: accountDetails,
     );
@@ -176,24 +179,24 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
     Size iconSize;
     if (hasChild(dropdownIcon)) {
       // place the dropdown icon in bottom right (LTR) or bottom left (RTL)
-      iconSize = layoutChild(dropdownIcon, new BoxConstraints.loose(size));
+      iconSize = layoutChild(dropdownIcon, BoxConstraints.loose(size));
       positionChild(dropdownIcon, _offsetForIcon(size, iconSize));
     }
 
     final String bottomLine = hasChild(accountEmail) ? accountEmail : (hasChild(accountName) ? accountName : null);
 
     if (bottomLine != null) {
-      final Size constraintSize = iconSize == null ? size : size - new Offset(iconSize.width, 0.0);
+      final Size constraintSize = iconSize == null ? size : size - Offset(iconSize.width, 0.0);
       iconSize ??= const Size(_kAccountDetailsHeight, _kAccountDetailsHeight);
 
       // place bottom line center at same height as icon center
-      final Size bottomLineSize = layoutChild(bottomLine, new BoxConstraints.loose(constraintSize));
+      final Size bottomLineSize = layoutChild(bottomLine, BoxConstraints.loose(constraintSize));
       final Offset bottomLineOffset = _offsetForBottomLine(size, iconSize, bottomLineSize);
       positionChild(bottomLine, bottomLineOffset);
 
       // place account name above account email
       if (bottomLine == accountEmail && hasChild(accountName)) {
-        final Size nameSize = layoutChild(accountName, new BoxConstraints.loose(constraintSize));
+        final Size nameSize = layoutChild(accountName, BoxConstraints.loose(constraintSize));
         positionChild(accountName, _offsetForName(size, nameSize, bottomLineOffset));
       }
     }
@@ -205,9 +208,9 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
   Offset _offsetForIcon(Size size, Size iconSize) {
     switch (textDirection) {
       case TextDirection.ltr:
-        return new Offset(size.width - iconSize.width, size.height - iconSize.height);
+        return Offset(size.width - iconSize.width, size.height - iconSize.height);
       case TextDirection.rtl:
-        return new Offset(0.0, size.height - iconSize.height);
+        return Offset(0.0, size.height - iconSize.height);
     }
     assert(false, 'Unreachable');
     return null;
@@ -217,9 +220,9 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
     final double y = size.height - 0.5 * iconSize.height - 0.5 * bottomLineSize.height;
     switch (textDirection) {
       case TextDirection.ltr:
-        return new Offset(0.0, y);
+        return Offset(0.0, y);
       case TextDirection.rtl:
-        return new Offset(size.width - bottomLineSize.width, y);
+        return Offset(size.width - bottomLineSize.width, y);
     }
     assert(false, 'Unreachable');
     return null;
@@ -229,9 +232,9 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
     final double y = bottomLineOffset.dy - nameSize.height;
     switch (textDirection) {
       case TextDirection.ltr:
-        return new Offset(0.0, y);
+        return Offset(0.0, y);
       case TextDirection.rtl:
-        return new Offset(size.width - nameSize.width, y);
+        return Offset(size.width - nameSize.width, y);
     }
     assert(false, 'Unreachable');
     return null;
@@ -253,7 +256,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   const UserAccountsDrawerHeader({
     Key key,
     this.decoration,
-    this.margin: const EdgeInsets.only(bottom: 8.0),
+    this.margin = const EdgeInsets.only(bottom: 8.0),
     this.currentAccountPicture,
     this.otherAccountsPictures,
     @required this.accountName,
@@ -290,7 +293,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   final VoidCallback onDetailsPressed;
 
   @override
-  _UserAccountsDrawerHeaderState createState() => new _UserAccountsDrawerHeaderState();
+  _UserAccountsDrawerHeaderState createState() => _UserAccountsDrawerHeaderState();
 }
 
 class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
@@ -306,30 +309,31 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    return new Semantics(
+    assert(debugCheckHasMaterialLocalizations(context));
+    return Semantics(
       container: true,
       label: MaterialLocalizations.of(context).signedInLabel,
-      child: new DrawerHeader(
-        decoration: widget.decoration ?? new BoxDecoration(
+      child: DrawerHeader(
+        decoration: widget.decoration ?? BoxDecoration(
           color: Theme.of(context).primaryColor,
         ),
         margin: widget.margin,
         padding: const EdgeInsetsDirectional.only(top: 16.0, start: 16.0),
-        child: new SafeArea(
+        child: SafeArea(
           bottom: false,
-          child: new Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              new Expanded(
-                child: new Padding(
+              Expanded(
+                child: Padding(
                   padding: const EdgeInsetsDirectional.only(end: 16.0),
-                  child: new _AccountPictures(
+                  child: _AccountPictures(
                     currentAccountPicture: widget.currentAccountPicture,
                     otherAccountsPictures: widget.otherAccountsPictures,
                   ),
                 )
               ),
-              new _AccountDetails(
+              _AccountDetails(
                 accountName: widget.accountName,
                 accountEmail: widget.accountEmail,
                 isOpen: _isOpen,

@@ -11,8 +11,8 @@ void main() {
       return const Text('oopsie!', textDirection: TextDirection.ltr);
     };
     await tester.pumpWidget(
-      new SizedBox(
-        child: new Builder(
+      SizedBox(
+        child: Builder(
           builder: (BuildContext context) {
             throw 'test';
           },

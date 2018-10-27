@@ -5,10 +5,12 @@
 import 'dart:async';
 
 import '../android/apk.dart';
+import '../project.dart';
+import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
-  BuildApkCommand({bool verboseHelp: false}) {
+  BuildApkCommand({bool verboseHelp = false}) {
     usesTargetOption();
     addBuildModeFlags();
     usesFlavorOption();
@@ -17,13 +19,8 @@ class BuildApkCommand extends BuildSubCommand {
     usesBuildNameOption();
 
     argParser
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
-      )
       ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
-      ..addFlag('prefer-shared-library',
+      ..addFlag('build-shared-library',
         negatable: false,
         help: 'Whether to prefer compiling to a *.so file (android only).',
       )
@@ -37,13 +34,18 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   final String description = 'Build an Android APK file from your app.\n\n'
-    'This command can build debug and release versions of your application. \'debug\' builds support\n'
-    'debugging and a quick development cycle. \'release\' builds don\'t support debugging and are\n'
+    'This command can build debug and release versions of your application. \'debug\' builds support '
+    'debugging and a quick development cycle. \'release\' builds don\'t support debugging and are '
     'suitable for deploying to app stores.';
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     await super.runCommand();
-    await buildApk(buildInfo: getBuildInfo(), target: targetFile);
+    await buildApk(
+      project: await FlutterProject.current(),
+      target: targetFile,
+      buildInfo: getBuildInfo(),
+    );
+    return null;
   }
 }

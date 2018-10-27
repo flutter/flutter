@@ -104,6 +104,8 @@ class SliverConstraints extends Constraints {
     @required this.crossAxisExtent,
     @required this.crossAxisDirection,
     @required this.viewportMainAxisExtent,
+    @required this.remainingCacheExtent,
+    @required this.cacheOrigin,
   }) : assert(axisDirection != null),
        assert(growthDirection != null),
        assert(userScrollDirection != null),
@@ -112,7 +114,9 @@ class SliverConstraints extends Constraints {
        assert(remainingPaintExtent != null),
        assert(crossAxisExtent != null),
        assert(crossAxisDirection != null),
-       assert(viewportMainAxisExtent != null);
+       assert(viewportMainAxisExtent != null),
+       assert(remainingCacheExtent != null),
+       assert(cacheOrigin != null);
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -126,8 +130,10 @@ class SliverConstraints extends Constraints {
     double crossAxisExtent,
     AxisDirection crossAxisDirection,
     double viewportMainAxisExtent,
+    double remainingCacheExtent,
+    double cacheOrigin,
   }) {
-    return new SliverConstraints(
+    return SliverConstraints(
       axisDirection: axisDirection ?? this.axisDirection,
       growthDirection: growthDirection ?? this.growthDirection,
       userScrollDirection: userScrollDirection ?? this.userScrollDirection,
@@ -137,6 +143,8 @@ class SliverConstraints extends Constraints {
       crossAxisExtent: crossAxisExtent ?? this.crossAxisExtent,
       crossAxisDirection: crossAxisDirection ?? this.crossAxisDirection,
       viewportMainAxisExtent: viewportMainAxisExtent ?? this.viewportMainAxisExtent,
+      remainingCacheExtent: remainingCacheExtent ?? this.remainingCacheExtent,
+      cacheOrigin: cacheOrigin ?? this.cacheOrigin,
     );
   }
 
@@ -258,6 +266,47 @@ class SliverConstraints extends Constraints {
   /// For a vertical list, this is the height of the viewport.
   final double viewportMainAxisExtent;
 
+  /// Where the cache area starts relative to the [scrollOffset].
+  ///
+  /// Slivers that fall into the cache area located before the leading edge and
+  /// after the trailing edge of the viewport should still render content
+  /// because they are about to become visible when the user scrolls.
+  ///
+  /// The [cacheOrigin] describes where the [remainingCacheExtent] starts relative
+  /// to the [scrollOffset]. A cache origin of 0 means that the sliver does not
+  /// have to provide any content before the current [scrollOffset]. A
+  /// [cacheOrigin] of -250.0 means that even though the first visible part of
+  /// the sliver will be at the provided [scrollOffset], the sliver should
+  /// render content starting 250.0 before the [scrollOffset] to fill the
+  /// cache area of the viewport.
+  ///
+  /// The [cacheOrigin] is always negative or zero and will never exceed
+  /// -[scrollOffset]. In other words, a sliver is never asked to provide
+  /// content before its zero [scrollOffset].
+  ///
+  /// See also:
+  ///  * [RenderViewport.cacheExtent] for a description of a viewport's cache area.
+  final double cacheOrigin;
+
+
+  /// Describes how much content the sliver should provide starting from the
+  /// [cacheOrigin].
+  ///
+  /// Not all content in the [remainingCacheExtent] will be visible as some
+  /// of it might fall into the cache area of the viewport.
+  ///
+  /// Each sliver should start laying out content at the [cacheOrigin] and
+  /// try to provide as much content as the [remainingCacheExtent] allows.
+  ///
+  /// The [remainingCacheExtent] is always larger or equal to the
+  /// [remainingPaintExtent]. Content, that falls in the [remainingCacheExtent],
+  /// but is outside of the [remainingPaintExtent] is currently not visible
+  /// in the viewport.
+  ///
+  /// See also:
+  ///  * [RenderViewport.cacheExtent] for a description of a viewport's cache area.
+  final double remainingCacheExtent;
+
   /// The axis along which the [scrollOffset] and [remainingPaintExtent] are measured.
   Axis get axis => axisDirectionToAxis(axisDirection);
 
@@ -310,21 +359,21 @@ class SliverConstraints extends Constraints {
   ///
   /// Useful for slivers that have [RenderBox] children.
   BoxConstraints asBoxConstraints({
-    double minExtent: 0.0,
-    double maxExtent: double.infinity,
+    double minExtent = 0.0,
+    double maxExtent = double.infinity,
     double crossAxisExtent,
   }) {
     crossAxisExtent ??= this.crossAxisExtent;
     switch (axis) {
       case Axis.horizontal:
-        return new BoxConstraints(
+        return BoxConstraints(
           minHeight: crossAxisExtent,
           maxHeight: crossAxisExtent,
           minWidth: minExtent,
           maxWidth: maxExtent,
         );
       case Axis.vertical:
-        return new BoxConstraints(
+        return BoxConstraints(
           minWidth: crossAxisExtent,
           maxWidth: crossAxisExtent,
           minHeight: minExtent,
@@ -336,17 +385,17 @@ class SliverConstraints extends Constraints {
 
   @override
   bool debugAssertIsValid({
-    bool isAppliedConstraint: false,
+    bool isAppliedConstraint = false,
     InformationCollector informationCollector,
   }) {
     assert(() {
       void verify(bool check, String message) {
         if (check)
           return;
-        final StringBuffer information = new StringBuffer();
+        final StringBuffer information = StringBuffer();
         if (informationCollector != null)
           informationCollector(information);
-        throw new FlutterError('$runtimeType is not valid: $message\n${information}The offending constraints were:\n  $this');
+        throw FlutterError('$runtimeType is not valid: $message\n${information}The offending constraints were:\n  $this');
       }
       verify(axis != null, 'The "axis" is null.');
       verify(growthDirection != null, 'The "growthDirection" is null.');
@@ -361,6 +410,8 @@ class SliverConstraints extends Constraints {
       verify(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection), 'The "axisDirection" and the "crossAxisDirection" are along the same axis.');
       verify(viewportMainAxisExtent >= 0.0, 'The "viewportMainAxisExtent" is negative.');
       verify(remainingPaintExtent >= 0.0, 'The "remainingPaintExtent" is negative.');
+      verify(remainingCacheExtent >= 0.0, 'The "remainingCacheExtent" is negative.');
+      verify(cacheOrigin <= 0.0, 'The "cacheOrigin" is positive.');
       verify(isNormalized, 'The constraints are not normalized.'); // should be redundant with earlier checks
       return true;
     }());
@@ -382,7 +433,9 @@ class SliverConstraints extends Constraints {
         && typedOther.remainingPaintExtent == remainingPaintExtent
         && typedOther.crossAxisExtent == crossAxisExtent
         && typedOther.crossAxisDirection == crossAxisDirection
-        && typedOther.viewportMainAxisExtent == viewportMainAxisExtent;
+        && typedOther.viewportMainAxisExtent == viewportMainAxisExtent
+        && typedOther.remainingCacheExtent == remainingCacheExtent
+        && typedOther.cacheOrigin == cacheOrigin;
   }
 
   @override
@@ -396,6 +449,8 @@ class SliverConstraints extends Constraints {
       crossAxisExtent,
       crossAxisDirection,
       viewportMainAxisExtent,
+      remainingCacheExtent,
+      cacheOrigin,
     );
   }
 
@@ -408,9 +463,11 @@ class SliverConstraints extends Constraints {
              'scrollOffset: ${scrollOffset.toStringAsFixed(1)}, '
              'remainingPaintExtent: ${remainingPaintExtent.toStringAsFixed(1)}, ' +
              (overlap != 0.0 ? 'overlap: ${overlap.toStringAsFixed(1)}, ' : '') +
-             'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}, ' +
-             'crossAxisDirection: $crossAxisDirection, ' +
-             'viewportMainAxisExtent: ${viewportMainAxisExtent.toStringAsFixed(1)}' +
+             'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}, '
+             'crossAxisDirection: $crossAxisDirection, '
+             'viewportMainAxisExtent: ${viewportMainAxisExtent.toStringAsFixed(1)}, '
+             'remainingCacheExtent: ${remainingCacheExtent.toStringAsFixed(1)} '
+             'cacheOrigin: ${cacheOrigin.toStringAsFixed(1)} '
            ')';
   }
 }
@@ -430,16 +487,17 @@ class SliverGeometry extends Diagnosticable {
   ///
   /// The other arguments must not be null.
   const SliverGeometry({
-    this.scrollExtent: 0.0,
-    this.paintExtent: 0.0,
-    this.paintOrigin: 0.0,
+    this.scrollExtent = 0.0,
+    this.paintExtent = 0.0,
+    this.paintOrigin = 0.0,
     double layoutExtent,
-    this.maxPaintExtent: 0.0,
-    this.maxScrollObstructionExtent: 0.0,
+    this.maxPaintExtent = 0.0,
+    this.maxScrollObstructionExtent = 0.0,
     double hitTestExtent,
     bool visible,
-    this.hasVisualOverflow: false,
+    this.hasVisualOverflow = false,
     this.scrollOffsetCorrection,
+    double cacheExtent,
   }) : assert(scrollExtent != null),
        assert(paintExtent != null),
        assert(paintOrigin != null),
@@ -448,10 +506,11 @@ class SliverGeometry extends Diagnosticable {
        assert(scrollOffsetCorrection != 0.0),
        layoutExtent = layoutExtent ?? paintExtent,
        hitTestExtent = hitTestExtent ?? paintExtent,
+       cacheExtent = cacheExtent ?? layoutExtent ?? paintExtent,
        visible = visible ?? paintExtent > 0.0;
 
   /// A sliver that occupies no space at all.
-  static const SliverGeometry zero = const SliverGeometry();
+  static const SliverGeometry zero = SliverGeometry();
 
   /// The (estimated) total scrollable extent that this sliver has content for.
   ///
@@ -585,6 +644,18 @@ class SliverGeometry extends Diagnosticable {
   /// its offset based on this value.
   final double scrollOffsetCorrection;
 
+  /// How many pixels the sliver has consumed in the
+  /// [SliverConstraints.remainingCacheExtent].
+  ///
+  /// This value should be equal to or larger than the [layoutExtent] because
+  /// the sliver allways consumes at least the [layoutExtent] from the
+  /// [SliverConstraints.remainingCacheExtent] and possibly more if it falls
+  /// into the cache area of the viewport.
+  ///
+  /// See also:
+  ///  * [RenderViewport.cacheExtent] for a description of a viewport's cache area.
+  final double cacheExtent;
+
   /// Asserts that this geometry is internally consistent.
   ///
   /// Does nothing if asserts are disabled. Always returns true.
@@ -595,10 +666,10 @@ class SliverGeometry extends Diagnosticable {
       void verify(bool check, String message) {
         if (check)
           return;
-        final StringBuffer information = new StringBuffer();
+        final StringBuffer information = StringBuffer();
         if (informationCollector != null)
           informationCollector(information);
-        throw new FlutterError('$runtimeType is not valid: $message\n$information');
+        throw FlutterError('$runtimeType is not valid: $message\n$information');
       }
       verify(scrollExtent != null, 'The "scrollExtent" is null.');
       verify(scrollExtent >= 0.0, 'The "scrollExtent" is negative.');
@@ -607,6 +678,7 @@ class SliverGeometry extends Diagnosticable {
       verify(paintOrigin != null, 'The "paintOrigin" is null.');
       verify(layoutExtent != null, 'The "layoutExtent" is null.');
       verify(layoutExtent >= 0.0, 'The "layoutExtent" is negative.');
+      verify(cacheExtent >= 0.0, 'The "cacheExtent" is negative.');
       if (layoutExtent > paintExtent) {
         verify(false,
           'The "layoutExtent" exceeds the "paintExtent".\n' +
@@ -637,24 +709,25 @@ class SliverGeometry extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DoubleProperty('scrollExtent', scrollExtent));
+    properties.add(DoubleProperty('scrollExtent', scrollExtent));
     if (paintExtent > 0.0) {
-      properties.add(new DoubleProperty('paintExtent', paintExtent, unit : visible ? null : ' but not painting'));
+      properties.add(DoubleProperty('paintExtent', paintExtent, unit : visible ? null : ' but not painting'));
     } else if (paintExtent == 0.0) {
       if (visible) {
-        properties.add(new DoubleProperty('paintExtent', paintExtent, unit: visible ? null : ' but visible'));
+        properties.add(DoubleProperty('paintExtent', paintExtent, unit: visible ? null : ' but visible'));
       }
-      properties.add(new FlagProperty('visible', value: visible, ifFalse: 'hidden'));
+      properties.add(FlagProperty('visible', value: visible, ifFalse: 'hidden'));
     } else {
       // Negative paintExtent!
-      properties.add(new DoubleProperty('paintExtent', paintExtent, tooltip: '!'));
+      properties.add(DoubleProperty('paintExtent', paintExtent, tooltip: '!'));
     }
-    properties.add(new DoubleProperty('paintOrigin', paintOrigin, defaultValue: 0.0));
-    properties.add(new DoubleProperty('layoutExtent', layoutExtent, defaultValue: paintExtent));
-    properties.add(new DoubleProperty('maxPaintExtent', maxPaintExtent));
-    properties.add(new DoubleProperty('hitTestExtent', hitTestExtent, defaultValue: paintExtent));
-    properties.add(new DiagnosticsProperty<bool>('hasVisualOverflow', hasVisualOverflow, defaultValue: false));
-    properties.add(new DoubleProperty('scrollOffsetCorrection', scrollOffsetCorrection, defaultValue: null));
+    properties.add(DoubleProperty('paintOrigin', paintOrigin, defaultValue: 0.0));
+    properties.add(DoubleProperty('layoutExtent', layoutExtent, defaultValue: paintExtent));
+    properties.add(DoubleProperty('maxPaintExtent', maxPaintExtent));
+    properties.add(DoubleProperty('hitTestExtent', hitTestExtent, defaultValue: paintExtent));
+    properties.add(DiagnosticsProperty<bool>('hasVisualOverflow', hasVisualOverflow, defaultValue: false));
+    properties.add(DoubleProperty('scrollOffsetCorrection', scrollOffsetCorrection, defaultValue: null));
+    properties.add(DoubleProperty('cacheExtent', cacheExtent, defaultValue: 0.0));
   }
 }
 
@@ -941,7 +1014,7 @@ abstract class RenderSliver extends RenderObject {
         contract = 'Because this RenderSliver has sizedByParent set to true, it must set its geometry in performResize().';
       else
         contract = 'Because this RenderSliver has sizedByParent set to false, it must set its geometry in performLayout().';
-      throw new FlutterError(
+      throw FlutterError(
         'RenderSliver geometry setter called incorrectly.\n'
         '$violation\n'
         '$hint\n'
@@ -961,13 +1034,13 @@ abstract class RenderSliver extends RenderObject {
     assert(constraints.axis != null);
     switch (constraints.axis) {
       case Axis.horizontal:
-        return new Rect.fromLTWH(
+        return Rect.fromLTWH(
           0.0, 0.0,
           geometry.paintExtent,
           constraints.crossAxisExtent,
         );
       case Axis.vertical:
-        return new Rect.fromLTWH(
+        return Rect.fromLTWH(
           0.0, 0.0,
           constraints.crossAxisExtent,
           geometry.paintExtent,
@@ -989,7 +1062,7 @@ abstract class RenderSliver extends RenderObject {
     ));
     assert(() {
       if (geometry.paintExtent > constraints.remainingPaintExtent) {
-        throw new FlutterError(
+        throw FlutterError(
           'SliverGeometry has a paintOffset that exceeds the remainingPaintExtent from the constraints.\n'
           'The render object whose geometry violates the constraints is the following:\n'
           '  ${toStringShallow(joiner: '\n  ')}\n' +
@@ -1063,7 +1136,7 @@ abstract class RenderSliver extends RenderObject {
         crossAxisPosition >= 0.0 && crossAxisPosition < constraints.crossAxisExtent) {
       if (hitTestChildren(result, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition) ||
           hitTestSelf(mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition)) {
-        result.add(new SliverHitTestEntry(
+        result.add(SliverHitTestEntry(
           this,
           mainAxisPosition: mainAxisPosition,
           crossAxisPosition: crossAxisPosition
@@ -1123,6 +1196,22 @@ abstract class RenderSliver extends RenderObject {
     return (to.clamp(a, b) - from.clamp(a, b)).clamp(0.0, constraints.remainingPaintExtent);
   }
 
+  /// Computes the portion of the region from `from` to `to` that is within
+  /// the cache extent of the viewport, assuming that only the region from the
+  /// [SliverConstraints.cacheOrigin] that is
+  /// [SliverConstraints.remainingCacheExtent] high is visible, and that
+  /// the relationship between scroll offsets and paint offsets is linear.
+  ///
+  /// This method is not useful if there is not a 1:1 relationship between
+  /// consumed scroll offset and consumed cache extent.
+  double calculateCacheOffset(SliverConstraints constraints, { @required double from, @required double to }) {
+    assert(from <= to);
+    final double a = constraints.scrollOffset + constraints.cacheOrigin;
+    final double b = constraints.scrollOffset + constraints.remainingCacheExtent;
+    // the clamp on the next line is to avoid floating point rounding errors
+    return (to.clamp(a, b) - from.clamp(a, b)).clamp(0.0, constraints.remainingCacheExtent);
+  }
+
   /// Returns the distance from the leading _visible_ edge of the sliver to the
   /// side of the given child closest to that edge.
   ///
@@ -1152,7 +1241,7 @@ abstract class RenderSliver extends RenderObject {
   @protected
   double childMainAxisPosition(covariant RenderObject child) {
     assert(() {
-      throw new FlutterError('$runtimeType does not implement childPosition.');
+      throw FlutterError('$runtimeType does not implement childPosition.');
     }());
     return 0.0;
   }
@@ -1189,7 +1278,7 @@ abstract class RenderSliver extends RenderObject {
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(() {
-      throw new FlutterError('$runtimeType does not implement applyPaintTransform.');
+      throw FlutterError('$runtimeType does not implement applyPaintTransform.');
     }());
   }
 
@@ -1204,13 +1293,13 @@ abstract class RenderSliver extends RenderObject {
     assert(!debugNeedsLayout);
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
       case AxisDirection.up:
-        return new Size(constraints.crossAxisExtent, -geometry.paintExtent);
+        return Size(constraints.crossAxisExtent, -geometry.paintExtent);
       case AxisDirection.right:
-        return new Size(geometry.paintExtent, constraints.crossAxisExtent);
+        return Size(geometry.paintExtent, constraints.crossAxisExtent);
       case AxisDirection.down:
-        return new Size(constraints.crossAxisExtent, geometry.paintExtent);
+        return Size(constraints.crossAxisExtent, geometry.paintExtent);
       case AxisDirection.left:
-        return new Size(-geometry.paintExtent, constraints.crossAxisExtent);
+        return Size(-geometry.paintExtent, constraints.crossAxisExtent);
     }
     return null;
   }
@@ -1240,7 +1329,7 @@ abstract class RenderSliver extends RenderObject {
         dy2 = -dy2;
       }
       canvas.drawPath(
-        new Path()
+        Path()
           ..moveTo(p0.dx, p0.dy)
           ..lineTo(p1.dx, p1.dy)
           ..moveTo(p1.dx - dx1, p1.dy - dy1)
@@ -1257,11 +1346,11 @@ abstract class RenderSliver extends RenderObject {
     assert(() {
       if (debugPaintSizeEnabled) {
         final double strokeWidth = math.min(4.0, geometry.paintExtent / 30.0);
-        final Paint paint = new Paint()
+        final Paint paint = Paint()
           ..color = const Color(0xFF33CC33)
           ..strokeWidth = strokeWidth
           ..style = PaintingStyle.stroke
-          ..maskFilter = new MaskFilter.blur(BlurStyle.solid, strokeWidth);
+          ..maskFilter = MaskFilter.blur(BlurStyle.solid, strokeWidth);
         final double arrowExtent = geometry.paintExtent;
         final double padding = math.max(2.0, strokeWidth);
         final Canvas canvas = context.canvas;
@@ -1326,7 +1415,7 @@ abstract class RenderSliver extends RenderObject {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<SliverGeometry>('geometry', geometry));
+    properties.add(DiagnosticsProperty<SliverGeometry>('geometry', geometry));
   }
 }
 
@@ -1379,11 +1468,11 @@ abstract class RenderSliverHelpers implements RenderSliver {
       case Axis.horizontal:
         if (!rightWayUp)
           absolutePosition = child.size.width - absolutePosition;
-        return child.hitTest(result, position: new Offset(absolutePosition, absoluteCrossAxisPosition));
+        return child.hitTest(result, position: Offset(absolutePosition, absoluteCrossAxisPosition));
       case Axis.vertical:
         if (!rightWayUp)
           absolutePosition = child.size.height - absolutePosition;
-        return child.hitTest(result, position: new Offset(absoluteCrossAxisPosition, absolutePosition));
+        return child.hitTest(result, position: Offset(absoluteCrossAxisPosition, absolutePosition));
     }
     return false;
   }
@@ -1441,7 +1530,7 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObje
   @override
   void setupParentData(RenderObject child) {
     if (child.parentData is! SliverPhysicalParentData)
-      child.parentData = new SliverPhysicalParentData();
+      child.parentData = SliverPhysicalParentData();
   }
 
   /// Sets the [SliverPhysicalParentData.paintOffset] for the given child
@@ -1454,16 +1543,16 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObje
     assert(constraints.growthDirection != null);
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
       case AxisDirection.up:
-        childParentData.paintOffset = new Offset(0.0, -(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset)));
+        childParentData.paintOffset = Offset(0.0, -(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset)));
         break;
       case AxisDirection.right:
-        childParentData.paintOffset = new Offset(-constraints.scrollOffset, 0.0);
+        childParentData.paintOffset = Offset(-constraints.scrollOffset, 0.0);
         break;
       case AxisDirection.down:
-        childParentData.paintOffset = new Offset(0.0, -constraints.scrollOffset);
+        childParentData.paintOffset = Offset(0.0, -constraints.scrollOffset);
         break;
       case AxisDirection.left:
-        childParentData.paintOffset = new Offset(-(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset)), 0.0);
+        childParentData.paintOffset = Offset(-(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset)), 0.0);
         break;
     }
     assert(childParentData.paintOffset != null);
@@ -1537,11 +1626,14 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
     }
     assert(childExtent != null);
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: childExtent);
+    final double cacheExtent = calculateCacheOffset(constraints, from: 0.0, to: childExtent);
+
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
-    geometry = new SliverGeometry(
+    geometry = SliverGeometry(
       scrollExtent: childExtent,
       paintExtent: paintedChildSize,
+      cacheExtent: cacheExtent,
       maxPaintExtent: childExtent,
       hitTestExtent: paintedChildSize,
       hasVisualOverflow: childExtent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,

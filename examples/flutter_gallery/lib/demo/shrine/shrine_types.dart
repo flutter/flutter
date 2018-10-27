@@ -70,7 +70,7 @@ class Product {
 }
 
 class Order {
-  Order({ @required this.product, this.quantity: 1, this.inCart: false })
+  Order({ @required this.product, this.quantity = 1, this.inCart = false })
     : assert(product != null),
       assert(quantity != null && quantity >= 0),
       assert(inCart != null);
@@ -80,7 +80,7 @@ class Order {
   final bool inCart;
 
   Order copyWith({ Product product, int quantity, bool inCart }) {
-    return new Order(
+    return Order(
       product: product ?? this.product,
       quantity: quantity ?? this.quantity,
       inCart: inCart ?? this.inCart

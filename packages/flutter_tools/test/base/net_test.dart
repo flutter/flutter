@@ -7,18 +7,18 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:quiver/testing/async.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
   testUsingContext('retry from 500', () async {
     String error;
-    new FakeAsync().run((FakeAsync time) {
+    FakeAsync().run((FakeAsync time) {
       fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
         error = 'test completed unexpectedly';
-      }, onError: (dynamic error) {
-        error = 'test failed unexpectedly';
+      }, onError: (dynamic exception) {
+        error = 'test failed unexpectedly: $exception';
       });
       expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 10000));
@@ -32,16 +32,16 @@ void main() {
     expect(testLogger.errorText, isEmpty);
     expect(error, isNull);
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => new MockHttpClient(500),
+    HttpClientFactory: () => () => MockHttpClient(500),
   });
 
   testUsingContext('retry from network error', () async {
     String error;
-    new FakeAsync().run((FakeAsync time) {
+    FakeAsync().run((FakeAsync time) {
       fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
         error = 'test completed unexpectedly';
-      }, onError: (dynamic error) {
-        error = 'test failed unexpectedly';
+      }, onError: (dynamic exception) {
+        error = 'test failed unexpectedly: $exception';
       });
       expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 10000));
@@ -55,8 +55,70 @@ void main() {
     expect(testLogger.errorText, isEmpty);
     expect(error, isNull);
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => new MockHttpClient(200),
+    HttpClientFactory: () => () => MockHttpClient(200),
   });
+
+  testUsingContext('retry from SocketException', () async {
+    String error;
+    FakeAsync().run((FakeAsync time) {
+      fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic exception) {
+        error = 'test failed unexpectedly: $exception';
+      });
+      expect(testLogger.statusText, '');
+      time.elapse(const Duration(milliseconds: 10000));
+      expect(testLogger.statusText,
+        'Download failed -- attempting retry 1 in 1 second...\n'
+        'Download failed -- attempting retry 2 in 2 seconds...\n'
+        'Download failed -- attempting retry 3 in 4 seconds...\n'
+        'Download failed -- attempting retry 4 in 8 seconds...\n'
+      );
+    });
+    expect(testLogger.errorText, isEmpty);
+    expect(error, isNull);
+    expect(testLogger.traceText, contains('Download error: SocketException'));
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () => () => MockHttpClientThrowing(
+      const io.SocketException('test exception handling'),
+    ),
+  });
+
+  testUsingContext('no retry from HandshakeException', () async {
+    String error;
+    FakeAsync().run((FakeAsync time) {
+      fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic exception) {
+        error = 'test failed: $exception';
+      });
+      expect(testLogger.statusText, '');
+      time.elapse(const Duration(milliseconds: 10000));
+      expect(testLogger.statusText, '');
+    });
+    expect(error, startsWith('test failed'));
+    expect(testLogger.traceText, contains('HandshakeException'));
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () => () => MockHttpClientThrowing(
+      const io.HandshakeException('test exception handling'),
+    ),
+  });
+}
+
+class MockHttpClientThrowing implements io.HttpClient {
+  MockHttpClientThrowing(this.exception);
+
+  final Exception exception;
+
+  @override
+  Future<io.HttpClientRequest> getUrl(Uri url) async {
+    throw exception;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw 'io.HttpClient - $invocation';
+  }
 }
 
 class MockHttpClient implements io.HttpClient {
@@ -66,7 +128,7 @@ class MockHttpClient implements io.HttpClient {
 
   @override
   Future<io.HttpClientRequest> getUrl(Uri url) async {
-    return new MockHttpClientRequest(statusCode);
+    return MockHttpClientRequest(statusCode);
   }
 
   @override
@@ -82,7 +144,7 @@ class MockHttpClientRequest implements io.HttpClientRequest {
 
   @override
   Future<io.HttpClientResponse> close() async {
-    return new MockHttpClientResponse(statusCode);
+    return MockHttpClientResponse(statusCode);
   }
 
   @override
@@ -104,7 +166,7 @@ class MockHttpClientResponse extends Stream<List<int>> implements io.HttpClientR
   StreamSubscription<List<int>> listen(void onData(List<int> event), {
     Function onError, void onDone(), bool cancelOnError
   }) {
-    return new Stream<List<int>>.fromFuture(new Future<List<int>>.error(const io.SocketException('test')))
+    return Stream<List<int>>.fromFuture(Future<List<int>>.error(const io.SocketException('test')))
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 

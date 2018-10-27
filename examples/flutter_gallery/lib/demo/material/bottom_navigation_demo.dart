@@ -4,28 +4,31 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class NavigationIconView {
   NavigationIconView({
     Widget icon,
+    Widget activeIcon,
     String title,
     Color color,
     TickerProvider vsync,
   }) : _icon = icon,
        _color = color,
        _title = title,
-       item = new BottomNavigationBarItem(
+       item = BottomNavigationBarItem(
          icon: icon,
-         title: new Text(title),
+         activeIcon: activeIcon,
+         title: Text(title),
          backgroundColor: color,
        ),
-       controller = new AnimationController(
+       controller = AnimationController(
          duration: kThemeAnimationDuration,
          vsync: vsync,
        ) {
-    _animation = new CurvedAnimation(
-      parent: controller,
+    _animation = controller.drive(CurveTween(
       curve: const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
-    );
+    ));
   }
 
   final Widget _icon;
@@ -33,7 +36,7 @@ class NavigationIconView {
   final String _title;
   final BottomNavigationBarItem item;
   final AnimationController controller;
-  CurvedAnimation _animation;
+  Animation<double> _animation;
 
   FadeTransition transition(BottomNavigationBarType type, BuildContext context) {
     Color iconColor;
@@ -46,19 +49,21 @@ class NavigationIconView {
           : themeData.accentColor;
     }
 
-    return new FadeTransition(
+    return FadeTransition(
       opacity: _animation,
-      child: new SlideTransition(
-        position: new Tween<Offset>(
-          begin: const Offset(0.0, 0.02), // Slightly down.
-          end: Offset.zero,
-        ).animate(_animation),
-        child: new IconTheme(
-          data: new IconThemeData(
+      child: SlideTransition(
+        position: _animation.drive(
+          Tween<Offset>(
+            begin: const Offset(0.0, 0.02), // Slightly down.
+            end: Offset.zero,
+          ),
+        ),
+        child: IconTheme(
+          data: IconThemeData(
             color: iconColor,
             size: 120.0,
           ),
-          child: new Semantics(
+          child: Semantics(
             label: 'Placeholder for $_title tab',
             child: _icon,
           ),
@@ -72,7 +77,7 @@ class CustomIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
-    return new Container(
+    return Container(
       margin: const EdgeInsets.all(4.0),
       width: iconTheme.size - 8.0,
       height: iconTheme.size - 8.0,
@@ -81,11 +86,26 @@ class CustomIcon extends StatelessWidget {
   }
 }
 
+class CustomInactiveIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final IconThemeData iconTheme = IconTheme.of(context);
+    return Container(
+      margin: const EdgeInsets.all(4.0),
+      width: iconTheme.size - 8.0,
+      height: iconTheme.size - 8.0,
+      decoration: BoxDecoration(
+        border: Border.all(color: iconTheme.color, width: 2.0),
+      )
+    );
+  }
+}
+
 class BottomNavigationDemo extends StatefulWidget {
   static const String routeName = '/material/bottom_navigation';
 
   @override
-  _BottomNavigationDemoState createState() => new _BottomNavigationDemoState();
+  _BottomNavigationDemoState createState() => _BottomNavigationDemoState();
 }
 
 class _BottomNavigationDemoState extends State<BottomNavigationDemo>
@@ -98,31 +118,34 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   void initState() {
     super.initState();
     _navigationViews = <NavigationIconView>[
-      new NavigationIconView(
+      NavigationIconView(
         icon: const Icon(Icons.access_alarm),
         title: 'Alarm',
         color: Colors.deepPurple,
         vsync: this,
       ),
-      new NavigationIconView(
-        icon: new CustomIcon(),
+      NavigationIconView(
+        activeIcon: CustomIcon(),
+        icon: CustomInactiveIcon(),
         title: 'Box',
         color: Colors.deepOrange,
         vsync: this,
       ),
-      new NavigationIconView(
-        icon: const Icon(Icons.cloud),
+      NavigationIconView(
+        activeIcon: const Icon(Icons.cloud),
+        icon: const Icon(Icons.cloud_queue),
         title: 'Cloud',
         color: Colors.teal,
         vsync: this,
       ),
-      new NavigationIconView(
-        icon: const Icon(Icons.favorite),
+      NavigationIconView(
+        activeIcon: const Icon(Icons.favorite),
+        icon: const Icon(Icons.favorite_border),
         title: 'Favorites',
         color: Colors.indigo,
         vsync: this,
       ),
-      new NavigationIconView(
+      NavigationIconView(
         icon: const Icon(Icons.event_available),
         title: 'Event',
         color: Colors.pink,
@@ -164,14 +187,14 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
       return aValue.compareTo(bValue);
     });
 
-    return new Stack(children: transitions);
+    return Stack(children: transitions);
   }
 
   @override
   Widget build(BuildContext context) {
-    final BottomNavigationBar botNavBar = new BottomNavigationBar(
+    final BottomNavigationBar botNavBar = BottomNavigationBar(
       items: _navigationViews
-          .map((NavigationIconView navigationView) => navigationView.item)
+          .map<BottomNavigationBarItem>((NavigationIconView navigationView) => navigationView.item)
           .toList(),
       currentIndex: _currentIndex,
       type: _type,
@@ -184,11 +207,12 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
       },
     );
 
-    return new Scaffold(
-      appBar: new AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('Bottom navigation'),
         actions: <Widget>[
-          new PopupMenuButton<BottomNavigationBarType>(
+          MaterialDemoDocumentationButton(BottomNavigationDemo.routeName),
+          PopupMenuButton<BottomNavigationBarType>(
             onSelected: (BottomNavigationBarType value) {
               setState(() {
                 _type = value;
@@ -197,17 +221,17 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
             itemBuilder: (BuildContext context) => <PopupMenuItem<BottomNavigationBarType>>[
               const PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.fixed,
-                child: const Text('Fixed'),
+                child: Text('Fixed'),
               ),
               const PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.shifting,
-                child: const Text('Shifting'),
+                child: Text('Shifting'),
               )
             ],
           )
         ],
       ),
-      body: new Center(
+      body: Center(
         child: _buildTransitionsStack()
       ),
       bottomNavigationBar: botNavBar,

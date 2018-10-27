@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'framework.dart';
 
 /// Signature for [Notification] listeners.
@@ -12,7 +10,7 @@ import 'framework.dart';
 /// notification to continue to be dispatched to further ancestors.
 ///
 /// Used by [NotificationListener.onNotification].
-typedef bool NotificationListenerCallback<T extends Notification>(T notification);
+typedef NotificationListenerCallback<T extends Notification> = bool Function(T notification);
 
 /// A notification that can bubble up the widget tree.
 ///

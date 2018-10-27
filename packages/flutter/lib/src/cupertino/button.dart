@@ -2,21 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
-const Color _kDisabledBackground = const Color(0xFFA9A9A9);
-const Color _kDisabledForeground = const Color(0xFFC4C4C4);
+const Color _kDisabledBackground = Color(0xFFA9A9A9);
+const Color _kDisabledForeground = Color(0xFFC4C4C4);
 
-const TextStyle _kButtonTextStyle = const TextStyle(
+const TextStyle _kButtonTextStyle = TextStyle(
   fontFamily: '.SF UI Text',
   inherit: false,
-  fontSize: 15.0,
-  fontWeight: FontWeight.normal,
+  fontSize: 17.5,
+  letterSpacing: -0.24,
+  fontWeight: FontWeight.w400,
   color: CupertinoColors.activeBlue,
   textBaseline: TextBaseline.alphabetic,
 );
@@ -29,9 +28,9 @@ final TextStyle _kBackgroundButtonTextStyle = _kButtonTextStyle.copyWith(
   color: CupertinoColors.white,
 );
 
-const EdgeInsets _kButtonPadding = const EdgeInsets.all(16.0);
-const EdgeInsets _kBackgroundButtonPadding = const EdgeInsets.symmetric(
-  vertical: 16.0,
+const EdgeInsets _kButtonPadding = EdgeInsets.all(16.0);
+const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
+  vertical: 14.0,
   horizontal: 64.0,
 );
 
@@ -49,9 +48,10 @@ class CupertinoButton extends StatefulWidget {
     @required this.child,
     this.padding,
     this.color,
-    this.minSize: 44.0,
-    this.pressedOpacity: 0.1,
-    this.borderRadius: const BorderRadius.all(const Radius.circular(8.0)),
+    this.disabledColor,
+    this.minSize = 44.0,
+    this.pressedOpacity = 0.1,
+    this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     @required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0));
 
@@ -69,6 +69,14 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// Defaults to null which produces a button with no background or border.
   final Color color;
+
+  /// The color of the button's background when the button is disabled.
+  ///
+  /// Ignored if the [CupertinoButton] doesn't also have a [color].
+  ///
+  /// Defaults to a standard iOS disabled color when [color] is specified and
+  /// [disabledColor] is null.
+  final Color disabledColor;
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
@@ -102,39 +110,46 @@ class CupertinoButton extends StatefulWidget {
   bool get enabled => onPressed != null;
 
   @override
-  _CupertinoButtonState createState() => new _CupertinoButtonState();
+  _CupertinoButtonState createState() => _CupertinoButtonState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
+    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }
 }
 
 class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProviderStateMixin {
   // Eyeballed values. Feel free to tweak.
-  static const Duration kFadeOutDuration = const Duration(milliseconds: 10);
-  static const Duration kFadeInDuration = const Duration(milliseconds: 100);
-  Tween<double> _opacityTween;
+  static const Duration kFadeOutDuration = Duration(milliseconds: 10);
+  static const Duration kFadeInDuration = Duration(milliseconds: 100);
+  final Tween<double> _opacityTween = Tween<double>(begin: 1.0);
 
   AnimationController _animationController;
-
-  void _setTween() {
-    _opacityTween = new Tween<double>(
-      begin: 1.0,
-      end: widget.pressedOpacity ?? 1.0,
-    );
-  }
+  Animation<double> _opacityAnimation;
 
   @override
   void initState() {
     super.initState();
-    _animationController = new AnimationController(
+    _animationController = AnimationController(
       duration: const Duration(milliseconds: 200),
       value: 0.0,
       vsync: this,
     );
+    _opacityAnimation = _animationController
+      .drive(CurveTween(curve: Curves.decelerate))
+      .drive(_opacityTween);
     _setTween();
+  }
+
+  @override
+  void didUpdateWidget(CupertinoButton old) {
+    super.didUpdateWidget(old);
+    _setTween();
+  }
+
+  void _setTween() {
+    _opacityTween.end = widget.pressedOpacity ?? 1.0;
   }
 
   @override
@@ -142,12 +157,6 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     _animationController.dispose();
     _animationController = null;
     super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(CupertinoButton old) {
-    super.didUpdateWidget(old);
-    _setTween();
   }
 
   bool _buttonHeldDown = false;
@@ -177,10 +186,10 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     if (_animationController.isAnimating)
       return;
     final bool wasHeldDown = _buttonHeldDown;
-    final Future<Null> ticker = _buttonHeldDown
+    final TickerFuture ticker = _buttonHeldDown
         ? _animationController.animateTo(1.0, duration: kFadeOutDuration)
         : _animationController.animateTo(0.0, duration: kFadeInDuration);
-    ticker.then((Null value) {
+    ticker.then<void>((void value) {
       if (mounted && wasHeldDown != _buttonHeldDown)
         _animate();
     });
@@ -191,41 +200,38 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final bool enabled = widget.enabled;
     final Color backgroundColor = widget.color;
 
-    return new GestureDetector(
+    return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapDown: enabled ? _handleTapDown : null,
       onTapUp: enabled ? _handleTapUp : null,
       onTapCancel: enabled ? _handleTapCancel : null,
       onTap: widget.onPressed,
-      child: new Semantics(
+      child: Semantics(
         button: true,
-        child: new ConstrainedBox(
+        child: ConstrainedBox(
           constraints: widget.minSize == null
             ? const BoxConstraints()
-            : new BoxConstraints(
+            : BoxConstraints(
               minWidth: widget.minSize,
               minHeight: widget.minSize,
             ),
-          child: new FadeTransition(
-            opacity: _opacityTween.animate(new CurvedAnimation(
-              parent: _animationController,
-              curve: Curves.decelerate,
-            )),
-            child: new DecoratedBox(
-              decoration: new BoxDecoration(
+          child: FadeTransition(
+            opacity: _opacityAnimation,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
                 borderRadius: widget.borderRadius,
                 color: backgroundColor != null && !enabled
-                  ? _kDisabledBackground
+                  ? widget.disabledColor ?? _kDisabledBackground
                   : backgroundColor,
               ),
-              child: new Padding(
+              child: Padding(
                 padding: widget.padding ?? (backgroundColor != null
                   ? _kBackgroundButtonPadding
                   : _kButtonPadding),
-                child: new Center(
+                child: Center(
                   widthFactor: 1.0,
                   heightFactor: 1.0,
-                  child: new DefaultTextStyle(
+                  child: DefaultTextStyle(
                     style: backgroundColor != null
                       ? _kBackgroundButtonTextStyle
                       : enabled

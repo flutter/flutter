@@ -68,7 +68,8 @@ contain translations for the same set of resource IDs as
 For each resource ID defined for English in material_en.arb, there is
 an additional resource with an '@' prefix. These '@' resources are not
 used by the material library at run time, they just exist to inform
-translators about how the value will be used.
+translators about how the value will be used, and to inform the code
+generator about what code to write.
 
 ```dart
 "cancelButtonLabel": "CANCEL",
@@ -130,16 +131,18 @@ help define an app's text theme and time picker layout respectively.
 
 The value of `timeOfDayFormat` defines how a time picker displayed by
 [showTimePicker()](https://docs.flutter.io/flutter/material/showTimePicker.html)
-formats and lays out its time controls. The value of `timeOfDayFormat` must be
-a string that matches one of the formats defined by
-https://docs.flutter.io/flutter/material/TimeOfDayFormat-class.html.
+formats and lays out its time controls. The value of `timeOfDayFormat`
+must be a string that matches one of the formats defined by
+<https://docs.flutter.io/flutter/material/TimeOfDayFormat-class.html>.
+It is converted to an enum value because the `material_en.arb` file
+has this value labeled as `"x-flutter-type": "icuShortTimePattern"`.
 
 The value of `scriptCategory` is based on the
-[Language categories reference](https://material.io/guidelines/style/typography.html#typography-language-categories-reference)
+[Language categories reference](https://material.io/design/typography/language-support.html#language-categories-reference)
 section in the Material spec. The `scriptCategory` value is used when looking up
 the `TextTheme`, see the
-[MaterialTextGeometry](https://docs.flutter.io/flutter/material/MaterialTextGeometry/forScriptCategory.html)
-class.
+[MaterialTextGeometry](https://docs.flutter.io/flutter/material/MaterialTextGeometry/localizedFor.html)
+method.
 
 
 ### Generated file localizations.dart: all of the localizations as a Map

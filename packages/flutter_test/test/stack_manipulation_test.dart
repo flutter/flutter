@@ -10,7 +10,7 @@ void main() {
       expect(false, isTrue);
       throw 'unexpectedly did not throw';
     } catch (e, stack) {
-      final StringBuffer information = new StringBuffer();
+      final StringBuffer information = StringBuffer();
       expect(reportExpectCall(stack, information), 4);
       final List<String> lines = information.toString().split('\n');
       expect(lines[0], 'This was caught by the test expectation on the following line:');
@@ -20,7 +20,7 @@ void main() {
     try {
       throw null;
     } catch (e, stack) {
-      final StringBuffer information = new StringBuffer();
+      final StringBuffer information = StringBuffer();
       expect(reportExpectCall(stack, information), 0);
       expect(information.toString(), '');
     }

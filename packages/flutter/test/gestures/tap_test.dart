@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:test/test.dart';
 
+import '../flutter_test_alternative.dart';
 import 'gesture_tester.dart';
 
 class TestGestureArenaMember extends GestureArenaMember {
@@ -20,61 +20,61 @@ void main() {
   setUp(ensureGestureBinding);
 
   // Down/up pair 1: normal tap sequence
-  const PointerDownEvent down1 = const PointerDownEvent(
+  const PointerDownEvent down1 = PointerDownEvent(
     pointer: 1,
-    position: const Offset(10.0, 10.0)
+    position: Offset(10.0, 10.0)
   );
 
-  const PointerUpEvent up1 = const PointerUpEvent(
+  const PointerUpEvent up1 = PointerUpEvent(
     pointer: 1,
-    position: const Offset(11.0, 9.0)
+    position: Offset(11.0, 9.0)
   );
 
   // Down/up pair 2: normal tap sequence far away from pair 1
-  const PointerDownEvent down2 = const PointerDownEvent(
+  const PointerDownEvent down2 = PointerDownEvent(
     pointer: 2,
-    position: const Offset(30.0, 30.0)
+    position: Offset(30.0, 30.0)
   );
 
-  const PointerUpEvent up2 = const PointerUpEvent(
+  const PointerUpEvent up2 = PointerUpEvent(
     pointer: 2,
-    position: const Offset(31.0, 29.0)
+    position: Offset(31.0, 29.0)
   );
 
   // Down/move/up sequence 3: intervening motion, more than kTouchSlop. (~21px)
-  const PointerDownEvent down3 = const PointerDownEvent(
+  const PointerDownEvent down3 = PointerDownEvent(
     pointer: 3,
-    position: const Offset(10.0, 10.0)
+    position: Offset(10.0, 10.0)
   );
 
-  const PointerMoveEvent move3 = const PointerMoveEvent(
+  const PointerMoveEvent move3 = PointerMoveEvent(
     pointer: 3,
-    position: const Offset(25.0, 25.0)
+    position: Offset(25.0, 25.0)
   );
 
-  const PointerUpEvent up3 = const PointerUpEvent(
+  const PointerUpEvent up3 = PointerUpEvent(
     pointer: 3,
-    position: const Offset(25.0, 25.0)
+    position: Offset(25.0, 25.0)
   );
 
   // Down/move/up sequence 4: intervening motion, less than kTouchSlop. (~17px)
-  const PointerDownEvent down4 = const PointerDownEvent(
+  const PointerDownEvent down4 = PointerDownEvent(
     pointer: 4,
-    position: const Offset(10.0, 10.0)
+    position: Offset(10.0, 10.0)
   );
 
-  const PointerMoveEvent move4 = const PointerMoveEvent(
+  const PointerMoveEvent move4 = PointerMoveEvent(
     pointer: 4,
-    position: const Offset(22.0, 22.0)
+    position: Offset(22.0, 22.0)
   );
 
-  const PointerUpEvent up4 = const PointerUpEvent(
+  const PointerUpEvent up4 = PointerUpEvent(
     pointer: 4,
-    position: const Offset(22.0, 22.0)
+    position: Offset(22.0, 22.0)
   );
 
   testGesture('Should recognize tap', (GestureTester tester) {
-    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -96,7 +96,7 @@ void main() {
   });
 
   testGesture('No duplicate tap events', (GestureTester tester) {
-    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
 
     int tapsRecognized = 0;
     tap.onTap = () {
@@ -129,7 +129,7 @@ void main() {
   });
 
   testGesture('Should not recognize two overlapping taps', (GestureTester tester) {
-    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
 
     int tapsRecognized = 0;
     tap.onTap = () {
@@ -163,7 +163,7 @@ void main() {
   });
 
   testGesture('Distance cancels tap', (GestureTester tester) {
-    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -196,7 +196,7 @@ void main() {
   });
 
   testGesture('Short distance does not cancel tap', (GestureTester tester) {
-    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -229,7 +229,7 @@ void main() {
   });
 
   testGesture('Timeout does not cancel tap', (GestureTester tester) {
-    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -253,7 +253,7 @@ void main() {
   });
 
   testGesture('Should yield to other arena members', (GestureTester tester) {
-    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -261,7 +261,7 @@ void main() {
     };
 
     tap.addPointer(down1);
-    final TestGestureArenaMember member = new TestGestureArenaMember();
+    final TestGestureArenaMember member = TestGestureArenaMember();
     final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
     GestureBinding.instance.gestureArena.hold(1);
     tester.closeArena(1);
@@ -281,7 +281,7 @@ void main() {
   });
 
   testGesture('Should trigger on release of held arena', (GestureTester tester) {
-    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -289,7 +289,7 @@ void main() {
     };
 
     tap.addPointer(down1);
-    final TestGestureArenaMember member = new TestGestureArenaMember();
+    final TestGestureArenaMember member = TestGestureArenaMember();
     final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
     GestureBinding.instance.gestureArena.hold(1);
     tester.closeArena(1);
@@ -310,10 +310,10 @@ void main() {
   });
 
   testGesture('Should log exceptions from callbacks', (GestureTester tester) {
-    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
 
     tap.onTap = () {
-      throw new Exception(test);
+      throw Exception(test);
     };
 
     final FlutterExceptionHandler previousErrorHandler = FlutterError.onError;
@@ -335,8 +335,8 @@ void main() {
   });
 
   testGesture('No duplicate tap events', (GestureTester tester) {
-    final TapGestureRecognizer tapA = new TapGestureRecognizer();
-    final TapGestureRecognizer tapB = new TapGestureRecognizer();
+    final TapGestureRecognizer tapA = TapGestureRecognizer();
+    final TapGestureRecognizer tapB = TapGestureRecognizer();
 
     final List<String> log = <String>[];
     tapA.onTapDown = (TapDownDetails details) { log.add('tapA onTapDown'); };

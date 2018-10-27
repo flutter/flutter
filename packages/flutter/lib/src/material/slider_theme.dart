@@ -53,7 +53,7 @@ class SliderTheme extends InheritedWidget {
   /// ```dart
   /// class Launch extends StatefulWidget {
   ///   @override
-  ///   State createState() => new LaunchState();
+  ///   State createState() => LaunchState();
   /// }
   ///
   /// class LaunchState extends State<Launch> {
@@ -61,9 +61,9 @@ class SliderTheme extends InheritedWidget {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new SliderTheme(
-  ///       data: SliderTheme.of(context).copyWith(activeRailColor: const Color(0xff804040)),
-  ///       child: new Slider(
+  ///     return SliderTheme(
+  ///       data: SliderTheme.of(context).copyWith(activeTrackColor: const Color(0xff804040)),
+  ///       child: Slider(
   ///         onChanged: (double value) { setState(() { _rocketThrust = value; }); },
   ///         value: _rocketThrust,
   ///       ),
@@ -121,7 +121,7 @@ enum ShowValueIndicator {
 ///
 ///  * The "thumb", which is a shape that slides horizontally when the user
 ///    drags it.
-///  * The "rail", which is the line that the slider thumb slides along.
+///  * The "track", which is the line that the slider thumb slides along.
 ///  * The "value indicator", which is a shape that pops up when the user
 ///    is dragging the thumb to indicate the value being selected.
 ///  * The "active" side of the slider is the side between the thumb and the
@@ -160,7 +160,7 @@ class SliderThemeData extends Diagnosticable {
   /// ```dart
   /// class Blissful extends StatefulWidget {
   ///   @override
-  ///   State createState() => new BlissfulState();
+  ///   State createState() => BlissfulState();
   /// }
   ///
   /// class BlissfulState extends State<Blissful> {
@@ -168,9 +168,9 @@ class SliderThemeData extends Diagnosticable {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new SliderTheme(
-  ///       data: SliderTheme.of(context).copyWith(activeRailColor: const Color(0xff404080)),
-  ///       child: new Slider(
+  ///     return SliderTheme(
+  ///       data: SliderTheme.of(context).copyWith(activeTrackColor: const Color(0xff404080)),
+  ///       child: Slider(
   ///         onChanged: (double value) { setState(() { _bliss = value; }); },
   ///         value: _bliss,
   ///       ),
@@ -179,10 +179,10 @@ class SliderThemeData extends Diagnosticable {
   /// }
   /// ```
   const SliderThemeData({
-    @required this.activeRailColor,
-    @required this.inactiveRailColor,
-    @required this.disabledActiveRailColor,
-    @required this.disabledInactiveRailColor,
+    @required this.activeTrackColor,
+    @required this.inactiveTrackColor,
+    @required this.disabledActiveTrackColor,
+    @required this.disabledInactiveTrackColor,
     @required this.activeTickMarkColor,
     @required this.inactiveTickMarkColor,
     @required this.disabledActiveTickMarkColor,
@@ -195,10 +195,10 @@ class SliderThemeData extends Diagnosticable {
     @required this.valueIndicatorShape,
     @required this.showValueIndicator,
     @required this.valueIndicatorTextStyle,
-  })  : assert(activeRailColor != null),
-        assert(inactiveRailColor != null),
-        assert(disabledActiveRailColor != null),
-        assert(disabledInactiveRailColor != null),
+  })  : assert(activeTrackColor != null),
+        assert(inactiveTrackColor != null),
+        assert(disabledActiveTrackColor != null),
+        assert(disabledInactiveTrackColor != null),
         assert(activeTickMarkColor != null),
         assert(inactiveTickMarkColor != null),
         assert(disabledActiveTickMarkColor != null),
@@ -234,10 +234,10 @@ class SliderThemeData extends Diagnosticable {
 
     // These are Material Design defaults, and are used to derive
     // component Colors (with opacity) from base colors.
-    const int activeRailAlpha = 0xff;
-    const int inactiveRailAlpha = 0x3d; // 24% opacity
-    const int disabledActiveRailAlpha = 0x52; // 32% opacity
-    const int disabledInactiveRailAlpha = 0x1f; // 12% opacity
+    const int activeTrackAlpha = 0xff;
+    const int inactiveTrackAlpha = 0x3d; // 24% opacity
+    const int disabledActiveTrackAlpha = 0x52; // 32% opacity
+    const int disabledInactiveTrackAlpha = 0x1f; // 12% opacity
     const int activeTickMarkAlpha = 0x8a; // 54% opacity
     const int inactiveTickMarkAlpha = 0x8a; // 54% opacity
     const int disabledActiveTickMarkAlpha = 0x1f; // 12% opacity
@@ -253,11 +253,11 @@ class SliderThemeData extends Diagnosticable {
     // implement this. Choosing the "light" version for now.
     const int overlayLightAlpha = 0x29; // 16% opacity
 
-    return new SliderThemeData(
-      activeRailColor: primaryColor.withAlpha(activeRailAlpha),
-      inactiveRailColor: primaryColor.withAlpha(inactiveRailAlpha),
-      disabledActiveRailColor: primaryColorDark.withAlpha(disabledActiveRailAlpha),
-      disabledInactiveRailColor: primaryColorDark.withAlpha(disabledInactiveRailAlpha),
+    return SliderThemeData(
+      activeTrackColor: primaryColor.withAlpha(activeTrackAlpha),
+      inactiveTrackColor: primaryColor.withAlpha(inactiveTrackAlpha),
+      disabledActiveTrackColor: primaryColorDark.withAlpha(disabledActiveTrackAlpha),
+      disabledInactiveTrackColor: primaryColorDark.withAlpha(disabledInactiveTrackAlpha),
       activeTickMarkColor: primaryColorLight.withAlpha(activeTickMarkAlpha),
       inactiveTickMarkColor: primaryColor.withAlpha(inactiveTickMarkAlpha),
       disabledActiveTickMarkColor: primaryColorLight.withAlpha(disabledActiveTickMarkAlpha),
@@ -273,35 +273,35 @@ class SliderThemeData extends Diagnosticable {
     );
   }
 
-  /// The color of the [Slider] rail between the [Slider.min] position and the
+  /// The color of the [Slider] track between the [Slider.min] position and the
   /// current thumb position.
-  final Color activeRailColor;
+  final Color activeTrackColor;
 
-  /// The color of the [Slider] rail between the current thumb position and the
+  /// The color of the [Slider] track between the current thumb position and the
   /// [Slider.max] position.
-  final Color inactiveRailColor;
+  final Color inactiveTrackColor;
 
-  /// The color of the [Slider] rail between the [Slider.min] position and the
+  /// The color of the [Slider] track between the [Slider.min] position and the
   /// current thumb position when the [Slider] is disabled.
-  final Color disabledActiveRailColor;
+  final Color disabledActiveTrackColor;
 
-  /// The color of the [Slider] rail between the current thumb position and the
+  /// The color of the [Slider] track between the current thumb position and the
   /// [Slider.max] position when the [Slider] is disabled.
-  final Color disabledInactiveRailColor;
+  final Color disabledInactiveTrackColor;
 
-  /// The color of the rail's tick marks that are drawn between the [Slider.min]
+  /// The color of the track's tick marks that are drawn between the [Slider.min]
   /// position and the current thumb position.
   final Color activeTickMarkColor;
 
-  /// The color of the rail's tick marks that are drawn between the current
+  /// The color of the track's tick marks that are drawn between the current
   /// thumb position and the [Slider.max] position.
   final Color inactiveTickMarkColor;
 
-  /// The color of the rail's tick marks that are drawn between the [Slider.min]
+  /// The color of the track's tick marks that are drawn between the [Slider.min]
   /// position and the current thumb position when the [Slider] is disabled.
   final Color disabledActiveTickMarkColor;
 
-  /// The color of the rail's tick marks that are drawn between the current
+  /// The color of the track's tick marks that are drawn between the current
   /// thumb position and the [Slider.max] position when the [Slider] is
   /// disabled.
   final Color disabledInactiveTickMarkColor;
@@ -350,10 +350,10 @@ class SliderThemeData extends Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SliderThemeData copyWith({
-    Color activeRailColor,
-    Color inactiveRailColor,
-    Color disabledActiveRailColor,
-    Color disabledInactiveRailColor,
+    Color activeTrackColor,
+    Color inactiveTrackColor,
+    Color disabledActiveTrackColor,
+    Color disabledInactiveTrackColor,
     Color activeTickMarkColor,
     Color inactiveTickMarkColor,
     Color disabledActiveTickMarkColor,
@@ -367,11 +367,11 @@ class SliderThemeData extends Diagnosticable {
     ShowValueIndicator showValueIndicator,
     TextStyle valueIndicatorTextStyle,
   }) {
-    return new SliderThemeData(
-      activeRailColor: activeRailColor ?? this.activeRailColor,
-      inactiveRailColor: inactiveRailColor ?? this.inactiveRailColor,
-      disabledActiveRailColor: disabledActiveRailColor ?? this.disabledActiveRailColor,
-      disabledInactiveRailColor: disabledInactiveRailColor ?? this.disabledInactiveRailColor,
+    return SliderThemeData(
+      activeTrackColor: activeTrackColor ?? this.activeTrackColor,
+      inactiveTrackColor: inactiveTrackColor ?? this.inactiveTrackColor,
+      disabledActiveTrackColor: disabledActiveTrackColor ?? this.disabledActiveTrackColor,
+      disabledInactiveTrackColor: disabledInactiveTrackColor ?? this.disabledInactiveTrackColor,
       activeTickMarkColor: activeTickMarkColor ?? this.activeTickMarkColor,
       inactiveTickMarkColor: inactiveTickMarkColor ?? this.inactiveTickMarkColor,
       disabledActiveTickMarkColor: disabledActiveTickMarkColor ?? this.disabledActiveTickMarkColor,
@@ -391,26 +391,16 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// The arguments must not be null.
   ///
-  /// The `t` argument represents position on the timeline, with 0.0 meaning
-  /// that the interpolation has not started, returning `a` (or something
-  /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
-  /// returning `b` (or something equivalent to `b`), and values in between
-  /// meaning that the interpolation is at the relevant point on the timeline
-  /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
-  /// 1.0, so negative values and values greater than 1.0 are valid (and can
-  /// easily be generated by curves such as [Curves.elasticInOut]).
-  ///
-  /// Values for `t` are usually obtained from an [Animation<double>], such as
-  /// an [AnimationController].
+  /// {@macro dart.ui.shadow.lerp}
   static SliderThemeData lerp(SliderThemeData a, SliderThemeData b, double t) {
     assert(a != null);
     assert(b != null);
     assert(t != null);
-    return new SliderThemeData(
-      activeRailColor: Color.lerp(a.activeRailColor, b.activeRailColor, t),
-      inactiveRailColor: Color.lerp(a.inactiveRailColor, b.inactiveRailColor, t),
-      disabledActiveRailColor: Color.lerp(a.disabledActiveRailColor, b.disabledActiveRailColor, t),
-      disabledInactiveRailColor: Color.lerp(a.disabledInactiveRailColor, b.disabledInactiveRailColor, t),
+    return SliderThemeData(
+      activeTrackColor: Color.lerp(a.activeTrackColor, b.activeTrackColor, t),
+      inactiveTrackColor: Color.lerp(a.inactiveTrackColor, b.inactiveTrackColor, t),
+      disabledActiveTrackColor: Color.lerp(a.disabledActiveTrackColor, b.disabledActiveTrackColor, t),
+      disabledInactiveTrackColor: Color.lerp(a.disabledInactiveTrackColor, b.disabledInactiveTrackColor, t),
       activeTickMarkColor: Color.lerp(a.activeTickMarkColor, b.activeTickMarkColor, t),
       inactiveTickMarkColor: Color.lerp(a.inactiveTickMarkColor, b.inactiveTickMarkColor, t),
       disabledActiveTickMarkColor: Color.lerp(a.disabledActiveTickMarkColor, b.disabledActiveTickMarkColor, t),
@@ -429,10 +419,10 @@ class SliderThemeData extends Diagnosticable {
   @override
   int get hashCode {
     return hashValues(
-      activeRailColor,
-      inactiveRailColor,
-      disabledActiveRailColor,
-      disabledInactiveRailColor,
+      activeTrackColor,
+      inactiveTrackColor,
+      disabledActiveTrackColor,
+      disabledInactiveTrackColor,
       activeTickMarkColor,
       inactiveTickMarkColor,
       disabledActiveTickMarkColor,
@@ -457,10 +447,10 @@ class SliderThemeData extends Diagnosticable {
       return false;
     }
     final SliderThemeData otherData = other;
-    return otherData.activeRailColor == activeRailColor &&
-        otherData.inactiveRailColor == inactiveRailColor &&
-        otherData.disabledActiveRailColor == disabledActiveRailColor &&
-        otherData.disabledInactiveRailColor == disabledInactiveRailColor &&
+    return otherData.activeTrackColor == activeTrackColor &&
+        otherData.inactiveTrackColor == inactiveTrackColor &&
+        otherData.disabledActiveTrackColor == disabledActiveTrackColor &&
+        otherData.disabledInactiveTrackColor == disabledInactiveTrackColor &&
         otherData.activeTickMarkColor == activeTickMarkColor &&
         otherData.inactiveTickMarkColor == inactiveTickMarkColor &&
         otherData.disabledActiveTickMarkColor == disabledActiveTickMarkColor &&
@@ -478,29 +468,29 @@ class SliderThemeData extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final ThemeData defaultTheme = new ThemeData.fallback();
-    final SliderThemeData defaultData = new SliderThemeData.fromPrimaryColors(
+    final ThemeData defaultTheme = ThemeData.fallback();
+    final SliderThemeData defaultData = SliderThemeData.fromPrimaryColors(
       primaryColor: defaultTheme.primaryColor,
       primaryColorDark: defaultTheme.primaryColorDark,
       primaryColorLight: defaultTheme.primaryColorLight,
       valueIndicatorTextStyle: defaultTheme.accentTextTheme.body2,
     );
-    properties.add(new DiagnosticsProperty<Color>('activeRailColor', activeRailColor, defaultValue: defaultData.activeRailColor));
-    properties.add(new DiagnosticsProperty<Color>('inactiveRailColor', inactiveRailColor, defaultValue: defaultData.inactiveRailColor));
-    properties.add(new DiagnosticsProperty<Color>('disabledActiveRailColor', disabledActiveRailColor, defaultValue: defaultData.disabledActiveRailColor, level: DiagnosticLevel.debug));
-    properties.add(new DiagnosticsProperty<Color>('disabledInactiveRailColor', disabledInactiveRailColor, defaultValue: defaultData.disabledInactiveRailColor, level: DiagnosticLevel.debug));
-    properties.add(new DiagnosticsProperty<Color>('activeTickMarkColor', activeTickMarkColor, defaultValue: defaultData.activeTickMarkColor, level: DiagnosticLevel.debug));
-    properties.add(new DiagnosticsProperty<Color>('inactiveTickMarkColor', inactiveTickMarkColor, defaultValue: defaultData.inactiveTickMarkColor, level: DiagnosticLevel.debug));
-    properties.add(new DiagnosticsProperty<Color>('disabledActiveTickMarkColor', disabledActiveTickMarkColor, defaultValue: defaultData.disabledActiveTickMarkColor, level: DiagnosticLevel.debug));
-    properties.add(new DiagnosticsProperty<Color>('disabledInactiveTickMarkColor', disabledInactiveTickMarkColor, defaultValue: defaultData.disabledInactiveTickMarkColor, level: DiagnosticLevel.debug));
-    properties.add(new DiagnosticsProperty<Color>('thumbColor', thumbColor, defaultValue: defaultData.thumbColor));
-    properties.add(new DiagnosticsProperty<Color>('disabledThumbColor', disabledThumbColor, defaultValue: defaultData.disabledThumbColor, level: DiagnosticLevel.debug));
-    properties.add(new DiagnosticsProperty<Color>('overlayColor', overlayColor, defaultValue: defaultData.overlayColor, level: DiagnosticLevel.debug));
-    properties.add(new DiagnosticsProperty<Color>('valueIndicatorColor', valueIndicatorColor, defaultValue: defaultData.valueIndicatorColor));
-    properties.add(new DiagnosticsProperty<SliderComponentShape>('thumbShape', thumbShape, defaultValue: defaultData.thumbShape, level: DiagnosticLevel.debug));
-    properties.add(new DiagnosticsProperty<SliderComponentShape>('valueIndicatorShape', valueIndicatorShape, defaultValue: defaultData.valueIndicatorShape, level: DiagnosticLevel.debug));
-    properties.add(new EnumProperty<ShowValueIndicator>('showValueIndicator', showValueIndicator, defaultValue: defaultData.showValueIndicator));
-    properties.add(new DiagnosticsProperty<TextStyle>('valueIndicatorTextStyle', valueIndicatorTextStyle, defaultValue: defaultData.valueIndicatorTextStyle));
+    properties.add(DiagnosticsProperty<Color>('activeTrackColor', activeTrackColor, defaultValue: defaultData.activeTrackColor));
+    properties.add(DiagnosticsProperty<Color>('inactiveTrackColor', inactiveTrackColor, defaultValue: defaultData.inactiveTrackColor));
+    properties.add(DiagnosticsProperty<Color>('disabledActiveTrackColor', disabledActiveTrackColor, defaultValue: defaultData.disabledActiveTrackColor, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Color>('disabledInactiveTrackColor', disabledInactiveTrackColor, defaultValue: defaultData.disabledInactiveTrackColor, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Color>('activeTickMarkColor', activeTickMarkColor, defaultValue: defaultData.activeTickMarkColor, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Color>('inactiveTickMarkColor', inactiveTickMarkColor, defaultValue: defaultData.inactiveTickMarkColor, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Color>('disabledActiveTickMarkColor', disabledActiveTickMarkColor, defaultValue: defaultData.disabledActiveTickMarkColor, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Color>('disabledInactiveTickMarkColor', disabledInactiveTickMarkColor, defaultValue: defaultData.disabledInactiveTickMarkColor, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Color>('thumbColor', thumbColor, defaultValue: defaultData.thumbColor));
+    properties.add(DiagnosticsProperty<Color>('disabledThumbColor', disabledThumbColor, defaultValue: defaultData.disabledThumbColor, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Color>('overlayColor', overlayColor, defaultValue: defaultData.overlayColor, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Color>('valueIndicatorColor', valueIndicatorColor, defaultValue: defaultData.valueIndicatorColor));
+    properties.add(DiagnosticsProperty<SliderComponentShape>('thumbShape', thumbShape, defaultValue: defaultData.thumbShape, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<SliderComponentShape>('valueIndicatorShape', valueIndicatorShape, defaultValue: defaultData.valueIndicatorShape, level: DiagnosticLevel.debug));
+    properties.add(EnumProperty<ShowValueIndicator>('showValueIndicator', showValueIndicator, defaultValue: defaultData.showValueIndicator));
+    properties.add(DiagnosticsProperty<TextStyle>('valueIndicatorTextStyle', valueIndicatorTextStyle, defaultValue: defaultData.valueIndicatorTextStyle));
   }
 }
 
@@ -567,7 +557,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return new Size.fromRadius(isEnabled ? _thumbRadius : _disabledThumbRadius);
+    return Size.fromRadius(isEnabled ? _thumbRadius : _disabledThumbRadius);
   }
 
   @override
@@ -584,18 +574,18 @@ class RoundSliderThumbShape extends SliderComponentShape {
     double value,
   }) {
     final Canvas canvas = context.canvas;
-    final Tween<double> radiusTween = new Tween<double>(
+    final Tween<double> radiusTween = Tween<double>(
       begin: _disabledThumbRadius,
       end: _thumbRadius,
     );
-    final ColorTween colorTween = new ColorTween(
+    final ColorTween colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.thumbColor,
     );
     canvas.drawCircle(
       thumbCenter,
       radiusTween.evaluate(enableAnimation),
-      new Paint()..color = colorTween.evaluate(enableAnimation),
+      Paint()..color = colorTween.evaluate(enableAnimation),
     );
   }
 }
@@ -634,7 +624,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   // The padding on either side of the label.
   static const double _labelPadding = 8.0;
   static const double _distanceBetweenTopBottomCenters = 40.0;
-  static const Offset _topLobeCenter = const Offset(0.0, -_distanceBetweenTopBottomCenters);
+  static const Offset _topLobeCenter = Offset(0.0, -_distanceBetweenTopBottomCenters);
   static const double _topNeckRadius = 14.0;
   // The length of the hypotenuse of the triangle formed by the center
   // of the left top lobe arc and the center of the top left neck arc.
@@ -644,7 +634,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   static const double _twoSeventyDegrees = 3.0 * math.pi / 2.0;
   static const double _ninetyDegrees = math.pi / 2.0;
   static const double _thirtyDegrees = math.pi / 6.0;
-  static const Size _preferredSize = const Size.fromHeight(_distanceBetweenTopBottomCenters + _topLobeRadius + _bottomLobeRadius);
+  static const Size _preferredSize = Size.fromHeight(_distanceBetweenTopBottomCenters + _topLobeRadius + _bottomLobeRadius);
   // Set to true if you want a rectangle to be drawn around the label bubble.
   // This helps with building tests that check that the label draws in the right
   // place (because it prints the rect in the failed test output). It should not
@@ -660,7 +650,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   // Adds an arc to the path that has the attributes passed in. This is
   // a convenience to make adding arcs have less boilerplate.
   static void _addArc(Path path, Offset center, double radius, double startAngle, double endAngle) {
-    final Rect arcRect = new Rect.fromCircle(center: center, radius: radius);
+    final Rect arcRect = Rect.fromCircle(center: center, radius: radius);
     path.arcTo(arcRect, startAngle, endAngle - startAngle, false);
   }
 
@@ -671,21 +661,21 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     const double bottomNeckStartAngle = _bottomLobeEndAngle - math.pi;
     const double bottomNeckEndAngle = 0.0;
 
-    final Path path = new Path();
-    final Offset bottomKnobStart = new Offset(
+    final Path path = Path();
+    final Offset bottomKnobStart = Offset(
       _bottomLobeRadius * math.cos(_bottomLobeStartAngle),
       _bottomLobeRadius * math.sin(_bottomLobeStartAngle),
     );
     final Offset bottomNeckRightCenter = bottomKnobStart +
-        new Offset(
+        Offset(
           bottomNeckRadius * math.cos(bottomNeckStartAngle),
           -bottomNeckRadius * math.sin(bottomNeckStartAngle),
         );
-    final Offset bottomNeckLeftCenter = new Offset(
+    final Offset bottomNeckLeftCenter = Offset(
       -bottomNeckRightCenter.dx,
       bottomNeckRightCenter.dy,
     );
-    final Offset bottomNeckStartRight = new Offset(
+    final Offset bottomNeckStartRight = Offset(
       bottomNeckRightCenter.dx - bottomNeckRadius,
       bottomNeckRightCenter.dy,
     );
@@ -712,7 +702,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
       bottomNeckEndAngle,
     );
 
-    _bottomLobeEnd = new Offset(
+    _bottomLobeEnd = Offset(
       -bottomNeckStartRight.dx,
       bottomNeckStartRight.dy,
     );
@@ -737,7 +727,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     Offset center,
   ) {
     const double edgeMargin = 4.0;
-    final Rect topLobeRect = new Rect.fromLTWH(
+    final Rect topLobeRect = Rect.fromLTWH(
       -_topLobeRadius - halfWidthNeeded,
       -_topLobeRadius - _distanceBetweenTopBottomCenters,
       2.0 * (_topLobeRadius + halfWidthNeeded),
@@ -796,7 +786,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     rightWidthNeeded = halfWidthNeeded + shift;
     leftWidthNeeded = halfWidthNeeded - shift;
 
-    final Path path = new Path();
+    final Path path = Path();
     final Offset bottomLobeEnd = _addBottomLobe(path);
 
     // The base of the triangle between the top lobe center and the centers of
@@ -811,11 +801,11 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     final double leftTheta = (1.0 - leftAmount) * _thirtyDegrees;
     final double rightTheta = (1.0 - rightAmount) * _thirtyDegrees;
     // The center of the top left neck arc.
-    final Offset neckLeftCenter = new Offset(
+    final Offset neckLeftCenter = Offset(
       -neckTriangleBase,
       _topLobeCenter.dy + math.cos(leftTheta) * _neckTriangleHypotenuse,
     );
-    final Offset neckRightCenter = new Offset(
+    final Offset neckRightCenter = Offset(
       neckTriangleBase,
       _topLobeCenter.dy + math.cos(rightTheta) * _neckTriangleHypotenuse,
     );
@@ -827,19 +817,19 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     final double neckStretchBaseline = bottomLobeEnd.dy - math.max(neckLeftCenter.dy, neckRightCenter.dy);
     final double t = math.pow(inverseTextScale, 3.0);
     final double stretch = (neckStretchBaseline * t).clamp(0.0, 10.0 * neckStretchBaseline);
-    final Offset neckStretch = new Offset(0.0, neckStretchBaseline - stretch);
+    final Offset neckStretch = Offset(0.0, neckStretchBaseline - stretch);
 
     assert(!_debuggingLabelLocation ||
         () {
-          final Offset leftCenter = _topLobeCenter - new Offset(leftWidthNeeded, 0.0) + neckStretch;
-          final Offset rightCenter = _topLobeCenter + new Offset(rightWidthNeeded, 0.0) + neckStretch;
-          final Rect valueRect = new Rect.fromLTRB(
+          final Offset leftCenter = _topLobeCenter - Offset(leftWidthNeeded, 0.0) + neckStretch;
+          final Offset rightCenter = _topLobeCenter + Offset(rightWidthNeeded, 0.0) + neckStretch;
+          final Rect valueRect = Rect.fromLTRB(
             leftCenter.dx - _topLobeRadius,
             leftCenter.dy - _topLobeRadius,
             rightCenter.dx + _topLobeRadius,
             rightCenter.dy + _topLobeRadius,
           );
-          final Paint outlinePaint = new Paint()
+          final Paint outlinePaint = Paint()
             ..color = const Color(0xffff0000)
             ..style = PaintingStyle.stroke
             ..strokeWidth = 1.0;
@@ -856,14 +846,14 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     );
     _addArc(
       path,
-      _topLobeCenter - new Offset(leftWidthNeeded, 0.0) + neckStretch,
+      _topLobeCenter - Offset(leftWidthNeeded, 0.0) + neckStretch,
       _topLobeRadius,
       _ninetyDegrees + leftTheta,
       _twoSeventyDegrees,
     );
     _addArc(
       path,
-      _topLobeCenter + new Offset(rightWidthNeeded, 0.0) + neckStretch,
+      _topLobeCenter + Offset(rightWidthNeeded, 0.0) + neckStretch,
       _topLobeRadius,
       _twoSeventyDegrees,
       _twoSeventyDegrees + math.pi - rightTheta,
@@ -881,7 +871,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     canvas.save();
     canvas.translate(shift, -_distanceBetweenTopBottomCenters + neckStretch.dy);
     canvas.scale(inverseTextScale, inverseTextScale);
-    labelPainter.paint(canvas, Offset.zero - new Offset(labelHalfWidth, labelPainter.height / 2.0));
+    labelPainter.paint(canvas, Offset.zero - Offset(labelHalfWidth, labelPainter.height / 2.0));
     canvas.restore();
     canvas.restore();
   }
@@ -899,7 +889,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     TextDirection textDirection,
     double value,
   }) {
-    final ColorTween enableColor = new ColorTween(
+    final ColorTween enableColor = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
     );
@@ -907,7 +897,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
       parentBox,
       context.canvas,
       thumbCenter,
-      new Paint()..color = enableColor.evaluate(enableAnimation),
+      Paint()..color = enableColor.evaluate(enableAnimation),
       activationAnimation.value,
       labelPainter,
     );

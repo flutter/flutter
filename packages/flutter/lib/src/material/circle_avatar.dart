@@ -23,8 +23,8 @@ import 'theme_data.dart';
 /// [backgroundImage] property:
 ///
 /// ```dart
-/// new CircleAvatar(
-///   backgroundImage: new NetworkImage(userAvatarUrl),
+/// CircleAvatar(
+///   backgroundImage: NetworkImage(userAvatarUrl),
 /// )
 /// ```
 ///
@@ -34,9 +34,9 @@ import 'theme_data.dart';
 /// provided using a [Text] widget as the [child] and a [backgroundColor]:
 ///
 /// ```dart
-/// new CircleAvatar(
+/// CircleAvatar(
 ///   backgroundColor: Colors.brown.shade800,
-///   child: new Text('AH'),
+///   child: Text('AH'),
 /// )
 /// ```
 ///
@@ -146,7 +146,7 @@ class CircleAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
-    TextStyle textStyle = theme.primaryTextTheme.title.copyWith(color: foregroundColor);
+    TextStyle textStyle = theme.primaryTextTheme.subhead.copyWith(color: foregroundColor);
     Color effectiveBackgroundColor = backgroundColor;
     if (effectiveBackgroundColor == null) {
       switch (ThemeData.estimateBrightnessForColor(textStyle.color)) {
@@ -169,29 +169,31 @@ class CircleAvatar extends StatelessWidget {
     }
     final double minDiameter = _minDiameter;
     final double maxDiameter = _maxDiameter;
-    return new AnimatedContainer(
-      constraints: new BoxConstraints(
+    return AnimatedContainer(
+      constraints: BoxConstraints(
         minHeight: minDiameter,
         minWidth: minDiameter,
         maxWidth: maxDiameter,
         maxHeight: maxDiameter,
       ),
       duration: kThemeChangeDuration,
-      decoration: new BoxDecoration(
+      decoration: BoxDecoration(
         color: effectiveBackgroundColor,
-        image: backgroundImage != null ? new DecorationImage(image: backgroundImage) : null,
+        image: backgroundImage != null
+          ? DecorationImage(image: backgroundImage, fit: BoxFit.cover)
+          : null,
         shape: BoxShape.circle,
       ),
       child: child == null
           ? null
-          : new Center(
-              child: new MediaQuery(
+          : Center(
+              child: MediaQuery(
                 // Need to ignore the ambient textScaleFactor here so that the
                 // text doesn't escape the avatar when the textScaleFactor is large.
                 data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                child: new IconTheme(
+                child: IconTheme(
                   data: theme.iconTheme.copyWith(color: textStyle.color),
-                  child: new DefaultTextStyle(
+                  child: DefaultTextStyle(
                     style: textStyle,
                     child: child,
                   ),

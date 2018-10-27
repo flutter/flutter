@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'framework.dart';
 import 'navigator.dart';
 import 'will_pop_scope.dart';
@@ -24,7 +22,7 @@ class Form extends StatefulWidget {
   const Form({
     Key key,
     @required this.child,
-    this.autovalidate: false,
+    this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
   }) : assert(child != null),
@@ -74,7 +72,7 @@ class Form extends StatefulWidget {
   final VoidCallback onChanged;
 
   @override
-  FormState createState() => new FormState();
+  FormState createState() => FormState();
 }
 
 /// State associated with a [Form] widget.
@@ -85,7 +83,7 @@ class Form extends StatefulWidget {
 /// Typically obtained via [Form.of].
 class FormState extends State<Form> {
   int _generation = 0;
-  final Set<FormFieldState<dynamic>> _fields = new Set<FormFieldState<dynamic>>();
+  final Set<FormFieldState<dynamic>> _fields = Set<FormFieldState<dynamic>>();
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
@@ -113,9 +111,9 @@ class FormState extends State<Form> {
   Widget build(BuildContext context) {
     if (widget.autovalidate)
       _validate();
-    return new WillPopScope(
+    return WillPopScope(
       onWillPop: widget.onWillPop,
-      child: new _FormScope(
+      child: _FormScope(
         formState: this,
         generation: _generation,
         child: widget.child,
@@ -185,17 +183,17 @@ class _FormScope extends InheritedWidget {
 /// Signature for validating a form field.
 ///
 /// Used by [FormField.validator].
-typedef String FormFieldValidator<T>(T value);
+typedef FormFieldValidator<T> = String Function(T value);
 
 /// Signature for being notified when a form field changes value.
 ///
 /// Used by [FormField.onSaved].
-typedef void FormFieldSetter<T>(T newValue);
+typedef FormFieldSetter<T> = void Function(T newValue);
 
 /// Signature for building the widget representing the form field.
 ///
 /// Used by [FormField.builder].
-typedef Widget FormFieldBuilder<T>(FormFieldState<T> field);
+typedef FormFieldBuilder<T> = Widget Function(FormFieldState<T> field);
 
 /// A single form field.
 ///
@@ -228,7 +226,8 @@ class FormField<T> extends StatefulWidget {
     this.onSaved,
     this.validator,
     this.initialValue,
-    this.autovalidate: false,
+    this.autovalidate = false,
+    this.enabled = true,
   }) : assert(builder != null),
        super(key: key);
 
@@ -258,8 +257,15 @@ class FormField<T> extends StatefulWidget {
   /// autovalidates, this value will be ignored.
   final bool autovalidate;
 
+  /// Whether the form is able to receive user input.
+  ///
+  /// Defaults to true. If [autovalidate] is true, the field will be validated.
+  /// Likewise, if this field is false, the widget will not be validated
+  /// regardless of [autovalidate].
+  final bool enabled;
+
   @override
-  FormFieldState<T> createState() => new FormFieldState<T>();
+  FormFieldState<T> createState() => FormFieldState<T>();
 }
 
 /// The current state of a [FormField]. Passed to the [FormFieldBuilder] method
@@ -346,7 +352,8 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.autovalidate)
+    // Only autovalidate if the widget is also enabled
+    if (widget.autovalidate && widget.enabled)
       _validate();
     Form.of(context)?._register(this);
     return widget.builder(this);

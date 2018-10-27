@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlag;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
@@ -16,12 +14,12 @@ void main() {
     int pressedCount = 0;
 
     Widget buildFrame(VoidCallback onPressed) {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new Theme(
-          data: new ThemeData(),
-          child: new Center(
-            child: new OutlineButton(onPressed: onPressed),
+        child: Theme(
+          data: ThemeData(),
+          child: Center(
+            child: OutlineButton(onPressed: onPressed),
           ),
         ),
       );
@@ -46,48 +44,73 @@ void main() {
   });
 
 
-  testWidgets('Outline shape and border overrides', (WidgetTester tester) async {
-    const Color fillColor = const Color(0xFF00FF00);
-    const Color borderColor = const Color(0xFFFF0000);
-    const Color highlightedBorderColor = const Color(0xFF0000FF);
+  testWidgets('OutlineButton shape and border component overrides', (WidgetTester tester) async {
+    const Color fillColor = Color(0xFF00FF00);
+    const Color borderColor = Color(0xFFFF0000);
+    const Color highlightedBorderColor = Color(0xFF0000FF);
+    const Color disabledBorderColor = Color(0xFFFF00FF);
     const double borderWidth = 4.0;
 
-    await tester.pumpWidget(
-      new Directionality(
+    Widget buildFrame({VoidCallback onPressed}) {
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new Theme(
-          data: new ThemeData(),
-          child: new Container(
+        child: Theme(
+          data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          child: Container(
             alignment: Alignment.topLeft,
-            child: new OutlineButton(
+            child: OutlineButton(
               shape: const RoundedRectangleBorder(), // default border radius is 0
+              clipBehavior: Clip.antiAlias,
               color: fillColor,
               highlightedBorderColor: highlightedBorderColor,
+              disabledBorderColor: disabledBorderColor,
               borderSide: const BorderSide(
                 width: borderWidth,
                 color: borderColor,
               ),
-              onPressed: () { },
-              child: const Text('button')
+              onPressed: onPressed,
+              child: const Text('button'),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
+
+    final Rect clipRect = Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
+    final Path clipPath = Path()..addRect(clipRect);
 
     final Finder outlineButton = find.byType(OutlineButton);
-    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
 
-    final Rect clipRect = new Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
-    final Path clipPath = new Path()..addRect(clipRect);
+    // Pump a button with a null onPressed callback to make it disabled.
+    await tester.pumpWidget(
+      buildFrame(onPressed: null),
+    );
+
+    // Expect that the button is disabled and painted with the disabled border color.
+    expect(tester.widget<OutlineButton>(outlineButton).enabled, false);
+    expect(
+      outlineButton, //find.byType(OutlineButton),
+      paints
+        ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
+        ..path(color: disabledBorderColor, strokeWidth: borderWidth));
+
+    // Pump a new button with a no-op onPressed callback to make it enabled.
+    await tester.pumpWidget(
+      buildFrame(onPressed: () { }),
+    );
+
+    // Wait for the border color to change from disabled to enabled.
+    await tester.pumpAndSettle();
+
+    // Expect that the button is disabled and painted with the enabled border color.
+    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
     expect(
       outlineButton,
       paints
         // initially the interior of the button is transparent
         ..path(color: fillColor.withAlpha(0x00))
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
-        ..path(color: borderColor, strokeWidth: borderWidth)
-    );
+        ..path(color: borderColor, strokeWidth: borderWidth));
 
     final Offset center = tester.getCenter(outlineButton);
     final TestGesture gesture = await tester.startGesture(center);
@@ -100,8 +123,7 @@ void main() {
       paints
         ..path(color: fillColor.withAlpha(0xFF))
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
-        ..path(color: highlightedBorderColor, strokeWidth: borderWidth)
-    );
+        ..path(color: highlightedBorderColor, strokeWidth: borderWidth));
 
     // Tap gesture completes, button returns to its initial configuration.
     await gesture.up();
@@ -111,21 +133,42 @@ void main() {
       paints
         ..path(color: fillColor.withAlpha(0x00))
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
-        ..path(color: borderColor, strokeWidth: borderWidth)
+        ..path(color: borderColor, strokeWidth: borderWidth));
+  });
+
+  testWidgets('OutlineButton has no clip by default', (WidgetTester tester) async {
+    final GlobalKey buttonKey = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Center(
+            child: OutlineButton(
+                key: buttonKey,
+                onPressed: () { },
+                child: const Text('ABC'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+        tester.renderObject(find.byKey(buttonKey)),
+        paintsExactlyCountTimes(#clipPath, 0)
     );
   });
 
-
   testWidgets('OutlineButton contributes semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new OutlineButton(
+        child: Material(
+          child: Center(
+            child: OutlineButton(
               onPressed: () { },
-              child: const Text('ABC')
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -133,15 +176,15 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             actions: <SemanticsAction>[
               SemanticsAction.tap,
             ],
             label: 'ABC',
-            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
-            transform: new Matrix4.translationValues(356.0, 282.0, 0.0),
+            rect: Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            transform: Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
@@ -159,13 +202,13 @@ void main() {
 
   testWidgets('OutlineButton scales textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new MediaQuery(
+        child: Material(
+          child: MediaQuery(
             data: const MediaQueryData(textScaleFactor: 1.0),
-            child: new Center(
-              child: new OutlineButton(
+            child: Center(
+              child: OutlineButton(
                 onPressed: () { },
                 child: const Text('ABC'),
               ),
@@ -175,18 +218,18 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(OutlineButton)), equals(const Size(88.0, 36.0)));
+    expect(tester.getSize(find.byType(OutlineButton)), equals(const Size(88.0, 48.0)));
     expect(tester.getSize(find.byType(Text)), equals(const Size(42.0, 14.0)));
 
     // textScaleFactor expands text, but not button.
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new MediaQuery(
+        child: Material(
+          child: MediaQuery(
             data: const MediaQueryData(textScaleFactor: 1.3),
-            child: new Center(
-              child: new FlatButton(
+            child: Center(
+              child: FlatButton(
                 onPressed: () { },
                 child: const Text('ABC'),
               ),
@@ -196,22 +239,21 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 36.0)));
+    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 48.0)));
     // Scaled text rendering is different on Linux and Mac by one pixel.
-    // TODO(#12357): Update this test when text rendering is fixed.
+    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[54.0, 55.0]));
     expect(tester.getSize(find.byType(Text)).height, isIn(<double>[18.0, 19.0]));
 
-
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new MediaQuery(
+        child: Material(
+          child: MediaQuery(
             data: const MediaQueryData(textScaleFactor: 3.0),
-            child: new Center(
-              child: new FlatButton(
+            child: Center(
+              child: FlatButton(
                 onPressed: () { },
                 child: const Text('ABC'),
               ),
@@ -222,16 +264,16 @@ void main() {
     );
 
     // Scaled text rendering is different on Linux and Mac by one pixel.
-    // TODO(#12357): Update this test when text rendering is fixed.
+    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(tester.getSize(find.byType(FlatButton)).width, isIn(<double>[158.0, 159.0]));
-    expect(tester.getSize(find.byType(FlatButton)).height, equals(42.0));
+    expect(tester.getSize(find.byType(FlatButton)).height, equals(48.0));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
   });
 
   testWidgets('OutlineButton implements debugFillDescription', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = new DiagnosticPropertiesBuilder();
-    new OutlineButton(
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    OutlineButton(
         onPressed: () {},
         textColor: const Color(0xFF00FF00),
         disabledTextColor: const Color(0xFFFF0000),

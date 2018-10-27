@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'framework.dart';
 import 'navigator.dart';
 import 'routes.dart';
@@ -39,7 +37,7 @@ class WillPopScope extends StatefulWidget {
   final WillPopCallback onWillPop;
 
   @override
-  _WillPopScopeState createState() => new _WillPopScopeState();
+  _WillPopScopeState createState() => _WillPopScopeState();
 }
 
 class _WillPopScopeState extends State<WillPopScope> {

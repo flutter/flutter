@@ -1,4 +1,10 @@
 {
+  "reorderItemDown": "Mover hacia abajo",
+  "reorderItemLeft": "Mover hacia la izquierda",
+  "reorderItemToEnd": "Mover al final",
+  "reorderItemRight": "Mover hacia la derecha",
+  "reorderItemUp": "Mover hacia arriba",
+  "reorderItemToStart": "Mover al inicio",
   "tabLabel": "Pestaña $tabIndex de $tabCount",
   "showAccountsLabel": "Mostrar cuentas",
   "modalBarrierDismissLabel": "Descartar",
@@ -34,5 +40,15 @@
   "scriptCategory": "English-like",
   "timeOfDayFormat": "h:mm a",
   "anteMeridiemAbbreviation": "a.m.",
-  "postMeridiemAbbreviation": "p.m."
+  "postMeridiemAbbreviation": "p.m.",
+  "drawerLabel": "Menú de navegación",
+  "popupMenuLabel": "Menú emergente",
+  "dialogLabel": "Diálogo",
+  "alertDialogLabel": "Alerta",
+  "searchFieldLabel": "Buscar",
+  "expandedIconTapHint": "Contraer",
+  "collapsedIconTapHint": "Expandir",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Queda 1 carácter",
+  "remainingTextFieldCharacterCountOther": "Quedan $remainingCount caracteres"
 }

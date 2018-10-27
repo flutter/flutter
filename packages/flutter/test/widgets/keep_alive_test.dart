@@ -11,7 +11,7 @@ class Leaf extends StatefulWidget {
   const Leaf({ Key key, this.child }) : super(key: key);
   final Widget child;
   @override
-  _LeafState createState() => new _LeafState();
+  _LeafState createState() => _LeafState();
 }
 
 class _LeafState extends State<Leaf> {
@@ -23,7 +23,7 @@ class _LeafState extends State<Leaf> {
 
   @override
   Widget build(BuildContext context) {
-    return new KeepAlive(
+    return KeepAlive(
       keepAlive: _keepAlive,
       child: widget.child,
     );
@@ -31,10 +31,10 @@ class _LeafState extends State<Leaf> {
 }
 
 List<Widget> generateList(Widget child) {
-  return new List<Widget>.generate(
+  return List<Widget>.generate(
     100,
-    (int index) => new Leaf(
-      key: new GlobalObjectKey<_LeafState>(index),
+    (int index) => Leaf(
+      key: GlobalObjectKey<_LeafState>(index),
       child: child,
     ),
     growable: false,
@@ -44,11 +44,13 @@ List<Widget> generateList(Widget child) {
 void main() {
   testWidgets('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
+          cacheExtent: 0.0,
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           itemExtent: 12.3, // about 50 widgets visible
           children: generateList(const Placeholder()),
         ),
@@ -56,134 +58,142 @@ void main() {
     );
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
     await tester.drag(find.byType(ListView), const Offset(0.0, -300.0)); // about 25 widgets' worth
     await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
     const GlobalObjectKey<_LeafState>(60).currentState.setKeepAlive(true);
     await tester.drag(find.byType(ListView), const Offset(0.0, 300.0)); // back to top
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsOneWidget);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
     const GlobalObjectKey<_LeafState>(60).currentState.setKeepAlive(false);
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
   testWidgets('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
+          cacheExtent: 0.0,
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
-          children: generateList(new Container(height: 12.3, child: const Placeholder())), // about 50 widgets visible
+          addSemanticIndexes: false,
+          children: generateList(Container(height: 12.3, child: const Placeholder())), // about 50 widgets visible
         ),
       ),
     );
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
     await tester.drag(find.byType(ListView), const Offset(0.0, -300.0)); // about 25 widgets' worth
     await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
     const GlobalObjectKey<_LeafState>(60).currentState.setKeepAlive(true);
     await tester.drag(find.byType(ListView), const Offset(0.0, 300.0)); // back to top
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsOneWidget);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
     const GlobalObjectKey<_LeafState>(60).currentState.setKeepAlive(false);
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
   testWidgets('KeepAlive with GridView', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new GridView.count(
+        child: GridView.count(
+          cacheExtent: 0.0,
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           crossAxisCount: 2,
           childAspectRatio: 400.0 / 24.6, // about 50 widgets visible
-          children: generateList(new Container(child: const Placeholder())),
+          children: generateList(Container(child: const Placeholder())),
         ),
       ),
     );
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
     await tester.drag(find.byType(GridView), const Offset(0.0, -300.0)); // about 25 widgets' worth
     await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
     const GlobalObjectKey<_LeafState>(60).currentState.setKeepAlive(true);
     await tester.drag(find.byType(GridView), const Offset(0.0, 300.0)); // back to top
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsOneWidget);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
     const GlobalObjectKey<_LeafState>(60).currentState.setKeepAlive(false);
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90)), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
   testWidgets('KeepAlive render tree description', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           itemExtent: 400.0, // 2 visible children
           children: generateList(const Placeholder()),
         ),
@@ -220,7 +230,7 @@ void main() {
       '       │ diagnosis: insufficient data to draw conclusion (less than five\n'
       '       │   repaints)\n'
       '       │\n'
-      '       └─child: _RenderExcludableScrollSemantics#00000\n'
+      '       └─child: _RenderScrollSemantics#00000\n'
       '         │ parentData: <none> (can use size)\n'
       '         │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
       '         │ semantic boundary\n'
@@ -270,10 +280,12 @@ void main() {
       '                     │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
       '                     │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
       '                     │   crossAxisDirection: AxisDirection.right,\n'
-      '                     │   viewportMainAxisExtent: 600.0)\n'
+      '                     │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0\n'
+      '                     │   cacheOrigin: 0.0 )\n'
       '                     │ geometry: SliverGeometry(scrollExtent: 40000.0, paintExtent:\n'
-      '                     │   600.0, maxPaintExtent: 40000.0, hasVisualOverflow: true)\n'
-      '                     │ currently live children: 0 to 1\n'
+      '                     │   600.0, maxPaintExtent: 40000.0, hasVisualOverflow: true,\n'
+      '                     │   cacheExtent: 850.0)\n'
+      '                     │ currently live children: 0 to 2\n'
       '                     │\n'
       '                     ├─child with index 0: RenderLimitedBox#00000\n'
       '                     │ │ parentData: index=0; layoutOffset=0.0\n'
@@ -287,14 +299,26 @@ void main() {
       '                     │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     │     size: Size(800.0, 400.0)\n'
       '                     │\n'
-      '                     └─child with index 1: RenderLimitedBox#00000\n'                                       // <----- no dashed line starts here
-      '                       │ parentData: index=1; layoutOffset=400.0\n'
+      '                     ├─child with index 1: RenderLimitedBox#00000\n'                                       // <----- no dashed line starts here
+      '                     │ │ parentData: index=1; layoutOffset=400.0\n'
+      '                     │ │ constraints: BoxConstraints(w=800.0, h=400.0)\n'
+      '                     │ │ size: Size(800.0, 400.0)\n'
+      '                     │ │ maxWidth: 400.0\n'
+      '                     │ │ maxHeight: 400.0\n'
+      '                     │ │\n'
+      '                     │ └─child: RenderCustomPaint#00000\n'
+      '                     │     parentData: <none> (can use size)\n'
+      '                     │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
+      '                     │     size: Size(800.0, 400.0)\n'
+      '                     │\n'
+      '                     └─child with index 2: RenderLimitedBox#00000 NEEDS-PAINT\n'
+      '                       │ parentData: index=2; layoutOffset=800.0\n'
       '                       │ constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       │ size: Size(800.0, 400.0)\n'
       '                       │ maxWidth: 400.0\n'
       '                       │ maxHeight: 400.0\n'
       '                       │\n'
-      '                       └─child: RenderCustomPaint#00000\n'
+      '                       └─child: RenderCustomPaint#00000 NEEDS-PAINT\n'
       '                           parentData: <none> (can use size)\n'
       '                           constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                           size: Size(800.0, 400.0)\n'
@@ -335,7 +359,7 @@ void main() {
       '       │ diagnosis: insufficient data to draw conclusion (less than five\n'
       '       │   repaints)\n'
       '       │\n'
-      '       └─child: _RenderExcludableScrollSemantics#00000\n'
+      '       └─child: _RenderScrollSemantics#00000\n'
       '         │ parentData: <none> (can use size)\n'
       '         │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
       '         │ semantic boundary\n'
@@ -385,10 +409,24 @@ void main() {
       '                     │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
       '                     │   2000.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
       '                     │   crossAxisDirection: AxisDirection.right,\n'
-      '                     │   viewportMainAxisExtent: 600.0)\n'
+      '                     │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 1100.0\n'
+      '                     │   cacheOrigin: -250.0 )\n'
       '                     │ geometry: SliverGeometry(scrollExtent: 40000.0, paintExtent:\n'
-      '                     │   600.0, maxPaintExtent: 40000.0, hasVisualOverflow: true)\n'
-      '                     │ currently live children: 5 to 6\n'
+      '                     │   600.0, maxPaintExtent: 40000.0, hasVisualOverflow: true,\n'
+      '                     │   cacheExtent: 1100.0)\n'
+      '                     │ currently live children: 4 to 7\n'
+      '                     │\n'
+      '                     ├─child with index 4: RenderLimitedBox#00000 NEEDS-PAINT\n'
+      '                     │ │ parentData: index=4; layoutOffset=1600.0\n'
+      '                     │ │ constraints: BoxConstraints(w=800.0, h=400.0)\n'
+      '                     │ │ size: Size(800.0, 400.0)\n'
+      '                     │ │ maxWidth: 400.0\n'
+      '                     │ │ maxHeight: 400.0\n'
+      '                     │ │\n'
+      '                     │ └─child: RenderCustomPaint#00000 NEEDS-PAINT\n'
+      '                     │     parentData: <none> (can use size)\n'
+      '                     │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
+      '                     │     size: Size(800.0, 400.0)\n'
       '                     │\n'
       '                     ├─child with index 5: RenderLimitedBox#00000\n'                                       // <----- this is index 5, not 0
       '                     │ │ parentData: index=5; layoutOffset=2000.0\n'
@@ -403,13 +441,25 @@ void main() {
       '                     │     size: Size(800.0, 400.0)\n'
       '                     │\n'
       '                     ├─child with index 6: RenderLimitedBox#00000\n'
-      '                     ╎ │ parentData: index=6; layoutOffset=2400.0\n'
+      '                     │ │ parentData: index=6; layoutOffset=2400.0\n'
+      '                     │ │ constraints: BoxConstraints(w=800.0, h=400.0)\n'
+      '                     │ │ size: Size(800.0, 400.0)\n'
+      '                     │ │ maxWidth: 400.0\n'
+      '                     │ │ maxHeight: 400.0\n'
+      '                     │ │\n'
+      '                     │ └─child: RenderCustomPaint#00000\n'
+      '                     │     parentData: <none> (can use size)\n'
+      '                     │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
+      '                     │     size: Size(800.0, 400.0)\n'
+      '                     │\n'
+      '                     ├─child with index 7: RenderLimitedBox#00000 NEEDS-PAINT\n'
+      '                     ╎ │ parentData: index=7; layoutOffset=2800.0\n'
       '                     ╎ │ constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     ╎ │ size: Size(800.0, 400.0)\n'
       '                     ╎ │ maxWidth: 400.0\n'
       '                     ╎ │ maxHeight: 400.0\n'
       '                     ╎ │\n'
-      '                     ╎ └─child: RenderCustomPaint#00000\n'
+      '                     ╎ └─child: RenderCustomPaint#00000 NEEDS-PAINT\n'
       '                     ╎     parentData: <none> (can use size)\n'
       '                     ╎     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     ╎     size: Size(800.0, 400.0)\n'

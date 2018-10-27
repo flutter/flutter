@@ -1,4 +1,5 @@
 {
+  "remainingTextFieldCharacterCountFew": "$remainingCount caractere rămase",
   "selectedRowCountTitleFew": "$selectedRowCount articole selectate",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "HH:mm",
@@ -36,5 +37,21 @@
   "signedInLabel": "V-ați conectat",
   "hideAccountsLabel": "Ascundeți conturile",
   "showAccountsLabel": "Afișați conturile",
-  "modalBarrierDismissLabel": "Închideți"
+  "modalBarrierDismissLabel": "Închideți",
+  "drawerLabel": "Meniu de navigare",
+  "popupMenuLabel": "Meniu pop-up",
+  "dialogLabel": "Casetă de dialog",
+  "alertDialogLabel": "Alertă",
+  "searchFieldLabel": "Căutați",
+  "reorderItemToStart": "Mutați la început",
+  "reorderItemToEnd": "Mutați la sfârșit",
+  "reorderItemUp": "Mutați în sus",
+  "reorderItemDown": "Mutați în jos",
+  "reorderItemLeft": "Mutați la stânga",
+  "reorderItemRight": "Mutați la dreapta",
+  "expandedIconTapHint": "Restrângeți",
+  "collapsedIconTapHint": "Extindeți",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "un caracter rămas",
+  "remainingTextFieldCharacterCountOther": "$remainingCount de caractere rămase"
 }

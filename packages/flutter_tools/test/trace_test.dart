@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/commands/trace.dart';
-import 'package:test/test.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
@@ -13,7 +12,7 @@ import 'src/mocks.dart';
 void main() {
   group('trace', () {
     testUsingContext('returns 1 when no Android device is connected', () async {
-      final TraceCommand command = new TraceCommand();
+      final TraceCommand command = TraceCommand();
       applyMocksToCommand(command);
       try {
         await createTestCommandRunner(command).run(<String>['trace']);

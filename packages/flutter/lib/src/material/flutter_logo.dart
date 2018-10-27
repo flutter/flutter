@@ -21,10 +21,10 @@ class FlutterLogo extends StatelessWidget {
     Key key,
     this.size,
     this.colors,
-    this.textColor: const Color(0xFF616161),
-    this.style: FlutterLogoStyle.markOnly,
-    this.duration: const Duration(milliseconds: 750),
-    this.curve: Curves.fastOutSlowIn,
+    this.textColor = const Color(0xFF616161),
+    this.style = FlutterLogoStyle.markOnly,
+    this.duration = const Duration(milliseconds: 750),
+    this.curve = Curves.fastOutSlowIn,
   }) : super(key: key);
 
   /// The size of the logo in logical pixels.
@@ -70,12 +70,12 @@ class FlutterLogo extends StatelessWidget {
     final IconThemeData iconTheme = IconTheme.of(context);
     final double iconSize = size ?? iconTheme.size;
     final MaterialColor logoColors = colors ?? Colors.blue;
-    return new AnimatedContainer(
+    return AnimatedContainer(
       width: iconSize,
       height: iconSize,
       duration: duration,
       curve: curve,
-      decoration: new FlutterLogoDecoration(
+      decoration: FlutterLogoDecoration(
         lightColor: logoColors.shade400,
         darkColor: logoColors.shade900,
         style: style,

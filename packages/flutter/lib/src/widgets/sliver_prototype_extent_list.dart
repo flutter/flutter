@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -53,11 +52,11 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   @override
   _RenderSliverPrototypeExtentList createRenderObject(BuildContext context) {
     final _SliverPrototypeExtentListElement element = context;
-    return new _RenderSliverPrototypeExtentList(childManager: element);
+    return _RenderSliverPrototypeExtentList(childManager: element);
   }
 
   @override
-  _SliverPrototypeExtentListElement createElement() => new _SliverPrototypeExtentListElement(this);
+  _SliverPrototypeExtentListElement createElement() => _SliverPrototypeExtentListElement(this);
 }
 
 class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
@@ -70,7 +69,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   _RenderSliverPrototypeExtentList get renderObject => super.renderObject;
 
   Element _prototype;
-  static final Object _prototypeSlot = new Object();
+  static final Object _prototypeSlot = Object();
 
   @override
   void insertChildRenderObject(covariant RenderObject child, covariant dynamic slot) {

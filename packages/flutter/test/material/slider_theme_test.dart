@@ -13,31 +13,31 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Slider theme is built by ThemeData', (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    expect(sliderTheme.activeRailColor.value, equals(Colors.red.value));
-    expect(sliderTheme.inactiveRailColor.value, equals(Colors.red.withAlpha(0x3d).value));
+    expect(sliderTheme.activeTrackColor.value, equals(Colors.red.value));
+    expect(sliderTheme.inactiveTrackColor.value, equals(Colors.red.withAlpha(0x3d).value));
   });
 
   testWidgets('Slider uses ThemeData slider theme if present', (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
     Widget buildSlider(SliderThemeData data) {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window),
-          child: new Material(
-            child: new Center(
-              child: new Theme(
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window),
+          child: Material(
+            child: Center(
+              child: Theme(
                 data: theme,
                 child: const Slider(
                   value: 0.5,
@@ -55,30 +55,30 @@ void main() {
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
-    expect(sliderBox, paints..rect(color: sliderTheme.disabledActiveRailColor)..rect(color: sliderTheme.disabledInactiveRailColor));
+    expect(sliderBox, paints..rect(color: sliderTheme.disabledActiveTrackColor)..rect(color: sliderTheme.disabledInactiveTrackColor));
   });
 
   testWidgets('Slider overrides ThemeData theme if SliderTheme present', (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
     final SliderThemeData customTheme = sliderTheme.copyWith(
-      activeRailColor: Colors.purple,
-      inactiveRailColor: Colors.purple.withAlpha(0x3d),
+      activeTrackColor: Colors.purple,
+      inactiveTrackColor: Colors.purple.withAlpha(0x3d),
     );
 
     Widget buildSlider(SliderThemeData data) {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window),
-          child: new Material(
-            child: new Center(
-              child: new Theme(
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window),
+          child: Material(
+            child: Center(
+              child: Theme(
                 data: theme,
-                child: new SliderTheme(
+                child: SliderTheme(
                   data: customTheme,
                   child: const Slider(
                     value: 0.5,
@@ -97,26 +97,26 @@ void main() {
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
-    expect(sliderBox, paints..rect(color: customTheme.disabledActiveRailColor)..rect(color: customTheme.disabledInactiveRailColor));
+    expect(sliderBox, paints..rect(color: customTheme.disabledActiveTrackColor)..rect(color: customTheme.disabledInactiveTrackColor));
   });
 
-  testWidgets('SliderThemeData generates correct opacities for materialDefaults', (WidgetTester tester) async {
-    const Color customColor1 = const Color(0xcafefeed);
-    const Color customColor2 = const Color(0xdeadbeef);
-    const Color customColor3 = const Color(0xdecaface);
-    const Color customColor4 = const Color(0xfeedcafe);
+  testWidgets('SliderThemeData generates correct opacities for fromPrimaryColors', (WidgetTester tester) async {
+    const Color customColor1 = Color(0xcafefeed);
+    const Color customColor2 = Color(0xdeadbeef);
+    const Color customColor3 = Color(0xdecaface);
+    const Color customColor4 = Color(0xfeedcafe);
 
-    final SliderThemeData sliderTheme = new SliderThemeData.fromPrimaryColors(
+    final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
       primaryColor: customColor1,
       primaryColorDark: customColor2,
       primaryColorLight: customColor3,
-      valueIndicatorTextStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor4),
+      valueIndicatorTextStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor4),
     );
 
-    expect(sliderTheme.activeRailColor, equals(customColor1.withAlpha(0xff)));
-    expect(sliderTheme.inactiveRailColor, equals(customColor1.withAlpha(0x3d)));
-    expect(sliderTheme.disabledActiveRailColor, equals(customColor2.withAlpha(0x52)));
-    expect(sliderTheme.disabledInactiveRailColor, equals(customColor2.withAlpha(0x1f)));
+    expect(sliderTheme.activeTrackColor, equals(customColor1.withAlpha(0xff)));
+    expect(sliderTheme.inactiveTrackColor, equals(customColor1.withAlpha(0x3d)));
+    expect(sliderTheme.disabledActiveTrackColor, equals(customColor2.withAlpha(0x52)));
+    expect(sliderTheme.disabledInactiveTrackColor, equals(customColor2.withAlpha(0x1f)));
     expect(sliderTheme.activeTickMarkColor, equals(customColor3.withAlpha(0x8a)));
     expect(sliderTheme.inactiveTickMarkColor, equals(customColor1.withAlpha(0x8a)));
     expect(sliderTheme.disabledActiveTickMarkColor, equals(customColor3.withAlpha(0x1f)));
@@ -125,31 +125,31 @@ void main() {
     expect(sliderTheme.disabledThumbColor, equals(customColor2.withAlpha(0x52)));
     expect(sliderTheme.overlayColor, equals(customColor1.withAlpha(0x29)));
     expect(sliderTheme.valueIndicatorColor, equals(customColor1.withAlpha(0xff)));
-    expect(sliderTheme.thumbShape, equals(const isInstanceOf<RoundSliderThumbShape>()));
-    expect(sliderTheme.valueIndicatorShape, equals(const isInstanceOf<PaddleSliderValueIndicatorShape>()));
+    expect(sliderTheme.thumbShape, equals(isInstanceOf<RoundSliderThumbShape>()));
+    expect(sliderTheme.valueIndicatorShape, equals(isInstanceOf<PaddleSliderValueIndicatorShape>()));
     expect(sliderTheme.showValueIndicator, equals(ShowValueIndicator.onlyForDiscrete));
     expect(sliderTheme.valueIndicatorTextStyle.color, equals(customColor4));
   });
 
   testWidgets('SliderThemeData lerps correctly', (WidgetTester tester) async {
-    final SliderThemeData sliderThemeBlack = new SliderThemeData.fromPrimaryColors(
+    final SliderThemeData sliderThemeBlack = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
       primaryColorLight: Colors.black,
-      valueIndicatorTextStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.black),
+      valueIndicatorTextStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.black),
     );
-    final SliderThemeData sliderThemeWhite = new SliderThemeData.fromPrimaryColors(
+    final SliderThemeData sliderThemeWhite = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.white,
       primaryColorDark: Colors.white,
       primaryColorLight: Colors.white,
-      valueIndicatorTextStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
+      valueIndicatorTextStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
     );
     final SliderThemeData lerp = SliderThemeData.lerp(sliderThemeBlack, sliderThemeWhite, 0.5);
-    const Color middleGrey = const Color(0xff7f7f7f);
-    expect(lerp.activeRailColor, equals(middleGrey.withAlpha(0xff)));
-    expect(lerp.inactiveRailColor, equals(middleGrey.withAlpha(0x3d)));
-    expect(lerp.disabledActiveRailColor, equals(middleGrey.withAlpha(0x52)));
-    expect(lerp.disabledInactiveRailColor, equals(middleGrey.withAlpha(0x1f)));
+    const Color middleGrey = Color(0xff7f7f7f);
+    expect(lerp.activeTrackColor, equals(middleGrey.withAlpha(0xff)));
+    expect(lerp.inactiveTrackColor, equals(middleGrey.withAlpha(0x3d)));
+    expect(lerp.disabledActiveTrackColor, equals(middleGrey.withAlpha(0x52)));
+    expect(lerp.disabledInactiveTrackColor, equals(middleGrey.withAlpha(0x1f)));
     expect(lerp.activeTickMarkColor, equals(middleGrey.withAlpha(0x8a)));
     expect(lerp.inactiveTickMarkColor, equals(middleGrey.withAlpha(0x8a)));
     expect(lerp.disabledActiveTickMarkColor, equals(middleGrey.withAlpha(0x1f)));
@@ -162,7 +162,7 @@ void main() {
   });
 
   testWidgets('Default slider thumb shape draws correctly', (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
     );
@@ -170,18 +170,18 @@ void main() {
     double value = 0.45;
     Widget buildApp({
       int divisions,
-      bool enabled: true,
+      bool enabled = true,
     }) {
       final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window),
-          child: new Material(
-            child: new Center(
-              child: new SliderTheme(
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window),
+          child: Material(
+            child: Center(
+              child: SliderTheme(
                 data: sliderTheme,
-                child: new Slider(
+                child: Slider(
                   value: value,
                   label: '$value',
                   divisions: divisions,
@@ -227,23 +227,23 @@ void main() {
   });
 
   testWidgets('Default slider value indicator shape draws correctly', (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500, showValueIndicator: ShowValueIndicator.always);
     Widget buildApp(String value, {double sliderValue = 0.5, double textScale = 1.0}) {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScale),
-          child: new Material(
-            child: new Row(
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScale),
+          child: Material(
+            child: Row(
               children: <Widget>[
-                new Expanded(
-                  child: new SliderTheme(
+                Expanded(
+                  child: SliderTheme(
                     data: sliderTheme,
-                    child: new Slider(
+                    child: Slider(
                       value: sliderValue,
                       label: '$value',
                       divisions: 3,

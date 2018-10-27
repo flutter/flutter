@@ -9,10 +9,10 @@ import 'package:flutter/rendering.dart';
 void main() {
   testWidgets('GridView default control', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
-          child: new GridView.count(
+        child: Center(
+          child: GridView.count(
             crossAxisCount: 1,
           ),
         ),
@@ -22,19 +22,19 @@ void main() {
 
   // Tests https://github.com/flutter/flutter/issues/5522
   testWidgets('GridView displays correct children with nonzero padding', (WidgetTester tester) async {
-    const EdgeInsets padding = const EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
+    const EdgeInsets padding = EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
 
-    final Widget testWidget = new Directionality(
+    final Widget testWidget = Directionality(
       textDirection: TextDirection.ltr,
-      child: new Align(
-        child: new SizedBox(
+      child: Align(
+        child: SizedBox(
           height: 800.0,
           width: 300.0, // forces the grid children to be 300..300
-          child: new GridView.count(
+          child: GridView.count(
             crossAxisCount: 1,
             padding: padding,
-            children: new List<Widget>.generate(10, (int index) {
-              return new Text('$index', key: new ValueKey<int>(index));
+            children: List<Widget>.generate(10, (int index) {
+              return Text('$index', key: ValueKey<int>(index));
             }).toList(),
           ),
         ),
@@ -80,14 +80,14 @@ void main() {
   testWidgets('GridView.count() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9506
     Widget buildFrame(int itemCount) {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new GridView.count(
+        child: GridView.count(
           crossAxisCount: itemCount,
-          children: new List<Widget>.generate(itemCount, (int index) {
-            return new SizedBox(
+          children: List<Widget>.generate(itemCount, (int index) {
+            return SizedBox(
               height: 200.0,
-              child: new Text('item $index'),
+              child: Text('item $index'),
             );
           }),
         ),

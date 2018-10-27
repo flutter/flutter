@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('toString control test', (WidgetTester tester) async {
-    await tester.pumpWidget(const Center(child: const Text('Hello', textDirection: TextDirection.ltr)));
+    await tester.pumpWidget(const Center(child: Text('Hello', textDirection: TextDirection.ltr)));
     final HitTestResult result = tester.hitTestOnBinding(Offset.zero);
     expect(result, hasOneLineDescription);
     expect(result.path.first, hasOneLineDescription);

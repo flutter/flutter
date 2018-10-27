@@ -13,13 +13,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 class TestServiceExtensionsBinding extends BindingBase
   with ServicesBinding,
        GestureBinding,
        SchedulerBinding,
        PaintingBinding,
+       SemanticsBinding,
        RendererBinding,
        WidgetsBinding {
 
@@ -42,7 +43,7 @@ class TestServiceExtensionsBinding extends BindingBase
   int reassembled = 0;
   bool pendingReassemble = false;
   @override
-  Future<Null> performReassemble() {
+  Future<void> performReassemble() {
     reassembled += 1;
     pendingReassemble = true;
     return super.performReassemble();
@@ -53,7 +54,7 @@ class TestServiceExtensionsBinding extends BindingBase
   void scheduleFrame() {
     frameScheduled = true;
   }
-  Future<Null> doFrame() async {
+  Future<void> doFrame() async {
     frameScheduled = false;
     if (ui.window.onBeginFrame != null)
       ui.window.onBeginFrame(Duration.zero);
@@ -73,8 +74,8 @@ class TestServiceExtensionsBinding extends BindingBase
     pendingReassemble = false;
   }
 
-  Future<Null> flushMicrotasks() {
-    final Completer<Null> completer = new Completer<Null>();
+  Future<void> flushMicrotasks() {
+    final Completer<void> completer = Completer<void>();
     Timer.run(completer.complete);
     return completer.future;
   }
@@ -101,7 +102,7 @@ void main() {
   final List<String> console = <String>[];
 
   test('Service extensions - pretest', () async {
-    binding = new TestServiceExtensionsBinding();
+    binding = TestServiceExtensionsBinding();
     expect(binding.frameScheduled, isTrue);
     await binding.doFrame(); // initial frame scheduled by creating the binding
     expect(binding.frameScheduled, isFalse);
@@ -193,11 +194,11 @@ void main() {
     console.clear();
   });
 
-  test('Service extensions - debugDumpSemanticsTreeInGeometricOrder', () async {
+  test('Service extensions - debugDumpSemanticsTreeInTraversalOrder', () async {
     Map<String, dynamic> result;
 
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpSemanticsTreeInGeometricOrder', <String, String>{});
+    result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
     expect(result, <String, String>{});
     expect(console, <String>['Semantics not collected.']);
     console.clear();
@@ -297,6 +298,35 @@ void main() {
     expect(binding.frameScheduled, isFalse);
   });
 
+  test('Service extensions - profileWidgetBuilds', () async {
+    Map<String, dynamic> result;
+
+    expect(binding.frameScheduled, isFalse);
+    expect(debugProfileBuildsEnabled, false);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(debugProfileBuildsEnabled, false);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{ 'enabled': 'true' });
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(debugProfileBuildsEnabled, true);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(debugProfileBuildsEnabled, true);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{ 'enabled': 'false' });
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(debugProfileBuildsEnabled, false);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(debugProfileBuildsEnabled, false);
+
+    expect(binding.frameScheduled, isFalse);
+  });
+
   test('Service extensions - evict', () async {
     Map<String, dynamic> result;
     bool completed;
@@ -305,7 +335,7 @@ void main() {
     BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) async {
       expect(utf8.decode(message.buffer.asUint8List()), 'test');
       completed = true;
-      return new ByteData(5); // 0x0000000000
+      return ByteData(5); // 0x0000000000
     });
     bool data;
     data = await rootBundle.loadStructuredData<bool>('test', (String value) async { expect(value, '\x00\x00\x00\x00\x00'); return true; });
@@ -327,13 +357,6 @@ void main() {
   test('Service extensions - exit', () async {
     // no test for _calling_ 'exit', because that should terminate the process!
     expect(binding.extensions.containsKey('exit'), isTrue);
-  });
-
-  test('Service extensions - frameworkPresent', () async {
-    Map<String, dynamic> result;
-
-    result = await binding.testExtension('frameworkPresent', <String, String>{});
-    expect(result, <String, String>{});
   });
 
   test('Service extensions - platformOverride', () async {
@@ -461,7 +484,6 @@ void main() {
 
   test('Service extensions - debugWidgetInspector', () async {
     Map<String, dynamic> result;
-
     expect(binding.frameScheduled, isFalse);
     expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
     result = await binding.testExtension('debugWidgetInspector', <String, String>{});
@@ -506,9 +528,12 @@ void main() {
   });
 
   test('Service extensions - posttest', () async {
+    // See widget_inspector_test.dart for tests of the 15 ext.flutter.inspector
+    // service extensions included in this count.
+
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 17);
+    expect(binding.extensions.length, 38);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;

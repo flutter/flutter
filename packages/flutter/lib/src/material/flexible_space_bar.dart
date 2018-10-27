@@ -10,6 +10,18 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 import 'theme.dart';
 
+/// The collapsing effect while the space bar expands or collapses.
+enum CollapseMode {
+  /// The background widget will scroll in a parallax fashion.
+  parallax,
+
+  /// The background widget pin in place until it reaches the min extent.
+  pin,
+
+  /// The background widget will act as normal with no collapsing effect.
+  none,
+}
+
 /// The part of a material design [AppBar] that expands and collapses.
 ///
 /// Most commonly used in in the [SliverAppBar.flexibleSpace] field, a flexible
@@ -34,8 +46,10 @@ class FlexibleSpaceBar extends StatefulWidget {
     Key key,
     this.title,
     this.background,
-    this.centerTitle
-  }) : super(key: key);
+    this.centerTitle,
+    this.collapseMode = CollapseMode.parallax
+  }) : assert(collapseMode != null),
+       super(key: key);
 
   /// The primary contents of the flexible space bar when expanded.
   ///
@@ -52,6 +66,11 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
 
+  /// Collapse effect while scrolling.
+  ///
+  /// Defaults to [CollapseMode.parallax].
+  final CollapseMode collapseMode;
+
   /// Wraps a widget that contains an [AppBar] to convey sizing information down
   /// to the [FlexibleSpaceBar].
   ///
@@ -64,7 +83,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     @required Widget child,
   }) {
     assert(currentExtent != null);
-    return new _FlexibleSpaceBarSettings(
+    return _FlexibleSpaceBarSettings(
       toolbarOpacity: toolbarOpacity ?? 1.0,
       minExtent: minExtent ?? currentExtent,
       maxExtent: maxExtent ?? currentExtent,
@@ -74,7 +93,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   }
 
   @override
-  _FlexibleSpaceBarState createState() => new _FlexibleSpaceBarState();
+  _FlexibleSpaceBarState createState() => _FlexibleSpaceBarState();
 }
 
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
@@ -106,6 +125,19 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     return null;
   }
 
+  double _getCollapsePadding(double t, _FlexibleSpaceBarSettings settings) {
+    switch (widget.collapseMode) {
+      case CollapseMode.pin:
+        return -(settings.maxExtent - settings.currentExtent);
+      case CollapseMode.none:
+        return 0.0;
+      case CollapseMode.parallax:
+        final double deltaExtent = settings.maxExtent - settings.minExtent;
+        return -Tween<double>(begin: 0.0, end: deltaExtent / 4.0).transform(t);
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final _FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(_FlexibleSpaceBarSettings);
@@ -124,15 +156,14 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
       const double fadeEnd = 1.0;
       assert(fadeStart <= fadeEnd);
-      final double opacity = 1.0 - new Interval(fadeStart, fadeEnd).transform(t);
-      final double parallax = new Tween<double>(begin: 0.0, end: deltaExtent / 4.0).lerp(t);
+      final double opacity = 1.0 - Interval(fadeStart, fadeEnd).transform(t);
       if (opacity > 0.0) {
-        children.add(new Positioned(
-          top: -parallax,
+        children.add(Positioned(
+          top: _getCollapsePadding(t, settings),
           left: 0.0,
           right: 0.0,
           height: settings.maxExtent,
-          child: new Opacity(
+          child: Opacity(
             opacity: opacity,
             child: widget.background
           )
@@ -141,6 +172,19 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     }
 
     if (widget.title != null) {
+      Widget title;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          title = widget.title;
+          break;
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.android:
+          title = Semantics(
+            namesRoute: true,
+            child: widget.title,
+          );
+      }
+
       final ThemeData theme = Theme.of(context);
       final double opacity = settings.toolbarOpacity;
       if (opacity > 0.0) {
@@ -149,28 +193,31 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           color: titleStyle.color.withOpacity(opacity)
         );
         final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
-        final double scaleValue = new Tween<double>(begin: 1.5, end: 1.0).lerp(t);
-        final Matrix4 scaleTransform = new Matrix4.identity()
+        final double scaleValue = Tween<double>(begin: 1.5, end: 1.0).transform(t);
+        final Matrix4 scaleTransform = Matrix4.identity()
           ..scale(scaleValue, scaleValue, 1.0);
         final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
-        children.add(new Container(
-          padding: new EdgeInsetsDirectional.only(
+        children.add(Container(
+          padding: EdgeInsetsDirectional.only(
             start: effectiveCenterTitle ? 0.0 : 72.0,
             bottom: 16.0
           ),
-          child: new Transform(
+          child: Transform(
             alignment: titleAlignment,
             transform: scaleTransform,
-            child: new Align(
+            child: Align(
               alignment: titleAlignment,
-              child: new DefaultTextStyle(style: titleStyle, child: widget.title)
+              child: DefaultTextStyle(
+                style: titleStyle,
+                child: title,
+              )
             )
           )
         ));
       }
     }
 
-    return new ClipRect(child: new Stack(children: children));
+    return ClipRect(child: Stack(children: children));
   }
 }
 

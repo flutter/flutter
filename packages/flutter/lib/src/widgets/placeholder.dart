@@ -18,12 +18,12 @@ class _PlaceholderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
     final Rect rect = Offset.zero & size;
-    final Path path = new Path()
+    final Path path = Path()
       ..addRect(rect)
       ..addPolygon(<Offset>[rect.topRight, rect.bottomLeft], false)
       ..addPolygon(<Offset>[rect.topLeft, rect.bottomRight], false);
@@ -53,10 +53,10 @@ class Placeholder extends StatelessWidget {
   /// Creates a widget which draws a box.
   const Placeholder({
     Key key,
-    this.color: const Color(0xFF455A64), // Blue Grey 700
-    this.strokeWidth: 2.0,
-    this.fallbackWidth: 400.0,
-    this.fallbackHeight: 400.0,
+    this.color = const Color(0xFF455A64), // Blue Grey 700
+    this.strokeWidth = 2.0,
+    this.fallbackWidth = 400.0,
+    this.fallbackHeight = 400.0,
   }) : super(key: key);
 
   /// The color to draw the placeholder box.
@@ -83,12 +83,12 @@ class Placeholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new LimitedBox(
+    return LimitedBox(
       maxWidth: fallbackWidth,
       maxHeight: fallbackHeight,
-      child: new CustomPaint(
+      child: CustomPaint(
         size: Size.infinite,
-        foregroundPainter: new _PlaceholderPainter(
+        foregroundPainter: _PlaceholderPainter(
           color: color,
           strokeWidth: strokeWidth,
         ),

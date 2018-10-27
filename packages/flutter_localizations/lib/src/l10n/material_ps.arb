@@ -33,5 +33,21 @@
   "signedInLabel": "ننوتل",
   "hideAccountsLabel": "حسابونه پټ کړئ",
   "showAccountsLabel": "حسابونه ښکاره کړئ",
-  "modalBarrierDismissLabel": "رد کړه"
+  "modalBarrierDismissLabel": "رد کړه",
+  "drawerLabel": "د نیویگیشن مینو",
+  "popupMenuLabel": "د پاپ اپ مینو",
+  "dialogLabel": "خبرې اترې",
+  "alertDialogLabel": "خبرتیا",
+  "searchFieldLabel": "لټون",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

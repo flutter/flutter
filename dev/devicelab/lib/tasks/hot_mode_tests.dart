@@ -16,7 +16,7 @@ import '../framework/utils.dart';
 final Directory _editedFlutterGalleryDir = dir(path.join(Directory.systemTemp.path, 'edited_flutter_gallery'));
 final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'examples/flutter_gallery'));
 
-TaskFunction createHotModeTest({ bool isPreviewDart2: true }) {
+TaskFunction createHotModeTest() {
   return () async {
     final Device device = await devices.workingDevice;
     await device.unlock();
@@ -25,19 +25,15 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: true }) {
     final List<String> options = <String>[
       '--hot', '-d', device.deviceId, '--benchmark', '--verbose', '--resident'
     ];
-    if (isPreviewDart2)
-      options.add('--preview-dart-2');
-    else
-      options.add('--no-preview-dart-2');
     setLocalEngineOptionIfNecessary(options);
     int hotReloadCount = 0;
     Map<String, dynamic> twoReloadsData;
     Map<String, dynamic> freshRestartReloadsData;
-    await inDirectory(flutterDirectory, () async {
+    await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
-      await inDirectory(_editedFlutterGalleryDir, () async {
+      await inDirectory<void>(_editedFlutterGalleryDir, () async {
         if (deviceOperatingSystem == DeviceOperatingSystem.ios)
           await prepareProvisioningCertificates(_editedFlutterGalleryDir.path);
         {
@@ -47,11 +43,11 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: true }) {
               environment: null
           );
 
-          final Completer<Null> stdoutDone = new Completer<Null>();
-          final Completer<Null> stderrDone = new Completer<Null>();
+          final Completer<void> stdoutDone = Completer<void>();
+          final Completer<void> stderrDone = Completer<void>();
           process.stdout
-              .transform(utf8.decoder)
-              .transform(const LineSplitter())
+              .transform<String>(utf8.decoder)
+              .transform<String>(const LineSplitter())
               .listen((String line) {
             if (line.contains('\] Reloaded ')) {
               if (hotReloadCount == 0) {
@@ -76,35 +72,35 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: true }) {
             stdoutDone.complete();
           });
           process.stderr
-              .transform(utf8.decoder)
-              .transform(const LineSplitter())
+              .transform<String>(utf8.decoder)
+              .transform<String>(const LineSplitter())
               .listen((String line) {
             print('stderr: $line');
           }, onDone: () {
             stderrDone.complete();
           });
 
-          await Future.wait<Null>(
-              <Future<Null>>[stdoutDone.future, stderrDone.future]);
+          await Future.wait<void>(
+              <Future<void>>[stdoutDone.future, stderrDone.future]);
           await process.exitCode;
 
           twoReloadsData = json.decode(benchmarkFile.readAsStringSync());
         }
         benchmarkFile.deleteSync();
 
-        // start `flutter run` again to make sure it loads from the previous state
-        // (in case of --preview-dart-2 frontend loads up from previously generated kernel files).
+        // Start `flutter run` again to make sure it loads from the previous
+        // state. Frontend loads up from previously generated kernel files.
         {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
               <String>['run']..addAll(options),
               environment: null
           );
-          final Completer<Null> stdoutDone = new Completer<Null>();
-          final Completer<Null> stderrDone = new Completer<Null>();
+          final Completer<void> stdoutDone = Completer<void>();
+          final Completer<void> stderrDone = Completer<void>();
           process.stdout
-              .transform(utf8.decoder)
-              .transform(const LineSplitter())
+              .transform<String>(utf8.decoder)
+              .transform<String>(const LineSplitter())
               .listen((String line) {
             if (line.contains('\] Reloaded ')) {
               process.stdin.writeln('q');
@@ -114,16 +110,16 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: true }) {
             stdoutDone.complete();
           });
           process.stderr
-              .transform(utf8.decoder)
-              .transform(const LineSplitter())
+              .transform<String>(utf8.decoder)
+              .transform<String>(const LineSplitter())
               .listen((String line) {
             print('stderr: $line');
           }, onDone: () {
             stderrDone.complete();
           });
 
-          await Future.wait<Null>(
-              <Future<Null>>[stdoutDone.future, stderrDone.future]);
+          await Future.wait<void>(
+              <Future<void>>[stdoutDone.future, stderrDone.future]);
           await process.exitCode;
 
           freshRestartReloadsData =
@@ -134,7 +130,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: true }) {
 
 
 
-    return new TaskResult.success(
+    return TaskResult.success(
       <String, dynamic> {
         'hotReloadInitialDevFSSyncMilliseconds': twoReloadsData['hotReloadInitialDevFSSyncMilliseconds'][0],
         'hotRestartMillisecondsToFrame': twoReloadsData['hotRestartMillisecondsToFrame'][0],
@@ -142,6 +138,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: true }) {
         'hotReloadDevFSSyncMilliseconds': twoReloadsData['hotReloadDevFSSyncMilliseconds'][0],
         'hotReloadFlutterReassembleMilliseconds': twoReloadsData['hotReloadFlutterReassembleMilliseconds'][0],
         'hotReloadVMReloadMilliseconds': twoReloadsData['hotReloadVMReloadMilliseconds'][0],
+        'hotReloadMillisecondsToFrameAfterChange' : twoReloadsData['hotReloadMillisecondsToFrame'][1],
         'hotReloadDevFSSyncMillisecondsAfterChange': twoReloadsData['hotReloadDevFSSyncMilliseconds'][1],
         'hotReloadFlutterReassembleMillisecondsAfterChange': twoReloadsData['hotReloadFlutterReassembleMilliseconds'][1],
         'hotReloadVMReloadMillisecondsAfterChange': twoReloadsData['hotReloadVMReloadMilliseconds'][1],
@@ -154,6 +151,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: true }) {
         'hotReloadDevFSSyncMilliseconds',
         'hotReloadFlutterReassembleMilliseconds',
         'hotReloadVMReloadMilliseconds',
+        'hotReloadMillisecondsToFrameAfterChange',
         'hotReloadDevFSSyncMillisecondsAfterChange',
         'hotReloadFlutterReassembleMillisecondsAfterChange',
         'hotReloadVMReloadMillisecondsAfterChange',

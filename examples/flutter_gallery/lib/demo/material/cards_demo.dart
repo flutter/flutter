@@ -5,6 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class TravelDestination {
@@ -25,23 +27,23 @@ class TravelDestination {
 
 final List<TravelDestination> destinations = <TravelDestination>[
   const TravelDestination(
-    assetName: 'top_10_australian_beaches.jpg',
+    assetName: 'places/india_thanjavur_market.png',
     assetPackage: _kGalleryAssetsPackage,
-    title: 'Top 10 Australian beaches',
-    description: const <String>[
+    title: 'Top 10 Cities to Visit in Tamil Nadu',
+    description: <String>[
       'Number 10',
-      'Whitehaven Beach',
-      'Whitsunday Island, Whitsunday Islands',
+      'Thanjavur',
+      'Thanjavur, Tamil Nadu',
     ],
   ),
   const TravelDestination(
-    assetName: 'kangaroo_valley_safari.jpg',
+    assetName: 'places/india_chettinad_silk_maker.png',
     assetPackage: _kGalleryAssetsPackage,
-    title: 'Kangaroo Valley Safari',
-    description: const <String>[
-      '2031 Moss Vale Road',
-      'Kangaroo Valley 2577',
-      'New South Wales',
+    title: 'Artisans of Southern India',
+    description: <String>[
+      'Silk Spinners',
+      'Chettinad',
+      'Sivaganga, Tamil Nadu',
     ],
   )
 ];
@@ -61,37 +63,37 @@ class TravelDestinationItem extends StatelessWidget {
     final TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.subhead;
 
-    return new SafeArea(
+    return SafeArea(
       top: false,
       bottom: false,
-      child: new Container(
+      child: Container(
         padding: const EdgeInsets.all(8.0),
         height: height,
-        child: new Card(
+        child: Card(
           shape: shape,
-          child: new Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               // photo and title
-              new SizedBox(
+              SizedBox(
                 height: 184.0,
-                child: new Stack(
+                child: Stack(
                   children: <Widget>[
-                    new Positioned.fill(
-                      child: new Image.asset(
+                    Positioned.fill(
+                      child: Image.asset(
                         destination.assetName,
                         package: destination.assetPackage,
                         fit: BoxFit.cover,
                       ),
                     ),
-                    new Positioned(
+                    Positioned(
                       bottom: 16.0,
                       left: 16.0,
                       right: 16.0,
-                      child: new FittedBox(
+                      child: FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
-                        child: new Text(destination.title,
+                        child: Text(destination.title,
                           style: titleStyle,
                         ),
                       ),
@@ -100,42 +102,42 @@ class TravelDestinationItem extends StatelessWidget {
                 ),
               ),
               // description and share/explore buttons
-              new Expanded(
-                child: new Padding(
+              Expanded(
+                child: Padding(
                   padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
-                  child: new DefaultTextStyle(
+                  child: DefaultTextStyle(
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
                     style: descriptionStyle,
-                    child: new Column(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         // three line description
-                        new Padding(
+                        Padding(
                           padding: const EdgeInsets.only(bottom: 8.0),
-                          child: new Text(
+                          child: Text(
                             destination.description[0],
                             style: descriptionStyle.copyWith(color: Colors.black54),
                           ),
                         ),
-                        new Text(destination.description[1]),
-                        new Text(destination.description[2]),
+                        Text(destination.description[1]),
+                        Text(destination.description[2]),
                       ],
                     ),
                   ),
                 ),
               ),
               // share, explore buttons
-              new ButtonTheme.bar(
-                child: new ButtonBar(
+              ButtonTheme.bar(
+                child: ButtonBar(
                   alignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    new FlatButton(
+                    FlatButton(
                       child: const Text('SHARE'),
                       textColor: Colors.amber.shade500,
                       onPressed: () { /* do nothing */ },
                     ),
-                    new FlatButton(
+                    FlatButton(
                       child: const Text('EXPLORE'),
                       textColor: Colors.amber.shade500,
                       onPressed: () { /* do nothing */ },
@@ -156,7 +158,7 @@ class CardsDemo extends StatefulWidget {
   static const String routeName = '/material/cards';
 
   @override
-  _CardsDemoState createState() => new _CardsDemoState();
+  _CardsDemoState createState() => _CardsDemoState();
 }
 
 class _CardsDemoState extends State<CardsDemo> {
@@ -164,20 +166,21 @@ class _CardsDemoState extends State<CardsDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('Travel stream'),
         actions: <Widget>[
-          new IconButton(
+          MaterialDemoDocumentationButton(CardsDemo.routeName),
+          IconButton(
             icon: const Icon(Icons.sentiment_very_satisfied),
             onPressed: () {
               setState(() {
                 _shape = _shape != null ? null : const RoundedRectangleBorder(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: const Radius.circular(16.0),
-                    topRight: const Radius.circular(16.0),
-                    bottomLeft: const Radius.circular(2.0),
-                    bottomRight: const Radius.circular(2.0),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    topRight: Radius.circular(16.0),
+                    bottomLeft: Radius.circular(2.0),
+                    bottomRight: Radius.circular(2.0),
                   ),
                 );
               });
@@ -185,13 +188,13 @@ class _CardsDemoState extends State<CardsDemo> {
           ),
         ],
       ),
-      body: new ListView(
+      body: ListView(
         itemExtent: TravelDestinationItem.height,
         padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-        children: destinations.map((TravelDestination destination) {
-          return new Container(
+        children: destinations.map<Widget>((TravelDestination destination) {
+          return Container(
             margin: const EdgeInsets.only(bottom: 8.0),
-            child: new TravelDestinationItem(
+            child: TravelDestinationItem(
               destination: destination,
               shape: _shape,
             ),

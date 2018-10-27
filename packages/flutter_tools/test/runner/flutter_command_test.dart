@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/time.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
@@ -24,17 +24,17 @@ void main() {
     List<int> mockTimes;
 
     setUp(() {
-      cache = new MockCache();
-      clock = new MockClock();
-      usage = new MockUsage();
+      cache = MockCache();
+      clock = MockClock();
+      usage = MockUsage();
       when(usage.isFirstRun).thenReturn(false);
       when(clock.now()).thenAnswer(
-        (Invocation _) => new DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
+        (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
       );
     });
 
     testUsingContext('honors shouldUpdateCache false', () async {
-      final DummyFlutterCommand flutterCommand = new DummyFlutterCommand(shouldUpdateCache: false);
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: false);
       await flutterCommand.run();
       verifyZeroInteractions(cache);
     },
@@ -43,7 +43,7 @@ void main() {
     });
 
     testUsingContext('honors shouldUpdateCache true', () async {
-      final DummyFlutterCommand flutterCommand = new DummyFlutterCommand(shouldUpdateCache: true);
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: true);
       await flutterCommand.run();
       verify(cache.updateAll()).called(1);
     },
@@ -55,12 +55,14 @@ void main() {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
-      final DummyFlutterCommand flutterCommand = new DummyFlutterCommand();
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await flutterCommand.run();
       verify(clock.now()).called(2);
 
       expect(
-        verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
+        verify(usage.sendTiming(
+                captureAny, captureAny, captureAny,
+                label: captureAnyNamed('label'))).captured,
         <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null]
       );
     },
@@ -74,10 +76,12 @@ void main() {
       mockTimes = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand =
-          new DummyFlutterCommand(noUsagePath: true);
+          DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
       verify(clock.now()).called(2);
-      verifyNever(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAny));
+      verifyNever(usage.sendTiming(
+                   any, any, any,
+                   label: anyNamed('label')));
     },
     overrides: <Type, Generator>{
       Clock: () => clock,
@@ -88,20 +92,22 @@ void main() {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
-      final FlutterCommandResult commandResult = new FlutterCommandResult(
+      final FlutterCommandResult commandResult = FlutterCommandResult(
         ExitStatus.success,
         // nulls should be cleaned up.
         timingLabelParts: <String> ['blah1', 'blah2', null, 'blah3'],
-        endTimeOverride: new DateTime.fromMillisecondsSinceEpoch(1500)
+        endTimeOverride: DateTime.fromMillisecondsSinceEpoch(1500)
       );
 
-      final DummyFlutterCommand flutterCommand = new DummyFlutterCommand(
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async => commandResult
       );
       await flutterCommand.run();
       verify(clock.now()).called(2);
       expect(
-        verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
+        verify(usage.sendTiming(
+                captureAny, captureAny, captureAny,
+                label: captureAnyNamed('label'))).captured,
         <dynamic>[
           'flutter',
           'dummy',
@@ -119,8 +125,12 @@ void main() {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
-      final DummyFlutterCommand flutterCommand =
-          new DummyFlutterCommand(commandFunction: () async { throwToolExit('fail'); });
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          throwToolExit('fail');
+          return null; // unreachable
+        },
+      );
 
       try {
         await flutterCommand.run();
@@ -130,8 +140,15 @@ void main() {
         verify(clock.now()).called(2);
 
         expect(
-          verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
-          <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), 'fail']
+          verify(usage.sendTiming(
+                  captureAny, captureAny, captureAny,
+                  label: captureAnyNamed('label'))).captured,
+          <dynamic>[
+            'flutter',
+            'dummy',
+            const Duration(milliseconds: 1000),
+            'fail'
+          ]
         );
       }
     },
@@ -144,13 +161,13 @@ void main() {
 
 }
 
-typedef Future<FlutterCommandResult> CommandFunction();
+typedef CommandFunction = Future<FlutterCommandResult> Function();
 
 class DummyFlutterCommand extends FlutterCommand {
 
   DummyFlutterCommand({
-    this.shouldUpdateCache : false,
-    this.noUsagePath : false,
+    this.shouldUpdateCache  = false,
+    this.noUsagePath  = false,
     this.commandFunction,
   });
 
@@ -171,7 +188,7 @@ class DummyFlutterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    return commandFunction == null ? null : commandFunction();
+    return commandFunction == null ? null : await commandFunction();
   }
 }
 

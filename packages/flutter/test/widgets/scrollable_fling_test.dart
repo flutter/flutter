@@ -5,27 +5,26 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
-const TextStyle testFont = const TextStyle(
-  color: const Color(0xFF00FF00),
+const TextStyle testFont = TextStyle(
+  color: Color(0xFF00FF00),
   fontFamily: 'Ahem',
 );
 
-Future<Null> pumpTest(WidgetTester tester, TargetPlatform platform) async {
-  await tester.pumpWidget(new Container());
-  await tester.pumpWidget(new MaterialApp(
-    theme: new ThemeData(
+Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
+  await tester.pumpWidget(Container());
+  await tester.pumpWidget(MaterialApp(
+    theme: ThemeData(
       platform: platform,
     ),
-    home: new Container(
+    home: Container(
       color: const Color(0xFF111111),
-      child: new ListView.builder(
+      child: ListView.builder(
         itemBuilder: (BuildContext context, int index) {
-          return new Text('$index', style: testFont);
+          return Text('$index', style: testFont);
         },
       ),
     ),
   ));
-  return null;
 }
 
 const double dragOffset = 213.82;
@@ -46,9 +45,10 @@ void main() {
 
     await pumpTest(tester, TargetPlatform.iOS);
     await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
-    expect(getCurrentOffset(), dragOffset);
+    // Scroll starts ease into the scroll on iOS.
+    expect(getCurrentOffset(), moreOrLessEquals(210.71026666666666));
     await tester.pump(); // trigger fling
-    expect(getCurrentOffset(), dragOffset);
+    expect(getCurrentOffset(), moreOrLessEquals(210.71026666666666));
     await tester.pump(const Duration(seconds: 5));
     final double result2 = getCurrentOffset();
 
@@ -60,11 +60,11 @@ void main() {
 
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 250; i += 1)
-      textWidgets.add(new GestureDetector(onTap: () { log.add('tap $i'); }, child: new Text('$i', style: testFont)));
+      textWidgets.add(GestureDetector(onTap: () { log.add('tap $i'); }, child: Text('$i', style: testFont)));
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(children: textWidgets)
+        child: ListView(children: textWidgets)
       ),
     );
 
@@ -88,11 +88,11 @@ void main() {
 
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 250; i += 1)
-      textWidgets.add(new GestureDetector(onTap: () { log.add('tap $i'); }, child: new Text('$i', style: testFont)));
+      textWidgets.add(GestureDetector(onTap: () { log.add('tap $i'); }, child: Text('$i', style: testFont)));
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(children: textWidgets)
+        child: ListView(children: textWidgets)
       ),
     );
 

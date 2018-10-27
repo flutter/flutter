@@ -7,34 +7,41 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('Sliver appbars - floating and pinned - second app bar stacks below', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: const MediaQueryData(),
-          child: new CustomScrollView(
-            controller: controller,
-            slivers: const <Widget>[
-              const SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: const Text('A')),
-              const SliverAppBar(primary: false, pinned: true, title: const Text('B')),
-              const SliverList(
-                delegate: const SliverChildListDelegate(
-                  const <Widget>[
-                    const Text('C'),
-                    const Text('D'),
-                    const SizedBox(height: 500.0),
-                    const Text('E'),
-                    const SizedBox(height: 500.0),
-                  ],
+      Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: CustomScrollView(
+              controller: controller,
+              slivers: const <Widget>[
+                SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: Text('A')),
+                SliverAppBar(primary: false, pinned: true, title: Text('B')),
+                SliverList(
+                  delegate: SliverChildListDelegate(
+                    <Widget>[
+                      Text('C'),
+                      Text('D'),
+                      SizedBox(height: 500.0),
+                      Text('E'),
+                      SizedBox(height: 500.0),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
-    const Offset textPositionInAppBar = const Offset(16.0, 18.0);
+    const Offset textPositionInAppBar = Offset(16.0, 18.0);
     expect(tester.getTopLeft(find.text('A')), textPositionInAppBar);
     // top app bar is 200.0 high at this point
     expect(tester.getTopLeft(find.text('B')), const Offset(0.0, 200.0) + textPositionInAppBar);
@@ -57,6 +64,6 @@ void main() {
     // we have scrolled 600.0 pixels
     // initial position of E was 200 + 56 + cSize.height + cSize.height + 500
     // we've scrolled that up by 600.0, meaning it's at that minus 600 now:
-    expect(tester.getTopLeft(find.text('E')), new Offset(0.0, 200.0 + 56.0 + cSize.height * 2.0 + 500.0 - 600.0));
+    expect(tester.getTopLeft(find.text('E')), Offset(0.0, 200.0 + 56.0 + cSize.height * 2.0 + 500.0 - 600.0));
   });
 }

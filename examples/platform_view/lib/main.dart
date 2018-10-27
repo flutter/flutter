@@ -8,15 +8,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(new PlatformView());
+  runApp(PlatformView());
 }
 
 class PlatformView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'Platform View',
-      theme: new ThemeData(
+      theme: ThemeData(
         primarySwatch: Colors.grey,
       ),
       home: const MyHomePage(title: 'Platform View'),
@@ -30,12 +30,12 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => new _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   static const MethodChannel _methodChannel =
-      const MethodChannel('samples.flutter.io/platform_view');
+      MethodChannel('samples.flutter.io/platform_view');
 
   int _counter = 0;
 
@@ -45,7 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<Null> _launchPlatformCount() async {
+  Future<void> _launchPlatformCount() async {
     final int platformCounter =
         await _methodChannel.invokeMethod('switchView', _counter);
     setState(() {
@@ -54,25 +54,25 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) => new Scaffold(
-        appBar: new AppBar(
-          title: new Text(widget.title),
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
         ),
-        body: new Column(
+        body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            new Expanded(
-              child: new Center(
-                child: new Column(
+            Expanded(
+              child: Center(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    new Text(
+                    Text(
                       'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
                       style: const TextStyle(fontSize: 17.0),
                     ),
-                    new Padding(
+                    Padding(
                       padding: const EdgeInsets.all(18.0),
-                      child: new RaisedButton(
+                      child: RaisedButton(
                           child: Platform.isIOS
                               ? const Text('Continue in iOS view')
                               : const Text('Continue in Android view'),
@@ -82,22 +82,22 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             ),
-            new Container(
+            Container(
               padding: const EdgeInsets.only(bottom: 15.0, left: 5.0),
-              child: new Row(
+              child: Row(
                 children: <Widget>[
-                  new Image.asset('assets/flutter-mark-square-64.png',
+                  Image.asset('assets/flutter-mark-square-64.png',
                       scale: 1.5),
                   const Text(
                     'Flutter',
-                    style: const TextStyle(fontSize: 30.0),
+                    style: TextStyle(fontSize: 30.0),
                   ),
                 ],
               ),
             ),
           ],
         ),
-        floatingActionButton: new FloatingActionButton(
+        floatingActionButton: FloatingActionButton(
           onPressed: _incrementCounter,
           tooltip: 'Increment',
           child: const Icon(Icons.add),

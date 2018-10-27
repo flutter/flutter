@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'app.dart' show CupertinoApp;
 import 'route.dart';
 
 /// A single tab view with its own [Navigator] state and history.
@@ -29,20 +29,25 @@ import 'route.dart';
 /// These navigation properties are not shared with any sibling [CupertinoTabView]
 /// nor any ancestor or descendant [Navigator] instances.
 ///
+/// To push a route above this [CupertinoTabView] instead of inside it (such
+/// as when showing a dialog on top of all tabs), use
+/// `Navigator.of(rootNavigator: true)`.
+///
 /// See also:
 ///
 ///  * [CupertinoTabScaffold], a typical host that supports switching between tabs.
 ///  * [CupertinoPageRoute], a typical modal page route pushed onto the
 ///    [CupertinoTabView]'s [Navigator].
-class CupertinoTabView extends StatelessWidget {
+class CupertinoTabView extends StatefulWidget {
   /// Creates the content area for a tab in a [CupertinoTabScaffold].
   const CupertinoTabView({
     Key key,
     this.builder,
+    this.defaultTitle,
     this.routes,
     this.onGenerateRoute,
     this.onUnknownRoute,
-    this.navigatorObservers: const <NavigatorObserver>[],
+    this.navigatorObservers = const <NavigatorObserver>[],
   }) : assert(navigatorObservers != null),
        super(key: key);
 
@@ -52,6 +57,9 @@ class CupertinoTabView extends StatelessWidget {
   /// If a [builder] is specified, then [routes] must not include an entry for `/`,
   /// as [builder] takes its place.
   final WidgetBuilder builder;
+
+  /// The title of the default route.
+  final String defaultTitle;
 
   /// This tab view's routing table.
   ///
@@ -95,36 +103,69 @@ class CupertinoTabView extends StatelessWidget {
   final List<NavigatorObserver> navigatorObservers;
 
   @override
+  _CupertinoTabViewState createState() {
+    return _CupertinoTabViewState();
+  }
+}
+
+class _CupertinoTabViewState extends State<CupertinoTabView> {
+  HeroController _heroController;
+  List<NavigatorObserver> _navigatorObservers;
+
+  @override
+  void initState() {
+    super.initState();
+    _heroController = CupertinoApp.createCupertinoHeroController();
+    _updateObservers();
+  }
+
+  @override
+   void didUpdateWidget(CupertinoTabView oldWidget) {
+     super.didUpdateWidget(oldWidget);
+     _updateObservers();
+  }
+
+  void _updateObservers() {
+    _navigatorObservers =
+        List<NavigatorObserver>.from(widget.navigatorObservers)
+          ..add(_heroController);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return new Navigator(
+    return Navigator(
       onGenerateRoute: _onGenerateRoute,
       onUnknownRoute: _onUnknownRoute,
-      observers: navigatorObservers,
+      observers: _navigatorObservers,
     );
   }
 
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
     final String name = settings.name;
     WidgetBuilder routeBuilder;
-    if (name == Navigator.defaultRouteName && builder != null)
-      routeBuilder = builder;
-    else if (routes != null)
-      routeBuilder = routes[name];
+    String title;
+    if (name == Navigator.defaultRouteName && widget.builder != null) {
+      routeBuilder = widget.builder;
+      title = widget.defaultTitle;
+    }
+    else if (widget.routes != null)
+      routeBuilder = widget.routes[name];
     if (routeBuilder != null) {
-      return new CupertinoPageRoute<dynamic>(
+      return CupertinoPageRoute<dynamic>(
         builder: routeBuilder,
+        title: title,
         settings: settings,
       );
     }
-    if (onGenerateRoute != null)
-      return onGenerateRoute(settings);
+    if (widget.onGenerateRoute != null)
+      return widget.onGenerateRoute(settings);
     return null;
   }
 
   Route<dynamic> _onUnknownRoute(RouteSettings settings) {
     assert(() {
-      if (onUnknownRoute == null) {
-        throw new FlutterError(
+      if (widget.onUnknownRoute == null) {
+        throw FlutterError(
           'Could not find a generator for route $settings in the $runtimeType.\n'
           'Generators for routes are searched for in the following order:\n'
           ' 1. For the "/" route, the "builder" property, if non-null, is used.\n'
@@ -138,10 +179,10 @@ class CupertinoTabView extends StatelessWidget {
       }
       return true;
     }());
-    final Route<dynamic> result = onUnknownRoute(settings);
+    final Route<dynamic> result = widget.onUnknownRoute(settings);
     assert(() {
       if (result == null) {
-        throw new FlutterError(
+        throw FlutterError(
           'The onUnknownRoute callback returned null.\n'
           'When the $runtimeType requested the route $settings from its '
           'onUnknownRoute callback, the callback returned null. Such callbacks '

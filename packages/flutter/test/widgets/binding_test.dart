@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-class MemoryPressureObserver extends WidgetsBindingObserver {
+class MemoryPressureObserver with WidgetsBindingObserver {
   bool sawMemoryPressure = false;
 
   @override
@@ -17,7 +17,7 @@ class MemoryPressureObserver extends WidgetsBindingObserver {
   }
 }
 
-class AppLifecycleStateObserver extends WidgetsBindingObserver {
+class AppLifecycleStateObserver with WidgetsBindingObserver {
   AppLifecycleState lifecycleState;
 
   @override
@@ -26,7 +26,7 @@ class AppLifecycleStateObserver extends WidgetsBindingObserver {
   }
 }
 
-class PushRouteObserver extends WidgetsBindingObserver {
+class PushRouteObserver with WidgetsBindingObserver {
   String pushedRoute;
 
   @override
@@ -42,7 +42,7 @@ void main() {
   });
 
   testWidgets('didHaveMemoryPressure callback', (WidgetTester tester) async {
-    final MemoryPressureObserver observer = new MemoryPressureObserver();
+    final MemoryPressureObserver observer = MemoryPressureObserver();
     WidgetsBinding.instance.addObserver(observer);
     final ByteData message = const JSONMessageCodec().encodeMessage(
       <String, dynamic>{'type': 'memoryPressure'});
@@ -52,7 +52,7 @@ void main() {
   });
 
   testWidgets('handleLifecycleStateChanged callback', (WidgetTester tester) async {
-    final AppLifecycleStateObserver observer = new AppLifecycleStateObserver();
+    final AppLifecycleStateObserver observer = AppLifecycleStateObserver();
     WidgetsBinding.instance.addObserver(observer);
 
     ByteData message = const StringCodec().encodeMessage('AppLifecycleState.paused');
@@ -73,7 +73,7 @@ void main() {
   });
 
   testWidgets('didPushRoute callback', (WidgetTester tester) async {
-    final PushRouteObserver observer = new PushRouteObserver();
+    final PushRouteObserver observer = PushRouteObserver();
     WidgetsBinding.instance.addObserver(observer);
 
     const String testRouteName = 'testRouteName';

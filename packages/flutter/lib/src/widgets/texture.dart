@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/foundation.dart';
 import 'framework.dart';
 
 /// A rectangle upon which a backend texture is mapped.
@@ -41,7 +40,7 @@ class Texture extends LeafRenderObjectWidget {
   final int textureId;
 
   @override
-  TextureBox createRenderObject(BuildContext context) => new TextureBox(textureId: textureId);
+  TextureBox createRenderObject(BuildContext context) => TextureBox(textureId: textureId);
 
   @override
   void updateRenderObject(BuildContext context, TextureBox renderObject) {

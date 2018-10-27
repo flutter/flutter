@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,14 +14,14 @@ List<int> dismissedItems = <int>[];
 Widget background;
 const double crossAxisEndOffset = 0.5;
 
-Widget buildTest({ double startToEndThreshold, TextDirection textDirection: TextDirection.ltr }) {
-  return new Directionality(
+Widget buildTest({ double startToEndThreshold, TextDirection textDirection = TextDirection.ltr }) {
+  return Directionality(
     textDirection: textDirection,
-    child: new StatefulBuilder(
+    child: StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         Widget buildDismissibleItem(int item) {
-          return new Dismissible(
-            key: new ValueKey<int>(item),
+          return Dismissible(
+            key: ValueKey<int>(item),
             direction: dismissDirection,
             onDismissed: (DismissDirection direction) {
               setState(() {
@@ -39,22 +38,22 @@ Widget buildTest({ double startToEndThreshold, TextDirection textDirection: Text
                 ? <DismissDirection, double>{}
                 : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
             crossAxisEndOffset: crossAxisEndOffset,
-            child: new Container(
+            child: Container(
               width: itemExtent,
               height: itemExtent,
-              child: new Text(item.toString()),
+              child: Text(item.toString()),
             ),
           );
         }
 
-        return new Container(
+        return Container(
           padding: const EdgeInsets.all(10.0),
-          child: new ListView(
+          child: ListView(
             scrollDirection: scrollDirection,
             itemExtent: itemExtent,
             children: <int>[0, 1, 2, 3, 4]
               .where((int i) => !dismissedItems.contains(i))
-              .map(buildDismissibleItem).toList(),
+              .map<Widget>(buildDismissibleItem).toList(),
           ),
         );
       },
@@ -62,9 +61,9 @@ Widget buildTest({ double startToEndThreshold, TextDirection textDirection: Text
   );
 }
 
-typedef Future<Null> DismissMethod(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection });
+typedef DismissMethod = Future<void> Function(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection });
 
-Future<Null> dismissElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection }) async {
+Future<void> dismissElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection }) async {
   Offset downLocation;
   Offset upLocation;
   switch (gestureDirection) {
@@ -99,7 +98,7 @@ Future<Null> dismissElement(WidgetTester tester, Finder finder, { @required Axis
   await gesture.up();
 }
 
-Future<Null> flingElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection, double initialOffsetFactor: 0.0 }) async {
+Future<void> flingElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection, double initialOffsetFactor = 0.0 }) async {
   Offset delta;
   switch (gestureDirection) {
     case AxisDirection.left:
@@ -120,7 +119,7 @@ Future<Null> flingElement(WidgetTester tester, Finder finder, { @required AxisDi
   await tester.fling(finder, delta, 1000.0, initialOffset: delta * initialOffsetFactor);
 }
 
-Future<Null> flingElementFromZero(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection }) async {
+Future<void> flingElementFromZero(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection }) async {
   // This is a special case where we drag in one direction, then fling back so
   // that at the point of release, we're at exactly the point at which we
   // started, but with velocity. This is needed to check a boundary condition
@@ -128,9 +127,9 @@ Future<Null> flingElementFromZero(WidgetTester tester, Finder finder, { @require
   await flingElement(tester, finder, gestureDirection: gestureDirection, initialOffsetFactor: -1.0);
 }
 
-Future<Null> dismissItem(WidgetTester tester, int item, {
+Future<void> dismissItem(WidgetTester tester, int item, {
   @required AxisDirection gestureDirection,
-  DismissMethod mechanism: dismissElement,
+  DismissMethod mechanism = dismissElement,
 }) async {
   assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
@@ -145,9 +144,9 @@ Future<Null> dismissItem(WidgetTester tester, int item, {
   await tester.pump(); // rebuild after the callback removes the entry
 }
 
-Future<Null> checkFlingItemBeforeMovementEnd(WidgetTester tester, int item, {
+Future<void> checkFlingItemBeforeMovementEnd(WidgetTester tester, int item, {
   @required AxisDirection gestureDirection,
-  DismissMethod mechanism: rollbackElement
+  DismissMethod mechanism = rollbackElement
 }) async {
   assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
@@ -159,9 +158,9 @@ Future<Null> checkFlingItemBeforeMovementEnd(WidgetTester tester, int item, {
   await tester.pump(const Duration(milliseconds: 100));
 }
 
-Future<Null> checkFlingItemAfterMovement(WidgetTester tester, int item, {
+Future<void> checkFlingItemAfterMovement(WidgetTester tester, int item, {
   @required AxisDirection gestureDirection,
-  DismissMethod mechanism: rollbackElement
+  DismissMethod mechanism = rollbackElement
 }) async {
   assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
@@ -173,7 +172,7 @@ Future<Null> checkFlingItemAfterMovement(WidgetTester tester, int item, {
   await tester.pump(const Duration(milliseconds: 300));
 }
 
-Future<Null> rollbackElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection, double initialOffsetFactor: 0.0 }) async {
+Future<void> rollbackElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection, double initialOffsetFactor = 0.0 }) async {
   Offset delta;
   switch (gestureDirection) {
     case AxisDirection.left:
@@ -199,11 +198,11 @@ class Test1215DismissibleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Dismissible(
-      key: new ObjectKey(text),
-      child: new AspectRatio(
+    return Dismissible(
+      key: ObjectKey(text),
+      child: AspectRatio(
         aspectRatio: 1.0,
-        child: new Text(text),
+        child: Text(text),
       ),
     );
   }
@@ -539,7 +538,7 @@ void main() {
 
     await tester.pumpWidget(buildTest());
     final Offset location = tester.getTopLeft(find.text('0'));
-    const Offset offset = const Offset(0.0, 5.0);
+    const Offset offset = Offset(0.0, 5.0);
     final TestGesture gesture = await tester.startGesture(location, pointer: 5);
     await gesture.moveBy(offset);
     await tester.pumpWidget(buildTest());
@@ -560,16 +559,16 @@ void main() {
   // Dismissible contract. This is not an example of good practice.
   testWidgets('dismissing bottom then top (smoketest)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
-          child: new Container(
+        child: Center(
+          child: Container(
             width: 100.0,
             height: 1000.0,
-            child: new Column(
+            child: Column(
               children: const <Widget>[
-                const Test1215DismissibleWidget('1'),
-                const Test1215DismissibleWidget('2'),
+                Test1215DismissibleWidget('1'),
+                Test1215DismissibleWidget('2'),
               ],
             ),
           ),

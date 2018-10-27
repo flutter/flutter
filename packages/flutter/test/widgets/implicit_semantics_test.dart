@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlag;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -13,18 +11,18 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Implicit Semantics merge behavior', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Semantics(
+        child: Semantics(
           container: true,
           explicitChildNodes: false,
-          child: new Column(
+          child: Column(
             children: const <Widget>[
-              const Text('Michael Goderbauer'),
-              const Text('goderbauer@google.com'),
+              Text('Michael Goderbauer'),
+              Text('goderbauer@google.com'),
             ],
           ),
         ),
@@ -36,9 +34,9 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-        new TestSemantics.root(
+        TestSemantics.root(
           children: <TestSemantics>[
-            new TestSemantics.rootChild(
+            TestSemantics.rootChild(
               id: 1,
               label: 'Michael Goderbauer\ngoderbauer@google.com',
             ),
@@ -50,15 +48,15 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Semantics(
+        child: Semantics(
           container: true,
           explicitChildNodes: true,
-          child: new Column(
+          child: Column(
             children: const <Widget>[
-              const Text('Michael Goderbauer'),
-              const Text('goderbauer@google.com'),
+              Text('Michael Goderbauer'),
+              Text('goderbauer@google.com'),
             ],
           ),
         ),
@@ -72,19 +70,17 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-        new TestSemantics.root(
+        TestSemantics.root(
           children: <TestSemantics>[
-            new TestSemantics.rootChild(
+            TestSemantics.rootChild(
               id: 1,
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   id: 2,
-                  nextNodeId: 3,
                   label: 'Michael Goderbauer',
                 ),
-                new TestSemantics(
+                TestSemantics(
                   id: 3,
-                  previousNodeId: 2,
                   label: 'goderbauer@google.com',
                 ),
               ],
@@ -97,17 +93,17 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Semantics(
+        child: Semantics(
           container: true,
           explicitChildNodes: true,
-          child: new Semantics(
+          child: Semantics(
             label: 'Signed in as',
-            child: new Column(
+            child: Column(
               children: const <Widget>[
-                const Text('Michael Goderbauer'),
-                const Text('goderbauer@google.com'),
+                Text('Michael Goderbauer'),
+                Text('goderbauer@google.com'),
               ],
             ),
           ),
@@ -121,12 +117,12 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-        new TestSemantics.root(
+        TestSemantics.root(
           children: <TestSemantics>[
-            new TestSemantics.rootChild(
+            TestSemantics.rootChild(
               id: 1,
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   id: 4,
                   label: 'Signed in as\nMichael Goderbauer\ngoderbauer@google.com',
                 ),
@@ -140,17 +136,17 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Semantics(
+        child: Semantics(
           container: true,
           explicitChildNodes: false,
-          child: new Semantics(
+          child: Semantics(
             label: 'Signed in as',
-            child: new Column(
+            child: Column(
               children: const <Widget>[
-                const Text('Michael Goderbauer'),
-                const Text('goderbauer@google.com'),
+                Text('Michael Goderbauer'),
+                Text('goderbauer@google.com'),
               ],
             ),
           ),
@@ -163,9 +159,9 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-        new TestSemantics.root(
+        TestSemantics.root(
           children: <TestSemantics>[
-            new TestSemantics.rootChild(
+            TestSemantics.rootChild(
               id: 1,
               label: 'Signed in as\nMichael Goderbauer\ngoderbauer@google.com',
             ),
@@ -180,36 +176,36 @@ void main() {
   });
 
   testWidgets('Do not merge with conflicts', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Semantics(
+        child: Semantics(
           container: true,
           explicitChildNodes: false,
-          child: new Column(
+          child: Column(
             children: <Widget>[
-              new Semantics(
+              Semantics(
                 label: 'node 1',
                 selected: true,
-                child: new Container(
+                child: Container(
                   width: 10.0,
                   height: 10.0,
                 ),
               ),
-              new Semantics(
+              Semantics(
                 label: 'node 2',
                 selected: true,
-                child: new Container(
+                child: Container(
                   width: 10.0,
                   height: 10.0,
                 ),
               ),
-              new Semantics(
+              Semantics(
                 label: 'node 3',
                 selected: true,
-                child: new Container(
+                child: Container(
                   width: 10.0,
                   height: 10.0,
                 ),
@@ -228,27 +224,23 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-        new TestSemantics.root(
+        TestSemantics.root(
           children: <TestSemantics>[
-            new TestSemantics.rootChild(
+            TestSemantics.rootChild(
               id: 5,
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   id: 6,
-                  nextNodeId: 7,
                   flags: SemanticsFlag.isSelected.index,
                   label: 'node 1',
                 ),
-                new TestSemantics(
+                TestSemantics(
                   id: 7,
-                  previousNodeId: 6,
-                  nextNodeId: 8,
                   flags: SemanticsFlag.isSelected.index,
                   label: 'node 2',
                 ),
-                new TestSemantics(
+                TestSemantics(
                   id: 8,
-                  previousNodeId: 7,
                   flags: SemanticsFlag.isSelected.index,
                   label: 'node 3',
                 ),

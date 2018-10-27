@@ -34,5 +34,21 @@
   "viewLicensesButtonLabel": "LIZENZEN ANZEIGEN",
   "anteMeridiemAbbreviation": "VORM.",
   "postMeridiemAbbreviation": "NACHM.",
-  "modalBarrierDismissLabel": "Schließen"
+  "modalBarrierDismissLabel": "Schließen",
+  "drawerLabel": "Navigationsmenü",
+  "popupMenuLabel": "Pop-up-Menü",
+  "dialogLabel": "Dialogfeld",
+  "alertDialogLabel": "Benachrichtigung",
+  "searchFieldLabel": "Suchen",
+  "reorderItemToStart": "An den Anfang verschieben",
+  "reorderItemToEnd": "An das Ende verschieben",
+  "reorderItemUp": "Nach oben verschieben",
+  "reorderItemDown": "Nach unten verschieben",
+  "reorderItemLeft": "Nach links verschieben",
+  "reorderItemRight": "Nach rechts verschieben",
+  "expandedIconTapHint": "Minimieren",
+  "collapsedIconTapHint": "Maximieren",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Noch 1 Zeichen",
+  "remainingTextFieldCharacterCountOther": "Noch $remainingCount Zeichen"
 }

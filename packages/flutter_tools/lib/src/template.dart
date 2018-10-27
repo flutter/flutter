@@ -53,19 +53,20 @@ class Template {
   factory Template.fromName(String name) {
     // All named templates are placed in the 'templates' directory
     final Directory templateDir = templateDirectoryInPackage(name);
-    return new Template(templateDir, templateDir);
+    return Template(templateDir, templateDir);
   }
 
   static const String templateExtension = '.tmpl';
   static const String copyTemplateExtension = '.copy.tmpl';
-  final Pattern _kTemplateLanguageVariant = new RegExp(r'(\w+)-(\w+)\.tmpl.*');
+  final Pattern _kTemplateLanguageVariant = RegExp(r'(\w+)-(\w+)\.tmpl.*');
 
   Map<String /* relative */, String /* absolute source */> _templateFilePaths;
 
   int render(
     Directory destination,
     Map<String, dynamic> context, {
-    bool overwriteExisting: true,
+    bool overwriteExisting = true,
+    bool printStatusWhenWriting = true,
   }) {
     destination.createSync(recursive: true);
     int fileCount = 0;
@@ -106,6 +107,10 @@ class Template {
     }
 
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
+      final bool withRootModule = context['withRootModule'] ?? false;
+      if (!withRootModule && absoluteSourcePath.contains('flutter_root'))
+        return;
+
       final String finalDestinationPath = renderPath(relativeDestinationPath);
       if (finalDestinationPath == null)
         return;
@@ -117,14 +122,17 @@ class Template {
       if (finalDestinationFile.existsSync()) {
         if (overwriteExisting) {
           finalDestinationFile.deleteSync(recursive: true);
-          printStatus('  $relativePathForLogging (overwritten)');
+          if (printStatusWhenWriting)
+            printStatus('  $relativePathForLogging (overwritten)');
         } else {
           // The file exists but we cannot overwrite it, move on.
-          printTrace('  $relativePathForLogging (existing - skipped)');
+          if (printStatusWhenWriting)
+            printTrace('  $relativePathForLogging (existing - skipped)');
           return;
         }
       } else {
-        printStatus('  $relativePathForLogging (created)');
+        if (printStatusWhenWriting)
+          printStatus('  $relativePathForLogging (created)');
       }
 
       fileCount++;
@@ -146,7 +154,7 @@ class Template {
 
       if (sourceFile.path.endsWith(templateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
-        final String renderedContents = new mustache.Template(templateContents).renderString(context);
+        final String renderedContents = mustache.Template(templateContents).renderString(context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
 

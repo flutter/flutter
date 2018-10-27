@@ -19,41 +19,41 @@ class NotEquals {
 
 void main() {
   testWidgets('Keys', (WidgetTester tester) async {
-    expect(new ValueKey<int>(nonconst(3)) == new ValueKey<int>(nonconst(3)), isTrue);
-    expect(new ValueKey<num>(nonconst(3)) == new ValueKey<int>(nonconst(3)), isFalse);
-    expect(new ValueKey<int>(nonconst(3)) == new ValueKey<int>(nonconst(2)), isFalse);
+    expect(ValueKey<int>(nonconst(3)) == ValueKey<int>(nonconst(3)), isTrue);
+    expect(ValueKey<num>(nonconst(3)) == ValueKey<int>(nonconst(3)), isFalse);
+    expect(ValueKey<int>(nonconst(3)) == ValueKey<int>(nonconst(2)), isFalse);
     expect(const ValueKey<double>(double.nan) == const ValueKey<double>(double.nan), isFalse);
 
-    expect(new Key(nonconst('')) == new ValueKey<String>(nonconst('')), isTrue);
-    expect(new ValueKey<String>(nonconst('')) == new ValueKey<String>(nonconst('')), isTrue);
-    expect(new TestValueKey<String>(nonconst('')) == new ValueKey<String>(nonconst('')), isFalse);
-    expect(new TestValueKey<String>(nonconst('')) == new TestValueKey<String>(nonconst('')), isTrue);
+    expect(Key(nonconst('')) == ValueKey<String>(nonconst('')), isTrue);
+    expect(ValueKey<String>(nonconst('')) == ValueKey<String>(nonconst('')), isTrue);
+    expect(TestValueKey<String>(nonconst('')) == ValueKey<String>(nonconst('')), isFalse);
+    expect(TestValueKey<String>(nonconst('')) == TestValueKey<String>(nonconst('')), isTrue);
 
-    expect(new ValueKey<String>(nonconst('')) == new ValueKey<dynamic>(nonconst('')), isFalse);
-    expect(new TestValueKey<String>(nonconst('')) == new TestValueKey<dynamic>(nonconst('')), isFalse);
+    expect(ValueKey<String>(nonconst('')) == ValueKey<dynamic>(nonconst('')), isFalse);
+    expect(TestValueKey<String>(nonconst('')) == TestValueKey<dynamic>(nonconst('')), isFalse);
 
-    expect(new UniqueKey() == new UniqueKey(), isFalse);
-    final LocalKey k = new UniqueKey();
-    expect(new UniqueKey() == new UniqueKey(), isFalse);
+    expect(UniqueKey() == UniqueKey(), isFalse);
+    final LocalKey k = UniqueKey();
+    expect(UniqueKey() == UniqueKey(), isFalse);
     expect(k == k, isTrue);
 
-    expect(new ValueKey<LocalKey>(k) == new ValueKey<LocalKey>(k), isTrue);
-    expect(new ValueKey<LocalKey>(k) == new ValueKey<UniqueKey>(k), isFalse);
-    expect(new ObjectKey(k) == new ObjectKey(k), isTrue);
+    expect(ValueKey<LocalKey>(k) == ValueKey<LocalKey>(k), isTrue);
+    expect(ValueKey<LocalKey>(k) == ValueKey<UniqueKey>(k), isFalse);
+    expect(ObjectKey(k) == ObjectKey(k), isTrue);
 
     final NotEquals constNotEquals = nonconst(const NotEquals());
-    expect(new ValueKey<NotEquals>(constNotEquals) == new ValueKey<NotEquals>(constNotEquals), isFalse);
-    expect(new ObjectKey(constNotEquals) == new ObjectKey(constNotEquals), isTrue);
+    expect(ValueKey<NotEquals>(constNotEquals) == ValueKey<NotEquals>(constNotEquals), isFalse);
+    expect(ObjectKey(constNotEquals) == ObjectKey(constNotEquals), isTrue);
 
     final Object constObject = nonconst(const Object());
-    expect(new ObjectKey(constObject) == new ObjectKey(constObject), isTrue);
-    expect(new ObjectKey(new Object()) == new ObjectKey(new Object()), isFalse);
+    expect(ObjectKey(constObject) == ObjectKey(constObject), isTrue);
+    expect(ObjectKey(nonconst(Object())) == ObjectKey(nonconst(Object())), isFalse);
 
     expect(const ValueKey<bool>(true), hasOneLineDescription);
-    expect(new UniqueKey(), hasOneLineDescription);
+    expect(UniqueKey(), hasOneLineDescription);
     expect(const ObjectKey(true), hasOneLineDescription);
-    expect(new GlobalKey(), hasOneLineDescription);
-    expect(new GlobalKey(debugLabel: 'hello'), hasOneLineDescription);
+    expect(GlobalKey(), hasOneLineDescription);
+    expect(GlobalKey(debugLabel: 'hello'), hasOneLineDescription);
     expect(const GlobalObjectKey(true), hasOneLineDescription);
   });
 }
