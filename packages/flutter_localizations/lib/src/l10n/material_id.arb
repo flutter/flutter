@@ -34,5 +34,21 @@
   "modalBarrierDismissLabel": "Tutup",
   "signedInLabel": "Telah login",
   "hideAccountsLabel": "Sembunyikan akun",
-  "showAccountsLabel": "Tampilkan akun"
+  "showAccountsLabel": "Tampilkan akun",
+  "drawerLabel": "Menu navigasi",
+  "popupMenuLabel": "Menu pop-up",
+  "dialogLabel": "Dialog",
+  "alertDialogLabel": "Notifikasi",
+  "searchFieldLabel": "Telusuri",
+  "reorderItemToStart": "Pindahkan ke awal",
+  "reorderItemToEnd": "Pindahkan ke akhir",
+  "reorderItemUp": "Naikkan",
+  "reorderItemDown": "Turunkan",
+  "reorderItemLeft": "Pindahkan ke kiri",
+  "reorderItemRight": "Pindahkan ke kanan",
+  "expandedIconTapHint": "Ciutkan",
+  "collapsedIconTapHint": "Luaskan",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Sisa 1 karakter",
+  "remainingTextFieldCharacterCountOther": "Sisa $remainingCount karakter"
 }

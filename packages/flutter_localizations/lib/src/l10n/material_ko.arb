@@ -34,5 +34,21 @@
   "signedInLabel": "로그인됨",
   "hideAccountsLabel": "계정 숨기기",
   "showAccountsLabel": "계정 표시",
-  "modalBarrierDismissLabel": "닫기"
+  "modalBarrierDismissLabel": "닫기",
+  "drawerLabel": "탐색 메뉴",
+  "popupMenuLabel": "팝업 메뉴",
+  "dialogLabel": "대화상자",
+  "alertDialogLabel": "알림",
+  "searchFieldLabel": "검색",
+  "reorderItemToStart": "시작으로 이동",
+  "reorderItemToEnd": "끝으로 이동",
+  "reorderItemUp": "위로 이동",
+  "reorderItemDown": "아래로 이동",
+  "reorderItemLeft": "왼쪽으로 이동",
+  "reorderItemRight": "오른쪽으로 이동",
+  "expandedIconTapHint": "접기",
+  "collapsedIconTapHint": "펼치기",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "1자 남음",
+  "remainingTextFieldCharacterCountOther": "$remainingCount자 남음"
 }

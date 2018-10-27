@@ -48,8 +48,8 @@ class ScrollController extends ChangeNotifier {
   ///
   /// The values of `initialScrollOffset` and `keepScrollOffset` must not be null.
   ScrollController({
-    double initialScrollOffset: 0.0,
-    this.keepScrollOffset: true,
+    double initialScrollOffset = 0.0,
+    this.keepScrollOffset = true,
     this.debugLabel,
   }) : assert(initialScrollOffset != null),
        assert(keepScrollOffset != null),
@@ -142,15 +142,15 @@ class ScrollController extends ChangeNotifier {
   ///
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
-  Future<Null> animateTo(double offset, {
+  Future<void> animateTo(double offset, {
     @required Duration duration,
     @required Curve curve,
   }) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    final List<Future<Null>> animations = new List<Future<Null>>(_positions.length);
+    final List<Future<void>> animations = List<Future<void>>(_positions.length);
     for (int i = 0; i < _positions.length; i += 1)
       animations[i] = _positions[i].animateTo(offset, duration: duration, curve: curve);
-    return Future.wait<Null>(animations).then((List<Null> _) => null);
+    return Future.wait<void>(animations).then<void>((List<void> _) => null);
   }
 
   /// Jumps the scroll position from its current value to the given value,
@@ -167,7 +167,7 @@ class ScrollController extends ChangeNotifier {
   /// value was out of range.
   void jumpTo(double value) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    for (ScrollPosition position in new List<ScrollPosition>.from(_positions))
+    for (ScrollPosition position in List<ScrollPosition>.from(_positions))
       position.jumpTo(value);
   }
 
@@ -229,7 +229,7 @@ class ScrollController extends ChangeNotifier {
     ScrollContext context,
     ScrollPosition oldPosition,
   ) {
-    return new ScrollPositionWithSingleContext(
+    return ScrollPositionWithSingleContext(
       physics: physics,
       context: context,
       initialPixels: initialScrollOffset,
@@ -291,19 +291,19 @@ class ScrollController extends ChangeNotifier {
 /// the different list lengths.
 ///
 /// ```dart
-/// new PageView(
+/// PageView(
 ///   children: <Widget>[
-///     new ListView(
+///     ListView(
 ///       controller: _trackingScrollController,
-///       children: new List<Widget>.generate(100, (int i) => new Text('page 0 item $i')).toList(),
+///       children: List<Widget>.generate(100, (int i) => Text('page 0 item $i')).toList(),
 ///     ),
-///    new ListView(
+///    ListView(
 ///      controller: _trackingScrollController,
-///      children: new List<Widget>.generate(200, (int i) => new Text('page 1 item $i')).toList(),
+///      children: List<Widget>.generate(200, (int i) => Text('page 1 item $i')).toList(),
 ///    ),
-///    new ListView(
+///    ListView(
 ///      controller: _trackingScrollController,
-///      children: new List<Widget>.generate(300, (int i) => new Text('page 2 item $i')).toList(),
+///      children: List<Widget>.generate(300, (int i) => Text('page 2 item $i')).toList(),
 ///     ),
 ///   ],
 /// )
@@ -315,8 +315,8 @@ class TrackingScrollController extends ScrollController {
   /// Creates a scroll controller that continually updates its
   /// [initialScrollOffset] to match the last scroll notification it received.
   TrackingScrollController({
-    double initialScrollOffset: 0.0,
-    bool keepScrollOffset: true,
+    double initialScrollOffset = 0.0,
+    bool keepScrollOffset = true,
     String debugLabel,
   }) : super(initialScrollOffset: initialScrollOffset,
              keepScrollOffset: keepScrollOffset,

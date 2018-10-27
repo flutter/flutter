@@ -33,7 +33,7 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   /// The [childManager] argument must not be null.
   RenderSliverFillViewport({
     @required RenderSliverBoxChildManager childManager,
-    double viewportFraction: 1.0,
+    double viewportFraction = 1.0,
   }) : assert(viewportFraction != null),
        assert(viewportFraction > 0.0),
        _viewportFraction = viewportFraction,
@@ -122,7 +122,7 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
-    geometry = new SliverGeometry(
+    geometry = SliverGeometry(
       scrollExtent: constraints.viewportMainAxisExtent,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,

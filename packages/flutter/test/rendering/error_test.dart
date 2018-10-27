@@ -13,10 +13,10 @@ void main() {
   const String errorMessage = 'Some error message';
 
   testWidgets('test draw error paragraph', (WidgetTester tester) async {
-    await tester.pumpWidget(new ErrorWidget(new Exception(errorMessage)));
+    await tester.pumpWidget(ErrorWidget(Exception(errorMessage)));
 
     expect(find.byType(ErrorWidget), paints
-        ..rect(rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 600.0))
+        ..rect(rect: Rect.fromLTWH(0.0, 0.0, 800.0, 600.0))
         ..paragraph(offset: Offset.zero));
   });
 }

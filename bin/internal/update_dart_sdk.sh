@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright 2016 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -51,7 +51,15 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
   mkdir -p -- "$DART_SDK_PATH"
   DART_SDK_ZIP="$FLUTTER_ROOT/bin/cache/$DART_ZIP_NAME"
 
-  curl --continue-at - --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1
+  curl --continue-at - --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1 || {
+    echo
+    echo "Failed to retrieve the Dart SDK at $DART_SDK_URL"
+    echo "If you're located in China, please follow"
+    echo "https://github.com/flutter/flutter/wiki/Using-Flutter-in-China"
+    echo
+    rm -f -- "$DART_SDK_ZIP"
+    exit 1
+  }
   unzip -o -q "$DART_SDK_ZIP" -d "$FLUTTER_ROOT/bin/cache" || {
     echo
     echo "It appears that the downloaded file is corrupt; please try the operation again later."

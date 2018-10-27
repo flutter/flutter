@@ -5,30 +5,62 @@
 import 'dart:convert' show json;
 import 'dart:io';
 
+// The first suffix in kPluralSuffixes must be "Other". "Other" is special
+// because it's the only one that is required.
+const List<String> kPluralSuffixes = <String>['Other', 'Zero', 'One', 'Two', 'Few', 'Many'];
+final RegExp kPluralRegexp = RegExp(r'(\w*)(' + kPluralSuffixes.skip(1).join(r'|') + r')$');
+
+class ValidationError implements Exception {
+  ValidationError(this. message);
+  final String message;
+  @override
+  String toString() => message;
+}
+
 /// Sanity checking of the @foo metadata in the English translations,
 /// material_en.arb.
 ///
+/// - For each foo, resource, there must be a corresponding @foo.
 /// - For each @foo resource, there must be a corresponding foo, except
 ///   for plurals, for which there must be a fooOther.
 /// - Each @foo resource must have a Map value with a String valued
 ///   description entry.
 ///
-/// Returns an error message upon failure, null on success.
-String validateEnglishLocalizations(File file) {
-  final StringBuffer errorMessages = new StringBuffer();
+/// Throws an exception upon failure.
+void validateEnglishLocalizations(File file) {
+  final StringBuffer errorMessages = StringBuffer();
 
   if (!file.existsSync()) {
     errorMessages.writeln('English localizations do not exist: $file');
-    return errorMessages.toString();
+    throw ValidationError(errorMessages.toString());
   }
 
   final Map<String, dynamic> bundle = json.decode(file.readAsStringSync());
+
+  for (String resourceId in bundle.keys) {
+    if (resourceId.startsWith('@'))
+      continue;
+
+    if (bundle['@$resourceId'] != null)
+      continue;
+
+    bool checkPluralResource(String suffix) {
+      final int suffixIndex = resourceId.indexOf(suffix);
+      return suffixIndex != -1 && bundle['@${resourceId.substring(0, suffixIndex)}'] != null;
+    }
+    if (kPluralSuffixes.any(checkPluralResource))
+      continue;
+
+    errorMessages.writeln('A value was not specified for @$resourceId');
+  }
+
   for (String atResourceId in bundle.keys) {
     if (!atResourceId.startsWith('@'))
       continue;
 
     final dynamic atResourceValue = bundle[atResourceId];
-    final Map<String, String> atResource = atResourceValue is Map ? atResourceValue : null;
+    final Map<String, dynamic> atResource =
+        atResourceValue is Map<String, dynamic> ? atResourceValue : null;
     if (atResource == null) {
       errorMessages.writeln('A map value was not specified for $atResourceId');
       continue;
@@ -50,7 +82,8 @@ String validateEnglishLocalizations(File file) {
     }
   }
 
-  return errorMessages.isEmpty ? null : errorMessages.toString();
+  if (errorMessages.isNotEmpty)
+    throw ValidationError(errorMessages.toString());
 }
 
 /// Enforces the following invariants in our localizations:
@@ -61,14 +94,14 @@ String validateEnglishLocalizations(File file) {
 /// Uses "en" localizations as the canonical source of locale keys that other
 /// locales are compared against.
 ///
-/// If validation fails, return an error message, otherwise return null.
-String validateLocalizations(
+/// If validation fails, throws an exception.
+void validateLocalizations(
   Map<String, Map<String, String>> localeToResources,
   Map<String, Map<String, dynamic>> localeToAttributes,
 ) {
   final Map<String, String> canonicalLocalizations = localeToResources['en'];
-  final Set<String> canonicalKeys = new Set<String>.from(canonicalLocalizations.keys);
-  final StringBuffer errorMessages = new StringBuffer();
+  final Set<String> canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
+  final StringBuffer errorMessages = StringBuffer();
   bool explainMissingKeys = false;
   for (final String locale in localeToResources.keys) {
     final Map<String, String> resources = localeToResources[locale];
@@ -79,17 +112,14 @@ String validateLocalizations(
     // Many languages require only a subset of these variations, so we do not
     // require them so long as the "Other" variation exists.
     bool isPluralVariation(String key) {
-      final RegExp pluralRegexp = new RegExp(r'(\w*)(Zero|One|Two|Few|Many)$');
-      final Match pluralMatch = pluralRegexp.firstMatch(key);
-
+      final Match pluralMatch = kPluralRegexp.firstMatch(key);
       if (pluralMatch == null)
         return false;
-
       final String prefix = pluralMatch[1];
       return resources.containsKey('${prefix}Other');
     }
 
-    final Set<String> keys = new Set<String>.from(
+    final Set<String> keys = Set<String>.from(
       resources.keys.where((String key) => !isPluralVariation(key))
     );
 
@@ -131,7 +161,6 @@ String validateLocalizations(
           ..writeln('  "notUsed": "Sindhi time format does not use a.m. indicator"')
           ..writeln('}');
     }
-    return errorMessages.toString();
+    throw ValidationError(errorMessages.toString());
   }
-  return null;
 }

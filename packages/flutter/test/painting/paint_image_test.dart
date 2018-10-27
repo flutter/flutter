@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 class TestImage implements ui.Image {
   TestImage({ this.width, this.height });
@@ -19,6 +21,11 @@ class TestImage implements ui.Image {
 
   @override
   void dispose() { }
+
+  @override
+  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
+    throw UnsupportedError('Cannot encode test image');
+  }
 }
 
 class TestCanvas implements Canvas {
@@ -32,11 +39,11 @@ class TestCanvas implements Canvas {
 
 void main() {
   test('Cover and align', () {
-    final TestImage image = new TestImage(width: 300, height: 300);
-    final TestCanvas canvas = new TestCanvas();
+    final TestImage image = TestImage(width: 300, height: 300);
+    final TestCanvas canvas = TestCanvas();
     paintImage(
       canvas: canvas,
-      rect: new Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
+      rect: Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
       image: image,
       fit: BoxFit.cover,
       alignment: const Alignment(-1.0, 0.0),
@@ -48,8 +55,8 @@ void main() {
 
     expect(command, isNotNull);
     expect(command.positionalArguments[0], equals(image));
-    expect(command.positionalArguments[1], equals(new Rect.fromLTWH(0.0, 75.0, 300.0, 150.0)));
-    expect(command.positionalArguments[2], equals(new Rect.fromLTWH(50.0, 75.0, 200.0, 100.0)));
+    expect(command.positionalArguments[1], equals(Rect.fromLTWH(0.0, 75.0, 300.0, 150.0)));
+    expect(command.positionalArguments[2], equals(Rect.fromLTWH(50.0, 75.0, 200.0, 100.0)));
   });
 
   // See also the DecorationImage tests in: decoration_test.dart

@@ -1,4 +1,6 @@
 {
+  "remainingTextFieldCharacterCountTwo": "נותרו $remainingCount תווים",
+  "remainingTextFieldCharacterCountMany": "נותרו $remainingCount תווים",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "H:mm",
   "selectedRowCountTitleOne": "פריט אחד נבחר",
@@ -36,5 +38,21 @@
   "signedInLabel": "מחובר",
   "hideAccountsLabel": "הסתרת החשבונות",
   "showAccountsLabel": "הצגת החשבונות",
-  "modalBarrierDismissLabel": "סגירה"
+  "modalBarrierDismissLabel": "סגירה",
+  "drawerLabel": "תפריט ניווט",
+  "popupMenuLabel": "תפריט קופץ",
+  "dialogLabel": "תיבת דו-שיח",
+  "alertDialogLabel": "התראה",
+  "searchFieldLabel": "חיפוש",
+  "reorderItemToStart": "העברה להתחלה",
+  "reorderItemToEnd": "העברה לסוף",
+  "reorderItemUp": "העברה למעלה",
+  "reorderItemDown": "העברה למטה",
+  "reorderItemLeft": "העברה שמאלה",
+  "reorderItemRight": "העברה ימינה",
+  "expandedIconTapHint": "כיווץ",
+  "collapsedIconTapHint": "הרחבה",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "נותר תו אחד",
+  "remainingTextFieldCharacterCountOther": "נותרו $remainingCount תווים"
 }

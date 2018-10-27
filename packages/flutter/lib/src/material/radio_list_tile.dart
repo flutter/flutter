@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'radio.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// A [ListTile] with a [Radio]. In other words, a radio button with a label.
 ///
@@ -50,15 +50,15 @@ import 'theme.dart';
 /// SingingCharacter _character = SingingCharacter.lafayette;
 ///
 /// // In the build function of that State:
-/// new Column(
+/// Column(
 ///   children: <Widget>[
-///     new RadioListTile<SingingCharacter>(
+///     RadioListTile<SingingCharacter>(
 ///       title: const Text('Lafayette'),
 ///       value: SingingCharacter.lafayette,
 ///       groupValue: _character,
 ///       onChanged: (SingingCharacter value) { setState(() { _character = value; }); },
 ///     ),
-///     new RadioListTile<SingingCharacter>(
+///     RadioListTile<SingingCharacter>(
 ///       title: const Text('Thomas Jefferson'),
 ///       value: SingingCharacter.jefferson,
 ///       groupValue: _character,
@@ -97,11 +97,11 @@ class RadioListTile<T> extends StatelessWidget {
     this.activeColor,
     this.title,
     this.subtitle,
-    this.isThreeLine: false,
+    this.isThreeLine = false,
     this.dense,
     this.secondary,
-    this.selected: false,
-    this.controlAffinity: ListTileControlAffinity.platform,
+    this.selected = false,
+    this.controlAffinity = ListTileControlAffinity.platform,
   }) : assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
@@ -130,7 +130,7 @@ class RadioListTile<T> extends StatelessWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new RadioListTile<SingingCharacter>(
+  /// RadioListTile<SingingCharacter>(
   ///   title: const Text('Lafayette'),
   ///   value: SingingCharacter.lafayette,
   ///   groupValue: _character,
@@ -194,11 +194,12 @@ class RadioListTile<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget control = new Radio<T>(
+    final Widget control = Radio<T>(
       value: value,
       groupValue: groupValue,
       onChanged: onChanged,
       activeColor: activeColor,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
     Widget leading, trailing;
     switch (controlAffinity) {
@@ -212,10 +213,10 @@ class RadioListTile<T> extends StatelessWidget {
         trailing = control;
         break;
     }
-    return new MergeSemantics(
+    return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
-        child: new ListTile(
+        child: ListTile(
           leading: leading,
           title: title,
           subtitle: subtitle,

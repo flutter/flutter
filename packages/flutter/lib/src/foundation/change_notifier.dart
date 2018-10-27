@@ -53,12 +53,12 @@ abstract class ValueListenable<T> extends Listenable {
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier extends Listenable {
-  ObserverList<VoidCallback> _listeners = new ObserverList<VoidCallback>();
+  ObserverList<VoidCallback> _listeners = ObserverList<VoidCallback>();
 
   bool _debugAssertNotDisposed() {
     assert(() {
       if (_listeners == null) {
-        throw new FlutterError(
+        throw FlutterError(
           'A $runtimeType was used after being disposed.\n'
           'Once you have called dispose() on a $runtimeType, it can no longer be used.'
         );
@@ -154,13 +154,13 @@ class ChangeNotifier extends Listenable {
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
     if (_listeners != null) {
-      final List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
+      final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
       for (VoidCallback listener in localListeners) {
         try {
           if (_listeners.contains(listener))
             listener();
         } catch (exception, stack) {
-          FlutterError.reportError(new FlutterErrorDetails(
+          FlutterError.reportError(FlutterErrorDetails(
             exception: exception,
             stack: stack,
             library: 'foundation library',

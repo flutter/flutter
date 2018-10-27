@@ -68,8 +68,8 @@ abstract class InteractiveInkFeature extends InkFeature {
   }
 }
 
-/// An encapsulation of an [InteractiveInkFeature] constructor used by [InkWell]
-/// [InkResponse] and [ThemeData].
+/// An encapsulation of an [InteractiveInkFeature] constructor used by
+/// [InkWell], [InkResponse], and [ThemeData].
 ///
 /// Interactive ink feature implementations should provide a static const
 /// `splashFactory` value that's an instance of this class. The `splashFactory`
@@ -92,9 +92,11 @@ abstract class InteractiveInkFeatureFactory {
     @required RenderBox referenceBox,
     @required Offset position,
     @required Color color,
-    bool containedInkWell: false,
+    @required TextDirection textDirection,
+    bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
+    ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
   });
@@ -129,11 +131,11 @@ abstract class InteractiveInkFeatureFactory {
 /// The first diagram shows how it looks if the [InkResponse] is relatively
 /// large:
 ///
-/// ![The highlight is a disc centered in the box, smaller than the child widget.](https://flutter.github.io/assets-for-api-docs/material/ink_response_large.png)
+/// ![The highlight is a disc centered in the box, smaller than the child widget.](https://flutter.github.io/assets-for-api-docs/assets/material/ink_response_large.png)
 ///
 /// The second diagram shows how it looks if the [InkResponse] is small:
 ///
-/// ![The highlight is a disc overflowing the box, centered on the child.](https://flutter.github.io/assets-for-api-docs/material/ink_response_small.png)
+/// ![The highlight is a disc overflowing the box, centered on the child.](https://flutter.github.io/assets-for-api-docs/assets/material/ink_response_small.png)
 ///
 /// The main thing to notice from these diagrams is that the splashes happily
 /// exceed the bounds of the widget (because [containedInkWell] is false).
@@ -142,7 +144,7 @@ abstract class InteractiveInkFeatureFactory {
 /// [highlightShape] of [BoxShape.rectangle] with [containedInkWell] set to
 /// true. These are the values used by [InkWell].
 ///
-/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
+/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/assets/material/ink_well.png)
 ///
 /// The [InkResponse] widget must have a [Material] widget as an ancestor. The
 /// [Material] widget is where the ink reactions are actually painted. This
@@ -192,18 +194,21 @@ class InkResponse extends StatefulWidget {
     Key key,
     this.child,
     this.onTap,
+    this.onTapDown,
+    this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
     this.onHighlightChanged,
-    this.containedInkWell: false,
-    this.highlightShape: BoxShape.circle,
+    this.containedInkWell = false,
+    this.highlightShape = BoxShape.circle,
     this.radius,
     this.borderRadius,
+    this.customBorder,
     this.highlightColor,
     this.splashColor,
     this.splashFactory,
-    this.enableFeedback: true,
-    this.excludeFromSemantics: false,
+    this.enableFeedback = true,
+    this.excludeFromSemantics = false,
   }) : assert(containedInkWell != null),
        assert(highlightShape != null),
        assert(enableFeedback != null),
@@ -217,6 +222,13 @@ class InkResponse extends StatefulWidget {
 
   /// Called when the user taps this part of the material.
   final GestureTapCallback onTap;
+
+  /// Called when the user taps down this part of the material.
+  final GestureTapDownCallback onTapDown;
+
+  /// Called when the user cancels a tap that was started on this part of the
+  /// material.
+  final GestureTapCallback onTapCancel;
 
   /// Called when the user double taps this part of the material.
   final GestureTapCallback onDoubleTap;
@@ -276,10 +288,14 @@ class InkResponse extends StatefulWidget {
   ///  * [splashFactory], which defines the appearance of the splash.
   final double radius;
 
-  /// The clipping radius of the containing rect.
+  /// The clipping radius of the containing rect. This is effective only if
+  /// [customBorder] is null.
   ///
   /// If this is null, it is interpreted as [BorderRadius.zero].
   final BorderRadius borderRadius;
+
+  /// The custom clip border which overrides [borderRadius].
+  final ShapeBorder customBorder;
 
   /// The highlight color of the ink response. If this property is null then the
   /// highlight color of the theme, [ThemeData.highlightColor], will be used.
@@ -357,11 +373,12 @@ class InkResponse extends StatefulWidget {
   @mustCallSuper
   bool debugCheckContext(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasDirectionality(context));
     return true;
   }
 
   @override
-  _InkResponseState<InkResponse> createState() => new _InkResponseState<InkResponse>();
+  _InkResponseState<InkResponse> createState() => _InkResponseState<InkResponse>();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -373,9 +390,13 @@ class InkResponse extends StatefulWidget {
       gestures.add('double tap');
     if (onLongPress != null)
       gestures.add('long press');
-    properties.add(new IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
-    properties.add(new DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
-    properties.add(new DiagnosticsProperty<BoxShape>(
+    if (onTapDown != null)
+      gestures.add('tap down');
+    if (onTapCancel != null)
+      gestures.add('tap cancel');
+    properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
+    properties.add(DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
+    properties.add(DiagnosticsProperty<BoxShape>(
       'highlightShape',
       highlightShape,
       description: '${containedInkWell ? "clipped to " : ""}$highlightShape',
@@ -384,7 +405,7 @@ class InkResponse extends StatefulWidget {
   }
 }
 
-class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKeepAliveClientMixin {
+class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKeepAliveClientMixin<T> {
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
   InkHighlight _lastHighlight;
@@ -398,14 +419,16 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     if (value) {
       if (_lastHighlight == null) {
         final RenderBox referenceBox = context.findRenderObject();
-        _lastHighlight = new InkHighlight(
+        _lastHighlight = InkHighlight(
           controller: Material.of(context),
           referenceBox: referenceBox,
           color: widget.highlightColor ?? Theme.of(context).highlightColor,
           shape: widget.highlightShape,
           borderRadius: widget.borderRadius,
+          customBorder: widget.customBorder,
           rectCallback: widget.getRectCallback(referenceBox),
           onRemoved: _handleInkHighlightRemoval,
+          textDirection: Directionality.of(context),
         );
         updateKeepAlive();
       } else {
@@ -432,6 +455,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     final Color color = widget.splashColor ?? Theme.of(context).splashColor;
     final RectCallback rectCallback = widget.containedInkWell ? widget.getRectCallback(referenceBox) : null;
     final BorderRadius borderRadius = widget.borderRadius;
+    final ShapeBorder customBorder = widget.customBorder;
 
     InteractiveInkFeature splash;
     void onRemoved() {
@@ -453,7 +477,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       rectCallback: rectCallback,
       radius: widget.radius,
       borderRadius: borderRadius,
+      customBorder: customBorder,
       onRemoved: onRemoved,
+      textDirection: Directionality.of(context),
     );
 
     return splash;
@@ -461,9 +487,12 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   void _handleTapDown(TapDownDetails details) {
     final InteractiveInkFeature splash = _createInkFeature(details);
-    _splashes ??= new HashSet<InteractiveInkFeature>();
+    _splashes ??= HashSet<InteractiveInkFeature>();
     _splashes.add(splash);
     _currentSplash = splash;
+    if (widget.onTapDown != null) {
+      widget.onTapDown(details);
+    }
     updateKeepAlive();
     updateHighlight(true);
   }
@@ -482,6 +511,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   void _handleTapCancel() {
     _currentSplash?.cancel();
     _currentSplash = null;
+    if (widget.onTapCancel != null) {
+      widget.onTapCancel();
+    }
     updateHighlight(false);
   }
 
@@ -525,7 +557,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     _lastHighlight?.color = widget.highlightColor ?? themeData.highlightColor;
     _currentSplash?.color = widget.splashColor ?? themeData.splashColor;
     final bool enabled = widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null;
-    return new GestureDetector(
+    return GestureDetector(
       onTapDown: enabled ? _handleTapDown : null,
       onTap: enabled ? () => _handleTap(context) : null,
       onTapCancel: enabled ? _handleTapCancel : null,
@@ -546,9 +578,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// The following diagram shows how an [InkWell] looks when tapped, when using
 /// default values.
 ///
-/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
+/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/assets/material/ink_well.png)
 ///
-/// The [InkResponse] widget must have a [Material] widget as an ancestor. The
+/// The [InkWell] widget must have a [Material] widget as an ancestor. The
 /// [Material] widget is where the ink reactions are actually painted. This
 /// matches the material design premise wherein the [Material] is what is
 /// actually reacting to touches by spreading ink.
@@ -599,20 +631,25 @@ class InkWell extends InkResponse {
     GestureTapCallback onTap,
     GestureTapCallback onDoubleTap,
     GestureLongPressCallback onLongPress,
+    GestureTapDownCallback onTapDown,
+    GestureTapCancelCallback onTapCancel,
     ValueChanged<bool> onHighlightChanged,
     Color highlightColor,
     Color splashColor,
     InteractiveInkFeatureFactory splashFactory,
     double radius,
     BorderRadius borderRadius,
-    bool enableFeedback: true,
-    bool excludeFromSemantics: false,
+    ShapeBorder customBorder,
+    bool enableFeedback = true,
+    bool excludeFromSemantics = false,
   }) : super(
     key: key,
     child: child,
     onTap: onTap,
     onDoubleTap: onDoubleTap,
     onLongPress: onLongPress,
+    onTapDown: onTapDown,
+    onTapCancel: onTapCancel,
     onHighlightChanged: onHighlightChanged,
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
@@ -621,6 +658,7 @@ class InkWell extends InkResponse {
     splashFactory: splashFactory,
     radius: radius,
     borderRadius: borderRadius,
+    customBorder: customBorder,
     enableFeedback: enableFeedback,
     excludeFromSemantics: excludeFromSemantics,
   );

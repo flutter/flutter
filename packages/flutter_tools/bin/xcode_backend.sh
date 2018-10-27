@@ -80,47 +80,65 @@ BuildApp() {
   AssertExists "${project_path}"
 
   local derived_dir="${SOURCE_ROOT}/Flutter"
+  if [[ -e "${project_path}/.ios" ]]; then
+    derived_dir="${project_path}/.ios/Flutter"
+  fi
   RunCommand mkdir -p -- "$derived_dir"
   AssertExists "$derived_dir"
 
-  RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
   RunCommand rm -rf -- "${derived_dir}/App.framework"
-  RunCommand rm -f -- "${derived_dir}/app.flx"
-  RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
-  RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
+
+  local local_engine_flag=""
+  local flutter_framework="${framework_path}/Flutter.framework"
+  local flutter_podspec="${framework_path}/Flutter.podspec"
+  if [[ -n "$LOCAL_ENGINE" ]]; then
+    local_engine_flag="--local-engine=${LOCAL_ENGINE}"
+    flutter_framework="${LOCAL_ENGINE}/Flutter.framework"
+    flutter_podspec="${LOCAL_ENGINE}/Flutter.podspec"
+  fi
+
+  if [[ -e "${project_path}/.ios" ]]; then
+    RunCommand rm -rf -- "${derived_dir}/engine"
+    mkdir "${derived_dir}/engine"
+    RunCommand cp -r -- ${flutter_podspec} "${derived_dir}/engine"
+    RunCommand cp -r -- ${flutter_framework} "${derived_dir}/engine"
+    RunCommand find "${derived_dir}/engine/Flutter.framework" -type f -exec chmod a-w "{}" \;
+  else
+    RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
+    RunCommand cp -r -- ${flutter_framework} "${derived_dir}"
+    RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
+  fi
+
   RunCommand pushd "${project_path}" > /dev/null
 
   AssertExists "${target_path}"
 
+  local verbose_flag=""
+  if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
+    verbose_flag="--verbose"
+  fi
+
   local build_dir="${FLUTTER_BUILD_DIR:-build}"
-  local local_engine_flag=""
-  if [[ -n "$LOCAL_ENGINE" ]]; then
-    local_engine_flag="--local-engine=$LOCAL_ENGINE"
+
+  local track_widget_creation_flag=""
+  if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
+    track_widget_creation_flag="--track-widget-creation"
   fi
 
-  local preview_dart_2_flag=""
-  if [[ -n "$PREVIEW_DART_2" ]]; then
-    preview_dart_2_flag="--preview-dart-2"
-  else
-    preview_dart_2_flag="--no-preview-dart-2"
-  fi
-
-  if [[ "$CURRENT_ARCH" != "x86_64" ]]; then
-    local aot_flags=""
-    if [[ "$build_mode" == "debug" ]]; then
-      aot_flags="--interpreter --debug"
-    else
-      aot_flags="--${build_mode}"
-    fi
-
+  if [[ "${build_mode}" != "debug" ]]; then
     StreamOutput " ├─Building Dart code..."
-    RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build aot \
+    # Transform ARCHS to comma-separated list of target architectures.
+    local archs="${ARCHS// /,}"
+    RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
+      ${verbose_flag}                                                       \
+      build aot                                                             \
       --output-dir="${build_dir}/aot"                                       \
       --target-platform=ios                                                 \
       --target="${target_path}"                                             \
-      ${aot_flags}                                                          \
+      --${build_mode}                                                       \
+      --ios-arch="${archs}"                                                 \
       ${local_engine_flag}                                                  \
-      ${preview_dart_2_flag}
+      ${track_widget_creation_flag}
 
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to build ${project_path}."
@@ -128,17 +146,57 @@ BuildApp() {
     fi
     StreamOutput "done"
 
-    RunCommand cp -r -- "${build_dir}/aot/App.framework" "${derived_dir}"
+    local app_framework="${build_dir}/aot/App.framework"
+
+    RunCommand cp -r -- "${app_framework}" "${derived_dir}"
+
+    StreamOutput " ├─Generating dSYM file..."
+    # Xcode calls `symbols` during app store upload, which uses Spotlight to
+    # find dSYM files for embedded frameworks. When it finds the dSYM file for
+    # `App.framework` it throws an error, which aborts the app store upload.
+    # To avoid this, we place the dSYM files in a folder ending with ".noindex",
+    # which hides it from Spotlight, https://github.com/flutter/flutter/issues/22560.
+    RunCommand mkdir -p -- "${build_dir}/dSYMs.noindex"
+    RunCommand xcrun dsymutil -o "${build_dir}/dSYMs.noindex/App.framework.dSYM" "${app_framework}/App"
+    if [[ $? -ne 0 ]]; then
+      EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
+      exit -1
+    fi
+    StreamOutput "done"
+
+    StreamOutput " ├─Stripping debug symbols..."
+    RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
+    if [[ $? -ne 0 ]]; then
+      EchoError "Failed to strip ${derived_dir}/App.framework/App."
+      exit -1
+    fi
+    StreamOutput "done"
+
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
+
+    # Build stub for all requested architectures.
+    local arch_flags=""
+    read -r -a archs <<< "$ARCHS"
+    for arch in "${archs[@]}"; do
+      arch_flags="${arch_flags}-arch $arch "
+    done
+
     RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
+        ${arch_flags} \
         -dynamiclib \
         -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
         -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \
         -install_name '@rpath/App.framework/App' \
         -o "${derived_dir}/App.framework/App" -)"
   fi
-  RunCommand cp -- "${derived_dir}/AppFrameworkInfo.plist" "${derived_dir}/App.framework/Info.plist"
+
+  local plistPath="${project_path}/ios/Flutter/AppFrameworkInfo.plist"
+  if [[ -e "${project_path}/.ios" ]]; then
+    plistPath="${project_path}/.ios/Flutter/AppFrameworkInfo.plist"
+  fi
+
+  RunCommand cp -- "$plistPath" "${derived_dir}/App.framework/Info.plist"
 
   local precompilation_flag=""
   if [[ "$CURRENT_ARCH" != "x86_64" ]] && [[ "$build_mode" != "debug" ]]; then
@@ -146,15 +204,17 @@ BuildApp() {
   fi
 
   StreamOutput " ├─Assembling Flutter resources..."
-  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build flx \
-    --target="${target_path}"                                             \
-    --output-file="${derived_dir}/app.flx"                                \
-    --snapshot="${build_dir}/snapshot_blob.bin"                           \
-    --depfile="${build_dir}/snapshot_blob.bin.d"                          \
-    --working-dir="${derived_dir}/flutter_assets"                         \
-    ${precompilation_flag}                                                \
-    ${local_engine_flag}                                                  \
-    ${preview_dart_2_flag}
+  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics             \
+    ${verbose_flag}                                                         \
+    build bundle                                                            \
+    --target-platform=ios                                                   \
+    --target="${target_path}"                                               \
+    --${build_mode}                                                         \
+    --depfile="${build_dir}/snapshot_blob.bin.d"                            \
+    --asset-dir="${derived_dir}/flutter_assets"                             \
+    ${precompilation_flag}                                                  \
+    ${local_engine_flag}                                                    \
+    ${track_widget_creation_flag}
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package ${project_path}."
@@ -183,7 +243,8 @@ GetFrameworkExecutablePath() {
 LipoExecutable() {
   local executable="$1"
   shift
-  local archs=("$@")
+  # Split $@ into an array.
+  read -r -a archs <<< "$@"
 
   # Extract architecture-specific framework executables.
   local all_executables=()
@@ -224,11 +285,10 @@ LipoExecutable() {
 ThinFramework() {
   local framework_dir="$1"
   shift
-  local archs=("$@")
 
   local plist_path="${framework_dir}/Info.plist"
   local executable="$(GetFrameworkExecutablePath "${framework_dir}")"
-  LipoExecutable "${executable}" "${archs[@]}"
+  LipoExecutable "${executable}" "$@"
 }
 
 ThinAppFrameworks() {
@@ -241,9 +301,47 @@ ThinAppFrameworks() {
   done
 }
 
+# Adds the App.framework as an embedded binary and the flutter_assets as
+# resources.
+EmbedFlutterFrameworks() {
+  AssertExists "${FLUTTER_APPLICATION_PATH}"
+
+  # Prefer the hidden .ios folder, but fallback to a visible ios folder if .ios
+  # doesn't exist.
+  local flutter_ios_out_folder="${FLUTTER_APPLICATION_PATH}/.ios/Flutter"
+  if [[ ! -d ${flutter_ios_out_folder} ]]; then
+    flutter_ios_out_folder="${FLUTTER_APPLICATION_PATH}/ios/Flutter"
+  fi
+
+  AssertExists "${flutter_ios_out_folder}"
+
+  # Copy the flutter_assets to the Application's resources.
+  AssertExists "${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/"
+  RunCommand cp -r -- "${flutter_ios_out_folder}/flutter_assets" "${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/"
+
+  # Embed App.framework from Flutter into the app (after creating the Frameworks directory
+  # if it doesn't already exist).
+  local xcode_frameworks_dir=${BUILT_PRODUCTS_DIR}"/"${PRODUCT_NAME}".app/Frameworks"
+  RunCommand mkdir -p -- "${xcode_frameworks_dir}"
+  RunCommand cp -Rv -- "${flutter_ios_out_folder}/App.framework" "${xcode_frameworks_dir}"
+
+  # Embed the actual Flutter.framework that the Flutter app expects to run against,
+  # which could be a local build or an arch/type specific build.
+  # Remove it first since Xcode might be trying to hold some of these files - this way we're 
+  # sure to get a clean copy.
+  RunCommand rm -rf -- "${xcode_frameworks_dir}/Flutter.framework"
+  RunCommand cp -Rv -- "${flutter_ios_out_folder}/engine/Flutter.framework" "${xcode_frameworks_dir}/"
+  
+  # Sign the binaries we moved.
+  local identity="${EXPANDED_CODE_SIGN_IDENTITY_NAME:-$CODE_SIGN_IDENTITY}"
+
+  RunCommand codesign --force --verbose --sign "${identity}" -- "${xcode_frameworks_dir}/App.framework/App"
+  RunCommand codesign --force --verbose --sign "${identity}" -- "${xcode_frameworks_dir}/Flutter.framework/Flutter"
+}
+
 # Main entry point.
 
-# TODO(cbracken) improve error handling, then enable set -e
+# TODO(cbracken): improve error handling, then enable set -e
 
 if [[ $# == 0 ]]; then
   # Backwards-compatibility: if no args are provided, build.
@@ -254,5 +352,7 @@ else
       BuildApp ;;
     "thin")
       ThinAppFrameworks ;;
+    "embed")
+      EmbedFlutterFrameworks ;;
   esac
 fi

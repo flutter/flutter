@@ -33,7 +33,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     assert(_pointer == pointer);
     assert(_winner != null || _members.isNotEmpty);
     _close();
-    _winner ??= _members[0];
+    _winner ??= _owner.captain ?? _members[0];
     for (GestureArenaMember member in _members) {
       if (member != _winner)
         member.rejectGesture(pointer);
@@ -61,7 +61,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     assert(_pointer == pointer);
     _members.add(member);
     _entry ??= GestureBinding.instance.gestureArena.add(pointer, this);
-    return new _CombiningGestureArenaEntry(this, member);
+    return _CombiningGestureArenaEntry(this, member);
   }
 
   void _resolve(GestureArenaMember member, GestureDisposition disposition) {
@@ -74,7 +74,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
         _entry.resolve(disposition);
     } else {
       assert(disposition == GestureDisposition.accepted);
-      _winner ??= member;
+      _winner ??= _owner.captain ?? member;
       _entry.resolve(disposition);
     }
   }
@@ -86,14 +86,19 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
 /// Normally, a recognizer competes directly in the [GestureArenaManager] to
 /// recognize a sequence of pointer events as a gesture. With a
 /// [GestureArenaTeam], recognizers can compete in the arena in a group with
-/// other recognizers.
+/// other recognizers. Arena teams may have a captain which wins the arena on
+/// behalf of its team.
 ///
-/// When gesture recognizers are in a team together, then once there are no
-/// other competing gestures in the arena, the first gesture to have been added
-/// to the team automatically wins, instead of the gestures continuing to
-/// compete against each other.
+/// When gesture recognizers are in a team together without a captain, then once
+/// there are no other competing gestures in the arena, the first gesture to
+/// have been added to the team automatically wins, instead of the gestures
+/// continuing to compete against each other.
 ///
-/// For example, [Slider] uses this to support both a
+/// When gesture recognizers are in a team with a captain, then once one of the
+/// team members claims victory or there are no other competing gestures in the
+/// arena, the captain wins the arena, and all other team members lose.
+///
+/// For example, [Slider] uses a team without a captain to support both a
 /// [HorizontalDragGestureRecognizer] and a [TapGestureRecognizer], but without
 /// the drag recognizer having to wait until the user has dragged outside the
 /// slop region of the tap gesture before triggering. Since they compete as a
@@ -105,10 +110,26 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
 /// the horizontal nor vertical drag recognizers can claim victory) the tap
 /// recognizer still actually wins, despite being in the team.
 ///
+/// [AndroidView] uses a team with a captain to decide which gestures are
+/// forwarded to the native view. For example if we want to forward taps and
+/// vertical scrolls to a native Android view, [TapGestureRecognizers] and
+/// [VerticalDragGestureRecognizer] are added to a team with a captain(the captain is set to be a
+/// gesture recognizer that never explicitly claims the gesture).
+/// The captain allows [AndroidView] to know when any gestures in the team has been
+/// recognized (or all other arena members are out), once the captain wins the
+/// gesture is forwarded to the Android view.
+///
 /// To assign a gesture recognizer to a team, set
 /// [OneSequenceGestureRecognizer.team] to an instance of [GestureArenaTeam].
 class GestureArenaTeam {
   final Map<int, _CombiningGestureArenaMember> _combiners = <int, _CombiningGestureArenaMember>{};
+
+  /// A member that wins on behalf of the entire team.
+  ///
+  /// If not null, when any one of the [GestureArenaTeam] members claims victory
+  /// the captain accepts the gesture.
+  /// If null, the member that claims a victory accepts the gesture.
+  GestureArenaMember captain;
 
   /// Adds a new member to the arena on behalf of this team.
   ///
@@ -119,7 +140,7 @@ class GestureArenaTeam {
   /// [OneSequenceGestureRecognizer.team].
   GestureArenaEntry add(int pointer, GestureArenaMember member) {
     final _CombiningGestureArenaMember combiner = _combiners.putIfAbsent(
-        pointer, () => new _CombiningGestureArenaMember(this, pointer));
+        pointer, () => _CombiningGestureArenaMember(this, pointer));
     return combiner._add(pointer, member);
   }
 }

@@ -10,20 +10,20 @@ void main() {
   testWidgets('Scroll notification basics', (WidgetTester tester) async {
     ScrollNotification notification;
 
-    await tester.pumpWidget(new NotificationListener<ScrollNotification>(
+    await tester.pumpWidget(NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification value) {
         if (value is ScrollStartNotification || value is ScrollUpdateNotification || value is ScrollEndNotification)
           notification = value;
         return false;
       },
-      child: new SingleChildScrollView(
+      child: SingleChildScrollView(
         child: const SizedBox(height: 1200.0)
       )
     ));
 
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
-    expect(notification, const isInstanceOf<ScrollStartNotification>());
+    expect(notification, isInstanceOf<ScrollStartNotification>());
     expect(notification.depth, equals(0));
     final ScrollStartNotification start = notification;
     expect(start.dragDetails, isNotNull);
@@ -31,7 +31,7 @@ void main() {
 
     await gesture.moveBy(const Offset(-10.0, -10.0));
     await tester.pump(const Duration(seconds: 1));
-    expect(notification, const isInstanceOf<ScrollUpdateNotification>());
+    expect(notification, isInstanceOf<ScrollUpdateNotification>());
     expect(notification.depth, equals(0));
     final ScrollUpdateNotification update = notification;
     expect(update.dragDetails, isNotNull);
@@ -40,7 +40,7 @@ void main() {
 
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
-    expect(notification, const isInstanceOf<ScrollEndNotification>());
+    expect(notification, isInstanceOf<ScrollEndNotification>());
     expect(notification.depth, equals(0));
     final ScrollEndNotification end = notification;
     expect(end.dragDetails, isNotNull);
@@ -53,24 +53,24 @@ void main() {
     final List<int> depth0Values = <int>[];
     final List<int> depth1Values = <int>[];
 
-    await tester.pumpWidget(new NotificationListener<ScrollNotification>(
+    await tester.pumpWidget(NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification value) {
         depth1Types.add(value.runtimeType);
         depth1Values.add(value.depth);
         return false;
       },
-      child: new SingleChildScrollView(
-        child: new SizedBox(
+      child: SingleChildScrollView(
+        child: SizedBox(
           height: 1200.0,
-          child: new NotificationListener<ScrollNotification>(
+          child: NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification value) {
               depth0Types.add(value.runtimeType);
               depth0Values.add(value.depth);
               return false;
             },
-            child: new Container(
+            child: Container(
               padding: const EdgeInsets.all(50.0),
-              child: new SingleChildScrollView(child: const SizedBox(height: 1200.0))
+              child: SingleChildScrollView(child: const SizedBox(height: 1200.0))
             )
           )
         )

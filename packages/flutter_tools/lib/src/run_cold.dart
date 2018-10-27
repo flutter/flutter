@@ -12,16 +12,17 @@ import 'globals.dart';
 import 'resident_runner.dart';
 import 'tracing.dart';
 
+// TODO(flutter/flutter#23031): Test this.
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     List<FlutterDevice> devices, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI: true,
-    this.traceStartup: false,
+    bool usesTerminalUI = true,
+    this.traceStartup = false,
     this.applicationBinary,
-    bool stayResident: true,
-    bool ipv6: false,
+    bool stayResident = true,
+    bool ipv6 = false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -30,14 +31,14 @@ class ColdRunner extends ResidentRunner {
              ipv6: ipv6);
 
   final bool traceStartup;
-  final String applicationBinary;
+  final File applicationBinary;
 
   @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<Null> appStartedCompleter,
+    Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild: true
+    bool shouldBuild = true
   }) async {
     final bool prebuiltMode = applicationBinary != null;
     if (!prebuiltMode) {
@@ -66,7 +67,7 @@ class ColdRunner extends ResidentRunner {
 
     if (flutterDevices.first.observatoryUris != null) {
       // For now, only support one debugger connection.
-      connectionInfoCompleter?.complete(new DebugConnectionInfo(
+      connectionInfoCompleter?.complete(DebugConnectionInfo(
         httpUri: flutterDevices.first.observatoryUris.first,
         wsUri: flutterDevices.first.vmServices.first.wsAddress,
       ));
@@ -109,43 +110,50 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  Future<Null> handleTerminalCommand(String code) async => null;
+  Future<void> handleTerminalCommand(String code) async { }
 
   @override
-  Future<Null> cleanupAfterSignal() async {
+  Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
     await stopApp();
   }
 
   @override
-  Future<Null> cleanupAtFinish() async {
+  Future<void> cleanupAtFinish() async {
     await stopEchoingDeviceLog();
   }
 
   @override
   void printHelp({ @required bool details }) {
     bool haveDetails = false;
+    bool haveAnything = false;
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
       if (device.observatoryUris != null) {
-        for (Uri uri in device.observatoryUris)
+        for (Uri uri in device.observatoryUris) {
           printStatus('An Observatory debugger and profiler on $dname is available at $uri');
+          haveAnything = true;
+        }
       }
     }
     if (supportsServiceProtocol) {
       haveDetails = true;
-      if (details)
+      if (details) {
         printHelpDetails();
+        haveAnything = true;
+      }
     }
     if (haveDetails && !details) {
       printStatus('For a more detailed help message, press "h". To quit, press "q".');
-    } else {
+    } else if (haveAnything) {
       printStatus('To repeat this help message, press "h". To quit, press "q".');
+    } else {
+      printStatus('To quit, press "q".');
     }
   }
 
   @override
-  Future<Null> preStop() async {
+  Future<void> preStop() async {
     for (FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
       if (device.vmServices == null || device.vmServices.isEmpty)

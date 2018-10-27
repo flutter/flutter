@@ -66,7 +66,7 @@ class HitTestResult {
   /// The first entry in the path is the most specific, typically the one at
   /// the leaf of tree being hit tested. Event propagation starts with the most
   /// specific (i.e., first) entry and proceeds in order through the path.
-  List<HitTestEntry> get path => new List<HitTestEntry>.unmodifiable(_path);
+  Iterable<HitTestEntry> get path => _path;
   final List<HitTestEntry> _path;
 
   /// Add a [HitTestEntry] to the path.

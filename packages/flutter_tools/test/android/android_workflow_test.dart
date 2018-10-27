@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -25,56 +24,66 @@ void main() {
   MockStdio stdio;
 
   setUp(() {
-    sdk = new MockAndroidSdk();
-    fs = new MemoryFileSystem();
+    sdk = MockAndroidSdk();
+    fs = MemoryFileSystem();
     fs.directory('/home/me').createSync(recursive: true);
-    processManager = new MockProcessManager();
-    stdio = new MockStdio();
+    processManager = MockProcessManager();
+    stdio = MockStdio();
   });
 
   MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {
-    final Stream<List<int>> stdoutStream = new Stream<List<int>>.fromIterable(
-        stdout.map((String s) => s.codeUnits));
-    return (List<String> command) => new MockProcess(stdout: stdoutStream);
+    final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(
+        stdout.map<List<int>>((String s) => s.codeUnits));
+    return (List<String> command) => MockProcess(stdout: stdoutStream);
   }
 
-  testUsingContext('licensesAccepted handles garbage/no output', () async {
-    MockAndroidSdk.createSdkDirectory();
+  testUsingContext('licensesAccepted throws if cannot run sdkmanager', () async {
+    processManager.succeed = false;
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
-    final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
-    final LicensesAccepted result = await androidWorkflow.licensesAccepted;
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
+    expect(licenseValidator.licensesAccepted, throwsToolExit());
+  }, overrides: <Type, Generator>{
+    AndroidSdk: () => sdk,
+    FileSystem: () => fs,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    ProcessManager: () => processManager,
+    Stdio: () => stdio,
+  });
+
+  testUsingContext('licensesAccepted handles garbage/no output', () async {
+    when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
+    final LicensesAccepted result = await licenseValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.unknown));
     expect(processManager.commands.first, equals('/foo/bar/sdkmanager'));
     expect(processManager.commands.last, equals('--licenses'));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => new FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
 
   testUsingContext('licensesAccepted works for all licenses accepted', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.processFactory = processMetaFactory(<String>[
        '[=======================================] 100% Computing updates...             ',
        'All SDK package licenses accepted.'
     ]);
 
-    final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
-    final LicensesAccepted result = await androidWorkflow.licensesAccepted;
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
+    final LicensesAccepted result = await licenseValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.all));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => new FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
 
   testUsingContext('licensesAccepted works for some licenses accepted', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.processFactory = processMetaFactory(<String>[
       '[=======================================] 100% Computing updates...             ',
@@ -82,19 +91,18 @@ void main() {
       'Review licenses that have not been accepted (y/N)?',
     ]);
 
-    final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
-    final LicensesAccepted result = await androidWorkflow.licensesAccepted;
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
+    final LicensesAccepted result = await licenseValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.some));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => new FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
 
   testUsingContext('licensesAccepted works for no licenses accepted', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.processFactory = processMetaFactory(<String>[
       '[=======================================] 100% Computing updates...             ',
@@ -102,69 +110,65 @@ void main() {
       'Review licenses that have not been accepted (y/N)?',
     ]);
 
-    final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
-    final LicensesAccepted result = await androidWorkflow.licensesAccepted;
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
+    final LicensesAccepted result = await licenseValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.none));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => new FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
 
   testUsingContext('runLicenseManager succeeds for version >= 26', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn('26.0.0');
 
-    expect(await AndroidWorkflow.runLicenseManager(), isTrue);
+    expect(await AndroidLicenseValidator.runLicenseManager(), isTrue);
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => new FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
 
   testUsingContext('runLicenseManager errors for version < 26', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn('25.0.0');
 
-    expect(AndroidWorkflow.runLicenseManager(), throwsToolExit(message: 'To update, run'));
+    expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit(message: 'To update, run'));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => new FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
 
   testUsingContext('runLicenseManager errors correctly for null version', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn(null);
 
-    expect(AndroidWorkflow.runLicenseManager(), throwsToolExit(message: 'To update, run'));
+    expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit(message: 'To update, run'));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => new FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
 
   testUsingContext('runLicenseManager errors when sdkmanager is not found', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.succeed = false;
 
-    expect(AndroidWorkflow.runLicenseManager(), throwsToolExit());
+    expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit());
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => new FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });

@@ -22,13 +22,13 @@ enum _DragState {
 /// the screen is available in the `details`.
 ///
 /// See [DragGestureRecognizer.onEnd].
-typedef void GestureDragEndCallback(DragEndDetails details);
+typedef GestureDragEndCallback = void Function(DragEndDetails details);
 
 /// Signature for when the pointer that previously triggered a
 /// [GestureDragDownCallback] did not complete.
 ///
 /// See [DragGestureRecognizer.onCancel].
-typedef void GestureDragCancelCallback();
+typedef GestureDragCancelCallback = void Function();
 
 /// Recognizes movement.
 ///
@@ -113,14 +113,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void addPointer(PointerEvent event) {
     startTrackingPointer(event.pointer);
-    _velocityTrackers[event.pointer] = new VelocityTracker();
+    _velocityTrackers[event.pointer] = VelocityTracker();
     if (_state == _DragState.ready) {
       _state = _DragState.possible;
       _initialPosition = event.position;
       _pendingDragOffset = Offset.zero;
       _lastPendingEventTimestamp = event.timeStamp;
       if (onDown != null)
-        invokeCallback<void>('onDown', () => onDown(new DragDownDetails(globalPosition: _initialPosition)));
+        invokeCallback<void>('onDown', () => onDown(DragDownDetails(globalPosition: _initialPosition)));
     } else if (_state == _DragState.accepted) {
       resolve(GestureDisposition.accepted);
     }
@@ -140,7 +140,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       final Offset delta = event.delta;
       if (_state == _DragState.accepted) {
         if (onUpdate != null) {
-          invokeCallback<void>('onUpdate', () => onUpdate(new DragUpdateDetails(
+          invokeCallback<void>('onUpdate', () => onUpdate(DragUpdateDetails(
             sourceTimeStamp: event.timeStamp,
             delta: _getDeltaForDetails(delta),
             primaryDelta: _getPrimaryValueFromOffset(delta),
@@ -166,17 +166,18 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _pendingDragOffset = Offset.zero;
       _lastPendingEventTimestamp = null;
       if (onStart != null) {
-        invokeCallback<void>('onStart', () => onStart(new DragStartDetails(
+        invokeCallback<void>('onStart', () => onStart(DragStartDetails(
           sourceTimeStamp: timestamp,
           globalPosition: _initialPosition,
         )));
       }
       if (delta != Offset.zero && onUpdate != null) {
-        invokeCallback<void>('onUpdate', () => onUpdate(new DragUpdateDetails(
+        final Offset deltaForDetails = _getDeltaForDetails(delta);
+        invokeCallback<void>('onUpdate', () => onUpdate(DragUpdateDetails(
           sourceTimeStamp: timestamp,
-          delta: _getDeltaForDetails(delta),
+          delta: deltaForDetails,
           primaryDelta: _getPrimaryValueFromOffset(delta),
-          globalPosition: _initialPosition,
+          globalPosition: _initialPosition + deltaForDetails,
         )));
       }
     }
@@ -204,16 +205,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
       final VelocityEstimate estimate = tracker.getVelocityEstimate();
       if (estimate != null && _isFlingGesture(estimate)) {
-        final Velocity velocity = new Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
+        final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
           .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
-        invokeCallback<void>('onEnd', () => onEnd(new DragEndDetails(
+        invokeCallback<void>('onEnd', () => onEnd(DragEndDetails(
           velocity: velocity,
           primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
         )), debugReport: () {
           return '$estimate; fling at $velocity.';
         });
       } else {
-        invokeCallback<void>('onEnd', () => onEnd(new DragEndDetails(
+        invokeCallback<void>('onEnd', () => onEnd(DragEndDetails(
           velocity: Velocity.zero,
           primaryVelocity: 0.0,
         )), debugReport: () {
@@ -258,7 +259,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragOffset.dy.abs() > kTouchSlop;
 
   @override
-  Offset _getDeltaForDetails(Offset delta) => new Offset(0.0, delta.dy);
+  Offset _getDeltaForDetails(Offset delta) => Offset(0.0, delta.dy);
 
   @override
   double _getPrimaryValueFromOffset(Offset value) => value.dy;
@@ -292,7 +293,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragOffset.dx.abs() > kTouchSlop;
 
   @override
-  Offset _getDeltaForDetails(Offset delta) => new Offset(delta.dx, 0.0);
+  Offset _getDeltaForDetails(Offset delta) => Offset(delta.dx, 0.0);
 
   @override
   double _getPrimaryValueFromOffset(Offset value) => value.dx;

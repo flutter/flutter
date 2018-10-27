@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,17 +15,17 @@ import 'semantics_tester.dart';
 void main() {
 
   testWidgets('Drawer control test', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     BuildContext savedContext;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Builder(
+      MaterialApp(
+        home: Builder(
           builder: (BuildContext context) {
             savedContext = context;
-            return new Scaffold(
+            return Scaffold(
               key: scaffoldKey,
               drawer: const Text('drawer'),
-              body: new Container(),
+              body: Container(),
             );
           },
         ),
@@ -44,13 +46,13 @@ void main() {
   });
 
   testWidgets('Drawer tap test', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
+      MaterialApp(
+        home: Scaffold(
           key: scaffoldKey,
           drawer: const Text('drawer'),
-          body: new Container(),
+          body: Container(),
         ),
       ),
     );
@@ -76,23 +78,23 @@ void main() {
   });
 
   testWidgets('Drawer drag cancel resume (LTR)', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
+      MaterialApp(
+        home: Scaffold(
           key: scaffoldKey,
-          drawer: new Drawer(
-            child: new ListView(
+          drawer: Drawer(
+            child: ListView(
               children: <Widget>[
                 const Text('drawer'),
-                new Container(
+                Container(
                   height: 1000.0,
                   color: Colors.blue[500],
                 ),
               ],
             ),
           ),
-          body: new Container(),
+          body: Container(),
         ),
       ),
     );
@@ -126,25 +128,25 @@ void main() {
   });
 
   testWidgets('Drawer drag cancel resume (RTL)', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Directionality(
+      MaterialApp(
+        home: Directionality(
           textDirection: TextDirection.rtl,
-          child: new Scaffold(
+          child: Scaffold(
             key: scaffoldKey,
-            drawer: new Drawer(
-              child: new ListView(
+            drawer: Drawer(
+              child: ListView(
                 children: <Widget>[
                   const Text('drawer'),
-                  new Container(
+                  Container(
                     height: 1000.0,
                     color: Colors.blue[500],
                   ),
                 ],
               ),
             ),
-            body: new Container(),
+            body: Container(),
           ),
         ),
       ),
@@ -179,28 +181,28 @@ void main() {
   });
 
   testWidgets('Drawer navigator back button', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool buttonPressed = false;
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Builder(
+      MaterialApp(
+        home: Builder(
           builder: (BuildContext context) {
-            return new Scaffold(
+            return Scaffold(
               key: scaffoldKey,
-              drawer: new Drawer(
-                child: new ListView(
+              drawer: Drawer(
+                child: ListView(
                   children: <Widget>[
                     const Text('drawer'),
-                    new FlatButton(
+                    FlatButton(
                       child: const Text('close'),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
                 ),
               ),
-              body: new Container(
-                child: new FlatButton(
+              body: Container(
+                child: FlatButton(
                   child: const Text('button'),
                   onPressed: () { buttonPressed = true; },
                 ),
@@ -231,14 +233,14 @@ void main() {
   testWidgets('Dismissible ModalBarrier includes button in semantic tree on iOS', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-    final SemanticsTester semantics = new SemanticsTester(tester);
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Builder(
+      MaterialApp(
+        home: Builder(
           builder: (BuildContext context) {
-            return new Scaffold(
+            return Scaffold(
               key: scaffoldKey,
               drawer: const Drawer(),
             );
@@ -259,17 +261,17 @@ void main() {
   });
 
   testWidgets('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Builder(
+      MaterialApp(
+        home: Builder(
           builder: (BuildContext context) {
-            return new Scaffold(
+            return Scaffold(
               key: scaffoldKey,
               drawer: const Drawer(),
-              body: new Container(),
+              body: Container(),
             );
           },
         ),
@@ -284,4 +286,40 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Drawer contains route semantics flags', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              key: scaffoldKey,
+              drawer: const Drawer(),
+              body: Container(),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the drawer.
+    scaffoldKey.currentState.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(semantics, includesNodeWith(
+      label: 'Navigation menu',
+      flags: <SemanticsFlag>[
+        SemanticsFlag.scopesRoute,
+        SemanticsFlag.namesRoute,
+      ],
+    ));
+
+    semantics.dispose();
+  });
 }
+
+

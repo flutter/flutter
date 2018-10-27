@@ -11,7 +11,7 @@ import 'io.dart';
 
 const int kNetworkProblemExitCode = 50;
 
-typedef HttpClient HttpClientFactory();
+typedef HttpClientFactory = HttpClient Function();
 
 /// Download a file from the given URL and return the bytes.
 Future<List<int>> fetchUrl(Uri url) async {
@@ -23,7 +23,7 @@ Future<List<int>> fetchUrl(Uri url) async {
     if (result != null)
       return result;
     printStatus('Download failed -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
-    await new Future<Null>.delayed(new Duration(seconds: duration));
+    await Future<void>.delayed(Duration(seconds: duration));
     if (duration < 64)
       duration *= 2;
   }
@@ -35,7 +35,7 @@ Future<List<int>> _attempt(Uri url) async {
   if (context[HttpClientFactory] != null) {
     httpClient = context[HttpClientFactory]();
   } else {
-    httpClient = new HttpClient();
+    httpClient = HttpClient();
   }
   HttpClientRequest request;
   try {
@@ -48,6 +48,9 @@ Future<List<int>> _attempt(Uri url) async {
       'URL: $url',
       exitCode: kNetworkProblemExitCode,
     );
+  } on SocketException catch (error) {
+    printTrace('Download error: $error');
+    return null;
   }
   final HttpClientResponse response = await request.close();
   if (response.statusCode != 200) {
@@ -65,7 +68,7 @@ Future<List<int>> _attempt(Uri url) async {
   }
   printTrace('Received response from server, collecting bytes...');
   try {
-    final BytesBuilder responseBody = new BytesBuilder(copy: false);
+    final BytesBuilder responseBody = BytesBuilder(copy: false);
     await response.forEach(responseBody.add);
     return responseBody.takeBytes();
   } on IOException catch (error) {

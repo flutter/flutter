@@ -8,7 +8,7 @@ import '../doctor.dart';
 import '../runner/flutter_command.dart';
 
 class DoctorCommand extends FlutterCommand {
-  DoctorCommand({this.verbose: false}) {
+  DoctorCommand({this.verbose = false}) {
     argParser.addFlag('android-licenses',
       defaultsTo: false,
       negatable: false,
@@ -27,6 +27,6 @@ class DoctorCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final bool success = await doctor.diagnose(androidLicenses: argResults['android-licenses'], verbose: verbose);
-    return new FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
+    return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
 }

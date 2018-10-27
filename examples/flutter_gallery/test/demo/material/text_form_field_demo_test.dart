@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('validates name field correctly', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(home: const TextFormFieldDemo()));
+    await tester.pumpWidget(const MaterialApp(home: TextFormFieldDemo()));
 
     final Finder submitButton = find.widgetWithText(RaisedButton, 'SUBMIT');
     expect(submitButton, findsOneWidget);
@@ -20,6 +20,7 @@ void main() {
     expect(passwordField, findsOneWidget);
 
     await tester.enterText(nameField, '');
+    await tester.pumpAndSettle();
     // The submit button isn't initially visible. Drag it into view so that
     // it will see the tap.
     await tester.drag(nameField, const Offset(0.0, -1200.0));
@@ -34,6 +35,7 @@ void main() {
     expect(find.text('Name is required.'), findsOneWidget);
     expect(find.text('Please enter only alphabetical characters.'), findsNothing);
     await tester.enterText(nameField, '#');
+    await tester.pumpAndSettle();
 
     // Make the submit button visible again (by dragging the name field), so
     // it will see the tap.

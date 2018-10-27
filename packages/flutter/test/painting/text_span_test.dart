@@ -4,16 +4,16 @@
 
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart' show nonconst;
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('TextSpan equals', () {
-    final TextSpan a1 = new TextSpan(text: nonconst('a'));
-    final TextSpan a2 = new TextSpan(text: nonconst('a'));
-    final TextSpan b1 = new TextSpan(children: <TextSpan>[ a1 ]);
-    final TextSpan b2 = new TextSpan(children: <TextSpan>[ a2 ]);
-    final TextSpan c1 = new TextSpan(text: nonconst(null));
-    final TextSpan c2 = new TextSpan(text: nonconst(null));
+    final TextSpan a1 = TextSpan(text: nonconst('a'));
+    final TextSpan a2 = TextSpan(text: nonconst('a'));
+    final TextSpan b1 = TextSpan(children: <TextSpan>[ a1 ]);
+    final TextSpan b2 = TextSpan(children: <TextSpan>[ a2 ]);
+    final TextSpan c1 = TextSpan(text: nonconst(null));
+    final TextSpan c2 = TextSpan(text: nonconst(null));
 
     expect(a1 == a2, isTrue);
     expect(b1 == b2, isTrue);
@@ -29,20 +29,20 @@ void main() {
   });
 
   test('TextSpan toStringDeep', () {
-    const TextSpan test = const TextSpan(
+    const TextSpan test = TextSpan(
       text: 'a',
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 10.0,
       ),
-      children: const <TextSpan>[
-        const TextSpan(
+      children: <TextSpan>[
+        TextSpan(
           text: 'b',
-          children: const <TextSpan>[
-            const TextSpan(),
+          children: <TextSpan>[
+            TextSpan(),
           ],
         ),
         null,
-        const TextSpan(
+        TextSpan(
           text: 'c',
         ),
       ],

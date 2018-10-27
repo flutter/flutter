@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -36,7 +35,7 @@ Map<MaterialListType, double> kListTileExtent = const <MaterialListType, double>
   MaterialListType.threeLine: 88.0,
 };
 
-const Duration _kExpand = const Duration(milliseconds: 200);
+const Duration _kExpand = Duration(milliseconds: 200);
 
 /// This class is deprecated. Please use [ListTile] instead.
 @deprecated
@@ -47,7 +46,7 @@ class TwoLevelListItem extends StatelessWidget {
     this.leading,
     @required this.title,
     this.trailing,
-    this.enabled: true,
+    this.enabled = true,
     this.onTap,
     this.onLongPress
   }) : assert(title != null),
@@ -90,9 +89,9 @@ class TwoLevelListItem extends StatelessWidget {
     final TwoLevelList parentList = context.ancestorWidgetOfExactType(TwoLevelList);
     assert(parentList != null);
 
-    return new SizedBox(
+    return SizedBox(
       height: kListTileExtent[parentList.type],
-      child: new ListTile(
+      child: ListTile(
         leading: leading,
         title: title,
         trailing: trailing,
@@ -114,7 +113,7 @@ class TwoLevelSublist extends StatefulWidget {
     @required this.title,
     this.backgroundColor,
     this.onOpenChanged,
-    this.children: const <Widget>[],
+    this.children = const <Widget>[],
   }) : super(key: key);
 
   /// A widget to display before the title.
@@ -143,7 +142,7 @@ class TwoLevelSublist extends StatefulWidget {
   final Color backgroundColor;
 
   @override
-  _TwoLevelSublistState createState() => new _TwoLevelSublistState();
+  _TwoLevelSublistState createState() => _TwoLevelSublistState();
 }
 
 @deprecated
@@ -162,14 +161,14 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: _kExpand, vsync: this);
-    _easeOutAnimation = new CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-    _easeInAnimation = new CurvedAnimation(parent: _controller, curve: Curves.easeIn);
-    _borderColor = new ColorTween(begin: Colors.transparent);
-    _headerColor = new ColorTween();
-    _iconColor = new ColorTween();
-    _iconTurns = new Tween<double>(begin: 0.0, end: 0.5).animate(_easeInAnimation);
-    _backgroundColor = new ColorTween();
+    _controller = AnimationController(duration: _kExpand, vsync: this);
+    _easeOutAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _easeInAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _borderColor = ColorTween(begin: Colors.transparent);
+    _headerColor = ColorTween();
+    _iconColor = ColorTween();
+    _iconTurns = Tween<double>(begin: 0.0, end: 0.5).animate(_easeInAnimation);
+    _backgroundColor = ColorTween();
 
     _isExpanded = PageStorage.of(context)?.readState(context) ?? false;
     if (_isExpanded)
@@ -196,35 +195,35 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
   }
 
   Widget buildList(BuildContext context, Widget child) {
-    return new Container(
-      decoration: new BoxDecoration(
+    return Container(
+      decoration: BoxDecoration(
         color: _backgroundColor.evaluate(_easeOutAnimation),
-        border: new Border(
-          top: new BorderSide(color: _borderColor.evaluate(_easeOutAnimation)),
-          bottom: new BorderSide(color: _borderColor.evaluate(_easeOutAnimation))
+        border: Border(
+          top: BorderSide(color: _borderColor.evaluate(_easeOutAnimation)),
+          bottom: BorderSide(color: _borderColor.evaluate(_easeOutAnimation))
         )
       ),
-      child: new Column(
+      child: Column(
         children: <Widget>[
           IconTheme.merge(
-            data: new IconThemeData(color: _iconColor.evaluate(_easeInAnimation)),
-            child: new TwoLevelListItem(
+            data: IconThemeData(color: _iconColor.evaluate(_easeInAnimation)),
+            child: TwoLevelListItem(
               onTap: _handleOnTap,
               leading: widget.leading,
-              title: new DefaultTextStyle(
+              title: DefaultTextStyle(
                 style: Theme.of(context).textTheme.subhead.copyWith(color: _headerColor.evaluate(_easeInAnimation)),
                 child: widget.title
               ),
-              trailing: new RotationTransition(
+              trailing: RotationTransition(
                 turns: _iconTurns,
                 child: const Icon(Icons.expand_more)
               )
             )
           ),
-          new ClipRect(
-            child: new Align(
+          ClipRect(
+            child: Align(
               heightFactor: _easeInAnimation.value,
-              child: new Column(children: widget.children)
+              child: Column(children: widget.children)
             )
           )
         ]
@@ -246,7 +245,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
       ..begin = Colors.transparent
       ..end = widget.backgroundColor ?? Colors.transparent;
 
-    return new AnimatedBuilder(
+    return AnimatedBuilder(
       animation: _controller.view,
       builder: buildList
     );
@@ -261,8 +260,8 @@ class TwoLevelList extends StatelessWidget {
   /// The [type] argument must not be null.
   const TwoLevelList({
     Key key,
-    this.children: const <Widget>[],
-    this.type: MaterialListType.twoLine,
+    this.children = const <Widget>[],
+    this.type = MaterialListType.twoLine,
     this.padding,
   }) : assert(type != null),
        super(key: key);
@@ -280,7 +279,7 @@ class TwoLevelList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ListView(
+    return ListView(
       padding: padding,
       shrinkWrap: true,
       children: KeyedSubtree.ensureUniqueKeysForList(children),

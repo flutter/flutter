@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart' show EnginePhase;
 export 'package:flutter_test/flutter_test.dart' show EnginePhase;
 
-class TestRenderingFlutterBinding extends BindingBase with ServicesBinding, GestureBinding, SchedulerBinding, PaintingBinding, RendererBinding {
+class TestRenderingFlutterBinding extends BindingBase with ServicesBinding, GestureBinding, SchedulerBinding, PaintingBinding, SemanticsBinding, RendererBinding {
   EnginePhase phase = EnginePhase.composite;
 
   @override
@@ -39,7 +39,7 @@ class TestRenderingFlutterBinding extends BindingBase with ServicesBinding, Gest
 
 TestRenderingFlutterBinding _renderer;
 TestRenderingFlutterBinding get renderer {
-  _renderer ??= new TestRenderingFlutterBinding();
+  _renderer ??= TestRenderingFlutterBinding();
   return _renderer;
 }
 
@@ -57,17 +57,17 @@ TestRenderingFlutterBinding get renderer {
 /// has no build phase.
 void layout(RenderBox box, {
   BoxConstraints constraints,
-  Alignment alignment: Alignment.center,
-  EnginePhase phase: EnginePhase.layout,
+  Alignment alignment = Alignment.center,
+  EnginePhase phase = EnginePhase.layout,
 }) {
   assert(box != null); // If you want to just repump the last box, call pumpFrame().
   assert(box.parent == null); // We stick the box in another, so you can't reuse it easily, sorry.
 
   renderer.renderView.child = null;
   if (constraints != null) {
-    box = new RenderPositionedBox(
+    box = RenderPositionedBox(
       alignment: alignment,
-      child: new RenderConstrainedBox(
+      child: RenderConstrainedBox(
         additionalConstraints: constraints,
         child: box
       )
@@ -78,7 +78,7 @@ void layout(RenderBox box, {
   pumpFrame(phase: phase);
 }
 
-void pumpFrame({ EnginePhase phase: EnginePhase.layout }) {
+void pumpFrame({ EnginePhase phase = EnginePhase.layout }) {
   assert(renderer != null);
   assert(renderer.renderView != null);
   assert(renderer.renderView.child != null); // call layout() first!

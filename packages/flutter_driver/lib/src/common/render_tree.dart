@@ -27,7 +27,7 @@ class RenderTree extends Result {
 
   /// Deserializes the result from JSON.
   static RenderTree fromJson(Map<String, dynamic> json) {
-    return new RenderTree(json['tree']);
+    return RenderTree(json['tree']);
   }
 
   @override

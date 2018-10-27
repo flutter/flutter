@@ -1,4 +1,4 @@
-// Copyright 2018 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,7 @@ import 'dart:core';
 /// Throws an [ArgumentError] if the address is neither.
 void validateAddress(String address) {
   if (!(isIpV4Address(address) || isIpV6Address(address))) {
-    throw new ArgumentError(
+    throw ArgumentError(
         '"$address" is neither a valid IPv4 nor IPv6 address');
   }
 }

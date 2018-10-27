@@ -7,8 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('FractionalOffset control test', () {
-    const FractionalOffset a = const FractionalOffset(0.5, 0.25);
-    const FractionalOffset b = const FractionalOffset(1.25, 0.75);
+    const FractionalOffset a = FractionalOffset(0.5, 0.25);
+    const FractionalOffset b = FractionalOffset(1.25, 0.75);
 
     expect(a, hasOneLineDescription);
     expect(a.hashCode, equals(const FractionalOffset(0.5, 0.25).hashCode));
@@ -34,12 +34,12 @@ void main() {
   });
 
   test('FractionalOffset.fromOffsetAndSize()', () {
-    final FractionalOffset a = new FractionalOffset.fromOffsetAndSize(const Offset(100.0, 100.0), const Size(200.0, 400.0));
+    final FractionalOffset a = FractionalOffset.fromOffsetAndSize(const Offset(100.0, 100.0), const Size(200.0, 400.0));
     expect(a, const FractionalOffset(0.5, 0.25));
   });
 
   test('FractionalOffset.fromOffsetAndRect()', () {
-    final FractionalOffset a = new FractionalOffset.fromOffsetAndRect(const Offset(150.0, 120.0), new Rect.fromLTWH(50.0, 20.0, 200.0, 400.0));
+    final FractionalOffset a = FractionalOffset.fromOffsetAndRect(const Offset(150.0, 120.0), Rect.fromLTWH(50.0, 20.0, 200.0, 400.0));
     expect(a, const FractionalOffset(0.5, 0.25));
   });
 }

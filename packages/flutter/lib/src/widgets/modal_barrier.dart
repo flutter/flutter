@@ -31,8 +31,9 @@ class ModalBarrier extends StatelessWidget {
   const ModalBarrier({
     Key key,
     this.color,
-    this.dismissible: true,
+    this.dismissible = true,
     this.semanticsLabel,
+    this.barrierSemanticsDismissible = true,
   }) : super(key: key);
 
   /// If non-null, fill the barrier with this color.
@@ -51,6 +52,13 @@ class ModalBarrier extends StatelessWidget {
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final bool dismissible;
 
+  /// Whether the modal barrier semantics are included in the semantics tree.
+  ///
+  /// See also:
+  ///  * [ModalRoute.semanticsDismissible], which controls this property for
+  ///    the [ModalBarrier] built by [ModalRoute] pages.
+  final bool barrierSemanticsDismissible;
+
   /// Semantics label used for the barrier if it is [dismissable].
   ///
   /// The semantics label is read out by accessibility tools (e.g. TalkBack
@@ -65,25 +73,27 @@ class ModalBarrier extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(!dismissible || semanticsLabel == null || debugCheckHasDirectionality(context));
-    final bool semanticsDismissable = dismissible && defaultTargetPlatform != TargetPlatform.android;
-    return new BlockSemantics(
-      child: new ExcludeSemantics(
-        // On Android, the back button is used to dismiss a modal.
-        excluding: !semanticsDismissable,
-        child: new GestureDetector(
+    final bool semanticsDismissible = dismissible && defaultTargetPlatform != TargetPlatform.android;
+    final bool modalBarrierSemanticsDismissible = barrierSemanticsDismissible ?? semanticsDismissible;
+    return BlockSemantics(
+      child: ExcludeSemantics(
+        // On Android, the back button is used to dismiss a modal. On iOS, some
+        // modal barriers are not dismissible in accessibility mode.
+        excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
+        child: GestureDetector(
           onTapDown: (TapDownDetails details) {
             if (dismissible)
               Navigator.pop(context);
           },
           behavior: HitTestBehavior.opaque,
-          child: new Semantics(
-            label: semanticsDismissable ? semanticsLabel : null,
-            textDirection: semanticsDismissable && semanticsLabel != null ? Directionality.of(context) : null,
-            child: new ConstrainedBox(
+          child: Semantics(
+            label: semanticsDismissible ? semanticsLabel : null,
+            textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
+            child: ConstrainedBox(
               constraints: const BoxConstraints.expand(),
-              child: color == null ? null : new DecoratedBox(
-                decoration: new BoxDecoration(
-                  color: color
+              child: color == null ? null : DecoratedBox(
+                decoration: BoxDecoration(
+                  color: color,
                 )
               )
             )
@@ -115,8 +125,9 @@ class AnimatedModalBarrier extends AnimatedWidget {
   const AnimatedModalBarrier({
     Key key,
     Animation<Color> color,
-    this.dismissible: true,
+    this.dismissible = true,
     this.semanticsLabel,
+    this.barrierSemanticsDismissible,
   }) : super(key: key, listenable: color);
 
   /// If non-null, fill the barrier with this color.
@@ -145,12 +156,20 @@ class AnimatedModalBarrier extends AnimatedWidget {
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final String semanticsLabel;
 
+  /// Whether the modal barrier semantics are included in the semantics tree.
+  ///
+  /// See also:
+  ///  * [ModalRoute.semanticsDismissible], which controls this property for
+  ///    the [ModalBarrier] built by [ModalRoute] pages.
+  final bool barrierSemanticsDismissible;
+
   @override
   Widget build(BuildContext context) {
-    return new ModalBarrier(
+    return ModalBarrier(
       color: color?.value,
       dismissible: dismissible,
       semanticsLabel: semanticsLabel,
+      barrierSemanticsDismissible: barrierSemanticsDismissible,
     );
   }
 }

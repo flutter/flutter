@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/commands/install.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -13,24 +12,24 @@ import '../src/mocks.dart';
 void main() {
   group('install', () {
     testUsingContext('returns 0 when Android is connected and ready for an install', () async {
-      final InstallCommand command = new InstallCommand();
+      final InstallCommand command = InstallCommand();
       applyMocksToCommand(command);
 
-      final MockAndroidDevice device = new MockAndroidDevice();
-      when(device.isAppInstalled(any)).thenReturn(false);
-      when(device.installApp(any)).thenReturn(true);
+      final MockAndroidDevice device = MockAndroidDevice();
+      when(device.isAppInstalled(any)).thenAnswer((_) async => false);
+      when(device.installApp(any)).thenAnswer((_) async => true);
       testDeviceManager.addDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install']);
     });
 
     testUsingContext('returns 0 when iOS is connected and ready for an install', () async {
-      final InstallCommand command = new InstallCommand();
+      final InstallCommand command = InstallCommand();
       applyMocksToCommand(command);
 
-      final MockIOSDevice device = new MockIOSDevice();
-      when(device.isAppInstalled(any)).thenReturn(false);
-      when(device.installApp(any)).thenReturn(true);
+      final MockIOSDevice device = MockIOSDevice();
+      when(device.isAppInstalled(any)).thenAnswer((_) async => false);
+      when(device.installApp(any)).thenAnswer((_) async => true);
       testDeviceManager.addDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install']);

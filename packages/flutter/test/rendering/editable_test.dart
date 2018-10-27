@@ -4,17 +4,35 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
+
+class FakeEditableTextState extends TextSelectionDelegate {
+  @override
+  TextEditingValue get textEditingValue { return const TextEditingValue(); }
+
+  @override
+  set textEditingValue(TextEditingValue value) {}
+
+  @override
+  void hideToolbar() {}
+
+  @override
+  void bringIntoView(TextPosition position) {}
+}
 
 void main() {
   test('editable intrinsics', () {
-    final RenderEditable editable = new RenderEditable(
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
       text: const TextSpan(
-        style: const TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
         text: '12345',
       ),
       textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
-      offset: new ViewportOffset.zero(),
+      locale: const Locale('ja', 'JP'),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
     );
     expect(editable.getMinIntrinsicWidth(double.infinity), 50.0);
     expect(editable.getMaxIntrinsicWidth(double.infinity), 50.0);
@@ -33,6 +51,7 @@ void main() {
         ' │ maxLines: 1\n'
         ' │ selectionColor: null\n'
         ' │ textScaleFactor: 1.0\n'
+        ' │ locale: ja_JP\n'
         ' │ selection: null\n'
         ' │ offset: _FixedViewportOffset#00000(offset: 0.0)\n'
         ' ╘═╦══ text ═══\n'

@@ -7,22 +7,22 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-    PersistentBottomSheetController<Null> bottomSheet;
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    PersistentBottomSheetController<void> bottomSheet;
     int buildCount = 0;
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: const Text('body'))
+        body: const Center(child: Text('body'))
       )
     ));
 
-    bottomSheet = scaffoldKey.currentState.showBottomSheet<Null>((_) {
-      return new Builder(
+    bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((_) {
+      return Builder(
         builder: (BuildContext context) {
           buildCount += 1;
-          return new Container(height: 200.0);
+          return Container(height: 200.0);
         }
       );
     });
@@ -36,23 +36,23 @@ void main() {
   });
 
   testWidgets('Verify that a scrollable BottomSheet can be dismissed', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: const Text('body'))
+        body: const Center(child: Text('body'))
       )
     ));
 
-    scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
-      return new ListView(
+    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+      return ListView(
         shrinkWrap: true,
         primary: false,
         children: <Widget>[
-          new Container(height: 100.0, child: const Text('One')),
-          new Container(height: 100.0, child: const Text('Two')),
-          new Container(height: 100.0, child: const Text('Three')),
+          Container(height: 100.0, child: const Text('One')),
+          Container(height: 100.0, child: const Text('Two')),
+          Container(height: 100.0, child: const Text('Three')),
         ],
       );
     });
@@ -68,21 +68,21 @@ void main() {
   });
 
   testWidgets('showBottomSheet()', (WidgetTester tester) async {
-    final GlobalKey key = new GlobalKey();
-    await tester.pumpWidget(new MaterialApp(
-      home: new Scaffold(
-        body: new Placeholder(key: key),
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Placeholder(key: key),
       )
     ));
 
     int buildCount = 0;
-    showBottomSheet<Null>(
+    showBottomSheet<void>(
       context: key.currentContext,
       builder: (BuildContext context) {
-        return new Builder(
+        return Builder(
           builder: (BuildContext context) {
             buildCount += 1;
-            return new Container(height: 200.0);
+            return Container(height: 200.0);
           }
         );
       },
@@ -95,17 +95,17 @@ void main() {
     BuildContext scaffoldContext;
     BuildContext bottomSheetContext;
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new MediaQuery(
+    await tester.pumpWidget(MaterialApp(
+      home: MediaQuery(
         data: const MediaQueryData(
-          padding: const EdgeInsets.all(50.0),
+          padding: EdgeInsets.all(50.0),
         ),
-        child: new Scaffold(
+        child: Scaffold(
           resizeToAvoidBottomPadding: false,
-          body: new Builder(
+          body: Builder(
             builder: (BuildContext context) {
               scaffoldContext = context;
-              return new Container();
+              return Container();
             }
           ),
         ),
@@ -114,11 +114,11 @@ void main() {
 
     await tester.pump();
 
-    showBottomSheet<Null>(
+    showBottomSheet<void>(
       context: scaffoldContext,
       builder: (BuildContext context) {
         bottomSheetContext = context;
-        return new Container();
+        return Container();
       },
     );
 
@@ -132,5 +132,63 @@ void main() {
         right: 50.0,
       ),
     );
+  });
+
+  testWidgets('Scaffold.bottomSheet', (WidgetTester tester) async {
+    final Key bottomSheetKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: const Placeholder(),
+          bottomSheet: Container(
+            key: bottomSheetKey,
+            alignment: Alignment.center,
+            height: 200.0,
+            child: Builder(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  child: const Text('showModalBottomSheet'),
+                  onPressed: () {
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) => const Text('modal bottom sheet'),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('showModalBottomSheet'), findsOneWidget);
+    expect(tester.getSize(find.byKey(bottomSheetKey)), const Size(800.0, 200.0));
+    expect(tester.getTopLeft(find.byKey(bottomSheetKey)), const Offset(0.0, 400.0));
+
+    // Show the modal bottomSheet
+    await tester.tap(find.text('showModalBottomSheet'));
+    await tester.pumpAndSettle();
+    expect(find.text('modal bottom sheet'), findsOneWidget);
+
+    // Dismiss the modal bottomSheet
+    await tester.tap(find.text('modal bottom sheet'));
+    await tester.pumpAndSettle();
+    expect(find.text('modal bottom sheet'), findsNothing);
+    expect(find.text('showModalBottomSheet'), findsOneWidget);
+
+    // Remove the persistent bottomSheet
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          bottomSheet: null,
+          body: Placeholder(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('showModalBottomSheet'), findsNothing);
+    expect(find.byKey(bottomSheetKey), findsNothing);
   });
 }

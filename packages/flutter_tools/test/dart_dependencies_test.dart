@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/dart/dependencies.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:test/test.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
@@ -25,7 +24,7 @@ void main() {
       final String mainPath = fs.path.join(testPath, 'main.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
       final DartDependencySetBuilder builder =
-          new DartDependencySetBuilder(mainPath, packagesPath);
+          DartDependencySetBuilder(mainPath, packagesPath);
       final Set<String> dependencies = builder.build();
       expect(dependencies.contains(canonicalizePath(mainPath)), isTrue);
       expect(dependencies.contains(canonicalizePath(fs.path.join(testPath, 'foo.dart'))), isTrue);
@@ -36,7 +35,7 @@ void main() {
       final String mainPath = fs.path.join(testPath, 'main.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
       final DartDependencySetBuilder builder =
-          new DartDependencySetBuilder(mainPath, packagesPath);
+          DartDependencySetBuilder(mainPath, packagesPath);
       try {
         builder.build();
         fail('expect an exception to be thrown.');
@@ -50,7 +49,7 @@ void main() {
       final String mainPath = fs.path.join(testPath, 'main.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
       final DartDependencySetBuilder builder =
-          new DartDependencySetBuilder(mainPath, packagesPath);
+          DartDependencySetBuilder(mainPath, packagesPath);
       try {
         builder.build();
         fail('expect an exception to be thrown.');
@@ -64,7 +63,7 @@ void main() {
       final String mainPath = fs.path.join(testPath, 'main.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
       final DartDependencySetBuilder builder =
-          new DartDependencySetBuilder(mainPath, packagesPath);
+          DartDependencySetBuilder(mainPath, packagesPath);
       try {
         builder.build();
         fail('expect an exception to be thrown.');
@@ -78,7 +77,7 @@ void main() {
       final String testPath = fs.path.join(dataPath, 'asci_casing');
       final String mainPath = fs.path.join(testPath, 'main.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
-      final DartDependencySetBuilder builder = new DartDependencySetBuilder(mainPath, packagesPath);
+      final DartDependencySetBuilder builder = DartDependencySetBuilder(mainPath, packagesPath);
       final Set<String> deps = builder.build();
       expect(deps, contains(endsWith('This_Import_Has_fuNNy_casING.dart')));
     });
@@ -88,7 +87,7 @@ void main() {
       final String mainPath = fs.path.join(testPath, 'main.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
       final DartDependencySetBuilder builder =
-          new DartDependencySetBuilder(mainPath, packagesPath);
+          DartDependencySetBuilder(mainPath, packagesPath);
       try {
         builder.build();
         fail('expect an exception to be thrown.');

@@ -79,7 +79,7 @@ class Icon extends StatelessWidget {
   /// Typically, a material design color will be used, as follows:
   ///
   /// ```dart
-  ///  new Icon(
+  ///  Icon(
   ///    icon: Icons.widgets,
   ///    color: Colors.blue.shade400,
   ///  ),
@@ -122,9 +122,9 @@ class Icon extends StatelessWidget {
     final double iconSize = size ?? iconTheme.size;
 
     if (icon == null) {
-      return new Semantics(
+      return Semantics(
         label: semanticLabel,
-        child: new SizedBox(width: iconSize, height: iconSize)
+        child: SizedBox(width: iconSize, height: iconSize)
       );
     }
 
@@ -133,11 +133,11 @@ class Icon extends StatelessWidget {
     if (iconOpacity != 1.0)
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
 
-    Widget iconWidget = new RichText(
+    Widget iconWidget = RichText(
       textDirection: textDirection, // Since we already fetched it for the assert...
-      text: new TextSpan(
-        text: new String.fromCharCode(icon.codePoint),
-        style: new TextStyle(
+      text: TextSpan(
+        text: String.fromCharCode(icon.codePoint),
+        style: TextStyle(
           inherit: false,
           color: iconColor,
           fontSize: iconSize,
@@ -150,8 +150,8 @@ class Icon extends StatelessWidget {
     if (icon.matchTextDirection) {
       switch (textDirection) {
         case TextDirection.rtl:
-          iconWidget = new Transform(
-            transform: new Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+          iconWidget = Transform(
+            transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
             alignment: Alignment.center,
             transformHitTests: false,
             child: iconWidget,
@@ -162,13 +162,13 @@ class Icon extends StatelessWidget {
       }
     }
 
-    return new Semantics(
+    return Semantics(
       label: semanticLabel,
-      child: new ExcludeSemantics(
-        child: new SizedBox(
+      child: ExcludeSemantics(
+        child: SizedBox(
           width: iconSize,
           height: iconSize,
-          child: new Center(
+          child: Center(
             child: iconWidget,
           ),
         ),
@@ -179,8 +179,8 @@ class Icon extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<IconData>('icon', icon, ifNull: '<empty>', showName: false));
-    properties.add(new DoubleProperty('size', size, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<IconData>('icon', icon, ifNull: '<empty>', showName: false));
+    properties.add(DoubleProperty('size', size, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
   }
 }

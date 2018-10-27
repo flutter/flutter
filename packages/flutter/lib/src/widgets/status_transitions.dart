@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'basic.dart';
 import 'framework.dart';
 
@@ -26,7 +24,7 @@ abstract class StatusTransitionWidget extends StatefulWidget {
   Widget build(BuildContext context);
 
   @override
-  _StatusTransitionState createState() => new _StatusTransitionState();
+  _StatusTransitionState createState() => _StatusTransitionState();
 }
 
 class _StatusTransitionState extends State<StatusTransitionWidget> {

@@ -5,14 +5,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('PhysicalModel - creates a physical model layer when it needs compositing', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    debugDisableShadows = false;
+    await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
-        child: new PhysicalModel(
+        child: PhysicalModel(
           shape: BoxShape.rectangle,
           color: Colors.grey,
           shadowColor: Colors.red,
           elevation: 1.0,
-          child: new Material(child: new TextField(controller: new TextEditingController())),
+          child: Material(child: TextField(controller: TextEditingController())),
         ),
       ),
     );
@@ -25,5 +26,6 @@ void main() {
     expect(physicalModelLayer.shadowColor, Colors.red);
     expect(physicalModelLayer.color, Colors.grey);
     expect(physicalModelLayer.elevation, 1.0);
+    debugDisableShadows = true;
   });
 }
