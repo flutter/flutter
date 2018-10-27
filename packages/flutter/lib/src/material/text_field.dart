@@ -92,6 +92,26 @@ class TextField extends StatefulWidget {
   /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
   /// and [enableInteractiveSelection] arguments must not be null.
   ///
+  /// ## Sample code
+  ///
+  /// This example shows how to create [TextField] as password input which
+  /// allows 25 characters only and calls callback method when user presses the
+  /// 'done' button on the keyboard.
+  ///
+  /// ```dart
+  /// void _login(String passwd) {
+  ///   // provide login logic
+  /// }
+  ///
+  /// TextField(
+  ///   decoration: const InputDecoration(labelText: 'Password'),
+  ///   obscureText: true,
+  ///   maxLength: 25,
+  ///   maxLengthEnforced: true,
+  ///   onSubmitted: _login,
+  /// )
+  /// ```
+  ///
   /// See also:
   ///
   ///  * [maxLength], which discusses the precise meaning of "number of
