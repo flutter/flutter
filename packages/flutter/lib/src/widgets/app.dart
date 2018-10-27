@@ -27,49 +27,26 @@ export 'dart:ui' show Locale;
 
 /// The signature of [WidgetsApp.localeListResolutionCallback].
 ///
-/// A `LocaleListResolutionCallback` is responsible for computing the locale of the app's
+/// A [LocaleListResolutionCallback] is responsible for computing the locale of the app's
 /// [Localizations] object when the app starts and when user changes the list of
 /// locales for the device.
 ///
-/// The `locales` list is the device's preferred locales when the app started, or the
+/// The [locales] list is the device's preferred locales when the app started, or the
 /// device's preferred locales the user selected after the app was started. This list
-/// is in order of preference The `supportedLocales` parameter is just the value of
+/// is in order of preference The [supportedLocales] parameter is just the value of
 /// [WidgetsApp.supportedLocales].
-///
-/// When a `LocaleListResolutionCallback` is provided, Flutter will first attempt to
-/// resolve the locale with the provided `LocaleListResolutionCallback`, and if the
-/// callback or result is null, will fallback to trying the [LocaleResolutionCallback].
-/// If both [LocaleResolutionCallback] and 'LocaleListResolutionCallback' may be left
-/// null or fail to resolve (return null), the fallback algorithm will be used.
-///
-/// The priority of each available fallback is:
-///
-///  * [LocaleListResolutionCallback] is attempted first.
-///  * `LocaleResolutionCallback` is attempted second.
-///  * Flutter's fallback algorithm is attempted last.
 typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.localeResolutionCallback].
 ///
-/// A `LocaleResolutionCallback` is responsible for computing the locale of the app's
+/// A [LocaleResolutionCallback] is responsible for computing the locale of the app's
 /// [Localizations] object when the app starts and when user changes the default
 /// locale for the device.
 ///
-/// The `locale` is the device's default locale when the app started, or the
+/// The [locale] is the device's default locale when the app started, or the
 /// device locale the user selected after the app was started. The default locale
-/// is the first locale in the list of preferred locales. The `supportedLocales`
+/// is the first locale in the list of preferred locales. The [supportedLocales]
 /// parameter is just the value of [WidgetsApp.supportedLocales].
-///
-/// When a `LocaleResolutionCallback` is provided, `LocaleResolutionCallback` will
-/// be called after failure to resolve locale with [LocaleListResolutionCallback].
-/// If both `LocaleResolutionCallback` and [LocaleListResolutionCallback] may be left
-/// null or fail to resolve (return null), the fallback algorithm will be used.
-///
-/// The priority of each available fallback is:
-///
-///  * [LocaleListResolutionCallback] is attempted first.
-///  * `LocaleResolutionCallback` is attempted second.
-///  * Flutter's fallback algorithm is attempted last.
 typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
@@ -466,56 +443,36 @@ class WidgetsApp extends StatefulWidget {
   /// when the app is started, and when the user changes the
   /// device's locale.
   ///
-  /// The returned value becomes the locale of this app's [Localizations]
-  /// widget. The callback's `locales` parameter is the device's preferred
-  /// locales list when the app started, or the device locales the user selected
-  /// after the app was started. The callback's `supportedLocales` parameter is
-  /// just the value [supportedLocales].
+  /// When a [localeListResolutionCallback] is provided, Flutter will first attempt to
+  /// resolve the locale with the provided [localeListResolutionCallback]. If the
+  /// callback or result is null, will fallback to trying the [localeResolutionCallback].
+  /// If both [localeResolutionCallback] and [localeListResolutionCallback] are left null
+  /// or fail to resolve (return null), the [WidgetsApp.fallbackLocaleResolution]
+  /// fallback algorithm will be used.
   ///
-  /// If the callback is null or if it returns null then the resolved locale is:
+  /// The priority of each available fallback is:
   ///
-  /// - The value returned by [localeResolutionCallback] if the callback is not null.
-  /// - The callback's `locale` parameter if it's equal to a supported locale.
-  /// - The first supported locale with the same [Locale.languageCode] and
-  ///   [Locale.scriptCode] as the callback's `locale` parameter.
-  /// - The first supported locale with the same [Locale.languageCode] as the
-  ///   callback's `locale` parameter.
-  /// - The first locale in [supportedLocales].
+  ///  1. [localeListResolutionCallback] is attempted first.
+  ///  2. [localeResolutionCallback] is attempted second.
+  ///  3. Flutter's [WidgetsApp.fallbackLocaleResolution] algorithm is attempted last.
   /// {@endtemplate}
   ///
+  /// This callback considers the entire list of preferred locales.
+  /// 
   /// See also:
   ///
   ///  * [MaterialApp.localeResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
   final LocaleListResolutionCallback localeListResolutionCallback;
 
-  /// {@template flutter.widgets.widgetsApp.localeResolutionCallback}
-  /// This callback is responsible for choosing the app's locale
-  /// when the app is started, and when the user changes the
-  /// device's locale.
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
   ///
-  /// The returned value becomes the locale of this app's [Localizations]
-  /// widget. The callback's `locale` parameter is the device's locale when
-  /// the app started, or the device locale the user selected after the app was
-  /// started. The callback's `supportedLocales` parameter is just the value
-  /// [supportedLocales].
-  ///
-  /// This callback is only called if no [localeListResolutionCallback] is
-  /// provided or its return value is null.
-  ///
-  /// If the callback is null or if it returns null then the resolved locale is:
-  ///
-  /// - The callback's `locale` parameter if it's equal to a supported locale.
-  /// - The first supported locale with the same [Locale.languageCode] and
-  ///   [Locale.scriptCode] as the callback's `locale` parameter.
-  /// - The first supported locale with the same [Locale.languageCode] as the
-  ///   callback's `locale` parameter.
-  /// - The first locale in [supportedLocales].
-  /// {@endtemplate}
+  /// This callback considers only the default locale, which is the first locale
+  /// in the preferred locales list.
   ///
   /// See also:
   ///
-  ///  * [MaterialApp.localeResolutionCallback], which sets the callback of the
+  ///  * [MaterialApp.localeListResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
   final LocaleResolutionCallback localeResolutionCallback;
 
@@ -763,12 +720,31 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         return locale;
     }
     // Both callbacks failed, falling back to default algorithm.
-    return _fallbackLocaleResolution(preferredLocales, supportedLocales);
+    return fallbackLocaleResolution(preferredLocales, supportedLocales);
   }
 
-  static Locale _fallbackLocaleResolution(List<Locale> preferredLocales, Iterable<Locale> supportedLocales) {
-    // newLocale can be null when called before the platform has had a chance to
-    // initialize the locales. We default to the first supported locale.
+  /// The default fallback locale resolution algorithm.
+  ///
+  /// This algorithm prioritizes speed at the cost of slightly less appropriate
+  /// resolutions for edge cases.
+  ///
+  /// Custom resolution algorithms can be provided through [WidgetsApp.localeListResolutionCallback]
+  /// or [WidgetsApp.localeResolutionCallback].
+  ///
+  /// This algorithm will resolve to the earliest locale in [preferredLocales] that
+  /// matches the most fields, prioritizing in the order of perfect match, 
+  /// languageCode+countryCode, languageCode+scriptCode, languageCode-only.
+  ///
+  /// In the case where a locale is matched by languageCode-only and is not the
+  /// default (first) locale, the next locale in preferredLocales with a
+  /// perfect match can supercede the languageCode-only match if it exists.
+  ///
+  /// When a preferredLocale matches more than one supported locale, it will resolve
+  /// to the first matching locale listed in the supportedLocales.
+  static Locale fallbackLocaleResolution(List<Locale> preferredLocales, Iterable<Locale> supportedLocales) {
+    // preferredLocales can be null when called before the platform has had a chance to
+    // initialize the locales. Platforms without locale passing support will provide an empty list.
+    // We default to the first supported locale in these cases.
     if (preferredLocales == null || preferredLocales.isEmpty) {
       return supportedLocales.first;
     }
@@ -784,16 +760,23 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       languageAndScriptLocales[ui.hashValues(locale.languageCode.hashCode, locale.scriptCode.hashCode)] ??= locale;
       languageLocales[locale.languageCode.hashCode] ??= locale;
     }
-    // Loop over user's preferred locales
+
+    // Since languageCode-only matches are possibly low quality, we don't return
+    // it instantly when we find such a match. We check to see if the next
+    // preferred locale in the list has a high accuracy match, and only return
+    // the languageCode-only match when a higher accuracy match in the next
+    // preferred locale cannot be found.
     Locale matchesLanguageCode;
-    for (int localeIndex = 0; localeIndex < preferredLocales.length; localeIndex++) {
+    // Loop over user's preferred locales
+    for (int localeIndex = 0; localeIndex < preferredLocales.length; localeIndex += 1) {
       Locale userLocale = preferredLocales[localeIndex];
       // Look for perfect match.
       if (allSupportedLocales.containsKey(ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode, userLocale.countryCode.hashCode))) {
         return userLocale;
       }
-      // Wait until next userLocale to see if there is a high accuracy match before
-      // returning a language-only match.
+      // If there was a languageCode-only match in the previous iteration's higher
+      // ranked preferred locale, we return it if the current userLocale does not
+      // have a perfect match.
       if (matchesLanguageCode != null) {
         return matchesLanguageCode;
       }
@@ -805,11 +788,11 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       if (languageAndCountryLocales.containsKey(ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode))) {
         return languageAndCountryLocales[ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode)];
       }
-      // Look and store language only match.
+      // Look and store language-only match.
       if (languageLocales.containsKey(userLocale.languageCode.hashCode)) {
         matchesLanguageCode = languageLocales[userLocale.languageCode.hashCode];
         // Since first (default) locale is usually highly preferred, we will allow
-        // only a languageCode to suffice to be instantly matched.
+        // a languageCode-only match to be instantly matched.
         if (localeIndex == 0) {
           return matchesLanguageCode;
         }
