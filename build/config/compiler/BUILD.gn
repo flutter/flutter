@@ -415,9 +415,12 @@ config("compiler") {
       "-funwind-tables",
       "-fno-short-enums",
       "-nostdinc++",
-      "-Wa,--noexecstack",
+
+      # TODO(kf6gpe): -Wa,--noexecstack is not supported by the Mac toolchain
+      # with targeting Android. https://github.com/flutter/flutter/issues/23606
+      # "-Wa,--noexecstack",
       "-Wformat",
-      "-Wformat-security"
+      "-Wformat-security",
     ]
     if (!is_clang) {
       # Clang doesn't support these flags.
