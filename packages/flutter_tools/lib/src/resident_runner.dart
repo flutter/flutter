@@ -79,15 +79,11 @@ class FlutterDevice {
     vmServices = localVmServices;
   }
 
-  Future<void> refreshViews() {
+  Future<void> refreshViews() async {
     if (vmServices == null || vmServices.isEmpty)
-      return Future<void>.value(null);
-    final List<Future<void>> futures = <Future<void>>[];
+      return;
     for (VMService service in vmServices)
-      futures.add(service.vm.refreshViews());
-    final Completer<void> completer = Completer<void>();
-    Future.wait(futures).whenComplete(() => completer.complete(null)); // ignore: unawaited_futures
-    return completer.future;
+      await service.vm.refreshViews();
   }
 
   List<FlutterView> get views {
