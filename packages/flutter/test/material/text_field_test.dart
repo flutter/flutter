@@ -741,6 +741,11 @@ void main() {
     final Offset firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
     final Offset secondPos = textOffsetToPosition(tester, testValue.indexOf('Second'));
     final Offset thirdPos = textOffsetToPosition(tester, testValue.indexOf('Third'));
+    final Offset middleStringPos = textOffsetToPosition(tester, testValue.indexOf('irst'));
+    expect(firstPos.dx, 0);
+    expect(secondPos.dx, 0);
+    expect(thirdPos.dx, 0);
+    expect(middleStringPos.dx, 34);
     expect(firstPos.dx, secondPos.dx);
     expect(firstPos.dx, thirdPos.dx);
     expect(firstPos.dy, lessThan(secondPos.dy));
@@ -823,6 +828,8 @@ void main() {
     // Check that the last line of text is not displayed.
     final Offset firstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
     final Offset fourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
+    expect(firstPos.dx, 0);
+    expect(fourthPos.dx, 0);
     expect(firstPos.dx, fourthPos.dx);
     expect(firstPos.dy, lessThan(fourthPos.dy));
     expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
