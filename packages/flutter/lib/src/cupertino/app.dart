@@ -12,16 +12,6 @@ import 'localizations.dart';
 import 'route.dart';
 import 'theme.dart';
 
-// Based on specs from https://developer.apple.com/design/resources/ for
-// iOS 12.
-const TextStyle _kDefaultTextStyle = TextStyle(
-  fontFamily: '.SF Pro Text',
-  fontSize: 17.0,
-  letterSpacing: -0.38,
-  color: CupertinoColors.black,
-  decoration: TextDecoration.none,
-);
-
 /// An application that uses Cupertino design.
 ///
 /// A convenience widget that wraps a number of widgets that are commonly
@@ -295,7 +285,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
           builder: widget.builder,
           title: widget.title,
           onGenerateTitle: widget.onGenerateTitle,
-          textStyle: _kDefaultTextStyle,
+          textStyle: _themeData.textTheme.textStyle,
           color: widget.color ?? CupertinoColors.activeBlue,
           locale: widget.locale,
           localizationsDelegates: _localizationsDelegates,
@@ -308,13 +298,12 @@ class _CupertinoAppState extends State<CupertinoApp> {
           showSemanticsDebugger: widget.showSemanticsDebugger,
           debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
           inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-            return CupertinoButton(
+            return CupertinoButton.filled(
               child: const Icon(
                 CupertinoIcons.search,
                 size: 28.0,
                 color: CupertinoColors.white,
               ),
-              color: CupertinoColors.activeBlue,
               padding: EdgeInsets.zero,
               onPressed: onPressed,
             );

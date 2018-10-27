@@ -39,15 +39,10 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: const TextStyle(
-        fontFamily: '.SF UI Text',
-        inherit: false,
-        fontSize: 17.0,
-        color: CupertinoColors.black,
-      ),
+      style: CupertinoTheme.of(context).textTheme.textStyle,
       child: CupertinoPageScaffold(
         child: DecoratedBox(
-          decoration: const BoxDecoration(color: Color(0xFFEFEFF4)),
+          decoration: BoxDecoration(color: CupertinoTheme.of(context).tableBackgroundColor),
           child: CustomScrollView(
             slivers: <Widget>[
               CupertinoSliverNavigationBar(
@@ -152,7 +147,7 @@ class _ListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: CupertinoColors.white,
+      color: CupertinoTheme.of(context).scaffoldBackgroundColor,
       height: 60.0,
       padding: const EdgeInsets.only(top: 9.0),
       child: Row(
@@ -215,11 +210,11 @@ class _ListItem extends StatelessWidget {
                       letterSpacing: -0.41,
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(left: 9.0),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 9.0),
                     child: Icon(
                       CupertinoIcons.info,
-                      color: CupertinoColors.activeBlue
+                      color: CupertinoTheme.of(context).primaryColor,
                     ),
                   ),
                 ],

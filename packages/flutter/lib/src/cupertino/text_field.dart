@@ -685,7 +685,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           decoration: widget.decoration,
           // The main decoration and the disabled scrim exists separately.
           child: Container(
-            color: enabled ? null : _kDisabledBackground,
+            color: enabled
+                ? null
+                : CupertinoTheme.of(context).brightness == Brightness.light
+                    ? _kDisabledBackground
+                    : CupertinoColors.darkBackgroundGray,
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTapDown: _handleTapDown,

@@ -9,6 +9,7 @@ import 'colors.dart';
 
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultLightTextStyle = TextStyle(
+  inherit: false,
   fontFamily: '.SF Pro Text',
   fontSize: 17.0,
   letterSpacing: -0.41,
@@ -18,6 +19,7 @@ const TextStyle _kDefaultLightTextStyle = TextStyle(
 
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultDarkTextStyle = TextStyle(
+  inherit: false,
   fontFamily: '.SF Pro Text',
   fontSize: 17.0,
   letterSpacing: -0.41,
@@ -28,16 +30,16 @@ const TextStyle _kDefaultDarkTextStyle = TextStyle(
 // Values derived from https://developer.apple.com/design/resources/.
 // Color comes from the primary color.
 const TextStyle _kDefaultActionSheetTextActionStyle = TextStyle(
-  fontFamily: '.SF Pro Display',
   inherit: false,
+  fontFamily: '.SF Pro Display',
   fontSize: 20.0,
   letterSpacing: 0.38,
 );
 
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultActionSheetTextContentStyle = TextStyle(
-  fontFamily: '.SF Pro Text',
   inherit: false,
+  fontFamily: '.SF Pro Text',
   fontSize: 13.0,
   letterSpacing: -0.08,
   color: Color(0xFF8F8F8F),
@@ -45,14 +47,15 @@ const TextStyle _kDefaultActionSheetTextContentStyle = TextStyle(
 
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultTabLabelTextStyle = TextStyle(
-  fontFamily: '.SF Pro Text',
   inherit: false,
+  fontFamily: '.SF Pro Text',
   fontSize: 10.0,
   letterSpacing: -0.24,
   color: CupertinoColors.inactiveGray,
 );
 
 const TextStyle _kDefaultMiddleTitleLightTextStyle = TextStyle(
+  inherit: false,
   fontFamily: '.SF Pro Text',
   fontSize: 17.0,
   fontWeight: FontWeight.w600,
@@ -61,6 +64,7 @@ const TextStyle _kDefaultMiddleTitleLightTextStyle = TextStyle(
 );
 
 const TextStyle _kDefaultMiddleTitleDarkTextStyle = TextStyle(
+  inherit: false,
   fontFamily: '.SF Pro Text',
   fontSize: 17.0,
   fontWeight: FontWeight.w600,
@@ -69,6 +73,7 @@ const TextStyle _kDefaultMiddleTitleDarkTextStyle = TextStyle(
 );
 
 const TextStyle _kDefaultLargeTitleLightTextStyle = TextStyle(
+  inherit: false,
   fontFamily: '.SF Pro Display',
   fontSize: 34.0,
   fontWeight: FontWeight.w700,
@@ -77,6 +82,7 @@ const TextStyle _kDefaultLargeTitleLightTextStyle = TextStyle(
 );
 
 const TextStyle _kDefaultLargeTitleDarkTextStyle = TextStyle(
+  inherit: false,
   fontFamily: '.SF Pro Display',
   fontSize: 34.0,
   fontWeight: FontWeight.w700,

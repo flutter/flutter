@@ -173,13 +173,13 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
-      final double bottomPadding = widget.tabBar.preferredSize.height
-          + existingMediaQuery.padding.bottom;
+      final double bottomPadding =
+          widget.tabBar.preferredSize.height + existingMediaQuery.padding.bottom;
 
       // If tab bar opaque, directly stop the main content higher. If
       // translucent, let main content draw behind the tab bar but hint the
       // obstructed area.
-      if (widget.tabBar.opaque) {
+      if (widget.tabBar.opaque(context)) {
         content = Padding(
           padding: EdgeInsets.only(bottom: bottomPadding),
           child: content,
