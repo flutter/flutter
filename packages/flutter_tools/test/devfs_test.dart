@@ -71,7 +71,7 @@ void main() {
       file.parent.createSync(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3]);
 
-      final DateTime fiveSecondsAgo = DateTime.now().subtract(Duration(seconds:5));
+      final DateTime fiveSecondsAgo = DateTime.now().subtract(const Duration(seconds:5));
       expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
       expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
       expect(content.isModifiedAfter(null), isTrue);
