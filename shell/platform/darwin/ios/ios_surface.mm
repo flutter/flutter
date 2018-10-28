@@ -6,8 +6,8 @@
 
 #include <memory>
 
-#include <flutter/shell/platform/darwin/ios/ios_surface_gl.h>
-#include <flutter/shell/platform/darwin/ios/ios_surface_software.h>
+#include "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
+#include "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 
 namespace shell {
 
