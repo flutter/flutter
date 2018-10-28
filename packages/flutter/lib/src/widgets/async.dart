@@ -35,9 +35,9 @@ import 'framework.dart';
 /// termination by overriding [afterDone]. Finally, the summary may be updated
 /// on change of stream by overriding [afterDisconnected] and [afterConnected].
 ///
-/// [T] is the type of stream events.
+/// `T` is the type of stream events.
 ///
-/// [S] is the type of interaction summary.
+/// `S` is the type of interaction summary.
 ///
 /// See also:
 ///
@@ -332,14 +332,9 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// state is `ConnectionState.active`.
 ///
 /// The initial snapshot data can be controlled by specifying [initialData].
-/// You would use this facility to ensure that if the [builder] is invoked
-/// before the first event arrives on the stream, the snapshot carries data of
-/// your choice rather than the default null value.
-///
-/// See also:
-///
-/// * [StreamBuilderBase], which supports widget building based on a computation
-/// that spans all interactions made with the stream.
+/// This should be used to ensure that the first frame has the expected value,
+/// as the builder will always be called before the stream listener has a chance
+/// to be processed.
 ///
 /// ## Sample code
 ///
@@ -363,25 +358,41 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///   },
 /// )
 /// ```
-// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
+///
+/// See also:
+///
+///  * [ValueListenableBuilder], which wraps a [ValueListenable] instead of a
+///    [Stream].
+///  * [StreamBuilderBase], which supports widget building based on a computation
+///    that spans all interactions made with the stream.
+// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1139 is fixed
 class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
   /// snapshot of interaction with the specified [stream] and whose build
-  /// strategy is given by [builder]. The [initialData] is used to create the
-  /// initial snapshot. It is null by default.
+  /// strategy is given by [builder].
+  ///
+  /// The [initialData] is used to create the initial snapshot.
+  ///
+  /// The [builder] must not be null.
   const StreamBuilder({
     Key key,
     this.initialData,
     Stream<T> stream,
     @required this.builder
-  })
-      : assert(builder != null),
-        super(key: key, stream: stream);
+  }) : assert(builder != null),
+       super(key: key, stream: stream);
 
-  /// The build strategy currently used by this builder. Cannot be null.
+  /// The build strategy currently used by this builder.
   final AsyncWidgetBuilder<T> builder;
 
-  /// The data that will be used to create the initial snapshot. Null by default.
+  /// The data that will be used to create the initial snapshot.
+  ///
+  /// Providing this value (presumably obtained sychronously somehow when the
+  /// [Stream] was created) ensures that the first frame will show useful data.
+  /// Otherwise, the first frame will be built with the value null, regardless
+  /// of whether a value is available on the stream: since streams are
+  /// asynchronous, no events from the stream can be obtained before the initial
+  /// build.
   final T initialData;
 
   @override
