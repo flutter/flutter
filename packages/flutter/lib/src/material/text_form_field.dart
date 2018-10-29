@@ -40,8 +40,9 @@ import 'theme.dart';
 ///    surround the actual text editing widget.
 ///
 /// ## Sample code
+///
 /// Creates a [TextFormField] with an [InputDecoration] and validator function.
-/// In this example, onSaved is empty, but can optionally be used to call a
+/// In this example, [onSaved] is empty, but can optionally be used to call a
 /// custom function when the user saves the form.
 ///
 /// ```dart
