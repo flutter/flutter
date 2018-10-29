@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/semantics.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -20,6 +21,7 @@ export 'package:flutter/painting.dart' show
   AssetImage,
   ExactAssetImage,
   FileImage,
+  FilterQuality,
   ImageConfiguration,
   ImageInfo,
   ImageStream,
@@ -42,7 +44,7 @@ export 'package:flutter/painting.dart' show
 ///
 ///  * [ImageProvider], which has an example showing how this might be used.
 ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size size }) {
-  return new ImageConfiguration(
+  return ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
     devicePixelRatio: MediaQuery.of(context, nullOk: true)?.devicePixelRatio ?? 1.0,
     locale: Localizations.localeOf(context, nullOk: true),
@@ -70,14 +72,14 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// See also:
 ///
 ///   * [ImageCache], which holds images that may be reused.
-Future<Null> precacheImage(
+Future<void> precacheImage(
   ImageProvider provider,
   BuildContext context, {
   Size size,
   ImageErrorListener onError,
 }) {
   final ImageConfiguration config = createLocalImageConfiguration(context, size: size);
-  final Completer<Null> completer = new Completer<Null>();
+  final Completer<void> completer = Completer<void>();
   final ImageStream stream = provider.resolve(config);
   void listener(ImageInfo image, bool sync) {
     completer.complete();
@@ -87,7 +89,7 @@ Future<Null> precacheImage(
     if (onError != null) {
       onError(exception, stackTrace);
     } else {
-      FlutterError.reportError(new FlutterErrorDetails(
+      FlutterError.reportError(FlutterErrorDetails(
         context: 'image failed to precache',
         library: 'image resource service',
         exception: exception,
@@ -97,7 +99,7 @@ Future<Null> precacheImage(
     }
   }
   stream.addListener(listener, onError: errorListener);
-  completer.future.then((Null _) { stream.removeListener(listener); });
+  completer.future.then<void>((void value) { stream.removeListener(listener); });
   return completer.future;
 }
 
@@ -142,6 +144,11 @@ class Image extends StatefulWidget {
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
   ///
+  /// Use [filterQuality] to change the quality when scaling an image.
+  /// Use the [FilterQuality.low] quality setting to scale the image,
+  /// which corresponds to bilinear interpolation, rather than the default
+  /// [FilterQuality.none] which corresponds to nearest-neighbor.
+  ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   const Image({
     Key key,
@@ -158,9 +165,11 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.filterQuality = FilterQuality.low,
   }) : assert(image != null),
        assert(alignment != null),
        assert(repeat != null),
+       assert(filterQuality != null),
        assert(matchTextDirection != null),
        super(key: key);
 
@@ -178,6 +187,11 @@ class Image extends StatefulWidget {
   /// An optional [headers] argument can be used to send custom HTTP headers
   /// with the image request.
   ///
+  /// Use [filterQuality] to change the quality when scaling an image.
+  /// Use the [FilterQuality.low] quality setting to scale the image,
+  /// which corresponds to bilinear interpolation, rather than the default
+  /// [FilterQuality.none] which corresponds to nearest-neighbor.
+  ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.network(String src, {
     Key key,
@@ -194,8 +208,9 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.filterQuality = FilterQuality.low,
     Map<String, String> headers,
-  }) : image = new NetworkImage(src, scale: scale, headers: headers),
+  }) : image = NetworkImage(src, scale: scale, headers: headers),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -213,6 +228,11 @@ class Image extends StatefulWidget {
   /// On Android, this may require the
   /// `android.permission.READ_EXTERNAL_STORAGE` permission.
   ///
+  /// Use [filterQuality] to change the quality when scaling an image.
+  /// Use the [FilterQuality.low] quality setting to scale the image,
+  /// which corresponds to bilinear interpolation, rather than the default
+  /// [FilterQuality.none] which corresponds to nearest-neighbor.
+  ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.file(File file, {
     Key key,
@@ -229,9 +249,11 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
-  }) : image = new FileImage(file, scale: scale),
+    this.filterQuality = FilterQuality.low,
+  }) : image = FileImage(file, scale: scale),
        assert(alignment != null),
        assert(repeat != null),
+       assert(filterQuality != null),
        assert(matchTextDirection != null),
        super(key: key);
 
@@ -249,7 +271,8 @@ class Image extends StatefulWidget {
   /// addition:
   ///
   /// * If the `scale` argument is provided and is not null, then the exact
-  /// asset specified will be used.
+  /// asset specified will be used. To display an image variant with a specific
+  /// density, the exact path must be provided (e.g. `images/2x/cat.png`).
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   //
@@ -270,6 +293,11 @@ class Image extends StatefulWidget {
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
   ///
+  /// Use [filterQuality] to change the quality when scaling an image.
+  /// Use the [FilterQuality.low] quality setting to scale the image,
+  /// which corresponds to bilinear interpolation, rather than the default
+  /// [FilterQuality.none] which corresponds to nearest-neighbor.
+  ///
   /// ## Sample code
   ///
   /// Suppose that the project's `pubspec.yaml` file contains the following:
@@ -286,7 +314,7 @@ class Image extends StatefulWidget {
   /// render the `images/2x/cat.png` file:
   ///
   /// ```dart
-  /// new Image.asset('images/cat.png')
+  /// Image.asset('images/cat.png')
   /// ```
   ///
   /// This corresponds to the file that is in the project's `images/2x/`
@@ -311,7 +339,7 @@ class Image extends StatefulWidget {
   /// Then to display the image, use:
   ///
   /// ```dart
-  /// new Image.asset('icons/heart.png', package: 'my_icons')
+  /// Image.asset('icons/heart.png', package: 'my_icons')
   /// ```
   ///
   /// Assets used by the package itself should also be displayed using the
@@ -368,9 +396,10 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     String package,
+    this.filterQuality = FilterQuality.low,
   }) : image = scale != null
-         ? new ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
-         : new AssetImage(name, bundle: bundle, package: package),
+         ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
+         : AssetImage(name, bundle: bundle, package: package),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -384,6 +413,11 @@ class Image extends StatefulWidget {
   /// widget should be placed in a context that sets tight layout constraints.
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
+  ///
+  /// Use [filterQuality] to change the quality when scaling an image.
+  /// Use the [FilterQuality.low] quality setting to scale the image,
+  /// which corresponds to bilinear interpolation, rather than the default
+  /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.memory(Uint8List bytes, {
@@ -401,7 +435,8 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
-  }) : image = new MemoryImage(bytes, scale: scale),
+    this.filterQuality = FilterQuality.low,
+  }) : image = MemoryImage(bytes, scale: scale),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -436,6 +471,13 @@ class Image extends StatefulWidget {
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color color;
+
+  /// Used to set the [FilterQuality] of the image.
+  ///
+  /// Use the [FilterQuality.low] quality setting to scale the image with
+  /// bilinear interpolation, or the [FilterQuality.none] which corresponds
+  /// to nearest-neighbor.
+  final FilterQuality filterQuality;
 
   /// Used to combine [color] with this image.
   ///
@@ -526,23 +568,24 @@ class Image extends StatefulWidget {
   final bool excludeFromSemantics;
 
   @override
-  _ImageState createState() => new _ImageState();
+  _ImageState createState() => _ImageState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<ImageProvider>('image', image));
-    properties.add(new DoubleProperty('width', width, defaultValue: null));
-    properties.add(new DoubleProperty('height', height, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(new EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
-    properties.add(new EnumProperty<BoxFit>('fit', fit, defaultValue: null));
-    properties.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
-    properties.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
-    properties.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
-    properties.add(new FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
-    properties.add(new StringProperty('semanticLabel', semanticLabel, defaultValue: null));
-    properties.add(new DiagnosticsProperty<bool>('this.excludeFromSemantics', excludeFromSemantics));
+    properties.add(DiagnosticsProperty<ImageProvider>('image', image));
+    properties.add(DoubleProperty('width', width, defaultValue: null));
+    properties.add(DoubleProperty('height', height, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
+    properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
+    properties.add(DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
+    properties.add(FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
+    properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('this.excludeFromSemantics', excludeFromSemantics));
+    properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
   }
 }
 
@@ -550,9 +593,12 @@ class _ImageState extends State<Image> {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
   bool _isListeningToStream = false;
+  bool _invertColors;
 
   @override
   void didChangeDependencies() {
+    _invertColors = MediaQuery.of(context, nullOk: true)?.invertColors
+      ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
     _resolveImage();
 
     if (TickerMode.of(context))
@@ -580,7 +626,7 @@ class _ImageState extends State<Image> {
     final ImageStream newStream =
       widget.image.resolve(createLocalImageConfiguration(
           context,
-          size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null
+          size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null
       ));
     assert(newStream != null);
     _updateSourceStream(newStream);
@@ -633,7 +679,7 @@ class _ImageState extends State<Image> {
 
   @override
   Widget build(BuildContext context) {
-    final RawImage image = new RawImage(
+    final RawImage image = RawImage(
       image: _imageInfo?.image,
       width: widget.width,
       height: widget.height,
@@ -645,10 +691,12 @@ class _ImageState extends State<Image> {
       repeat: widget.repeat,
       centerSlice: widget.centerSlice,
       matchTextDirection: widget.matchTextDirection,
+      invertColors: _invertColors,
+      filterQuality: widget.filterQuality,
     );
     if (widget.excludeFromSemantics)
       return image;
-    return new Semantics(
+    return Semantics(
       container: widget.semanticLabel != null,
       image: true,
       label: widget.semanticLabel == null ? '' : widget.semanticLabel,
@@ -659,7 +707,7 @@ class _ImageState extends State<Image> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<ImageStream>('stream', _imageStream));
-    description.add(new DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));
+    description.add(DiagnosticsProperty<ImageStream>('stream', _imageStream));
+    description.add(DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));
   }
 }

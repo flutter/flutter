@@ -112,7 +112,7 @@ class _CenterFloatFabLocation extends FloatingActionButtonLocation {
     if (bottomSheetHeight > 0.0)
       fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
 
-    return new Offset(fabX, fabY);
+    return Offset(fabX, fabY);
   }
 }
 
@@ -149,7 +149,7 @@ class _EndFloatFabLocation extends FloatingActionButtonLocation {
     if (bottomSheetHeight > 0.0)
       fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
 
-    return new Offset(fabX, fabY);
+    return Offset(fabX, fabY);
   }
 }
 
@@ -201,7 +201,7 @@ class _EndDockedFloatingActionButtonLocation extends _DockedFloatingActionButton
       break;
     }
     // Return an offset with a docked Y coordinate.
-    return new Offset(fabX, getDockedY(scaffoldGeometry));
+    return Offset(fabX, getDockedY(scaffoldGeometry));
   }
 }
 
@@ -211,7 +211,7 @@ class _CenterDockedFloatingActionButtonLocation extends _DockedFloatingActionBut
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
-    return new Offset(fabX, getDockedY(scaffoldGeometry));
+    return Offset(fabX, getDockedY(scaffoldGeometry));
   }
 }
 
@@ -270,7 +270,7 @@ abstract class FloatingActionButtonAnimator {
   ///   @override
   ///   Animation<double> getScaleAnimation({@required Animation<double> parent}) {
   ///     // The animations will cross at value 0, and the train will return to 1.0.
-  ///     return new TrainHoppingAnimation(
+  ///     return TrainHoppingAnimation(
   ///       Tween<double>(begin: 1.0, end: -1.0).animate(parent),
   ///       Tween<double>(begin: -1.0, end: 1.0).animate(parent),
   ///     );
@@ -289,10 +289,10 @@ abstract class FloatingActionButtonAnimator {
   /// [FloatingActionButton] through a full circle:
   ///
   /// ```dart
-  ///   @override
-  ///   Animation<double> getRotationAnimation({@required Animation<double> parent}) {
-  ///     return new Tween<double>(begin: 0.0, end: 1.0).animate(parent);
-  ///   }
+  /// @override
+  /// Animation<double> getRotationAnimation({@required Animation<double> parent}) {
+  ///   return Tween<double>(begin: 0.0, end: 1.0).animate(parent);
+  /// }
   /// ```
   Animation<double> getRotationAnimation({@required Animation<double> parent});
 
@@ -331,26 +331,29 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
     // Animate the scale down from 1 to 0 in the first half of the animation
     // then from 0 back to 1 in the second half.
     const Curve curve = Interval(0.5, 1.0, curve: Curves.ease);
-    return new _AnimationSwap<double>(
-      new ReverseAnimation(new CurveTween(curve: curve.flipped).animate(parent)),
-      new CurveTween(curve: curve).animate(parent),
+    return _AnimationSwap<double>(
+      ReverseAnimation(parent.drive(CurveTween(curve: curve.flipped))),
+      parent.drive(CurveTween(curve: curve)),
       parent,
       0.5,
     );
   }
 
+  // Because we only see the last half of the rotation tween,
+  // it needs to go twice as far.
+  static final Animatable<double> _rotationTween = Tween<double>(
+    begin: 1.0 - kFloatingActionButtonTurnInterval * 2.0,
+    end: 1.0,
+  );
+
+  static final Animatable<double> _thresholdCenterTween = CurveTween(curve: const Threshold(0.5));
+
   @override
   Animation<double> getRotationAnimation({Animation<double> parent}) {
-    // Because we only see the last half of the rotation tween,
-    // it needs to go twice as far.
-    final Tween<double> rotationTween = new Tween<double>(
-      begin: 1.0 - kFloatingActionButtonTurnInterval * 2,
-      end: 1.0,
-    );
     // This rotation will turn on the way in, but not on the way out.
-    return new _AnimationSwap<double>(
-      rotationTween.animate(parent),
-      new ReverseAnimation(new CurveTween(curve: const Threshold(0.5)).animate(parent)),
+    return _AnimationSwap<double>(
+      parent.drive(_rotationTween),
+      ReverseAnimation(parent.drive(_thresholdCenterTween)),
       parent,
       0.5,
     );

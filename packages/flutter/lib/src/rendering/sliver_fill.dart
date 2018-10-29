@@ -122,7 +122,7 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
-    geometry = new SliverGeometry(
+    geometry = SliverGeometry(
       scrollExtent: constraints.viewportMainAxisExtent,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,

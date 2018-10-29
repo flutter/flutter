@@ -7,12 +7,13 @@ import 'dart:async';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
-import '../runner/flutter_command.dart' show FlutterOptions;
+import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({bool verboseHelp = false}) {
     usesTargetOption();
+    usesFilesystemOptions(hide: !verboseHelp);
     addBuildModeFlags();
     argParser
       ..addFlag('precompiled', negatable: false)
@@ -21,14 +22,7 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('asset-base', help: 'Ignored. Will be removed.', hide: !verboseHelp)
       ..addOption('manifest', defaultsTo: defaultManifestPath)
       ..addOption('private-key', defaultsTo: defaultPrivateKeyPath)
-      ..addOption('snapshot', defaultsTo: defaultSnapshotPath)
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
-      ..addOption('kernel-file', defaultsTo: defaultApplicationKernelPath)
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
-      )
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
         allowed: <String>['android-arm', 'android-arm64', 'ios']
@@ -39,12 +33,20 @@ class BuildBundleCommand extends BuildSubCommand {
       )
       ..addOption('precompile',
         hide: !verboseHelp,
-        help: 'Precompile functions specified in input file. This flag is only\n'
-              'allowed when using --dynamic. It takes a Dart compilation trace\n'
-              'file produced by the training run of the application. With this\n'
-              'flag, instead of using default Dart VM snapshot provided by the\n'
-              'engine, the application will use its own snapshot that includes\n'
-              'additional functions.'
+        help: 'Precompile functions specified in input file. This flag is only '
+              'allowed when using --dynamic. It takes a Dart compilation trace '
+              'file produced by the training run of the application. With this '
+              'flag, instead of using default Dart VM snapshot provided by the '
+              'engine, the application will use its own snapshot that includes '
+              'additional compiled functions.'
+      )
+      ..addFlag('hotupdate',
+        hide: !verboseHelp,
+        help: 'Build differential snapshot based on the last state of the build '
+              'tree and any changes to the application source code since then. '
+              'This flag is only allowed when using --dynamic. With this flag, '
+              'a partial VM snapshot is generated that is loaded on top of the '
+              'original VM snapshot that contains precompiled code.'
       )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
@@ -58,18 +60,7 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addFlag('report-licensed-packages',
         help: 'Whether to report the names of all the packages that are included '
               'in the application\'s LICENSE file.',
-        defaultsTo: false)
-      ..addMultiOption('filesystem-root',
-        hide: !verboseHelp,
-        help: 'Specify the path, that is used as root in a virtual file system\n'
-            'for compilation. Input file name should be specified as Uri in\n'
-            'filesystem-scheme scheme. Use only in Dart 2 mode.\n'
-            'Requires --output-dill option to be explicitly specified.\n')
-      ..addOption('filesystem-scheme',
-        defaultsTo: 'org-dartlang-root',
-        hide: !verboseHelp,
-        help: 'Specify the scheme that is used for virtual file system used in\n'
-            'compilation. See more details on filesystem-root option.\n');
+        defaultsTo: false);
     usesPubOption();
   }
 
@@ -85,7 +76,7 @@ class BuildBundleCommand extends BuildSubCommand {
       ' iOS runtimes.';
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     await super.runCommand();
 
     final String targetPlatform = argResults['target-platform'];
@@ -100,20 +91,19 @@ class BuildBundleCommand extends BuildSubCommand {
       buildMode: buildMode,
       mainPath: targetFile,
       manifestPath: argResults['manifest'],
-      snapshotPath: argResults['snapshot'],
-      applicationKernelFilePath: argResults['kernel-file'],
       depfilePath: argResults['depfile'],
       privateKeyPath: argResults['private-key'],
       assetDirPath: argResults['asset-dir'],
-      previewDart2: argResults['preview-dart-2'],
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
       compilationTraceFilePath: argResults['precompile'],
+      buildHotUpdate: argResults['hotupdate'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],
       fileSystemRoots: argResults['filesystem-root'],
     );
+    return null;
   }
 }

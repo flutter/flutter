@@ -203,13 +203,13 @@ class Visibility extends StatelessWidget {
     if (maintainSize) {
       Widget result = child;
       if (!maintainInteractivity) {
-        result = new IgnorePointer(
+        result = IgnorePointer(
           child: child,
           ignoring: !visible,
           ignoringSemantics: !visible && !maintainSemantics,
         );
       }
-      return new Opacity(
+      return Opacity(
         opacity: visible ? 1.0 : 0.0,
         alwaysIncludeSemantics: maintainSemantics,
         child: result,
@@ -221,8 +221,8 @@ class Visibility extends StatelessWidget {
     if (maintainState) {
       Widget result = child;
       if (!maintainAnimation)
-        result = new TickerMode(child: child, enabled: visible);
-      return new Offstage(
+        result = TickerMode(child: child, enabled: visible);
+      return Offstage(
         child: result,
         offstage: !visible,
       );
@@ -235,11 +235,11 @@ class Visibility extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new FlagProperty('visible', value: visible, ifFalse: 'hidden', ifTrue: 'visible'));
-    properties.add(new FlagProperty('maintainState', value: maintainState, ifFalse: 'maintainState'));
-    properties.add(new FlagProperty('maintainAnimation', value: maintainAnimation, ifFalse: 'maintainAnimation'));
-    properties.add(new FlagProperty('maintainSize', value: maintainSize, ifFalse: 'maintainSize'));
-    properties.add(new FlagProperty('maintainSemantics', value: maintainSemantics, ifFalse: 'maintainSemantics'));
-    properties.add(new FlagProperty('maintainInteractivity', value: maintainInteractivity, ifFalse: 'maintainInteractivity'));
+    properties.add(FlagProperty('visible', value: visible, ifFalse: 'hidden', ifTrue: 'visible'));
+    properties.add(FlagProperty('maintainState', value: maintainState, ifFalse: 'maintainState'));
+    properties.add(FlagProperty('maintainAnimation', value: maintainAnimation, ifFalse: 'maintainAnimation'));
+    properties.add(FlagProperty('maintainSize', value: maintainSize, ifFalse: 'maintainSize'));
+    properties.add(FlagProperty('maintainSemantics', value: maintainSemantics, ifFalse: 'maintainSemantics'));
+    properties.add(FlagProperty('maintainInteractivity', value: maintainInteractivity, ifFalse: 'maintainInteractivity'));
   }
 }

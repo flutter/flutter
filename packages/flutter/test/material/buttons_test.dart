@@ -16,13 +16,13 @@ void main() {
   });
 
   testWidgets('Does FlatButton contribute semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new FlatButton(
+        child: Material(
+          child: Center(
+            child: FlatButton(
               onPressed: () { },
               child: const Text('ABC')
             ),
@@ -32,15 +32,15 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             actions: <SemanticsAction>[
               SemanticsAction.tap,
             ],
             label: 'ABC',
-            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-            transform: new Matrix4.translationValues(356.0, 276.0, 0.0),
+            rect: Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            transform: Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
@@ -56,13 +56,13 @@ void main() {
   });
 
   testWidgets('Does RaisedButton contribute semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new RaisedButton(
+        child: Material(
+          child: Center(
+            child: RaisedButton(
               onPressed: () { },
               child: const Text('ABC')
             ),
@@ -72,15 +72,15 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             actions: <SemanticsAction>[
               SemanticsAction.tap,
             ],
             label: 'ABC',
-            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-            transform: new Matrix4.translationValues(356.0, 276.0, 0.0),
+            rect: Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            transform: Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
@@ -97,13 +97,13 @@ void main() {
 
   testWidgets('Does FlatButton scale with font scale changes', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new MediaQuery(
+        child: Material(
+          child: MediaQuery(
             data: const MediaQueryData(textScaleFactor: 1.0),
-            child: new Center(
-              child: new FlatButton(
+            child: Center(
+              child: FlatButton(
                 onPressed: () { },
                 child: const Text('ABC'),
               ),
@@ -118,13 +118,13 @@ void main() {
 
     // textScaleFactor expands text, but not button.
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new MediaQuery(
+        child: Material(
+          child: MediaQuery(
             data: const MediaQueryData(textScaleFactor: 1.3),
-            child: new Center(
-              child: new FlatButton(
+            child: Center(
+              child: FlatButton(
                 onPressed: () { },
                 child: const Text('ABC'),
               ),
@@ -142,13 +142,13 @@ void main() {
 
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new MediaQuery(
+        child: Material(
+          child: MediaQuery(
             data: const MediaQueryData(textScaleFactor: 3.0),
-            child: new Center(
-              child: new FlatButton(
+            child: Center(
+              child: FlatButton(
                 onPressed: () { },
                 child: const Text('ABC'),
               ),
@@ -172,9 +172,9 @@ void main() {
     const Color directSplashColor = Color(0xFF000011);
     const Color directHighlightColor = Color(0xFF000011);
 
-    Widget buttonWidget = new Material(
-      child: new Center(
-        child: new MaterialButton(
+    Widget buttonWidget = Material(
+      child: Center(
+        child: MaterialButton(
           splashColor: directSplashColor,
           highlightColor: directHighlightColor,
           onPressed: () { /* to make sure the button is enabled */ },
@@ -184,10 +184,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Theme(
-          data: new ThemeData(
+        child: Theme(
+          data: ThemeData(
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: buttonWidget,
@@ -200,9 +200,9 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final Rect expectedClipRect = new Rect.fromLTRB(356.0, 282.0, 444.0, 318.0);
-    final Path expectedClipPath = new Path()
-     ..addRRect(new RRect.fromRectAndRadius(
+    final Rect expectedClipRect = Rect.fromLTRB(356.0, 282.0, 444.0, 318.0);
+    final Path expectedClipPath = Path()
+     ..addRRect(RRect.fromRectAndRadius(
          expectedClipRect,
          const Radius.circular(2.0),
      ));
@@ -220,9 +220,9 @@ void main() {
     const Color themeSplashColor1 = Color(0xFF001100);
     const Color themeHighlightColor1 = Color(0xFF001100);
 
-    buttonWidget = new Material(
-      child: new Center(
-        child: new MaterialButton(
+    buttonWidget = Material(
+      child: Center(
+        child: MaterialButton(
           onPressed: () { /* to make sure the button is enabled */ },
           clipBehavior: Clip.antiAlias,
         ),
@@ -230,10 +230,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Theme(
-          data: new ThemeData(
+        child: Theme(
+          data: ThemeData(
             highlightColor: themeHighlightColor1,
             splashColor: themeSplashColor1,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -258,10 +258,10 @@ void main() {
     const Color themeHighlightColor2 = Color(0xFF002200);
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Theme(
-          data: new ThemeData(
+        child: Theme(
+          data: ThemeData(
             highlightColor: themeHighlightColor2,
             splashColor: themeSplashColor2,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -282,10 +282,10 @@ void main() {
   });
 
   testWidgets('MaterialButton has no clip by default', (WidgetTester tester) async {
-    final GlobalKey buttonKey = new GlobalKey();
-    final Widget buttonWidget = new Material(
-      child: new Center(
-        child: new MaterialButton(
+    final GlobalKey buttonKey = GlobalKey();
+    final Widget buttonWidget = Material(
+      child: Center(
+        child: MaterialButton(
           key: buttonKey,
           onPressed: () { /* to make sure the button is enabled */ },
         ),
@@ -293,10 +293,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Theme(
-          data: new ThemeData(
+        child: Theme(
+          data: ThemeData(
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: buttonWidget,
@@ -310,23 +310,43 @@ void main() {
     );
   });
 
-  testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+  testWidgets('Disabled MaterialButton has correct default text color', (WidgetTester tester) async {
+    const String testText = 'Disabled';
+    const Widget buttonWidget = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: MaterialButton(
+            onPressed: null,
+            child: Text(testText), // button is disabled
+          ),
+        ),
+      ),
+    );
 
-    final Rect expectedButtonSize = new Rect.fromLTRB(0.0, 0.0, 116.0, 48.0);
+    await tester.pumpWidget(buttonWidget);
+
+    final RichText text = tester.widget<RichText>(find.byType(RichText));
+    expect(text.text.style.color, Colors.black38);
+  });
+
+  testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    final Rect expectedButtonSize = Rect.fromLTRB(0.0, 0.0, 116.0, 48.0);
     // Button is in center of screen
-    final Matrix4 expectedButtonTransform = new Matrix4.identity()
+    final Matrix4 expectedButtonTransform = Matrix4.identity()
       ..translate(
         TestSemantics.fullScreen.width / 2 - expectedButtonSize.width /2,
         TestSemantics.fullScreen.height / 2 - expectedButtonSize.height /2,
       );
 
     // enabled button
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new Material(
-        child: new Center(
-          child: new MaterialButton(
+      child: Material(
+        child: Center(
+          child: MaterialButton(
             child: const Text('Button'),
             onPressed: () { /* to make sure the button is enabled */ },
           ),
@@ -335,9 +355,9 @@ void main() {
     ));
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             id: 1,
             rect: expectedButtonSize,
             transform: expectedButtonTransform,
@@ -369,9 +389,9 @@ void main() {
     ));
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             id: 1,
             rect: expectedButtonSize,
             transform: expectedButtonTransform,
@@ -389,16 +409,83 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('MaterialButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
-    final Key key1 = new UniqueKey();
+  testWidgets('MaterialButton minWidth and height parameters', (WidgetTester tester) async {
+    Widget buildFrame({ double minWidth, double height, EdgeInsets padding = EdgeInsets.zero, Widget child }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: MaterialButton(
+            padding: padding,
+            minWidth: minWidth,
+            height: height,
+            onPressed: null,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            child: child,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(minWidth: 8.0, height: 24.0));
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(8.0, 24.0));
+
+    await tester.pumpWidget(buildFrame(minWidth: 8.0));
+    // Default minHeight constraint is 36, see RawMaterialButton.
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(8.0, 36.0));
+
+    await tester.pumpWidget(buildFrame(height: 8.0));
+    // Default minWidth constraint is 88, see RawMaterialButton.
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(88.0, 8.0));
+
+    await tester.pumpWidget(buildFrame());
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(88.0, 36.0));
+
+    await tester.pumpWidget(buildFrame(padding: const EdgeInsets.all(4.0)));
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(88.0, 36.0));
+
+    // Size is defined by the padding.
     await tester.pumpWidget(
-      new Theme(
-        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
-        child: new Directionality(
+      buildFrame(
+        minWidth: 0.0,
+        height: 0.0,
+        padding: const EdgeInsets.all(4.0),
+      ),
+    );
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(8.0, 8.0));
+
+    // Size is defined by the padded child.
+    await tester.pumpWidget(
+      buildFrame(
+        minWidth: 0.0,
+        height: 0.0,
+        padding: const EdgeInsets.all(4.0),
+        child: const SizedBox(width: 8.0, height: 8.0),
+      ),
+    );
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(16.0, 16.0));
+
+    // Size is defined by the minWidth, height constraints.
+    await tester.pumpWidget(
+      buildFrame(
+        minWidth: 18.0,
+        height: 18.0,
+        padding: const EdgeInsets.all(4.0),
+        child: const SizedBox(width: 8.0, height: 8.0),
+      ),
+    );
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(18.0, 18.0));
+  });
+
+  testWidgets('MaterialButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    final Key key1 = UniqueKey();
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new Material(
-            child: new Center(
-              child: new MaterialButton(
+          child: Material(
+            child: Center(
+              child: MaterialButton(
                 key: key1,
                 child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () {},
@@ -411,15 +498,15 @@ void main() {
 
     expect(tester.getSize(find.byKey(key1)), const Size(88.0, 48.0));
 
-    final Key key2 = new UniqueKey();
+    final Key key2 = UniqueKey();
     await tester.pumpWidget(
-      new Theme(
-        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-        child: new Directionality(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new Material(
-            child: new Center(
-              child: new MaterialButton(
+          child: Material(
+            child: Center(
+              child: MaterialButton(
                 key: key2,
                 child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () {},
@@ -434,15 +521,15 @@ void main() {
   });
 
   testWidgets('FlatButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
-    final Key key1 = new UniqueKey();
+    final Key key1 = UniqueKey();
     await tester.pumpWidget(
-      new Theme(
-        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
-        child: new Directionality(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new Material(
-            child: new Center(
-              child: new FlatButton(
+          child: Material(
+            child: Center(
+              child: FlatButton(
                 key: key1,
                 child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () {},
@@ -455,15 +542,15 @@ void main() {
 
     expect(tester.getSize(find.byKey(key1)), const Size(88.0, 48.0));
 
-    final Key key2 = new UniqueKey();
+    final Key key2 = UniqueKey();
     await tester.pumpWidget(
-      new Theme(
-        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-        child: new Directionality(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new Material(
-            child: new Center(
-              child: new FlatButton(
+          child: Material(
+            child: Center(
+              child: FlatButton(
                 key: key2,
                 child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () {},
@@ -478,15 +565,15 @@ void main() {
   });
 
   testWidgets('RaisedButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
-    final Key key1 = new UniqueKey();
+    final Key key1 = UniqueKey();
     await tester.pumpWidget(
-      new Theme(
-        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
-        child: new Directionality(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new Material(
-            child: new Center(
-              child: new RaisedButton(
+          child: Material(
+            child: Center(
+              child: RaisedButton(
                 key: key1,
                 child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () {},
@@ -499,15 +586,15 @@ void main() {
 
     expect(tester.getSize(find.byKey(key1)), const Size(88.0, 48.0));
 
-    final Key key2 = new UniqueKey();
+    final Key key2 = UniqueKey();
     await tester.pumpWidget(
-      new Theme(
-        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-        child: new Directionality(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new Material(
-            child: new Center(
-              child: new RaisedButton(
+          child: Material(
+            child: Center(
+              child: RaisedButton(
                 key: key2,
                 child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () {},
@@ -519,5 +606,23 @@ void main() {
     );
 
     expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
+  });
+
+  testWidgets('RaisedButton has no clip by default', (WidgetTester tester) async{
+    await tester.pumpWidget(
+      Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: RaisedButton(
+              onPressed: () { /* to make sure the button is enabled */ },
+            ),
+          )
+      ),
+    );
+
+    expect(
+        tester.renderObject(find.byType(RaisedButton)),
+        paintsExactlyCountTimes(#clipPath, 0)
+    );
   });
 }

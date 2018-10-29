@@ -10,22 +10,22 @@ void main() {
   testWidgets('Can hit test flex children of stacks', (WidgetTester tester) async {
     bool didReceiveTap = false;
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Container(
+        child: Container(
           color: const Color(0xFF00FF00),
-          child: new Stack(
+          child: Stack(
             children: <Widget>[
-              new Positioned(
+              Positioned(
                 top: 10.0,
                 left: 10.0,
-                child: new Column(
+                child: Column(
                   children: <Widget>[
-                    new GestureDetector(
+                    GestureDetector(
                       onTap: () {
                         didReceiveTap = true;
                       },
-                      child: new Container(
+                      child: Container(
                         color: const Color(0xFF0000FF),
                         width: 100.0,
                         height: 100.0,
@@ -49,7 +49,7 @@ void main() {
 
   testWidgets('Flexible defaults to loose', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Row(
+      Row(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
           Flexible(child: SizedBox(width: 100.0, height: 200.0)),
@@ -63,7 +63,7 @@ void main() {
 
   testWidgets('Can pass null for flex', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Row(
+      Row(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
           Expanded(flex: null, child: Text('one', textDirection: TextDirection.ltr)),
@@ -76,34 +76,34 @@ void main() {
   testWidgets('Doesn\'t overflow because of floating point accumulated error', (WidgetTester tester) async {
     // both of these cases have failed in the past due to floating point issues
     await tester.pumpWidget(
-      new Center(
-        child: new Container(
+      Center(
+        child: Container(
           height: 400.0,
-          child: new Column(
+          child: Column(
             children: <Widget>[
-              new Expanded(child: new Container()),
-              new Expanded(child: new Container()),
-              new Expanded(child: new Container()),
-              new Expanded(child: new Container()),
-              new Expanded(child: new Container()),
-              new Expanded(child: new Container()),
+              Expanded(child: Container()),
+              Expanded(child: Container()),
+              Expanded(child: Container()),
+              Expanded(child: Container()),
+              Expanded(child: Container()),
+              Expanded(child: Container()),
             ],
           ),
         ),
       ),
     );
     await tester.pumpWidget(
-      new Center(
-        child: new Container(
+      Center(
+        child: Container(
           height: 199.0,
-          child: new Column(
+          child: Column(
             children: <Widget>[
-              new Expanded(child: new Container()),
-              new Expanded(child: new Container()),
-              new Expanded(child: new Container()),
-              new Expanded(child: new Container()),
-              new Expanded(child: new Container()),
-              new Expanded(child: new Container()),
+              Expanded(child: Container()),
+              Expanded(child: Container()),
+              Expanded(child: Container()),
+              Expanded(child: Container()),
+              Expanded(child: Container()),
+              Expanded(child: Container()),
             ],
           ),
         ),
@@ -116,20 +116,20 @@ void main() {
     // we only get a single exception. Otherwise we'd get two, the one we want and
     // an extra one when we discover we never computed a size.
     await tester.pumpWidget(
-      new Column(
+      Column(
         children: <Widget>[
-          new Column(),
+          Column(),
         ],
       ),
       Duration.zero,
       EnginePhase.layout,
     );
     await tester.pumpWidget(
-      new Column(
+      Column(
         children: <Widget>[
-          new Column(
+          Column(
             children: <Widget>[
-              new Expanded(child: new Container()),
+              Expanded(child: Container()),
             ],
           ),
         ],

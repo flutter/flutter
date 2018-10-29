@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../painting/image_test_utils.dart';
 
-Future<Null> main() async {
+Future<void> main() async {
   // These must run outside test zone to complete
   final ui.Image targetImage = await createTestImage();
   final ui.Image placeholderImage = await createTestImage();
@@ -23,12 +23,12 @@ Future<Null> main() async {
       RawImage displayedImage() => tester.widget(find.byType(RawImage));
 
       // The placeholder is expected to be already loaded
-      final TestImageProvider placeholderProvider = new TestImageProvider(placeholderImage);
+      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
 
       // Test case: long loading image
-      final TestImageProvider imageProvider = new TestImageProvider(targetImage);
+      final TestImageProvider imageProvider = TestImageProvider(targetImage);
 
-      await tester.pumpWidget(new FadeInImage(
+      await tester.pumpWidget(FadeInImage(
         placeholder: placeholderProvider,
         image: imageProvider,
         fadeOutDuration: const Duration(milliseconds: 50),
@@ -59,7 +59,7 @@ Future<Null> main() async {
 
       // Test case: re-use state object (didUpdateWidget)
       final dynamic stateBeforeDidUpdateWidget = state();
-      await tester.pumpWidget(new FadeInImage(
+      await tester.pumpWidget(FadeInImage(
         placeholder: placeholderProvider,
         image: imageProvider,
       ));
@@ -70,8 +70,8 @@ Future<Null> main() async {
 
       // Test case: new state object but cached image
       final dynamic stateBeforeRecreate = state();
-      await tester.pumpWidget(new Container()); // clear widget tree to prevent state reuse
-      await tester.pumpWidget(new FadeInImage(
+      await tester.pumpWidget(Container()); // clear widget tree to prevent state reuse
+      await tester.pumpWidget(FadeInImage(
         placeholder: placeholderProvider,
         image: imageProvider,
       ));
@@ -86,13 +86,13 @@ Future<Null> main() async {
       RawImage displayedImage() => tester.widget(find.byType(RawImage));
 
       // The placeholder is expected to be already loaded
-      final TestImageProvider placeholderProvider = new TestImageProvider(placeholderImage);
-      final TestImageProvider secondPlaceholderProvider = new TestImageProvider(secondPlaceholderImage);
+      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+      final TestImageProvider secondPlaceholderProvider = TestImageProvider(secondPlaceholderImage);
 
       // Test case: long loading image
-      final TestImageProvider imageProvider = new TestImageProvider(targetImage);
+      final TestImageProvider imageProvider = TestImageProvider(targetImage);
 
-      await tester.pumpWidget(new FadeInImage(
+      await tester.pumpWidget(FadeInImage(
         placeholder: placeholderProvider,
         image: imageProvider,
         fadeOutDuration: const Duration(milliseconds: 50),
@@ -104,7 +104,7 @@ Future<Null> main() async {
       expect(displayedImage().image, same(placeholderImage)); // placeholder completed
       expect(displayedImage().image, isNot(same(secondPlaceholderImage)));
 
-      await tester.pumpWidget(new FadeInImage(
+      await tester.pumpWidget(FadeInImage(
         placeholder: secondPlaceholderProvider,
         image: imageProvider,
         fadeOutDuration: const Duration(milliseconds: 50),

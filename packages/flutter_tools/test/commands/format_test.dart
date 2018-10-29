@@ -30,8 +30,8 @@ void main() {
       final String original = srcFile.readAsStringSync();
       srcFile.writeAsStringSync(original.replaceFirst('main()', 'main(  )'));
 
-      final FormatCommand command = new FormatCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final FormatCommand command = FormatCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['format', srcFile.path]);
 
       final String formatted = srcFile.readAsStringSync();
@@ -47,8 +47,8 @@ void main() {
           'main()', 'main(  )');
       srcFile.writeAsStringSync(nonFormatted);
 
-      final FormatCommand command = new FormatCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final FormatCommand command = FormatCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['format', '--dry-run', srcFile.path]);
 
       final String shouldNotFormatted = srcFile.readAsStringSync();
@@ -64,8 +64,8 @@ void main() {
           'main()', 'main(  )');
       srcFile.writeAsStringSync(nonFormatted);
 
-      final FormatCommand command = new FormatCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final FormatCommand command = FormatCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
 
       expect(runner.run(<String>[
         'format', '--dry-run', '--set-exit-if-changed', srcFile.path

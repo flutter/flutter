@@ -86,12 +86,8 @@ GOTO :after_subroutine
   IF NOT EXIST "%stamp_path%" GOTO do_snapshot
   SET /P stamp_value=<"%stamp_path%"
   IF !stamp_value! NEQ !revision! GOTO do_snapshot
-  REM Compare "last modified" timestamps
   SET pubspec_yaml_path=%flutter_tools_dir%\pubspec.yaml
   SET pubspec_lock_path=%flutter_tools_dir%\pubspec.lock
-  FOR %%i IN ("%pubspec_yaml_path%") DO SET yaml_timestamp=%%~ti
-  FOR %%i IN ("%pubspec_lock_path%") DO SET lock_timestamp=%%~ti
-  IF !yaml_timestamp! EQU !lock_timestamp! GOTO do_snapshot
   FOR /F %%i IN ('DIR /B /O:D "%pubspec_yaml_path%" "%pubspec_lock_path%"') DO SET newer_file=%%i
   IF "%newer_file%" EQU "pubspec.yaml" GOTO do_snapshot
 
@@ -103,7 +99,7 @@ GOTO :after_subroutine
     SET update_dart_bin=%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
     SET "update_dart_bin=!update_dart_bin:'=''!"
-    CALL PowerShell.exe -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
+    PowerShell.exe -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to update Dart SDK. Retrying...
       timeout /t 5 /nobreak
@@ -153,7 +149,7 @@ GOTO :after_subroutine
 
     POPD
 
-    CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
+    "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to create dart snapshot for flutter tool.
       SET exit_code=%ERRORLEVEL%
@@ -166,20 +162,15 @@ GOTO :after_subroutine
 
 :after_subroutine
 
-CALL "%dart%" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %*
-SET exit_code=%ERRORLEVEL%
-
-REM The VM exits with code 253 if the snapshot version is out-of-date.
-IF "%exit_code%" EQU "253" (
-  CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
-  SET exit_code=%ERRORLEVEL%
-  IF "%exit_code%" EQU "253" (
-    ECHO Error: Unable to create dart snapshot for flutter tool.
-    EXIT /B %exit_code%
-  )
-  CALL "%dart%" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %*
-  SET exit_code=%ERRORLEVEL%
-)
+REM Chaining the call to 'dart' and 'exit' with an ampersand ensures that
+REM Windows reads both commands into memory once before executing them. This
+REM avoids nasty errors that may otherwise occure when the dart command (e.g. as
+REM part of 'flutter upgrade') modifies this batch script while it is executing.
+REM
+REM Do not use the CALL command in the next line to execute Dart. CALL causes
+REM Windows to re-read the line from disk after the CALL command has finished
+REM regardless of the ampersand chain.
+"%dart%" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & exit /B !ERRORLEVEL!
 
 :final_exit
 EXIT /B %exit_code%

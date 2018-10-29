@@ -10,25 +10,25 @@ void main() {
   group('layout', () {
     testWidgets('selected item is in the middle', (WidgetTester tester) async {
       final FixedExtentScrollController controller =
-          new FixedExtentScrollController(initialItem: 1);
+          FixedExtentScrollController(initialItem: 1);
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Align(
+          child: Align(
             alignment: Alignment.topLeft,
-            child: new SizedBox(
+            child: SizedBox(
               height: 300.0,
               width: 300.0,
-              child: new CupertinoPicker(
+              child: CupertinoPicker(
                 scrollController: controller,
                 itemExtent: 50.0,
                 onSelectedItemChanged: (_) {},
-                children: new List<Widget>.generate(3, (int index) {
-                  return new Container(
+                children: List<Widget>.generate(3, (int index) {
+                  return Container(
                     height: 50.0,
                     width: 300.0,
-                    child: new Text(index.toString()),
+                    child: Text(index.toString()),
                   );
                 }),
               ),
@@ -69,17 +69,17 @@ void main() {
         });
 
         await tester.pumpWidget(
-          new Directionality(
+          Directionality(
             textDirection: TextDirection.ltr,
-            child: new CupertinoPicker(
+            child: CupertinoPicker(
               itemExtent: 100.0,
               onSelectedItemChanged: (int index) { selectedItems.add(index); },
-              children: new List<Widget>.generate(100, (int index) {
-                return new Center(
-                  child: new Container(
+              children: List<Widget>.generate(100, (int index) {
+                return Center(
+                  child: Container(
                     width: 400.0,
                     height: 100.0,
-                    child: new Text(index.toString()),
+                    child: Text(index.toString()),
                   ),
                 );
               }),
@@ -124,17 +124,17 @@ void main() {
         });
 
         await tester.pumpWidget(
-          new Directionality(
+          Directionality(
             textDirection: TextDirection.ltr,
-            child: new CupertinoPicker(
+            child: CupertinoPicker(
               itemExtent: 100.0,
               onSelectedItemChanged: (int index) { selectedItems.add(index); },
-              children: new List<Widget>.generate(100, (int index) {
-                return new Center(
-                  child: new Container(
+              children: List<Widget>.generate(100, (int index) {
+                return Center(
+                  child: Container(
                     width: 400.0,
                     height: 100.0,
-                    child: new Text(index.toString()),
+                    child: Text(index.toString()),
                   ),
                 );
               }),
@@ -153,22 +153,22 @@ void main() {
     testWidgets('a drag in between items settles back', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       final FixedExtentScrollController controller =
-          new FixedExtentScrollController(initialItem: 10);
+          FixedExtentScrollController(initialItem: 10);
       final List<int> selectedItems = <int>[];
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new CupertinoPicker(
+          child: CupertinoPicker(
             scrollController: controller,
             itemExtent: 100.0,
             onSelectedItemChanged: (int index) { selectedItems.add(index); },
-            children: new List<Widget>.generate(100, (int index) {
-              return new Center(
-                child: new Container(
+            children: List<Widget>.generate(100, (int index) {
+              return Center(
+                child: Container(
                   width: 400.0,
                   height: 100.0,
-                  child: new Text(index.toString()),
+                  child: Text(index.toString()),
                 ),
               );
             }),
@@ -210,22 +210,22 @@ void main() {
     testWidgets('a big fling that overscrolls springs back', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       final FixedExtentScrollController controller =
-          new FixedExtentScrollController(initialItem: 10);
+          FixedExtentScrollController(initialItem: 10);
       final List<int> selectedItems = <int>[];
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new CupertinoPicker(
+          child: CupertinoPicker(
             scrollController: controller,
             itemExtent: 100.0,
             onSelectedItemChanged: (int index) { selectedItems.add(index); },
-            children: new List<Widget>.generate(100, (int index) {
-              return new Center(
-                child: new Container(
+            children: List<Widget>.generate(100, (int index) {
+              return Center(
+                child: Container(
                   width: 400.0,
                   height: 100.0,
-                  child: new Text(index.toString()),
+                  child: Text(index.toString()),
                 ),
               );
             }),

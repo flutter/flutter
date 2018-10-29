@@ -11,11 +11,11 @@ void main() {
   testWidgets('MediaQuery does not have a default', (WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
-      new Builder(
+      Builder(
         builder: (BuildContext context) {
           tested = true;
           MediaQuery.of(context); // should throw
-          return new Container();
+          return Container();
         }
       )
     );
@@ -26,12 +26,12 @@ void main() {
   testWidgets('MediaQuery defaults to null', (WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
-      new Builder(
+      Builder(
         builder: (BuildContext context) {
           final MediaQueryData data = MediaQuery.of(context, nullOk: true);
           expect(data, isNull);
           tested = true;
-          return new Container();
+          return Container();
         }
       )
     );
@@ -39,17 +39,18 @@ void main() {
   });
 
   testWidgets('MediaQueryData is sane', (WidgetTester tester) async {
-    final MediaQueryData data = new MediaQueryData.fromWindow(ui.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(ui.window);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
     expect(data.size, equals(ui.window.physicalSize / ui.window.devicePixelRatio));
     expect(data.accessibleNavigation, false);
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
+    expect(data.boldText, false);
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
-    final MediaQueryData data = new MediaQueryData.fromWindow(ui.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(ui.window);
     final MediaQueryData copied = data.copyWith();
     expect(copied.size, data.size);
     expect(copied.devicePixelRatio, data.devicePixelRatio);
@@ -60,10 +61,11 @@ void main() {
     expect(copied.accessibleNavigation, data.accessibleNavigation);
     expect(copied.invertColors, data.invertColors);
     expect(copied.disableAnimations, data.disableAnimations);
+    expect(copied.boldText, data.boldText);
   });
 
   testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
-    final MediaQueryData data = new MediaQueryData.fromWindow(ui.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(ui.window);
     final MediaQueryData copied = data.copyWith(
       size: const Size(3.14, 2.72),
       devicePixelRatio: 1.41,
@@ -74,6 +76,7 @@ void main() {
       accessibleNavigation: true,
       invertColors: true,
       disableAnimations: true,
+      boldText: true,
     );
     expect(copied.size, const Size(3.14, 2.72));
     expect(copied.devicePixelRatio, 1.41);
@@ -84,6 +87,7 @@ void main() {
     expect(copied.accessibleNavigation, true);
     expect(copied.invertColors, true);
     expect(copied.disableAnimations, true);
+    expect(copied.boldText, true);
   });
 
  testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
@@ -95,7 +99,7 @@ void main() {
 
    MediaQueryData unpadded;
    await tester.pumpWidget(
-     new MediaQuery(
+     MediaQuery(
        data: const MediaQueryData(
          size: size,
          devicePixelRatio: devicePixelRatio,
@@ -106,19 +110,20 @@ void main() {
          accessibleNavigation: true,
          invertColors: true,
          disableAnimations: true,
+         boldText: true,
        ),
-       child: new Builder(
+       child: Builder(
          builder: (BuildContext context) {
-           return new MediaQuery.removePadding(
+           return MediaQuery.removePadding(
              context: context,
              removeLeft: true,
              removeTop: true,
              removeRight: true,
              removeBottom: true,
-             child: new Builder(
+             child: Builder(
                builder: (BuildContext context) {
                  unpadded = MediaQuery.of(context);
-                 return new Container();
+                 return Container();
                }
              ),
            );
@@ -136,6 +141,7 @@ void main() {
    expect(unpadded.accessibleNavigation, true);
    expect(unpadded.invertColors, true);
    expect(unpadded.disableAnimations, true);
+   expect(unpadded.boldText, true);
   });
 
   testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
@@ -147,7 +153,7 @@ void main() {
 
     MediaQueryData unpadded;
     await tester.pumpWidget(
-      new MediaQuery(
+      MediaQuery(
         data: const MediaQueryData(
           size: size,
           devicePixelRatio: devicePixelRatio,
@@ -158,19 +164,20 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          boldText: true,
         ),
-        child: new Builder(
+        child: Builder(
           builder: (BuildContext context) {
-            return new MediaQuery.removeViewInsets(
+            return MediaQuery.removeViewInsets(
               context: context,
               removeLeft: true,
               removeTop: true,
               removeRight: true,
               removeBottom: true,
-              child: new Builder(
+              child: Builder(
                 builder: (BuildContext context) {
                   unpadded = MediaQuery.of(context);
-                  return new Container();
+                  return Container();
                 }
               ),
             );
@@ -188,6 +195,7 @@ void main() {
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
+    expect(unpadded.boldText, true);
   });
 
  testWidgets('MediaQuery.textScaleFactorOf', (WidgetTester tester) async {
@@ -195,17 +203,17 @@ void main() {
    double insideTextScaleFactor;
 
    await tester.pumpWidget(
-     new Builder(
+     Builder(
        builder: (BuildContext context) {
          outsideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
-         return new MediaQuery(
+         return MediaQuery(
            data: const MediaQueryData(
              textScaleFactor: 4.0,
            ),
-           child: new Builder(
+           child: Builder(
              builder: (BuildContext context) {
                insideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
-               return new Container();
+               return Container();
              },
            ),
          );
@@ -216,4 +224,31 @@ void main() {
    expect(outsideTextScaleFactor, 1.0);
    expect(insideTextScaleFactor, 4.0);
  });
+
+  testWidgets('MediaQuery.boldTextOverride', (WidgetTester tester) async {
+    bool outsideBoldTextOverride;
+    bool insideBoldTextOverride;
+
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          outsideBoldTextOverride = MediaQuery.boldTextOverride(context);
+          return MediaQuery(
+            data: const MediaQueryData(
+              boldText: true,
+            ),
+            child: Builder(
+              builder: (BuildContext context) {
+                insideBoldTextOverride = MediaQuery.boldTextOverride(context);
+                return Container();
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(outsideBoldTextOverride, false);
+    expect(insideBoldTextOverride, true);
+  });
 }

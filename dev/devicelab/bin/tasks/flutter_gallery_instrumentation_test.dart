@@ -13,7 +13,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 // with the Java code to report its status. If this test fails due to a problem on the Dart
 // side, you can debug that by just running that file directly using `flutter run`.
 
-Future<Null> main() async {
+Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
 
   await task(() async {
@@ -30,6 +30,6 @@ Future<Null> main() async {
       });
     });
 
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   });
 }

@@ -7,6 +7,7 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
 import '../device.dart';
@@ -37,24 +38,28 @@ final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
     addBuildModeFlags(defaultToRelease: false);
+    usesIsolateFilterOption(hide: !verboseHelp);
+    usesTargetOption();
+    usesFilesystemOptions(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
         help: 'Local port where the observatory is listening.',
-      )
-      ..addFlag(
-        'preview-dart-2',
-        defaultsTo: true,
+      )..addOption('pid-file',
+        help: 'Specify a file to write the process id to. '
+              'You can send SIGUSR1 to trigger a hot reload '
+              'and SIGUSR2 to trigger a hot restart.',
+      )..addOption(
+        'project-root',
         hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
+        help: 'Normally used only in run target',
       )..addFlag('machine',
           hide: !verboseHelp,
           negatable: false,
-          help: 'Handle machine structured JSON command input and provide output\n'
+          help: 'Handle machine structured JSON command input and provide output '
                 'and progress in machine friendly format.',
       );
-    usesTargetOption();
-    hotRunnerFactory ??= new HotRunnerFactory();
+    hotRunnerFactory ??= HotRunnerFactory();
   }
 
   HotRunnerFactory hotRunnerFactory;
@@ -77,32 +82,34 @@ class AttachCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> validateCommand() async {
-    super.validateCommand();
+  Future<void> validateCommand() async {
+    await super.validateCommand();
     if (await findTargetDevice() == null)
       throwToolExit(null);
     observatoryPort;
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
 
     await _validateArguments();
+
+    writePidFile(argResults['pid-file']);
 
     final Device device = await findTargetDevice();
     final int devicePort = observatoryPort;
 
     final Daemon daemon = argResults['machine']
-      ? new Daemon(stdinCommandStream, stdoutCommandResponse,
-            notifyingLogger: new NotifyingLogger(), logToStdout: true)
+      ? Daemon(stdinCommandStream, stdoutCommandResponse,
+            notifyingLogger: NotifyingLogger(), logToStdout: true)
       : null;
 
     Uri observatoryUri;
     if (devicePort == null) {
       ProtocolDiscovery observatoryDiscovery;
       try {
-        observatoryDiscovery = new ProtocolDiscovery.observatory(
+        observatoryDiscovery = ProtocolDiscovery.observatory(
           device.getLogReader(),
           portForwarder: device.portForwarder,
         );
@@ -117,15 +124,23 @@ class AttachCommand extends FlutterCommand {
       observatoryUri = Uri.parse('http://$ipv4Loopback:$localPort/');
     }
     try {
-      final FlutterDevice flutterDevice = new FlutterDevice(device,
-          trackWidgetCreation: false, previewDart2: argResults['preview-dart-2']);
+      final FlutterDevice flutterDevice = FlutterDevice(
+        device,
+        trackWidgetCreation: false,
+        dillOutputPath: argResults['output-dill'],
+        fileSystemRoots: argResults['filesystem-root'],
+        fileSystemScheme: argResults['filesystem-scheme'],
+        viewFilter: argResults['isolate-filter'],
+      );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = hotRunnerFactory.build(
         <FlutterDevice>[flutterDevice],
         target: targetFile,
-        debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
+        debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
         packagesFilePath: globalResults['packages'],
         usesTerminalUI: daemon == null,
+        projectRootPath: argResults['project-root'],
+        dillOutputPath: argResults['output-dill'],
       );
 
       if (daemon != null) {
@@ -146,6 +161,7 @@ class AttachCommand extends FlutterCommand {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
       ports.forEach(device.portForwarder.unforward);
     }
+    return null;
   }
 
   Future<void> _validateArguments() async {}
@@ -164,7 +180,7 @@ class HotRunnerFactory {
       String dillOutputPath,
       bool stayResident = true,
       bool ipv6 = false,
-  }) => new HotRunner(
+  }) => HotRunner(
     devices,
     target: target,
     debuggingOptions: debuggingOptions,

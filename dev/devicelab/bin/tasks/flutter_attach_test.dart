@@ -13,11 +13,11 @@ import 'package:flutter_devicelab/framework/utils.dart';
 
 Future<void> testReload(Process process, { Future<void> Function() onListening }) async {
   section('Testing hot reload, restart and quit');
-  final Completer<Null> listening = new Completer<Null>();
-  final Completer<Null> ready = new Completer<Null>();
-  final Completer<Null> reloaded = new Completer<Null>();
-  final Completer<Null> restarted = new Completer<Null>();
-  final Completer<Null> finished = new Completer<Null>();
+  final Completer<void> listening = Completer<void>();
+  final Completer<void> ready = Completer<void>();
+  final Completer<void> reloaded = Completer<void>();
+  final Completer<void> restarted = Completer<void>();
+  final Completer<void> finished = Completer<void>();
   final List<String> stdout = <String>[];
   final List<String> stderr = <String>[];
 
@@ -26,14 +26,14 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
 
   int exitCode;
   process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
     print('attach:stdout: $line');
     stdout.add(line);
     if (line.contains('Waiting') && onListening != null)
       listening.complete(onListening());
-    if (line.contains('To quit, press "q".'))
+    if (line.contains('To detach, press "d"; to quit, press "q".'))
       ready.complete();
     if (line.contains('Reloaded '))
       reloaded.complete();
@@ -43,16 +43,16 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
       finished.complete();
   });
   process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
     print('run:stderr: $line');
     stdout.add(line);
   });
 
-  process.exitCode.then((int processExitCode) { exitCode = processExitCode; });
+  process.exitCode.then<void>((int processExitCode) { exitCode = processExitCode; });
 
-  Future<dynamic> eventOrExit(Future<Null> event) {
+  Future<dynamic> eventOrExit(Future<void> event) {
     return Future.any<dynamic>(<Future<dynamic>>[ event, process.exitCode ]);
   }
 
@@ -96,7 +96,7 @@ void main() {
           <String>['--suppress-analytics', 'build', 'apk', '--debug', 'lib/main.dart'],
       );
       final String lastLine = buildStdout.split('\n').last;
-      final RegExp builtRegExp = new RegExp(r'Built (.+)( \(|\.$)');
+      final RegExp builtRegExp = RegExp(r'Built (.+)( \(|\.$)');
       final String apkPath = builtRegExp.firstMatch(lastLine)[1];
 
       section('Installing $apkPath');
@@ -116,7 +116,7 @@ void main() {
         });
 
         // Give the device the time to really shut down the app.
-        await new Future<Null>.delayed(const Duration(milliseconds: 200));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
         // After the delay, force-stopping it shouldn't do anything, but doesn't hurt.
         await device.shellExec('am', <String>['force-stop', kAppId]);
 
@@ -128,7 +128,7 @@ void main() {
         // If the next line fails, your device may not support regexp search.
         final String observatoryLine = await device.adb(<String>['logcat', '-e', 'Observatory listening on http:', '-m', '1', '-T', currentTime]);
         print('Found observatory line: $observatoryLine');
-        final String observatoryPort = new RegExp(r'Observatory listening on http://.*:([0-9]+)').firstMatch(observatoryLine)[1];
+        final String observatoryPort = RegExp(r'Observatory listening on http://.*:([0-9]+)').firstMatch(observatoryLine)[1];
         print('Extracted observatory port: $observatoryPort');
 
         section('Launching attach with given port');
@@ -144,6 +144,6 @@ void main() {
         await device.adb(<String>['uninstall', kAppId]);
       }
     });
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   });
 }

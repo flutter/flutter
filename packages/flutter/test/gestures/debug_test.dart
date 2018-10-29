@@ -7,14 +7,14 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('debugPrintGestureArenaDiagnostics', (WidgetTester tester) {
+  testWidgets('debugPrintGestureArenaDiagnostics', (WidgetTester tester) async {
     PointerEvent event;
     debugPrintGestureArenaDiagnostics = true;
     final DebugPrintCallback oldCallback = debugPrint;
     final List<String> log = <String>[];
     debugPrint = (String s, { int wrapWidth }) { log.add(s); };
 
-    final TapGestureRecognizer tap = new TapGestureRecognizer()
+    final TapGestureRecognizer tap = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) { }
       ..onTapUp = (TapUpDetails details) { }
       ..onTap = () { }
@@ -53,14 +53,14 @@ void main() {
     debugPrint = oldCallback;
   });
 
-  testWidgets('debugPrintRecognizerCallbacksTrace', (WidgetTester tester) {
+  testWidgets('debugPrintRecognizerCallbacksTrace', (WidgetTester tester) async {
     PointerEvent event;
     debugPrintRecognizerCallbacksTrace = true;
     final DebugPrintCallback oldCallback = debugPrint;
     final List<String> log = <String>[];
     debugPrint = (String s, { int wrapWidth }) { log.add(s); };
 
-    final TapGestureRecognizer tap = new TapGestureRecognizer()
+    final TapGestureRecognizer tap = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) { }
       ..onTapUp = (TapUpDetails details) { }
       ..onTap = () { }
@@ -95,7 +95,7 @@ void main() {
     debugPrint = oldCallback;
   });
 
-  testWidgets('debugPrintGestureArenaDiagnostics and debugPrintRecognizerCallbacksTrace', (WidgetTester tester) {
+  testWidgets('debugPrintGestureArenaDiagnostics and debugPrintRecognizerCallbacksTrace', (WidgetTester tester) async {
     PointerEvent event;
     debugPrintGestureArenaDiagnostics = true;
     debugPrintRecognizerCallbacksTrace = true;
@@ -103,7 +103,7 @@ void main() {
     final List<String> log = <String>[];
     debugPrint = (String s, { int wrapWidth }) { log.add(s); };
 
-    final TapGestureRecognizer tap = new TapGestureRecognizer()
+    final TapGestureRecognizer tap = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) { }
       ..onTapUp = (TapUpDetails details) { }
       ..onTap = () { }
@@ -147,7 +147,7 @@ void main() {
   });
 
   test('TapGestureRecognizer _sentTapDown toString', () {
-    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
     expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready)'));
     const PointerEvent event = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
     tap.addPointer(event);

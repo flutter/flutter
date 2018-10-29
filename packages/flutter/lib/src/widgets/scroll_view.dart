@@ -50,7 +50,8 @@ abstract class ScrollView extends StatelessWidget {
   /// Creates a widget that scrolls.
   ///
   /// If the [primary] argument is true, the [controller] must be null.
-  ScrollView({
+  ScrollView({ // ignore: prefer_const_constructors_in_immutables
+               // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
     Key key,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
@@ -59,6 +60,7 @@ abstract class ScrollView extends StatelessWidget {
     ScrollPhysics physics,
     this.shrinkWrap = false,
     this.cacheExtent,
+    this.semanticChildCount,
   }) : assert(reverse != null),
        assert(shrinkWrap != null),
        assert(!(controller != null && primary == true),
@@ -171,6 +173,21 @@ abstract class ScrollView extends StatelessWidget {
   /// {@macro flutter.rendering.viewport.cacheExtent}
   final double cacheExtent;
 
+  /// The number of children that will contribute semantic information.
+  ///
+  /// Some subtypes of [ScrollView] can infer this value automatically. For
+  /// example [ListView] will use the number of widgets in the child list,
+  /// while the [new ListView.separated] constructor will use half that amount.
+  ///
+  /// For [CustomScrollView] and other types which do not receive a builder
+  /// or list of widgets, the child count must be explicitly provided. If the
+  /// number is unknown or unbounded this should be left unset or set to null.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
+  final int semanticChildCount;
+
   /// Returns the [AxisDirection] in which the scroll view scrolls.
   ///
   /// Combines the [scrollDirection] with the [reverse] boolean to obtain the
@@ -207,13 +224,13 @@ abstract class ScrollView extends StatelessWidget {
     List<Widget> slivers,
   ) {
     if (shrinkWrap) {
-      return new ShrinkWrappingViewport(
+      return ShrinkWrappingViewport(
         axisDirection: axisDirection,
         offset: offset,
         slivers: slivers,
       );
     }
-    return new Viewport(
+    return Viewport(
       axisDirection: axisDirection,
       offset: offset,
       slivers: slivers,
@@ -229,28 +246,29 @@ abstract class ScrollView extends StatelessWidget {
     final ScrollController scrollController = primary
       ? PrimaryScrollController.of(context)
       : controller;
-    final Scrollable scrollable = new Scrollable(
+    final Scrollable scrollable = Scrollable(
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,
+      semanticChildCount: semanticChildCount,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return buildViewport(context, offset, axisDirection, slivers);
       },
     );
     return primary && scrollController != null
-      ? new PrimaryScrollController.none(child: scrollable)
+      ? PrimaryScrollController.none(child: scrollable)
       : scrollable;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new EnumProperty<Axis>('scrollDirection', scrollDirection));
-    properties.add(new FlagProperty('reverse', value: reverse, ifTrue: 'reversed', showName: true));
-    properties.add(new DiagnosticsProperty<ScrollController>('controller', controller, showName: false, defaultValue: null));
-    properties.add(new FlagProperty('primary', value: primary, ifTrue: 'using primary controller', showName: true));
-    properties.add(new DiagnosticsProperty<ScrollPhysics>('physics', physics, showName: false, defaultValue: null));
-    properties.add(new FlagProperty('shrinkWrap', value: shrinkWrap, ifTrue: 'shrink-wrapping', showName: true));
+    properties.add(EnumProperty<Axis>('scrollDirection', scrollDirection));
+    properties.add(FlagProperty('reverse', value: reverse, ifTrue: 'reversed', showName: true));
+    properties.add(DiagnosticsProperty<ScrollController>('controller', controller, showName: false, defaultValue: null));
+    properties.add(FlagProperty('primary', value: primary, ifTrue: 'using primary controller', showName: true));
+    properties.add(DiagnosticsProperty<ScrollPhysics>('physics', physics, showName: false, defaultValue: null));
+    properties.add(FlagProperty('shrinkWrap', value: shrinkWrap, ifTrue: 'shrink-wrapping', showName: true));
   }
 }
 
@@ -273,41 +291,41 @@ abstract class ScrollView extends StatelessWidget {
 /// bar, a grid, and an infinite list.
 ///
 /// ```dart
-/// new CustomScrollView(
+/// CustomScrollView(
 ///   slivers: <Widget>[
 ///     const SliverAppBar(
 ///       pinned: true,
 ///       expandedHeight: 250.0,
-///       flexibleSpace: const FlexibleSpaceBar(
-///         title: const Text('Demo'),
+///       flexibleSpace: FlexibleSpaceBar(
+///         title: Text('Demo'),
 ///       ),
 ///     ),
-///     new SliverGrid(
-///       gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
+///     SliverGrid(
+///       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
 ///         maxCrossAxisExtent: 200.0,
 ///         mainAxisSpacing: 10.0,
 ///         crossAxisSpacing: 10.0,
 ///         childAspectRatio: 4.0,
 ///       ),
-///       delegate: new SliverChildBuilderDelegate(
+///       delegate: SliverChildBuilderDelegate(
 ///         (BuildContext context, int index) {
-///           return new Container(
+///           return Container(
 ///             alignment: Alignment.center,
 ///             color: Colors.teal[100 * (index % 9)],
-///             child: new Text('grid item $index'),
+///             child: Text('grid item $index'),
 ///           );
 ///         },
 ///         childCount: 20,
 ///       ),
 ///     ),
-///     new SliverFixedExtentList(
+///     SliverFixedExtentList(
 ///       itemExtent: 50.0,
-///       delegate: new SliverChildBuilderDelegate(
+///       delegate: SliverChildBuilderDelegate(
 ///         (BuildContext context, int index) {
-///           return new Container(
+///           return Container(
 ///             alignment: Alignment.center,
 ///             color: Colors.lightBlue[100 * (index % 9)],
-///             child: new Text('list item $index'),
+///             child: Text('list item $index'),
 ///           );
 ///         },
 ///       ),
@@ -315,6 +333,40 @@ abstract class ScrollView extends StatelessWidget {
 ///   ],
 /// )
 /// ```
+///
+/// ## Accessibility
+///
+/// A [CustomScrollView] can allow Talkback/VoiceOver to make announcements
+/// to the user when the scroll state changes. For example, on Android an
+/// announcement might be read as "showing items 1 to 10 of 23". To produce
+/// this announcment, the scroll view needs three pieces of information:
+///
+///   * The first visible child index.
+///   * The total number of children.
+///   * The total number of visible children.
+///
+/// The last value can be computed exactly by the framework, however the first
+/// two must be provided. Most of the higher-level scrollable widgets provide
+/// this information automatically. For example, [ListView] provides each child
+/// widget with a semantic index automatically and sets the semantic child
+/// count to the length of the list.
+///
+/// To determine visible indexes, the scroll view needs a way to associate the
+/// generated semantics of each scrollable item with a semantic index. This can
+/// be done by wrapping the child widgets in an [IndexedSemantics].
+///
+/// This semantic index is not necesarily the same as the index of the widget
+/// in the scrollable, because some widgets may not contribute semantic
+/// information. Consider a [new ListView.separated()], every other widget is a
+/// divider with no semantic information. In this case, only odd numbered
+/// widgets have a semantic index (equal to the index ~/ 2). Furthermore, the
+/// total number of children in this example would be half the number of
+/// widgets. Note that [new ListView.separated()] handles this automatically
+/// and is only used here as an example.
+///
+/// The total number of visible children can be provided by the constructor
+/// parameter `semanticChildCount`. This should always be the same as the
+/// number of widgets wrapped in [IndexedSemantics].
 ///
 /// See also:
 ///
@@ -328,6 +380,8 @@ abstract class ScrollView extends StatelessWidget {
 ///    and float as the scroll view scrolls.
 ///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
+///  * [IndexedSemantics], which allows annotating child lists with an index
+///    for scroll announcements.
 class CustomScrollView extends ScrollView {
   /// Creates a [ScrollView] that creates custom scroll effects using slivers.
   ///
@@ -342,6 +396,7 @@ class CustomScrollView extends ScrollView {
     bool shrinkWrap = false,
     double cacheExtent,
     this.slivers = const <Widget>[],
+    int semanticChildCount,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -351,6 +406,7 @@ class CustomScrollView extends ScrollView {
     physics: physics,
     shrinkWrap: shrinkWrap,
     cacheExtent: cacheExtent,
+    semanticChildCount: semanticChildCount,
   );
 
   /// The slivers to place inside the viewport.
@@ -382,6 +438,7 @@ abstract class BoxScrollView extends ScrollView {
     bool shrinkWrap = false,
     this.padding,
     double cacheExtent,
+    int semanticChildCount,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -391,6 +448,7 @@ abstract class BoxScrollView extends ScrollView {
     physics: physics,
     shrinkWrap: shrinkWrap,
     cacheExtent: cacheExtent,
+    semanticChildCount: semanticChildCount,
   );
 
   /// The amount of space by which to inset the children.
@@ -413,7 +471,7 @@ abstract class BoxScrollView extends ScrollView {
             ? mediaQueryVerticalPadding
             : mediaQueryHorizontalPadding;
         // Leave behind the cross axis padding.
-        sliver = new MediaQuery(
+        sliver = MediaQuery(
           data: mediaQuery.copyWith(
             padding: scrollDirection == Axis.vertical
                 ? mediaQueryHorizontalPadding
@@ -425,7 +483,7 @@ abstract class BoxScrollView extends ScrollView {
     }
 
     if (effectivePadding != null)
-      sliver = new SliverPadding(padding: effectivePadding, sliver: sliver);
+      sliver = SliverPadding(padding: effectivePadding, sliver: sliver);
     return <Widget>[ sliver ];
   }
 
@@ -436,7 +494,7 @@ abstract class BoxScrollView extends ScrollView {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
   }
 }
 
@@ -487,11 +545,11 @@ abstract class BoxScrollView extends ScrollView {
 /// An infinite list of children:
 ///
 /// ```dart
-/// new ListView.builder(
-///   padding: new EdgeInsets.all(8.0),
+/// ListView.builder(
+///   padding: EdgeInsets.all(8.0),
 ///   itemExtent: 20.0,
 ///   itemBuilder: (BuildContext context, int index) {
-///     return new Text('entry $index');
+///     return Text('entry $index');
 ///   },
 /// )
 /// ```
@@ -597,7 +655,7 @@ abstract class BoxScrollView extends ScrollView {
 /// [CustomScrollView]:
 ///
 /// ```dart
-/// new ListView(
+/// ListView(
 ///   shrinkWrap: true,
 ///   padding: const EdgeInsets.all(20.0),
 ///   children: <Widget>[
@@ -610,13 +668,13 @@ abstract class BoxScrollView extends ScrollView {
 /// ```
 ///
 /// ```dart
-/// new CustomScrollView(
+/// CustomScrollView(
 ///   shrinkWrap: true,
 ///   slivers: <Widget>[
-///     new SliverPadding(
+///     SliverPadding(
 ///       padding: const EdgeInsets.all(20.0),
-///       sliver: new SliverList(
-///         delegate: new SliverChildListDelegate(
+///       sliver: SliverList(
+///         delegate: SliverChildListDelegate(
 ///           <Widget>[
 ///             const Text('I\'m dedicating every day to you'),
 ///             const Text('Domestic life was never quite my style'),
@@ -657,8 +715,10 @@ class ListView extends BoxScrollView {
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
-  /// [SliverChildListDelegate.addRepaintBoundaries] property. Both must not be
-  /// null.
+  /// [SliverChildListDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildListDelegate.addSemanticIndexes] property. None
+  /// may be null.
   ListView({
     Key key,
     Axis scrollDirection = Axis.vertical,
@@ -671,12 +731,15 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
     double cacheExtent,
     List<Widget> children = const <Widget>[],
-  }) : childrenDelegate = new SliverChildListDelegate(
+    int semanticChildCount,
+  }) : childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
        ), super(
     key: key,
     scrollDirection: scrollDirection,
@@ -687,6 +750,7 @@ class ListView extends BoxScrollView {
     shrinkWrap: shrinkWrap,
     padding: padding,
     cacheExtent: cacheExtent,
+    semanticChildCount: semanticChildCount ?? children.length,
   );
 
   /// Creates a scrollable, linear array of widgets that are created on demand.
@@ -711,8 +775,10 @@ class ListView extends BoxScrollView {
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
-  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. Both must not
-  /// be null.
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property. None may be
+  /// null.
   ListView.builder({
     Key key,
     Axis scrollDirection = Axis.vertical,
@@ -727,12 +793,15 @@ class ListView extends BoxScrollView {
     int itemCount,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
     double cacheExtent,
-  }) : childrenDelegate = new SliverChildBuilderDelegate(
+    int semanticChildCount,
+  }) : childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          childCount: itemCount,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
        ), super(
     key: key,
     scrollDirection: scrollDirection,
@@ -742,7 +811,8 @@ class ListView extends BoxScrollView {
     physics: physics,
     shrinkWrap: shrinkWrap,
     padding: padding,
-    cacheExtent: cacheExtent
+    cacheExtent: cacheExtent,
+    semanticChildCount: semanticChildCount ?? itemCount,
   );
 
   /// Creates a fixed-length scrollable linear array of list "items" separated
@@ -773,12 +843,12 @@ class ListView extends BoxScrollView {
   /// are separated by [Divider]s.
   ///
   /// ```dart
-  /// new ListView.separated(
+  /// ListView.separated(
   ///   itemCount: 25,
-  ///   separatorBuilder: (BuildContext context, int index) => new Divider(),
+  ///   separatorBuilder: (BuildContext context, int index) => Divider(),
   ///   itemBuilder: (BuildContext context, int index) {
-  ///     return new ListTile(
-  ///       title: new Text('item $index'),
+  ///     return ListTile(
+  ///       title: Text('item $index'),
   ///     );
   ///   },
   /// )
@@ -787,8 +857,10 @@ class ListView extends BoxScrollView {
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
-  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. Both must not
-  /// be null.
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property. None may be
+  /// null.
   ListView.separated({
     Key key,
     Axis scrollDirection = Axis.vertical,
@@ -803,21 +875,26 @@ class ListView extends BoxScrollView {
     @required int itemCount,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
     double cacheExtent,
   }) : assert(itemBuilder != null),
        assert(separatorBuilder != null),
        assert(itemCount != null && itemCount >= 0),
        itemExtent = null,
-       childrenDelegate = new SliverChildBuilderDelegate(
+       childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
            return index.isEven
              ? itemBuilder(context, itemIndex)
              : separatorBuilder(context, itemIndex);
          },
-         childCount: math.max(0, itemCount * 2 - 1),
+         childCount: _computeSemanticChildCount(itemCount),
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
+         semanticIndexCallback: (Widget _, int index) {
+           return index.isEven ? index ~/ 2 : null;
+         }
        ), super(
     key: key,
     scrollDirection: scrollDirection,
@@ -827,7 +904,8 @@ class ListView extends BoxScrollView {
     physics: physics,
     shrinkWrap: shrinkWrap,
     padding: padding,
-    cacheExtent: cacheExtent
+    cacheExtent: cacheExtent,
+    semanticChildCount: _computeSemanticChildCount(itemCount),
   );
 
   /// Creates a scrollable, linear array of widgets with a custom child model.
@@ -846,6 +924,7 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     @required this.childrenDelegate,
     double cacheExtent,
+    int semanticChildCount,
   }) : assert(childrenDelegate != null),
        super(
          key: key,
@@ -857,6 +936,7 @@ class ListView extends BoxScrollView {
          shrinkWrap: shrinkWrap,
          padding: padding,
          cacheExtent: cacheExtent,
+         semanticChildCount: semanticChildCount,
        );
 
   /// If non-null, forces the children to have the given extent in the scroll
@@ -879,18 +959,23 @@ class ListView extends BoxScrollView {
   @override
   Widget buildChildLayout(BuildContext context) {
     if (itemExtent != null) {
-      return new SliverFixedExtentList(
+      return SliverFixedExtentList(
         delegate: childrenDelegate,
         itemExtent: itemExtent,
       );
     }
-    return new SliverList(delegate: childrenDelegate);
+    return SliverList(delegate: childrenDelegate);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DoubleProperty('itemExtent', itemExtent, defaultValue: null));
+    properties.add(DoubleProperty('itemExtent', itemExtent, defaultValue: null));
+  }
+
+  // Helper method to compute the semantic child count for the separated constructor.
+  static int _computeSemanticChildCount(int itemCount) {
+    return math.max(0, itemCount * 2 - 1);
   }
 }
 
@@ -969,7 +1054,7 @@ class ListView extends BoxScrollView {
 /// [CustomScrollView]:
 ///
 /// ```dart
-/// new GridView.count(
+/// GridView.count(
 ///   primary: false,
 ///   padding: const EdgeInsets.all(20.0),
 ///   crossAxisSpacing: 10.0,
@@ -986,12 +1071,12 @@ class ListView extends BoxScrollView {
 /// ```
 ///
 /// ```dart
-/// new CustomScrollView(
+/// CustomScrollView(
 ///   primary: false,
 ///   slivers: <Widget>[
-///     new SliverPadding(
+///     SliverPadding(
 ///       padding: const EdgeInsets.all(20.0),
-///       sliver: new SliverGrid.count(
+///       sliver: SliverGrid.count(
 ///         crossAxisSpacing: 10.0,
 ///         crossAxisCount: 2,
 ///         children: <Widget>[
@@ -1046,13 +1131,16 @@ class GridView extends BoxScrollView {
     @required this.gridDelegate,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
     double cacheExtent,
     List<Widget> children = const <Widget>[],
+    int semanticChildCount,
   }) : assert(gridDelegate != null),
-       childrenDelegate = new SliverChildListDelegate(
+       childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
        ),
        super(
          key: key,
@@ -1063,7 +1151,8 @@ class GridView extends BoxScrollView {
          physics: physics,
          shrinkWrap: shrinkWrap,
          padding: padding,
-        cacheExtent: cacheExtent,
+         cacheExtent: cacheExtent,
+         semanticChildCount: semanticChildCount ?? children.length,
        );
 
   /// Creates a scrollable, 2D array of widgets that are created on demand.
@@ -1099,13 +1188,16 @@ class GridView extends BoxScrollView {
     int itemCount,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
     double cacheExtent,
+    int semanticChildCount,
   }) : assert(gridDelegate != null),
-       childrenDelegate = new SliverChildBuilderDelegate(
+       childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          childCount: itemCount,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
        ),
        super(
          key: key,
@@ -1116,7 +1208,8 @@ class GridView extends BoxScrollView {
          physics: physics,
          shrinkWrap: shrinkWrap,
          padding: padding,
-        cacheExtent: cacheExtent,
+         cacheExtent: cacheExtent,
+         semanticChildCount: semanticChildCount ?? itemCount,
        );
 
   /// Creates a scrollable, 2D array of widgets with both a custom
@@ -1138,6 +1231,7 @@ class GridView extends BoxScrollView {
     @required this.gridDelegate,
     @required this.childrenDelegate,
     double cacheExtent,
+    int semanticChildCount,
   }) : assert(gridDelegate != null),
        assert(childrenDelegate != null),
        super(
@@ -1149,7 +1243,8 @@ class GridView extends BoxScrollView {
          physics: physics,
          shrinkWrap: shrinkWrap,
          padding: padding,
-        cacheExtent: cacheExtent,
+         cacheExtent: cacheExtent,
+         semanticChildCount: semanticChildCount,
        );
 
   /// Creates a scrollable, 2D array of widgets with a fixed number of tiles in
@@ -1181,18 +1276,21 @@ class GridView extends BoxScrollView {
     double childAspectRatio = 1.0,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
     double cacheExtent,
     List<Widget> children = const <Widget>[],
-  }) : gridDelegate = new SliverGridDelegateWithFixedCrossAxisCount(
+    int semanticChildCount,
+  }) : gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
          crossAxisCount: crossAxisCount,
          mainAxisSpacing: mainAxisSpacing,
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
        ),
-       childrenDelegate = new SliverChildListDelegate(
+       childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
        ), super(
     key: key,
     scrollDirection: scrollDirection,
@@ -1203,6 +1301,7 @@ class GridView extends BoxScrollView {
     shrinkWrap: shrinkWrap,
     padding: padding,
     cacheExtent: cacheExtent,
+    semanticChildCount: semanticChildCount ?? children.length,
   );
 
   /// Creates a scrollable, 2D array of widgets with tiles that each have a
@@ -1234,17 +1333,20 @@ class GridView extends BoxScrollView {
     double childAspectRatio = 1.0,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
     List<Widget> children = const <Widget>[],
-  }) : gridDelegate = new SliverGridDelegateWithMaxCrossAxisExtent(
+    int semanticChildCount,
+  }) : gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
          maxCrossAxisExtent: maxCrossAxisExtent,
          mainAxisSpacing: mainAxisSpacing,
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
        ),
-       childrenDelegate = new SliverChildListDelegate(
+       childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
        ), super(
     key: key,
     scrollDirection: scrollDirection,
@@ -1254,6 +1356,7 @@ class GridView extends BoxScrollView {
     physics: physics,
     shrinkWrap: shrinkWrap,
     padding: padding,
+    semanticChildCount: semanticChildCount ?? children.length,
   );
 
   /// A delegate that controls the layout of the children within the [GridView].
@@ -1272,7 +1375,7 @@ class GridView extends BoxScrollView {
 
   @override
   Widget buildChildLayout(BuildContext context) {
-    return new SliverGrid(
+    return SliverGrid(
       delegate: childrenDelegate,
       gridDelegate: gridDelegate,
     );

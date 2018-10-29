@@ -6,11 +6,11 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
+import 'test_utils.dart';
 
 /// This duration is arbitrary but is ideally:
 /// a) long enough to ensure that if the app is crashing at startup, we notice
@@ -19,14 +19,14 @@ const Duration requiredLifespan = Duration(seconds: 5);
 
 void main() {
   group('flutter run', () {
-    final BasicProject _project = new BasicProject();
+    final BasicProject _project = BasicProject();
     FlutterTestDriver _flutter;
     Directory tempDir;
 
     setUp(() async {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_lifetime_test.');
+      tempDir = createResolvedTempDirectorySync();
       await _project.setUpIn(tempDir);
-      _flutter = new FlutterTestDriver(tempDir);
+      _flutter = FlutterTestDriver(tempDir);
     });
 
     tearDown(() async {
@@ -36,15 +36,14 @@ void main() {
 
     test('does not terminate when a debugger is attached', () async {
       await _flutter.run(withDebugger: true);
-      await new Future<void>.delayed(requiredLifespan);
+      await Future<void>.delayed(requiredLifespan);
       expect(_flutter.hasExited, equals(false));
     });
 
     test('does not terminate when a debugger is attached and pause-on-exceptions', () async {
       await _flutter.run(withDebugger: true, pauseOnExceptions: true);
-      await new Future<void>.delayed(requiredLifespan);
+      await Future<void>.delayed(requiredLifespan);
       expect(_flutter.hasExited, equals(false));
     });
-    // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/17833.
-  }, timeout: const Timeout.factor(6), skip: platform.isWindows);
+  }, timeout: const Timeout.factor(6));
 }

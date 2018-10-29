@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('flutter_test timeout logic - addTime - negative', (WidgetTester tester) async {
     await tester.runAsync(() async {
-      await new Future<void>.delayed(const Duration(milliseconds: 3500));
+      await Future<void>.delayed(const Duration(milliseconds: 3500));
     }, additionalTime: const Duration(milliseconds: 200));
   });
 }

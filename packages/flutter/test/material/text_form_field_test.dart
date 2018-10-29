@@ -11,10 +11,10 @@ void main() {
     const TextAlign alignment = TextAlign.center;
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new TextFormField(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
               textAlign: alignment,
             ),
           ),
@@ -31,10 +31,10 @@ void main() {
 
   testWidgets('Passes textInputAction to underlying TextField', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new TextFormField(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
               textInputAction: TextInputAction.next,
             ),
           ),
@@ -53,10 +53,10 @@ void main() {
     final VoidCallback onEditingComplete = () {};
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new TextFormField(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
               onEditingComplete: onEditingComplete,
             ),
           ),
@@ -75,10 +75,10 @@ void main() {
     bool _called = false;
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new TextFormField(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
               onFieldSubmitted: (String value) { _called = true; },
             ),
           ),
@@ -96,12 +96,60 @@ void main() {
     int _validateCalled = 0;
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new TextFormField(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
               autovalidate: true,
               validator: (String value) { _validateCalled++; return null; },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(_validateCalled, 1);
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.enterText(find.byType(TextField), 'a');
+    await tester.pump();
+    expect(_validateCalled, 2);
+  });
+
+  testWidgets('validate is not called if widget is disabled', (WidgetTester tester) async {
+    int _validateCalled = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              enabled: false,
+              autovalidate: true,
+              validator: (String value) { _validateCalled += 1; return null; },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(_validateCalled, 0);
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.enterText(find.byType(TextField), 'a');
+    await tester.pump();
+    expect(_validateCalled, 0);
+  });
+
+  testWidgets('validate is called if widget is enabled', (WidgetTester tester) async {
+    int _validateCalled = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              enabled: true,
+              autovalidate: true,
+              validator: (String value) { _validateCalled += 1; return null; },
             ),
           ),
         ),

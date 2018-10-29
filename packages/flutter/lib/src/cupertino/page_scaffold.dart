@@ -22,8 +22,10 @@ class CupertinoPageScaffold extends StatelessWidget {
     Key key,
     this.navigationBar,
     this.backgroundColor = CupertinoColors.white,
+    this.resizeToAvoidBottomInset = true,
     @required this.child,
   }) : assert(child != null),
+       assert(resizeToAvoidBottomInset != null),
        super(key: key);
 
   /// The [navigationBar], typically a [CupertinoNavigationBar], is drawn at the
@@ -49,6 +51,15 @@ class CupertinoPageScaffold extends StatelessWidget {
   /// By default uses [CupertinoColors.white] color.
   final Color backgroundColor;
 
+  /// Whether the [child] should size itself to avoid the window's bottom inset.
+  ///
+  /// For example, if there is an onscreen keyboard displayed above the
+  /// scaffold, the body can be resized to avoid overlapping the keyboard, which
+  /// prevents widgets inside the body from being obscured by the keyboard.
+  ///
+  /// Defaults to true.
+  final bool resizeToAvoidBottomInset;
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> stacked = <Widget>[];
@@ -59,25 +70,33 @@ class CupertinoPageScaffold extends StatelessWidget {
 
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
-      final double topPadding = navigationBar.preferredSize.height
-          + existingMediaQuery.padding.top;
+      final double topPadding =
+          navigationBar.preferredSize.height + existingMediaQuery.padding.top;
+
+      // Propagate bottom padding and include viewInsets if appropriate
+      final double bottomPadding = resizeToAvoidBottomInset
+          ? existingMediaQuery.viewInsets.bottom
+          : 0.0;
 
       // If navigation bar is opaquely obstructing, directly shift the main content
       // down. If translucent, let main content draw behind navigation bar but hint the
       // obstructed area.
       if (navigationBar.fullObstruction) {
-        paddedContent = new Padding(
-          padding: new EdgeInsets.only(top: topPadding),
+        paddedContent = Padding(
+          padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
           child: child,
         );
       } else {
-        paddedContent = new MediaQuery(
+        paddedContent = MediaQuery(
           data: existingMediaQuery.copyWith(
             padding: existingMediaQuery.padding.copyWith(
               top: topPadding,
             ),
           ),
-          child: child,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: bottomPadding),
+            child: child,
+          ),
         );
       }
     }
@@ -86,7 +105,7 @@ class CupertinoPageScaffold extends StatelessWidget {
     stacked.add(paddedContent);
 
     if (navigationBar != null) {
-      stacked.add(new Positioned(
+      stacked.add(Positioned(
         top: 0.0,
         left: 0.0,
         right: 0.0,
@@ -94,9 +113,9 @@ class CupertinoPageScaffold extends StatelessWidget {
       ));
     }
 
-    return new DecoratedBox(
-      decoration: new BoxDecoration(color: backgroundColor),
-      child: new Stack(
+    return DecoratedBox(
+      decoration: BoxDecoration(color: backgroundColor),
+      child: Stack(
         children: stacked,
       ),
     );

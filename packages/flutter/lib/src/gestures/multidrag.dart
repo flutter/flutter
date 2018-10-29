@@ -17,7 +17,7 @@ import 'recognizer.dart';
 import 'velocity_tracker.dart';
 
 /// Signature for when [MultiDragGestureRecognizer] recognizes the start of a drag gesture.
-typedef Drag GestureMultiDragStartCallback(Offset position);
+typedef GestureMultiDragStartCallback = Drag Function(Offset position);
 
 /// Per-pointer state for a [MultiDragGestureRecognizer].
 ///
@@ -33,7 +33,7 @@ abstract class MultiDragPointerState {
   /// The global coordinates of the pointer when the pointer contacted the screen.
   final Offset initialPosition;
 
-  final VelocityTracker _velocityTracker = new VelocityTracker();
+  final VelocityTracker _velocityTracker = VelocityTracker();
   Drag _client;
 
   /// The offset of the pointer from the last position that was reported to the client.
@@ -69,7 +69,7 @@ abstract class MultiDragPointerState {
     if (_client != null) {
       assert(pendingDelta == null);
       // Call client last to avoid reentrancy.
-      _client.update(new DragUpdateDetails(
+      _client.update(DragUpdateDetails(
         sourceTimeStamp: event.timeStamp,
         delta: event.delta,
         globalPosition: event.position,
@@ -115,7 +115,7 @@ abstract class MultiDragPointerState {
     assert(client != null);
     assert(pendingDelta != null);
     _client = client;
-    final DragUpdateDetails details = new DragUpdateDetails(
+    final DragUpdateDetails details = DragUpdateDetails(
       sourceTimeStamp: _lastPendingEventTimestamp,
       delta: pendingDelta,
       globalPosition: initialPosition,
@@ -130,7 +130,7 @@ abstract class MultiDragPointerState {
     assert(_arenaEntry != null);
     if (_client != null) {
       assert(pendingDelta == null);
-      final DragEndDetails details = new DragEndDetails(velocity: _velocityTracker.getVelocity());
+      final DragEndDetails details = DragEndDetails(velocity: _velocityTracker.getVelocity());
       final Drag client = _client;
       _client = null;
       // Call client last to avoid reentrancy.
@@ -338,7 +338,7 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Im
 
   @override
   _ImmediatePointerState createNewPointerState(PointerDownEvent event) {
-    return new _ImmediatePointerState(event.position);
+    return _ImmediatePointerState(event.position);
   }
 
   @override
@@ -384,7 +384,7 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_H
 
   @override
   _HorizontalPointerState createNewPointerState(PointerDownEvent event) {
-    return new _HorizontalPointerState(event.position);
+    return _HorizontalPointerState(event.position);
   }
 
   @override
@@ -430,7 +430,7 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Ver
 
   @override
   _VerticalPointerState createNewPointerState(PointerDownEvent event) {
-    return new _VerticalPointerState(event.position);
+    return _VerticalPointerState(event.position);
   }
 
   @override
@@ -441,7 +441,7 @@ class _DelayedPointerState extends MultiDragPointerState {
   _DelayedPointerState(Offset initialPosition, Duration delay)
     : assert(delay != null),
       super(initialPosition) {
-    _timer = new Timer(delay, _delayPassed);
+    _timer = Timer(delay, _delayPassed);
   }
 
   Timer _timer;
@@ -537,7 +537,7 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Dela
 
   @override
   _DelayedPointerState createNewPointerState(PointerDownEvent event) {
-    return new _DelayedPointerState(event.position, delay);
+    return _DelayedPointerState(event.position, delay);
   }
 
   @override

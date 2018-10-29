@@ -35,7 +35,7 @@ class ViewConfiguration {
 
   /// Creates a transformation matrix that applies the [devicePixelRatio].
   Matrix4 toMatrix() {
-    return new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
+    return Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
 
   @override
@@ -121,7 +121,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   Layer _updateMatricesAndCreateNewRootLayer() {
     _rootTransform = configuration.toMatrix();
-    final ContainerLayer rootLayer = new TransformLayer(transform: _rootTransform);
+    final ContainerLayer rootLayer = TransformLayer(transform: _rootTransform);
     rootLayer.attach(this);
     assert(_rootTransform != null);
     return rootLayer;
@@ -144,7 +144,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(_size.isFinite);
 
     if (child != null)
-      child.layout(new BoxConstraints.tight(_size));
+      child.layout(BoxConstraints.tight(_size));
   }
 
   @override
@@ -165,7 +165,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   bool hitTest(HitTestResult result, { Offset position }) {
     if (child != null)
       child.hitTest(result, position: position);
-    result.add(new HitTestEntry(this));
+    result.add(HitTestEntry(this));
     return true;
   }
 
@@ -191,9 +191,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void compositeFrame() {
     Timeline.startSync('Compositing', arguments: timelineWhitelistArguments);
     try {
-      final ui.SceneBuilder builder = new ui.SceneBuilder();
-      layer.addToScene(builder, Offset.zero);
-      final ui.Scene scene = builder.build();
+      final ui.SceneBuilder builder = ui.SceneBuilder();
+      final ui.Scene scene = layer.buildScene(builder);
       if (automaticSystemUiAdjustment)
         _updateSystemChrome();
       ui.window.render(scene);
@@ -210,8 +209,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   void _updateSystemChrome() {
     final Rect bounds = paintBounds;
-    final Offset top = new Offset(bounds.center.dx, ui.window.padding.top / ui.window.devicePixelRatio);
-    final Offset bottom = new Offset(bounds.center.dx, bounds.center.dy - ui.window.padding.bottom / ui.window.devicePixelRatio);
+    final Offset top = Offset(bounds.center.dx, ui.window.padding.top / ui.window.devicePixelRatio);
+    final Offset bottom = Offset(bounds.center.dx, bounds.center.dy - ui.window.padding.bottom / ui.window.devicePixelRatio);
     final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle lowerOverlayStyle;
@@ -225,7 +224,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     }
     // If there are no overlay styles in the UI don't bother updating.
     if (upperOverlayStyle != null || lowerOverlayStyle != null) {
-      final SystemUiOverlayStyle overlayStyle = new SystemUiOverlayStyle(
+      final SystemUiOverlayStyle overlayStyle = SystemUiOverlayStyle(
         statusBarBrightness: upperOverlayStyle?.statusBarBrightness,
         statusBarIconBrightness: upperOverlayStyle?.statusBarIconBrightness,
         statusBarColor: upperOverlayStyle?.statusBarColor,
@@ -252,13 +251,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // root superclasses don't include any interesting information for this
     // class
     assert(() {
-      properties.add(new DiagnosticsNode.message('debug mode enabled - ${Platform.operatingSystem}'));
+      properties.add(DiagnosticsNode.message('debug mode enabled - ${Platform.operatingSystem}'));
       return true;
     }());
-    properties.add(new DiagnosticsProperty<Size>('window size', ui.window.physicalSize, tooltip: 'in physical pixels'));
-    properties.add(new DoubleProperty('device pixel ratio', ui.window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
-    properties.add(new DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
+    properties.add(DiagnosticsProperty<Size>('window size', ui.window.physicalSize, tooltip: 'in physical pixels'));
+    properties.add(DoubleProperty('device pixel ratio', ui.window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
+    properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
     if (ui.window.semanticsEnabled)
-      properties.add(new DiagnosticsNode.message('semantics enabled'));
+      properties.add(DiagnosticsNode.message('semantics enabled'));
   }
 }

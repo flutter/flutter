@@ -17,7 +17,7 @@ void main() {
     MockHttpClientResponse response;
 
     setUp(() {
-      response = new MockHttpClientResponse();
+      response = MockHttpClientResponse();
        when(response.listen(
          any,
          onDone: anyNamed('onDone'),
@@ -29,7 +29,7 @@ void main() {
         final void Function() onDone = invocation.namedArguments[#onDone];
         final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 
-        return new Stream<List<int>>.fromIterable(
+        return Stream<List<int>>.fromIterable(
             <List<int>>[chunkOne, chunkTwo]).listen(
           onData,
           onDone: onDone,
@@ -79,8 +79,8 @@ void main() {
         final void Function() onDone = invocation.namedArguments[#onDone];
         final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 
-        return new Stream<List<int>>.fromFuture(
-                new Future<List<int>>.error(new Exception('Test Error')))
+        return Stream<List<int>>.fromFuture(
+                Future<List<int>>.error(Exception('Test Error')))
             .listen(
           onData,
           onDone: onDone,

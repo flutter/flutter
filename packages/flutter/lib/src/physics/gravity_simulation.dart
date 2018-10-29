@@ -16,7 +16,7 @@ import 'simulation.dart';
 ///
 /// ```dart
 /// void _startFall() {
-///   _controller.animateWith(new GravitySimulation(
+///   _controller.animateWith(GravitySimulation(
 ///     10.0, // acceleration, pixels per second per second
 ///     0.0, // starting position, pixels
 ///     300.0, // ending position, pixels

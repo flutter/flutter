@@ -11,10 +11,10 @@ import 'io.dart';
 import 'process_manager.dart';
 import 'utils.dart';
 
-typedef String StringConverter(String string);
+typedef StringConverter = String Function(String string);
 
 /// A function that will be run before the VM exits.
-typedef Future<dynamic> ShutdownHook();
+typedef ShutdownHook = Future<dynamic> Function();
 
 // TODO(ianh): We have way too many ways to run subprocesses in this project.
 // Convert most of these into one or more lightweight wrappers around the
@@ -74,7 +74,7 @@ void addShutdownHook(
 /// hooks within a given stage will be started in parallel and will be
 /// guaranteed to run to completion before shutdown hooks in the next stage are
 /// started.
-Future<Null> runShutdownHooks() async {
+Future<void> runShutdownHooks() async {
   printTrace('Running shutdown hooks');
   _shutdownHooksRunning = true;
   try {
@@ -137,8 +137,8 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
     environment: environment
   );
   final StreamSubscription<String> stdoutSubscription = process.stdout
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
       if (mapFunction != null)
@@ -152,8 +152,8 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
       }
     });
   final StreamSubscription<String> stderrSubscription = process.stderr
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
       if (mapFunction != null)
@@ -164,12 +164,12 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
 
   // Wait for stdout to be fully processed
   // because process.exitCode may complete first causing flaky tests.
-  await waitGroup<Null>(<Future<Null>>[
-    stdoutSubscription.asFuture<Null>(),
-    stderrSubscription.asFuture<Null>(),
+  await waitGroup<void>(<Future<void>>[
+    stdoutSubscription.asFuture<void>(),
+    stderrSubscription.asFuture<void>(),
   ]);
 
-  await waitGroup<Null>(<Future<Null>>[
+  await waitGroup<void>(<Future<void>>[
     stdoutSubscription.cancel(),
     stderrSubscription.cancel(),
   ]);
@@ -191,7 +191,9 @@ Future<int> runInteractively(List<String> command, {
     allowReentrantFlutter: allowReentrantFlutter,
     environment: environment,
   );
-  process.stdin.addStream(stdin);
+  // The real stdin will never finish streaming. Pipe until the child process
+  // finishes.
+  process.stdin.addStream(stdin); // ignore: unawaited_futures
   // Wait for stdout and stderr to be fully processed, because process.exitCode
   // may complete first.
   await Future.wait<dynamic>(<Future<dynamic>>[
@@ -201,9 +203,9 @@ Future<int> runInteractively(List<String> command, {
   return await process.exitCode;
 }
 
-Future<Null> runAndKill(List<String> cmd, Duration timeout) {
+Future<void> runAndKill(List<String> cmd, Duration timeout) {
   final Future<Process> proc = runDetached(cmd);
-  return new Future<Null>.delayed(timeout, () async {
+  return Future<void>.delayed(timeout, () async {
     printTrace('Intentionally killing ${cmd[0]}');
     processManager.killPid((await proc).pid);
   });
@@ -229,7 +231,7 @@ Future<RunResult> runAsync(List<String> cmd, {
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter, environment),
   );
-  final RunResult runResults = new RunResult(results, cmd);
+  final RunResult runResults = RunResult(results, cmd);
   printTrace(runResults.toString());
   return runResults;
 }
@@ -245,8 +247,10 @@ Future<RunResult> runCheckedAsync(List<String> cmd, {
     allowReentrantFlutter: allowReentrantFlutter,
     environment: environment,
   );
-  if (result.exitCode != 0)
-    throw 'Exit code ${result.exitCode} from: ${cmd.join(' ')}:\n$result';
+  if (result.exitCode != 0) {
+    throw ProcessException(cmd[0], cmd.sublist(1),
+      'Process "${cmd[0]}" exited abnormally:\n$result', result.exitCode);
+  }
   return result;
 }
 
@@ -377,7 +381,7 @@ class RunResult {
 
   @override
   String toString() {
-    final StringBuffer out = new StringBuffer();
+    final StringBuffer out = StringBuffer();
     if (processResult.stdout.isNotEmpty)
       out.writeln(processResult.stdout);
     if (processResult.stderr.isNotEmpty)
@@ -387,7 +391,7 @@ class RunResult {
 
  /// Throws a [ProcessException] with the given `message`.
  void throwException(String message) {
-    throw new ProcessException(
+    throw ProcessException(
       _command.first,
       _command.skip(1).toList(),
       message,

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -12,6 +13,7 @@ import 'package:mockito/mockito.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
+import 'src/mocks.dart';
 
 void main() {
   group('validateReloadReport', () {
@@ -91,33 +93,44 @@ void main() {
   });
 
   group('hotRestart', () {
-    final List<FlutterDevice> devices = <FlutterDevice>[];
+    final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    MockLocalEngineArtifacts mockArtifacts;
 
     setUp(() {
-      devices.add(new FlutterDevice(new MockDevice(),
-          previewDart2: false, trackWidgetCreation: false));
+      mockArtifacts = MockLocalEngineArtifacts();
+      when(mockArtifacts.getArtifactPath(Artifact.flutterPatchedSdkPath)).thenReturn('some/path');
     });
 
     testUsingContext('no setup', () async {
-      expect((await new HotRunner(devices).restart(fullRestart: true)).isOk,
-          true);
+      final List<FlutterDevice> devices = <FlutterDevice>[FlutterDevice(MockDevice(), generator: residentCompiler, trackWidgetCreation: false)];
+      expect((await HotRunner(devices).restart(fullRestart: true)).isOk, false);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => mockArtifacts,
     });
 
     testUsingContext('setup function succeeds', () async {
-      expect((await new HotRunner(devices).restart(fullRestart: true)).isOk,
-          true);
+      final List<FlutterDevice> devices = <FlutterDevice>[FlutterDevice(MockDevice(), generator: residentCompiler, trackWidgetCreation: false)];
+      final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
+      expect(result.isOk, false);
+      expect(result.message, isNot('setupHotRestart failed'));
     }, overrides: <Type, Generator>{
-      HotRunnerConfig: () => new TestHotRunnerConfig(successfulSetup: true),
+      Artifacts: () => mockArtifacts,
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
 
     testUsingContext('setup function fails', () async {
-      expect((await new HotRunner(devices).restart(fullRestart: true)).isOk,
-          false);
+      final List<FlutterDevice> devices = <FlutterDevice>[FlutterDevice(MockDevice(), generator: residentCompiler, trackWidgetCreation: false)];
+      final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
+      expect(result.isOk, false);
+      expect(result.message, 'setupHotRestart failed');
     }, overrides: <Type, Generator>{
-      HotRunnerConfig: () => new TestHotRunnerConfig(successfulSetup: false),
+      Artifacts: () => mockArtifacts,
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: false),
     });
   });
 }
+
+class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 
 class MockDevice extends Mock implements Device {
   MockDevice() {
@@ -126,9 +139,9 @@ class MockDevice extends Mock implements Device {
 }
 
 class TestHotRunnerConfig extends HotRunnerConfig {
-  bool successfulSetup;
-
   TestHotRunnerConfig({@required this.successfulSetup});
+
+  bool successfulSetup;
 
   @override
   Future<bool> setupHotRestart() async {

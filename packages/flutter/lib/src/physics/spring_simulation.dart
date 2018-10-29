@@ -94,7 +94,7 @@ class SpringSimulation extends Simulation {
     double velocity, {
     Tolerance tolerance = Tolerance.defaultTolerance,
   }) : _endPosition = end,
-      _solution = new _SpringSolution(spring, start - end, velocity),
+      _solution = _SpringSolution(spring, start - end, velocity),
       super(tolerance: tolerance);
 
   final double _endPosition;
@@ -159,10 +159,10 @@ abstract class _SpringSolution {
     assert(initialVelocity != null);
     final double cmk = spring.damping * spring.damping - 4 * spring.mass * spring.stiffness;
     if (cmk == 0.0)
-      return new _CriticalSolution(spring, initialPosition, initialVelocity);
+      return _CriticalSolution(spring, initialPosition, initialVelocity);
     if (cmk > 0.0)
-      return new _OverdampedSolution(spring, initialPosition, initialVelocity);
-    return new _UnderdampedSolution(spring, initialPosition, initialVelocity);
+      return _OverdampedSolution(spring, initialPosition, initialVelocity);
+    return _UnderdampedSolution(spring, initialPosition, initialVelocity);
   }
 
   double x(double time);
@@ -179,7 +179,7 @@ class _CriticalSolution implements _SpringSolution {
     final double r = -spring.damping / (2.0 * spring.mass);
     final double c1 = distance;
     final double c2 = velocity / (r * distance);
-    return new _CriticalSolution.withArgs(r, c1, c2);
+    return _CriticalSolution.withArgs(r, c1, c2);
   }
 
   _CriticalSolution.withArgs(double r, double c1, double c2)
@@ -215,7 +215,7 @@ class _OverdampedSolution implements _SpringSolution {
     final double r2 = (-spring.damping + math.sqrt(cmk)) / (2.0 * spring.mass);
     final double c2 = (velocity - r1 * distance) / (r2 - r1);
     final double c1 = distance - c2;
-    return new _OverdampedSolution.withArgs(r1, r2, c1, c2);
+    return _OverdampedSolution.withArgs(r1, r2, c1, c2);
   }
 
   _OverdampedSolution.withArgs(double r1, double r2, double c1, double c2)
@@ -253,7 +253,7 @@ class _UnderdampedSolution implements _SpringSolution {
     final double r = -(spring.damping / 2.0 * spring.mass);
     final double c1 = distance;
     final double c2 = (velocity - r * distance) / w;
-    return new _UnderdampedSolution.withArgs(w, r, c1, c2);
+    return _UnderdampedSolution.withArgs(w, r, c1, c2);
   }
 
   _UnderdampedSolution.withArgs(double w, double r, double c1, double c2)

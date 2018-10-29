@@ -20,7 +20,7 @@ class AnalyzeCommand extends FlutterCommand {
         help: 'Analyze the current project, if applicable.', defaultsTo: true);
     argParser.addFlag('dartdocs',
         negatable: false,
-        help: 'List every public member that is lacking documentation.\n'
+        help: 'List every public member that is lacking documentation. '
               '(The public_member_api_docs lint must be enabled in analysis_options.yaml)',
         hide: !verboseHelp);
     argParser.addFlag('watch',
@@ -34,10 +34,6 @@ class AnalyzeCommand extends FlutterCommand {
         valueHelp: 'path-to-sdk',
         help: 'The path to the Dart SDK.',
         hide: !verboseHelp);
-    argParser.addFlag('use-cfe',
-        help: 'Run the analysis server with the --use-cfe option. This is a '
-            'temporary flag for use while the analyzer migrates to the CFE.',
-        hide: !verboseHelp);
 
     // Hidden option to enable a benchmarking mode.
     argParser.addFlag('benchmark',
@@ -49,7 +45,7 @@ class AnalyzeCommand extends FlutterCommand {
 
     // Not used by analyze --watch
     argParser.addFlag('congratulate',
-        help: 'Show output even when there are no errors, warnings, hints, or lints.\n'
+        help: 'Show output even when there are no errors, warnings, hints, or lints. '
               'Ignored if --watch is specified.',
         defaultsTo: true);
     argParser.addFlag('preamble',
@@ -84,20 +80,22 @@ class AnalyzeCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() {
+  Future<FlutterCommandResult> runCommand() async {
     if (argResults['watch']) {
-      return new AnalyzeContinuously(
+      await AnalyzeContinuously(
         argResults,
         runner.getRepoRoots(),
         runner.getRepoPackages(),
       ).analyze();
+      return null;
     } else {
-      return new AnalyzeOnce(
+      await AnalyzeOnce(
         argResults,
         runner.getRepoRoots(),
         runner.getRepoPackages(),
         workingDirectory: workingDirectory,
       ).analyze();
+      return null;
     }
   }
 }

@@ -13,9 +13,10 @@ void main() {
 
     BinaryMessages.setMockMessageHandler('test1', (ByteData message) async {
       log.add(message);
+      return null;
     });
 
-    final ByteData message = new ByteData(2)..setUint16(0, 0xABCD);
+    final ByteData message = ByteData(2)..setUint16(0, 0xABCD);
     await BinaryMessages.send('test1', message);
     expect(log, equals(<ByteData>[message]));
     log.clear();

@@ -61,7 +61,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     assert(_pointer == pointer);
     _members.add(member);
     _entry ??= GestureBinding.instance.gestureArena.add(pointer, this);
-    return new _CombiningGestureArenaEntry(this, member);
+    return _CombiningGestureArenaEntry(this, member);
   }
 
   void _resolve(GestureArenaMember member, GestureDisposition disposition) {
@@ -140,7 +140,7 @@ class GestureArenaTeam {
   /// [OneSequenceGestureRecognizer.team].
   GestureArenaEntry add(int pointer, GestureArenaMember member) {
     final _CombiningGestureArenaMember combiner = _combiners.putIfAbsent(
-        pointer, () => new _CombiningGestureArenaMember(this, pointer));
+        pointer, () => _CombiningGestureArenaMember(this, pointer));
     return combiner._add(pointer, member);
   }
 }

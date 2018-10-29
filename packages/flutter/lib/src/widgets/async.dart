@@ -93,7 +93,7 @@ abstract class StreamBuilderBase<T, S> extends StatefulWidget {
   Widget build(BuildContext context, S currentSummary);
 
   @override
-  State<StreamBuilderBase<T, S>> createState() => new _StreamBuilderBaseState<T, S>();
+  State<StreamBuilderBase<T, S>> createState() => _StreamBuilderBaseState<T, S>();
 }
 
 /// State for [StreamBuilderBase].
@@ -230,7 +230,7 @@ class AsyncSnapshot<T> {
       return data;
     if (hasError)
       throw error;
-    throw new StateError('Snapshot has neither data nor error');
+    throw StateError('Snapshot has neither data nor error');
   }
 
   /// The latest error object received by the asynchronous computation.
@@ -244,7 +244,7 @@ class AsyncSnapshot<T> {
   ///
   /// The [data] and [error] fields persist unmodified, even if the new state is
   /// [ConnectionState.none].
-  AsyncSnapshot<T> inState(ConnectionState state) => new AsyncSnapshot<T>._(state, data, error);
+  AsyncSnapshot<T> inState(ConnectionState state) => AsyncSnapshot<T>._(state, data, error);
 
   /// Returns whether this snapshot contains a non-null [data] value.
   ///
@@ -288,7 +288,7 @@ class AsyncSnapshot<T> {
 /// itself based on a snapshot from interacting with a [Stream].
 /// * [FutureBuilder], which delegates to an [AsyncWidgetBuilder] to build
 /// itself based on a snapshot from interacting with a [Future].
-typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snapshot);
+typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnapshot<T> snapshot);
 
 /// Widget that builds itself based on the latest snapshot of interaction with
 /// a [Stream].
@@ -348,20 +348,22 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// set by a selector elsewhere in the UI.
 ///
 /// ```dart
-/// new StreamBuilder<int>(
+/// StreamBuilder<int>(
 ///   stream: _lot?.bids, // a Stream<int> or null
 ///   builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
 ///     if (snapshot.hasError)
-///       return new Text('Error: ${snapshot.error}');
+///       return Text('Error: ${snapshot.error}');
 ///     switch (snapshot.connectionState) {
-///       case ConnectionState.none: return new Text('Select lot');
-///       case ConnectionState.waiting: return new Text('Awaiting bids...');
-///       case ConnectionState.active: return new Text('\$${snapshot.data}');
-///       case ConnectionState.done: return new Text('\$${snapshot.data} (closed)');
+///       case ConnectionState.none: return Text('Select lot');
+///       case ConnectionState.waiting: return Text('Awaiting bids...');
+///       case ConnectionState.active: return Text('\$${snapshot.data}');
+///       case ConnectionState.done: return Text('\$${snapshot.data} (closed)');
 ///     }
+///     return null; // unreachable
 ///   },
 /// )
 /// ```
+// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
 class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
   /// snapshot of interaction with the specified [stream] and whose build
@@ -383,19 +385,19 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   final T initialData;
 
   @override
-  AsyncSnapshot<T> initial() => new AsyncSnapshot<T>.withData(ConnectionState.none, initialData);
+  AsyncSnapshot<T> initial() => AsyncSnapshot<T>.withData(ConnectionState.none, initialData);
 
   @override
   AsyncSnapshot<T> afterConnected(AsyncSnapshot<T> current) => current.inState(ConnectionState.waiting);
 
   @override
   AsyncSnapshot<T> afterData(AsyncSnapshot<T> current, T data) {
-    return new AsyncSnapshot<T>.withData(ConnectionState.active, data);
+    return AsyncSnapshot<T>.withData(ConnectionState.active, data);
   }
 
   @override
   AsyncSnapshot<T> afterError(AsyncSnapshot<T> current, Object error) {
-    return new AsyncSnapshot<T>.withError(ConnectionState.active, error);
+    return AsyncSnapshot<T>.withError(ConnectionState.active, error);
   }
 
   @override
@@ -477,23 +479,25 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// `_calculation` field is set by pressing a button elsewhere in the UI.
 ///
 /// ```dart
-/// new FutureBuilder<String>(
+/// FutureBuilder<String>(
 ///   future: _calculation, // a previously-obtained Future<String> or null
 ///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
 ///     switch (snapshot.connectionState) {
 ///       case ConnectionState.none:
-///         return new Text('Press button to start.');
+///         return Text('Press button to start.');
 ///       case ConnectionState.active:
 ///       case ConnectionState.waiting:
-///         return new Text('Awaiting result...');
+///         return Text('Awaiting result...');
 ///       case ConnectionState.done:
 ///         if (snapshot.hasError)
-///           return new Text('Error: ${snapshot.error}');
-///         return new Text('Result: ${snapshot.data}');
+///           return Text('Error: ${snapshot.error}');
+///         return Text('Result: ${snapshot.data}');
 ///     }
+///     return null; // unreachable
 ///   },
 /// )
 /// ```
+// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of
   /// interaction with a [Future].
@@ -546,7 +550,7 @@ class FutureBuilder<T> extends StatefulWidget {
   final T initialData;
 
   @override
-  State<FutureBuilder<T>> createState() => new _FutureBuilderState<T>();
+  State<FutureBuilder<T>> createState() => _FutureBuilderState<T>();
 }
 
 /// State for [FutureBuilder].
@@ -560,7 +564,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   @override
   void initState() {
     super.initState();
-    _snapshot = new AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData);
+    _snapshot = AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData);
     _subscribe();
   }
 
@@ -587,18 +591,18 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
 
   void _subscribe() {
     if (widget.future != null) {
-      final Object callbackIdentity = new Object();
+      final Object callbackIdentity = Object();
       _activeCallbackIdentity = callbackIdentity;
       widget.future.then<void>((T data) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
-            _snapshot = new AsyncSnapshot<T>.withData(ConnectionState.done, data);
+            _snapshot = AsyncSnapshot<T>.withData(ConnectionState.done, data);
           });
         }
       }, onError: (Object error) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
-            _snapshot = new AsyncSnapshot<T>.withError(ConnectionState.done, error);
+            _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error);
           });
         }
       });

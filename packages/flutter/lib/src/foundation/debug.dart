@@ -25,7 +25,7 @@ bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debug
   assert(() {
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null)
-      throw new FlutterError(reason);
+      throw FlutterError(reason);
     return true;
   }());
   return true;
@@ -53,7 +53,7 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
   bool instrument = false;
   assert(() { instrument = debugInstrumentationEnabled; return true; }());
   if (instrument) {
-    final Stopwatch stopwatch = new Stopwatch()..start();
+    final Stopwatch stopwatch = Stopwatch()..start();
     return action().whenComplete(() {
       stopwatch.stop();
       debugPrint('Action "$description" took ${stopwatch.elapsed}');
@@ -63,8 +63,13 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
   }
 }
 
-/// Arguments to whitelist [Timeline] events in order to be shown in the
-/// developer centric version of the Observatory Timeline.
+/// Argument passed to [Timeline] events in order to cause those events to be
+/// shown in the developer-centric version of the Observatory Timeline.
+///
+/// See also:
+///
+///  * [Timeline.startSync], which typically takes this value as its `arguments`
+///    argument.
 const Map<String, String> timelineWhitelistArguments = <String, String>{
   'mode': 'basic'
 };

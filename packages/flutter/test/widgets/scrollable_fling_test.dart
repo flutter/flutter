@@ -10,22 +10,21 @@ const TextStyle testFont = TextStyle(
   fontFamily: 'Ahem',
 );
 
-Future<Null> pumpTest(WidgetTester tester, TargetPlatform platform) async {
-  await tester.pumpWidget(new Container());
-  await tester.pumpWidget(new MaterialApp(
-    theme: new ThemeData(
+Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
+  await tester.pumpWidget(Container());
+  await tester.pumpWidget(MaterialApp(
+    theme: ThemeData(
       platform: platform,
     ),
-    home: new Container(
+    home: Container(
       color: const Color(0xFF111111),
-      child: new ListView.builder(
+      child: ListView.builder(
         itemBuilder: (BuildContext context, int index) {
-          return new Text('$index', style: testFont);
+          return Text('$index', style: testFont);
         },
       ),
     ),
   ));
-  return null;
 }
 
 const double dragOffset = 213.82;
@@ -61,11 +60,11 @@ void main() {
 
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 250; i += 1)
-      textWidgets.add(new GestureDetector(onTap: () { log.add('tap $i'); }, child: new Text('$i', style: testFont)));
+      textWidgets.add(GestureDetector(onTap: () { log.add('tap $i'); }, child: Text('$i', style: testFont)));
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(children: textWidgets)
+        child: ListView(children: textWidgets)
       ),
     );
 
@@ -89,11 +88,11 @@ void main() {
 
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 250; i += 1)
-      textWidgets.add(new GestureDetector(onTap: () { log.add('tap $i'); }, child: new Text('$i', style: testFont)));
+      textWidgets.add(GestureDetector(onTap: () { log.add('tap $i'); }, child: Text('$i', style: testFont)));
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(children: textWidgets)
+        child: ListView(children: textWidgets)
       ),
     );
 

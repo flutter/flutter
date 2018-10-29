@@ -2,6 +2,9 @@
 [![Build Status - Cirrus](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.com/github/flutter/flutter/master)
 [![Coverage Status -](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
 
+
+# Build beautiful native apps in record time
+
 Flutter is Google’s mobile app SDK for crafting high-quality native interfaces on iOS and Android in record time. Flutter works with existing code, is used by developers and organizations around the world, and is free and open source.
 
 ### Documentation
@@ -9,7 +12,8 @@ Flutter is Google’s mobile app SDK for crafting high-quality native interfaces
 * **Main site: [flutter.io][]**
 * [Install](https://flutter.io/get-started/install/)
 * [Get started](https://flutter.io/get-started/)
-* [Contribute](CONTRIBUTING.md)
+* [Changelog](https://github.com/flutter/flutter/wiki/Changelog)
+* [Contribute](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md#contributing-to-flutter)
 
 ## Fast development
 
@@ -20,9 +24,13 @@ without losing state, on
 emulators, simulators, and hardware for iOS
 and Android.
 
-<img src="https://user-images.githubusercontent.com/919717/28131204-0f8c3cda-66ee-11e7-9428-6a0513eac75d.gif" alt="Make a change in your code, and your app changes instantly.">
+<img src="https://raw.githubusercontent.com/flutter/website/master/src/images/intellij/hot-reload.gif" alt="Make a change in your code, and your app changes instantly.">
 
-## Expressive, beautiful UIs
+## Expressive and flexible UI
+Quickly ship features with a focus on native end-user experiences.
+Layered architecture allows full customization, which results in incredibly
+fast rendering and expressive and flexible designs.
+
 
 Delight your users with Flutter's built-in
 beautiful Material Design and
@@ -64,13 +72,13 @@ class CounterState extends State<Counter> {
     // build methods fast, so that you can just rebuild anything that
     // needs updating rather than having to individually change
     // instances of widgets.
-    return new Row(
+    return Row(
       children: <Widget>[
-        new RaisedButton(
+        RaisedButton(
           onPressed: increment,
-          child: new Text('Increment'),
+          child: Text('Increment'),
         ),
-        new Text('Count: $counter'),
+        Text('Count: $counter'),
       ],
     );
   }
@@ -92,7 +100,7 @@ and access native features and SDKs on Android and iOS.
 Accessing platform features is easy. Here is a snippet from our <a href="https://github.com/flutter/flutter/tree/master/examples/platform_channel">interop example</a>:
 
 ```dart
-Future<Null> getBatteryLevel() async {
+Future<void> getBatteryLevel() async {
   var batteryLevel = 'unknown';
   try {
     int result = await methodChannel.invokeMethod('getBatteryLevel');

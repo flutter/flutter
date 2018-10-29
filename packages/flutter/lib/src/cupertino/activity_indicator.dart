@@ -37,7 +37,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
   final double radius;
 
   @override
-  _CupertinoActivityIndicatorState createState() => new _CupertinoActivityIndicatorState();
+  _CupertinoActivityIndicatorState createState() => _CupertinoActivityIndicatorState();
 }
 
 
@@ -47,7 +47,7 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(
+    _controller = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: this,
     );
@@ -75,11 +75,11 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
 
   @override
   Widget build(BuildContext context) {
-    return new SizedBox(
+    return SizedBox(
       height: widget.radius * 2,
       width: widget.radius * 2,
-      child: new CustomPaint(
-        painter: new _CupertinoActivityIndicatorPainter(
+      child: CustomPaint(
+        painter: _CupertinoActivityIndicatorPainter(
           position: _controller,
           radius: widget.radius,
         ),
@@ -98,7 +98,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
   _CupertinoActivityIndicatorPainter({
     this.position,
     double radius,
-  }) : tickFundamentalRRect = new RRect.fromLTRBXY(
+  }) : tickFundamentalRRect = RRect.fromLTRBXY(
            -radius,
            1.0 * radius / _kDefaultIndicatorRadius,
            -radius / 2.0,
@@ -113,7 +113,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = new Paint();
+    final Paint paint = Paint();
 
     canvas.save();
     canvas.translate(size.width / 2.0, size.height / 2.0);

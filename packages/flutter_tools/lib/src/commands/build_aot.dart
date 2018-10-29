@@ -17,7 +17,7 @@ import '../runner/flutter_command.dart';
 import 'build.dart';
 
 class BuildAotCommand extends BuildSubCommand {
-  BuildAotCommand({bool verboseHelp = false}) {
+  BuildAotCommand() {
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();
@@ -28,11 +28,6 @@ class BuildAotCommand extends BuildSubCommand {
         allowed: <String>['android-arm', 'android-arm64', 'ios']
       )
       ..addFlag('quiet', defaultsTo: false)
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
-      )
       ..addFlag('build-shared-library',
         negatable: false,
         defaultsTo: false,
@@ -40,8 +35,8 @@ class BuildAotCommand extends BuildSubCommand {
       )
       ..addMultiOption('ios-arch',
         splitCommas: true,
-        defaultsTo: defaultIOSArchs.map(getNameForIOSArch),
-        allowed: IOSArch.values.map(getNameForIOSArch),
+        defaultsTo: defaultIOSArchs.map<String>(getNameForIOSArch),
+        allowed: IOSArch.values.map<String>(getNameForIOSArch),
         help: 'iOS architectures to build.',
       )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
@@ -61,7 +56,7 @@ class BuildAotCommand extends BuildSubCommand {
   final String description = "Build an ahead-of-time compiled snapshot of your app's Dart code.";
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     await super.runCommand();
 
     final String targetPlatform = argResults['target-platform'];
@@ -81,23 +76,22 @@ class BuildAotCommand extends BuildSubCommand {
     }
     final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
     try {
-      final bool previewDart2 = argResults['preview-dart-2'];
       String mainPath = findMainDartFile(targetFile);
-      final AOTSnapshotter snapshotter = new AOTSnapshotter();
+      final AOTSnapshotter snapshotter = AOTSnapshotter();
 
-      // Compile to kernel, if Dart 2.
-      if (previewDart2) {
-        mainPath = await snapshotter.compileKernel(
-          platform: platform,
-          buildMode: buildMode,
-          mainPath: mainPath,
-          outputPath: outputPath,
-          extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
-        );
-        if (mainPath == null) {
-          throwToolExit('Compiler terminated unexpectedly.');
-          return;
-        }
+      // Compile to kernel.
+      mainPath = await snapshotter.compileKernel(
+        platform: platform,
+        buildMode: buildMode,
+        mainPath: mainPath,
+        packagesPath: PackageMap.globalPackagesPath,
+        trackWidgetCreation: false,
+        outputPath: outputPath,
+        extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
+      );
+      if (mainPath == null) {
+        throwToolExit('Compiler terminated unexpectedly.');
+        return null;
       }
 
       // Build AOT snapshot.
@@ -118,17 +112,16 @@ class BuildAotCommand extends BuildSubCommand {
             mainPath: mainPath,
             packagesPath: PackageMap.globalPackagesPath,
             outputPath: outputPath,
-            previewDart2: previewDart2,
             buildSharedLibrary: false,
             extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
-          ).then((int buildExitCode) {
+          ).then<int>((int buildExitCode) {
             return buildExitCode;
           });
         });
 
         // Merge arch-specific App.frameworks into a multi-arch App.framework.
-        if ((await Future.wait(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
-          final Iterable<String> dylibs = iosBuilds.values.map((String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
+        if ((await Future.wait<int>(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
+          final Iterable<String> dylibs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
           fs.directory(fs.path.join(outputPath, 'App.framework'))..createSync();
           await runCheckedAsync(<String>['lipo']
             ..addAll(dylibs)
@@ -149,21 +142,19 @@ class BuildAotCommand extends BuildSubCommand {
           mainPath: mainPath,
           packagesPath: PackageMap.globalPackagesPath,
           outputPath: outputPath,
-          previewDart2: previewDart2,
           buildSharedLibrary: argResults['build-shared-library'],
           extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
         );
         if (snapshotExitCode != 0) {
           status?.cancel();
-          printError('Snapshotting exited with non-zero exit code: $snapshotExitCode');
-          return;
+          throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');
         }
       }
     } on String catch (error) {
       // Catch the String exceptions thrown from the `runCheckedSync` methods below.
       status?.cancel();
       printError(error);
-      return;
+      return null;
     }
     status?.stop();
 
@@ -176,5 +167,6 @@ class BuildAotCommand extends BuildSubCommand {
     } else {
       printStatus(builtMessage);
     }
+    return null;
   }
 }

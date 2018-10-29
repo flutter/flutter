@@ -8,10 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('FlexibleSpaceBar centers title on iOS', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.android),
-        home: new Scaffold(
-          appBar: new AppBar(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Scaffold(
+          appBar: AppBar(
             flexibleSpace: const FlexibleSpaceBar(
               title: Text('X')
             )
@@ -26,13 +26,13 @@ void main() {
     expect(center.dx, lessThan(400.0 - size.width / 2.0));
 
     // Clear the widget tree to avoid animating between Android and iOS.
-    await tester.pumpWidget(new Container(key: new UniqueKey()));
+    await tester.pumpWidget(Container(key: UniqueKey()));
 
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: new Scaffold(
-          appBar: new AppBar(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          appBar: AppBar(
             flexibleSpace: const FlexibleSpaceBar(
               title: Text('X')
             )

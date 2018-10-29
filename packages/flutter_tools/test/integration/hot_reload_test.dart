@@ -4,24 +4,23 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-
 import 'package:vm_service_client/vm_service_client.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
+import 'test_utils.dart';
 
 void main() {
-  group('hot reload', () {
+  group('hot', () {
     Directory tempDir;
-    final BasicProject _project = new BasicProject();
+    final BasicProject _project = BasicProject();
     FlutterTestDriver _flutter;
 
     setUp(() async {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_hot_reload_test_app.');
+      tempDir = createResolvedTempDirectorySync();
       await _project.setUpIn(tempDir);
-      _flutter = new FlutterTestDriver(tempDir);
+      _flutter = FlutterTestDriver(tempDir);
     });
 
     tearDown(() async {
@@ -29,21 +28,22 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    test('works without error', () async {
+    test('reload works without error', () async {
       await _flutter.run();
       await _flutter.hotReload();
-      // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/17833.
-    }, skip: platform.isWindows);
+    });
 
-    test('hits breakpoints with file:// prefixes after reload', () async {
+    test('restart works without error', () async {
+      await _flutter.run();
+      await _flutter.hotRestart();
+    });
+
+    test('reload hits breakpoints after reload', () async {
       await _flutter.run(withDebugger: true);
-
-      // Hit breakpoint using a file:// URI.
       final VMIsolate isolate = await _flutter.breakAt(
-          new Uri.file(_project.breakpointFile).toString(),
+          _project.breakpointUri,
           _project.breakpointLine);
       expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
-      // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/18441.
-    }, skip: !platform.isLinux);
+    });
   }, timeout: const Timeout.factor(6));
 }

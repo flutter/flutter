@@ -9,7 +9,7 @@ class Leaf extends StatefulWidget {
   const Leaf({ Key key, this.child }) : super(key: key);
   final Widget child;
   @override
-  _LeafState createState() => new _LeafState();
+  _LeafState createState() => _LeafState();
 }
 
 class _LeafState extends State<Leaf> {
@@ -27,8 +27,8 @@ class _LeafState extends State<Leaf> {
     _keepAlive = value;
     if (_keepAlive) {
       if (_handle == null) {
-        _handle = new KeepAliveHandle();
-        new KeepAliveNotification(_handle).dispatch(context);
+        _handle = KeepAliveHandle();
+        KeepAliveNotification(_handle).dispatch(context);
       }
     } else {
       _handle?.release();
@@ -39,24 +39,24 @@ class _LeafState extends State<Leaf> {
   @override
   Widget build(BuildContext context) {
     if (_keepAlive && _handle == null) {
-      _handle = new KeepAliveHandle();
-      new KeepAliveNotification(_handle).dispatch(context);
+      _handle = KeepAliveHandle();
+      KeepAliveNotification(_handle).dispatch(context);
     }
     return widget.child;
   }
 }
 
 List<Widget> generateList(Widget child, { @required bool impliedMode }) {
-  return new List<Widget>.generate(
+  return List<Widget>.generate(
     100,
     (int index) {
-      final Widget result = new Leaf(
-        key: new GlobalObjectKey<_LeafState>(index),
+      final Widget result = Leaf(
+        key: GlobalObjectKey<_LeafState>(index),
         child: child,
       );
       if (impliedMode)
         return result;
-      return new AutomaticKeepAlive(child: result);
+      return AutomaticKeepAlive(child: result);
     },
     growable: false,
   );
@@ -65,11 +65,12 @@ List<Widget> generateList(Widget child, { @required bool impliedMode }) {
 void tests({ @required bool impliedMode }) {
   testWidgets('AutomaticKeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           addAutomaticKeepAlives: impliedMode,
           addRepaintBoundaries: impliedMode,
+          addSemanticIndexes: false,
           itemExtent: 12.3, // about 50 widgets visible
           cacheExtent: 0.0,
           children: generateList(const Placeholder(), impliedMode: impliedMode),
@@ -112,14 +113,15 @@ void tests({ @required bool impliedMode }) {
 
   testWidgets('AutomaticKeepAlive with ListView without itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           addAutomaticKeepAlives: impliedMode,
           addRepaintBoundaries: impliedMode,
+          addSemanticIndexes: false,
           cacheExtent: 0.0,
           children: generateList(
-            new Container(height: 12.3, child: const Placeholder()), // about 50 widgets visible
+            Container(height: 12.3, child: const Placeholder()), // about 50 widgets visible
             impliedMode: impliedMode,
           ),
         ),
@@ -161,16 +163,17 @@ void tests({ @required bool impliedMode }) {
 
   testWidgets('AutomaticKeepAlive with GridView', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new GridView.count(
+        child: GridView.count(
           addAutomaticKeepAlives: impliedMode,
           addRepaintBoundaries: impliedMode,
+          addSemanticIndexes: false,
           crossAxisCount: 2,
           childAspectRatio: 400.0 / 24.6, // about 50 widgets visible
           cacheExtent: 0.0,
           children: generateList(
-            new Container(child: const Placeholder()),
+            Container(child: const Placeholder()),
             impliedMode: impliedMode,
           ),
         ),
@@ -217,30 +220,31 @@ void main() {
 
   testWidgets('AutomaticKeepAlive double', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           cacheExtent: 0.0,
           children: <Widget>[
-            new AutomaticKeepAlive(
-              child: new Container(
+            AutomaticKeepAlive(
+              child: Container(
                 height: 400.0,
-                child: new Stack(children: const <Widget>[
+                child: Stack(children: const <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
                   Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
                 ]),
               ),
             ),
-            new AutomaticKeepAlive(
-              child: new Container(
+            AutomaticKeepAlive(
+              child: Container(
                 key: const GlobalObjectKey<_LeafState>(2),
                 height: 400.0,
               ),
             ),
-            new AutomaticKeepAlive(
-              child: new Container(
+            AutomaticKeepAlive(
+              child: Container(
                 key: const GlobalObjectKey<_LeafState>(3),
                 height: 400.0,
               ),
@@ -300,35 +304,36 @@ void main() {
 
   testWidgets('AutomaticKeepAlive double 2', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           cacheExtent: 0.0,
           children: <Widget>[
-            new AutomaticKeepAlive(
-              child: new Container(
+            AutomaticKeepAlive(
+              child: Container(
                 height: 400.0,
-                child: new Stack(children: const <Widget>[
+                child: Stack(children: const <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
                   Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
                 ]),
               ),
             ),
-            new AutomaticKeepAlive(
-              child: new Container(
+            AutomaticKeepAlive(
+              child: Container(
                 height: 400.0,
-                child: new Stack(children: const <Widget>[
+                child: Stack(children: const <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
                   Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
                 ]),
               ),
             ),
-            new AutomaticKeepAlive(
-              child: new Container(
+            AutomaticKeepAlive(
+              child: Container(
                 height: 400.0,
-                child: new Stack(children: const <Widget>[
+                child: Stack(children: const <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
                   Leaf(key: GlobalObjectKey<_LeafState>(5), child: Placeholder()),
                 ]),
@@ -355,34 +360,35 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(4)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(5)), findsOneWidget);
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView(
+      child: ListView(
         addAutomaticKeepAlives: false,
         addRepaintBoundaries: false,
+        addSemanticIndexes: false,
         cacheExtent: 0.0,
         children: <Widget>[
-          new AutomaticKeepAlive(
-            child: new Container(
+          AutomaticKeepAlive(
+            child: Container(
               height: 400.0,
-              child: new Stack(children: const <Widget>[
+              child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
               ]),
             ),
           ),
-          new AutomaticKeepAlive(
-            child: new Container(
+          AutomaticKeepAlive(
+            child: Container(
               height: 400.0,
-              child: new Stack(children: const <Widget>[
+              child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
               ]),
             ),
           ),
-          new AutomaticKeepAlive(
-            child: new Container(
+          AutomaticKeepAlive(
+            child: Container(
               height: 400.0,
-              child: new Stack(children: const <Widget>[
+              child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(5), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
@@ -418,33 +424,34 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(4), skipOffstage: false), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(5), skipOffstage: false), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsNothing);
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView(
+      child: ListView(
         addAutomaticKeepAlives: false,
         addRepaintBoundaries: false,
+        addSemanticIndexes: false,
         cacheExtent: 0.0,
         children: <Widget>[
-          new AutomaticKeepAlive(
-            child: new Container(
+          AutomaticKeepAlive(
+            child: Container(
               height: 400.0,
-              child: new Stack(children: const <Widget>[
+              child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
               ]),
             ),
           ),
-          new AutomaticKeepAlive(
-            child: new Container(
+          AutomaticKeepAlive(
+            child: Container(
               height: 400.0,
-              child: new Stack(children: const <Widget>[
+              child: Stack(children: const <Widget>[
               ]),
             ),
           ),
-          new AutomaticKeepAlive(
-            child: new Container(
+          AutomaticKeepAlive(
+            child: Container(
               height: 400.0,
-              child: new Stack(children: const <Widget>[
+              child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(5), child: Placeholder()),
@@ -465,9 +472,10 @@ void main() {
   });
 
   testWidgets('AutomaticKeepAlive with keepAlive set to true before initState', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView.builder(
+      child: ListView.builder(
+        addSemanticIndexes: false,
         itemCount: 50,
         itemBuilder: (BuildContext context, int index){
           if (index == 0){
@@ -475,9 +483,9 @@ void main() {
               key: GlobalObjectKey<_AlwaysKeepAliveState>(0),
             );
           }
-          return new Container(
+          return Container(
             height: 44.0,
-            child: new Text('FooBar $index'),
+            child: Text('FooBar $index'),
           );
         },
       ),
@@ -496,13 +504,52 @@ void main() {
     expect(find.text('FooBar 1'), findsNothing);
     expect(find.text('FooBar 2'), findsNothing);
   });
+
+  testWidgets('AutomaticKeepAlive with keepAlive set to true before initState and widget goes out of scope', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        addSemanticIndexes: false,
+        itemCount: 250,
+        itemBuilder: (BuildContext context, int index){
+          if (index % 2 == 0){
+            return _AlwaysKeepAlive(
+              key: GlobalObjectKey<_AlwaysKeepAliveState>(index),
+            );
+          }
+          return Container(
+            height: 44.0,
+            child: Text('FooBar $index'),
+          );
+        },
+      ),
+    ));
+
+    expect(find.text('keep me alive'), findsNWidgets(7));
+    expect(find.text('FooBar 1'), findsOneWidget);
+    expect(find.text('FooBar 3'), findsOneWidget);
+
+    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0)), findsOneWidget);
+
+    final ScrollableState state = tester.state(find.byType(Scrollable));
+    final ScrollPosition position = state.position;
+    position.jumpTo(3025.0);
+
+    await tester.pump();
+    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0), skipOffstage: false), findsOneWidget);
+
+    expect(find.text('keep me alive', skipOffstage: false), findsNWidgets(23));
+    expect(find.text('FooBar 1'), findsNothing);
+    expect(find.text('FooBar 3'), findsNothing);
+    expect(find.text('FooBar 73'), findsOneWidget);
+  });
 }
 
 class _AlwaysKeepAlive extends StatefulWidget {
   const _AlwaysKeepAlive({Key key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => new _AlwaysKeepAliveState();
+  State<StatefulWidget> createState() => _AlwaysKeepAliveState();
 }
 
 class _AlwaysKeepAliveState extends State<_AlwaysKeepAlive> with AutomaticKeepAliveClientMixin<_AlwaysKeepAlive> {
@@ -512,7 +559,7 @@ class _AlwaysKeepAliveState extends State<_AlwaysKeepAlive> with AutomaticKeepAl
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return new Container(
+    return Container(
       height: 48.0,
       child: const Text('keep me alive'),
     );

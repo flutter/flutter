@@ -6,11 +6,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
 class RenderSolidColorBox extends RenderDecoratedBox {
+  RenderSolidColorBox(this.backgroundColor, { this.desiredSize = Size.infinite })
+      : super(decoration: BoxDecoration(color: backgroundColor));
+
   final Size desiredSize;
   final Color backgroundColor;
-
-  RenderSolidColorBox(this.backgroundColor, { this.desiredSize = Size.infinite })
-      : super(decoration: new BoxDecoration(color: backgroundColor));
 
   @override
   double computeMinIntrinsicWidth(double height) {
@@ -42,7 +42,7 @@ class RenderSolidColorBox extends RenderDecoratedBox {
     if (event is PointerDownEvent) {
       decoration = const BoxDecoration(color: Color(0xFFFF0000));
     } else if (event is PointerUpEvent) {
-      decoration = new BoxDecoration(color: backgroundColor);
+      decoration = BoxDecoration(color: backgroundColor);
     }
   }
 }

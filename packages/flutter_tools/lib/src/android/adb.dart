@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-final RegExp _whitespaceRegex = new RegExp(r'\s+');
+final RegExp _whitespaceRegex = RegExp(r'\s+');
 
 String cleanAdbDeviceName(String name) {
   // Some emulators use `___` in the name as separators.

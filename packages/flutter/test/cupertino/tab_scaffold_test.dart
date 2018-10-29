@@ -20,13 +20,13 @@ void main() {
     final List<int> tabsPainted = <int>[];
 
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabScaffold(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
           tabBuilder: (BuildContext context, int index) {
-            return new CustomPaint(
-              child: new Text('Page ${index + 1}'),
-              painter: new TestCallbackPainter(
+            return CustomPaint(
+              child: Text('Page ${index + 1}'),
+              painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); }
               )
             );
@@ -74,12 +74,12 @@ void main() {
     final List<int> tabsBuilt = <int>[];
 
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabScaffold(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
           tabBuilder: (BuildContext context, int index) {
             tabsBuilt.add(index);
-            return new Text('Page ${index + 1}');
+            return Text('Page ${index + 1}');
           },
         ),
       ),
@@ -107,15 +107,15 @@ void main() {
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
     // 2 nodes for 2 tabs
-    final List<FocusNode> focusNodes = <FocusNode>[new FocusNode(), new FocusNode()];
+    final List<FocusNode> focusNodes = <FocusNode>[FocusNode(), FocusNode()];
 
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new Material(
-          child: new CupertinoTabScaffold(
+      CupertinoApp(
+        home: Material(
+          child: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
             tabBuilder: (BuildContext context, int index) {
-              return new TextField(
+              return TextField(
                 focusNode: focusNodes[index],
                 autofocus: true,
               );
@@ -142,24 +142,24 @@ void main() {
 
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = <FocusNode>[
-      new FocusNode(), new FocusNode(), new FocusNode(), new FocusNode(),
+      FocusNode(), FocusNode(), FocusNode(), FocusNode(),
     ];
 
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new Material(
-          child: new CupertinoTabScaffold(
+      CupertinoApp(
+        home: Material(
+          child: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
             tabBuilder: (BuildContext context, int index) {
-              return new Column(
+              return Column(
                 children: <Widget>[
-                  new TextField(
+                  TextField(
                     focusNode: focusNodes[index * 2],
                     decoration: const InputDecoration(
                       hintText: 'TextField 1',
                     ),
                   ),
-                  new TextField(
+                  TextField(
                     focusNode: focusNodes[index * 2 + 1],
                     decoration: const InputDecoration(
                       hintText: 'TextField 2',
@@ -210,13 +210,13 @@ void main() {
     final List<int> tabsPainted = <int>[];
 
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabScaffold(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
           tabBuilder: (BuildContext context, int index) {
-            return new CustomPaint(
-              child: new Text('Page ${index + 1}'),
-              painter: new TestCallbackPainter(
+            return CustomPaint(
+              child: Text('Page ${index + 1}'),
+              painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); }
               )
             );
@@ -228,13 +228,13 @@ void main() {
     expect(tabsPainted, <int>[0]);
 
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabScaffold(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
           tabBar: _buildTabBar(selectedTab: 1), // Programmatically change the tab now.
           tabBuilder: (BuildContext context, int index) {
-            return new CustomPaint(
-              child: new Text('Page ${index + 1}'),
-              painter: new TestCallbackPainter(
+            return CustomPaint(
+              child: Text('Page ${index + 1}'),
+              painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); }
               )
             );
@@ -257,7 +257,7 @@ void main() {
 }
 
 CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
-  return new CupertinoTabBar(
+  return CupertinoTabBar(
     items: const <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         icon: ImageIcon(TestImageProvider(24, 24)),

@@ -21,6 +21,7 @@ void main() {
       (TextEditingValue oldValue, TextEditingValue newValue) {
         calledOldValue = oldValue;
         calledNewValue = newValue;
+        return null;
       }
     );
 
@@ -46,7 +47,7 @@ void main() {
 
     test('test blacklisting formatter', () {
       final TextEditingValue actualValue =
-          new BlacklistingTextInputFormatter(new RegExp(r'[a-z]'))
+          BlacklistingTextInputFormatter(RegExp(r'[a-z]'))
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
@@ -79,7 +80,7 @@ void main() {
 
     test('test whitelisting formatter', () {
       final TextEditingValue actualValue =
-          new WhitelistingTextInputFormatter(new RegExp(r'[a-c]'))
+          WhitelistingTextInputFormatter(RegExp(r'[a-c]'))
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
@@ -111,7 +112,7 @@ void main() {
 
     test('test length limiting formatter', () {
       final TextEditingValue actualValue =
-      new LengthLimitingTextInputFormatter(6)
+      LengthLimitingTextInputFormatter(6)
           .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
@@ -135,7 +136,7 @@ void main() {
       );
 
       final TextEditingValue actualValue =
-      new LengthLimitingTextInputFormatter(1)
+      LengthLimitingTextInputFormatter(1)
         .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting the empty string.
@@ -158,7 +159,7 @@ void main() {
       );
 
       final TextEditingValue actualValue =
-      new LengthLimitingTextInputFormatter(2)
+      LengthLimitingTextInputFormatter(2)
         .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting two runes.
@@ -199,7 +200,7 @@ void main() {
           extentOffset: 1,
         ),
       );
-      TextEditingValue actualValue = new LengthLimitingTextInputFormatter(1).formatEditUpdate(testOldValue, testNewValue);
+      TextEditingValue actualValue = LengthLimitingTextInputFormatter(1).formatEditUpdate(testOldValue, testNewValue);
       expect(actualValue, const TextEditingValue(
         text: '\u{1F984}',
         selection: TextSelection(
@@ -217,7 +218,7 @@ void main() {
           extentOffset: 1,
         ),
       );
-      actualValue = new LengthLimitingTextInputFormatter(1).formatEditUpdate(testOldValue, testNewValue);
+      actualValue = LengthLimitingTextInputFormatter(1).formatEditUpdate(testOldValue, testNewValue);
       expect(actualValue, const TextEditingValue(
         text: '\u{0058}',
         selection: TextSelection(
@@ -230,7 +231,7 @@ void main() {
 
     test('test length limiting formatter when selection is off the end', () {
       final TextEditingValue actualValue =
-      new LengthLimitingTextInputFormatter(2)
+      LengthLimitingTextInputFormatter(2)
           .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting

@@ -9,12 +9,12 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Chip demo has semantic labels', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    await tester.pumpWidget(new MaterialApp(
-      theme: new ThemeData(platform: TargetPlatform.iOS),
-      home: new ChipDemo(),
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.iOS),
+      home: ChipDemo(),
     ));
 
-    expect(tester.getSemanticsData(find.byIcon(Icons.vignette)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byIcon(Icons.vignette)), matchesSemantics(
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
@@ -22,7 +22,7 @@ void main() {
       label: 'Update border shape',
     ));
 
-    expect(tester.getSemanticsData(find.byIcon(Icons.refresh)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byIcon(Icons.refresh)), matchesSemantics(
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,

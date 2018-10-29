@@ -13,7 +13,7 @@ class TestWidget extends StatefulWidget {
   final int syncedState;
 
   @override
-  TestWidgetState createState() => new TestWidgetState();
+  TestWidgetState createState() => TestWidgetState();
 }
 
 class TestWidgetState extends State<TestWidget> {
@@ -45,11 +45,11 @@ void main() {
 
   testWidgets('no change', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Container(
-        child: new Container(
-          child: new TestWidget(
+      Container(
+        child: Container(
+          child: TestWidget(
             persistentState: 1,
-            child: new Container()
+            child: Container()
           )
         )
       )
@@ -61,11 +61,11 @@ void main() {
     expect(state.updates, equals(0));
 
     await tester.pumpWidget(
-      new Container(
-        child: new Container(
-          child: new TestWidget(
+      Container(
+        child: Container(
+          child: TestWidget(
             persistentState: 2,
-            child: new Container()
+            child: Container()
           )
         )
       )
@@ -74,16 +74,16 @@ void main() {
     expect(state.persistentState, equals(1));
     expect(state.updates, equals(1));
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
   });
 
   testWidgets('remove one', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Container(
-        child: new Container(
-          child: new TestWidget(
+      Container(
+        child: Container(
+          child: TestWidget(
             persistentState: 10,
-            child: new Container()
+            child: Container()
           )
         )
       )
@@ -95,10 +95,10 @@ void main() {
     expect(state.updates, equals(0));
 
     await tester.pumpWidget(
-      new Container(
-        child: new TestWidget(
+      Container(
+        child: TestWidget(
           persistentState: 11,
-          child: new Container()
+          child: Container()
         )
       )
     );
@@ -108,25 +108,25 @@ void main() {
     expect(state.persistentState, equals(11));
     expect(state.updates, equals(0));
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
   });
 
   testWidgets('swap instances around', (WidgetTester tester) async {
     const Widget a = TestWidget(persistentState: 0x61, syncedState: 0x41, child: Text('apple', textDirection: TextDirection.ltr));
     const Widget b = TestWidget(persistentState: 0x62, syncedState: 0x42, child: Text('banana', textDirection: TextDirection.ltr));
-    await tester.pumpWidget(new Column());
+    await tester.pumpWidget(Column());
 
-    final GlobalKey keyA = new GlobalKey();
-    final GlobalKey keyB = new GlobalKey();
+    final GlobalKey keyA = GlobalKey();
+    final GlobalKey keyB = GlobalKey();
 
     await tester.pumpWidget(
-      new Column(
+      Column(
         children: <Widget>[
-          new Container(
+          Container(
             key: keyA,
             child: a
           ),
-          new Container(
+          Container(
             key: keyB,
             child: b
           )
@@ -147,13 +147,13 @@ void main() {
     expect(second.syncedState, equals(0x42));
 
     await tester.pumpWidget(
-      new Column(
+      Column(
         children: <Widget>[
-          new Container(
+          Container(
             key: keyA,
             child: a
           ),
-          new Container(
+          Container(
             key: keyB,
             child: b
           )
@@ -176,13 +176,13 @@ void main() {
     // since they are both "old" nodes, they shouldn't sync with each other even though they look alike
 
     await tester.pumpWidget(
-      new Column(
+      Column(
         children: <Widget>[
-          new Container(
+          Container(
             key: keyA,
             child: b
           ),
-          new Container(
+          Container(
             key: keyB,
             child: a
           )

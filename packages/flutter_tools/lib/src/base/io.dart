@@ -77,7 +77,7 @@ export 'dart:io'
         WebSocketTransformer;
 
 /// Exits the process with the given [exitCode].
-typedef void ExitFunction(int exitCode);
+typedef ExitFunction = void Function(int exitCode);
 
 const ExitFunction _defaultExitFunction = io.exit;
 
@@ -97,7 +97,7 @@ ExitFunction get exit => _exitFunction;
 @visibleForTesting
 void setExitFunctionForTests([ExitFunction exitFunction]) {
   _exitFunction = exitFunction ?? (int exitCode) {
-    throw new ProcessExit(exitCode, immediate: true);
+    throw ProcessExit(exitCode, immediate: true);
   };
 }
 
@@ -127,7 +127,7 @@ class ProcessSignal implements io.ProcessSignal {
 
   @override
   Stream<ProcessSignal> watch() {
-    return _delegate.watch().map((io.ProcessSignal signal) => this);
+    return _delegate.watch().map<ProcessSignal>((io.ProcessSignal signal) => this);
   }
 
   @override
@@ -155,6 +155,11 @@ class Stdio {
   Stream<List<int>> get stdin => io.stdin;
   io.IOSink get stdout => io.stdout;
   io.IOSink get stderr => io.stderr;
+
+  bool get hasTerminal => io.stdout.hasTerminal;
+  int get terminalColumns => hasTerminal ? io.stdout.terminalColumns : null;
+  int get terminalLines => hasTerminal ? io.stdout.terminalLines : null;
+  bool get supportsAnsiEscapes => hasTerminal ? io.stdout.supportsAnsiEscapes : false;
 }
 
 io.IOSink get stderr => context[Stdio].stderr;
@@ -162,3 +167,5 @@ io.IOSink get stderr => context[Stdio].stderr;
 Stream<List<int>> get stdin => context[Stdio].stdin;
 
 io.IOSink get stdout => context[Stdio].stdout;
+
+Stdio get stdio => context[Stdio];

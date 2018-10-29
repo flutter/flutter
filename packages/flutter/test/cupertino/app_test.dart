@@ -7,18 +7,18 @@ import 'package:flutter/cupertino.dart';
 
 void main() {
   testWidgets('Heroes work', (WidgetTester tester) async {
-    await tester.pumpWidget(new CupertinoApp(
+    await tester.pumpWidget(CupertinoApp(
       home:
-        new ListView(
+        ListView(
           children: <Widget>[
             const Hero(tag: 'a', child: Text('foo')),
-            new Builder(builder: (BuildContext context) {
-              return new CupertinoButton(
+            Builder(builder: (BuildContext context) {
+              return CupertinoButton(
                 child: const Text('next'),
                 onPressed: () {
                   Navigator.push(
                     context,
-                    new CupertinoPageRoute<void>(
+                    CupertinoPageRoute<void>(
                       builder: (BuildContext context) {
                         return const Hero(tag: 'a', child: Text('foo'));
                       }
@@ -39,5 +39,27 @@ void main() {
     // page routes and exists as its own overlay on top of both routes.
     expect(find.widgetWithText(CupertinoPageRoute, 'foo'), findsNothing);
     expect(find.widgetWithText(Navigator, 'foo'), findsOneWidget);
+  });
+
+  testWidgets('Has default cupertino localizations', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Column(
+              children: <Widget>[
+                Text(CupertinoLocalizations.of(context).selectAllButtonLabel),
+                Text(CupertinoLocalizations.of(context).datePickerMediumDate(
+                  DateTime(2018, 10, 4),
+                )),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Select All'), findsOneWidget);
+    expect(find.text('Thu Oct 4 '), findsOneWidget);
   });
 }

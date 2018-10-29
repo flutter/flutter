@@ -24,8 +24,9 @@ class InjectPluginsCommand extends FlutterCommand {
   final bool hidden;
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     final FlutterProject project = await FlutterProject.current();
+    refreshPluginsList(project);
     await injectPlugins(project);
     final bool result = hasPlugins(project);
     if (result) {
@@ -33,5 +34,7 @@ class InjectPluginsCommand extends FlutterCommand {
     } else {
       printStatus('This project does not use plugins, no GeneratedPluginRegistrants have been created.');
     }
+
+    return null;
   }
 }

@@ -9,8 +9,8 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   test('Compound borders', () {
-    final Border b1 = new Border.all(color: const Color(0xFF00FF00));
-    final Border b2 = new Border.all(color: const Color(0xFF0000FF));
+    final Border b1 = Border.all(color: const Color(0xFF00FF00));
+    final Border b2 = Border.all(color: const Color(0xFF0000FF));
     expect(
       (b1 + b2).toString(),
       'Border.all(BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid)) + '
@@ -58,7 +58,7 @@ void main() {
       'Border.all(BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid))'
     );
     expect((b1 + b2).dimensions, const EdgeInsets.all(2.0));
-    final Rect rect = new Rect.fromLTRB(11.0, 15.0, 299.0, 175.0);
+    final Rect rect = Rect.fromLTRB(11.0, 15.0, 299.0, 175.0);
     expect((Canvas canvas) => (b1 + b2).paint(canvas, rect), paints
       ..rect(rect: rect.deflate(0.5), color: b2.top.color)
       ..rect(rect: rect.deflate(1.5), color: b1.top.color)
@@ -123,7 +123,7 @@ void main() {
       'BorderDirectional(top: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid))'
     );
     expect((b1 + b2).dimensions, const EdgeInsetsDirectional.fromSTEB(2.0, 2.0, 2.0, 2.0));
-    final Rect rect = new Rect.fromLTRB(11.0, 15.0, 299.0, 175.0);
+    final Rect rect = Rect.fromLTRB(11.0, 15.0, 299.0, 175.0);
     expect((Canvas canvas) => (b1 + b2).paint(canvas, rect, textDirection: TextDirection.rtl), paints
       ..rect(rect: rect.deflate(0.5), color: b2.top.color)
       ..rect(rect: rect.deflate(1.5), color: b1.top.color)
