@@ -1,4 +1,4 @@
-Signature: 2db9344acf0f42c388f138fae3ed6879
+Signature: 8091adfa7932f89b3b0394c79ff1ddb5
 
 UNUSED LICENSES:
 
@@ -1590,6 +1590,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrClearStencilClipOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDebugMarkerOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.h
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.cpp
@@ -3080,6 +3082,7 @@ FILE: ../../../third_party/skia/include/gpu/GrResourceKey.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleInterface.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_indirect.h
 FILE: ../../../third_party/skia/include/ports/SkRemotableFontMgr.h
+FILE: ../../../third_party/skia/include/private/SkHalf.h
 FILE: ../../../third_party/skia/samplecode/SampleHT.cpp
 FILE: ../../../third_party/skia/samplecode/SampleIdentityScale.cpp
 FILE: ../../../third_party/skia/samplecode/SampleRectanizer.cpp
@@ -3099,7 +3102,6 @@ FILE: ../../../third_party/skia/src/core/SkDrawable.cpp
 FILE: ../../../third_party/skia/src/core/SkFont.cpp
 FILE: ../../../third_party/skia/src/core/SkForceCPlusPlusLinking.cpp
 FILE: ../../../third_party/skia/src/core/SkHalf.cpp
-FILE: ../../../third_party/skia/src/core/SkHalf.h
 FILE: ../../../third_party/skia/src/core/SkImageGenerator.cpp
 FILE: ../../../third_party/skia/src/core/SkMaskCache.cpp
 FILE: ../../../third_party/skia/src/core/SkMaskCache.h
@@ -3585,6 +3587,9 @@ FILE: ../../../third_party/skia/include/ports/SkFontMgr_empty.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_fontconfig.h
 FILE: ../../../third_party/skia/include/private/SkAtomics.h
 FILE: ../../../third_party/skia/include/private/SkMutex.h
+FILE: ../../../third_party/skia/include/private/SkNx.h
+FILE: ../../../third_party/skia/include/private/SkNx_neon.h
+FILE: ../../../third_party/skia/include/private/SkNx_sse.h
 FILE: ../../../third_party/skia/include/private/SkSemaphore.h
 FILE: ../../../third_party/skia/include/private/SkSpinlock.h
 FILE: ../../../third_party/skia/include/private/SkTHash.h
@@ -3663,7 +3668,6 @@ FILE: ../../../third_party/skia/src/core/SkLocalMatrixImageFilter.cpp
 FILE: ../../../third_party/skia/src/core/SkMiniRecorder.cpp
 FILE: ../../../third_party/skia/src/core/SkMiniRecorder.h
 FILE: ../../../third_party/skia/src/core/SkNextID.h
-FILE: ../../../third_party/skia/src/core/SkNx.h
 FILE: ../../../third_party/skia/src/core/SkOpts.cpp
 FILE: ../../../third_party/skia/src/core/SkOpts.h
 FILE: ../../../third_party/skia/src/core/SkPathPriv.h
@@ -3830,8 +3834,6 @@ FILE: ../../../third_party/skia/src/opts/SkBlitMask_opts_arm_neon.cpp
 FILE: ../../../third_party/skia/src/opts/SkBlitMask_opts_arm_neon.h
 FILE: ../../../third_party/skia/src/opts/SkBlitRow_opts.h
 FILE: ../../../third_party/skia/src/opts/SkColor_opts_neon.h
-FILE: ../../../third_party/skia/src/opts/SkNx_neon.h
-FILE: ../../../third_party/skia/src/opts/SkNx_sse.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_sse41.cpp
 FILE: ../../../third_party/skia/src/opts/SkOpts_ssse3.cpp
 FILE: ../../../third_party/skia/src/opts/SkXfermode_opts.h
