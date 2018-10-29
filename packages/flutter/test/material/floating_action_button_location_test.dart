@@ -133,8 +133,6 @@ void main() {
           final Iterable<double> currentRotations = rotationTransitions.map(
               (RotationTransition t) => t.turns.value);
 
-          print('$previousRotations, $currentRotations, $previousRect, $currentRect');
-
           if (previousRotations != null && previousRotations.isNotEmpty
               && currentRotations != null && currentRotations.isNotEmpty
               && previousRect != null && currentRect != null) {
