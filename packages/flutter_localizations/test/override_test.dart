@@ -107,6 +107,7 @@ void main() {
     Widget buildLocaleFrame(Locale locale) {
       return buildFrame(
         locale: locale,
+        supportedLocales: <Locale>[locale],
         buildContent: (BuildContext context) {
           return Localizations.override(
             context: context,
