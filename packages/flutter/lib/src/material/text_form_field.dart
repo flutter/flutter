@@ -38,6 +38,22 @@ import 'theme.dart';
 ///    integration.
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
+///
+/// ## Sample code
+///
+/// ```dart
+/// new TextFormField(
+///   decoration: const InputDecoration(
+///     icon: const Icon(Icons.person),
+///     hintText: 'What do people call you?',
+///     labelText: 'Name *',
+///   ),
+///   onSaved: (String value) {},
+///   validator: (String value) {
+///     return value.contains('@') ? 'Do not use the @ char.' : null;
+///   },
+/// )
+/// ```
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
   ///
