@@ -5,13 +5,27 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
+import 'package:stack_trace/stack_trace.dart';
 
-import 'package:test/src/backend/runtime.dart'; // ignore: implementation_imports
-import 'package:test/src/backend/suite_platform.dart'; // ignore: implementation_imports
-import 'package:test/src/runner/plugin/platform.dart'; // ignore: implementation_imports
-import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // ignore: implementation_imports
+import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
+import 'package:test_api/src/runner/platform.dart'; // ignore: implementation_imports
+import 'package:test_api/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
+import 'package:test_api/src/runner/runner_suite.dart'; // ignore: implementation_imports
+import 'package:test_api/src/runner/suite.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/group.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/test.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/live_test.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/metadata.dart'; // ignore: implementation_imports
+import 'package:test_api/src/runner/environment.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/live_test_controller.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/suite.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/state.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/message.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/group_entry.dart'; // ignore: implementation_imports
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -135,14 +149,9 @@ String generateTestBootstrap({
 import 'dart:convert';
 import 'dart:io';  // ignore: dart_io_import
 
-// We import this library first in order to trigger an import error for
-// package:test (rather than package:stream_channel) when the developer forgets
-// to add a dependency on package:test.
-import 'package:test/src/runner/plugin/remote_platform_helpers.dart';
-
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/src/runner.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test/src/runner/vm/catch_isolate_errors.dart';
 
 import '$testUrl' as test;
 '''
@@ -381,6 +390,20 @@ class _FlutterPlatform extends PlatformPlugin {
   // we clean everything up.
 
   int _testCount = 0;
+
+  @override
+  Future<RunnerSuite> load(
+    String path,
+    SuitePlatform platform,
+    SuiteConfiguration suiteConfig,
+    Object message,
+  ) async {
+    // loadChannel may throw an exception. That's fine; it will cause the
+    // LoadSuite to emit an error, which will be presented to the user.
+    final StreamChannel<dynamic> channel = loadChannel(path, platform);
+    final RunnerSuiteController controller = deserializeSuite(path, platform, suiteConfig, const PluginEnvironment(), channel, message);
+    return await controller.suite;
+  }
 
   @override
   StreamChannel<dynamic> loadChannel(String testPath, SuitePlatform platform) {
@@ -892,6 +915,180 @@ class _FlutterPlatform extends PlatformPlugin {
       default:
         return 'Shell subprocess crashed with unexpected exit code $exitCode $when.';
     }
+  }
+}
+
+RunnerSuiteController deserializeSuite(
+    String path,
+    SuitePlatform suitePlatform,
+    SuiteConfiguration suiteConfig,
+    Environment environment,
+    StreamChannel<dynamic> channel,
+    Object message) {
+  final Disconnector<dynamic> disconnector = Disconnector<dynamic>();
+  final MultiChannel<dynamic> suiteChannel = MultiChannel<dynamic>(channel.transform<dynamic>(disconnector));
+  suiteChannel.sink.add(<String, dynamic>{
+    'type': 'initial',
+    'platform': suitePlatform.serialize(),
+    'metadata': suiteConfig.metadata.serialize(),
+    'asciiGlyphs': platform.isWindows,
+    'path': path,
+    'collectTraces': false,
+    'noRetry': true,
+    'foldTraceExcept': true,
+    'foldTraceOnly': true,
+  }..addAll(message));
+  final Completer<Group> completer = Completer<Group>();
+  final Zone loadSuiteZone = Zone.current;
+  void handleError(dynamic error, StackTrace stackTrace) {
+    disconnector.disconnect();
+    if (completer.isCompleted) {
+      // If we've already provided a controller, send the error to the
+      // LoadSuite. This will cause the virtual load test to fail, which will
+      // notify the user of the error.
+      loadSuiteZone.handleUncaughtError(error, stackTrace);
+    } else {
+      completer.completeError(error, stackTrace);
+    }
+  }
+   suiteChannel.stream.listen((dynamic response) {
+    final String type = response['type'];
+    switch (type) {
+      case 'print':
+        print(response['line']);
+        break;
+      case 'loadException':
+        handleError(Exception(response['message']), Trace.current());
+        break;
+      case 'error':
+        handleError(Exception(response['error']), null); // TOOD FIXME
+        break;
+      case 'success':
+        final _Deserializer deserializer = _Deserializer(suiteChannel);
+        completer.complete(deserializer.deserializeGroup(response['root']));
+        break;
+      }
+    },
+    onError: handleError,
+    onDone: () {
+      if (completer.isCompleted) {
+        return;
+      }
+      completer.completeError(
+        Exception('Connection closed before test suite loaded: $path'),
+        Trace.current(),
+      );
+    });
+  return RunnerSuiteController(
+    environment, suiteConfig, suiteChannel, completer.future, suitePlatform,
+    path: path,
+    onClose: () => disconnector.disconnect().catchError(handleError));
+}
+
+/// A utility class for storing state while deserializing tests.
+class _Deserializer {
+  _Deserializer(this._channel);
+
+  /// The channel over which tests communicate.
+  final MultiChannel<Map<String, Object>> _channel;
+
+  /// Deserializes [group] into a concrete [Group].
+  Group deserializeGroup(Map<String, Object> group) {
+    final Metadata metadata = Metadata.deserialize(group['metadata']);
+    final List<Map<String, Object>> entries = group['entries'];
+    return Group(group['name'],
+      entries.map<GroupEntry>((Map<String, Object> entry) => entry['type'] == 'group' ? deserializeGroup(entry) : _deserializeTest(entry)),
+      metadata: metadata,
+      trace: group['trace'] == null ? null: Trace.parse(group['trace']),
+      setUpAll: _deserializeTest(group['setUpAll']),
+      tearDownAll: _deserializeTest(group['tearDownAll']),
+    );
+  }
+
+  /// Deserializes [test] into a concrete [Test] class.
+  ///
+  /// Returns `null` if [test] is `null`.
+  Test _deserializeTest(Map<dynamic, dynamic> test) {
+    if (test == null) {
+      return null;
+    }
+    final Metadata metadata = Metadata.deserialize(test['metadata']);
+    final Trace trace = test['trace'] == null ? null : Trace.parse(test['trace']);
+    final MultiChannel<dynamic> testChannel = _channel.virtualChannel(test['channel']);
+    return RunnerTest(test['name'], metadata, trace, testChannel);
+  }
+}
+
+/// A test running remotely, controlled by a stream channel.
+class RunnerTest extends Test {
+  RunnerTest(this.name, this.metadata, this.trace, this._channel);
+
+  @override
+  final String name;
+  @override
+  final Trace trace;
+  @override
+  final Metadata metadata;
+
+  /// The channel used to communicate with the test's [IframeListener].
+  final MultiChannel<dynamic> _channel;
+
+  @override
+  LiveTest load(Suite suite, {Iterable<Group> groups}) {
+    LiveTestController controller;
+    VirtualChannel<Map<String, Object>> testChannel;
+    controller = LiveTestController(suite, this, () {
+      controller.setState(const State(Status.running, Result.success));
+      testChannel = _channel.virtualChannel();
+      _channel.sink.add(<String, Object>{'command': 'run', 'channel': testChannel.id});
+      testChannel.stream.listen((Map<String, Object> message) {
+        final String type = message['type'];
+        switch (type) {
+          case 'error':
+            controller.addError(Exception(message['error']), null); // TODO:fixme
+            break;
+          case 'state-change':
+            controller.setState(State(Status.parse(message['status']), Result.parse(message['result'])));
+            break;
+          case 'message':
+            controller.message(Message(MessageType.parse(message['message-type']), message['text']));
+            break;
+          case 'complete':
+            controller.completer.complete();
+            break;
+        }
+      }, onDone: () {
+        // When the test channel closes—presumably becuase the browser
+        // closed—mark the test as complete no matter what.
+        if (controller.completer.isCompleted) {
+          return;
+        }
+        controller.completer.complete();
+      });
+    }, () {
+      // If the test has finished running, just disconnect the channel.
+      if (controller.completer.isCompleted) {
+        testChannel.sink.close();
+        return;
+      }
+      () async {
+        // If the test is still running, send it a message telling it to shut
+        // down ASAP. This causes the [Invoker] to eagerly throw exceptions
+        // whenever the test touches it.
+        testChannel.sink.add(<String, String>{'command': 'close'});
+        await controller.completer.future;
+        await testChannel.sink.close();
+      }();
+    }, groups: groups);
+    return controller.liveTest;
+  }
+
+  @override
+  Test forPlatform(SuitePlatform platform) {
+    if (!metadata.testOn.evaluate(platform)) {
+      return null;
+    }
+    return RunnerTest(name, metadata.forPlatform(platform), trace, _channel);
   }
 }
 
