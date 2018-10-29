@@ -9,8 +9,6 @@ import 'dialog.dart';
 
 /// Defines a theme for [Dialog] widgets.
 ///
-/// A dialog theme describes the shape of the [Dialog]'s border.
-///
 /// Descendant widgets obtain the current theme's [DialogTheme] object using
 /// `Theme.of(context).dialogTheme`.
 /// [ThemeData.dialogTheme] can be customized by copying it (using

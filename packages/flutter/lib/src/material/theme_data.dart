@@ -151,8 +151,8 @@ class ThemeData extends Diagnosticable {
     MaterialTapTargetSize materialTapTargetSize,
     PageTransitionsTheme pageTransitionsTheme,
     ColorScheme colorScheme,
-    Typography typography,
     DialogTheme dialogTheme,
+    Typography typography,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -292,8 +292,8 @@ class ThemeData extends Diagnosticable {
       materialTapTargetSize: materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme,
       colorScheme: colorScheme,
-      typography: typography,
       dialogTheme: dialogTheme,
+      typography: typography,
     );
   }
 
@@ -351,8 +351,8 @@ class ThemeData extends Diagnosticable {
     @required this.materialTapTargetSize,
     @required this.pageTransitionsTheme,
     @required this.colorScheme,
-    @required this.typography,
     @required this.dialogTheme,
+    @required this.typography,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -396,8 +396,8 @@ class ThemeData extends Diagnosticable {
        assert(materialTapTargetSize != null),
        assert(pageTransitionsTheme != null),
        assert(colorScheme != null),
-       assert(typography != null),
-       assert(dialogTheme != null);
+       assert(dialogTheme != null),
+       assert(typography != null);
 
   // Warning: make sure these properties are in the exact same order as in
   // hashValues() and in the raw constructor and in the order of fields in
@@ -623,12 +623,12 @@ class ThemeData extends Diagnosticable {
   /// that is possible without significant backwards compatibility breaks.
   final ColorScheme colorScheme;
 
+  /// A theme for customizing the shape of a dialog.
+  final DialogTheme dialogTheme;
+
   /// The color and geometry [TextTheme] values used to configure [textTheme],
   /// [primaryTextTheme], and [accentTextTheme].
   final Typography typography;
-
-  /// A theme for customizing the shape of a dialog.
-  final DialogTheme dialogTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
@@ -676,8 +676,8 @@ class ThemeData extends Diagnosticable {
     MaterialTapTargetSize materialTapTargetSize,
     PageTransitionsTheme pageTransitionsTheme,
     ColorScheme colorScheme,
-    Typography typography,
     DialogTheme dialogTheme,
+    Typography typography,
   }) {
     return ThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -724,8 +724,8 @@ class ThemeData extends Diagnosticable {
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       colorScheme: colorScheme ?? this.colorScheme,
-      typography: typography ?? this.typography,
       dialogTheme: dialogTheme ?? this.dialogTheme,
+      typography: typography ?? this.typography,
     );
   }
 
@@ -851,8 +851,8 @@ class ThemeData extends Diagnosticable {
       materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
       pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
-      typography: Typography.lerp(a.typography, b.typography, t),
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
+      typography: Typography.lerp(a.typography, b.typography, t),
     );
   }
 
@@ -908,8 +908,8 @@ class ThemeData extends Diagnosticable {
            (otherData.materialTapTargetSize == materialTapTargetSize) &&
            (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
            (otherData.colorScheme == colorScheme) &&
-           (otherData.typography == typography) &&
-           (otherData.dialogTheme == dialogTheme);
+           (otherData.dialogTheme == dialogTheme) &&
+           (otherData.typography == typography);
   }
 
   @override
@@ -965,8 +965,8 @@ class ThemeData extends Diagnosticable {
           materialTapTargetSize,
           pageTransitionsTheme,
           colorScheme,
-          typography,
           dialogTheme,
+          typography,
         ),
       ),
     );
@@ -1017,8 +1017,8 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme));
-    properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme));
+    properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography));
   }
 }
 
