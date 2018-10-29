@@ -249,7 +249,7 @@ void main() {
                 value: value,
                 hint: const Text('Select Value'),
                 decoration: const InputDecoration(
-                  prefixIcon: const Icon(Icons.fastfood)
+                  prefixIcon: Icon(Icons.fastfood)
                 ),
                 items: menuItems.map((String val) {
                   return DropdownMenuItem<String>(

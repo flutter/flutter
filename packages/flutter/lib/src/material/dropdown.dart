@@ -772,6 +772,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 /// is provided by the [InputDecorator].
 ///
 /// See also:
+///
 ///  * [DropdownButton], which is the underlying Widget providing the functionality
 ///  * [InputDecorator], which shows the visual elements and styles the form
 ///    field
@@ -817,7 +818,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
   final ValueChanged<T> onChanged;
 
   @override
-  FormFieldState<T> createState() => new _DropdownButtonFormFieldState<T>();
+  FormFieldState<T> createState() => _DropdownButtonFormFieldState<T>();
 }
 
 class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
