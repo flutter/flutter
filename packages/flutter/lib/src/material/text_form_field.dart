@@ -58,7 +58,7 @@ class TextFormField extends FormField<String> {
     TextCapitalization textCapitalization = TextCapitalization.none,
     TextInputAction textInputAction,
     TextStyle style,
-    TextDirection textDirection;
+    TextDirection textDirection,
     TextAlign textAlign = TextAlign.start,
     bool autofocus = false,
     bool obscureText = false,
