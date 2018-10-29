@@ -69,8 +69,7 @@ void main() {
 
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byKey(_painterKey),

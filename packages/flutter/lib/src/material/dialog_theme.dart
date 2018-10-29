@@ -9,23 +9,36 @@ import 'dialog.dart';
 
 /// Defines a theme for [Dialog] widgets.
 ///
-/// Descendant widgets obtain the current theme's [DialogTheme] object using
-/// `Theme.of(context).dialogTheme`.
-/// [ThemeData.dialogTheme] can be customized by copying it (using
+/// Descendant widgets obtain the current [DialogTheme] object using
+/// `DialogTheme.of(context)`.
+/// instances of [DialogTheme] can be customized by copying it (using
 /// [DialogTheme.copyWith]).
+///
+/// When Shape is `null`, the dialog defaults to a [RoundedRectangleBorder] with
+/// a border radius of 2.0 on all corners.
 ///
 /// See also:
 ///
-///  * [Dialog], a widget that displays a material dialog, [Dialog] is used by
-///  [AlertDialog], and [SimpleDialog].
+///  * [Dialog], a material dialog that can be customized using this [DialogTheme].
 ///  * [ThemeData], which describes the overall theme information for the
-///  application.
+///    application.
 class DialogTheme extends Diagnosticable {
-  /// Creates a dialog theme that can be used with [ThemeData.dialogTheme].
+  /// Creates a dialog theme that can be used for [ThemeData.dialogTheme].
   const DialogTheme({ this.shape });
 
   /// Default value for [Dialog.shape].
   final ShapeBorder shape;
+
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
+  DialogTheme copyWith({ ShapeBorder shape }) {
+    return DialogTheme(shape: shape ?? this.shape);
+  }
+
+  /// The data from the closest [DialogTheme] instance given the build context.
+  static DialogTheme of(BuildContext context) {
+    return Theme.of(context).dialogTheme;
+  }
 
   /// Linearly interpolate between two dialog themes.
   ///
@@ -33,18 +46,14 @@ class DialogTheme extends Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static DialogTheme lerp(DialogTheme a, DialogTheme b, double t) {
-    assert(a != null);
-    assert(b != null);
     assert(t != null);
     return DialogTheme(
-        shape: ShapeBorder.lerp(a.shape, b.shape, t)
+        shape: ShapeBorder.lerp(a?.shape, b?.shape, t)
     );
   }
 
   @override
-  int get hashCode {
-    return shape.hashCode;
-  }
+  int get hashCode => shape.hashCode;
 
   @override
   bool operator ==(dynamic other) {
@@ -54,5 +63,11 @@ class DialogTheme extends Diagnosticable {
       return false;
     final DialogTheme typedOther = other;
     return typedOther.shape == shape;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }

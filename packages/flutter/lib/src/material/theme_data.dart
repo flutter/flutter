@@ -6,13 +6,13 @@ import 'dart:ui' show Color, hashValues;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/material/dialog_theme.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'dialog_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
