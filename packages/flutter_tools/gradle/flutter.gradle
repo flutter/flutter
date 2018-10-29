@@ -190,19 +190,19 @@ class FlutterPlugin implements Plugin<Project> {
             def pluginProject = project.rootProject.findProject(":$name")
             if (pluginProject != null) {
                 project.dependencies {
-                    if (project.getConfigurations().findByName("implementation")) {
-                        implementation pluginProject
+                    if (project.getConfigurations().findByName("api")) {
+                        api pluginProject
                     } else {
                         compile pluginProject
                     }
                 }
-		pluginProject.afterEvaluate {
+                pluginProject.afterEvaluate {
                     pluginProject.android.buildTypes {
                         profile {
                             initWith debug
                         }
                     }
-		}
+                }
                 pluginProject.afterEvaluate this.&addFlutterJarCompileOnlyDependency
             } else {
                 project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
@@ -289,7 +289,10 @@ class FlutterPlugin implements Plugin<Project> {
      * Returns a Flutter Jar file path suitable for the specified Android buildMode.
      */
     private File flutterJarFor(buildMode) {
-        if (buildMode == "profile") {
+        if (flutterJar != null) {
+            // for local engine build
+            return flutterJar
+        } else if (buildMode == "profile") {
             return profileFlutterJar
         } else if (buildMode == "dynamicProfile") {
             return dynamicProfileFlutterJar
@@ -428,12 +431,10 @@ class FlutterPlugin implements Plugin<Project> {
                 with flutterTask.assets
             }
 
-            if (packageAssets) {
-                // Only include configurations that exist in parent project.
-                Task mergeAssets = project.tasks.findByPath(":app:merge${variant.name.capitalize()}Assets")
-                if (mergeAssets) {
-                    mergeAssets.dependsOn(copyFlutterAssetsTask)
-                }
+            // Only include configurations that exist in parent project.
+            Task mergeAssets = project.tasks.findByPath(":app:merge${variant.name.capitalize()}Assets")
+            if (packageAssets && mergeAssets) {
+                mergeAssets.dependsOn(copyFlutterAssetsTask)
             } else {
                 variant.outputs[0].processResources.dependsOn(copyFlutterAssetsTask)
             }
