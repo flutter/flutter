@@ -106,7 +106,7 @@ class TextField extends StatefulWidget {
     this.textCapitalization = TextCapitalization.none,
     this.style,
     this.textAlign = TextAlign.start,
-    this.textDirection = TextDirection.ltr,
+    this.textDirection,
     this.autofocus = false,
     this.obscureText = false,
     this.autocorrect = true,
