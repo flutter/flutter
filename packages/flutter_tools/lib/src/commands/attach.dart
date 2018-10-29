@@ -37,6 +37,9 @@ final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
 /// ```
 /// As soon as a new observatory is detected the command attaches to it and
 /// enables hot reloading.
+///
+/// To attach to a flutter mod running on a fuchsia device, `module` must
+/// also be provided.
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
     addBuildModeFlags(defaultToRelease: false);
@@ -122,11 +125,12 @@ class AttachCommand extends FlutterCommand {
         await observatoryDiscovery?.cancel();
       }
     } else if (devicePort == null && device is FuchsiaDevice) {
+      hotRunnerConfig.computeDartDependencies = false;
       final String module = argResults['module'];
       if (module == null) {
         throwToolExit('\'-module\' is requried for attaching to a fuchsia device');
       }
-      hotRunnerConfig.computeDartDependencies = false;
+      ipv6 = _isIpv6(device.id.split('%').first);
       final List<int> ports = await device.servicePorts();
       final List<int> localPorts = <int>[];
       for (int port in ports) {
@@ -134,9 +138,12 @@ class AttachCommand extends FlutterCommand {
         localPorts.add(socket.port);
         await device.portForwarder.forward(port, hostPort: socket.port);
       }
+      printStatus('Waiting for a connection from Flutter on ${device.name}...');
       final int localPort = await device.findIsolatePort(module, localPorts);
-      observatoryUri = Uri.parse('http://[$ipv6Loopback]:$localPort/');
-      ipv6 = true;
+      printStatus('Done.');
+      observatoryUri = ipv6
+        ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
+        : Uri.parse('http://$ipv4Loopback:$localPort/');
     } else {
       final int localPort = await device.portForwarder.forward(devicePort);
       observatoryUri = Uri.parse('http://$ipv4Loopback:$localPort/');
@@ -184,6 +191,15 @@ class AttachCommand extends FlutterCommand {
   }
 
   Future<void> _validateArguments() async {}
+
+  bool _isIpv6(String address) {
+    try {
+      Uri.parseIPv6Address(address);
+      return true;
+    } on FormatException {
+      return false;
+    }
+  }
 }
 
 class HotRunnerFactory {
