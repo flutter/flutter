@@ -21,7 +21,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Cupertino Switch'),
+        middle: const Text('Switch'),
         previousPageTitle: 'Cupertino',
         trailing: CupertinoDemoDocumentationButton(CupertinoSwitchDemo.routeName),
       ),

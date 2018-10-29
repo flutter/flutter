@@ -209,9 +209,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final Color primaryColor = CupertinoTheme.of(context).primaryColor;
     final Color backgroundColor = widget.color ?? (widget._filled ? primaryColor : null);
     final Color foregroundColor = backgroundColor != null
-        ? CupertinoTheme.of(context).brightness == Brightness.light
-            ? CupertinoColors.white
-            : CupertinoColors.black
+        ? CupertinoTheme.of(context).primaryContrastingColor
         : enabled
             ? primaryColor
             : _kDisabledForeground;

@@ -17,9 +17,6 @@ const Color _kDefaultBarLightBackgroundColor = Color(0xCCF8F8F8);
 // Values derived from https://developer.apple.com/design/resources/.
 const Color _kDefaultBarDarkBackgroundColor = Color(0xB7212121);
 
-// Values derived from https://developer.apple.com/design/resources/.
-const Color _kDefaultBarBorderColor = Color(0x4C000000);
-
 class CupertinoTheme extends StatelessWidget {
   const CupertinoTheme({
     Key key,
@@ -59,9 +56,9 @@ class _InheritedCupertinoTheme extends InheritedModel<_ThemeDataProperties> {
   @override
   bool updateShouldNotifyDependent(_InheritedCupertinoTheme oldWidget, Set<_ThemeDataProperties> dependencies) {
     return (data.barBackgroundColor != oldWidget.data.barBackgroundColor && dependencies.contains(_ThemeDataProperties.barBackgroundColor))
-        || (data.barBorderColor != oldWidget.data.barBorderColor && dependencies.contains(_ThemeDataProperties.barBorderColor))
         || (data.brightness != oldWidget.data.brightness && dependencies.contains(_ThemeDataProperties.brightness))
         || (data.primaryColor != oldWidget.data.primaryColor && dependencies.contains(_ThemeDataProperties.primaryColor))
+        || (data.primaryContrastingColor != oldWidget.data.primaryContrastingColor && dependencies.contains(_ThemeDataProperties.primaryContrastingColor))
         || (data.scaffoldBackgroundColor != oldWidget.data.scaffoldBackgroundColor && dependencies.contains(_ThemeDataProperties.scaffoldBackgroundColor))
         || (data.tableBackgroundColor != oldWidget.data.tableBackgroundColor && dependencies.contains(_ThemeDataProperties.tableBackgroundColor))
         || (data.textTheme != oldWidget.data.textTheme && dependencies.contains(_ThemeDataProperties.textTheme));
@@ -70,9 +67,9 @@ class _InheritedCupertinoTheme extends InheritedModel<_ThemeDataProperties> {
 
 enum _ThemeDataProperties {
   barBackgroundColor,
-  barBorderColor,
   brightness,
   primaryColor,
+  primaryContrastingColor,
   scaffoldBackgroundColor,
   tableBackgroundColor,
   textTheme,
@@ -87,13 +84,13 @@ class _CupertinoThemeInheritedData implements CupertinoThemeData {
   Color get barBackgroundColor => getData(_ThemeDataProperties.barBackgroundColor).barBackgroundColor;
 
   @override
-  Color get barBorderColor => getData(_ThemeDataProperties.barBorderColor).barBorderColor;
-
-  @override
   Brightness get brightness => getData(_ThemeDataProperties.brightness).brightness;
 
   @override
   Color get primaryColor => getData(_ThemeDataProperties.primaryColor).primaryColor;
+
+  @override
+  Color get primaryContrastingColor => getData(_ThemeDataProperties.primaryContrastingColor).primaryContrastingColor;
 
   @override
   Color get scaffoldBackgroundColor => getData(_ThemeDataProperties.scaffoldBackgroundColor).scaffoldBackgroundColor;
@@ -113,29 +110,29 @@ class CupertinoThemeData {
   factory CupertinoThemeData({
     Brightness brightness,
     Color primaryColor,
+    Color primaryContrastingColor,
     CupertinoTextTheme textTheme,
     Color barBackgroundColor,
-    Color barBorderColor,
     Color scaffoldBackgroundColor,
     Color tableBackgroundColor,
   }) {
     brightness ??= Brightness.light;
     final bool isLight = brightness == Brightness.light;
     primaryColor ??= isLight ? CupertinoColors.activeBlue : CupertinoColors.activeOrange;
+    primaryContrastingColor ??= isLight ? CupertinoColors.white : CupertinoColors.black;
     textTheme ??= CupertinoTextTheme(
       isDark: !isLight,
       primaryColor: primaryColor,
     );
     barBackgroundColor ??= isLight ? _kDefaultBarLightBackgroundColor : _kDefaultBarDarkBackgroundColor;
-    barBorderColor ??= _kDefaultBarBorderColor;
     scaffoldBackgroundColor ??= isLight ? CupertinoColors.white : CupertinoColors.black;
     tableBackgroundColor ??= isLight ? CupertinoColors.extraLightBackgroundGray : CupertinoColors.darkBackgroundGray;
     return CupertinoThemeData._(
       brightness,
       primaryColor,
+      primaryContrastingColor,
       textTheme,
       barBackgroundColor,
-      barBorderColor,
       scaffoldBackgroundColor,
       tableBackgroundColor,
     );
@@ -144,18 +141,18 @@ class CupertinoThemeData {
   const CupertinoThemeData._(
     this.brightness,
     this.primaryColor,
+    this.primaryContrastingColor,
     this.textTheme,
     this.barBackgroundColor,
-    this.barBorderColor,
     this.scaffoldBackgroundColor,
     this.tableBackgroundColor,
   );
 
   final Brightness brightness;
   final Color primaryColor;
+  final Color primaryContrastingColor;
   final CupertinoTextTheme textTheme;
   final Color barBackgroundColor;
-  final Color barBorderColor;
   final Color scaffoldBackgroundColor;
   final Color tableBackgroundColor;
 }

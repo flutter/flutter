@@ -20,7 +20,7 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Cupertino Buttons'),
+        middle: const Text('Buttons'),
         previousPageTitle: 'Cupertino',
         trailing: CupertinoDemoDocumentationButton(CupertinoButtonsDemo.routeName),
       ),

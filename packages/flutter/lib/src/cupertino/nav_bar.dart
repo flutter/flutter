@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
-import 'colors.dart';
 import 'icons.dart';
 import 'page_scaffold.dart';
 import 'route.dart';
@@ -320,6 +319,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   ///
   /// The default color for text in the [middle] slot is always black, as per
   /// iOS standard design.
+  @Deprecated('Use CupertinoTheme and primaryColor to propagate color')
   final Color actionsForegroundColor;
 
   /// {@template flutter.cupertino.navBar.transitionBetweenRoutes}
@@ -403,7 +403,6 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       userLargeTitle: null,
       large: false,
     );
-
 
     final Widget navBar = _wrapWithBackground(
       border: widget.border,
@@ -597,6 +596,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   ///
   /// The default color for text in the [largeTitle] slot is always black, as per
   /// iOS standard design.
+  @Deprecated('Use CupertinoTheme and primaryColor to propagate color')
   final Color actionsForegroundColor;
 
   /// {@macro flutter.cupertino.navBar.transitionBetweenRoutes}

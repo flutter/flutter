@@ -21,7 +21,7 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Cupertino Sliders'),
+        middle: const Text('Sliders'),
         previousPageTitle: 'Cupertino',
         trailing: CupertinoDemoDocumentationButton(CupertinoSliderDemo.routeName),
       ),

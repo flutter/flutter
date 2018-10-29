@@ -32,13 +32,14 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Cupertino Alerts'),
+        middle: const Text('Alerts'),
         previousPageTitle: 'Cupertino',
         trailing: CupertinoDemoDocumentationButton(CupertinoAlertDemo.routeName),
       ),
       child: Builder(
         builder: (BuildContext context) {
           return ListView(
+            // Add more padding to the normal safe area.
             padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0)
                 + MediaQuery.of(context).padding,
             children: <Widget>[
