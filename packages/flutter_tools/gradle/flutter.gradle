@@ -190,19 +190,19 @@ class FlutterPlugin implements Plugin<Project> {
             def pluginProject = project.rootProject.findProject(":$name")
             if (pluginProject != null) {
                 project.dependencies {
-                    if (project.getConfigurations().findByName("implementation")) {
-                        implementation pluginProject
+                    if (project.getConfigurations().findByName("api")) {
+                        api pluginProject
                     } else {
                         compile pluginProject
                     }
                 }
-		pluginProject.afterEvaluate {
+                pluginProject.afterEvaluate {
                     pluginProject.android.buildTypes {
                         profile {
                             initWith debug
                         }
                     }
-		}
+                }
                 pluginProject.afterEvaluate this.&addFlutterJarCompileOnlyDependency
             } else {
                 project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
