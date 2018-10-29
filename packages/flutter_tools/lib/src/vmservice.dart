@@ -951,17 +951,10 @@ class VM extends ServiceObjectOwner {
 
   Future<void> refreshViews() {
     if (!isFlutterEngine)
-      return Future<void>.value(null);
+      return null;
     _viewCache.clear();
-    final Completer<void> completer = Completer<void>();
-    final List<Future<ServiceObject>> futures = <Future<ServiceObject>>[];
-    for (Isolate isolate in isolates.toList()) {
-      futures.add(vmService.vm.invokeRpc<ServiceObject>('_flutter.listViews',
-          timeout: kLongRequestTimeout,
-          params: <String, dynamic> {'isolateId': isolate.id}));
-    }
-    Future.wait(futures).whenComplete(() => completer.complete(null)); // ignore: unawaited_futures
-    return completer.future;
+    // Send one per-application request that refreshes all views in the app.
+    return vmService.vm.invokeRpc<ServiceObject>('_flutter.listViews', timeout: kLongRequestTimeout);
   }
 
   Iterable<FlutterView> get views => _viewCache.values;
