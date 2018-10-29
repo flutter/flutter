@@ -10,6 +10,7 @@ void main() {
   for (String language in kSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
       final Locale locale = Locale(language, '');
+
       expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
 
       final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
