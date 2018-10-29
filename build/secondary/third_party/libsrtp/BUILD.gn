@@ -372,19 +372,19 @@ if (use_system_libsrtp) {
     group("srtp_runtest") {
       deps = [
         ":rdbx_driver",
-        ":srtp_driver",
-        ":roc_driver",
         ":replay_driver",
+        ":roc_driver",
         ":rtpw",
+        ":srtp_driver",
+        ":srtp_test_aes_calc",
         ":srtp_test_cipher_driver",
         ":srtp_test_datatypes_driver",
-        ":srtp_test_stat_driver",
-        ":srtp_test_sha1_driver",
+        ":srtp_test_env",
         ":srtp_test_kernel_driver",
-        ":srtp_test_aes_calc",
         ":srtp_test_rand_gen",
         ":srtp_test_rand_gen_soak",
-        ":srtp_test_env",
+        ":srtp_test_sha1_driver",
+        ":srtp_test_stat_driver",
       ]
     }
   }

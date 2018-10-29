@@ -67,8 +67,8 @@ android_resources("android_support_v7_mediarouter_resources") {
 
 android_java_prebuilt("android_support_v7_mediarouter_java") {
   deps = [
-    ":android_support_v7_mediarouter_resources",
     ":android_support_v7_appcompat_java",
+    ":android_support_v7_mediarouter_resources",
   ]
   jar_path = "$android_sdk_root/extras/android/support/v7/mediarouter/libs/android-support-v7-mediarouter.jar"
 }

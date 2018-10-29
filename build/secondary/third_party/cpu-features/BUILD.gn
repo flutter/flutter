@@ -3,9 +3,7 @@
 # found in the LICENSE file.
 
 source_set("cpu-features") {
-  public_configs = [
-    "//third_party/android_tools:cpu_features_include",
-  ]
+  public_configs = [ "//third_party/android_tools:cpu_features_include" ]
   deps = [
     "//third_party/android_tools:cpu_features",
   ]

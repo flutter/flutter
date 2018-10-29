@@ -15,9 +15,7 @@
 static_library("benchmark") {
   defines = [ "HAVE_STD_REGEX" ]
 
-  include_dirs = [
-    "//third_party/benchmark/include",
-  ]
+  include_dirs = [ "//third_party/benchmark/include" ]
 
   sources = [
     "//third_party/benchmark/src/arraysize.h",

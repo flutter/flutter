@@ -63,12 +63,13 @@ config("compiler") {
   # not be compatible with newer ones. To achieve this, we insert a synthetic
   # define into the compile line. We only do this for toolchains that we use
   # from buildtools.
-  toolchain_version = exec_script("//build/util/lastchange.py",
-                                  [
-                                    "--source-dir=" + rebase_path("//buildtools"),
-                                    "--revision-only",
-                                  ],
-                                  "trim string")
+  toolchain_version =
+      exec_script("//build/util/lastchange.py",
+                  [
+                    "--source-dir=" + rebase_path("//buildtools"),
+                    "--revision-only",
+                  ],
+                  "trim string")
   defines = [ "TOOLCHAIN_VERSION=$toolchain_version" ]
 
   # In general, Windows is totally different, but all the other builds share
@@ -303,7 +304,7 @@ config("compiler") {
 
     if (!is_android) {
       defines += [
-        "_FILE_OFFSET_BITS=64", # https://android.googlesource.com/platform/bionic/+/master/docs/32-bit-abi.md#32_bit-and
+        "_FILE_OFFSET_BITS=64",  # https://android.googlesource.com/platform/bionic/+/master/docs/32-bit-abi.md#32_bit-and
         "_LARGEFILE_SOURCE",
         "_LARGEFILE64_SOURCE",
       ]
@@ -428,6 +429,7 @@ config("compiler") {
       "-Wl,--no-undefined",
       "-Wl,--exclude-libs,ALL",
       "-fuse-ld=lld",
+
       # Enable identical code folding to reduce size.
       "-Wl,--icf=all",
     ]
@@ -518,8 +520,7 @@ config("runtime_library") {
     # strange errors. The include ordering here is important; change with
     # caution.
     cflags += [
-      "-isystem" +
-          rebase_path("$android_libcpp_root/include", root_build_dir),
+      "-isystem" + rebase_path("$android_libcpp_root/include", root_build_dir),
       "-isystem" + rebase_path(
               "$android_ndk_root/sources/cxx-stl/llvm-libc++abi/include",
               root_build_dir),

@@ -49,7 +49,6 @@ if (use_goma) {
 #  current_cpu: current_cpu to pass as a build arg
 #  environment: File name of environment file.
 template("msvc_toolchain") {
-
   env = invoker.environment
 
   if (is_debug) {

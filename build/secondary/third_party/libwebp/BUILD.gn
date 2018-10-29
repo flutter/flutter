@@ -20,17 +20,16 @@ config("libwebp_defines") {
 
 source_set("libwebp_sse41") {
   include_dirs = [ "//third_party/libwebp/src" ]
-    configs += [ ":libwebp_defines" ]
-    sources = [
-      "//third_party/libwebp/src/dsp/alpha_processing_sse41.c",
-      "//third_party/libwebp/src/dsp/dec_sse41.c",
-      "//third_party/libwebp/src/dsp/enc_sse41.c",
-      "//third_party/libwebp/src/dsp/lossless_enc_sse41.c",
-    ]
-      if ((current_cpu == "x86" || current_cpu == "x64") &&
-        (!is_win || is_clang)) {
-        cflags_c = [ "-msse4.1" ]
-      }
+  configs += [ ":libwebp_defines" ]
+  sources = [
+    "//third_party/libwebp/src/dsp/alpha_processing_sse41.c",
+    "//third_party/libwebp/src/dsp/dec_sse41.c",
+    "//third_party/libwebp/src/dsp/enc_sse41.c",
+    "//third_party/libwebp/src/dsp/lossless_enc_sse41.c",
+  ]
+  if ((current_cpu == "x86" || current_cpu == "x64") && (!is_win || is_clang)) {
+    cflags_c = [ "-msse4.1" ]
+  }
 }
 
 source_set("libwebp_avx2") {
@@ -39,14 +38,13 @@ source_set("libwebp_avx2") {
   sources = [
     "//third_party/libwebp/src/dsp/enc_avx2.c",
   ]
-    if ((current_cpu == "x86" || current_cpu == "x64") &&
-      (!is_win || is_clang)) {
-      cflags_c = [ "-mavx2" ]
-    }
+  if ((current_cpu == "x86" || current_cpu == "x64") && (!is_win || is_clang)) {
+    cflags_c = [ "-mavx2" ]
+  }
 }
 
 source_set("libwebp") {
-  public_configs = [":libwebp_config"]
+  public_configs = [ ":libwebp_config" ]
   configs += [ ":libwebp_defines" ]
   deps = [
     ":libwebp_avx2",
@@ -162,6 +160,5 @@ source_set("libwebp") {
     "//third_party/libwebp/src/utils/rescaler_utils.c",
     "//third_party/libwebp/src/utils/thread_utils.c",
     "//third_party/libwebp/src/utils/utils.c",
-    ]
-
+  ]
 }

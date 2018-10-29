@@ -56,8 +56,7 @@ template("android_gcc_toolchain") {
         assert(false, "Unknown host")
       }
 
-      prefix = rebase_path("//buildtools/$host_dir/clang/bin",
-                           root_build_dir)
+      prefix = rebase_path("//buildtools/$host_dir/clang/bin", root_build_dir)
 
       cc = compiler_prefix + prefix + "/clang"
       cxx = compiler_prefix + prefix + "/clang++"

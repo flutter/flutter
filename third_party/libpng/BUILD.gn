@@ -30,8 +30,8 @@ source_set("libpng") {
   ]
 
   if ((is_ios && !use_ios_simulator) ||
-      ((is_android || is_linux) && (current_cpu == "arm" || current_cpu == "arm64"))) {
-
+      ((is_android || is_linux) &&
+       (current_cpu == "arm" || current_cpu == "arm64"))) {
     if (is_android) {
       import("//build/config/android/config.gni")
       rebased_android_toolchain_root =
@@ -48,9 +48,7 @@ source_set("libpng") {
       "arm/filter_neon_intrinsics.c",
     ]
 
-    defines += [
-      "PNG_ARM_NEON_OPT=2"
-    ]
+    defines += [ "PNG_ARM_NEON_OPT=2" ]
   }
 
   deps = [
