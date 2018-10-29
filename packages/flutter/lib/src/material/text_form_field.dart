@@ -40,11 +40,14 @@ import 'theme.dart';
 ///    surround the actual text editing widget.
 ///
 /// ## Sample code
+/// Creates a [TextFormField] with an [InputDecoration] and validator function.
+/// In this example, onSaved is empty, but can optionally be used to call a
+/// custom function when the user saves the form.
 ///
 /// ```dart
-/// new TextFormField(
+/// TextFormField(
 ///   decoration: const InputDecoration(
-///     icon: const Icon(Icons.person),
+///     icon: Icon(Icons.person),
 ///     hintText: 'What do people call you?',
 ///     labelText: 'Name *',
 ///   ),
