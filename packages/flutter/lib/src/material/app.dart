@@ -194,6 +194,8 @@ class MaterialApp extends StatefulWidget {
   /// )
   /// ```
   ///
+  /// ## Adding localizations for a new locale
+  ///
   /// The information that follows applies to the unusual case of an app
   /// adding translations for a language not already supported by
   /// [GlobalMaterialLocalizations].
