@@ -10,9 +10,8 @@ import 'dialog.dart';
 /// Defines a theme for [Dialog] widgets.
 ///
 /// Descendant widgets obtain the current [DialogTheme] object using
-/// `DialogTheme.of(context)`.
-/// instances of [DialogTheme] can be customized by copying it (using
-/// [DialogTheme.copyWith]).
+/// `DialogTheme.of(context)`. Instances of [DialogTheme] can be customized by 
+/// copying it (using [DialogTheme.copyWith]).
 ///
 /// When Shape is `null`, the dialog defaults to a [RoundedRectangleBorder] with
 /// a border radius of 2.0 on all corners.
