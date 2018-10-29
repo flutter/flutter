@@ -203,12 +203,10 @@ using namespace shell;
   UIViewController* viewController = [UIApplication sharedApplication].keyWindow.rootViewController;
   if ([viewController isKindOfClass:[UINavigationController class]]) {
     [((UINavigationController*)viewController) popViewControllerAnimated:NO];
-    [_engine.get() setViewController:nil];
   } else {
     auto engineViewController = static_cast<UIViewController*>([_engine.get() viewController]);
     if (engineViewController != viewController) {
       [engineViewController dismissViewControllerAnimated:NO completion:nil];
-      [_engine.get() setViewController:nil];
     }
   }
 }
