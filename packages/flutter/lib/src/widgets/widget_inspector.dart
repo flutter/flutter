@@ -1852,7 +1852,7 @@ mixin WidgetInspectorService {
   }
 
   /// All events dispatched by a [WidgetInspectorService] use this method
-  /// instead of calling [developer.postEvent] directly  so that tests for
+  /// instead of calling [developer.postEvent] directly so that tests for
   /// [WidgetInspectorService] can track which events were dispatched by
   /// overriding this method.
   @protected
@@ -1870,12 +1870,21 @@ mixin WidgetInspectorService {
   void _onPaint(RenderObject renderObject) {
     try {
       final Element element = renderObject.debugCreator?.element;
-      assert(element is RenderObjectElement);
+      if (element is! RenderObjectElement) {
+        // This branch should not hit as long as all RenderObjects were created
+        // by Widgets. It is possible there might be some render objects
+        // created directly without using the Widget layer so we add this check
+        // to improve robustness.
+        return;
+      }
       _repaintStats.add(element);
 
+      // Give all ancestor elements credit for repainting as long as they do
+      // not have their own associated RenderObject.
       element.visitAncestorElements((Element ancestor) {
         if (ancestor is RenderObjectElement) {
-          // This ancestor has its onw RenderObject. Don't conflate it.
+          // This ancestor has its own RenderObject so we can precisely track
+          // when it repaints.
           return false;
         }
         _repaintStats.add(ancestor);
@@ -1971,41 +1980,43 @@ class _ElementLocationStatsTracker {
   /// the creation location is local to the current project.
   void add(Element element) {
     final Object widget = element.widget;
-    if (widget is _HasCreationLocation) {
-      final _Location location = widget._location;
-      final int id = _toLocationId(location);
+    if (widget is! _HasCreationLocation) {
+      return;
+    }
+    final _HasCreationLocation creationLocationSource = widget;
+    final _Location location = creationLocationSource._location;
+    final int id = _toLocationId(location);
 
-      _LocationCount entry;
-      if (id >= _stats.length || _stats[id] == null) {
-        // After the first frame, almost all creation ids will already be in
-        // _stats so this slow path will rarely be hit.
-        while (id >= _stats.length) {
-          _stats.add(null);
-        }
-        entry = _LocationCount(
-          location: location,
-          id: id,
-          local: WidgetInspectorService.instance._isLocalCreationLocation(location),
-        );
-        if (entry.local) {
-          newLocations.add(entry);
-        }
-        _stats[id] = entry;
-      } else {
-        entry = _stats[id];
+    _LocationCount entry;
+    if (id >= _stats.length || _stats[id] == null) {
+      // After the first frame, almost all creation ids will already be in
+      // _stats so this slow path will rarely be hit.
+      while (id >= _stats.length) {
+        _stats.add(null);
       }
-
-      // We could in the future add an option to track stats for all widgets but
-      // that would significantly increase the size of the events posted using
-      // [developer.postEvent] and current use cases for this feature focus on
-      // helping users find problems with their widgets not the platform
-      // widgets.
+      entry = _LocationCount(
+        location: location,
+        id: id,
+        local: WidgetInspectorService.instance._isLocalCreationLocation(location),
+      );
       if (entry.local) {
-        if (entry.count == 0) {
-          active.add(entry);
-        }
-        entry.increment();
+        newLocations.add(entry);
       }
+      _stats[id] = entry;
+    } else {
+      entry = _stats[id];
+    }
+
+    // We could in the future add an option to track stats for all widgets but
+    // that would significantly increase the size of the events posted using
+    // [developer.postEvent] and current use cases for this feature focus on
+    // helping users find problems with their widgets not the platform
+    // widgets.
+    if (entry.local) {
+      if (entry.count == 0) {
+        active.add(entry);
+      }
+      entry.increment();
     }
   }
 

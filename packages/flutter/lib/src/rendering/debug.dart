@@ -126,9 +126,11 @@ typedef ProfilePaintCallback = void Function(RenderObject renderObject);
 /// This callback is only invoked in debug builds.
 ///
 /// See also:
+///
 ///  * [debugProfilePaintsEnabled], which does something similar but adds
 ///    [dart:developer.Timeline] events instead of invoking a callback.
-///  * [debugOnBuild], which does something similar for widgets being built.
+///  * [debugOnRebuildDirtyWidget], which does something similar for widgets
+///    being built.
 ///  * [WidgetInspectorService], which uses the [debugOnProfilePaint]
 ///    callback to generate aggregate profile statistics describing what paints
 ///    occurred when the `ext.flutter.inspector.trackRepaintWidgets` service
