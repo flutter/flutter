@@ -60,7 +60,7 @@ void main() {
 
   testWidgets('Custom dialog shape matches golden', (WidgetTester tester) async {
     const RoundedRectangleBorder customBorder =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(1.0)));
+      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
       actions: <Widget>[ ],
