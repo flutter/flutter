@@ -3514,6 +3514,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (!_active || !_dirty)
       return;
     assert(() {
+      if (debugOnRebuildDirtyWidget != null) {
+        debugOnRebuildDirtyWidget(this, _debugBuiltOnce);
+      }
       if (debugPrintRebuildDirtyWidgets) {
         if (!_debugBuiltOnce) {
           debugPrint('Building $this');
