@@ -898,7 +898,6 @@ void main() {
 
       ScaffoldGeometry geometry = listenerState.cache.value;
       final Rect transitioningFabRect = geometry.floatingActionButtonArea;
-
       
       final double transitioningRotation = tester.widget<RotationTransition>(
         find.byType(RotationTransition),
@@ -916,7 +915,6 @@ void main() {
       expect(transitioningRotation, lessThan(1.0));
 
       expect(completedRotation, equals(1.0));
-
 
       expect(
         geometry.floatingActionButtonArea,
