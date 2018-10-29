@@ -10,7 +10,6 @@ void main() {
   for (String language in kSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
       final Locale locale = Locale(language, '');
-
       expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
 
       final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
@@ -74,6 +73,17 @@ void main() {
       expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNot(contains(r'$tabCount')));
       expect(() => localizations.tabLabel(tabIndex: 0, tabCount: 5), throwsAssertionError);
       expect(() => localizations.tabLabel(tabIndex: 2, tabCount: 0), throwsAssertionError);
+
+      expect(localizations.formatHour(const TimeOfDay(hour: 10, minute: 0)), isNotNull);
+      expect(localizations.formatMinute(const TimeOfDay(hour: 10, minute: 0)), isNotNull);
+      expect(localizations.formatYear(DateTime(2018, 8, 1)), isNotNull);
+      expect(localizations.formatMediumDate(DateTime(2018, 8, 1)), isNotNull);
+      expect(localizations.formatFullDate(DateTime(2018, 8, 1)), isNotNull);
+      expect(localizations.formatMonthYear(DateTime(2018, 8, 1)), isNotNull);
+      expect(localizations.narrowWeekdays, isNotNull);
+      expect(localizations.narrowWeekdays.length, 7);
+      expect(localizations.formatDecimal(123), isNotNull);
+      expect(localizations.formatTimeOfDay(const TimeOfDay(hour: 10, minute: 0)), isNotNull);
     });
   }
 
