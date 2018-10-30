@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show hashValues;
+
 import 'package:flutter/widgets.dart';
 
+import 'debug.dart';
 import 'material_localizations.dart';
+
 
 /// Whether the [TimeOfDay] is before or after noon.
 enum DayPeriod {
@@ -96,7 +99,8 @@ class TimeOfDay {
   ///
   /// This is a shortcut for [MaterialLocalizations.formatTimeOfDay].
   String format(BuildContext context) {
-    debugCheckHasMediaQuery(context);
+    assert(debugCheckHasMediaQuery(context));
+    assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return localizations.formatTimeOfDay(
       this,
