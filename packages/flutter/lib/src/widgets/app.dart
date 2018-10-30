@@ -757,6 +757,12 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   /// When a preferredLocale matches more than one supported locale, it will resolve
   /// to the first matching locale listed in the supportedLocales.
   ///
+  /// When all [preferredLocales] have been exhausted without a match, the first countryCode only
+  /// match will be returned.
+  ///
+  /// When no match at all is found, the first (default) locale in [supportedLocales] will be
+  /// returned.
+  ///
   /// This algorithm does not take language distance (how similar languages are to each other)
   /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
   /// when `de` is not supported and `zh` is listed before `fr` (German is closer to French
@@ -797,12 +803,6 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       if (allSupportedLocales.containsKey(ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode, userLocale.countryCode.hashCode))) {
         return userLocale;
       }
-      // If there was a languageCode-only match in the previous iteration's higher
-      // ranked preferred locale, we return it if the current userLocale does not
-      // have a perfect match.
-      if (matchesLanguageCode != null) {
-        return matchesLanguageCode;
-      }
       // Look for language+script match.
       if (userLocale.scriptCode != null && languageAndScriptLocales.containsKey(ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode))) {
         return languageAndScriptLocales[ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode)];
@@ -811,12 +811,22 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       if (userLocale.countryCode != null && languageAndCountryLocales.containsKey(ui.hashValues(userLocale.languageCode.hashCode, userLocale.countryCode.hashCode))) {
         return languageAndCountryLocales[ui.hashValues(userLocale.languageCode.hashCode, userLocale.countryCode.hashCode)];
       }
+      // If there was a languageCode-only match in the previous iteration's higher
+      // ranked preferred locale, we return it if the current userLocale does not
+      // have a perfect match.
+      if (matchesLanguageCode != null) {
+        return matchesLanguageCode;
+      }
       // Look and store language-only match.
       if (languageLocales.containsKey(userLocale.languageCode.hashCode)) {
         matchesLanguageCode = languageLocales[userLocale.languageCode.hashCode];
         // Since first (default) locale is usually highly preferred, we will allow
-        // a languageCode-only match to be instantly matched.
-        if (localeIndex == 0) {
+        // a languageCode-only match to be instantly matched. If the next preferred
+        // languageCode is the same, we defer hastily returning until the next iteration
+        // since it can only be the same or improved match.
+        if (localeIndex == 0
+          && !(localeIndex + 1 < preferredLocales.length
+              && preferredLocales[localeIndex + 1].languageCode == userLocale.languageCode)) {
           return matchesLanguageCode;
         }
       }
