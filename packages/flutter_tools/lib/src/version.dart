@@ -47,7 +47,7 @@ class FlutterVersion {
     'master',
     'dev',
     'beta',
-    'release',
+    'stable',
   ]);
 
   /// This maps old branch names to the names of branches that replaced them.
@@ -63,7 +63,7 @@ class FlutterVersion {
 
   String _channel;
   /// The channel is the upstream branch.
-  /// `master`, `dev`, `beta`, `release`; or old ones, like `alpha`, `hackathon`, ...
+  /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
   String get channel => _channel;
 
   /// The name of the local branch.
