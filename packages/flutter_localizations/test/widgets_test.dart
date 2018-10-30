@@ -697,6 +697,7 @@ void main() {
   });
 
   testWidgets('WidgetsApp.locale is resolved against supportedLocales', (WidgetTester tester) async {
+    // app locale matches a supportedLocale
     await tester.pumpWidget(
       buildFrame(
         supportedLocales: const <Locale>[
@@ -709,10 +710,10 @@ void main() {
         }
       )
     );
-
     await tester.pumpAndSettle();
     expect(find.text('en_US'), findsOneWidget);
 
+    // app locale matches a supportedLocale's language
     await tester.pumpWidget(
       buildFrame(
         supportedLocales: const <Locale>[
@@ -725,10 +726,10 @@ void main() {
         }
       )
     );
-
     await tester.pumpAndSettle();
     expect(find.text('en_GB'), findsOneWidget);
 
+    // app locale matches no supportedLocale
     await tester.pumpWidget(
       buildFrame(
         supportedLocales: const <Locale>[
@@ -741,7 +742,6 @@ void main() {
         }
       )
     );
-
     await tester.pumpAndSettle();
     expect(find.text('zh_CN'), findsOneWidget);
   });
