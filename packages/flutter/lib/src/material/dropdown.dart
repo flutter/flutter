@@ -765,54 +765,47 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 }
 
-/// A convenience class that wraps a [DropdownButton] in a [FormField] so as to
+/// A convenience widget that wraps a [DropdownButton] in a [FormField] so as to
 /// act as a part of a [Form].
-///
-/// The [DropdownButton] widget is displayed without the underline, because it
-/// is provided by the [InputDecorator].
-///
-/// See also:
-///
-///  * [DropdownButton], which is the underlying Widget providing the functionality
-///  * [InputDecorator], which shows the visual elements and styles the form
-///    field
 class DropdownButtonFormField<T> extends FormField<T> {
   /// Creates a [DropdownButton] widget wrapped in an [InputDecorator] and
   /// [FormField].
   ///
-  /// As per [DropdownButton] items and onChanged must be supplied.
+  /// As per [DropdownButton] items and onChanged must be supplied. The
+  /// [DropdownButton] [items] and [onChanged] parameters must not be null.
   DropdownButtonFormField({
     Key key,
     T value,
     @required List<DropdownMenuItem<T>> items,
     @required this.onChanged,
-    InputDecoration decoration,
+    InputDecoration decoration = const InputDecoration(),
     FormFieldSetter<T> onSaved,
     FormFieldValidator<T> validator,
     Widget hint,
-  }) : super(
-    key: key,
-    onSaved: onSaved,
-    initialValue: value,
-    validator: validator,
-    builder: (FormFieldState<T> field) {
-      final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
-        .applyDefaults(Theme.of(field.context).inputDecorationTheme);
-      return InputDecorator(
-        decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-        isEmpty: value == null,
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<T>(
-              isDense: true,
-              value: value,
-              items: items,
-              hint: hint,
-              onChanged: field.didChange,
-          ),
-        ),
-      );
-    }
-  );
+  }) : assert(decoration != null),
+       super(
+         key: key,
+         onSaved: onSaved,
+         initialValue: value,
+         validator: validator,
+         builder: (FormFieldState<T> field) {
+           final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
+             .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+           return InputDecorator(
+             decoration: effectiveDecoration.copyWith(errorText: field.errorText),
+             isEmpty: value == null,
+             child: DropdownButtonHideUnderline(
+               child: DropdownButton<T>(
+                 isDense: true,
+                 value: value,
+                 items: items,
+                 hint: hint,
+                 onChanged: field.didChange,
+               ),
+             ),
+           );
+         }
+       );
 
   /// Called when the user selects an item.
   final ValueChanged<T> onChanged;

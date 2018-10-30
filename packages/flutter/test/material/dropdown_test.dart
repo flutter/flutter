@@ -272,10 +272,10 @@ void main() {
 
     expect(value, equals('one'));
     await tester.tap(find.text('one'));
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('three').last);
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
     expect(value, equals('three'));
   });
 
