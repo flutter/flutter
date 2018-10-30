@@ -26,6 +26,8 @@ class CupertinoTheme extends StatelessWidget {
        assert(data != null),
        super(key: key);
 
+  static final CupertinoThemeData _kFallbackTheme = CupertinoThemeData();
+
   final CupertinoThemeData data;
   final Widget child;
 
