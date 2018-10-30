@@ -2268,7 +2268,7 @@ class InputDecoration {
   /// can be expanded beyond that. Anything larger than 24px will require
   /// additional padding to ensure it matches the material spec of 12px padding
   /// between the right edge of the input and trailing edge of the prefix icon.
-  /// The following snipped shows how to pad the trailing edge of the suffix
+  /// The following snippet shows how to pad the trailing edge of the suffix
   /// icon:
   ///
   /// ```dart
