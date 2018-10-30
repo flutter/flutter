@@ -4,12 +4,11 @@
 
 import 'dart:ui' show hashValues;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'debug.dart';
 import 'material_localizations.dart';
 
-import 'debug.dart';
 
 /// Whether the [TimeOfDay] is before or after noon.
 enum DayPeriod {
