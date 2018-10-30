@@ -177,9 +177,9 @@ void main() {
           const FooMaterialLocalizationsDelegate(supportedLanguage: 'de', backButtonTooltip: 'DE'),
         ],
         supportedLocales: const <Locale>[
-          Locale('en', ''),
-          Locale('fr', ''),
-          Locale('de', ''),
+          Locale('en'),
+          Locale('fr'),
+          Locale('de'),
         ],
         buildContent: (BuildContext context) {
           return Text(
