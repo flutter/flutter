@@ -355,14 +355,14 @@ abstract class ScrollView extends StatelessWidget {
 /// generated semantics of each scrollable item with a semantic index. This can
 /// be done by wrapping the child widgets in an [IndexedSemantics].
 ///
-/// This semantic index is not necesarily the same as the index of the widget
-/// in the scrollable, because some widgets may not contribute semantic
-/// information. Consider a [new ListView.separated()], every other widget is a
+/// This semantic index is not necesarily the same as the index of the widget in
+/// the scrollable, because some widgets may not contribute semantic
+/// information. Consider a [new ListView.separated()]: every other widget is a
 /// divider with no semantic information. In this case, only odd numbered
 /// widgets have a semantic index (equal to the index ~/ 2). Furthermore, the
 /// total number of children in this example would be half the number of
-/// widgets. Note that [new ListView.separated()] handles this automatically
-/// and is only used here as an example.
+/// widgets. (The [new ListView.separated()] constructor handles this
+/// automatically; this is only used here as an example.)
 ///
 /// The total number of visible children can be provided by the constructor
 /// parameter `semanticChildCount`. This should always be the same as the
