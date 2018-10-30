@@ -137,6 +137,51 @@ class PointerEventConverter {
           );
           state.lastPosition = position;
           break;
+        case ui.PointerChange.update:
+          final bool alreadyAdded = _pointers.containsKey(datum.device);
+          final _PointerState state = _ensureStateForPointer(datum, position);
+          if (!alreadyAdded) {
+            assert(state.lastPosition == position);
+            yield PointerAddedEvent(
+                timeStamp: timeStamp,
+                kind: kind,
+                device: datum.device,
+                position: position,
+                obscured: datum.obscured,
+                pressureMin: datum.pressureMin,
+                pressureMax: datum.pressureMax,
+                distance: datum.distance,
+                distanceMax: datum.distanceMax,
+                radiusMin: radiusMin,
+                radiusMax: radiusMax,
+                orientation: datum.orientation,
+                tilt: datum.tilt
+            );
+          }
+          final Offset offset = position - state.lastPosition;
+          state.lastPosition = position;
+          yield PointerUpdateEvent(
+              timeStamp: timeStamp,
+              pointer: state.pointer,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              delta: offset,
+              buttons: datum.buttons,
+              obscured: datum.obscured,
+              pressure: datum.pressure,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distanceMax: datum.distanceMax,
+              radiusMajor: radiusMajor,
+              radiusMinor: radiusMinor,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt
+          );
+          state.lastPosition = position;
+          break;
         case ui.PointerChange.down:
           final bool alreadyAdded = _pointers.containsKey(datum.device);
           final _PointerState state = _ensureStateForPointer(datum, position);

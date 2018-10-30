@@ -416,6 +416,62 @@ class PointerHoverEvent extends PointerEvent {
   );
 }
 
+/// The pointer has moved with respect to the device while the pointer is not
+/// in contact with the device.
+///
+/// See also:
+///
+///  * [PointerMoveEvent], which reports movement while the pointer is in
+///    contact with the device.
+class PointerUpdateEvent extends PointerEvent {
+  /// Creates a pointer hover event.
+  ///
+  /// All of the argument must be non-null.
+  const PointerUpdateEvent({
+    Duration timeStamp = Duration.zero,
+    int pointer = 0,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+    int device = 0,
+    Offset position = Offset.zero,
+    Offset delta = Offset.zero,
+    int buttons = 0,
+    bool obscured = false,
+    double pressure = 1.0,
+    double pressureMin = 1.0,
+    double pressureMax = 1.0,
+    double distanceMax = 0.0,
+    double radiusMajor = 0.0,
+    double radiusMinor = 0.0,
+    double radiusMin = 0.0,
+    double radiusMax = 0.0,
+    double orientation = 0.0,
+    double tilt = 0.0,
+    bool synthesized = false,
+  }) : super(
+    timeStamp: timeStamp,
+    pointer: pointer,
+    kind: kind,
+    device: device,
+    position: position,
+    delta: delta,
+    buttons: buttons,
+    down: true,
+    obscured: obscured,
+    pressure: pressure,
+    pressureMin: pressureMin,
+    pressureMax: pressureMax,
+    distance: 0.0,
+    distanceMax: distanceMax,
+    radiusMajor: radiusMajor,
+    radiusMinor: radiusMinor,
+    radiusMin: radiusMin,
+    radiusMax: radiusMax,
+    orientation: orientation,
+    tilt: tilt,
+    synthesized: synthesized,
+  );
+}
+
 /// The pointer has made contact with the device.
 class PointerDownEvent extends PointerEvent {
   /// Creates a pointer down event.
