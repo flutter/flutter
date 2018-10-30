@@ -695,4 +695,54 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('en_US zh_CN'), findsOneWidget);
   });
+
+  testWidgets('WidgetsApp.locale is resolved against supportedLocales', (WidgetTester tester) async {
+    // app locale matches a supportedLocale
+    await tester.pumpWidget(
+      buildFrame(
+        supportedLocales: const <Locale>[
+          Locale('zh', 'CN'),
+          Locale('en', 'US'),
+        ],
+        locale: const Locale('en', 'US'),
+        buildContent: (BuildContext context) {
+          return Text(Localizations.localeOf(context).toString());
+        }
+      )
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('en_US'), findsOneWidget);
+
+    // app locale matches a supportedLocale's language
+    await tester.pumpWidget(
+      buildFrame(
+        supportedLocales: const <Locale>[
+          Locale('zh', 'CN'),
+          Locale('en', 'GB'),
+        ],
+        locale: const Locale('en', 'US'),
+        buildContent: (BuildContext context) {
+          return Text(Localizations.localeOf(context).toString());
+        }
+      )
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('en_GB'), findsOneWidget);
+
+    // app locale matches no supportedLocale
+    await tester.pumpWidget(
+      buildFrame(
+        supportedLocales: const <Locale>[
+          Locale('zh', 'CN'),
+          Locale('en', 'US'),
+        ],
+        locale: const Locale('ab', 'CD'),
+        buildContent: (BuildContext context) {
+          return Text(Localizations.localeOf(context).toString());
+        }
+      )
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('zh_CN'), findsOneWidget);
+  });
 }
