@@ -2135,7 +2135,7 @@ class BuildOwner {
           'calling scheduleBuildFor().\n'
           'If you did not attempt to call scheduleBuildFor() yourself, then this probably '
           'indicates a bug in the widgets framework. Please report it: '
-          'https://github.com/flutter/flutter/issues/new'
+          'https://github.com/flutter/flutter/issues/new?template=BUG.md'
         );
       }
       return true;
