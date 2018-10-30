@@ -34,7 +34,9 @@ Future<void> buildApk({
 
   final List<String> validationResult = androidSdk.validateSdkWellFormed();
   if (validationResult.isNotEmpty) {
-    validationResult.forEach(printError);
+    for (String message in validationResult) {
+      printError(message, wrap: false);
+    }
     throwToolExit('Try re-installing or updating your Android SDK.');
   }
 

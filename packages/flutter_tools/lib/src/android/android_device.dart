@@ -440,7 +440,7 @@ class AndroidDevice extends Device {
     final String result = (await runCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
     if (result.contains('Error: ')) {
-      printError(result.trim());
+      printError(result.trim(), wrap: false);
       return LaunchResult.failed();
     }
 
