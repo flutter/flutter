@@ -770,12 +770,12 @@ class DropdownButtonFormField<T> extends FormField<T> {
   /// Creates a [DropdownButton] widget wrapped in an [InputDecorator] and
   /// [FormField].
   ///
-  /// The [DropdownButton] [items] and [onChanged] parameters must not be null.
+  /// The [DropdownButton] [items] parameters must not be null.
   DropdownButtonFormField({
     Key key,
     T value,
     @required List<DropdownMenuItem<T>> items,
-    @required this.onChanged,
+    this.onChanged,
     InputDecoration decoration = const InputDecoration(),
     FormFieldSetter<T> onSaved,
     FormFieldValidator<T> validator,
