@@ -415,7 +415,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 
   /// Notify all the observers that the locale has changed (using
   /// [WidgetsBindingObserver.didChangeLocales]), giving them the
-  /// `locale` argument.
+  /// `locales` argument.
   ///
   /// This is called by [handleLocaleChanged] when the [Window.onLocaleChanged]
   /// notification is received.

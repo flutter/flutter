@@ -227,11 +227,22 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   /// Artificially calls dispatchLocaleChanged on the Widget binding,
   /// then flushes microtasks.
+  ///
+  /// Passes only one single Locale.
   Future<void> setLocale(String languageCode, String countryCode) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
-      final Locale locale = Locale(languageCode, countryCode);
-      dispatchLocaleChanged(locale);
+      final Locale locale = Locale(languageCode, countryCode == '' ? null : countryCode);
+      dispatchLocalesChanged(<Locale>[locale]);
+    });
+  }
+
+  /// Artificially calls dispatchLocaleChanged on the Widget binding,
+  /// then flushes microtasks.
+  Future<void> setLocales(List<Locale> locales) {
+    return TestAsyncUtils.guard<void>(() async {
+      assert(inTest);
+      dispatchLocalesChanged(locales);
     });
   }
 

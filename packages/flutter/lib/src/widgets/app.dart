@@ -51,8 +51,6 @@ typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Ite
 /// was started. The default locale is the first locale in the list of preferred
 /// locales. The [supportedLocales] parameter is just the value of
 /// [WidgetsApp.supportedLocales].
-
->>>>>>> 40fc45ace3d75dce1a69b901429f3b6355a15fb9
 typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
@@ -720,6 +718,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   // LOCALIZATION
 
+  /// This is the resolved locale, and is one of the supportedLocales.
   Locale _locale;
 
   Locale _resolveLocales(List<Locale> preferredLocales, Iterable<Locale> supportedLocales) {
@@ -757,6 +756,11 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   ///
   /// When a preferredLocale matches more than one supported locale, it will resolve
   /// to the first matching locale listed in the supportedLocales.
+  ///
+  /// This algorithm does not take language distance (how similar languages are to each other)
+  /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
+  /// when `de` is not supported and `zh` is listed before `fr` (German is closer to French
+  /// than Chinese).
   static Locale fallbackLocaleResolution(List<Locale> preferredLocales, Iterable<Locale> supportedLocales) {
     // preferredLocales can be null when called before the platform has had a chance to
     // initialize the locales. Platforms without locale passing support will provide an empty list.
@@ -770,11 +774,13 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     Map<int, Locale> languageAndCountryLocales = HashMap<int, Locale>();
     Map<int, Locale> languageAndScriptLocales = HashMap<int, Locale>();
     Map<int, Locale> languageLocales = HashMap<int, Locale>();
+    Map<int, Locale> countryLocales = HashMap<int, Locale>();
     for (Locale locale in supportedLocales) {
       allSupportedLocales[ui.hashValues(locale.languageCode.hashCode, locale.scriptCode.hashCode, locale.countryCode.hashCode)] ??= locale;
       languageAndCountryLocales[ui.hashValues(locale.languageCode.hashCode, locale.countryCode)] ??= locale;
       languageAndScriptLocales[ui.hashValues(locale.languageCode.hashCode, locale.scriptCode.hashCode)] ??= locale;
       languageLocales[locale.languageCode.hashCode] ??= locale;
+      countryLocales[locale.countryCode.hashCode] ??= locale;
     }
 
     // Since languageCode-only matches are possibly low quality, we don't return
@@ -783,6 +789,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     // the languageCode-only match when a higher accuracy match in the next
     // preferred locale cannot be found.
     Locale matchesLanguageCode;
+    Locale matchesCountryCode;
     // Loop over user's preferred locales
     for (int localeIndex = 0; localeIndex < preferredLocales.length; localeIndex += 1) {
       Locale userLocale = preferredLocales[localeIndex];
@@ -796,13 +803,13 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       if (matchesLanguageCode != null) {
         return matchesLanguageCode;
       }
-      // Look for language+country match.
-      if (languageAndCountryLocales.containsKey(ui.hashValues(userLocale.languageCode.hashCode, userLocale.countryCode.hashCode))) {
-        return languageAndCountryLocales[ui.hashValues(userLocale.languageCode.hashCode, userLocale.countryCode.hashCode)];
-      }
       // Look for language+script match.
-      if (languageAndCountryLocales.containsKey(ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode))) {
-        return languageAndCountryLocales[ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode)];
+      if (userLocale.scriptCode != null && languageAndScriptLocales.containsKey(ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode))) {
+        return languageAndScriptLocales[ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode)];
+      }
+      // Look for language+country match.
+      if (userLocale.countryCode != null && languageAndCountryLocales.containsKey(ui.hashValues(userLocale.languageCode.hashCode, userLocale.countryCode.hashCode))) {
+        return languageAndCountryLocales[ui.hashValues(userLocale.languageCode.hashCode, userLocale.countryCode.hashCode)];
       }
       // Look and store language-only match.
       if (languageLocales.containsKey(userLocale.languageCode.hashCode)) {
@@ -813,14 +820,25 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
           return matchesLanguageCode;
         }
       }
+      // countryCode only match. When all else except default supported locale fails,
+      // attempt to match by country only, as a user is likely to be familar with a
+      // language from their listed country.
+      if (userLocale.countryCode != null && countryLocales.containsKey(userLocale.countryCode.hashCode)) {
+        matchesCountryCode ??= countryLocales[userLocale.countryCode.hashCode];
+      }
     }
-    return matchesLanguageCode ?? supportedLocales.first;
+    // When there is no languageCode only match. Fallback to matching countryCode only. Country
+    // fallback only applies on iOS. When there is no countryCode only match, we return first
+    // suported locale.
+    Locale resolvedLocale = matchesLanguageCode ?? matchesCountryCode ?? supportedLocales.first;
+    if (matchesLanguageCode == null) {
+      debugPrint('Warning: Resolved locale (' + resolvedLocale.toString() + ') has a different language code than the user\'s preferred locales (' + preferredLocales.toString() + ').');
+    }
+    return resolvedLocale;
   }
 
   @override
   void didChangeLocales(List<Locale> locales) {
-    if (locales.first == _locale)
-      return;
     final Locale newLocale = _resolveLocales(locales, widget.supportedLocales);
     if (newLocale != _locale) {
       setState(() {
@@ -982,7 +1000,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       data: MediaQueryData.fromWindow(ui.window),
       child: Localizations(
         locale: widget.locale != null
-          ? _resolveLocale(widget.locale, widget.supportedLocales)
+          ? _resolveLocales(<Locale>[widget.locale], widget.supportedLocales)
           : _locale,
         delegates: _localizationsDelegates.toList(),
         child: title,
