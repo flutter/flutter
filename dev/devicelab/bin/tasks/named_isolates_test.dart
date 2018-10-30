@@ -32,7 +32,7 @@ void main() {
     section('Verify all the debug isolate names are set');
     runProcess.stdin.write('l');
     await Future.wait<dynamic>(<Future<dynamic>>[firstNameFound.future, secondNameFound.future])
-                .timeout(Duration(seconds: 1), onTimeout: () => throw 'Isolate names not found.');
+                .timeout(const Duration(seconds: 1), onTimeout: () => throw 'Isolate names not found.');
     await _quitRunner(runProcess);
 
     section('Attach to the second debug isolate');

@@ -385,6 +385,82 @@ void main() {
     );
   });
 
+  testWidgets('Multiple nav bars tags do not conflict if in different navigators',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.search),
+                title: Text('Tab 1'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.settings),
+                title: Text('Tab 2'),
+              ),
+            ],
+          ),
+          tabBuilder: (BuildContext context, int tab) {
+            return CupertinoTabView(
+              builder: (BuildContext context) {
+                return CupertinoPageScaffold(
+                  navigationBar: CupertinoNavigationBar(
+                    middle: Text('Tab ${tab + 1} Page 1'),
+                  ),
+                  child: Center(
+                    child: CupertinoButton(
+                      child: const Text('Next'),
+                      onPressed: () {
+                        Navigator.push<void>(context, CupertinoPageRoute<void>(
+                          title: 'Tab ${tab + 1} Page 2',
+                          builder: (BuildContext context) {
+                            return const CupertinoPageScaffold(
+                              navigationBar: CupertinoNavigationBar(),
+                              child: Placeholder(),
+                            );
+                          }
+                        ));
+                      },
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pump();
+
+    expect(find.text('Tab 1 Page 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Tab 2 Page 1'), findsOneWidget);
+
+    // At this point, there are 2 nav bars seeded with the same _defaultHeroTag.
+    // But they're inside different navigators.
+
+    await tester.tap(find.text('Next'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // One is inside the flight shuttle and another is invisible in the
+    // incoming route in case a new flight needs to be created midflight.
+    expect(find.text('Tab 2 Page 2'), findsNWidgets(2));
+
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Tab 2 Page 2'), findsOneWidget);
+    // Offstaged by tab 2's navigator.
+    expect(find.text('Tab 2 Page 1', skipOffstage: false), findsOneWidget);
+    // Offstaged by the CupertinoTabScaffold.
+    expect(find.text('Tab 1 Page 1', skipOffstage: false), findsOneWidget);
+    // Never navigated to tab 1 page 2.
+    expect(find.text('Tab 1 Page 2', skipOffstage: false), findsNothing);
+  });
+
   testWidgets('Transition box grows to large title size',
       (WidgetTester tester) async {
     await startTransitionBetween(
@@ -1014,5 +1090,111 @@ void main() {
 
     expect(bottomBuildTimes, 2);
     expect(topBuildTimes, 3);
+  });
+
+  testWidgets('Back swipe gesture transitions',
+      (WidgetTester tester) async {
+    await startTransitionBetween(
+      tester,
+      fromTitle: 'Page 1',
+      toTitle: 'Page 2',
+    );
+
+    // Go to the next page.
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Start the gesture at the edge of the screen.
+    final TestGesture gesture =  await tester.startGesture(const Offset(5.0, 200.0));
+    // Trigger the swipe.
+    await gesture.moveBy(const Offset(100.0, 0.0));
+
+    // Back gestures should trigger and draw the hero transition in the very same
+    // frame (since the "from" route has already moved to reveal the "to" route).
+    await tester.pump();
+
+    // Page 2, which is the middle of the top route, start to fly back to the right.
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Page 2'))),
+      const Offset(352.5802058875561, 13.5),
+    );
+
+    // Page 1 is in transition in 2 places. Once as the top back label and once
+    // as the bottom middle.
+    expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
+
+    // Past the halfway point now.
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await gesture.up();
+
+    await tester.pump();
+
+    // Transition continues.
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Page 2'))),
+      const Offset(654.2055835723877, 13.5),
+    );
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Page 2'))),
+      const Offset(720.8727767467499, 13.5),
+    );
+
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Cleans up properly
+    expect(() => flying(tester, find.text('Page 1')), throwsAssertionError);
+    expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
+    // Just the bottom route's middle now.
+    expect(find.text('Page 1'), findsOneWidget);
+  });
+
+  testWidgets('Back swipe gesture cancels properly with transition',
+      (WidgetTester tester) async {
+    await startTransitionBetween(
+      tester,
+      fromTitle: 'Page 1',
+      toTitle: 'Page 2',
+    );
+
+    // Go to the next page.
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Start the gesture at the edge of the screen.
+    final TestGesture gesture =  await tester.startGesture(const Offset(5.0, 200.0));
+    // Trigger the swipe.
+    await gesture.moveBy(const Offset(100.0, 0.0));
+
+    // Back gestures should trigger and draw the hero transition in the very same
+    // frame (since the "from" route has already moved to reveal the "to" route).
+    await tester.pump();
+
+    // Page 2, which is the middle of the top route, start to fly back to the right.
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Page 2'))),
+      const Offset(352.5802058875561, 13.5),
+    );
+
+    await gesture.up();
+    await tester.pump();
+
+    // Transition continues from the point we let off.
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Page 2'))),
+      const Offset(352.5802058875561, 13.5),
+    );
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Page 2'))),
+      const Offset(350.00985169410706, 13.5),
+    );
+
+    // Finish the snap back animation.
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Cleans up properly
+    expect(() => flying(tester, find.text('Page 1')), throwsAssertionError);
+    expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
+    // Back to page 2.
+    expect(find.text('Page 2'), findsOneWidget);
   });
 }

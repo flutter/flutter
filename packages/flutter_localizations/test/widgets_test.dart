@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -537,10 +539,8 @@ void main() {
       )
     );
 
-    // Startup time. Default test locale is null, so
-    // no supported matches. Use the first locale.
     await tester.pumpAndSettle();
-    expect(find.text('zh_CN'), findsOneWidget);
+    expect(find.text('en_GB'), findsOneWidget);
 
     // defaultLocaleChangedHandler prefers exact supported locale match
     await tester.binding.setLocale('en', 'CA');
@@ -581,8 +581,7 @@ void main() {
       )
     );
 
-    // Initial WidgetTester locale is null due to no platform intitializing it.
-    // The locale gets resolved to "en_US", which is the first supported locale.
+    // Initial WidgetTester locale is `en_US`.
     await tester.pumpAndSettle();
     expect(find.text('en_US TextDirection.ltr'), findsOneWidget);
 
@@ -623,8 +622,7 @@ void main() {
       )
     );
 
-    // Initial WidgetTester locale is null due to no platform intitializing it.
-    // The locale gets resolved to "en_US", which is the first supported locale.
+    // Initial WidgetTester locale is `en_US`.
     await tester.pumpAndSettle();
     expect(find.text('en_US TextDirection.rtl'), findsOneWidget);
 
@@ -657,8 +655,7 @@ void main() {
       )
     );
 
-    // Initial WidgetTester locale is null due to no platform intitializing it.
-    // The locale gets resolved to "en_US", which is the first supported locale.
+    // Initial WidgetTester locale is `en_US`.
     await tester.pumpAndSettle();
     expect(find.text('en_US TextDirection.rtl'), findsOneWidget);
 
@@ -675,4 +672,27 @@ void main() {
     expect(find.text('da_DA TextDirection.rtl'), findsOneWidget);
   });
 
+  // We provide <Locale>[Locale('en', 'US'), Locale('zh', 'CN')] as ui.window.locales
+  // for flutter tester so that the behavior of tests match that of production
+  // environments. Here, we test the default locales.
+  testWidgets('WidgetsApp DefaultWidgetLocalizations', (WidgetTester tester) async {
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      buildFrame(
+        // Accept whatever locale we're given
+        localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) => locale,
+        delegates: <OnlyRTLDefaultWidgetsLocalizationsDelegate>[
+          const OnlyRTLDefaultWidgetsLocalizationsDelegate(),
+        ],
+        buildContent: (BuildContext context) {
+          final Locale locale1 = ui.window.locales.first;
+          final Locale locale2 = ui.window.locales[1];
+          return Text('$locale1 $locale2');
+        }
+      )
+    );
+     // Initial WidgetTester default locales is `en_US` and `zh_CN`.
+    await tester.pumpAndSettle();
+    expect(find.text('en_US zh_CN'), findsOneWidget);
+  });
 }

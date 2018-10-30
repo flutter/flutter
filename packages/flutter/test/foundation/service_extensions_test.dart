@@ -528,12 +528,18 @@ void main() {
   });
 
   test('Service extensions - posttest', () async {
-    // See widget_inspector_test.dart for tests of the 15 ext.flutter.inspector
+    // See widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions included in this count.
+    int widgetInspectorExtensionCount = 15;
+    if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
+      // Some inspector extensions are only exposed if widget creation locations
+      // are tracked.
+      widgetInspectorExtensionCount += 2;
+    }
 
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 38);
+    expect(binding.extensions.length, 23 + widgetInspectorExtensionCount);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
