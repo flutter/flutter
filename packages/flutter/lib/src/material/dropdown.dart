@@ -787,7 +787,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
          initialValue: value,
          validator: validator,
          builder: (FormFieldState<T> field) {
-           final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
+           final InputDecoration effectiveDecoration = decoration
              .applyDefaults(Theme.of(field.context).inputDecorationTheme);
            return InputDecorator(
              decoration: effectiveDecoration.copyWith(errorText: field.errorText),
