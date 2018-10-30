@@ -998,6 +998,56 @@ void main() {
       semantics.dispose();
     });
 
+    testWidgets('Drawer state query correctly', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SafeArea(
+            left: false,
+            top: true,
+            right: false,
+            bottom: false,
+            child: Scaffold(
+              endDrawer: const Drawer(
+                child: Text('endDrawer'),
+              ),
+              drawer: const Drawer(
+                child: Text('drawer'),
+              ),
+              body: const Text('scaffold body'),
+              appBar: AppBar(
+                centerTitle: true,
+                title: const Text('Title')
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open Drawer, tap on end drawer, which closes the drawer, but does
+      // not open the drawer.
+      await tester.tap(find.byType(IconButton).first);
+      await tester.pumpAndSettle();
+
+      final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+
+      expect(true, scaffoldState.drawerOpened);
+
+      await tester.tap(find.byType(IconButton).last);
+      await tester.pumpAndSettle();
+
+      expect(false, scaffoldState.drawerOpened);
+
+      await tester.tap(find.byType(IconButton).last);
+      await tester.pumpAndSettle();
+
+      expect(true, scaffoldState.endDrawerOpened);
+
+      await tester.tap(find.byType(IconButton).first);
+      await tester.pumpAndSettle();
+
+      expect(false, scaffoldState.drawerOpened);
+    });
+
     testWidgets('Dual Drawer Opening', (WidgetTester tester) async {
 
       await tester.pumpWidget(
