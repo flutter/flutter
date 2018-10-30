@@ -99,7 +99,7 @@ abstract class ValueListenable<T> extends Listenable {
 /// See also:
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
-class ChangeNotifier extends Listenable {
+class ChangeNotifier implements Listenable {
   ObserverList<VoidCallback> _listeners = ObserverList<VoidCallback>();
 
   bool _debugAssertNotDisposed() {
