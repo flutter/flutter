@@ -1023,33 +1023,35 @@ void main() {
         ),
       );
 
-      // Open Drawer, tap on end drawer, which closes the drawer, but does
-      // not open the drawer.
-      await tester.tap(find.byType(IconButton).first);
-      await tester.pumpAndSettle();
-
       final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
 
-      expect(true, scaffoldState.drawerOpened);
+      final Finder drawerOpenButton = find.byType(IconButton).first;
+      final Finder endDrawerOpenButton = find.byType(IconButton).last;
 
-      await tester.tap(find.byType(IconButton).last);
+      await tester.tap(drawerOpenButton);
+      await tester.pumpAndSettle();
+      expect(true, scaffoldState.isDrawerOpen);
+      await tester.tap(endDrawerOpenButton);
+      await tester.pumpAndSettle();
+      expect(false, scaffoldState.isDrawerOpen);
+
+      await tester.tap(endDrawerOpenButton);
+      await tester.pumpAndSettle();
+      expect(true, scaffoldState.isEndDrawerOpen);
+      await tester.tap(drawerOpenButton);
+      await tester.pumpAndSettle();
+      expect(false, scaffoldState.isEndDrawerOpen);
+
+      scaffoldState.openDrawer();
+      expect(true, scaffoldState.isDrawerOpen);
+      await tester.tap(drawerOpenButton);
       await tester.pumpAndSettle();
 
-      expect(false, scaffoldState.drawerOpened);
-
-      await tester.tap(find.byType(IconButton).last);
-      await tester.pumpAndSettle();
-
-      expect(true, scaffoldState.endDrawerOpened);
-
-      await tester.tap(find.byType(IconButton).first);
-      await tester.pumpAndSettle();
-
-      expect(false, scaffoldState.drawerOpened);
+      scaffoldState.openEndDrawer();
+      expect(true, scaffoldState.isEndDrawerOpen);
     });
 
     testWidgets('Dual Drawer Opening', (WidgetTester tester) async {
-
       await tester.pumpWidget(
         MaterialApp(
           home: SafeArea(
