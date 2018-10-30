@@ -765,14 +765,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 }
 
-/// A convenience widget that wraps a [DropdownButton] in a [FormField] so as to
-/// act as a part of a [Form].
+/// A convenience widget that wraps a [DropdownButton] in a [FormField].
 class DropdownButtonFormField<T> extends FormField<T> {
   /// Creates a [DropdownButton] widget wrapped in an [InputDecorator] and
   /// [FormField].
   ///
-  /// As per [DropdownButton] items and onChanged must be supplied. The
-  /// [DropdownButton] [items] and [onChanged] parameters must not be null.
+  /// The [DropdownButton] [items] and [onChanged] parameters must not be null.
   DropdownButtonFormField({
     Key key,
     T value,
