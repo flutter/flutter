@@ -43,10 +43,16 @@ typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Ite
 /// [Localizations] object when the app starts and when user changes the default
 /// locale for the device.
 ///
-/// The [locale] is the device's default locale when the app started, or the
-/// device locale the user selected after the app was started. The default locale
-/// is the first locale in the list of preferred locales. The [supportedLocales]
-/// parameter is just the value of [WidgetsApp.supportedLocales].
+/// This callback is also used if the app is created with a specific locale using
+/// the [new WidgetsApp] `locale` parameter.
+///
+/// The [locale] is either the value of [WidgetsApp.locale], or the device's default
+/// locale when the app started, or the device locale the user selected after the app
+/// was started. The default locale is the first locale in the list of preferred
+/// locales. The [supportedLocales] parameter is just the value of
+/// [WidgetsApp.supportedLocales].
+
+>>>>>>> 40fc45ace3d75dce1a69b901429f3b6355a15fb9
 typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
@@ -424,10 +430,22 @@ class WidgetsApp extends StatefulWidget {
   final Color color;
 
   /// {@template flutter.widgets.widgetsApp.locale}
-  /// The initial locale for this app's [Localizations] widget.
+  /// The initial locale for this app's [Localizations] widget is based
+  /// on this value.
   ///
-  /// If the 'locale' is null the system's locale value is used.
+  /// If the 'locale' is null then the system's locale value is used.
+  ///
+  /// The value of [Localizations.locale] will equal this locale if
+  /// it matches one of the [supportedLocales]. Otherwise it will be
+  /// the first [supportedLocale].
   /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [localeResolutionCallback], which can override the default
+  ///    [supportedLocales] matching algorithm.
+  ///  * [localizationsDelegates], which collectively define all of the localized
+  ///    resources used by this app.
   final Locale locale;
 
   /// {@template flutter.widgets.widgetsApp.localizationsDelegates}
@@ -496,10 +514,8 @@ class WidgetsApp extends StatefulWidget {
   ///
   ///  * [MaterialApp.supportedLocales], which sets the `supportedLocales`
   ///    of the [WidgetsApp] it creates.
-  ///
   ///  * [localeResolutionCallback], an app callback that resolves the app's locale
   ///    when the device's locale changes.
-  ///
   ///  * [localizationsDelegates], which collectively define all of the localized
   ///    resources used by this app.
   final Iterable<Locale> supportedLocales;
@@ -965,7 +981,9 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     return MediaQuery(
       data: MediaQueryData.fromWindow(ui.window),
       child: Localizations(
-        locale: widget.locale ?? _locale,
+        locale: widget.locale != null
+          ? _resolveLocale(widget.locale, widget.supportedLocales)
+          : _locale,
         delegates: _localizationsDelegates.toList(),
         child: title,
       ),

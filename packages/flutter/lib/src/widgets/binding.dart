@@ -711,6 +711,11 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 
   @override
   Future<void> performReassemble() {
+    assert(() {
+      WidgetInspectorService.instance.performReassemble();
+      return true;
+    }());
+
     deferFirstFrameReport();
     if (renderViewElement != null)
       buildOwner.reassemble(renderViewElement);

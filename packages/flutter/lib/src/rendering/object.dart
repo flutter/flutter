@@ -161,6 +161,8 @@ class PaintingContext extends ClipContext {
     assert(() {
       if (debugProfilePaintsEnabled)
         Timeline.startSync('${child.runtimeType}', arguments: timelineWhitelistArguments);
+      if (debugOnProfilePaint != null)
+        debugOnProfilePaint(child);
       return true;
     }());
 
@@ -198,6 +200,7 @@ class PaintingContext extends ClipContext {
         return true;
       }());
     }
+    assert(child._layer != null);
     child._layer.offset = offset;
     appendLayer(child._layer);
   }
@@ -488,7 +491,7 @@ class PaintingContext extends ClipContext {
   /// ancestor render objects that this render object will include a composited
   /// layer, which, for example, causes them to use composited clips.
   void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
-    pushLayer(OpacityLayer(alpha: alpha), painter, offset);
+    pushLayer(OpacityLayer(alpha: alpha, offset: offset), painter, Offset.zero);
   }
 
   @override

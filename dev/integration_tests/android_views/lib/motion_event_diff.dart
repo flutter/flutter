@@ -122,11 +122,7 @@ void diffPointerCoordsList(StringBuffer diffBuffer,
 
 void diffPointerCoords(Map<String, dynamic> expected,
     Map<String, dynamic> actual, int pointerIdx, StringBuffer diffBuffer) {
-  diffMaps(expected, actual, diffBuffer,
-      messagePrefix: '[pointerCoord $pointerIdx] ',
-      excludeKeys: <String>[
-        'size', // Currently the framework doesn't get the size from the engine.
-      ]);
+  diffMaps(expected, actual, diffBuffer, messagePrefix: '[pointerCoord $pointerIdx] ');
 }
 
 void diffMaps(
