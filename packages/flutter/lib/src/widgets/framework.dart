@@ -4076,12 +4076,6 @@ class InheritedElement extends ProxyElement {
   }
 
   @override
-  void rebuild() {
-    _dependents.clear();
-    super.rebuild();
-  }
-
-  @override
   void debugDeactivated() {
     assert(() {
       assert(_dependents.isEmpty);
