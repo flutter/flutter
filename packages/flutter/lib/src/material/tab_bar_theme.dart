@@ -6,16 +6,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'tabs.dart';
-
 /// Defines a theme for [TabBar] widgets.
 ///
 /// A tab bar theme describes the color of the tab label and the size/shape of
 /// the [TabBar.indicator].
 ///
 /// Descendant widgets obtain the current theme's [TabBarTheme] object using
-/// `TabBarTheme.of(context)`. Instances of [TabBarTheme] can be customized by
-/// copying it (using [TabBarTheme.copyWith]).
+/// `TabBarTheme.of(context)`. Instances of [TabBarTheme] can be customized with
+/// [TabBarTheme.copyWith].
 ///
 /// See also:
 ///
