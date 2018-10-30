@@ -418,7 +418,8 @@ class WidgetsApp extends StatefulWidget {
   /// If the 'locale' is null then the system's locale value is used.
   ///
   /// The value of [Localizations.locale] will equal this locale if
-  /// it matches one of the [supportedLocales].
+  /// it matches one of the [supportedLocales]. Otherwise it will be
+  /// the first [supportedLocale].
   /// {@endtemplate}
   ///
   /// See also:
