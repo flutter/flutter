@@ -1,4 +1,4 @@
-Signature: 7cbb84dfa470cc7f298b1185c3b6a29e
+Signature: 704e64d4334e7d077da8202028e3bf0a
 
 UNUSED LICENSES:
 
@@ -826,7 +826,6 @@ FILE: ../../../third_party/skia/include/core/SkOverdrawCanvas.h
 FILE: ../../../third_party/skia/include/core/SkRasterHandleAllocator.h
 FILE: ../../../third_party/skia/include/core/SkSwizzle.h
 FILE: ../../../third_party/skia/include/core/SkYUVASizeInfo.h
-FILE: ../../../third_party/skia/include/core/SkYUVSizeInfo.h
 FILE: ../../../third_party/skia/include/effects/SkArithmeticImageFilter.h
 FILE: ../../../third_party/skia/include/effects/SkOverdrawColorFilter.h
 FILE: ../../../third_party/skia/include/effects/SkPaintImageFilter.h
@@ -1460,7 +1459,7 @@ FILE: ../../../third_party/skia/src/core/SkSurfaceCharacterization.cpp
 FILE: ../../../third_party/skia/src/core/SkTextBlobPriv.h
 FILE: ../../../third_party/skia/src/core/SkTypeface_remote.cpp
 FILE: ../../../third_party/skia/src/core/SkTypeface_remote.h
-FILE: ../../../third_party/skia/src/core/SkYUVSizeInfo.cpp
+FILE: ../../../third_party/skia/src/core/SkYUVASizeInfo.cpp
 FILE: ../../../third_party/skia/src/effects/SkOpPE.h
 FILE: ../../../third_party/skia/src/effects/SkOpPathEffect.cpp
 FILE: ../../../third_party/skia/src/effects/SkShaderMaskFilter.cpp
