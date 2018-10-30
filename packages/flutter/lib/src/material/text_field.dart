@@ -106,6 +106,7 @@ class TextField extends StatefulWidget {
     this.textCapitalization = TextCapitalization.none,
     this.style,
     this.textAlign = TextAlign.start,
+    this.textDirection,
     this.autofocus = false,
     this.obscureText = false,
     this.autocorrect = true,
@@ -175,6 +176,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.textAlign}
   final TextAlign textAlign;
+
+  /// {@macro flutter.widgets.editableText.textDirection}
+  final TextDirection textDirection;
 
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
@@ -508,6 +512,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         textCapitalization: widget.textCapitalization,
         style: style,
         textAlign: widget.textAlign,
+        textDirection: widget.textDirection,
         autofocus: widget.autofocus,
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
