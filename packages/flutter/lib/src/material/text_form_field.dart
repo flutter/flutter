@@ -42,8 +42,6 @@ import 'theme.dart';
 /// ## Sample code
 ///
 /// Creates a [TextFormField] with an [InputDecoration] and validator function.
-/// In this example, [onSaved] is empty, but can optionally be used to call a
-/// custom function when the user saves the form.
 ///
 /// ```dart
 /// TextFormField(
@@ -52,7 +50,10 @@ import 'theme.dart';
 ///     hintText: 'What do people call you?',
 ///     labelText: 'Name *',
 ///   ),
-///   onSaved: (String value) {},
+///   onSaved: (String value) {
+///     // This optional block of code can be used to run
+///     // code when the user saves the form.
+///   },
 ///   validator: (String value) {
 ///     return value.contains('@') ? 'Do not use the @ char.' : null;
 ///   },
