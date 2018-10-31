@@ -177,7 +177,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
   /// null, [navigatorKey] must also be null.
-  /// {@endTemplate}
+  /// {@endtemplate}
   final GlobalKey<NavigatorState> navigatorKey;
 
   /// {@template flutter.widgets.widgetsApp.onGenerateRoute}
@@ -237,7 +237,7 @@ class WidgetsApp extends StatefulWidget {
   /// APIs such as [Navigator.push] and [Navigator.pop] will work as expected.
   /// In contrast, the widget returned from [builder] is inserted _above_ the
   /// app's [Navigator] (if any).
-  /// {@endTemplate}
+  /// {@endtemplate}
   ///
   /// If this property is set, the [pageRouteBuilder] property must also be set
   /// so that the default route handler will know what kind of [PageRoute]s to
@@ -266,7 +266,7 @@ class WidgetsApp extends StatefulWidget {
   /// The [Navigator] is only built if routes are provided (either via [home],
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
   /// [builder] must not be null.
-  /// {@endTemplate}
+  /// {@endtemplate}
   ///
   /// If the routes map is not empty, the [pageRouteBuilder] property must be set
   /// so that the default route handler will know what kind of [PageRoute]s to
