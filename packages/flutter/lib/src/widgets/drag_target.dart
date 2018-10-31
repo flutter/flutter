@@ -431,7 +431,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
 /// This includes the [Velocity] at which the pointer was moving and [Offset]
 /// when the draggable event occurred, and whether its [DragTarget] accepted it.
 ///
-/// Also, this is the Details object for callbacks that use [DragEndCallback].
+/// Also, this is the details object for callbacks that use [DragEndCallback].
 class DraggableDetails {
   DraggableDetails._({
     this.wasAccepted,
@@ -439,7 +439,7 @@ class DraggableDetails {
     this.offset
   });
 
-  /// Determines whether the [DragTarget] accepted this draggable
+  /// Determines whether the [DragTarget] accepted this draggable.
   final bool wasAccepted;
 
   /// The velocity at which the pointer was moving when the specific pointer
