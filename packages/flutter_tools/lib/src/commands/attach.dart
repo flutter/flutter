@@ -100,7 +100,6 @@ class AttachCommand extends FlutterCommand {
     Cache.releaseLockEarly();
 
     await _validateArguments();
-    hotRunnerConfig.computeDartDependencies = false; // FIXME
 
     final Device device = await findTargetDevice();
     final int devicePort = observatoryPort;
