@@ -16,8 +16,8 @@
 namespace shell {
 
 IOSSurfaceSoftware::IOSSurfaceSoftware(fml::scoped_nsobject<CALayer> layer,
-                                       flow::ExternalViewEmbedder& view_embedder)
-    : layer_(std::move(layer)), external_view_embedder_(view_embedder) {
+                                       FlutterPlatformViewsController& platform_views_controller)
+    : IOSSurface(platform_views_controller), layer_(std::move(layer)) {
   UpdateStorageSizeIfNecessary();
 }
 
@@ -123,11 +123,17 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
 
   layer_.get().contents = reinterpret_cast<id>(static_cast<CGImageRef>(pixmap_image));
 
+  GetPlatformViewsController().Present();
+
   return true;
 }
 
 flow::ExternalViewEmbedder* IOSSurfaceSoftware::GetExternalViewEmbedder() {
-  return &external_view_embedder_;
+  return this;
+}
+void IOSSurfaceSoftware::CompositeEmbeddedView(int view_id,
+                                               const flow::EmbeddedViewParams& params) {
+  GetPlatformViewsController().CompositeEmbeddedView(view_id, params);
 }
 
 }  // namespace shell

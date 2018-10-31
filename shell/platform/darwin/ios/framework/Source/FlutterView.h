@@ -11,7 +11,6 @@
 
 #import "FlutterPlatformViews_Internal.h"
 
-#include "flutter/flow/embedded_views.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
@@ -21,7 +20,7 @@
 - (shell::Rasterizer::Screenshot)takeScreenshot:(shell::Rasterizer::ScreenshotType)type
                                 asBase64Encoded:(BOOL)base64Encode;
 
-- (flow::ExternalViewEmbedder*)externalViewEmbedder;
+- (shell::FlutterPlatformViewsController*)platformViewsController;
 
 @end
 

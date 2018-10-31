@@ -66,8 +66,6 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
                flutterView:flutter_view_] autorelease];
   views_[viewId] = fml::scoped_nsobject<FlutterTouchInterceptingView>([view retain]);
 
-  UIView* flutter_view = flutter_view_.get();
-  [flutter_view addSubview:views_[viewId].get()];
   result(nil);
 }
 
@@ -127,6 +125,33 @@ void FlutterPlatformViewsController::CompositeEmbeddedView(int view_id,
 
   UIView* view = views_[view_id];
   [view setFrame:rect];
+  composition_order_.push_back(view_id);
+}
+
+void FlutterPlatformViewsController::Present() {
+  if (composition_order_ == active_composition_order_) {
+    composition_order_.clear();
+    return;
+  }
+  UIView* flutter_view = flutter_view_.get();
+
+  // This can be more efficient, instead of removing all views and then re-attaching them,
+  // we should only remove the views that has been completly removed from the layer tree, and
+  // reorder the views using UIView's bringSubviewToFront.
+  // TODO(amirh): make this more efficient.
+  // https://github.com/flutter/flutter/issues/23793
+  for (UIView* sub_view in [flutter_view subviews]) {
+    [sub_view removeFromSuperview];
+  }
+
+  active_composition_order_.clear();
+  for (size_t i = 0; i < composition_order_.size(); i++) {
+    int view_id = composition_order_[i];
+    [flutter_view addSubview:views_[view_id].get()];
+    active_composition_order_.push_back(view_id);
+  }
+
+  composition_order_.clear();
 }
 
 }  // namespace shell

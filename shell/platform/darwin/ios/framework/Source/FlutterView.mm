@@ -80,11 +80,11 @@ id<FlutterViewEngineDelegate> _delegate;
     fml::scoped_nsobject<CAEAGLLayer> eagl_layer(
         reinterpret_cast<CAEAGLLayer*>([self.layer retain]));
     return std::make_unique<shell::IOSSurfaceGL>(std::move(eagl_layer),
-                                                 *[_delegate externalViewEmbedder]);
+                                                 *[_delegate platformViewsController]);
   } else {
     fml::scoped_nsobject<CALayer> layer(reinterpret_cast<CALayer*>([self.layer retain]));
     return std::make_unique<shell::IOSSurfaceSoftware>(std::move(layer),
-                                                       *[_delegate externalViewEmbedder]);
+                                                       *[_delegate platformViewsController]);
   }
 }
 

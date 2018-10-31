@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_SOFTWARE_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_SOFTWARE_H_
 
+#include "flutter/flow/embedded_views.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/gpu/gpu_surface_software.h"
@@ -14,10 +15,12 @@
 
 namespace shell {
 
-class IOSSurfaceSoftware final : public IOSSurface, public GPUSurfaceSoftwareDelegate {
+class IOSSurfaceSoftware final : public IOSSurface,
+                                 public GPUSurfaceSoftwareDelegate,
+                                 public flow::ExternalViewEmbedder {
  public:
   IOSSurfaceSoftware(fml::scoped_nsobject<CALayer> layer,
-                     flow::ExternalViewEmbedder& view_embedder);
+                     FlutterPlatformViewsController& platform_views_controller);
 
   ~IOSSurfaceSoftware() override;
 
@@ -42,9 +45,11 @@ class IOSSurfaceSoftware final : public IOSSurface, public GPUSurfaceSoftwareDel
   // |shell::GPUSurfaceSoftwareDelegate|
   flow::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
+  // |flow::ExternalViewEmbedder|
+  void CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) override;
+
  private:
   fml::scoped_nsobject<CALayer> layer_;
-  flow::ExternalViewEmbedder& external_view_embedder_;
   sk_sp<SkSurface> sk_surface_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceSoftware);

@@ -15,10 +15,12 @@
 
 namespace shell {
 
-class IOSSurfaceGL : public IOSSurface, public GPUSurfaceGLDelegate {
+class IOSSurfaceGL : public IOSSurface,
+                     public GPUSurfaceGLDelegate,
+                     public flow::ExternalViewEmbedder {
  public:
   IOSSurfaceGL(fml::scoped_nsobject<CAEAGLLayer> layer,
-               flow::ExternalViewEmbedder& external_view_embedder);
+               FlutterPlatformViewsController& platform_views_controller);
 
   ~IOSSurfaceGL() override;
 
@@ -43,10 +45,11 @@ class IOSSurfaceGL : public IOSSurface, public GPUSurfaceGLDelegate {
   // |shell::GPUSurfaceGLDelegate|
   flow::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
+  // |flow::ExternalViewEmbedder|
+  void CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) override;
+
  private:
   IOSGLContext context_;
-
-  flow::ExternalViewEmbedder& external_view_embedder_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceGL);
 };
