@@ -133,11 +133,16 @@ class FlutterProject {
 
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS, for app and module projects only.
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
+  Future<void> ensureReadyForPlatformSpecificTooling({
+    Map<String, dynamic> templateContext = const <String, dynamic>{
+      'androidLanguage': 'java',
+      'iosLanguage': 'objc',
+    },
+  }) async {
     if (!directory.existsSync() || hasExampleApp)
       return;
     refreshPluginsList(this);
-    await android.ensureReadyForPlatformSpecificTooling();
+    await android.ensureReadyForPlatformSpecificTooling(templateContext: templateContext);
     await ios.ensureReadyForPlatformSpecificTooling();
     await injectPlugins(this);
   }
@@ -380,15 +385,15 @@ class AndroidProject {
     return _firstMatchInFile(gradleFile, _groupPattern)?.group(1);
   }
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
+  Future<void> ensureReadyForPlatformSpecificTooling({@required Map<String, dynamic> templateContext}) async {
     if (isModule && _shouldRegenerateFromTemplate()) {
-      await _regenerateLibrary();
+      await _regenerateLibrary(templateContext: templateContext);
       // Add ephemeral host app, if an editable host app does not already exist.
       if (!_editableHostAppDirectory.existsSync()) {
         print('Generating host_app_common template for Android');
-        await _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _ephemeralDirectory);
+        await _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _ephemeralDirectory, templateContext: templateContext);
         print('Generating host_app_ephemeral template for Android');
-        await _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_ephemeral'), _ephemeralDirectory);
+        await _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_ephemeral'), _ephemeralDirectory, templateContext: templateContext);
       }
     }
     if (!hostAppGradleRoot.existsSync()) {

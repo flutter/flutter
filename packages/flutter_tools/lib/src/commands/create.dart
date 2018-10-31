@@ -374,7 +374,7 @@ Future<int> _generateApp(Directory directory, Map<String, dynamic> templateConte
   print('\n\n');
   print('Now making host apps editable.');
   // Make the host apps editable.
-  await project.ensureReadyForPlatformSpecificTooling();
+  await project.ensureReadyForPlatformSpecificTooling(templateContext: templateContext);
   print('Android host app:');
   generatedCount += await project.android.makeHostAppEditable(templateContext: templateContext);
   print('\n\niOS host app:');
@@ -400,7 +400,7 @@ Future<int> _generateLinkableProject(Directory directory, Map<String, dynamic> t
       offline: templateContext['offline'],
     );
     final FlutterProject project = await FlutterProject.fromDirectory(directory);
-    await project.ensureReadyForPlatformSpecificTooling();
+    await project.ensureReadyForPlatformSpecificTooling(templateContext: templateContext);
   }
   return generatedCount;
 }
@@ -463,7 +463,7 @@ Future<int> _generateLegacyAppV1(Directory directory, Map<String, dynamic> templ
 
   if (templateContext['pub']) {
     await pubGet(context: PubContext.create, directory: directory.path, offline: templateContext['offline']);
-    await project.ensureReadyForPlatformSpecificTooling();
+    await project.ensureReadyForPlatformSpecificTooling(templateContext: templateContext);
   }
 
   gradle.updateLocalProperties(project: project, requireAndroidSdk: false);

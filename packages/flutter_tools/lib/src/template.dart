@@ -216,11 +216,13 @@ class TemplateInstructions {
     return TemplateInstructions(
       sourceDirPath: sourceDir.absolute.path,
       destinationDirPath: destinationDir.absolute.path,
-      pathMappings: relativeSourceFilePaths.map((String relativeSourcePath) => TemplatePathMapping(
-        baseTemplatePath: sourceDir.absolute.path,
-        relativeTemplatePath: relativeSourcePath,
-        baseDestinationPath: destinationDir.absolute.path,
-      )).toList()
+      pathMappings: relativeSourceFilePaths.map((String relativeSourcePath) {
+        return TemplatePathMapping(
+          baseTemplatePath: sourceDir.absolute.path,
+          relativeTemplatePath: relativeSourcePath,
+          baseDestinationPath: destinationDir.absolute.path,
+        );
+      }).toList()
     );
   }
 
