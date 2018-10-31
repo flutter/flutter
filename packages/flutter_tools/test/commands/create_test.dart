@@ -51,7 +51,7 @@ void main() {
       dir: projectDir,
       createArgs: <String>[],
       expectedPaths: <String>[
-        'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+        'android/app/src/main/java/com/example/flutterproject/host/MainActivity.java',
         '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
         'flutter_project.iml',
         '.ios/Flutter/AppFrameworkInfo.plist',
@@ -70,7 +70,7 @@ void main() {
       dir: projectDir,
       createArgs: <String>[],
       expectedPaths: <String>[
-        'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+        'android/app/src/main/java/com/example/flutterproject/host/MainActivity.java',
         '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
         'flutter_project.iml',
         '.ios/Flutter/AppFrameworkInfo.plist',
@@ -132,7 +132,7 @@ void main() {
         'lib/main.dart',
       ],
       unexpectedPaths: <String>[
-        'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+        'android/app/src/main/java/com/example/flutterproject/host/MainActivity.java',
       ],
     );
   }, timeout: allowForCreateFlutterProject);
@@ -165,7 +165,7 @@ void main() {
         'lib/main.dart',
       ],
       unexpectedPaths: <String>[
-        'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+        'android/app/src/main/java/com/example/flutterproject/host/MainActivity.java',
       ],
     );
   }, timeout: allowForCreateFlutterProject);
@@ -196,7 +196,7 @@ void main() {
         'test/flutter_project_test.dart',
       ],
       unexpectedPaths: <String>[
-        'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+        'android/app/src/main/java/com/example/flutterproject/host/MainActivity.java',
         'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
         'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
         'example/ios/Runner/AppDelegate.h',
@@ -278,9 +278,9 @@ void main() {
 
   testUsingContext('plugin project with valid custom project name', () async {
     return _createProject(
-      projectDir,
-      <String>['--no-pub', '--template=plugin', '--project-name', 'xyz'],
-      <String>[
+      dir: projectDir,
+      createArgs: <String>['--no-pub', '--template=plugin', '--project-name', 'xyz'],
+      expectedPaths: <String>[
         'android/src/main/java/com/example/xyz/XyzPlugin.java',
         'example/android/app/src/main/java/com/example/xyzexample/MainActivity.java',
       ],
@@ -293,9 +293,10 @@ void main() {
 
   testUsingContext('plugin project with invalid custom project name', () async {
     expect(
-      () => _createProject(projectDir,
-        <String>['--no-pub', '--template=plugin', '--project-name', 'xyz.xyz'],
-        <String>[],
+      () => _createProject(
+        dir: projectDir,
+        createArgs: <String>['--no-pub', '--template=plugin', '--project-name', 'xyz.xyz'],
+        expectedPaths: <String>[],
       ),
       throwsToolExit(message: '"xyz.xyz" is not a valid Dart package name.'),
     );
@@ -608,27 +609,6 @@ void main() {
     );
   });
 
-  testUsingContext('overwrites existing directory when requested', () async {
-    Cache.flutterRoot = '../..';
-    final Directory existingDirectory = fs.directory(fs.path.join(projectDir.path, 'bad'));
-    if (!existingDirectory.existsSync()) {
-      existingDirectory.createSync(recursive: true);
-    }
-    final File existingFile = fs.file(fs.path.join(existingDirectory.path, 'lib', 'main.dart'));
-    existingFile.createSync(recursive: true);
-    await _createProject(
-      fs.directory(existingDirectory.path),
-      <String>['--overwrite'],
-      <String>[
-        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-        'lib/main.dart',
-        'ios/Flutter/AppFrameworkInfo.plist',
-        'ios/Runner/AppDelegate.m',
-        'ios/Runner/GeneratedPluginRegistrant.h',
-      ],
-    );
-  });
-
   testUsingContext('fails when invalid package name', () async {
     Cache.flutterRoot = '../..';
     final CreateCommand command = CreateCommand();
@@ -673,13 +653,13 @@ void main() {
 
   testUsingContext('can create a sample-based project', () async {
     await _createAndAnalyzeProject(
-      projectDir,
-      <String>['--no-pub', '--sample=foo.bar.Baz'],
-      <String>[
+      dir: projectDir,
+      createArgs: <String>['--no-pub', '--sample=foo.bar.Baz'],
+      expectedPaths: <String>[
         'lib/main.dart',
         'flutter_project.iml',
         'android/app/src/main/AndroidManifest.xml',
-        'ios/Flutter/AppFrameworkInfo.plist',
+        '.ios/Flutter/AppFrameworkInfo.plist',
       ],
       unexpectedPaths: <String>['test'],
     );

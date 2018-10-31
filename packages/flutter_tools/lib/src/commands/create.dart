@@ -294,19 +294,19 @@ class CreateCommand extends FlutterCommand {
     int generatedFileCount = 0;
     switch (template) {
       case _ProjectType.app:
-        generatedFileCount += await _generateApp(relativeDir, templateContext, overwrite: argResults['overwrite']);
+        generatedFileCount += await _generateApp(relativeDir, templateContext);
         break;
       case _ProjectType.legacy_app_v1:
         generatedFileCount += await _generateLegacyAppV1(relativeDir, templateContext);
         break;
       case _ProjectType.module:
-        generatedFileCount += await _generateModule(relativeDir, templateContext, overwrite: argResults['overwrite']);
+        generatedFileCount += await _generateModule(relativeDir, templateContext);
         break;
       case _ProjectType.package:
-        generatedFileCount += await _generatePackage(relativeDir, templateContext, overwrite: argResults['overwrite']);
+        generatedFileCount += await _generatePackage(relativeDir, templateContext);
         break;
       case _ProjectType.plugin:
-        generatedFileCount += await _generatePlugin(relativeDir, templateContext, overwrite: argResults['overwrite']);
+        generatedFileCount += await _generatePlugin(relativeDir, templateContext);
         break;
     }
     if (sampleCode != null) {
