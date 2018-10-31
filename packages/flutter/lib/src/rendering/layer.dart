@@ -357,6 +357,40 @@ class TextureLayer extends Layer {
   S find<S>(Offset regionOffset) => null;
 }
 
+/// A layer that shows an embedded [UIView](https://developer.apple.com/documentation/uikit/uiview)
+/// on iOS.
+class PlatformViewLayer extends Layer {
+  /// Creates a platform view layer.
+  ///
+  /// The `rect` and `viewId` parameters must not be null.
+  PlatformViewLayer({
+    @required this.rect,
+    @required this.viewId,
+  }): assert(rect != null), assert(viewId != null);
+
+  /// Bounding rectangle of this layer in the global coordinate space.
+  final Rect rect;
+
+  /// The unique identifier of the UIView displayed on this layer.
+  ///
+  /// A UIView with this identifier must have been created by [PlatformViewsServices.initUiKitView].
+  final int viewId;
+
+  @override
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+    final Rect shiftedRect = rect.shift(layerOffset);
+    builder.addPlatformView(
+      viewId,
+      offset: shiftedRect.topLeft,
+      width: shiftedRect.width,
+      height: shiftedRect.height,
+    );
+  }
+
+  @override
+  S find<S>(Offset regionOffset) => null;
+}
+
 /// A layer that indicates to the compositor that it should display
 /// certain performance statistics within it.
 ///
