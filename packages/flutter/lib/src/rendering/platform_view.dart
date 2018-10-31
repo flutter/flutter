@@ -235,7 +235,7 @@ class RenderAndroidView extends RenderBox {
   }
 }
 
-/// A render object for an iOS UIKit UIView.
+/// This is work in progress, not yet ready to be used, and requires a custom engine build. A render object for an iOS UIKit UIView.
 ///
 /// [RenderUiKitView] is responsible for sizing and displaying an iOS
 /// [UIView](https://developer.apple.com/documentation/uikit/uiview).

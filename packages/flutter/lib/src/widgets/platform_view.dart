@@ -174,7 +174,7 @@ class AndroidView extends StatefulWidget {
 }
 
 // TODO(amirh): describe the embedding mechanism.
-/// Embeds an iOS view in the Widget hierarchy.
+/// This is work in progress, not yet ready to be used, and requires a custom engine build. Embeds an iOS view in the Widget hierarchy.
 ///
 /// Embedding iOS views is an expensive operation and should be avoided when a Flutter
 /// equivalent is possible.

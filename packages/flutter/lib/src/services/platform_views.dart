@@ -93,7 +93,7 @@ class PlatformViewsService {
   }
 
   // TODO(amirh): reference the iOS plugin API for registering a UIView factory once it lands.
-  /// Creates a controller for a new iOS UIView.
+  /// This is work in progress, not yet ready to be used, and requires a custom engine build. Creates a controller for a new iOS UIView.
   ///
   /// `id` is an unused unique identifier generated with [platformViewsRegistry].
   ///
