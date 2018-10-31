@@ -4,6 +4,7 @@
 
 import 'dart:ui' show Color, hashValues;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -153,6 +154,7 @@ class ThemeData extends Diagnosticable {
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
     Typography typography,
+    CupertinoThemeData cupertinoOverrideTheme
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -294,6 +296,7 @@ class ThemeData extends Diagnosticable {
       colorScheme: colorScheme,
       dialogTheme: dialogTheme,
       typography: typography,
+      cupertinoOverrideTheme: cupertinoOverrideTheme,
     );
   }
 
@@ -353,6 +356,7 @@ class ThemeData extends Diagnosticable {
     @required this.colorScheme,
     @required this.dialogTheme,
     @required this.typography,
+    @required this.cupertinoOverrideTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -630,6 +634,8 @@ class ThemeData extends Diagnosticable {
   /// [primaryTextTheme], and [accentTextTheme].
   final Typography typography;
 
+  final CupertinoThemeData cupertinoOverrideTheme;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -678,6 +684,7 @@ class ThemeData extends Diagnosticable {
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
     Typography typography,
+    CupertinoThemeData cupertinoOverrideTheme,
   }) {
     return ThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -726,6 +733,7 @@ class ThemeData extends Diagnosticable {
       colorScheme: colorScheme ?? this.colorScheme,
       dialogTheme: dialogTheme ?? this.dialogTheme,
       typography: typography ?? this.typography,
+      cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
     );
   }
 
@@ -853,6 +861,7 @@ class ThemeData extends Diagnosticable {
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
       typography: Typography.lerp(a.typography, b.typography, t),
+      cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
     );
   }
 
@@ -909,7 +918,8 @@ class ThemeData extends Diagnosticable {
            (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
            (otherData.colorScheme == colorScheme) &&
            (otherData.dialogTheme == dialogTheme) &&
-           (otherData.typography == typography);
+           (otherData.typography == typography) &&
+           (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme);
   }
 
   @override
@@ -967,6 +977,7 @@ class ThemeData extends Diagnosticable {
           colorScheme,
           dialogTheme,
           typography,
+          cupertinoOverrideTheme,
         ),
       ),
     );
@@ -1019,7 +1030,67 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography));
+    properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme));
   }
+}
+
+@immutable
+class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
+  MaterialBasedCupertinoThemeData({
+    @required ThemeData materialTheme,
+  }) : assert(materialTheme != null),
+       _materialTheme = materialTheme,
+       _brightness = materialTheme.cupertinoOverrideTheme?.brightness,
+       _primaryColor = materialTheme.cupertinoOverrideTheme?.primaryColor,
+       _primaryContrastingColor = materialTheme.cupertinoOverrideTheme?.primaryContrastingColor,
+       _scaffoldBackgroundColor = materialTheme.cupertinoOverrideTheme?.scaffoldBackgroundColor,
+       super(
+         brightness: materialTheme.cupertinoOverrideTheme?.brightness,
+         primaryColor: materialTheme.cupertinoOverrideTheme?.primaryColor,
+         primaryContrastingColor: materialTheme.cupertinoOverrideTheme?.primaryContrastingColor,
+         textTheme: materialTheme.cupertinoOverrideTheme?.textTheme,
+         barBackgroundColor: materialTheme.cupertinoOverrideTheme?.barBackgroundColor,
+         scaffoldBackgroundColor: materialTheme.cupertinoOverrideTheme?.scaffoldBackgroundColor,
+         tableBackgroundColor: materialTheme.cupertinoOverrideTheme?.tableBackgroundColor,
+       );
+
+  final ThemeData _materialTheme;
+
+  final Brightness _brightness;
+  Brightness get brightness => _brightness ?? _materialTheme.brightness;
+
+  final Color _primaryColor;
+  Color get primaryColor => _primaryColor ?? _materialTheme.colorScheme.primary;
+
+  final Color _primaryContrastingColor;
+  Color get primaryContrastingColor => _primaryContrastingColor ?? _materialTheme.colorScheme.onPrimary;
+
+  final Color _scaffoldBackgroundColor;
+  Color get scaffoldBackgroundColor => _scaffoldBackgroundColor ?? _materialTheme.colorScheme.background;
+
+//  // Copy with shouldn't change the base Material ThemeData. To change the
+//  // base Material ThemeData, create a new Material Theme and use copyWith on
+//  // the Material ThemeData instead.
+//  MaterialBasedCupertinoThemeData copyWith({
+//    Brightness brightness,
+//    Color primaryColor,
+//    Color primaryContrastingColor,
+//    CupertinoTextTheme textTheme,
+//    Color barBackgroundColor,
+//    Color scaffoldBackgroundColor,
+//    Color tableBackgroundColor,
+//  }) {
+//    return MaterialBasedCupertinoThemeData(
+//      materialTheme: _materialTheme,
+//      brightness: brightness ?? _brightness,
+//      primaryColor: primaryColor ?? _primaryColor,
+//      primaryContrastingColor: primaryContrastingColor ?? _primaryContrastingColor,
+//      textTheme: textTheme,
+//      barBackgroundColor: barBackgroundColor,
+//      scaffoldBackgroundColor: scaffoldBackgroundColor ?? _scaffoldBackgroundColor,
+//      tableBackgroundColor: tableBackgroundColor,
+//    );
+//  }
 }
 
 class _IdentityThemeDataCacheKey {

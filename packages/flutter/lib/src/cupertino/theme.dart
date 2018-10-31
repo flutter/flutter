@@ -17,52 +17,32 @@ const Color _kDefaultBarLightBackgroundColor = Color(0xCCF8F8F8);
 // Values derived from https://developer.apple.com/design/resources/.
 const Color _kDefaultBarDarkBackgroundColor = Color(0xB7212121);
 
-class CupertinoTheme extends StatelessWidget {
+class CupertinoTheme extends InheritedModel<_ThemeDataProperties> {
   const CupertinoTheme({
     Key key,
     @required this.data,
-    @required this.child,
+    @required Widget child,
   }) : assert(child != null),
        assert(data != null),
-       super(key: key);
-
-  final CupertinoThemeData data;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return _InheritedCupertinoTheme(
-      data: data,
-      child: child,
-    );
-  }
-
-  static CupertinoThemeData of(BuildContext context) => _CupertinoThemeInheritedData(context);
-}
-
-class _InheritedCupertinoTheme extends InheritedModel<_ThemeDataProperties> {
-  const _InheritedCupertinoTheme({
-    Key key,
-    @required this.data,
-    @required Widget child
-  }) : assert(data != null),
        super(key: key, child: child);
 
   final CupertinoThemeData data;
 
   @override
-  bool updateShouldNotify(_InheritedCupertinoTheme old) => data != old.data;
+  bool updateShouldNotify(CupertinoTheme old) => data != old.data;
 
   @override
-  bool updateShouldNotifyDependent(_InheritedCupertinoTheme oldWidget, Set<_ThemeDataProperties> dependencies) {
+  bool updateShouldNotifyDependent(CupertinoTheme oldWidget, Set<_ThemeDataProperties> dependencies) {
     return (data.barBackgroundColor != oldWidget.data.barBackgroundColor && dependencies.contains(_ThemeDataProperties.barBackgroundColor))
-        || (data.brightness != oldWidget.data.brightness && dependencies.contains(_ThemeDataProperties.brightness))
-        || (data.primaryColor != oldWidget.data.primaryColor && dependencies.contains(_ThemeDataProperties.primaryColor))
-        || (data.primaryContrastingColor != oldWidget.data.primaryContrastingColor && dependencies.contains(_ThemeDataProperties.primaryContrastingColor))
-        || (data.scaffoldBackgroundColor != oldWidget.data.scaffoldBackgroundColor && dependencies.contains(_ThemeDataProperties.scaffoldBackgroundColor))
-        || (data.tableBackgroundColor != oldWidget.data.tableBackgroundColor && dependencies.contains(_ThemeDataProperties.tableBackgroundColor))
-        || (data.textTheme != oldWidget.data.textTheme && dependencies.contains(_ThemeDataProperties.textTheme));
+      || (data.brightness != oldWidget.data.brightness && dependencies.contains(_ThemeDataProperties.brightness))
+      || (data.primaryColor != oldWidget.data.primaryColor && dependencies.contains(_ThemeDataProperties.primaryColor))
+      || (data.primaryContrastingColor != oldWidget.data.primaryContrastingColor && dependencies.contains(_ThemeDataProperties.primaryContrastingColor))
+      || (data.scaffoldBackgroundColor != oldWidget.data.scaffoldBackgroundColor && dependencies.contains(_ThemeDataProperties.scaffoldBackgroundColor))
+      || (data.tableBackgroundColor != oldWidget.data.tableBackgroundColor && dependencies.contains(_ThemeDataProperties.tableBackgroundColor))
+      || (data.textTheme != oldWidget.data.textTheme && dependencies.contains(_ThemeDataProperties.textTheme));
   }
+
+  static CupertinoThemeData of(BuildContext context) => _CupertinoThemeInheritedData(context);
 }
 
 enum _ThemeDataProperties {
@@ -102,7 +82,7 @@ class _CupertinoThemeInheritedData extends CupertinoThemeData {
   CupertinoTextTheme get textTheme => getData(_ThemeDataProperties.textTheme).textTheme;
 
   CupertinoThemeData getData(_ThemeDataProperties property) {
-    return InheritedModel.inheritFrom<_InheritedCupertinoTheme>(context, aspect: property)?.data
+    return InheritedModel.inheritFrom<CupertinoTheme>(context, aspect: property)?.data
         ?? const CupertinoThemeData();
   }
 }
