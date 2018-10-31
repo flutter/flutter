@@ -300,8 +300,8 @@ class ThemeData extends Diagnosticable {
     );
   }
 
-  /// Create a [ThemeData] given a set of exact values. All the values
-  /// must be specified.
+  /// Create a [ThemeData] given a set of exact values. All the values except
+  /// cupertinoOverrideTheme must be specified.
   ///
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes created with the

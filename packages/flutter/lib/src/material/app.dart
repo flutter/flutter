@@ -96,7 +96,6 @@ class MaterialApp extends StatefulWidget {
     this.onGenerateTitle,
     this.color,
     this.theme,
-    this.cupertinoTheme,
     this.locale,
     this.localizationsDelegates,
     this.localeListResolutionCallback,
@@ -166,8 +165,6 @@ class MaterialApp extends StatefulWidget {
 
   /// The colors to use for the application's widgets.
   final ThemeData theme;
-
-  final CupertinoThemeData cupertinoTheme;
 
   /// {@macro flutter.widgets.widgetsApp.color}
   final Color color;
@@ -353,15 +350,11 @@ class _MaterialScrollBehavior extends ScrollBehavior {
 
 class _MaterialAppState extends State<MaterialApp> {
   HeroController _heroController;
-  ThemeData _themeData;
-  CupertinoThemeData _cupertinoThemeData;
 
   @override
   void initState() {
     super.initState();
     _heroController = HeroController(createRectTween: _createRectTween);
-    _themeData = widget.theme ?? ThemeData.fallback();
-    _createCupertinoThemeData();
     _updateNavigator();
   }
 
@@ -376,24 +369,6 @@ class _MaterialAppState extends State<MaterialApp> {
       _heroController = HeroController(createRectTween: _createRectTween);
     }
     _updateNavigator();
-    if (widget.theme != oldWidget.theme && widget.theme != null) {
-      _themeData = widget.theme;
-      if (widget.cupertinoTheme == null) {
-        _createCupertinoThemeData();
-      }
-    }
-    if (widget.theme != oldWidget.cupertinoTheme && widget.cupertinoTheme != null) {
-      _cupertinoThemeData = widget.cupertinoTheme;
-    }
-  }
-
-  void _createCupertinoThemeData() {
-    assert(_themeData != null, 'Material theme must be created first');
-    _cupertinoThemeData = widget.cupertinoTheme ?? CupertinoThemeData(
-      brightness: _themeData.brightness,
-      primaryColor: _themeData.primaryColor,
-      scaffoldBackgroundColor: _themeData.scaffoldBackgroundColor,
-    );
   }
 
   List<NavigatorObserver> _navigatorObservers;
@@ -428,49 +403,47 @@ class _MaterialAppState extends State<MaterialApp> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = widget.theme ?? ThemeData.fallback();
     Widget result = AnimatedTheme(
-      data: _themeData,
+      data: theme,
       isMaterialAppTheme: true,
-      child: CupertinoTheme(
-        data: _cupertinoThemeData,
-        child: WidgetsApp(
-          key: GlobalObjectKey(this),
-          navigatorKey: widget.navigatorKey,
-          navigatorObservers: _navigatorObservers,
-          // TODO(dnfield): when https://github.com/dart-lang/sdk/issues/34572 is resolved
-          // this can use type arguments again
-          pageRouteBuilder: (RouteSettings settings, WidgetBuilder builder) =>
-            MaterialPageRoute<dynamic>(settings: settings, builder: builder),
-          home: widget.home,
-          routes: widget.routes,
-          initialRoute: widget.initialRoute,
-          onGenerateRoute: widget.onGenerateRoute,
-          onUnknownRoute: widget.onUnknownRoute,
-          builder: widget.builder,
-          title: widget.title,
-          onGenerateTitle: widget.onGenerateTitle,
-          textStyle: _errorTextStyle,
-          // blue is the primary color of the default theme
-          color: widget.color ?? theme?.primaryColor ?? Colors.blue,
-          locale: widget.locale,
-          localizationsDelegates: _localizationsDelegates,
-          localeResolutionCallback: widget.localeResolutionCallback,
-          localeListResolutionCallback: widget.localeListResolutionCallback,
-          supportedLocales: widget.supportedLocales,
-          showPerformanceOverlay: widget.showPerformanceOverlay,
-          checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-          checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-          showSemanticsDebugger: widget.showSemanticsDebugger,
-          debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-          inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-            return FloatingActionButton(
-              child: const Icon(Icons.search),
-              onPressed: onPressed,
-              mini: true,
-            );
-          },
-        ),
-      )
+      child: WidgetsApp(
+        key: GlobalObjectKey(this),
+        navigatorKey: widget.navigatorKey,
+        navigatorObservers: _navigatorObservers,
+        // TODO(dnfield): when https://github.com/dart-lang/sdk/issues/34572 is resolved
+        // this can use type arguments again
+        pageRouteBuilder: (RouteSettings settings, WidgetBuilder builder) =>
+          MaterialPageRoute<dynamic>(settings: settings, builder: builder),
+        home: widget.home,
+        routes: widget.routes,
+        initialRoute: widget.initialRoute,
+        onGenerateRoute: widget.onGenerateRoute,
+        onUnknownRoute: widget.onUnknownRoute,
+        builder: widget.builder,
+        title: widget.title,
+        onGenerateTitle: widget.onGenerateTitle,
+        textStyle: _errorTextStyle,
+        // blue is the primary color of the default theme
+        color: widget.color ?? theme?.primaryColor ?? Colors.blue,
+        locale: widget.locale,
+        localizationsDelegates: _localizationsDelegates,
+        localeResolutionCallback: widget.localeResolutionCallback,
+        localeListResolutionCallback: widget.localeListResolutionCallback,
+        supportedLocales: widget.supportedLocales,
+        showPerformanceOverlay: widget.showPerformanceOverlay,
+        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+        showSemanticsDebugger: widget.showSemanticsDebugger,
+        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+        inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
+          return FloatingActionButton(
+            child: const Icon(Icons.search),
+            onPressed: onPressed,
+            mini: true,
+          );
+        },
+      ),
     );
 
     assert(() {

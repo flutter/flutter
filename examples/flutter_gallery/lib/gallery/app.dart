@@ -126,22 +126,34 @@ class _GalleryAppState extends State<GalleryApp> {
         child: home,
       );
     }
-
-    return MaterialApp(
-      theme: _options.theme.data.copyWith(platform: _options.platform),
-      title: 'Flutter Gallery',
-      color: Colors.grey,
-      showPerformanceOverlay: _options.showPerformanceOverlay,
-      checkerboardOffscreenLayers: _options.showOffscreenLayersCheckerboard,
-      checkerboardRasterCacheImages: _options.showRasterCacheImagesCheckerboard,
-      routes: _buildRoutes(),
-      builder: (BuildContext context, Widget child) {
-        return Directionality(
-          textDirection: _options.textDirection,
-          child: _applyTextScaleFactor(child),
-        );
-      },
-      home: home,
+    return ScopedModel<AppStateModel>(
+      model: model,
+      child: MaterialApp(
+        theme: _options.theme.data.copyWith(platform: _options.platform),
+        title: 'Flutter Gallery',
+        color: Colors.grey,
+        showPerformanceOverlay: _options.showPerformanceOverlay,
+        checkerboardOffscreenLayers: _options.showOffscreenLayersCheckerboard,
+        checkerboardRasterCacheImages: _options.showRasterCacheImagesCheckerboard,
+        routes: _buildRoutes(),
+        builder: (BuildContext context, Widget child) {
+          return Directionality(
+            textDirection: _options.textDirection,
+            child: _applyTextScaleFactor(
+              // Specifically use a blank Cupertino theme here and not transfer
+              // over the Material primary color etc except the brightness to
+              // showcase standard iOS looks.
+              CupertinoTheme(
+                data: CupertinoThemeData(
+                  brightness: _options.theme.data.brightness,
+                ),
+                child: child,
+              ),
+            ),
+          );
+        },
+        home: home,
+      ),
     );
   }
 }
