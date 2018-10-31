@@ -22,12 +22,11 @@ import 'theme.dart';
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
 class BottomAppBarTheme extends Diagnosticable {
-  /// Creates a dialog theme that can be used for [ThemeData.BottomAppBarTheme].
+  /// Creates a BAB theme that can be used for [ThemeData.BottomAppBarTheme].
   const BottomAppBarTheme({
     this.color,
-    this.elevation = 8.0,
+    this.elevation,
     this.shape,
-    this.notchMargin = 4.0,
   });
 
   /// Default value for [BottomAppBar.color].
@@ -36,11 +35,8 @@ class BottomAppBarTheme extends Diagnosticable {
   /// Default value for [BottomAppBar.elevation].
   final double elevation;
 
-  /// Default value for [Dialog.shape].
+  /// Default value for [BottomAppBar.shape].
   final NotchedShape shape;
-
-  /// Default value for [notchMargin].
-  final double notchMargin;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -48,13 +44,11 @@ class BottomAppBarTheme extends Diagnosticable {
     Color color,
     double elevation,
     NotchedShape shape,
-    double notchMargin,
   }) {
     return BottomAppBarTheme(
-        color: color ?? this.color,
-        elevation: elevation ?? this.elevation,
-        shape: shape ?? this.shape,
-        notchMargin: notchMargin ?? this.notchMargin,
+      color: color ?? this.color,
+      elevation: elevation ?? this.elevation,
+      shape: shape ?? this.shape,
     );
   }
 
@@ -63,21 +57,19 @@ class BottomAppBarTheme extends Diagnosticable {
     return Theme.of(context).bottomAppBarTheme;
   }
 
-  /// Linearly interpolate between two dialog themes.
+  /// Linearly interpolate between two BAB themes.
   ///
-  /// The arguments must not be null.
+  /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BottomAppBarTheme lerp(BottomAppBarTheme a, BottomAppBarTheme b, double t) {
     assert(t != null);
     return BottomAppBarTheme(
-        color: Color.lerp(a?.color, b?.color, t),
-        elevation: lerpDouble(a?.elevation, b?.elevation, t),
-        shape: t < 0.5 ? a?.shape : b?.shape,
-        notchMargin: lerpDouble(a?.notchMargin, b?.notchMargin, t),
+      color: Color.lerp(a?.color, b?.color, t),
+      elevation: lerpDouble(a?.elevation, b?.elevation, t),
+      shape: t < 0.5 ? a?.shape : b?.shape,
     );
   }
-
 
   @override
   int get hashCode {
@@ -85,7 +77,6 @@ class BottomAppBarTheme extends Diagnosticable {
       color,
       elevation,
       shape,
-      notchMargin,
     );
   }
 
@@ -96,15 +87,17 @@ class BottomAppBarTheme extends Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     final BottomAppBarTheme typedOther = other;
-    return typedOther.shape == shape;
+    return typedOther.color == color
+        && typedOther.elevation == elevation
+        && typedOther.shape == shape;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    const double defaultElevation = 8.0;
     properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: 8.0));
+    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: defaultElevation));
     properties.add(DiagnosticsProperty<NotchedShape>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('notchMargin', notchMargin, defaultValue: 4.0));
   }
 }
