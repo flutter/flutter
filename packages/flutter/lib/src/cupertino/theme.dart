@@ -26,8 +26,6 @@ class CupertinoTheme extends StatelessWidget {
        assert(data != null),
        super(key: key);
 
-  static final CupertinoThemeData _kFallbackTheme = CupertinoThemeData();
-
   final CupertinoThemeData data;
   final Widget child;
 
@@ -77,10 +75,10 @@ enum _ThemeDataProperties {
   textTheme,
 }
 
-class _CupertinoThemeInheritedData implements CupertinoThemeData {
+class _CupertinoThemeInheritedData extends CupertinoThemeData {
   _CupertinoThemeInheritedData(this.context);
 
-  BuildContext context;
+  final BuildContext context;
 
   @override
   Color get barBackgroundColor => getData(_ThemeDataProperties.barBackgroundColor).barBackgroundColor;
@@ -104,12 +102,75 @@ class _CupertinoThemeInheritedData implements CupertinoThemeData {
   CupertinoTextTheme get textTheme => getData(_ThemeDataProperties.textTheme).textTheme;
 
   CupertinoThemeData getData(_ThemeDataProperties property) {
-    return InheritedModel.inheritFrom<_InheritedCupertinoTheme>(context, aspect: property).data;
+    return InheritedModel.inheritFrom<_InheritedCupertinoTheme>(context, aspect: property)?.data
+        ?? const CupertinoThemeData();
   }
 }
 
+@immutable
 class CupertinoThemeData {
-  factory CupertinoThemeData({
+  const CupertinoThemeData({
+    Brightness brightness,
+    Color primaryColor,
+    Color primaryContrastingColor,
+    CupertinoTextTheme textTheme,
+    Color barBackgroundColor,
+    Color scaffoldBackgroundColor,
+    Color tableBackgroundColor,
+  }) : _brightness = brightness,
+       _primaryColor = primaryColor,
+       _primaryContrastingColor = primaryContrastingColor,
+       _textTheme = textTheme,
+       _barBackgroundColor = barBackgroundColor,
+       _scaffoldBackgroundColor = scaffoldBackgroundColor,
+       _tableBackgroundColor = tableBackgroundColor;
+
+  bool get _isLight => brightness == Brightness.light;
+
+  final Brightness _brightness;
+  Brightness get brightness => _brightness ?? Brightness.light;
+
+  final Color _primaryColor;
+  Color get primaryColor {
+    return _primaryColor
+        ?? (_isLight ? CupertinoColors.activeBlue : CupertinoColors.activeOrange);
+  }
+
+  final Color _primaryContrastingColor;
+  Color get primaryContrastingColor {
+    return _primaryContrastingColor
+        ?? (_isLight ? CupertinoColors.white : CupertinoColors.black);
+  }
+
+  final CupertinoTextTheme _textTheme;
+  CupertinoTextTheme get textTheme {
+    return _textTheme ?? CupertinoTextTheme(
+      isLight: _isLight,
+      primaryColor: primaryColor,
+    );
+  }
+
+  final Color _barBackgroundColor;
+  Color get barBackgroundColor {
+    return _barBackgroundColor ?? _isLight
+        ? _kDefaultBarLightBackgroundColor
+        : _kDefaultBarDarkBackgroundColor;
+  }
+
+  final Color _scaffoldBackgroundColor;
+  Color get scaffoldBackgroundColor {
+    return _scaffoldBackgroundColor
+        ?? _isLight ? CupertinoColors.white : CupertinoColors.black;
+  }
+
+  final Color _tableBackgroundColor;
+  Color get tableBackgroundColor {
+    return _tableBackgroundColor ?? _isLight
+        ? CupertinoColors.extraLightBackgroundGray
+        : CupertinoColors.darkBackgroundGray;
+  }
+
+  CupertinoThemeData copyWith({
     Brightness brightness,
     Color primaryColor,
     Color primaryContrastingColor,
@@ -118,43 +179,14 @@ class CupertinoThemeData {
     Color scaffoldBackgroundColor,
     Color tableBackgroundColor,
   }) {
-    brightness ??= Brightness.light;
-    final bool isLight = brightness == Brightness.light;
-    primaryColor ??= isLight ? CupertinoColors.activeBlue : CupertinoColors.activeOrange;
-    primaryContrastingColor ??= isLight ? CupertinoColors.white : CupertinoColors.black;
-    textTheme ??= CupertinoTextTheme(
-      isDark: !isLight,
-      primaryColor: primaryColor,
-    );
-    barBackgroundColor ??= isLight ? _kDefaultBarLightBackgroundColor : _kDefaultBarDarkBackgroundColor;
-    scaffoldBackgroundColor ??= isLight ? CupertinoColors.white : CupertinoColors.black;
-    tableBackgroundColor ??= isLight ? CupertinoColors.extraLightBackgroundGray : CupertinoColors.darkBackgroundGray;
-    return CupertinoThemeData._(
-      brightness,
-      primaryColor,
-      primaryContrastingColor,
-      textTheme,
-      barBackgroundColor,
-      scaffoldBackgroundColor,
-      tableBackgroundColor,
+    return CupertinoThemeData(
+      brightness: brightness ?? _brightness,
+      primaryColor: primaryColor ?? _primaryColor,
+      primaryContrastingColor: primaryContrastingColor ?? _primaryContrastingColor,
+      textTheme: textTheme ?? _textTheme,
+      barBackgroundColor: barBackgroundColor ?? _barBackgroundColor,
+      scaffoldBackgroundColor: scaffoldBackgroundColor ?? _scaffoldBackgroundColor,
+      tableBackgroundColor: tableBackgroundColor ?? _tableBackgroundColor,
     );
   }
-
-  const CupertinoThemeData._(
-    this.brightness,
-    this.primaryColor,
-    this.primaryContrastingColor,
-    this.textTheme,
-    this.barBackgroundColor,
-    this.scaffoldBackgroundColor,
-    this.tableBackgroundColor,
-  );
-
-  final Brightness brightness;
-  final Color primaryColor;
-  final Color primaryContrastingColor;
-  final CupertinoTextTheme textTheme;
-  final Color barBackgroundColor;
-  final Color scaffoldBackgroundColor;
-  final Color tableBackgroundColor;
 }

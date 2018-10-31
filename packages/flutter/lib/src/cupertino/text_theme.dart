@@ -28,6 +28,16 @@ const TextStyle _kDefaultDarkTextStyle = TextStyle(
 );
 
 // Values derived from https://developer.apple.com/design/resources/.
+const TextStyle _kDefaultActionTextStyle = TextStyle(
+  inherit: false,
+  fontFamily: '.SF Pro Text',
+  fontSize: 17.0,
+  letterSpacing: -0.41,
+  color: CupertinoColors.activeBlue,
+  decoration: TextDecoration.none,
+);
+
+// Values derived from https://developer.apple.com/design/resources/.
 // Color comes from the primary color.
 const TextStyle _kDefaultActionSheetTextActionStyle = TextStyle(
   inherit: false,
@@ -92,98 +102,80 @@ const TextStyle _kDefaultLargeTitleDarkTextStyle = TextStyle(
 
 @immutable
 class CupertinoTextTheme extends Diagnosticable {
-  factory CupertinoTextTheme({
+  const CupertinoTextTheme({
     Color primaryColor,
-    bool isDark,
+    bool isLight,
     TextStyle textStyle,
     TextStyle actionTextStyle,
-    TextStyle actionSheetActionTextStyle,
-    TextStyle actionSheetContentTextStyle,
     TextStyle tabLabelTextStyle,
     TextStyle navTitleTextStyle,
     TextStyle navLargeTitleTextStyle,
     TextStyle navActionTextStyle,
-  }) {
-    textStyle ??= isDark ? _kDefaultDarkTextStyle : _kDefaultLightTextStyle;
-    actionTextStyle ??= _kDefaultLightTextStyle.copyWith(
-      color: primaryColor,
-    );
-    actionSheetActionTextStyle ??= _kDefaultActionSheetTextActionStyle.copyWith(
-      color: primaryColor,
-    );
-    actionSheetContentTextStyle ??= _kDefaultActionSheetTextContentStyle;
-    tabLabelTextStyle ??= _kDefaultTabLabelTextStyle;
-    navTitleTextStyle ??= isDark ? _kDefaultMiddleTitleDarkTextStyle : _kDefaultMiddleTitleLightTextStyle;
-    navLargeTitleTextStyle ??= isDark ? _kDefaultLargeTitleDarkTextStyle : _kDefaultLargeTitleLightTextStyle;
-    navActionTextStyle ??= _kDefaultLightTextStyle.copyWith(
-      color: primaryColor,
-    );
-    return CupertinoTextTheme._(
-      textStyle,
-      actionTextStyle,
-      actionSheetContentTextStyle,
-      actionSheetActionTextStyle,
-      tabLabelTextStyle,
-      navTitleTextStyle,
-      navLargeTitleTextStyle,
-      navActionTextStyle,
+  }) : _primaryColor = primaryColor ?? CupertinoColors.activeBlue,
+       _isLight = isLight ?? true,
+       _textStyle = textStyle,
+       _actionTextStyle = actionTextStyle,
+       _tabLabelTextStyle = tabLabelTextStyle,
+       _navTitleTextStyle = navTitleTextStyle,
+       _navLargeTitleTextStyle = navLargeTitleTextStyle,
+       _navActionTextStyle = navActionTextStyle;
+
+  final Color _primaryColor;
+  final bool _isLight;
+
+  final TextStyle _textStyle;
+  TextStyle get textStyle => _textStyle ?? _isLight ? _kDefaultLightTextStyle : _kDefaultDarkTextStyle;
+
+  final TextStyle _actionTextStyle;
+  TextStyle get actionTextStyle {
+    return _actionTextStyle ?? _kDefaultActionTextStyle.copyWith(
+      color: _primaryColor,
     );
   }
 
-  CupertinoTextTheme._(
-    this.textStyle,
-    this.actionTextStyle,
-    this.actionSheetContentTextStyle,
-    this.actionSheetActionTextStyle,
-    this.tabLabelTextStyle,
-    this.navTitleTextStyle,
-    this.navLargeTitleTextStyle,
-    this.navActionTextStyle,
-  );
+  final TextStyle _tabLabelTextStyle;
+  TextStyle get tabLabelTextStyle => _tabLabelTextStyle ?? _kDefaultTabLabelTextStyle;
 
-  final TextStyle textStyle;
-  final TextStyle actionTextStyle;
-  final TextStyle actionSheetContentTextStyle;
-  final TextStyle actionSheetActionTextStyle;
-  final TextStyle tabLabelTextStyle;
-  final TextStyle navTitleTextStyle;
-  final TextStyle navLargeTitleTextStyle;
-  final TextStyle navActionTextStyle;
+  final TextStyle _navTitleTextStyle;
+  TextStyle get navTitleTextStyle {
+    return _navTitleTextStyle ?? _isLight
+        ? _kDefaultMiddleTitleLightTextStyle
+        : _kDefaultMiddleTitleDarkTextStyle;
+  }
+
+  final TextStyle _navLargeTitleTextStyle;
+  TextStyle get navLargeTitleTextStyle {
+    return _navLargeTitleTextStyle ?? _isLight
+        ? _kDefaultLargeTitleLightTextStyle
+        : _kDefaultLargeTitleDarkTextStyle;
+  }
+
+  final TextStyle _navActionTextStyle;
+  TextStyle get navActionTextStyle {
+    return _navActionTextStyle ?? _kDefaultActionTextStyle.copyWith(
+      color: _primaryColor,
+    );
+  }
 
   CupertinoTextTheme copyWith({
+    Color primaryColor,
+    bool isLight,
     TextStyle textStyle,
     TextStyle actionTextStyle,
-    TextStyle actionSheetActionTextStyle,
-    TextStyle actionSheetContentTextStyle,
     TextStyle tabLabelTextStyle,
     TextStyle navTitleTextStyle,
     TextStyle navLargeTitleTextStyle,
     TextStyle navActionTextStyle,
   }) {
-    return CupertinoTextTheme._(
-      textStyle ?? this.textStyle,
-      actionTextStyle ?? this.actionTextStyle,
-      actionSheetContentTextStyle ?? this.actionSheetContentTextStyle,
-      actionSheetActionTextStyle ?? this.actionSheetContentTextStyle,
-      tabLabelTextStyle ?? this.tabLabelTextStyle,
-      navTitleTextStyle ?? this.navTitleTextStyle,
-      navLargeTitleTextStyle ?? this.navLargeTitleTextStyle,
-      navActionTextStyle ?? this.navActionTextStyle,
-    );
-  }
-
-  CupertinoTextTheme merge(CupertinoTextTheme other) {
-    if (other == null)
-      return this;
-    return copyWith(
-      textStyle: textStyle?.merge(other.textStyle) ?? other.textStyle,
-      actionTextStyle: actionTextStyle?.merge(other.actionTextStyle) ?? other.actionTextStyle,
-      actionSheetContentTextStyle: actionSheetContentTextStyle?.merge(other.actionSheetContentTextStyle) ?? other.actionSheetContentTextStyle,
-      actionSheetActionTextStyle: actionSheetActionTextStyle?.merge(other.actionSheetActionTextStyle) ?? other.actionSheetContentTextStyle,
-      tabLabelTextStyle: tabLabelTextStyle?.merge(other.tabLabelTextStyle) ?? other.tabLabelTextStyle,
-      navTitleTextStyle: navTitleTextStyle?.merge(other.navTitleTextStyle) ?? other.navTitleTextStyle,
-      navLargeTitleTextStyle: navLargeTitleTextStyle?.merge(other.navLargeTitleTextStyle) ?? other.navLargeTitleTextStyle,
-      navActionTextStyle: navActionTextStyle?.merge(other.navActionTextStyle) ?? other.navActionTextStyle,
+    return CupertinoTextTheme(
+      primaryColor: primaryColor ?? _primaryColor,
+      isLight: isLight ?? _isLight,
+      textStyle: textStyle ?? _textStyle,
+      actionTextStyle: actionTextStyle ?? _actionTextStyle,
+      tabLabelTextStyle: tabLabelTextStyle ?? _tabLabelTextStyle,
+      navTitleTextStyle: navTitleTextStyle ?? _navTitleTextStyle,
+      navLargeTitleTextStyle: navLargeTitleTextStyle ?? _navLargeTitleTextStyle,
+      navActionTextStyle: navActionTextStyle ?? _navActionTextStyle,
     );
   }
 }

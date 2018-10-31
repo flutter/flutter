@@ -125,9 +125,7 @@ Widget _wrapActiveColor(Color color, BuildContext context, Widget child) {
   }
 
   return CupertinoTheme(
-    data: CupertinoThemeData(
-      primaryColor: color,
-    ),
+    data: CupertinoTheme.of(context).copyWith(primaryColor: color),
     child: child,
   );
 }

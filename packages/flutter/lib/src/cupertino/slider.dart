@@ -485,15 +485,14 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     final double trackActive = offset.dx + _thumbCenter;
 
     final Canvas canvas = context.canvas;
-    final Paint paint = Paint();
 
     if (visualPosition > 0.0) {
-      paint.color = rightColor;
+      final Paint paint = Paint()..color = rightColor;
       canvas.drawRRect(RRect.fromLTRBXY(trackLeft, trackTop, trackActive, trackBottom, 1.0, 1.0), paint);
     }
 
     if (visualPosition < 1.0) {
-      paint.color = leftColor;
+      final Paint paint = Paint()..color = leftColor;
       canvas.drawRRect(RRect.fromLTRBXY(trackActive, trackTop, trackRight, trackBottom, 1.0, 1.0), paint);
     }
 

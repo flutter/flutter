@@ -160,6 +160,10 @@ abstract class InheritedModel<T> extends InheritedWidget {
     // Create a dependency on all of the type T ancestor models up until
     // a model is found for which isSupportedAspect(aspect) is true.
     final List<InheritedElement> models = _findModels<T>(context, aspect).toList();
+    if (models.isEmpty) {
+      return null;
+    }
+
     final InheritedElement lastModel = models.last;
     for (InheritedElement model in models) {
       final T value = context.inheritFromElement(model, aspect: aspect);

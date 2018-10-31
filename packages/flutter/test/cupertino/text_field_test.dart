@@ -1103,11 +1103,11 @@ void main() {
     'text field respects theme',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        CupertinoApp(
+        const CupertinoApp(
           theme: CupertinoThemeData(
             brightness: Brightness.dark,
           ),
-          home: const Center(
+          home: Center(
             child: CupertinoTextField(),
           ),
         ),

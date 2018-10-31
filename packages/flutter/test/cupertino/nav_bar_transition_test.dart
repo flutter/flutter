@@ -13,9 +13,11 @@ Future<void> startTransitionBetween(
   String fromTitle,
   String toTitle,
   TextDirection textDirection = TextDirection.ltr,
+  CupertinoThemeData theme,
 }) async {
   await tester.pumpWidget(
     CupertinoApp(
+      theme: theme,
       builder: (BuildContext context, Widget navigator) {
         return Directionality(
           textDirection: textDirection,
@@ -187,8 +189,8 @@ void main() {
         tester.renderObject(flying(tester, find.text('Page 1')).first);
     expect(bottomMiddle.text.style.color, const Color(0xFF00070F));
     expect(bottomMiddle.text.style.fontWeight, FontWeight.w600);
-    expect(bottomMiddle.text.style.fontFamily, '.SF UI Text');
-    expect(bottomMiddle.text.style.letterSpacing, -0.08952957153320312);
+    expect(bottomMiddle.text.style.fontFamily, '.SF Pro Text');
+    expect(bottomMiddle.text.style.letterSpacing, -0.41);
 
     checkOpacity(
         tester, flying(tester, find.text('Page 1')).first, 0.8609542846679688);
@@ -199,8 +201,8 @@ void main() {
         tester.renderObject(flying(tester, find.text('Page 1')).last);
     expect(topBackLabel.text.style.color, const Color(0xFF00070F));
     expect(topBackLabel.text.style.fontWeight, FontWeight.w600);
-    expect(topBackLabel.text.style.fontFamily, '.SF UI Text');
-    expect(topBackLabel.text.style.letterSpacing, -0.08952957153320312);
+    expect(topBackLabel.text.style.fontFamily, '.SF Pro Text');
+    expect(topBackLabel.text.style.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.0);
 
@@ -208,19 +210,70 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomMiddle.text.style.color, const Color(0xFF0073F0));
     expect(bottomMiddle.text.style.fontWeight, FontWeight.w400);
-    expect(bottomMiddle.text.style.fontFamily, '.SF UI Text');
-    expect(bottomMiddle.text.style.letterSpacing, -0.231169798374176);
+    expect(bottomMiddle.text.style.fontFamily, '.SF Pro Text');
+    expect(bottomMiddle.text.style.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
     expect(topBackLabel.text.style.color, const Color(0xFF0073F0));
     expect(topBackLabel.text.style.fontWeight, FontWeight.w400);
-    expect(topBackLabel.text.style.fontFamily, '.SF UI Text');
-    expect(topBackLabel.text.style.letterSpacing, -0.231169798374176);
+    expect(topBackLabel.text.style.fontFamily, '.SF Pro Text');
+    expect(topBackLabel.text.style.letterSpacing, -0.41);
 
     checkOpacity(
         tester, flying(tester, find.text('Page 1')).last, 0.8733493089675903);
   });
+
+  testWidgets('Font transitions respect themes',
+      (WidgetTester tester) async {
+      await startTransitionBetween(
+        tester,
+        fromTitle: 'Page 1',
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+      );
+
+      // Be mid-transition.
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // The transition's stack is ordered. The bottom middle is inserted first.
+      final RenderParagraph bottomMiddle =
+      tester.renderObject(flying(tester, find.text('Page 1')).first);
+      expect(bottomMiddle.text.style.color, const Color(0xFFFFF8EF));
+      expect(bottomMiddle.text.style.fontWeight, FontWeight.w600);
+      expect(bottomMiddle.text.style.fontFamily, '.SF Pro Text');
+      expect(bottomMiddle.text.style.letterSpacing, -0.41);
+
+      checkOpacity(
+        tester, flying(tester, find.text('Page 1')).first, 0.8609542846679688);
+
+      // The top back label is styled exactly the same way. But the opacity tweens
+      // are flipped.
+      final RenderParagraph topBackLabel =
+      tester.renderObject(flying(tester, find.text('Page 1')).last);
+      expect(topBackLabel.text.style.color, const Color(0xFFFFF8EF));
+      expect(topBackLabel.text.style.fontWeight, FontWeight.w600);
+      expect(topBackLabel.text.style.fontFamily, '.SF Pro Text');
+      expect(topBackLabel.text.style.letterSpacing, -0.41);
+
+      checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.0);
+
+      // Move animation further a bit.
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(bottomMiddle.text.style.color, const Color(0xFFFF9A0E));
+      expect(bottomMiddle.text.style.fontWeight, FontWeight.w400);
+      expect(bottomMiddle.text.style.fontFamily, '.SF Pro Text');
+      expect(bottomMiddle.text.style.letterSpacing, -0.41);
+
+      checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
+
+      expect(topBackLabel.text.style.color, const Color(0xFFFF9A0E));
+      expect(topBackLabel.text.style.fontWeight, FontWeight.w400);
+      expect(topBackLabel.text.style.fontFamily, '.SF Pro Text');
+      expect(topBackLabel.text.style.letterSpacing, -0.41);
+
+      checkOpacity(
+        tester, flying(tester, find.text('Page 1')).last, 0.8733493089675903);
+    });
 
   testWidgets('Fullscreen dialogs do not create heroes',
       (WidgetTester tester) async {
