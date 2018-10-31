@@ -12,6 +12,7 @@ import 'button_bar.dart';
 import 'button_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'dialog_theme.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -81,6 +82,7 @@ class Dialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final DialogTheme dialogTheme = DialogTheme.of(context);
     return AnimatedPadding(
       padding: MediaQuery.of(context).viewInsets + const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
       duration: insetAnimationDuration,
@@ -99,7 +101,7 @@ class Dialog extends StatelessWidget {
               color: _getColor(context),
               type: MaterialType.card,
               child: child,
-              shape: shape ?? _defaultDialogShape,
+              shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
             ),
           ),
         ),
