@@ -5,15 +5,14 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/process_manager.dart';
-import 'package:flutter_tools/src/globals.dart';
-
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/process_manager.dart';
+import '../globals.dart';
 
 /// The [FuchsiaSdk] instance.
 FuchsiaSdk get fuchsiaSdk => context[FuchsiaSdk];

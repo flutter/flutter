@@ -4,18 +4,18 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../vmservice.dart';
 
 import 'fuchsia_sdk.dart';
 import 'fuchsia_workflow.dart';
