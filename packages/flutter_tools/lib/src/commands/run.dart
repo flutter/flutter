@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -19,6 +18,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import 'daemon.dart';
 
+// TODO(flutter/flutter#23031): Test this.
 abstract class RunCommandBase extends FlutterCommand {
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
@@ -46,6 +46,7 @@ abstract class RunCommandBase extends FlutterCommand {
     usesTargetOption();
     usesPortOptions();
     usesPubOption();
+    usesIsolateFilterOption(hide: !verboseHelp);
   }
 
   bool get traceStartup => argResults['trace-startup'];
@@ -274,6 +275,8 @@ class RunCommand extends RunCommandBase {
     // debug mode.
     final bool hotMode = shouldUseHotMode();
 
+    writePidFile(argResults['pid-file']);
+
     if (argResults['machine']) {
       if (devices.length > 1)
         throwToolExit('--machine does not support -d all.');
@@ -338,12 +341,6 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    final String pidFile = argResults['pid-file'];
-    if (pidFile != null) {
-      // Write our pid to the file.
-      fs.file(pidFile).writeAsStringSync(pid.toString());
-    }
-
     final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {
       return FlutterDevice(
         device,
@@ -351,6 +348,7 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
+        viewFilter: argResults['isolate-filter'],
       );
     }).toList();
 

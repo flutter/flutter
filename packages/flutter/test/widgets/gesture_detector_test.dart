@@ -334,13 +334,13 @@ void main() {
       ),
     );
 
-    Future<Null> longPress(Duration timeout) async {
+    Future<void> longPress(Duration timeout) async {
       final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
       await tester.pump(timeout);
       await gesture.up();
     }
 
-    await longPress(kLongPressTimeout + Duration(seconds: 1)); // To make sure the time for long press has occured
+    await longPress(kLongPressTimeout + const Duration(seconds: 1)); // To make sure the time for long press has occurred
     expect(longPressUp, 1);
   });
 }

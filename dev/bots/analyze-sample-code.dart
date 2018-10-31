@@ -327,7 +327,7 @@ void processBlock(Line line, List<String> block, List<Section> sections) {
     sections.add(Section(line, 'dynamic expression$_expressionId = ', block.toList(), ';'));
   } else if (block.first.startsWith('await ')) {
     _expressionId += 1;
-    sections.add(Section(line, 'Future<Null> expression$_expressionId() async { ', block.toList(), ' }'));
+    sections.add(Section(line, 'Future<void> expression$_expressionId() async { ', block.toList(), ' }'));
   } else if (block.first.startsWith('class ') || block.first.startsWith('enum ')) {
     sections.add(Section(line, null, block.toList(), null));
   } else if ((block.first.startsWith('_') || block.first.startsWith('final ')) && block.first.contains(' = ')) {

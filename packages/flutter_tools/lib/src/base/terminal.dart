@@ -45,7 +45,7 @@ class OutputPreferences {
     int wrapColumn,
     bool showColor,
   })  : wrapText = wrapText ?? io.stdio?.hasTerminal ?? const io.Stdio().hasTerminal,
-        wrapColumn = wrapColumn ?? io.stdio?.terminalColumns ?? const io.Stdio().terminalColumns ?? kDefaultTerminalColumns,
+        _overrideWrapColumn = wrapColumn,
         showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
 
   /// If [wrapText] is true, then any text sent to the context's [Logger]
@@ -64,8 +64,12 @@ class OutputPreferences {
   /// To find out if we're writing to a terminal, it tries the context's stdio,
   /// and if that's not set, it tries creating a new [io.Stdio] and asks it, if
   /// that doesn't have an idea of the terminal width, then we just use a
-  /// default of 100. It will be ignored if wrapText is false.
-  final int wrapColumn;
+  /// default of 100. It will be ignored if [wrapText] is false.
+  final int _overrideWrapColumn;
+  int get wrapColumn {
+    return  _overrideWrapColumn ?? io.stdio?.terminalColumns
+      ?? const io.Stdio().terminalColumns ?? kDefaultTerminalColumns;
+  }
 
   /// Whether or not to output ANSI color codes when writing to the output
   /// terminal. Defaults to whatever [platform.stdoutSupportsAnsi] says if

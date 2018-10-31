@@ -137,6 +137,7 @@ class FlutterDriver {
   static const String _setVMTimelineFlagsMethodName = '_setVMTimelineFlags';
   static const String _getVMTimelineMethodName = '_getVMTimeline';
   static const String _clearVMTimelineMethodName = '_clearVMTimeline';
+  static const String _collectAllGarbageMethodName = '_collectAllGarbage';
 
   static int _nextDriverId = 0;
 
@@ -789,6 +790,22 @@ class FlutterDriver {
       await _sendCommand(SetFrameSync(true, timeout: timeout));
     }
     return result;
+  }
+
+  /// Force a garbage collection run in the VM.
+  Future<void> forceGC() async {
+    try {
+      await _peer
+          .sendRequest(_collectAllGarbageMethodName, <String, String>{
+            'isolateId': 'isolates/${_appIsolate.numberAsString}',
+          });
+    } catch (error, stackTrace) {
+      throw DriverError(
+        'Failed to force a GC due to remote error',
+        error,
+        stackTrace,
+      );
+    }
   }
 
   /// Closes the underlying connection to the VM service.

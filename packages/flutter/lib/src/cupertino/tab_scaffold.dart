@@ -45,7 +45,7 @@ import 'bottom_tab_bar.dart';
 ///               child: const Text('Next page'),
 ///               onPressed: () {
 ///                 Navigator.of(context).push(
-///                   CupertinoPageRoute<Null>(
+///                   CupertinoPageRoute<void>(
 ///                     builder: (BuildContext context) {
 ///                       return CupertinoPageScaffold(
 ///                         navigationBar: CupertinoNavigationBar(

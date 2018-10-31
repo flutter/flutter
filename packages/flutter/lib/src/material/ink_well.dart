@@ -68,8 +68,8 @@ abstract class InteractiveInkFeature extends InkFeature {
   }
 }
 
-/// An encapsulation of an [InteractiveInkFeature] constructor used by [InkWell]
-/// [InkResponse] and [ThemeData].
+/// An encapsulation of an [InteractiveInkFeature] constructor used by
+/// [InkWell], [InkResponse], and [ThemeData].
 ///
 /// Interactive ink feature implementations should provide a static const
 /// `splashFactory` value that's an instance of this class. The `splashFactory`
