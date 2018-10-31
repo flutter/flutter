@@ -100,6 +100,7 @@ class AttachCommand extends FlutterCommand {
     Cache.releaseLockEarly();
 
     await _validateArguments();
+    hotRunnerConfig.computeDartDependencies = false; // FIXME
 
     final Device device = await findTargetDevice();
     final int devicePort = observatoryPort;
@@ -125,10 +126,9 @@ class AttachCommand extends FlutterCommand {
         await observatoryDiscovery?.cancel();
       }
     } else if (devicePort == null && device is FuchsiaDevice) {
-      hotRunnerConfig.computeDartDependencies = false;
       final String module = argResults['module'];
       if (module == null) {
-        throwToolExit('\'-module\' is requried for attaching to a fuchsia device');
+        throwToolExit('\'-module\' is requried for attaching to a Fuchsia device');
       }
       ipv6 = _isIpv6(device.id.split('%').first);
       final List<int> ports = await device.servicePorts();
@@ -168,6 +168,7 @@ class AttachCommand extends FlutterCommand {
         dillOutputPath: argResults['output-dill'],
         ipv6: ipv6,
       );
+      flutterDevice.startEchoingDeviceLog();
 
       if (daemon != null) {
         AppInstance app;

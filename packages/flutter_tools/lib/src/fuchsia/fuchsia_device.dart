@@ -27,6 +27,8 @@ final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 class _FuchsiaLogReader extends DeviceLogReader {
   _FuchsiaLogReader(this._device);
 
+  static final Pattern pattern = RegExp(r'\[\d+\.\d+\]\[\d+\]\[\d+\]\[klog\] INFO: \w+\(flutter\): ');
+
   FuchsiaDevice _device;
 
   @override String get name => _device.name;
@@ -34,7 +36,8 @@ class _FuchsiaLogReader extends DeviceLogReader {
   Stream<String> _logLines;
   @override
   Stream<String> get logLines {
-    _logLines ??= const Stream<String>.empty();
+    _logLines ??= fuchsiaSdk.syslogs()
+      .where((String line) => pattern.matchAsPrefix(line) != null);
     return _logLines;
   }
 

@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/process_manager.dart';
+import 'package:flutter_tools/src/globals.dart';
+
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -42,6 +49,31 @@ class FuchsiaSdk {
     try {
       final RunResult process = await runAsync(<String>['fx', 'netaddr', '--fuchsia', '--nowait']);
       return process.stdout.trim();
+    } on ArgumentError catch (exception) {
+      throwToolExit('$exception');
+    }
+    return null;
+  }
+
+  /// Returns the fuchsia system logs for an attached device.
+  ///
+  /// Does not currently support multiple attached devices.
+  Stream<String> syslogs() {
+    Process process;
+    try {
+      final StreamController<String> controller = StreamController<String>(onCancel: () {
+        process.kill();
+      });
+      processManager.start(<String>['fx', 'syslog']).then((Process newProcess) {
+        printTrace('Running logs');
+        if (controller.isClosed) {
+          return;
+        }
+        process = newProcess;
+        process.exitCode.then((_) => controller.close);
+        controller.addStream(process.stdout.transform(utf8.decoder).transform(const LineSplitter()));
+      });
+      return controller.stream;
     } on ArgumentError catch (exception) {
       throwToolExit('$exception');
     }
