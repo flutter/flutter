@@ -375,7 +375,7 @@ class FlutterPlugin implements Plugin<Project> {
             Task copySharedFlutterAssetsTask = project.tasks.create(name: "copySharedFlutterAssets${variant.name.capitalize()}", type: Copy) {
                 from(project.zipTree(releaseFlutterJar))
                 include 'assets/flutter_shared/*'
-                into 'src/main'
+                into "src/${variant.name}"
             }
             Task copyFlutterAssetsTask = project.tasks.create(name: "copyFlutterAssets${variant.name.capitalize()}", type: Copy) {
                 dependsOn flutterTask
