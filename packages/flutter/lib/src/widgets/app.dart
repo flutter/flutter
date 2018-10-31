@@ -776,11 +776,11 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     }
     // Hash the supported locales because apps can support many locales and would
     // be expensive to search through them many times.
-    Map<int, Locale> allSupportedLocales = HashMap<int, Locale>();
-    Map<int, Locale> languageAndCountryLocales = HashMap<int, Locale>();
-    Map<int, Locale> languageAndScriptLocales = HashMap<int, Locale>();
-    Map<int, Locale> languageLocales = HashMap<int, Locale>();
-    Map<int, Locale> countryLocales = HashMap<int, Locale>();
+    final Map<int, Locale> allSupportedLocales = HashMap<int, Locale>();
+    final Map<int, Locale> languageAndCountryLocales = HashMap<int, Locale>();
+    final Map<int, Locale> languageAndScriptLocales = HashMap<int, Locale>();
+    final Map<int, Locale> languageLocales = HashMap<int, Locale>();
+    final Map<int, Locale> countryLocales = HashMap<int, Locale>();
     for (Locale locale in supportedLocales) {
       allSupportedLocales[ui.hashValues(locale.languageCode.hashCode, locale.scriptCode.hashCode, locale.countryCode.hashCode)] ??= locale;
       languageAndCountryLocales[ui.hashValues(locale.languageCode.hashCode, locale.countryCode)] ??= locale;
@@ -798,7 +798,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     Locale matchesCountryCode;
     // Loop over user's preferred locales
     for (int localeIndex = 0; localeIndex < preferredLocales.length; localeIndex += 1) {
-      Locale userLocale = preferredLocales[localeIndex];
+      final Locale userLocale = preferredLocales[localeIndex];
       // Look for perfect match.
       if (allSupportedLocales.containsKey(ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode, userLocale.countryCode.hashCode))) {
         return userLocale;
@@ -823,7 +823,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         // Since first (default) locale is usually highly preferred, we will allow
         // a languageCode-only match to be instantly matched. If the next preferred
         // languageCode is the same, we defer hastily returning until the next iteration
-        // since it can only be the same or improved match.
+        // since at worst it is the same and at best an improved match.
         if (localeIndex == 0
           && !(localeIndex + 1 < preferredLocales.length
               && preferredLocales[localeIndex + 1].languageCode == userLocale.languageCode)) {
@@ -840,7 +840,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     // When there is no languageCode only match. Fallback to matching countryCode only. Country
     // fallback only applies on iOS. When there is no countryCode only match, we return first
     // suported locale.
-    Locale resolvedLocale = matchesLanguageCode ?? matchesCountryCode ?? supportedLocales.first;
+    final Locale resolvedLocale = matchesLanguageCode ?? matchesCountryCode ?? supportedLocales.first;
     if (matchesLanguageCode == null) {
       debugPrint('Warning: Resolved locale (' + resolvedLocale.toString() + ') has a different language code than the user\'s preferred locales (' + preferredLocales.toString() + ').');
     }
