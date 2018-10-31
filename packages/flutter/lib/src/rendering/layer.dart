@@ -377,7 +377,7 @@ class PlatformViewLayer extends Layer {
   final int viewId;
 
   @override
-  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     final Rect shiftedRect = rect.shift(layerOffset);
     builder.addPlatformView(
       viewId,
@@ -385,6 +385,7 @@ class PlatformViewLayer extends Layer {
       width: shiftedRect.width,
       height: shiftedRect.height,
     );
+    return null;
   }
 
   @override
