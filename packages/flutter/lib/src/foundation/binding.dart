@@ -400,7 +400,7 @@ abstract class BindingBase {
   ///
   /// Both guards ensure that Dart's tree shaker can remove the code for the
   /// service extension in release builds.
-  /// {@endTemplate}
+  /// {@endtemplate}
   @protected
   void registerServiceExtension({
     @required String name,
