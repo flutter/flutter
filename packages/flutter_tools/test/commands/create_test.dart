@@ -481,7 +481,6 @@ void main() {
     final String xcodeConfig = xcodeConfigFile.readAsStringSync();
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
-    expect(xcodeConfig, contains('FLUTTER_FRAMEWORK_DIR='));
     // App identification
     final String xcodeProjectPath = fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
     expectExists(xcodeProjectPath);
