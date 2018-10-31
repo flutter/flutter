@@ -142,15 +142,15 @@ class ScrollController extends ChangeNotifier {
   ///
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
-  Future<Null> animateTo(double offset, {
+  Future<void> animateTo(double offset, {
     @required Duration duration,
     @required Curve curve,
   }) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    final List<Future<Null>> animations = List<Future<Null>>(_positions.length);
+    final List<Future<void>> animations = List<Future<void>>(_positions.length);
     for (int i = 0; i < _positions.length; i += 1)
       animations[i] = _positions[i].animateTo(offset, duration: duration, curve: curve);
-    return Future.wait<Null>(animations).then<Null>((List<Null> _) => null);
+    return Future.wait<void>(animations).then<void>((List<void> _) => null);
   }
 
   /// Jumps the scroll position from its current value to the given value,

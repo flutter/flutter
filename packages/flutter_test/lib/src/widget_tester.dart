@@ -300,7 +300,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         await binding.pump(duration, phase);
         count += 1;
       } while (binding.hasScheduledFrame);
-    }).then<int>((void _) => count);
+    }).then<int>((_) => count);
   }
 
   /// Runs a [callback] that performs real asynchronous work.
@@ -677,6 +677,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   SemanticsHandle ensureSemantics() {
     return binding.pipelineOwner.ensureSemantics();
   }
+
+  /// Given a widget `W` specified by [finder] and a [Scrollable] widget `S` in
+  /// its ancestry tree, this scrolls `S` so as to make `W` visible.
+  ///
+  /// Shorthand for `Scrollable.ensureVisible(tester.element(finder))`
+  Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 }
 
 typedef _TickerDisposeCallback = void Function(_TestTicker ticker);

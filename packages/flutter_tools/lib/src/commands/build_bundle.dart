@@ -23,7 +23,6 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('manifest', defaultsTo: defaultManifestPath)
       ..addOption('private-key', defaultsTo: defaultPrivateKeyPath)
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
-      ..addOption('kernel-file', defaultsTo: defaultApplicationKernelPath)
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
         allowed: <String>['android-arm', 'android-arm64', 'ios']
@@ -92,7 +91,6 @@ class BuildBundleCommand extends BuildSubCommand {
       buildMode: buildMode,
       mainPath: targetFile,
       manifestPath: argResults['manifest'],
-      applicationKernelFilePath: argResults['kernel-file'],
       depfilePath: argResults['depfile'],
       privateKeyPath: argResults['private-key'],
       assetDirPath: argResults['asset-dir'],

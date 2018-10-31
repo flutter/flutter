@@ -313,7 +313,8 @@ const int kMinColumnWidth = 10;
 /// Wraps a block of text into lines no longer than [columnWidth].
 ///
 /// Tries to split at whitespace, but if that's not good enough to keep it
-/// under the limit, then it splits in the middle of a word.
+/// under the limit, then it splits in the middle of a word. If [columnWidth] is
+/// smaller than 10 columns, will wrap at 10 columns.
 ///
 /// Preserves indentation (leading whitespace) for each line (delimited by '\n')
 /// in the input, and will indent wrapped lines that same amount, adding
@@ -339,11 +340,12 @@ const int kMinColumnWidth = 10;
 /// [outputPreferences.wrapColumn], which is set with the --wrap-column option.
 ///
 /// If [outputPreferences.wrapText] is false, then the text will be returned
-/// unchanged.
+/// unchanged. If [shouldWrap] is specified, then it overrides the
+/// [outputPreferences.wrapText] setting.
 ///
 /// The [indent] and [hangingIndent] must be smaller than [columnWidth] when
 /// added together.
-String wrapText(String text, {int columnWidth, int hangingIndent, int indent}) {
+String wrapText(String text, {int columnWidth, int hangingIndent, int indent, bool shouldWrap}) {
   if (text == null || text.isEmpty) {
     return '';
   }
@@ -366,6 +368,7 @@ String wrapText(String text, {int columnWidth, int hangingIndent, int indent}) {
       final List<String> firstLineWrap = _wrapTextAsLines(
         trimmedText,
         columnWidth: columnWidth - leadingWhitespace.length,
+        shouldWrap: shouldWrap,
       );
       notIndented = <String>[firstLineWrap.removeAt(0)];
       trimmedText = trimmedText.substring(notIndented[0].length).trimLeft();
@@ -373,12 +376,14 @@ String wrapText(String text, {int columnWidth, int hangingIndent, int indent}) {
         notIndented.addAll(_wrapTextAsLines(
           trimmedText,
           columnWidth: columnWidth - leadingWhitespace.length - hangingIndent,
+          shouldWrap: shouldWrap,
         ));
       }
     } else {
       notIndented = _wrapTextAsLines(
         trimmedText,
         columnWidth: columnWidth - leadingWhitespace.length,
+        shouldWrap: shouldWrap,
       );
     }
     String hangingIndentString;
@@ -396,6 +401,13 @@ String wrapText(String text, {int columnWidth, int hangingIndent, int indent}) {
     ));
   }
   return result.join('\n');
+}
+
+void writePidFile(String pidFile) {
+  if (pidFile != null) {
+    // Write our pid to the file.
+    fs.file(pidFile).writeAsStringSync(io.pid.toString());
+  }
 }
 
 // Used to represent a run of ANSI control sequences next to a visible
@@ -419,14 +431,16 @@ class _AnsiRun {
 /// default will be [outputPreferences.wrapColumn].
 ///
 /// If [outputPreferences.wrapText] is false, then the text will be returned
-/// simply split at the newlines, but not wrapped.
-List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth}) {
+/// simply split at the newlines, but not wrapped. If [shouldWrap] is specified,
+/// then it overrides the [outputPreferences.wrapText] setting.
+List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth, bool shouldWrap}) {
   if (text == null || text.isEmpty) {
     return <String>[''];
   }
   assert(columnWidth != null);
   assert(columnWidth >= 0);
   assert(start >= 0);
+  shouldWrap ??= outputPreferences.wrapText;
 
   /// Returns true if the code unit at [index] in [text] is a whitespace
   /// character.
@@ -488,7 +502,7 @@ List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth}) {
   for (String line in text.split('\n')) {
     // If the line is short enough, even with ANSI codes, then we can just add
     // add it and move on.
-    if (line.length <= effectiveLength || !outputPreferences.wrapText) {
+    if (line.length <= effectiveLength || !shouldWrap) {
       result.add(line);
       continue;
     }

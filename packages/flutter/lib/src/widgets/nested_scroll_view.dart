@@ -704,7 +704,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     _outerPosition.updateCanDrag(maxInnerExtent);
   }
 
-  Future<Null> animateTo(double to, {
+  Future<void> animateTo(double to, {
     @required Duration duration,
     @required Curve curve,
   }) async {
@@ -713,7 +713,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       duration,
       curve,
     );
-    final List<Future<Null>> resultFutures = <Future<Null>>[outerActivity.done];
+    final List<Future<void>> resultFutures = <Future<void>>[outerActivity.done];
     beginActivity(
       outerActivity,
       (_NestedScrollPosition position) {
@@ -726,7 +726,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         return innerActivity;
       },
     );
-    await Future.wait<Null>(resultFutures);
+    await Future.wait<void>(resultFutures);
   }
 
   void jumpTo(double to) {
@@ -1070,7 +1070,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   @override
-  Future<Null> animateTo(double to, {
+  Future<void> animateTo(double to, {
     @required Duration duration,
     @required Curve curve,
   }) {

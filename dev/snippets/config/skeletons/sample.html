@@ -1,0 +1,20 @@
+{@inject-html}
+<div class="snippet-container">
+  <div class="snippet">
+    <div class="snippet-description">
+      {@end-inject-html}
+      {{description}}
+      {@inject-html}
+    </div>
+    <div class="copyable-container">
+      <button class="copy-button-overlay copy-button" title="Copy to clipboard"
+              onclick="copyTextToClipboard(findSiblingWithId(this, 'sample-code'));">
+        <i class="material-icons copy-image">assignment</i>
+      </button>
+      <pre class="language-dart" id="sample-code">
+        <code class="language-dart">{{code}}</code>
+      </pre>
+    </div>
+  </div>
+</div>
+{@end-inject-html}

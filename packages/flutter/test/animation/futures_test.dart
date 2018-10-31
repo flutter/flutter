@@ -22,7 +22,7 @@ void main() {
       vsync: const TestVSync(),
     );
     final List<String> log = <String>[];
-    Future<Null> runTest() async {
+    Future<void> runTest() async {
       log.add('a'); // t=0
       await controller1.forward(); // starts at t=0 again
       log.add('b'); // wants to end at t=100 but missed frames until t=150
@@ -32,7 +32,7 @@ void main() {
       log.add('d'); // wants to end at t=1099 but missed frames until t=1200
     }
     log.add('start');
-    runTest().then((Null value) {
+    runTest().then((void value) {
       log.add('end');
     });
     await tester.pump(); // t=0
@@ -71,7 +71,7 @@ void main() {
       vsync: const TestVSync(),
     );
     final List<String> log = <String>[];
-    Future<Null> runTest() async {
+    Future<void> runTest() async {
       log.add('a'); // t=0
       await controller1.forward().orCancel; // starts at t=0 again
       log.add('b'); // wants to end at t=100 but missed frames until t=150
@@ -81,7 +81,7 @@ void main() {
       log.add('d'); // wants to end at t=1099 but missed frames until t=1200
     }
     log.add('start');
-    runTest().then((Null value) {
+    runTest().then((void value) {
       log.add('end');
     });
     await tester.pump(); // t=0
@@ -112,7 +112,7 @@ void main() {
       vsync: const TestVSync(),
     );
     final List<String> log = <String>[];
-    Future<Null> runTest() async {
+    Future<void> runTest() async {
       try {
         log.add('start');
         await controller1.forward().orCancel;
@@ -121,7 +121,7 @@ void main() {
         log.add('caught');
       }
     }
-    runTest().then((Null value) {
+    runTest().then((void value) {
       log.add('end');
     });
     await tester.pump(); // start ticker
@@ -172,10 +172,10 @@ void main() {
     final TickerFuture f = controller1.forward();
     await tester.pump(); // start ticker
     await tester.pump(const Duration(milliseconds: 200)); // end ticker
-    expect(await f.asStream().single, isNull);
+    expect(f.asStream().single, isInstanceOf<Future<void>>());
     await f.catchError((dynamic e) { throw 'do not reach'; });
-    expect(await f.then<bool>((Null value) => true), isTrue);
-    expect(await f.whenComplete(() => false), isNull);
-    expect(await f.timeout(const Duration(seconds: 5)), isNull);
+    expect(await f.then<bool>((_) => true), isTrue);
+    expect(f.whenComplete(() => false), isInstanceOf<Future<void>>());
+    expect(f.timeout(const Duration(seconds: 5)), isInstanceOf<Future<void>>());
   });
 }

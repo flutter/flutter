@@ -278,10 +278,10 @@ class MemoryIOSink implements IOSink {
   Future<void> get done => close();
 
   @override
-  Future<void> close() async => null;
+  Future<void> close() async { }
 
   @override
-  Future<void> flush() async => null;
+  Future<void> flush() async { }
 }
 
 /// A Stdio that collects stdout and supports simulated stdin.
@@ -427,7 +427,11 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
 
   @override
   Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
-    messages.add('writeFile $fsName $deviceUri');
+    String message = 'writeFile $fsName $deviceUri';
+    if (content is DevFSFileContent) {
+      message += ' ${content.file.path}';
+    }
+    messages.add(message);
     devicePathToContent[deviceUri] = content;
   }
 

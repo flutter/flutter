@@ -47,7 +47,7 @@ typedef IterableFilter<T> = Iterable<T> Function(Iterable<T> input);
 ///  * [VoidCallback], a synchronous version of this signature.
 ///  * [AsyncValueGetter], a signature for asynchronous getters.
 ///  * [AsyncValueSetter], a signature for asynchronous setters.
-typedef AsyncCallback = Future<Null> Function();
+typedef AsyncCallback = Future<void> Function();
 
 /// Signature for callbacks that report that a value has been set and return a
 /// [Future] that completes when the value has been saved.
@@ -56,7 +56,7 @@ typedef AsyncCallback = Future<Null> Function();
 ///
 ///  * [ValueSetter], a synchronous version of this signature.
 ///  * [AsyncValueGetter], the getter equivalent of this signature.
-typedef AsyncValueSetter<T> = Future<Null> Function(T value);
+typedef AsyncValueSetter<T> = Future<void> Function(T value);
 
 /// Signature for callbacks that are to asynchronously report a value on demand.
 ///
@@ -280,3 +280,23 @@ class _LazyListIterator<E> implements Iterator<E> {
     return true;
   }
 }
+
+/// A factory interface that also reports the type of the created objects.
+class Factory<T> {
+  /// Creates a new factory.
+  ///
+  /// The `constructor` parameter must not be null.
+  const Factory(this.constructor) : assert(constructor != null);
+
+  /// Creates a new object of type T.
+  final ValueGetter<T> constructor;
+
+  /// The type of the objects created by this factory.
+  Type get type => T;
+
+  @override
+  String toString() {
+    return 'Factory(type: $type)';
+  }
+}
+

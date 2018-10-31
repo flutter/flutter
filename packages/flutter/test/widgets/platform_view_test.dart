@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -260,9 +261,9 @@ void main() {
 
     expect(
       viewsController.motionEvents[currentViewId + 1],
-      orderedEquals(<FakeMotionEvent> [
-        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
-        const FakeMotionEvent(AndroidViewController.kActionUp, <int> [0], <Offset> [Offset(50.0, 50.0)]),
+      orderedEquals(<FakeMotionEvent>[
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int>[0], <Offset>[Offset(50.0, 50.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionUp, <int>[0], <Offset>[Offset(50.0, 50.0)]),
       ]),
     );
   });
@@ -277,7 +278,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
-          children: <Widget> [
+          children: <Widget>[
             Listener(
               behavior: HitTestBehavior.opaque,
               onPointerDown: (PointerDownEvent e) { numPointerDownsOnParent++; },
@@ -320,7 +321,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
-          children: <Widget> [
+          children: <Widget>[
             Listener(
               behavior: HitTestBehavior.opaque,
               onPointerDown: (PointerDownEvent e) { numPointerDownsOnParent++; },
@@ -345,8 +346,8 @@ void main() {
 
     expect(
       viewsController.motionEvents[currentViewId + 1],
-      orderedEquals(<FakeMotionEvent> [
-        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
+      orderedEquals(<FakeMotionEvent>[
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int>[0], <Offset>[Offset(50.0, 50.0)]),
       ]),
     );
     expect(
@@ -365,7 +366,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
-          children: <Widget> [
+          children: <Widget>[
             Listener(
               behavior: HitTestBehavior.opaque,
               onPointerDown: (PointerDownEvent e) { numPointerDownsOnParent++; },
@@ -390,8 +391,8 @@ void main() {
 
     expect(
       viewsController.motionEvents[currentViewId + 1],
-      orderedEquals(<FakeMotionEvent> [
-        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
+      orderedEquals(<FakeMotionEvent>[
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int>[0], <Offset>[Offset(50.0, 50.0)]),
       ]),
     );
     expect(
@@ -423,9 +424,9 @@ void main() {
 
     expect(
       viewsController.motionEvents[currentViewId + 1],
-      orderedEquals(<FakeMotionEvent> [
-        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(40.0, 40.0)]),
-        const FakeMotionEvent(AndroidViewController.kActionUp, <int> [0], <Offset> [Offset(40.0, 40.0)]),
+      orderedEquals(<FakeMotionEvent>[
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int>[0], <Offset>[Offset(40.0, 40.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionUp, <int>[0], <Offset>[Offset(40.0, 40.0)]),
       ]),
     );
   });
@@ -562,7 +563,11 @@ void main() {
             height: 100.0,
             child: AndroidView(
               viewType: 'webview',
-              gestureRecognizers: <OneSequenceGestureRecognizer> [VerticalDragGestureRecognizer()],
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+                Factory<VerticalDragGestureRecognizer>(
+                  () => VerticalDragGestureRecognizer(),
+                ),
+              ].toSet(),
               layoutDirection: TextDirection.ltr,
             ),
           ),
@@ -577,10 +582,10 @@ void main() {
     expect(verticalDragAcceptedByParent, false);
     expect(
       viewsController.motionEvents[currentViewId + 1],
-      orderedEquals(<FakeMotionEvent> [
-        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
-        const FakeMotionEvent(AndroidViewController.kActionMove, <int> [0], <Offset> [Offset(50.0, 150.0)]),
-        const FakeMotionEvent(AndroidViewController.kActionUp, <int> [0], <Offset> [Offset(50.0, 150.0)]),
+      orderedEquals(<FakeMotionEvent>[
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int>[0], <Offset>[Offset(50.0, 50.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionMove, <int>[0], <Offset>[Offset(50.0, 150.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionUp, <int>[0], <Offset>[Offset(50.0, 150.0)]),
       ]),
     );
   });
@@ -616,9 +621,9 @@ void main() {
     expect(verticalDragAcceptedByParent, false);
     expect(
       viewsController.motionEvents[currentViewId + 1],
-      orderedEquals(<FakeMotionEvent> [
-        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
-        const FakeMotionEvent(AndroidViewController.kActionUp, <int> [0], <Offset> [Offset(50.0, 50.0)]),
+      orderedEquals(<FakeMotionEvent>[
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int>[0], <Offset>[Offset(50.0, 50.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionUp, <int>[0], <Offset>[Offset(50.0, 50.0)]),
       ]),
     );
   });
@@ -662,10 +667,10 @@ void main() {
 
     expect(
       viewsController.motionEvents[currentViewId + 1],
-      orderedEquals(<FakeMotionEvent> [
-        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
-        const FakeMotionEvent(AndroidViewController.kActionMove, <int> [0], <Offset> [Offset(50.0, 150.0)]),
-        const FakeMotionEvent(AndroidViewController.kActionUp, <int> [0], <Offset> [Offset(50.0, 150.0)]),
+      orderedEquals(<FakeMotionEvent>[
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int>[0], <Offset>[Offset(50.0, 50.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionMove, <int>[0], <Offset>[Offset(50.0, 150.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionUp, <int>[0], <Offset>[Offset(50.0, 150.0)]),
       ]),
     );
   });
@@ -684,7 +689,11 @@ void main() {
             height: 100.0,
             child: AndroidView(
               viewType: 'webview',
-              gestureRecognizers: <OneSequenceGestureRecognizer>[ EagerGestureRecognizer() ],
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+                Factory<OneSequenceGestureRecognizer>(
+                  () => EagerGestureRecognizer(),
+                ),
+              ].toSet(),
               layoutDirection: TextDirection.ltr,
             ),
           ),
@@ -700,9 +709,62 @@ void main() {
     // pointer down event is immediately dispatched.
     expect(
       viewsController.motionEvents[currentViewId + 1],
-      orderedEquals(<FakeMotionEvent> [
-        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
+      orderedEquals(<FakeMotionEvent>[
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int>[0], <Offset>[Offset(50.0, 50.0)]),
       ]),
     );
+  });
+
+  testWidgets('RenderAndroidView reconstructed with same gestureRecognizers', (WidgetTester tester) async {
+    final FakePlatformViewsController viewsController = FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+
+    final AndroidView androidView = AndroidView(
+      viewType: 'webview',
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+        Factory<EagerGestureRecognizer>(
+          () => EagerGestureRecognizer(),
+        ),
+      ].toSet(),
+      layoutDirection: TextDirection.ltr,
+    );
+
+    await tester.pumpWidget(androidView);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(androidView);
+  });
+
+  testWidgets('AndroidView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
+    final FakePlatformViewsController viewsController = FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+
+    int factoryInvocationCount = 0;
+    final ValueGetter<EagerGestureRecognizer> constructRecognizer = () {
+        factoryInvocationCount += 1;
+        return EagerGestureRecognizer();
+      };
+
+    await tester.pumpWidget(
+      AndroidView(
+        viewType: 'webview',
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+          Factory<EagerGestureRecognizer>(constructRecognizer),
+        ].toSet(),
+        layoutDirection: TextDirection.ltr,
+      ),
+    );
+
+    await tester.pumpWidget(
+      AndroidView(
+        viewType: 'webview',
+        hitTestBehavior: PlatformViewHitTestBehavior.translucent,
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+          Factory<EagerGestureRecognizer>(constructRecognizer),
+        ].toSet(),
+        layoutDirection: TextDirection.ltr,
+      ),
+    );
+
+    expect(factoryInvocationCount, 1);
   });
 }

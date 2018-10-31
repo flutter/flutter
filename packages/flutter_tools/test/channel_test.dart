@@ -56,8 +56,10 @@ void main() {
       final Process process = createMockProcess(
           stdout: 'origin/dev\n'
                   'origin/beta\n'
+                  'origin/stable\n'
                   'upstream/dev\n'
-                  'upstream/beta\n');
+                  'upstream/beta\n'
+                  'upstream/stable\n');
       when(mockProcessManager.start(
         <String>['git', 'branch', '-r'],
         workingDirectory: anyNamed('workingDirectory'),
@@ -83,7 +85,7 @@ void main() {
         .where((String line) => line?.isNotEmpty == true)
         .skip(1); // remove `Flutter channels:` line
 
-      expect(rows, <String>['dev', 'beta']);
+      expect(rows, <String>['dev', 'beta', 'stable']);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
@@ -127,6 +129,40 @@ void main() {
 
       expect(testLogger.statusText, contains("Switching to flutter channel 'beta'..."));
       expect(testLogger.errorText, hasLength(0));
+
+      when(mockProcessManager.start(
+        <String>['git', 'fetch'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<Process>.value(createMockProcess()));
+      when(mockProcessManager.start(
+        <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/stable'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<Process>.value(createMockProcess()));
+      when(mockProcessManager.start(
+        <String>['git', 'checkout', 'stable', '--'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<Process>.value(createMockProcess()));
+
+      await runner.run(<String>['channel', 'stable']);
+
+      verify(mockProcessManager.start(
+        <String>['git', 'fetch'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).called(1);
+      verify(mockProcessManager.start(
+        <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/stable'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).called(1);
+      verify(mockProcessManager.start(
+        <String>['git', 'checkout', 'stable', '--'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).called(1);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       FileSystem: () => MemoryFileSystem(),
