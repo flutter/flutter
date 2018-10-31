@@ -4,7 +4,8 @@
 
 import 'dart:async';
 import 'dart:convert';
-
+import 'dart:isolate';
+import 'package:path/path.dart' as p;
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -25,6 +26,9 @@ import 'package:test_api/src/backend/suite.dart'; // ignore: implementation_impo
 import 'package:test_api/src/backend/state.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/message.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/group_entry.dart'; // ignore: implementation_imports
+import 'package:test_api/src/util/remote_exception.dart'; // ignore: implementation_imports
+import 'package:source_span/source_span.dart';
+import 'package:test_api/src/utils.dart'; // ignore: implementation_imports
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -226,7 +230,7 @@ class _Compiler {
       if (suppressOutput)
         return;
 
-      if (message.startsWith('Error: Could not resolve the package \'test\'')) {
+      if (message.startsWith('Error: Could not resolve the package \'test_api\'')) {
         printTrace(message);
         printError(
           '\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',
@@ -951,7 +955,7 @@ RunnerSuiteController deserializeSuite(
       completer.completeError(error, stackTrace);
     }
   }
-   suiteChannel.stream.listen((dynamic response) {
+  suiteChannel.stream.listen((dynamic response) {
     final String type = response['type'];
     switch (type) {
       case 'print':
@@ -961,7 +965,8 @@ RunnerSuiteController deserializeSuite(
         handleError(Exception(response['message']), Trace.current());
         break;
       case 'error':
-        handleError(Exception(response['error']), null); // TOOD FIXME
+        final AsyncError asyncError = RemoteException.deserialize(response['error']);
+        handleError(LoadException(path, asyncError.error), asyncError.stackTrace);
         break;
       case 'success':
         final _Deserializer deserializer = _Deserializer(suiteChannel);
@@ -996,18 +1001,18 @@ class _Deserializer {
   Group deserializeGroup(Map<dynamic, dynamic> group) {
     final Metadata metadata = Metadata.deserialize(group['metadata']);
     return Group(
-        group['name'] ,
-        (group['entries']).map<GroupEntry>((dynamic entry) {
-          if (entry['type'] == 'group')
-            return deserializeGroup(entry);
-          return _deserializeTest(entry);
-        }),
-        metadata: metadata,
-        trace: group['trace'] == null
-            ? null
-            : Trace.parse(group['trace'] ),
-        setUpAll: _deserializeTest(group['setUpAll']),
-        tearDownAll: _deserializeTest(group['tearDownAll']));
+      group['name'] ,
+      group['entries'].map<GroupEntry>((dynamic entry) {
+        if (entry['type'] == 'group') {
+          return deserializeGroup(entry);
+        }
+        return _deserializeTest(entry);
+      }),
+      metadata: metadata,
+      trace: group['trace'] == null ? null : Trace.parse(group['trace'] ),
+      setUpAll: _deserializeTest(group['setUpAll']),
+      tearDownAll: _deserializeTest(group['tearDownAll']),
+    );
   }
 
   /// Deserializes [test] into a concrete [Test] class.
@@ -1033,7 +1038,7 @@ class RunnerTest extends Test {
   @override
   final Trace trace;
 
- @override
+  @override
   final Metadata metadata;
 
   /// The channel used to communicate with the test's [IframeListener].
@@ -1051,7 +1056,9 @@ class RunnerTest extends Test {
         final String type = message['type'];
         switch (type) {
           case 'error':
-            controller.addError(Exception(message['error']), null); // TODO:fixme
+            final AsyncError asyncError = RemoteException.deserialize(message['error']);
+            final StackTrace stackTrace = asyncError.stackTrace;
+            controller.addError(asyncError.error, stackTrace);
             break;
           case 'state-change':
             controller.setState(State(Status.parse(message['status']), Result.parse(message['result'])));
@@ -1155,4 +1162,59 @@ class _AsyncError {
   const _AsyncError(this.error, this.stack);
   final dynamic error;
   final StackTrace stack;
+}
+
+/// A regular expression for matching filename annotations in
+/// [IsolateSpawnException] messages.
+final RegExp _isolateFileRegExp = RegExp(r"^'(file:/[^']+)': (error|warning): ", multiLine: true);
+
+class LoadException implements Exception {
+  final String path;
+
+  final Object innerError;
+
+  LoadException(this.path, this.innerError);
+
+  @override
+  String toString({bool color = false}) {
+    final StringBuffer buffer = StringBuffer();
+    if (color) {
+      buffer.write('\u001b[31m'); // red
+    }
+    buffer.write('Failed to load "$path":');
+    if (color) {
+      buffer.write('\u001b[0m'); // no color
+    }
+    String innerString = getErrorMessage(innerError);
+    if (innerError is IsolateSpawnException) {
+      // If this is a parse error, clean up the noisy filename annotations.
+      innerString = innerString.replaceAllMapped(_isolateFileRegExp, (Match match) {
+        if (p.fromUri(match[1]) == p.absolute(path)) {
+          return '';
+        }
+        return '${p.prettyUri(match[1])}: ';
+      });
+      // If this is a file system error, get rid of both the preamble and the
+      // useless stack trace.
+      // This message was used prior to 1.11.0-dev.3.0.
+      innerString = innerString.replaceFirst(
+        'Unhandled exception:\n'
+        'Uncaught Error: Load Error: ',
+        '');
+      // This message was used after 1.11.0-dev.3.0.
+      innerString = innerString.replaceFirst(
+        'Unhandled exception:\n'
+        'Load Error for ',
+        '');
+      innerString = innerString.replaceFirst('FileSystemException: ', '');
+      innerString = innerString.split('Stack Trace:\n').first.trim();
+    }
+    if (innerError is SourceSpanException) {
+      final SourceSpanException innerException = innerError;
+      innerString = innerException.toString(color: color).replaceFirst(' of $path', '');
+    }
+    buffer.write(innerString.contains('\n') ? '\n' : ' ');
+    buffer.write(innerString);
+    return buffer.toString();
+  }
 }
