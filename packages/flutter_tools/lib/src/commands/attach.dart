@@ -167,7 +167,6 @@ class AttachCommand extends FlutterCommand {
         dillOutputPath: argResults['output-dill'],
         ipv6: ipv6,
       );
-      flutterDevice.startEchoingDeviceLog();
 
       if (daemon != null) {
         AppInstance app;
