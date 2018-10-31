@@ -21,7 +21,6 @@ export 'package:flutter/foundation.dart' show
   protected,
   required,
   visibleForTesting;
-
 export 'package:flutter/foundation.dart' show FlutterError, debugPrint, debugPrintStack;
 export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
 export 'package:flutter/foundation.dart' show DiagnosticLevel;
@@ -3527,6 +3526,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       owner._debugCurrentBuildTarget = this;
       return true;
     }());
+
+    if (_dependencies != null && _dependencies.isNotEmpty) {
+      for (InheritedElement dependency in _dependencies)
+        dependency._dependents.remove(this);
+    }
+
     performRebuild();
     assert(() {
       assert(owner._debugCurrentBuildTarget == this);
