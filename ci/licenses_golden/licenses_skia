@@ -1,4 +1,4 @@
-Signature: 264da6c34d83b2ee0220a52d5144fb14
+Signature: 43e922594cb33489e05c7330203bda50
 
 UNUSED LICENSES:
 
@@ -1329,6 +1329,7 @@ FILE: ../../../third_party/skia/gm/shadermaskfilter.cpp
 FILE: ../../../third_party/skia/gm/sharedcorners.cpp
 FILE: ../../../third_party/skia/gm/skinning.cpp
 FILE: ../../../third_party/skia/gm/trickycubicstrokes.cpp
+FILE: ../../../third_party/skia/gm/unpremul.cpp
 FILE: ../../../third_party/skia/gm/wacky_yuv_formats.cpp
 FILE: ../../../third_party/skia/include/android/SkAnimatedImage.h
 FILE: ../../../third_party/skia/include/c/sk_colorspace.h
