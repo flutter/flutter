@@ -961,5 +961,43 @@ void main() {
       );
     });
 
+    testWidgets('Create UIView with params', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: UiKitView(
+              viewType: 'webview',
+              layoutDirection: TextDirection.ltr,
+              creationParams: 'creation parameters',
+              creationParamsCodec: const StringCodec(),
+            ),
+          ),
+        ),
+      );
+
+      final FakeUiKitView fakeView = viewsController.views.first;
+      final Uint8List rawCreationParams = fakeView.creationParams;
+      final ByteData byteData = ByteData.view(
+          rawCreationParams.buffer,
+          rawCreationParams.offsetInBytes,
+          rawCreationParams.lengthInBytes
+      );
+      final dynamic actualParams = const StringCodec().decodeMessage(byteData);
+
+      expect(actualParams, 'creation parameters');
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeUiKitView>[
+          FakeUiKitView(currentViewId + 1, 'webview', fakeView.creationParams)
+        ]),
+      );
+    });
+
   });
 }

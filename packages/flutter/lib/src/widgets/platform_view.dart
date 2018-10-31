@@ -56,8 +56,8 @@ class AndroidView extends StatefulWidget {
   ///
   /// {@template flutter.widgets.platformViews.constructorParams}
   /// The `viewType` and `hitTestBehavior` parameters must not be null.
-  /// {@endtemplate}
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
+  /// {@endtemplate}
   AndroidView({ // ignore: prefer_const_constructors_in_immutables
                 // TODO(aam): Remove lint ignore above once https://dartbug.com/34297 is fixed
     Key key,
@@ -193,8 +193,11 @@ class UiKitView extends StatefulWidget {
     this.onPlatformViewCreated,
     this.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
     this.layoutDirection,
+    this.creationParams,
+    this.creationParamsCodec,
   }) : assert(viewType != null),
         assert(hitTestBehavior != null),
+        assert(creationParams == null || creationParamsCodec != null),
         super(key: key);
 
   // TODO(amirh): reference the iOS API doc once avaliable.
@@ -211,6 +214,19 @@ class UiKitView extends StatefulWidget {
 
   /// {@macro flutter.widgets.platformViews.directionParam}
   final TextDirection layoutDirection;
+
+  /// Passed as the `arguments` argument of [-[FlutterPlatformViewFactory createWithFrame:viewIdentifier:arguments:]](/objcdoc/Protocols/FlutterPlatformViewFactory.html#/c:objc(pl)FlutterPlatformViewFactory(im)createWithFrame:viewIdentifier:arguments:)
+  ///
+  /// This can be used by plugins to pass constructor parameters to the embedded Android view.
+  final dynamic creationParams;
+
+  /// The codec used to encode `creationParams` before sending it to the
+  /// platform side. It should match the codec returned by [-[FlutterPlatformViewFactory createArgsCodec:]](/objcdoc/Protocols/FlutterPlatformViewFactory.html#/c:objc(pl)FlutterPlatformViewFactory(im)createArgsCodec)
+  ///
+  /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec], [StringCodec], or [BinaryCodec].
+  ///
+  /// This must not be null if [creationParams] is not null.
+  final MessageCodec<dynamic> creationParamsCodec;
 
   @override
   State<UiKitView> createState() => _UiKitViewState();
@@ -379,6 +395,8 @@ class _UiKitViewState extends State<UiKitView> {
       id: _id,
       viewType: widget.viewType,
       layoutDirection: _layoutDirection,
+      creationParams: widget.creationParams,
+      creationParamsCodec: widget.creationParamsCodec,
     );
     if (!mounted) {
       controller.dispose();
