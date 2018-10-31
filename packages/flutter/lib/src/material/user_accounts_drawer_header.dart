@@ -79,7 +79,7 @@ class _AccountDetails extends StatefulWidget {
   final bool isOpen;
 
   @override
-  _AccountDetailsState createState() => new _AccountDetailsState();
+  _AccountDetailsState createState() => _AccountDetailsState();
 }
 
 class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProviderStateMixin {
@@ -90,12 +90,12 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
   void initState () {
     super.initState();
 
-    _controller = new AnimationController(
+    _controller = AnimationController(
       value: widget.isOpen ? 1.0 : 0.0,
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    _animation = new CurvedAnimation(
+    _animation = CurvedAnimation(
         parent: _controller,
         curve: Curves.fastOutSlowIn,
         reverseCurve: Curves.fastOutSlowIn.flipped,
