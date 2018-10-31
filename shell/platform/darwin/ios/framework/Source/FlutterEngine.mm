@@ -44,12 +44,15 @@
   fml::WeakPtr<FlutterViewController> _viewController;
   fml::scoped_nsobject<FlutterObservatoryPublisher> _publisher;
 
+  std::unique_ptr<shell::FlutterPlatformViewsController> _platformViewsController;
+
   // Channels
   fml::scoped_nsobject<FlutterPlatformPlugin> _platformPlugin;
   fml::scoped_nsobject<FlutterTextInputPlugin> _textInputPlugin;
   fml::scoped_nsobject<FlutterMethodChannel> _localizationChannel;
   fml::scoped_nsobject<FlutterMethodChannel> _navigationChannel;
   fml::scoped_nsobject<FlutterMethodChannel> _platformChannel;
+  fml::scoped_nsobject<FlutterMethodChannel> _platformViewsChannel;
   fml::scoped_nsobject<FlutterMethodChannel> _textInputChannel;
   fml::scoped_nsobject<FlutterBasicMessageChannel> _lifecycleChannel;
   fml::scoped_nsobject<FlutterBasicMessageChannel> _systemChannel;
@@ -73,6 +76,7 @@
 
   _pluginPublications = [NSMutableDictionary new];
   _publisher.reset([[FlutterObservatoryPublisher alloc] init]);
+  _platformViewsController.reset(new shell::FlutterPlatformViewsController());
 
   [self setupChannels];
 
@@ -143,6 +147,9 @@
 - (FlutterPlatformPlugin*)platformPlugin {
   return _platformPlugin.get();
 }
+- (shell::FlutterPlatformViewsController*)platformViewsController {
+  return _platformViewsController.get();
+}
 - (FlutterTextInputPlugin*)textInputPlugin {
   return _textInputPlugin.get();
 }
@@ -184,6 +191,11 @@
       binaryMessenger:self
                 codec:[FlutterJSONMethodCodec sharedInstance]]);
 
+  _platformViewsChannel.reset([[FlutterMethodChannel alloc]
+         initWithName:@"flutter/platform_views"
+      binaryMessenger:self
+                codec:[FlutterStandardMethodCodec sharedInstance]]);
+
   _textInputChannel.reset([[FlutterMethodChannel alloc]
          initWithName:@"flutter/textinput"
       binaryMessenger:self
@@ -217,6 +229,11 @@
     [_platformChannel.get() setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
       [_platformPlugin.get() handleMethodCall:call result:result];
     }];
+
+    [_platformViewsChannel.get()
+        setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+          _platformViewsController->OnMethodCall(call, result);
+        }];
 
     [_textInputChannel.get() setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
       [_textInputPlugin.get() handleMethodCall:call result:result];
@@ -379,6 +396,10 @@
   return _shell->Screenshot(type, base64Encode);
 }
 
+- (flow::ExternalViewEmbedder*)externalViewEmbedder {
+  return _platformViewsController.get();
+}
+
 #pragma mark - FlutterBinaryMessenger
 
 - (void)sendOnChannel:(NSString*)channel message:(NSData*)message {
@@ -514,18 +535,7 @@
 
 - (void)registerViewFactory:(NSObject<FlutterPlatformViewFactory>*)factory
                      withId:(NSString*)factoryId {
-  // TODO(amirh/dnfield): this shouldn't need to fail - PlatformViewsController should be
-  // independent. Dev builds of engine should just fail here.  We don't want to fail in release mode
-  // because this shouldn't ordinarily happen.
-  FML_DCHECK([_flutterEngine viewController])
-      << "Cannot register a view factory on a headless engine.";
-  if ([_flutterEngine viewController]) {
-    [[_flutterEngine viewController] platformViewsController]->RegisterViewFactory(factory,
-                                                                                   factoryId);
-  } else {
-    // Shouldn't ordinarily happen, but at least give warning if it does.
-    FML_LOG(ERROR) << "Cannot register a view factory on a headless engine.";
-  }
+  [_flutterEngine platformViewsController] -> RegisterViewFactory(factory, factoryId);
 }
 
 @end

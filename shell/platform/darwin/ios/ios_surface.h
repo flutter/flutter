@@ -13,8 +13,6 @@
 
 namespace shell {
 
-typedef flow::ExternalViewEmbedder* (^GetExternalViewEmbedder)(void);
-
 class IOSSurface {
  public:
   IOSSurface();
