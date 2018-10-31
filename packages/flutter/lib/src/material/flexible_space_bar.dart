@@ -83,7 +83,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     @required Widget child,
   }) {
     assert(currentExtent != null);
-    return _FlexibleSpaceBarSettings(
+    return FlexibleSpaceBarSettings(
       toolbarOpacity: toolbarOpacity ?? 1.0,
       minExtent: minExtent ?? currentExtent,
       maxExtent: maxExtent ?? currentExtent,
@@ -125,7 +125,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     return null;
   }
 
-  double _getCollapsePadding(double t, _FlexibleSpaceBarSettings settings) {
+  double _getCollapsePadding(double t, FlexibleSpaceBarSettings settings) {
     switch (widget.collapseMode) {
       case CollapseMode.pin:
         return -(settings.maxExtent - settings.currentExtent);
@@ -140,7 +140,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
   @override
   Widget build(BuildContext context) {
-    final _FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(_FlexibleSpaceBarSettings);
+    final FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(FlexibleSpaceBarSettings);
     assert(settings != null, 'A FlexibleSpaceBar must be wrapped in the widget returned by FlexibleSpaceBar.createSettings().');
 
     final List<Widget> children = <Widget>[];
@@ -221,8 +221,13 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   }
 }
 
-class _FlexibleSpaceBarSettings extends InheritedWidget {
-  const _FlexibleSpaceBarSettings({
+/// Wraps a widget that contains an [AppBar] to convey sizing information down
+/// to the [FlexibleSpaceBar].
+class FlexibleSpaceBarSettings extends InheritedWidget {
+  /// Creates a Flexible Space Bar Settings widget.
+  ///
+  /// Most commonly used by [Scaffold] and [SliverAppBar].
+  const FlexibleSpaceBarSettings({
     Key key,
     this.toolbarOpacity,
     this.minExtent,
@@ -231,13 +236,20 @@ class _FlexibleSpaceBarSettings extends InheritedWidget {
     Widget child,
   }) : super(key: key, child: child);
 
+  /// Affects how transparent the toolbar appears in the [FlexibleSpaceBar].
   final double toolbarOpacity;
+
+  /// Minimum height of the resulting [FlexibleSpaceBar].
   final double minExtent;
+
+  /// Maximum height of the resulting [FlexibleSpaceBar].
   final double maxExtent;
+
+  /// The current height of the attached [FlexibleSpaceBar].
   final double currentExtent;
 
   @override
-  bool updateShouldNotify(_FlexibleSpaceBarSettings oldWidget) {
+  bool updateShouldNotify(FlexibleSpaceBarSettings oldWidget) {
     return toolbarOpacity != oldWidget.toolbarOpacity
         || minExtent != oldWidget.minExtent
         || maxExtent != oldWidget.maxExtent
