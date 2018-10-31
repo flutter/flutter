@@ -1050,7 +1050,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// See also:
   ///
   ///   * [ScaffoldState.openDrawer], which opens the [Scaffold.drawer] of a
-  ///     [Scaffold] <https://docs.flutter.io/flutter/material/ScaffoldState/openDrawer.html>
+  ///   [Scaffold].
   bool get isDrawerOpen => _drawerOpened;
 
   /// Whether the [Scaffold.endDrawer] is opened.
@@ -1058,7 +1058,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// See also:
   ///
   ///   * [ScaffoldState.openEndDrawer], which opens the [Scaffold.endDrawer] of
-  ///     a [Scaffold] <https://docs.flutter.io/flutter/material/ScaffoldState/openEndDrawer.html>
+  ///     a [Scaffold].
   bool get isEndDrawerOpen => _endDrawerOpened;
 
   void _drawerOpenedCallback(bool isOpened) {
