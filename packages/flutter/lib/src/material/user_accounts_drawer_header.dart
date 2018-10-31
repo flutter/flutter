@@ -123,17 +123,6 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
   }
 
   @override
-  void didUpdateWidget (_AccountDetails oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.isOpen) {
-      _controller.forward();
-    } else {
-      _controller.reverse();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
@@ -184,7 +173,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
             width: _kAccountDetailsHeight,
             child: Center(
               child: Transform.rotate(
-                angle: _animation.value * math.PI,
+                angle: _animation.value * math.pi,
                 child: Icon(
                   Icons.arrow_drop_down,
                   color: Colors.white,
