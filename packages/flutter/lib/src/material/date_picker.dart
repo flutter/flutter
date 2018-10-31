@@ -943,7 +943,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
     final Widget picker = Flexible(
       child: SizedBox(
@@ -1086,6 +1085,8 @@ Future<DateTime> showDatePicker({
     'Provided initialDate must satisfy provided selectableDayPredicate'
   );
   assert(initialDatePickerMode != null, 'initialDatePickerMode must not be null');
+  assert(context != null);
+  assert(debugCheckHasMaterialLocalizations(context));
 
   Widget child = _DatePickerDialog(
     initialDate: initialDate,

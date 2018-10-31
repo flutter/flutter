@@ -758,6 +758,7 @@ class NotifyingLogger extends Logger {
       TerminalColor color,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     _messageController.add(LogMessage('error', message, stackTrace));
   }
@@ -770,6 +771,7 @@ class NotifyingLogger extends Logger {
       bool newline = true,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     _messageController.add(LogMessage('status', message));
   }
@@ -892,6 +894,7 @@ class _AppRunLogger extends Logger {
       TerminalColor color,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     if (parent != null) {
       parent.printError(
@@ -900,6 +903,7 @@ class _AppRunLogger extends Logger {
         emphasis: emphasis,
         indent: indent,
         hangingIndent: hangingIndent,
+        wrap: wrap,
       );
     } else {
       if (stackTrace != null) {
@@ -925,6 +929,7 @@ class _AppRunLogger extends Logger {
       bool newline = true,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     if (parent != null) {
       parent.printStatus(
@@ -934,6 +939,7 @@ class _AppRunLogger extends Logger {
         newline: newline,
         indent: indent,
         hangingIndent: hangingIndent,
+        wrap: wrap,
       );
     } else {
       _sendLogEvent(<String, dynamic>{'log': message});
