@@ -112,18 +112,18 @@ void main() {
     expect(followerLayer.debugSubtreeNeedsAddToScene, true);
   });
 
-  void checkNeedsAddToScene(Layer layer, void mutate()) {
+  void checkNeedsAddToScene(Layer layer, void mutateCallback()) {
     layer.debugMarkClean();
     layer.updateSubtreeNeedsAddToScene();  // ignore: invalid_use_of_protected_member
     expect(layer.debugSubtreeNeedsAddToScene, false);
-    mutate();
+    mutateCallback();
     layer.updateSubtreeNeedsAddToScene();  // ignore: invalid_use_of_protected_member
     expect(layer.debugSubtreeNeedsAddToScene, true);
   }
 
   test('mutating PictureLayer fields triggers needsAddToScene', () {
     final PictureLayer pictureLayer = PictureLayer(Rect.zero);
-    checkNeedsAddToScene(pictureLayer, (){
+    checkNeedsAddToScene(pictureLayer, () {
       final PictureRecorder recorder = PictureRecorder();
       pictureLayer.picture = recorder.endRecording();
     });
