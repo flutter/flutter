@@ -60,10 +60,21 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
     return;
   }
 
-  // TODO(amirh): decode and pass the creation args.
-  FlutterTouchInterceptingView* view = [[[FlutterTouchInterceptingView alloc]
-      initWithEmbeddedView:[factory createWithFrame:CGRectZero viewIdentifier:viewId arguments:nil]
-               flutterView:flutter_view_] autorelease];
+  id params = nil;
+  if ([factory respondsToSelector:@selector(createArgsCodec)]) {
+    NSObject<FlutterMessageCodec>* codec = [factory createArgsCodec];
+    if (codec != nil && args[@"params"] != nil) {
+      FlutterStandardTypedData* paramsData = args[@"params"];
+      params = [codec decode:paramsData.data];
+    }
+  }
+
+  UIView* embedded_view = [factory createWithFrame:CGRectZero
+                                    viewIdentifier:viewId
+                                         arguments:params];
+  FlutterTouchInterceptingView* view =
+      [[[FlutterTouchInterceptingView alloc] initWithEmbeddedView:embedded_view
+                                                      flutterView:flutter_view_] autorelease];
   views_[viewId] = fml::scoped_nsobject<FlutterTouchInterceptingView>([view retain]);
 
   result(nil);
