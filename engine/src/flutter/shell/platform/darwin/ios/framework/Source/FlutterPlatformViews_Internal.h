@@ -13,6 +13,18 @@
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 
+// A UIView that is used as the parent for embedded UIViews.
+//
+// This view has 2 roles:
+// 1. Delay or prevent touch events from arriving the embedded view.
+// 2. Dispatching all events that are hittested to the embedded view to the FlutterView.
+@interface FlutterTouchInterceptingView : UIView
+- (instancetype)initWithEmbeddedView:(UIView*)embeddedView flutterView:(UIView*)flutterView;
+
+// Stop delaying any active touch sequence (and let it arrive the embedded view).
+- (void)releaseGesture;
+@end
+
 namespace shell {
 
 class FlutterPlatformViewsController : public flow::ExternalViewEmbedder {
@@ -28,11 +40,12 @@ class FlutterPlatformViewsController : public flow::ExternalViewEmbedder {
   fml::scoped_nsobject<FlutterMethodChannel> channel_;
   fml::scoped_nsobject<FlutterView> flutter_view_;
   std::map<std::string, fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>> factories_;
-  std::map<int64_t, fml::scoped_nsobject<UIView>> views_;
+  std::map<int64_t, fml::scoped_nsobject<FlutterTouchInterceptingView>> views_;
 
   void OnMethodCall(FlutterMethodCall* call, FlutterResult& result);
   void OnCreate(FlutterMethodCall* call, FlutterResult& result);
   void OnDispose(FlutterMethodCall* call, FlutterResult& result);
+  void OnAcceptGesture(FlutterMethodCall* call, FlutterResult& result);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterPlatformViewsController);
 };
