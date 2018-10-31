@@ -474,7 +474,7 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// This callback considers the entire list of preferred locales.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [MaterialApp.localeResolutionCallback], which sets the callback of the
@@ -747,7 +747,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   /// or [WidgetsApp.localeResolutionCallback].
   ///
   /// This algorithm will resolve to the earliest locale in [preferredLocales] that
-  /// matches the most fields, prioritizing in the order of perfect match, 
+  /// matches the most fields, prioritizing in the order of perfect match,
   /// languageCode+countryCode, languageCode+scriptCode, languageCode-only.
   ///
   /// In the case where a locale is matched by languageCode-only and is not the
@@ -813,7 +813,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       }
       // If there was a languageCode-only match in the previous iteration's higher
       // ranked preferred locale, we return it if the current userLocale does not
-      // have a perfect match.
+      // have a better match.
       if (matchesLanguageCode != null) {
         return matchesLanguageCode;
       }
