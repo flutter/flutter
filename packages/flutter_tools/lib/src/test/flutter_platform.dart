@@ -935,8 +935,8 @@ RunnerSuiteController deserializeSuite(
     'path': path,
     'collectTraces': false,
     'noRetry': true,
-    'foldTraceExcept': true,
-    'foldTraceOnly': true,
+    'foldTraceExcept': <String>[],
+    'foldTraceOnly': <String>[],
   }..addAll(message));
   final Completer<Group> completer = Completer<Group>();
   final Zone loadSuiteZone = Zone.current;
@@ -979,10 +979,10 @@ RunnerSuiteController deserializeSuite(
         Trace.current(),
       );
     });
-  return RunnerSuiteController(
-    environment, suiteConfig, suiteChannel, completer.future, suitePlatform,
-    path: path,
-    onClose: () => disconnector.disconnect().catchError(handleError));
+   return RunnerSuiteController(
+      environment, suiteConfig, suiteChannel, completer.future, suitePlatform,
+      path: path,
+      onClose: () => disconnector.disconnect().catchError(handleError));
 }
 
 /// A utility class for storing state while deserializing tests.
@@ -990,19 +990,24 @@ class _Deserializer {
   _Deserializer(this._channel);
 
   /// The channel over which tests communicate.
-  final MultiChannel<Map<String, Object>> _channel;
+  final MultiChannel<dynamic> _channel;
 
   /// Deserializes [group] into a concrete [Group].
-  Group deserializeGroup(Map<String, Object> group) {
+  Group deserializeGroup(Map<dynamic, dynamic> group) {
     final Metadata metadata = Metadata.deserialize(group['metadata']);
-    final List<Map<String, Object>> entries = group['entries'];
-    return Group(group['name'],
-      entries.map<GroupEntry>((Map<String, Object> entry) => entry['type'] == 'group' ? deserializeGroup(entry) : _deserializeTest(entry)),
-      metadata: metadata,
-      trace: group['trace'] == null ? null: Trace.parse(group['trace']),
-      setUpAll: _deserializeTest(group['setUpAll']),
-      tearDownAll: _deserializeTest(group['tearDownAll']),
-    );
+    return Group(
+        group['name'] ,
+        (group['entries']).map<GroupEntry>((dynamic entry) {
+          if (entry['type'] == 'group')
+            return deserializeGroup(entry);
+          return _deserializeTest(entry);
+        }),
+        metadata: metadata,
+        trace: group['trace'] == null
+            ? null
+            : Trace.parse(group['trace'] ),
+        setUpAll: _deserializeTest(group['setUpAll']),
+        tearDownAll: _deserializeTest(group['tearDownAll']));
   }
 
   /// Deserializes [test] into a concrete [Test] class.
@@ -1018,16 +1023,17 @@ class _Deserializer {
     return RunnerTest(test['name'], metadata, trace, testChannel);
   }
 }
-
-/// A test running remotely, controlled by a stream channel.
+ /// A test running remotely, controlled by a stream channel.
 class RunnerTest extends Test {
   RunnerTest(this.name, this.metadata, this.trace, this._channel);
 
   @override
   final String name;
+
   @override
   final Trace trace;
-  @override
+
+ @override
   final Metadata metadata;
 
   /// The channel used to communicate with the test's [IframeListener].
@@ -1036,12 +1042,12 @@ class RunnerTest extends Test {
   @override
   LiveTest load(Suite suite, {Iterable<Group> groups}) {
     LiveTestController controller;
-    VirtualChannel<Map<String, Object>> testChannel;
+    VirtualChannel<dynamic> testChannel;
     controller = LiveTestController(suite, this, () {
       controller.setState(const State(Status.running, Result.success));
       testChannel = _channel.virtualChannel();
       _channel.sink.add(<String, Object>{'command': 'run', 'channel': testChannel.id});
-      testChannel.stream.listen((Map<String, Object> message) {
+      testChannel.stream.listen((dynamic message) {
         final String type = message['type'];
         switch (type) {
           case 'error':
