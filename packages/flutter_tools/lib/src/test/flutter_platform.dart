@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 
-import 'package:path/path.dart' as p;
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -1189,10 +1188,10 @@ class LoadException implements Exception {
     if (innerError is IsolateSpawnException) {
       // If this is a parse error, clean up the noisy filename annotations.
       innerString = innerString.replaceAllMapped(_isolateFileRegExp, (Match match) {
-        if (p.fromUri(match[1]) == p.absolute(path)) {
+        if (fs.path.fromUri(match[1]) == fs.path.absolute(path)) {
           return '';
         }
-        return '${p.prettyUri(match[1])}: ';
+        return '${fs.path.prettyUri(match[1])}: ';
       });
       // If this is a file system error, get rid of both the preamble and the
       // useless stack trace.
