@@ -416,8 +416,13 @@ class PointerHoverEvent extends PointerEvent {
   );
 }
 
-/// The pointer has moved with respect to the device while the pointer is not
-/// in contact with the device.
+/// The pointer data has changed.
+///
+/// This event is sent on Android for non-primary pointers when their data
+/// such as position changes at the same time as the primary pointer changed.
+/// This event is needed for those situations when we don't know yet whether
+/// the secondary pointer change was a move or a hover because Android has
+/// batched it with the primary pointer.
 ///
 /// See also:
 ///
