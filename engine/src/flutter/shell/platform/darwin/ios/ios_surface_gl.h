@@ -18,7 +18,7 @@ namespace shell {
 class IOSSurfaceGL : public IOSSurface, public GPUSurfaceGLDelegate {
  public:
   IOSSurfaceGL(fml::scoped_nsobject<CAEAGLLayer> layer,
-               ::shell::GetExternalViewEmbedder get_view_embedder);
+               flow::ExternalViewEmbedder& external_view_embedder);
 
   ~IOSSurfaceGL() override;
 
@@ -46,7 +46,7 @@ class IOSSurfaceGL : public IOSSurface, public GPUSurfaceGLDelegate {
  private:
   IOSGLContext context_;
 
-  fml::scoped_nsprotocol<::shell::GetExternalViewEmbedder> get_view_embedder_;
+  flow::ExternalViewEmbedder& external_view_embedder_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceGL);
 };

@@ -113,8 +113,6 @@
   _statusBarStyle = UIStatusBarStyleDefault;
 
   [self setupNotificationCenterObservers];
-  _platformViewsController.reset(
-      new shell::FlutterPlatformViewsController(_engine.get(), _flutterView.get()));
 }
 
 - (fml::scoped_nsobject<FlutterEngine>)engine {
@@ -123,10 +121,6 @@
 
 - (fml::WeakPtr<FlutterViewController>)getWeakPtr {
   return _weakFactory->GetWeakPtr();
-}
-
-- (flow::ExternalViewEmbedder*)viewEmbedder {
-  return _platformViewsController.get();
 }
 
 - (void)setupNotificationCenterObservers {
@@ -364,10 +358,11 @@
   // NotifyCreated/NotifyDestroyed are synchronous and require hops between the UI and GPU thread.
   if (appeared) {
     [self installSplashScreenViewCallback];
+    [_engine.get() platformViewsController] -> SetFlutterView(_flutterView.get());
     [_engine.get() platformView] -> NotifyCreated();
-
   } else {
     [_engine.get() platformView] -> NotifyDestroyed();
+    [_engine.get() platformViewsController] -> SetFlutterView(nullptr);
   }
 }
 

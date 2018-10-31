@@ -23,7 +23,7 @@
 
 @implementation FlutterView
 
-id<FlutterScreenshotDelegate> _delegate;
+id<FlutterViewEngineDelegate> _delegate;
 
 - (instancetype)init {
   @throw([NSException exceptionWithName:@"FlutterView must initWithDelegate"
@@ -43,7 +43,7 @@ id<FlutterScreenshotDelegate> _delegate;
                                userInfo:nil]);
 }
 
-- (instancetype)initWithDelegate:(id<FlutterScreenshotDelegate>)delegate opaque:(BOOL)opaque {
+- (instancetype)initWithDelegate:(id<FlutterViewEngineDelegate>)delegate opaque:(BOOL)opaque {
   FML_DCHECK(delegate) << "Delegate must not be nil.";
   self = [super initWithFrame:CGRectNull];
 
@@ -53,23 +53,6 @@ id<FlutterScreenshotDelegate> _delegate;
   }
 
   return self;
-}
-
-- (FlutterViewController*)flutterViewController {
-  // Find the first view controller in the responder chain and see if it is a FlutterViewController.
-  for (UIResponder* responder = self.nextResponder; responder != nil;
-       responder = responder.nextResponder) {
-    if ([responder isKindOfClass:[UIViewController class]]) {
-      if ([responder isKindOfClass:[FlutterViewController class]]) {
-        return reinterpret_cast<FlutterViewController*>(responder);
-      } else {
-        // Should only happen if a non-FlutterViewController tries to somehow (via dynamic class
-        // resolution or reparenting) set a FlutterView as its view.
-        return nil;
-      }
-    }
-  }
-  return nil;
 }
 
 - (void)layoutSubviews {
@@ -93,16 +76,15 @@ id<FlutterScreenshotDelegate> _delegate;
 }
 
 - (std::unique_ptr<shell::IOSSurface>)createSurface {
-  ::shell::GetExternalViewEmbedder get_view_embedder = [[^() {
-    return [[self flutterViewController] viewEmbedder];
-  } copy] autorelease];
   if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
     fml::scoped_nsobject<CAEAGLLayer> eagl_layer(
         reinterpret_cast<CAEAGLLayer*>([self.layer retain]));
-    return std::make_unique<shell::IOSSurfaceGL>(std::move(eagl_layer), get_view_embedder);
+    return std::make_unique<shell::IOSSurfaceGL>(std::move(eagl_layer),
+                                                 *[_delegate externalViewEmbedder]);
   } else {
     fml::scoped_nsobject<CALayer> layer(reinterpret_cast<CALayer*>([self.layer retain]));
-    return std::make_unique<shell::IOSSurfaceSoftware>(std::move(layer), get_view_embedder);
+    return std::make_unique<shell::IOSSurfaceSoftware>(std::move(layer),
+                                                       *[_delegate externalViewEmbedder]);
   }
 }
 

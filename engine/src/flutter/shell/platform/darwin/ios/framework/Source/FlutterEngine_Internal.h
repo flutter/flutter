@@ -7,6 +7,8 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 
+#import "FlutterPlatformViews_Internal.h"
+
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
@@ -22,7 +24,7 @@
 
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 
-@interface FlutterEngine () <FlutterScreenshotDelegate>
+@interface FlutterEngine () <FlutterViewEngineDelegate>
 
 - (shell::Shell&)shell;
 
@@ -37,6 +39,7 @@
                                base64Encode:(bool)base64Encode;
 
 - (FlutterPlatformPlugin*)platformPlugin;
+- (shell::FlutterPlatformViewsController*)platformViewsController;
 - (FlutterTextInputPlugin*)textInputPlugin;
 - (void)launchEngine:(NSString*)entrypoint libraryURI:(NSString*)libraryOrNil;
 

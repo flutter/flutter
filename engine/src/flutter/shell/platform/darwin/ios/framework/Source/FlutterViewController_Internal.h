@@ -19,8 +19,6 @@
 
 @property(readonly) fml::scoped_nsobject<FlutterEngine> engine;
 
-- (flow::ExternalViewEmbedder*)viewEmbedder;
-
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLER_INTERNAL_H_
