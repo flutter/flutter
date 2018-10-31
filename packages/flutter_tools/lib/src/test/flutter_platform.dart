@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
+
 import 'package:path/path.dart' as p;
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -1169,11 +1170,10 @@ class _AsyncError {
 final RegExp _isolateFileRegExp = RegExp(r"^'(file:/[^']+)': (error|warning): ", multiLine: true);
 
 class LoadException implements Exception {
-  final String path;
-
-  final Object innerError;
-
   LoadException(this.path, this.innerError);
+
+  final String path;
+  final Object innerError;
 
   @override
   String toString({bool color = false}) {
