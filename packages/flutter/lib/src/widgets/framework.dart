@@ -3530,6 +3530,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (_dependencies != null && _dependencies.isNotEmpty) {
       for (InheritedElement dependency in _dependencies)
         dependency._dependents.remove(this);
+      _dependencies.clear();
     }
 
     performRebuild();
