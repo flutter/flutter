@@ -119,10 +119,10 @@ class IMobileDevice {
     try {
       final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key, '--simple']);
       if (result.exitCode != 0)
-        throw ToolExit('idevice_id returned an error:\n${result.stderr}');
+        throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
       return result.stdout.trim();
     } on ProcessException {
-      throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
+      throw ToolExit('Failed to invoke ideviceinfo. Run flutter doctor.');
     }
   }
 

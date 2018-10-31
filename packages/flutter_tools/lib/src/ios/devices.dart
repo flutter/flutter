@@ -149,9 +149,13 @@ class IOSDevice extends Device {
       if (id.isEmpty)
         continue;
 
-      final String deviceName = await iMobileDevice.getInfoForDevice(id, 'DeviceName');
-      final String sdkVersion = await iMobileDevice.getInfoForDevice(id, 'ProductVersion');
-      devices.add(IOSDevice(id, name: deviceName, sdkVersion: sdkVersion));
+      try {
+        final String deviceName = await iMobileDevice.getInfoForDevice(id, 'DeviceName');
+        final String sdkVersion = await iMobileDevice.getInfoForDevice(id, 'ProductVersion');
+        devices.add(IOSDevice(id, name: deviceName, sdkVersion: sdkVersion));
+      } catch (_) {
+        // Unable to get device info. Possibly a network device.
+      }
     }
     return devices;
   }
