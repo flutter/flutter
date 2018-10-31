@@ -10,8 +10,8 @@
 namespace shell {
 
 IOSSurfaceGL::IOSSurfaceGL(fml::scoped_nsobject<CAEAGLLayer> layer,
-                           flow::ExternalViewEmbedder& view_embedder)
-    : context_(std::move(layer)), external_view_embedder_(view_embedder) {}
+                           FlutterPlatformViewsController& platform_views_controller)
+    : IOSSurface(platform_views_controller), context_(std::move(layer)) {}
 
 IOSSurfaceGL::~IOSSurfaceGL() = default;
 
@@ -55,11 +55,20 @@ bool IOSSurfaceGL::GLContextClearCurrent() {
 
 bool IOSSurfaceGL::GLContextPresent() {
   TRACE_EVENT0("flutter", "IOSSurfaceGL::GLContextPresent");
-  return IsValid() ? context_.PresentRenderBuffer() : false;
+  if (!IsValid() || !context_.PresentRenderBuffer()) {
+    return false;
+  }
+
+  GetPlatformViewsController().Present();
+  return true;
 }
 
 flow::ExternalViewEmbedder* IOSSurfaceGL::GetExternalViewEmbedder() {
-  return &external_view_embedder_;
+  return this;
+}
+
+void IOSSurfaceGL::CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) {
+  GetPlatformViewsController().CompositeEmbeddedView(view_id, params);
 }
 
 }  // namespace shell

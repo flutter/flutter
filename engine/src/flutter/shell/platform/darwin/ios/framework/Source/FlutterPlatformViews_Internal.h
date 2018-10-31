@@ -26,7 +26,7 @@
 
 namespace shell {
 
-class FlutterPlatformViewsController : public flow::ExternalViewEmbedder {
+class FlutterPlatformViewsController {
  public:
   FlutterPlatformViewsController() = default;
 
@@ -36,6 +36,8 @@ class FlutterPlatformViewsController : public flow::ExternalViewEmbedder {
 
   void CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params);
 
+  void Present();
+
   void OnMethodCall(FlutterMethodCall* call, FlutterResult& result);
 
  private:
@@ -43,6 +45,13 @@ class FlutterPlatformViewsController : public flow::ExternalViewEmbedder {
   fml::scoped_nsobject<UIView> flutter_view_;
   std::map<std::string, fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>> factories_;
   std::map<int64_t, fml::scoped_nsobject<FlutterTouchInterceptingView>> views_;
+
+  // A vector of embedded view IDs according to their composition order.
+  // The last ID in this vector belond to the that is composited on top of all others.
+  std::vector<int64_t> composition_order_;
+
+  // The latest composition order that was presented in Present().
+  std::vector<int64_t> active_composition_order_;
 
   void OnCreate(FlutterMethodCall* call, FlutterResult& result);
   void OnDispose(FlutterMethodCall* call, FlutterResult& result);

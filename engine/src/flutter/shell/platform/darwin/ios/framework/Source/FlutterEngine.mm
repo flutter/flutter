@@ -396,10 +396,6 @@
   return _shell->Screenshot(type, base64Encode);
 }
 
-- (flow::ExternalViewEmbedder*)externalViewEmbedder {
-  return _platformViewsController.get();
-}
-
 #pragma mark - FlutterBinaryMessenger
 
 - (void)sendOnChannel:(NSString*)channel message:(NSData*)message {
