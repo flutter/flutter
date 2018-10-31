@@ -395,7 +395,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
           _disposeRecognizerIfInactive();
         }
         if (mounted && widget.onDragEnd != null) {
-          widget.onDragEnd(DraggableDetails._(
+          widget.onDragEnd(DraggableDetails(
               wasAccepted: wasAccepted,
               velocity: velocity,
               offset: offset
@@ -433,11 +433,17 @@ class _DraggableState<T> extends State<Draggable<T>> {
 ///
 /// Also, this is the details object for callbacks that use [DragEndCallback].
 class DraggableDetails {
-  DraggableDetails._({
-    this.wasAccepted,
-    this.velocity,
-    this.offset
-  });
+  /// Creates details for a [DraggableDetails].
+  ///
+  /// If [wasAccepted] is not specified, it will default to `false`.
+  ///
+  /// The [velocity] or [offset] arguments must not be `null`.
+  DraggableDetails({
+    this.wasAccepted = false,
+    @required this.velocity,
+    @required this.offset
+  }) : assert(velocity != null),
+       assert(offset != null);
 
   /// Determines whether the [DragTarget] accepted this draggable.
   final bool wasAccepted;
