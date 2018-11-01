@@ -38,7 +38,7 @@ final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
 /// As soon as a new observatory is detected the command attaches to it and
 /// enables hot reloading.
 ///
-/// To attach to a flutter mod running on a fuchsia device, `module` must
+/// To attach to a flutter mod running on a fuchsia device, `--module` must
 /// also be provided.
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
@@ -58,7 +58,8 @@ class AttachCommand extends FlutterCommand {
         'module',
         abbr: 'm',
         hide: !verboseHelp,
-        help: 'The name of the module (required if attaching to a fuchsia device)'
+        help: 'The name of the module (required if attaching to a fuchsia device)',
+        valueHelp: 'module-name',
       )..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
@@ -112,44 +113,45 @@ class AttachCommand extends FlutterCommand {
     Uri observatoryUri;
     bool ipv6 = false;
     bool attachLogger = false;
-    if (devicePort == null && device is! FuchsiaDevice) {
-      ProtocolDiscovery observatoryDiscovery;
-      try {
-        observatoryDiscovery = ProtocolDiscovery.observatory(
-          device.getLogReader(),
-          portForwarder: device.portForwarder,
-        );
+    if (devicePort == null) {
+      if (device is FuchsiaDevice) {
+        attachLogger = true;
+        final String module = argResults['module'];
+        if (module == null) {
+          throwToolExit('\'--module\' is requried for attaching to a Fuchsia device');
+        }
+        ipv6 = _isIpv6(device.id.split('%').first);
+        final List<int> ports = await device.servicePorts();
+        if (ports.isEmpty) {
+          throwToolExit('No active service ports on ${device.name}');
+        }
+        final List<int> localPorts = <int>[];
+        for (int port in ports) {
+          localPorts.add(await device.portForwarder.forward(port));
+        }
         printStatus('Waiting for a connection from Flutter on ${device.name}...');
-        observatoryUri = await observatoryDiscovery.uri;
+        final int localPort = await device.findIsolatePort(module, localPorts);
+        if (localPort == null) {
+          throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
+        }
         printStatus('Done.');
-      } finally {
-        await observatoryDiscovery?.cancel();
+        observatoryUri = ipv6
+          ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
+          : Uri.parse('http://$ipv4Loopback:$localPort/');
+      } else {
+        ProtocolDiscovery observatoryDiscovery;
+        try {
+          observatoryDiscovery = ProtocolDiscovery.observatory(
+            device.getLogReader(),
+            portForwarder: device.portForwarder,
+          );
+          printStatus('Waiting for a connection from Flutter on ${device.name}...');
+          observatoryUri = await observatoryDiscovery.uri;
+          printStatus('Done.');
+        } finally {
+          await observatoryDiscovery?.cancel();
+        }
       }
-    } else if (devicePort == null && device is FuchsiaDevice) {
-      attachLogger = true;
-      final String module = argResults['module'];
-      if (module == null) {
-        throwToolExit('\'-module\' is requried for attaching to a Fuchsia device');
-      }
-      ipv6 = _isIpv6(device.id.split('%').first);
-      final List<int> ports = await device.servicePorts();
-      if (ports.isEmpty) {
-        throwToolExit('No active Observatories on ${device.name}');
-      }
-      final List<int> localPorts = <int>[];
-      for (int port in ports) {
-        final int localPort = await device.portForwarder.forward(port);
-        localPorts.add(localPort);
-      }
-      printStatus('Waiting for a connection from Flutter on ${device.name}...');
-      final int localPort = await device.findIsolatePort(module, localPorts);
-      if (localPort == null) {
-        throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
-      }
-      printStatus('Done.');
-      observatoryUri = ipv6
-        ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
-        : Uri.parse('http://$ipv4Loopback:$localPort/');
     } else {
       final int localPort = await device.portForwarder.forward(devicePort);
       observatoryUri = Uri.parse('http://$ipv4Loopback:$localPort/');

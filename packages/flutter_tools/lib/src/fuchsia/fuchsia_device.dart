@@ -27,7 +27,8 @@ final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 class _FuchsiaLogReader extends DeviceLogReader {
   _FuchsiaLogReader(this._device);
 
-  static final Pattern pattern = RegExp(r'\[\d+\.\d+\]\[\d+\]\[\d+\]\[klog\] INFO: \w+\(flutter\): ');
+  // TODO(jonahwilliams): handle filtering log output from different modules.
+  static final Pattern flutterLogOutput = RegExp(r'\[\d+\.\d+\]\[\d+\]\[\d+\]\[klog\] INFO: \w+\(flutter\): ');
 
   FuchsiaDevice _device;
 
@@ -37,7 +38,7 @@ class _FuchsiaLogReader extends DeviceLogReader {
   @override
   Stream<String> get logLines {
     _logLines ??= fuchsiaSdk.syslogs()
-      .where((String line) => pattern.matchAsPrefix(line) != null);
+      .where((String line) => flutterLogOutput.matchAsPrefix(line) != null);
     return _logLines;
   }
 
@@ -148,15 +149,11 @@ class FuchsiaDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'Fuchsia';
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) {
-    return _logReader ??= _FuchsiaLogReader(this);
-  }
+  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader ??= _FuchsiaLogReader(this);
   _FuchsiaLogReader _logReader;
 
   @override
-  DevicePortForwarder get portForwarder {
-    return _portForwarder ??= _FuchsiaPortForwarder(this);
-  }
+  DevicePortForwarder get portForwarder => _portForwarder ??= _FuchsiaPortForwarder(this);
   _FuchsiaPortForwarder _portForwarder;
 
   @override
@@ -176,7 +173,7 @@ class FuchsiaDevice extends Device {
   Future<String> shell(String command) async {
     final RunResult result = await runAsync(<String>[
       'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, id, command]);
-    if (result.exitCode != 0) {
+    if (result.exitCode != 0 || result.stderr.isNotEmpty) {
       throwToolExit('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
       return null;
     }
