@@ -471,12 +471,226 @@ void main() {
       ));
 
       expect(theme.brightness, Brightness.light);
+      // We took the scaffold background override but the rest are still cascaded
+      // to the material theme.
       expect(theme.primaryColor, Colors.blue);
       expect(theme.primaryContrastingColor, Colors.white);
       expect(theme.scaffoldBackgroundColor, CupertinoColors.lightBackgroundGray);
       expect(theme.textTheme.textStyle.fontFamily, '.SF Pro Text');
       expect(theme.textTheme.textStyle.fontSize, 17.0);
     });
+
+    testWidgets('Can override properties that are independent of material', (WidgetTester tester) async {
+      final CupertinoThemeData theme = await testTheme(tester, ThemeData(
+        cupertinoOverrideTheme: const CupertinoThemeData(
+          // The bar colors ignore all things material except brightness.
+          barBackgroundColor: CupertinoColors.black,
+        ),
+      ));
+
+      expect(theme.primaryColor, Colors.blue);
+      // MaterialBasedCupertinoThemeData should also function like a normal CupertinoThemeData.
+      expect(theme.barBackgroundColor, CupertinoColors.black);
+    });
+
+    testWidgets('Changing material theme triggers rebuilds', (WidgetTester tester) async {
+      CupertinoThemeData theme = await testTheme(tester, ThemeData(
+        primarySwatch: Colors.red,
+      ));
+
+      expect(timesBuilt, 1);
+      expect(theme.primaryColor, Colors.red);
+
+      theme = await testTheme(tester, ThemeData(
+        primarySwatch: Colors.orange,
+      ));
+
+      expect(timesBuilt, 2);
+      expect(theme.primaryColor, Colors.orange);
+    });
+
+    testWidgets(
+      'Changing material theme triggers rebuilds when derivatives are read',
+      (WidgetTester tester) async {
+        CupertinoThemeData theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.red,
+        ));
+
+        expect(timesBuilt, 1);
+        expect(theme.primaryContrastingColor, Colors.white);
+
+        theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.orange,
+        ));
+
+        expect(timesBuilt, 2);
+        expect(theme.primaryContrastingColor, Colors.black);
+      },
+    );
+
+    testWidgets(
+      'Changing material theme does not trigger rebuilds when derivatives do not change',
+      (WidgetTester tester) async {
+        CupertinoThemeData theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.purple,
+        ));
+
+        expect(timesBuilt, 1);
+        expect(theme.primaryContrastingColor, Colors.white);
+
+        theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.brown,
+        ));
+
+        expect(timesBuilt, 1);
+        expect(theme.primaryContrastingColor, Colors.white);
+      },
+    );
+
+    testWidgets(
+      'Changing material theme does not trigger rebuilds read aspects are not derivatives',
+      (WidgetTester tester) async {
+        CupertinoThemeData theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.purple,
+        ));
+
+        expect(timesBuilt, 1);
+        expect(theme.barBackgroundColor, const Color(0xCCF8F8F8));
+
+        theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.brown,
+        ));
+
+        // Bar color is independent of material theme except brightness.
+        expect(timesBuilt, 1);
+        expect(theme.barBackgroundColor, const Color(0xCCF8F8F8));
+      },
+    );
+
+    testWidgets(
+      'Changing cupertino theme override triggers rebuilds',
+      (WidgetTester tester) async {
+        CupertinoThemeData theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.purple,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            primaryColor: CupertinoColors.activeOrange,
+          ),
+        ));
+
+        expect(timesBuilt, 1);
+        expect(theme.primaryColor, CupertinoColors.activeOrange);
+
+        theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.purple,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            primaryColor: CupertinoColors.activeGreen,
+          ),
+        ));
+
+        expect(timesBuilt, 2);
+        expect(theme.primaryColor, CupertinoColors.activeGreen);
+      },
+    );
+
+    testWidgets(
+      'Cupertino theme override blocks derivative changes',
+      (WidgetTester tester) async {
+        CupertinoThemeData theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.purple,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            primaryColor: CupertinoColors.activeOrange,
+          ),
+        ));
+
+        expect(timesBuilt, 1);
+        expect(theme.primaryColor, CupertinoColors.activeOrange);
+
+        // Change the upstream material primary color.
+        theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.blue,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            // But the primary material color is preempted by the override.
+            primaryColor: CupertinoColors.activeOrange,
+          ),
+        ));
+
+        expect(timesBuilt, 1);
+        expect(theme.primaryColor, CupertinoColors.activeOrange);
+      },
+    );
+
+    testWidgets(
+      'Cupertino overrides do not block derivatives triggering rebuilds when derivatives are not overridden',
+      (WidgetTester tester) async {
+        CupertinoThemeData theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.purple,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            primaryContrastingColor: CupertinoColors.destructiveRed,
+          ),
+        ));
+
+        expect(timesBuilt, 1);
+        expect(theme.textTheme.actionTextStyle.color, Colors.purple);
+        expect(theme.primaryContrastingColor, CupertinoColors.destructiveRed);
+
+        theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.green,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            primaryContrastingColor: CupertinoColors.destructiveRed,
+          ),
+        ));
+
+        expect(timesBuilt, 2);
+        expect(theme.textTheme.actionTextStyle.color, Colors.green);
+        expect(theme.primaryContrastingColor, CupertinoColors.destructiveRed);
+      },
+    );
+
+    testWidgets(
+      'copyWith only copies the overrides, not the material or cupertino derivatives',
+      (WidgetTester tester) async {
+        final CupertinoThemeData originalTheme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.purple,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            primaryContrastingColor: CupertinoColors.activeOrange,
+          ),
+        ));
+
+        final CupertinoThemeData copiedTheme = originalTheme.copyWith(
+          barBackgroundColor: CupertinoColors.destructiveRed,
+        );
+
+        final CupertinoThemeData theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.blue,
+          cupertinoOverrideTheme: copiedTheme,
+        ));
+
+        expect(theme.primaryColor, Colors.blue);
+        expect(theme.primaryContrastingColor, CupertinoColors.activeOrange);
+        expect(theme.barBackgroundColor, CupertinoColors.destructiveRed);
+      },
+    );
+
+    testWidgets(
+      "Material themes with no cupertino overrides can also be copyWith'ed",
+      (WidgetTester tester) async {
+        final CupertinoThemeData originalTheme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.purple,
+        ));
+
+        final CupertinoThemeData copiedTheme = originalTheme.copyWith(
+          primaryContrastingColor: CupertinoColors.destructiveRed,
+        );
+
+        final CupertinoThemeData theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.blue,
+          cupertinoOverrideTheme: copiedTheme,
+        ));
+
+        expect(theme.primaryColor, Colors.blue);
+        expect(theme.primaryContrastingColor, CupertinoColors.destructiveRed);
+      },
+    );
   });
 }
 

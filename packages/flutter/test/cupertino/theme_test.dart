@@ -142,4 +142,23 @@ void main() {
       expect(theme.primaryColor, CupertinoColors.activeOrange);
     },
   );
+
+  testWidgets(
+    'copyWith works',
+    (WidgetTester tester) async {
+      final CupertinoThemeData originalTheme = CupertinoThemeData(
+        brightness: Brightness.dark,
+      );
+
+      final CupertinoThemeData theme = await testTheme(tester, originalTheme.copyWith(
+        primaryColor: CupertinoColors.activeGreen,
+      ));
+
+      expect(theme.brightness, Brightness.dark);
+      expect(theme.primaryColor, CupertinoColors.activeGreen);
+      // Now check calculated derivatives.
+      expect(theme.textTheme.actionTextStyle.color, CupertinoColors.activeGreen);
+      expect(theme.scaffoldBackgroundColor, CupertinoColors.black);
+    },
+  );
 }

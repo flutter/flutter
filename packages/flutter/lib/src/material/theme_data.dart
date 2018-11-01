@@ -1041,7 +1041,16 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   MaterialBasedCupertinoThemeData({
     @required ThemeData materialTheme,
   }) : assert(materialTheme != null),
-       _materialTheme = materialTheme;
+       _materialTheme = materialTheme,
+       super.raw(
+         materialTheme.cupertinoOverrideTheme?.brightness,
+         materialTheme.cupertinoOverrideTheme?.primaryColor,
+         materialTheme.cupertinoOverrideTheme?.primaryContrastingColor,
+         materialTheme.cupertinoOverrideTheme?.textTheme,
+         materialTheme.cupertinoOverrideTheme?.barBackgroundColor,
+         materialTheme.cupertinoOverrideTheme?.scaffoldBackgroundColor,
+         materialTheme.cupertinoOverrideTheme?.tableBackgroundColor,
+       );
 
   final ThemeData _materialTheme;
 
@@ -1060,7 +1069,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   // Copy with shouldn't change the base Material ThemeData. To change the
   // base Material ThemeData, create a new Material Theme and use copyWith on
   // the Material ThemeData instead.
-  MaterialBasedCupertinoThemeData copyWith({
+  CupertinoThemeData copyWith({
     Brightness brightness,
     Color primaryColor,
     Color primaryContrastingColor,
@@ -1069,7 +1078,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
     Color scaffoldBackgroundColor,
     Color tableBackgroundColor,
   }) {
-    final CupertinoThemeData override = _materialTheme.cupertinoOverrideTheme?.copyWith(
+    return _materialTheme.cupertinoOverrideTheme?.copyWith(
       brightness: brightness,
       primaryColor: primaryColor,
       primaryContrastingColor: primaryContrastingColor,
@@ -1085,10 +1094,6 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
       barBackgroundColor: barBackgroundColor,
       scaffoldBackgroundColor: scaffoldBackgroundColor,
       tableBackgroundColor: tableBackgroundColor,
-    );
-
-    return MaterialBasedCupertinoThemeData(
-      materialTheme: _materialTheme.copyWith(cupertinoOverrideTheme: override),
     );
   }
 }

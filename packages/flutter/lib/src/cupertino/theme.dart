@@ -85,10 +85,32 @@ class _CupertinoThemeInheritedData extends CupertinoThemeData {
     return InheritedModel.inheritFrom<CupertinoTheme>(context, aspect: property)?.data
         ?? const CupertinoThemeData();
   }
+
+  @override
+  CupertinoThemeData copyWith({
+    Brightness brightness,
+    Color primaryColor,
+    Color primaryContrastingColor,
+    CupertinoTextTheme textTheme,
+    Color barBackgroundColor,
+    Color scaffoldBackgroundColor,
+    Color tableBackgroundColor,
+  }) {
+    // When you copyWith, you effectively are depending on everything.
+    return InheritedModel.inheritFrom<CupertinoTheme>(context)?.data?.copyWith(
+      brightness: brightness,
+      primaryColor: primaryColor,
+      primaryContrastingColor: primaryContrastingColor,
+      textTheme: textTheme,
+      barBackgroundColor: barBackgroundColor,
+      scaffoldBackgroundColor: scaffoldBackgroundColor,
+      tableBackgroundColor: tableBackgroundColor,
+    );
+  }
 }
 
 @immutable
-class CupertinoThemeData {
+class CupertinoThemeData extends Diagnosticable {
   const CupertinoThemeData({
     Brightness brightness,
     Color primaryColor,
@@ -191,6 +213,19 @@ class CupertinoThemeData {
       scaffoldBackgroundColor: scaffoldBackgroundColor ?? _scaffoldBackgroundColor,
       tableBackgroundColor: tableBackgroundColor ?? _tableBackgroundColor,
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    const CupertinoThemeData defaultData = CupertinoThemeData();
+    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
+    properties.add(DiagnosticsProperty<Color>('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
+    properties.add(DiagnosticsProperty<Color>('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
+    properties.add(DiagnosticsProperty<CupertinoTextTheme>('textTheme', textTheme, defaultValue: defaultData.textTheme));
+    properties.add(DiagnosticsProperty<Color>('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
+    properties.add(DiagnosticsProperty<Color>('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
+    properties.add(DiagnosticsProperty<Color>('tableBackgroundColor', tableBackgroundColor, defaultValue: defaultData.tableBackgroundColor));
   }
 }
 
