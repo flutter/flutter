@@ -115,6 +115,7 @@ abstract class PointerEvent {
     this.radiusMax = 0.0,
     this.orientation = 0.0,
     this.tilt = 0.0,
+    this.data = 0,
     this.synthesized = false,
   });
 
@@ -245,6 +246,9 @@ abstract class PointerEvent {
   /// the stylus is flat on that surface).
   final double tilt;
 
+  /// Opaque platform-specific data associated with the event.
+  final int data;
+
   /// We occasionally synthesize PointerEvents that aren't exact translations
   /// of [ui.PointerData] from the engine to cover small cross-OS discrepancies
   /// in pointer behaviors.
@@ -285,6 +289,7 @@ abstract class PointerEvent {
              'radiusMax: $radiusMax, '
              'orientation: $orientation, '
              'tilt: $tilt, '
+             'data: $data, '
              'synthesized: $synthesized'
            ')';
   }
@@ -416,67 +421,6 @@ class PointerHoverEvent extends PointerEvent {
   );
 }
 
-/// The pointer data has changed.
-///
-/// This event is sent on Android for non-primary pointers when their data
-/// such as position changes at the same time as the primary pointer changed.
-/// This event is needed for those situations when we don't know yet whether
-/// the secondary pointer change was a move or a hover because Android has
-/// batched it with the primary pointer.
-///
-/// See also:
-///
-///  * [PointerMoveEvent], which reports movement while the pointer is in
-///    contact with the device.
-class PointerUpdateEvent extends PointerEvent {
-  /// Creates a pointer hover event.
-  ///
-  /// All of the argument must be non-null.
-  const PointerUpdateEvent({
-    Duration timeStamp = Duration.zero,
-    int pointer = 0,
-    PointerDeviceKind kind = PointerDeviceKind.touch,
-    int device = 0,
-    Offset position = Offset.zero,
-    Offset delta = Offset.zero,
-    int buttons = 0,
-    bool obscured = false,
-    double pressure = 1.0,
-    double pressureMin = 1.0,
-    double pressureMax = 1.0,
-    double distanceMax = 0.0,
-    double radiusMajor = 0.0,
-    double radiusMinor = 0.0,
-    double radiusMin = 0.0,
-    double radiusMax = 0.0,
-    double orientation = 0.0,
-    double tilt = 0.0,
-    bool synthesized = false,
-  }) : super(
-    timeStamp: timeStamp,
-    pointer: pointer,
-    kind: kind,
-    device: device,
-    position: position,
-    delta: delta,
-    buttons: buttons,
-    down: true,
-    obscured: obscured,
-    pressure: pressure,
-    pressureMin: pressureMin,
-    pressureMax: pressureMax,
-    distance: 0.0,
-    distanceMax: distanceMax,
-    radiusMajor: radiusMajor,
-    radiusMinor: radiusMinor,
-    radiusMin: radiusMin,
-    radiusMax: radiusMax,
-    orientation: orientation,
-    tilt: tilt,
-    synthesized: synthesized,
-  );
-}
-
 /// The pointer has made contact with the device.
 class PointerDownEvent extends PointerEvent {
   /// Creates a pointer down event.
@@ -556,6 +500,7 @@ class PointerMoveEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
+    int data = 0,
     bool synthesized = false,
   }) : super(
     timeStamp: timeStamp,
@@ -579,6 +524,7 @@ class PointerMoveEvent extends PointerEvent {
     radiusMax: radiusMax,
     orientation: orientation,
     tilt: tilt,
+    data: data,
     synthesized: synthesized,
   );
 }
