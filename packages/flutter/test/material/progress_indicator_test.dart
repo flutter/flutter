@@ -263,7 +263,7 @@ void main() {
         child: Center(
           child: SizedBox(
             width: 100.0,
-            height: 18.0,
+            height: 12.0,
             child: LinearProgressIndicator(value: 0.25),
           ),
         ),
@@ -272,11 +272,34 @@ void main() {
     expect(
         find.byType(LinearProgressIndicator),
         paints
-          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 100.0, 18.0))
-          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 25.0, 18.0))
+          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 100.0, 12.0))
+          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 25.0, 12.0))
     );
     expect(tester.binding.transientCallbackCount, 0);
   });
+
+  testWidgets('LinearProgressIndicator with a height less than the minumum', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100.0,
+            height: 3.0,
+            child: LinearProgressIndicator(value: 0.25),
+          ),
+        ),
+      ),
+    );
+    expect(
+        find.byType(LinearProgressIndicator),
+        paints
+          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 100.0, 3.0))
+          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 25.0, 3.0))
+    );
+    expect(tester.binding.transientCallbackCount, 0);
+  });
+
   testWidgets('LinearProgressIndicator with default height', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
