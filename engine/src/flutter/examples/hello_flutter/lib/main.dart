@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This example shows how to show the text 'Hello, world.' using using the raw
+// This example shows how to show the text 'Hello, world.' using the raw
 // interface to the engine.
 
 import 'dart:ui' as ui;
