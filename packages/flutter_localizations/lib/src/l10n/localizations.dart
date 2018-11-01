@@ -9927,7 +9927,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'ПРИКАЖИ ЛИЦЕНЦЕ';
 }
 
-/// The translations for Serbian, using the Latin script (`sr_Latn`).
+/// The translations for Serbian (`sr`).
 class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   /// Create an instance of the translation bundle for Serbian, using the Latin script.
   ///
@@ -11712,13 +11712,37 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'查看许可';
 }
 
-/// The translations for Chinese, as used in Hong Kong (`zh_HK`).
-class MaterialLocalizationZhHk extends MaterialLocalizationZh {
-  /// Create an instance of the translation bundle for Chinese, as used in Hong Kong.
+/// The translations for Chinese (`zh`).
+class MaterialLocalizationZhHans extends MaterialLocalizationZh {
+  /// Create an instance of the translation bundle for Chinese, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
-  const MaterialLocalizationZhHk({
-    String localeName = 'zh_HK',
+  const MaterialLocalizationZhHans({
+    String localeName = 'zh_Hans',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+}
+
+/// The translations for Chinese (`zh`).
+class MaterialLocalizationZhHant extends MaterialLocalizationZh {
+  /// Create an instance of the translation bundle for Chinese, using the Han script.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationZhHant({
+    String localeName = 'zh_Hant',
     @required intl.DateFormat fullYearFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
@@ -11871,13 +11895,13 @@ class MaterialLocalizationZhHk extends MaterialLocalizationZh {
   String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
 }
 
-/// The translations for Chinese, as used in Taiwan (`zh_TW`).
-class MaterialLocalizationZhTw extends MaterialLocalizationZh {
-  /// Create an instance of the translation bundle for Chinese, as used in Taiwan.
+/// The translations for Chinese, using the Han script (`zh_Hant_HK`).
+class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
+  /// Create an instance of the translation bundle for Chinese, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
-  const MaterialLocalizationZhTw({
-    String localeName = 'zh_TW',
+  const MaterialLocalizationZhHantHk({
+    String localeName = 'zh_Hant_HK',
     @required intl.DateFormat fullYearFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
@@ -11893,141 +11917,30 @@ class MaterialLocalizationZhTw extends MaterialLocalizationZh {
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
+}
 
-  @override
-  String get tabLabelRaw => r'第 $tabIndex 個分頁 (共 $tabCount 個)';
-
-  @override
-  String get showAccountsLabel => r'顯示帳戶';
-
-  @override
-  String get modalBarrierDismissLabel => r'關閉';
-
-  @override
-  String get hideAccountsLabel => r'隱藏帳戶';
-
-  @override
-  String get signedInLabel => r'已登入帳戶';
-
-  @override
-  String get openAppDrawerTooltip => r'開啟導覽選單';
-
-  @override
-  String get closeButtonTooltip => r'關閉';
-
-  @override
-  String get deleteButtonTooltip => r'刪除';
-
-  @override
-  String get nextMonthTooltip => r'下個月';
-
-  @override
-  String get previousMonthTooltip => r'上個月';
-
-  @override
-  String get nextPageTooltip => r'下一頁';
-
-  @override
-  String get previousPageTooltip => r'上一頁';
-
-  @override
-  String get showMenuTooltip => r'顯示選單';
-
-  @override
-  String get aboutListTileTitleRaw => r'關於「$applicationName」';
-
-  @override
-  String get licensesPageTitle => r'授權';
-
-  @override
-  String get pageRowsInfoTitleRaw => r'第 $firstRow - $lastRow 列 (總共 $rowCount 列)';
-
-  @override
-  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow - $lastRow 列 (總共約 $rowCount 列)';
-
-  @override
-  String get rowsPerPageTitle => r'每頁列數：';
-
-  @override
-  String get selectedRowCountTitleOne => r'已選取 1 個項目';
-
-  @override
-  String get selectedRowCountTitleOther => r'已選取 $selectedRowCount 個項目';
-
-  @override
-  String get closeButtonLabel => r'關閉';
-
-  @override
-  String get continueButtonLabel => r'繼續';
-
-  @override
-  String get copyButtonLabel => r'複製';
-
-  @override
-  String get cutButtonLabel => r'剪下';
-
-  @override
-  String get okButtonLabel => r'確定';
-
-  @override
-  String get pasteButtonLabel => r'貼上';
-
-  @override
-  String get selectAllButtonLabel => r'全選';
-
-  @override
-  String get viewLicensesButtonLabel => r'查看授權';
-
-  @override
-  String get timePickerHourModeAnnouncement => r'選取小時數';
-
-  @override
-  String get timePickerMinuteModeAnnouncement => r'選取分鐘數';
-
-  @override
-  String get drawerLabel => r'導覽選單';
-
-  @override
-  String get popupMenuLabel => r'彈出式選單';
-
-  @override
-  String get dialogLabel => r'對話方塊';
-
-  @override
-  String get alertDialogLabel => r'快訊';
-
-  @override
-  String get searchFieldLabel => r'搜尋';
-
-  @override
-  String get reorderItemToStart => r'移至開頭';
-
-  @override
-  String get reorderItemToEnd => r'移至結尾';
-
-  @override
-  String get reorderItemUp => r'向上移';
-
-  @override
-  String get reorderItemDown => r'向下移';
-
-  @override
-  String get reorderItemLeft => r'向左移';
-
-  @override
-  String get reorderItemRight => r'向右移';
-
-  @override
-  String get expandedIconTapHint => r'收合';
-
-  @override
-  String get collapsedIconTapHint => r'展開';
-
-  @override
-  String get remainingTextFieldCharacterCountOne => r'還可輸入 1 個字元';
-
-  @override
-  String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
+/// The translations for Chinese, using the Han script (`zh_Hant_TW`).
+class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
+  /// Create an instance of the translation bundle for Chinese, using the Han script.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationZhHantTw({
+    String localeName = 'zh_Hant_TW',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 }
 
 /// The set of supported languages, as language code strings.
@@ -12107,15 +12020,15 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `ca` - Catalan Valencian
 ///  * `cs` - Czech
 ///  * `da` - Danish
-///  * `de` - German (plus one variant)
+///  * `de` - German
 ///  * `el` - Modern Greek
-///  * `en` - English (plus 7 variants)
-///  * `es` - Spanish Castilian (plus 20 variants)
+///  * `en` - English
+///  * `es` - Spanish Castilian
 ///  * `et` - Estonian
 ///  * `fa` - Persian
 ///  * `fi` - Finnish
 ///  * `fil` - Filipino Pilipino
-///  * `fr` - French (plus one variant)
+///  * `fr` - French
 ///  * `gsw` - Swiss German Alemannic Alsatian
 ///  * `he` - Hebrew
 ///  * `hi` - Hindi
@@ -12134,12 +12047,12 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `nl` - Dutch Flemish
 ///  * `pl` - Polish
 ///  * `ps` - Pushto Pashto
-///  * `pt` - Portuguese (plus one variant)
+///  * `pt` - Portuguese
 ///  * `ro` - Romanian Moldavian Moldovan
 ///  * `ru` - Russian
 ///  * `sk` - Slovak
 ///  * `sl` - Slovenian
-///  * `sr` - Serbian (plus one variant)
+///  * `sr` - Serbian
 ///  * `sv` - Swedish
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
@@ -12147,7 +12060,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `uk` - Ukrainian
 ///  * `ur` - Urdu
 ///  * `vi` - Vietnamese
-///  * `zh` - Chinese (plus 2 variants)
+///  * `zh` - Chinese (plus 2 country variations)
 /// {@endtemplate}
 ///
 /// Generally speaking, this method is only intended to be used by
@@ -12314,9 +12227,10 @@ GlobalMaterialLocalizations getTranslation(
     case 'sl':
       return MaterialLocalizationSl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sr': {
-      switch (locale.countryCode) {
-        case 'Latn':
+      switch (locale.scriptCode) {
+        case 'Latn': {
           return MaterialLocalizationSrLatn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        }
       }
       return MaterialLocalizationSr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     }
@@ -12335,11 +12249,25 @@ GlobalMaterialLocalizations getTranslation(
     case 'vi':
       return MaterialLocalizationVi(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'zh': {
+      switch (locale.scriptCode) {
+        case 'Hans': {
+          return MaterialLocalizationZhHans(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        }
+        case 'Hant': {
+          switch (locale.countryCode) {
+            case 'HK':
+              return MaterialLocalizationZhHantHk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+            case 'TW':
+              return MaterialLocalizationZhHantTw(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          }
+          return MaterialLocalizationZhHant(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        }
+      }
       switch (locale.countryCode) {
         case 'HK':
-          return MaterialLocalizationZhHk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationZhHantHk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'TW':
-          return MaterialLocalizationZhTw(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationZhHantTw(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
       return MaterialLocalizationZh(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     }
