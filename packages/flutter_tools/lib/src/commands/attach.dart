@@ -111,6 +111,7 @@ class AttachCommand extends FlutterCommand {
 
     Uri observatoryUri;
     bool ipv6 = false;
+    bool attachLogger = false;
     if (devicePort == null && device is! FuchsiaDevice) {
       ProtocolDiscovery observatoryDiscovery;
       try {
@@ -125,6 +126,7 @@ class AttachCommand extends FlutterCommand {
         await observatoryDiscovery?.cancel();
       }
     } else if (devicePort == null && device is FuchsiaDevice) {
+      attachLogger = true;
       final String module = argResults['module'];
       if (module == null) {
         throwToolExit('\'-module\' is requried for attaching to a Fuchsia device');
@@ -167,7 +169,9 @@ class AttachCommand extends FlutterCommand {
         dillOutputPath: argResults['output-dill'],
         ipv6: ipv6,
       );
-      flutterDevice.startEchoingDeviceLog();
+      if (attachLogger) {
+        flutterDevice.startEchoingDeviceLog();
+      }
 
       if (daemon != null) {
         AppInstance app;
