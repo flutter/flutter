@@ -128,7 +128,7 @@ class AttachCommand extends FlutterCommand {
         if (module == null) {
           throwToolExit('\'--module\' is requried for attaching to a Fuchsia device');
         }
-        ipv6 = _isIpv6(device.id.split('%').first);
+        ipv6 = _isIpv6(device.id);
         final List<int> ports = await device.servicePorts();
         if (ports.isEmpty) {
           throwToolExit('No active service ports on ${device.name}');
@@ -216,8 +216,10 @@ class AttachCommand extends FlutterCommand {
   Future<void> _validateArguments() async {}
 
   bool _isIpv6(String address) {
+    // Workaround for https://github.com/dart-lang/sdk/issues/29456
+    final String fragment = address.split('%').first;
     try {
-      Uri.parseIPv6Address(address);
+      Uri.parseIPv6Address(fragment);
       return true;
     } on FormatException {
       return false;
