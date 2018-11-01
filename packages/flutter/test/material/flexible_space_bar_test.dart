@@ -46,4 +46,74 @@ void main() {
     expect(center.dx, greaterThan(400.0 - size.width / 2.0));
     expect(center.dx, lessThan(400.0 + size.width / 2.0));
   });
+
+  testWidgets('FlexibleSpaceBarSettings works while public', (WidgetTester tester) async {
+    const double maxExtent = 300.0;
+
+    final FlexibleSpaceBarSettings customSettings =
+    FlexibleSpaceBar.createSettings(
+      currentExtent: maxExtent,
+      minExtent: 100,
+      maxExtent: maxExtent,
+      toolbarOpacity: .5,
+      child: AppBar(
+        flexibleSpace: const FlexibleSpaceBar(
+          title: Text('X'),
+          background:  Text('X2'),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Scaffold(
+            body: CustomScrollView(
+              primary: true,
+              slivers: <Widget>[
+                SliverPersistentHeader(
+                  floating: true,
+                  pinned: true,
+                  delegate: TestDelegate(settings: customSettings),
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                    color: Colors.orange[400],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox renderBox = tester.renderObject(find.byType(Positioned));
+    expect(renderBox.size.height, maxExtent);
+  });
+
+}
+
+class TestDelegate extends SliverPersistentHeaderDelegate {
+
+  const TestDelegate({
+    this.settings,
+  });
+
+  final FlexibleSpaceBarSettings settings;
+
+  @override
+  double get maxExtent => settings.maxExtent;
+
+  @override
+  double get minExtent => settings.minExtent;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return settings;
+  }
+
+  @override
+  bool shouldRebuild(TestDelegate oldDelegate) => false;
 }

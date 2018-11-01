@@ -226,7 +226,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 class FlexibleSpaceBarSettings extends InheritedWidget {
   /// Creates a Flexible Space Bar Settings widget.
   ///
-  /// Most commonly used by [Scaffold] and [SliverAppBar].
+  /// Used by [Scaffold] and [SliverAppBar].
   const FlexibleSpaceBarSettings({
     Key key,
     this.toolbarOpacity,
@@ -239,10 +239,10 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   /// Affects how transparent the toolbar appears in the [FlexibleSpaceBar].
   final double toolbarOpacity;
 
-  /// Minimum height of the resulting [FlexibleSpaceBar].
+  /// Minimum height of the resulting [FlexibleSpaceBar] when fully collapsed.
   final double minExtent;
 
-  /// Maximum height of the resulting [FlexibleSpaceBar].
+  /// Maximum height of the resulting [FlexibleSpaceBar] when fully expanded.
   final double maxExtent;
 
   /// The current height of the attached [FlexibleSpaceBar].
