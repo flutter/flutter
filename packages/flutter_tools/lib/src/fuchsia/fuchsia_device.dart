@@ -190,11 +190,10 @@ class FuchsiaDevice extends Device {
   Future<int> findIsolatePort(String isolateName, List<int> ports) async {
     for (int port in ports) {
       try {
-        // TODO(awdavies): The square-bracket enclosure for using the IPv6 loopback
+        // Note: The square-bracket enclosure for using the IPv6 loopback
         // didn't appear to work, but when assigning to the IPv4 loopback device,
         // netstat shows that the local port is actually being used on the IPv6
-        // loopback (::1). While this can be used for forwarding to the destination
-        // IPv6 interface, it cannot be used to connect to a websocket.
+        // loopback (::1).
         final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$port');
         final VMService vmService = await VMService.connect(uri);
         await vmService.getVM();
