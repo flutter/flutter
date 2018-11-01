@@ -48,52 +48,75 @@ void main() {
   });
 
   testWidgets('FlexibleSpaceBarSettings provides settings to a FlexibleSpaceBar', (WidgetTester tester) async {
+    const double minExtent = 100.0;
+    const double initExtent = 200.0;
     const double maxExtent = 300.0;
+    const double alpha = 0.5;
 
     final FlexibleSpaceBarSettings customSettings = FlexibleSpaceBar.createSettings(
-      currentExtent: maxExtent,
-      minExtent: 100,
+      currentExtent: initExtent,
+      minExtent: minExtent,
       maxExtent: maxExtent,
-      toolbarOpacity: .5,
+      toolbarOpacity: alpha,
       child: AppBar(
         flexibleSpace: const FlexibleSpaceBar(
-          title: Text('X'),
+          title: Text('title'),
           background:  Text('X2'),
+          collapseMode: CollapseMode.pin,
         ),
       ),
     );
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(
-          child: Scaffold(
-            body: CustomScrollView(
-              primary: true,
-              slivers: <Widget>[
-                SliverPersistentHeader(
-                  floating: true,
-                  pinned: true,
-                  delegate: TestDelegate(settings: customSettings),
+        home: Scaffold(
+          body: CustomScrollView(
+            primary: true,
+            slivers: <Widget>[
+              SliverPersistentHeader(
+                floating: true,
+                pinned: true,
+                delegate: TestDelegate(settings: customSettings),
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200.0,
+                  color: Colors.orange[400],
                 ),
-                SliverToBoxAdapter(
-                  child: Container(
-                    height: 1200.0,
-                    color: Colors.orange[400],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
 
-    final RenderBox renderBox = tester.renderObject(find.byType(Positioned));
-    expect(renderBox.size.height, maxExtent);
-    renderBox.
+    final RenderBox clipRect = tester.renderObject(find.byType(ClipRect).first);
+    final Transform transform = tester.firstWidget(find.byType(Transform));
 
+    // The current (200) is half way between the min (100) and max (300) and the
+    // lerp values used to calculate the scale are 1 and 1.5, so we check for 1.25.
+    expect(transform.transform.getMaxScaleOnAxis(), 1.25);
+
+    // The space bar rect always starts fully expanded.
+    expect(clipRect.size.height, maxExtent);
+
+    final Element actionTextBox = tester.element(find.text('title'));
+    final Widget textWidget = actionTextBox.widget;
+    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
+    if (textWidget is Text) {
+      TextStyle effectiveStyle = textWidget.style;
+      effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
+      expect(effectiveStyle.color.alpha, 128); // Which is alpha of .5
+    } else {
+      expect(false, true);
+    }
+
+    // We drag up to fully collapse the space bar.
+    await tester.drag(find.byType(Container).first, const Offset(0, -400.0));
+    await tester.pumpAndSettle();
+
+    expect(clipRect.size.height, minExtent);
   });
-
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {

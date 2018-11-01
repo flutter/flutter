@@ -75,6 +75,19 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// to the [FlexibleSpaceBar].
   ///
   /// Used by [Scaffold] and [SliverAppBar].
+  ///
+  /// [FlexibleSpaceBarSettings.toolbarOpacity] affects how transparent the text
+  /// within the toolbar appears.
+  ///
+  /// [FlexibleSpaceBarSettings.minExtent] sets the
+  /// the minimum height of the resulting [FlexibleSpaceBar] when fully
+  /// collapsed.
+  ///
+  /// [FlexibleSpaceBarSettings.maxExtent] sets the maximum height of
+  /// the resulting [FlexibleSpaceBar] when fully expanded.
+  ///
+  /// [FlexibleSpaceBarSettings.currentExtent] sets the height of the attached
+  /// [FlexibleSpaceBar] upon initialization.
   static Widget createSettings({
     double toolbarOpacity,
     double minExtent,
@@ -221,11 +234,11 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   }
 }
 
-/// Wraps a widget to convey sizing and opacity information down to the
-/// [FlexibleSpaceBar] contained within the [FlexibleSpaceBar.child].
+/// Provides sizing and opacity information to a [FlexibleSpaceBar].
 ///
-/// The [FlexibleSpaceBarSettings.child] widget must contain a
-/// [FlexibleSpaceBar] widget or else the settings will not have any affect.
+/// See also:
+///
+///   * [FlexibleSpaceBar] which creates a flexible space bar.
 class FlexibleSpaceBarSettings extends InheritedWidget {
   /// Creates a Flexible Space Bar Settings widget.
   ///
@@ -250,7 +263,9 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   /// Maximum height of the resulting [FlexibleSpaceBar] when fully expanded.
   final double maxExtent;
 
-  /// The current height of the attached [FlexibleSpaceBar].
+  /// If the [FlexibleSpaceBar.title] or the [FlexibleSpaceBar.background] is
+  /// not null, then this value is used to calculate the relative scale of
+  /// these elements upon initialization.
   final double currentExtent;
 
   @override
