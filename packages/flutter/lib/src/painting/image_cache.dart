@@ -26,7 +26,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// Generally this class is not used directly. The [ImageProvider] class and its
 /// subclasses automatically handle the caching of images.
 class ImageCache {
-  final Map<Object, ImageStreamCompleter> _pendingImages = <Object, ImageStreamCompleter>{};
+  final Map<Object, _PendingImage> _pendingImages = <Object, _PendingImage>{};
   final Map<Object, _CachedImage> _cache = <Object, _CachedImage>{};
 
   /// Maximum number of entries to store in the cache.
@@ -118,6 +118,11 @@ class ImageCache {
       _currentSizeBytes -= image.sizeBytes;
       return true;
     }
+    final _PendingImage pending = _pendingImages.remove(key);
+    if (pending != null) {
+      pending.removeListener();
+      return true;
+    }
     return false;
   }
 
@@ -129,10 +134,10 @@ class ImageCache {
   ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader()) {
     assert(key != null);
     assert(loader != null);
-    ImageStreamCompleter result = _pendingImages[key];
+    _PendingImage result = _pendingImages[key];
     // Nothing needs to be done because the image hasn't loaded yet.
     if (result != null)
-      return result;
+      return result.completer;
     // Remove the provider from the list so that we can move it to the
     // recently used position below.
     final _CachedImage image = _cache.remove(key);
@@ -140,11 +145,11 @@ class ImageCache {
       _cache[key] = image;
       return image.completer;
     }
-    result = loader();
+    result = _PendingImage(loader());
     void listener(ImageInfo info, bool syncCall) {
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
-      final _CachedImage image = _CachedImage(result, imageSize);
+      final _CachedImage image = _CachedImage(result.completer, imageSize);
       // If the image is bigger than the maximum cache size, and the cache size
       // is not zero, then increase the cache size to the size of the image plus
       // some change.
@@ -154,14 +159,14 @@ class ImageCache {
       _currentSizeBytes += imageSize;
       _pendingImages.remove(key);
       _cache[key] = image;
-      result.removeListener(listener);
+      result.completer.removeListener(listener);
       _checkCacheSize();
     }
     if (maximumSize > 0 && maximumSizeBytes > 0) {
       _pendingImages[key] = result;
       result.addListener(listener);
     }
-    return result;
+    return result.completer;
   }
 
   // Remove images from the cache until both the length and bytes are below
@@ -184,4 +189,22 @@ class _CachedImage {
 
   final ImageStreamCompleter completer;
   final int sizeBytes;
+}
+
+class _PendingImage {
+  _PendingImage(this.completer);
+
+  final ImageStreamCompleter completer;
+  ImageListener _listener;
+
+  void addListener(ImageListener listener) {
+    assert(_listener == null);
+    _listener = listener;
+    completer.addListener(listener);
+  }
+
+  void removeListener() {
+    completer.removeListener(_listener);
+    _listener = null;
+  }
 }
