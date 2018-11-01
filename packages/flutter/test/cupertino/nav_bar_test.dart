@@ -172,7 +172,7 @@ void main() {
     count = 0x000000;
     await tester.pumpWidget(
       CupertinoApp(
-        theme: CupertinoThemeData(brightness: Brightness.dark),
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
             onPressed: () {},

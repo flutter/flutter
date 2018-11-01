@@ -56,7 +56,7 @@ enum _ThemeDataProperties {
 }
 
 class _CupertinoThemeInheritedData extends CupertinoThemeData {
-  _CupertinoThemeInheritedData(this.context);
+  const _CupertinoThemeInheritedData(this.context);
 
   final BuildContext context;
 
@@ -97,13 +97,26 @@ class CupertinoThemeData {
     Color barBackgroundColor,
     Color scaffoldBackgroundColor,
     Color tableBackgroundColor,
-  }) : _brightness = brightness,
-       _primaryColor = primaryColor,
-       _primaryContrastingColor = primaryContrastingColor,
-       _textTheme = textTheme,
-       _barBackgroundColor = barBackgroundColor,
-       _scaffoldBackgroundColor = scaffoldBackgroundColor,
-       _tableBackgroundColor = tableBackgroundColor;
+  }) : this.raw(
+        brightness,
+        primaryColor,
+        primaryContrastingColor,
+        textTheme,
+        barBackgroundColor,
+        scaffoldBackgroundColor,
+        tableBackgroundColor,
+      );
+
+  @protected
+  const CupertinoThemeData.raw(
+    this._brightness,
+    this._primaryColor,
+    this._primaryContrastingColor,
+    this._textTheme,
+    this._barBackgroundColor,
+    this._scaffoldBackgroundColor,
+    this._tableBackgroundColor,
+  );
 
   bool get _isLight => brightness == Brightness.light;
 
@@ -112,14 +125,14 @@ class CupertinoThemeData {
 
   final Color _primaryColor;
   Color get primaryColor {
-    return _primaryColor
-        ?? (_isLight ? CupertinoColors.activeBlue : CupertinoColors.activeOrange);
+    return _primaryColor ??
+        (_isLight ? CupertinoColors.activeBlue : CupertinoColors.activeOrange);
   }
 
   final Color _primaryContrastingColor;
   Color get primaryContrastingColor {
-    return _primaryContrastingColor
-        ?? (_isLight ? CupertinoColors.white : CupertinoColors.black);
+    return _primaryContrastingColor ??
+        (_isLight ? CupertinoColors.white : CupertinoColors.black);
   }
 
   final CupertinoTextTheme _textTheme;
@@ -132,22 +145,32 @@ class CupertinoThemeData {
 
   final Color _barBackgroundColor;
   Color get barBackgroundColor {
-    return _barBackgroundColor ?? _isLight
-        ? _kDefaultBarLightBackgroundColor
-        : _kDefaultBarDarkBackgroundColor;
+    return _barBackgroundColor ??
+        (_isLight ? _kDefaultBarLightBackgroundColor : _kDefaultBarDarkBackgroundColor);
   }
 
   final Color _scaffoldBackgroundColor;
   Color get scaffoldBackgroundColor {
-    return _scaffoldBackgroundColor
-        ?? _isLight ? CupertinoColors.white : CupertinoColors.black;
+    return _scaffoldBackgroundColor ??
+        (_isLight ? CupertinoColors.white : CupertinoColors.black);
   }
 
   final Color _tableBackgroundColor;
   Color get tableBackgroundColor {
-    return _tableBackgroundColor ?? _isLight
-        ? CupertinoColors.extraLightBackgroundGray
-        : CupertinoColors.darkBackgroundGray;
+    return _tableBackgroundColor ??
+        (_isLight ? CupertinoColors.extraLightBackgroundGray : CupertinoColors.darkBackgroundGray);
+  }
+
+  CupertinoThemeData raw() {
+    return _RawCupertinoThemeData(
+      _brightness,
+      _primaryColor,
+      _primaryContrastingColor,
+      _textTheme,
+      _barBackgroundColor,
+      _scaffoldBackgroundColor,
+      _tableBackgroundColor,
+    );
   }
 
   CupertinoThemeData copyWith({
@@ -169,4 +192,33 @@ class CupertinoThemeData {
       tableBackgroundColor: tableBackgroundColor ?? _tableBackgroundColor,
     );
   }
+}
+
+@immutable
+class _RawCupertinoThemeData extends CupertinoThemeData {
+  const _RawCupertinoThemeData(
+    this.brightness,
+    this.primaryColor,
+    this.primaryContrastingColor,
+    this.textTheme,
+    this.barBackgroundColor,
+    this.scaffoldBackgroundColor,
+    this.tableBackgroundColor,
+  ) : super.raw(
+        brightness,
+        primaryColor,
+        primaryContrastingColor,
+        textTheme,
+        barBackgroundColor,
+        scaffoldBackgroundColor,
+        tableBackgroundColor,
+      );
+
+  @override final Brightness brightness;
+  @override final Color primaryColor;
+  @override final Color primaryContrastingColor;
+  @override final CupertinoTextTheme textTheme;
+  @override final Color barBackgroundColor;
+  @override final Color scaffoldBackgroundColor;
+  @override final Color tableBackgroundColor;
 }

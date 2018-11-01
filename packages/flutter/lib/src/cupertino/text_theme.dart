@@ -124,7 +124,7 @@ class CupertinoTextTheme extends Diagnosticable {
   final bool _isLight;
 
   final TextStyle _textStyle;
-  TextStyle get textStyle => _textStyle ?? _isLight ? _kDefaultLightTextStyle : _kDefaultDarkTextStyle;
+  TextStyle get textStyle => _textStyle ?? (_isLight ? _kDefaultLightTextStyle : _kDefaultDarkTextStyle);
 
   final TextStyle _actionTextStyle;
   TextStyle get actionTextStyle {
@@ -138,16 +138,14 @@ class CupertinoTextTheme extends Diagnosticable {
 
   final TextStyle _navTitleTextStyle;
   TextStyle get navTitleTextStyle {
-    return _navTitleTextStyle ?? _isLight
-        ? _kDefaultMiddleTitleLightTextStyle
-        : _kDefaultMiddleTitleDarkTextStyle;
+    return _navTitleTextStyle ??
+        (_isLight ? _kDefaultMiddleTitleLightTextStyle : _kDefaultMiddleTitleDarkTextStyle);
   }
 
   final TextStyle _navLargeTitleTextStyle;
   TextStyle get navLargeTitleTextStyle {
-    return _navLargeTitleTextStyle ?? _isLight
-        ? _kDefaultLargeTitleLightTextStyle
-        : _kDefaultLargeTitleDarkTextStyle;
+    return _navLargeTitleTextStyle ??
+        (_isLight ? _kDefaultLargeTitleLightTextStyle : _kDefaultLargeTitleDarkTextStyle);
   }
 
   final TextStyle _navActionTextStyle;

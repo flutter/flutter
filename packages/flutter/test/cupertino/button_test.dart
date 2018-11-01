@@ -268,7 +268,7 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: CupertinoThemeData(brightness: Brightness.dark),
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoButton(
           onPressed: () {},
           child: Builder(builder: (BuildContext context) {
@@ -282,7 +282,7 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: CupertinoThemeData(brightness: Brightness.dark),
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoButton.filled(
           onPressed: () {},
           child: Builder(builder: (BuildContext context) {

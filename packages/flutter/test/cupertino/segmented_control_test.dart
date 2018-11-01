@@ -232,7 +232,7 @@ void main() {
 
       await tester.pumpWidget(
         CupertinoApp(
-          theme: CupertinoThemeData(brightness: Brightness.dark),
+          theme: const CupertinoThemeData(brightness: Brightness.dark),
           home: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return CupertinoSegmentedControl<int>(

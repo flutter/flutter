@@ -248,6 +248,7 @@ class ThemeData extends Diagnosticable {
       labelStyle: textTheme.body2,
     );
     dialogTheme ??= const DialogTheme();
+    cupertinoOverrideTheme = cupertinoOverrideTheme?.raw();
 
     return ThemeData.raw(
       brightness: brightness,
@@ -686,6 +687,7 @@ class ThemeData extends Diagnosticable {
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
   }) {
+    cupertinoOverrideTheme = cupertinoOverrideTheme?.raw();
     return ThemeData.raw(
       brightness: brightness ?? this.brightness,
       primaryColor: primaryColor ?? this.primaryColor,
@@ -1039,58 +1041,56 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   MaterialBasedCupertinoThemeData({
     @required ThemeData materialTheme,
   }) : assert(materialTheme != null),
-       _materialTheme = materialTheme,
-       _brightness = materialTheme.cupertinoOverrideTheme?.brightness,
-       _primaryColor = materialTheme.cupertinoOverrideTheme?.primaryColor,
-       _primaryContrastingColor = materialTheme.cupertinoOverrideTheme?.primaryContrastingColor,
-       _scaffoldBackgroundColor = materialTheme.cupertinoOverrideTheme?.scaffoldBackgroundColor,
-       super(
-         brightness: materialTheme.cupertinoOverrideTheme?.brightness,
-         primaryColor: materialTheme.cupertinoOverrideTheme?.primaryColor,
-         primaryContrastingColor: materialTheme.cupertinoOverrideTheme?.primaryContrastingColor,
-         textTheme: materialTheme.cupertinoOverrideTheme?.textTheme,
-         barBackgroundColor: materialTheme.cupertinoOverrideTheme?.barBackgroundColor,
-         scaffoldBackgroundColor: materialTheme.cupertinoOverrideTheme?.scaffoldBackgroundColor,
-         tableBackgroundColor: materialTheme.cupertinoOverrideTheme?.tableBackgroundColor,
-       );
+       _materialTheme = materialTheme;
 
   final ThemeData _materialTheme;
 
-  final Brightness _brightness;
-  Brightness get brightness => _brightness ?? _materialTheme.brightness;
+  @override
+  Brightness get brightness => _materialTheme.cupertinoOverrideTheme?.brightness ?? _materialTheme.brightness;
 
-  final Color _primaryColor;
-  Color get primaryColor => _primaryColor ?? _materialTheme.colorScheme.primary;
+  @override
+  Color get primaryColor => _materialTheme.cupertinoOverrideTheme?.primaryColor ?? _materialTheme.colorScheme.primary;
 
-  final Color _primaryContrastingColor;
-  Color get primaryContrastingColor => _primaryContrastingColor ?? _materialTheme.colorScheme.onPrimary;
+  @override
+  Color get primaryContrastingColor => _materialTheme.cupertinoOverrideTheme?.primaryContrastingColor ?? _materialTheme.colorScheme.onPrimary;
 
-  final Color _scaffoldBackgroundColor;
-  Color get scaffoldBackgroundColor => _scaffoldBackgroundColor ?? _materialTheme.colorScheme.background;
+  @override
+  Color get scaffoldBackgroundColor => _materialTheme.cupertinoOverrideTheme?.scaffoldBackgroundColor ?? _materialTheme.scaffoldBackgroundColor;
 
-//  // Copy with shouldn't change the base Material ThemeData. To change the
-//  // base Material ThemeData, create a new Material Theme and use copyWith on
-//  // the Material ThemeData instead.
-//  MaterialBasedCupertinoThemeData copyWith({
-//    Brightness brightness,
-//    Color primaryColor,
-//    Color primaryContrastingColor,
-//    CupertinoTextTheme textTheme,
-//    Color barBackgroundColor,
-//    Color scaffoldBackgroundColor,
-//    Color tableBackgroundColor,
-//  }) {
-//    return MaterialBasedCupertinoThemeData(
-//      materialTheme: _materialTheme,
-//      brightness: brightness ?? _brightness,
-//      primaryColor: primaryColor ?? _primaryColor,
-//      primaryContrastingColor: primaryContrastingColor ?? _primaryContrastingColor,
-//      textTheme: textTheme,
-//      barBackgroundColor: barBackgroundColor,
-//      scaffoldBackgroundColor: scaffoldBackgroundColor ?? _scaffoldBackgroundColor,
-//      tableBackgroundColor: tableBackgroundColor,
-//    );
-//  }
+  // Copy with shouldn't change the base Material ThemeData. To change the
+  // base Material ThemeData, create a new Material Theme and use copyWith on
+  // the Material ThemeData instead.
+  MaterialBasedCupertinoThemeData copyWith({
+    Brightness brightness,
+    Color primaryColor,
+    Color primaryContrastingColor,
+    CupertinoTextTheme textTheme,
+    Color barBackgroundColor,
+    Color scaffoldBackgroundColor,
+    Color tableBackgroundColor,
+  }) {
+    final CupertinoThemeData override = _materialTheme.cupertinoOverrideTheme?.copyWith(
+      brightness: brightness,
+      primaryColor: primaryColor,
+      primaryContrastingColor: primaryContrastingColor,
+      textTheme: textTheme,
+      barBackgroundColor: barBackgroundColor,
+      scaffoldBackgroundColor: scaffoldBackgroundColor,
+      tableBackgroundColor: tableBackgroundColor,
+    ) ?? CupertinoThemeData(
+      brightness: brightness,
+      primaryColor: primaryColor,
+      primaryContrastingColor: primaryContrastingColor,
+      textTheme: textTheme,
+      barBackgroundColor: barBackgroundColor,
+      scaffoldBackgroundColor: scaffoldBackgroundColor,
+      tableBackgroundColor: tableBackgroundColor,
+    );
+
+    return MaterialBasedCupertinoThemeData(
+      materialTheme: _materialTheme.copyWith(cupertinoOverrideTheme: override),
+    );
+  }
 }
 
 class _IdentityThemeDataCacheKey {

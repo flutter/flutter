@@ -218,7 +218,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
   void initState() {
     super.initState();
     _heroController = CupertinoApp.createCupertinoHeroController();
-    _themeData = widget.theme ?? CupertinoThemeData();
+    _themeData = widget.theme ?? const CupertinoThemeData();
     _updateNavigator();
   }
 

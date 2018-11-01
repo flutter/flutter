@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/foundation/diagnostics.dart';
@@ -411,6 +412,71 @@ void main() {
     }
 
     expect(theme.textTheme.display4.debugLabel, '(englishLike display4 2014).merge(blackMountainView display4)');
+  });
+
+  group('Cupertino theme', () {
+    int timesBuilt;
+    CupertinoThemeData actualTheme;
+
+    final Widget child = Builder(
+      builder: (BuildContext context) {
+        timesBuilt++;
+        actualTheme = CupertinoTheme.of(context);
+        return const Placeholder();
+      },
+    );
+
+    Future<CupertinoThemeData> testTheme(WidgetTester tester, ThemeData theme) async {
+      await tester.pumpWidget(
+        Theme(
+          data: theme,
+          child: child,
+        ),
+      );
+      return actualTheme;
+    }
+
+    setUp(() {
+      timesBuilt = 0;
+      actualTheme = null;
+    });
+
+    testWidgets('Default theme has defaults', (WidgetTester tester) async {
+      final CupertinoThemeData theme = await testTheme(tester, ThemeData.light());
+
+      expect(theme.brightness, Brightness.light);
+      expect(theme.primaryColor, Colors.blue);
+      expect(theme.scaffoldBackgroundColor, Colors.grey[50]);
+      expect(theme.primaryContrastingColor, Colors.white);
+      expect(theme.textTheme.textStyle.fontFamily, '.SF Pro Text');
+      expect(theme.textTheme.textStyle.fontSize, 17.0);
+    });
+
+    testWidgets('Dark theme has defaults', (WidgetTester tester) async {
+      final CupertinoThemeData theme = await testTheme(tester, ThemeData.dark());
+
+      expect(theme.brightness, Brightness.dark);
+      expect(theme.primaryColor, Colors.blue);
+      expect(theme.primaryContrastingColor, Colors.white);
+      expect(theme.scaffoldBackgroundColor, Colors.grey[850]);
+      expect(theme.textTheme.textStyle.fontFamily, '.SF Pro Text');
+      expect(theme.textTheme.textStyle.fontSize, 17.0);
+    });
+
+    testWidgets('Can override material theme', (WidgetTester tester) async {
+      final CupertinoThemeData theme = await testTheme(tester, ThemeData(
+        cupertinoOverrideTheme: const CupertinoThemeData(
+          scaffoldBackgroundColor: CupertinoColors.lightBackgroundGray,
+        ),
+      ));
+
+      expect(theme.brightness, Brightness.light);
+      expect(theme.primaryColor, Colors.blue);
+      expect(theme.primaryContrastingColor, Colors.white);
+      expect(theme.scaffoldBackgroundColor, CupertinoColors.lightBackgroundGray);
+      expect(theme.textTheme.textStyle.fontFamily, '.SF Pro Text');
+      expect(theme.textTheme.textStyle.fontSize, 17.0);
+    });
   });
 }
 

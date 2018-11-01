@@ -380,7 +380,7 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: CupertinoThemeData(brightness: Brightness.dark),
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: Center(
           child: CupertinoSlider(
             onChanged: (double value) {},
@@ -398,7 +398,7 @@ void main() {
   testWidgets('Themes can be overridden', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        theme: CupertinoThemeData(brightness: Brightness.dark),
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: Center(
           child: CupertinoSlider(
             activeColor: CupertinoColors.activeGreen,

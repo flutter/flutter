@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'theme.dart';
 
 const Color _kDisabledBackground = Color(0xFFA9A9A9);
