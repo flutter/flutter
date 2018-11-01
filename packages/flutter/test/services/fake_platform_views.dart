@@ -229,9 +229,9 @@ class FakeAndroidPlatformView {
       return false;
     final FakeAndroidPlatformView typedOther = other;
     return id == typedOther.id &&
-        type == typedOther.type &&
-        creationParams == typedOther.creationParams &&
-        size == typedOther.size;
+           type == typedOther.type &&
+           creationParams == typedOther.creationParams &&
+           size == typedOther.size;
   }
 
   @override
@@ -285,8 +285,8 @@ class FakeUiKitView {
       return false;
     final FakeUiKitView typedOther = other;
     return id == typedOther.id &&
-      type == typedOther.type &&
-      creationParams == typedOther.creationParams;
+           type == typedOther.type &&
+           creationParams == typedOther.creationParams;
   }
 
   @override
