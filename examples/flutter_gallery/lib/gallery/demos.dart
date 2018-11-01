@@ -93,7 +93,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       icon: GalleryIcons.shrine,
       category: _kDemos,
       routeName: ShrineDemo.routeName,
-      buildRoute: (BuildContext context) => const ShrineDemo(),
+      buildRoute: (BuildContext context) => ShrineDemo(),
     ),
     GalleryDemo(
       title: 'Contact profile',
