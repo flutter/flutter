@@ -22,6 +22,9 @@ FuchsiaSdk get fuchsiaSdk => context[FuchsiaSdk];
 /// This workflow assumes development within the fuchsia source tree,
 /// including a working fx command-line tool in the user's PATH.
 class FuchsiaSdk {
+  static const List<String> _netaddrCommand = <String>['fx', 'netaddr', '--fuchsia', '--nowait'];
+  static const List<String> _netlsCommand = <String>['fx', 'netls', '--nowait'];
+  static const List<String> _syslogCommand = <String>['fx', 'syslog'];
 
   /// The location of the SSH configuration file used to interact with a
   /// fuchsia device.
@@ -46,7 +49,7 @@ class FuchsiaSdk {
   ///     > fe80::9aaa:fcff:fe60:d3af%eth1
   Future<String> netaddr() async {
     try {
-      final RunResult process = await runAsync(<String>['fx', 'netaddr', '--fuchsia', '--nowait']);
+      final RunResult process = await runAsync(_netaddrCommand);
       return process.stdout.trim();
     } on ArgumentError catch (exception) {
       throwToolExit('$exception');
@@ -63,7 +66,7 @@ class FuchsiaSdk {
       final StreamController<String> controller = StreamController<String>(onCancel: () {
         process.kill();
       });
-      processManager.start(<String>['fx', 'syslog']).then((Process newProcess) {
+      processManager.start(_syslogCommand).then((Process newProcess) {
         printTrace('Running logs');
         if (controller.isClosed) {
           return;
@@ -89,8 +92,7 @@ class FuchsiaSdk {
   ///     > device liliac-shore-only-last (fe80::82e4:da4d:fe81:227d/3)
   Future<String> netls() async {
     try {
-      final RunResult process = await runAsync(
-        <String>['fx', 'netls', '--nowait']);
+      final RunResult process = await runAsync(_netlsCommand);
       return process.stdout;
     } on ArgumentError catch (exception) {
       throwToolExit('$exception');

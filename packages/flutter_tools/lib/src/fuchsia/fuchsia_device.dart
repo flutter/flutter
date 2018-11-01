@@ -186,8 +186,10 @@ class FuchsiaDevice extends Device {
   /// Finds the first port running a VM matching `isolateName` from the
   /// provided set of `ports`.
   ///
-  /// TODO(jonahwilliams): replacing this with the hub will require an update
-  /// to the flutter_runner.
+  /// Returns null if no isolate port can be found.
+  ///
+  // TODO(jonahwilliams): replacing this with the hub will require an update
+  // to the flutter_runner.
   Future<int> findIsolatePort(String isolateName, List<int> ports) async {
     for (int port in ports) {
       try {
@@ -222,11 +224,16 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
   _FuchsiaPortForwarder(this.device);
 
   final FuchsiaDevice device;
+  final Map<int, Process> _sockets = <int, Process>{};
 
   @override
   Future<int> forward(int devicePort, {int hostPort}) async {
-    hostPort ??= 0;
-    // Note: the provided command works around a bug in -N, but the solution is flaky.
+    if (hostPort == null) {
+      final ServerSocket socket = await ServerSocket.bind(_ipv4Loopback, 0);
+      hostPort = socket.port;
+    }
+    // Note: the provided command works around a bug in -N, see US-515
+    // for more explanation.
     final List<String> command = <String>[
       'ssh', '-6', '-F', fuchsiaSdk.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
       '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true'
@@ -246,10 +253,13 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async {
     _forwardedPorts.remove(forwardedPort);
+    final ServerSocket socket = _sockets[forwardedPort.hostPort];
     final List<String> command = <String>[
         'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, '-O', 'cancel', '-vvv',
         '-L', '${forwardedPort.hostPort}:$_ipv4Loopback:${forwardedPort.devicePort}', device.id];
     final ProcessResult result = await processManager.run(command);
+    await socket.close();
+    _sockets.remove(forwardedPort.hostPort);
     if (result.exitCode != 0) {
       throwToolExit(result.stderr);
     }

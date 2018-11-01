@@ -131,14 +131,19 @@ class AttachCommand extends FlutterCommand {
       }
       ipv6 = _isIpv6(device.id.split('%').first);
       final List<int> ports = await device.servicePorts();
+      if (ports.isEmpty) {
+        throwToolExit('No active Observatories on ${device.name}');
+      }
       final List<int> localPorts = <int>[];
       for (int port in ports) {
-        final ServerSocket socket = await ServerSocket.bind(ipv4Loopback, 0);
-        localPorts.add(socket.port);
-        await device.portForwarder.forward(port, hostPort: socket.port);
+        final int localPort = await device.portForwarder.forward(port);
+        localPorts.add(localPort);
       }
       printStatus('Waiting for a connection from Flutter on ${device.name}...');
       final int localPort = await device.findIsolatePort(module, localPorts);
+      if (localPort == null) {
+        throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
+      }
       printStatus('Done.');
       observatoryUri = ipv6
         ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
