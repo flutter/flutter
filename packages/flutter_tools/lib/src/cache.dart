@@ -112,7 +112,18 @@ class Cache {
 
   String _dartSdkVersion;
 
-  String get dartSdkVersion => _dartSdkVersion ??= platform.version;
+  String get dartSdkVersion {
+    if (_dartSdkVersion == null) {
+      // Make the version string more customer-friendly.
+      // Changes '2.1.0-dev.8.0.flutter-4312ae32' to '2.1.0 (build 2.1.0-dev.8.0 4312ae32)'
+      final String justVersion = platform.version.split(' ')[0];
+      _dartSdkVersion = justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
+        final String noFlutter = match[2].replaceAll('.flutter-', ' ');
+        return '${match[1]} (build ${match[1]}$noFlutter)';
+      });
+    }
+    return _dartSdkVersion;
+  }
 
   String _engineRevision;
 
@@ -505,6 +516,43 @@ class FlutterEngine extends CachedArtifact {
     }
   }
 
+  Future<bool> areRemoteArtifactsAvailable({String engineVersion,
+                                            bool includeAllPlatforms = true}) async {
+    final bool includeAllPlatformsState = cache.includeAllPlatforms;
+    cache.includeAllPlatforms = includeAllPlatforms;
+
+    Future<bool> checkForArtifacts(String engineVersion) async {
+      engineVersion ??= version;
+      final String url = '$_storageBaseUrl/flutter_infra/flutter/$engineVersion/';
+
+      bool exists = false;
+      for (String pkgName in _getPackageDirs()) {
+        exists = await _doesRemoteExist('Checking package $pkgName is available...',
+            Uri.parse(url + pkgName + '.zip'));
+        if (!exists) {
+          return false;
+        }
+      }
+
+      for (List<String> toolsDir in _getBinaryDirs()) {
+        final String cacheDir = toolsDir[0];
+        final String urlPath = toolsDir[1];
+        exists = await _doesRemoteExist('Checking $cacheDir tools are available...',
+            Uri.parse(url + urlPath));
+        if (!exists) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    final bool result = await checkForArtifacts(engineVersion);
+    cache.includeAllPlatforms = includeAllPlatformsState;
+    return result;
+  }
+
+
   void _makeFilesExecutable(Directory dir) {
     for (FileSystemEntity entity in dir.listSync()) {
       if (entity is File) {
@@ -569,6 +617,13 @@ Future<void> _downloadFile(Uri url, File location) async {
   _ensureExists(location.parent);
   final List<int> fileBytes = await fetchUrl(url);
   location.writeAsBytesSync(fileBytes, flush: true);
+}
+
+Future<bool> _doesRemoteExist(String message, Uri url) async {
+  final Status status = logger.startProgress(message, expectSlowOperation: true);
+  final bool exists = await doesRemoteFileExist(url);
+  status.stop();
+  return exists;
 }
 
 /// Create the given [directory] and parents, as necessary.

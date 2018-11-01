@@ -342,7 +342,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         if (path != null)
           buf.write(' <- ');
       }
-      printStatus(buf.toString());
+      printStatus(buf.toString(), wrap: false);
     }
 
     if (paths.isEmpty) {

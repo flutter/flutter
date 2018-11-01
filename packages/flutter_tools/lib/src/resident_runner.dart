@@ -79,11 +79,15 @@ class FlutterDevice {
     vmServices = localVmServices;
   }
 
-  Future<void> refreshViews() async {
+  Future<void> refreshViews() {
     if (vmServices == null || vmServices.isEmpty)
-      return;
+      return Future<void>.value(null);
+    final List<Future<void>> futures = <Future<void>>[];
     for (VMService service in vmServices)
-      await service.vm.refreshViews();
+      futures.add(service.vm.refreshViews());
+    final Completer<void> completer = Completer<void>();
+    Future.wait(futures).whenComplete(() => completer.complete(null)); // ignore: unawaited_futures
+    return completer.future;
   }
 
   List<FlutterView> get views {
@@ -236,7 +240,7 @@ class FlutterDevice {
       return;
     _loggingSubscription = device.getLogReader(app: package).logLines.listen((String line) {
       if (!line.contains('Observatory listening on http'))
-        printStatus(line);
+        printStatus(line, wrap: false);
     });
   }
 
