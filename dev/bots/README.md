@@ -67,8 +67,10 @@ The typical cycle for editing a recipe is:
 
 1. Make your edits (probably to files in
    `//chrome_infra/build/scripts/slave/recipes/flutter`).
-2. Run `build/scripts/slave/recipes.py --use-bootstrap test train` to
-   update expected files
+2. Update the tests. Run `build/scripts/slave/recipes.py --use-bootstrap test
+   train` to update existing expected output to match the new output. Verify
+   completely new test cases by altering the `GenTests` method of the recipe.
+   The recipe is required to have 100% test coverage.
 3. Run `build/scripts/slave/recipes.py run flutter/<repo> slavename=<slavename>
    mastername=client.flutter buildername=<buildername> buildnumber=1234` where `<repo>` is one
    of `flutter` or `engine`, and `slavename` and `buildername` can be looked up
