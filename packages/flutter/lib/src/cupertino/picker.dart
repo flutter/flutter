@@ -166,7 +166,27 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   @override
   void initState() {
     super.initState();
-    _controller = widget.scrollController ?? FixedExtentScrollController();
+    if (widget.scrollController == null) {
+      _controller = FixedExtentScrollController();
+    }
+  }
+
+  @override
+  void didUpdateWidget(CupertinoPicker oldWidget) {
+    if (widget.scrollController != null && oldWidget.scrollController == null) {
+      _controller?.dispose();
+      _controller = null;
+    } else if (widget.scrollController == null && oldWidget.scrollController != null) {
+      assert(_controller == null);
+      _controller = FixedExtentScrollController();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
   }
 
   void _handleSelectedItemChanged(int index) {
@@ -254,9 +274,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       children: <Widget>[
         Positioned.fill(
           child: _CupertinoPickerSemantics(
-            scrollController: _controller,
+            scrollController: widget.scrollController ?? _controller,
             child: ListWheelScrollView.useDelegate(
-              controller: _controller,
+              controller: widget.scrollController ?? _controller,
               physics: const FixedExtentScrollPhysics(),
               diameterRatio: widget.diameterRatio,
               perspective: _kDefaultPerspective,
@@ -287,7 +307,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
 // Turns the scroll semantics of the ListView into a single adjustable semantics
 // node. This is done by removing all of the child semantics of the scroll
-// wheel and using the scroll indexes to loop up the current, previous, and
+// wheel and using the scroll indexes to look up the current, previous, and
 // next semantic label. This label is then turned into the value of a new
 // adjustable semantic node, with adjustment callbacks wired to move the
 // scroll controller.
