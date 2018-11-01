@@ -236,11 +236,12 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
     this.toolbarOpacity,
     this.minExtent,
     this.maxExtent,
-    this.currentExtent,
-    Widget child,
-  }) : super(key: key, child: child);
+    @required this.currentExtent,
+    @required Widget child,
+  }) :  assert(currentExtent != null),
+        super(key: key, child: child);
 
-  /// Affects how transparent the text within the [FlexibleSpaceBar] appears.
+  /// Affects how transparent the text within the toolbar appears.
   final double toolbarOpacity;
 
   /// Minimum height of the resulting [FlexibleSpaceBar] when fully collapsed.

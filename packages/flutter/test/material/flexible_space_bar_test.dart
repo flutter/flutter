@@ -47,11 +47,10 @@ void main() {
     expect(center.dx, lessThan(400.0 + size.width / 2.0));
   });
 
-  testWidgets('FlexibleSpaceBarSettings works while public', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBarSettings provides settings to a FlexibleSpaceBar', (WidgetTester tester) async {
     const double maxExtent = 300.0;
 
-    final FlexibleSpaceBarSettings customSettings =
-    FlexibleSpaceBar.createSettings(
+    final FlexibleSpaceBarSettings customSettings = FlexibleSpaceBar.createSettings(
       currentExtent: maxExtent,
       minExtent: 100,
       maxExtent: maxExtent,
@@ -91,6 +90,8 @@ void main() {
 
     final RenderBox renderBox = tester.renderObject(find.byType(Positioned));
     expect(renderBox.size.height, maxExtent);
+    renderBox.
+
   });
 
 }
