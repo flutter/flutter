@@ -179,6 +179,7 @@ class FakeIosPlatformViewsController {
     final Map<dynamic, dynamic> args = call.arguments;
     final int id = args['id'];
     final String viewType = args['viewType'];
+    final Uint8List creationParams = args['params'];
 
     if (_views.containsKey(id)) {
       throw PlatformException(
@@ -194,7 +195,7 @@ class FakeIosPlatformViewsController {
       );
     }
 
-    _views[id] = FakeUiKitView(id, viewType);
+    _views[id] = FakeUiKitView(id, viewType, creationParams);
     return Future<int>.sync(() => null);
   }
 
@@ -228,9 +229,9 @@ class FakeAndroidPlatformView {
       return false;
     final FakeAndroidPlatformView typedOther = other;
     return id == typedOther.id &&
-        type == typedOther.type &&
-        creationParams == typedOther.creationParams &&
-        size == typedOther.size;
+           type == typedOther.type &&
+           creationParams == typedOther.creationParams &&
+           size == typedOther.size;
   }
 
   @override
@@ -272,10 +273,11 @@ class FakeAndroidMotionEvent {
 }
 
 class FakeUiKitView {
-  FakeUiKitView(this.id, this.type);
+  FakeUiKitView(this.id, this.type, [this.creationParams]);
 
   final int id;
   final String type;
+  final Uint8List creationParams;
 
   @override
   bool operator ==(dynamic other) {
@@ -283,7 +285,8 @@ class FakeUiKitView {
       return false;
     final FakeUiKitView typedOther = other;
     return id == typedOther.id &&
-      type == typedOther.type;
+           type == typedOther.type &&
+           creationParams == typedOther.creationParams;
   }
 
   @override
@@ -291,6 +294,6 @@ class FakeUiKitView {
 
   @override
   String toString() {
-    return 'FakeIosPlatformView(id: $id, type: $type)';
+    return 'FakeUiKitView(id: $id, type: $type, creationParams: $creationParams)';
   }
 }
