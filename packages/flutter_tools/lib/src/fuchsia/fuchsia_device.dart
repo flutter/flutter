@@ -173,7 +173,7 @@ class FuchsiaDevice extends Device {
   Future<String> shell(String command) async {
     final RunResult result = await runAsync(<String>[
       'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, id, command]);
-    if (result.exitCode != 0 || result.stderr.isNotEmpty) {
+    if (result.exitCode != 0) {
       throwToolExit('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
       return null;
     }
