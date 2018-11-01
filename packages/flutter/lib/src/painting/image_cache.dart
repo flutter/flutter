@@ -48,8 +48,7 @@ class ImageCache {
       return;
     _maximumSize = value;
     if (maximumSize == 0) {
-      _cache.clear();
-      _currentSizeBytes = 0;
+      clear();
     } else {
       _checkCacheSize();
     }
@@ -78,8 +77,7 @@ class ImageCache {
       return;
     _maximumSizeBytes = value;
     if (_maximumSizeBytes == 0) {
-      _cache.clear();
-      _currentSizeBytes = 0;
+      clear();
     } else {
       _checkCacheSize();
     }
@@ -98,6 +96,7 @@ class ImageCache {
   /// cache, and when they complete they will be inserted as normal.
   void clear() {
     _cache.clear();
+    _pendingImages.clear();
     _currentSizeBytes = 0;
   }
 
