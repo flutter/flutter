@@ -7,6 +7,7 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
 import '../device.dart';
@@ -129,12 +130,16 @@ class AttachCommand extends FlutterCommand {
         for (int port in ports) {
           localPorts.add(await device.portForwarder.forward(port));
         }
-        printStatus('Waiting for a connection from Flutter on ${device.name}...');
+        final Status status = logger.startProgress(
+          'Waiting for a connection from Flutter on ${device.name}...',
+          expectSlowOperation: true,
+        );
         final int localPort = await device.findIsolatePort(module, localPorts);
         if (localPort == null) {
+          status.cancel();
           throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
         }
-        printStatus('Done.');
+        status.stop();
         observatoryUri = ipv6
           ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
           : Uri.parse('http://$ipv4Loopback:$localPort/');
