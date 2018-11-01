@@ -224,24 +224,24 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
   _FuchsiaPortForwarder(this.device);
 
   final FuchsiaDevice device;
-  final Map<int, Process> _sockets = <int, Process>{};
+  final Map<int, Process> _processes = <int, Process>{};
 
   @override
   Future<int> forward(int devicePort, {int hostPort}) async {
-    if (hostPort == null) {
-      final ServerSocket socket = await ServerSocket.bind(_ipv4Loopback, 0);
-      hostPort = socket.port;
-    }
+    hostPort ??= await _findPort();
     // Note: the provided command works around a bug in -N, see US-515
     // for more explanation.
     final List<String> command = <String>[
       'ssh', '-6', '-F', fuchsiaSdk.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
       '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true'
     ];
-    final ProcessResult result = await processManager.run(command);
-    if (result.exitCode != 0) {
-      throwToolExit('Failed to forward port:$devicePort');
-    }
+    final Process process = await processManager.start(command);
+    process.exitCode.then((int exitCode) { // ignore: unawaited_futures
+      if (exitCode != 0) {
+        throwToolExit('Failed to forward port:$devicePort');
+      }
+    });
+    _processes[hostPort] = process;
     _forwardedPorts.add(ForwardedPort(hostPort, devicePort));
     return hostPort;
   }
@@ -253,16 +253,30 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async {
     _forwardedPorts.remove(forwardedPort);
-    final ServerSocket socket = _sockets[forwardedPort.hostPort];
+    final Process process = _processes.remove(forwardedPort.hostPort);
+    process?.kill();
     final List<String> command = <String>[
         'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, '-O', 'cancel', '-vvv',
         '-L', '${forwardedPort.hostPort}:$_ipv4Loopback:${forwardedPort.devicePort}', device.id];
     final ProcessResult result = await processManager.run(command);
-    await socket.close();
-    _sockets.remove(forwardedPort.hostPort);
     if (result.exitCode != 0) {
       throwToolExit(result.stderr);
     }
+  }
+
+  static Future<int> _findPort() async {
+    int port = 0;
+    ServerSocket serverSocket;
+    try {
+      serverSocket = await ServerSocket.bind(_ipv4Loopback, 0);
+      port = serverSocket.port;
+    } catch (e) {
+      // Failures are signaled by a return value of 0 from this function.
+      printTrace('_findPort failed: $e');
+    }
+    if (serverSocket != null)
+      await serverSocket.close();
+    return port;
   }
 }
 
