@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'button_bar.dart';
 import 'button_theme.dart';
 import 'colors.dart';
+import 'debug.dart';
 import 'dialog.dart';
 import 'feedback.dart';
 import 'flat_button.dart';
@@ -1672,6 +1673,7 @@ Future<TimeOfDay> showTimePicker({
 }) async {
   assert(context != null);
   assert(initialTime != null);
+  assert(debugCheckHasMaterialLocalizations(context));
 
   return await showDialog<TimeOfDay>(
     context: context,

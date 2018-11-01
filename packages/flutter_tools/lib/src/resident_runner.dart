@@ -30,13 +30,14 @@ import 'vmservice.dart';
 
 class FlutterDevice {
   FlutterDevice(this.device, {
-    @required bool trackWidgetCreation,
+    @required this.trackWidgetCreation,
     this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.viewFilter,
     ResidentCompiler generator,
-  }) : generator = generator ?? ResidentCompiler(
+  }) : assert(trackWidgetCreation != null),
+       generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
@@ -53,6 +54,7 @@ class FlutterDevice {
   String fileSystemScheme;
   StreamSubscription<String> _loggingSubscription;
   final String viewFilter;
+  final bool trackWidgetCreation;
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered.
@@ -77,11 +79,15 @@ class FlutterDevice {
     vmServices = localVmServices;
   }
 
-  Future<void> refreshViews() async {
+  Future<void> refreshViews() {
     if (vmServices == null || vmServices.isEmpty)
-      return;
+      return Future<void>.value(null);
+    final List<Future<void>> futures = <Future<void>>[];
     for (VMService service in vmServices)
-      await service.vm.refreshViews();
+      futures.add(service.vm.refreshViews());
+    final Completer<void> completer = Completer<void>();
+    Future.wait(futures).whenComplete(() => completer.complete(null)); // ignore: unawaited_futures
+    return completer.future;
   }
 
   List<FlutterView> get views {
@@ -234,7 +240,7 @@ class FlutterDevice {
       return;
     _loggingSubscription = device.getLogReader(app: package).logLines.listen((String line) {
       if (!line.contains('Observatory listening on http'))
-        printStatus(line);
+        printStatus(line, wrap: false);
     });
   }
 
@@ -390,6 +396,7 @@ class FlutterDevice {
         generator: generator,
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
+        trackWidgetCreation: trackWidgetCreation,
         projectRootPath: projectRootPath,
         pathToReload: pathToReload
       );
@@ -443,6 +450,7 @@ abstract class ResidentRunner {
   String _mainPath;
   String get mainPath => _mainPath;
   String getReloadPath({bool fullRestart}) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
+
   AssetBundle _assetBundle;
   AssetBundle get assetBundle => _assetBundle;
 

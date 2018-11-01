@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import 'artifacts.dart';
 import 'asset.dart';
 import 'base/build.dart';
@@ -19,7 +21,24 @@ const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
 String get defaultDepfilePath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
-String get defaultApplicationKernelPath => fs.path.join(getBuildDirectory(), 'app.dill');
+
+String getDefaultApplicationKernelPath({@required bool trackWidgetCreation}) {
+  return getKernelPathForTransformerOptions(
+    fs.path.join(getBuildDirectory(), 'app.dill'),
+    trackWidgetCreation: trackWidgetCreation,
+  );
+}
+
+String getKernelPathForTransformerOptions(
+  String path, {
+  @required bool trackWidgetCreation,
+}) {
+  if (trackWidgetCreation) {
+    path += '.track.dill';
+  }
+  return path;
+}
+
 const String defaultPrivateKeyPath = 'privatekey.der';
 
 const String _kKernelKey = 'kernel_blob.bin';
@@ -50,7 +69,7 @@ Future<void> build({
   depfilePath ??= defaultDepfilePath;
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
-  applicationKernelFilePath ??= defaultApplicationKernelPath;
+  applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
 
   DevFSContent kernelContent;
   if (!precompiledSnapshot) {

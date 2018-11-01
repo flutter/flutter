@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
 import '../src/common.dart';
-import 'test_data/basic_project.dart';
+import 'test_data/hot_reload_project.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
   group('hot', () {
     Directory tempDir;
-    final BasicProject _project = BasicProject();
+    final HotReloadProject _project = HotReloadProject();
     FlutterTestDriver _flutter;
 
     setUp(() async {
@@ -33,6 +35,19 @@ void main() {
       await _flutter.hotReload();
     });
 
+    test('newly added code executes during reload', () async {
+      await _flutter.run();
+      _project.uncommentHotReloadPrint();
+      final StringBuffer stdout = StringBuffer();
+      final StreamSubscription<String> sub = _flutter.stdout.listen(stdout.writeln);
+      try {
+            await _flutter.hotReload();
+            expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
+      } finally {
+        await sub.cancel();
+      }
+    });
+
     test('restart works without error', () async {
       await _flutter.run();
       await _flutter.hotRestart();
@@ -41,7 +56,7 @@ void main() {
     test('reload hits breakpoints after reload', () async {
       await _flutter.run(withDebugger: true);
       final VMIsolate isolate = await _flutter.breakAt(
-          Uri.file(_project.breakpointFile),
+          _project.breakpointUri,
           _project.breakpointLine);
       expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
     });

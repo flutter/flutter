@@ -51,7 +51,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
     super.initServiceExtensions();
 
     assert(() {
-      // these service extensions only work in checked mode
+      // these service extensions only work in debug mode
       registerBoolServiceExtension(
         name: 'debugPaint',
         getter: () async => debugPaintSizeEnabled,
@@ -60,17 +60,17 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
             return Future<void>.value();
           debugPaintSizeEnabled = value;
           return _forceRepaint();
-        }
+        },
       );
       registerBoolServiceExtension(
-          name: 'debugPaintBaselinesEnabled',
-          getter: () async => debugPaintBaselinesEnabled,
-          setter: (bool value) {
+        name: 'debugPaintBaselinesEnabled',
+        getter: () async => debugPaintBaselinesEnabled,
+        setter: (bool value) {
           if (debugPaintBaselinesEnabled == value)
             return Future<void>.value();
           debugPaintBaselinesEnabled = value;
           return _forceRepaint();
-        }
+        },
       );
       registerBoolServiceExtension(
         name: 'repaintRainbow',
@@ -83,28 +83,43 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
           return Future<void>.value();
         },
       );
+      registerSignalServiceExtension(
+        name: 'debugDumpLayerTree',
+        callback: () {
+          debugDumpLayerTree();
+          return debugPrintDone;
+        },
+      );
       return true;
     }());
 
-    registerSignalServiceExtension(
-      name: 'debugDumpRenderTree',
-      callback: () { debugDumpRenderTree(); return debugPrintDone; }
-    );
+    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
+    if (!isReleaseMode) {
+      // these service extensions work in debug or profile mode
+      registerSignalServiceExtension(
+        name: 'debugDumpRenderTree',
+        callback: () {
+          debugDumpRenderTree();
+          return debugPrintDone;
+        },
+      );
 
-    registerSignalServiceExtension(
-      name: 'debugDumpLayerTree',
-      callback: () { debugDumpLayerTree(); return debugPrintDone; }
-    );
+      registerSignalServiceExtension(
+        name: 'debugDumpSemanticsTreeInTraversalOrder',
+        callback: () {
+          debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
+          return debugPrintDone;
+        },
+      );
 
-    registerSignalServiceExtension(
-      name: 'debugDumpSemanticsTreeInTraversalOrder',
-      callback: () { debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder); return debugPrintDone; }
-    );
-
-    registerSignalServiceExtension(
-      name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
-      callback: () { debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest); return debugPrintDone; }
-    );
+      registerSignalServiceExtension(
+        name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
+        callback: () {
+          debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest);
+          return debugPrintDone;
+        },
+      );
+    }
   }
 
   /// Creates a [RenderView] object to be the root of the

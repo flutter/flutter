@@ -165,7 +165,8 @@ class FuchsiaReloadCommand extends FlutterCommand {
           debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
           target: _target,
           projectRootPath: _fuchsiaProjectPath,
-              packagesFilePath: _dotPackagesPath);
+          packagesFilePath: _dotPackagesPath,
+        );
         printStatus('Connecting to $_modName');
         await hotRunner.attach();
       } finally {
@@ -539,7 +540,7 @@ class FuchsiaDeviceCommandRunner {
     printTrace(args.join(' '));
     final ProcessResult result = await processManager.run(args);
     if (result.exitCode != 0) {
-      printStatus('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
+      printStatus('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}', wrap: false);
       return null;
     }
     printTrace(result.stdout);

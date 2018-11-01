@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
@@ -56,6 +57,7 @@ void main() {
         'ios/Flutter/AppFrameworkInfo.plist',
         'ios/Runner/AppDelegate.m',
         'ios/Runner/GeneratedPluginRegistrant.h',
+        'lib/main.dart',
       ],
     );
     return _runFlutterTest(projectDir);
@@ -479,7 +481,6 @@ void main() {
     final String xcodeConfig = xcodeConfigFile.readAsStringSync();
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
-    expect(xcodeConfig, contains('FLUTTER_FRAMEWORK_DIR='));
     // App identification
     final String xcodeProjectPath = fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
     expectExists(xcodeProjectPath);
@@ -719,18 +720,52 @@ void main() {
     );
   });
 
-  // Verify that we fail with an error code when the file exists.
-  testUsingContext('fails when file exists', () async {
+  testUsingContext('fails when file exists where output directory should be', () async {
     Cache.flutterRoot = '../..';
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
-    final File existingFile = fs.file('${projectDir.path.toString()}/bad');
+    final File existingFile = fs.file(fs.path.join(projectDir.path, 'bad'));
     if (!existingFile.existsSync()) {
       existingFile.createSync(recursive: true);
     }
     expect(
       runner.run(<String>['create', existingFile.path]),
-      throwsToolExit(message: 'file exists'),
+      throwsToolExit(message: 'existing file'),
+    );
+  });
+
+  testUsingContext('fails overwrite when file exists where output directory should be', () async {
+    Cache.flutterRoot = '../..';
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final File existingFile = fs.file(fs.path.join(projectDir.path, 'bad'));
+    if (!existingFile.existsSync()) {
+      existingFile.createSync(recursive: true);
+    }
+    expect(
+      runner.run(<String>['create', '--overwrite', existingFile.path]),
+      throwsToolExit(message: 'existing file'),
+    );
+  });
+
+  testUsingContext('overwrites existing directory when requested', () async {
+    Cache.flutterRoot = '../..';
+    final Directory existingDirectory = fs.directory(fs.path.join(projectDir.path, 'bad'));
+    if (!existingDirectory.existsSync()) {
+      existingDirectory.createSync(recursive: true);
+    }
+    final File existingFile = fs.file(fs.path.join(existingDirectory.path, 'lib', 'main.dart'));
+    existingFile.createSync(recursive: true);
+    await _createProject(
+      fs.directory(existingDirectory.path),
+      <String>['--overwrite'],
+      <String>[
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'lib/main.dart',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+      ],
     );
   });
 
@@ -779,6 +814,24 @@ void main() {
       ProcessManager: () => loggingProcessManager,
     },
   );
+
+  testUsingContext('can create a sample-based project', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--no-pub', '--sample=foo.bar.Baz'],
+      <String>[
+        'lib/main.dart',
+        'flutter_project.iml',
+        'android/app/src/main/AndroidManifest.xml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+      ],
+      unexpectedPaths: <String>['test'],
+    );
+    expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
+      contains('void main() {}'));
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() {}'),
+  });
 }
 
 Future<void> _createProject(
@@ -899,5 +952,64 @@ class LoggingProcessManager extends LocalProcessManager {
       runInShell: runInShell,
       mode: mode,
     );
+  }
+}
+
+class MockHttpClient implements HttpClient {
+  MockHttpClient(this.statusCode, {this.result});
+
+  final int statusCode;
+  final String result;
+
+  @override
+  Future<HttpClientRequest> getUrl(Uri url) async {
+    return MockHttpClientRequest(statusCode, result: result);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw 'io.HttpClient - $invocation';
+  }
+}
+
+class MockHttpClientRequest implements HttpClientRequest {
+  MockHttpClientRequest(this.statusCode, {this.result});
+
+  final int statusCode;
+  final String result;
+
+  @override
+  Future<HttpClientResponse> close() async {
+    return MockHttpClientResponse(statusCode, result: result);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw 'io.HttpClientRequest - $invocation';
+  }
+}
+
+class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResponse {
+  MockHttpClientResponse(this.statusCode, {this.result});
+
+  @override
+  final int statusCode;
+
+  final String result;
+
+  @override
+  String get reasonPhrase => '<reason phrase>';
+
+  @override
+  StreamSubscription<List<int>> listen(void onData(List<int> event), {
+    Function onError, void onDone(), bool cancelOnError
+  }) {
+    return Stream<List<int>>.fromIterable(<List<int>>[result.codeUnits])
+      .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw 'io.HttpClientResponse - $invocation';
   }
 }

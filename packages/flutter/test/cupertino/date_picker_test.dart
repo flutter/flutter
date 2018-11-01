@@ -1,7 +1,10 @@
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -581,4 +584,98 @@ void main() {
       expect(date, DateTime(2018, 1, 1, 15, 59));
     });
   });
+
+  testWidgets('scrollController can be removed or added', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    int lastSelectedItem;
+    void onSelectedItemChanged(int index) {
+      lastSelectedItem = index;
+    }
+    await tester.pumpWidget(_buildPicker(
+      controller: FixedExtentScrollController(),
+      onSelectedItemChanged: onSelectedItemChanged,
+    ));
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(1, SemanticsAction.increase);
+    await tester.pumpAndSettle();
+    expect(lastSelectedItem, 1);
+
+    await tester.pumpWidget(_buildPicker(
+      onSelectedItemChanged: onSelectedItemChanged,
+    ));
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(1, SemanticsAction.increase);
+    await tester.pumpAndSettle();
+    expect(lastSelectedItem, 2);
+
+    await tester.pumpWidget(_buildPicker(
+      controller: FixedExtentScrollController(),
+      onSelectedItemChanged: onSelectedItemChanged,
+    ));
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(1, SemanticsAction.increase);
+    await tester.pumpAndSettle();
+    expect(lastSelectedItem, 3);
+
+    handle.dispose();
+  });
+
+  testWidgets('picker exports semantics', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    debugResetSemanticsIdCounter();
+    int lastSelectedItem;
+    await tester.pumpWidget(_buildPicker(onSelectedItemChanged: (int index) {
+      lastSelectedItem = index;
+    }));
+
+    expect(tester.getSemantics(find.byType(CupertinoPicker)), matchesSemantics(
+      children: <Matcher>[
+        matchesSemantics(
+          hasIncreaseAction: true,
+          hasDecreaseAction: false,
+          increasedValue: '1',
+          value: '0',
+          textDirection: TextDirection.ltr,
+        ),
+      ],
+    ));
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(1, SemanticsAction.increase);
+    await tester.pumpAndSettle();
+
+    expect(tester.getSemantics(find.byType(CupertinoPicker)), matchesSemantics(
+      children: <Matcher>[
+        matchesSemantics(
+          hasIncreaseAction: true,
+          hasDecreaseAction: true,
+          increasedValue: '2',
+          decreasedValue: '0',
+          value: '1',
+          textDirection: TextDirection.ltr,
+        ),
+      ],
+    ));
+    expect(lastSelectedItem, 1);
+    handle.dispose();
+  });
+}
+
+Widget _buildPicker({FixedExtentScrollController controller, ValueChanged<int> onSelectedItemChanged}) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: CupertinoPicker(
+      scrollController: controller,
+      itemExtent: 100.0,
+      onSelectedItemChanged: onSelectedItemChanged,
+      children: List<Widget>.generate(100, (int index) {
+        return Center(
+          child: Container(
+            width: 400.0,
+            height: 100.0,
+            child: Text(index.toString()),
+          ),
+        );
+      }),
+    ),
+  );
 }

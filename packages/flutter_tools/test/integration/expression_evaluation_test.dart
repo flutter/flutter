@@ -33,13 +33,13 @@ void main() {
 
     Future<VMIsolate> breakInBuildMethod(FlutterTestDriver flutter) async {
       return _flutter.breakAt(
-          Uri.file(_project.buildMethodBreakpointFile),
+          _project.buildMethodBreakpointUri,
           _project.buildMethodBreakpointLine);
     }
 
     Future<VMIsolate> breakInTopLevelFunction(FlutterTestDriver flutter) async {
       return _flutter.breakAt(
-          Uri.file(_project.topLevelFunctionBreakpointFile),
+          _project.topLevelFunctionBreakpointUri,
           _project.topLevelFunctionBreakpointLine);
     }
 

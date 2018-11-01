@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show hashValues;
+
 import 'package:flutter/widgets.dart';
 
+import 'debug.dart';
 import 'material_localizations.dart';
+
 
 /// Whether the [TimeOfDay] is before or after noon.
 enum DayPeriod {
@@ -19,7 +22,20 @@ enum DayPeriod {
 /// A value representing a time during the day, independent of the date that
 /// day might fall on or the time zone.
 ///
-/// The time is represented by [hour] and [minute] pair.
+/// The time is represented by [hour] and [minute] pair. Once created, both
+/// values cannot be changed.
+///
+/// You can create TimeOfDay using the constructor which requires both hour and
+/// minute or using [DateTime] object.
+/// Hours are specified between 0 and 23, as in a 24-hour clock.
+///
+/// ### Sample code
+///
+/// ```dart
+/// TimeOfDay now = TimeOfDay.now();
+/// TimeOfDay releaseTime = TimeOfDay(hour: 15, minute: 0); // 3:00pm
+/// TimeOfDay roomBooked = TimeOfDay.fromDateTime(DateTime.parse('2018-10-20 16:30:04Z')); // 4:30pm
+/// ```
 ///
 /// See also:
 ///
@@ -83,7 +99,8 @@ class TimeOfDay {
   ///
   /// This is a shortcut for [MaterialLocalizations.formatTimeOfDay].
   String format(BuildContext context) {
-    debugCheckHasMediaQuery(context);
+    assert(debugCheckHasMediaQuery(context));
+    assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return localizations.formatTimeOfDay(
       this,

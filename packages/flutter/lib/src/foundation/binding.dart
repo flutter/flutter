@@ -93,9 +93,7 @@ abstract class BindingBase {
   /// Implementations of this method must call their superclass
   /// implementation.
   ///
-  /// Service extensions are only exposed when the observatory is
-  /// included in the build, which should only happen in checked mode
-  /// and in profile mode.
+  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
   ///
   /// See also:
   ///
@@ -104,18 +102,23 @@ abstract class BindingBase {
   @mustCallSuper
   void initServiceExtensions() {
     assert(!_debugServiceExtensionsRegistered);
-    registerSignalServiceExtension(
-      name: 'reassemble',
-      callback: reassembleApplication,
-    );
-    registerSignalServiceExtension(
-      name: 'exit',
-      callback: _exitApplication,
-    );
-    registerSignalServiceExtension(
-      name: 'frameworkPresent',
-      callback: () => Future<void>.value(),
-    );
+
+    assert(() {
+      registerSignalServiceExtension(
+        name: 'reassemble',
+        callback: reassembleApplication,
+      );
+      return true;
+    }());
+
+    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
+    if (!isReleaseMode) {
+      registerSignalServiceExtension(
+        name: 'exit',
+        callback: _exitApplication,
+      );
+    }
+
     assert(() {
       registerServiceExtension(
         name: 'platformOverride',
@@ -239,6 +242,8 @@ abstract class BindingBase {
   /// no value.
   ///
   /// Calls the `callback` callback when the service extension is called.
+  ///
+  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
   @protected
   void registerSignalServiceExtension({
     @required String name,
@@ -267,6 +272,8 @@ abstract class BindingBase {
   ///
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
+  ///
+  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
   @protected
   void registerBoolServiceExtension({
     @required String name,
@@ -297,6 +304,8 @@ abstract class BindingBase {
   ///
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
+  ///
+  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
   @protected
   void registerNumericServiceExtension({
     @required String name,
@@ -326,6 +335,8 @@ abstract class BindingBase {
   ///
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
+  ///
+  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
   @protected
   void registerStringServiceExtension({
     @required String name,
@@ -345,16 +356,51 @@ abstract class BindingBase {
     );
   }
 
-  /// Registers a service extension method with the given name (full
-  /// name "ext.flutter.name"). The given callback is called when the
-  /// extension method is called. The callback must return a [Future]
-  /// that either eventually completes to a return value in the form
-  /// of a name/value map where the values can all be converted to
-  /// JSON using `json.encode()` (see [JsonEncoder]), or fails. In case of failure, the
-  /// failure is reported to the remote caller and is dumped to the
-  /// logs.
+  /// Registers a service extension method with the given name (full name
+  /// "ext.flutter.name").
+  ///
+  /// The given callback is called when the extension method is called. The
+  /// callback must return a [Future] that either eventually completes to a
+  /// return value in the form of a name/value map where the values can all be
+  /// converted to JSON using `json.encode()` (see [JsonEncoder]), or fails. In
+  /// case of failure, the failure is reported to the remote caller and is
+  /// dumped to the logs.
   ///
   /// The returned map will be mutated.
+  ///
+  /// {@template flutter.foundation.bindingBase.registerServiceExtension}
+  /// A registered service extension can only be activated if the vm-service
+  /// is included in the build, which only happens in debug and profile mode.
+  /// Although a service extension cannot be used in release mode its code may
+  /// still be included in the Dart snapshot and blow up binary size if it is
+  /// not wrapped in a guard that allows the tree shaker to remove it (see
+  /// sample code below).
+  ///
+  /// ## Sample Code
+  ///
+  /// The following code registers a service extension that is only included in
+  /// debug builds:
+  ///
+  /// ```dart
+  /// assert(() {
+  ///   // Register your service extension here.
+  ///   return true;
+  /// }());
+  ///
+  /// ```
+  ///
+  /// A service extension registered with the following code snippet is
+  /// available in debug and profile mode:
+  ///
+  /// ```dart
+  /// if (!const bool.fromEnvironment('dart.vm.product')) {
+  //   // Register your service extension here.
+  // }
+  /// ```
+  ///
+  /// Both guards ensure that Dart's tree shaker can remove the code for the
+  /// service extension in release builds.
+  /// {@endtemplate}
   @protected
   void registerServiceExtension({
     @required String name,

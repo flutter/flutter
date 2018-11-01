@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   for (String language in kSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
-      final Locale locale = Locale(language, '');
+      final Locale locale = Locale(language);
 
       expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
 
@@ -74,11 +74,22 @@ void main() {
       expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNot(contains(r'$tabCount')));
       expect(() => localizations.tabLabel(tabIndex: 0, tabCount: 5), throwsAssertionError);
       expect(() => localizations.tabLabel(tabIndex: 2, tabCount: 0), throwsAssertionError);
+
+      expect(localizations.formatHour(const TimeOfDay(hour: 10, minute: 0)), isNotNull);
+      expect(localizations.formatMinute(const TimeOfDay(hour: 10, minute: 0)), isNotNull);
+      expect(localizations.formatYear(DateTime(2018, 8, 1)), isNotNull);
+      expect(localizations.formatMediumDate(DateTime(2018, 8, 1)), isNotNull);
+      expect(localizations.formatFullDate(DateTime(2018, 8, 1)), isNotNull);
+      expect(localizations.formatMonthYear(DateTime(2018, 8, 1)), isNotNull);
+      expect(localizations.narrowWeekdays, isNotNull);
+      expect(localizations.narrowWeekdays.length, 7);
+      expect(localizations.formatDecimal(123), isNotNull);
+      expect(localizations.formatTimeOfDay(const TimeOfDay(hour: 10, minute: 0)), isNotNull);
     });
   }
 
   testWidgets('spot check selectedRowCount translations', (WidgetTester tester) async {
-    MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', ''));
+    MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en'));
     expect(localizations.selectedRowCountTitle(0), 'No items selected');
     expect(localizations.selectedRowCountTitle(1), '1 item selected');
     expect(localizations.selectedRowCountTitle(2), '2 items selected');
@@ -91,7 +102,7 @@ void main() {
     expect(localizations.selectedRowCountTitle(10019), '10,019 items selected');
     expect(localizations.selectedRowCountTitle(123456789), '123,456,789 items selected');
 
-    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('es', ''));
+    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('es'));
     expect(localizations.selectedRowCountTitle(0), 'No se han seleccionado elementos');
     expect(localizations.selectedRowCountTitle(1), '1 elemento seleccionado');
     expect(localizations.selectedRowCountTitle(2), '2 elementos seleccionados');
@@ -104,7 +115,7 @@ void main() {
     expect(localizations.selectedRowCountTitle(10019), '10.019 elementos seleccionados');
     expect(localizations.selectedRowCountTitle(123456789), '123.456.789 elementos seleccionados');
 
-    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('ro', ''));
+    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('ro'));
     expect(localizations.selectedRowCountTitle(0), 'Nu există elemente selectate');
     expect(localizations.selectedRowCountTitle(1), 'Un articol selectat');
     expect(localizations.selectedRowCountTitle(2), '2 articole selectate');
@@ -117,7 +128,7 @@ void main() {
     expect(localizations.selectedRowCountTitle(10019), '10.019 articole selectate');
     expect(localizations.selectedRowCountTitle(123456789), '123.456.789 de articole selectate');
 
-    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('km', ''));
+    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('km'));
     expect(localizations.selectedRowCountTitle(0), 'បាន​ជ្រើស​រើស​ធាតុ 0');
     expect(localizations.selectedRowCountTitle(1), 'បាន​ជ្រើស​រើស​ធាតុ 1');
     expect(localizations.selectedRowCountTitle(2), 'បាន​ជ្រើស​រើស​ធាតុ 2');
@@ -126,7 +137,7 @@ void main() {
   });
 
   testWidgets('spot check formatMediumDate(), formatFullDate() translations', (WidgetTester tester) async {
-    MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', ''));
+    MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en'));
     expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Thu, Jul 23');
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, July 23, 2015');
 
@@ -134,11 +145,11 @@ void main() {
     expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Thu 23 Jul');
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, 23 July 2015');
 
-    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('es', ''));
+    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('es'));
     expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'jue., 23 jul.');
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'jueves, 23 de julio de 2015');
 
-    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('de', ''));
+    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('de'));
     expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Do., 23. Juli');
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Donnerstag, 23. Juli 2015');
   });
