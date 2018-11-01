@@ -508,6 +508,7 @@ class DropdownButton<T> extends StatefulWidget {
     @required this.onChanged,
     this.elevation = 8,
     this.style,
+    this.icon = Icons.arrow_drop_down,
     this.iconSize = 24.0,
     this.isDense = false,
     this.isExpanded = false,
@@ -547,7 +548,12 @@ class DropdownButton<T> extends StatefulWidget {
   /// [ThemeData.textTheme] of the current [Theme].
   final TextStyle style;
 
-  /// The size to use for the drop-down button's down arrow icon button.
+  /// The asset to use for the drop-down button's icon.
+  ///
+  /// Defaults to [Icons.arrow_drop_down].
+  final IconData icon;
+
+  /// The size to use for the drop-down button's icon.
   ///
   /// Defaults to 24.0.
   final double iconSize;
@@ -662,7 +668,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     return math.max(_textStyle.fontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
-  Color get _downArrowColor {
+  Color get _iconColor {
     // These colors are not defined in the Material Design spec.
     if (_enabled) {
       if (Theme.of(context).brightness == Brightness.light) {
@@ -725,9 +731,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             widget.isExpanded ? Expanded(child: innerItemsWidget) : innerItemsWidget,
-            Icon(Icons.arrow_drop_down,
+            Icon(widget.icon,
               size: widget.iconSize,
-              color: _downArrowColor,
+              color: _iconColor,
             ),
           ],
         ),
