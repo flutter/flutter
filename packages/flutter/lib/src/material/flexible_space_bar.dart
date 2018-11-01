@@ -76,18 +76,18 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Used by [Scaffold] and [SliverAppBar].
   ///
-  /// [FlexibleSpaceBarSettings.toolbarOpacity] affects how transparent the text
-  /// within the toolbar appears.
+  /// `toolbarOpacity` affects how transparent the text within the toolbar
+  /// appears. `minExtent` sets the minimum height of the resulting
+  /// [FlexibleSpaceBar] when fully collapsed. `maxExtent` sets the maximum
+  /// height of the resulting [FlexibleSpaceBar] when fully expanded.
+  /// `currentExtent` sets the scale of the [FlexibleSpaceBar.background] and
+  /// [FlexibleSpaceBar.title] widgets of [FlexibleSpaceBar] upon
+  /// initialization.
   ///
-  /// [FlexibleSpaceBarSettings.minExtent] sets the
-  /// the minimum height of the resulting [FlexibleSpaceBar] when fully
-  /// collapsed.
+  /// See also:
   ///
-  /// [FlexibleSpaceBarSettings.maxExtent] sets the maximum height of
-  /// the resulting [FlexibleSpaceBar] when fully expanded.
-  ///
-  /// [FlexibleSpaceBarSettings.currentExtent] sets the height of the attached
-  /// [FlexibleSpaceBar] upon initialization.
+  ///   * [FlexibleSpaceBarSettings] which creates a settings object that can be
+  ///     used to specify these settings to a [FlexibleSpaceBar].
   static Widget createSettings({
     double toolbarOpacity,
     double minExtent,
