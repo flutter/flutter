@@ -27,14 +27,14 @@ class AsymmetricView extends StatelessWidget {
       return const <Container>[];
     }
 
-    /// This will return a list of columns. It will oscillate between the two
-    /// kinds of columns. Even cases of the index (0, 2, 4, etc) will be
-    /// TwoProductCardColumn and the odd cases will be OneProductCardColumn.
-    ///
-    /// Each pair of columns will advance us 3 products forward (2 + 1). That's
-    /// some kinda awkward math so we use _evenCasesIndex and _oddCasesIndex as
-    /// helpers for creating the index of the product list that will correspond
-    /// to the index of the list of columns.
+    // This will return a list of columns. It will oscillate between the two
+    // kinds of columns. Even cases of the index (0, 2, 4, etc) will be
+    // TwoProductCardColumn and the odd cases will be OneProductCardColumn.
+    //
+    // Each pair of columns will advance us 3 products forward (2 + 1). That's
+    // some kinda awkward math so we use _evenCasesIndex and _oddCasesIndex as
+    // helpers for creating the index of the product list that will correspond
+    // to the index of the list of columns.
     return List<Container>.generate(_listItemCount(products.length), (int index) {
       double width = .59 * MediaQuery.of(context).size.width;
       Widget column;
@@ -65,10 +65,10 @@ class AsymmetricView extends StatelessWidget {
   }
 
   int _evenCasesIndex(int input) {
-    /// The operator ~/ is a cool one. It's the truncating division operator. It
-    /// divides the number and if there's a remainder / decimal, it cuts it off.
-    /// This is like dividing and then casting the result to int. Also, it's
-    /// functionally equivalent to floor() in this case.
+    // The operator ~/ is a cool one. It's the truncating division operator. It
+    // divides the number and if there's a remainder / decimal, it cuts it off.
+    // This is like dividing and then casting the result to int. Also, it's
+    // functionally equivalent to floor() in this case.
     return input ~/ 2 * 3;
   }
 
