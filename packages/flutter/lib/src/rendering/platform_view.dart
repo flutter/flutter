@@ -448,6 +448,7 @@ class _MotionEventsDispatcher {
     final int numPointers = pointers.length;
 
     // This value must match the value in engine's FlutterView.java.
+    // This flag indicates whether the original Android pointer events were batched together.
     const int kPointerDataFlagBatched = 1;
 
     // Android MotionEvent objects can batch information on multiple pointers.
