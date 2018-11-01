@@ -110,7 +110,7 @@ void main() {
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when homebrew not installed', () async {
+    testUsingContext('Emits installed status when homebrew not installed, but not needed', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
@@ -119,7 +119,23 @@ void main() {
       when(xcode.isSimctlInstalled).thenReturn(true);
       final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget(hasHomebrew: false);
       final ValidationResult result = await workflow.validate();
-      expect(result.type, ValidationType.partial);
+      expect(result.type, ValidationType.installed);
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => iMobileDevice,
+      Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
+    });
+
+    testUsingContext('Emits installed status when homebrew not installed, but not needed', () async {
+      when(xcode.isInstalled).thenReturn(true);
+      when(xcode.versionText)
+          .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
+      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(xcode.eulaSigned).thenReturn(true);
+      when(xcode.isSimctlInstalled).thenReturn(true);
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget(hasHomebrew: false);
+      final ValidationResult result = await workflow.validate();
+      expect(result.type, ValidationType.installed);
     }, overrides: <Type, Generator>{
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
@@ -317,8 +333,8 @@ class IOSWorkflowTestTarget extends IOSValidator {
     String iosDeployVersionText = '1.9.2',
     bool hasIDeviceInstaller = true,
   }) : hasIosDeploy = Future<bool>.value(hasIosDeploy),
-       iosDeployVersionText = Future<String>.value(iosDeployVersionText),
-       hasIDeviceInstaller = Future<bool>.value(hasIDeviceInstaller);
+  iosDeployVersionText = Future<String>.value(iosDeployVersionText),
+  hasIDeviceInstaller = Future<bool>.value(hasIDeviceInstaller);
 
   @override
   final bool hasHomebrew;

@@ -125,8 +125,16 @@ class IOSValidator extends DoctorValidator {
       }
     }
 
-    // brew installed
-    if (hasHomebrew) {
+    bool requireHomeBrew = true;
+
+    if (iMobileDevice.isInstalled && await iMobileDevice.isWorking && await hasIDeviceInstaller &&
+        await hasIosDeploy && await _iosDeployIsInstalledAndMeetsVersionCheck &&
+        await cocoaPods.evaluateCocoaPodsInstallation == CocoaPodsStatus.recommended && await cocoaPods.isCocoaPodsInitialized) {
+          requireHomeBrew = false;
+    }
+
+    // brew installed or, if CocoaPods, IDeviceInstaller and Ios-Deploy are installed and working fine, we do not need Homebrew at all.
+    if (!requireHomeBrew || hasHomebrew) {
       brewStatus = ValidationType.installed;
 
       if (!iMobileDevice.isInstalled) {
@@ -174,7 +182,6 @@ class IOSValidator extends DoctorValidator {
           ));
         }
       }
-
     } else {
       brewStatus = ValidationType.missing;
       messages.add(ValidationMessage.error(
