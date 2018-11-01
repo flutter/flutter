@@ -243,10 +243,10 @@ void updateLocalProperties({
   changeIfNecessary('flutter.sdk', escapePath(Cache.flutterRoot));
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
-    final String buildName = buildInfo?.buildName ?? manifest.buildName;
+    final String buildName = buildInfo.buildName ?? manifest.buildName;
     if (buildName != null)
       changeIfNecessary('flutter.versionName', buildName);
-    final int buildNumber = buildInfo?.buildNumber ?? manifest.buildNumber;
+    final int buildNumber = buildInfo.buildNumber ?? manifest.buildNumber;
     if (buildNumber != null)
       changeIfNecessary('flutter.versionCode', '$buildNumber');
   }
