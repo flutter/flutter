@@ -46,7 +46,7 @@ import 'framework.dart';
 ///
 /// When the inherited model is rebuilt the [updateShouldNotify] and
 /// [updateShouldNotifyDependent] methods are used to decide what
-/// should be rebuilt.  If [updateShouldNotify] returns true, then the
+/// should be rebuilt. If [updateShouldNotify] returns true, then the
 /// inherited model's [updateShouldNotifyDependent] method is tested for
 /// each dependent and the set of aspect objects it depends on.
 /// The [updateShouldNotifyDependent] method must compare the set of aspect

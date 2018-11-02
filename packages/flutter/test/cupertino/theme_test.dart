@@ -146,7 +146,7 @@ void main() {
   testWidgets(
     'copyWith works',
     (WidgetTester tester) async {
-      final CupertinoThemeData originalTheme = CupertinoThemeData(
+      const CupertinoThemeData originalTheme = CupertinoThemeData(
         brightness: Brightness.dark,
       );
 

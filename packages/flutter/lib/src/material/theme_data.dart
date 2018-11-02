@@ -635,6 +635,16 @@ class ThemeData extends Diagnosticable {
   /// [primaryTextTheme], and [accentTextTheme].
   final Typography typography;
 
+  /// Components of the [CupertinoThemeData] to override from the Material
+  /// [ThemeData] adaptation.
+  ///
+  /// By default, [cupertinoOverrideTheme] is null and Cupertino widgets
+  /// descendent to the Material [Theme] will adhere to a [CupertinoTheme]
+  /// derived from the Material [ThemeData]. e.g. [ThemeData]'s [ColorTheme]
+  /// will also inform the [CupertinoThemeData]'s `primaryColor` etc.
+  ///
+  /// This cascading effect for individual attributes of the [CupertinoThemeData]
+  /// can be overridden using attributes of this [cupertinoOverrideTheme].
   final CupertinoThemeData cupertinoOverrideTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
@@ -1036,12 +1046,41 @@ class ThemeData extends Diagnosticable {
   }
 }
 
+/// A [CupertinoThemeData] that defers unspecified theme attributes to an
+/// upstream Material [ThemeData].
+///
+/// This type of [CupertinoThemeData] is used when using a Material [Theme]
+/// instead of a [CupertinoTheme] to harmonize Cupertino widgets and an ancestor
+/// Material [Theme]'s [ThemeData].
+///
+/// For a [CupertinoThemeData] whose unspecified attributes default to iOS
+/// defaults rather than to an ancestor Material [ThemeData], insert another
+/// [CupertinoTheme] as the `child` of the Material [Theme].
+///
+/// See also:
+///
+///  * [CupertinoThemeData], whose null constructor parameters default to
+///    reasonable iOS styling defaults rather than harmonizing with a Material
+///    theme.
+///  * [Theme], widget which inserts a [CupertinoTheme] with this
+///    [MaterialBasedCupertinoThemeData].
+// This class subclasses CupertinoThemeData rather than composes one because it
+// _is_ a CupertinoThemeData with partially altered behavior. e.g. its textTheme
+// is from the superclass and based on the primaryColor but the primaryColor
+// comes from the Material theme unless overridden.
 @immutable
 class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
+  /// Create a [MaterialBasedCupertinoThemeData] based on a Material [ThemeData]
+  /// and its `cupertinoOverrideTheme`.
+  ///
+  /// The [materialTheme] parameter must not be null.
   MaterialBasedCupertinoThemeData({
     @required ThemeData materialTheme,
   }) : assert(materialTheme != null),
        _materialTheme = materialTheme,
+       // Pass all values to the superclass so Material-agnostic properties
+       // like barBackgroundColor can still behave like a normal
+       // CupertinoThemeData.
        super.raw(
          materialTheme.cupertinoOverrideTheme?.brightness,
          materialTheme.cupertinoOverrideTheme?.primaryColor,
@@ -1069,6 +1108,18 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   // Copy with shouldn't change the base Material ThemeData. To change the
   // base Material ThemeData, create a new Material Theme and use copyWith on
   // the Material ThemeData instead.
+  /// Copies the [ThemeData]'s `cupertinoOverrideTheme`.
+  ///
+  /// Only the specified override attributes of the [ThemeData]'s
+  /// `cupertinoOverrideTheme` and the newly specified parameters are in the
+  /// returned [CupertinoThemeData]. No derived attributes from iOS defaults or
+  /// from cascaded Material theme attributes are copied.
+  ///
+  /// [MaterialBasedCupertinoThemeData.copyWith] cannot change the base
+  /// Material [ThemeData]. To change the base Material [ThemeData], create a
+  /// new Material [Theme] and use `copyWith` on the Material [ThemeData]
+  /// instead.
+  @override
   CupertinoThemeData copyWith({
     Brightness brightness,
     Color primaryColor,
