@@ -82,9 +82,6 @@ class TweenSequence<T> extends Animatable<T> {
     assert(false, 'TweenSequence.evaluate() could not find a interval for $t');
     return null;
   }
-
-  @override
-  String toString() => 'TweenSequence(${_items.length} items)';
 }
 
 /// A simple holder for one element of a [TweenSequence].
