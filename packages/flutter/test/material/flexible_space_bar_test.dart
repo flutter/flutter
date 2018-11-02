@@ -107,7 +107,7 @@ void main() {
     TextStyle effectiveStyle = textWidget.style;
     effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
     expect(effectiveStyle.color.alpha, 128); // Which is alpha of .5
-    
+
     // We drag up to fully collapse the space bar.
     await tester.drag(find.byType(Container).first, const Offset(0, -400.0));
     await tester.pumpAndSettle();
