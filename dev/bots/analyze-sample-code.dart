@@ -209,7 +209,7 @@ class SampleChecker {
       errors = await _analyze(tempDir, sections);
     } finally {
       if (errors.isNotEmpty) {
-        print('Kept temporary directory ${tempDir.path} because there were errors (see above).');
+        print('Kept temporary directory ${tempDir.path} because there were errors.');
         for (String filePath in errors.keys) {
           print('-------8< ${path.basename(filePath)} -------');
           errors[filePath].forEach(print);

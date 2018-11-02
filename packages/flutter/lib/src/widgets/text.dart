@@ -8,6 +8,9 @@ import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
+// Examples can assume:
+// String _name;
+
 /// The text style to apply to descendant [Text] widgets without explicit style.
 class DefaultTextStyle extends InheritedWidget {
   /// Creates a default text style for the given subtree.
