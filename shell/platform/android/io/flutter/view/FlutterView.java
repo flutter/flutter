@@ -447,8 +447,8 @@ public class FlutterView extends SurfaceView
         }
     }
 
-    private void addPointerForIndex(MotionEvent event, int pointerIndex, ByteBuffer packet) {
-        int pointerChange = getPointerChangeForAction(event.getActionMasked());
+    private void addPointerForIndex(MotionEvent event, int pointerIndex, int pointerChange,
+                                    int pointerData, ByteBuffer packet) {
         if (pointerChange == -1) {
             return;
         }
@@ -503,6 +503,8 @@ public class FlutterView extends SurfaceView
         } else {
             packet.putDouble(0.0); // tilt
         }
+
+        packet.putLong(pointerData); // platformData
     }
 
     @Override
@@ -521,8 +523,12 @@ public class FlutterView extends SurfaceView
         }
 
         // These values must match the unpacking code in hooks.dart.
-        final int kPointerDataFieldCount = 20;
+        final int kPointerDataFieldCount = 21;
         final int kBytePerField = 8;
+
+        // This value must match the value in framework's platform_view.dart.
+        // This flag indicates whether the original Android pointer events were batched together.
+        final int kPointerDataFlagBatched = 1;
 
         int pointerCount = event.getPointerCount();
 
@@ -530,17 +536,31 @@ public class FlutterView extends SurfaceView
         packet.order(ByteOrder.LITTLE_ENDIAN);
 
         int maskedAction = event.getActionMasked();
-        // ACTION_UP, ACTION_POINTER_UP, ACTION_DOWN, and ACTION_POINTER_DOWN
-        // only apply to a single pointer, other events apply to all pointers.
-        if (maskedAction == MotionEvent.ACTION_UP || maskedAction == MotionEvent.ACTION_POINTER_UP
-                || maskedAction == MotionEvent.ACTION_DOWN || maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
-            addPointerForIndex(event, event.getActionIndex(), packet);
+        int pointerChange = getPointerChangeForAction(event.getActionMasked());
+        if (maskedAction == MotionEvent.ACTION_DOWN || maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
+            // ACTION_DOWN and ACTION_POINTER_DOWN always apply to a single pointer only.
+            addPointerForIndex(event, event.getActionIndex(), pointerChange, 0, packet);
+        } else if (maskedAction == MotionEvent.ACTION_UP || maskedAction == MotionEvent.ACTION_POINTER_UP) {
+            // ACTION_UP and ACTION_POINTER_UP may contain position updates for other pointers.
+            // We are converting these updates to move events here in order to preserve this data.
+            // We also mark these events with a flag in order to help the framework reassemble
+            // the original Android event later, should it need to forward it to a PlatformView.
+            for (int p = 0; p < pointerCount; p++) {
+                if (p != event.getActionIndex()) {
+                    if (event.getToolType(p) == MotionEvent.TOOL_TYPE_FINGER) {
+                        addPointerForIndex(event, p, kPointerChangeMove, kPointerDataFlagBatched, packet);
+                    }
+                }
+            }
+            // It's important that we're sending the UP event last. This allows PlatformView
+            // to correctly batch everything back into the original Android event if needed.
+            addPointerForIndex(event, event.getActionIndex(), pointerChange, 0, packet);
         } else {
             // ACTION_MOVE may not actually mean all pointers have moved
             // but it's the responsibility of a later part of the system to
             // ignore 0-deltas if desired.
             for (int p = 0; p < pointerCount; p++) {
-                addPointerForIndex(event, p, packet);
+                addPointerForIndex(event, p, pointerChange, 0, packet);
             }
         }
 

@@ -50,6 +50,7 @@ struct alignas(8) PointerData {
   double radius_max;
   double orientation;
   double tilt;
+  int64_t platformData;
 
   void Clear();
 };
