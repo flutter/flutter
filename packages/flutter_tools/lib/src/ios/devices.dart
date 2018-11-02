@@ -153,8 +153,8 @@ class IOSDevice extends Device {
         final String deviceName = await iMobileDevice.getInfoForDevice(id, 'DeviceName');
         final String sdkVersion = await iMobileDevice.getInfoForDevice(id, 'ProductVersion');
         devices.add(IOSDevice(id, name: deviceName, sdkVersion: sdkVersion));
-      } catch (_) {
-        // Unable to get device info. Possibly a network device.
+      } on IOSDeviceNotFoundError catch (_) {
+        // Unable to find device with given udid. Possibly a network device.
       }
     }
     return devices;
