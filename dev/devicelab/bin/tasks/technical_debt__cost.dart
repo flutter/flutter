@@ -95,12 +95,12 @@ Future<void> main() async {
       <String, dynamic>{
         _kCostBenchmarkKey: await findCostsForRepo(),
         _kNumberOfDependenciesKey: await countDependencies(),
-	_kNumberOfConsumerDependenciesKey: await countConsumerDependencies(),
+        _kNumberOfConsumerDependenciesKey: await countConsumerDependencies(),
       },
       benchmarkScoreKeys: <String>[
         _kCostBenchmarkKey,
         _kNumberOfDependenciesKey,
-	_kNumberOfConsumerDependenciesKey,
+        _kNumberOfConsumerDependenciesKey,
       ],
     );
   });
