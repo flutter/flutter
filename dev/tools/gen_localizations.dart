@@ -109,7 +109,13 @@ String generateString(String s) {
 
 /// Simple data class to hold parsed locale. Does not promise validity of any data.
 class Locale {
-  Locale({this.languageCode, this.scriptCode, this.countryCode, this.length, this.origString}) {}
+  Locale({
+    this.languageCode,
+    this.scriptCode,
+    this.countryCode,
+    this.length,
+    this.origString
+  });
 
   String languageCode;
   String scriptCode;
@@ -156,7 +162,7 @@ String generateTranslationBundles() {
   final Map<String, Set<String>> languageAndScriptToCountryCodes = <String, Set<String>>{};
   final Set<String> allResourceIdentifiers = Set<String>();
   for (String localeString in localeToResources.keys.toList()..sort()) {
-    Locale locale = parseLocaleString(localeString);
+    final Locale locale = parseLocaleString(localeString);
     if (locale.scriptCode != null) {
       languageToScriptCodes[locale.languageCode] ??= Set<String>();
       languageToScriptCodes[locale.languageCode].add(locale.scriptCode);
@@ -253,7 +259,6 @@ String generateTranslationBundles() {
           final String camelCaseLocaleName = camelCase(localeName);
           final Map<String, String> localeResources = localeToResources[localeName];
           final String localeClassName = 'MaterialLocalization$camelCaseLocaleName';
-          final Locale locale = parseLocaleString(localeName);
           final String constructor = generateConstructor(localeClassName, localeName);
           output.writeln('');
           output.writeln('/// The translations for ${describeLocale(localeName)} (`$localeName`).');
@@ -296,7 +301,7 @@ String generateTranslationBundles() {
        output.writeln('}');
       }
     }
-    String scriptCodeMessage = scriptCodeCount == 0 ? '' : ' and $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's');
+    final String scriptCodeMessage = scriptCodeCount == 0 ? '' : ' and $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's');
     if (countryCodeCount == 0) {
       if (scriptCodeCount == 0)
         supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)}');
@@ -389,7 +394,7 @@ GlobalMaterialLocalizations getTranslation(
           output.writeln('''
           switch (locale.countryCode) {''');
           for (String localeName in languageToLocales[language]) {
-            Locale locale = parseLocaleString(localeName);
+            final Locale locale = parseLocaleString(localeName);
             if (locale.countryCode == null)
               continue;
             else
@@ -419,7 +424,7 @@ GlobalMaterialLocalizations getTranslation(
           // Not Explicitly defined, fallback to first locale with the same language and
           // script:
           for (String localeName in languageToLocales[language]) {
-            Locale locale = parseLocaleString(localeName);
+            final Locale locale = parseLocaleString(localeName);
             if (locale.scriptCode != scriptCode)
               continue;
             if (languageAndScriptToCountryCodes.containsKey(language + '_' + scriptCode)) {
@@ -439,7 +444,7 @@ GlobalMaterialLocalizations getTranslation(
       output.writeln('''
       switch (locale.countryCode) {''');
         for (String localeName in languageToLocales[language]) {
-          Locale locale = parseLocaleString(localeName);
+          final Locale locale = parseLocaleString(localeName);
           if (localeName == language)
             continue;
           assert(localeName.contains('_'));
