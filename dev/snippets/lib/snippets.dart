@@ -55,9 +55,7 @@ class SnippetGenerator {
   /// "description" injection into a comment. Only used for
   /// [SnippetType.application] snippets.
   String interpolateTemplate(List<_ComponentTuple> injections, String template) {
-    final String injectionMatches =
-        injections.map<String>((_ComponentTuple tuple) => RegExp.escape(tuple.name)).join('|');
-    final RegExp moustacheRegExp = RegExp('{{($injectionMatches)}}');
+    final RegExp moustacheRegExp = RegExp('{{([^}]+)}}');
     return template.replaceAllMapped(moustacheRegExp, (Match match) {
       if (match[1] == 'description') {
         // Place the description into a comment.
@@ -77,9 +75,13 @@ class SnippetGenerator {
         }
         return description.join('\n').trim();
       } else {
+        // If the match isn't found in the injections, then just remove the
+        // moustache reference, since we want to allow the sections to be
+        // "optional" in the input: users shouldn't be forced to add an empty
+        // "```dart preamble" section if that section would be empty.
         return injections
-            .firstWhere((_ComponentTuple tuple) => tuple.name == match[1])
-            .mergedContent;
+            .firstWhere((_ComponentTuple tuple) => tuple.name == match[1], orElse: () => null)
+            ?.mergedContent ?? '';
       }
     }).trim();
   }

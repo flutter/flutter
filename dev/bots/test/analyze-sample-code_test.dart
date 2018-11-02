@@ -8,18 +8,19 @@ import 'dart:io';
 import 'common.dart';
 
 void main() {
-  test('analyze-sample-code', () async {
-    final Process process = await Process.start(
+  test('analyze-sample-code', () {
+    final ProcessResult process = Process.runSync(
       '../../bin/cache/dart-sdk/bin/dart',
       <String>['analyze-sample-code.dart', 'test/analyze-sample-code-test-input'],
     );
-    final List<String> stdout = await process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList();
-    final List<String> stderr = await process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList();
-    final Match line = RegExp(r'^(.+)/main\.dart:[0-9]+:[0-9]+: .+$').matchAsPrefix(stdout[1]);
-    expect(line, isNot(isNull));
-    final String directory = line.group(1);
-    Directory(directory).deleteSync(recursive: true);
-    expect(await process.exitCode, 1);
+    final List<String> stdout = process.stdout.toString().split('\n');
+    final List<String> stderr = process.stderr.toString().split('\n');
+
+    final Match line = RegExp(r'Kept temporary directory (.+?) because there were errors\.', multiLine: true).firstMatch(process.stdout);
+    expect(line, isNotNull);
+    final String directory = line[1];
+    Directory(directory).deleteSync(recursive: true); // Clean up the messy temp dir.
+    expect(process.exitCode, isNot(equals(0)));
     expect(stderr, isEmpty);
     expect(stdout, <String>[
       'Found 2 sample code sections.',
@@ -65,5 +66,5 @@ void main() {
       '    24: ;',
       '-------8<-------',
     ]);
-  }, skip: !Platform.isLinux);
+  }, skip: Platform.isWindows);
 }
