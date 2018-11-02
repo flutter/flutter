@@ -72,7 +72,7 @@ class IOSValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
-    ValidationType packageManagerStatus = ValidationType.missing;
+    ValidationType packageManagerStatus = ValidationType.installed;
     String xcodeVersionInfo;
 
     if (xcode.isInstalled) {
@@ -125,14 +125,10 @@ class IOSValidator extends DoctorValidator {
       }
     }
 
-    final bool iHasIosDeploy = await hasIosDeploy;
-
-    packageManagerStatus = ValidationType.installed;
-
     if (!iMobileDevice.isInstalled) {
       packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(
-        'libimobiledevice and ideviceinstaller are not installed. To install with Homebrew, run:\n'
+        'libimobiledevice and ideviceinstaller are not installed. To install with Brew, run:\n'
         '  brew install --HEAD libimobiledevice\n'
         '  brew install ideviceinstaller'
       ));
@@ -141,7 +137,7 @@ class IOSValidator extends DoctorValidator {
       messages.add(ValidationMessage.error(
         'Verify that all connected devices have been paired with this computer in Xcode.\n'
         'If all devices have been paired, libimobiledevice and ideviceinstaller may require updating.\n'
-        'To update with Homebrew, run:\n'
+        'To update with Brew, run:\n'
         '  brew uninstall --ignore-dependencies libimobiledevice\n'
         '  brew install --HEAD libimobiledevice\n'
         '  brew install ideviceinstaller'
@@ -150,27 +146,29 @@ class IOSValidator extends DoctorValidator {
       packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(
         'ideviceinstaller is not installed; this is used to discover connected iOS devices.\n'
-        'To install with Homebrew, run:\n'
+        'To install with Brew, run:\n'
         '  brew install --HEAD libimobiledevice\n'
         '  brew install ideviceinstaller'
       ));
     }
 
+    final bool iHasIosDeploy = await hasIosDeploy;
+
     // Check ios-deploy is installed at meets version requirements.
     if (iHasIosDeploy) {
       messages.add(
-          ValidationMessage('ios-deploy ${await iosDeployVersionText}'));
+        ValidationMessage('ios-deploy ${await iosDeployVersionText}'));
     }
     if (!await _iosDeployIsInstalledAndMeetsVersionCheck) {
       packageManagerStatus = ValidationType.partial;
       if (iHasIosDeploy) {
         messages.add(ValidationMessage.error(
-          'ios-deploy out of date ($iosDeployMinimumVersion is required). To upgrade with Homebrew:\n'
+          'ios-deploy out of date ($iosDeployMinimumVersion is required). To upgrade with Brew:\n'
           '  brew upgrade ios-deploy'
         ));
       } else {
         messages.add(ValidationMessage.error(
-          'ios-deploy not installed. To install with Homebrew:\n'
+          'ios-deploy not installed. To install with Brew:\n'
           '  brew install ios-deploy'
         ));
       }
@@ -180,7 +178,7 @@ class IOSValidator extends DoctorValidator {
     if (packageManagerStatus == ValidationType.partial && !hasHomebrew) {
       packageManagerStatus = ValidationType.missing;
       messages.add(ValidationMessage.error(
-          'If you do not already have a package manager, Homebrew can be used to install tools for iOS device development.\n'
+          'Brew can be used to install tools for iOS device development.\n'
               'Download brew at https://brew.sh/.'
       ));
     }
