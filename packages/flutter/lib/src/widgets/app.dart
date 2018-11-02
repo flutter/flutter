@@ -802,7 +802,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         if (unsupportedType.toString() == 'CupertinoLocalizations')
           continue;
         message.writeln(
-          '> A delegate that supports $unsupportedType was not found.'
+          '> A $unsupportedType delegate that supports the $appLocale locale was not found.'
         );
       }
       message.writeln(
