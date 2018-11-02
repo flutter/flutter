@@ -1105,9 +1105,6 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   @override
   Color get scaffoldBackgroundColor => _materialTheme.cupertinoOverrideTheme?.scaffoldBackgroundColor ?? _materialTheme.scaffoldBackgroundColor;
 
-  // Copy with shouldn't change the base Material ThemeData. To change the
-  // base Material ThemeData, create a new Material Theme and use copyWith on
-  // the Material ThemeData instead.
   /// Copies the [ThemeData]'s `cupertinoOverrideTheme`.
   ///
   /// Only the specified override attributes of the [ThemeData]'s

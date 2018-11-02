@@ -106,6 +106,10 @@ class CupertinoApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.home}
   final Widget home;
 
+  /// The top-level [CupertinoTheme] styling.
+  ///
+  /// A null [theme] or unspecified attributes in a [theme] default to iOS
+  /// defaults.
   final CupertinoThemeData theme;
 
   /// The application's top-level routing table.

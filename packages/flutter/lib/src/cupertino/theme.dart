@@ -284,11 +284,21 @@ class CupertinoThemeData extends Diagnosticable {
   }
 
   final Color _tableBackgroundColor;
+  /// Background color of a table view behind cell groups.
+  ///
+  /// Defaults to a light or dark gray on the [brightness] if unspecified,
+  /// including [brightness] from a Material [ThemeData] if coming from a
+  /// Material [Theme].
+  ///
+  /// Reading this property from [CupertinoTheme.of] will create a dependency
+  /// from the [BuildContext] to changes in this property.
   Color get tableBackgroundColor {
     return _tableBackgroundColor ??
         (_isLight ? CupertinoColors.extraLightBackgroundGray : CupertinoColors.darkBackgroundGray);
   }
 
+  /// Return an instance of the [CupertinoThemeData] whose property getters
+  /// only return the construction time specifications with no derived values.
   CupertinoThemeData raw() {
     return _RawCupertinoThemeData(
       _brightness,
@@ -301,6 +311,13 @@ class CupertinoThemeData extends Diagnosticable {
     );
   }
 
+  /// Create a copy of [CupertinoThemeData] with specified attributes overridden.
+  ///
+  /// Only the current instance's specified attributes are copied instead of
+  /// derived values. For instance, if the current [primaryColor] is implied
+  /// to be [CupertinoColors.activeOrange] due to the current [brightness],
+  /// copying with a different [brightness] will also change the copy's
+  /// derived [primaryColor].
   CupertinoThemeData copyWith({
     Brightness brightness,
     Color primaryColor,

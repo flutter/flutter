@@ -38,24 +38,6 @@ const TextStyle _kDefaultActionTextStyle = TextStyle(
 );
 
 // Values derived from https://developer.apple.com/design/resources/.
-// Color comes from the primary color.
-const TextStyle _kDefaultActionSheetTextActionStyle = TextStyle(
-  inherit: false,
-  fontFamily: '.SF Pro Display',
-  fontSize: 20.0,
-  letterSpacing: 0.38,
-);
-
-// Values derived from https://developer.apple.com/design/resources/.
-const TextStyle _kDefaultActionSheetTextContentStyle = TextStyle(
-  inherit: false,
-  fontFamily: '.SF Pro Text',
-  fontSize: 13.0,
-  letterSpacing: -0.08,
-  color: Color(0xFF8F8F8F),
-);
-
-// Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultTabLabelTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Text',
@@ -100,8 +82,17 @@ const TextStyle _kDefaultLargeTitleDarkTextStyle = TextStyle(
   color: CupertinoColors.white,
 );
 
+/// Cupertino typography theme in a [CupertinoThemeData].
 @immutable
 class CupertinoTextTheme extends Diagnosticable {
+  /// Create a [CupertinoTextTheme].
+  ///
+  /// The [primaryColor] and [isLight] parameters are only used to derive
+  /// text style defaults when unspecified and themselves default to
+  /// [CupertinoColors.activeBlue] and [true] when unspecified.
+  ///
+  /// Other [TextStyle] parameters default to default iOS text styles based on
+  /// the present [primaryColor] and [isLight] when unspecified.
   const CupertinoTextTheme({
     Color primaryColor,
     bool isLight,
@@ -124,9 +115,11 @@ class CupertinoTextTheme extends Diagnosticable {
   final bool _isLight;
 
   final TextStyle _textStyle;
+  /// Typography of general text content for Cupertino widgets.
   TextStyle get textStyle => _textStyle ?? (_isLight ? _kDefaultLightTextStyle : _kDefaultDarkTextStyle);
 
   final TextStyle _actionTextStyle;
+  /// Typography of interactive text content such as text in a button without background.
   TextStyle get actionTextStyle {
     return _actionTextStyle ?? _kDefaultActionTextStyle.copyWith(
       color: _primaryColor,
@@ -134,27 +127,33 @@ class CupertinoTextTheme extends Diagnosticable {
   }
 
   final TextStyle _tabLabelTextStyle;
+  /// Typography of unselected tabs.
   TextStyle get tabLabelTextStyle => _tabLabelTextStyle ?? _kDefaultTabLabelTextStyle;
 
   final TextStyle _navTitleTextStyle;
+  /// Typography of titles in standard navigation bars.
   TextStyle get navTitleTextStyle {
     return _navTitleTextStyle ??
         (_isLight ? _kDefaultMiddleTitleLightTextStyle : _kDefaultMiddleTitleDarkTextStyle);
   }
 
   final TextStyle _navLargeTitleTextStyle;
+  /// Typography of large titles in sliver navigation bars.
   TextStyle get navLargeTitleTextStyle {
     return _navLargeTitleTextStyle ??
         (_isLight ? _kDefaultLargeTitleLightTextStyle : _kDefaultLargeTitleDarkTextStyle);
   }
 
   final TextStyle _navActionTextStyle;
+  /// Typography of interative text content in navigation bars.
   TextStyle get navActionTextStyle {
     return _navActionTextStyle ?? _kDefaultActionTextStyle.copyWith(
       color: _primaryColor,
     );
   }
 
+  /// Returns a copy of the current [CupertinoTextTheme] instance with
+  /// specified overrides.
   CupertinoTextTheme copyWith({
     Color primaryColor,
     bool isLight,

@@ -415,11 +415,13 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     );
 
     if (!widget.transitionBetweenRoutes || !_isTransitionable(context)) {
-      return _wrapActiveColor(widget.actionsForegroundColor, context, navBar);
+      // Lint ignore to maintain backward compatibility.
+      return _wrapActiveColor(widget.actionsForegroundColor, context, navBar); // ignore: deprecated_member_use
     }
 
     return _wrapActiveColor(
-      widget.actionsForegroundColor,
+      // Lint ignore to maintain backward compatibility.
+      widget.actionsForegroundColor, // ignore: deprecated_member_use
       context,
       Builder(
         // Get the context that might have a possibly changed CupertinoTheme.
@@ -624,7 +626,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
   @override
   Widget build(BuildContext context) {
-    final Color actionsForegroundColor = widget.actionsForegroundColor ?? CupertinoTheme.of(context).primaryColor;
+    // Lint ignore to maintain backward compatibility.
+    final Color actionsForegroundColor = widget.actionsForegroundColor ?? CupertinoTheme.of(context).primaryColor; // ignore: deprecated_member_use
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
@@ -641,7 +644,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     );
 
     return _wrapActiveColor(
-      widget.actionsForegroundColor,
+      // Lint ignore to maintain backward compatibility.
+      widget.actionsForegroundColor, // ignore: deprecated_member_use
       context,
       SliverPersistentHeader(
         pinned: true, // iOS navigation bars are always pinned.
