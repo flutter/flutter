@@ -1202,6 +1202,34 @@ void main() {
     expect(find.text('pt_PT'), findsOneWidget);
   });
 
+  // Simulates a Chinese-default app that supports english in Canada but not
+  // French. French-Canadian users should get 'en_CA' instead of Chinese.
+  testWidgets('WidgetsApp Multilingual country', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildFrame(
+        supportedLocales: const <Locale>[
+          Locale('zh', 'CN'),
+          Locale('en', 'CA'),
+          Locale('en', 'US'),
+          Locale('en', 'AU'),
+          Locale('de', 'DE'),
+        ],
+        buildContent: (BuildContext context) {
+          final Locale locale = Localizations.localeOf(context);
+          return Text('$locale');
+        }
+      )
+    );
+
+    await tester.binding.setLocales(const <Locale>[
+      Locale.fromSubtags(languageCode: 'fr', countryCode: 'CA'),
+      Locale.fromSubtags(languageCode: 'fr'),]
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('en_CA'), findsOneWidget);
+  });
+
+
   testWidgets('WidgetsApp Common cases', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildFrame(
