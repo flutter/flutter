@@ -83,6 +83,21 @@ void main() {
       ProcessManager: () => processManager,
     });
 
+    testUsingContext('returns sdk is well formed', () {
+      sdkDir = MockAndroidSdk.createSdkDirectory(withAndroidN: false, withNdkSysroot: false, withSdkManager: false);
+      Config.instance.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      when(processManager.canRun(sdk.adbPath)).thenReturn(true);
+
+      final List<String> validationIssues = sdk.validateSdkWellFormed();
+      expect(validationIssues.first, 'what is this?');
+
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => processManager,
+    });
+
     testUsingContext('does not throw on sdkmanager version check failure', () {
       sdkDir = MockAndroidSdk.createSdkDirectory();
       Config.instance.setValue('android-sdk', sdkDir.path);

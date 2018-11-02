@@ -108,6 +108,78 @@ ro.build.version.codename=REL
 ''';
 }
 
+class MockBrokenAndroidSdk extends Mock implements AndroidSdk {
+  static Directory createSdkDirectory({
+    bool withAndroidN = false,
+    String withNdkDir,
+    bool withNdkSysroot = false,
+    bool withSdkManager = true,
+  }) {
+    final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
+
+    _createSdkFile(dir, 'platform-tools/adb');
+
+    _createSdkFile(dir, 'build-tools/19.1.0/aapt');
+    _createSdkFile(dir, 'build-tools/22.0.1/aapt');
+    _createSdkFile(dir, 'build-tools/23.0.2/aapt');
+    if (withAndroidN)
+      _createSdkFile(dir, 'build-tools/24.0.0-preview/aapt');
+
+    _createSdkFile(dir, 'platforms/android-22/android.jar');
+    _createSdkFile(dir, 'platforms/android-23/android.jar');
+    if (withAndroidN) {
+      _createSdkFile(dir, 'platforms/android-N/android.jar');
+      _createSdkFile(dir, 'platforms/android-N/build.prop', contents: _buildProp);
+    }
+
+    if (withSdkManager)
+      _createSdkFile(dir, 'tools/bin/sdkmanager');
+
+    if (withNdkDir != null) {
+      final String ndkCompiler = fs.path.join(
+        'ndk-bundle',
+        'toolchains',
+        'arm-linux-androideabi-4.9',
+        'prebuilt',
+        withNdkDir,
+        'bin',
+        'arm-linux-androideabi-gcc',
+      );
+      _createSdkFile(dir, ndkCompiler);
+    }
+    if (withNdkSysroot) {
+      final String armPlatform = fs.path.join(
+        'ndk-bundle',
+        'platforms',
+        'android-9',
+        'arch-arm',
+      );
+      _createDir(dir, armPlatform);
+    }
+
+    return dir;
+  }
+
+  static void _createSdkFile(Directory dir, String filePath, { String contents }) {
+    final File file = dir.childFile(filePath);
+    file.createSync(recursive: true);
+    if (contents != null) {
+      file.writeAsStringSync(contents, flush: true);
+    }
+  }
+
+  static void _createDir(Directory dir, String path) {
+    final Directory directory = fs.directory(fs.path.join(dir.path, path));
+    directory.createSync(recursive: true);
+  }
+
+  static const String _buildProp = r'''
+ro.build.version.incremental=1624448
+ro.build.version.sdk=24
+ro.build.version.codename=REL
+''';
+}
+
 /// A strategy for creating Process objects from a list of commands.
 typedef ProcessFactory = Process Function(List<String> command);
 
