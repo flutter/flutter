@@ -219,7 +219,9 @@ String generateTranslationBundles() {
     }
     output.writeln('}');
     int countryCodeCount = 0;
+    int scriptCodeCount = 0;
     if (languageToScriptCodes.containsKey(languageName)) {
+      scriptCodeCount = languageToScriptCodes[languageName].length;
       // Language has scriptCodes, so we need to properly fallback countries to corresponding
       // script default values before language default values.
       for (String scriptCode in languageToScriptCodes[languageName]) {
@@ -270,7 +272,6 @@ String generateTranslationBundles() {
     } else {
       // No scriptCode. Here, we do not compare against script default (because it
       // doesn't exist).
-      int countryCodeCount = 0;
       final List<String> localeCodes = languageToLocales[languageName]..sort();
       for (String localeName in localeCodes) {
         if (localeName == languageName)
@@ -295,12 +296,17 @@ String generateTranslationBundles() {
        output.writeln('}');
       }
     }
+    String scriptCodeMessage = scriptCodeCount == 0 ? '' : ' and $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's');
     if (countryCodeCount == 0) {
-      supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)}');
+      if (scriptCodeCount == 0)
+        supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)}');
+      else
+        supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's') + ')');
+
     } else if (countryCodeCount == 1) {
-      supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus one country variation)');
+      supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus one country variation$scriptCodeMessage)');
     } else {
-      supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus $countryCodeCount country variations)');
+      supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus $countryCodeCount country variations$scriptCodeMessage)');
     }
   }
 

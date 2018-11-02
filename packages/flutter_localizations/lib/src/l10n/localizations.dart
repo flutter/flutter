@@ -12020,15 +12020,15 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `ca` - Catalan Valencian
 ///  * `cs` - Czech
 ///  * `da` - Danish
-///  * `de` - German
+///  * `de` - German (plus one country variation)
 ///  * `el` - Modern Greek
-///  * `en` - English
-///  * `es` - Spanish Castilian
+///  * `en` - English (plus 7 country variations)
+///  * `es` - Spanish Castilian (plus 20 country variations)
 ///  * `et` - Estonian
 ///  * `fa` - Persian
 ///  * `fi` - Finnish
 ///  * `fil` - Filipino Pilipino
-///  * `fr` - French
+///  * `fr` - French (plus one country variation)
 ///  * `gsw` - Swiss German Alemannic Alsatian
 ///  * `he` - Hebrew
 ///  * `hi` - Hindi
@@ -12047,12 +12047,12 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `nl` - Dutch Flemish
 ///  * `pl` - Polish
 ///  * `ps` - Pushto Pashto
-///  * `pt` - Portuguese
+///  * `pt` - Portuguese (plus one country variation)
 ///  * `ro` - Romanian Moldavian Moldovan
 ///  * `ru` - Russian
 ///  * `sk` - Slovak
 ///  * `sl` - Slovenian
-///  * `sr` - Serbian
+///  * `sr` - Serbian (plus 1 script)
 ///  * `sv` - Swedish
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
@@ -12060,7 +12060,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `uk` - Ukrainian
 ///  * `ur` - Urdu
 ///  * `vi` - Vietnamese
-///  * `zh` - Chinese (plus 2 country variations)
+///  * `zh` - Chinese (plus 2 country variations and 2 scripts)
 /// {@endtemplate}
 ///
 /// Generally speaking, this method is only intended to be used by
