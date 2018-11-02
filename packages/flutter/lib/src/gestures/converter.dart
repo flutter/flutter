@@ -240,7 +240,7 @@ class PointerEventConverter {
             radiusMax: radiusMax,
             orientation: datum.orientation,
             tilt: datum.tilt,
-            data: datum.data,
+            platformData: datum.platformData,
           );
           break;
         case ui.PointerChange.up:

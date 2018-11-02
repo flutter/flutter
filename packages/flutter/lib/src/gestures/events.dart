@@ -115,7 +115,7 @@ abstract class PointerEvent {
     this.radiusMax = 0.0,
     this.orientation = 0.0,
     this.tilt = 0.0,
-    this.data = 0,
+    this.platformData = 0,
     this.synthesized = false,
   });
 
@@ -247,7 +247,7 @@ abstract class PointerEvent {
   final double tilt;
 
   /// Opaque platform-specific data associated with the event.
-  final int data;
+  final int platformData;
 
   /// We occasionally synthesize PointerEvents that aren't exact translations
   /// of [ui.PointerData] from the engine to cover small cross-OS discrepancies
@@ -289,7 +289,7 @@ abstract class PointerEvent {
              'radiusMax: $radiusMax, '
              'orientation: $orientation, '
              'tilt: $tilt, '
-             'data: $data, '
+             'platformData: $platformData, '
              'synthesized: $synthesized'
            ')';
   }
@@ -500,7 +500,7 @@ class PointerMoveEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
-    int data = 0,
+    int platformData = 0,
     bool synthesized = false,
   }) : super(
     timeStamp: timeStamp,
@@ -524,7 +524,7 @@ class PointerMoveEvent extends PointerEvent {
     radiusMax: radiusMax,
     orientation: orientation,
     tilt: tilt,
-    data: data,
+    platformData: platformData,
     synthesized: synthesized,
   );
 }

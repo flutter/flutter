@@ -456,7 +456,7 @@ class _MotionEventsDispatcher {
     // When there are multiple active pointers we accumulate the information for all pointers
     // as we get PointerEvents, and only send it to the embedded Android view when
     // we see the last pointer. This way we achieve the same batching as Android.
-    if (event.data == kPointerDataFlagBatched ||
+    if (event.platformData == kPointerDataFlagBatched ||
         (isSinglePointerAction(event) && pointerIdx < numPointers - 1))
       return;
 
