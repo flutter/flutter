@@ -117,8 +117,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isVerifyOnly = argResults['verify-only'];
     final bool isConsumerOnly = argResults['consumer-only'];
 
-    // "consumer" packages are those our users are likely to rely on, and represents
-    // a specific subset of our SDK.
+    // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations).
     if (isConsumerOnly) {
       if (!isPrintTransitiveClosure) {
         throwToolExit(
