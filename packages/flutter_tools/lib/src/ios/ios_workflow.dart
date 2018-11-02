@@ -68,6 +68,9 @@ class IOSValidator extends DoctorValidator {
     }
   }
 
+  // Change this value if the number of checks for packages needed for installation changes
+  static const int totalChecks = 4;
+
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
@@ -125,7 +128,10 @@ class IOSValidator extends DoctorValidator {
       }
     }
 
+    int checksFailed = 0;
+
     if (!iMobileDevice.isInstalled) {
+      checksFailed += 1;
       packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(
         'libimobiledevice and ideviceinstaller are not installed. To install with Brew, run:\n'
@@ -133,6 +139,7 @@ class IOSValidator extends DoctorValidator {
         '  brew install ideviceinstaller'
       ));
     } else if (!await iMobileDevice.isWorking) {
+      checksFailed += 1;
       packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(
         'Verify that all connected devices have been paired with this computer in Xcode.\n'
@@ -143,6 +150,7 @@ class IOSValidator extends DoctorValidator {
         '  brew install ideviceinstaller'
       ));
     } else if (!await hasIDeviceInstaller) {
+      checksFailed += 1;
       packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(
         'ideviceinstaller is not installed; this is used to discover connected iOS devices.\n'
@@ -167,19 +175,22 @@ class IOSValidator extends DoctorValidator {
           '  brew upgrade ios-deploy'
         ));
       } else {
+        checksFailed += 1;
         messages.add(ValidationMessage.error(
           'ios-deploy not installed. To install with Brew:\n'
           '  brew install ios-deploy'
         ));
       }
     }
-    // If one of the checks for the packages failed, we need brew so that we can install
-    // the necessary packages. If they're all there, however, we don't even need brew.
-    if (packageManagerStatus == ValidationType.partial && !hasHomebrew) {
+
+    // If one of the checks for the packages failed, we may need brew so that we can install
+    // the necessary packages. If they're all there, however, we don't even need it.
+    if (checksFailed == totalChecks)
       packageManagerStatus = ValidationType.missing;
+    if (checksFailed > 0 && !hasHomebrew) {
       messages.add(ValidationMessage.error(
-          'Brew can be used to install tools for iOS device development.\n'
-              'Download brew at https://brew.sh/.'
+        'Brew can be used to install tools for iOS device development.\n'
+        'Download brew at https://brew.sh/.'
       ));
     }
 
