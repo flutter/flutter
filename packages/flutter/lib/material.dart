@@ -108,3 +108,4 @@ export 'src/material/two_level_list.dart';
 export 'src/material/typography.dart';
 export 'src/material/user_accounts_drawer_header.dart';
 export 'widgets.dart';
+export 'src/material/dialog_theme.dart';
