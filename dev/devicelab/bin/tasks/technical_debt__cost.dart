@@ -75,15 +75,14 @@ Future<int> countDependencies() async {
 
 Future<int> countConsumerDependencies() async {
   final List<String> lines = (await evalFlutter(
-    'update-packages',   
+    'update-packages',
     options: <String>['--transitive-closure', '--consumer-only'],
-  )).split('\n');        
+  )).split('\n');
   final int count = lines.where((String line) => line.contains('->')).length;
   if (count < 2) // we'll always have flutter and flutter_test, at least...
-    throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');                       
-  return count;          
-}      
-
+    throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
+  return count;
+}
 
 const String _kCostBenchmarkKey = 'technical_debt_in_dollars';
 const String _kNumberOfDependenciesKey = 'dependencies_count';
