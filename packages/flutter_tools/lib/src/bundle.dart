@@ -202,9 +202,11 @@ Future<void> writeBundle(
     bundleDir.deleteSync(recursive: true);
   bundleDir.createSync(recursive: true);
 
+  final List<Future<void>> futures = <Future<void>>[];
   for (MapEntry<String, DevFSContent> entry in assetEntries.entries) {
     final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
     file.parent.createSync(recursive: true);
-    file.writeAsBytesSync(await entry.value.contentsAsBytes());
+    futures.add(entry.value.contentsAsBytes().then(file.writeAsBytes));
   }
+  return Future.wait<void>(futures);
 }
