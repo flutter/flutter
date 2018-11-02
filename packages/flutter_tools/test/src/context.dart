@@ -298,7 +298,11 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 }
 
-class MockFlutterVersion extends Mock implements FlutterVersion {}
+class MockFlutterVersion extends Mock implements FlutterVersion {
+  MockFlutterVersion([this._clock = const Clock()]);
+
+  Clock _clock;
+}
 
 class MockClock extends Mock implements Clock {}
 

@@ -13,6 +13,8 @@ import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
+import 'package:quiver/time.dart';
+import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -28,6 +30,8 @@ void main() {
     MemoryFileSystem fs;
     Platform platform;
     FlutterCommandRunner runner;
+    Clock clock;
+    ProcessManager processManager;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -44,6 +48,8 @@ void main() {
       });
 
       runner = createTestCommandRunner(DummyFlutterCommand());
+      clock = MockClock();
+      processManager = MockProcessManager();
     });
 
     group('run', () {
@@ -70,6 +76,24 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         Platform: () => platform,
+      }, initializeFlutterRoot: false);
+    });
+
+    group('version', () {
+      testUsingContext('checks that Flutter toJson output reports the flutter framework version', () async {
+        final FlutterVersion version = FlutterVersion(const Clock());
+        final ProcessResult result = ProcessResult(0, 0, 'd52f315c35ae0d510777552fa4694c0979c09e3a', null);
+        when(processManager.runSync('git log -n 1 --pretty=format:%H'.split(' '))).thenReturn(result);
+        when(processManager.runSync('git rev-parse --abbrev-ref --symbolic @{u}'.split(' '))).thenReturn(result);
+        when(processManager.runSync('git rev-parse --abbrev-ref HEAD'.split(' '))).thenReturn(result);
+        when(processManager.runSync('git log -n 1 --pretty=format:%H'.split(' '))).thenReturn(result);
+
+
+        expect(version.toJson(), "what is this");
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        Platform: () => platform,
+        Clock: () => clock,
       }, initializeFlutterRoot: false);
     });
 
@@ -144,6 +168,7 @@ void main() {
     });
   });
 }
+class MockProcessManager extends Mock implements ProcessManager {}
 
 class FakeCommand extends FlutterCommand {
   OutputPreferences preferences;

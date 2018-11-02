@@ -21,6 +21,7 @@ class FlutterVersion {
   @visibleForTesting
   FlutterVersion([this._clock = const Clock()]) {
     _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
+    print(_channel.toString());
     final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
     _branch = branch == 'HEAD' ? _channel : branch;
 
@@ -108,6 +109,7 @@ class FlutterVersion {
   }
 
   Map<String, Object> toJson() => <String, Object>{
+        'frameworkVersion': frameworkVersion ?? 'unknown',
         'channel': channel,
         'repositoryUrl': repositoryUrl ?? 'unknown source',
         'frameworkRevision': frameworkRevision,
