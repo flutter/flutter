@@ -31,20 +31,20 @@ void OpacityLayer::Paint(PaintContext& context) const {
   SkPaint paint;
   paint.setAlpha(alpha_);
 
-  SkAutoCanvasRestore save(&context.canvas, true);
-  context.canvas.translate(offset_.fX, offset_.fY);
+  SkAutoCanvasRestore save(context.canvas, true);
+  context.canvas->translate(offset_.fX, offset_.fY);
 
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  context.canvas.setMatrix(
-      RasterCache::GetIntegralTransCTM(context.canvas.getTotalMatrix()));
+  context.canvas->setMatrix(
+      RasterCache::GetIntegralTransCTM(context.canvas->getTotalMatrix()));
 #endif
 
   if (layers().size() == 1 && context.raster_cache) {
-    const SkMatrix& ctm = context.canvas.getTotalMatrix();
+    const SkMatrix& ctm = context.canvas->getTotalMatrix();
     RasterCacheResult child_cache =
         context.raster_cache->Get(layers()[0].get(), ctm);
     if (child_cache.is_valid()) {
-      child_cache.draw(context.canvas, &paint);
+      child_cache.draw(*context.canvas, &paint);
       return;
     }
   }

@@ -10,7 +10,7 @@
 namespace shell {
 
 IOSSurfaceGL::IOSSurfaceGL(fml::scoped_nsobject<CAEAGLLayer> layer,
-                           FlutterPlatformViewsController& platform_views_controller)
+                           FlutterPlatformViewsController* platform_views_controller)
     : IOSSurface(platform_views_controller), context_(std::move(layer)) {}
 
 IOSSurfaceGL::~IOSSurfaceGL() = default;
@@ -59,16 +59,21 @@ bool IOSSurfaceGL::GLContextPresent() {
     return false;
   }
 
-  GetPlatformViewsController().Present();
-  return true;
+  FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
+  if (platform_views_controller == nullptr) {
+    return true;
+  }
+  return platform_views_controller->Present();
 }
 
 flow::ExternalViewEmbedder* IOSSurfaceGL::GetExternalViewEmbedder() {
   return this;
 }
 
-void IOSSurfaceGL::CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) {
-  GetPlatformViewsController().CompositeEmbeddedView(view_id, params);
+SkCanvas* IOSSurfaceGL::CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) {
+  FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
+  FML_CHECK(platform_views_controller != nullptr);
+  return platform_views_controller->CompositeEmbeddedView(view_id, params, *this);
 }
 
 }  // namespace shell

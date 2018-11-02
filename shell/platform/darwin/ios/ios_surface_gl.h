@@ -20,7 +20,7 @@ class IOSSurfaceGL : public IOSSurface,
                      public flow::ExternalViewEmbedder {
  public:
   IOSSurfaceGL(fml::scoped_nsobject<CAEAGLLayer> layer,
-               FlutterPlatformViewsController& platform_views_controller);
+               FlutterPlatformViewsController* platform_views_controller);
 
   ~IOSSurfaceGL() override;
 
@@ -46,7 +46,7 @@ class IOSSurfaceGL : public IOSSurface,
   flow::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
   // |flow::ExternalViewEmbedder|
-  void CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) override;
+  SkCanvas* CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) override;
 
  private:
   IOSGLContext context_;

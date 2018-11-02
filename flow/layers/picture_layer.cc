@@ -34,22 +34,22 @@ void PictureLayer::Paint(PaintContext& context) const {
   FML_DCHECK(picture_.get());
   FML_DCHECK(needs_painting());
 
-  SkAutoCanvasRestore save(&context.canvas, true);
-  context.canvas.translate(offset_.x(), offset_.y());
+  SkAutoCanvasRestore save(context.canvas, true);
+  context.canvas->translate(offset_.x(), offset_.y());
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  context.canvas.setMatrix(
-      RasterCache::GetIntegralTransCTM(context.canvas.getTotalMatrix()));
+  context.canvas->setMatrix(
+      RasterCache::GetIntegralTransCTM(context.canvas->getTotalMatrix()));
 #endif
 
   if (context.raster_cache) {
-    const SkMatrix& ctm = context.canvas.getTotalMatrix();
+    const SkMatrix& ctm = context.canvas->getTotalMatrix();
     RasterCacheResult result = context.raster_cache->Get(*picture(), ctm);
     if (result.is_valid()) {
-      result.draw(context.canvas);
+      result.draw(*context.canvas);
       return;
     }
   }
-  context.canvas.drawPicture(picture());
+  context.canvas->drawPicture(picture());
 }
 
 }  // namespace flow

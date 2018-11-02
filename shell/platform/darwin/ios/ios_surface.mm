@@ -11,12 +11,12 @@
 
 namespace shell {
 
-IOSSurface::IOSSurface(FlutterPlatformViewsController& platform_views_controller)
+IOSSurface::IOSSurface(FlutterPlatformViewsController* platform_views_controller)
     : platform_views_controller_(platform_views_controller) {}
 
 IOSSurface::~IOSSurface() = default;
 
-FlutterPlatformViewsController& IOSSurface::GetPlatformViewsController() {
+FlutterPlatformViewsController* IOSSurface::GetPlatformViewsController() {
   return platform_views_controller_;
 }
 }  // namespace shell

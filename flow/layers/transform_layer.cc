@@ -36,8 +36,8 @@ void TransformLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "TransformLayer::Paint");
   FML_DCHECK(needs_painting());
 
-  SkAutoCanvasRestore save(&context.canvas, true);
-  context.canvas.concat(transform_);
+  SkAutoCanvasRestore save(context.canvas, true);
+  context.canvas->concat(transform_);
   PaintChildren(context);
 }
 

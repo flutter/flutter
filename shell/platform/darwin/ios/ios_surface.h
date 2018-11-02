@@ -17,7 +17,7 @@ namespace shell {
 
 class IOSSurface {
  public:
-  IOSSurface(FlutterPlatformViewsController& platform_views_controller);
+  IOSSurface(FlutterPlatformViewsController* platform_views_controller);
 
   virtual ~IOSSurface();
 
@@ -30,10 +30,10 @@ class IOSSurface {
   virtual std::unique_ptr<Surface> CreateGPUSurface() = 0;
 
  protected:
-  FlutterPlatformViewsController& GetPlatformViewsController();
+  FlutterPlatformViewsController* GetPlatformViewsController();
 
  private:
-  FlutterPlatformViewsController& platform_views_controller_;
+  FlutterPlatformViewsController* platform_views_controller_;
 
  public:
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurface);

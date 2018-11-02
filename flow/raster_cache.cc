@@ -157,7 +157,7 @@ void RasterCache::Prepare(PrerollContext* context,
                             checkerboard_images_, layer->paint_bounds(),
                             [layer, context](SkCanvas* canvas) {
                               Layer::PaintContext paintContext = {
-                                  *canvas,
+                                  canvas,
                                   nullptr,
                                   context->frame_time,
                                   context->engine_time,

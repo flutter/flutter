@@ -26,6 +26,21 @@
 
 namespace shell {
 
+class IOSSurface;
+
+struct FlutterPlatformViewLayer {
+  FlutterPlatformViewLayer(UIView* overlay_view,
+                           std::unique_ptr<IOSSurface> ios_surface,
+                           std::unique_ptr<Surface> surface)
+      : overlay_view([overlay_view retain]),
+        ios_surface(std::move(ios_surface)),
+        surface(std::move(surface)){};
+
+  fml::scoped_nsobject<UIView> overlay_view;
+  std::unique_ptr<IOSSurface> ios_surface;
+  std::unique_ptr<Surface> surface;
+};
+
 class FlutterPlatformViewsController {
  public:
   FlutterPlatformViewsController() = default;
@@ -34,9 +49,11 @@ class FlutterPlatformViewsController {
 
   void RegisterViewFactory(NSObject<FlutterPlatformViewFactory>* factory, NSString* factoryId);
 
-  void CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params);
+  SkCanvas* CompositeEmbeddedView(int view_id,
+                                  const flow::EmbeddedViewParams& params,
+                                  IOSSurface& surface);
 
-  void Present();
+  bool Present();
 
   void OnMethodCall(FlutterMethodCall* call, FlutterResult& result);
 
@@ -45,6 +62,7 @@ class FlutterPlatformViewsController {
   fml::scoped_nsobject<UIView> flutter_view_;
   std::map<std::string, fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>> factories_;
   std::map<int64_t, fml::scoped_nsobject<FlutterTouchInterceptingView>> views_;
+  std::map<int64_t, std::unique_ptr<FlutterPlatformViewLayer>> overlays_;
 
   // A vector of embedded view IDs according to their composition order.
   // The last ID in this vector belond to the that is composited on top of all others.
@@ -53,9 +71,13 @@ class FlutterPlatformViewsController {
   // The latest composition order that was presented in Present().
   std::vector<int64_t> active_composition_order_;
 
+  std::vector<std::unique_ptr<SurfaceFrame>> composition_frames_;
+
   void OnCreate(FlutterMethodCall* call, FlutterResult& result);
   void OnDispose(FlutterMethodCall* call, FlutterResult& result);
   void OnAcceptGesture(FlutterMethodCall* call, FlutterResult& result);
+
+  void EnsureOverlayInitialized(int64_t overlay_id);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterPlatformViewsController);
 };
