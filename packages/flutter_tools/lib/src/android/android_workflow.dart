@@ -50,8 +50,6 @@ class AndroidWorkflow implements Workflow {
 class AndroidValidator extends DoctorValidator {
   AndroidValidator(): super('Android toolchain - develop for Android devices',);
 
-  static const String _jdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';
-
   /// Returns false if we cannot determine the Java version or if the version
   /// is not compatible.
   Future<bool> _checkJavaVersion(String javaBinary, List<ValidationMessage> messages) async {
