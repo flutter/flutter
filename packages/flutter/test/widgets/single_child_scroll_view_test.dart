@@ -131,12 +131,12 @@ void main() {
   });
 
   testWidgets('Vertical SingleChildScrollViews are primary by default', (WidgetTester tester) async {
-    final SingleChildScrollView view = SingleChildScrollView(scrollDirection: Axis.vertical);
+    const SingleChildScrollView view = SingleChildScrollView(scrollDirection: Axis.vertical);
     expect(view.primary, isTrue);
   });
 
   testWidgets('Horizontal SingleChildScrollViews are non-primary by default', (WidgetTester tester) async {
-    final SingleChildScrollView view = SingleChildScrollView(scrollDirection: Axis.horizontal);
+    const SingleChildScrollView view = SingleChildScrollView(scrollDirection: Axis.horizontal);
     expect(view.primary, isFalse);
   });
 
