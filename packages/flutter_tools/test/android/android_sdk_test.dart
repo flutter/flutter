@@ -15,7 +15,6 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
-
 class MockProcessManager extends Mock implements ProcessManager {}
 
 void main() {
