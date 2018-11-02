@@ -108,7 +108,7 @@ ro.build.version.codename=REL
 ''';
 }
 
-/// An SDK installation with several SDK levels (19, 22, 23).
+/// A broken SDK installation.
 class MockBrokenAndroidSdk extends Mock implements AndroidSdk {
   static Directory createSdkDirectory({
     bool withAndroidN = false,
