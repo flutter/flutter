@@ -101,15 +101,13 @@ void main() {
     expect(clipRect.size.height, maxExtent);
 
     final Element actionTextBox = tester.element(find.text('title'));
-    final Widget textWidget = actionTextBox.widget;
+    final Text textWidget = actionTextBox.widget;
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
-    if (textWidget is Text) {
-      TextStyle effectiveStyle = textWidget.style;
-      effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
-      expect(effectiveStyle.color.alpha, 128); // Which is alpha of .5
-    } else {
-      expect(false, true);
-    }
+
+    TextStyle effectiveStyle = textWidget.style;
+    effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
+    expect(effectiveStyle.color.alpha, 128); // Which is alpha of .5
+
 
     // We drag up to fully collapse the space bar.
     await tester.drag(find.byType(Container).first, const Offset(0, -400.0));
