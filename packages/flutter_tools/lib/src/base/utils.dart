@@ -530,7 +530,7 @@ List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth, bool
         result.add(joinRun(splitLine, currentLineStart, index));
 
         // Skip any intervening whitespace.
-        while (isWhitespace(splitLine[index]) && index < splitLine.length) {
+        while (index < splitLine.length && isWhitespace(splitLine[index])) {
           index++;
         }
 

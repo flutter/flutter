@@ -7,10 +7,12 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
 import '../device.dart';
+import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
 import '../resident_runner.dart';
@@ -18,6 +20,8 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 
 final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
+
+final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -35,6 +39,9 @@ final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 /// ```
 /// As soon as a new observatory is detected the command attaches to it and
 /// enables hot reloading.
+///
+/// To attach to a flutter mod running on a fuchsia device, `--module` must
+/// also be provided.
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
     addBuildModeFlags(defaultToRelease: false);
@@ -53,11 +60,17 @@ class AttachCommand extends FlutterCommand {
         'project-root',
         hide: !verboseHelp,
         help: 'Normally used only in run target',
+      )..addOption(
+        'module',
+        abbr: 'm',
+        hide: !verboseHelp,
+        help: 'The name of the module (required if attaching to a fuchsia device)',
+        valueHelp: 'module-name',
       )..addFlag('machine',
-          hide: !verboseHelp,
-          negatable: false,
-          help: 'Handle machine structured JSON command input and provide output '
-                'and progress in machine friendly format.',
+        hide: !verboseHelp,
+        negatable: false,
+        help: 'Handle machine structured JSON command input and provide output '
+              'and progress in machine friendly format.',
       );
     hotRunnerFactory ??= HotRunnerFactory();
   }
@@ -106,18 +119,50 @@ class AttachCommand extends FlutterCommand {
       : null;
 
     Uri observatoryUri;
+    bool ipv6 = false;
+    bool attachLogger = false;
     if (devicePort == null) {
-      ProtocolDiscovery observatoryDiscovery;
-      try {
-        observatoryDiscovery = ProtocolDiscovery.observatory(
-          device.getLogReader(),
-          portForwarder: device.portForwarder,
+      if (device is FuchsiaDevice) {
+        attachLogger = true;
+        final String module = argResults['module'];
+        if (module == null) {
+          throwToolExit('\'--module\' is requried for attaching to a Fuchsia device');
+        }
+        ipv6 = _isIpv6(device.id);
+        final List<int> ports = await device.servicePorts();
+        if (ports.isEmpty) {
+          throwToolExit('No active service ports on ${device.name}');
+        }
+        final List<int> localPorts = <int>[];
+        for (int port in ports) {
+          localPorts.add(await device.portForwarder.forward(port));
+        }
+        final Status status = logger.startProgress(
+          'Waiting for a connection from Flutter on ${device.name}...',
+          expectSlowOperation: true,
         );
-        printStatus('Waiting for a connection from Flutter on ${device.name}...');
-        observatoryUri = await observatoryDiscovery.uri;
-        printStatus('Done.');
-      } finally {
-        await observatoryDiscovery?.cancel();
+        final int localPort = await device.findIsolatePort(module, localPorts);
+        if (localPort == null) {
+          status.cancel();
+          throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
+        }
+        status.stop();
+        observatoryUri = ipv6
+          ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
+          : Uri.parse('http://$ipv4Loopback:$localPort/');
+      } else {
+        ProtocolDiscovery observatoryDiscovery;
+        try {
+          observatoryDiscovery = ProtocolDiscovery.observatory(
+            device.getLogReader(),
+            portForwarder: device.portForwarder,
+          );
+          printStatus('Waiting for a connection from Flutter on ${device.name}...');
+          observatoryUri = await observatoryDiscovery.uri;
+          printStatus('Done.');
+        } finally {
+          await observatoryDiscovery?.cancel();
+        }
       }
     } else {
       final int localPort = await device.portForwarder.forward(devicePort);
@@ -141,7 +186,11 @@ class AttachCommand extends FlutterCommand {
         usesTerminalUI: daemon == null,
         projectRootPath: argResults['project-root'],
         dillOutputPath: argResults['output-dill'],
+        ipv6: ipv6,
       );
+      if (attachLogger) {
+        flutterDevice.startEchoingDeviceLog();
+      }
 
       if (daemon != null) {
         AppInstance app;
@@ -165,6 +214,17 @@ class AttachCommand extends FlutterCommand {
   }
 
   Future<void> _validateArguments() async {}
+
+  bool _isIpv6(String address) {
+    // Workaround for https://github.com/dart-lang/sdk/issues/29456
+    final String fragment = address.split('%').first;
+    try {
+      Uri.parseIPv6Address(fragment);
+      return true;
+    } on FormatException {
+      return false;
+    }
+  }
 }
 
 class HotRunnerFactory {
