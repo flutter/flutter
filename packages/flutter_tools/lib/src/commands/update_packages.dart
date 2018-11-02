@@ -71,7 +71,7 @@ class UpdatePackagesCommand extends FlutterCommand {
               'that a consumer of the Flutter SDK will observe (When combined '
               'with transitive-closure)',
         defaultsTo: false,
-        negatable: true,
+        negatable: false,
       )
       ..addFlag(
         'verify-only',
@@ -120,14 +120,13 @@ class UpdatePackagesCommand extends FlutterCommand {
     // "consumer" packages are those our users are likely to rely on, and represents
     // a specific subset of our SDK.
     if (isConsumerOnly) {
-      // Only retain flutter, flutter_test, flutter_driver, and flutter_localizations.
-      const List<String> consumerPackages = <String>['flutter', 'flutter_test', 'flutter_driver', 'flutter_localizations'];
       if (!isPrintTransitiveClosure) {
         throwToolExit(
-          '--consumer-only and --no-consumer-only can only be used'
-          'with the --verify-only flag'
+          '--consumer-only can only be used with the --transitive-closure flag'
         );
       }
+      // Only retain flutter, flutter_test, flutter_driver, and flutter_localizations.
+      const List<String> consumerPackages = <String>['flutter', 'flutter_test', 'flutter_driver', 'flutter_localizations'];
       // ensure we only get flutter/packages
       packages.retainWhere((Directory directory) {
         return consumerPackages.any((String package) {
