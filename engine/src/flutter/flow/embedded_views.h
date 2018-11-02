@@ -6,6 +6,7 @@
 #define FLUTTER_FLOW_EMBEDDED_VIEWS_H_
 
 #include "flutter/fml/memory/ref_counted.h"
+#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkSize.h"
 
@@ -15,6 +16,7 @@ class EmbeddedViewParams {
  public:
   SkPoint offsetPixels;
   SkSize sizePoints;
+  SkISize canvasBaseLayerSize;
 };
 
 // This is only used on iOS when running in a non headless mode,
@@ -25,8 +27,8 @@ class ExternalViewEmbedder {
   ExternalViewEmbedder() = default;
 
   // Must be called on the UI thread.
-  virtual void CompositeEmbeddedView(int view_id,
-                                     const EmbeddedViewParams& params) {}
+  virtual SkCanvas* CompositeEmbeddedView(int view_id,
+                                          const EmbeddedViewParams& params) = 0;
 
   virtual ~ExternalViewEmbedder() = default;
 

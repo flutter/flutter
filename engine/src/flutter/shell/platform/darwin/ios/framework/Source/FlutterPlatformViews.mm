@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#import <UIKit/UIGestureRecognizerSubclass.h>
+
+#import "FlutterOverlayView.h"
+#import "flutter/shell/platform/darwin/ios/ios_surface.h"
+
 #include <map>
 #include <memory>
 #include <string>
@@ -9,8 +14,6 @@
 #include "FlutterPlatformViews_Internal.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h"
-
-#import <UIKit/UIGestureRecognizerSubclass.h>
 
 namespace shell {
 
@@ -45,7 +48,7 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
   long viewId = [args[@"id"] longValue];
   std::string viewType([args[@"viewType"] UTF8String]);
 
-  if (views_[viewId] != nil) {
+  if (views_.count(viewId) != 0) {
     result([FlutterError errorWithCode:@"recreating_view"
                                message:@"trying to create an already created view"
                                details:[NSString stringWithFormat:@"view id: '%ld'", viewId]]);
@@ -84,7 +87,7 @@ void FlutterPlatformViewsController::OnDispose(FlutterMethodCall* call, FlutterR
   NSDictionary<NSString*, id>* args = [call arguments];
   int64_t viewId = [args[@"id"] longLongValue];
 
-  if (views_[viewId] == nil) {
+  if (views_.count(viewId) == 0) {
     result([FlutterError errorWithCode:@"unknown_view"
                                message:@"trying to dispose an unknown"
                                details:[NSString stringWithFormat:@"view id: '%lld'", viewId]]);
@@ -94,6 +97,7 @@ void FlutterPlatformViewsController::OnDispose(FlutterMethodCall* call, FlutterR
   UIView* view = views_[viewId].get();
   [view removeFromSuperview];
   views_.erase(viewId);
+  overlays_.erase(viewId);
   result(nil);
 }
 
@@ -102,7 +106,7 @@ void FlutterPlatformViewsController::OnAcceptGesture(FlutterMethodCall* call,
   NSDictionary<NSString*, id>* args = [call arguments];
   int64_t viewId = [args[@"id"] longLongValue];
 
-  if (views_[viewId] == nil) {
+  if (views_.count(viewId) == 0) {
     result([FlutterError errorWithCode:@"unknown_view"
                                message:@"trying to set gesture state for an unknown view"
                                details:[NSString stringWithFormat:@"view id: '%lld'", viewId]]);
@@ -124,25 +128,39 @@ void FlutterPlatformViewsController::RegisterViewFactory(
       fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>([factory retain]);
 }
 
-void FlutterPlatformViewsController::CompositeEmbeddedView(int view_id,
-                                                           const flow::EmbeddedViewParams& params) {
+SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(
+    int view_id,
+    const flow::EmbeddedViewParams& params,
+    IOSSurface& ios_surface) {
   // TODO(amirh): assert that this is running on the platform thread once we support the iOS
   // embedded views thread configuration.
   // TODO(amirh): do nothing if the params didn't change.
+  EnsureOverlayInitialized(view_id);
   CGFloat screenScale = [[UIScreen mainScreen] scale];
   CGRect rect =
       CGRectMake(params.offsetPixels.x() / screenScale, params.offsetPixels.y() / screenScale,
                  params.sizePoints.width(), params.sizePoints.height());
 
-  UIView* view = views_[view_id];
+  UIView* view = views_[view_id].get();
   [view setFrame:rect];
   composition_order_.push_back(view_id);
+
+  composition_frames_.push_back(
+      overlays_[view_id]->surface->AcquireFrame(params.canvasBaseLayerSize));
+  SkCanvas* canvas = composition_frames_.back()->SkiaCanvas();
+  canvas->clear(SK_ColorTRANSPARENT);
+  return canvas;
 }
 
-void FlutterPlatformViewsController::Present() {
+bool FlutterPlatformViewsController::Present() {
+  bool did_submit = true;
+  for (size_t i = 0; i < composition_frames_.size(); i++) {
+    did_submit &= composition_frames_[i]->Submit();
+  }
+  composition_frames_.clear();
   if (composition_order_ == active_composition_order_) {
     composition_order_.clear();
-    return;
+    return did_submit;
   }
   UIView* flutter_view = flutter_view_.get();
 
@@ -159,10 +177,26 @@ void FlutterPlatformViewsController::Present() {
   for (size_t i = 0; i < composition_order_.size(); i++) {
     int view_id = composition_order_[i];
     [flutter_view addSubview:views_[view_id].get()];
+    [flutter_view addSubview:overlays_[view_id]->overlay_view.get()];
     active_composition_order_.push_back(view_id);
   }
 
   composition_order_.clear();
+  return did_submit;
+}
+
+void FlutterPlatformViewsController::EnsureOverlayInitialized(int64_t overlay_id) {
+  if (overlays_.count(overlay_id) != 0) {
+    return;
+  }
+  FlutterOverlayView* overlay_view = [[FlutterOverlayView alloc] init];
+  overlay_view.frame = flutter_view_.get().bounds;
+  overlay_view.autoresizingMask =
+      (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
+  std::unique_ptr<IOSSurface> ios_surface = overlay_view.createSurface;
+  std::unique_ptr<Surface> surface = ios_surface->CreateGPUSurface();
+  overlays_[overlay_id] = std::make_unique<FlutterPlatformViewLayer>(
+      overlay_view, std::move(ios_surface), std::move(surface));
 }
 
 }  // namespace shell

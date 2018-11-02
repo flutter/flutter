@@ -597,6 +597,8 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatfo
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache_Internal.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.mm

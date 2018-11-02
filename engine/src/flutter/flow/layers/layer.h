@@ -64,7 +64,7 @@ class Layer {
   virtual void Preroll(PrerollContext* context, const SkMatrix& matrix);
 
   struct PaintContext {
-    SkCanvas& canvas;
+    SkCanvas* canvas;
     ExternalViewEmbedder* view_embedder;
     const Stopwatch& frame_time;
     const Stopwatch& engine_time;

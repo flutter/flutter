@@ -83,7 +83,7 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting());
 
   if (elevation_ != 0) {
-    DrawShadow(&context.canvas, path_, shadow_color_, elevation_,
+    DrawShadow(context.canvas, path_, shadow_color_, elevation_,
                SkColorGetA(color_) != 0xff, device_pixel_ratio_);
   }
 
@@ -91,20 +91,20 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
   SkPaint paint;
   paint.setColor(color_);
   if (clip_behavior_ != Clip::antiAliasWithSaveLayer) {
-    context.canvas.drawPath(path_, paint);
+    context.canvas->drawPath(path_, paint);
   }
 
-  int saveCount = context.canvas.save();
+  int saveCount = context.canvas->save();
   switch (clip_behavior_) {
     case Clip::hardEdge:
-      context.canvas.clipPath(path_, false);
+      context.canvas->clipPath(path_, false);
       break;
     case Clip::antiAlias:
-      context.canvas.clipPath(path_, true);
+      context.canvas->clipPath(path_, true);
       break;
     case Clip::antiAliasWithSaveLayer:
-      context.canvas.clipPath(path_, true);
-      context.canvas.saveLayer(paint_bounds(), nullptr);
+      context.canvas->clipPath(path_, true);
+      context.canvas->saveLayer(paint_bounds(), nullptr);
       break;
     case Clip::none:
       break;
@@ -115,12 +115,12 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
     // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
     // using saveLayer, we have to call drawPaint instead of drawPath as
     // anti-aliased drawPath will always have such artifacts.
-    context.canvas.drawPaint(paint);
+    context.canvas->drawPaint(paint);
   }
 
   PaintChildren(context);
 
-  context.canvas.restoreToCount(saveCount);
+  context.canvas->restoreToCount(saveCount);
 }
 
 void PhysicalShapeLayer::DrawShadow(SkCanvas* canvas,

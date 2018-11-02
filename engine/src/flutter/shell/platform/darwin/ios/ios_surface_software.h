@@ -20,7 +20,7 @@ class IOSSurfaceSoftware final : public IOSSurface,
                                  public flow::ExternalViewEmbedder {
  public:
   IOSSurfaceSoftware(fml::scoped_nsobject<CALayer> layer,
-                     FlutterPlatformViewsController& platform_views_controller);
+                     FlutterPlatformViewsController* platform_views_controller);
 
   ~IOSSurfaceSoftware() override;
 
@@ -46,7 +46,7 @@ class IOSSurfaceSoftware final : public IOSSurface,
   flow::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
   // |flow::ExternalViewEmbedder|
-  void CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) override;
+  SkCanvas* CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) override;
 
  private:
   fml::scoped_nsobject<CALayer> layer_;
