@@ -72,3 +72,5 @@ class TestImage implements ui.Image {
     throw UnimplementedError();
   }
 }
+
+class TestImageStreamCompleter extends ImageStreamCompleter {}

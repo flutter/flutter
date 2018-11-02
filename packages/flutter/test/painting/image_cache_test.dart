@@ -86,7 +86,6 @@ void main() {
       expect(p.value, equals(16));
 
       // cache has three entries: 3(14), 4(15), 1(16)
-
     });
 
     test('clear removes all images and resets cache size', () async {
@@ -127,6 +126,63 @@ void main() {
       expect(imageCache.currentSize, 1);
       expect(imageCache.currentSizeBytes, 256);
       expect(imageCache.maximumSizeBytes, 256 + 1000);
+    });
+
+    test('pending image is returned if on is set', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+      final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
+
+      final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
+        return completer1;
+      });
+      final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage, () {
+        return completer2;
+      });
+
+      expect(resultingCompleter1, completer1);
+      expect(resultingCompleter2, completer1);
+    });
+
+    test('pending image is removed when cache is cleared', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+      final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
+
+      final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
+        return completer1;
+      });
+
+      imageCache.clear();
+
+      final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage, () {
+        return completer2;
+      });
+
+      expect(resultingCompleter1, completer1);
+      expect(resultingCompleter2, completer2);
+    });
+
+    test('pending image is removed when image is evicted', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+      final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
+
+      final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
+        return completer1;
+      });
+
+      imageCache.evict(testImage);
+
+      final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage, () {
+        return completer2;
+      });
+
+      expect(resultingCompleter1, completer1);
+      expect(resultingCompleter2, completer2);
     });
   });
 }
