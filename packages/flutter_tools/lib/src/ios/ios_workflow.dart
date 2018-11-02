@@ -72,7 +72,7 @@ class IOSValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
-    ValidationType brewStatus = ValidationType.missing;
+    ValidationType packageManagerStatus = ValidationType.missing;
     String xcodeVersionInfo;
 
     if (xcode.isInstalled) {
@@ -127,30 +127,30 @@ class IOSValidator extends DoctorValidator {
 
     final bool iHasIosDeploy = await hasIosDeploy;
 
-    brewStatus = ValidationType.installed;
+    packageManagerStatus = ValidationType.installed;
 
     if (!iMobileDevice.isInstalled) {
-      brewStatus = ValidationType.partial;
+      packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(
-        'libimobiledevice and ideviceinstaller are not installed. To install, run:\n'
+        'libimobiledevice and ideviceinstaller are not installed. To install with Homebrew, run:\n'
         '  brew install --HEAD libimobiledevice\n'
         '  brew install ideviceinstaller'
       ));
     } else if (!await iMobileDevice.isWorking) {
-      brewStatus = ValidationType.partial;
+      packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(
         'Verify that all connected devices have been paired with this computer in Xcode.\n'
         'If all devices have been paired, libimobiledevice and ideviceinstaller may require updating.\n'
-        'To update, run:\n'
+        'To update with Homebrew, run:\n'
         '  brew uninstall --ignore-dependencies libimobiledevice\n'
         '  brew install --HEAD libimobiledevice\n'
         '  brew install ideviceinstaller'
       ));
     } else if (!await hasIDeviceInstaller) {
-      brewStatus = ValidationType.partial;
+      packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(
         'ideviceinstaller is not installed; this is used to discover connected iOS devices.\n'
-        'To install, run:\n'
+        'To install with Homebrew, run:\n'
         '  brew install --HEAD libimobiledevice\n'
         '  brew install ideviceinstaller'
       ));
@@ -162,31 +162,31 @@ class IOSValidator extends DoctorValidator {
           ValidationMessage('ios-deploy ${await iosDeployVersionText}'));
     }
     if (!await _iosDeployIsInstalledAndMeetsVersionCheck) {
-      brewStatus = ValidationType.partial;
+      packageManagerStatus = ValidationType.partial;
       if (iHasIosDeploy) {
         messages.add(ValidationMessage.error(
-          'ios-deploy out of date ($iosDeployMinimumVersion is required). To upgrade:\n'
+          'ios-deploy out of date ($iosDeployMinimumVersion is required). To upgrade with Homebrew:\n'
           '  brew upgrade ios-deploy'
         ));
       } else {
         messages.add(ValidationMessage.error(
-          'ios-deploy not installed. To install:\n'
+          'ios-deploy not installed. To install with Homebrew:\n'
           '  brew install ios-deploy'
         ));
       }
     }
     // If one of the checks for the packages failed, we need brew so that we can install
     // the necessary packages. If they're all there, however, we don't even need brew.
-    if (brewStatus == ValidationType.partial) {
-      brewStatus = ValidationType.missing;
+    if (packageManagerStatus == ValidationType.partial && !hasHomebrew) {
+      packageManagerStatus = ValidationType.missing;
       messages.add(ValidationMessage.error(
-          'Brew not installed; use this to install tools for iOS device development.\n'
+          'If you do not already have a package manager, Homebrew can be used to install tools for iOS device development.\n'
               'Download brew at https://brew.sh/.'
       ));
     }
 
     return ValidationResult(
-        <ValidationType>[xcodeStatus, brewStatus].reduce(_mergeValidationTypes),
+        <ValidationType>[xcodeStatus, packageManagerStatus].reduce(_mergeValidationTypes),
         messages,
         statusInfo: xcodeVersionInfo
     );
