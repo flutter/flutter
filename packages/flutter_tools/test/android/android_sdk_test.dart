@@ -84,7 +84,7 @@ void main() {
     });
 
     testUsingContext('returns sdk is well formed', () {
-      sdkDir = MockAndroidSdk.createSdkDirectory(withAndroidN: false, withNdkSysroot: false, withSdkManager: false);
+      sdkDir = MockBrokenAndroidSdk.createSdkDirectory();
       Config.instance.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();

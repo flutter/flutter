@@ -109,53 +109,17 @@ ro.build.version.codename=REL
 }
 
 class MockBrokenAndroidSdk extends Mock implements AndroidSdk {
-  static Directory createSdkDirectory({
-    bool withAndroidN = false,
-    String withNdkDir,
-    bool withNdkSysroot = false,
-    bool withSdkManager = true,
-  }) {
-    final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
+  static Directory createSdkDirectory() {
+    final Directory dir = fs.systemTempDirectory.createTempSync('lnkzx.');
 
-    _createSdkFile(dir, 'platform-tools/adb');
+    _createSdkFile(dir, 'plmadfsdb');
 
-    _createSdkFile(dir, 'build-tools/19.1.0/aapt');
-    _createSdkFile(dir, 'build-tools/22.0.1/aapt');
-    _createSdkFile(dir, 'build-tools/23.0.2/aapt');
-    if (withAndroidN)
-      _createSdkFile(dir, 'build-tools/24.0.0-preview/aapt');
+    _createSdkFile(dir, 'bmasdfma;');
+    _createSdkFile(dir, 'buillknasfdladsf');
+    _createSdkFile(dir, 'bujasdfljt');
 
-    _createSdkFile(dir, 'platforms/android-22/android.jar');
-    _createSdkFile(dir, 'platforms/android-23/android.jar');
-    if (withAndroidN) {
-      _createSdkFile(dir, 'platforms/android-N/android.jar');
-      _createSdkFile(dir, 'platforms/android-N/build.prop', contents: _buildProp);
-    }
-
-    if (withSdkManager)
-      _createSdkFile(dir, 'tools/bin/sdkmanager');
-
-    if (withNdkDir != null) {
-      final String ndkCompiler = fs.path.join(
-        'ndk-bundle',
-        'toolchains',
-        'arm-linux-androideabi-4.9',
-        'prebuilt',
-        withNdkDir,
-        'bin',
-        'arm-linux-androideabi-gcc',
-      );
-      _createSdkFile(dir, ndkCompiler);
-    }
-    if (withNdkSysroot) {
-      final String armPlatform = fs.path.join(
-        'ndk-bundle',
-        'platforms',
-        'android-9',
-        'arch-arm',
-      );
-      _createDir(dir, armPlatform);
-    }
+    _createSdkFile(dir, 'platformljksadfr');
+    _createSdkFile(dir, 'platformsljkdsfar');
 
     return dir;
   }
