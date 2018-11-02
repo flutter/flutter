@@ -9,7 +9,7 @@
 namespace blink {
 
 // If this value changes, update the pointer data unpacking code in hooks.dart.
-static constexpr int kPointerDataFieldCount = 20;
+static constexpr int kPointerDataFieldCount = 21;
 
 static_assert(sizeof(PointerData) == sizeof(int64_t) * kPointerDataFieldCount,
               "PointerData has the wrong size");
