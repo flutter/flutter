@@ -242,24 +242,34 @@ class EditableText extends StatefulWidget {
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;
 
+  /// {@template flutter.widgets.editableText.obscureText}
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
-  /// Defaults to false.
+  /// When this is set to true, all the characters in the text field are
+  /// replaced by U+2022 BULLET characters (•).
+  ///
+  /// Defaults to false. Cannot be null.
+  /// {@endtemplate}
   final bool obscureText;
 
+  /// {@template flutter.widgets.editableText.autocorrect}
   /// Whether to enable autocorrection.
   ///
-  /// Defaults to true.
+  /// Defaults to true. Cannot be null.
+  /// {@endtemplate}
   final bool autocorrect;
 
   /// The text style to use for the editable text.
   final TextStyle style;
 
+  /// {@template flutter.widgets.editableText.textAlign}
   /// How the text should be aligned horizontally.
   ///
-  /// Defaults to [TextAlign.start].
+  /// Defaults to [TextAlign.start] and cannot be null.
+  /// {@endtemplate}
   final TextAlign textAlign;
 
+  /// {@template flutter.widgets.editableText.textDirection}
   /// The directionality of the text.
   ///
   /// This decides how [textAlign] values like [TextAlign.start] and
@@ -273,8 +283,10 @@ class EditableText extends StatefulWidget {
   /// its left.
   ///
   /// Defaults to the ambient [Directionality], if any.
+  /// {@endtemplate}
   final TextDirection textDirection;
 
+  /// {@template flutter.widgets.editableText.textCapitalization}
   /// Configures how the platform keyboard will select an uppercase or
   /// lowercase keyboard.
   ///
@@ -286,6 +298,7 @@ class EditableText extends StatefulWidget {
   /// See also:
   ///
   ///   * [TextCapitalization], for a description of each capitalization behavior.
+  /// {@endtemplate}
   final TextCapitalization textCapitalization;
 
   /// Used to select a font when the same Unicode character can
@@ -307,8 +320,11 @@ class EditableText extends StatefulWidget {
   final double textScaleFactor;
 
   /// The color to use when painting the cursor.
+  ///
+  /// Cannot be null.
   final Color cursorColor;
 
+  /// {@template flutter.widgets.editableText.maxLines}
   /// The maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// If this is 1 (the default), the text will not wrap, but will scroll
@@ -316,13 +332,20 @@ class EditableText extends StatefulWidget {
   ///
   /// If this is null, there is no limit to the number of lines. If it is not
   /// null, the value must be greater than zero.
+  /// {@endtemplate}
   final int maxLines;
 
-  /// Whether this input field should focus itself if nothing else is already focused.
-  /// If true, the keyboard will open as soon as this input obtains focus. Otherwise,
-  /// the keyboard is only shown after the user taps the text field.
+  /// {@template flutter.widgets.editableText.autofocus}
+  /// Whether this text field should focus itself if nothing else is already
+  /// focused.
   ///
-  /// Defaults to false.
+  /// If true, the keyboard will open as soon as this text field obtains focus.
+  /// Otherwise, the keyboard is only shown after the user taps the text field.
+  ///
+  /// Defaults to false. Cannot be null.
+  /// {@endtemplate}
+  // See https://github.com/flutter/flutter/issues/7035 for the rationale for this
+  // keyboard behavior.
   final bool autofocus;
 
   /// The color to use when painting the selection.
@@ -331,15 +354,23 @@ class EditableText extends StatefulWidget {
   /// Optional delegate for building the text selection handles and toolbar.
   final TextSelectionControls selectionControls;
 
+  /// {@template flutter.widgets.editableText.keyboardType}
   /// The type of keyboard to use for editing the text.
+  ///
+  /// Defaults to [TextInputType.text] if [maxLines] is one and
+  /// [TextInputType.multiline] otherwise.
+  /// {@endtemplate}
   final TextInputType keyboardType;
 
   /// The type of action button to use with the soft keyboard.
   final TextInputAction textInputAction;
 
+  /// {@template flutter.widgets.editableText.onChanged}
   /// Called when the text being edited changes.
+  /// {@endtemplate}
   final ValueChanged<String> onChanged;
 
+  /// {@template flutter.widgets.editableText.onEditingComplete}
   /// Called when the user submits editable content (e.g., user presses the "done"
   /// button on the keyboard).
   ///
@@ -356,17 +387,24 @@ class EditableText extends StatefulWidget {
   ///    another input widget within [onSubmitted].
   ///
   /// Providing [onEditingComplete] prevents the aforementioned default behavior.
+  /// {@endtemplate}
   final VoidCallback onEditingComplete;
 
-  /// Called when the user indicates that they are done editing the text in the field.
+  /// {@template flutter.widgets.editableText.onSubmitted}
+  /// Called when the user indicates that they are done editing the text in the
+  /// field.
+  /// {@endtemplate}
   final ValueChanged<String> onSubmitted;
 
   /// Called when the user changes the selection of text (including the cursor
   /// location).
   final SelectionChangedCallback onSelectionChanged;
 
-  /// Optional input validation and formatting overrides. Formatters are run
-  /// in the provided order when the text input changes.
+  /// {@template flutter.widgets.editableText.inputFormatters}
+  /// Optional input validation and formatting overrides.
+  ///
+  /// Formatters are run in the provided order when the text input changes.
+  /// {@endtemplate}
   final List<TextInputFormatter> inputFormatters;
 
   /// If true, the [RenderEditable] created by this widget will not handle
@@ -375,14 +413,18 @@ class EditableText extends StatefulWidget {
   /// This property is false by default.
   final bool rendererIgnoresPointer;
 
+  /// {@template flutter.widgets.editableText.cursorWidth}
   /// How thick the cursor will be.
   ///
   /// Defaults to 2.0
+  /// {@endtemplate}
   final double cursorWidth;
 
+  /// {@template flutter.widgets.editableText.cursorRadius}
   /// How rounded the corners of the cursor should be.
   ///
-  /// By default, the cursor has a Radius of zero.
+  /// By default, the cursor has no radius.
+  /// {@endtemplate}
   final Radius cursorRadius;
 
   /// The appearance of the keyboard.
@@ -392,6 +434,7 @@ class EditableText extends StatefulWidget {
   /// Defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 
+  /// {@template flutter.widgets.editableText.scrollPadding}
   /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view.
   ///
   /// When this widget receives focus and is not completely visible (for example scrolled partially
@@ -400,6 +443,7 @@ class EditableText extends StatefulWidget {
   /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
   ///
   /// Defaults to EdgeInserts.all(20.0).
+  /// {@endtemplate}
   final EdgeInsets scrollPadding;
 
   /// {@template flutter.widgets.editableText.enableInteractiveSelection}

@@ -23,7 +23,7 @@ import '../project.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
-const String gradleVersion = '4.4';
+const String gradleVersion = '4.10.2';
 final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
 
 GradleProject _cachedGradleProject;

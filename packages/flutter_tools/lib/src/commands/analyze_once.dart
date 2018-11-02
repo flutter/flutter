@@ -87,7 +87,8 @@ class AnalyzeOnce extends AnalyzeBase {
       }
     });
     server.onErrors.listen((FileAnalysisErrors fileErrors) {
-      errors.addAll(fileErrors.errors);
+      // Record the issues found (but filter out to do comments).
+      errors.addAll(fileErrors.errors.where((AnalysisError error) => error.type != 'TODO'));
     });
 
     await server.start();

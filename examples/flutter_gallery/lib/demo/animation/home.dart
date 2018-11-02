@@ -292,9 +292,6 @@ class _AllSectionsView extends AnimatedWidget {
     // The layout's progress from from a column to a row. Its value is
     // 0.0 when size.height equals the maxHeight, 1.0 when the size.height
     // equals the midHeight.
-    // The layout's progress from from a column to a row. Its value is
-    // 0.0 when size.height equals the maxHeight, 1.0 when the size.height
-    // equals the midHeight.
     final double tColumnToRow =
       1.0 - ((size.height - midHeight) /
              (maxHeight - midHeight)).clamp(0.0, 1.0);

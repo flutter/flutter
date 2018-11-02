@@ -310,6 +310,19 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
         },
       );
 
+      // This service extension is deprecated and will be removed by 12/1/2018.
+      // Use ext.flutter.inspector.show instead.
+      registerBoolServiceExtension(
+          name: 'debugWidgetInspector',
+          getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
+          setter: (bool value) {
+            if (WidgetsApp.debugShowWidgetInspectorOverride == value)
+              return Future<void>.value();
+            WidgetsApp.debugShowWidgetInspectorOverride = value;
+            return _forceRebuild();
+          }
+      );
+
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
 
       return true;
@@ -698,6 +711,11 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 
   @override
   Future<void> performReassemble() {
+    assert(() {
+      WidgetInspectorService.instance.performReassemble();
+      return true;
+    }());
+
     deferFirstFrameReport();
     if (renderViewElement != null)
       buildOwner.reassemble(renderViewElement);

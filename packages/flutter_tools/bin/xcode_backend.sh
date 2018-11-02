@@ -46,12 +46,35 @@ BuildApp() {
     target_path="${FLUTTER_TARGET}"
   fi
 
+  # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
+  # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
+  # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
+  local build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
+  local artifact_variant="unknown"
+  case "$build_mode" in
+    release*) build_mode="release"; artifact_variant="ios-release";;
+    profile*) build_mode="profile"; artifact_variant="ios-profile";;
+    debug*) build_mode="debug"; artifact_variant="ios";;
+    *) 
+      EchoError "========================================================================"
+      EchoError "ERROR: Unknown FLUTTER_BUILD_MODE: ${build_mode}."
+      EchoError "Valid values are 'Debug', 'Profile', or 'Release' (case insensitive)."
+      EchoError "This is controlled by the FLUTTER_BUILD_MODE environment varaible."
+      EchoError "If that is not set, the CONFIGURATION environment variable is used."
+      EchoError ""
+      EchoError "You can fix this by either adding an appropriately named build"
+      EchoError "configuration, or adding an appriate value for FLUTTER_BUILD_MODE to the"
+      EchoError ".xcconfig file for the current build configuration (${CONFIGURATION})."
+      EchoError "========================================================================"
+      exit -1;;
+  esac
+
   # Archive builds (ACTION=install) should always run in release mode.
-  if [[ "$ACTION" == "install" && "$FLUTTER_BUILD_MODE" != "release" ]]; then
+  if [[ "$ACTION" == "install" && "$build_mode" != "release" ]]; then
     EchoError "========================================================================"
     EchoError "ERROR: Flutter archive builds must be run in Release mode."
     EchoError ""
-    EchoError "To correct, run:"
+    EchoError "To correct, ensure FLUTTER_BUILD_MODE is set to release or run:"
     EchoError "flutter build ios --release"
     EchoError ""
     EchoError "then re-run Archive from Xcode."
@@ -59,24 +82,9 @@ BuildApp() {
     exit -1
   fi
 
-  local build_mode="release"
-  if [[ -n "$FLUTTER_BUILD_MODE" ]]; then
-    build_mode="${FLUTTER_BUILD_MODE}"
-  fi
-
-  local artifact_variant="unknown"
-  case "$build_mode" in
-    release) artifact_variant="ios-release";;
-    profile) artifact_variant="ios-profile";;
-    debug) artifact_variant="ios";;
-    *) echo "Unknown FLUTTER_BUILD_MODE: $FLUTTER_BUILD_MODE";;
-  esac
-
   local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
-  if [[ -n "$FLUTTER_FRAMEWORK_DIR" ]]; then
-    framework_path="${FLUTTER_FRAMEWORK_DIR}"
-  fi
-
+  
+  AssertExists "${framework_path}"  
   AssertExists "${project_path}"
 
   local derived_dir="${SOURCE_ROOT}/Flutter"
@@ -91,7 +99,20 @@ BuildApp() {
   local local_engine_flag=""
   local flutter_framework="${framework_path}/Flutter.framework"
   local flutter_podspec="${framework_path}/Flutter.podspec"
+
   if [[ -n "$LOCAL_ENGINE" ]]; then
+    if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
+      EchoError "========================================================================"
+      EchoError "ERROR: Requested build with Flutter local engine at '${LOCAL_ENGINE}'"
+      EchoError "This engine is not compatible with FLUTTER_BUILD_MODE: '${build_mode}'."
+      EchoError "You can fix this by updating the LOCAL_ENGINE environment variable, or"
+      EchoError "by running:"
+      EchoError "  flutter build ios --local-engine=ios_${build_mode}"
+      EchoError "or"
+      EchoError "  flutter build ios --local-engine=ios_${build_mode}_unopt"
+      EchoError "========================================================================"
+      exit -1
+    fi
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
     flutter_framework="${LOCAL_ENGINE}/Flutter.framework"
     flutter_podspec="${LOCAL_ENGINE}/Flutter.podspec"
@@ -129,6 +150,16 @@ BuildApp() {
     StreamOutput " ├─Building Dart code..."
     # Transform ARCHS to comma-separated list of target architectures.
     local archs="${ARCHS// /,}"
+    if [[ $archs =~ .*i386.* || $archs =~ .*x86_64.* ]]; then
+      EchoError "========================================================================"
+      EchoError "ERROR: Flutter does not support running in profile or release mode on"
+      EchoError "the Simulator (this build was: '$build_mode')."
+      EchoError "You can ensure Flutter runs in Debug mode with your host app in release"
+      EchoError "mode by setting FLUTTER_BUILD_MODE=debug in the .xcconfig associated"
+      EchoError "with the ${CONFIGURATION} build configuration."
+      EchoError "========================================================================"
+      exit -1
+    fi
     RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
       ${verbose_flag}                                                       \
       build aot                                                             \
@@ -309,8 +340,10 @@ EmbedFlutterFrameworks() {
   # Prefer the hidden .ios folder, but fallback to a visible ios folder if .ios
   # doesn't exist.
   local flutter_ios_out_folder="${FLUTTER_APPLICATION_PATH}/.ios/Flutter"
+  local flutter_ios_engine_folder="${FLUTTER_APPLICATION_PATH}/.ios/Flutter/engine"
   if [[ ! -d ${flutter_ios_out_folder} ]]; then
     flutter_ios_out_folder="${FLUTTER_APPLICATION_PATH}/ios/Flutter"
+    flutter_ios_engine_folder="${FLUTTER_APPLICATION_PATH}/ios/Flutter"
   fi
 
   AssertExists "${flutter_ios_out_folder}"
@@ -330,7 +363,7 @@ EmbedFlutterFrameworks() {
   # Remove it first since Xcode might be trying to hold some of these files - this way we're 
   # sure to get a clean copy.
   RunCommand rm -rf -- "${xcode_frameworks_dir}/Flutter.framework"
-  RunCommand cp -Rv -- "${flutter_ios_out_folder}/engine/Flutter.framework" "${xcode_frameworks_dir}/"
+  RunCommand cp -Rv -- "${flutter_ios_engine_folder}/Flutter.framework" "${xcode_frameworks_dir}/"
   
   # Sign the binaries we moved.
   local identity="${EXPANDED_CODE_SIGN_IDENTITY_NAME:-$CODE_SIGN_IDENTITY}"

@@ -20,6 +20,7 @@ import 'base/version.dart';
 import 'cache.dart';
 import 'device.dart';
 import 'error_messages.dart';
+import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
@@ -82,6 +83,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
       if (androidWorkflow.appliesToHostPlatform)
         _workflows.add(androidWorkflow);
+
+      if (fuchsiaWorkflow.appliesToHostPlatform)
+        _workflows.add(fuchsiaWorkflow);
     }
     return _workflows;
   }
@@ -160,6 +164,12 @@ class Doctor {
     }
 
     return buffer.toString();
+  }
+
+  Future<bool> checkRemoteArtifacts(String engineRevision) async {
+    final Cache cache = Cache();
+    final FlutterEngine engine = FlutterEngine(cache);
+    return await engine.areRemoteArtifactsAvailable(engineVersion: engineRevision);
   }
 
   /// Print information about the state of installed tooling.

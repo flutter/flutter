@@ -482,6 +482,28 @@ void main() {
     expect(binding.frameScheduled, isFalse);
   });
 
+  test('Service extensions - debugWidgetInspector', () async {
+    Map<String, dynamic> result;
+    expect(binding.frameScheduled, isFalse);
+    expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
+    result = await binding.testExtension('debugWidgetInspector', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
+    result = await binding.testExtension('debugWidgetInspector', <String, String>{ 'enabled': 'true' });
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(WidgetsApp.debugShowWidgetInspectorOverride, true);
+    result = await binding.testExtension('debugWidgetInspector', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(WidgetsApp.debugShowWidgetInspectorOverride, true);
+    result = await binding.testExtension('debugWidgetInspector', <String, String>{ 'enabled': 'false' });
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
+    result = await binding.testExtension('debugWidgetInspector', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
+    expect(binding.frameScheduled, isFalse);
+  });
+
   test('Service extensions - timeDilation', () async {
     Map<String, dynamic> result;
 
@@ -506,12 +528,18 @@ void main() {
   });
 
   test('Service extensions - posttest', () async {
-    // See widget_inspector_test.dart for tests of the 15 ext.flutter.inspector
+    // See widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions included in this count.
+    int widgetInspectorExtensionCount = 15;
+    if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
+      // Some inspector extensions are only exposed if widget creation locations
+      // are tracked.
+      widgetInspectorExtensionCount += 2;
+    }
 
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 37);
+    expect(binding.extensions.length, 23 + widgetInspectorExtensionCount);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;

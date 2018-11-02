@@ -4032,7 +4032,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     super.visitChildrenForSemantics(visitor);
   }
 
-
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);

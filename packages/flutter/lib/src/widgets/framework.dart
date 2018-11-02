@@ -1545,6 +1545,11 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///  * [StatelessWidget], for widgets that always build the same way given a
 ///    particular configuration and ambient state.
 ///  * [Widget], for an overview of widgets in general.
+///  * [InheritedNotifier], an inherited widget whose value can be a
+///    [Listenable], and which will notify dependents whenever the value
+///    sends notifications.
+///  * [InheritedModel], an inherited widget that allows clients to subscribe
+///    to changes for subparts of the value.
 abstract class InheritedWidget extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -3509,6 +3514,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (!_active || !_dirty)
       return;
     assert(() {
+      if (debugOnRebuildDirtyWidget != null) {
+        debugOnRebuildDirtyWidget(this, _debugBuiltOnce);
+      }
       if (debugPrintRebuildDirtyWidgets) {
         if (!_debugBuiltOnce) {
           debugPrint('Building $this');
@@ -3631,6 +3639,11 @@ typedef IndexedWidgetBuilder = Widget Function(BuildContext context, int index);
 /// Used by [AnimatedBuilder.builder], as well as [WidgetsApp.builder] and
 /// [MaterialApp.builder].
 typedef TransitionBuilder = Widget Function(BuildContext context, Widget child);
+
+/// A Signiture for a function that creates a widget given [onStepContinue] and [onStepCancel].
+///
+/// Used by [Stepper.builder].
+typedef ControlsWidgetBuilder = Widget Function(BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel});
 
 /// An [Element] that composes other [Element]s.
 ///
@@ -3941,15 +3954,26 @@ abstract class ProxyElement extends ComponentElement {
     assert(widget != newWidget);
     super.update(newWidget);
     assert(widget == newWidget);
-    notifyClients(oldWidget);
+    updated(oldWidget);
     _dirty = true;
     rebuild();
   }
 
-  /// Notify other objects that the widget associated with this element has changed.
+  /// Called during build when the [widget] has changed.
   ///
-  /// Called during [update] after changing the widget associated with this
-  /// element but before rebuilding this element.
+  /// By default, calls [notifyClients]. Subclasses may override this method to
+  /// avoid calling [notifyClients] unnecessarily (e.g. if the old and new
+  /// widgets are equivalent).
+  @protected
+  void updated(covariant ProxyWidget oldWidget) {
+    notifyClients(oldWidget);
+  }
+
+  /// Notify other objects that the widget associated with this element has
+  /// changed.
+  ///
+  /// Called during [update] (via [updated]) after changing the widget
+  /// associated with this element but before rebuilding this element.
   @protected
   void notifyClients(covariant ProxyWidget oldWidget);
 }
@@ -4186,18 +4210,28 @@ class InheritedElement extends ProxyElement {
   /// Calls [Element.didChangeDependencies] of all dependent elements, if
   /// [InheritedWidget.updateShouldNotify] returns true.
   ///
-  /// Notifies all dependent elements that this inherited widget has changed.
+  /// Called by [update], immediately prior to [build].
   ///
-  /// [InheritedElement] calls this function if the [widget]'s
-  /// [InheritedWidget.updateShouldNotify] returns true.
+  /// Calls [notifyClients] to actually trigger the notifications.
+  @override
+  void updated(InheritedWidget oldWidget) {
+    if (widget.updateShouldNotify(oldWidget))
+      super.updated(oldWidget);
+  }
+
+  /// Notifies all dependent elements that this inherited widget has changed, by
+  /// calling [Element.didChangeDependencies].
   ///
-  /// This method must be called during the build phase. Usually this method is
-  /// called automatically when an inherited widget is rebuilt, e.g. as a
-  /// result of calling [State.setState] above the inherited widget.
+  /// This method must only be called during the build phase. Usually this
+  /// method is called automatically when an inherited widget is rebuilt, e.g.
+  /// as a result of calling [State.setState] above the inherited widget.
+  ///
+  /// See also:
+  ///
+  ///  * [InheritedNotifier], a subclass of [InheritedWidget] that also calls
+  ///    this method when its [Listenable] sends a notification.
   @override
   void notifyClients(InheritedWidget oldWidget) {
-    if (!widget.updateShouldNotify(oldWidget))
-      return;
     assert(_debugCheckOwnerBuildTargetExists('notifyClients'));
     for (Element dependent in _dependents.keys) {
       assert(() {

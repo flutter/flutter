@@ -13,6 +13,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'build_info.dart';
+import 'bundle.dart';
 import 'compile.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
@@ -431,10 +432,13 @@ class DevFS {
     Set<String> fileFilter,
     @required ResidentCompiler generator,
     String dillOutputPath,
+    @required bool trackWidgetCreation,
     bool fullRestart = false,
     String projectRootPath,
     @required String pathToReload,
   }) async {
+    assert(trackWidgetCreation != null);
+    assert(generator != null);
     // Mark all entries as possibly deleted.
     for (DevFSContent content in _entries.values) {
       content._exists = false;
@@ -526,7 +530,7 @@ class DevFS {
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
       invalidatedFiles,
-      outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
+      outputPath:  dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
       packagesFilePath : _packagesFilePath,
     );
     // Don't send full kernel file that would overwrite what VM already
