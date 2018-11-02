@@ -475,7 +475,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   String get name => device.name;
 
   void _start() {
-    iMobileDevice.startLogger().then<void>((Process process) {
+    iMobileDevice.startLogger(device.id).then<void>((Process process) {
       _process = process;
       _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
       _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
