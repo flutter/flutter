@@ -123,26 +123,25 @@ class AttachCommand extends FlutterCommand {
     bool attachLogger = false;
     if (devicePort == null) {
       if (device is FuchsiaDevice) {
-        Status status;
+        attachLogger = true;
+        final String module = argResults['module'];
+        if (module == null) {
+          throwToolExit('\'--module\' is requried for attaching to a Fuchsia device');
+        }
+        ipv6 = _isIpv6(device.id);
+        final List<int> ports = await device.servicePorts();
+        if (ports.isEmpty) {
+          throwToolExit('No active service ports on ${device.name}');
+        }
+        final List<int> localPorts = <int>[];
+        for (int port in ports) {
+          localPorts.add(await device.portForwarder.forward(port));
+        }
+        final Status status = logger.startProgress(
+          'Waiting for a connection from Flutter on ${device.name}...',
+          expectSlowOperation: true,
+        );
         try {
-          attachLogger = true;
-          final String module = argResults['module'];
-          if (module == null) {
-            throwToolExit('\'--module\' is requried for attaching to a Fuchsia device');
-          }
-          ipv6 = _isIpv6(device.id);
-          final List<int> ports = await device.servicePorts();
-          if (ports.isEmpty) {
-            throwToolExit('No active service ports on ${device.name}');
-          }
-          final List<int> localPorts = <int>[];
-          for (int port in ports) {
-            localPorts.add(await device.portForwarder.forward(port));
-          }
-          status = logger.startProgress(
-            'Waiting for a connection from Flutter on ${device.name}...',
-            expectSlowOperation: true,
-          );
           final int localPort = await device.findIsolatePort(module, localPorts);
           if (localPort == null) {
             throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
