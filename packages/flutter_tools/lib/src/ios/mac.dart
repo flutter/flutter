@@ -127,7 +127,7 @@ class IMobileDevice {
   }
 
   /// Starts `idevicesyslog` and returns the running process.
-  Future<Process> startLogger() => runCommand(<String>['idevicesyslog']);
+  Future<Process> startLogger(String deviceID) => runCommand(<String>['idevicesyslog', '-u', deviceID]);
 
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
