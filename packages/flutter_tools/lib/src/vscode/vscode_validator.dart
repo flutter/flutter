@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/version.dart';
 import '../doctor.dart';
+import '../error_messages.dart';
 import 'vscode.dart';
 
 class VsCodeValidator extends DoctorValidator {
@@ -28,8 +29,8 @@ class VsCodeValidator extends DoctorValidator {
     ValidationType type = ValidationType.missing;
     final String vsCodeVersionText = _vsCode.version == Version.unknown
         ? null
-        : 'version ${_vsCode.version}';
-    messages.add(ValidationMessage('VS Code at ${_vsCode.directory}'));
+        : errorMessages.vsCodeVersion(_vsCode.version.toString());
+    messages.add(ValidationMessage(errorMessages.vsCodeLocation(_vsCode.directory)));
     if (_vsCode.isValid) {
       type = ValidationType.installed;
       messages.addAll(_vsCode.validationMessages
@@ -38,8 +39,7 @@ class VsCodeValidator extends DoctorValidator {
       type = ValidationType.partial;
       messages.addAll(_vsCode.validationMessages
           .map<ValidationMessage>((String m) => ValidationMessage.error(m)));
-      messages.add(ValidationMessage(
-          'Flutter extension not installed; install from\n$extensionMarketplaceUrl'));
+      messages.add(ValidationMessage(errorMessages.vsCodeFlutterExtensionMissing));
     }
 
     return ValidationResult(type, messages, statusInfo: vsCodeVersionText);

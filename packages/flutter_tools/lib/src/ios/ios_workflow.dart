@@ -10,6 +10,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../doctor.dart';
+import '../error_messages.dart';
 import 'cocoapods.dart';
 import 'mac.dart';
 import 'plist_utils.dart' as plist;
@@ -78,7 +79,7 @@ class IOSValidator extends DoctorValidator {
     if (xcode.isInstalled) {
       xcodeStatus = ValidationType.installed;
 
-      messages.add(ValidationMessage('Xcode at ${xcode.xcodeSelectPath}'));
+      messages.add(ValidationMessage(errorMessages.iOSXcodeLocation(xcode.xcodeSelectPath)));
 
       xcodeVersionInfo = xcode.versionText;
       if (xcodeVersionInfo.contains(','))
@@ -88,40 +89,25 @@ class IOSValidator extends DoctorValidator {
       if (!xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(
-          'Flutter requires a minimum Xcode version of $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor.0.\n'
-          'Download the latest version or update via the Mac App Store.'
+            errorMessages.iOSXcodeOutdated(kXcodeRequiredVersionMajor, kXcodeRequiredVersionMinor)
         ));
       }
 
       if (!xcode.eulaSigned) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(
-          'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.'
-        ));
+        messages.add(ValidationMessage.error(errorMessages.iOSXcodeEula));
       }
       if (!xcode.isSimctlInstalled) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(
-          'Xcode requires additional components to be installed in order to run.\n'
-          'Launch Xcode and install additional required components when prompted.'
-        ));
+        messages.add(ValidationMessage.error(errorMessages.iOSXcodeMissingSimct));
       }
 
     } else {
       xcodeStatus = ValidationType.missing;
       if (xcode.xcodeSelectPath == null || xcode.xcodeSelectPath.isEmpty) {
-        messages.add(ValidationMessage.error(
-            'Xcode not installed; this is necessary for iOS development.\n'
-            'Download at https://developer.apple.com/xcode/download/.'
-        ));
+        messages.add(ValidationMessage.error(errorMessages.iOSXcodeMissing));
       } else {
-        messages.add(ValidationMessage.error(
-            'Xcode installation is incomplete; a full installation is necessary for iOS development.\n'
-            'Download at: https://developer.apple.com/xcode/download/\n'
-            'Or install Xcode via the App Store.\n'
-            'Once installed, run:\n'
-            '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer'
-        ));
+        messages.add(ValidationMessage.error(errorMessages.iOSXcodeIncomplete));
       }
     }
 
@@ -131,56 +117,31 @@ class IOSValidator extends DoctorValidator {
 
       if (!iMobileDevice.isInstalled) {
         brewStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(
-            'libimobiledevice and ideviceinstaller are not installed. To install, run:\n'
-            '  brew install --HEAD libimobiledevice\n'
-            '  brew install ideviceinstaller'
-        ));
+        messages.add(ValidationMessage.error(errorMessages.iOSIMobileDeviceMissing));
       } else if (!await iMobileDevice.isWorking) {
         brewStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(
-            'Verify that all connected devices have been paired with this computer in Xcode.\n'
-            'If all devices have been paired, libimobiledevice and ideviceinstaller may require updating.\n'
-            'To update, run:\n'
-            '  brew uninstall --ignore-dependencies libimobiledevice\n'
-            '  brew install --HEAD libimobiledevice\n'
-            '  brew install ideviceinstaller'
-        ));
+        messages.add(ValidationMessage.error(errorMessages.iOSIMobileDeviceBroken));
       } else if (!await hasIDeviceInstaller) {
         brewStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(
-          'ideviceinstaller is not installed; this is used to discover connected iOS devices.\n'
-          'To install, run:\n'
-          '  brew install --HEAD libimobiledevice\n'
-          '  brew install ideviceinstaller'
-        ));
+        messages.add(ValidationMessage.error(errorMessages.iOSDeviceInstallerMissing));
       }
 
       // Check ios-deploy is installed at meets version requirements.
       if (await hasIosDeploy) {
-        messages.add(ValidationMessage('ios-deploy ${await iosDeployVersionText}'));
+        messages.add(ValidationMessage(errorMessages.iOSDeployVersion(await iosDeployVersionText)));
       }
       if (!await _iosDeployIsInstalledAndMeetsVersionCheck) {
         brewStatus = ValidationType.partial;
         if (await hasIosDeploy) {
-          messages.add(ValidationMessage.error(
-            'ios-deploy out of date ($iosDeployMinimumVersion is required). To upgrade:\n'
-            '  brew upgrade ios-deploy'
-          ));
+          messages.add(ValidationMessage.error(errorMessages.iOSDeployOutdated(iosDeployMinimumVersion)));
         } else {
-          messages.add(ValidationMessage.error(
-            'ios-deploy not installed. To install:\n'
-            '  brew install ios-deploy'
-          ));
+          messages.add(ValidationMessage.error(errorMessages.iOSDeployMissing));
         }
       }
 
     } else {
       brewStatus = ValidationType.missing;
-      messages.add(ValidationMessage.error(
-          'Brew not installed; use this to install tools for iOS device development.\n'
-              'Download brew at https://brew.sh/.'
-      ));
+      messages.add(ValidationMessage.error(errorMessages.iOSBrewMissing));
     }
 
     return ValidationResult(
@@ -211,34 +172,19 @@ class CocoaPodsValidator extends DoctorValidator {
 
       if (cocoaPodsStatus == CocoaPodsStatus.recommended) {
         if (await cocoaPods.isCocoaPodsInitialized) {
-          messages.add(ValidationMessage('CocoaPods version ${await cocoaPods.cocoaPodsVersionText}'));
+          messages.add(ValidationMessage(errorMessages.cocoaPodsVersion(await cocoaPods.cocoaPodsVersionText)));
         } else {
           status = ValidationType.partial;
-          messages.add(ValidationMessage.error(
-            'CocoaPods installed but not initialized.\n'
-            '$noCocoaPodsConsequence\n'
-            'To initialize CocoaPods, run:\n'
-            '  pod setup\n'
-            'once to finalize CocoaPods\' installation.'
-          ));
+          messages.add(ValidationMessage.error(errorMessages.cocoaPodsUninitialized));
         }
       } else {
         if (cocoaPodsStatus == CocoaPodsStatus.notInstalled) {
           status = ValidationType.missing;
-          messages.add(ValidationMessage.error(
-            'CocoaPods not installed.\n'
-            '$noCocoaPodsConsequence\n'
-            'To install:\n'
-            '$cocoaPodsInstallInstructions'
-          ));
+          messages.add(ValidationMessage.error(errorMessages.cocoaPodsMissing));
         } else {
           status = ValidationType.partial;
           messages.add(ValidationMessage.hint(
-            'CocoaPods out of date (${cocoaPods.cocoaPodsRecommendedVersion} is recommended).\n'
-            '$noCocoaPodsConsequence\n'
-            'To upgrade:\n'
-            '$cocoaPodsUpgradeInstructions'
-          ));
+              errorMessages.cocoaPodsOutdated(cocoaPods.cocoaPodsRecommendedVersion)));
         }
       }
     } else {
