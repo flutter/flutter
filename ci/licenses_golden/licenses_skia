@@ -1,4 +1,4 @@
-Signature: 5e00e5ed4bcf74d55663d10ad62a29c6
+Signature: 54c8d22f6f67488f47a801f05f0ef075
 
 UNUSED LICENSES:
 
@@ -990,7 +990,6 @@ FILE: ../../../third_party/skia/src/core/SkNormalMapSource.h
 FILE: ../../../third_party/skia/src/core/SkNormalSource.cpp
 FILE: ../../../third_party/skia/src/core/SkNormalSource.h
 FILE: ../../../third_party/skia/src/core/SkOverdrawCanvas.cpp
-FILE: ../../../third_party/skia/src/core/SkPM4f.h
 FILE: ../../../third_party/skia/src/core/SkPathMeasurePriv.h
 FILE: ../../../third_party/skia/src/core/SkRasterPipeline.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterPipeline.h
@@ -4378,7 +4377,6 @@ FILE: ../../../third_party/skia/src/core/SkMaskBlurFilter.h
 FILE: ../../../third_party/skia/src/core/SkRasterClipStack.h
 FILE: ../../../third_party/skia/src/core/SkSafeMath.h
 FILE: ../../../third_party/skia/src/core/SkSpriteBlitter_RGB565.cpp
-FILE: ../../../third_party/skia/src/core/SkUnPreMultiplyPriv.h
 FILE: ../../../third_party/skia/src/core/SkVertices.cpp
 FILE: ../../../third_party/skia/src/core/SkVptr.h
 FILE: ../../../third_party/skia/src/core/SkWritePixelsRec.h
