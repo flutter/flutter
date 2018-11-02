@@ -146,13 +146,13 @@ class AttachCommand extends FlutterCommand {
           if (localPort == null) {
             throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
           }
+          observatoryUri = ipv6
+            ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
+            : Uri.parse('http://$ipv4Loopback:$localPort/');
           status.stop();
         } finally {
           status.cancel();
         }
-        observatoryUri = ipv6
-          ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
-          : Uri.parse('http://$ipv4Loopback:$localPort/');
       } else {
         ProtocolDiscovery observatoryDiscovery;
         try {
