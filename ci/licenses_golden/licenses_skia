@@ -1,4 +1,4 @@
-Signature: b7d6a45cc3c766b0d23b3a77b3a99f98
+Signature: 5e00e5ed4bcf74d55663d10ad62a29c6
 
 UNUSED LICENSES:
 
@@ -1299,6 +1299,7 @@ FILE: ../../../third_party/skia/bench/PolyUtilsBench.cpp
 FILE: ../../../third_party/skia/bench/ShaderMaskFilterBench.cpp
 FILE: ../../../third_party/skia/experimental/nima/NimaActor.cpp
 FILE: ../../../third_party/skia/experimental/nima/NimaActor.h
+FILE: ../../../third_party/skia/experimental/pvg/draw_msg.proto
 FILE: ../../../third_party/skia/fuzz/FuzzCommon.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzPathMeasure.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzRegionOp.cpp
