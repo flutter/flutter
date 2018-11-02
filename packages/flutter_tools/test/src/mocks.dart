@@ -108,18 +108,24 @@ ro.build.version.codename=REL
 ''';
 }
 
+/// An SDK installation with several SDK levels (19, 22, 23).
 class MockBrokenAndroidSdk extends Mock implements AndroidSdk {
-  static Directory createSdkDirectory() {
-    final Directory dir = fs.systemTempDirectory.createTempSync('lnkzx.');
+  static Directory createSdkDirectory({
+    bool withAndroidN = false,
+    String withNdkDir,
+    bool withNdkSysroot = false,
+    bool withSdkManager = true,
+  }) {
+    final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
 
-    _createSdkFile(dir, 'plmadfsdb');
+    _createSdkFile(dir, 'platform-tools/adb');
 
-    _createSdkFile(dir, 'bmasdfma;');
-    _createSdkFile(dir, 'buillknasfdladsf');
-    _createSdkFile(dir, 'bujasdfljt');
+    _createSdkFile(dir, 'build-tools/sda/aapt');
+    _createSdkFile(dir, 'build-tools/af/aapt');
+    _createSdkFile(dir, 'build-tools/ljkasd/aapt');
 
-    _createSdkFile(dir, 'platformljksadfr');
-    _createSdkFile(dir, 'platformsljkdsfar');
+    _createSdkFile(dir, 'platforms/android-22/android.jar');
+    _createSdkFile(dir, 'platforms/android-23/android.jar');
 
     return dir;
   }

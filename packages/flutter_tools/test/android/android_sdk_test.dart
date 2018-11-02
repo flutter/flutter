@@ -11,9 +11,11 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
+import '../../lib/src/base/version.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
+
 
 class MockProcessManager extends Mock implements ProcessManager {}
 
@@ -83,7 +85,7 @@ void main() {
       ProcessManager: () => processManager,
     });
 
-    testUsingContext('returns sdk is well formed', () {
+    testUsingContext('returns validate sdk is well formed', () {
       sdkDir = MockBrokenAndroidSdk.createSdkDirectory();
       Config.instance.setValue('android-sdk', sdkDir.path);
 
@@ -91,8 +93,10 @@ void main() {
       when(processManager.canRun(sdk.adbPath)).thenReturn(true);
 
       final List<String> validationIssues = sdk.validateSdkWellFormed();
-      expect(validationIssues.first, 'what is this?');
-
+      expect(validationIssues.first, 'No valid Android SDK platforms found in'
+        ' /.tmp_rand0/flutter_mock_android_sdk.rand0/platforms.Candidates were:\n'
+        '  - android-22\n'
+        '  - android-23');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => processManager,
