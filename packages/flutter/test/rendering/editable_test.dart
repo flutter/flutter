@@ -65,4 +65,24 @@ void main() {
       ),
     );
   });
+
+  // Test that clipping will be used even when the text fits within the visible
+  // region if the start position of the text is offset (e.g. during scrolling
+  // animation).
+  test('correct clipping', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      text: const TextSpan(
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        text: 'A',
+      ),
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
+      locale: const Locale('en', 'US'),
+      offset: ViewportOffset.fixed(10.0),
+      textSelectionDelegate: delegate,
+    );
+    editable.layout(BoxConstraints.loose(Size(1000.0, 1000.0)));
+    expect(editable.hasVisualOverflow, true);
+  });
 }
