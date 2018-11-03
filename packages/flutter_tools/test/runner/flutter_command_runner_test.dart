@@ -43,9 +43,12 @@ void main() {
       fs.directory(_kProjectRoot).createSync(recursive: true);
       fs.currentDirectory = _kProjectRoot;
 
-      platform = FakePlatform(environment: <String, String>{
-        'FLUTTER_ROOT': _kFlutterRoot,
-      });
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+        },
+        version: '1 2 3 4 5',
+      );
 
       runner = createTestCommandRunner(DummyFlutterCommand());
       clock = MockClock();
@@ -81,19 +84,31 @@ void main() {
 
     group('version', () {
       testUsingContext('checks that Flutter toJson output reports the flutter framework version', () async {
+        final ProcessResult result = ProcessResult(0, 0, 'random', '0');
+
+        when(processManager.runSync('git log -n 1 --pretty=format:%H'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+        when(processManager.runSync('git rev-parse --abbrev-ref --symbolic @{u}'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+        when(processManager.runSync('git rev-parse --abbrev-ref HEAD'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+        when(processManager.runSync('git ls-remote --get-url master'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+        when(processManager.runSync('git log -n 1 --pretty=format:%ar'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+        when(processManager.runSync('git describe --match v*.*.* --first-parent --long --tags'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+        when(processManager.runSync('git log -n 1 --pretty=format:%ad --date=iso'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+
         final FlutterVersion version = FlutterVersion(const Clock());
-        final ProcessResult result = ProcessResult(0, 0, 'd52f315c35ae0d510777552fa4694c0979c09e3a', null);
-        when(processManager.runSync('git log -n 1 --pretty=format:%H'.split(' '))).thenReturn(result);
-        when(processManager.runSync('git rev-parse --abbrev-ref --symbolic @{u}'.split(' '))).thenReturn(result);
-        when(processManager.runSync('git rev-parse --abbrev-ref HEAD'.split(' '))).thenReturn(result);
-        when(processManager.runSync('git log -n 1 --pretty=format:%H'.split(' '))).thenReturn(result);
 
-
-        expect(version.toJson(), "what is this");
+        // Because the hash depends on the time, we just use the 0.0.0-unknown here.
+        expect(version.toJson()['frameworkVersion'], '0.0.0-unknown');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         Platform: () => platform,
-        Clock: () => clock,
+        ProcessManager: () => processManager,
       }, initializeFlutterRoot: false);
     });
 

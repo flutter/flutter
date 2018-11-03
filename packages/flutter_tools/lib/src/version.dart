@@ -21,10 +21,8 @@ class FlutterVersion {
   @visibleForTesting
   FlutterVersion([this._clock = const Clock()]) {
     _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
-    print(_channel.toString());
     final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
     _branch = branch == 'HEAD' ? _channel : branch;
-
     final int slash = _channel.indexOf('/');
     if (slash != -1) {
       final String remote = _channel.substring(0, slash);
@@ -557,6 +555,7 @@ class GitTagVersion {
   }
 
   String frameworkVersionFor(String revision) {
+    print(hash.toString());
     if (x == null || y == null || z == null || !revision.startsWith(hash))
       return '0.0.0-unknown';
     if (commits == 0)
