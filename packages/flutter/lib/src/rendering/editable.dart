@@ -923,8 +923,8 @@ class RenderEditable extends RenderBox {
 
   double _maxScrollExtent = 0;
 
-    // We need to check the paint offset here because during animation, the start of
-    // the text may position outside the visible region even when the text fits.
+  // We need to check the paint offset here because during animation, the start of
+  // the text may position outside the visible region even when the text fits.
   bool get _hasVisualOverflow => _maxScrollExtent > 0 || _paintOffset != Offset.zero;
 
   /// Returns the local coordinates of the endpoints of the given selection.
