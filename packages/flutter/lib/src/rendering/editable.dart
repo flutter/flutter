@@ -925,7 +925,7 @@ class RenderEditable extends RenderBox {
 
     // We need to check the paint offset here because during animation, the start of
     // the text may position outside the visible region even when the text fits.
-  bool get hasVisualOverflow => _maxScrollExtent > 0 || _paintOffset != Offset.zero;
+  bool get _hasVisualOverflow => _maxScrollExtent > 0 || _paintOffset != Offset.zero;
 
   /// Returns the local coordinates of the endpoints of the given selection.
   ///
@@ -1204,14 +1204,14 @@ class RenderEditable extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     _layoutText(constraints.maxWidth);
-    if (hasVisualOverflow)
+    if (_hasVisualOverflow)
       context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents);
     else
       _paintContents(context, offset);
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderObject child) => hasVisualOverflow ? Offset.zero & size : null;
+  Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
