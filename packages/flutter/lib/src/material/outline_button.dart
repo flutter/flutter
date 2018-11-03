@@ -267,11 +267,12 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
     if (widget.borderSide?.style == BorderStyle.none)
       return widget.borderSide;
 
+    // border colors according to material spec
     final Color color = (widget.enabled
         ? (_pressed
         ? (widget.highlightedBorderColor ?? widget.borderSide?.color)
         : widget.borderSide?.color)
-        : widget.disabledBorderColor) ?? (isDark ? const Color(0x3bffffff) : const Color(0x3b000000));
+        : widget.disabledBorderColor) ?? (isDark ? const Color(0x1effffff) : const Color(0x1e000000));
 
     return BorderSide(
       color: color,
