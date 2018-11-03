@@ -50,6 +50,7 @@ import 'package:path/path.dart' as path;
 // To run this: bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart
 
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
+final String _defaultFlutterPackage = path.join(_flutterRoot, 'packages', 'flutter', 'lib');
 final String _flutter = path.join(_flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 
 void main(List<String> arguments) {
@@ -58,7 +59,7 @@ void main(List<String> arguments) {
     // Used for testing.
     flutterPackage = Directory(arguments.single);
   } else {
-    flutterPackage = Directory(path.join(_flutterRoot, 'packages', 'flutter', 'lib'));
+    flutterPackage = Directory(_defaultFlutterPackage);
   }
   exitCode = SampleChecker(flutterPackage).checkSamples();
 }
@@ -66,17 +67,17 @@ void main(List<String> arguments) {
 /// Checks samples and code snippets for analysis errors.
 ///
 /// Extracts dartdoc content from flutter package source code, identifies code
-/// sections, and writes them to a temporary directory, where the analyzer is
-/// used to analyze the sources for problems. If problems are found, the error
-/// output from the analyzer is parsed for details, and the problem locations
-/// are translated back to the source location.
+/// sections, and writes them to a temporary directory, where 'flutter analyze'
+/// is used to analyze the sources for problems. If problems are found, the
+/// error output from the analyzer is parsed for details, and the problem
+/// locations are translated back to the source location.
 ///
 /// For snippets, the snippets are generated using the snippets tool, and they
 /// are analyzed with the samples. If errors are found in snippets, then the
 /// line number of the start of the snippet is given instead of the actual error
-/// line, since snippets get reformatted when written, and the line counts don't
-/// necessarily match. It does, however, print the source of the problematic
-/// line.
+/// line, since snippets get reformatted when written, and the line numbers
+/// don't necessarily match. It does, however, print the source of the
+/// problematic line.
 class SampleChecker {
   SampleChecker(this._flutterPackage) {
     _tempDir = Directory.systemTemp.createTempSync('flutter_analyze_sample_code.');
@@ -127,8 +128,10 @@ class SampleChecker {
     return path.canonicalize(path.join(platformScriptPath, '..', 'snippets', 'lib', 'main.dart'));
   }
 
-  static List<File> _listDartFiles(Directory directory, {bool recursive: false}) {
-    return directory.listSync(recursive: recursive, followLinks: false).whereType<File>().where((File file) => path.extension(file.path) == '.dart').toList();
+  static List<File> _listDartFiles(Directory directory, {bool recursive = false}) {
+    return directory.listSync(recursive: recursive, followLinks: false)
+      .whereType<File>()
+      .where((File file) => path.extension(file.path) == '.dart').toList();
   }
 
   /// Computes the headers needed for each sample file.
@@ -142,7 +145,7 @@ class SampleChecker {
       buffer.add('import \'dart:typed_data\';');
       buffer.add('import \'dart:ui\' as ui;');
       buffer.add('import \'package:flutter_test/flutter_test.dart\';');
-      for (File file in _listDartFiles(_flutterPackage)) {
+      for (File file in _listDartFiles(Directory(_defaultFlutterPackage))) {
         buffer.add('');
         buffer.add('// ${file.path}');
         buffer.add('import \'package:flutter/${path.basename(file.path)}\';');
