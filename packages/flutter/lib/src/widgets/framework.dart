@@ -2580,6 +2580,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   bool _active = false;
 
+  bool _building = false;
+
   @mustCallSuper
   void _reassemble() {
     markNeedsBuild();
@@ -3222,6 +3224,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   Map<Type, InheritedElement> _inheritedWidgets;
+  Set<InheritedElement> _buildDependencies;
   Set<InheritedElement> _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
@@ -3246,6 +3249,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(ancestor != null);
     _dependencies ??= HashSet<InheritedElement>();
     _dependencies.add(ancestor);
+    if (_building) {
+      _buildDependencies ??= HashSet<InheritedElement>();
+      _buildDependencies.add(ancestor);
+    }
     ancestor.updateDependencies(this, aspect);
     return ancestor.widget;
   }
@@ -3527,13 +3534,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       return true;
     }());
 
-    if (_dependencies != null && _dependencies.isNotEmpty) {
-      for (InheritedElement dependency in _dependencies)
+    if (_buildDependencies != null && _buildDependencies.isNotEmpty) {
+      for (InheritedElement dependency in _buildDependencies)
         dependency._dependents.remove(this);
-      _dependencies.clear();
+      _buildDependencies.clear();
     }
-
+    _building = true;
     performRebuild();
+    _building = false;
     assert(() {
       assert(owner._debugCurrentBuildTarget == this);
       owner._debugCurrentBuildTarget = debugPreviousBuildTarget;
