@@ -130,7 +130,7 @@ class IMobileDevice {
     try {
       final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key, '--simple']);
       if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
-        throw IOSDeviceNotFoundError('idevice_id returned an error:\n${result.stdout}');
+        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
       if (result.exitCode != 0)
         throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
       return result.stdout.trim();
