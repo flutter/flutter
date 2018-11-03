@@ -11,9 +11,9 @@ import '../intellij/intellij.dart';
 import 'android_studio.dart';
 
 class AndroidStudioValidator extends DoctorValidator {
-  final AndroidStudio _studio;
-
   AndroidStudioValidator(this._studio) : super('Android Studio');
+
+  final AndroidStudio _studio;
 
   static List<DoctorValidator> get allValidators {
     final List<DoctorValidator> validators = <DoctorValidator>[];
@@ -22,7 +22,7 @@ class AndroidStudioValidator extends DoctorValidator {
       validators.add(NoAndroidStudioValidator());
     } else {
       validators.addAll(studios
-          .map((AndroidStudio studio) => AndroidStudioValidator(studio)));
+          .map<DoctorValidator>((AndroidStudio studio) => AndroidStudioValidator(studio)));
     }
     return validators;
   }
@@ -46,11 +46,11 @@ class AndroidStudioValidator extends DoctorValidator {
     if (_studio.isValid) {
       type = ValidationType.installed;
       messages.addAll(_studio.validationMessages
-          .map((String m) => ValidationMessage(m)));
+          .map<ValidationMessage>((String m) => ValidationMessage(m)));
     } else {
       type = ValidationType.partial;
       messages.addAll(_studio.validationMessages
-          .map((String m) => ValidationMessage.error(m)));
+          .map<ValidationMessage>((String m) => ValidationMessage.error(m)));
       messages.add(ValidationMessage(
           'Try updating or re-installing Android Studio.'));
       if (_studio.configured != null) {
@@ -80,7 +80,7 @@ class NoAndroidStudioValidator extends DoctorValidator {
         'Android Studio not found; download from https://developer.android.com/studio/index.html\n'
         '(or visit https://flutter.io/setup/#android-setup for detailed instructions).'));
 
-    return ValidationResult(ValidationType.missing, messages,
+    return ValidationResult(ValidationType.notAvailable, messages,
         statusInfo: 'not installed');
   }
 }

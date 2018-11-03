@@ -100,7 +100,7 @@ Widget boilerplate({ Widget child }) {
   );
 }
 
-Future<Null> skipPastScrollingAnimation(WidgetTester tester) async {
+Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 200));
 }
@@ -145,7 +145,7 @@ void main() {
   }
 
   List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
-    return points.map((TextSelectionPoint point) {
+    return points.map<TextSelectionPoint>((TextSelectionPoint point) {
       return TextSelectionPoint(
         box.localToGlobal(point.point),
         point.direction,
@@ -212,7 +212,7 @@ void main() {
     final RenderBox inputBox = findTextFieldBox();
     final Size emptyInputSize = inputBox.size;
 
-    Future<Null> checkText(String testValue) async {
+    Future<void> checkText(String testValue) async {
       return TestAsyncUtils.guard(() async {
         await tester.enterText(find.byType(TextField), testValue);
         // Check that the onChanged event handler fired.
@@ -246,7 +246,7 @@ void main() {
     final EditableTextState editableText = tester.state(find.byType(EditableText));
 
     // Check that the cursor visibility toggles after each blink interval.
-    Future<Null> checkCursorToggle() async {
+    Future<void> checkCursorToggle() async {
       final bool initialShowCursor = editableText.cursorCurrentlyVisible;
       await tester.pump(editableText.cursorBlinkInterval);
       expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
@@ -404,6 +404,34 @@ void main() {
     expect(controller.selection.extentOffset, tapIndex);
   });
 
+  testWidgets('enableInteractiveSelection = false, tap', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          controller: controller,
+          enableInteractiveSelection: false,
+        ),
+      )
+    );
+    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.extentOffset, -1);
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    // Tap would ordinarily reposition the caret.
+    final int tapIndex = testValue.indexOf('e');
+    final Offset ePos = textOffsetToPosition(tester, tapIndex);
+    await tester.tapAt(ePos);
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.extentOffset, -1);
+  });
+
   testWidgets('Can long press to select', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -432,6 +460,37 @@ void main() {
     // 'def' is selected.
     expect(controller.selection.baseOffset, testValue.indexOf('d'));
     expect(controller.selection.extentOffset, testValue.indexOf('f')+1);
+  });
+
+  testWidgets('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          controller: controller,
+          enableInteractiveSelection: false,
+        ),
+      )
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    expect(controller.value.text, testValue);
+    await skipPastScrollingAnimation(tester);
+
+    expect(controller.selection.isCollapsed, true);
+
+    // Long press the 'e' to select 'def'.
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.extentOffset, -1);
   });
 
   testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
@@ -682,6 +741,11 @@ void main() {
     final Offset firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
     final Offset secondPos = textOffsetToPosition(tester, testValue.indexOf('Second'));
     final Offset thirdPos = textOffsetToPosition(tester, testValue.indexOf('Third'));
+    final Offset middleStringPos = textOffsetToPosition(tester, testValue.indexOf('irst'));
+    expect(firstPos.dx, 0);
+    expect(secondPos.dx, 0);
+    expect(thirdPos.dx, 0);
+    expect(middleStringPos.dx, 34);
     expect(firstPos.dx, secondPos.dx);
     expect(firstPos.dx, thirdPos.dx);
     expect(firstPos.dy, lessThan(secondPos.dy));
@@ -764,6 +828,8 @@ void main() {
     // Check that the last line of text is not displayed.
     final Offset firstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
     final Offset fourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
+    expect(firstPos.dx, 0);
+    expect(fourthPos.dx, 0);
     expect(firstPos.dx, fourthPos.dx);
     expect(firstPos.dy, lessThan(fourthPos.dy));
     expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
@@ -840,7 +906,7 @@ void main() {
       ),
     );
 
-    Future<Null> checkText(String testValue) {
+    Future<void> checkText(String testValue) {
       return TestAsyncUtils.guard(() async {
         await tester.enterText(find.byType(TextField), testValue);
 
@@ -870,7 +936,7 @@ void main() {
       ),
     );
 
-    Future<Null> checkText(String testValue) async {
+    Future<void> checkText(String testValue) async {
       return TestAsyncUtils.guard(() async {
         await tester.enterText(find.byType(TextField), testValue);
 
@@ -915,7 +981,7 @@ void main() {
     );
     final Text helperText = tester.widget(find.text('helper text'));
     expect(helperText.style.color, themeData.hintColor);
-    expect(helperText.style.fontSize, MaterialTextGeometry.englishLike.caption.fontSize);
+    expect(helperText.style.fontSize, Typography.englishLike2014.caption.fontSize);
   });
 
   testWidgets('TextField with specified helperStyle', (WidgetTester tester) async {
@@ -1721,8 +1787,8 @@ void main() {
   });
 
   testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: const Material(
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
         child: DefaultTextStyle(
           style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
           child: Center(
@@ -1746,8 +1812,8 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: DefaultTextStyle(
             style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
             child: Center(
@@ -2530,6 +2596,48 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('TextField semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          enableInteractiveSelection: false,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 1,
+          textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            // Absent the following because enableInteractiveSelection: false
+            // SemanticsAction.moveCursorBackwardByCharacter,
+            // SemanticsAction.moveCursorBackwardByWord,
+            // SemanticsAction.setSelection,
+            // SemanticsAction.paste,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+            SemanticsFlag.isFocused,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
   testWidgets('TextField semantics for selections', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = TextEditingController()
@@ -2818,6 +2926,48 @@ void main() {
       ),
     );
     expect(focusNode.hasFocus, isFalse);
+  });
+
+  testWidgets('TextField displays text with text direction', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(
+            textDirection: TextDirection.rtl,
+          ),
+        ),
+      ),
+    );
+
+    RenderEditable editable = findRenderEditable(tester);
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    await tester.pumpAndSettle();
+    Offset topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 10)).topLeft,
+    );
+
+    expect(topLeft.dx, equals(701.0));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(
+            textDirection: TextDirection.ltr,
+          ),
+        ),
+      ),
+    );
+
+    editable = findRenderEditable(tester);
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    await tester.pumpAndSettle();
+    topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 10)).topLeft,
+    );
+
+    expect(topLeft.dx, equals(160.0));
   });
 
   testWidgets('TextField semantics', (WidgetTester tester) async {

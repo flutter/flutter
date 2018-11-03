@@ -99,7 +99,7 @@ class Section {
 const String kDartDocPrefix = '///';
 const String kDartDocPrefixWithSpace = '$kDartDocPrefix ';
 
-Future<Null> main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   final Directory tempDir = Directory.systemTemp.createTempSync('flutter_analyze_sample_code.');
   int exitCode = 1;
   bool keepMain = false;
@@ -223,7 +223,7 @@ linter:
     print('Found $sampleCodeSections sample code sections.');
     final Process process = await Process.start(
       _flutter,
-      <String>['analyze', '--no-preamble', '--no-congratulate', mainDart.parent.path],
+      <String>['--no-wrap', 'analyze', '--no-preamble', '--no-congratulate', mainDart.parent.path],
       workingDirectory: tempDir.path,
     );
     final List<String> errors = <String>[];
@@ -327,7 +327,7 @@ void processBlock(Line line, List<String> block, List<Section> sections) {
     sections.add(Section(line, 'dynamic expression$_expressionId = ', block.toList(), ';'));
   } else if (block.first.startsWith('await ')) {
     _expressionId += 1;
-    sections.add(Section(line, 'Future<Null> expression$_expressionId() async { ', block.toList(), ' }'));
+    sections.add(Section(line, 'Future<void> expression$_expressionId() async { ', block.toList(), ' }'));
   } else if (block.first.startsWith('class ') || block.first.startsWith('enum ')) {
     sections.add(Section(line, null, block.toList(), null));
   } else if ((block.first.startsWith('_') || block.first.startsWith('final ')) && block.first.contains(' = ')) {

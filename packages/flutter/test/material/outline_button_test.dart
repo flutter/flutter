@@ -89,7 +89,7 @@ void main() {
     // Expect that the button is disabled and painted with the disabled border color.
     expect(tester.widget<OutlineButton>(outlineButton).enabled, false);
     expect(
-      outlineButton,
+      outlineButton, //find.byType(OutlineButton),
       paints
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: disabledBorderColor, strokeWidth: borderWidth));

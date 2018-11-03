@@ -782,7 +782,6 @@ void main() {
     expect(tester.widget<Material>(backgroundMaterial).color, Colors.green);
   });
 
-
   testWidgets('BottomNavigationBar shifting backgroundColor with transition', (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/22226
 
@@ -827,9 +826,29 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
       await expectLater(
         find.byType(BottomNavigationBar),
-        matchesGoldenFile('bottom_navigation_bar.shifting_transition.$pump.png'),
+        matchesGoldenFile(
+            'bottom_navigation_bar.shifting_transition.$pump.png'),
       );
     }
+  });
+
+  testWidgets('BottomNavigationBar item title should not be nullable',
+      (WidgetTester tester) async {
+    expect(() {
+      MaterialApp(
+          home: Scaffold(
+              bottomNavigationBar: BottomNavigationBar(
+                  type: BottomNavigationBarType.shifting,
+                  items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              title: Text('AC'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.access_alarm),
+            )
+          ])));
+    }, throwsA(isInstanceOf<AssertionError>()));
   });
 }
 

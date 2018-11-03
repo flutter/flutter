@@ -30,7 +30,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   IconData _icon;
   double _flutterFrameRate;
 
-  Future<Null> _summarizeStats() async {
+  Future<void> _summarizeStats() async {
     final double framesProduced = await channel.invokeMethod('getProducedFrameRate');
     final double framesConsumed = await channel.invokeMethod('getConsumedFrameRate');
     _summary = '''
@@ -39,7 +39,7 @@ Consumed: ${framesConsumed.toStringAsFixed(1)}fps
 Widget builds: $_widgetBuilds''';
   }
 
-  Future<Null> _nextState() async {
+  Future<void> _nextState() async {
     switch (_state) {
       case FrameState.initial:
         debugPrint('Starting .5x speed test...');
@@ -90,9 +90,9 @@ Widget builds: $_widgetBuilds''';
   static const int calibrationTickCount = 600;
 
   /// Measures Flutter's frame rate.
-  Future<Null> _calibrate() async {
+  Future<void> _calibrate() async {
     debugPrint('Awaiting calm (3 second pause)...');
-    await Future<Null>.delayed(const Duration(milliseconds: 3000));
+    await Future<void>.delayed(const Duration(milliseconds: 3000));
     debugPrint('Calibrating...');
     DateTime startTime;
     int tickCount = 0;

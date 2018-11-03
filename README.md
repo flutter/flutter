@@ -9,9 +9,10 @@ Flutter is Google’s mobile app SDK for crafting high-quality native interfaces
 
 ### Documentation
 
-* **Main site: [flutter.io][]**
+**Main site: [flutter.io][]**
 * [Install](https://flutter.io/get-started/install/)
 * [Get started](https://flutter.io/get-started/)
+* [Changelog](https://github.com/flutter/flutter/wiki/Changelog)
 * [Contribute](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md#contributing-to-flutter)
 
 ## Fast development
@@ -71,13 +72,13 @@ class CounterState extends State<Counter> {
     // build methods fast, so that you can just rebuild anything that
     // needs updating rather than having to individually change
     // instances of widgets.
-    return new Row(
+    return Row(
       children: <Widget>[
-        new RaisedButton(
+        RaisedButton(
           onPressed: increment,
-          child: new Text('Increment'),
+          child: Text('Increment'),
         ),
-        new Text('Count: $counter'),
+        Text('Count: $counter'),
       ],
     );
   }
@@ -99,7 +100,7 @@ and access native features and SDKs on Android and iOS.
 Accessing platform features is easy. Here is a snippet from our <a href="https://github.com/flutter/flutter/tree/master/examples/platform_channel">interop example</a>:
 
 ```dart
-Future<Null> getBatteryLevel() async {
+Future<void> getBatteryLevel() async {
   var batteryLevel = 'unknown';
   try {
     int result = await methodChannel.invokeMethod('getBatteryLevel');

@@ -6,6 +6,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class SliderDemo extends StatefulWidget {
   static const String routeName = '/material/slider';
 
@@ -132,7 +134,10 @@ class _SliderDemoState extends State<SliderDemo> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Sliders')),
+      appBar: AppBar(
+        title: const Text('Sliders'),
+        actions: <Widget>[MaterialDemoDocumentationButton(SliderDemo.routeName)],
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40.0),
         child: Column(

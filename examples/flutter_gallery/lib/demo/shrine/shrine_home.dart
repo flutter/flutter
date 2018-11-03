@@ -362,7 +362,7 @@ class _ShrineHomeState extends State<ShrineHome> {
   static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>(debugLabel: 'Shrine Home');
   static final _ShrineGridDelegate gridDelegate = _ShrineGridDelegate();
 
-  Future<Null> _showOrderPage(Product product) async {
+  Future<void> _showOrderPage(Product product) async {
     final Order order = _shoppingCart[product] ?? Order(product: product);
     final Order completedOrder = await Navigator.push(context, ShrineOrderRoute(
       order: order,
@@ -395,7 +395,7 @@ class _ShrineHomeState extends State<ShrineHome> {
             sliver: SliverGrid(
               gridDelegate: gridDelegate,
               delegate: SliverChildListDelegate(
-                _products.map((Product product) {
+                _products.map<Widget>((Product product) {
                   return _ProductItem(
                     product: product,
                     onPressed: () { _showOrderPage(product); },

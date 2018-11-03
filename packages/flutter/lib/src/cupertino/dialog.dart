@@ -219,8 +219,7 @@ class CupertinoAlertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context)
-                                              ?? const DefaultCupertinoLocalizations();
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     final bool isInAccessibilityMode = _isInAccessibilityMode(context);
     final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
     return MediaQuery(
@@ -1564,7 +1563,7 @@ class _RenderCupertinoDialogActions extends RenderBox
         )
       : Rect.zero;
 
-    final List<Rect> pressedButtonRects = _pressedButtons.map((RenderBox pressedButton) {
+    final List<Rect> pressedButtonRects = _pressedButtons.map<Rect>((RenderBox pressedButton) {
       final MultiChildLayoutParentData buttonParentData = pressedButton.parentData;
 
       return Rect.fromLTWH(

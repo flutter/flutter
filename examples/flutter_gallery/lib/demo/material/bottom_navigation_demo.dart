@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class NavigationIconView {
   NavigationIconView({
     Widget icon,
@@ -183,7 +185,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   Widget build(BuildContext context) {
     final BottomNavigationBar botNavBar = BottomNavigationBar(
       items: _navigationViews
-          .map((NavigationIconView navigationView) => navigationView.item)
+          .map<BottomNavigationBarItem>((NavigationIconView navigationView) => navigationView.item)
           .toList(),
       currentIndex: _currentIndex,
       type: _type,
@@ -200,6 +202,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
       appBar: AppBar(
         title: const Text('Bottom navigation'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(BottomNavigationDemo.routeName),
           PopupMenuButton<BottomNavigationBarType>(
             onSelected: (BottomNavigationBarType value) {
               setState(() {

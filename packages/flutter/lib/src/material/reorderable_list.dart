@@ -159,7 +159,7 @@ class _ReorderableListContent extends StatefulWidget {
   _ReorderableListContentState createState() => _ReorderableListContentState();
 }
 
-class _ReorderableListContentState extends State<_ReorderableListContent> with TickerProviderStateMixin {
+class _ReorderableListContentState extends State<_ReorderableListContent> with TickerProviderStateMixin<_ReorderableListContent> {
 
   // The extent along the [widget.scrollDirection] axis to allow a child to
   // drop into when the user reorders list children.
@@ -301,7 +301,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         scrollOffset < bottomOffset ? bottomOffset : topOffset,
         duration: _scrollAnimationDuration,
         curve: Curves.easeInOut,
-      ).then((Null none) {
+      ).then((void value) {
         setState(() {
           _scrolling = false;
         });

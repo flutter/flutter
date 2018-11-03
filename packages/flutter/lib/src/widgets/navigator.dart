@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -78,7 +79,7 @@ abstract class Route<T> {
   ///
   /// If the [settings] are not provided, an empty [RouteSettings] object is
   /// used instead.
-  Route({ RouteSettings settings }) : this.settings = settings ?? const RouteSettings();
+  Route({ RouteSettings settings }) : settings = settings ?? const RouteSettings();
 
   /// The navigator that the route is in, if any.
   NavigatorState get navigator => _navigator;
@@ -347,11 +348,18 @@ class NavigatorObserver {
   /// The [Navigator] replaced `oldRoute` with `newRoute`.
   void didReplace({ Route<dynamic> newRoute, Route<dynamic> oldRoute }) { }
 
-  /// The [Navigator]'s routes are being moved by a user gesture.
+  /// The [Navigator]'s route `route` is being moved by a user gesture.
   ///
-  /// For example, this is called when an iOS back gesture starts, and is used
-  /// to disabled hero animations during such interactions.
-  void didStartUserGesture() { }
+  /// For example, this is called when an iOS back gesture starts.
+  ///
+  /// Paired with a call to [didStopUserGesture] when the route is no longer
+  /// being manipulated via user gesture.
+  ///
+  /// If present, the route immediately below `route` is `previousRoute`.
+  /// Though the gesture may not necessarily conclude at `previousRoute` if
+  /// the gesture is canceled. In that case, [didStopUserGesture] is still
+  /// called but a follow-up [didPop] is not.
+  void didStartUserGesture(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
   /// User gesture is no longer controlling the [Navigator].
   ///
@@ -1545,8 +1553,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     for (NavigatorObserver observer in widget.observers)
       observer.didPush(route, oldRoute);
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
     return route.popped;
+  }
+
+  void _afterNavigation() {
+    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
+    if (!isReleaseMode) {
+      // This event is used by performance tools that show stats for the
+      // time interval since the last navigation event occurred ensuring that
+      // stats only reflect the current page.
+      // These tools do not need to know exactly what the new route is so no
+      // attempt is made to describe the current route as part of the event.
+      developer.postEvent('Flutter.Navigation', <String, dynamic>{});
+    }
+    _cancelActivePointers();
   }
 
   /// Replace the current route of the navigator by pushing the given route and
@@ -1597,7 +1618,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     for (NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
     return newRoute.popped;
   }
 
@@ -1650,7 +1671,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         observer.didRemove(removedRoute, oldRoute);
     }
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
     return newRoute.popped;
   }
 
@@ -1800,7 +1821,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       assert(!debugPredictedWouldPop);
     }
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
     return true;
   }
 
@@ -1841,7 +1862,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       observer.didRemove(route, previousRoute);
     route.dispose();
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
   }
 
   /// Immediately remove a route from the navigator, and [Route.dispose] it. The
@@ -1897,8 +1918,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void didStartUserGesture() {
     _userGesturesInProgress += 1;
     if (_userGesturesInProgress == 1) {
+      final Route<dynamic> route = _history.last;
+      final Route<dynamic> previousRoute = !route.willHandlePopInternally && _history.length > 1
+          ? _history[_history.length - 2]
+          : null;
+      // Don't operate the _history list since the gesture may be cancelled.
+      // In case of a back swipe, the gesture controller will call .pop() itself.
+
       for (NavigatorObserver observer in widget.observers)
-        observer.didStartUserGesture();
+        observer.didStartUserGesture(route, previousRoute);
     }
   }
 

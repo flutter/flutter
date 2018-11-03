@@ -21,8 +21,8 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'text_theme.dart';
 import 'theme.dart';
-import 'typography.dart';
 
 /// Initial display mode of the date picker dialog.
 ///
@@ -720,11 +720,11 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
 // Defines semantic traversal order of the top-level widgets inside the month
 // picker.
 class _MonthPickerSortKey extends OrdinalSortKey {
+  const _MonthPickerSortKey(double order) : super(order);
+
   static const _MonthPickerSortKey previousMonth = _MonthPickerSortKey(1.0);
   static const _MonthPickerSortKey nextMonth = _MonthPickerSortKey(2.0);
   static const _MonthPickerSortKey calendar = _MonthPickerSortKey(3.0);
-
-  const _MonthPickerSortKey(double order) : super(order);
 }
 
 /// A scrollable list of years to allow picking a year.
@@ -943,7 +943,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
     final Widget picker = Flexible(
       child: SizedBox(
@@ -1086,6 +1085,8 @@ Future<DateTime> showDatePicker({
     'Provided initialDate must satisfy provided selectableDayPredicate'
   );
   assert(initialDatePickerMode != null, 'initialDatePickerMode must not be null');
+  assert(context != null);
+  assert(debugCheckHasMaterialLocalizations(context));
 
   Widget child = _DatePickerDialog(
     initialDate: initialDate,

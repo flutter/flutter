@@ -382,7 +382,7 @@ class AndroidSdk {
     }
 
     // Match up platforms with the best corresponding build-tools.
-    _sdkVersions = platforms.map((Directory platformDir) {
+    _sdkVersions = platforms.map<AndroidSdkVersion>((Directory platformDir) {
       final String platformName = platformDir.basename;
       int platformVersion;
 
@@ -394,7 +394,7 @@ class AndroidSdk {
           final String buildProps = platformDir.childFile('build.prop').readAsStringSync();
           final String versionString = const LineSplitter()
               .convert(buildProps)
-              .map(_sdkVersionRe.firstMatch)
+              .map<Match>(_sdkVersionRe.firstMatch)
               .firstWhere((Match match) => match != null)
               .group(1);
           platformVersion = int.parse(versionString);

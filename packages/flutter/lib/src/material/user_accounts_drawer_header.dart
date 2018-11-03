@@ -30,7 +30,7 @@ class _AccountPictures extends StatelessWidget {
           top: 0.0,
           end: 0.0,
           child: Row(
-            children: (otherAccountsPictures ?? <Widget>[]).take(3).map((Widget picture) {
+            children: (otherAccountsPictures ?? <Widget>[]).take(3).map<Widget>((Widget picture) {
               return Padding(
                 padding: const EdgeInsetsDirectional.only(start: 8.0),
                 child: Semantics(

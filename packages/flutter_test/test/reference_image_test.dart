@@ -57,7 +57,7 @@ void main() {
     testWidgets('when image pixels do not match', (WidgetTester tester) async {
       expect(
         await matchesReferenceImage(createTestImage(100, 100, red)).matchAsync(createTestImage(100, 100, transparentRed)),
-        equals('does not match on 53 pixels'),
+        equals('does not match on 57 pixels'),
       );
       expect(
         await matchesReferenceImage(createTestImage(100, 100, red)).matchAsync(createTestImage(100, 100, green)),

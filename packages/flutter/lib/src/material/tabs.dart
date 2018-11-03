@@ -15,6 +15,7 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'tab_bar_theme.dart';
 import 'tab_controller.dart';
 import 'tab_indicator.dart';
 import 'theme.dart';
@@ -149,14 +150,22 @@ class _TabStyle extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
+    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+
     final TextStyle defaultStyle = labelStyle ?? themeData.primaryTextTheme.body2;
     final TextStyle defaultUnselectedStyle = unselectedLabelStyle ?? labelStyle ?? themeData.primaryTextTheme.body2;
     final Animation<double> animation = listenable;
     final TextStyle textStyle = selected
       ? TextStyle.lerp(defaultStyle, defaultUnselectedStyle, animation.value)
       : TextStyle.lerp(defaultUnselectedStyle, defaultStyle, animation.value);
-    final Color selectedColor = labelColor ?? themeData.primaryTextTheme.body2.color;
-    final Color unselectedColor = unselectedLabelColor ?? selectedColor.withAlpha(0xB2); // 70% alpha
+    final Color selectedColor =
+        labelColor
+         ?? tabBarTheme.labelColor
+         ?? themeData.primaryTextTheme.body2.color;
+    final Color unselectedColor =
+        unselectedLabelColor
+        ?? tabBarTheme.unselectedLabelColor
+        ?? selectedColor.withAlpha(0xB2); // 70% alpha
     final Color color = selected
       ? Color.lerp(selectedColor, unselectedColor, animation.value)
       : Color.lerp(unselectedColor, selectedColor, animation.value);
@@ -504,6 +513,8 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// Uses values from [TabBarTheme] if it is set in the current context.
+///
 /// See also:
 ///
 ///  * [TabBarView], which displays page views that correspond to each tab.
@@ -687,6 +698,9 @@ class _TabBarState extends State<TabBar> {
   Decoration get _indicator {
     if (widget.indicator != null)
       return widget.indicator;
+    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    if (tabBarTheme.indicator != null)
+      return tabBarTheme.indicator;
 
     Color color = widget.indicatorColor ?? Theme.of(context).indicatorColor;
     // ThemeData tries to avoid this by having indicatorColor avoid being the
@@ -741,7 +755,7 @@ class _TabBarState extends State<TabBar> {
     _indicatorPainter = _controller == null ? null : _IndicatorPainter(
       controller: _controller,
       indicator: _indicator,
-      indicatorSize: widget.indicatorSize,
+      indicatorSize: widget.indicatorSize ?? TabBarTheme.of(context).indicatorSize,
       tabKeys: _tabKeys,
       old: _indicatorPainter,
     );
@@ -885,6 +899,7 @@ class _TabBarState extends State<TabBar> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller.length == 0) {
       return Container(
@@ -1104,12 +1119,12 @@ class _TabBarViewState extends State<TabBarView> {
     }
   }
 
-  Future<Null> _warpToCurrentIndex() async {
+  Future<void> _warpToCurrentIndex() async {
     if (!mounted)
-      return Future<Null>.value();
+      return Future<void>.value();
 
     if (_pageController.page == _currentIndex.toDouble())
-      return Future<Null>.value();
+      return Future<void>.value();
 
     final int previousIndex = _controller.previousIndex;
     if ((_currentIndex - previousIndex).abs() == 1)
@@ -1133,7 +1148,7 @@ class _TabBarViewState extends State<TabBarView> {
 
     await _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
     if (!mounted)
-      return Future<Null>.value();
+      return Future<void>.value();
 
     setState(() {
       _warpUnderwayCount -= 1;

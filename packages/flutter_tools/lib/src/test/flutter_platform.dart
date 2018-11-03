@@ -20,9 +20,11 @@ import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
+import '../bundle.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../vmservice.dart';
 import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
@@ -190,7 +192,7 @@ void main() {
 
 enum _InitialResult { crashed, timedOut, connected }
 enum _TestResult { crashed, harnessBailed, testBailed }
-typedef _Finalizer = Future<Null> Function();
+typedef _Finalizer = Future<void> Function();
 
 class _CompilationRequest {
   _CompilationRequest(this.path, this.result);
@@ -230,7 +232,10 @@ class _Compiler {
       printError('$message');
     }
 
-    final String testFilePath = fs.path.join(fs.path.fromUri(projectRootDirectory), getBuildDirectory(), 'testfile.dill');
+    final String testFilePath = getKernelPathForTransformerOptions(
+      fs.path.join(fs.path.fromUri(projectRootDirectory), getBuildDirectory(), 'testfile.dill'),
+      trackWidgetCreation: trackWidgetCreation,
+    );
 
     ResidentCompiler createCompiler() {
       return ResidentCompiler(
@@ -238,7 +243,8 @@ class _Compiler {
         packagesPath: PackageMap.globalPackagesPath,
         trackWidgetCreation: trackWidgetCreation,
         compilerMessageConsumer: reportCompilerMessage,
-        initializeFromDill: testFilePath
+        initializeFromDill: testFilePath,
+        unsafePackageSerialization: false,
       );
     }
 
@@ -408,6 +414,22 @@ class _FlutterPlatform extends PlatformPlugin {
     return remoteChannel;
   }
 
+  Future<String> _compileExpressionService(String isolateId, String expression,
+      List<String> definitions, List<String> typeDefinitions,
+      String libraryUri, String klass, bool isStatic,
+      ) async {
+    if (compiler == null || compiler.compiler == null) {
+      throw 'Compiler is not set up properly to compile $expression';
+    }
+    final CompilerOutput compilerOutput =
+      await compiler.compiler.compileExpression(expression, definitions,
+        typeDefinitions, libraryUri, klass, isStatic);
+    if (compilerOutput != null && compilerOutput.outputFilename != null) {
+      return base64.encode(fs.file(compilerOutput.outputFilename).readAsBytesSync());
+    }
+    throw 'Failed to compile $expression';
+  }
+
   Future<_AsyncError> _startTest(
     String testPath,
     StreamChannel<dynamic> controller,
@@ -479,7 +501,6 @@ class _FlutterPlatform extends PlatformPlugin {
         packages: PackageMap.globalPackagesPath,
         enableObservatory: enableObservatory,
         startPaused: startPaused,
-        bundlePath: _getBundlePath(finalizers, ourTestCount),
         observatoryPort: explicitObservatoryPort,
         serverPort: server.port,
       );
@@ -522,11 +543,21 @@ class _FlutterPlatform extends PlatformPlugin {
             printTrace('test $ourTestCount: using observatory uri $detectedUri from pid ${process.pid}');
           }
           processObservatoryUri = detectedUri;
+
+          {
+            printTrace('Connecting to service protocol: $processObservatoryUri');
+            final Future<VMService> localVmService = VMService.connect(processObservatoryUri,
+              compileExpression: _compileExpressionService);
+            localVmService.then((VMService vmservice) {
+              printTrace('Successfully connected to service protocol: $processObservatoryUri');
+            });
+          }
+
           gotProcessObservatoryUri.complete();
           watcher?.handleStartedProcess(ProcessEvent(ourTestCount, process, processObservatoryUri));
         },
         startTimeoutTimer: () {
-          Future<_InitialResult>.delayed(_kTestStartupTimeout).then((_) => timeout.complete());
+          Future<_InitialResult>.delayed(_kTestStartupTimeout).then<void>((_) => timeout.complete());
         },
       );
 
@@ -536,7 +567,7 @@ class _FlutterPlatform extends PlatformPlugin {
       // The local test harness could get bored of us.
 
       printTrace('test $ourTestCount: awaiting initial result for pid ${process.pid}');
-      final _InitialResult initialResult = await Future.any(<Future<_InitialResult>>[
+      final _InitialResult initialResult = await Future.any<_InitialResult>(<Future<_InitialResult>>[
         process.exitCode.then<_InitialResult>((int exitCode) => _InitialResult.crashed),
         timeout.future.then<_InitialResult>((void value) => _InitialResult.timedOut),
         Future<_InitialResult>.delayed(_kTestProcessTimeout, () => _InitialResult.timedOut),
@@ -615,13 +646,13 @@ class _FlutterPlatform extends PlatformPlugin {
           );
 
           printTrace('test $ourTestCount: awaiting test result for pid ${process.pid}');
-          final _TestResult testResult = await Future.any(<Future<_TestResult>>[
+          final _TestResult testResult = await Future.any<_TestResult>(<Future<_TestResult>>[
             process.exitCode.then<_TestResult>((int exitCode) { return _TestResult.crashed; }),
             harnessDone.future.then<_TestResult>((void value) { return _TestResult.harnessBailed; }),
             testDone.future.then<_TestResult>((void value) { return _TestResult.testBailed; }),
           ]);
 
-          await Future.wait(<Future<void>>[
+          await Future.wait<void>(<Future<void>>[
             harnessToTest.cancel(),
             testToHarness.cancel(),
           ]);
@@ -711,37 +742,6 @@ class _FlutterPlatform extends PlatformPlugin {
     return listenerFile.path;
   }
 
-  String _getBundlePath(List<_Finalizer> finalizers, int ourTestCount) {
-    if (precompiledDillPath != null) {
-      return artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
-    }
-
-    // bundlePath needs to point to a folder with `platform.dill` file.
-    final Directory tempBundleDirectory = fs.systemTempDirectory
-        .createTempSync('flutter_test_bundle.');
-    finalizers.add(() async {
-      printTrace(
-          'test $ourTestCount: deleting temporary bundle directory');
-      tempBundleDirectory.deleteSync(recursive: true);
-    });
-
-    // copy 'vm_platform_strong.dill' into 'platform_strong.dill'
-    final File vmPlatformStrongDill = fs.file(
-      artifacts.getArtifactPath(Artifact.platformKernelDill),
-    );
-    printTrace('Copying platform_strong.dill file from ${vmPlatformStrongDill.path}');
-    final File platformDill = vmPlatformStrongDill.copySync(
-      tempBundleDirectory
-          .childFile('platform_strong.dill')
-          .path,
-    );
-    if (!platformDill.existsSync()) {
-      printError('unexpected error copying platform kernel file');
-    }
-
-    return tempBundleDirectory.path;
-  }
-
   String _generateTestMain({
     Uri testUrl,
   }) {
@@ -812,7 +812,6 @@ class _FlutterPlatform extends PlatformPlugin {
     String executable,
     String testPath, {
     String packages,
-    String bundlePath,
     bool enableObservatory = false,
     bool startPaused = false,
     int observatoryPort,
@@ -840,9 +839,7 @@ class _FlutterPlatform extends PlatformPlugin {
     }
     if (host.type == InternetAddressType.IPv6)
       command.add('--ipv6');
-    if (bundlePath != null) {
-      command.add('--flutter-assets-dir=$bundlePath');
-    }
+
     command.add('--enable-checked-mode');
     command.addAll(<String>[
       '--enable-software-rendering',
@@ -870,8 +867,8 @@ class _FlutterPlatform extends PlatformPlugin {
     const String observatoryString = 'Observatory listening on ';
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
-      stream.transform(utf8.decoder)
-        .transform(const LineSplitter())
+      stream.transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen(
           (String line) {
             if (line == _kStartTimeoutTimerMessage) {
