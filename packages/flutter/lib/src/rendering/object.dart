@@ -1333,11 +1333,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// The layout constraints most recently supplied by the parent.
   @protected
   Constraints get constraints => _constraints;
-  Constraints __constraints;
-  Constraints get _constraints => __constraints;
-  Constraints set _constraints(Constraints value) {
-    __constraints = value;
-  }
+  Constraints _constraints;
 
   /// Verify that the object's constraints are being met. Override
   /// this function in a subclass to verify that your state matches
