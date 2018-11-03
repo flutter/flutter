@@ -82,7 +82,7 @@ void main() {
       offset: ViewportOffset.fixed(10.0),
       textSelectionDelegate: delegate,
     );
-    editable.layout(BoxConstraints.loose(Size(1000.0, 1000.0)));
+    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(editable.hasVisualOverflow, true);
   });
 }
