@@ -796,12 +796,12 @@ void main() {
                 child: BottomNavigationBar(
                   type: BottomNavigationBarType.shifting,
                   currentIndex: _currentIndex,
-                  onTap: (index) {
+                  onTap: (int index) {
                     setState(() {
                       _currentIndex = index;
                     });
                   },
-                  items: <BottomNavigationBarItem>[
+                  items: const <BottomNavigationBarItem>[
                     BottomNavigationBarItem(
                       title: Text('Red'),
                       backgroundColor: Colors.red,
@@ -822,6 +822,7 @@ void main() {
     );
 
     await tester.tap(find.text('Green'));
+
     for (int pump = 0; pump < 8; pump++) {
       await tester.pump(const Duration(milliseconds: 30));
       await expectLater(
