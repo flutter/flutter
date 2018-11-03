@@ -94,14 +94,16 @@ class TextField extends StatefulWidget {
   ///
   /// ## Sample code
   ///
-  /// This example shows how to create [TextField] as password input which
-  /// allows 25 characters only and calls callback method when user presses the
-  /// 'done' button on the keyboard.
+  /// This example shows how to create a [TextField] as a password input field
+  /// which allows input of up to 25 characters and calls a callback method when
+  /// the user presses the 'done' button on the keyboard.
   ///
   /// ```dart
   /// void _login(String passwd) {
   ///   // provide login logic
   /// }
+  ///
+  /// ...
   ///
   /// TextField(
   ///   decoration: const InputDecoration(labelText: 'Password'),
