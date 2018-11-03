@@ -17,6 +17,11 @@ import 'package:process/process.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
+final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
+  Platform: _kNoColorTerminalPlatform,
+};
+
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockFile extends Mock implements File {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
@@ -339,7 +344,7 @@ Error launching application on iPhone.''',
         testLogger.errorText,
         contains('No Provisioning Profile was found for your project\'s Bundle Identifier or your \ndevice.'),
       );
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('No development team shows message', () async {
       final XcodeBuildResult buildResult = XcodeBuildResult(
@@ -420,6 +425,6 @@ Could not build the precompiled application for the device.''',
         testLogger.errorText,
         contains('Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
       );
-    });
+    }, overrides: noColorTerminalOverride);
   });
 }
