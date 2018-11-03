@@ -13,6 +13,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'build_info.dart';
+import 'bundle.dart';
 import 'compile.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
@@ -83,19 +84,31 @@ class DevFSFileContent extends DevFSContent {
   void _stat() {
     if (_linkTarget != null) {
       // Stat the cached symlink target.
-      _fileStat = _linkTarget.statSync();
-      return;
+      final FileStat fileStat = _linkTarget.statSync();
+      if (fileStat.type == FileSystemEntityType.notFound) {
+        _linkTarget = null;
+      } else {
+        _fileStat = fileStat;
+        return;
+      }
     }
-    _fileStat = file.statSync();
-    if (_fileStat.type == FileSystemEntityType.link) {
+    final FileStat fileStat = file.statSync();
+    _fileStat = fileStat.type == FileSystemEntityType.notFound ? null : fileStat;
+    if (_fileStat != null && _fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
       final FileSystemEntity linkTarget = fs.file(resolved);
       // Stat the link target.
-      _fileStat = linkTarget.statSync();
-      if (devFSConfig.cacheSymlinks) {
+      final FileStat fileStat = linkTarget.statSync();
+      if (fileStat.type == FileSystemEntityType.notFound) {
+        _fileStat = null;
+        _linkTarget = null;
+      } else if (devFSConfig.cacheSymlinks) {
         _linkTarget = linkTarget;
       }
+    }
+    if (_fileStat == null) {
+      printError('Unable to get status of file "${file.path}": file not found.');
     }
   }
 
@@ -106,21 +119,29 @@ class DevFSFileContent extends DevFSContent {
   bool get isModified {
     final FileStat _oldFileStat = _fileStat;
     _stat();
-    return _oldFileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
+    if (_oldFileStat == null && _fileStat == null)
+      return false;
+    return _oldFileStat == null || _fileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
   }
 
   @override
   bool isModifiedAfter(DateTime time) {
     final FileStat _oldFileStat = _fileStat;
     _stat();
-    return _oldFileStat == null || time == null || _fileStat.modified.isAfter(time);
+    if (_oldFileStat == null && _fileStat == null)
+      return false;
+    return time == null
+        || _oldFileStat == null
+        || _fileStat == null
+        || _fileStat.modified.isAfter(time);
   }
 
   @override
   int get size {
     if (_fileStat == null)
       _stat();
-    return _fileStat.size;
+    // Can still be null if the file wasn't found.
+    return _fileStat?.size ?? 0;
   }
 
   @override
@@ -411,10 +432,13 @@ class DevFS {
     Set<String> fileFilter,
     @required ResidentCompiler generator,
     String dillOutputPath,
+    @required bool trackWidgetCreation,
     bool fullRestart = false,
     String projectRootPath,
     @required String pathToReload,
   }) async {
+    assert(trackWidgetCreation != null);
+    assert(generator != null);
     // Mark all entries as possibly deleted.
     for (DevFSContent content in _entries.values) {
       content._exists = false;
@@ -506,7 +530,7 @@ class DevFS {
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
       invalidatedFiles,
-      outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
+      outputPath:  dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
       packagesFilePath : _packagesFilePath,
     );
     // Don't send full kernel file that would overwrite what VM already

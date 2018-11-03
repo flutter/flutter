@@ -161,6 +161,32 @@ class CupertinoPicker extends StatefulWidget {
 
 class _CupertinoPickerState extends State<CupertinoPicker> {
   int _lastHapticIndex;
+  FixedExtentScrollController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.scrollController == null) {
+      _controller = FixedExtentScrollController();
+    }
+  }
+
+  @override
+  void didUpdateWidget(CupertinoPicker oldWidget) {
+    if (widget.scrollController != null && oldWidget.scrollController == null) {
+      _controller = null;
+    } else if (widget.scrollController == null && oldWidget.scrollController != null) {
+      assert(_controller == null);
+      _controller = FixedExtentScrollController();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
 
   void _handleSelectedItemChanged(int index) {
     // Only the haptic engine hardware on iOS devices would produce the
@@ -246,17 +272,20 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     Widget result = Stack(
       children: <Widget>[
         Positioned.fill(
-          child: ListWheelScrollView.useDelegate(
-            controller: widget.scrollController,
-            physics: const FixedExtentScrollPhysics(),
-            diameterRatio: widget.diameterRatio,
-            perspective: _kDefaultPerspective,
-            offAxisFraction: widget.offAxisFraction,
-            useMagnifier: widget.useMagnifier,
-            magnification: widget.magnification,
-            itemExtent: widget.itemExtent,
-            onSelectedItemChanged: _handleSelectedItemChanged,
-            childDelegate: widget.childDelegate,
+          child: _CupertinoPickerSemantics(
+            scrollController: widget.scrollController ?? _controller,
+            child: ListWheelScrollView.useDelegate(
+              controller: widget.scrollController ?? _controller,
+              physics: const FixedExtentScrollPhysics(),
+              diameterRatio: widget.diameterRatio,
+              perspective: _kDefaultPerspective,
+              offAxisFraction: widget.offAxisFraction,
+              useMagnifier: widget.useMagnifier,
+              magnification: widget.magnification,
+              itemExtent: widget.itemExtent,
+              onSelectedItemChanged: _handleSelectedItemChanged,
+              childDelegate: widget.childDelegate,
+            ),
           ),
         ),
         _buildGradientScreen(),
@@ -272,5 +301,112 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       );
     }
     return result;
+  }
+}
+
+// Turns the scroll semantics of the ListView into a single adjustable semantics
+// node. This is done by removing all of the child semantics of the scroll
+// wheel and using the scroll indexes to look up the current, previous, and
+// next semantic label. This label is then turned into the value of a new
+// adjustable semantic node, with adjustment callbacks wired to move the
+// scroll controller.
+class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
+  const _CupertinoPickerSemantics({
+    Key key,
+    Widget child,
+    @required this.scrollController,
+  }) : super(key: key, child: child);
+
+  final FixedExtentScrollController scrollController;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderCupertinoPickerSemantics(scrollController, Directionality.of(context));
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderCupertinoPickerSemantics renderObject) {
+    renderObject
+      ..textDirection = Directionality.of(context)
+      ..controller = scrollController;
+  }
+}
+
+class _RenderCupertinoPickerSemantics extends RenderProxyBox {
+  _RenderCupertinoPickerSemantics(FixedExtentScrollController controller, this._textDirection) {
+    this.controller = controller;
+  }
+
+  FixedExtentScrollController get controller => _controller;
+  FixedExtentScrollController _controller;
+  set controller(FixedExtentScrollController value) {
+    if (value == _controller)
+      return;
+    if (_controller != null)
+      _controller.removeListener(_handleScrollUpdate);
+    else
+      _currentIndex = value.initialItem ?? 0;
+    value.addListener(_handleScrollUpdate);
+    _controller = value;
+  }
+
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (textDirection == value)
+      return;
+    _textDirection = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  int _currentIndex = 0;
+
+  void _handleIncrease() {
+    controller.jumpToItem(_currentIndex + 1);
+  }
+
+  void _handleDecrease() {
+    if (_currentIndex == 0)
+      return;
+    controller.jumpToItem(_currentIndex - 1);
+   }
+
+  void _handleScrollUpdate() {
+    if (controller.selectedItem == _currentIndex)
+      return;
+    _currentIndex = controller.selectedItem;
+    markNeedsSemanticsUpdate();
+  }
+   @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+    config.textDirection = textDirection;
+  }
+
+  @override
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+    if (children.isEmpty)
+      return super.assembleSemanticsNode(node, config, children);
+    final SemanticsNode scrollable = children.first;
+    final Map<int, SemanticsNode> indexedChildren = <int, SemanticsNode>{};
+    scrollable.visitChildren((SemanticsNode child) {
+      assert(child.indexInParent != null);
+      indexedChildren[child.indexInParent] = child;
+      return true;
+    });
+    if (indexedChildren[_currentIndex] == null) {
+      return node.updateWith(config: config);
+    }
+    config.value = indexedChildren[_currentIndex].label;
+    final SemanticsNode previousChild = indexedChildren[_currentIndex - 1];
+    final SemanticsNode nextChild = indexedChildren[_currentIndex + 1];
+    if (nextChild != null) {
+      config.increasedValue = nextChild.label;
+      config.onIncrease = _handleIncrease;
+    }
+    if (previousChild != null) {
+      config.decreasedValue = previousChild.label;
+      config.onDecrease = _handleDecrease;
+    }
+    node.updateWith(config: config);
   }
 }

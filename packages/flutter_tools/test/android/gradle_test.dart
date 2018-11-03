@@ -138,6 +138,10 @@ someOtherTask
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'paid')), 'assemblePaidRelease');
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
     });
+    test('should respect format of the flavored build types', () {
+      final GradleProject project = GradleProject(<String>['debug'], <String>['randomFlavor'], fs.directory('/some/dir'));
+      expect(project.assembleTaskFor(const BuildInfo(BuildMode.debug, 'randomFlavor')), 'assembleRandomFlavorDebug');
+    });
   });
 
   group('Gradle local.properties', () {

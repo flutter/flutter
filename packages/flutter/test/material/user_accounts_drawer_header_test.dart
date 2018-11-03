@@ -12,7 +12,7 @@ const Key avatarA = Key('A');
 const Key avatarC = Key('C');
 const Key avatarD = Key('D');
 
-Future<Null> pumpTestWidget(WidgetTester tester, {
+Future<void> pumpTestWidget(WidgetTester tester, {
   bool withName = true,
   bool withEmail = true,
   bool withOnDetailsPressedHandler = true,

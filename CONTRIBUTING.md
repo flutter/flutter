@@ -240,6 +240,14 @@ data downloaded by `flutter update-packages`.
 See [issue 4719](https://github.com/flutter/flutter/issues/4719) for ideas about
 how to improve this workflow.
 
+Communication
+-------------
+
+If you would like to chat to other people who work on Flutter, consider joining the
+https://gitter.im/flutter/contributors chat channel. (We also have a [general chat
+channel](https://gitter.im/flutter/flutter) for people who aren't working on Flutter
+but who use Flutter.)
+
 Working on the engine and the framework at the same time
 --------------------------------------------------------
 

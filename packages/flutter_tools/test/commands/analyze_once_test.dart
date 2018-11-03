@@ -41,7 +41,7 @@ void main() {
     testUsingContext('flutter create', () async {
       await runCommand(
         command: CreateCommand(),
-        arguments: <String>['create', projectPath],
+        arguments: <String>['--no-wrap', 'create', projectPath],
         statusTextContains: <String>[
           'All done!',
           'Your application code is in ${fs.path.normalize(fs.path.join(fs.path.relative(projectPath), 'lib', 'main.dart'))}',
@@ -167,6 +167,24 @@ void bar() {
 StringBuffer bar = StringBuffer('baz');
 ''';
       final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_3.');
+      tempDir.childFile('main.dart').writeAsStringSync(contents);
+      try {
+        await runCommand(
+          command: AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
+          arguments: <String>['analyze'],
+          statusTextContains: <String>['No issues found!'],
+        );
+      } finally {
+        tryToDelete(tempDir);
+      }
+    });
+
+    testUsingContext('returns no issues for todo comments', () async {
+      const String contents = '''
+// TODO(foobar):
+StringBuffer bar = StringBuffer('baz');
+''';
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_4.');
       tempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(

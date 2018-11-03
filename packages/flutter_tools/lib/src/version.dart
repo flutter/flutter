@@ -19,7 +19,7 @@ import 'globals.dart';
 
 class FlutterVersion {
   @visibleForTesting
-  FlutterVersion(this._clock) {
+  FlutterVersion([this._clock = const Clock()]) {
     _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
     final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
     _branch = branch == 'HEAD' ? _channel : branch;
@@ -47,7 +47,7 @@ class FlutterVersion {
     'master',
     'dev',
     'beta',
-    'release',
+    'stable',
   ]);
 
   /// This maps old branch names to the names of branches that replaced them.
@@ -63,7 +63,7 @@ class FlutterVersion {
 
   String _channel;
   /// The channel is the upstream branch.
-  /// `master`, `dev`, `beta`, `release`; or old ones, like `alpha`, `hackathon`, ...
+  /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
   String get channel => _channel;
 
   /// The name of the local branch.
@@ -82,7 +82,7 @@ class FlutterVersion {
 
   String get frameworkDate => frameworkCommitDate;
 
-  String get dartSdkVersion => Cache.instance.dartSdkVersion.split(' ')[0];
+  String get dartSdkVersion => Cache.instance.dartSdkVersion;
 
   String get engineRevision => Cache.instance.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
@@ -99,10 +99,10 @@ class FlutterVersion {
     final String engineText = 'Engine • revision $engineRevisionShort';
     final String toolsText = 'Tools • Dart $dartSdkVersion';
 
-    // Flutter 1.3.922-pre.2 • channel master • https://github.com/flutter/flutter.git
-    // Framework • revision 2259c59be8 • 19 minutes ago • 2016-08-15 22:51:40
-    // Engine • revision fe509b0d96
-    // Tools • Dart 1.19.0-dev.5.0
+    // Flutter 1.10.2-pre.69 • channel master • https://github.com/flutter/flutter.git
+    // Framework • revision 340c158f32 (84 minutes ago) • 2018-10-26 11:27:22 -0400
+    // Engine • revision 9c46333e14
+    // Tools • Dart 2.1.0 (build 2.1.0-dev.8.0 bf26f760b1)
 
     return '$flutterText\n$frameworkText\n$engineText\n$toolsText';
   }

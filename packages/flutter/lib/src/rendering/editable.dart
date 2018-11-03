@@ -118,6 +118,8 @@ class RenderEditable extends RenderBox {
   ///
   /// The [offset] is required and must not be null. You can use [new
   /// ViewportOffset.zero] if you have no need for scrolling.
+  ///
+  /// The [enableInteractiveSelection] argument must not be null.
   RenderEditable({
     TextSpan text,
     @required TextDirection textDirection,
@@ -137,6 +139,7 @@ class RenderEditable extends RenderBox {
     Locale locale,
     double cursorWidth = 1.0,
     Radius cursorRadius,
+    bool enableInteractiveSelection = true,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
@@ -145,8 +148,9 @@ class RenderEditable extends RenderBox {
        assert(offset != null),
        assert(ignorePointer != null),
        assert(obscureText != null),
+       assert(enableInteractiveSelection != null),
        assert(textSelectionDelegate != null),
-  _textPainter = TextPainter(
+       _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
          textDirection: textDirection,
@@ -162,6 +166,7 @@ class RenderEditable extends RenderBox {
        _offset = offset,
        _cursorWidth = cursorWidth,
        _cursorRadius = cursorRadius,
+       _enableInteractiveSelection = enableInteractiveSelection,
        _obscureText = obscureText {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
@@ -692,6 +697,20 @@ class RenderEditable extends RenderBox {
     markNeedsPaint();
   }
 
+  /// If false, [describeSemanticsConfiguration] will not set the
+  /// configuration's cursor motion or set selection callbacks.
+  ///
+  /// True by default.
+  bool get enableInteractiveSelection => _enableInteractiveSelection;
+  bool _enableInteractiveSelection;
+  set enableInteractiveSelection(bool value) {
+    if (_enableInteractiveSelection == value)
+      return;
+    _enableInteractiveSelection = value;
+    markNeedsTextLayout();
+    markNeedsSemanticsUpdate();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -705,10 +724,10 @@ class RenderEditable extends RenderBox {
       ..isFocused = hasFocus
       ..isTextField = true;
 
-    if (hasFocus)
+    if (hasFocus && enableInteractiveSelection)
       config.onSetSelection = _handleSetSelection;
 
-    if (_selection?.isValid == true) {
+    if (enableInteractiveSelection && _selection?.isValid == true) {
       config.textSelection = _selection;
       if (_textPainter.getOffsetBefore(_selection.extentOffset) != null) {
         config

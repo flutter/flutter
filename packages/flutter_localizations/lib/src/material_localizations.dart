@@ -14,10 +14,6 @@ import 'l10n/date_localizations.dart' as date_localizations;
 import 'l10n/localizations.dart';
 import 'widgets_localizations.dart';
 
-// Watch out: the supported locales list in the doc comment below must be kept
-// in sync with the list we test, see test/translations_test.dart, and of course
-// the actual list of supported locales in _MaterialLocalizationsDelegate.
-
 /// Implementation of localized strings for the material widgets using the
 /// `intl` package for date and time formatting.
 ///
@@ -502,18 +498,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     ).replaceFirst(r'$remainingCount', formatDecimal(remainingCount));
   }
 
-  /// The script category used by [localTextGeometry]. Must be one of the strings
-  /// declared in [MaterialTextGeometry].
-  //
-  // TODO(ianh): make this return a TextTheme from MaterialTextGeometry.
-  // TODO(ianh): drop the constructor on MaterialTextGeometry.
-  // TODO(ianh): drop the strings on MaterialTextGeometry.
-  @protected
-  String get scriptCategory;
-
-  /// Looks up text geometry defined in [MaterialTextGeometry].
   @override
-  TextTheme get localTextGeometry => MaterialTextGeometry.forScriptCategory(scriptCategory);
+  ScriptCategory get scriptCategory;
 
   /// A [LocalizationsDelegate] that uses [GlobalMaterialLocalizations.load]
   /// to create an instance of this class.

@@ -100,7 +100,7 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
     });
 
     testUsingContext('suppresses non-Flutter lines from output', () async {
-      when(mockIMobileDevice.startLogger()).thenAnswer((Invocation invocation) {
+      when(mockIMobileDevice.startLogger('123456')).thenAnswer((Invocation invocation) {
         final Process mockProcess = MockProcess();
         when(mockProcess.stdout).thenAnswer((Invocation invocation) =>
             Stream<List<int>>.fromIterable(<List<int>>['''
@@ -130,7 +130,7 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
     });
 
     testUsingContext('includes multi-line Flutter logs in the output', () async {
-      when(mockIMobileDevice.startLogger()).thenAnswer((Invocation invocation) {
+      when(mockIMobileDevice.startLogger('123456')).thenAnswer((Invocation invocation) {
         final Process mockProcess = MockProcess();
         when(mockProcess.stdout).thenAnswer((Invocation invocation) =>
             Stream<List<int>>.fromIterable(<List<int>>['''

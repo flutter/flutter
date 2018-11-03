@@ -1045,6 +1045,22 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   bool _drawerOpened = false;
   bool _endDrawerOpened = false;
 
+  /// Whether the [Scaffold.drawer] is opened.
+  ///
+  /// See also:
+  ///
+  ///   * [ScaffoldState.openDrawer], which opens the [Scaffold.drawer] of a
+  ///   [Scaffold].
+  bool get isDrawerOpen => _drawerOpened;
+
+  /// Whether the [Scaffold.endDrawer] is opened.
+  ///
+  /// See also:
+  ///
+  ///   * [ScaffoldState.openEndDrawer], which opens the [Scaffold.endDrawer] of
+  ///     a [Scaffold].
+  bool get isEndDrawerOpen => _endDrawerOpened;
+
   void _drawerOpenedCallback(bool isOpened) {
     setState(() {
       _drawerOpened = isOpened;
@@ -1192,7 +1208,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _snackBarController.value = 0.0;
       completer.complete(reason);
     } else {
-      _snackBarController.reverse().then<void>((Null _) {
+      _snackBarController.reverse().then<void>((void value) {
         assert(mounted);
         if (!completer.isCompleted)
           completer.complete(reason);

@@ -475,7 +475,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   String get name => device.name;
 
   void _start() {
-    iMobileDevice.startLogger().then<void>((Process process) {
+    iMobileDevice.startLogger(device.id).then<void>((Process process) {
       _process = process;
       _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
       _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
@@ -579,7 +579,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
   Future<void> unforward(ForwardedPort forwardedPort) async {
     if (!_forwardedPorts.remove(forwardedPort)) {
       // Not in list. Nothing to remove.
-      return null;
+      return;
     }
 
     printTrace('Unforwarding port $forwardedPort');
@@ -591,7 +591,5 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     } else {
       printError('Forwarded port did not have a valid process');
     }
-
-    return null;
   }
 }

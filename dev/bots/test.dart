@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
 
@@ -21,6 +22,7 @@ final List<String> flutterTestArgs = <String>[];
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'tool_tests': _runToolTests,
+  'aot_build_tests': _runAotBuildTests,
   'coverage': _runCoverage,
 };
 
@@ -149,16 +151,43 @@ Future<void> _runToolTests() async {
   print('${bold}DONE: All tests successful.$reset');
 }
 
+/// Verifies that AOT builds of some examples apps finish
+/// without crashing. It does not actually launch the AOT-built
+/// apps. That happens later in the devicelab. This is just
+/// a smoke-test.
+Future<void> _runAotBuildTests() async {
+  await _flutterBuildAot(path.join('examples', 'hello_world'));
+  await _flutterBuildAot(path.join('examples', 'flutter_gallery'));
+  await _flutterBuildAot(path.join('examples', 'flutter_view'));
+
+  print('${bold}DONE: All AOT build tests successful.$reset');
+}
+
+Future<void> _flutterBuildAot(String relativePathToApplication) {
+  return runCommand(flutter,
+    <String>['build', 'aot'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+}
+
 Future<void> _runTests() async {
   await _runSmokeTests();
 
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
+  // Only packages/flutter/test/widgets/widget_inspector_test.dart really
+  // needs to be run with --track-widget-creation but it is nice to run
+  // all of the tests in package:flutter with the flag to ensure that
+  // the Dart kernel transformer triggered by the flag does not break anything.
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: <String>['--track-widget-creation']);
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'));
+  await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
@@ -166,6 +195,9 @@ Future<void> _runTests() async {
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'));
+  // Regression test to ensure that code outside of package:flutter can run
+  // with --track-widget-creation.
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation']);
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'));
 
   print('${bold}DONE: All tests successful.$reset');
@@ -199,6 +231,8 @@ Future<void> _pubRunTest(
   bool enableFlutterToolAsserts = false
 }) {
   final List<String> args = <String>['run', 'test', '-rcompact'];
+  final int concurrency = math.max(1, Platform.numberOfProcessors - 1);
+  args.add('-j$concurrency');
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null)

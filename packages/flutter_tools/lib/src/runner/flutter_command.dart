@@ -100,7 +100,7 @@ abstract class FlutterCommand extends Command<void> {
       abbr: 't',
       defaultsTo: bundle.defaultMainPath,
       help: 'The main entry-point file of the application, as run on the device.\n'
-            'If the --target option is omitted, but a file name is provided on\n'
+            'If the --target option is omitted, but a file name is provided on '
             'the command line, then that is used instead.',
       valueHelp: 'path');
     _usesTargetOption = true;
@@ -164,6 +164,14 @@ abstract class FlutterCommand extends Command<void> {
               'On Android it is used as \'versionName\'.\n'
               'On Xcode builds it is used as \'CFBundleShortVersionString\'',
         valueHelp: 'x.y.z');
+  }
+
+  void usesIsolateFilterOption({@required bool hide}) {
+    argParser.addOption('isolate-filter',
+      defaultsTo: null,
+      hide: hide,
+      help: 'Restricts commands to a subset of the available isolates (running instances of Flutter).\n'
+            'Normally there\'s only one, but when adding Flutter to a pre-existing app it\'s possible to create multiple.');
   }
 
   void addBuildModeFlags({bool defaultToRelease = true, bool verboseHelp = false}) {
