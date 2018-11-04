@@ -548,6 +548,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.labelPadding,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
+    this.onTap,
   }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(indicator != null || (indicatorWeight != null && indicatorWeight > 0.0)),
@@ -659,6 +660,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this property is null then the [labelStyle] value is used. If [labelStyle]
   /// is null then the text style of the theme's body2 definition is used.
   final TextStyle unselectedLabelStyle;
+
+  final ValueChanged<int> onTap;
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
@@ -958,7 +961,7 @@ class _TabBarState extends State<TabBar> {
     final int tabCount = widget.tabs.length;
     for (int index = 0; index < tabCount; index += 1) {
       wrappedTabs[index] = InkWell(
-        onTap: () { _handleTap(index); },
+        onTap: () { widget.onTap != null ? widget.onTap(index) : _handleTap(index); },
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
           child: Stack(
