@@ -1488,6 +1488,8 @@ class InputDecorator extends StatefulWidget {
   /// Typically an [EditableText], [DropdownButton], or [InkWell].
   final Widget child;
 
+  /// Whether the label needs to get out of the way of the input, either by
+  /// floating or disappearing.
   bool get _labelShouldWithdraw => !isEmpty || isFocused;
 
   @override
