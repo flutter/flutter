@@ -35,7 +35,7 @@ abstract class InputBorder extends ShapeBorder {
   /// substitutes its own, using [copyWith], based on the current theme and
   /// [InputDecorator.isFocused].
   const InputBorder({
-    this.borderSide = const BorderSide(),
+    this.borderSide = BorderSide.none,
   }) : assert(borderSide != null);
 
   /// No input border.
