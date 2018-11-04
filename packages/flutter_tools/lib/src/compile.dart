@@ -173,7 +173,7 @@ class KernelCompiler {
       '--sdk-root',
       sdkRoot,
       '--strong',
-      '--target=$targetModel',
+      '--target=flutter',
     ];
     if (trackWidgetCreation)
       command.add('--track-widget-creation');
@@ -413,7 +413,7 @@ class ResidentCompiler {
       _sdkRoot,
       '--incremental',
       '--strong',
-      '--target=$_targetModel',
+      '--target=flutter',
     ];
     if (outputPath != null) {
       command.addAll(<String>['--output-dill', outputPath]);

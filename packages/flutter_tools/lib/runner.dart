@@ -122,6 +122,8 @@ Future<int> _handleToolError(
           'Crash report written to ${file.path};\n'
               'please let us know at https://github.com/flutter/flutter/issues.',
         );
+        print(error);
+        print(stackTrace);
         return _exit(1);
       } catch (error) {
         stderr.writeln(

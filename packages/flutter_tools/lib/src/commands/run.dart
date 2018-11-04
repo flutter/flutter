@@ -349,6 +349,7 @@ class RunCommand extends RunCommandBase {
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
+        targetModel: 'flutter', // TODO(jonahwilliams): support run for Fuchsia targets.
       );
     }).toList();
 
