@@ -413,7 +413,7 @@ class ResidentCompiler {
       _sdkRoot,
       '--incremental',
       '--strong',
-      '--target=$_targetModel,
+      '--target=$_targetModel',
     ];
     if (outputPath != null) {
       command.addAll(<String>['--output-dill', outputPath]);
