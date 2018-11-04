@@ -5,10 +5,10 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
-import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
+import 'src/artifacts.dart';
+import 'src/base/common.dart';
+import 'src/base/context.dart';
+import 'src/base/file_system.dart';
 
 import 'runner.dart' as runner;
 import 'src/commands/attach.dart';
