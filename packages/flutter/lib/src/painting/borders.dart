@@ -163,7 +163,6 @@ class BorderSide {
   /// non-uniform rectangular [Border]s have beveled edges and so paint their
   /// border sides as filled shapes rather than using a stroke.
   Paint toPaint() {
-    print(this);
     switch (style) {
       case BorderStyle.solid:
         return Paint()
