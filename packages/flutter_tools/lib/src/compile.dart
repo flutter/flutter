@@ -302,7 +302,7 @@ class ResidentCompiler {
     String fileSystemScheme,
     CompilerMessageConsumer compilerMessageConsumer = printError,
     String initializeFromDill,
-    String targetModel,
+    String targetModel = 'flutter',
     bool unsafePackageSerialization
   }) : assert(_sdkRoot != null),
        _trackWidgetCreation = trackWidgetCreation,

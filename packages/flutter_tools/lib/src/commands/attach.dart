@@ -171,7 +171,7 @@ class AttachCommand extends FlutterCommand {
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
-        targetModel: argResults['targetModel'] ?? 'flutter',
+        targetModel: argResults['targetModel'],
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = hotRunnerFactory.build(
