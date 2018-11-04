@@ -233,7 +233,6 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 TextFormField(
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    hasFloatingPlaceholder: false,
                     hintText: 'Tell us about yourself',
                     helperText: 'Keep it short, this is just a demo.',
                     labelText: 'Life story',

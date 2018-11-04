@@ -126,8 +126,6 @@ class _NoInputBorder extends InputBorder {
 ///
 ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
 ///    rounded rectangle around the input decorator's container.
-///  * [FilledInputBorder], an [InputDecorator] border with rounded corners
-///    and no painted outline.
 ///  * [InputDecoration], which is used to configure an [InputDecorator].
 class UnderlineInputBorder extends InputBorder {
   /// Creates an underline border for an [InputDecorator].
@@ -254,8 +252,6 @@ class UnderlineInputBorder extends InputBorder {
 ///
 ///  * [UnderlineInputBorder], the default [InputDecorator] border which
 ///    draws a horizontal line at the bottom of the input decorator's container.
-///  * [FilledInputBorder], an [InputDecorator] border with rounded corners
-///    and no painted outline.
 ///  * [InputDecoration], which is used to configure an [InputDecorator].
 class OutlineInputBorder extends InputBorder {
   /// Creates a rounded rectangle outline border for an [InputDecorator].

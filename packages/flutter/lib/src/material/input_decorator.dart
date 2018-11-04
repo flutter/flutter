@@ -1652,7 +1652,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   bool get _hasInlineLabel => !widget._labelShouldWithdraw && decoration.labelText != null;
 
   // True if the label will be shown at all.
-  // If there should be an inline label, the label will show (see [_hasInlineLabel]).
+  // If there should be an inline label, the label will show (see _hasInlineLabel).
   // If the label is a floating placeholder, it's always shown.
   bool get _shouldShowLabel => _hasInlineLabel || decoration.hasFloatingPlaceholder;
 
