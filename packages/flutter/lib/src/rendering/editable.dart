@@ -921,7 +921,11 @@ class RenderEditable extends RenderBox {
     return null;
   }
 
-  bool _hasVisualOverflow = false;
+  double _maxScrollExtent = 0;
+
+  // We need to check the paint offset here because during animation, the start of
+  // the text may position outside the visible region even when the text fits.
+  bool get _hasVisualOverflow => _maxScrollExtent > 0 || _paintOffset != Offset.zero;
 
   /// Returns the local coordinates of the endpoints of the given selection.
   ///
@@ -1146,8 +1150,7 @@ class RenderEditable extends RenderBox {
     final Size textPainterSize = _textPainter.size;
     size = Size(constraints.maxWidth, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
     final Size contentSize = Size(textPainterSize.width + _kCaretGap + cursorWidth, textPainterSize.height);
-    final double _maxScrollExtent = _getMaxScrollExtent(contentSize);
-    _hasVisualOverflow = _maxScrollExtent > 0.0;
+    _maxScrollExtent = _getMaxScrollExtent(contentSize);
     offset.applyViewportDimension(_viewportExtent);
     offset.applyContentDimensions(0.0, _maxScrollExtent);
   }
