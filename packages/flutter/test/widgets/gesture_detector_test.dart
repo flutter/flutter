@@ -340,7 +340,7 @@ void main() {
       await gesture.up();
     }
 
-    await longPress(kLongPressTimeout + Duration(seconds: 1)); // To make sure the time for long press has occured
+    await longPress(kLongPressTimeout + const Duration(seconds: 1)); // To make sure the time for long press has occurred
     expect(longPressUp, 1);
   });
 }

@@ -42,6 +42,7 @@ class FlutterTestDriver {
 
   VMServiceClient vmService;
   String get lastErrorInfo => _errorBuffer.toString();
+  Stream<String> get stdout => _stdout.stream;
   int get vmServicePort => _vmServicePort;
   bool get hasExited => _hasExited;
 

@@ -48,9 +48,9 @@ void main() {
       CupertinoPageRoute<void>(
         title: 'An iPod',
         builder: (BuildContext context) {
-          return CupertinoPageScaffold(
+          return const CupertinoPageScaffold(
             child: CustomScrollView(
-              slivers: const <Widget>[
+              slivers: <Widget>[
                 CupertinoSliverNavigationBar(),
               ],
             ),
