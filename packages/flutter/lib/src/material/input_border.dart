@@ -256,10 +256,10 @@ class UnderlineInputBorder extends InputBorder {
 class OutlineInputBorder extends InputBorder {
   /// Creates a rounded rectangle outline border for an [InputDecorator].
   ///
-  /// The [borderSide] parameter defaults to [BorderSide.none] (it must not be
-  /// null). Applications typically do not specify a [borderSide] parameter
-  /// because the input decorator substitutes its own, using [copyWith], based
-  /// on the current theme and [InputDecorator.isFocused].
+  /// The [borderSide] parameter defaults to a default [BorderSide] (it must not
+  /// be null). If an application does not specify a [borderSide] parameter of
+  /// value [BorderSide.none], the input decorator substitutes its own, using
+  /// [copyWith], based on the current theme and [InputDecorator.isFocused].
   ///
   /// The [borderRadius] parameter defaults to a value where all four
   /// corners have a circular radius of 4.0. The [borderRadius] parameter
