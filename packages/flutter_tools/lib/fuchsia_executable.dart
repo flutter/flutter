@@ -5,12 +5,13 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
+
+import 'runner.dart' as runner;
+
 import 'src/artifacts.dart';
 import 'src/base/common.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
-
-import 'runner.dart' as runner;
 import 'src/commands/attach.dart';
 import 'src/commands/devices.dart';
 import 'src/commands/shell_completion.dart';
