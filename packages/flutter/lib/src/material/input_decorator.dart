@@ -150,7 +150,7 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: widget.isAnimated ? _kTransitionDuration : Duration.zero,
+      duration: _kTransitionDuration,
       vsync: this,
     );
     _borderAnimation = CurvedAnimation(
@@ -1494,7 +1494,7 @@ class InputDecorator extends StatefulWidget {
   /// Typically an [EditableText], [DropdownButton], or [InkWell].
   final Widget child;
 
-  bool get _labelIsFloating => !isEmpty || isFocused;
+  bool get _labelShouldWithdraw => !isEmpty || isFocused;
 
   @override
   _InputDecoratorState createState() => _InputDecoratorState();
@@ -1531,14 +1531,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     super.initState();
     print(widget.decoration.hasFloatingPlaceholder);
     _floatingLabelController = AnimationController(
-      duration: widget.decoration.hasFloatingPlaceholder ? _kTransitionDuration : Duration.zero,
+      duration: _kTransitionDuration,
       vsync: this,
-      value: widget._labelIsFloating ? 1.0 : 0.0,
+      value: (widget.decoration.hasFloatingPlaceholder && widget._labelShouldWithdraw) ? 1.0 : 0.0,
     );
     _floatingLabelController.addListener(_handleChange);
 
     _shakingLabelController = AnimationController(
-      duration: widget.decoration.hasFloatingPlaceholder ? _kTransitionDuration : Duration.zero,
+      duration: _kTransitionDuration,
       vsync: this,
     );
   }
@@ -1580,9 +1580,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (widget.decoration != old.decoration)
       _effectiveDecoration = null;
 
-    if (widget._labelIsFloating != old._labelIsFloating) {
-      if (widget._labelIsFloating)
+    if (widget._labelShouldWithdraw != old._labelShouldWithdraw && widget.decoration.hasFloatingPlaceholder) {
+      if (widget._labelShouldWithdraw) {
         _floatingLabelController.forward();
+      }
       else
         _floatingLabelController.reverse();
     }
@@ -1648,7 +1649,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // True if the label will be shown and the hint will not.
   // If we're not focused, there's no value, and labelText was provided,
   // then the label appears where the hint would.
-  bool get _hasInlineLabel => !isFocused && isEmpty && decoration.labelText != null;
+  bool get _hasInlineLabel => !widget._labelShouldWithdraw && decoration.labelText != null;
+
+  // True if the label will be shown at all.
+  // If there should be an inline label, the label will show (see [_hasInlineLabel]).
+  // If the label is a floating placeholder, it's always shown.
+  bool get _shouldShowLabel => _hasInlineLabel || decoration.hasFloatingPlaceholder;
+
 
   // The base style for the inline label or hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
@@ -1712,7 +1719,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle hintStyle = inlineStyle.merge(decoration.hintStyle);
     final Widget hint = decoration.hintText == null ? null : AnimatedOpacity(
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
-      duration: decoration.hasFloatingPlaceholder ? _kTransitionDuration : Duration.zero,
+      duration: _kTransitionDuration,
       curve: _kTransitionCurve,
       child: Text(
         decoration.hintText,
@@ -1743,23 +1750,28 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle inlineLabelStyle = inlineStyle.merge(decoration.labelStyle);
     final Widget label = decoration.labelText == null ? null : _Shaker(
       animation: _shakingLabelController.view,
-      child: AnimatedDefaultTextStyle(
-        duration: decoration.hasFloatingPlaceholder ? _kTransitionDuration : Duration.zero,
+      child: AnimatedOpacity(
+        duration: _kTransitionDuration,
         curve: _kTransitionCurve,
-        style: widget._labelIsFloating
-          ? _getFloatingLabelStyle(themeData)
-          : inlineLabelStyle,
-        child: Text(
-          decoration.labelText,
-          overflow: TextOverflow.ellipsis,
-          textAlign: textAlign,
+        opacity: _shouldShowLabel ? 1.0 : 0.0,
+        child: AnimatedDefaultTextStyle(
+          duration:_kTransitionDuration,
+          curve: _kTransitionCurve,
+          style: widget._labelShouldWithdraw
+            ? _getFloatingLabelStyle(themeData)
+            : inlineLabelStyle,
+          child: Text(
+            decoration.labelText,
+            overflow: TextOverflow.ellipsis,
+            textAlign: textAlign,
+          ),
         ),
       ),
     );
 
     final Widget prefix = decoration.prefix == null && decoration.prefixText == null ? null :
       _AffixText(
-        labelIsFloating: widget._labelIsFloating,
+        labelIsFloating: widget._labelShouldWithdraw,
         text: decoration.prefixText,
         style: decoration.prefixStyle ?? hintStyle,
         child: decoration.prefix,
@@ -1767,7 +1779,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final Widget suffix = decoration.suffix == null && decoration.suffixText == null ? null :
       _AffixText(
-        labelIsFloating: widget._labelIsFloating,
+        labelIsFloating: widget._labelShouldWithdraw,
         text: decoration.suffixText,
         style: decoration.suffixStyle ?? hintStyle,
         child: decoration.suffix,
@@ -1826,7 +1838,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       textAlign: textAlign,
       helperText: decoration.helperText,
       helperStyle: _getHelperStyle(themeData),
-      isAnimated: widget.decoration.hasFloatingPlaceholder,
       errorText: decoration.errorText,
       errorStyle: _getErrorStyle(themeData),
       errorMaxLines: decoration.errorMaxLines,
@@ -1881,7 +1892,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         contentPadding: contentPadding,
         isCollapsed: decoration.isCollapsed,
         floatingLabelHeight: floatingLabelHeight,
-        floatingLabelProgress: _floatingLabelController.value,
+        floatingLabelProgress: _floatingLabelController.value ?? 0.0,
         border: border,
         borderGap: _borderGap,
         icon: icon,
@@ -2102,7 +2113,6 @@ class InputDecoration {
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
   final int errorMaxLines;
-
 
   /// Whether the placeholder text floats to become a label on focus.
   ///

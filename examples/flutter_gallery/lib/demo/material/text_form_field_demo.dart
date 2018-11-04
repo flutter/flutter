@@ -246,8 +246,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(borderSide: BorderSide.none),
                     filled: true,
-                      hasFloatingPlaceholder: false,
-
+                    hasFloatingPlaceholder: false,
                     labelText: 'Salary',
                     prefixText: '\$',
                     suffixText: 'USD',
