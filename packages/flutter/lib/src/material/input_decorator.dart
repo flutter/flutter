@@ -123,7 +123,6 @@ class _BorderContainer extends StatefulWidget {
     @required this.gap,
     @required this.gapAnimation,
     @required this.fillColor,
-    this.isAnimated = true,
     this.child,
   }) : assert(border != null),
        assert(gap != null),
@@ -134,7 +133,6 @@ class _BorderContainer extends StatefulWidget {
   final _InputBorderGap gap;
   final Animation<double> gapAnimation;
   final Color fillColor;
-  final bool isAnimated;
   final Widget child;
 
   @override
@@ -245,7 +243,6 @@ class _HelperError extends StatefulWidget {
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
-    this.isAnimated = true,
   }) : super(key: key);
 
   final TextAlign textAlign;
@@ -254,7 +251,6 @@ class _HelperError extends StatefulWidget {
   final String errorText;
   final TextStyle errorStyle;
   final int errorMaxLines;
-  final bool isAnimated;
 
   @override
   _HelperErrorState createState() => _HelperErrorState();
@@ -273,7 +269,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: widget.isAnimated ? _kTransitionDuration : Duration.zero,
+      duration: _kTransitionDuration,
       vsync: this,
     );
     if (widget.errorText != null) {
@@ -1389,14 +1385,12 @@ class _Decorator extends RenderObjectWidget {
 
 class _AffixText extends StatelessWidget {
   const _AffixText({
-    this.isAnimated = true,
     this.labelIsFloating,
     this.text,
     this.style,
     this.child
   });
 
-  final bool isAnimated;
   final bool labelIsFloating;
   final String text;
   final TextStyle style;
@@ -1407,7 +1401,7 @@ class _AffixText extends StatelessWidget {
     return DefaultTextStyle.merge(
       style: style,
       child: AnimatedOpacity(
-        duration: isAnimated ? _kTransitionDuration : Duration.zero,
+        duration: _kTransitionDuration,
         curve: _kTransitionCurve,
         opacity: labelIsFloating ? 1.0 : 0.0,
         child: child ?? Text(text, style: style,),
@@ -1740,7 +1734,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     border ??= _getDefaultBorder(themeData);
 
     final Widget container = _BorderContainer(
-      isAnimated: widget.decoration.hasFloatingPlaceholder,
       border: border,
       gap: _borderGap,
       gapAnimation: _floatingLabelController.view,
