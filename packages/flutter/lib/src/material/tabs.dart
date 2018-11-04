@@ -660,7 +660,10 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this property is null then the [labelStyle] value is used. If [labelStyle]
   /// is null then the text style of the theme's body2 definition is used.
   final TextStyle unselectedLabelStyle;
-
+  
+  /// An option callback when the [TabBar] is tapped.
+  ///
+  /// If this property is null, the [TabBar] handles taps automatically.
   final ValueChanged<int> onTap;
 
   /// A size whose height depends on if the tabs have both icons and text.
