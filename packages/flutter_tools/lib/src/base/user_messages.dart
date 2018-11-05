@@ -4,7 +4,7 @@ import 'context.dart';
 
 UserMessages get userMessages => context[UserMessages];
 
-/// Class containing the message strings that can be produced by Flutter tools.
+/// Class containing message strings that can be produced by Flutter tools.
 class UserMessages {
   // Messages used in FlutterValidator
   String flutterStatusInfo(String channel, String version, String os, String locale) =>
