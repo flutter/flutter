@@ -6,6 +6,11 @@ import 'package:meta/meta.dart';
 
 import 'print.dart';
 
+// Examples can assume:
+// int rows, columns;
+// String _name;
+// bool inherit;
+
 /// The various priority levels used to filter which diagnostics are shown and
 /// omitted.
 ///

@@ -150,7 +150,7 @@ class _TabStyle extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final TabBarTheme tabBarTheme = themeData.tabBarTheme;
+    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
 
     final TextStyle defaultStyle = labelStyle ?? themeData.primaryTextTheme.body2;
     final TextStyle defaultUnselectedStyle = unselectedLabelStyle ?? labelStyle ?? themeData.primaryTextTheme.body2;
@@ -513,7 +513,7 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// Uses values from [ThemeData.tabBarTheme] if it is set in the current context.
+/// Uses values from [TabBarTheme] if it is set in the current context.
 ///
 /// See also:
 ///
@@ -698,11 +698,11 @@ class _TabBarState extends State<TabBar> {
   Decoration get _indicator {
     if (widget.indicator != null)
       return widget.indicator;
-    final ThemeData themeData = Theme.of(context);
-    if (themeData.tabBarTheme.indicator != null)
-      return themeData.tabBarTheme.indicator;
+    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    if (tabBarTheme.indicator != null)
+      return tabBarTheme.indicator;
 
-    Color color = widget.indicatorColor ?? themeData.indicatorColor;
+    Color color = widget.indicatorColor ?? Theme.of(context).indicatorColor;
     // ThemeData tries to avoid this by having indicatorColor avoid being the
     // primaryColor. However, it's possible that the tab bar is on a
     // Material that isn't the primaryColor. In that case, if the indicator
@@ -755,7 +755,7 @@ class _TabBarState extends State<TabBar> {
     _indicatorPainter = _controller == null ? null : _IndicatorPainter(
       controller: _controller,
       indicator: _indicator,
-      indicatorSize: widget.indicatorSize ?? Theme.of(context).tabBarTheme.indicatorSize,
+      indicatorSize: widget.indicatorSize ?? TabBarTheme.of(context).indicatorSize,
       tabKeys: _tabKeys,
       old: _indicatorPainter,
     );
@@ -899,6 +899,7 @@ class _TabBarState extends State<TabBar> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller.length == 0) {
       return Container(

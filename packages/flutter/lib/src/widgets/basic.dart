@@ -65,6 +65,10 @@ export 'package:flutter/rendering.dart' show
 // Examples can assume:
 // class TestWidget extends StatelessWidget { @override Widget build(BuildContext context) => const Placeholder(); }
 // WidgetTester tester;
+// bool _visible;
+// class Sky extends CustomPainter { @override void paint(Canvas c, Size s) => null; @override bool shouldRepaint(Sky s) => false; }
+// BuildContext context;
+// dynamic userAvatarUrl;
 
 // BIDIRECTIONAL TEXT SUPPORT
 

@@ -221,9 +221,9 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
     return Container(
-      constraints: const BoxConstraints.tightFor(
-        width: double.infinity,
-        height: _kLinearProgressIndicatorHeight,
+      constraints: const BoxConstraints(
+        minWidth: double.infinity,
+        minHeight: _kLinearProgressIndicatorHeight,
       ),
       child: CustomPaint(
         painter: _LinearProgressIndicatorPainter(

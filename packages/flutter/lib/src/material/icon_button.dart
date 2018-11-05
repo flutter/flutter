@@ -37,15 +37,25 @@ const double _kMinButtonSize = 48.0;
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
 ///
-/// ## Sample code
+/// {@tool snippet --template=stateful_widget}
+///
+/// This sample shows an `IconButton` that uses the Material icon "volume_up" to
+/// increase the volume.
+///
+/// ```dart preamble
+/// double _volume = 0.0;
+/// ```
 ///
 /// ```dart
-/// IconButton(
-///   icon: Icon(Icons.volume_up),
-///   tooltip: 'Increase volume by 10%',
-///   onPressed: () { setState(() { _volume *= 1.1; }); },
-/// )
+/// Widget build(BuildContext) {
+///   return IconButton(
+///     icon: Icon(Icons.volume_up),
+///     tooltip: 'Increase volume by 10%',
+///     onPressed: () { setState(() { _volume *= 1.1; }); },
+///   );
+/// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

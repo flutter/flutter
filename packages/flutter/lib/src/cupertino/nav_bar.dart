@@ -65,13 +65,33 @@ const TextStyle _kLargeTitleTextStyle = TextStyle(
 
 // There's a single tag for all instances of navigation bars because they can
 // all transition between each other (per Navigator) via Hero transitions.
-const _HeroTag _defaultHeroTag = _HeroTag();
+const _HeroTag _defaultHeroTag = _HeroTag(null);
 
 class _HeroTag {
-  const _HeroTag();
+  const _HeroTag(this.navigator);
+
+  final NavigatorState navigator;
+
   // Let the Hero tag be described in tree dumps.
   @override
-  String toString() => 'Default Hero tag for Cupertino navigation bars';
+  String toString() => 'Default Hero tag for Cupertino navigation bars with navigator $navigator';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    final _HeroTag otherTag = other;
+    return navigator == otherTag.navigator;
+  }
+
+  @override
+  int get hashCode {
+    return identityHashCode(navigator);
+  }
 }
 
 TextStyle _navBarItemStyle(Color color) {
@@ -316,6 +336,10 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// to also has a [CupertinoNavigationBar] or a [CupertinoSliverNavigationBar]
   /// with [transitionBetweenRoutes] set to true.
   ///
+  /// This transition will also occur on edge back swipe gestures like on iOS
+  /// but only if the previous page below has `maintainState` set to true on the
+  /// [PageRoute].
+  ///
   /// When set to true, only one navigation bar can be present per route unless
   /// [heroTag] is also set.
   ///
@@ -327,9 +351,13 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// Tag for the navigation bar's Hero widget if [transitionBetweenRoutes] is true.
   ///
   /// Defaults to a common tag between all [CupertinoNavigationBar] and
-  /// [CupertinoSliverNavigationBar] instances so they can all transition
-  /// between each other as long as there's only one per route. Use this tag
-  /// override with different tags to have multiple navigation bars per route.
+  /// [CupertinoSliverNavigationBar] instances of the same [Navigator]. With the
+  /// default tag, all navigation bars of the same navigator can transition
+  /// between each other as long as there's only one navigation bar per route.
+  ///
+  /// This [heroTag] can be overridden to manually handle having multiple
+  /// navigation bars per route or to transition between multiple
+  /// [Navigator]s.
   ///
   /// Cannot be null. To disable Hero transitions for this navigation bar,
   /// set [transitionBetweenRoutes] to false.
@@ -394,10 +422,13 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     }
 
     return Hero(
-      tag: widget.heroTag,
+      tag: widget.heroTag == _defaultHeroTag
+          ? _HeroTag(Navigator.of(context))
+          : widget.heroTag,
       createRectTween: _linearTranslateWithLargestRectSizeTween,
       placeholderBuilder: _navBarHeroLaunchPadBuilder,
       flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
+      transitionOnUserGestures: true,
       child: _TransitionableNavigationBar(
         componentsKeys: keys,
         backgroundColor: widget.backgroundColor,
@@ -728,10 +759,13 @@ class _LargeTitleNavigationBarSliverDelegate
     }
 
     return Hero(
-      tag: heroTag,
+      tag: heroTag == _defaultHeroTag
+          ? _HeroTag(Navigator.of(context))
+          : heroTag,
       createRectTween: _linearTranslateWithLargestRectSizeTween,
       flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
       placeholderBuilder: _navBarHeroLaunchPadBuilder,
+      transitionOnUserGestures: true,
       // This is all the way down here instead of being at the top level of
       // CupertinoSliverNavigationBar like CupertinoNavigationBar because it
       // needs to wrap the top level RenderBox rather than a RenderSliver.
