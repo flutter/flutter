@@ -139,7 +139,7 @@ class IOSValidator extends DoctorValidator {
         '  brew install ideviceinstaller'
       ));
     } else if (!await iMobileDevice.isWorking) {
-      checksFailed += 1;
+      checksFailed += 2;
       packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(
         'Verify that all connected devices have been paired with this computer in Xcode.\n'
@@ -150,7 +150,7 @@ class IOSValidator extends DoctorValidator {
         '  brew install ideviceinstaller'
       ));
     } else if (!await hasIDeviceInstaller) {
-      checksFailed += 1;
+      checksFailed += 3;
       packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(
         'ideviceinstaller is not installed; this is used to discover connected iOS devices.\n'
@@ -182,7 +182,7 @@ class IOSValidator extends DoctorValidator {
         ));
       }
     }
-
+    
     // If one of the checks for the packages failed, we may need brew so that we can install
     // the necessary packages. If they're all there, however, we don't even need it.
     if (checksFailed == totalChecks)

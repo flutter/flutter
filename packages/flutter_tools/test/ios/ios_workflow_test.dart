@@ -45,6 +45,8 @@ void main() {
       final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget(
         hasHomebrew: false,
         hasIosDeploy: false,
+        hasIDeviceInstaller: false,
+        iosDeployVersionText: '0.0.0',
       );
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.missing);
