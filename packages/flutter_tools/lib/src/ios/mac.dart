@@ -441,6 +441,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         if (line == 'done') {
           buildSubStatus?.stop();
           buildSubStatus = null;
+          return null;
         } else {
           initialBuildStatus.cancel();
           buildSubStatus = logger.startProgress(
