@@ -15,17 +15,8 @@ void main() {
     final List<String> stdoutLines = process.stdout.toString().split('\n');
     final List<String> stderrLines = process.stderr.toString().split('\n')
       ..removeWhere((String line) => line.startsWith('Analyzer output:'));
-    final Match line = RegExp(
-      r'Kept temporary directory (.+) because there were errors\.',
-      multiLine: true,
-    ).firstMatch(process.stderr);
-    expect(line, isNotNull);
-    final String directory = line[1];
-    Directory(directory).deleteSync(recursive: true); // Clean up the messy temp dir.
     expect(process.exitCode, isNot(equals(0)));
     expect(stderrLines, <String>[
-      'Kept temporary directory $directory because there were errors.',
-      '',
       'known_broken_documentation.dart:27:9: new Opacity(',
       '>>> Unnecessary new keyword (unnecessary_new)',
       'known_broken_documentation.dart:39:9: new Opacity(',

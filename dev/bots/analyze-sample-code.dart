@@ -168,17 +168,15 @@ class SampleChecker {
       errors = _analyze(_tempDir, sections, snippets);
     } finally {
       if (errors.isNotEmpty) {
-        stderr.writeln('Kept temporary directory ${_tempDir.path} because there were errors.\n');
         for (String filePath in errors.keys) {
           errors[filePath].forEach(stderr.writeln);
         }
         stderr.writeln('\nFound ${errors.length} sample code errors.');
-      } else {
-        try {
-          _tempDir.deleteSync(recursive: true);
-        } on FileSystemException catch (e) {
-          stderr.writeln('Failed to delete ${_tempDir.path}: $e');
-        }
+      }
+      try {
+        _tempDir.deleteSync(recursive: true);
+      } on FileSystemException catch (e) {
+        stderr.writeln('Failed to delete ${_tempDir.path}: $e');
       }
       // If we made a snapshot, remove it (so as not to clutter up the tree).
       if (_snippetsSnapshotPath != null) {
