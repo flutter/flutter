@@ -229,23 +229,20 @@ class _Compiler {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
-    final Directory outputDillDirectory =
-        fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
+    final Directory outputDillDirectory = fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
     final File outputDill = outputDillDirectory.childFile('output.dill');
 
     printTrace('Compiler will use the following file as its incremental dill file: ${outputDill.path}');
 
     bool suppressOutput = false;
-    void reportCompilerMessage(String message,
-        {bool emphasis, TerminalColor color}) {
+    void reportCompilerMessage(String message, {bool emphasis, TerminalColor color}) {
       if (suppressOutput) {
         return;
       }
 
       if (message.startsWith('Error: Could not resolve the package \'test\'')) {
         printTrace(message);
-        printError(
-          '\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',
+        printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',
           emphasis: emphasis,
           color: color,
         );
@@ -308,12 +305,9 @@ class _Compiler {
             await _shutdown();
           } else {
             final File outputFile = fs.file(outputPath);
-            final File kernelReadyToRun =
-                await outputFile.copy('${request.path}.dill');
+            final File kernelReadyToRun = await outputFile.copy('${request.path}.dill');
             final File testCache = fs.file(testFilePath);
-            if (firstCompile ||
-                !testCache.existsSync() ||
-                (testCache.lengthSync() < outputFile.lengthSync())) {
+            if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
               // The idea is to keep the cache file up-to-date and include as
               // much as possible in an effort to re-use as many packages as
               // possible.
