@@ -1,4 +1,4 @@
-Signature: 73b642988dd9ff4fb0ecba33d252027f
+Signature: e75c84941535a4996e449be164b69a57
 
 UNUSED LICENSES:
 
@@ -4830,6 +4830,7 @@ FILE: ../../../third_party/skia/include/effects/SkDashPathEffect.h
 FILE: ../../../third_party/skia/include/effects/SkDiscretePathEffect.h
 FILE: ../../../third_party/skia/include/effects/SkGradientShader.h
 FILE: ../../../third_party/skia/include/effects/SkTableMaskFilter.h
+FILE: ../../../third_party/skia/include/private/SkColorData.h
 FILE: ../../../third_party/skia/include/private/SkFixed.h
 FILE: ../../../third_party/skia/include/private/SkFloatingPoint.h
 FILE: ../../../third_party/skia/include/private/SkNoncopyable.h
@@ -4858,7 +4859,6 @@ FILE: ../../../third_party/skia/src/core/SkBlurMask.h
 FILE: ../../../third_party/skia/src/core/SkBuffer.cpp
 FILE: ../../../third_party/skia/src/core/SkBuffer.h
 FILE: ../../../third_party/skia/src/core/SkColor.cpp
-FILE: ../../../third_party/skia/src/core/SkColorData.h
 FILE: ../../../third_party/skia/src/core/SkColorFilter.cpp
 FILE: ../../../third_party/skia/src/core/SkCoreBlitters.h
 FILE: ../../../third_party/skia/src/core/SkDebug.cpp
