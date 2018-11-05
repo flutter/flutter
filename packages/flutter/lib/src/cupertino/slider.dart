@@ -14,6 +14,7 @@ import 'thumb_painter.dart';
 
 // Examples can assume:
 // int _cupertinoSliderValue = 1;
+// void setState(VoidCallback fn) { }
 
 /// An iOS-style slider.
 ///

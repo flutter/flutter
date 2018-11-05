@@ -19,6 +19,7 @@ export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
 // Examples can assume:
 // AnimationController _controller, fadeAnimationController, sizeAnimationController;
 // bool dismissed;
+// void setState(VoidCallback fn) { }
 
 /// The direction in which an animation is running.
 enum _AnimationDirection {

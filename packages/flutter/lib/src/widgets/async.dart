@@ -12,6 +12,7 @@ import 'framework.dart';
 
 // Examples can assume:
 // dynamic _lot;
+// Future<String> _calculation;
 
 /// Base class for widgets that build themselves based on interaction with
 /// a specified [Stream].

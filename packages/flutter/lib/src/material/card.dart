@@ -12,9 +12,10 @@ import 'theme.dart';
 /// A card is a sheet of [Material] used to represent some related information,
 /// for example an album, a geographical location, a meal, contact details, etc.
 ///
-/// ## Sample code
+/// {@tool snippet --template=stateless_widget}
 ///
-/// Here is an example of using a [Card] widget.
+/// This sample shows creation of a [Card] widget that shows album information
+/// and two actions.
 ///
 /// ```dart
 /// Card(
@@ -42,10 +43,11 @@ import 'theme.dart';
 ///       ),
 ///     ],
 ///   ),
-/// )
+/// );
 /// ```
+/// {@end-tool}
 ///
-/// This is what it would look like:
+/// This is what it looks like when run:
 ///
 /// ![A card with a slight shadow, consisting of two rows, one with an icon and
 /// some text describing a musical, and the other with buttons for buying
