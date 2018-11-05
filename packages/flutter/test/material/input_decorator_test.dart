@@ -1880,11 +1880,6 @@ void main() {
   });
 
   test('InputBorder equality', () {
-    // FilledInputBorder's equality is defined only by the borderRadius
-//    const FilledInputBorder filledInputBorder = FilledInputBorder(borderRadius: BorderRadius.all(Radius.circular(9.0)));
-//    expect(filledInputBorder, const FilledInputBorder(borderRadius: BorderRadius.all(Radius.circular(9.0))));
-//    expect(filledInputBorder, isNot(const FilledInputBorder()));
-
     // OutlineInputBorder's equality is defined by the borderRadius, borderSide, & gapPadding
     const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
@@ -1906,11 +1901,6 @@ void main() {
 
 
   test('InputBorder hashCodes', () {
-    // FilledInputBorder's hashCode is defined only by the borderRadius
-//    const FilledInputBorder filledInputBorder = FilledInputBorder(borderRadius: BorderRadius.all(Radius.circular(9.0)));
-//    expect(filledInputBorder.hashCode, const FilledInputBorder(borderRadius: BorderRadius.all(Radius.circular(9.0))).hashCode);
-//    expect(filledInputBorder.hashCode, isNot(const FilledInputBorder().hashCode));
-//
     // OutlineInputBorder's hashCode is defined by the borderRadius, borderSide, & gapPadding
     const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
