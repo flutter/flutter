@@ -1407,6 +1407,7 @@ void main() {
       isEmpty: false,
       child: Placeholder(),
     );
+    print(child.toString());
     expect(
       child.toString(),
       "InputDecorator-[<'key'>](decoration: InputDecoration(), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",

@@ -1681,7 +1681,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   InputBorder _getDefaultBorder(ThemeData themeData) {
-    if (decoration.border.borderSide.style == BorderStyle.none) {
+    if (decoration.border?.borderSide?.style == BorderStyle.none) {
       return decoration.border;
     }
 
@@ -2655,8 +2655,8 @@ class InputDecoration {
       description.add('errorStyle: "$errorStyle"');
     if (errorMaxLines != null)
       description.add('errorMaxLines: "$errorMaxLines"');
-    if (hasFloatingPlaceholder == true)
-      description.add('hasFloatingPlaceholder: true');
+    if (hasFloatingPlaceholder == false)
+      description.add('hasFloatingPlaceholder: false');
     if (isDense ?? false)
       description.add('isDense: $isDense');
     if (contentPadding != null)
