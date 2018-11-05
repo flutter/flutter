@@ -63,6 +63,15 @@ class CupertinoTheme extends InheritedModel<_ThemeDataProperties> {
       || (data.textTheme != oldWidget.data.textTheme && dependencies.contains(_ThemeDataProperties.textTheme));
   }
 
+  /// Retrieve the [CupertinoThemeData] from an ancestor [CupertinoTheme] widget.
+  ///
+  /// May return a default [CupertinoThemeData] if no [CupertinoTheme] widgets
+  /// exist in the ancestry tree.
+  ///
+  /// No [InheritedModel] dependency is created when the [CupertinoThemeData]
+  /// object is provided but a dependency is created when properties on the
+  /// [CupertinoThemeData] are read. When a dependency is created, a rebuild
+  /// is invoked on the reader when the read properties are changed.
   static CupertinoThemeData of(BuildContext context) => _CupertinoThemeInheritedData(context);
 }
 

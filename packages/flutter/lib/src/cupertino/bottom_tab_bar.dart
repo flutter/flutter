@@ -114,6 +114,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(_kTabBarHeight);
 
+  /// Indicates whether the tab bar is fully opaque or can have contents behind
+  /// it show through it.
   bool opaque(BuildContext context) {
     final Color backgroundColor =
         this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor;
