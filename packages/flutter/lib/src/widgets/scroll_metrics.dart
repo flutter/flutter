@@ -7,6 +7,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import '../util.dart';
+
 /// A description of a [Scrollable]'s contents, useful for modeling the state
 /// of its viewport.
 ///
@@ -142,6 +144,9 @@ class FixedScrollMetrics extends ScrollMetrics {
 
   @override
   String toString() {
-    return '$runtimeType(${extentBefore.toStringAsFixed(1)}..[${extentInside.toStringAsFixed(1)}]..${extentAfter.toStringAsFixed(1)})';
+    if (assertionsEnabled) {
+      return '$runtimeType(${extentBefore.toStringAsFixed(1)}..[${extentInside.toStringAsFixed(1)}]..${extentAfter.toStringAsFixed(1)})';
+    }
+    return super.toString();
   }
 }

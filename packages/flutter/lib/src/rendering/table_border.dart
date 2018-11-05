@@ -5,6 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' hide Border;
 
+import '../util.dart';
+
 /// Border specification for [Table] widgets.
 ///
 /// This is like [Border], with the addition of two sides: the inner horizontal
@@ -276,5 +278,5 @@ class TableBorder {
   int get hashCode => hashValues(top, right, bottom, left, horizontalInside, verticalInside);
 
   @override
-  String toString() => 'TableBorder($top, $right, $bottom, $left, $horizontalInside, $verticalInside)';
+  String toString() => assertionsEnabled ? 'TableBorder($top, $right, $bottom, $left, $horizontalInside, $verticalInside)' : super.toString();
 }

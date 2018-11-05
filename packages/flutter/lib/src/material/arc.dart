@@ -8,6 +8,8 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/animation.dart';
 import 'package:flutter/painting.dart';
 
+import '../util.dart';
+
 // How close the begin and end points must be to an axis to be considered
 // vertical or horizontal.
 const double _kOnAxisDelta = 2.0;
@@ -169,7 +171,10 @@ class MaterialPointArcTween extends Tween<Offset> {
 
   @override
   String toString() {
-    return '$runtimeType($begin \u2192 $end; center=$center, radius=$radius, beginAngle=$beginAngle, endAngle=$endAngle)';
+    if (assertionsEnabled) {
+      return '$runtimeType($begin \u2192 $end; center=$center, radius=$radius, beginAngle=$beginAngle, endAngle=$endAngle)';
+    }
+    return super.toString();
   }
 }
 
@@ -324,7 +329,10 @@ class MaterialRectArcTween extends RectTween {
 
   @override
   String toString() {
-    return '$runtimeType($begin \u2192 $end; beginArc=$beginArc, endArc=$endArc)';
+    if (assertionsEnabled) {
+      return '$runtimeType($begin \u2192 $end; beginArc=$beginArc, endArc=$endArc)';
+    }
+    return super.toString();
   }
 }
 
@@ -410,6 +418,9 @@ class MaterialRectCenterArcTween extends RectTween {
 
   @override
   String toString() {
-    return '$runtimeType($begin \u2192 $end; centerArc=$centerArc)';
+    if (assertionsEnabled) {
+      return '$runtimeType($begin \u2192 $end; centerArc=$centerArc)';
+    }
+    return super.toString();
   }
 }

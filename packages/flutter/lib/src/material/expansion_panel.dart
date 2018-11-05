@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../util.dart';
 import 'expand_icon.dart';
 import 'mergeable_material.dart';
 import 'theme.dart';
@@ -32,9 +33,12 @@ class _SaltedKey<S, V> extends LocalKey {
 
   @override
   String toString() {
-    final String saltString = S == String ? '<\'$salt\'>' : '<$salt>';
-    final String valueString = V == String ? '<\'$value\'>' : '<$value>';
-    return '[$saltString $valueString]';
+    if (assertionsEnabled) {
+      final String saltString = S == String ? '<\'$salt\'>' : '<$salt>';
+      final String valueString = V == String ? '<\'$value\'>' : '<$value>';
+      return '[$saltString $valueString]';
+    }
+    return super.toString();
   }
 }
 

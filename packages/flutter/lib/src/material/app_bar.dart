@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import '../util.dart';
 import 'back_button.dart';
 import 'constants.dart';
 import 'debug.dart';
@@ -701,7 +702,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   String toString() {
-    return '${describeIdentity(this)}(topPadding: ${topPadding.toStringAsFixed(1)}, bottomHeight: ${_bottomHeight.toStringAsFixed(1)}, ...)';
+    if (assertionsEnabled) {
+      return '${describeIdentity(this)}(topPadding: ${topPadding.toStringAsFixed(1)}, bottomHeight: ${_bottomHeight.toStringAsFixed(1)}, ...)';
+    }
+    return super.toString();
   }
 }
 

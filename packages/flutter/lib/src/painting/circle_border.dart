@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import '../util.dart';
 import 'basic_types.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
@@ -93,6 +94,6 @@ class CircleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side)';
+    return assertionsEnabled ? '$runtimeType($side)' : super.toString();
   }
 }

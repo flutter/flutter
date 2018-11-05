@@ -6,6 +6,7 @@ import 'dart:ui' show VoidCallback;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'tween.dart';
 
 // Examples can assume:
@@ -162,7 +163,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
 
   @override
   String toString() {
-    return '${describeIdentity(this)}(${toStringDetails()})';
+    return assertionsEnabled ? '${describeIdentity(this)}(${toStringDetails()})' : super.toString();
   }
 
   /// Provides a string describing the status of this object, but not including

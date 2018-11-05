@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../util.dart';
 import 'events.dart';
 
 /// An object that can hit-test pointers.
@@ -49,7 +50,7 @@ class HitTestEntry {
   final HitTestTarget target;
 
   @override
-  String toString() => '$target';
+  String toString() => assertionsEnabled ? '$target' : super.toString();
 }
 
 /// The result of performing a hit test.
@@ -79,5 +80,7 @@ class HitTestResult {
   }
 
   @override
-  String toString() => 'HitTestResult(${_path.isEmpty ? "<empty path>" : _path.join(", ")})';
+  String toString() => assertionsEnabled
+    ? 'HitTestResult(${_path.isEmpty ? "<empty path>" : _path.join(", ")})'
+    : super.toString();
 }

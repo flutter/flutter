@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'basic_types.dart';
 
 /// Base class for [BorderRadius] that allows for text-direction aware resolution.
@@ -150,6 +151,10 @@ abstract class BorderRadiusGeometry {
 
   @override
   String toString() {
+    if (!assertionsEnabled) {
+      return super.toString();
+    }
+
     String visual, logical;
     if (_topLeft == _topRight &&
         _topRight == _bottomLeft &&

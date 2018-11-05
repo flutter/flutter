@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'box.dart';
 import 'debug_overflow_indicator.dart';
 import 'object.dart';
@@ -51,7 +52,7 @@ class FlexParentData extends ContainerBoxParentData<RenderBox> {
   FlexFit fit;
 
   @override
-  String toString() => '${super.toString()}; flex=$flex; fit=$fit';
+  String toString() => assertionsEnabled ? '${super.toString()}; flex=$flex; fit=$fit' : super.toString();
 }
 
 /// How much space should be occupied in the main axis.

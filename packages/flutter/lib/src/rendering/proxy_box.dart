@@ -14,6 +14,7 @@ import 'package:flutter/semantics.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
+import '../util.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -1090,7 +1091,7 @@ abstract class CustomClipper<T> {
   bool shouldReclip(covariant CustomClipper<T> oldClipper);
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => assertionsEnabled ? '$runtimeType' : super.toString();
 }
 
 /// A [CustomClipper] that clips to the outer path of a [ShapeBorder].

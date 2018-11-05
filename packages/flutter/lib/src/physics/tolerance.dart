@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../util.dart';
+
 /// Structure that specifies maximum allowable magnitudes for distances,
 /// durations, and velocity differences to be considered equal.
 class Tolerance {
@@ -42,5 +44,5 @@ class Tolerance {
   final double velocity;
 
   @override
-  String toString() => 'Tolerance(distance: ±$distance, time: ±$time, velocity: ±$velocity)';
+  String toString() => assertionsEnabled ? 'Tolerance(distance: ±$distance, time: ±$time, velocity: ±$velocity)' : super.toString();
 }

@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import '../util.dart';
 import 'simulation.dart';
 import 'tolerance.dart';
 import 'utils.dart';
@@ -55,7 +56,7 @@ class SpringDescription {
   final double damping;
 
   @override
-  String toString() => '$runtimeType(mass: ${mass.toStringAsFixed(1)}, stiffness: ${stiffness.toStringAsFixed(1)}, damping: ${damping.toStringAsFixed(1)})';
+  String toString() => assertionsEnabled ? '$runtimeType(mass: ${mass.toStringAsFixed(1)}, stiffness: ${stiffness.toStringAsFixed(1)}, damping: ${damping.toStringAsFixed(1)})' : super.toString();
 }
 
 /// The kind of spring solution that the [SpringSimulation] is using to simulate the spring.
@@ -119,7 +120,7 @@ class SpringSimulation extends Simulation {
   }
 
   @override
-  String toString() => '$runtimeType(end: $_endPosition, $type)';
+  String toString() => assertionsEnabled ? '$runtimeType(end: $_endPosition, $type)' : super.toString();
 }
 
 /// A SpringSimulation where the value of [x] is guaranteed to have exactly the

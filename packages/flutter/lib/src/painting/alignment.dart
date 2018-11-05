@@ -6,6 +6,7 @@ import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'basic_types.dart';
 
 /// Base class for [Alignment] that allows for text-direction aware
@@ -118,11 +119,14 @@ abstract class AlignmentGeometry {
 
   @override
   String toString() {
-    if (_start == 0.0)
-      return Alignment._stringify(_x, _y);
-    if (_x == 0.0)
-      return AlignmentDirectional._stringify(_start, _y);
-    return Alignment._stringify(_x, _y) + ' + ' + AlignmentDirectional._stringify(_start, 0.0);
+    if (assertionsEnabled) {
+      if (_start == 0.0)
+        return Alignment._stringify(_x, _y);
+      if (_x == 0.0)
+        return AlignmentDirectional._stringify(_start, _y);
+      return Alignment._stringify(_x, _y) + ' + ' + AlignmentDirectional._stringify(_start, 0.0);
+    }
+    return super.toString();
   }
 
   @override
@@ -363,7 +367,7 @@ class Alignment extends AlignmentGeometry {
   }
 
   @override
-  String toString() => _stringify(x, y);
+  String toString() => assertionsEnabled ? _stringify(x, y) : super.toString();
 }
 
 /// An offset that's expressed as a fraction of a [Size], but whose horizontal
@@ -553,7 +557,7 @@ class AlignmentDirectional extends AlignmentGeometry {
   }
 
   @override
-  String toString() => _stringify(start, y);
+  String toString() => assertionsEnabled ? _stringify(start, y) : super.toString();
 }
 
 class _MixedAlignment extends AlignmentGeometry {

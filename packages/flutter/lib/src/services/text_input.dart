@@ -8,6 +8,7 @@ import 'dart:ui' show TextAffinity, hashValues;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'message_codec.dart';
 import 'system_channels.dart';
 import 'system_chrome.dart';
@@ -115,10 +116,13 @@ class TextInputType {
 
   @override
   String toString() {
-    return '$runtimeType('
-        'name: $_name, '
-        'signed: $signed, '
-        'decimal: $decimal)';
+    if (assertionsEnabled) {
+      return '$runtimeType('
+          'name: $_name, '
+          'signed: $signed, '
+          'decimal: $decimal)';
+    }
+    return super.toString();
   }
 
   @override
@@ -512,7 +516,7 @@ class TextEditingValue {
   }
 
   @override
-  String toString() => '$runtimeType(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
+  String toString() => assertionsEnabled ? '$runtimeType(text: \u2524$text\u251C, selection: $selection, composing: $composing)' : super.toString();
 
   @override
   bool operator ==(dynamic other) {

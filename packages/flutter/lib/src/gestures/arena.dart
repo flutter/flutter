@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'debug.dart';
 
 /// Whether the gesture was accepted or rejected.
@@ -72,23 +73,26 @@ class _GestureArena {
 
   @override
   String toString() {
-    final StringBuffer buffer = StringBuffer();
-    if (members.isEmpty) {
-      buffer.write('<empty>');
-    } else {
-      buffer.write(members.map<String>((GestureArenaMember member) {
-        if (member == eagerWinner)
-          return '$member (eager winner)';
-        return '$member';
-      }).join(', '));
+    if (assertionsEnabled) {
+      final StringBuffer buffer = StringBuffer();
+      if (members.isEmpty) {
+        buffer.write('<empty>');
+      } else {
+        buffer.write(members.map<String>((GestureArenaMember member) {
+          if (member == eagerWinner)
+            return '$member (eager winner)';
+          return '$member';
+        }).join(', '));
+      }
+      if (isOpen)
+        buffer.write(' [open]');
+      if (isHeld)
+        buffer.write(' [held]');
+      if (hasPendingSweep)
+        buffer.write(' [hasPendingSweep]');
+      return buffer.toString();
     }
-    if (isOpen)
-      buffer.write(' [open]');
-    if (isHeld)
-      buffer.write(' [held]');
-    if (hasPendingSweep)
-      buffer.write(' [hasPendingSweep]');
-    return buffer.toString();
+    return super.toString();
   }
 }
 

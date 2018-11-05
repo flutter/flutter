@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../util.dart';
 import 'basic_types.dart';
 import 'print.dart';
 
@@ -143,34 +144,37 @@ class FlutterErrorDetails {
 
   @override
   String toString() {
-    final StringBuffer buffer = StringBuffer();
-    if ((library != null && library != '') || (context != null && context != '')) {
-      if (library != null && library != '') {
-        buffer.write('Error caught by $library');
+    if (assertionsEnabled) {
+      final StringBuffer buffer = StringBuffer();
+      if ((library != null && library != '') || (context != null && context != '')) {
+        if (library != null && library != '') {
+          buffer.write('Error caught by $library');
+          if (context != null && context != '')
+            buffer.write(', ');
+        } else {
+          buffer.writeln('Exception ');
+        }
         if (context != null && context != '')
-          buffer.write(', ');
+          buffer.write('thrown $context');
+        buffer.writeln('.');
       } else {
-        buffer.writeln('Exception ');
+        buffer.write('An error was caught.');
       }
-      if (context != null && context != '')
-        buffer.write('thrown $context');
-      buffer.writeln('.');
-    } else {
-      buffer.write('An error was caught.');
-    }
-    buffer.writeln(exceptionAsString());
-    if (informationCollector != null)
-      informationCollector(buffer);
-    if (stack != null) {
-      Iterable<String> stackLines = stack.toString().trimRight().split('\n');
-      if (stackFilter != null) {
-        stackLines = stackFilter(stackLines);
-      } else {
-        stackLines = FlutterError.defaultStackFilter(stackLines);
+      buffer.writeln(exceptionAsString());
+      if (informationCollector != null)
+        informationCollector(buffer);
+      if (stack != null) {
+        Iterable<String> stackLines = stack.toString().trimRight().split('\n');
+        if (stackFilter != null) {
+          stackLines = stackFilter(stackLines);
+        } else {
+          stackLines = FlutterError.defaultStackFilter(stackLines);
+        }
+        buffer.writeAll(stackLines, '\n');
       }
-      buffer.writeAll(stackLines, '\n');
+      return buffer.toString().trimRight();
     }
-    return buffer.toString().trimRight();
+    return super.toString();
   }
 }
 

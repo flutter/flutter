@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
@@ -315,8 +316,11 @@ class _HeroFlightManifest {
 
   @override
   String toString() {
-    return '_HeroFlightManifest($type tag: $tag from route: ${fromRoute.settings} '
-        'to route: ${toRoute.settings} with hero: $fromHero to $toHero)';
+    if (assertionsEnabled) {
+      return '_HeroFlightManifest($type tag: $tag from route: ${fromRoute.settings} '
+          'to route: ${toRoute.settings} with hero: $fromHero to $toHero)';
+    }
+    return super.toString();
   }
 }
 
@@ -537,10 +541,13 @@ class _HeroFlight {
 
   @override
   String toString() {
-    final RouteSettings from = manifest.fromRoute.settings;
-    final RouteSettings to = manifest.toRoute.settings;
-    final Object tag = manifest.tag;
-    return 'HeroFlight(for: $tag, from: $from, to: $to ${_proxyAnimation.parent})';
+    if (assertionsEnabled) {
+      final RouteSettings from = manifest.fromRoute.settings;
+      final RouteSettings to = manifest.toRoute.settings;
+      final Object tag = manifest.tag;
+      return 'HeroFlight(for: $tag, from: $from, to: $to ${_proxyAnimation.parent})';
+    }
+    return super.toString();
   }
 }
 

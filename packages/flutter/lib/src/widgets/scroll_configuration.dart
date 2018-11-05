@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import '../util.dart';
 import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_physics.dart';
@@ -75,7 +76,7 @@ class ScrollBehavior {
   bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => assertionsEnabled ? '$runtimeType' : super.toString();
 }
 
 /// Controls how [Scrollable] widgets behave in a subtree.

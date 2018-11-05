@@ -7,6 +7,7 @@ import 'dart:ui' show lerpDouble, hashValues;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'box.dart';
 import 'object.dart';
 
@@ -167,7 +168,7 @@ class RelativeRect {
   int get hashCode => hashValues(left, top, right, bottom);
 
   @override
-  String toString() => 'RelativeRect.fromLTRB(${left?.toStringAsFixed(1)}, ${top?.toStringAsFixed(1)}, ${right?.toStringAsFixed(1)}, ${bottom?.toStringAsFixed(1)})';
+  String toString() => assertionsEnabled ? 'RelativeRect.fromLTRB(${left?.toStringAsFixed(1)}, ${top?.toStringAsFixed(1)}, ${right?.toStringAsFixed(1)}, ${bottom?.toStringAsFixed(1)})' : super.toString();
 }
 
 /// Parent data for use with [RenderStack].
@@ -213,23 +214,26 @@ class StackParentData extends ContainerBoxParentData<RenderBox> {
 
   @override
   String toString() {
-    final List<String> values = <String>[];
-    if (top != null)
-      values.add('top=$top');
-    if (right != null)
-      values.add('right=$right');
-    if (bottom != null)
-      values.add('bottom=$bottom');
-    if (left != null)
-      values.add('left=$left');
-    if (width != null)
-      values.add('width=$width');
-    if (height != null)
-      values.add('height=$height');
-    if (values.isEmpty)
-      values.add('not positioned');
-    values.add(super.toString());
-    return values.join('; ');
+    if (assertionsEnabled) {
+      final List<String> values = <String>[];
+      if (top != null)
+        values.add('top=$top');
+      if (right != null)
+        values.add('right=$right');
+      if (bottom != null)
+        values.add('bottom=$bottom');
+      if (left != null)
+        values.add('left=$left');
+      if (width != null)
+        values.add('width=$width');
+      if (height != null)
+        values.add('height=$height');
+      if (values.isEmpty)
+        values.add('not positioned');
+      values.add(super.toString());
+      return values.join('; ');
+    }
+    return super.toString();
   }
 }
 

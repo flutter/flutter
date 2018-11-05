@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../util.dart';
 import 'constants.dart';
 import 'theme.dart';
 
@@ -570,7 +571,7 @@ abstract class InkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform);
 
   @override
-  String toString() => describeIdentity(this);
+  String toString() => assertionsEnabled ? describeIdentity(this) : super.toString();
 }
 
 /// An interpolation between two [ShapeBorder]s.

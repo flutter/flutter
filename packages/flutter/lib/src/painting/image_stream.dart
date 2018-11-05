@@ -9,6 +9,8 @@ import 'dart:ui' show hashValues;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../util.dart';
+
 /// A [dart:ui.Image] object with its corresponding scale.
 ///
 /// ImageInfo objects are used by [ImageStream] objects to represent the
@@ -41,7 +43,7 @@ class ImageInfo {
   final double scale;
 
   @override
-  String toString() => '$image @ ${scale}x';
+  String toString() => assertionsEnabled ? '$image @ ${scale}x' : super.toString();
 
   @override
   int get hashCode => hashValues(image, scale);

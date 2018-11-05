@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'system_channels.dart';
 
 /// Specifies a particular device orientation.
@@ -172,7 +173,7 @@ class SystemUiOverlayStyle {
   }
 
   @override
-  String toString() => _toMap().toString();
+  String toString() => assertionsEnabled ? _toMap().toString() : super.toString();
 
   /// Creates a copy of this theme with the given fields replaced with new values.
   SystemUiOverlayStyle copyWith({

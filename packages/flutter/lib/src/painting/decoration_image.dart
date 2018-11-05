@@ -6,6 +6,7 @@ import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'alignment.dart';
 import 'basic_types.dart';
 import 'borders.dart';
@@ -156,22 +157,25 @@ class DecorationImage {
 
   @override
   String toString() {
-    final List<String> properties = <String>[];
-    properties.add('$image');
-    if (colorFilter != null)
-      properties.add('$colorFilter');
-    if (fit != null &&
-        !(fit == BoxFit.fill && centerSlice != null) &&
-        !(fit == BoxFit.scaleDown && centerSlice == null))
-      properties.add('$fit');
-    properties.add('$alignment');
-    if (centerSlice != null)
-      properties.add('centerSlice: $centerSlice');
-    if (repeat != ImageRepeat.noRepeat)
-      properties.add('$repeat');
-    if (matchTextDirection)
-      properties.add('match text direction');
-    return '$runtimeType(${properties.join(", ")})';
+    if (assertionsEnabled) {
+      final List<String> properties = <String>[];
+      properties.add('$image');
+      if (colorFilter != null)
+        properties.add('$colorFilter');
+      if (fit != null &&
+          !(fit == BoxFit.fill && centerSlice != null) &&
+          !(fit == BoxFit.scaleDown && centerSlice == null))
+        properties.add('$fit');
+      properties.add('$alignment');
+      if (centerSlice != null)
+        properties.add('centerSlice: $centerSlice');
+      if (repeat != ImageRepeat.noRepeat)
+        properties.add('$repeat');
+      if (matchTextDirection)
+        properties.add('match text direction');
+      return '$runtimeType(${properties.join(", ")})';
+    }
+    return super.toString();
   }
 }
 
@@ -289,7 +293,10 @@ class DecorationImagePainter {
 
   @override
   String toString() {
-    return '$runtimeType(stream: $_imageStream, image: $_image) for $_details';
+    if (assertionsEnabled) {
+      return '$runtimeType(stream: $_imageStream, image: $_image) for $_details';
+    }
+    return super.toString();
   }
 }
 

@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
@@ -512,18 +513,21 @@ class Border extends BoxBorder {
 
   @override
   String toString() {
-    if (isUniform)
-      return '$runtimeType.all($top)';
-    final List<String> arguments = <String>[];
-    if (top != BorderSide.none)
-      arguments.add('top: $top');
-    if (right != BorderSide.none)
-      arguments.add('right: $right');
-    if (bottom != BorderSide.none)
-      arguments.add('bottom: $bottom');
-    if (left != BorderSide.none)
-      arguments.add('left: $left');
-    return '$runtimeType(${arguments.join(", ")})';
+    if (assertionsEnabled) {
+      if (isUniform)
+        return '$runtimeType.all($top)';
+      final List<String> arguments = <String>[];
+      if (top != BorderSide.none)
+        arguments.add('top: $top');
+      if (right != BorderSide.none)
+        arguments.add('right: $right');
+      if (bottom != BorderSide.none)
+        arguments.add('bottom: $bottom');
+      if (left != BorderSide.none)
+        arguments.add('left: $left');
+      return '$runtimeType(${arguments.join(", ")})';
+    }
+    return super.toString();
   }
 }
 
@@ -817,15 +821,18 @@ class BorderDirectional extends BoxBorder {
 
   @override
   String toString() {
-    final List<String> arguments = <String>[];
-    if (top != BorderSide.none)
-      arguments.add('top: $top');
-    if (start != BorderSide.none)
-      arguments.add('start: $start');
-    if (end != BorderSide.none)
-      arguments.add('end: $end');
-    if (bottom != BorderSide.none)
-      arguments.add('bottom: $bottom');
-    return '$runtimeType(${arguments.join(", ")})';
+    if (assertionsEnabled) {
+      final List<String> arguments = <String>[];
+      if (top != BorderSide.none)
+        arguments.add('top: $top');
+      if (start != BorderSide.none)
+        arguments.add('start: $start');
+      if (end != BorderSide.none)
+        arguments.add('end: $end');
+      if (bottom != BorderSide.none)
+        arguments.add('bottom: $bottom');
+      return '$runtimeType(${arguments.join(", ")})';
+    }
+    return super.toString();
   }
 }

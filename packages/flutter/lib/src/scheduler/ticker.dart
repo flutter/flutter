@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'binding.dart';
 
 /// Signature for the callback passed to the [Ticker] class's constructor.
@@ -312,22 +313,25 @@ class Ticker {
 
   @override
   String toString({ bool debugIncludeStack = false }) {
-    final StringBuffer buffer = StringBuffer();
-    buffer.write('$runtimeType(');
-    assert(() {
-      buffer.write(debugLabel ?? '');
-      return true;
-    }());
-    buffer.write(')');
-    assert(() {
-      if (debugIncludeStack) {
-        buffer.writeln();
-        buffer.writeln('The stack trace when the $runtimeType was actually created was:');
-        FlutterError.defaultStackFilter(_debugCreationStack.toString().trimRight().split('\n')).forEach(buffer.writeln);
-      }
-      return true;
-    }());
-    return buffer.toString();
+    if (assertionsEnabled) {
+      final StringBuffer buffer = StringBuffer();
+      buffer.write('$runtimeType(');
+      assert(() {
+        buffer.write(debugLabel ?? '');
+        return true;
+      }());
+      buffer.write(')');
+      assert(() {
+        if (debugIncludeStack) {
+          buffer.writeln();
+          buffer.writeln('The stack trace when the $runtimeType was actually created was:');
+          FlutterError.defaultStackFilter(_debugCreationStack.toString().trimRight().split('\n')).forEach(buffer.writeln);
+        }
+        return true;
+      }());
+      return buffer.toString();
+    }
+    return super.toString();
   }
 }
 
@@ -439,7 +443,7 @@ class TickerFuture implements Future<void> {
   }
 
   @override
-  String toString() => '${describeIdentity(this)}(${ _completed == null ? "active" : _completed ? "complete" : "canceled" })';
+  String toString() => assertionsEnabled ? '${describeIdentity(this)}(${ _completed == null ? "active" : _completed ? "complete" : "canceled" })' : super.toString();
 }
 
 /// Exception thrown by [Ticker] objects on the [TickerFuture.orCancel] future
@@ -456,8 +460,11 @@ class TickerCanceled implements Exception {
 
   @override
   String toString() {
-    if (ticker != null)
-      return 'This ticker was canceled: $ticker';
-    return 'The ticker was canceled before the "orCancel" property was first used.';
+    if (assertionsEnabled) {
+      if (ticker != null)
+        return 'This ticker was canceled: $ticker';
+      return 'The ticker was canceled before the "orCancel" property was first used.';
+    }
+    return super.toString();
   }
 }

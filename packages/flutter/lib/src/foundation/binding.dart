@@ -9,6 +9,7 @@ import 'dart:io' show exit;
 
 import 'package:meta/meta.dart';
 
+import '../util.dart';
 import 'assertions.dart';
 import 'basic_types.dart';
 import 'debug.dart';
@@ -463,7 +464,7 @@ abstract class BindingBase {
   }
 
   @override
-  String toString() => '<$runtimeType>';
+  String toString() => assertionsEnabled ? '<$runtimeType>' : super.toString();
 }
 
 /// Terminate the Flutter application.

@@ -11,6 +11,7 @@ import 'dart:ui' show hashValues;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../util.dart';
 import 'image_provider.dart';
 
 const String _kAssetManifestFileName = 'AssetManifest.json';
@@ -287,5 +288,7 @@ class AssetImage extends AssetBundleImageProvider {
   int get hashCode => hashValues(keyName, bundle);
 
   @override
-  String toString() => '$runtimeType(bundle: $bundle, name: "$keyName")';
+  String toString() => assertionsEnabled
+    ? '$runtimeType(bundle: $bundle, name: "$keyName")'
+    : super.toString();
 }

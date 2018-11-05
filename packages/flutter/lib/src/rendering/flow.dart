@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
+import '../util.dart';
 import 'box.dart';
 import 'object.dart';
 
@@ -131,7 +132,7 @@ abstract class FlowDelegate {
   ///
   /// By default, returns the [runtimeType] of the class.
   @override
-  String toString() => '$runtimeType';
+  String toString() => assertionsEnabled ? '$runtimeType' : super.toString();
 }
 
 int _getAlphaFromOpacity(double opacity) => (opacity * 255).round();

@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'basic.dart';
 import 'framework.dart';
 
@@ -313,18 +314,21 @@ class MediaQueryData {
 
   @override
   String toString() {
-    return '$runtimeType('
-             'size: $size, '
-             'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}, '
-             'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}, '
-             'padding: $padding, '
-             'viewInsets: $viewInsets, '
-             'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
-             'accessibleNavigation: $accessibleNavigation'
-             'disableAnimations: $disableAnimations'
-             'invertColors: $invertColors'
-             'boldText: $boldText'
-           ')';
+    if (assertionsEnabled) {
+      return '$runtimeType('
+              'size: $size, '
+              'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}, '
+              'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}, '
+              'padding: $padding, '
+              'viewInsets: $viewInsets, '
+              'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
+              'accessibleNavigation: $accessibleNavigation'
+              'disableAnimations: $disableAnimations'
+              'invertColors: $invertColors'
+              'boldText: $boldText'
+            ')';
+    }
+    return super.toString();
   }
 }
 

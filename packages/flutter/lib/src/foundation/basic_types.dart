@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:collection';
 
+import '../util.dart';
+
 // COMMON SIGNATURES
 
 export 'dart:ui' show VoidCallback;
@@ -296,7 +298,7 @@ class Factory<T> {
 
   @override
   String toString() {
-    return 'Factory(type: $type)';
+    return assertionsEnabled ? 'Factory(type: $type)' : super.toString();
   }
 }
 

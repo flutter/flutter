@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../util.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
@@ -456,19 +457,22 @@ class SliverConstraints extends Constraints {
 
   @override
   String toString() {
-    return 'SliverConstraints('
-             '$axisDirection, '
-             '$growthDirection, '
-             '$userScrollDirection, '
-             'scrollOffset: ${scrollOffset.toStringAsFixed(1)}, '
-             'remainingPaintExtent: ${remainingPaintExtent.toStringAsFixed(1)}, ' +
-             (overlap != 0.0 ? 'overlap: ${overlap.toStringAsFixed(1)}, ' : '') +
-             'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}, '
-             'crossAxisDirection: $crossAxisDirection, '
-             'viewportMainAxisExtent: ${viewportMainAxisExtent.toStringAsFixed(1)}, '
-             'remainingCacheExtent: ${remainingCacheExtent.toStringAsFixed(1)} '
-             'cacheOrigin: ${cacheOrigin.toStringAsFixed(1)} '
-           ')';
+    if (assertionsEnabled) {
+      return 'SliverConstraints('
+              '$axisDirection, '
+              '$growthDirection, '
+              '$userScrollDirection, '
+              'scrollOffset: ${scrollOffset.toStringAsFixed(1)}, '
+              'remainingPaintExtent: ${remainingPaintExtent.toStringAsFixed(1)}, ' +
+              (overlap != 0.0 ? 'overlap: ${overlap.toStringAsFixed(1)}, ' : '') +
+              'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}, '
+              'crossAxisDirection: $crossAxisDirection, '
+              'viewportMainAxisExtent: ${viewportMainAxisExtent.toStringAsFixed(1)}, '
+              'remainingCacheExtent: ${remainingCacheExtent.toStringAsFixed(1)} '
+              'cacheOrigin: ${cacheOrigin.toStringAsFixed(1)} '
+            ')';
+    }
+    return super.toString();
   }
 }
 
@@ -771,7 +775,7 @@ class SliverHitTestEntry extends HitTestEntry {
   final double crossAxisPosition;
 
   @override
-  String toString() => '${target.runtimeType}@(mainAxis: $mainAxisPosition, crossAxis: $crossAxisPosition)';
+  String toString() => assertionsEnabled ? '${target.runtimeType}@(mainAxis: $mainAxisPosition, crossAxis: $crossAxisPosition)' : super.toString();
 }
 
 /// Parent data structure used by parents of slivers that position their
@@ -791,7 +795,7 @@ class SliverLogicalParentData extends ParentData {
   double layoutOffset = 0.0;
 
   @override
-  String toString() => 'layoutOffset=${layoutOffset.toStringAsFixed(1)}';
+  String toString() => assertionsEnabled ? 'layoutOffset=${layoutOffset.toStringAsFixed(1)}' : super.toString();
 }
 
 /// Parent data for slivers that have multiple children and that position their
@@ -823,7 +827,7 @@ class SliverPhysicalParentData extends ParentData {
   }
 
   @override
-  String toString() => 'paintOffset=$paintOffset';
+  String toString() => assertionsEnabled ? 'paintOffset=$paintOffset' : super.toString();
 }
 
 /// Parent data for slivers that have multiple children and that position their

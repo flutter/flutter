@@ -7,6 +7,7 @@ import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'container.dart';
@@ -134,7 +135,7 @@ abstract class LocalizationsDelegate<T> {
   Type get type => T;
 
   @override
-  String toString() => '$runtimeType[$type]';
+  String toString() => assertionsEnabled ? '$runtimeType[$type]' : super.toString();
 }
 
 /// Interface for localized resource values for the lowest levels of the Flutter

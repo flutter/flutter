@@ -7,6 +7,7 @@ import 'dart:ui' as ui show Gradient, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'alignment.dart';
 import 'basic_types.dart';
 
@@ -420,7 +421,10 @@ class LinearGradient extends Gradient {
 
   @override
   String toString() {
-    return '$runtimeType($begin, $end, $colors, $stops, $tileMode)';
+    if (assertionsEnabled) {
+      return '$runtimeType($begin, $end, $colors, $stops, $tileMode)';
+    }
+    return super.toString();
   }
 }
 
@@ -692,7 +696,10 @@ class RadialGradient extends Gradient {
 
   @override
   String toString() {
-    return '$runtimeType($center, $radius, $colors, $stops, $tileMode, $focal, $focalRadius)';
+    if (assertionsEnabled) {
+      return '$runtimeType($center, $radius, $colors, $stops, $tileMode, $focal, $focalRadius)';
+    }
+    return super.toString();
   }
 }
 
@@ -919,6 +926,9 @@ class SweepGradient extends Gradient {
 
   @override
   String toString() {
-    return '$runtimeType($center, $startAngle, $endAngle, $colors, $stops, $tileMode)';
+    if (assertionsEnabled) {
+      return '$runtimeType($center, $startAngle, $endAngle, $colors, $stops, $tileMode)';
+    }
+    return super.toString();
   }
 }

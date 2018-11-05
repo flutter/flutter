@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'scroll_context.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
@@ -241,9 +242,12 @@ class ScrollController extends ChangeNotifier {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
-    debugFillDescription(description);
-    return '${describeIdentity(this)}(${description.join(", ")})';
+    if (assertionsEnabled) {
+      final List<String> description = <String>[];
+      debugFillDescription(description);
+      return '${describeIdentity(this)}(${description.join(", ")})';
+    }
+    return super.toString();
   }
 
   /// Add additional information to the given description for use by [toString].

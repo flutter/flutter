@@ -6,6 +6,8 @@ import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
+
 /// A description of an icon fulfilled by a font glyph.
 ///
 /// See [Icons] for a number of predefined icons available for material
@@ -64,5 +66,5 @@ class IconData {
   int get hashCode => hashValues(codePoint, fontFamily, fontPackage, matchTextDirection);
 
   @override
-  String toString() => 'IconData(U+${codePoint.toRadixString(16).toUpperCase().padLeft(5, '0')})';
+  String toString() => assertionsEnabled ? 'IconData(U+${codePoint.toRadixString(16).toUpperCase().padLeft(5, '0')})' : super.toString();
 }

@@ -8,6 +8,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../util.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'focus_manager.dart';
@@ -314,7 +315,7 @@ class RouteSettings {
   final bool isInitialRoute;
 
   @override
-  String toString() => '"$name"';
+  String toString() => assertionsEnabled ? '"$name"' : super.toString();
 }
 
 /// An interface for observing the behavior of a [Navigator].

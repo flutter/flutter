@@ -6,6 +6,7 @@ import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'alignment.dart';
 import 'basic_types.dart';
 
@@ -192,7 +193,10 @@ class FractionalOffset extends Alignment {
 
   @override
   String toString() {
-    return 'FractionalOffset(${dx.toStringAsFixed(1)}, '
-                            '${dy.toStringAsFixed(1)})';
+    if (assertionsEnabled) {
+      return 'FractionalOffset(${dx.toStringAsFixed(1)}, '
+                              '${dy.toStringAsFixed(1)})';
+    }
+    return super.toString();
   }
 }

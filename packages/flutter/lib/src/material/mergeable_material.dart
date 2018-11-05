@@ -7,6 +7,7 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../util.dart';
 import 'divider.dart';
 import 'material.dart';
 import 'shadows.dart';
@@ -51,7 +52,10 @@ class MaterialSlice extends MergeableMaterialItem {
 
   @override
   String toString() {
-    return 'MergeableSlice(key: $key, child: $child)';
+    if (assertionsEnabled) {
+      return 'MergeableSlice(key: $key, child: $child)';
+    }
+    return super.toString();
   }
 }
 
@@ -72,7 +76,10 @@ class MaterialGap extends MergeableMaterialItem {
 
   @override
   String toString() {
-    return 'MaterialGap(key: $key, child: $size)';
+    if (assertionsEnabled) {
+      return 'MaterialGap(key: $key, child: $size)';
+    }
+    return super.toString();
   }
 }
 
@@ -639,7 +646,10 @@ class _MergeableMaterialSliceKey extends GlobalKey {
 
   @override
   String toString() {
-    return '_MergeableMaterialSliceKey($value)';
+    if (assertionsEnabled) {
+      return '_MergeableMaterialSliceKey($value)';
+    }
+    return super.toString();
   }
 }
 

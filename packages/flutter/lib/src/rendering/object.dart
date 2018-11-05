@@ -13,6 +13,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../util.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
@@ -33,7 +34,7 @@ class ParentData {
   void detach() { }
 
   @override
-  String toString() => '<none>';
+  String toString() => assertionsEnabled ? '<none>' : super.toString();
 }
 
 /// Signature for painting into a [PaintingContext].
@@ -495,7 +496,7 @@ class PaintingContext extends ClipContext {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode(layer: $_containerLayer, canvas bounds: $estimatedBounds)';
+  String toString() => assertionsEnabled ? '$runtimeType#$hashCode(layer: $_containerLayer, canvas bounds: $estimatedBounds)' : super.toString();
 }
 
 /// An abstract set of layout constraints.
@@ -2564,7 +2565,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   }
 
   @override
-  String toString({ DiagnosticLevel minLevel }) => toStringShort();
+  String toString({ DiagnosticLevel minLevel }) => assertionsEnabled ? toStringShort() : super.toString();
 
   /// Returns a description of the tree rooted at this node.
   /// If the prefix argument is provided, then every line in the output

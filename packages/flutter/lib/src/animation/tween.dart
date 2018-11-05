@@ -6,6 +6,7 @@ import 'dart:ui' show Color, Size, Rect;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'animation.dart';
 import 'animations.dart';
 import 'curves.dart';
@@ -88,7 +89,7 @@ class _AnimatedEvaluation<T> extends Animation<T> with AnimationWithParentMixin<
 
   @override
   String toString() {
-    return '$parent\u27A9$_evaluatable\u27A9$value';
+    return assertionsEnabled ? '$parent\u27A9$_evaluatable\u27A9$value' : super.toString();
   }
 
   @override
@@ -110,7 +111,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 
   @override
   String toString() {
-    return '$_parent\u27A9$_evaluatable';
+    return assertionsEnabled ? '$_parent\u27A9$_evaluatable' : super.toString();
   }
 }
 
@@ -258,7 +259,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
   }
 
   @override
-  String toString() => '$runtimeType($begin \u2192 $end)';
+  String toString() => assertionsEnabled ? '$runtimeType($begin \u2192 $end)' : super.toString();
 }
 
 /// A [Tween] that evaluates its [parent] in reverse.
@@ -396,7 +397,7 @@ class ConstantTween<T> extends Tween<T> {
   T lerp(double t) => begin;
 
   @override
-  String toString() => '$runtimeType(value: begin)';
+  String toString() => assertionsEnabled ? '$runtimeType(value: begin)' : super.toString();
 }
 
 /// Transforms the value of the given animation by the given curve.
@@ -444,5 +445,5 @@ class CurveTween extends Animatable<double> {
   }
 
   @override
-  String toString() => '$runtimeType(curve: $curve)';
+  String toString() => assertionsEnabled ? '$runtimeType(curve: $curve)' : super.toString();
 }

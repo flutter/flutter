@@ -6,6 +6,7 @@ import 'dart:ui' as ui show lerpDouble, WindowPadding;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'basic_types.dart';
 
 /// Base class for [EdgeInsets] that allows for text-direction aware
@@ -226,6 +227,10 @@ abstract class EdgeInsetsGeometry {
 
   @override
   String toString() {
+    if (!assertionsEnabled) {
+      return super.toString();
+    }
+
     if (_start == 0.0 && _end == 0.0) {
       if (_left == 0.0 && _right == 0.0 && _top == 0.0 && _bottom == 0.0)
         return 'EdgeInsets.zero';

@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../util.dart';
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
@@ -150,7 +151,7 @@ class OverlayEntry {
   }
 
   @override
-  String toString() => '${describeIdentity(this)}(opaque: $opaque; maintainState: $maintainState)';
+  String toString() => assertionsEnabled ? '${describeIdentity(this)}(opaque: $opaque; maintainState: $maintainState)' : super.toString();
 }
 
 class _OverlayEntry extends StatefulWidget {

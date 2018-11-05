@@ -7,6 +7,7 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import '../util.dart';
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
@@ -53,21 +54,24 @@ class TableRow {
 
   @override
   String toString() {
-    final StringBuffer result = StringBuffer();
-    result.write('TableRow(');
-    if (key != null)
-      result.write('$key, ');
-    if (decoration != null)
-      result.write('$decoration, ');
-    if (children == null) {
-      result.write('child list is null');
-    } else if (children.isEmpty) {
-      result.write('no children');
-    } else {
-      result.write('$children');
+    if (assertionsEnabled) {
+      final StringBuffer result = StringBuffer();
+      result.write('TableRow(');
+      if (key != null)
+        result.write('$key, ');
+      if (decoration != null)
+        result.write('$decoration, ');
+      if (children == null) {
+        result.write('child list is null');
+      } else if (children.isEmpty) {
+        result.write('no children');
+      } else {
+        result.write('$children');
+      }
+      result.write(')');
+      return result.toString();
     }
-    result.write(')');
-    return result.toString();
+    return super.toString();
   }
 }
 

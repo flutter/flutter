@@ -6,6 +6,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
+
 /// An easing curve, i.e. a mapping of the unit interval to the unit interval.
 ///
 /// Easing curves are used to adjust the rate of change of an animation over
@@ -52,7 +54,7 @@ abstract class Curve {
 
   @override
   String toString() {
-    return '$runtimeType';
+    return assertionsEnabled ? '$runtimeType' : super.toString();
   }
 }
 
@@ -92,7 +94,7 @@ class SawTooth extends Curve {
 
   @override
   String toString() {
-    return '$runtimeType($count)';
+    return assertionsEnabled ? '$runtimeType($count)' : super.toString();
   }
 }
 
@@ -145,9 +147,12 @@ class Interval extends Curve {
 
   @override
   String toString() {
-    if (curve is! _Linear)
-      return '$runtimeType($begin\u22EF$end)\u27A9$curve';
-    return '$runtimeType($begin\u22EF$end)';
+    if (assertionsEnabled) {
+      if (curve is! _Linear)
+        return '$runtimeType($begin\u22EF$end)\u27A9$curve';
+      return '$runtimeType($begin\u22EF$end)';
+    }
+    return super.toString();
   }
 }
 
@@ -255,7 +260,10 @@ class Cubic extends Curve {
 
   @override
   String toString() {
-    return '$runtimeType(${a.toStringAsFixed(2)}, ${b.toStringAsFixed(2)}, ${c.toStringAsFixed(2)}, ${d.toStringAsFixed(2)})';
+    if (assertionsEnabled) {
+      return '$runtimeType(${a.toStringAsFixed(2)}, ${b.toStringAsFixed(2)}, ${c.toStringAsFixed(2)}, ${d.toStringAsFixed(2)})';
+    }
+    return super.toString();
   }
 }
 
@@ -291,7 +299,10 @@ class FlippedCurve extends Curve {
 
   @override
   String toString() {
-    return '$runtimeType($curve)';
+    if (assertionsEnabled) {
+      return '$runtimeType($curve)';
+    }
+    return super.toString();
   }
 }
 
@@ -403,7 +414,7 @@ class ElasticInCurve extends Curve {
 
   @override
   String toString() {
-    return '$runtimeType($period)';
+    return assertionsEnabled ? '$runtimeType($period)' : super.toString();
   }
 }
 
@@ -431,7 +442,7 @@ class ElasticOutCurve extends Curve {
 
   @override
   String toString() {
-    return '$runtimeType($period)';
+    return assertionsEnabled ? '$runtimeType($period)' : super.toString();
   }
 }
 
@@ -464,7 +475,7 @@ class ElasticInOutCurve extends Curve {
 
   @override
   String toString() {
-    return '$runtimeType($period)';
+    return assertionsEnabled ? '$runtimeType($period)' : super.toString();
   }
 }
 

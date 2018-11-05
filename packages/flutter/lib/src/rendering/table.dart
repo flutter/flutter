@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'box.dart';
 import 'object.dart';
 import 'table_border.dart';
@@ -23,7 +24,7 @@ class TableCellParentData extends BoxParentData {
   int y;
 
   @override
-  String toString() => '${super.toString()}; ${verticalAlignment == null ? "default vertical alignment" : "$verticalAlignment"}';
+  String toString() => assertionsEnabled ? '${super.toString()}; ${verticalAlignment == null ? "default vertical alignment" : "$verticalAlignment"}' : super.toString();
 }
 
 /// Base class to describe how wide a column in a [RenderTable] should be.
@@ -76,7 +77,7 @@ abstract class TableColumnWidth {
   double flex(Iterable<RenderBox> cells) => null;
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => assertionsEnabled ? '$runtimeType' : super.toString();
 }
 
 /// Sizes the column according to the intrinsic dimensions of all the
@@ -115,7 +116,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   double flex(Iterable<RenderBox> cells) => _flex;
 
   @override
-  String toString() => '$runtimeType(flex: ${_flex?.toStringAsFixed(1)})';
+  String toString() => assertionsEnabled ? '$runtimeType(flex: ${_flex?.toStringAsFixed(1)})' : super.toString();
 }
 
 /// Sizes the column to a specific number of pixels.
@@ -141,7 +142,7 @@ class FixedColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($value)';
+  String toString() => assertionsEnabled ? '$runtimeType($value)' : super.toString();
 }
 
 /// Sizes the column to a fraction of the table's constraints' maxWidth.
@@ -173,7 +174,7 @@ class FractionColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($value)';
+  String toString() => assertionsEnabled ? '$runtimeType($value)' : super.toString();
 }
 
 /// Sizes the column by taking a part of the remaining space once all
@@ -210,7 +211,7 @@ class FlexColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($value)';
+  String toString() => assertionsEnabled ? '$runtimeType($value)' : super.toString();
 }
 
 /// Sizes the column such that it is the size that is the maximum of
@@ -261,7 +262,7 @@ class MaxColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($a, $b)';
+  String toString() => assertionsEnabled ? '$runtimeType($a, $b)' : super.toString();
 }
 
 /// Sizes the column such that it is the size that is the minimum of
@@ -312,7 +313,7 @@ class MinColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($a, $b)';
+  String toString() => assertionsEnabled ? '$runtimeType($a, $b)' : super.toString();
 }
 
 /// Vertical alignment options for cells in [RenderTable] objects.

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'animation.dart';
 import 'tween.dart';
 
@@ -128,5 +129,5 @@ class _Interval {
   double value(double t) => (t - start) / (end - start);
 
   @override
-  String toString() => '<$start, $end>';
+  String toString() => assertionsEnabled ? '<$start, $end>' : super.toString();
 }

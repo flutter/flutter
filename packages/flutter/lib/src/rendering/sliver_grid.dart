@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'box.dart';
 import 'object.dart';
 import 'sliver.dart';
@@ -71,12 +72,15 @@ class SliverGridGeometry {
 
   @override
   String toString() {
-    return 'SliverGridGeometry('
-      'scrollOffset: $scrollOffset, '
-      'crossAxisOffset: $crossAxisOffset, '
-      'mainAxisExtent: $mainAxisExtent, '
-      'crossAxisExtent: $crossAxisExtent'
-    ')';
+    if (assertionsEnabled) {
+      return 'SliverGridGeometry('
+        'scrollOffset: $scrollOffset, '
+        'crossAxisOffset: $crossAxisOffset, '
+        'mainAxisExtent: $mainAxisExtent, '
+        'crossAxisExtent: $crossAxisExtent'
+      ')';
+    }
+    return super.toString();
   }
 }
 
@@ -456,7 +460,7 @@ class SliverGridParentData extends SliverMultiBoxAdaptorParentData {
   double crossAxisOffset;
 
   @override
-  String toString() => 'crossAxisOffset=$crossAxisOffset; ${super.toString()}';
+  String toString() => assertionsEnabled ? 'crossAxisOffset=$crossAxisOffset; ${super.toString()}' : super.toString();
 }
 
 /// A sliver that places multiple box children in a two dimensional arrangement.

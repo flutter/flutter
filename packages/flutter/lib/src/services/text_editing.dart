@@ -6,6 +6,8 @@ import 'dart:ui' show hashValues, TextAffinity, TextPosition;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
+
 export 'dart:ui' show TextAffinity, TextPosition;
 
 /// A range of characters in a string of text.
@@ -90,7 +92,7 @@ class TextRange {
   );
 
   @override
-  String toString() => 'TextRange(start: $start, end: $end)';
+  String toString() => assertionsEnabled ? 'TextRange(start: $start, end: $end)' : super.toString();
 }
 
 /// A range of text that represents a selection.
@@ -176,7 +178,10 @@ class TextSelection extends TextRange {
 
   @override
   String toString() {
-    return '$runtimeType(baseOffset: $baseOffset, extentOffset: $extentOffset, affinity: $affinity, isDirectional: $isDirectional)';
+    if (assertionsEnabled) {
+      return '$runtimeType(baseOffset: $baseOffset, extentOffset: $extentOffset, affinity: $affinity, isDirectional: $isDirectional)';
+    }
+    return super.toString();
   }
 
   @override

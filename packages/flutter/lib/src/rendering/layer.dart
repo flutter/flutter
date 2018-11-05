@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../util.dart';
 import 'debug.dart';
 
 /// A composited layer.
@@ -1392,7 +1393,7 @@ class LayerLink {
   LeaderLayer _leader;
 
   @override
-  String toString() => '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
+  String toString() => assertionsEnabled ? '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })' : super.toString();
 }
 
 /// A composited layer that can be followed by a [FollowerLayer].

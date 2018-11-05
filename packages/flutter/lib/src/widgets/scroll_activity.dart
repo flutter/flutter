@@ -11,6 +11,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../util.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -131,7 +132,7 @@ abstract class ScrollActivity {
   }
 
   @override
-  String toString() => describeIdentity(this);
+  String toString() => assertionsEnabled ? describeIdentity(this) : super.toString();
 }
 
 /// A scroll activity that does nothing.
@@ -409,7 +410,7 @@ class ScrollDragController implements Drag {
   dynamic _lastDetails;
 
   @override
-  String toString() => describeIdentity(this);
+  String toString() => assertionsEnabled ? describeIdentity(this) : super.toString();
 }
 
 /// The activity a scroll view performs when a the user drags their finger
@@ -480,7 +481,10 @@ class DragScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '${describeIdentity(this)}($_controller)';
+    if (assertionsEnabled) {
+      return '${describeIdentity(this)}($_controller)';
+    }
+    return super.toString();
   }
 }
 
@@ -570,7 +574,10 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '${describeIdentity(this)}($_controller)';
+    if (assertionsEnabled) {
+      return '${describeIdentity(this)}($_controller)';
+    }
+    return super.toString();
   }
 }
 
@@ -654,6 +661,9 @@ class DrivenScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '${describeIdentity(this)}($_controller)';
+    if (assertionsEnabled) {
+      return '${describeIdentity(this)}($_controller)';
+    }
+    return super.toString();
   }
 }

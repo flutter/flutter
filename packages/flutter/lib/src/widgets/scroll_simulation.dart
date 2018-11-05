@@ -7,6 +7,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 
+import '../util.dart';
+
 /// An implementation of scroll physics that matches iOS.
 ///
 /// See also:
@@ -123,7 +125,10 @@ class BouncingScrollSimulation extends Simulation {
 
   @override
   String toString() {
-    return '$runtimeType(leadingExtent: $leadingExtent, trailingExtent: $trailingExtent)';
+    if (assertionsEnabled) {
+      return '$runtimeType(leadingExtent: $leadingExtent, trailingExtent: $trailingExtent)';
+    }
+    return super.toString();
   }
 }
 

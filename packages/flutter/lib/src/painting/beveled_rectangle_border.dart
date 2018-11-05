@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import '../util.dart';
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
@@ -146,6 +147,6 @@ class BeveledRectangleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side, $borderRadius)';
+    return assertionsEnabled ? '$runtimeType($side, $borderRadius)' : super.toString();
   }
 }

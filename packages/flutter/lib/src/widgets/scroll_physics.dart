@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 
+import '../util.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
@@ -236,9 +237,12 @@ class ScrollPhysics {
 
   @override
   String toString() {
-    if (parent == null)
-      return runtimeType.toString();
-    return '$runtimeType -> $parent';
+    if (assertionsEnabled) {
+      if (parent == null)
+        return runtimeType.toString();
+      return '$runtimeType -> $parent';
+    }
+    return super.toString();
   }
 }
 

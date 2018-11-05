@@ -9,6 +9,7 @@ import 'package:flutter/semantics.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
+import '../util.dart';
 import 'box.dart';
 import 'object.dart';
 import 'proxy_box.dart';
@@ -260,7 +261,7 @@ abstract class CustomPainter extends Listenable {
   bool hitTest(Offset position) => null;
 
   @override
-  String toString() => '${describeIdentity(this)}(${ _repaint?.toString() ?? "" })';
+  String toString() => assertionsEnabled ? '${describeIdentity(this)}(${ _repaint?.toString() ?? "" })' : super.toString();
 }
 
 /// Contains properties describing information drawn in a rectangle contained by

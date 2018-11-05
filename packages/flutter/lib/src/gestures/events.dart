@@ -6,6 +6,8 @@ import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
+
 export 'dart:ui' show Offset, PointerDeviceKind;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the primary mouse button.
@@ -258,7 +260,7 @@ abstract class PointerEvent {
   final bool synthesized;
 
   @override
-  String toString() => '$runtimeType($position)';
+  String toString() => assertionsEnabled ? '$runtimeType($position)' : super.toString();
 
   /// Returns a complete textual description of this event.
   String toStringFull() {

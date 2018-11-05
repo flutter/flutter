@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import '../util.dart';
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
@@ -42,7 +43,7 @@ class ScaleStartDetails {
   final Offset focalPoint;
 
   @override
-  String toString() => 'ScaleStartDetails(focalPoint: $focalPoint)';
+  String toString() => assertionsEnabled ? 'ScaleStartDetails(focalPoint: $focalPoint)' : super.toString();
 }
 
 /// Details for [GestureScaleUpdateCallback].
@@ -72,7 +73,9 @@ class ScaleUpdateDetails {
   final double rotation;
 
   @override
-  String toString() => 'ScaleUpdateDetails(focalPoint: $focalPoint, scale: $scale, rotation: $rotation)';
+  String toString() => assertionsEnabled
+    ? 'ScaleUpdateDetails(focalPoint: $focalPoint, scale: $scale, rotation: $rotation)'
+    : super.toString();
 }
 
 /// Details for [GestureScaleEndCallback].
@@ -87,7 +90,7 @@ class ScaleEndDetails {
   final Velocity velocity;
 
   @override
-  String toString() => 'ScaleEndDetails(velocity: $velocity)';
+  String toString() => assertionsEnabled ? 'ScaleEndDetails(velocity: $velocity)' : super.toString();
 }
 
 /// Signature for when the pointers in contact with the screen have established

@@ -6,6 +6,7 @@ import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
@@ -136,7 +137,10 @@ class RoundedRectangleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side, $borderRadius)';
+    if (assertionsEnabled) {
+      return '$runtimeType($side, $borderRadius)';
+    }
+    return super.toString();
   }
 }
 
@@ -296,6 +300,9 @@ class _RoundedRectangleToCircleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return 'RoundedRectangleBorder($side, $borderRadius, ${(circleness * 100).toStringAsFixed(1)}% of the way to being a CircleBorder)';
+    if (assertionsEnabled) {
+      return 'RoundedRectangleBorder($side, $borderRadius, ${(circleness * 100).toStringAsFixed(1)}% of the way to being a CircleBorder)';
+    }
+    return super.toString();
   }
 }

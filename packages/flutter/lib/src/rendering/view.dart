@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../util.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
@@ -39,7 +40,7 @@ class ViewConfiguration {
   }
 
   @override
-  String toString() => '$size at ${devicePixelRatio}x';
+  String toString() => assertionsEnabled ? '$size at ${devicePixelRatio}x' : super.toString();
 }
 
 /// The root of the render tree.

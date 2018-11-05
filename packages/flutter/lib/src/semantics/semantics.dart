@@ -13,6 +13,7 @@ import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../util.dart';
 import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
@@ -66,7 +67,7 @@ class SemanticsTag {
   final String name;
 
   @override
-  String toString() => '$runtimeType($name)';
+  String toString() => assertionsEnabled ? '$runtimeType($name)' : super.toString();
 }
 
 /// An identifier of a custom semantics action.
@@ -136,7 +137,7 @@ class CustomSemanticsAction {
 
   @override
   String toString() {
-    return 'CustomSemanticsAction(${_ids[this]}, label:$label, hint:$hint, action:$action)';
+    return assertionsEnabled ? 'CustomSemanticsAction(${_ids[this]}, label:$label, hint:$hint, action:$action)' : super.toString();
   }
 
   // Logic to assign a unique id to each custom action without requiring
@@ -2438,7 +2439,7 @@ class SemanticsOwner extends ChangeNotifier {
   }
 
   @override
-  String toString() => describeIdentity(this);
+  String toString() => assertionsEnabled ? describeIdentity(this) : super.toString();
 }
 
 /// Describes the semantic information associated with the owning

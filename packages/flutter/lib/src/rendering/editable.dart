@@ -12,6 +12,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import '../util.dart';
 import 'box.dart';
 import 'object.dart';
 import 'viewport_offset.dart';
@@ -69,13 +70,16 @@ class TextSelectionPoint {
 
   @override
   String toString() {
-    switch (direction) {
-      case TextDirection.ltr:
-        return '$point-ltr';
-      case TextDirection.rtl:
-        return '$point-rtl';
+    if (assertionsEnabled) {
+      switch (direction) {
+        case TextDirection.ltr:
+          return '$point-ltr';
+        case TextDirection.rtl:
+          return '$point-rtl';
+      }
+      return '$point';
     }
-    return '$point';
+    return super.toString();
   }
 }
 

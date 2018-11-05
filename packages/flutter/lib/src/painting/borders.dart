@@ -7,6 +7,7 @@ import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'basic_types.dart';
 import 'edge_insets.dart';
 
@@ -257,7 +258,9 @@ class BorderSide {
   int get hashCode => hashValues(color, width, style);
 
   @override
-  String toString() => '$runtimeType($color, ${width.toStringAsFixed(1)}, $style)';
+  String toString() => assertionsEnabled
+    ? '$runtimeType($color, ${width.toStringAsFixed(1)}, $style)'
+    : super.toString();
 }
 
 /// Base class for shape outlines.
@@ -467,7 +470,7 @@ abstract class ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType()';
+    return assertionsEnabled ? '$runtimeType()' : super.toString();
   }
 }
 
@@ -615,11 +618,14 @@ class _CompoundBorder extends ShapeBorder {
 
   @override
   String toString() {
-    // We list them in reverse order because when adding two borders they end up
-    // in the list in the opposite order of what the source looks like: a + b =>
-    // [b, a]. We do this to make the painting code more optimal, and most of
-    // the rest of the code doesn't care, except toString() (for debugging).
-    return borders.reversed.map<String>((ShapeBorder border) => border.toString()).join(' + ');
+    if (assertionsEnabled) {
+      // We list them in reverse order because when adding two borders they end up
+      // in the list in the opposite order of what the source looks like: a + b =>
+      // [b, a]. We do this to make the painting code more optimal, and most of
+      // the rest of the code doesn't care, except toString() (for debugging).
+      return borders.reversed.map<String>((ShapeBorder border) => border.toString()).join(' + ');
+    }
+    return super.toString();
   }
 }
 

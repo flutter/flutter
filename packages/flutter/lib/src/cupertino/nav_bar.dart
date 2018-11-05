@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import '../util.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'icons.dart';
@@ -74,7 +75,7 @@ class _HeroTag {
 
   // Let the Hero tag be described in tree dumps.
   @override
-  String toString() => 'Default Hero tag for Cupertino navigation bars with navigator $navigator';
+  String toString() => assertionsEnabled ? 'Default Hero tag for Cupertino navigation bars with navigator $navigator' : super.toString();
 
   @override
   bool operator ==(Object other) {

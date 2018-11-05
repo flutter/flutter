@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show PointerData, PointerChange;
 
+import '../util.dart';
 import 'events.dart';
 
 class _PointerState {
@@ -32,7 +33,10 @@ class _PointerState {
 
   @override
   String toString() {
-    return '_PointerState(pointer: $pointer, down: $down, lastPosition: $lastPosition)';
+    if (assertionsEnabled) {
+      return '_PointerState(pointer: $pointer, down: $down, lastPosition: $lastPosition)';
+    }
+    return super.toString();
   }
 }
 

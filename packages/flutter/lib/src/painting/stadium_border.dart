@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show lerpDouble;
 
+import '../util.dart';
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
@@ -122,7 +123,7 @@ class StadiumBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side)';
+    return assertionsEnabled ? '$runtimeType($side)' : super.toString();
   }
 }
 
@@ -270,8 +271,11 @@ class _StadiumToCircleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return 'StadiumBorder($side, ${(circleness * 100).toStringAsFixed(1)}% '
-           'of the way to being a CircleBorder)';
+    if (assertionsEnabled) {
+      return 'StadiumBorder($side, ${(circleness * 100).toStringAsFixed(1)}% '
+            'of the way to being a CircleBorder)';
+    }
+    return super.toString();
   }
 }
 
@@ -413,8 +417,11 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return 'StadiumBorder($side, $borderRadius, '
-           '${(rectness * 100).toStringAsFixed(1)}% of the way to being a '
-           'RoundedRectangleBorder)';
+    if (assertionsEnabled) {
+      return 'StadiumBorder($side, $borderRadius, '
+            '${(rectness * 100).toStringAsFixed(1)}% of the way to being a '
+            'RoundedRectangleBorder)';
+    }
+    return super.toString();
   }
 }

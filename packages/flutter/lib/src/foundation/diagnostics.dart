@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 
+import '../util.dart';
 import 'print.dart';
 
 // Examples can assume:
@@ -619,7 +620,7 @@ class _PrefixedStringBuilder {
   }
 
   @override
-  String toString() => _buffer.toString();
+  String toString() => assertionsEnabled ? _buffer.toString() : super.toString();
 }
 
 class _NoDefaultValue {
@@ -789,18 +790,21 @@ abstract class DiagnosticsNode {
     TextTreeConfiguration parentConfiguration,
     DiagnosticLevel minLevel = DiagnosticLevel.info,
   }) {
-    assert(style != null);
-    assert(minLevel != null);
-    if (style == DiagnosticsTreeStyle.singleLine)
-      return toStringDeep(parentConfiguration: parentConfiguration, minLevel: minLevel);
+    if (assertionsEnabled) {
+      assert(style != null);
+      assert(minLevel != null);
+      if (style == DiagnosticsTreeStyle.singleLine)
+        return toStringDeep(parentConfiguration: parentConfiguration, minLevel: minLevel);
 
-    final String description = toDescription(parentConfiguration: parentConfiguration);
+      final String description = toDescription(parentConfiguration: parentConfiguration);
 
-    if (name == null || name.isEmpty || !showName)
-      return description;
+      if (name == null || name.isEmpty || !showName)
+        return description;
 
-    return description.contains('\n') ? '$name$_separator\n$description'
-                                      : '$name$_separator $description';
+      return description.contains('\n') ? '$name$_separator\n$description'
+                                        : '$name$_separator $description';
+    }
+    return super.toString();
   }
 
   /// Returns a configuration specifying how this object should be rendered
@@ -2123,7 +2127,10 @@ abstract class Diagnosticable {
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) {
-    return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
+    if (assertionsEnabled) {
+      return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
+    }
+    return super.toString();
   }
 
   /// Returns a debug representation of the object that is used by debugging
@@ -2465,7 +2472,10 @@ abstract class DiagnosticableTree extends Diagnosticable {
 mixin DiagnosticableTreeMixin implements DiagnosticableTree {
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) {
-    return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
+    if (assertionsEnabled) {
+      return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
+    }
+    return super.toString();
   }
 
   @override

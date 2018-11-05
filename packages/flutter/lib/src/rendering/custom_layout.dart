@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'box.dart';
 import 'object.dart';
 
@@ -15,7 +16,7 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
   Object id;
 
   @override
-  String toString() => '${super.toString()}; id=$id';
+  String toString() => assertionsEnabled ? '${super.toString()}; id=$id' : super.toString();
 }
 
 /// A delegate that controls the layout of multiple children.
@@ -267,7 +268,7 @@ abstract class MultiChildLayoutDelegate {
   ///
   /// By default, returns the [runtimeType] of the class.
   @override
-  String toString() => '$runtimeType';
+  String toString() => assertionsEnabled ? '$runtimeType' : super.toString();
 }
 
 /// Defers the layout of multiple children to a delegate.

@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../util.dart';
 import 'colors.dart';
 import 'input_border.dart';
 import 'theme.dart';
@@ -2604,68 +2605,71 @@ class InputDecoration {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
-    if (icon != null)
-      description.add('icon: $icon');
-    if (labelText != null)
-      description.add('labelText: "$labelText"');
-    if (helperText != null)
-      description.add('helperText: "$helperText"');
-    if (hintText != null)
-      description.add('hintText: "$hintText"');
-    if (errorText != null)
-      description.add('errorText: "$errorText"');
-    if (errorStyle != null)
-      description.add('errorStyle: "$errorStyle"');
-    if (errorMaxLines != null)
-      description.add('errorMaxLines: "$errorMaxLines"');
-    if (isDense ?? false)
-      description.add('isDense: $isDense');
-    if (contentPadding != null)
-      description.add('contentPadding: $contentPadding');
-    if (isCollapsed)
-      description.add('isCollapsed: $isCollapsed');
-    if (prefixIcon != null)
-      description.add('prefixIcon: $prefixIcon');
-    if (prefix != null)
-      description.add('prefix: $prefix');
-    if (prefixText != null)
-      description.add('prefixText: $prefixText');
-    if (prefixStyle != null)
-      description.add('prefixStyle: $prefixStyle');
-    if (suffixIcon != null)
-      description.add('suffixIcon: $suffixIcon');
-    if (suffix != null)
-      description.add('suffix: $suffix');
-    if (suffixText != null)
-      description.add('suffixText: $suffixText');
-    if (suffixStyle != null)
-      description.add('suffixStyle: $suffixStyle');
-    if (counterText != null)
-      description.add('counterText: $counterText');
-    if (counterStyle != null)
-      description.add('counterStyle: $counterStyle');
-    if (filled == true) // filled == null same as filled == false
-      description.add('filled: true');
-    if (fillColor != null)
-      description.add('fillColor: $fillColor');
-    if (errorBorder != null)
-      description.add('errorBorder: $errorBorder');
-    if (focusedBorder != null)
-      description.add('focusedBorder: $focusedBorder');
-    if (focusedErrorBorder != null)
-      description.add('focusedErrorBorder: $focusedErrorBorder');
-    if (disabledBorder != null)
-      description.add('disabledBorder: $disabledBorder');
-    if (enabledBorder != null)
-      description.add('enabledBorder: $enabledBorder');
-    if (border != null)
-      description.add('border: $border');
-    if (!enabled)
-      description.add('enabled: false');
-    if (semanticCounterText != null)
-      description.add('semanticCounterText: $semanticCounterText');
-    return 'InputDecoration(${description.join(', ')})';
+    if (assertionsEnabled) {
+      final List<String> description = <String>[];
+      if (icon != null)
+        description.add('icon: $icon');
+      if (labelText != null)
+        description.add('labelText: "$labelText"');
+      if (helperText != null)
+        description.add('helperText: "$helperText"');
+      if (hintText != null)
+        description.add('hintText: "$hintText"');
+      if (errorText != null)
+        description.add('errorText: "$errorText"');
+      if (errorStyle != null)
+        description.add('errorStyle: "$errorStyle"');
+      if (errorMaxLines != null)
+        description.add('errorMaxLines: "$errorMaxLines"');
+      if (isDense ?? false)
+        description.add('isDense: $isDense');
+      if (contentPadding != null)
+        description.add('contentPadding: $contentPadding');
+      if (isCollapsed)
+        description.add('isCollapsed: $isCollapsed');
+      if (prefixIcon != null)
+        description.add('prefixIcon: $prefixIcon');
+      if (prefix != null)
+        description.add('prefix: $prefix');
+      if (prefixText != null)
+        description.add('prefixText: $prefixText');
+      if (prefixStyle != null)
+        description.add('prefixStyle: $prefixStyle');
+      if (suffixIcon != null)
+        description.add('suffixIcon: $suffixIcon');
+      if (suffix != null)
+        description.add('suffix: $suffix');
+      if (suffixText != null)
+        description.add('suffixText: $suffixText');
+      if (suffixStyle != null)
+        description.add('suffixStyle: $suffixStyle');
+      if (counterText != null)
+        description.add('counterText: $counterText');
+      if (counterStyle != null)
+        description.add('counterStyle: $counterStyle');
+      if (filled == true) // filled == null same as filled == false
+        description.add('filled: true');
+      if (fillColor != null)
+        description.add('fillColor: $fillColor');
+      if (errorBorder != null)
+        description.add('errorBorder: $errorBorder');
+      if (focusedBorder != null)
+        description.add('focusedBorder: $focusedBorder');
+      if (focusedErrorBorder != null)
+        description.add('focusedErrorBorder: $focusedErrorBorder');
+      if (disabledBorder != null)
+        description.add('disabledBorder: $disabledBorder');
+      if (enabledBorder != null)
+        description.add('enabledBorder: $enabledBorder');
+      if (border != null)
+        description.add('border: $border');
+      if (!enabled)
+        description.add('enabled: false');
+      if (semanticCounterText != null)
+        description.add('semanticCounterText: $semanticCounterText');
+      return 'InputDecoration(${description.join(', ')})';
+    }
+    return super.toString();
   }
 }
 

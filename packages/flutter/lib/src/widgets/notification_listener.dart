@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../util.dart';
 import 'framework.dart';
 
 /// Signature for [Notification] listeners.
@@ -61,9 +62,12 @@ abstract class Notification {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
-    debugFillDescription(description);
-    return '$runtimeType(${description.join(", ")})';
+    if (assertionsEnabled) {
+      final List<String> description = <String>[];
+      debugFillDescription(description);
+      return '$runtimeType(${description.join(", ")})';
+    }
+    return super.toString();
   }
 
   /// Add additional information to the given description for use by [toString].

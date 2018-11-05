@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 
+import '../util.dart';
 import 'assertions.dart';
 import 'basic_types.dart';
 import 'diagnostics.dart';
@@ -240,7 +241,10 @@ class _MergingListenable extends ChangeNotifier {
 
   @override
   String toString() {
-    return 'Listenable.merge([${_children.join(", ")}])';
+    if (assertionsEnabled) {
+      return 'Listenable.merge([${_children.join(", ")}])';
+    }
+    return super.toString();
   }
 }
 
@@ -265,5 +269,5 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   }
 
   @override
-  String toString() => '${describeIdentity(this)}($value)';
+  String toString() => assertionsEnabled ? '${describeIdentity(this)}($value)' : super.toString();
 }

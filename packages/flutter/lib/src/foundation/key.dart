@@ -6,6 +6,8 @@ import 'dart:ui' show hashValues;
 
 import 'package:meta/meta.dart';
 
+import '../util.dart';
+
 /// A [Key] is an identifier for [Widget]s, [Element]s and [SemanticsNode]s.
 ///
 /// A new widget will only be used to update an existing element if its key is
@@ -74,12 +76,15 @@ class ValueKey<T> extends LocalKey {
 
   @override
   String toString() {
-    final String valueString = T == String ? '<\'$value\'>' : '<$value>';
-    // The crazy on the next line is a workaround for
-    // https://github.com/dart-lang/sdk/issues/33297
-    if (runtimeType == _TypeLiteral<ValueKey<T>>().type)
-      return '[$valueString]';
-    return '[$T $valueString]';
+    if (assertionsEnabled) {
+      final String valueString = T == String ? '<\'$value\'>' : '<$value>';
+      // The crazy on the next line is a workaround for
+      // https://github.com/dart-lang/sdk/issues/33297
+      if (runtimeType == _TypeLiteral<ValueKey<T>>().type)
+        return '[$valueString]';
+      return '[$T $valueString]';
+    }
+    return super.toString();
   }
 }
 

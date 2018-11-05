@@ -7,6 +7,7 @@ import 'dart:ui' as ui show Shadow, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'basic_types.dart';
 import 'debug.dart';
 
@@ -131,5 +132,7 @@ class BoxShadow extends ui.Shadow {
   int get hashCode => hashValues(color, offset, blurRadius, spreadRadius);
 
   @override
-  String toString() => 'BoxShadow($color, $offset, $blurRadius, $spreadRadius)';
+  String toString() => assertionsEnabled
+    ? 'BoxShadow($color, $offset, $blurRadius, $spreadRadius)'
+    : super.toString();
 }

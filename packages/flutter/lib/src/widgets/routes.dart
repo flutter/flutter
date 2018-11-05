@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -281,7 +282,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   String get debugLabel => '$runtimeType';
 
   @override
-  String toString() => '$runtimeType(animation: $_controller)';
+  String toString() => assertionsEnabled ? '$runtimeType(animation: $_controller)' : super.toString();
 }
 
 /// An entry in the history of a [LocalHistoryRoute].
@@ -1227,7 +1228,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  String toString() => '$runtimeType($settings, animation: $_animation)';
+  String toString() => assertionsEnabled ? '$runtimeType($settings, animation: $_animation)' : super.toString();
 }
 
 /// A modal route that overlays a widget over the current route.

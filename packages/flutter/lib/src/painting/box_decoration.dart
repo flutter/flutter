@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'box_border.dart';
@@ -429,6 +430,9 @@ class _BoxDecorationPainter extends BoxPainter {
 
   @override
   String toString() {
-    return 'BoxPainter for $_decoration';
+    if (assertionsEnabled) {
+      return 'BoxPainter for $_decoration';
+    }
+    return super.toString();
   }
 }

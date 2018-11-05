@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
+
 /// The direction of a scroll, relative to the positive scroll offset axis given
 /// by an [AxisDirection] and a [GrowthDirection].
 ///
@@ -206,9 +208,12 @@ abstract class ViewportOffset extends ChangeNotifier {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
-    debugFillDescription(description);
-    return '${describeIdentity(this)}(${description.join(", ")})';
+    if (assertionsEnabled) {
+      final List<String> description = <String>[];
+      debugFillDescription(description);
+      return '${describeIdentity(this)}(${description.join(", ")})';
+    }
+    return super.toString();
   }
 
   /// Add additional information to the given description for use by [toString].

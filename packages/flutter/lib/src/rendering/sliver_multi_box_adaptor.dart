@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../util.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
@@ -136,7 +137,7 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
   bool _keptAlive = false;
 
   @override
-  String toString() => 'index=$index; ${keepAlive == true ? "keepAlive; " : ""}${super.toString()}';
+  String toString() => assertionsEnabled ? 'index=$index; ${keepAlive == true ? "keepAlive; " : ""}${super.toString()}' : super.toString();
 }
 
 /// A sliver with multiple box children.

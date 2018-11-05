@@ -6,6 +6,7 @@ import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'lsq_solver.dart';
 
 export 'dart:ui' show Offset;
@@ -73,7 +74,9 @@ class Velocity {
   int get hashCode => pixelsPerSecond.hashCode;
 
   @override
-  String toString() => 'Velocity(${pixelsPerSecond.dx.toStringAsFixed(1)}, ${pixelsPerSecond.dy.toStringAsFixed(1)})';
+  String toString() => assertionsEnabled
+    ? 'Velocity(${pixelsPerSecond.dx.toStringAsFixed(1)}, ${pixelsPerSecond.dy.toStringAsFixed(1)})'
+    : super.toString();
 }
 
 /// A two dimensional velocity estimate.
@@ -121,7 +124,9 @@ class VelocityEstimate {
   final Offset offset;
 
   @override
-  String toString() => 'VelocityEstimate(${pixelsPerSecond.dx.toStringAsFixed(1)}, ${pixelsPerSecond.dy.toStringAsFixed(1)}; offset: $offset, duration: $duration, confidence: ${confidence.toStringAsFixed(1)})';
+  String toString() => assertionsEnabled
+    ? 'VelocityEstimate(${pixelsPerSecond.dx.toStringAsFixed(1)}, ${pixelsPerSecond.dy.toStringAsFixed(1)}; offset: $offset, duration: $duration, confidence: ${confidence.toStringAsFixed(1)})'
+    : super.toString();
 }
 
 class _PointAtTime {
@@ -133,7 +138,7 @@ class _PointAtTime {
   final Offset point;
 
   @override
-  String toString() => '_PointAtTime($point at $time)';
+  String toString() => assertionsEnabled ? '_PointAtTime($point at $time)' : super.toString();
 }
 
 /// Computes a pointer's velocity based on data from [PointerMoveEvent]s.

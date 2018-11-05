@@ -7,6 +7,7 @@ import 'dart:collection' show SplayTreeMap, HashMap;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import '../util.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'framework.dart';
@@ -176,9 +177,12 @@ abstract class SliverChildDelegate {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
-    debugFillDescription(description);
-    return '${describeIdentity(this)}(${description.join(", ")})';
+    if (assertionsEnabled) {
+      final List<String> description = <String>[];
+      debugFillDescription(description);
+      return '${describeIdentity(this)}(${description.join(", ")})';
+    }
+    return super.toString();
   }
 
   /// Add additional information to the given description for use by [toString].

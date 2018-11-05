@@ -11,6 +11,7 @@ import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../util.dart';
 import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
@@ -106,6 +107,10 @@ class ImageConfiguration {
 
   @override
   String toString() {
+    if (!assertionsEnabled) {
+      return super.toString();
+    }
+
     final StringBuffer result = StringBuffer();
     result.write('ImageConfiguration(');
     bool hasArguments = false;
@@ -346,7 +351,7 @@ abstract class ImageProvider<T> {
   ImageStreamCompleter load(T key);
 
   @override
-  String toString() => '$runtimeType()';
+  String toString() => assertionsEnabled ? '$runtimeType()' : super.toString();
 }
 
 /// Key for the image obtained by an [AssetImage] or [ExactAssetImage].
@@ -392,7 +397,9 @@ class AssetBundleImageKey {
   int get hashCode => hashValues(bundle, name, scale);
 
   @override
-  String toString() => '$runtimeType(bundle: $bundle, name: "$name", scale: $scale)';
+  String toString() => assertionsEnabled
+    ? '$runtimeType(bundle: $bundle, name: "$name", scale: $scale)'
+    : super.toString();
 }
 
 /// A subclass of [ImageProvider] that knows about [AssetBundle]s.
@@ -509,7 +516,9 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   int get hashCode => hashValues(url, scale);
 
   @override
-  String toString() => '$runtimeType("$url", scale: $scale)';
+  String toString() => assertionsEnabled
+    ? '$runtimeType("$url", scale: $scale)'
+    : super.toString();
 }
 
 /// Decodes the given [File] object as an image, associating it with the given
@@ -571,7 +580,9 @@ class FileImage extends ImageProvider<FileImage> {
   int get hashCode => hashValues(file?.path, scale);
 
   @override
-  String toString() => '$runtimeType("${file?.path}", scale: $scale)';
+  String toString() => assertionsEnabled
+    ? '$runtimeType("${file?.path}", scale: $scale)'
+    : super.toString();
 }
 
 /// Decodes the given [Uint8List] buffer as an image, associating it with the
@@ -632,7 +643,9 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   int get hashCode => hashValues(bytes.hashCode, scale);
 
   @override
-  String toString() => '$runtimeType(${describeIdentity(bytes)}, scale: $scale)';
+  String toString() => assertionsEnabled
+    ? '$runtimeType(${describeIdentity(bytes)}, scale: $scale)'
+    : super.toString();
 }
 
 /// Fetches an image from an [AssetBundle], associating it with the given scale.
@@ -769,5 +782,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
   int get hashCode => hashValues(keyName, scale, bundle);
 
   @override
-  String toString() => '$runtimeType(name: "$keyName", scale: $scale, bundle: $bundle)';
+  String toString() => assertionsEnabled
+    ? '$runtimeType(name: "$keyName", scale: $scale, bundle: $bundle)'
+    : super.toString();
 }

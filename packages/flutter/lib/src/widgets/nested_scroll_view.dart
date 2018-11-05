@@ -11,6 +11,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../util.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'primary_scroll_controller.dart';
@@ -830,7 +831,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   @override
-  String toString() => '$runtimeType(outer=$_outerController; inner=$_innerController)';
+  String toString() => assertionsEnabled ? '$runtimeType(outer=$_outerController; inner=$_innerController)' : super.toString();
 }
 
 class _NestedScrollController extends ScrollController {
@@ -1210,7 +1211,10 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
 
   @override
   String toString() {
-    return '$runtimeType(${metrics.minRange} .. ${metrics.maxRange}; correcting by ${metrics.correctionOffset})';
+    if (assertionsEnabled) {
+      return '$runtimeType(${metrics.minRange} .. ${metrics.maxRange}; correcting by ${metrics.correctionOffset})';
+    }
+    return super.toString();
   }
 }
 
@@ -1283,19 +1287,22 @@ class SliverOverlapAbsorberHandle extends ChangeNotifier {
 
   @override
   String toString() {
-    String extra;
-    switch (_writers) {
-      case 0:
-        extra = ', orphan';
-        break;
-      case 1:
-        // normal case
-        break;
-      default:
-        extra = ', $_writers WRITERS ASSIGNED';
-        break;
+    if (assertionsEnabled) {
+      String extra;
+      switch (_writers) {
+        case 0:
+          extra = ', orphan';
+          break;
+        case 1:
+          // normal case
+          break;
+        default:
+          extra = ', $_writers WRITERS ASSIGNED';
+          break;
+      }
+      return '$runtimeType($layoutExtent$extra)';
     }
-    return '$runtimeType($layoutExtent$extra)';
+    return super.toString();
   }
 }
 

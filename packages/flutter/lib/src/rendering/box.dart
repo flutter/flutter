@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
+import '../util.dart';
 import 'debug.dart';
 import 'object.dart';
 
@@ -592,20 +593,23 @@ class BoxConstraints extends Constraints {
 
   @override
   String toString() {
-    final String annotation = isNormalized ? '' : '; NOT NORMALIZED';
-    if (minWidth == double.infinity && minHeight == double.infinity)
-      return 'BoxConstraints(biggest$annotation)';
-    if (minWidth == 0 && maxWidth == double.infinity &&
-        minHeight == 0 && maxHeight == double.infinity)
-      return 'BoxConstraints(unconstrained$annotation)';
-    String describe(double min, double max, String dim) {
-      if (min == max)
-        return '$dim=${min.toStringAsFixed(1)}';
-      return '${min.toStringAsFixed(1)}<=$dim<=${max.toStringAsFixed(1)}';
+    if (assertionsEnabled) {
+      final String annotation = isNormalized ? '' : '; NOT NORMALIZED';
+      if (minWidth == double.infinity && minHeight == double.infinity)
+        return 'BoxConstraints(biggest$annotation)';
+      if (minWidth == 0 && maxWidth == double.infinity &&
+          minHeight == 0 && maxHeight == double.infinity)
+        return 'BoxConstraints(unconstrained$annotation)';
+      String describe(double min, double max, String dim) {
+        if (min == max)
+          return '$dim=${min.toStringAsFixed(1)}';
+        return '${min.toStringAsFixed(1)}<=$dim<=${max.toStringAsFixed(1)}';
+      }
+      final String width = describe(minWidth, maxWidth, 'w');
+      final String height = describe(minHeight, maxHeight, 'h');
+      return 'BoxConstraints($width, $height$annotation)';
     }
-    final String width = describe(minWidth, maxWidth, 'w');
-    final String height = describe(minHeight, maxHeight, 'h');
-    return 'BoxConstraints($width, $height$annotation)';
+    return super.toString();
   }
 }
 
@@ -625,7 +629,7 @@ class BoxHitTestEntry extends HitTestEntry {
   final Offset localPosition;
 
   @override
-  String toString() => '${describeIdentity(target)}@$localPosition';
+  String toString() => assertionsEnabled ? '${describeIdentity(target)}@$localPosition' : super.toString();
 }
 
 /// Parent data used by [RenderBox] and its subclasses.
@@ -634,7 +638,7 @@ class BoxParentData extends ParentData {
   Offset offset = Offset.zero;
 
   @override
-  String toString() => 'offset=$offset';
+  String toString() => assertionsEnabled ? 'offset=$offset' : super.toString();
 }
 
 /// Abstract ParentData subclass for RenderBox subclasses that want the

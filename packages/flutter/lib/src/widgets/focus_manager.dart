@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
+
 /// A leaf node in the focus tree that can receive focus.
 ///
 /// The focus tree keeps track of which widget is the user's current focus. The
@@ -104,7 +106,7 @@ class FocusNode extends ChangeNotifier {
   }
 
   @override
-  String toString() => '${describeIdentity(this)}${hasFocus ? '(FOCUSED)' : ''}';
+  String toString() => assertionsEnabled ? '${describeIdentity(this)}${hasFocus ? '(FOCUSED)' : ''}' : super.toString();
 }
 
 /// An interior node in the focus tree.
@@ -452,10 +454,13 @@ class FocusManager {
 
   @override
   String toString() {
-    final String status = _haveScheduledUpdate ? ' UPDATE SCHEDULED' : '';
-    const String indent = '  ';
-    return '${describeIdentity(this)}$status\n'
-      '${indent}currentFocus: $_currentFocus\n'
-      '${rootScope.toStringDeep(prefixLineOne: indent, prefixOtherLines: indent)}';
+    if (assertionsEnabled) {
+      final String status = _haveScheduledUpdate ? ' UPDATE SCHEDULED' : '';
+      const String indent = '  ';
+      return '${describeIdentity(this)}$status\n'
+        '${indent}currentFocus: $_currentFocus\n'
+        '${rootScope.toStringDeep(prefixLineOne: indent, prefixOtherLines: indent)}';
+    }
+    return super.toString();
   }
 }

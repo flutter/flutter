@@ -7,6 +7,7 @@ import 'dart:ui' show VoidCallback;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
@@ -233,9 +234,12 @@ class ProxyAnimation extends Animation<double>
 
   @override
   String toString() {
-    if (parent == null)
-      return '$runtimeType(null; ${super.toStringDetails()} ${value.toStringAsFixed(3)})';
-    return '$parent\u27A9$runtimeType';
+    if (assertionsEnabled) {
+      if (parent == null)
+        return '$runtimeType(null; ${super.toStringDetails()} ${value.toStringAsFixed(3)})';
+      return '$parent\u27A9$runtimeType';
+    }
+    return super.toString();
   }
 }
 
@@ -311,7 +315,7 @@ class ReverseAnimation extends Animation<double>
 
   @override
   String toString() {
-    return '$parent\u27AA$runtimeType';
+    return assertionsEnabled ? '$parent\u27AA$runtimeType' : super.toString();
   }
 }
 
@@ -453,11 +457,14 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
 
   @override
   String toString() {
-    if (reverseCurve == null)
-      return '$parent\u27A9$curve';
-    if (_useForwardCurve)
-      return '$parent\u27A9$curve\u2092\u2099/$reverseCurve';
-    return '$parent\u27A9$curve/$reverseCurve\u2092\u2099';
+    if (assertionsEnabled) {
+      if (reverseCurve == null)
+        return '$parent\u27A9$curve';
+      if (_useForwardCurve)
+        return '$parent\u27A9$curve\u2092\u2099/$reverseCurve';
+      return '$parent\u27A9$curve/$reverseCurve\u2092\u2099';
+    }
+    return super.toString();
   }
 }
 
@@ -589,9 +596,12 @@ class TrainHoppingAnimation extends Animation<double>
 
   @override
   String toString() {
-    if (_nextTrain != null)
-      return '$currentTrain\u27A9$runtimeType(next: $_nextTrain)';
-    return '$currentTrain\u27A9$runtimeType(no next)';
+    if (assertionsEnabled) {
+      if (_nextTrain != null)
+        return '$currentTrain\u27A9$runtimeType(next: $_nextTrain)';
+      return '$currentTrain\u27A9$runtimeType(no next)';
+    }
+    return super.toString();
   }
 }
 
@@ -651,7 +661,7 @@ abstract class CompoundAnimation<T> extends Animation<T>
 
   @override
   String toString() {
-    return '$runtimeType($first, $next)';
+    return assertionsEnabled ? '$runtimeType($first, $next)' : super.toString();
   }
 
   AnimationStatus _lastStatus;

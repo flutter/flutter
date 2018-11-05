@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../util.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
@@ -128,7 +129,7 @@ class RevealedOffset {
 
   @override
   String toString() {
-    return '$runtimeType(offset: $offset, rect: $rect)';
+    return assertionsEnabled ? '$runtimeType(offset: $offset, rect: $rect)' : super.toString();
   }
 }
 

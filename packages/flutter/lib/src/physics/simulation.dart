@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../util.dart';
 import 'tolerance.dart';
 
 /// The base class for all simulations.
@@ -52,5 +53,5 @@ abstract class Simulation {
   Tolerance tolerance;
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => assertionsEnabled ? '$runtimeType' : super.toString();
 }

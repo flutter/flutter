@@ -7,6 +7,8 @@ import 'dart:ui' show Color, lerpDouble, hashValues;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
+
 double _getHue(double red, double green, double blue, double max, double delta) {
   double hue;
   if (max == 0.0) {
@@ -230,7 +232,9 @@ class HSVColor {
   int get hashCode => hashValues(alpha, hue, saturation, value);
 
   @override
-  String toString() => '$runtimeType($alpha, $hue, $saturation, $value)';
+  String toString() => assertionsEnabled
+    ? '$runtimeType($alpha, $hue, $saturation, $value)'
+    : super.toString();
 }
 
 /// A color represented using [alpha], [hue], [saturation], and [lightness].
@@ -416,7 +420,9 @@ class HSLColor {
   int get hashCode => hashValues(alpha, hue, saturation, lightness);
 
   @override
-  String toString() => '$runtimeType($alpha, $hue, $saturation, $lightness)';
+  String toString() => assertionsEnabled
+    ? '$runtimeType($alpha, $hue, $saturation, $lightness)'
+    : super.toString();
 }
 
 /// A color that has a small table of related colors called a "swatch".
@@ -458,5 +464,7 @@ class ColorSwatch<T> extends Color {
   int get hashCode => hashValues(runtimeType, value, _swatch);
 
   @override
-  String toString() => '$runtimeType(primary value: ${super.toString()})';
+  String toString() => assertionsEnabled
+    ? '$runtimeType(primary value: ${super.toString()})'
+    : super.toString();
 }

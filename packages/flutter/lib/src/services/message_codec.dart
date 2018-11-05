@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'platform_channel.dart';
 
 export 'dart:typed_data' show ByteData;
@@ -48,7 +49,7 @@ class MethodCall {
   final dynamic arguments;
 
   @override
-  String toString() => '$runtimeType($method, $arguments)';
+  String toString() => assertionsEnabled ? '$runtimeType($method, $arguments)' : super.toString();
 }
 
 /// A codec for method calls and enveloped results.
@@ -118,7 +119,7 @@ class PlatformException implements Exception {
   final dynamic details;
 
   @override
-  String toString() => 'PlatformException($code, $message, $details)';
+  String toString() => assertionsEnabled ? 'PlatformException($code, $message, $details)' : super.toString();
 }
 
 /// Thrown to indicate that a platform interaction failed to find a handling
@@ -140,5 +141,5 @@ class MissingPluginException implements Exception {
   final String message;
 
   @override
-  String toString() => 'MissingPluginException($message)';
+  String toString() => assertionsEnabled ? 'MissingPluginException($message)' : super.toString();
 }

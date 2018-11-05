@@ -6,6 +6,7 @@ import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'velocity_tracker.dart';
 
 /// Details object for callbacks that use [GestureDragDownCallback].
@@ -29,7 +30,7 @@ class DragDownDetails {
   final Offset globalPosition;
 
   @override
-  String toString() => '$runtimeType($globalPosition)';
+  String toString() => assertionsEnabled ? '$runtimeType($globalPosition)' : super.toString();
 }
 
 /// Signature for when a pointer has contacted the screen and might begin to
@@ -71,7 +72,7 @@ class DragStartDetails {
   // instead).
 
   @override
-  String toString() => '$runtimeType($globalPosition)';
+  String toString() => assertionsEnabled ? '$runtimeType($globalPosition)' : super.toString();
 }
 
 /// Signature for when a pointer has contacted the screen and has begun to move.
@@ -140,7 +141,7 @@ class DragUpdateDetails {
   final Offset globalPosition;
 
   @override
-  String toString() => '$runtimeType($delta)';
+  String toString() => assertionsEnabled ? '$runtimeType($delta)' : super.toString();
 }
 
 /// Signature for when a pointer that is in contact with the screen and moving
@@ -190,5 +191,5 @@ class DragEndDetails {
   final double primaryVelocity;
 
   @override
-  String toString() => '$runtimeType($velocity)';
+  String toString() => assertionsEnabled ? '$runtimeType($velocity)' : super.toString();
 }

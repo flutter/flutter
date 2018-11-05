@@ -4,6 +4,8 @@
 
 import 'package:flutter/painting.dart';
 
+import '../util.dart';
+
 /// An event sent by the application to notify interested listeners that
 /// something happened to the user interface (e.g. a view scrolled).
 ///
@@ -43,12 +45,15 @@ abstract class SemanticsEvent {
 
   @override
   String toString() {
-    final List<String> pairs = <String>[];
-    final Map<String, dynamic> dataMap = getDataMap();
-    final List<String> sortedKeys = dataMap.keys.toList()..sort();
-    for (String key in sortedKeys)
-      pairs.add('$key: ${dataMap[key]}');
-    return '$runtimeType(${pairs.join(', ')})';
+    if (assertionsEnabled) {
+      final List<String> pairs = <String>[];
+      final Map<String, dynamic> dataMap = getDataMap();
+      final List<String> sortedKeys = dataMap.keys.toList()..sort();
+      for (String key in sortedKeys)
+        pairs.add('$key: ${dataMap[key]}');
+      return '$runtimeType(${pairs.join(', ')})';
+    }
+    return super.toString();
   }
 }
 

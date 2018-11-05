@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'platform_messages.dart';
 
 /// A collection of resources used by the application.
@@ -92,7 +93,7 @@ abstract class AssetBundle {
   void evict(String key) { }
 
   @override
-  String toString() => '${describeIdentity(this)}()';
+  String toString() => assertionsEnabled ? '${describeIdentity(this)}()' : super.toString();
 }
 
 /// An [AssetBundle] that loads resources over the network.
@@ -140,7 +141,7 @@ class NetworkAssetBundle extends AssetBundle {
   // should implement evict().
 
   @override
-  String toString() => '${describeIdentity(this)}($_baseUrl)';
+  String toString() => assertionsEnabled ? '${describeIdentity(this)}($_baseUrl)' : super.toString();
 }
 
 /// An [AssetBundle] that permanently caches string and structured resources

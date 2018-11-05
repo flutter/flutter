@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import '../util.dart';
 import 'scaffold.dart';
 
 // TODO(hmuller): should be device dependent.
@@ -90,7 +91,7 @@ abstract class FloatingActionButtonLocation {
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry);
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => assertionsEnabled ? '$runtimeType' : super.toString();
 }
 
 class _CenterFloatFabLocation extends FloatingActionButtonLocation {
@@ -311,7 +312,7 @@ abstract class FloatingActionButtonAnimator {
   double getAnimationRestart(double previousValue) => 0.0;
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => assertionsEnabled ? '$runtimeType' : super.toString();
 }
 
 class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {

@@ -8,6 +8,7 @@
 
 import 'dart:async' show Future, Stream, StreamSubscription;
 
+import '../util.dart';
 import 'framework.dart';
 
 // Examples can assume:
@@ -262,7 +263,7 @@ class AsyncSnapshot<T> {
   bool get hasError => error != null;
 
   @override
-  String toString() => '$runtimeType($connectionState, $data, $error)';
+  String toString() => assertionsEnabled ? '$runtimeType($connectionState, $data, $error)' : super.toString();
 
   @override
   bool operator ==(dynamic other) {

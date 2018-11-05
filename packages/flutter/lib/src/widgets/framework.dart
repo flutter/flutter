@@ -9,6 +9,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import '../util.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 
@@ -54,7 +55,7 @@ class UniqueKey extends LocalKey {
   UniqueKey();
 
   @override
-  String toString() => '[#${shortHash(this)}]';
+  String toString() => assertionsEnabled ? '[#${shortHash(this)}]' : super.toString();
 }
 
 /// A key that takes its identity from the object used as its value.
@@ -83,9 +84,12 @@ class ObjectKey extends LocalKey {
 
   @override
   String toString() {
-    if (runtimeType == ObjectKey)
-      return '[${describeIdentity(value)}]';
-    return '[$runtimeType ${describeIdentity(value)}]';
+    if (assertionsEnabled) {
+      if (runtimeType == ObjectKey)
+        return '[${describeIdentity(value)}]';
+      return '[$runtimeType ${describeIdentity(value)}]';
+    }
+    return super.toString();
   }
 }
 
@@ -271,10 +275,13 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 
   @override
   String toString() {
-    final String label = _debugLabel != null ? ' $_debugLabel' : '';
-    if (runtimeType == LabeledGlobalKey)
-      return '[GlobalKey#${shortHash(this)}$label]';
-    return '[${describeIdentity(this)}$label]';
+    if (assertionsEnabled) {
+      final String label = _debugLabel != null ? ' $_debugLabel' : '';
+      if (runtimeType == LabeledGlobalKey)
+        return '[GlobalKey#${shortHash(this)}$label]';
+      return '[${describeIdentity(this)}$label]';
+    }
+    return super.toString();
   }
 }
 
@@ -321,15 +328,18 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 
   @override
   String toString() {
-    String selfType = runtimeType.toString();
-    // const GlobalObjectKey().runtimeType.toString() returns 'GlobalObjectKey<State<StatefulWidget>>'
-    // because GlobalObjectKey is instantiated to its bounds. To avoid cluttering the output
-    // we remove the suffix.
-    const String suffix = '<State<StatefulWidget>>';
-    if (selfType.endsWith(suffix)) {
-      selfType = selfType.substring(0, selfType.length - suffix.length);
+    if (assertionsEnabled) {
+      String selfType = runtimeType.toString();
+      // const GlobalObjectKey().runtimeType.toString() returns 'GlobalObjectKey<State<StatefulWidget>>'
+      // because GlobalObjectKey is instantiated to its bounds. To avoid cluttering the output
+      // we remove the suffix.
+      const String suffix = '<State<StatefulWidget>>';
+      if (selfType.endsWith(suffix)) {
+        selfType = selfType.substring(0, selfType.length - suffix.length);
+      }
+      return '[$selfType ${describeIdentity(value)}]';
     }
-    return '[$selfType ${describeIdentity(value)}]';
+    return super.toString();
   }
 }
 
@@ -4950,7 +4960,7 @@ class _DebugCreator {
   _DebugCreator(this.element);
   final RenderObjectElement element;
   @override
-  String toString() => element.debugGetCreatorChain(12);
+  String toString() => assertionsEnabled ? element.debugGetCreatorChain(12) : super.toString();
 }
 
 FlutterErrorDetails _debugReportException(

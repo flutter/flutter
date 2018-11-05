@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
+import '../util.dart';
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
 import 'button_bar.dart';
@@ -162,7 +163,10 @@ class _TransitionSnapshotFabLocation extends FloatingActionButtonLocation {
 
   @override
   String toString() {
-    return '$runtimeType(begin: $begin, end: $end, progress: $progress)';
+    if (assertionsEnabled) {
+      return '$runtimeType(begin: $begin, end: $end, progress: $progress)';
+    }
+    return super.toString();
   }
 }
 

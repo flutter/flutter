@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../util.dart';
 import 'framework.dart';
 
 /// A [ValueKey] that defines where [PageStorage] values will be saved.
@@ -61,7 +62,10 @@ class _StorageEntryIdentifier {
 
   @override
   String toString() {
-    return 'StorageEntryIdentifier(${keys?.join(":")})';
+    if (assertionsEnabled) {
+      return 'StorageEntryIdentifier(${keys?.join(":")})';
+    }
+    return super.toString();
   }
 }
 

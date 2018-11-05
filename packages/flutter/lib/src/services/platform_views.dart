@@ -8,6 +8,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'message_codec.dart';
 import 'system_channels.dart';
 
@@ -172,7 +173,7 @@ class AndroidPointerProperties {
 
   @override
   String toString() {
-    return 'AndroidPointerProperties(id: $id, toolType: $toolType)';
+    return assertionsEnabled ? 'AndroidPointerProperties(id: $id, toolType: $toolType)' : super.toString();
   }
 }
 
@@ -256,7 +257,7 @@ class AndroidPointerCoords {
 
   @override
   String toString() {
-    return 'AndroidPointerCoords(orientation: $orientation, pressure: $pressure, size: $size, toolMajor: $toolMajor, toolMinor: $toolMinor, touchMajor: $touchMajor, touchMinor: $touchMinor, x: $x, y: $y)';
+    return assertionsEnabled ? 'AndroidPointerCoords(orientation: $orientation, pressure: $pressure, size: $size, toolMajor: $toolMajor, toolMinor: $toolMinor, touchMajor: $touchMajor, touchMinor: $touchMinor, x: $x, y: $y)' : super.toString();
   }
 }
 
@@ -383,7 +384,7 @@ class AndroidMotionEvent {
 
   @override
   String toString() {
-    return 'AndroidPointerEvent(downTime: $downTime, eventTime: $eventTime, action: $action, pointerCount: $pointerCount, pointerProperties: $pointerProperties, pointerCoords: $pointerCoords, metaState: $metaState, buttonState: $buttonState, xPrecision: $xPrecision, yPrecision: $yPrecision, deviceId: $deviceId, edgeFlags: $edgeFlags, source: $source, flags: $flags)';
+    return assertionsEnabled ? 'AndroidPointerEvent(downTime: $downTime, eventTime: $eventTime, action: $action, pointerCount: $pointerCount, pointerProperties: $pointerProperties, pointerCoords: $pointerCoords, metaState: $metaState, buttonState: $buttonState, xPrecision: $xPrecision, yPrecision: $yPrecision, deviceId: $deviceId, edgeFlags: $edgeFlags, source: $source, flags: $flags)' : super.toString();
   }
 }
 

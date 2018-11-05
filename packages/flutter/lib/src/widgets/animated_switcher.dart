@@ -7,6 +7,7 @@ import 'dart:collection';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
+import '../util.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'ticker_provider.dart';
@@ -40,7 +41,7 @@ class _ChildEntry {
   Widget widgetChild;
 
   @override
-  String toString() => 'Entry#${shortHash(this)}($widgetChild)';
+  String toString() => assertionsEnabled ? 'Entry#${shortHash(this)}($widgetChild)' : super.toString();
 }
 
 /// Signature for builders used to generate custom transitions for
