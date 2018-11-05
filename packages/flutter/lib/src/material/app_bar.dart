@@ -219,7 +219,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// ## Sample code
+  /// {@tool snippet --template=stateless_widget}
+  ///
+  /// This sample shows adding an action to an [AppBar] that opens a shopping cart.
   ///
   /// ```dart
   /// Scaffold(
@@ -235,8 +237,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///       ),
   ///     ],
   ///   ),
-  /// )
+  /// );
   /// ```
+  /// {@end-tool}
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will

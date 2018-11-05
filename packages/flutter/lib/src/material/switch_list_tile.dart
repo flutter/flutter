@@ -9,6 +9,10 @@ import 'switch.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// void setState(VoidCallback fn) { }
+// bool _lights;
+
 /// A [ListTile] with a [Switch]. In other words, a switch with a label.
 ///
 /// The entire list tile is interactive: tapping anywhere in the tile toggles
