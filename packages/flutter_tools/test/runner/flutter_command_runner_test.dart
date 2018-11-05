@@ -30,7 +30,6 @@ void main() {
     MemoryFileSystem fs;
     Platform platform;
     FlutterCommandRunner runner;
-    Clock clock;
     ProcessManager processManager;
 
     setUpAll(() {
@@ -51,7 +50,6 @@ void main() {
       );
 
       runner = createTestCommandRunner(DummyFlutterCommand());
-      clock = MockClock();
       processManager = MockProcessManager();
     });
 
