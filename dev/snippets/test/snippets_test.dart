@@ -5,16 +5,13 @@
 import 'dart:io' hide Platform;
 import 'package:path/path.dart' as path;
 
-import 'package:platform/platform.dart' show FakePlatform;
-
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 import 'package:snippets/configuration.dart';
 import 'package:snippets/snippets.dart';
 
 void main() {
   group('Generator', () {
-    FakePlatform fakePlatform;
     Configuration configuration;
     SnippetGenerator generator;
     Directory tmpDir;
@@ -22,10 +19,8 @@ void main() {
 
     setUp(() {
       tmpDir = Directory.systemTemp.createTempSync('snippets_test');
-      fakePlatform = FakePlatform(
-          script: Uri.file(path.join(
-              tmpDir.absolute.path, 'flutter', 'dev', 'snippets', 'lib', 'snippets_test.dart')));
-      configuration = Configuration(platform: fakePlatform);
+      configuration = Configuration(flutterRoot: Directory(path.join(
+          tmpDir.absolute.path, 'flutter')));
       configuration.createOutputDirectory();
       configuration.templatesDirectory.createSync(recursive: true);
       configuration.skeletonsDirectory.createSync(recursive: true);
@@ -67,7 +62,7 @@ A description of the snippet.
 
 On several lines.
 
-```dart preamble
+```my-dart_language my-preamble
 const String name = 'snippet';
 ```
 

@@ -498,7 +498,7 @@ abstract class Widget extends DiagnosticableTree {
 ///    widget, so that only the inner-most widget needs to be rebuilt when the
 ///    theme changes.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// The following is a skeleton of a stateless widget subclass called `GreenFrog`:
 ///
@@ -512,6 +512,8 @@ abstract class Widget extends DiagnosticableTree {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// Normally widgets have more constructor arguments, each of which corresponds
 /// to a `final` property. The next example shows the more generic widget `Frog`
@@ -535,6 +537,7 @@ abstract class Widget extends DiagnosticableTree {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// By convention, widget constructors only use named arguments. Named arguments
 /// can be marked as required using [@required]. Also by convention, the first
@@ -705,7 +708,7 @@ abstract class StatelessWidget extends Widget {
 ///    [KeyedSubtree] widget may be useful for this purpose if no other widget
 ///    can conveniently be assigned the key.)
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// The following is a skeleton of a stateful widget subclass called `YellowBird`:
 ///
@@ -724,6 +727,8 @@ abstract class StatelessWidget extends Widget {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// In this example. the [State] has no actual state. State is normally
 /// represented as private member fields. Also, normally widgets have more
@@ -765,6 +770,7 @@ abstract class StatelessWidget extends Widget {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// By convention, widget constructors only use named arguments. Named arguments
 /// can be marked as required using [@required]. Also by convention, the first
@@ -1366,7 +1372,7 @@ abstract class ProxyWidget extends Widget {
 /// thus also to a particular [RenderObjectWidget] class. That class is `T`, the
 /// [ParentDataWidget] type argument.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example shows how you would build a [ParentDataWidget] to configure a
 /// `FrogJar` widget's children by specifying a [Size] for each one.
@@ -1394,6 +1400,7 @@ abstract class ProxyWidget extends Widget {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1496,7 +1503,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 /// Inherited widgets, when referenced in this way, will cause the consumer to
 /// rebuild when the inherited widget itself changes state.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// The following is a skeleton of an inherited widget called `FrogColor`:
 ///
@@ -1520,6 +1527,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///   bool updateShouldNotify(FrogColor old) => color != old.color;
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// The convention is to provide a static method `of` on the [InheritedWidget]
 /// which does the call to [BuildContext.inheritFromWidgetOfExactType]. This
@@ -1988,13 +1996,14 @@ abstract class BuildContext {
   /// an ancestor from one of those methods, save a reference to the ancestor
   /// by calling [ancestorStateOfType] in [State.didChangeDependencies].
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// ScrollableState scrollable = context.ancestorStateOfType(
   ///   const TypeMatcher<ScrollableState>(),
   /// );
   /// ```
+  /// {@end-tool}
   State ancestorStateOfType(TypeMatcher matcher);
 
   /// Returns the [State] object of the furthest ancestor [StatefulWidget] widget

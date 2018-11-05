@@ -18,9 +18,10 @@ void errorExit(String message) {
 // A Tuple containing the name and contents associated with a code block in a
 // snippet.
 class _ComponentTuple {
-  _ComponentTuple(this.name, this.contents);
+  _ComponentTuple(this.name, this.contents, {String language}) : language = language ?? '';
   final String name;
   final List<String> contents;
+  final String language;
   String get mergedContent => contents.join('\n').trim();
 }
 
@@ -28,7 +29,9 @@ class _ComponentTuple {
 /// the output directory.
 class SnippetGenerator {
   SnippetGenerator({Configuration configuration})
-      : configuration = configuration ?? const Configuration() {
+      : configuration = configuration ??
+           // This script must be run from dev/docs, so the root is up two levels.
+            Configuration(flutterRoot: Directory(path.canonicalize(path.join('..', '..')))) {
     this.configuration.createOutputDirectory();
   }
 
@@ -95,11 +98,16 @@ class SnippetGenerator {
   /// if not a [SnippetType.application] snippet.
   String interpolateSkeleton(SnippetType type, List<_ComponentTuple> injections, String skeleton) {
     final List<String> result = <String>[];
+    const HtmlEscape htmlEscape = HtmlEscape();
+    String language;
     for (_ComponentTuple injection in injections) {
       if (!injection.name.startsWith('code')) {
         continue;
       }
       result.addAll(injection.contents);
+      if (injection.language.isNotEmpty) {
+        language = injection.language;
+      }
       result.addAll(<String>['', '// ...', '']);
     }
     if (result.length > 3) {
@@ -109,16 +117,17 @@ class SnippetGenerator {
       'description': injections
           .firstWhere((_ComponentTuple tuple) => tuple.name == 'description')
           .mergedContent,
-      'code': result.join('\n'),
+      'code': htmlEscape.convert(result.join('\n')),
+      'language': language ?? 'dart',
     }..addAll(type == SnippetType.application
         ? <String, String>{
             'id':
                 injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'id').mergedContent,
             'app':
-                injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent,
+                htmlEscape.convert(injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent),
           }
         : <String, String>{'id': '', 'app': ''});
-    return skeleton.replaceAllMapped(RegExp(r'{{(code|app|id|description)}}'), (Match match) {
+    return skeleton.replaceAllMapped(RegExp('{{(${substitutions.keys.join('|')})}}'), (Match match) {
       return substitutions[match[1]];
     });
   }
@@ -126,31 +135,32 @@ class SnippetGenerator {
   /// Parses the input for the various code and description segments, and
   /// returns them in the order found.
   List<_ComponentTuple> parseInput(String input) {
-    bool inSnippet = false;
+    bool inCodeBlock = false;
     input = input.trim();
     final List<String> description = <String>[];
     final List<_ComponentTuple> components = <_ComponentTuple>[];
-    String currentComponent;
+    String language;
+    final RegExp codeStartEnd = RegExp(r'^\s*```([-\w]+|[-\w]+ ([-\w]+))?\s*$');
     for (String line in input.split('\n')) {
-      final Match match = RegExp(r'^\s*```(dart|dart (\w+))?\s*$').firstMatch(line);
-      if (match != null) {
-        inSnippet = !inSnippet;
+      final Match match = codeStartEnd.firstMatch(line);
+      if (match != null) { // If we saw the start or end of a code block
+        inCodeBlock = !inCodeBlock;
         if (match[1] != null) {
-          currentComponent = match[1];
+          language = match[1];
           if (match[2] != null) {
-            components.add(_ComponentTuple('code-${match[2]}', <String>[]));
+            components.add(_ComponentTuple('code-${match[2]}', <String>[], language: language));
           } else {
-            components.add(_ComponentTuple('code', <String>[]));
+            components.add(_ComponentTuple('code', <String>[], language: language));
           }
         } else {
-          currentComponent = null;
+          language = null;
         }
         continue;
       }
-      if (!inSnippet) {
+      if (!inCodeBlock) {
         description.add(line);
       } else {
-        assert(currentComponent != null);
+        assert(language != null);
         components.last.contents.add(line);
       }
     }

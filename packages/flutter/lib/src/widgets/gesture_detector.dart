@@ -113,7 +113,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// effects. The [InkWell] class implements this effect and can be used in place
 /// of a [GestureDetector] for handling taps.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example makes a rectangle react to being tapped by setting the
 /// `_lights` field:
@@ -129,6 +129,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ## Debugging
 ///
@@ -453,7 +454,7 @@ class GestureDetector extends StatelessWidget {
 /// Configuring the gesture recognizers requires a carefully constructed map, as
 /// described in [gestures] and as shown in the example below.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example shows how to hook up a [TapGestureRecognizer]. It assumes that
 /// the code is being used inside a [State] object with a `_last` field that is
@@ -476,6 +477,7 @@ class GestureDetector extends StatelessWidget {
 ///   child: Container(width: 300.0, height: 300.0, color: Colors.yellow, child: Text(_last)),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
