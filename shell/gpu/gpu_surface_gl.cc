@@ -280,8 +280,10 @@ bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
   if (offscreen_surface_ != nullptr) {
     TRACE_EVENT0("flutter", "CopyTextureOnscreen");
     SkPaint paint;
-    onscreen_surface_->getCanvas()->drawImage(
-        offscreen_surface_->makeImageSnapshot(), 0, 0, &paint);
+    SkCanvas* onscreen_canvas = onscreen_surface_->getCanvas();
+    onscreen_canvas->clear(SK_ColorTRANSPARENT);
+    onscreen_canvas->drawImage(offscreen_surface_->makeImageSnapshot(), 0, 0,
+                               &paint);
   }
 
   {
