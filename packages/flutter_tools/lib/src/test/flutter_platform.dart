@@ -566,14 +566,11 @@ class _FlutterPlatform extends PlatformPlugin {
               explicitObservatoryPort == detectedUri.port);
           if (startPaused && !machine) {
             printStatus('The test process has been started.');
-            printStatus(
-                'You can now connect to it using observatory. To connect, load the following Web site in your browser:');
+            printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
             printStatus('  $detectedUri');
-            printStatus(
-                'You should first set appropriate breakpoints, then resume the test in the debugger.');
+            printStatus('You should first set appropriate breakpoints, then resume the test in the debugger.');
           } else {
-            printTrace(
-                'test $ourTestCount: using observatory uri $detectedUri from pid ${process.pid}');
+            printTrace('test $ourTestCount: using observatory uri $detectedUri from pid ${process.pid}');
           }
           processObservatoryUri = detectedUri;
           gotProcessObservatoryUri.complete();
@@ -591,8 +588,7 @@ class _FlutterPlatform extends PlatformPlugin {
       // The engine could connect to us, in which case webSocket.future will complete.
       // The local test harness could get bored of us.
 
-      printTrace(
-          'test $ourTestCount: awaiting initial result for pid ${process.pid}');
+      printTrace('test $ourTestCount: awaiting initial result for pid ${process.pid}');
       final _InitialResult initialResult =
           await Future.any<_InitialResult>(<Future<_InitialResult>>[
         process.exitCode
@@ -610,8 +606,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
       switch (initialResult) {
         case _InitialResult.crashed:
-          printTrace(
-              'test $ourTestCount: process with pid ${process.pid} crashed before connecting to test harness');
+          printTrace('test $ourTestCount: process with pid ${process.pid} crashed before connecting to test harness');
           final int exitCode = await process.exitCode;
           subprocessActive = false;
           final String message = _getErrorMessage(
@@ -622,8 +617,7 @@ class _FlutterPlatform extends PlatformPlugin {
           controller.sink.addError(message);
           // Awaited for with 'sink.done' below.
           controller.sink.close(); // ignore: unawaited_futures
-          printTrace(
-              'test $ourTestCount: waiting for controller sink to close');
+          printTrace('test $ourTestCount: waiting for controller sink to close');
           await controller.sink.done;
           await watcher?.handleTestCrashed(ProcessEvent(ourTestCount, process));
           break;
@@ -631,22 +625,18 @@ class _FlutterPlatform extends PlatformPlugin {
           // Could happen either if the process takes a long time starting
           // (_kTestProcessTimeout), or if once Dart code starts running, it takes a
           // long time to open the WebSocket connection (_kTestStartupTimeout).
-          printTrace(
-              'test $ourTestCount: timed out waiting for process with pid ${process.pid} to connect to test harness');
-          final String message = _getErrorMessage(
-              'Test never connected to test harness.', testPath, shellPath);
+          printTrace('test $ourTestCount: timed out waiting for process with pid ${process.pid} to connect to test harness');
+          final String message = _getErrorMessage('Test never connected to test harness.', testPath, shellPath);
           controller.sink.addError(message);
           // Awaited for with 'sink.done' below.
           controller.sink.close(); // ignore: unawaited_futures
-          printTrace(
-              'test $ourTestCount: waiting for controller sink to close');
+          printTrace('test $ourTestCount: waiting for controller sink to close');
           await controller.sink.done;
           await watcher
               ?.handleTestTimedOut(ProcessEvent(ourTestCount, process));
           break;
         case _InitialResult.connected:
-          printTrace(
-              'test $ourTestCount: process with pid ${process.pid} connected to test harness');
+          printTrace('test $ourTestCount: process with pid ${process.pid} connected to test harness');
           final WebSocket testSocket = await webSocket.future;
 
           final Completer<void> harnessDone = Completer<void>();
@@ -693,8 +683,7 @@ class _FlutterPlatform extends PlatformPlugin {
             cancelOnError: true,
           );
 
-          printTrace(
-              'test $ourTestCount: awaiting test result for pid ${process.pid}');
+          printTrace('test $ourTestCount: awaiting test result for pid ${process.pid}');
           final _TestResult testResult =
               await Future.any<_TestResult>(<Future<_TestResult>>[
             process.exitCode.then<_TestResult>((int exitCode) {
@@ -715,8 +704,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
           switch (testResult) {
             case _TestResult.crashed:
-              printTrace(
-                  'test $ourTestCount: process with pid ${process.pid} crashed');
+              printTrace('test $ourTestCount: process with pid ${process.pid} crashed');
               final int exitCode = await process.exitCode;
               subprocessActive = false;
               final String message = _getErrorMessage(
@@ -727,19 +715,16 @@ class _FlutterPlatform extends PlatformPlugin {
               controller.sink.addError(message);
               // Awaited for with 'sink.done' below.
               controller.sink.close(); // ignore: unawaited_futures
-              printTrace(
-                  'test $ourTestCount: waiting for controller sink to close');
+              printTrace('test $ourTestCount: waiting for controller sink to close');
               await controller.sink.done;
               break;
             case _TestResult.harnessBailed:
             case _TestResult.testBailed:
               if (testResult == _TestResult.harnessBailed) {
-                printTrace(
-                    'test $ourTestCount: process with pid ${process.pid} no longer needed by test harness');
+                printTrace('test $ourTestCount: process with pid ${process.pid} no longer needed by test harness');
               } else {
                 assert(testResult == _TestResult.testBailed);
-                printTrace(
-                    'test $ourTestCount: process with pid ${process.pid} no longer needs test harness');
+                printTrace('test $ourTestCount: process with pid ${process.pid} no longer needs test harness');
               }
               await watcher?.handleFinishedTest(
                   ProcessEvent(ourTestCount, process, processObservatoryUri));
@@ -748,8 +733,7 @@ class _FlutterPlatform extends PlatformPlugin {
           break;
       }
     } catch (error, stack) {
-      printTrace(
-          'test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
+      printTrace('test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
       if (!controllerSinkClosed) {
         controller.sink.addError(error, stack);
       } else {
@@ -763,8 +747,7 @@ class _FlutterPlatform extends PlatformPlugin {
         try {
           await finalizer();
         } catch (error, stack) {
-          printTrace(
-              'test $ourTestCount: error while cleaning up; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
+          printTrace('test $ourTestCount: error while cleaning up; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
           if (!controllerSinkClosed) {
             controller.sink.addError(error, stack);
           } else {
@@ -867,10 +850,8 @@ class _FlutterPlatform extends PlatformPlugin {
     sb.writeln('</fontconfig>');
 
     if (fontsDirectory == null) {
-      fontsDirectory =
-          fs.systemTempDirectory.createTempSync('flutter_test_fonts.');
-      printTrace(
-          'Using this directory for fonts configuration: ${fontsDirectory.path}');
+      fontsDirectory = fs.systemTempDirectory.createTempSync('flutter_test_fonts.');
+      printTrace('Using this directory for fonts configuration: ${fontsDirectory.path}');
     }
 
     _cachedFontConfig = fs.file('${fontsDirectory.path}/fonts.conf');
