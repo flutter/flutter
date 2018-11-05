@@ -13,6 +13,10 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'thumb_painter.dart';
 
+// Examples can assume:
+// bool _lights;
+// void setState(VoidCallback fn) { }
+
 /// An iOS-style switch.
 ///
 /// Used to toggle the on/off state of a single setting.

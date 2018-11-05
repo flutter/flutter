@@ -10,6 +10,9 @@ import 'basic.dart';
 import 'framework.dart';
 import 'image.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 /// A widget that paints a [Decoration] either before or after its child paints.
 ///
 /// [Container] insets its child by the widths of the borders; this widget does

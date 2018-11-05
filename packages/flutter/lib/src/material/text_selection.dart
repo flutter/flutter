@@ -104,8 +104,7 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
   }
 }
 
-/// Draws a single text selection handle. The [type] determines where the handle
-/// points (e.g. the [left] handle points up and to the right).
+/// Draws a single text selection handle which points up and to the left.
 class _TextSelectionHandlePainter extends CustomPainter {
   _TextSelectionHandlePainter({ this.color });
 

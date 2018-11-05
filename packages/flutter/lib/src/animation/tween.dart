@@ -12,6 +12,7 @@ import 'curves.dart';
 
 // Examples can assume:
 // Animation<Offset> _animation;
+// AnimationController _controller;
 
 /// An object that can produce a value of type `T` given an [Animation<double>]
 /// as input.
@@ -413,7 +414,7 @@ class ConstantTween<T> extends Tween<T> {
 /// animation produced by an [AnimationController] `controller`:
 ///
 /// ```dart
-/// final Animation<double> animation = controller.drive(
+/// final Animation<double> animation = _controller.drive(
 ///   CurveTween(curve: Curves.ease),
 /// );
 /// ```
