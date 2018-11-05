@@ -8,9 +8,9 @@ import '../base/context.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../doctor.dart';
-import '../error_messages.dart';
 import 'cocoapods.dart';
 import 'mac.dart';
 import 'plist_utils.dart' as plist;
@@ -79,7 +79,7 @@ class IOSValidator extends DoctorValidator {
     if (xcode.isInstalled) {
       xcodeStatus = ValidationType.installed;
 
-      messages.add(ValidationMessage(errorMessages.iOSXcodeLocation(xcode.xcodeSelectPath)));
+      messages.add(ValidationMessage(userMessages.iOSXcodeLocation(xcode.xcodeSelectPath)));
 
       xcodeVersionInfo = xcode.versionText;
       if (xcodeVersionInfo.contains(','))
@@ -89,25 +89,25 @@ class IOSValidator extends DoctorValidator {
       if (!xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(
-            errorMessages.iOSXcodeOutdated(kXcodeRequiredVersionMajor, kXcodeRequiredVersionMinor)
+            userMessages.iOSXcodeOutdated(kXcodeRequiredVersionMajor, kXcodeRequiredVersionMinor)
         ));
       }
 
       if (!xcode.eulaSigned) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(errorMessages.iOSXcodeEula));
+        messages.add(ValidationMessage.error(userMessages.iOSXcodeEula));
       }
       if (!xcode.isSimctlInstalled) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(errorMessages.iOSXcodeMissingSimct));
+        messages.add(ValidationMessage.error(userMessages.iOSXcodeMissingSimct));
       }
 
     } else {
       xcodeStatus = ValidationType.missing;
       if (xcode.xcodeSelectPath == null || xcode.xcodeSelectPath.isEmpty) {
-        messages.add(ValidationMessage.error(errorMessages.iOSXcodeMissing));
+        messages.add(ValidationMessage.error(userMessages.iOSXcodeMissing));
       } else {
-        messages.add(ValidationMessage.error(errorMessages.iOSXcodeIncomplete));
+        messages.add(ValidationMessage.error(userMessages.iOSXcodeIncomplete));
       }
     }
 
@@ -117,31 +117,31 @@ class IOSValidator extends DoctorValidator {
 
       if (!iMobileDevice.isInstalled) {
         brewStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(errorMessages.iOSIMobileDeviceMissing));
+        messages.add(ValidationMessage.error(userMessages.iOSIMobileDeviceMissing));
       } else if (!await iMobileDevice.isWorking) {
         brewStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(errorMessages.iOSIMobileDeviceBroken));
+        messages.add(ValidationMessage.error(userMessages.iOSIMobileDeviceBroken));
       } else if (!await hasIDeviceInstaller) {
         brewStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(errorMessages.iOSDeviceInstallerMissing));
+        messages.add(ValidationMessage.error(userMessages.iOSDeviceInstallerMissing));
       }
 
       // Check ios-deploy is installed at meets version requirements.
       if (await hasIosDeploy) {
-        messages.add(ValidationMessage(errorMessages.iOSDeployVersion(await iosDeployVersionText)));
+        messages.add(ValidationMessage(userMessages.iOSDeployVersion(await iosDeployVersionText)));
       }
       if (!await _iosDeployIsInstalledAndMeetsVersionCheck) {
         brewStatus = ValidationType.partial;
         if (await hasIosDeploy) {
-          messages.add(ValidationMessage.error(errorMessages.iOSDeployOutdated(iosDeployMinimumVersion)));
+          messages.add(ValidationMessage.error(userMessages.iOSDeployOutdated(iosDeployMinimumVersion)));
         } else {
-          messages.add(ValidationMessage.error(errorMessages.iOSDeployMissing));
+          messages.add(ValidationMessage.error(userMessages.iOSDeployMissing));
         }
       }
 
     } else {
       brewStatus = ValidationType.missing;
-      messages.add(ValidationMessage.error(errorMessages.iOSBrewMissing));
+      messages.add(ValidationMessage.error(userMessages.iOSBrewMissing));
     }
 
     return ValidationResult(
@@ -172,19 +172,19 @@ class CocoaPodsValidator extends DoctorValidator {
 
       if (cocoaPodsStatus == CocoaPodsStatus.recommended) {
         if (await cocoaPods.isCocoaPodsInitialized) {
-          messages.add(ValidationMessage(errorMessages.cocoaPodsVersion(await cocoaPods.cocoaPodsVersionText)));
+          messages.add(ValidationMessage(userMessages.cocoaPodsVersion(await cocoaPods.cocoaPodsVersionText)));
         } else {
           status = ValidationType.partial;
-          messages.add(ValidationMessage.error(errorMessages.cocoaPodsUninitialized));
+          messages.add(ValidationMessage.error(userMessages.cocoaPodsUninitialized));
         }
       } else {
         if (cocoaPodsStatus == CocoaPodsStatus.notInstalled) {
           status = ValidationType.missing;
-          messages.add(ValidationMessage.error(errorMessages.cocoaPodsMissing));
+          messages.add(ValidationMessage.error(userMessages.cocoaPodsMissing));
         } else {
           status = ValidationType.partial;
           messages.add(ValidationMessage.hint(
-              errorMessages.cocoaPodsOutdated(cocoaPods.cocoaPodsRecommendedVersion)));
+              userMessages.cocoaPodsOutdated(cocoaPods.cocoaPodsRecommendedVersion)));
         }
       }
     } else {

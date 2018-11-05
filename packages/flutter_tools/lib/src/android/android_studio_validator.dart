@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
+import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../doctor.dart';
-import '../error_messages.dart';
 import '../globals.dart';
 import '../intellij/intellij.dart';
 import 'android_studio.dart';
@@ -35,9 +35,9 @@ class AndroidStudioValidator extends DoctorValidator {
 
     final String studioVersionText = _studio.version == Version.unknown
         ? null
-        : errorMessages.androidStudioVersion(_studio.version.toString());
+        : userMessages.androidStudioVersion(_studio.version.toString());
     messages
-        .add(ValidationMessage(errorMessages.androidStudioLocation(_studio.directory)));
+        .add(ValidationMessage(userMessages.androidStudioLocation(_studio.directory)));
 
     final IntelliJPlugins plugins = IntelliJPlugins(_studio.pluginsPath);
     plugins.validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
@@ -52,9 +52,9 @@ class AndroidStudioValidator extends DoctorValidator {
       type = ValidationType.partial;
       messages.addAll(_studio.validationMessages
           .map<ValidationMessage>((String m) => ValidationMessage.error(m)));
-      messages.add(ValidationMessage(errorMessages.androidStudioNeedsUpdate));
+      messages.add(ValidationMessage(userMessages.androidStudioNeedsUpdate));
       if (_studio.configured != null) {
-        messages.add(ValidationMessage(errorMessages.androidStudioResetDir));
+        messages.add(ValidationMessage(userMessages.androidStudioResetDir));
       }
     }
 
@@ -71,9 +71,9 @@ class NoAndroidStudioValidator extends DoctorValidator {
 
     final String cfgAndroidStudio = config.getValue('android-studio-dir');
     if (cfgAndroidStudio != null) {
-      messages.add(ValidationMessage.error(errorMessages.androidStudioMissing(cfgAndroidStudio)));
+      messages.add(ValidationMessage.error(userMessages.androidStudioMissing(cfgAndroidStudio)));
     }
-    messages.add(ValidationMessage(errorMessages.androidStudioInstallation));
+    messages.add(ValidationMessage(userMessages.androidStudioInstallation));
 
     return ValidationResult(ValidationType.notAvailable, messages,
         statusInfo: 'not installed');

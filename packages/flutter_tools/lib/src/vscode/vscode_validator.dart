@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
+import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../doctor.dart';
-import '../error_messages.dart';
 import 'vscode.dart';
 
 class VsCodeValidator extends DoctorValidator {
@@ -29,8 +29,8 @@ class VsCodeValidator extends DoctorValidator {
     ValidationType type = ValidationType.missing;
     final String vsCodeVersionText = _vsCode.version == Version.unknown
         ? null
-        : errorMessages.vsCodeVersion(_vsCode.version.toString());
-    messages.add(ValidationMessage(errorMessages.vsCodeLocation(_vsCode.directory)));
+        : userMessages.vsCodeVersion(_vsCode.version.toString());
+    messages.add(ValidationMessage(userMessages.vsCodeLocation(_vsCode.directory)));
     if (_vsCode.isValid) {
       type = ValidationType.installed;
       messages.addAll(_vsCode.validationMessages
@@ -39,7 +39,7 @@ class VsCodeValidator extends DoctorValidator {
       type = ValidationType.partial;
       messages.addAll(_vsCode.validationMessages
           .map<ValidationMessage>((String m) => ValidationMessage.error(m)));
-      messages.add(ValidationMessage(errorMessages.vsCodeFlutterExtensionMissing));
+      messages.add(ValidationMessage(userMessages.vsCodeFlutterExtensionMissing));
     }
 
     return ValidationResult(type, messages, statusInfo: vsCodeVersionText);

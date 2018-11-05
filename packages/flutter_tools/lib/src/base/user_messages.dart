@@ -1,13 +1,11 @@
-import 'base/context.dart';
-import 'ios/cocoapods.dart';
-import 'vscode/vscode_validator.dart';
+import '../ios/cocoapods.dart';
+import '../vscode/vscode_validator.dart';
+import 'context.dart';
 
-ErrorMessages get errorMessages => context[ErrorMessages];
+UserMessages get userMessages => context[UserMessages];
 
-/// Class containing the messages that can be produced by the doctor validators.
-/// Members are split by validator and are given in the order they appear in the
-/// validator code.
-class ErrorMessages {
+/// Class containing the message strings that can be produced by Flutter tools.
+class UserMessages {
   // Messages used in FlutterValidator
   String flutterStatusInfo(String channel, String version, String os, String locale) =>
       'Channel $channel, v$version, on $os, locale $locale';
