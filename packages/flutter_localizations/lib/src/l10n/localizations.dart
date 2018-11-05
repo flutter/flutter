@@ -11895,9 +11895,9 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
 }
 
-/// The translations for Chinese, using the Han script (`zh_Hant_HK`).
+/// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
 class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
-  /// Create an instance of the translation bundle for Chinese, using the Han script.
+  /// Create an instance of the translation bundle for Chinese, as used in Hong Kong, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZhHantHk({
@@ -11919,9 +11919,9 @@ class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
   );
 }
 
-/// The translations for Chinese, using the Han script (`zh_Hant_TW`).
+/// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
 class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
-  /// Create an instance of the translation bundle for Chinese, using the Han script.
+  /// Create an instance of the translation bundle for Chinese, as used in Taiwan, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZhHantTw({

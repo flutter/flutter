@@ -129,14 +129,21 @@ String describeLocale(String tag) {
   assert(subtags.isNotEmpty);
   assert(_languages.containsKey(subtags[0]));
   final String language = _languages[subtags[0]];
-  if (subtags.length >= 2) {
-    final String region = _regions[subtags[1]];
-    final String script = _scripts[subtags[1]];
+  String output = '$language';
+  String region = null;
+  String script = null;
+  if (subtags.length == 2) {
+    region = _regions[subtags[1]];
+    script = _scripts[subtags[1]];
     assert(region != null || script != null);
-    if (region != null)
-      return '$language, as used in $region';
-    if (script != null)
-      return '$language, using the $script script';
+  } else if (subtags.length >= 3) {
+    region = _regions[subtags[2]];
+    script = _scripts[subtags[1]];
+    assert(region != null && script != null);
   }
-  return '$language';
+  if (region != null)
+    output += ', as used in $region';
+  if (script != null)
+    output += ', using the $script script';
+  return output;
 }
