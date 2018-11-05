@@ -1887,7 +1887,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         contentPadding: contentPadding,
         isCollapsed: decoration.isCollapsed,
         floatingLabelHeight: floatingLabelHeight,
-        floatingLabelProgress: _floatingLabelController.value ?? 0.0,
+        floatingLabelProgress: _floatingLabelController.value,
         border: border,
         borderGap: _borderGap,
         icon: icon,

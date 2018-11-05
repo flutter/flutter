@@ -243,9 +243,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 TextFormField(
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    border: OutlineInputBorder(borderSide: BorderSide.none),
-                    filled: true,
-                    hasFloatingPlaceholder: false,
+                    border: OutlineInputBorder(),
                     labelText: 'Salary',
                     prefixText: '\$',
                     suffixText: 'USD',
