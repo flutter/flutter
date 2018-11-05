@@ -98,7 +98,7 @@ class TweenSequenceItem<T> {
   /// animation's duration indicated by [weight] and this item's position
   /// in the list of items.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// The value of this item can be "curved" by chaining it to a [CurveTween].
   /// For example to create a tween that eases from 0.0 to 10.0:
@@ -107,6 +107,7 @@ class TweenSequenceItem<T> {
   /// Tween<double>(begin: 0.0, end: 10.0)
   ///   .chain(CurveTween(curve: Curves.ease))
   /// ```
+  /// {@end-tool}
   final Animatable<T> tween;
 
   /// An abitrary value that indicates the relative percentage of a

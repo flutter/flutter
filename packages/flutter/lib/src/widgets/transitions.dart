@@ -760,7 +760,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This code defines a widget called `Spinner` that spins a green square
 /// continually. It is built with an [AnimatedBuilder] and makes use of the
@@ -805,6 +805,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 class AnimatedBuilder extends AnimatedWidget {
   /// Creates an animated builder.
   ///

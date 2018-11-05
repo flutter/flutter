@@ -2232,7 +2232,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// asynchronous computation) will at best have no useful effect and at worse
   /// will cause crashes as the data will be in an inconsistent state.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// The following snippet will describe the node as a button that responds to
   /// tap actions.
@@ -2253,6 +2253,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   @protected
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     // Nothing to do by default.
