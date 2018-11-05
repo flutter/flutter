@@ -83,10 +83,10 @@ Color getBorderColor(WidgetTester tester) => getBorderSide(tester)?.color;
 
 double getOpacity(WidgetTester tester, String textValue) {
   final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-      find.ancestor(
-        of: find.text(textValue),
-        matching: find.byType(FadeTransition),
-      ).first
+    find.ancestor(
+      of: find.text(textValue),
+      matching: find.byType(FadeTransition),
+    ).first
   );
   return opacityWidget.opacity.value;
 }
@@ -1278,9 +1278,9 @@ void main() {
       // isFocused: false (default)
       isEmpty: true,
       decoration: const InputDecoration(
-          border: OutlineInputBorder(borderSide: BorderSide.none),
-          hasFloatingPlaceholder: false,
-          labelText: 'label',
+        border: OutlineInputBorder(borderSide: BorderSide.none),
+        hasFloatingPlaceholder: false,
+        labelText: 'label',
         ),
       ),
     );
