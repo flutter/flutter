@@ -1525,7 +1525,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   @override
   void initState() {
     super.initState();
-    print(widget.decoration.hasFloatingPlaceholder);
     _floatingLabelController = AnimationController(
       duration: _kTransitionDuration,
       vsync: this,
