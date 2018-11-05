@@ -114,6 +114,50 @@ void main() {
 
     expect(clipRect.size.height, minExtent);
   });
+
+  testWidgets('FlexibleSpaceBar has default titleStartOffset', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Scaffold(
+          appBar: AppBar(
+            flexibleSpace: const FlexibleSpaceBar(
+              title: Text('X')
+            )
+          )
+        )
+      )
+    );
+
+    final Finder title = find.text('X');
+    final Offset topLeft = tester.getTopLeft(title);
+
+    expect(topLeft.dx, equals(72.0));
+  });
+
+  testWidgets('FlexibleSpaceBar has defined titleStartOffset', (WidgetTester tester) async {
+    const double definedOffset = 24.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Scaffold(
+          appBar: AppBar(
+            flexibleSpace: const FlexibleSpaceBar(
+              title: Text('X'),
+              titleStartOffset: definedOffset
+            )
+          )
+        )
+      )
+    );
+
+    final Finder title = find.text('X');
+    final Offset topLeft = tester.getTopLeft(title);
+
+    expect(topLeft.dx, equals(definedOffset));
+  });
+
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
