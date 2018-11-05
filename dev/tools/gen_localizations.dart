@@ -74,6 +74,14 @@ final Map<String, Map<String, String>> localeToResources = <String, Map<String, 
 /// See also: <https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes>
 final Map<String, Map<String, dynamic>> localeToResourceAttributes = <String, Map<String, dynamic>>{};
 
+/// Set that holds the locales that were assumed from the existing locales.
+///
+/// For example, when the data lacks data for zh_Hant, we will use the data of
+/// the first Hant Chinese locale as a default by repeating the data. If an
+/// explicit match is later found, we can reference this set to see if we should
+/// overwrite the existing assumed data. 
+final Set<String> assumedLocales = Set<String>();
+
 /// Return `s` as a Dart-parseable raw string in single or double quotes.
 ///
 /// Double quotes are expanded:
@@ -603,17 +611,73 @@ String generateConstructor(String className, String localeName) {
 /// and [resources] keys.
 void processBundle(File file, { @required String locale }) {
   assert(locale != null);
-  localeToResources[locale] ??= <String, String>{};
-  localeToResourceAttributes[locale] ??= <String, dynamic>{};
-  final Map<String, String> resources = localeToResources[locale];
-  final Map<String, dynamic> attributes = localeToResourceAttributes[locale];
-  final Map<String, dynamic> bundle = json.decode(file.readAsStringSync());
-  for (String key in bundle.keys) {
-    // The ARB file resource "attributes" for foo are called @foo.
-    if (key.startsWith('@'))
-      attributes[key.substring(1)] = bundle[key];
-    else
-      resources[key] = bundle[key];
+  // Helper method to fill the maps with the correct data from file.
+  void populateResources(String locale) {
+    final Map<String, String> resources = localeToResources[locale];
+    final Map<String, dynamic> attributes = localeToResourceAttributes[locale];
+    final Map<String, dynamic> bundle = json.decode(file.readAsStringSync());
+    for (String key in bundle.keys) {
+      // The ARB file resource "attributes" for foo are called @foo.
+      if (key.startsWith('@'))
+        attributes[key.substring(1)] = bundle[key];
+      else
+        resources[key] = bundle[key];
+    }
+  }
+  // Only pre-assume script if there is a country or script code to assume off of.
+  if (locale.split('_').length > 1)
+    locale = assumeScriptCode(locale);
+  // Allow overwrite if the existing data is assumed.
+  if (assumedLocales.contains(locale)) {
+    localeToResources[locale] = <String, String>{};
+    localeToResourceAttributes[locale] = <String, dynamic>{};
+    assumedLocales.remove(locale);
+  } else {
+    localeToResources[locale] ??= <String, String>{};
+    localeToResourceAttributes[locale] ??= <String, dynamic>{}; 
+  }
+  populateResources(locale);
+  // Add an assumed locale to default to when there is no info on scriptOnly locales.
+  locale = assumeScriptCode(locale);
+  final LocaleInfo localeInfo = LocaleInfo.fromString(locale);
+  if (localeInfo.scriptCode != null) {
+    final String scriptLocale = localeInfo.languageCode + '_' + localeInfo.scriptCode;
+    if (!localeToResources.containsKey(scriptLocale)) {
+      assumedLocales.add(scriptLocale);
+      localeToResources[scriptLocale] ??= <String, String>{};
+      localeToResourceAttributes[scriptLocale] ??= <String, dynamic>{}; 
+      populateResources(scriptLocale);
+    }
+  }
+}
+
+
+/// Adds scriptCodes to locales where we are able to assume it to provide
+/// finer granularity when resolving locales.
+String assumeScriptCode(String locale) {
+  final LocaleInfo localeInfo = LocaleInfo.fromString(locale);
+  if (localeInfo.scriptCode != null)
+    return locale;
+  switch (localeInfo.languageCode) {
+    case 'zh': {
+      switch (localeInfo.countryCode) {
+        case 'CN':
+          return localeInfo.languageCode + '_Hans_' + localeInfo.countryCode;
+        case 'SG':
+          return localeInfo.languageCode + '_Hans_' + localeInfo.countryCode;
+        case 'TW':
+          return localeInfo.languageCode + '_Hant_' + localeInfo.countryCode;
+        case 'HK':
+          return localeInfo.languageCode + '_Hant_' + localeInfo.countryCode;
+        case 'MO':
+          return localeInfo.languageCode + '_Hant_' + localeInfo.countryCode;
+        case null:
+          return localeInfo.languageCode + '_Hans';
+      }
+      return locale;
+    }
+    default:
+      return locale;
   }
 }
 
