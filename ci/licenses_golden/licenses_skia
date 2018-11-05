@@ -1,4 +1,4 @@
-Signature: b73acbe1fbe5d82063f6124714922157
+Signature: bc5f7b7c9112c3dbb54f6250960e451a
 
 UNUSED LICENSES:
 
@@ -1294,6 +1294,7 @@ FILE: ../../../third_party/skia/bench/CubicMapBench.cpp
 FILE: ../../../third_party/skia/bench/GrCCFillGeometryBench.cpp
 FILE: ../../../third_party/skia/bench/ImageCycleBench.cpp
 FILE: ../../../third_party/skia/bench/JSONBench.cpp
+FILE: ../../../third_party/skia/bench/PathOpsBench.cpp
 FILE: ../../../third_party/skia/bench/PolyUtilsBench.cpp
 FILE: ../../../third_party/skia/bench/ShaderMaskFilterBench.cpp
 FILE: ../../../third_party/skia/experimental/nima/NimaActor.cpp
@@ -1337,6 +1338,7 @@ FILE: ../../../third_party/skia/include/c/sk_imageinfo.h
 FILE: ../../../third_party/skia/include/core/SkCanvasVirtualEnforcer.h
 FILE: ../../../third_party/skia/include/core/SkCoverageMode.h
 FILE: ../../../third_party/skia/include/core/SkFontParameters.h
+FILE: ../../../third_party/skia/include/core/SkFontTypes.h
 FILE: ../../../third_party/skia/include/core/SkYUVAIndex.h
 FILE: ../../../third_party/skia/include/effects/SkOpPathEffect.h
 FILE: ../../../third_party/skia/include/effects/SkShaderMaskFilter.h
@@ -1442,6 +1444,7 @@ FILE: ../../../third_party/skia/src/core/SkCubicMap.h
 FILE: ../../../third_party/skia/src/core/SkDeferredDisplayList.cpp
 FILE: ../../../third_party/skia/src/core/SkDeferredDisplayListPriv.h
 FILE: ../../../third_party/skia/src/core/SkDraw_text.cpp
+FILE: ../../../third_party/skia/src/core/SkFontPriv.h
 FILE: ../../../third_party/skia/src/core/SkGlyph.cpp
 FILE: ../../../third_party/skia/src/core/SkIPoint16.h
 FILE: ../../../third_party/skia/src/core/SkMaskFilterBase.h
@@ -3388,7 +3391,6 @@ FILE: ../../../third_party/skia/src/pathops/SkPathOpsCurve.h
 FILE: ../../../third_party/skia/src/pathops/SkPathOpsLine.cpp
 FILE: ../../../third_party/skia/src/pathops/SkPathOpsLine.h
 FILE: ../../../third_party/skia/src/pathops/SkPathOpsOp.cpp
-FILE: ../../../third_party/skia/src/pathops/SkPathOpsPoint.cpp
 FILE: ../../../third_party/skia/src/pathops/SkPathOpsPoint.h
 FILE: ../../../third_party/skia/src/pathops/SkPathOpsQuad.cpp
 FILE: ../../../third_party/skia/src/pathops/SkPathOpsQuad.h
