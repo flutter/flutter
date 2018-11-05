@@ -568,7 +568,16 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   /// data. Subsequent invocations have no effect.
   static void _loadDateIntlDataIfNotLoaded() {
     if (!_dateIntlDataInitialized) {
+      // TODO(garyq): Add support for scriptCodes. Do not strip scriptCode from string.
       date_localizations.dateSymbols.forEach((String locale, dynamic data) {
+        final List<String> codes = locale.split('_');
+        String countryCode;
+        if (codes.length == 2) {
+          countryCode = codes[1].length < 4 ? codes[1] : null;
+        } else if (codes.length == 3) {
+          countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
+        }
+        locale = codes[0] + '_' + countryCode;
         assert(date_localizations.datePatterns.containsKey(locale));
         final intl.DateSymbols symbols = intl.DateSymbols.deserializeFromMap(data);
         date_symbol_data_custom.initializeDateFormattingCustom(

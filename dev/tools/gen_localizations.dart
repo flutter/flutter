@@ -108,29 +108,23 @@ String generateString(String s) {
 }
 
 /// Simple data class to hold parsed locale. Does not promise validity of any data.
-class Locale {
-  Locale({
+class LocaleInfo {
+  LocaleInfo({
     this.languageCode,
     this.scriptCode,
     this.countryCode,
     this.length,
-    this.origString
+    this.originalString
   });
 
-  String languageCode;
-  String scriptCode;
-  String countryCode;
-  int length;          // The number of fields. Ranges from 1-3.
-  String origString;   // Original un-parsed locale string.
-}
-
-/// Simple parser. Expects the locale string to be in the form of 'language_script_COUNTRY'
-/// where the langauge is 2 characters, script is 4 characters with the first uppercase,
-/// and country is 2-3 characters and all uppercase.
-///
-/// 'language_COUNTRY' or 'language_script' are also valid. Missing fields will be null.
-Locale parseLocaleString(String locale) {
+  /// Simple parser. Expects the locale string to be in the form of 'language_script_COUNTRY'
+  /// where the langauge is 2 characters, script is 4 characters with the first uppercase,
+  /// and country is 2-3 characters and all uppercase.
+  ///
+  /// 'language_COUNTRY' or 'language_script' are also valid. Missing fields will be null.
+  factory LocaleInfo.fromString(String locale) {
     final List<String> codes = locale.split('_'); // [language, script, country]
+    assert(codes.isNotEmpty && codes.length < 4);
     String scriptCode;
     String countryCode;
     if (codes.length == 2) {
@@ -140,15 +134,21 @@ Locale parseLocaleString(String locale) {
       scriptCode = codes[1].length > codes[2].length ? codes[1] : codes[2];
       countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
     }
-    assert(codes.length == 1 || codes.length == 2 || codes.length == 3);
     assert(codes[0] != null);
-    return Locale(
+    return LocaleInfo(
       languageCode: codes[0],
       scriptCode: scriptCode,
       countryCode: countryCode,
       length: codes.length,
-      origString: locale,
+      originalString: locale,
     );
+  }
+
+  final String languageCode;
+  final String scriptCode;
+  final String countryCode;
+  final int length;          // The number of fields. Ranges from 1-3.
+  final String originalString;   // Original un-parsed locale string.
 }
 
 /// This is the core of this script; it generates the code used for translations.
@@ -162,7 +162,7 @@ String generateTranslationBundles() {
   final Map<String, Set<String>> languageAndScriptToCountryCodes = <String, Set<String>>{};
   final Set<String> allResourceIdentifiers = Set<String>();
   for (String localeString in localeToResources.keys.toList()..sort()) {
-    final Locale locale = parseLocaleString(localeString);
+    final LocaleInfo locale = LocaleInfo.fromString(localeString);
     if (locale.scriptCode != null) {
       languageToScriptCodes[locale.languageCode] ??= Set<String>();
       languageToScriptCodes[locale.languageCode].add(locale.scriptCode);
@@ -173,8 +173,8 @@ String generateTranslationBundles() {
       languageAndScriptToCountryCodes[key].add(locale.countryCode);
     }
     languageToLocales[locale.languageCode] ??= <String>[];
-    languageToLocales[locale.languageCode].add(locale.origString);
-    allResourceIdentifiers.addAll(localeToResources[locale.origString].keys);
+    languageToLocales[locale.languageCode].add(locale.originalString);
+    allResourceIdentifiers.addAll(localeToResources[locale.originalString].keys);
   }
 
   output.writeln('''
@@ -285,7 +285,7 @@ String generateTranslationBundles() {
         final String camelCaseLocaleName = camelCase(localeName);
         final Map<String, String> localeResources = localeToResources[localeName];
         final String localeClassName = 'MaterialLocalization$camelCaseLocaleName';
-        final Locale locale = parseLocaleString(localeName);
+        final LocaleInfo locale = LocaleInfo.fromString(localeName);
         final String scriptCode = locale.scriptCode == null || locale.countryCode == null ? '' : locale.scriptCode;
         final String constructor = generateConstructor(localeClassName, localeName);
         output.writeln('');
@@ -394,7 +394,7 @@ GlobalMaterialLocalizations getTranslation(
           output.writeln('''
           switch (locale.countryCode) {''');
           for (String localeName in languageToLocales[language]) {
-            final Locale locale = parseLocaleString(localeName);
+            final LocaleInfo locale = LocaleInfo.fromString(localeName);
             if (locale.countryCode == null)
               continue;
             else
@@ -424,7 +424,7 @@ GlobalMaterialLocalizations getTranslation(
           // Not Explicitly defined, fallback to first locale with the same language and
           // script:
           for (String localeName in languageToLocales[language]) {
-            final Locale locale = parseLocaleString(localeName);
+            final LocaleInfo locale = LocaleInfo.fromString(localeName);
             if (locale.scriptCode != scriptCode)
               continue;
             if (languageAndScriptToCountryCodes.containsKey(language + '_' + scriptCode)) {
@@ -444,7 +444,7 @@ GlobalMaterialLocalizations getTranslation(
       output.writeln('''
       switch (locale.countryCode) {''');
         for (String localeName in languageToLocales[language]) {
-          final Locale locale = parseLocaleString(localeName);
+          final LocaleInfo locale = LocaleInfo.fromString(localeName);
           if (localeName == language)
             continue;
           assert(localeName.contains('_'));
