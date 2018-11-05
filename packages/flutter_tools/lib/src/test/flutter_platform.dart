@@ -648,14 +648,12 @@ class _FlutterPlatform extends PlatformPlugin {
             onDone: harnessDone.complete,
             onError: (dynamic error, dynamic stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
-              printError(
-                  'test harness controller stream experienced an unexpected error\ntest: $testPath\nerror: $error');
+              printError('test harness controller stream experienced an unexpected error\ntest: $testPath\nerror: $error');
               if (!controllerSinkClosed) {
                 controller.sink.addError(error, stack);
                 controller.sink.close();
               } else {
-                printError(
-                    'unexpected error from test harness controller stream: $error');
+                printError('unexpected error from test harness controller stream: $error');
               }
             },
             cancelOnError: true,
@@ -671,8 +669,7 @@ class _FlutterPlatform extends PlatformPlugin {
             onDone: testDone.complete,
             onError: (dynamic error, dynamic stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
-              printError(
-                  'test socket stream experienced an unexpected error\ntest: $testPath\nerror: $error');
+              printError('test socket stream experienced an unexpected error\ntest: $testPath\nerror: $error');
               if (!controllerSinkClosed) {
                 controller.sink.addError(error, stack);
                 controller.sink.close();
@@ -751,8 +748,7 @@ class _FlutterPlatform extends PlatformPlugin {
           if (!controllerSinkClosed) {
             controller.sink.addError(error, stack);
           } else {
-            printError(
-                'unhandled error during finalization of test:\n$testPath\n$error\n$stack');
+            printError('unhandled error during finalization of test:\n$testPath\n$error\n$stack');
             outOfBandError ??= _AsyncError(error, stack);
           }
         }
@@ -777,8 +773,7 @@ class _FlutterPlatform extends PlatformPlugin {
   String _createListenerDart(List<_Finalizer> finalizers, int ourTestCount,
       String testPath, HttpServer server) {
     // Prepare a temporary directory to store the Dart file that will talk to us.
-    final Directory tempDir =
-        fs.systemTempDirectory.createTempSync('flutter_test_listener.');
+    final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_test_listener.');
     finalizers.add(() async {
       printTrace('test $ourTestCount: deleting temporary directory');
       tempDir.deleteSync(recursive: true);
@@ -869,8 +864,7 @@ class _FlutterPlatform extends PlatformPlugin {
     int observatoryPort,
     int serverPort,
   }) {
-    assert(executable !=
-        null); // Please provide the path to the shell in the SKY_SHELL environment variable.
+    assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
     assert(!startPaused || enableObservatory);
     final List<String> command = <String>[executable];
     if (enableObservatory) {
@@ -944,16 +938,14 @@ class _FlutterPlatform extends PlatformPlugin {
                 reportObservatoryUri(uri);
               }
             } catch (error) {
-              printError(
-                  'Could not parse shell observatory port message: $error');
+              printError('Could not parse shell observatory port message: $error');
             }
           } else if (line != null) {
             printStatus('Shell: $line');
           }
         },
         onError: (dynamic error) {
-          printError(
-              'shell console stream for process pid ${process.pid} experienced an unexpected error: $error');
+          printError('shell console stream for process pid ${process.pid} experienced an unexpected error: $error');
         },
         cancelOnError: true,
       );
@@ -1017,8 +1009,7 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
         assert(futureResults.length == 2);
         assert(futureResults.first == null);
         if (futureResults.last is _AsyncError) {
-          _done.completeError(
-              futureResults.last.error, futureResults.last.stack);
+          _done.completeError(futureResults.last.error, futureResults.last.stack);
         } else {
           assert(futureResults.last == null);
           _done.complete();
@@ -1032,8 +1023,7 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
   @override
   void add(S event) => _parent.add(event);
   @override
-  void addError(dynamic errorEvent, [StackTrace stackTrace]) =>
-      _parent.addError(errorEvent, stackTrace);
+  void addError(dynamic errorEvent, [StackTrace stackTrace]) => _parent.addError(errorEvent, stackTrace);
   @override
   Future<dynamic> addStream(Stream<S> stream) => _parent.addStream(stream);
 }
