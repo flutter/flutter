@@ -172,7 +172,7 @@ class FuchsiaDevice extends Device {
   /// Run `command` on the Fuchsia device shell.
   Future<String> shell(String command) async {
     final RunResult result = await runAsync(<String>[
-      'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, id, command]);
+      'ssh', '-F', fuchsiaArtifacts.sshConfig.absolute.path, id, command]);
     if (result.exitCode != 0) {
       throwToolExit('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
       return null;
@@ -228,7 +228,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     // Note: the provided command works around a bug in -N, see US-515
     // for more explanation.
     final List<String> command = <String>[
-      'ssh', '-6', '-F', fuchsiaSdk.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
+      'ssh', '-6', '-F', fuchsiaArtifacts.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
       '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true'
     ];
     final Process process = await processManager.start(command);
@@ -252,7 +252,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     final Process process = _processes.remove(forwardedPort.hostPort);
     process?.kill();
     final List<String> command = <String>[
-        'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, '-O', 'cancel', '-vvv',
+        'ssh', '-F', fuchsiaArtifacts.sshConfig.absolute.path, '-O', 'cancel', '-vvv',
         '-L', '${forwardedPort.hostPort}:$_ipv4Loopback:${forwardedPort.devicePort}', device.id];
     final ProcessResult result = await processManager.run(command);
     if (result.exitCode != 0) {

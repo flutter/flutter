@@ -15,6 +15,7 @@ import 'src/base/file_system.dart';
 import 'src/commands/attach.dart';
 import 'src/commands/devices.dart';
 import 'src/commands/shell_completion.dart';
+import 'src/fuchsia/fuchsia_sdk.dart';
 import 'src/runner/flutter_command.dart';
 
  final ArgParser parser = ArgParser.allowAnything()
@@ -27,6 +28,10 @@ import 'src/runner/flutter_command.dart';
   ..addOption(
     'dart-sdk',
     help: 'The path to the patched dart-sdk binary.',
+  )
+  ..addOption(
+    'ssh-config',
+    help: 'The path to the ssh configuration file.',
   );
 
 /// Main entry point for fuchsia commands.
@@ -39,12 +44,16 @@ Future<void> main(List<String> args) async {
   final bool verboseHelp = help && verbose;
   final File dartSdk = fs.file(results['dart-sdk']);
   final File frontendServer = fs.file(results['frontend-server']);
+  final File sshConfig = fs.file(results['ssh-config']);
 
   if (!dartSdk.existsSync()) {
-    throwToolExit('--frontend-server is required');
+    throwToolExit('--frontend-server is required: ${dartSdk.path} does not exist.');
   }
   if (!frontendServer.existsSync()) {
-    throwToolExit('--dart-sdk is required');
+    throwToolExit('--dart-sdk is required: ${frontendServer.path} does not exist.');
+  }
+  if (!sshConfig.existsSync()) {
+    throwToolExit('--ssh-config is required: ${sshConfig.path} does not exist.');
   }
 
   await runner.run(args, <FlutterCommand>[
@@ -55,6 +64,7 @@ Future<void> main(List<String> args) async {
      muteCommandLogging: help,
      verboseHelp: verboseHelp,
      overrides: <Type, Generator>{
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       Artifacts: () => OverrideArtifacts(
         parent: CachedArtifacts(),
           frontendServer: frontendServer,
