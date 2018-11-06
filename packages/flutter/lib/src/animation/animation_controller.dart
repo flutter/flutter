@@ -123,7 +123,7 @@ enum AnimationBehavior {
 /// This can be used to write code such as the `fadeOutAndUpdateState` method
 /// below.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// Here is a stateful [Foo] widget. Its [State] uses the
 /// [SingleTickerProviderStateMixin] to implement the necessary
@@ -172,8 +172,6 @@ enum AnimationBehavior {
 ///   }
 /// }
 /// ```
-/// {@end-tool}
-/// {@tool sample}
 ///
 /// The following method (for a [State] subclass) drives two animation
 /// controllers using Dart's asynchronous syntax for awaiting [Future] objects:
@@ -191,7 +189,6 @@ enum AnimationBehavior {
 ///   }
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// The assumption in the code above is that the animation controllers are being
 /// disposed in the [State] subclass' override of the [State.dispose] method.

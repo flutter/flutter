@@ -45,7 +45,7 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 /// identifies it to the delegate. The [LayoutId.id] needs to be unique among
 /// the children that the [CustomMultiChildLayout] manages.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// Below is an example implementation of [performLayout] that causes one widget
 /// (the follower) to be the same size as another (the leader):
@@ -80,7 +80,6 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 ///   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => false;
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// The delegate gives the leader widget loose constraints, which means the
 /// child determines what size to be (subject to fitting within the given size).

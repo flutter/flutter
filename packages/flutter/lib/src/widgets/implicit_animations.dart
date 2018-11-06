@@ -1018,7 +1018,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_opacity.mp4}
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// ```dart
 /// class LogoFade extends StatefulWidget {
@@ -1052,7 +1052,6 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///   }
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///

@@ -32,7 +32,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// handlers must be implemented (and the analyzer will list those that have
 /// been omitted).
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// This [StatefulWidget] implements the parts of the [State] and
 /// [WidgetsBindingObserver] protocols necessary to react to application
@@ -72,7 +72,6 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///   }
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// To respond to other notifications, replace the [didChangeAppLifecycleState]
 /// method above with other methods from this class.
@@ -110,7 +109,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from [Window.onMetricsChanged].
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// This [StatefulWidget] implements the parts of the [State] and
   /// [WidgetsBindingObserver] protocols necessary to react when the device is
@@ -150,7 +149,6 @@ abstract class WidgetsBindingObserver {
   ///   }
   /// }
   /// ```
-  /// {@end-tool}
   ///
   /// In general, this is unnecessary as the layout system takes care of
   /// automatically recomputing the application geometry when the application
@@ -170,7 +168,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from [Window.onTextScaleFactorChanged].
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// ```dart
   /// class TextScaleFactorReactor extends StatefulWidget {
@@ -206,7 +204,6 @@ abstract class WidgetsBindingObserver {
   ///   }
   /// }
   /// ```
-  /// {@end-tool}
   ///
   /// See also:
   ///

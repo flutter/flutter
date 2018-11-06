@@ -167,7 +167,7 @@ class DefaultTextStyle extends InheritedWidget {
 /// behavior is useful, for example, to make the text bold while using the
 /// default font family and size.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// ```dart
 /// Text(
@@ -177,14 +177,13 @@ class DefaultTextStyle extends InheritedWidget {
 ///   style: TextStyle(fontWeight: FontWeight.bold),
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// Using the [Text.rich] constructor, the [Text] widget can
 /// display a paragraph with differently styled [TextSpan]s. The sample
 /// that follows displays "Hello beautiful world" with different styles
 /// for each word.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// ```dart
 /// const Text.rich(
@@ -197,7 +196,6 @@ class DefaultTextStyle extends InheritedWidget {
 ///   ),
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// ## Interactivity
 ///

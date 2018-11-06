@@ -19,7 +19,7 @@ import 'theme.dart';
 ///
 /// Typically used with a [Scaffold] and a [FloatingActionButton].
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// ```dart
 /// Scaffold(
@@ -30,7 +30,6 @@ import 'theme.dart';
 ///   floatingActionButton: FloatingActionButton(onPressed: null),
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///

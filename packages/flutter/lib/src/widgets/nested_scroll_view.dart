@@ -60,7 +60,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// (those inside the [TabBarView], hooking them together so that they appear,
 /// to the user, as one coherent scroll view.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// This example shows a [NestedScrollView] whose header is the combination of a
 /// [TabBar] in a [SliverAppBar] and whose body is a [TabBarView]. It uses a
@@ -174,7 +174,6 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///   ),
 /// )
 /// ```
-/// {@end-tool}
 class NestedScrollView extends StatefulWidget {
   /// Creates a nested scroll view.
   ///

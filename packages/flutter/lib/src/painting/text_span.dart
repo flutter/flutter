@@ -27,7 +27,7 @@ import 'text_style.dart';
 /// span in a widget, use a [RichText]. For text with a single style, consider
 /// using the [Text] widget.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// The text "Hello world!", in black:
 ///
@@ -37,7 +37,6 @@ import 'text_style.dart';
 ///   style: TextStyle(color: Colors.black),
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// _There is some more detailed sample code in the documentation for the
 /// [recognizer] property._
@@ -94,7 +93,7 @@ class TextSpan extends DiagnosticableTree {
   /// The code that owns the [GestureRecognizer] object must call
   /// [GestureRecognizer.dispose] when the [TextSpan] object is no longer used.
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// This example shows how to manage the lifetime of a gesture recognizer
   /// provided to a [TextSpan] object. It defines a `BuzzingText` widget which
@@ -153,7 +152,6 @@ class TextSpan extends DiagnosticableTree {
   ///   }
   /// }
   /// ```
-  /// {@end-tool}
   final GestureRecognizer recognizer;
 
   /// Apply the [style], [text], and [children] of this object to the

@@ -239,23 +239,19 @@ abstract class BoxBorder extends ShapeBorder {
 ///
 /// The sides are represented by [BorderSide] objects.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// All four borders the same, two-pixel wide solid white:
 ///
 /// ```dart
 /// Border.all(width: 2.0, color: const Color(0xFFFFFFFF))
 /// ```
-/// {@end-tool}
-/// {@tool sample}
 ///
 /// The border for a material design divider:
 ///
 /// ```dart
 /// Border(bottom: BorderSide(color: Theme.of(context).dividerColor))
 /// ```
-/// {@end-tool}
-/// {@tool sample}
 ///
 /// A 1990s-era "OK" button:
 ///
@@ -288,7 +284,6 @@ abstract class BoxBorder extends ShapeBorder {
 ///   ),
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///

@@ -170,7 +170,7 @@ class ImageConfiguration {
 ///
 /// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// The following shows the code required to write a widget that fully conforms
 /// to the [ImageProvider] and [Widget] protocols. (It is essentially a
@@ -244,7 +244,6 @@ class ImageConfiguration {
 ///   }
 /// }
 /// ```
-/// {@end-tool}
 @optionalTypeArgs
 abstract class ImageProvider<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -300,7 +299,7 @@ abstract class ImageProvider<T> {
   /// The [configuration] is optional and defaults to
   /// [ImageConfiguration.empty].
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// The following sample code shows how an image loaded using the [Image]
   /// widget can be evicted using a [NetworkImage] with a matching url.
@@ -323,7 +322,6 @@ abstract class ImageProvider<T> {
   ///   }
   /// }
   /// ```
-  /// {@end-tool}
   Future<bool> evict({ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty}) async {
     cache ??= imageCache;
     final T key = await obtainKey(configuration);

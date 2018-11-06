@@ -176,7 +176,7 @@ class TextTheme extends Diagnosticable {
   /// the typography styles in the material design specification, as a starting
   /// point.
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// ```dart
   /// /// A Widget that sets the ambient theme's title text color for its
@@ -203,7 +203,6 @@ class TextTheme extends Diagnosticable {
   ///   }
   /// }
   /// ```
-  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -260,7 +259,7 @@ class TextTheme extends Diagnosticable {
   /// [TextTheme] has only some fields defined, and you want to define the rest
   /// by merging it with a default theme.
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// ```dart
   /// /// A Widget that sets the ambient theme's title text color for its
@@ -285,7 +284,6 @@ class TextTheme extends Diagnosticable {
   ///   }
   /// }
   /// ```
-  /// {@end-tool}
   ///
   /// See also:
   ///

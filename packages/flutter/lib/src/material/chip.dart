@@ -377,7 +377,7 @@ abstract class TappableChipAttributes {
   /// taps on the label or avatar parts of the chip. If [onPressed] is null,
   /// then the chip will be disabled.
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// ```dart
   /// class Blacksmith extends StatelessWidget {
@@ -394,7 +394,6 @@ abstract class TappableChipAttributes {
   ///   }
   /// }
   /// ```
-  /// {@end-tool}
   VoidCallback get onPressed;
 
   /// Elevation to be applied on the chip during the press motion.
@@ -419,7 +418,7 @@ abstract class TappableChipAttributes {
 /// Requires one of its ancestors to be a [Material] widget. The [label]
 /// and [clipBehavior] arguments must not be null.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// ```dart
 /// Chip(
@@ -430,7 +429,6 @@ abstract class TappableChipAttributes {
 ///   label: Text('Aaron Burr'),
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///
@@ -536,7 +534,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 ///  * In a horizontally scrollable list, like a [ListView] whose
 ///    scrollDirection is [Axis.horizontal].
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// ```dart
 /// InputChip(
@@ -550,7 +548,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 ///   }
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///
@@ -687,7 +684,7 @@ class InputChip extends StatelessWidget
 /// Requires one of its ancestors to be a [Material] widget. The [selected] and
 /// [label] arguments must not be null.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// ```dart
 /// class MyThreeOptions extends StatefulWidget {
@@ -719,7 +716,6 @@ class InputChip extends StatelessWidget
 ///   }
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///
@@ -834,7 +830,7 @@ class ChoiceChip extends StatelessWidget
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// ```dart
 /// class ActorFilterEntry {
@@ -895,7 +891,6 @@ class ChoiceChip extends StatelessWidget
 ///   }
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1017,7 +1012,7 @@ class FilterChip extends StatelessWidget
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// ```dart
 /// ActionChip(
@@ -1031,7 +1026,6 @@ class FilterChip extends StatelessWidget
 ///   }
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///

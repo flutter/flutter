@@ -28,7 +28,7 @@ import 'theme.dart';
 /// [StatelessWidget.build] method or from a [State]'s methods as you have to
 /// provide a [BuildContext].
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// To trigger platform-specific feedback before executing the actual callback:
 ///
@@ -52,8 +52,6 @@ import 'theme.dart';
 ///   }
 /// }
 /// ```
-/// {@end-tool}
-/// {@tool sample}
 ///
 /// Alternatively, you can also call [forTap] or [forLongPress] directly within
 /// your tap or long press handler:
@@ -78,7 +76,6 @@ import 'theme.dart';
 ///   }
 /// }
 /// ```
-/// {@end-tool}
 class Feedback {
   Feedback._();
 

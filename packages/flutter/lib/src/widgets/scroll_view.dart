@@ -284,7 +284,7 @@ abstract class ScrollView extends StatelessWidget {
 /// To control the initial scroll offset of the scroll view, provide a
 /// [controller] with its [ScrollController.initialScrollOffset] property set.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// This sample code shows a scroll view that contains a flexible pinned app
 /// bar, a grid, and an infinite list.
@@ -332,7 +332,6 @@ abstract class ScrollView extends StatelessWidget {
 ///   ],
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// ## Accessibility
 ///
@@ -540,7 +539,7 @@ abstract class BoxScrollView extends ScrollView {
 /// extremities to avoid partial obstructions indicated by [MediaQuery]'s
 /// padding. To avoid this behavior, override with a zero [padding] property.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// An infinite list of children:
 ///
@@ -553,7 +552,6 @@ abstract class BoxScrollView extends ScrollView {
 ///   },
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// ## Child elements' lifecycle
 ///
@@ -650,7 +648,7 @@ abstract class BoxScrollView extends ScrollView {
 /// [SliverGrid] or [SliverAppBar], can be put in the [CustomScrollView.slivers]
 /// list.
 ///
-/// {@tool sample}
+/// ### Sample code
 ///
 /// Here are two brief snippets showing a [ListView] and its equivalent using
 /// [CustomScrollView]:
@@ -667,8 +665,6 @@ abstract class BoxScrollView extends ScrollView {
 ///   ],
 /// )
 /// ```
-/// {@end-tool}
-/// {@tool sample}
 ///
 /// ```dart
 /// CustomScrollView(
@@ -690,7 +686,6 @@ abstract class BoxScrollView extends ScrollView {
 ///   ],
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///
@@ -841,7 +836,7 @@ class ListView extends BoxScrollView {
   /// advance, or all at once when the [ListView] itself is created, it is more
   /// efficient to use [new ListView].
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// This example shows how to create [ListView] whose [ListTile] list items
   /// are separated by [Divider]s.
@@ -857,7 +852,6 @@ class ListView extends BoxScrollView {
   ///   },
   /// )
   /// ```
-  /// {@end-tool}
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
@@ -1053,7 +1047,7 @@ class ListView extends BoxScrollView {
 /// [SliverList] or [SliverAppBar], can be put in the [CustomScrollView.slivers]
 /// list.
 ///
-/// {@tool sample}
+/// ### Sample code
 ///
 /// Here are two brief snippets showing a [GridView] and its equivalent using
 /// [CustomScrollView]:
@@ -1074,8 +1068,6 @@ class ListView extends BoxScrollView {
 ///   ],
 /// )
 /// ```
-/// {@end-tool}
-/// {@tool sample}
 ///
 /// ```dart
 /// CustomScrollView(
@@ -1099,7 +1091,6 @@ class ListView extends BoxScrollView {
 ///   ],
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///

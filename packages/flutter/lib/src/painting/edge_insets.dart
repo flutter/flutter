@@ -282,7 +282,7 @@ abstract class EdgeInsetsGeometry {
 /// _start_, top, _end_, and bottom, where start and end are resolved in terms
 /// of a [TextDirection] (typically obtained from the ambient [Directionality]).
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// Here are some examples of how to create [EdgeInsets] instances:
 ///
@@ -291,23 +291,18 @@ abstract class EdgeInsetsGeometry {
 /// ```dart
 /// const EdgeInsets.all(8.0)
 /// ```
-/// {@end-tool}
-/// {@tool sample}
 ///
 /// Eight pixel margin above and below, no horizontal margins:
 ///
 /// ```dart
 /// const EdgeInsets.symmetric(vertical: 8.0)
 /// ```
-/// {@end-tool}
-/// {@tool sample}
 ///
 /// Left margin indent of 40 pixels:
 ///
 /// ```dart
 /// const EdgeInsets.only(left: 40.0)
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///
@@ -321,27 +316,25 @@ class EdgeInsets extends EdgeInsetsGeometry {
 
   /// Creates insets where all the offsets are `value`.
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical eight-pixel margin on all sides:
   ///
   /// ```dart
   /// const EdgeInsets.all(8.0)
   /// ```
-  /// {@end-tool}
   const EdgeInsets.all(double value)
       : left = value, top = value, right = value, bottom = value;
 
   /// Creates insets with only the given values non-zero.
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Left margin indent of 40 pixels:
   ///
   /// ```dart
   /// const EdgeInsets.only(left: 40.0)
   /// ```
-  /// {@end-tool}
   const EdgeInsets.only({
     this.left = 0.0,
     this.top = 0.0,
@@ -351,14 +344,13 @@ class EdgeInsets extends EdgeInsetsGeometry {
 
   /// Creates insets with symmetrical vertical and horizontal offsets.
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Eight pixel margin above and below, no horizontal margins:
   ///
   /// ```dart
   /// const EdgeInsets.symmetric(vertical: 8.0)
   /// ```
-  /// {@end-tool}
   const EdgeInsets.symmetric({ double vertical = 0.0,
                              double horizontal = 0.0 })
     : left = horizontal, top = vertical, right = horizontal, bottom = vertical;
@@ -608,14 +600,13 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
 
   /// Creates insets with only the given values non-zero.
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// A margin indent of 40 pixels on the leading side:
   ///
   /// ```dart
   /// const EdgeInsetsDirectional.only(start: 40.0)
   /// ```
-  /// {@end-tool}
   const EdgeInsetsDirectional.only({
     this.start = 0.0,
     this.top = 0.0,

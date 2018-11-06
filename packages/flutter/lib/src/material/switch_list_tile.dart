@@ -39,7 +39,7 @@ import 'theme_data.dart';
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// This widget shows a switch that, when toggled, changes the state of a [bool]
 /// member field called `_lights`.
@@ -52,7 +52,6 @@ import 'theme_data.dart';
 ///   secondary: const Icon(Icons.lightbulb_outline),
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///

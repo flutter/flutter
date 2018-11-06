@@ -39,7 +39,7 @@ import 'theme.dart';
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// Creates a [TextFormField] with an [InputDecoration] and validator function.
 ///
@@ -59,7 +59,6 @@ import 'theme.dart';
 ///   },
 /// )
 /// ```
-/// {@end-tool}
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
   ///

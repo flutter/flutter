@@ -725,7 +725,7 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -734,7 +734,6 @@ class Navigator extends StatefulWidget {
   ///   Navigator.pushNamed(context, '/nyc/1776');
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   static Future<T> pushNamed<T extends Object>(BuildContext context, String routeName) {
     return Navigator.of(context).pushNamed<T>(routeName);
@@ -773,7 +772,7 @@ class Navigator extends StatefulWidget {
   /// and `TO` is the type of the return value of the old route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -782,7 +781,6 @@ class Navigator extends StatefulWidget {
   ///   Navigator.pushReplacementNamed(context, '/jouett/1781');
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   static Future<T> pushReplacementNamed<T extends Object, TO extends Object>(BuildContext context, String routeName, { TO result }) {
     return Navigator.of(context).pushReplacementNamed<T, TO>(routeName, result: result);
@@ -821,7 +819,7 @@ class Navigator extends StatefulWidget {
   /// and `TO` is the return value type of the old route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -830,7 +828,6 @@ class Navigator extends StatefulWidget {
   ///   Navigator.popAndPushNamed(context, '/nyc/1776');
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   static Future<T> popAndPushNamed<T extends Object, TO extends Object>(BuildContext context, String routeName, { TO result }) {
     return Navigator.of(context).popAndPushNamed<T, TO>(routeName, result: result);
@@ -875,7 +872,7 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the new route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -884,7 +881,6 @@ class Navigator extends StatefulWidget {
   ///   Navigator.pushNamedAndRemoveUntil(context, '/calendar', ModalRoute.withName('/'));
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   static Future<T> pushNamedAndRemoveUntil<T extends Object>(BuildContext context, String newRouteName, RoutePredicate predicate) {
     return Navigator.of(context).pushNamedAndRemoveUntil<T>(newRouteName, predicate);
@@ -908,7 +904,7 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -917,7 +913,6 @@ class Navigator extends StatefulWidget {
   ///   Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => MyPage()));
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   static Future<T> push<T extends Object>(BuildContext context, Route<T> route) {
     return Navigator.of(context).push(route);
@@ -951,7 +946,7 @@ class Navigator extends StatefulWidget {
   /// and `TO` is the type of the return value of the old route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -961,7 +956,6 @@ class Navigator extends StatefulWidget {
   ///       context, MaterialPageRoute(builder: (BuildContext context) => MyHomePage()));
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   static Future<T> pushReplacement<T extends Object, TO extends Object>(BuildContext context, Route<T> newRoute, { TO result }) {
     return Navigator.of(context).pushReplacement<T, TO>(newRoute, result: result);
@@ -1002,7 +996,7 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the new route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -1015,7 +1009,6 @@ class Navigator extends StatefulWidget {
   ///   );
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   static Future<T> pushAndRemoveUntil<T extends Object>(BuildContext context, Route<T> newRoute, RoutePredicate predicate) {
     return Navigator.of(context).pushAndRemoveUntil<T>(newRoute, predicate);
@@ -1160,7 +1153,7 @@ class Navigator extends StatefulWidget {
   /// false); returns false if there are no further previous routes.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage for closing a route is as follows:
   ///
@@ -1169,7 +1162,6 @@ class Navigator extends StatefulWidget {
   ///   Navigator.pop(context);
   /// }
   /// ```
-  /// {@end-tool}
   ///
   /// A dialog box might be closed with a result:
   ///
@@ -1198,7 +1190,7 @@ class Navigator extends StatefulWidget {
   /// See [pop] for more details of the semantics of popping a route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -1207,7 +1199,6 @@ class Navigator extends StatefulWidget {
   ///   Navigator.popUntil(context, ModalRoute.withName('/login'));
   /// }
   /// ```
-  /// {@end-tool}
   static void popUntil(BuildContext context, RoutePredicate predicate) {
     Navigator.of(context).popUntil(predicate);
   }
@@ -1458,7 +1449,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -1467,7 +1458,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.pushNamed('/nyc/1776');
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   Future<T> pushNamed<T extends Object>(String routeName) {
     return push<T>(_routeNamed<T>(routeName));
@@ -1479,7 +1469,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushReplacementNamed}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -1488,7 +1478,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.pushReplacementNamed('/jouett/1781');
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   Future<T> pushReplacementNamed<T extends Object, TO extends Object>(String routeName, { TO result }) {
     return pushReplacement<T, TO>(_routeNamed<T>(routeName), result: result);
@@ -1499,7 +1488,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.popAndPushNamed}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -1508,7 +1497,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.popAndPushNamed('/nyc/1776');
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   Future<T> popAndPushNamed<T extends Object, TO extends Object>(String routeName, { TO result }) {
     pop<TO>(result);
@@ -1520,7 +1508,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushNamedAndRemoveUntil}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -1529,7 +1517,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.pushNamedAndRemoveUntil('/calendar', ModalRoute.withName('/'));
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   Future<T> pushNamedAndRemoveUntil<T extends Object>(String newRouteName, RoutePredicate predicate) {
     return pushAndRemoveUntil<T>(_routeNamed<T>(newRouteName), predicate);
@@ -1539,7 +1526,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.push}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -1548,7 +1535,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.push(MaterialPageRoute(builder: (BuildContext context) => MyPage()));
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   Future<T> push<T extends Object>(Route<T> route) {
     assert(!_debugLocked);
@@ -1591,7 +1577,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushReplacement}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -1601,7 +1587,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///       MaterialPageRoute(builder: (BuildContext context) => MyHomePage()));
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   Future<T> pushReplacement<T extends Object, TO extends Object>(Route<T> newRoute, { TO result }) {
     assert(!_debugLocked);
@@ -1643,7 +1628,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushAndRemoveUntil}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -1655,7 +1640,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   );
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   Future<T> pushAndRemoveUntil<T extends Object>(Route<T> newRoute, RoutePredicate predicate) {
     assert(!_debugLocked);
@@ -1793,7 +1777,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pop}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage for closing a route is as follows:
   ///
@@ -1802,8 +1786,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.pop();
   /// }
   /// ```
-  /// {@end-tool}
-  /// {@tool sample}
   ///
   /// A dialog box might be closed with a result:
   ///
@@ -1812,7 +1794,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.pop(true); // dialog returns true
   /// }
   /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   bool pop<T extends Object>([ T result ]) {
     assert(!_debugLocked);
@@ -1849,7 +1830,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.popUntil}
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// Typical usage is as follows:
   ///
@@ -1858,7 +1839,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.popUntil(ModalRoute.withName('/login'));
   /// }
   /// ```
-  /// {@end-tool}
   void popUntil(RoutePredicate predicate) {
     while (!predicate(_history.last))
       pop();

@@ -20,7 +20,7 @@ import 'image.dart';
 ///
 /// Commonly used with [BoxDecoration].
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// This sample shows a radial gradient that draws a moon on a night sky:
 ///
@@ -39,7 +39,6 @@ import 'image.dart';
 ///   ),
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///
@@ -179,7 +178,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// [padding] (e.g. borders in a [BoxDecoration] contribute to the [padding]);
 /// see [Decoration.padding].
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// This example shows a 48x48 green square (placed inside a [Center] widget in
 /// case the parent widget has its own opinions regarding the size that the
@@ -196,8 +195,6 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///   ),
 /// )
 /// ```
-/// {@end-tool}
-/// {@tool sample}
 ///
 /// This example shows how to use many of the features of [Container] at once.
 /// The [constraints] are set to fit the font size plus ample headroom
@@ -226,7 +223,6 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///   transform: Matrix4.rotationZ(0.1),
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///

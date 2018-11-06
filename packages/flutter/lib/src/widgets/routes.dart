@@ -325,7 +325,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   /// The given local history entry must not already be part of another local
   /// history route.
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// The following example is an app with 2 pages: `HomePage` and `SecondPage`.
   /// The `HomePage` can navigate to the `SecondPage`.
@@ -442,7 +442,6 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///   }
   /// }
   /// ```
-  /// {@end-tool}
   void addLocalHistoryEntry(LocalHistoryEntry entry) {
     assert(entry._owner == null);
     entry._owner = this;
@@ -1268,7 +1267,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// than only specific subtypes. For example, to watch for all [PageRoute]
 /// variants, the `RouteObserver<PageRoute<dynamic>>` type may be used.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// To make a [StatefulWidget] aware of its current [Route] state, implement
 /// [RouteAware] in its [State] and subscribe it to a [RouteObserver]:
@@ -1317,7 +1316,6 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 /// }
 /// ```
-/// {@end-tool}
 class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   final Map<R, Set<RouteAware>> _listeners = <R, Set<RouteAware>>{};
 

@@ -657,7 +657,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar]
 /// and a [FloatingActionButton]. The [body] is a [Text] placed in a [Center]
@@ -684,7 +684,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///   floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///

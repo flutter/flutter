@@ -114,7 +114,7 @@ class CupertinoSlider extends StatefulWidget {
   /// The value passed will be the last [value] that the slider had before the
   /// change began.
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// ```dart
   /// CupertinoSlider(
@@ -132,7 +132,6 @@ class CupertinoSlider extends StatefulWidget {
   ///   },
   /// )
   /// ```
-  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -146,7 +145,7 @@ class CupertinoSlider extends StatefulWidget {
   /// [onChanged] for that), but rather to know when the user has completed
   /// selecting a new [value] by ending a drag.
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// ```dart
   /// CupertinoSlider(
@@ -164,7 +163,6 @@ class CupertinoSlider extends StatefulWidget {
   ///   },
   /// )
   /// ```
-  /// {@end-tool}
   ///
   /// See also:
   ///

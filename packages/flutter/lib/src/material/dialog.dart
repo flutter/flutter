@@ -133,7 +133,7 @@ class Dialog extends StatelessWidget {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// This snippet shows a method in a [State] which, when called, displays a dialog box
 /// and returns a [Future] that completes when the dialog is dismissed.
@@ -167,7 +167,6 @@ class Dialog extends StatelessWidget {
 ///   );
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///
@@ -335,7 +334,7 @@ class AlertDialog extends StatelessWidget {
 /// title and the first option, and 24 pixels of spacing between the last option
 /// and the bottom of the dialog.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// ```dart
 /// SimpleDialogOption(
@@ -343,7 +342,6 @@ class AlertDialog extends StatelessWidget {
 ///   child: const Text('Treasury department'),
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///
@@ -400,7 +398,7 @@ class SimpleDialogOption extends StatelessWidget {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
-/// {@tool sample}
+/// ## Sample code
 ///
 /// In this example, the user is asked to select between two options. These
 /// options are represented as an enum. The [showDialog] method here returns
@@ -443,7 +441,6 @@ class SimpleDialogOption extends StatelessWidget {
 ///   }
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///

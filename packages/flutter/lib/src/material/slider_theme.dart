@@ -48,7 +48,7 @@ class SliderTheme extends InheritedWidget {
   /// Defaults to the ambient [ThemeData.sliderTheme] if there is no
   /// [SliderTheme] in the given build context.
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// ```dart
   /// class Launch extends StatefulWidget {
@@ -71,7 +71,6 @@ class SliderTheme extends InheritedWidget {
   ///   }
   /// }
   /// ```
-  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -156,7 +155,7 @@ class SliderThemeData extends Diagnosticable {
   /// [copyWith] on the one you get from [SliderTheme.of], or create an
   /// entirely new one with [SliderThemeData.fromPrimaryColors].
   ///
-  /// {@tool sample}
+  /// ## Sample code
   ///
   /// ```dart
   /// class Blissful extends StatefulWidget {
@@ -179,7 +178,6 @@ class SliderThemeData extends Diagnosticable {
   ///   }
   /// }
   /// ```
-  /// {@end-tool}
   const SliderThemeData({
     @required this.activeTrackColor,
     @required this.inactiveTrackColor,
