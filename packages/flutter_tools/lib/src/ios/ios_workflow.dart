@@ -182,7 +182,7 @@ class IOSValidator extends DoctorValidator {
         ));
       }
     }
-    
+
     // If one of the checks for the packages failed, we may need brew so that we can install
     // the necessary packages. If they're all there, however, we don't even need it.
     if (checksFailed == totalChecks)
