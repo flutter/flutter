@@ -148,10 +148,14 @@ class WidgetsApp extends StatefulWidget {
          'must have their initial values '
          '(null, null, and the empty list, respectively).'
        ),
-       assert(onGenerateRoute != null || pageRouteBuilder != null,
-         'If onGenerateRoute is not provided, the pageRouteBuilder must be specified '
-         'so that the default handler will know what kind of PageRoute transition '
-         'bo build.'),
+       assert(
+         builder != null ||
+         onGenerateRoute != null ||
+         pageRouteBuilder != null,
+         'If neither builder nor onGenerateRoute are provided, the '
+         'pageRouteBuilder must be specified so that the default handler '
+         'will know what kind of PageRoute transition to build.'
+       ),
        assert(title != null),
        assert(color != null),
        assert(supportedLocales != null && supportedLocales.isNotEmpty),
