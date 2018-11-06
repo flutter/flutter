@@ -641,4 +641,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 
   @override
   bool shouldReload(_MaterialLocalizationsDelegate old) => false;
+
+  @override
+  String toString() => 'GlobalMaterialLocalizations.delegate(${kSupportedLanguages.length} locales)';
 }

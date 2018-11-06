@@ -9,6 +9,9 @@ import 'radio.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// void setState(VoidCallback fn) { }
+
 /// A [ListTile] with a [Radio]. In other words, a radio button with a label.
 ///
 /// The entire list tile is interactive: tapping anywhere in the tile selects

@@ -13,6 +13,9 @@ const String _kDefaultDebugLabel = 'unknown';
 const String _kColorForegroundWarning = 'Cannot provide both a color and a foreground\n'
          'The color argument is just a shorthand for "foreground: new Paint()..color = color".';
 
+// Examples can assume:
+// BuildContext context;
+
 /// An immutable style in which paint text.
 ///
 /// ## Sample code
