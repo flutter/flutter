@@ -1,4 +1,4 @@
-Signature: 8379ed5a6e6d7f0adaa4a5733395fe1c
+Signature: 296c8243892ab5e244211130f7830fbe
 
 UNUSED LICENSES:
 
@@ -1337,6 +1337,7 @@ FILE: ../../../third_party/skia/include/c/sk_colorspace.h
 FILE: ../../../third_party/skia/include/c/sk_imageinfo.h
 FILE: ../../../third_party/skia/include/core/SkCanvasVirtualEnforcer.h
 FILE: ../../../third_party/skia/include/core/SkCoverageMode.h
+FILE: ../../../third_party/skia/include/core/SkFontMetrics.h
 FILE: ../../../third_party/skia/include/core/SkFontParameters.h
 FILE: ../../../third_party/skia/include/core/SkFontTypes.h
 FILE: ../../../third_party/skia/include/core/SkYUVAIndex.h
