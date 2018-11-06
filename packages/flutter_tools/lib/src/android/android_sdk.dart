@@ -336,11 +336,11 @@ class AndroidSdk {
       return <String>['Android SDK file not found: $adbPath.'];
 
     if (sdkVersions.isEmpty || latestVersion == null) {
-      final StringBuffer msg = StringBuffer('No valid Android SDK platforms found in ${_platformsDir.path}. ');
+      final StringBuffer msg = StringBuffer('No valid Android SDK platforms found in ${_platformsDir.path}.');
       if (_platforms.isEmpty) {
         msg.write('  Directory was empty. ');
       } else {
-        msg.write('Candidates were:\n');
+        msg.write(' Candidates were:\n');
         msg.write(_platforms
           .map((Directory dir) => '  - ${dir.basename}')
           .join('\n'));

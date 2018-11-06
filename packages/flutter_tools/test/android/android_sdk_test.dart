@@ -92,7 +92,7 @@ void main() {
 
       final List<String> validationIssues = sdk.validateSdkWellFormed();
       expect(validationIssues.first, 'No valid Android SDK platforms found in'
-        ' /.tmp_rand0/flutter_mock_android_sdk.rand0/platforms.Candidates were:\n'
+        ' /.tmp_rand0/flutter_mock_android_sdk.rand0/platforms. Candidates were:\n'
         '  - android-22\n'
         '  - android-23');
     }, overrides: <Type, Generator>{
