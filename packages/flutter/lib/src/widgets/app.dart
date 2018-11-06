@@ -8,7 +8,6 @@ import 'dart:ui' as ui show window, hashValues;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/foundation.dart';
 
 import 'banner.dart';
 import 'basic.dart';
