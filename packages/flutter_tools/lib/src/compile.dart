@@ -294,19 +294,23 @@ class _CompileExpressionRequest extends _CompilationRequest {
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
 class ResidentCompiler {
-  ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation = false,
-      String packagesPath, List<String> fileSystemRoots, String fileSystemScheme,
-      CompilerMessageConsumer compilerMessageConsumer = printError,
-      String initializeFromDill, bool unsafePackageSerialization})
-    : assert(_sdkRoot != null),
-      _trackWidgetCreation = trackWidgetCreation,
-      _packagesPath = packagesPath,
-      _fileSystemRoots = fileSystemRoots,
-      _fileSystemScheme = fileSystemScheme,
-      _stdoutHandler = _StdoutHandler(consumer: compilerMessageConsumer),
-      _controller = StreamController<_CompilationRequest>(),
-      _initializeFromDill = initializeFromDill,
-      _unsafePackageSerialization = unsafePackageSerialization {
+  ResidentCompiler(this._sdkRoot, {
+    bool trackWidgetCreation = false,
+    String packagesPath,
+    List<String> fileSystemRoots,
+    String fileSystemScheme,
+    CompilerMessageConsumer compilerMessageConsumer = printError,
+    String initializeFromDill,
+    bool unsafePackageSerialization
+  }) : assert(_sdkRoot != null),
+       _trackWidgetCreation = trackWidgetCreation,
+       _packagesPath = packagesPath,
+       _fileSystemRoots = fileSystemRoots,
+       _fileSystemScheme = fileSystemScheme,
+       _stdoutHandler = _StdoutHandler(consumer: compilerMessageConsumer),
+       _controller = StreamController<_CompilationRequest>(),
+       _initializeFromDill = initializeFromDill,
+       _unsafePackageSerialization = unsafePackageSerialization {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';

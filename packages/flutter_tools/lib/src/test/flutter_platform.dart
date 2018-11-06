@@ -8,10 +8,14 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 
-import 'package:test/src/backend/runtime.dart'; // ignore: implementation_imports
-import 'package:test/src/backend/suite_platform.dart'; // ignore: implementation_imports
-import 'package:test/src/runner/plugin/platform.dart'; // ignore: implementation_imports
-import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // ignore: implementation_imports
+import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/platform.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
+import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -24,7 +28,6 @@ import '../bundle.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
-import '../vmservice.dart';
 import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
@@ -133,28 +136,49 @@ String generateTestBootstrap({
 
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';  // ignore: dart_io_import
-
-// We import this library first in order to trigger an import error for
-// package:test (rather than package:stream_channel) when the developer forgets
-// to add a dependency on package:test.
-import 'package:test/src/runner/plugin/remote_platform_helpers.dart';
+import 'dart:isolate';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:test_api/src/remote_listener.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test/src/runner/vm/catch_isolate_errors.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 import '$testUrl' as test;
-'''
-  );
+''');
   if (testConfigFile != null) {
     buffer.write('''
 import '${Uri.file(testConfigFile.path)}' as test_config;
-'''
-    );
+''');
   }
   buffer.write('''
+
+/// Returns a serialized test suite.
+StreamChannel<dynamic> serializeSuite(Function getMain(),
+    {bool hidePrints = true, Future<dynamic> beforeLoad()}) {
+  return RemoteListener.start(getMain,
+      hidePrints: hidePrints, beforeLoad: beforeLoad);
+}
+
+/// Capture any top-level errors (mostly lazy syntax errors, since other are
+/// caught below) and report them to the parent isolate.
+void catchIsolateErrors() {
+  final ReceivePort errorPort = ReceivePort();
+  // Treat errors non-fatal because otherwise they'll be double-printed.
+  Isolate.current.setErrorsFatal(false);
+  Isolate.current.addErrorListener(errorPort.sendPort);
+  errorPort.listen((dynamic message) {
+    // Masquerade as an IsolateSpawnException because that's what this would
+    // be if the error had been detected statically.
+    final IsolateSpawnException error = IsolateSpawnException(message[0]);
+    final Trace stackTrace =
+        message[1] == null ? Trace(const <Frame>[]) : Trace.parse(message[1]);
+    Zone.current.handleUncaughtError(error, stackTrace);
+  });
+}
+
 
 void main() {
   print('$_kStartTimeoutTimerMessage');
@@ -164,8 +188,7 @@ void main() {
     catchIsolateErrors();
     goldenFileComparator = new LocalFileComparator(Uri.parse('$testUrl'));
     autoUpdateGoldenFiles = $updateGoldens;
-'''
-  );
+''');
   if (testConfigFile != null) {
     buffer.write('''
     return () => test_config.main(test.main);
@@ -185,8 +208,7 @@ void main() {
     socket.addStream(channel.stream.map(json.encode));
   });
 }
-'''
-  );
+''');
   return buffer.toString();
 }
 
@@ -207,21 +229,20 @@ class _Compiler {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
-    final Directory outputDillDirectory = fs.systemTempDirectory
-        .createTempSync('flutter_test_compiler.');
+    final Directory outputDillDirectory = fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
     final File outputDill = outputDillDirectory.childFile('output.dill');
 
     printTrace('Compiler will use the following file as its incremental dill file: ${outputDill.path}');
 
     bool suppressOutput = false;
     void reportCompilerMessage(String message, {bool emphasis, TerminalColor color}) {
-      if (suppressOutput)
+      if (suppressOutput) {
         return;
+      }
 
-      if (message.startsWith('Error: Could not resolve the package \'test\'')) {
+      if (message.startsWith('Error: Could not resolve the package \'flutter_test\'')) {
         printTrace(message);
-        printError(
-          '\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',
+        printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',
           emphasis: emphasis,
           color: color,
         );
@@ -267,11 +288,12 @@ class _Compiler {
           }
           suppressOutput = false;
           final CompilerOutput compilerOutput = await handleTimeout<CompilerOutput>(
-              compiler.recompile(
-                  request.path,
-                  <String>[request.path],
-                  outputPath: outputDill.path),
-              request.path);
+            compiler.recompile(
+              request.path,
+              <String>[request.path],
+              outputPath: outputDill.path),
+              request.path,
+            );
           final String outputPath = compilerOutput?.outputFilename;
 
           // In case compiler didn't produce output or reported compilation
@@ -307,8 +329,7 @@ class _Compiler {
     });
   }
 
-  final StreamController<_CompilationRequest> compilerController =
-      StreamController<_CompilationRequest>();
+  final StreamController<_CompilationRequest> compilerController = StreamController<_CompilationRequest>();
   final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
   ResidentCompiler compiler;
 
@@ -384,6 +405,21 @@ class _FlutterPlatform extends PlatformPlugin {
   int _testCount = 0;
 
   @override
+  Future<RunnerSuite> load(
+    String path,
+    SuitePlatform platform,
+    SuiteConfiguration suiteConfig,
+    Object message,
+  ) async {
+    // loadChannel may throw an exception. That's fine; it will cause the
+    // LoadSuite to emit an error, which will be presented to the user.
+    final StreamChannel<dynamic> channel = loadChannel(path, platform);
+    final RunnerSuiteController controller = deserializeSuite(path, platform,
+        suiteConfig, const PluginEnvironment(), channel, message);
+    return await controller.suite;
+  }
+
+  @override
   StreamChannel<dynamic> loadChannel(String testPath, SuitePlatform platform) {
     if (_testCount > 0) {
       // Fail if there will be a port conflict.
@@ -414,22 +450,6 @@ class _FlutterPlatform extends PlatformPlugin {
     return remoteChannel;
   }
 
-  Future<String> _compileExpressionService(String isolateId, String expression,
-      List<String> definitions, List<String> typeDefinitions,
-      String libraryUri, String klass, bool isStatic,
-      ) async {
-    if (compiler == null || compiler.compiler == null) {
-      throw 'Compiler is not set up properly to compile $expression';
-    }
-    final CompilerOutput compilerOutput =
-      await compiler.compiler.compileExpression(expression, definitions,
-        typeDefinitions, libraryUri, klass, isStatic);
-    if (compilerOutput != null && compilerOutput.outputFilename != null) {
-      return base64.encode(fs.file(compilerOutput.outputFilename).readAsBytesSync());
-    }
-    throw 'Failed to compile $expression';
-  }
-
   Future<_AsyncError> _startTest(
     String testPath,
     StreamChannel<dynamic> controller,
@@ -437,14 +457,18 @@ class _FlutterPlatform extends PlatformPlugin {
   ) async {
     printTrace('test $ourTestCount: starting test $testPath');
 
-    _AsyncError outOfBandError; // error that we couldn't send to the harness that we need to send via our future
+    _AsyncError
+        outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
-    final List<_Finalizer> finalizers = <_Finalizer>[]; // Will be run in reverse order.
+    final List<_Finalizer> finalizers =
+        <_Finalizer>[]; // Will be run in reverse order.
     bool subprocessActive = false;
     bool controllerSinkClosed = false;
     try {
       // Callback can't throw since it's just setting a variable.
-      controller.sink.done.whenComplete(() { controllerSinkClosed = true; }); // ignore: unawaited_futures
+      controller.sink.done.whenComplete(() { // ignore: unawaited_futures
+        controllerSinkClosed = true;
+      }); // ignore: unawaited_futures
 
       // Prepare our WebSocket server to talk to the engine subproces.
       final HttpServer server = await HttpServer.bind(host, port);
@@ -482,7 +506,8 @@ class _FlutterPlatform extends PlatformPlugin {
       } else if (precompiledDillFiles != null) {
         mainDart = precompiledDillFiles[testPath];
       }
-      mainDart ??= _createListenerDart(finalizers, ourTestCount, testPath, server);
+      mainDart ??=
+          _createListenerDart(finalizers, ourTestCount, testPath, server);
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
@@ -511,10 +536,14 @@ class _FlutterPlatform extends PlatformPlugin {
           process.kill();
           final int exitCode = await process.exitCode;
           subprocessActive = false;
-          if (!controllerSinkClosed && exitCode != -15) { // ProcessSignal.SIGTERM
+          if (!controllerSinkClosed && exitCode != -15) {
+            // ProcessSignal.SIGTERM
             // We expect SIGTERM (15) because we tried to terminate it.
             // It's negative because signals are returned as negative exit codes.
-            final String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'after tests finished'), testPath, shellPath);
+            final String message = _getErrorMessage(
+                _getExitCodeMessage(exitCode, 'after tests finished'),
+                testPath,
+                shellPath);
             controller.sink.addError(message);
           }
         }
@@ -522,8 +551,9 @@ class _FlutterPlatform extends PlatformPlugin {
 
       final Completer<void> timeout = Completer<void>();
       final Completer<void> gotProcessObservatoryUri = Completer<void>();
-      if (!enableObservatory)
+      if (!enableObservatory) {
         gotProcessObservatoryUri.complete();
+      }
 
       // Pipe stdout and stderr from the subprocess to our printStatus console.
       // We also keep track of what observatory port the engine used, if any.
@@ -533,7 +563,7 @@ class _FlutterPlatform extends PlatformPlugin {
         reportObservatoryUri: (Uri detectedUri) {
           assert(processObservatoryUri == null);
           assert(explicitObservatoryPort == null ||
-                 explicitObservatoryPort == detectedUri.port);
+              explicitObservatoryPort == detectedUri.port);
           if (startPaused && !machine) {
             printStatus('The test process has been started.');
             printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
@@ -543,21 +573,13 @@ class _FlutterPlatform extends PlatformPlugin {
             printTrace('test $ourTestCount: using observatory uri $detectedUri from pid ${process.pid}');
           }
           processObservatoryUri = detectedUri;
-
-          {
-            printTrace('Connecting to service protocol: $processObservatoryUri');
-            final Future<VMService> localVmService = VMService.connect(processObservatoryUri,
-              compileExpression: _compileExpressionService);
-            localVmService.then((VMService vmservice) {
-              printTrace('Successfully connected to service protocol: $processObservatoryUri');
-            });
-          }
-
           gotProcessObservatoryUri.complete();
-          watcher?.handleStartedProcess(ProcessEvent(ourTestCount, process, processObservatoryUri));
+          watcher?.handleStartedProcess(
+              ProcessEvent(ourTestCount, process, processObservatoryUri));
         },
         startTimeoutTimer: () {
-          Future<_InitialResult>.delayed(_kTestStartupTimeout).then<void>((_) => timeout.complete());
+          Future<_InitialResult>.delayed(_kTestStartupTimeout)
+              .then<void>((_) => timeout.complete());
         },
       );
 
@@ -567,10 +589,14 @@ class _FlutterPlatform extends PlatformPlugin {
       // The local test harness could get bored of us.
 
       printTrace('test $ourTestCount: awaiting initial result for pid ${process.pid}');
-      final _InitialResult initialResult = await Future.any<_InitialResult>(<Future<_InitialResult>>[
-        process.exitCode.then<_InitialResult>((int exitCode) => _InitialResult.crashed),
-        timeout.future.then<_InitialResult>((void value) => _InitialResult.timedOut),
-        Future<_InitialResult>.delayed(_kTestProcessTimeout, () => _InitialResult.timedOut),
+      final _InitialResult initialResult =
+          await Future.any<_InitialResult>(<Future<_InitialResult>>[
+        process.exitCode
+            .then<_InitialResult>((int exitCode) => _InitialResult.crashed),
+        timeout.future
+            .then<_InitialResult>((void value) => _InitialResult.timedOut),
+        Future<_InitialResult>.delayed(
+            _kTestProcessTimeout, () => _InitialResult.timedOut),
         gotProcessObservatoryUri.future.then<_InitialResult>((void value) {
           return webSocket.future.then<_InitialResult>(
             (WebSocket webSocket) => _InitialResult.connected,
@@ -583,7 +609,11 @@ class _FlutterPlatform extends PlatformPlugin {
           printTrace('test $ourTestCount: process with pid ${process.pid} crashed before connecting to test harness');
           final int exitCode = await process.exitCode;
           subprocessActive = false;
-          final String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'before connecting to test harness'), testPath, shellPath);
+          final String message = _getErrorMessage(
+              _getExitCodeMessage(
+                  exitCode, 'before connecting to test harness'),
+              testPath,
+              shellPath);
           controller.sink.addError(message);
           // Awaited for with 'sink.done' below.
           controller.sink.close(); // ignore: unawaited_futures
@@ -602,15 +632,19 @@ class _FlutterPlatform extends PlatformPlugin {
           controller.sink.close(); // ignore: unawaited_futures
           printTrace('test $ourTestCount: waiting for controller sink to close');
           await controller.sink.done;
-          await watcher?.handleTestTimedOut(ProcessEvent(ourTestCount, process));
+          await watcher
+              ?.handleTestTimedOut(ProcessEvent(ourTestCount, process));
           break;
         case _InitialResult.connected:
           printTrace('test $ourTestCount: process with pid ${process.pid} connected to test harness');
           final WebSocket testSocket = await webSocket.future;
 
           final Completer<void> harnessDone = Completer<void>();
-          final StreamSubscription<dynamic> harnessToTest = controller.stream.listen(
-            (dynamic event) { testSocket.add(json.encode(event)); },
+          final StreamSubscription<dynamic> harnessToTest =
+              controller.stream.listen(
+            (dynamic event) {
+              testSocket.add(json.encode(event));
+            },
             onDone: harnessDone.complete,
             onError: (dynamic error, dynamic stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
@@ -628,7 +662,8 @@ class _FlutterPlatform extends PlatformPlugin {
           final Completer<void> testDone = Completer<void>();
           final StreamSubscription<dynamic> testToHarness = testSocket.listen(
             (dynamic encodedEvent) {
-              assert(encodedEvent is String); // we shouldn't ever get binary messages
+              assert(encodedEvent
+                  is String); // we shouldn't ever get binary messages
               controller.sink.add(json.decode(encodedEvent));
             },
             onDone: testDone.complete,
@@ -646,10 +681,17 @@ class _FlutterPlatform extends PlatformPlugin {
           );
 
           printTrace('test $ourTestCount: awaiting test result for pid ${process.pid}');
-          final _TestResult testResult = await Future.any<_TestResult>(<Future<_TestResult>>[
-            process.exitCode.then<_TestResult>((int exitCode) { return _TestResult.crashed; }),
-            harnessDone.future.then<_TestResult>((void value) { return _TestResult.harnessBailed; }),
-            testDone.future.then<_TestResult>((void value) { return _TestResult.testBailed; }),
+          final _TestResult testResult =
+              await Future.any<_TestResult>(<Future<_TestResult>>[
+            process.exitCode.then<_TestResult>((int exitCode) {
+              return _TestResult.crashed;
+            }),
+            harnessDone.future.then<_TestResult>((void value) {
+              return _TestResult.harnessBailed;
+            }),
+            testDone.future.then<_TestResult>((void value) {
+              return _TestResult.testBailed;
+            }),
           ]);
 
           await Future.wait<void>(<Future<void>>[
@@ -662,7 +704,11 @@ class _FlutterPlatform extends PlatformPlugin {
               printTrace('test $ourTestCount: process with pid ${process.pid} crashed');
               final int exitCode = await process.exitCode;
               subprocessActive = false;
-              final String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'before test harness closed its WebSocket'), testPath, shellPath);
+              final String message = _getErrorMessage(
+                  _getExitCodeMessage(
+                      exitCode, 'before test harness closed its WebSocket'),
+                  testPath,
+                  shellPath);
               controller.sink.addError(message);
               // Awaited for with 'sink.done' below.
               controller.sink.close(); // ignore: unawaited_futures
@@ -677,7 +723,8 @@ class _FlutterPlatform extends PlatformPlugin {
                 assert(testResult == _TestResult.testBailed);
                 printTrace('test $ourTestCount: process with pid ${process.pid} no longer needs test harness');
               }
-              await watcher?.handleFinishedTest(ProcessEvent(ourTestCount, process, processObservatoryUri));
+              await watcher?.handleFinishedTest(
+                  ProcessEvent(ourTestCount, process, processObservatoryUri));
               break;
           }
           break;
@@ -726,8 +773,7 @@ class _FlutterPlatform extends PlatformPlugin {
   String _createListenerDart(List<_Finalizer> finalizers, int ourTestCount,
       String testPath, HttpServer server) {
     // Prepare a temporary directory to store the Dart file that will talk to us.
-    final Directory tempDir = fs.systemTempDirectory
-        .createTempSync('flutter_test_listener.');
+    final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_test_listener.');
     finalizers.add(() async {
       printTrace('test $ourTestCount: deleting temporary directory');
       tempDir.deleteSync(recursive: true);
@@ -757,7 +803,7 @@ class _FlutterPlatform extends PlatformPlugin {
       }
       if (directory.childFile(_kProjectRootSentinel).existsSync()) {
         printTrace('Stopping scan for $_kTestConfigFileName; '
-                   'found project root at ${directory.path}');
+            'found project root at ${directory.path}');
         break;
       }
       directory = directory.parent;
@@ -788,8 +834,9 @@ class _FlutterPlatform extends PlatformPlugin {
   /// Returns a Fontconfig config file that limits font fallback to the
   /// artifact cache directory.
   File get _fontConfigFile {
-    if (_cachedFontConfig != null)
+    if (_cachedFontConfig != null) {
       return _cachedFontConfig;
+    }
 
     final StringBuffer sb = StringBuffer();
     sb.writeln('<fontconfig>');
@@ -832,13 +879,15 @@ class _FlutterPlatform extends PlatformPlugin {
       // the obvious simplification to this code and remove this entire feature.
       if (observatoryPort != null)
         command.add('--observatory-port=$observatoryPort');
-      if (startPaused)
+      if (startPaused) {
         command.add('--start-paused');
+      }
     } else {
       command.add('--disable-observatory');
     }
-    if (host.type == InternetAddressType.IPv6)
+    if (host.type == InternetAddressType.IPv6) {
       command.add('--ipv6');
+    }
 
     command.add('--enable-checked-mode');
     command.addAll(<String>[
@@ -865,36 +914,41 @@ class _FlutterPlatform extends PlatformPlugin {
     void reportObservatoryUri(Uri uri),
   }) {
     const String observatoryString = 'Observatory listening on ';
-    for (Stream<List<int>> stream in
-        <Stream<List<int>>>[process.stderr, process.stdout]) {
-      stream.transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen(
-          (String line) {
-            if (line == _kStartTimeoutTimerMessage) {
-              if (startTimeoutTimer != null)
-                startTimeoutTimer();
-            } else if (line.startsWith('error: Unable to read Dart source \'package:test/')) {
-              printTrace('Shell: $line');
-              printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n');
-            } else if (line.startsWith(observatoryString)) {
-              printTrace('Shell: $line');
-              try {
-                final Uri uri = Uri.parse(line.substring(observatoryString.length));
-                if (reportObservatoryUri != null)
-                  reportObservatoryUri(uri);
-              } catch (error) {
-                printError('Could not parse shell observatory port message: $error');
-              }
-            } else if (line != null) {
-              printStatus('Shell: $line');
+    for (Stream<List<int>> stream in <Stream<List<int>>>[
+      process.stderr,
+      process.stdout
+    ]) {
+      stream
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen(
+        (String line) {
+          if (line == _kStartTimeoutTimerMessage) {
+            if (startTimeoutTimer != null) {
+              startTimeoutTimer();
             }
-          },
-          onError: (dynamic error) {
-            printError('shell console stream for process pid ${process.pid} experienced an unexpected error: $error');
-          },
-          cancelOnError: true,
-        );
+          } else if (line.startsWith('error: Unable to read Dart source \'package:test/')) {
+            printTrace('Shell: $line');
+            printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n');
+          } else if (line.startsWith(observatoryString)) {
+            printTrace('Shell: $line');
+            try {
+              final Uri uri = Uri.parse(line.substring(observatoryString.length));
+              if (reportObservatoryUri != null) {
+                reportObservatoryUri(uri);
+              }
+            } catch (error) {
+              printError('Could not parse shell observatory port message: $error');
+            }
+          } else if (line != null) {
+            printStatus('Shell: $line');
+          }
+        },
+        onError: (dynamic error) {
+          printError('shell console stream for process pid ${process.pid} experienced an unexpected error: $error');
+        },
+        cancelOnError: true,
+      );
     }
   }
 
@@ -969,7 +1023,7 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
   @override
   void add(S event) => _parent.add(event);
   @override
-  void addError(dynamic errorEvent, [ StackTrace stackTrace ]) => _parent.addError(errorEvent, stackTrace);
+  void addError(dynamic errorEvent, [StackTrace stackTrace]) => _parent.addError(errorEvent, stackTrace);
   @override
   Future<dynamic> addStream(Stream<S> stream) => _parent.addStream(stream);
 }
