@@ -236,3 +236,19 @@ dart_tool("fuchsia_tester") {
     "$flutter_root/shell",
   ]
 }
+
+dart_tool("fuchsia_tools") {
+  package_name = "fuchsia_tools"
+  main_dart = "bin/fuchsia_tools.dart"
+
+  # Can be left empty as analysis is disabled.
+  sources = []
+
+  disable_analysis = true
+
+  deps = [
+    ":flutter_tools",
+  ]
+
+  # TODO(jonahwilliams): add a frontend_server as a non dart dep.
+}
