@@ -640,7 +640,7 @@ String assumeScriptCode(String localeString) {
     }
     case 'sr': {
       if (localeInfo.countryCode == null)
-        return localeInfo.languageCode + '_Cryl';
+        return localeInfo.languageCode + '_Cyrl';
       return localeString;
     }
     default:

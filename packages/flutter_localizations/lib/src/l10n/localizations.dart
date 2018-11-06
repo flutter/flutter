@@ -9928,12 +9928,12 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Serbian (`sr`).
-class MaterialLocalizationSrCryl extends MaterialLocalizationSr {
-  /// Create an instance of the translation bundle for Serbian.
+class MaterialLocalizationSrCyrl extends MaterialLocalizationSr {
+  /// Create an instance of the translation bundle for Serbian, using the Cyrillic script.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
-  const MaterialLocalizationSrCryl({
-    String localeName = 'sr_Cryl',
+  const MaterialLocalizationSrCyrl({
+    String localeName = 'sr_Cyrl',
     @required intl.DateFormat fullYearFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
@@ -12252,8 +12252,8 @@ GlobalMaterialLocalizations getTranslation(
       return MaterialLocalizationSl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sr': {
       switch (locale.scriptCode) {
-        case 'Cryl': {
-          return MaterialLocalizationSrCryl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        case 'Cyrl': {
+          return MaterialLocalizationSrCyrl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         }
         case 'Latn': {
           return MaterialLocalizationSrLatn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);

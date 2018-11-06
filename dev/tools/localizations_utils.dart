@@ -58,7 +58,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   bool operator ==(Object other) {
     if (!(other is LocaleInfo))
       return false;
-    LocaleInfo otherLocale = other;
+    final LocaleInfo otherLocale = other;
     return originalString == otherLocale.originalString;
   }
 
