@@ -617,7 +617,7 @@ void processBundle(File file, { @required String localeString }) {
 /// across various countries. For example, we know Taiwan uses traditional (Hant)
 /// script, so it is safe to apply (Hant) to Taiwanese languages.
 String assumeScriptCode(String localeString) {
-  LocaleInfo localeInfo = LocaleInfo.fromString(localeString);
+  final LocaleInfo localeInfo = LocaleInfo.fromString(localeString);
   if (localeInfo.scriptCode != null)
     return localeString;
   switch (localeInfo.languageCode) {
@@ -633,16 +633,14 @@ String assumeScriptCode(String localeString) {
           return localeInfo.languageCode + '_Hant_' + localeInfo.countryCode;
         case 'MO':
           return localeInfo.languageCode + '_Hant_' + localeInfo.countryCode;
-        case null:
-          return localeInfo.languageCode + '_Hans';
       }
+      if (localeInfo.countryCode == null)
+        return localeInfo.languageCode + '_Hans';
       return localeString;
     }
     case 'sr': {
-      switch (localeInfo.countryCode) {
-        case null:
-          return localeInfo.languageCode + '_Cryl';
-      }
+      if (localeInfo.countryCode == null)
+        return localeInfo.languageCode + '_Cryl';
       return localeString;
     }
     default:

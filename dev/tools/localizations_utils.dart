@@ -36,7 +36,9 @@ class LocaleInfo implements Comparable<LocaleInfo> {
       scriptCode = codes[1].length > codes[2].length ? codes[1] : codes[2];
       countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
     }
-    assert(codes[0] != null);
+    assert(codes[0] != null && codes[0].isNotEmpty);
+    assert(countryCode == null || countryCode.isNotEmpty);
+    assert(scriptCode == null || scriptCode.isNotEmpty);
     return LocaleInfo(
       languageCode: codes[0],
       scriptCode: scriptCode,
@@ -53,8 +55,11 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   final String originalString;   // Original un-parsed locale string.
 
   @override
-  bool operator ==(LocaleInfo other) {
-    return originalString == other.originalString;
+  bool operator ==(Object other) {
+    if (!(other is LocaleInfo))
+      return false;
+    LocaleInfo otherLocale = other;
+    return originalString == otherLocale.originalString;
   }
 
   @override
@@ -194,8 +199,8 @@ String describeLocale(String tag) {
   assert(_languages.containsKey(subtags[0]));
   final String language = _languages[subtags[0]];
   String output = '$language';
-  String region = null;
-  String script = null;
+  String region;
+  String script;
   if (subtags.length == 2) {
     region = _regions[subtags[1]];
     script = _scripts[subtags[1]];
