@@ -841,9 +841,6 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     // fallback only applies on iOS. When there is no countryCode only match, we return first
     // suported locale.
     final Locale resolvedLocale = matchesLanguageCode ?? matchesCountryCode ?? supportedLocales.first;
-    if (matchesLanguageCode == null) {
-      debugPrint('Warning: Resolved locale (' + resolvedLocale.toString() + ') has a different language code than the user\'s preferred locales (' + preferredLocales.toString() + ').');
-    }
     return resolvedLocale;
   }
 
