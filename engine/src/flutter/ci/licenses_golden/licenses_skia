@@ -1,4 +1,4 @@
-Signature: e3cc1988ec6ab965c836880bde5aa4cb
+Signature: 8379ed5a6e6d7f0adaa4a5733395fe1c
 
 UNUSED LICENSES:
 
@@ -1985,6 +1985,7 @@ FILE: ../../../third_party/skia/animations/text#1.xml
 FILE: ../../../third_party/skia/bench/microbench.json
 FILE: ../../../third_party/skia/bench/skpbench.json
 FILE: ../../../third_party/skia/docker/skia-release/Dockerfile
+FILE: ../../../third_party/skia/docker/skia-wasm-release/Dockerfile
 FILE: ../../../third_party/skia/docker/skia-with-swift-shader-base/Dockerfile
 FILE: ../../../third_party/skia/docker/skia-with-swift-shader-base/build-with-swift-shader-and-run
 FILE: ../../../third_party/skia/docs/SkAutoCanvasRestore_Reference.bmh
