@@ -656,6 +656,8 @@ class SliverGeometry extends Diagnosticable {
   ///  * [RenderViewport.cacheExtent] for a description of a viewport's cache area.
   final double cacheExtent;
 
+  static const double _epsilon = 1e-10;
+
   /// Asserts that this geometry is internally consistent.
   ///
   /// Does nothing if asserts are disabled. Always returns true.
@@ -686,7 +688,7 @@ class SliverGeometry extends Diagnosticable {
         );
       }
       verify(maxPaintExtent != null, 'The "maxPaintExtent" is null.');
-      if (maxPaintExtent < paintExtent) {
+      if (paintExtent - maxPaintExtent > _epsilon) {
         verify(false,
           'The "maxPaintExtent" is less than the "paintExtent".\n' +
           _debugCompareFloats('maxPaintExtent', maxPaintExtent, 'paintExtent', paintExtent) +
