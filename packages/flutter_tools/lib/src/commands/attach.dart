@@ -47,6 +47,7 @@ class AttachCommand extends FlutterCommand {
     addBuildModeFlags(defaultToRelease: false);
     usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
+    usesFilesystemOptions(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
