@@ -193,6 +193,23 @@ abstract class FlutterCommand extends Command<void> {
             '--release or --profile; --debug always has this enabled.');
   }
 
+  void usesFuchsiaOptions({bool hide = false}) {
+    argParser.addOption(
+      'target-model',
+      help: 'Target model that determines what core libraries are available',
+      defaultsTo: 'flutter',
+      hide: hide,
+      allowed: const <String>['flutter', 'flutter_runner'],
+    );
+    argParser.addOption(
+      'module',
+      abbr: 'm',
+      hide: hide,
+      help: 'The name of the module (required if attaching to a fuchsia device)',
+      valueHelp: 'module-name',
+    );
+  }
+
   set defaultBuildMode(BuildMode value) {
     _defaultBuildMode = value;
   }
