@@ -338,7 +338,7 @@ class AndroidSdk {
     if (sdkVersions.isEmpty || latestVersion == null) {
       final StringBuffer msg = StringBuffer('No valid Android SDK platforms found in ${_platformsDir.path}.');
       if (_platforms.isEmpty) {
-        msg.write('  Directory was empty. ');
+        msg.write('  Directory was empty.');
       } else {
         msg.write(' Candidates were:\n');
         msg.write(_platforms
