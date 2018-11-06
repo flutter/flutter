@@ -124,6 +124,19 @@ void main() {
     // Icon has rotated 180 degrees.
     expect(transformWidget.transform.getRotation()[0], -1.0);
     expect(transformWidget.transform.getRotation()[4], -1.0);
+
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(Duration(milliseconds: 10));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpAndSettle();
+    await tester.pump();
+    transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon has rotated 180 degrees back to the original position.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
   });
 
   testWidgets('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
