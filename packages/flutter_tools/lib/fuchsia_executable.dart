@@ -47,10 +47,10 @@ Future<void> main(List<String> args) async {
   final File sshConfig = fs.file(results['ssh-config']);
 
   if (!dartSdk.existsSync()) {
-    throwToolExit('--frontend-server is required: ${dartSdk.path} does not exist.');
+    throwToolExit('--dart-sdk is required: ${dartSdk.path} does not exist.');
   }
   if (!frontendServer.existsSync()) {
-    throwToolExit('--dart-sdk is required: ${frontendServer.path} does not exist.');
+    throwToolExit('--frontend-server is required: ${frontendServer.path} does not exist.');
   }
   if (!sshConfig.existsSync()) {
     throwToolExit('--ssh-config is required: ${sshConfig.path} does not exist.');
@@ -67,8 +67,8 @@ Future<void> main(List<String> args) async {
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       Artifacts: () => OverrideArtifacts(
         parent: CachedArtifacts(),
-          frontendServer: frontendServer,
-          engineDartBinary: dartSdk,
-       )
+        frontendServer: frontendServer,
+        engineDartBinary: dartSdk,
+      )
      });
 }
