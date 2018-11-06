@@ -8,32 +8,41 @@ The results of such builds are viewable at:
 * https://build.chromium.org/p/client.flutter/console
   - Additional testing and processing done after changes are submitted.
 
-The external master pages for the Chromium infra bots do not allow
-forcing new builds. Contact @eseidelGoogle or another member of
-Google's Flutter team if you need to do that.
+The Chromium infra bots do not allow forcing new builds from outside
+the Google network. Contact @eseidelGoogle or another Google member of
+the Flutter team if you need to do that.
 
-The [Cirrus](https://cirrus-ci.org)-based bots run the [`test.dart`](test.dart)
-script for each PR and submission. It does testing for the tools, for the
-framework, and (for submitted changes only) rebuilds and updates the master
-branch API docs staging site. For tagged dev and beta builds, it also builds and
-deploys the gallery app to the app stores.
+The [Cirrus](https://cirrus-ci.org)-based bots run the
+[`test.dart`](test.dart) script for each PR and submission. This does
+testing for the tools, for the framework, and (for submitted changes
+only) rebuilds and updates the master branch API docs staging site.
+For tagged dev and beta builds, it also builds and deploys the gallery
+app to the app stores. It is configured by the
+[.cirrus.yml](/.cirrus.yml).
 
-The rest of this document discusses only the Chromium infra bots.
+We also have post-commit testing with actual devices, in what we call
+our [devicelab](../dev/devicelab/README.md).
 
-This infrastructure is broken into two parts. A buildbot master specified by our
+## Chromium infra bots
+
+This part of our infrastructure is broken into two parts. A buildbot
+master specified by our
 [builders.pyl](https://chromium.googlesource.com/chromium/tools/build.git/+/master/masters/master.client.flutter/builders.pyl)
 file, and a [set of
 recipes](https://chromium.googlesource.com/chromium/tools/build.git/+/master/scripts/slave/recipes/flutter)
-which we run on that master.  Both of these technologies are highly specific to
-Google's Chromium project. We're just borrowing some of their infrastructure.
+which we run on that master. Both of these technologies are highly
+specific to Google's Chromium project. We're just borrowing some of
+their infrastructure.
 
-## Prerequisites
+### Prerequisites
+
+To work on this infrastructure you will need:
 
 - [install depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools)
 - Python package installer: `sudo apt-get install python-pip`
 - Python coverage package (only needed for `training_simulation`): `sudo pip install coverage`
 
-## Getting the code
+### Getting the code
 
 The following will get way more than just recipe code, but it _will_ get the recipe code:
 
@@ -49,7 +58,7 @@ Most of the functionality for recipes comes from `recipe_modules`, which are
 unfortunately spread to many separate repositories.  After checking out the code
 search for files named `api.py` or `example.py` under `infra/build`.
 
-## Editing a recipe
+### Editing a recipe
 
 Flutter has one recipe per repository. Currently
 [flutter/flutter](https://chromium.googlesource.com/chromium/tools/build.git/+/master/scripts/slave/recipes/flutter/flutter.py)
@@ -79,7 +88,7 @@ The typical cycle for editing a recipe is:
 4. Upload the patch (`git commit`, `git cl upload`) and send it to someone in
    the `recipes/flutter/OWNERS` file for review.
 
-## Editing the client.flutter buildbot master
+### Editing the client.flutter buildbot master
 
 Flutter uses Chromium's fancy
 [builders.pyl](https://chromium.googlesource.com/infra/infra/+/master/doc/users/services/buildbot/builders.pyl.md)
@@ -94,7 +103,7 @@ https://build.chromium.org/p/client.flutter.  Carefully follow the [builders.pyl
 docs](https://chromium.googlesource.com/infra/infra/+/master/doc/users/services/buildbot/builders.pyl.md)
 to do so.
 
-## Future Directions
+### Future Directions
 
 We would like to host our own recipes instead of storing them in
 [build](https://chromium.googlesource.com/chromium/tools/build.git/+/master/scripts/slave/recipes/flutter).
@@ -103,7 +112,8 @@ recipes](https://github.com/luci/recipes-py/blob/master/doc/cross_repo.md) is
 in-progress.  If you view the git log of this directory, you'll see we initially
 tried, but it's not quite ready.
 
-# Android Tools
+
+### Android Tools
 
 The Android SDK and NDK used by Flutter's Chrome infra bots are stored in Google Cloud. During the build a bot runs the
 `download_android_tools.py` script that downloads the required version of the Android SDK into `dev/bots/android_tools`.
@@ -112,7 +122,7 @@ To check which components are currently installed, download the current SDK stor
 `download_android_tools.py` script, then `dev/bots/android_tools/sdk/tools/bin/sdkmanager --list`. If you find that some
 components need to be updated or installed, follow the steps below:
 
-## How to update Android SDK on Google Cloud Storage
+#### How to update Android SDK on Google Cloud Storage
 
 1. Run Android SDK Manager and update packages
    `$ dev/bots/android_tools/sdk/tools/android update sdk`
@@ -132,7 +142,7 @@ components need to be updated or installed, follow the steps below:
 5. Run upload_android_tools.py -t sdk
    `$ dev/bots/upload_android_tools.py -t sdk`
 
-## How to update Android NDK on Google Cloud Storage
+#### How to update Android NDK on Google Cloud Storage
 
 1. Download a new NDK binary (e.g. android-ndk-r10e-linux-x86_64.bin)
 2. cd dev/bots/android_tools
@@ -151,6 +161,7 @@ components need to be updated or installed, follow the steps below:
    `$ cd ../..`
    `$ dev/bots/upload_android_tools.py -t ndk`
 
+
 ## Flutter codelabs build test
 
 The Flutter codelabs exercise Material Components in the form of a
@@ -161,9 +172,9 @@ The Flutter codelabs build test ensures that the final version of the
 [Material Components for Flutter
 Codelabs](https://github.com/material-components/material-components-flutter-codelabs)
 can be built. This test serves as a smoke test for the Flutter
-framework and should not fail. Please address the issue from within
-your PR and rerun the test. If you feel that the test failing is not a
-direct result of changes made in your PR or that breaking this test is
-absolutely necessary, escalate this issue by [submitting an
+framework and should not fail. If it does, please address any issues
+in your PR and rerun the test. If you feel that the test failing is
+not a direct result of changes made in your PR or that breaking this
+test is absolutely necessary, escalate this issue by [submitting an
 issue](https://github.com/material-components/material-components-flutter-codelabs/issues/new?title=%5BURGENT%5D%20Flutter%20Framework%20breaking%20PR)
 to the MDC-Flutter Team.
