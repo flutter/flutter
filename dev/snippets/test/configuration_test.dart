@@ -4,7 +4,7 @@
 
 import 'package:platform/platform.dart' show FakePlatform;
 
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 import 'package:snippets/configuration.dart';
 
