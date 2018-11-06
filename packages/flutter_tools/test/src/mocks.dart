@@ -108,48 +108,6 @@ ro.build.version.codename=REL
 ''';
 }
 
-/// A broken SDK installation.
-class MockBrokenAndroidSdk extends Mock implements AndroidSdk {
-  static Directory createSdkDirectory({
-    bool withAndroidN = false,
-    String withNdkDir,
-    bool withNdkSysroot = false,
-    bool withSdkManager = true,
-  }) {
-    final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
-
-    _createSdkFile(dir, 'platform-tools/adb');
-
-    _createSdkFile(dir, 'build-tools/sda/aapt');
-    _createSdkFile(dir, 'build-tools/af/aapt');
-    _createSdkFile(dir, 'build-tools/ljkasd/aapt');
-
-    _createSdkFile(dir, 'platforms/android-22/android.jar');
-    _createSdkFile(dir, 'platforms/android-23/android.jar');
-
-    return dir;
-  }
-
-  static void _createSdkFile(Directory dir, String filePath, { String contents }) {
-    final File file = dir.childFile(filePath);
-    file.createSync(recursive: true);
-    if (contents != null) {
-      file.writeAsStringSync(contents, flush: true);
-    }
-  }
-
-  static void _createDir(Directory dir, String path) {
-    final Directory directory = fs.directory(fs.path.join(dir.path, path));
-    directory.createSync(recursive: true);
-  }
-
-  static const String _buildProp = r'''
-ro.build.version.incremental=1624448
-ro.build.version.sdk=24
-ro.build.version.codename=REL
-''';
-}
-
 /// A strategy for creating Process objects from a list of commands.
 typedef ProcessFactory = Process Function(List<String> command);
 
