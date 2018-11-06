@@ -12,8 +12,13 @@ Flutter is Google’s mobile app SDK for crafting high-quality native interfaces
 **Main site: [flutter.io][]**
 * [Install](https://flutter.io/get-started/install/)
 * [Get started](https://flutter.io/get-started/)
+* [API documentation](https://docs.flutter.io/)
 * [Changelog](https://github.com/flutter/flutter/wiki/Changelog)
-* [Contribute](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md#contributing-to-flutter)
+* [How to contribute](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
+
+For announcements about new releases and breaking changes, follow the
+[flutter-announce@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-announce)
+mailing list.
 
 ## Fast development
 
@@ -128,52 +133,16 @@ If you are an experienced iOS or Android developer,
 you can use Flutter for your views and leverage much of your
 existing Java/Kotlin/ObjC/Swift investment.
 
-### Build
-
-* **Beautiful app UIs**
-    * Rich 2D GPU-accelerated APIs
-    * Reactive framework
-    * Animation/motion APIs
-    * Material Design and iOS widgets
-* **Fluid coding experience**
-    * Sub-second, stateful hot reload
-    * IntelliJ: refactor, code completion, etc
-    * Dart language and core libs
-    * Package manager
-* **Full-featured apps**
-    * Interop with mobile OS APIs & SDKs
-    * Gradle/Java/Kotlin
-    * Cocoapods/ObjC/Swift
-
-### Optimize
-
-* **Test**
-    * Unit testing
-    * Integration testing
-    * On-device testing
-* **Debug**
-    * IDE debugger
-    * Web-based debugger
-    * async/await aware
-    * Expression evaluator
-* **Profile**
-    * Timeline
-    * CPU and memory
-    * In-app perf charts
-
-### Deploy
-
-* **Compile**
-    * Native ARM code
-    * Dead code elimination
-* **Distribution**
-    * App Store
-    * Play Store
-
 Learn more about what makes Flutter special in the
 <a href="https://flutter.io/technical-overview/">technical overview</a>.
 
+# More resources
+
 Join us in our [Gitter chat room](https://gitter.im/flutter/flutter) or join our public mailing list,
 [flutter-dev@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-dev).
+
+# How to contribute
+
+To join the team working on Flutter, see our [contributor guide](CONTRIBUTING.md).
 
 [flutter.io]: https://flutter.io/
