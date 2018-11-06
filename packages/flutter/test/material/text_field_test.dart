@@ -101,7 +101,7 @@ Widget boilerplate({ Widget child }) {
   );
 }
 
-Future<void> skipPastScrollingAnimation(WidgetTester tester) async { //
+Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 200));
 }
