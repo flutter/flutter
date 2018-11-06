@@ -303,7 +303,6 @@ class LocalEngineArtifacts extends Artifacts {
 /// An implementation of [Artifacts] that provides individual overrides.
 ///
 /// If an artifact is not provided, the lookup delegates to the parent.
-/// Currently only allows overriding the location of the [frontendServer].
 class OverrideArtifacts implements Artifacts {
   /// Creates a new [OverrideArtifacts].
   ///
@@ -311,15 +310,20 @@ class OverrideArtifacts implements Artifacts {
   OverrideArtifacts({
     @required this.parent,
     this.frontendServer,
+    this.engineDartBinary,
   }) : assert(parent != null);
 
   final Artifacts parent;
   final File frontendServer;
+  final File engineDartBinary;
 
   @override
   String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
     if (artifact == Artifact.frontendServerSnapshotForEngineDartSdk && frontendServer != null) {
       return frontendServer.path;
+    }
+    if (artifact == Artifact.engineDartBinary && engineDartBinary != null) {
+      return engineDartBinary.path;
     }
     return parent.getArtifactPath(artifact, platform, mode);
   }
