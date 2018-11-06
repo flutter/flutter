@@ -133,12 +133,12 @@ class TravelDestinationItem extends StatelessWidget {
                   alignment: MainAxisAlignment.start,
                   children: <Widget>[
                     FlatButton(
-                      child: const Text('SHARE'),
+                      child: Text('SHARE', semanticsLabel: 'Share ${destination.title}'),
                       textColor: Colors.amber.shade500,
                       onPressed: () { /* do nothing */ },
                     ),
                     FlatButton(
-                      child: const Text('EXPLORE'),
+                      child: Text('EXPLORE', semanticsLabel: 'Explore ${destination.title}'),
                       textColor: Colors.amber.shade500,
                       onPressed: () { /* do nothing */ },
                     ),
@@ -172,7 +172,10 @@ class _CardsDemoState extends State<CardsDemo> {
         actions: <Widget>[
           MaterialDemoDocumentationButton(CardsDemo.routeName),
           IconButton(
-            icon: const Icon(Icons.sentiment_very_satisfied),
+            icon: const Icon(
+              Icons.sentiment_very_satisfied,
+              semanticLabel: 'update shape',
+            ),
             onPressed: () {
               setState(() {
                 _shape = _shape != null ? null : const RoundedRectangleBorder(
