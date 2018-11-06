@@ -77,13 +77,13 @@ void main() {
           generator.generate(inputFile, SnippetType.application, template: 'template', id: 'id');
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
-      expect(html, contains("print('The actual \$name.');"));
+      expect(html, contains('print(&#39;The actual \$name.&#39;);'));
       expect(html, contains('A description of the snippet.\n'));
       expect(
           html,
-          contains('// A description of the snippet.\n'
-              '//\n'
-              '// On several lines.\n'));
+          contains('&#47;&#47; A description of the snippet.\n'
+              '&#47;&#47;\n'
+              '&#47;&#47; On several lines.\n'));
       expect(html, contains('void main() {'));
     });
 
@@ -105,7 +105,7 @@ void main() {
       final String html = generator.generate(inputFile, SnippetType.sample);
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
-      expect(html, contains("print('The actual \$name.');"));
+      expect(html, contains('  print(&#39;The actual \$name.&#39;);'));
       expect(html, contains('A description of the snippet.\n\nOn several lines.\n'));
       expect(html, contains('main() {'));
     });
