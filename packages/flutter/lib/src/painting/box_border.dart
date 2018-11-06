@@ -9,6 +9,9 @@ import 'border_radius.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 /// The shape to use when rendering a [Border] or [BoxDecoration].
 ///
 /// Consider using [ShapeBorder] subclasses directly (with [ShapeDecoration]),

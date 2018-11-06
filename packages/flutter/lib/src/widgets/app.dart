@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection' show HashMap;
 import 'dart:ui' as ui show window, hashValues;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 
@@ -193,7 +194,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
   /// null, [navigatorKey] must also be null.
-  /// {@endTemplate}
+  /// {@endtemplate}
   final GlobalKey<NavigatorState> navigatorKey;
 
   /// {@template flutter.widgets.widgetsApp.onGenerateRoute}
@@ -253,7 +254,7 @@ class WidgetsApp extends StatefulWidget {
   /// APIs such as [Navigator.push] and [Navigator.pop] will work as expected.
   /// In contrast, the widget returned from [builder] is inserted _above_ the
   /// app's [Navigator] (if any).
-  /// {@endTemplate}
+  /// {@endtemplate}
   ///
   /// If this property is set, the [pageRouteBuilder] property must also be set
   /// so that the default route handler will know what kind of [PageRoute]s to
@@ -282,7 +283,7 @@ class WidgetsApp extends StatefulWidget {
   /// The [Navigator] is only built if routes are provided (either via [home],
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
   /// [builder] must not be null.
-  /// {@endTemplate}
+  /// {@endtemplate}
   ///
   /// If the routes map is not empty, the [pageRouteBuilder] property must be set
   /// so that the default route handler will know what kind of [PageRoute]s to
@@ -898,6 +899,53 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   // BUILDER
 
+  bool _debugCheckLocalizations(Locale appLocale) {
+    assert(() {
+      final Set<Type> unsupportedTypes =
+        _localizationsDelegates.map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type).toSet();
+      for (LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
+        if (!unsupportedTypes.contains(delegate.type))
+          continue;
+        if (delegate.isSupported(appLocale))
+          unsupportedTypes.remove(delegate.type);
+      }
+      if (unsupportedTypes.isEmpty)
+        return true;
+
+      // Currently the Cupertino library only provides english localizations.
+      // Remove this when https://github.com/flutter/flutter/issues/23847
+      // is fixed.
+      if (listEquals(unsupportedTypes.map((Type type) => type.toString()).toList(), <String>['CupertinoLocalizations']))
+        return true;
+
+      final StringBuffer message = StringBuffer();
+      message.writeln('\u2550' * 8);
+      message.writeln(
+        'Warning: This application\'s locale, $appLocale, is not supported by all of its\n'
+        'localization delegates.'
+      );
+      for (Type unsupportedType in unsupportedTypes) {
+        // Currently the Cupertino library only provides english localizations.
+        // Remove this when https://github.com/flutter/flutter/issues/23847
+        // is fixed.
+        if (unsupportedType.toString() == 'CupertinoLocalizations')
+          continue;
+        message.writeln(
+          '> A $unsupportedType delegate that supports the $appLocale locale was not found.'
+        );
+      }
+      message.writeln(
+        'See https://flutter.io/tutorials/internationalization/ for more\n'
+        'information about configuring an app\'s locale, supportedLocales,\n'
+        'and localizationsDelegates parameters.'
+      );
+      message.writeln('\u2550' * 8);
+      debugPrint(message.toString());
+      return true;
+    }());
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget navigator;
@@ -1003,12 +1051,16 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       );
     }
 
+    final Locale appLocale = widget.locale != null
+      ? _resolveLocales(<Locale>[widget.locale], widget.supportedLocales)
+      : _locale;
+
+    assert(_debugCheckLocalizations(appLocale));
+
     return MediaQuery(
       data: MediaQueryData.fromWindow(ui.window),
       child: Localizations(
-        locale: widget.locale != null
-          ? _resolveLocales(<Locale>[widget.locale], widget.supportedLocales)
-          : _locale,
+        locale: appLocale,
         delegates: _localizationsDelegates.toList(),
         child: title,
       ),

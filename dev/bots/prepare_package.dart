@@ -45,7 +45,7 @@ class ProcessRunnerException implements Exception {
   }
 }
 
-enum Branch { dev, beta, release }
+enum Branch { dev, beta, stable }
 
 String getBranchName(Branch branch) {
   switch (branch) {
@@ -53,8 +53,8 @@ String getBranchName(Branch branch) {
       return 'beta';
     case Branch.dev:
       return 'dev';
-    case Branch.release:
-      return 'release';
+    case Branch.stable:
+      return 'stable';
   }
   return null;
 }
@@ -65,8 +65,8 @@ Branch fromBranchName(String name) {
       return Branch.beta;
     case 'dev':
       return Branch.dev;
-    case 'release':
-      return Branch.release;
+    case 'stable':
+      return Branch.stable;
     default:
       throw ArgumentError('Invalid branch name.');
   }

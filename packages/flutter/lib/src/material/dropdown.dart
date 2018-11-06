@@ -12,6 +12,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
 import 'ink_well.dart';
+import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'scrollbar.dart';
@@ -761,5 +762,64 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         child: result
       ),
     );
+  }
+}
+
+/// A convenience widget that wraps a [DropdownButton] in a [FormField].
+class DropdownButtonFormField<T> extends FormField<T> {
+  /// Creates a [DropdownButton] widget wrapped in an [InputDecorator] and
+  /// [FormField].
+  ///
+  /// The [DropdownButton] [items] parameters must not be null.
+  DropdownButtonFormField({
+    Key key,
+    T value,
+    @required List<DropdownMenuItem<T>> items,
+    this.onChanged,
+    InputDecoration decoration = const InputDecoration(),
+    FormFieldSetter<T> onSaved,
+    FormFieldValidator<T> validator,
+    Widget hint,
+  }) : assert(decoration != null),
+       super(
+         key: key,
+         onSaved: onSaved,
+         initialValue: value,
+         validator: validator,
+         builder: (FormFieldState<T> field) {
+           final InputDecoration effectiveDecoration = decoration
+             .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+           return InputDecorator(
+             decoration: effectiveDecoration.copyWith(errorText: field.errorText),
+             isEmpty: value == null,
+             child: DropdownButtonHideUnderline(
+               child: DropdownButton<T>(
+                 isDense: true,
+                 value: value,
+                 items: items,
+                 hint: hint,
+                 onChanged: field.didChange,
+               ),
+             ),
+           );
+         }
+       );
+
+  /// Called when the user selects an item.
+  final ValueChanged<T> onChanged;
+
+  @override
+  FormFieldState<T> createState() => _DropdownButtonFormFieldState<T>();
+}
+
+class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
+  @override
+  DropdownButtonFormField<T> get widget => super.widget;
+
+  @override
+  void didChange(T value) {
+    super.didChange(value);
+    if (widget.onChanged != null)
+      widget.onChanged(value);
   }
 }

@@ -20,6 +20,7 @@ import 'theme.dart';
 // Examples can assume:
 // int _dollars = 0;
 // int _duelCommandment = 1;
+// void setState(VoidCallback fn) { }
 
 /// A callback that formats a numeric value from a [Slider] widget.
 ///
