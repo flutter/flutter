@@ -27,12 +27,6 @@ typedef CompilerMessageConsumer = void Function(String message, {bool emphasis, 
 /// The target model describes the set of core libraries that are availible within
 /// the SDK.
 class TargetModel {
-  /// The flutter patched dart SDK
-  static const TargetModel flutter = TargetModel._('flutter');
-
-  /// The fuchsia patched SDK.
-  static const TargetModel flutterRunner = TargetModel._('flutter_runner');
-
   /// Parse a [TargetModel] from a raw string.
   ///
   /// Throws an [AssertionError] if passed a value other than 'flutter' or
@@ -49,6 +43,12 @@ class TargetModel {
   }
 
   const TargetModel._(this._value);
+  
+  /// The flutter patched dart SDK
+  static const TargetModel flutter = TargetModel._('flutter');
+
+  /// The fuchsia patched SDK.
+  static const TargetModel flutterRunner = TargetModel._('flutter_runner');
 
   final String _value;
 
