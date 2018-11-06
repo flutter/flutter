@@ -131,7 +131,7 @@ class IOSValidator extends DoctorValidator {
     int checksFailed = 0;
 
     if (!iMobileDevice.isInstalled) {
-      checksFailed += 1;
+      checksFailed += 3;
       packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(
         'libimobiledevice and ideviceinstaller are not installed. To install with Brew, run:\n'
@@ -150,7 +150,7 @@ class IOSValidator extends DoctorValidator {
         '  brew install ideviceinstaller'
       ));
     } else if (!await hasIDeviceInstaller) {
-      checksFailed += 3;
+      checksFailed += 1;
       packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(
         'ideviceinstaller is not installed; this is used to discover connected iOS devices.\n'

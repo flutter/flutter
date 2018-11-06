@@ -21,6 +21,7 @@ import '../src/context.dart';
 void main() {
   group('iOS Workflow validation', () {
     MockIMobileDevice iMobileDevice;
+    MockIMobileDevice iMobileDeviceUninstalled;
     MockXcode xcode;
     MockProcessManager processManager;
     MockCocoaPods cocoaPods;
@@ -28,6 +29,7 @@ void main() {
 
     setUp(() {
       iMobileDevice = MockIMobileDevice();
+      iMobileDeviceUninstalled = MockIMobileDevice(isInstalled: false);
       xcode = MockXcode();
       processManager = MockProcessManager();
       cocoaPods = MockCocoaPods();
@@ -51,7 +53,7 @@ void main() {
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.missing);
     }, overrides: <Type, Generator>{
-      IMobileDevice: () => iMobileDevice,
+      IMobileDevice: () => iMobileDeviceUninstalled,
       Xcode: () => xcode,
       CocoaPods: () => cocoaPods,
     });
