@@ -177,14 +177,8 @@ String generateTranslationBundles() {
   final LocaleInfo canonicalLocale = LocaleInfo.fromString('en');
   for (String languageName in languageCodes) {
     final LocaleInfo languageLocale = LocaleInfo.fromString(languageName);
-    final String camelCaseLanguage = camelCase(languageLocale);
+    writeClassHeader(output, languageLocale, 'GlobalMaterialLocalizations');
     final Map<String, String> languageResources = localeToResources[languageLocale];
-    final String languageClassName = 'MaterialLocalization$camelCaseLanguage';
-    final String constructor = generateConstructor(languageClassName, languageLocale);
-    output.writeln('');
-    output.writeln('/// The translations for ${describeLocale(languageName)} (`$languageName`).');
-    output.writeln('class $languageClassName extends GlobalMaterialLocalizations {');
-    output.writeln(constructor);
     for (String key in allKeys) {
       final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key];
       output.writeln(generateGetter(key, languageResources[key], attributes));
@@ -198,14 +192,8 @@ String generateTranslationBundles() {
       // script default values before language default values.
       for (String scriptCode in languageToScriptCodes[languageName]) {
         final LocaleInfo scriptBaseLocale = LocaleInfo.fromString(languageName + '_' + scriptCode);
-        final String camelCaseScript = camelCase(scriptBaseLocale);
+        writeClassHeader(output, scriptBaseLocale, 'MaterialLocalization${camelCase(languageLocale)}');
         final Map<String, String> scriptResources = localeToResources[scriptBaseLocale];
-        final String scriptClassName = 'MaterialLocalization$camelCaseScript';
-        final String constructor = generateConstructor(scriptClassName, scriptBaseLocale);
-        output.writeln('');
-        output.writeln('/// The translations for ${describeLocale(languageName)} (`$languageName`).');
-        output.writeln('class $scriptClassName extends $languageClassName {');
-        output.writeln(constructor);
         for (String key in scriptResources.keys) {
           if (languageResources[key] == scriptResources[key])
             continue;
@@ -223,14 +211,8 @@ String generateTranslationBundles() {
           if (locale.scriptCode != scriptCode)
             continue;
           countryCodeCount += 1;
-          final String camelCaseLocaleName = camelCase(locale);
+          writeClassHeader(output, locale, 'MaterialLocalization${camelCase(scriptBaseLocale)}');
           final Map<String, String> localeResources = localeToResources[locale];
-          final String localeClassName = 'MaterialLocalization$camelCaseLocaleName';
-          final String constructor = generateConstructor(localeClassName, locale);
-          output.writeln('');
-          output.writeln('/// The translations for ${describeLocale(locale.originalString)} (`${locale.originalString}}`).');
-          output.writeln('class $localeClassName extends $languageClassName$scriptCode {');
-          output.writeln(constructor);
           for (String key in localeResources.keys) {
             // When script fallback contains the key, we compare to it instead of language fallback.
             if (scriptResources.containsKey(key) ? scriptResources[key] == localeResources[key] : languageResources[key] == localeResources[key])
@@ -249,15 +231,8 @@ String generateTranslationBundles() {
         if (locale.originalString == languageName)
           continue;
         countryCodeCount += 1;
-        final String camelCaseLocaleName = camelCase(locale);
         final Map<String, String> localeResources = localeToResources[locale];
-        final String localeClassName = 'MaterialLocalization$camelCaseLocaleName';
-        final String scriptCode = locale.scriptCode == null || locale.countryCode == null ? '' : locale.scriptCode;
-        final String constructor = generateConstructor(localeClassName, locale);
-        output.writeln('');
-        output.writeln('/// The translations for ${describeLocale(locale.originalString)} (`${locale.originalString}`).');
-        output.writeln('class $localeClassName extends $languageClassName$scriptCode {');
-        output.writeln(constructor);
+        writeClassHeader(output, locale, 'MaterialLocalization${camelCase(languageLocale)}');
         for (String key in localeResources.keys) {
           if (languageResources[key] == localeResources[key])
             continue;
@@ -434,6 +409,17 @@ GlobalMaterialLocalizations getTranslation(
 }''');
 
   return output.toString();
+}
+
+/// Writes the header of each class which corresponds to a locale.
+void writeClassHeader(StringBuffer output, LocaleInfo locale, String superClass) {
+  final String camelCaseName = camelCase(locale);
+  final String className = 'MaterialLocalization$camelCaseName';
+  final String constructor = generateConstructor(className, locale);
+  output.writeln('');
+  output.writeln('/// The translations for ${describeLocale(locale.originalString)} (`${locale.originalString}`).');
+  output.writeln('class $className extends $superClass {');
+  output.writeln(constructor);
 }
 
 /// Returns the appropriate type for getters with the given attributes.

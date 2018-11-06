@@ -9927,7 +9927,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'ПРИКАЖИ ЛИЦЕНЦЕ';
 }
 
-/// The translations for Serbian (`sr`).
+/// The translations for Serbian, using the Cyrillic script (`sr_Cyrl`).
 class MaterialLocalizationSrCyrl extends MaterialLocalizationSr {
   /// Create an instance of the translation bundle for Serbian, using the Cyrillic script.
   ///
@@ -9951,7 +9951,7 @@ class MaterialLocalizationSrCyrl extends MaterialLocalizationSr {
   );
 }
 
-/// The translations for Serbian (`sr`).
+/// The translations for Serbian, using the Latin script (`sr_Latn`).
 class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   /// Create an instance of the translation bundle for Serbian, using the Latin script.
   ///
@@ -11736,7 +11736,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'查看许可';
 }
 
-/// The translations for Chinese (`zh`).
+/// The translations for Chinese, using the Han script (`zh_Hans`).
 class MaterialLocalizationZhHans extends MaterialLocalizationZh {
   /// Create an instance of the translation bundle for Chinese, using the Han script.
   ///
@@ -11760,7 +11760,7 @@ class MaterialLocalizationZhHans extends MaterialLocalizationZh {
   );
 }
 
-/// The translations for Chinese (`zh`).
+/// The translations for Chinese, using the Han script (`zh_Hant`).
 class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   /// Create an instance of the translation bundle for Chinese, using the Han script.
   ///
@@ -11919,7 +11919,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
 }
 
-/// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK}`).
+/// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
 class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
   /// Create an instance of the translation bundle for Chinese, as used in Hong Kong, using the Han script.
   ///
@@ -11943,7 +11943,7 @@ class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
   );
 }
 
-/// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW}`).
+/// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
 class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   /// Create an instance of the translation bundle for Chinese, as used in Taiwan, using the Han script.
   ///
