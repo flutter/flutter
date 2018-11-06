@@ -828,6 +828,7 @@ void main() {
         find.byType(BottomNavigationBar),
         matchesGoldenFile(
             'bottom_navigation_bar.shifting_transition.$pump.png'),
+	skip: !Platform.isLinux,
       );
     }
   });
