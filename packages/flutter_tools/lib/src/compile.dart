@@ -122,6 +122,7 @@ class KernelCompiler {
     String mainPath,
     String outputFilePath,
     String depFilePath,
+    String targetModel = 'flutter',
     bool linkPlatformKernelIn = false,
     bool aot = false,
     @required bool trackWidgetCreation,
@@ -172,7 +173,7 @@ class KernelCompiler {
       '--sdk-root',
       sdkRoot,
       '--strong',
-      '--target=flutter',
+      '--target=$targetModel',
     ];
     if (trackWidgetCreation)
       command.add('--track-widget-creation');
@@ -294,19 +295,25 @@ class _CompileExpressionRequest extends _CompilationRequest {
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
 class ResidentCompiler {
-  ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation = false,
-      String packagesPath, List<String> fileSystemRoots, String fileSystemScheme,
-      CompilerMessageConsumer compilerMessageConsumer = printError,
-      String initializeFromDill, bool unsafePackageSerialization})
-    : assert(_sdkRoot != null),
-      _trackWidgetCreation = trackWidgetCreation,
-      _packagesPath = packagesPath,
-      _fileSystemRoots = fileSystemRoots,
-      _fileSystemScheme = fileSystemScheme,
-      _stdoutHandler = _StdoutHandler(consumer: compilerMessageConsumer),
-      _controller = StreamController<_CompilationRequest>(),
-      _initializeFromDill = initializeFromDill,
-      _unsafePackageSerialization = unsafePackageSerialization {
+  ResidentCompiler(this._sdkRoot, {
+    bool trackWidgetCreation = false,
+    String packagesPath,
+    List<String> fileSystemRoots,
+    String fileSystemScheme,
+    CompilerMessageConsumer compilerMessageConsumer = printError,
+    String initializeFromDill,
+    String targetModel = 'flutter',
+    bool unsafePackageSerialization
+  }) : assert(_sdkRoot != null),
+       _trackWidgetCreation = trackWidgetCreation,
+       _packagesPath = packagesPath,
+       _fileSystemRoots = fileSystemRoots,
+       _fileSystemScheme = fileSystemScheme,
+       _targetModel = targetModel,
+       _stdoutHandler = _StdoutHandler(consumer: compilerMessageConsumer),
+       _controller = StreamController<_CompilationRequest>(),
+       _initializeFromDill = initializeFromDill,
+       _unsafePackageSerialization = unsafePackageSerialization {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
@@ -314,6 +321,7 @@ class ResidentCompiler {
 
   final bool _trackWidgetCreation;
   final String _packagesPath;
+  final String _targetModel;
   final List<String> _fileSystemRoots;
   final String _fileSystemScheme;
   String _sdkRoot;
@@ -405,7 +413,7 @@ class ResidentCompiler {
       _sdkRoot,
       '--incremental',
       '--strong',
-      '--target=flutter',
+      '--target=$_targetModel',
     ];
     if (outputPath != null) {
       command.addAll(<String>['--output-dill', outputPath]);
