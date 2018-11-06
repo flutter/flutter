@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:mockito/mockito.dart';
@@ -86,6 +87,7 @@ void main() {
       Logger: () => mockLogger,
       ProcessManager: () => mockProcessManager,
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
+      Platform: () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false
     });
   });
 }

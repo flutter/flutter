@@ -9,6 +9,7 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/net.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
@@ -22,6 +23,10 @@ import '../src/context.dart';
 
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
+final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Map<Type, Generator> noColorTerminalOverride = <Type, Generator> {
+  Platform: _kNoColorTerminalPlatform,
+};
 
 void main() {
   Directory tempDir;
@@ -109,7 +114,7 @@ void main() {
               '.ios/',
             ]),
         throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'));
-  }, timeout: allowForRemotePubInvocation);
+  }, timeout: allowForRemotePubInvocation, overrides: noColorTerminalOverride);
 
   testUsingContext('Will create an app project if non-empty non-project directory exists without .metadata', () async {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);
@@ -438,6 +443,7 @@ void main() {
     expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
   }, overrides: <Type, Generator>{
     FlutterVersion: () => mockFlutterVersion,
+    Platform: _kNoColorTerminalPlatform,
   }, timeout: allowForCreateFlutterProject);
 
   testUsingContext('has correct content and formatting with app template', () async {
@@ -508,6 +514,7 @@ void main() {
     expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
   }, overrides: <Type, Generator>{
     FlutterVersion: () => mockFlutterVersion,
+    Platform: _kNoColorTerminalPlatform,
   }, timeout: allowForCreateFlutterProject);
 
   testUsingContext('can re-gen default template over existing project', () async {

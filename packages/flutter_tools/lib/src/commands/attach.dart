@@ -141,15 +141,19 @@ class AttachCommand extends FlutterCommand {
           'Waiting for a connection from Flutter on ${device.name}...',
           expectSlowOperation: true,
         );
-        final int localPort = await device.findIsolatePort(module, localPorts);
-        if (localPort == null) {
+        try {
+          final int localPort = await device.findIsolatePort(module, localPorts);
+          if (localPort == null) {
+            throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
+          }
+          observatoryUri = ipv6
+            ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
+            : Uri.parse('http://$ipv4Loopback:$localPort/');
+          status.stop();
+        } catch (_) {
           status.cancel();
-          throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
+          rethrow;
         }
-        status.stop();
-        observatoryUri = ipv6
-          ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
-          : Uri.parse('http://$ipv4Loopback:$localPort/');
       } else {
         ProtocolDiscovery observatoryDiscovery;
         try {

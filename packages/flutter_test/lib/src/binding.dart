@@ -15,7 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
-import 'package:test/test.dart' as test_package;
+import 'package:test_api/test_api.dart' as test_package;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vector_math/vector_math_64.dart';
 
@@ -1600,7 +1600,7 @@ class _MockHttpRequest extends HttpClientRequest {
   List<Cookie> get cookies => null;
 
   @override
-  Future<HttpClientResponse> get done => null;
+  Future<HttpClientResponse> get done async => null;
 
   @override
   Future<void> flush() {

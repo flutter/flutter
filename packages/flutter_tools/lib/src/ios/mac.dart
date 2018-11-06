@@ -83,6 +83,17 @@ class PropertyList {
   }
 }
 
+/// Specialized exception for expected situations where the ideviceinfo
+/// tool responds with exit code 255 / 'No device found' message
+class IOSDeviceNotFoundError implements Exception {
+  IOSDeviceNotFoundError(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 class IMobileDevice {
   const IMobileDevice();
 
@@ -118,11 +129,13 @@ class IMobileDevice {
   Future<String> getInfoForDevice(String deviceID, String key) async {
     try {
       final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key, '--simple']);
+      if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
+        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
       if (result.exitCode != 0)
-        throw ToolExit('idevice_id returned an error:\n${result.stderr}');
+        throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
       return result.stdout.trim();
     } on ProcessException {
-      throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
+      throw ToolExit('Failed to invoke ideviceinfo. Run flutter doctor.');
     }
   }
 
@@ -441,6 +454,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         if (line == 'done') {
           buildSubStatus?.stop();
           buildSubStatus = null;
+          return null;
         } else {
           initialBuildStatus.cancel();
           buildSubStatus = logger.startProgress(
