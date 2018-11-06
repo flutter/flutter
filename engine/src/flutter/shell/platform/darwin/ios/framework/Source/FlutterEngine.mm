@@ -22,6 +22,7 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
+#include "flutter/shell/platform/darwin/ios/ios_surface.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 @interface FlutterEngine () <FlutterTextInputDelegate>
@@ -295,13 +296,8 @@
       threadLabel.UTF8String,  // label
       shell::ThreadHost::Type::UI | shell::ThreadHost::Type::GPU | shell::ThreadHost::Type::IO};
 
-  blink::TaskRunners task_runners(threadLabel.UTF8String,                          // label
-                                  fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
-                                  _threadHost.gpu_thread->GetTaskRunner(),         // gpu
-                                  _threadHost.ui_thread->GetTaskRunner(),          // ui
-                                  _threadHost.io_thread->GetTaskRunner()           // io
-  );
-
+  bool embedded_views_preview_enabled = [[[NSBundle mainBundle]
+      objectForInfoDictionaryKey:@(shell::kEmbeddedViewsPreview)] boolValue];
   // Lambda captures by pointers to ObjC objects are fine here because the
   // create call is
   // synchronous.
@@ -314,12 +310,41 @@
     return std::make_unique<shell::Rasterizer>(shell.GetTaskRunners());
   };
 
-  // Create the shell. This is a blocking operation.
-  _shell = shell::Shell::Create(std::move(task_runners),  // task runners
-                                std::move(settings),      // settings
-                                on_create_platform_view,  // platform view creation
-                                on_create_rasterizer      // rasterzier creation
-  );
+  if (embedded_views_preview_enabled) {
+    // Embedded views requires the gpu and the platform views to be the same.
+    // The plan is to eventually dynamically merge the threads when there's a
+    // platform view in the layer tree.
+    // For now we run in a single threaded configuration.
+    // TODO(amirh/chinmaygarde): merge only the gpu and platform threads.
+    // https://github.com/flutter/flutter/issues/23974
+    // TODO(amirh/chinmaygarde): remove this, and dynamically change the thread configuration.
+    // https://github.com/flutter/flutter/issues/23975
+    blink::TaskRunners task_runners(threadLabel.UTF8String,                          // label
+                                    fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
+                                    fml::MessageLoop::GetCurrent().GetTaskRunner(),  // gpu
+                                    fml::MessageLoop::GetCurrent().GetTaskRunner(),  // ui
+                                    fml::MessageLoop::GetCurrent().GetTaskRunner()   // io
+    );
+    // Create the shell. This is a blocking operation.
+    _shell = shell::Shell::Create(std::move(task_runners),  // task runners
+                                  std::move(settings),      // settings
+                                  on_create_platform_view,  // platform view creation
+                                  on_create_rasterizer      // rasterzier creation
+    );
+  } else {
+    blink::TaskRunners task_runners(threadLabel.UTF8String,                          // label
+                                    fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
+                                    _threadHost.gpu_thread->GetTaskRunner(),         // gpu
+                                    _threadHost.ui_thread->GetTaskRunner(),          // ui
+                                    _threadHost.io_thread->GetTaskRunner()           // io
+    );
+    // Create the shell. This is a blocking operation.
+    _shell = shell::Shell::Create(std::move(task_runners),  // task runners
+                                  std::move(settings),      // settings
+                                  on_create_platform_view,  // platform view creation
+                                  on_create_rasterizer      // rasterzier creation
+    );
+  }
 
   if (_shell == nullptr) {
     FML_LOG(ERROR) << "Could not start a shell FlutterEngine with entrypoint: "

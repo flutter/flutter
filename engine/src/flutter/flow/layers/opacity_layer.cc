@@ -39,7 +39,12 @@ void OpacityLayer::Paint(PaintContext& context) const {
       RasterCache::GetIntegralTransCTM(context.canvas->getTotalMatrix()));
 #endif
 
-  if (layers().size() == 1 && context.raster_cache) {
+  // Embedded platform views are changing the canvas in the middle of the paint
+  // traversal. To make sure we paint on the right canvas, when the embedded
+  // platform views preview is enabled (context.view_embedded is not null) we
+  // don't use the cache.
+  if (context.view_embedder == nullptr && layers().size() == 1 &&
+      context.raster_cache) {
     const SkMatrix& ctm = context.canvas->getTotalMatrix();
     RasterCacheResult child_cache =
         context.raster_cache->Get(layers()[0].get(), ctm);
