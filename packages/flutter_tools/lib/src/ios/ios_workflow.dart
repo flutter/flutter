@@ -175,16 +175,17 @@ class CocoaPodsValidator extends DoctorValidator {
           messages.add(ValidationMessage(userMessages.cocoaPodsVersion(await cocoaPods.cocoaPodsVersionText)));
         } else {
           status = ValidationType.partial;
-          messages.add(ValidationMessage.error(userMessages.cocoaPodsUninitialized));
+          messages.add(ValidationMessage.error(userMessages.cocoaPodsUninitialized(noCocoaPodsConsequence)));
         }
       } else {
         if (cocoaPodsStatus == CocoaPodsStatus.notInstalled) {
           status = ValidationType.missing;
-          messages.add(ValidationMessage.error(userMessages.cocoaPodsMissing));
+          messages.add(ValidationMessage.error(
+              userMessages.cocoaPodsMissing(noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
         } else {
           status = ValidationType.partial;
           messages.add(ValidationMessage.hint(
-              userMessages.cocoaPodsOutdated(cocoaPods.cocoaPodsRecommendedVersion)));
+              userMessages.cocoaPodsOutdated(cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
         }
       }
     } else {

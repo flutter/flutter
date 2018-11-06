@@ -39,7 +39,7 @@ class VsCodeValidator extends DoctorValidator {
       type = ValidationType.partial;
       messages.addAll(_vsCode.validationMessages
           .map<ValidationMessage>((String m) => ValidationMessage.error(m)));
-      messages.add(ValidationMessage(userMessages.vsCodeFlutterExtensionMissing));
+      messages.add(ValidationMessage(userMessages.vsCodeFlutterExtensionMissing(extensionMarketplaceUrl)));
     }
 
     return ValidationResult(type, messages, statusInfo: vsCodeVersionText);
