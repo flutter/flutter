@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 final RegExp calibrationRegExp = RegExp('Flutter frame rate is (.*)fps');
 final RegExp statsRegExp = RegExp('Produced: (.*)fps\nConsumed: (.*)fps\nWidget builds: (.*)');
