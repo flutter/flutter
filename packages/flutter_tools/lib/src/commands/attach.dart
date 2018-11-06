@@ -150,8 +150,9 @@ class AttachCommand extends FlutterCommand {
             ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
             : Uri.parse('http://$ipv4Loopback:$localPort/');
           status.stop();
-        } finally {
+        } catch (_) {
           status.cancel();
+          rethrow;
         }
       } else {
         ProtocolDiscovery observatoryDiscovery;
