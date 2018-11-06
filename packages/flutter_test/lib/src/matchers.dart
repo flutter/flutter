@@ -9,9 +9,9 @@ import 'dart:ui' as ui;
 import 'dart:ui';
 
 import 'package:meta/meta.dart';
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test/test.dart' as test_package show TypeMatcher;
-import 'package:test/src/frontend/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
+import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
