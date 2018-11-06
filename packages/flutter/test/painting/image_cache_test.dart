@@ -128,7 +128,7 @@ void main() {
       expect(imageCache.maximumSizeBytes, 256 + 1000);
     });
 
-    test('pending image is returned if on is set', () async {
+    test('already pending image is returned when it is put into the cache again', () async {
       const TestImage testImage = TestImage(width: 8, height: 8);
 
       final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
