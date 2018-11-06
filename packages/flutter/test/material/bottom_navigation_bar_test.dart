@@ -786,7 +786,6 @@ void main() {
     // Regression test for: https://github.com/flutter/flutter/issues/22226
 
     int _currentIndex = 0;
-
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
