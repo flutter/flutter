@@ -43,7 +43,7 @@ class TargetModel {
   }
 
   const TargetModel._(this._value);
-  
+
   /// The flutter patched dart SDK
   static const TargetModel flutter = TargetModel._('flutter');
 
