@@ -155,21 +155,22 @@ String generateTranslationBundles() {
   // We also generate one subclass for each locale with a script code (e.g.
   // `MaterialLocalizationZhHant`). Their superclasses are the aforementioned
   // language classes for the same locale but without a script code (e.g.
-  // `MaterialLocalizationZh`). This script subclass are defined in a separate
-  // .arb file. These classes only override getters that return a different value
-  // than their superclass.
+  // `MaterialLocalizationZh`).
 
   // We also generate one subclass for each locale with a country code (e.g.
   // `MaterialLocalizationEnGb`). Their superclasses are the aforementioned
   // language classes for the same locale but without a country code (e.g.
-  // `MaterialLocalizationEn`). These classes only override getters that return
-  // a different value than their superclass.
+  // `MaterialLocalizationEn`).
 
-  // If scriptCodes for a language are defined, we expect a scriptCode in locales
-  // that contain a countryCode. The superclass becomes the script sublcass
-  // (e.g. `MaterialLocalizationZhHant`) and the generated subclass will also
-  // contain the script code (e.g. `MaterialLocalizationZhHantTW`). Not defining
-  // the scriptCode for the country can result in unexpected resolutions.
+  // If scriptCodes for a language are defined, we expect a scriptCode to be
+  // defined for locales that contain a countryCode. The superclass becomes
+  // the script sublcass (e.g. `MaterialLocalizationZhHant`) and the generated
+  // subclass will also contain the script code (e.g. `MaterialLocalizationZhHantTW`).
+
+  // When scriptCodes are not defined for languages that uses scriptCode to distinguish
+  // between significantly differing scripts, we maintain the assumeScriptCode function
+  // that manually applies scriptCodes to the locale in question. We then generate the
+  // script classes based on the first locale that we assume to use the script.
 
   final List<String> allKeys = allResourceIdentifiers.toList()..sort();
   final List<String> languageCodes = languageToLocales.keys.toList()..sort();
@@ -611,6 +612,10 @@ void processBundle(File file, { @required String localeString }) {
 
 /// Adds scriptCodes to locales where we are able to assume it to provide
 /// finer granularity when resolving locales.
+/// 
+/// The basis of the assumptions here are based off of known usage of scripts
+/// across various countries. For example, we know Taiwan uses traditional (Hant)
+/// script, so it is safe to apply (Hant) to Taiwanese languages.
 String assumeScriptCode(String localeString) {
   LocaleInfo localeInfo = LocaleInfo.fromString(localeString);
   if (localeInfo.scriptCode != null)
