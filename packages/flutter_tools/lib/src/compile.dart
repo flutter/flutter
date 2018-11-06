@@ -24,6 +24,38 @@ KernelCompiler get kernelCompiler => context[KernelCompiler];
 
 typedef CompilerMessageConsumer = void Function(String message, {bool emphasis, TerminalColor color});
 
+/// The target model describes the set of core libraries that are availible within
+/// the SDK.
+class TargetModel {
+  /// The flutter patched dart SDK
+  static const TargetModel flutter = TargetModel._('flutter');
+
+  /// The fuchsia patched SDK.
+  static const TargetModel flutterRunner = TargetModel._('flutter_runner');
+
+  /// Parse a [TargetModel] from a raw string.
+  ///
+  /// Throws an [AssertionError] if passed a value other than 'flutter' or
+  /// 'flutter_runner'.
+  factory TargetModel(String rawValue) {
+    switch (rawValue) {
+      case 'flutter':
+        return flutter;
+      case 'flutter_runner':
+        return flutterRunner;
+    }
+    assert(false);
+    return null;
+  }
+
+  const TargetModel._(this._value);
+
+  final String _value;
+
+  @override
+  String toString() => _value;
+}
+
 class CompilerOutput {
   const CompilerOutput(this.outputFilename, this.errorCount);
 
@@ -122,7 +154,7 @@ class KernelCompiler {
     String mainPath,
     String outputFilePath,
     String depFilePath,
-    String targetModel = 'flutter',
+    TargetModel targetModel = TargetModel.flutter,
     bool linkPlatformKernelIn = false,
     bool aot = false,
     @required bool trackWidgetCreation,
@@ -302,7 +334,7 @@ class ResidentCompiler {
     String fileSystemScheme,
     CompilerMessageConsumer compilerMessageConsumer = printError,
     String initializeFromDill,
-    String targetModel = 'flutter',
+    TargetModel targetModel = TargetModel.flutter,
     bool unsafePackageSerialization
   }) : assert(_sdkRoot != null),
        _trackWidgetCreation = trackWidgetCreation,
@@ -321,7 +353,7 @@ class ResidentCompiler {
 
   final bool _trackWidgetCreation;
   final String _packagesPath;
-  final String _targetModel;
+  final TargetModel _targetModel;
   final List<String> _fileSystemRoots;
   final String _fileSystemScheme;
   String _sdkRoot;
