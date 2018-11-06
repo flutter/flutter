@@ -9,6 +9,70 @@ import 'dart:io';
 import 'package:args/args.dart' as argslib;
 import 'package:meta/meta.dart';
 
+/// Simple data class to hold parsed locale. Does not promise validity of any data.
+class LocaleInfo implements Comparable<LocaleInfo> {
+  LocaleInfo({
+    this.languageCode,
+    this.scriptCode,
+    this.countryCode,
+    this.length,
+    this.originalString
+  });
+
+  /// Simple parser. Expects the locale string to be in the form of 'language_script_COUNTRY'
+  /// where the langauge is 2 characters, script is 4 characters with the first uppercase,
+  /// and country is 2-3 characters and all uppercase.
+  ///
+  /// 'language_COUNTRY' or 'language_script' are also valid. Missing fields will be null.
+  factory LocaleInfo.fromString(String locale) {
+    final List<String> codes = locale.split('_'); // [language, script, country]
+    assert(codes.isNotEmpty && codes.length < 4);
+    String scriptCode;
+    String countryCode;
+    if (codes.length == 2) {
+      scriptCode = codes[1].length >= 4 ? codes[1] : null;
+      countryCode = codes[1].length < 4 ? codes[1] : null;
+    } else if (codes.length == 3) {
+      scriptCode = codes[1].length > codes[2].length ? codes[1] : codes[2];
+      countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
+    }
+    assert(codes[0] != null);
+    return LocaleInfo(
+      languageCode: codes[0],
+      scriptCode: scriptCode,
+      countryCode: countryCode,
+      length: codes.length,
+      originalString: locale,
+    );
+  }
+
+  final String languageCode;
+  final String scriptCode;
+  final String countryCode;
+  final int length;          // The number of fields. Ranges from 1-3.
+  final String originalString;   // Original un-parsed locale string.
+
+  @override
+  bool operator ==(LocaleInfo other) {
+    return originalString == other.originalString;
+  }
+
+  @override
+  int get hashCode {
+    return originalString.hashCode;
+  }
+
+  @override
+  String toString() {
+    return originalString;
+  }
+
+  @override
+  int compareTo(LocaleInfo other) {
+    return originalString.compareTo(other.originalString);
+  }
+}
+
 void exitWithError(String errorMessage) {
   assert(errorMessage != null);
   stderr.writeln('fatal: $errorMessage');
@@ -26,8 +90,8 @@ void checkCwdIsRepoRoot(String commandName) {
   }
 }
 
-String camelCase(String locale) {
-  return locale
+String camelCase(LocaleInfo locale) {
+  return locale.originalString
     .split('_')
     .map<String>((String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
     .join('');

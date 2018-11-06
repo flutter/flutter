@@ -9928,6 +9928,30 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Serbian (`sr`).
+class MaterialLocalizationSrCryl extends MaterialLocalizationSr {
+  /// Create an instance of the translation bundle for Serbian.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationSrCryl({
+    String localeName = 'sr_Cryl',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+}
+
+/// The translations for Serbian (`sr`).
 class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   /// Create an instance of the translation bundle for Serbian, using the Latin script.
   ///
@@ -11895,7 +11919,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
 }
 
-/// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
+/// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK}`).
 class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
   /// Create an instance of the translation bundle for Chinese, as used in Hong Kong, using the Han script.
   ///
@@ -11919,7 +11943,7 @@ class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
   );
 }
 
-/// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
+/// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW}`).
 class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   /// Create an instance of the translation bundle for Chinese, as used in Taiwan, using the Han script.
   ///
@@ -12052,7 +12076,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `ru` - Russian
 ///  * `sk` - Slovak
 ///  * `sl` - Slovenian
-///  * `sr` - Serbian (plus 1 script)
+///  * `sr` - Serbian (plus 2 scripts)
 ///  * `sv` - Swedish
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
@@ -12228,6 +12252,9 @@ GlobalMaterialLocalizations getTranslation(
       return MaterialLocalizationSl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sr': {
       switch (locale.scriptCode) {
+        case 'Cryl': {
+          return MaterialLocalizationSrCryl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        }
         case 'Latn': {
           return MaterialLocalizationSrLatn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         }

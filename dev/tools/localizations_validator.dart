@@ -5,6 +5,8 @@
 import 'dart:convert' show json;
 import 'dart:io';
 
+import 'localizations_utils.dart';
+
 // The first suffix in kPluralSuffixes must be "Other". "Other" is special
 // because it's the only one that is required.
 const List<String> kPluralSuffixes = <String>['Other', 'Zero', 'One', 'Two', 'Few', 'Many'];
@@ -96,14 +98,14 @@ void validateEnglishLocalizations(File file) {
 ///
 /// If validation fails, throws an exception.
 void validateLocalizations(
-  Map<String, Map<String, String>> localeToResources,
-  Map<String, Map<String, dynamic>> localeToAttributes,
+  Map<LocaleInfo, Map<String, String>> localeToResources,
+  Map<LocaleInfo, Map<String, dynamic>> localeToAttributes,
 ) {
-  final Map<String, String> canonicalLocalizations = localeToResources['en'];
+  final Map<String, String> canonicalLocalizations = localeToResources[LocaleInfo.fromString('en')];
   final Set<String> canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
   final StringBuffer errorMessages = StringBuffer();
   bool explainMissingKeys = false;
-  for (final String locale in localeToResources.keys) {
+  for (final LocaleInfo locale in localeToResources.keys) {
     final Map<String, String> resources = localeToResources[locale];
 
     // Whether `key` corresponds to one of the plural variations of a key with
@@ -128,24 +130,8 @@ void validateLocalizations(
     final Set<String> invalidKeys = keys.difference(canonicalKeys);
     if (invalidKeys.isNotEmpty)
       errorMessages.writeln('Locale "$locale" contains invalid resource keys: ${invalidKeys.join(', ')}');
-
-    // For language-level locales only, check that they have a complete list of
-    // keys, or opted out of using certain ones.
-    if (locale.length == 2) {
-      final Map<String, dynamic> attributes = localeToAttributes[locale];
-      final List<String> missingKeys = <String>[];
-
-      for (final String missingKey in canonicalKeys.difference(keys)) {
-        final dynamic attribute = attributes[missingKey];
-        final bool intentionallyOmitted = attribute is Map && attribute.containsKey('notUsed');
-        if (!intentionallyOmitted && !isPluralVariation(missingKey))
-          missingKeys.add(missingKey);
-      }
-      if (missingKeys.isNotEmpty) {
-        explainMissingKeys = true;
-        errorMessages.writeln('Locale "$locale" is missing the following resource keys: ${missingKeys.join(', ')}');
-      }
-    }
+    // No longer check for missing keys in country-leve locales as inheritance ensures
+    // missing keys are filled in by language-level fallback.
   }
 
   if (errorMessages.isNotEmpty) {
