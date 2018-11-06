@@ -8,7 +8,7 @@ import 'dart:io' as io;
 import 'package:android_semantics_testing/test_constants.dart';
 import 'package:android_semantics_testing/android_semantics_testing.dart';
 
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 import 'package:flutter_driver/flutter_driver.dart';
 
 void main() {
