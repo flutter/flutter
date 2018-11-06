@@ -40,8 +40,7 @@ class FlutterDevice {
        generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
          trackWidgetCreation: trackWidgetCreation,
-         fileSystemRoots: fileSystemRoots,
-         fileSystemScheme: fileSystemScheme,
+         fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
        );
 
   final Device device;
