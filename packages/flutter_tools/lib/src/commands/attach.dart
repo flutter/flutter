@@ -10,6 +10,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../compile.dart';
 import '../commands/daemon.dart';
 import '../device.dart';
 import '../fuchsia/fuchsia_device.dart';
@@ -171,7 +172,7 @@ class AttachCommand extends FlutterCommand {
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
-        targetModel: argResults['target-model'],
+        targetModel: TargetModel(argResults['target-model']),
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = hotRunnerFactory.build(
