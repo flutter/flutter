@@ -113,7 +113,8 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
   @override
   void didUpdateWidget (_AccountDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isOpen) {
+    if (_animation.status == AnimationStatus.dismissed ||
+        _animation.status == AnimationStatus.reverse) {
       _controller.forward();
     } else {
       _controller.reverse();
@@ -175,8 +176,8 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
                   Icons.arrow_drop_down,
                   color: Colors.white,
                   semanticLabel: widget.isOpen
-                      ? localizations.hideAccountsLabel
-                      : localizations.showAccountsLabel,
+                    ? localizations.hideAccountsLabel
+                    : localizations.showAccountsLabel,
                 ),
               ),
             ),

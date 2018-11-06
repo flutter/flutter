@@ -106,31 +106,24 @@ void main() {
 
   testWidgets('UserAccountsDrawerHeader icon rotation test', (WidgetTester tester) async {
     await pumpTestWidget(tester);
-
     Transform transformWidget = tester.firstWidget(find.byType(Transform));
-    expect(transformWidget.transform.getRotation(), Matrix3(
-        1.0,
-        -0.0,
-        0.0,
-        0.0,
-        1.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0));
+
+    // Icon is right side up.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
 
     await tester.tap(find.byType(Icon));
+    await tester.pump();
     await tester.pump(Duration(milliseconds: 10));
     expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpAndSettle();
+    await tester.pump();
     transformWidget = tester.firstWidget(find.byType(Transform));
-    expect(transformWidget.transform.storage,  <dynamic>[
-      moreOrLessEquals(0.0), 1.0, 0.0, 0.0,
-      -1.0, moreOrLessEquals(0.0), 0.0, 0.0,
-      0.0, 0.0, 1.0, 0.0,
-      700.0, -100.0, 0.0, 1.0,
-    ]);
 
-
+    // Icon has rotated 180 degrees.
+    expect(transformWidget.transform.getRotation()[0], -1.0);
+    expect(transformWidget.transform.getRotation()[4], -1.0);
   });
 
   testWidgets('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
