@@ -79,7 +79,7 @@ final Map<LocaleInfo, Map<String, dynamic>> localeToResourceAttributes = <Locale
 /// For example, when the data lacks data for zh_Hant, we will use the data of
 /// the first Hant Chinese locale as a default by repeating the data. If an
 /// explicit match is later found, we can reference this set to see if we should
-/// overwrite the existing assumed data. 
+/// overwrite the existing assumed data.
 final Set<LocaleInfo> assumedLocales = Set<LocaleInfo>();
 
 /// Return `s` as a Dart-parseable raw string in single or double quotes.
@@ -578,7 +578,7 @@ void processBundle(File file, { @required String localeString }) {
     assumedLocales.remove(locale);
   } else {
     localeToResources[locale] ??= <String, String>{};
-    localeToResourceAttributes[locale] ??= <String, dynamic>{}; 
+    localeToResourceAttributes[locale] ??= <String, dynamic>{};
   }
   populateResources(locale);
   // Add an assumed locale to default to when there is no info on scriptOnly locales.
@@ -589,7 +589,7 @@ void processBundle(File file, { @required String localeString }) {
     if (!localeToResources.containsKey(scriptLocale)) {
       assumedLocales.add(scriptLocale);
       localeToResources[scriptLocale] ??= <String, String>{};
-      localeToResourceAttributes[scriptLocale] ??= <String, dynamic>{}; 
+      localeToResourceAttributes[scriptLocale] ??= <String, dynamic>{};
       populateResources(scriptLocale);
     }
   }
@@ -598,7 +598,7 @@ void processBundle(File file, { @required String localeString }) {
 
 /// Adds scriptCodes to locales where we are able to assume it to provide
 /// finer granularity when resolving locales.
-/// 
+///
 /// The basis of the assumptions here are based off of known usage of scripts
 /// across various countries. For example, we know Taiwan uses traditional (Hant)
 /// script, so it is safe to apply (Hant) to Taiwanese languages.

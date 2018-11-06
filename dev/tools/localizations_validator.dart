@@ -131,20 +131,20 @@ void validateLocalizations(
     if (invalidKeys.isNotEmpty)
       errorMessages.writeln('Locale "$locale" contains invalid resource keys: ${invalidKeys.join(', ')}');
     // For language-level locales only, check that they have a complete list of
-    // keys, or opted out of using certain ones.  
-    if (locale.length == 1) { 
-      final Map<String, dynamic> attributes = localeToAttributes[locale]; 
-      final List<String> missingKeys = <String>[];  
-       for (final String missingKey in canonicalKeys.difference(keys)) {  
-        final dynamic attribute = attributes[missingKey]; 
-        final bool intentionallyOmitted = attribute is Map && attribute.containsKey('notUsed'); 
-        if (!intentionallyOmitted && !isPluralVariation(missingKey))  
-          missingKeys.add(missingKey);  
-      } 
-      if (missingKeys.isNotEmpty) { 
-        explainMissingKeys = true;  
-        errorMessages.writeln('Locale "$locale" is missing the following resource keys: ${missingKeys.join(', ')}');  
-      } 
+    // keys, or opted out of using certain ones.
+    if (locale.length == 1) {
+      final Map<String, dynamic> attributes = localeToAttributes[locale];
+      final List<String> missingKeys = <String>[];
+       for (final String missingKey in canonicalKeys.difference(keys)) {
+        final dynamic attribute = attributes[missingKey];
+        final bool intentionallyOmitted = attribute is Map && attribute.containsKey('notUsed');
+        if (!intentionallyOmitted && !isPluralVariation(missingKey))
+          missingKeys.add(missingKey);
+      }
+      if (missingKeys.isNotEmpty) {
+        explainMissingKeys = true;
+        errorMessages.writeln('Locale "$locale" is missing the following resource keys: ${missingKeys.join(', ')}');
+      }
     }
   }
 
