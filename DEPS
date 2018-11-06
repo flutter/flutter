@@ -138,7 +138,7 @@ deps = {
    Var('fuchsia_git') + '/third_party/rapidjson' + '@' + '32d07c55db1bb6c2ae17cba4033491a667647753',
 
   'src/third_party/harfbuzz':
-   Var('fuchsia_git') + '/third_party/harfbuzz' + '@' + 'd837034f09a957faf2814002e8ebd81da6151d1b',
+   Var('fuchsia_git') + '/third_party/harfbuzz' + '@' + '02caec6c1c6ad996666788b8e920ccaec8b385e5',
 
    # Chromium-style
    #
