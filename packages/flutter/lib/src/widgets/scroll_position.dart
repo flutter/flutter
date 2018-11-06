@@ -563,6 +563,26 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void jumpTo(double value);
 
   @override
+  Future<void> moveTo(double to, {
+    Duration duration,
+    Curve curve,
+    bool clamp = true,
+  }) {
+    assert(to != null);
+    assert(clamp != null);
+
+    if (clamp)
+      to = to.clamp(minScrollExtent, maxScrollExtent);
+
+    if (duration == null || duration == Duration.zero) {
+      jumpTo(to);
+      return Future<void>.value();
+    } else {
+      return animateTo(to, duration: duration, curve: curve ?? Curves.ease);
+    }
+  }
+
+  @override
   bool get allowImplicitScrolling => physics.allowImplicitScrolling;
 
   /// Deprecated. Use [jumpTo] or a custom [ScrollPosition] instead.
