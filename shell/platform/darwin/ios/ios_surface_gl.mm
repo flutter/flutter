@@ -67,7 +67,11 @@ bool IOSSurfaceGL::GLContextPresent() {
 }
 
 flow::ExternalViewEmbedder* IOSSurfaceGL::GetExternalViewEmbedder() {
-  return this;
+  if ([[[NSBundle mainBundle] objectForInfoDictionaryKey:@(kEmbeddedViewsPreview)] boolValue]) {
+    return this;
+  } else {
+    return nullptr;
+  }
 }
 
 SkCanvas* IOSSurfaceGL::CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) {

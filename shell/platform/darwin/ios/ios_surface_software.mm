@@ -131,7 +131,11 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
 }
 
 flow::ExternalViewEmbedder* IOSSurfaceSoftware::GetExternalViewEmbedder() {
-  return this;
+  if ([[[NSBundle mainBundle] objectForInfoDictionaryKey:@(kEmbeddedViewsPreview)] boolValue]) {
+    return this;
+  } else {
+    return nullptr;
+  }
 }
 
 SkCanvas* IOSSurfaceSoftware::CompositeEmbeddedView(int view_id,

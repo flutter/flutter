@@ -162,16 +162,7 @@ bool Rasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
 
   auto canvas = frame->SkiaCanvas();
 
-  // External view embedding required that the gpu and platform threads are the
-  // same. The dynamic merging of these threads is WIP so for now we don't
-  // populate the view embedder. Once we can merge the threads, we should
-  // populate the view embedded here with surface_->GetExternalViewEmbedder() if
-  // the scene contains an external view (and we can probably assert that the
-  // gpu and platform threads are the same).
-  //
-  // TODO(amirh): populate the view embedder once we dynamically merge the
-  // threads for embedded platform views.
-  auto external_view_embedder = nullptr;
+  auto external_view_embedder = surface_->GetExternalViewEmbedder();
 
   auto compositor_frame = compositor_context_->AcquireFrame(
       surface_->GetContext(), canvas, external_view_embedder,
