@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 
 import 'colors.dart';
 import 'debug.dart';
@@ -12,15 +15,50 @@ import 'ink_well.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
 
-class _AccountPictures extends StatelessWidget {
+class _AccountPictures extends StatefulWidget {
   const _AccountPictures({
     Key key,
     this.currentAccountPicture,
     this.otherAccountsPictures,
-  }) : super(key: key);
+  });
 
   final Widget currentAccountPicture;
   final List<Widget> otherAccountsPictures;
+
+  @override
+  _AccountDetailsState createState() => _AccountDetailsState();
+}
+
+class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProviderStateMixin {
+  Animation<double> _animation;
+  AnimationController _controller;
+  @override
+  void initState () {
+    super.initState();
+    _controller = AnimationController(
+        value: widget.isOpen ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.fastOutSlowIn,
+      reverseCurve: Curves.fastOutSlowIn.flipped,
+    )
+      ..addListener(() => setState(() {
+        // [animation]'s value has changed here.
+      }));
+  }
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+  @override
+  void didUpdateWidget (_AccountDetails oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isOpen) {
+      _controller.forward();
 
   @override
   Widget build(BuildContext context) {
