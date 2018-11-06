@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -826,8 +827,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
       await expectLater(
         find.byType(BottomNavigationBar),
-        matchesGoldenFile(
-            'bottom_navigation_bar.shifting_transition.$pump.png'),
+        matchesGoldenFile('bottom_navigation_bar.shifting_transition.$pump.png'),
+	      skip: !Platform.isLinux,
       );
     }
   });
