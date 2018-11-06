@@ -47,8 +47,6 @@ class AttachCommand extends FlutterCommand {
     addBuildModeFlags(defaultToRelease: false);
     usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
-    usesFilesystemOptions(hide: !verboseHelp);
-    usesFuchsiaOptions(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
@@ -61,6 +59,12 @@ class AttachCommand extends FlutterCommand {
         'project-root',
         hide: !verboseHelp,
         help: 'Normally used only in run target',
+      )..addOption(
+        'module',
+        abbr: 'm',
+        hide: !verboseHelp,
+        help: 'The name of the module (required if attaching to a fuchsia device)',
+        valueHelp: 'module-name',
       )..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
@@ -171,7 +175,6 @@ class AttachCommand extends FlutterCommand {
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
-        targetModel: argResults['target-model'],
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = hotRunnerFactory.build(

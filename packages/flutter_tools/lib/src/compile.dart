@@ -122,7 +122,6 @@ class KernelCompiler {
     String mainPath,
     String outputFilePath,
     String depFilePath,
-    String targetModel = 'flutter',
     bool linkPlatformKernelIn = false,
     bool aot = false,
     @required bool trackWidgetCreation,
@@ -173,7 +172,7 @@ class KernelCompiler {
       '--sdk-root',
       sdkRoot,
       '--strong',
-      '--target=$targetModel',
+      '--target=flutter',
     ];
     if (trackWidgetCreation)
       command.add('--track-widget-creation');
@@ -302,14 +301,12 @@ class ResidentCompiler {
     String fileSystemScheme,
     CompilerMessageConsumer compilerMessageConsumer = printError,
     String initializeFromDill,
-    String targetModel = 'flutter',
     bool unsafePackageSerialization
   }) : assert(_sdkRoot != null),
        _trackWidgetCreation = trackWidgetCreation,
        _packagesPath = packagesPath,
        _fileSystemRoots = fileSystemRoots,
        _fileSystemScheme = fileSystemScheme,
-       _targetModel = targetModel,
        _stdoutHandler = _StdoutHandler(consumer: compilerMessageConsumer),
        _controller = StreamController<_CompilationRequest>(),
        _initializeFromDill = initializeFromDill,
@@ -321,7 +318,6 @@ class ResidentCompiler {
 
   final bool _trackWidgetCreation;
   final String _packagesPath;
-  final String _targetModel;
   final List<String> _fileSystemRoots;
   final String _fileSystemScheme;
   String _sdkRoot;
@@ -413,7 +409,7 @@ class ResidentCompiler {
       _sdkRoot,
       '--incremental',
       '--strong',
-      '--target=$_targetModel',
+      '--target=flutter',
     ];
     if (outputPath != null) {
       command.addAll(<String>['--output-dill', outputPath]);

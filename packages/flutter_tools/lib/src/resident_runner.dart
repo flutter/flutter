@@ -35,7 +35,6 @@ class FlutterDevice {
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.viewFilter,
-    String targetModel = 'flutter',
     ResidentCompiler generator,
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
@@ -43,7 +42,6 @@ class FlutterDevice {
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots,
          fileSystemScheme: fileSystemScheme,
-         targetModel: targetModel,
        );
 
   final Device device;
