@@ -65,6 +65,7 @@ Future<T> runInContext<T>(
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(),
       FuchsiaSdk: () => FuchsiaSdk(),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(),
       FuchsiaWorkflow: () => FuchsiaWorkflow(),
       Flags: () => const EmptyFlags(),
       FlutterVersion: () => FlutterVersion(const Clock()),
