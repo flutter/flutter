@@ -7,16 +7,28 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../base/common.dart';
+import '../base/io.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
+import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../globals.dart';
+import '../vmservice.dart';
 
 import 'fuchsia_sdk.dart';
 import 'fuchsia_workflow.dart';
 
+final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
+final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
+
 /// Read the log for a particular device.
 class _FuchsiaLogReader extends DeviceLogReader {
   _FuchsiaLogReader(this._device);
+
+  // TODO(jonahwilliams): handle filtering log output from different modules.
+  static final Pattern flutterLogOutput = RegExp(r'\[\d+\.\d+\]\[\d+\]\[\d+\]\[klog\] INFO: \w+\(flutter\): ');
 
   FuchsiaDevice _device;
 
@@ -25,7 +37,8 @@ class _FuchsiaLogReader extends DeviceLogReader {
   Stream<String> _logLines;
   @override
   Stream<String> get logLines {
-    _logLines ??= const Stream<String>.empty();
+    _logLines ??= fuchsiaSdk.syslogs()
+      .where((String line) => flutterLogOutput.matchAsPrefix(line) != null);
     return _logLines;
   }
 
@@ -48,21 +61,26 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
       return <Device>[];
     }
     final String text = await fuchsiaSdk.netls();
-    return parseFuchsiaDeviceOutput(text);
+    final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
+    for (String name in parseFuchsiaDeviceOutput(text)) {
+      final String id = await fuchsiaSdk.netaddr();
+      devices.add(FuchsiaDevice(id, name: name));
+    }
+    return devices;
   }
 
   @override
   Future<List<String>> getDiagnostics() async => const <String>[];
 }
 
-/// Parses output from the netls tool into fuchsia devices.
+/// Parses output from the netls tool into fuchsia devices names.
 ///
 /// Example output:
 ///     $ ./netls
 ///     > device liliac-shore-only-last (fe80::82e4:da4d:fe81:227d/3)
 @visibleForTesting
-List<FuchsiaDevice> parseFuchsiaDeviceOutput(String text) {
-  final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
+List<String> parseFuchsiaDeviceOutput(String text) {
+  final List<String> names = <String>[];
   for (String rawLine in text.trim().split('\n')) {
     final String line = rawLine.trim();
     if (!line.startsWith('device'))
@@ -70,10 +88,9 @@ List<FuchsiaDevice> parseFuchsiaDeviceOutput(String text) {
     // ['device', 'device name', '(id)']
     final List<String> words = line.split(' ');
     final String name = words[1];
-    final String id = words[2].substring(1, words[2].length - 1);
-    devices.add(FuchsiaDevice(id, name: name));
+    names.add(name);
   }
-  return devices;
+  return names;
 }
 
 class FuchsiaDevice extends Device {
@@ -131,15 +148,13 @@ class FuchsiaDevice extends Device {
   @override
   Future<String> get sdkNameAndVersion async => 'Fuchsia';
 
-  _FuchsiaLogReader _logReader;
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) {
-    _logReader ??= _FuchsiaLogReader(this);
-    return _logReader;
-  }
+  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader ??= _FuchsiaLogReader(this);
+  _FuchsiaLogReader _logReader;
 
   @override
-  DevicePortForwarder get portForwarder => null;
+  DevicePortForwarder get portForwarder => _portForwarder ??= _FuchsiaPortForwarder(this);
+  _FuchsiaPortForwarder _portForwarder;
 
   @override
   void clearLogs() {
@@ -147,4 +162,141 @@ class FuchsiaDevice extends Device {
 
   @override
   bool get supportsScreenshot => false;
+
+  /// List the ports currently running a dart observatory.
+  Future<List<int>> servicePorts() async {
+    final String lsOutput = await shell('ls /tmp/dart.services');
+    return parseFuchsiaDartPortOutput(lsOutput);
+  }
+
+  /// Run `command` on the Fuchsia device shell.
+  Future<String> shell(String command) async {
+    final RunResult result = await runAsync(<String>[
+      'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, id, command]);
+    if (result.exitCode != 0) {
+      throwToolExit('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
+      return null;
+    }
+    return result.stdout;
+  }
+
+  /// Finds the first port running a VM matching `isolateName` from the
+  /// provided set of `ports`.
+  ///
+  /// Returns null if no isolate port can be found.
+  ///
+  // TODO(jonahwilliams): replacing this with the hub will require an update
+  // to the flutter_runner.
+  Future<int> findIsolatePort(String isolateName, List<int> ports) async {
+    for (int port in ports) {
+      try {
+        // Note: The square-bracket enclosure for using the IPv6 loopback
+        // didn't appear to work, but when assigning to the IPv4 loopback device,
+        // netstat shows that the local port is actually being used on the IPv6
+        // loopback (::1).
+        final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$port');
+        final VMService vmService = await VMService.connect(uri);
+        await vmService.getVM();
+        await vmService.refreshViews();
+        for (FlutterView flutterView in vmService.vm.views) {
+          if (flutterView.uiIsolate == null) {
+            continue;
+          }
+          final Uri address = flutterView.owner.vmService.httpAddress;
+          if (flutterView.uiIsolate.name.contains(isolateName)) {
+            return address.port;
+          }
+        }
+      } on SocketException catch (err) {
+        printTrace('Failed to connect to $port: $err');
+      }
+    }
+    throwToolExit('No ports found running $isolateName');
+    return null;
+  }
+}
+
+class _FuchsiaPortForwarder extends DevicePortForwarder {
+  _FuchsiaPortForwarder(this.device);
+
+  final FuchsiaDevice device;
+  final Map<int, Process> _processes = <int, Process>{};
+
+  @override
+  Future<int> forward(int devicePort, {int hostPort}) async {
+    hostPort ??= await _findPort();
+    // Note: the provided command works around a bug in -N, see US-515
+    // for more explanation.
+    final List<String> command = <String>[
+      'ssh', '-6', '-F', fuchsiaSdk.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
+      '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true'
+    ];
+    final Process process = await processManager.start(command);
+    process.exitCode.then((int exitCode) { // ignore: unawaited_futures
+      if (exitCode != 0) {
+        throwToolExit('Failed to forward port:$devicePort');
+      }
+    });
+    _processes[hostPort] = process;
+    _forwardedPorts.add(ForwardedPort(hostPort, devicePort));
+    return hostPort;
+  }
+
+  @override
+  List<ForwardedPort> get forwardedPorts => _forwardedPorts;
+  final List<ForwardedPort> _forwardedPorts = <ForwardedPort>[];
+
+  @override
+  Future<void> unforward(ForwardedPort forwardedPort) async {
+    _forwardedPorts.remove(forwardedPort);
+    final Process process = _processes.remove(forwardedPort.hostPort);
+    process?.kill();
+    final List<String> command = <String>[
+        'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, '-O', 'cancel', '-vvv',
+        '-L', '${forwardedPort.hostPort}:$_ipv4Loopback:${forwardedPort.devicePort}', device.id];
+    final ProcessResult result = await processManager.run(command);
+    if (result.exitCode != 0) {
+      throwToolExit(result.stderr);
+    }
+  }
+
+  static Future<int> _findPort() async {
+    int port = 0;
+    ServerSocket serverSocket;
+    try {
+      serverSocket = await ServerSocket.bind(_ipv4Loopback, 0);
+      port = serverSocket.port;
+    } catch (e) {
+      // Failures are signaled by a return value of 0 from this function.
+      printTrace('_findPort failed: $e');
+    }
+    if (serverSocket != null)
+      await serverSocket.close();
+    return port;
+  }
+}
+
+/// Parses output from `dart.services` output on a fuchsia device.
+///
+/// Example output:
+///     $ ls /tmp/dart.services
+///     > d  2          0 .
+///     > -  1          0 36780
+@visibleForTesting
+List<int> parseFuchsiaDartPortOutput(String text) {
+  final List<int> ports = <int>[];
+  if (text == null)
+    return ports;
+  for (String line in text.split('\n')) {
+    final String trimmed = line.trim();
+    final int lastSpace = trimmed.lastIndexOf(' ');
+    final String lastWord = trimmed.substring(lastSpace + 1);
+    if ((lastWord != '.') && (lastWord != '..')) {
+      final int value = int.tryParse(lastWord);
+      if (value != null) {
+        ports.add(value);
+      }
+    }
+  }
+  return ports;
 }

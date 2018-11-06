@@ -19,11 +19,20 @@ void main() {
 
     test('parse netls log output', () {
       const String example = 'device lilia-shore-only-last (fe80::0000:a00a:f00f:2002/3)';
-      final List<FuchsiaDevice> devices = parseFuchsiaDeviceOutput(example);
+      final List<String> names = parseFuchsiaDeviceOutput(example);
 
-      expect(devices.length, 1);
-      expect(devices.first.id, 'fe80::0000:a00a:f00f:2002/3');
-      expect(devices.first.name, 'lilia-shore-only-last');
+      expect(names.length, 1);
+      expect(names.first, 'lilia-shore-only-last');
+    });
+
+    test('parse ls tmp/dart.servies output', () {
+      const String example = '''
+d  2          0 .
+'-  1          0 36780
+''';
+      final List<int> ports = parseFuchsiaDartPortOutput(example);
+      expect(ports.length, 1);
+      expect(ports.single, 36780);
     });
   });
 }

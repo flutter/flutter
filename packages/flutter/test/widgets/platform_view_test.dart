@@ -23,7 +23,7 @@ void main() {
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
@@ -47,7 +47,7 @@ void main() {
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
@@ -55,7 +55,7 @@ void main() {
               viewType: 'webview',
               layoutDirection: TextDirection.ltr,
               creationParams: 'creation parameters',
-              creationParamsCodec: const StringCodec(),
+              creationParamsCodec: StringCodec(),
             ),
           ),
         ),
@@ -85,7 +85,7 @@ void main() {
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 0.0,
             height: 0.0,
@@ -105,7 +105,7 @@ void main() {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
@@ -117,7 +117,7 @@ void main() {
       viewsController.resizeCompleter = Completer<void>();
 
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 100.0,
             height: 50.0,
@@ -156,7 +156,7 @@ void main() {
       viewsController.registerViewType('webview');
       viewsController.registerViewType('maps');
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
@@ -166,7 +166,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
@@ -188,7 +188,7 @@ void main() {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
@@ -253,7 +253,7 @@ void main() {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
-        Align(
+        const Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
             width: 200.0,
@@ -294,7 +294,7 @@ void main() {
                   numPointerDownsOnParent++;
                 },
               ),
-              Positioned(
+              const Positioned(
                 child: SizedBox(
                   width: 200.0,
                   height: 100.0,
@@ -339,7 +339,7 @@ void main() {
                   numPointerDownsOnParent++;
                 },
               ),
-              Positioned(
+              const Positioned(
                 child: SizedBox(
                   width: 200.0,
                   height: 100.0,
@@ -387,7 +387,7 @@ void main() {
                   numPointerDownsOnParent++;
                 },
               ),
-              Positioned(
+              const Positioned(
                 child: SizedBox(
                   width: 200.0,
                   height: 100.0,
@@ -428,7 +428,7 @@ void main() {
           alignment: Alignment.topLeft,
           child: Container(
             margin: const EdgeInsets.all(10.0),
-            child: SizedBox(
+            child: const SizedBox(
               width: 200.0,
               height: 100.0,
               child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
@@ -456,7 +456,7 @@ void main() {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('maps');
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
@@ -474,7 +474,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
@@ -497,7 +497,7 @@ void main() {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('maps');
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.rtl,
           child: Center(
             child: SizedBox(
@@ -518,7 +518,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
             child: SizedBox(
@@ -553,7 +553,7 @@ void main() {
               onVerticalDragStart: (DragStartDetails d) {
                 verticalDragAcceptedByParent = true;
               },
-              child: SizedBox(
+              child: const SizedBox(
                 width: 200.0,
                 height: 100.0,
                 child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
@@ -637,7 +637,7 @@ void main() {
               verticalDragAcceptedByParent = true;
             },
             onLongPress: () {},
-            child: SizedBox(
+            child: const SizedBox(
               width: 200.0,
               height: 100.0,
               child: AndroidView(
@@ -669,7 +669,7 @@ void main() {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
-        Align(
+        const Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
             width: 200.0,
@@ -686,7 +686,7 @@ void main() {
       await gesture.moveBy(const Offset(0.0, 100.0));
 
       await tester.pumpWidget(
-        Align(
+        const Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
             width: 200.0,

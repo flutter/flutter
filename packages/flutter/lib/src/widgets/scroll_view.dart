@@ -50,8 +50,7 @@ abstract class ScrollView extends StatelessWidget {
   /// Creates a widget that scrolls.
   ///
   /// If the [primary] argument is true, the [controller] must be null.
-  ScrollView({ // ignore: prefer_const_constructors_in_immutables
-               // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
+  const ScrollView({
     Key key,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
@@ -67,8 +66,8 @@ abstract class ScrollView extends StatelessWidget {
            'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
            'You cannot both set primary to true and pass an explicit controller.'
        ),
-       primary = primary ?? controller == null && scrollDirection == Axis.vertical,
-       physics = physics ?? (primary == true || (primary == null && controller == null && scrollDirection == Axis.vertical) ? const AlwaysScrollableScrollPhysics() : null),
+       primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
+       physics = physics ?? (primary == true || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null),
        super(key: key);
 
   /// The axis along which the scroll view scrolls.
@@ -386,7 +385,7 @@ class CustomScrollView extends ScrollView {
   /// Creates a [ScrollView] that creates custom scroll effects using slivers.
   ///
   /// If the [primary] argument is true, the [controller] must be null.
-  CustomScrollView({
+  const CustomScrollView({
     Key key,
     Axis scrollDirection = Axis.vertical,
     bool reverse = false,
@@ -428,7 +427,7 @@ abstract class BoxScrollView extends ScrollView {
   /// Creates a [ScrollView] uses a single child layout model.
   ///
   /// If the [primary] argument is true, the [controller] must be null.
-  BoxScrollView({
+  const BoxScrollView({
     Key key,
     Axis scrollDirection = Axis.vertical,
     bool reverse = false,
@@ -912,7 +911,7 @@ class ListView extends BoxScrollView {
   ///
   /// For example, a custom child model can control the algorithm used to
   /// estimate the size of children that are not actually visible.
-  ListView.custom({
+  const ListView.custom({
     Key key,
     Axis scrollDirection = Axis.vertical,
     bool reverse = false,
@@ -1219,7 +1218,7 @@ class GridView extends BoxScrollView {
   /// a [SliverChildBuilderDelegate] or use the [GridView.builder] constructor.
   ///
   /// The [gridDelegate] and [childrenDelegate] arguments must not be null.
-  GridView.custom({
+  const GridView.custom({
     Key key,
     Axis scrollDirection = Axis.vertical,
     bool reverse = false,
