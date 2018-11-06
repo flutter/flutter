@@ -688,7 +688,7 @@ class SliverGeometry extends Diagnosticable {
         );
       }
       verify(maxPaintExtent != null, 'The "maxPaintExtent" is null.');
-      // If the maxPaintExtent is slightly more than paintExtent, but the difference is still less
+      // If the paintExtent is slightly more than the maxPaintExtent, but the difference is still less
       // than epsilon, we will not throw the assert below.
       if (paintExtent - maxPaintExtent > _epsilon) {
         verify(false,
