@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -103,6 +104,34 @@ void main() {
     expect(avatarDTopRight.dx - avatarCTopRight.dx, equals(40.0 + 16.0)); // size + space between
   });
 
+  testWidgets('UserAccountsDrawerHeader icon rotation test', (WidgetTester tester) async {
+    await pumpTestWidget(tester);
+
+    Transform transformWidget = tester.firstWidget(find.byType(Transform));
+    expect(transformWidget.transform.getRotation(), Matrix3(
+        1.0,
+        -0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0));
+
+    await tester.tap(find.byType(Icon));
+    await tester.pump(Duration(milliseconds: 10));
+    expect(tester.hasRunningAnimations, isTrue);
+    transformWidget = tester.firstWidget(find.byType(Transform));
+    expect(transformWidget.transform.storage,  <dynamic>[
+      moreOrLessEquals(0.0), 1.0, 0.0, 0.0,
+      -1.0, moreOrLessEquals(0.0), 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      700.0, -100.0, 0.0, 1.0,
+    ]);
+
+
+  });
 
   testWidgets('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
     Widget buildFrame({
