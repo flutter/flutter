@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 
 const String kDocsRoot = 'dev/docs';
 const String kPublishRoot = '$kDocsRoot/doc';
+const String kSnippetsRoot = 'dev/snippets';
 
 /// This script expects to run with the cwd as the root of the flutter repo. It
 /// will generate documentation for the packages in `//packages/` and write the
@@ -99,7 +100,7 @@ Future<void> main(List<String> arguments) async {
   createFooter('$kDocsRoot/lib/footer.html');
   copyAssets();
   cleanOutSnippets();
-  precompileSnippetsTool();
+  await precompileSnippetsTool(pubExecutable, pubEnvironment);
 
   final List<String> dartdocBaseArgs = <String>['global', 'run'];
   if (args['checked']) {
@@ -142,6 +143,7 @@ Future<void> main(List<String> arguments) async {
       'cli_util',
       'csslib',
       'flutter_goldens',
+      'flutter_goldens_client',
       'front_end',
       'fuchsia_remote_debug_protocol',
       'glob',
@@ -176,7 +178,7 @@ Future<void> main(List<String> arguments) async {
       'package:web_socket_channel/html.dart',
     ].join(','),
     '--favicon=favicon.ico',
-    '--package-order', 'flutter,Dart,flutter_test,flutter_driver',
+    '--package-order', 'flutter,Dart,platform_integration,flutter_test,flutter_driver',
     '--auto-include-dependencies',
   ]);
 
@@ -300,30 +302,46 @@ void cleanOutSnippets() {
   }
 }
 
-File precompileSnippetsTool() {
+Future<File> precompileSnippetsTool(
+  String pubExecutable,
+  Map<String, String> pubEnvironment,
+) async {
   final File snapshotPath = File(path.join('bin', 'cache', 'snippets.snapshot'));
   print('Precompiling snippets tool into ${snapshotPath.absolute.path}');
   if (snapshotPath.existsSync()) {
     snapshotPath.deleteSync();
   }
+
+  Process process = await Process.start(
+    pubExecutable,
+    <String>['get'],
+    workingDirectory: kSnippetsRoot,
+    environment: pubEnvironment,
+  );
+  printStream(process.stdout, prefix: 'pub:stdout: ');
+  printStream(process.stderr, prefix: 'pub:stderr: ');
+  final int code = await process.exitCode;
+  if (code != 0)
+    exit(code);
+
   // In order to be able to optimize properly, we need to provide a training set
   // of arguments, and an input file to process.
   final Directory tempDir = Directory.systemTemp.createTempSync('dartdoc_snippet_');
   final File trainingFile = File(path.join(tempDir.path, 'snippet_training'));
   trainingFile.writeAsStringSync('```dart\nvoid foo(){}\n```');
-  Process.runSync(Platform.resolvedExecutable, <String>[
+  ProcessResult result = Process.runSync(Platform.resolvedExecutable, <String>[
     '--snapshot=${snapshotPath.absolute.path}',
     '--snapshot_kind=app-jit',
     path.join(
-      'dev',
-      'snippets',
       'lib',
       'main.dart',
     ),
     '--type=sample',
     '--input=${trainingFile.absolute.path}',
     '--output=${path.join(tempDir.absolute.path, 'training_output.txt')}',
-  ]);
+  ], workingDirectory: path.absolute(kSnippetsRoot));
+  if (result.exitCode != 0)
+    throw Exception('Could not generate snippets snapshot:\n${result.stderr}');
   tempDir.deleteSync(recursive: true);
   return snapshotPath;
 }
