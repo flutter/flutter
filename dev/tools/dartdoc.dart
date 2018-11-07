@@ -205,8 +205,6 @@ Future<void> main(List<String> arguments) async {
   if (exitCode != 0)
     exit(exitCode);
 
-  createRobotsTxt();
-
   sanityCheckDocs();
 
   createIndexAndCleanup();
@@ -332,7 +330,6 @@ File precompileSnippetsTool() {
 
 void sanityCheckDocs() {
   final List<String> canaries = <String>[
-    '$kPublishRoot/robots.txt',
     '$kPublishRoot/assets/overrides.css',
     '$kPublishRoot/api/dart-io/File-class.html',
     '$kPublishRoot/api/dart-ui/Canvas-class.html',
@@ -347,11 +344,6 @@ void sanityCheckDocs() {
     if (!File(canary).existsSync())
       throw Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
   }
-}
-
-/// Create a robots.txt at the top level that allows all crawlers.
-void createRobotsTxt() {
-  File('$kPublishRoot/robots.txt').writeAsStringSync('# All robots welcome!\n');
 }
 
 /// Creates a custom index.html because we try to maintain old
