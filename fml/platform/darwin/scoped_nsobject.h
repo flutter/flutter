@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -42,12 +42,10 @@ class scoped_nsprotocol {
  public:
   explicit scoped_nsprotocol(NST object = nil) : object_(object) {}
 
-  scoped_nsprotocol(const scoped_nsprotocol<NST>& that)
-      : object_([that.object_ retain]) {}
+  scoped_nsprotocol(const scoped_nsprotocol<NST>& that) : object_([that.object_ retain]) {}
 
   template <typename NSU>
-  scoped_nsprotocol(const scoped_nsprotocol<NSU>& that)
-      : object_([that.get() retain]) {}
+  scoped_nsprotocol(const scoped_nsprotocol<NSU>& that) : object_([that.get() retain]) {}
 
   ~scoped_nsprotocol() { [object_ release]; }
 
@@ -113,15 +111,12 @@ bool operator!=(C p1, const scoped_nsprotocol<C>& p2) {
 template <typename NST>
 class scoped_nsobject : public scoped_nsprotocol<NST*> {
  public:
-  explicit scoped_nsobject(NST* object = nil)
-      : scoped_nsprotocol<NST*>(object) {}
+  explicit scoped_nsobject(NST* object = nil) : scoped_nsprotocol<NST*>(object) {}
 
-  scoped_nsobject(const scoped_nsobject<NST>& that)
-      : scoped_nsprotocol<NST*>(that) {}
+  scoped_nsobject(const scoped_nsobject<NST>& that) : scoped_nsprotocol<NST*>(that) {}
 
   template <typename NSU>
-  scoped_nsobject(const scoped_nsobject<NSU>& that)
-      : scoped_nsprotocol<NST*>(that) {}
+  scoped_nsobject(const scoped_nsobject<NSU>& that) : scoped_nsprotocol<NST*>(that) {}
 
   scoped_nsobject& operator=(const scoped_nsobject<NST>& that) {
     scoped_nsprotocol<NST*>::operator=(that);
@@ -135,12 +130,10 @@ class scoped_nsobject<id> : public scoped_nsprotocol<id> {
  public:
   explicit scoped_nsobject(id object = nil) : scoped_nsprotocol<id>(object) {}
 
-  scoped_nsobject(const scoped_nsobject<id>& that)
-      : scoped_nsprotocol<id>(that) {}
+  scoped_nsobject(const scoped_nsobject<id>& that) : scoped_nsprotocol<id>(that) {}
 
   template <typename NSU>
-  scoped_nsobject(const scoped_nsobject<NSU>& that)
-      : scoped_nsprotocol<id>(that) {}
+  scoped_nsobject(const scoped_nsobject<NSU>& that) : scoped_nsprotocol<id>(that) {}
 
   scoped_nsobject& operator=(const scoped_nsobject<id>& that) {
     scoped_nsprotocol<id>::operator=(that);
