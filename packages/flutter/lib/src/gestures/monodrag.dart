@@ -8,7 +8,7 @@ import 'drag_details.dart';
 import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
-import 'package:flutter/foundation.dart';
+
 enum _DragState {
   ready,
   possible,
