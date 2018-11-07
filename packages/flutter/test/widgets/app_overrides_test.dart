@@ -48,20 +48,6 @@ void main() {
     expect(find.byType(CheckedModeBanner), findsOneWidget);
   });
 
-  testWidgets('WidgetsApp with builder only', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
-    await tester.pumpWidget(
-      WidgetsApp(
-        key: key,
-        builder: (BuildContext context, Widget child) {
-          return const Placeholder();
-        },
-        color: const Color(0xFF123456),
-      ),
-    );
-    expect(find.byKey(key), findsOneWidget);
-  });
-
   testWidgets('showPerformanceOverlayOverride true', (WidgetTester tester) async {
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
     WidgetsApp.showPerformanceOverlayOverride = true;
