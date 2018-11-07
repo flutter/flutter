@@ -453,7 +453,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   void dispose() {
     _focusNode?.dispose();
     _controller?.removeListener(updateKeepAlive);
-    _doubleTapTimer.cancel();
+    _doubleTapTimer?.cancel();
     super.dispose();
   }
 
@@ -463,6 +463,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
   RenderEditable get _renderEditable => _editableTextKey.currentState.renderEditable;
 
+  // The down handler is force-run on success of a single tap and optimistically
+  // run before a long press success.
   void _handleTapDown(TapDownDetails details) {
     _renderEditable.handleTapDown(details);
     // This isn't detected as a double tap gesture in the gesture recognizer
@@ -470,7 +472,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     // on whether it's a single tap, the first tap of a double tap, the second
     // tap held down, a clean double tap etc.
     if (_doubleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
-      _renderEditable.handleDoubleTap();
+      // If there was already a previous tap, the second down hold/tap is a
+      // double tap.
+      _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
       _doubleTapTimer.cancel();
       _doubleTapTimeout();
       _isDoubleTap = true;
@@ -479,10 +483,17 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
   void _handleTapUp(TapUpDetails details) {
     if (!_isDoubleTap) {
-      _renderEditable.handleTap();
+      _renderEditable.selectPosition(cause: SelectionChangedCause.tap);
       _lastTapOffset = details.globalPosition;
       _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
       _requestKeyboard();
+    }
+    _isDoubleTap = false;
+  }
+
+  void _handleLongPress() {
+    if (!_isDoubleTap) {
+      _renderEditable.selectPosition(cause: SelectionChangedCause.longPress);
     }
     _isDoubleTap = false;
   }
@@ -682,6 +693,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
               behavior: HitTestBehavior.translucent,
               onTapDown: _handleTapDown,
               onTapUp: _handleTapUp,
+              onLongPress: _handleLongPress,
               excludeFromSemantics: true,
               child: _addTextDependentAttachments(paddedEditable),
             ),

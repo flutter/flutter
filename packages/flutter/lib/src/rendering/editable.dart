@@ -1089,12 +1089,7 @@ class RenderEditable extends RenderBox {
   /// When [ignorePointer] is true, an ancestor widget must respond to tap
   /// events by calling this method.
   void handleTap() {
-    _layoutText(constraints.maxWidth);
-    assert(_lastTapDownPosition != null);
-    if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
-      onSelectionChanged(TextSelection.fromPosition(position), this, SelectionChangedCause.tap);
-    }
+    selectPosition(cause: SelectionChangedCause.tap);
   }
   void _handleTap() {
     assert(!ignorePointer);
@@ -1108,12 +1103,7 @@ class RenderEditable extends RenderBox {
   /// When [ignorePointer] is true, an ancestor widget must respond to double
   /// tap events by calling this method.
   void handleDoubleTap() {
-    _layoutText(constraints.maxWidth);
-    assert(_lastTapDownPosition != null);
-    if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
-      onSelectionChanged(_selectWordAtOffset(position), this, SelectionChangedCause.doubleTap);
-    }
+    selectWord(cause: SelectionChangedCause.doubleTap);
   }
   void _handleDoubleTap() {
     assert(!ignorePointer);
@@ -1127,16 +1117,33 @@ class RenderEditable extends RenderBox {
   /// When [ignorePointer] is true, an ancestor widget must respond to long
   /// press events by calling this method.
   void handleLongPress() {
-    _layoutText(constraints.maxWidth);
-    assert(_lastTapDownPosition != null);
-    if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
-      onSelectionChanged(_selectWordAtOffset(position), this, SelectionChangedCause.longPress);
-    }
+    selectWord(cause: SelectionChangedCause.longPress);
   }
   void _handleLongPress() {
     assert(!ignorePointer);
     handleLongPress();
+  }
+
+  /// Move selection to the location of the last tap down.
+  void selectPosition({@required SelectionChangedCause cause}) {
+    assert(cause != null);
+    _layoutText(constraints.maxWidth);
+    assert(_lastTapDownPosition != null);
+    if (onSelectionChanged != null) {
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
+      onSelectionChanged(TextSelection.fromPosition(position), this, cause);
+    }
+  }
+
+  /// Select a word around the location of the last tap down.
+  void selectWord({@required SelectionChangedCause cause}) {
+    assert(cause != null);
+    _layoutText(constraints.maxWidth);
+    assert(_lastTapDownPosition != null);
+    if (onSelectionChanged != null) {
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
+      onSelectionChanged(_selectWordAtOffset(position), this, cause);
+    }
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
