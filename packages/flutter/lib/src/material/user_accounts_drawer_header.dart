@@ -125,6 +125,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
+    debugCheckHasMaterialLocalizations(context);
 
     final ThemeData theme = Theme.of(context);
     final List<Widget> children = <Widget>[];
