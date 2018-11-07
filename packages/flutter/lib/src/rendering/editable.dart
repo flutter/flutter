@@ -177,8 +177,6 @@ class RenderEditable extends RenderBox {
     _tap = TapGestureRecognizer(debugOwner: this)
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap;
-    _doubleTap = DoubleTapGestureRecognizer(debugOwner: this)
-      ..onDoubleTap = _handleDoubleTap;
     _longPress = LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
   }
@@ -1051,7 +1049,6 @@ class RenderEditable extends RenderBox {
   bool hitTestSelf(Offset position) => true;
 
   TapGestureRecognizer _tap;
-  DoubleTapGestureRecognizer _doubleTap;
   LongPressGestureRecognizer _longPress;
 
   @override
@@ -1061,7 +1058,6 @@ class RenderEditable extends RenderBox {
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && onSelectionChanged != null) {
       _tap.addPointer(event);
-      _doubleTap.addPointer(event);
       _longPress.addPointer(event);
     }
   }
@@ -1104,10 +1100,6 @@ class RenderEditable extends RenderBox {
   /// tap events by calling this method.
   void handleDoubleTap() {
     selectWord(cause: SelectionChangedCause.doubleTap);
-  }
-  void _handleDoubleTap() {
-    assert(!ignorePointer);
-    handleDoubleTap();
   }
 
   /// If [ignorePointer] is false (the default) then this method is called by
