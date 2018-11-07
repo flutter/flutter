@@ -34,7 +34,7 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 class CupertinoPicker extends StatefulWidget {
   /// Creates a picker from a concrete list of children.
   ///
-  /// The [diameterRatio] and [itemExtent] arguments must not be null. The
+  /// The [backgroundColor], [diameterRatio] and [itemExtent] arguments must not be null. The
   /// [itemExtent] must be greater than zero.
   ///
   /// The [backgroundColor] defaults to light gray. It can be set to null to
@@ -58,15 +58,15 @@ class CupertinoPicker extends StatefulWidget {
     @required List<Widget> children,
     bool looping = false,
   }) : assert(children != null),
-       assert(diameterRatio != null),
-       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-       assert(magnification > 0),
-       assert(itemExtent != null),
-       assert(itemExtent > 0),
-       childDelegate = looping
-                       ? ListWheelChildLoopingListDelegate(children: children)
-                       : ListWheelChildListDelegate(children: children),
-       super(key: key);
+        assert(diameterRatio != null),
+        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+  assert(magnification > 0),
+  assert(itemExtent != null),
+  assert(itemExtent > 0),
+  childDelegate = looping
+  ? ListWheelChildLoopingListDelegate(children: children)
+      : ListWheelChildListDelegate(children: children),
+  super(key: key);
 
   /// Creates a picker from an [IndexedWidgetBuilder] callback where the builder
   /// is dynamically invoked during layout.
@@ -98,13 +98,13 @@ class CupertinoPicker extends StatefulWidget {
     @required IndexedWidgetBuilder itemBuilder,
     int childCount,
   }) : assert(itemBuilder != null),
-       assert(diameterRatio != null),
-       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-       assert(magnification > 0),
-       assert(itemExtent != null),
-       assert(itemExtent > 0),
-       childDelegate = ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount),
-       super(key: key);
+        assert(diameterRatio != null),
+        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+  assert(magnification > 0),
+  assert(itemExtent != null),
+  assert(itemExtent > 0),
+  childDelegate = ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount),
+  super(key: key);
 
   /// Relative ratio between this picker's height and the simulated cylinder's diameter.
   ///
@@ -202,24 +202,28 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     }
   }
 
-  /// Makes the fade to white edge gradients.
+  /// Makes the fade to [CupertinoPicker.backgroundColor] edge gradients.
   Widget _buildGradientScreen() {
+    // To account for the possibility that the background color is transparent
+    // we will factor in its opacity while calculating the gradient.
+    final Color widgetBackgroundColor = widget.backgroundColor;
+    final double opacity = widgetBackgroundColor.opacity;
     return Positioned.fill(
       child: IgnorePointer(
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: <Color>[
-                Color(0xFFFFFFFF),
-                Color(0xF2FFFFFF),
-                Color(0xDDFFFFFF),
-                Color(0x00FFFFFF),
-                Color(0x00FFFFFF),
-                Color(0xDDFFFFFF),
-                Color(0xF2FFFFFF),
-                Color(0xFFFFFFFF),
+                widgetBackgroundColor.withOpacity(0),
+                widgetBackgroundColor.withAlpha(0xF2 * opacity.floor()),
+                widgetBackgroundColor.withAlpha(0xDD * opacity.floor()),
+                widgetBackgroundColor.withAlpha(0x00 * opacity.floor()),
+                widgetBackgroundColor.withAlpha(0x00 * opacity.floor()),
+                widgetBackgroundColor.withAlpha(0xDD * opacity.floor()),
+                widgetBackgroundColor.withAlpha(0xF2 * opacity.floor()),
+                widgetBackgroundColor.withOpacity(0),
               ],
-              stops: <double>[
+              stops: const <double>[
                 0.0, 0.05, 0.09, 0.22, 0.78, 0.91, 0.95, 1.0,
               ],
               begin: Alignment.topCenter,
@@ -235,7 +239,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   /// the lens and partially grayed out around it.
   Widget _buildMagnifierScreen() {
     final Color foreground = widget.backgroundColor?.withAlpha(
-      (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt()
+        (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt()
     );
 
     return IgnorePointer(
@@ -248,13 +252,13 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
           ),
           Container(
             decoration: const BoxDecoration(
-              border: Border(
-                top: BorderSide(width: 0.0, color: _kHighlighterBorder),
-                bottom: BorderSide(width: 0.0, color: _kHighlighterBorder),
-              )
+                border: Border(
+                  top: BorderSide(width: 0.0, color: _kHighlighterBorder),
+                  bottom: BorderSide(width: 0.0, color: _kHighlighterBorder),
+                )
             ),
             constraints: BoxConstraints.expand(
-                height: widget.itemExtent * widget.magnification,
+              height: widget.itemExtent * widget.magnification,
             ),
           ),
           Expanded(
@@ -367,7 +371,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     if (_currentIndex == 0)
       return;
     controller.jumpToItem(_currentIndex - 1);
-   }
+  }
 
   void _handleScrollUpdate() {
     if (controller.selectedItem == _currentIndex)
@@ -375,7 +379,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     _currentIndex = controller.selectedItem;
     markNeedsSemanticsUpdate();
   }
-   @override
+  @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;

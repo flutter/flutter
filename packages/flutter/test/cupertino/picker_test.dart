@@ -56,6 +56,50 @@ void main() {
     });
   });
 
+  group('gradient', () {
+    testWidgets('gradient displays correctly with background color', (WidgetTester tester) async {
+      const Color backgroundColor = Color.fromRGBO(255, 0, 0, 1.0);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 300.0,
+              width: 300.0,
+              child: CupertinoPicker(
+                backgroundColor: backgroundColor,
+                itemExtent: 15.0,
+                children: const <Widget>[
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                ],
+                onSelectedItemChanged: (int i) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      final Container container = tester.firstWidget(find.byType(Container));
+      final BoxDecoration boxDecoration = container.decoration;
+      expect(boxDecoration.gradient.colors, <Color>[
+        backgroundColor.withOpacity(0),
+        backgroundColor.withAlpha(0xF2),
+        backgroundColor.withAlpha(0xDD),
+        backgroundColor.withAlpha(0x00),
+        backgroundColor.withAlpha(0x00),
+        backgroundColor.withAlpha(0xDD),
+        backgroundColor.withAlpha(0xF2),
+        backgroundColor.withOpacity(0),
+      ]);
+    });
+  });
+
   group('scroll', () {
     testWidgets(
       'scrolling calls onSelectedItemChanged and triggers haptic feedback',
