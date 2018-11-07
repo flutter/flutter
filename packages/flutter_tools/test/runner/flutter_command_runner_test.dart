@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
-import 'package:quiver/time.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
@@ -30,7 +29,6 @@ void main() {
     MemoryFileSystem fs;
     Platform platform;
     FlutterCommandRunner runner;
-    Clock clock;
     ProcessManager processManager;
 
     setUpAll(() {
@@ -51,7 +49,6 @@ void main() {
       );
 
       runner = createTestCommandRunner(DummyFlutterCommand());
-      clock = MockClock();
       processManager = MockProcessManager();
     });
 
@@ -101,7 +98,7 @@ void main() {
         when(processManager.runSync('git log -n 1 --pretty=format:%ad --date=iso'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
 
-        final FlutterVersion version = FlutterVersion(const Clock());
+        final FlutterVersion version = FlutterVersion();
 
         // Because the hash depends on the time, we just use the 0.0.0-unknown here.
         expect(version.toJson()['frameworkVersion'], '0.0.0-unknown');
