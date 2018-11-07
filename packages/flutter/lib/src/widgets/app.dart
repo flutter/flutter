@@ -33,15 +33,25 @@ export 'dart:ui' show Locale;
 ///
 /// The [locales] list is the device's preferred locales when the app started, or the
 /// device's preferred locales the user selected after the app was started. This list
-/// is in order of preference The [supportedLocales] parameter is just the value of
+/// is in order of preference. The [supportedLocales] parameter is just the value of
 /// [WidgetsApp.supportedLocales].
+///
+/// See also:
+///
+///  * [LocaleResolutionCallback], which takes only one default locale (instead of a list)
+///    and is attempted only after this callback fails or is null.
 typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.localeResolutionCallback].
 ///
+/// It is recommended to provide a [LocaleListResolutionCallback] instead of a
+/// [LocaleResolutionCallback] when possible, as [LocaleListResolutionCallback] as
+/// this callback only recieves a subset of the information provided
+/// in [LocaleListResolutionCallback].
+///
 /// A [LocaleResolutionCallback] is responsible for computing the locale of the app's
 /// [Localizations] object when the app starts and when user changes the default
-/// locale for the device.
+/// locale for the device after [LocaleListResolutionCallback] fails or is not provided.
 ///
 /// This callback is also used if the app is created with a specific locale using
 /// the [new WidgetsApp] `locale` parameter.
@@ -51,6 +61,11 @@ typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Ite
 /// was started. The default locale is the first locale in the list of preferred
 /// locales. The [supportedLocales] parameter is just the value of
 /// [WidgetsApp.supportedLocales].
+///
+/// See also:
+///
+///  * [LocaleListResolutionCallback], which takes a list of preferred locales (instead of one locale).
+///    Resolutions by [LocaleListResolutionCallback] take precedence over [LocaleResolutionCallback].
 typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
@@ -461,7 +476,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// When a [localeListResolutionCallback] is provided, Flutter will first attempt to
   /// resolve the locale with the provided [localeListResolutionCallback]. If the
-  /// callback or result is null, will fallback to trying the [localeResolutionCallback].
+  /// callback or result is null, it will fallback to trying the [localeResolutionCallback].
   /// If both [localeResolutionCallback] and [localeListResolutionCallback] are left null
   /// or fail to resolve (return null), the [WidgetsApp.fallbackLocaleResolution]
   /// fallback algorithm will be used.
