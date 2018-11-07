@@ -128,5 +128,20 @@ void main() {
       expect(imageCache.currentSizeBytes, 256);
       expect(imageCache.maximumSizeBytes, 256 + 1000);
     });
+
+    test('can evict an image that is pending', () async {
+      const TestImage testImage = TestImage(width: 8, height:  8);
+      // Image is pending.
+      final TestDelayImageProvider provider = TestDelayImageProvider(1, 1, image: testImage);
+      final ImageStream stream = provider.resolve(ImageConfiguration.empty);
+      final Future<ImageInfo> result = extractOneFrame(stream);
+      // Remove image from cache.
+      expect(imageCache.currentSize, 0);
+      expect(imageCache.evict(1), true);
+      // Complete loading.
+      provider.complete();
+      expect(await result, isNotNull);
+      expect(imageCache.currentSize, 0);
+    });
   });
 }
