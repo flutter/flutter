@@ -113,7 +113,7 @@ source_set("txt") {
   ]
 
   deps = [
-    "//third_party/skia:effects",
+    "//third_party/skia",
   ]
 
   if (is_mac || is_ios) {

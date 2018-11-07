@@ -60,12 +60,10 @@ source_set("vulkan") {
   deps = [
     "$flutter_root/fml",
     "//third_party/skia",
-    "//third_party/skia:gpu",
   ]
 
   public_configs = [
     ":vulkan_config",
     "$flutter_root:config",
-    "//third_party/skia:skia_private",
   ]
 }

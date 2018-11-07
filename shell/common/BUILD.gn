@@ -102,7 +102,6 @@ source_set("common") {
     "$flutter_root/synchronization",
     "//third_party/dart/runtime:dart_api",
     "//third_party/skia",
-    "//third_party/skia:gpu",
   ]
 
   public_deps = [

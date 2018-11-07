@@ -108,8 +108,6 @@ source_set("ui") {
     "//third_party/dart/runtime/bin:dart_io_api",
     "//third_party/rapidjson",
     "//third_party/skia",
-    "//third_party/skia:effects",
-    "//third_party/skia:gpu",
     "//third_party/tonic",
   ]
   if (is_fuchsia) {
