@@ -108,6 +108,7 @@ class FlutterVersion {
   }
 
   Map<String, Object> toJson() => <String, Object>{
+        'frameworkVersion': frameworkVersion ?? 'unknown',
         'channel': channel,
         'repositoryUrl': repositoryUrl ?? 'unknown source',
         'frameworkRevision': frameworkRevision,
