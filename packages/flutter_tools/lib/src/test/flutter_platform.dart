@@ -591,7 +591,7 @@ class _FlutterPlatform extends PlatformPlugin {
           }
           processObservatoryUri = detectedUri;
           {
-          printTrace('Connecting to service protocol: $processObservatoryUri');
+            printTrace('Connecting to service protocol: $processObservatoryUri');
             final Future<VMService> localVmService = VMService.connect(processObservatoryUri,
               compileExpression: _compileExpressionService);
             localVmService.then((VMService vmservice) {
