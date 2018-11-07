@@ -11,6 +11,7 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
+import 'test_data/tests_project.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
 
@@ -76,6 +77,47 @@ void main() {
     test('can evaluate expressions returning complex objects in build method', () async {
       await _flutter.run(withDebugger: true);
       await breakInBuildMethod(_flutter);
+      await evaluateComplexReturningExpressions(_flutter);
+    });
+  }, timeout: const Timeout.factor(6));
+
+  group('flutter test expression evaluation', () {
+    Directory tempDir;
+    final TestsProject _project = TestsProject();
+    FlutterTestTestDriver _flutter;
+
+    setUp(() async {
+      tempDir = createResolvedTempDirectorySync();
+      await _project.setUpIn(tempDir);
+      _flutter = FlutterTestTestDriver(tempDir);
+    });
+
+    tearDown(() async {
+      await _flutter.quit();
+      tryToDelete(tempDir);
+    });
+
+    test('can evaluate trivial expressions in a test', () async {
+      await _flutter.test(
+        withDebugger: true,
+        beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
+      );
+      await evaluateTrivialExpressions(_flutter);
+    });
+
+    test('can evaluate complex expressions in a test', () async {
+      await _flutter.test(
+        withDebugger: true,
+        beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
+      );
+      await evaluateComplexExpressions(_flutter);
+    });
+
+    test('can evaluate expressions returning complex objects in a test', () async {
+      await _flutter.test(
+        withDebugger: true,
+        beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
+      );
       await evaluateComplexReturningExpressions(_flutter);
     });
   }, timeout: const Timeout.factor(6));
