@@ -479,14 +479,14 @@ class WidgetsApp extends StatefulWidget {
   /// resolve the locale with the provided [localeListResolutionCallback]. If the
   /// callback or result is null, it will fallback to trying the [localeResolutionCallback].
   /// If both [localeResolutionCallback] and [localeListResolutionCallback] are left null
-  /// or fail to resolve (return null), the [WidgetsApp.fallbackLocaleResolution]
+  /// or fail to resolve (return null), the [WidgetsApp.defaultLocaleListResolution]
   /// fallback algorithm will be used.
   ///
   /// The priority of each available fallback is:
   ///
   ///  1. [localeListResolutionCallback] is attempted first.
   ///  2. [localeResolutionCallback] is attempted second.
-  ///  3. Flutter's [WidgetsApp.fallbackLocaleResolution] algorithm is attempted last.
+  ///  3. Flutter's [WidgetsApp.defaultLocaleListResolution] algorithm is attempted last.
   /// {@endtemplate}
   ///
   /// This callback considers the entire list of preferred locales.
@@ -751,16 +751,19 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         return locale;
     }
     // Both callbacks failed, falling back to default algorithm.
-    return fallbackLocaleResolution(preferredLocales, supportedLocales);
+    return defaultLocaleListResolution(preferredLocales, supportedLocales);
   }
 
-  /// The default fallback locale resolution algorithm.
-  ///
-  /// This algorithm prioritizes speed at the cost of slightly less appropriate
-  /// resolutions for edge cases.
+  /// The default locale resolution algorithm.
   ///
   /// Custom resolution algorithms can be provided through [WidgetsApp.localeListResolutionCallback]
   /// or [WidgetsApp.localeResolutionCallback].
+  ///
+  /// When no custom locale resolition algorithms are provided or if both fail to resolve,
+  /// Flutter will default to calling this algorithm.
+  ///
+  /// This algorithm prioritizes speed at the cost of slightly less appropriate
+  /// resolutions for edge cases.
   ///
   /// This algorithm will resolve to the earliest locale in [preferredLocales] that
   /// matches the most fields, prioritizing in the order of perfect match,
@@ -783,7 +786,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
   /// when `de` is not supported and `zh` is listed before `fr` (German is closer to French
   /// than Chinese).
-  static Locale fallbackLocaleResolution(List<Locale> preferredLocales, Iterable<Locale> supportedLocales) {
+  static Locale defaultLocaleListResolution(List<Locale> preferredLocales, Iterable<Locale> supportedLocales) {
     // preferredLocales can be null when called before the platform has had a chance to
     // initialize the locales. Platforms without locale passing support will provide an empty list.
     // We default to the first supported locale in these cases.
