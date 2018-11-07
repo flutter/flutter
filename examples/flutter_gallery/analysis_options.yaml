@@ -1,0 +1,8 @@
+# Take our settings from the repo's main analysis_options.yaml file, but add
+# an exclude for the build directory.
+
+include: ../../analysis_options.yaml
+
+analyzer:
+  exclude:
+    - build/**

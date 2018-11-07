@@ -99,6 +99,7 @@ Future<void> main(List<String> arguments) async {
   createFooter('$kDocsRoot/lib/footer.html');
   copyAssets();
   cleanOutSnippets();
+  precompileSnippetsTool();
 
   final List<String> dartdocBaseArgs = <String>['global', 'run'];
   if (args['checked']) {
@@ -297,6 +298,34 @@ void cleanOutSnippets() {
       ..deleteSync(recursive: true)
       ..createSync(recursive: true);
   }
+}
+
+File precompileSnippetsTool() {
+  final File snapshotPath = File(path.join('bin', 'cache', 'snippets.snapshot'));
+  print('Precompiling snippets tool into ${snapshotPath.absolute.path}');
+  if (snapshotPath.existsSync()) {
+    snapshotPath.deleteSync();
+  }
+  // In order to be able to optimize properly, we need to provide a training set
+  // of arguments, and an input file to process.
+  final Directory tempDir = Directory.systemTemp.createTempSync('dartdoc_snippet_');
+  final File trainingFile = File(path.join(tempDir.path, 'snippet_training'));
+  trainingFile.writeAsStringSync('```dart\nvoid foo(){}\n```');
+  Process.runSync(Platform.resolvedExecutable, <String>[
+    '--snapshot=${snapshotPath.absolute.path}',
+    '--snapshot_kind=app-jit',
+    path.join(
+      'dev',
+      'snippets',
+      'lib',
+      'main.dart',
+    ),
+    '--type=sample',
+    '--input=${trainingFile.absolute.path}',
+    '--output=${path.join(tempDir.absolute.path, 'training_output.txt')}',
+  ]);
+  tempDir.deleteSync(recursive: true);
+  return snapshotPath;
 }
 
 void sanityCheckDocs() {

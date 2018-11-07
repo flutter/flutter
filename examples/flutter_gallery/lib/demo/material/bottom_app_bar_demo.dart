@@ -33,7 +33,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     label: 'circular floating action button',
     value: FloatingActionButton(
       onPressed: _showSnackbar,
-      child: Icon(Icons.add),
+      child: Icon(Icons.add, semanticLabel: 'Action'),
       backgroundColor: Colors.orange,
     ),
   );
@@ -43,7 +43,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     label: 'diamond shape floating action button',
     value: _DiamondFab(
       onPressed: _showSnackbar,
-      child: Icon(Icons.add),
+      child: Icon(Icons.add, semanticLabel: 'Action'),
     ),
   );
 
@@ -147,7 +147,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         actions: <Widget>[
           MaterialDemoDocumentationButton(BottomAppBarDemo.routeName),
           IconButton(
-            icon: const Icon(Icons.sentiment_very_satisfied),
+            icon: const Icon(Icons.sentiment_very_satisfied, semanticLabel: 'Update shape'),
             onPressed: () {
               setState(() {
                 _fabShape = _fabShape == kCircularFab ? kDiamondFab : kCircularFab;
@@ -349,7 +349,7 @@ class _DemoBottomAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> rowContents = <Widget> [
       IconButton(
-        icon: const Icon(Icons.menu),
+        icon: const Icon(Icons.menu, semanticLabel: 'Show bottom sheet'),
         onPressed: () {
           showModalBottomSheet<void>(
             context: context,
@@ -367,7 +367,7 @@ class _DemoBottomAppBar extends StatelessWidget {
 
     rowContents.addAll(<Widget> [
       IconButton(
-        icon: const Icon(Icons.search),
+        icon: const Icon(Icons.search, semanticLabel: 'show search action',),
         onPressed: () {
           Scaffold.of(context).showSnackBar(
             const SnackBar(content: Text('This is a dummy search action.')),
@@ -379,6 +379,7 @@ class _DemoBottomAppBar extends StatelessWidget {
           Theme.of(context).platform == TargetPlatform.iOS
               ? Icons.more_horiz
               : Icons.more_vert,
+          semanticLabel: 'Show menu actions',
         ),
         onPressed: () {
           Scaffold.of(context).showSnackBar(

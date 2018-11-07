@@ -101,7 +101,7 @@ class _AccountDetails extends StatelessWidget {
 
     if (accountEmail != null) {
       final Widget accountEmailLine = LayoutId(
-        id: _AccountDetailsLayout.accountEmail,
+        id: _AccountDetailsLayout.accountEmail,i
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 2.0),
           child: DefaultTextStyle(

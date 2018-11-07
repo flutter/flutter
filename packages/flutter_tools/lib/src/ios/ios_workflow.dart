@@ -135,6 +135,9 @@ class IOSValidator extends DoctorValidator {
       packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(
         'libimobiledevice and ideviceinstaller are not installed. To install with Brew, run:\n'
+        '  brew update\n'
+        '  brew install --HEAD usbmuxd\n'
+        '  brew link usbmuxd\n'
         '  brew install --HEAD libimobiledevice\n'
         '  brew install ideviceinstaller'
       ));
@@ -145,7 +148,12 @@ class IOSValidator extends DoctorValidator {
         'Verify that all connected devices have been paired with this computer in Xcode.\n'
         'If all devices have been paired, libimobiledevice and ideviceinstaller may require updating.\n'
         'To update with Brew, run:\n'
+        '  brew update\n'
         '  brew uninstall --ignore-dependencies libimobiledevice\n'
+        '  brew uninstall --ignore-dependencies usbmuxd\n'
+        '  brew install --HEAD usbmuxd\n'
+        '  brew unlink usbmuxd\n'
+        '  brew link usbmuxd\n'
         '  brew install --HEAD libimobiledevice\n'
         '  brew install ideviceinstaller'
       ));
@@ -155,6 +163,8 @@ class IOSValidator extends DoctorValidator {
       messages.add(ValidationMessage.error(
         'ideviceinstaller is not installed; this is used to discover connected iOS devices.\n'
         'To install with Brew, run:\n'
+        '  brew install --HEAD usbmuxd\n'
+        '  brew link usbmuxd\n'
         '  brew install --HEAD libimobiledevice\n'
         '  brew install ideviceinstaller'
       ));

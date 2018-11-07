@@ -35,12 +35,15 @@ class FlutterDevice {
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.viewFilter,
+    TargetModel targetModel = TargetModel.flutter,
     ResidentCompiler generator,
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
          trackWidgetCreation: trackWidgetCreation,
-         fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
+         fileSystemRoots: fileSystemRoots,
+         fileSystemScheme: fileSystemScheme,
+         targetModel: targetModel,
        );
 
   final Device device;

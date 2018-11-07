@@ -243,14 +243,14 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: BackdropDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
-    }, skip: true);
+    });
 
     testWidgets('bottom_app_bar_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(MaterialApp(home: BottomAppBarDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
-    }, skip: true);
+    });
 
     testWidgets('bottom_navigation_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
@@ -264,14 +264,14 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: ButtonsDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
-    }, skip: true);
+    });
 
     testWidgets('cards_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(MaterialApp(home: CardsDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
-    }, skip: true);
+    });
 
     testWidgets('chip_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
@@ -446,14 +446,14 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: TabsFabDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
-    }, skip: true);
+    });
 
     testWidgets('text_form_field_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: TextFormFieldDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
-    }, skip: true);
+    });
 
     testWidgets('tooltip_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
@@ -503,7 +503,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: BottomAppBarDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      }, skip: true); // https://github.com/flutter/flutter/issues/21651
+      });
 
       testWidgets('bottom_navigation_demo $themeName', (WidgetTester tester) async {
         final AutomatedTestWidgetsFlutterBinding binding = tester.binding;
@@ -521,7 +521,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: ButtonsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      }, skip: true); // https://github.com/flutter/flutter/issues/21647
+      });
 
       testWidgets('cards_demo $themeName', (WidgetTester tester) async {
         final AutomatedTestWidgetsFlutterBinding binding = tester.binding;
@@ -530,7 +530,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: CardsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      }, skip: true); // https://github.com/flutter/flutter/issues/21651
+      });
 
       testWidgets('chip_demo $themeName', (WidgetTester tester) async {
         final AutomatedTestWidgetsFlutterBinding binding = tester.binding;

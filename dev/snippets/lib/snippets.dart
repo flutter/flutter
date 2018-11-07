@@ -18,9 +18,10 @@ void errorExit(String message) {
 // A Tuple containing the name and contents associated with a code block in a
 // snippet.
 class _ComponentTuple {
-  _ComponentTuple(this.name, this.contents);
+  _ComponentTuple(this.name, this.contents, {String language}) : language = language ?? '';
   final String name;
   final List<String> contents;
+  final String language;
   String get mergedContent => contents.join('\n').trim();
 }
 
@@ -28,7 +29,9 @@ class _ComponentTuple {
 /// the output directory.
 class SnippetGenerator {
   SnippetGenerator({Configuration configuration})
-      : configuration = configuration ?? const Configuration() {
+      : configuration = configuration ??
+           // This script must be run from dev/docs, so the root is up two levels.
+            Configuration(flutterRoot: Directory(path.canonicalize(path.join('..', '..')))) {
     this.configuration.createOutputDirectory();
   }
 
@@ -55,9 +58,7 @@ class SnippetGenerator {
   /// "description" injection into a comment. Only used for
   /// [SnippetType.application] snippets.
   String interpolateTemplate(List<_ComponentTuple> injections, String template) {
-    final String injectionMatches =
-        injections.map<String>((_ComponentTuple tuple) => RegExp.escape(tuple.name)).join('|');
-    final RegExp moustacheRegExp = RegExp('{{($injectionMatches)}}');
+    final RegExp moustacheRegExp = RegExp('{{([^}]+)}}');
     return template.replaceAllMapped(moustacheRegExp, (Match match) {
       if (match[1] == 'description') {
         // Place the description into a comment.
@@ -77,9 +78,13 @@ class SnippetGenerator {
         }
         return description.join('\n').trim();
       } else {
+        // If the match isn't found in the injections, then just remove the
+        // moustache reference, since we want to allow the sections to be
+        // "optional" in the input: users shouldn't be forced to add an empty
+        // "```dart preamble" section if that section would be empty.
         return injections
-            .firstWhere((_ComponentTuple tuple) => tuple.name == match[1])
-            .mergedContent;
+            .firstWhere((_ComponentTuple tuple) => tuple.name == match[1], orElse: () => null)
+            ?.mergedContent ?? '';
       }
     }).trim();
   }
@@ -93,36 +98,36 @@ class SnippetGenerator {
   /// if not a [SnippetType.application] snippet.
   String interpolateSkeleton(SnippetType type, List<_ComponentTuple> injections, String skeleton) {
     final List<String> result = <String>[];
+    const HtmlEscape htmlEscape = HtmlEscape();
+    String language;
     for (_ComponentTuple injection in injections) {
       if (!injection.name.startsWith('code')) {
         continue;
       }
       result.addAll(injection.contents);
+      if (injection.language.isNotEmpty) {
+        language = injection.language;
+      }
       result.addAll(<String>['', '// ...', '']);
     }
     if (result.length > 3) {
       result.removeRange(result.length - 3, result.length);
     }
-    String formattedCode;
-    try {
-      formattedCode = formatter.format(result.join('\n'));
-    } on FormatterException catch (exception) {
-      errorExit('Unable to format snippet code: $exception');
-    }
     final Map<String, String> substitutions = <String, String>{
       'description': injections
           .firstWhere((_ComponentTuple tuple) => tuple.name == 'description')
           .mergedContent,
-      'code': formattedCode,
+      'code': htmlEscape.convert(result.join('\n')),
+      'language': language ?? 'dart',
     }..addAll(type == SnippetType.application
         ? <String, String>{
             'id':
                 injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'id').mergedContent,
             'app':
-                injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent,
+                htmlEscape.convert(injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent),
           }
         : <String, String>{'id': '', 'app': ''});
-    return skeleton.replaceAllMapped(RegExp(r'{{(code|app|id|description)}}'), (Match match) {
+    return skeleton.replaceAllMapped(RegExp('{{(${substitutions.keys.join('|')})}}'), (Match match) {
       return substitutions[match[1]];
     });
   }
@@ -130,31 +135,32 @@ class SnippetGenerator {
   /// Parses the input for the various code and description segments, and
   /// returns them in the order found.
   List<_ComponentTuple> parseInput(String input) {
-    bool inSnippet = false;
+    bool inCodeBlock = false;
     input = input.trim();
     final List<String> description = <String>[];
     final List<_ComponentTuple> components = <_ComponentTuple>[];
-    String currentComponent;
+    String language;
+    final RegExp codeStartEnd = RegExp(r'^\s*```([-\w]+|[-\w]+ ([-\w]+))?\s*$');
     for (String line in input.split('\n')) {
-      final Match match = RegExp(r'^\s*```(dart|dart (\w+))?\s*$').firstMatch(line);
-      if (match != null) {
-        inSnippet = !inSnippet;
+      final Match match = codeStartEnd.firstMatch(line);
+      if (match != null) { // If we saw the start or end of a code block
+        inCodeBlock = !inCodeBlock;
         if (match[1] != null) {
-          currentComponent = match[1];
+          language = match[1];
           if (match[2] != null) {
-            components.add(_ComponentTuple('code-${match[2]}', <String>[]));
+            components.add(_ComponentTuple('code-${match[2]}', <String>[], language: language));
           } else {
-            components.add(_ComponentTuple('code', <String>[]));
+            components.add(_ComponentTuple('code', <String>[], language: language));
           }
         } else {
-          currentComponent = null;
+          language = null;
         }
         continue;
       }
-      if (!inSnippet) {
+      if (!inCodeBlock) {
         description.add(line);
       } else {
-        assert(currentComponent != null);
+        assert(language != null);
         components.last.contents.add(line);
       }
     }
@@ -182,7 +188,7 @@ class SnippetGenerator {
   /// The [id] is a string ID to use for the output file, and to tell the user
   /// about in the `flutter create` hint. It must not be null if the [type] is
   /// [SnippetType.application].
-  String generate(File input, SnippetType type, {String template, String id}) {
+  String generate(File input, SnippetType type, {String template, String id, File output}) {
     assert(template != null || type != SnippetType.application);
     assert(id != null || type != SnippetType.application);
     assert(input != null);
@@ -207,11 +213,14 @@ class SnippetGenerator {
         try {
           app = formatter.format(app);
         } on FormatterException catch (exception) {
+          stderr.write('Code to format:\n$app\n');
           errorExit('Unable to format snippet app template: $exception');
         }
 
         snippetData.add(_ComponentTuple('app', app.split('\n')));
-        getOutputFile(id).writeAsStringSync(app);
+        final File outputFile = output ?? getOutputFile(id);
+        stderr.writeln('Writing to ${outputFile.absolute.path}');
+        outputFile.writeAsStringSync(app);
         break;
       case SnippetType.sample:
         break;

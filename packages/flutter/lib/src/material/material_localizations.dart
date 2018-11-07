@@ -338,6 +338,9 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 
   @override
   bool shouldReload(_MaterialLocalizationsDelegate old) => false;
+
+  @override
+  String toString() => 'DefaultMaterialLocalizations.delegate(en_US)';
 }
 
 /// US English strings for the material widgets.

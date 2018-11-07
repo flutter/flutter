@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   test('Should be able to build and layout a paragraph', () {

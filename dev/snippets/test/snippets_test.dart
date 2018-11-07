@@ -5,8 +5,6 @@
 import 'dart:io' hide Platform;
 import 'package:path/path.dart' as path;
 
-import 'package:platform/platform.dart' show FakePlatform;
-
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 import 'package:snippets/configuration.dart';
@@ -14,7 +12,6 @@ import 'package:snippets/snippets.dart';
 
 void main() {
   group('Generator', () {
-    FakePlatform fakePlatform;
     Configuration configuration;
     SnippetGenerator generator;
     Directory tmpDir;
@@ -22,10 +19,8 @@ void main() {
 
     setUp(() {
       tmpDir = Directory.systemTemp.createTempSync('snippets_test');
-      fakePlatform = FakePlatform(
-          script: Uri.file(path.join(
-              tmpDir.absolute.path, 'flutter', 'dev', 'snippets', 'lib', 'snippets_test.dart')));
-      configuration = Configuration(platform: fakePlatform);
+      configuration = Configuration(flutterRoot: Directory(path.join(
+          tmpDir.absolute.path, 'flutter')));
       configuration.createOutputDirectory();
       configuration.templatesDirectory.createSync(recursive: true);
       configuration.skeletonsDirectory.createSync(recursive: true);
@@ -67,7 +62,7 @@ A description of the snippet.
 
 On several lines.
 
-```dart preamble
+```my-dart_language my-preamble
 const String name = 'snippet';
 ```
 
@@ -82,13 +77,13 @@ void main() {
           generator.generate(inputFile, SnippetType.application, template: 'template', id: 'id');
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
-      expect(html, contains("print('The actual \$name.');"));
+      expect(html, contains('print(&#39;The actual \$name.&#39;);'));
       expect(html, contains('A description of the snippet.\n'));
       expect(
           html,
-          contains('// A description of the snippet.\n'
-              '//\n'
-              '// On several lines.\n'));
+          contains('&#47;&#47; A description of the snippet.\n'
+              '&#47;&#47;\n'
+              '&#47;&#47; On several lines.\n'));
       expect(html, contains('void main() {'));
     });
 
@@ -110,7 +105,7 @@ void main() {
       final String html = generator.generate(inputFile, SnippetType.sample);
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
-      expect(html, contains("print('The actual \$name.');"));
+      expect(html, contains('  print(&#39;The actual \$name.&#39;);'));
       expect(html, contains('A description of the snippet.\n\nOn several lines.\n'));
       expect(html, contains('main() {'));
     });
