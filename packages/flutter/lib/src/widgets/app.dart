@@ -39,7 +39,8 @@ export 'dart:ui' show Locale;
 /// See also:
 ///
 ///  * [LocaleResolutionCallback], which takes only one default locale (instead of a list)
-///    and is attempted only after this callback fails or is null.
+///    and is attempted only after this callback fails or is null. [LocaleListResolutionCallback]
+///    is recommended over [LocaleResolutionCallback].
 typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.localeResolutionCallback].
@@ -815,16 +816,19 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     for (int localeIndex = 0; localeIndex < preferredLocales.length; localeIndex += 1) {
       final Locale userLocale = preferredLocales[localeIndex];
       // Look for perfect match.
-      if (allSupportedLocales.containsKey(ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode, userLocale.countryCode.hashCode))) {
+      int hashCode = ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode, userLocale.countryCode.hashCode);
+      if (allSupportedLocales.containsKey(hashCode)) {
         return userLocale;
       }
       // Look for language+script match.
-      if (userLocale.scriptCode != null && languageAndScriptLocales.containsKey(ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode))) {
-        return languageAndScriptLocales[ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode)];
+      hashCode = ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode);
+      if (userLocale.scriptCode != null && languageAndScriptLocales.containsKey(hashCode)) {
+        return languageAndScriptLocales[hashCode];
       }
       // Look for language+country match.
-      if (userLocale.countryCode != null && languageAndCountryLocales.containsKey(ui.hashValues(userLocale.languageCode.hashCode, userLocale.countryCode.hashCode))) {
-        return languageAndCountryLocales[ui.hashValues(userLocale.languageCode.hashCode, userLocale.countryCode.hashCode)];
+      hashCode = ui.hashValues(userLocale.languageCode.hashCode, userLocale.countryCode.hashCode);
+      if (userLocale.countryCode != null && languageAndCountryLocales.containsKey(hashCode)) {
+        return languageAndCountryLocales[hashCode];
       }
       // If there was a languageCode-only match in the previous iteration's higher
       // ranked preferred locale, we return it if the current userLocale does not
@@ -833,27 +837,28 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         return matchesLanguageCode;
       }
       // Look and store language-only match.
-      if (languageLocales.containsKey(userLocale.languageCode.hashCode)) {
-        matchesLanguageCode = languageLocales[userLocale.languageCode.hashCode];
+      hashCode = userLocale.languageCode.hashCode;
+      if (languageLocales.containsKey(hashCode)) {
+        matchesLanguageCode = languageLocales[hashCode];
         // Since first (default) locale is usually highly preferred, we will allow
         // a languageCode-only match to be instantly matched. If the next preferred
         // languageCode is the same, we defer hastily returning until the next iteration
         // since at worst it is the same and at best an improved match.
-        if (localeIndex == 0
-          && !(localeIndex + 1 < preferredLocales.length
-              && preferredLocales[localeIndex + 1].languageCode == userLocale.languageCode)) {
+        if (localeIndex == 0 &&
+            !(localeIndex + 1 < preferredLocales.length &&
+            preferredLocales[localeIndex + 1].languageCode == userLocale.languageCode)) {
           return matchesLanguageCode;
         }
       }
       // countryCode only match. When all else except default supported locale fails,
       // attempt to match by country only, as a user is likely to be familar with a
       // language from their listed country.
-      if (userLocale.countryCode != null && countryLocales.containsKey(userLocale.countryCode.hashCode)) {
-        matchesCountryCode ??= countryLocales[userLocale.countryCode.hashCode];
+      if (matchesCountryCode == null && userLocale.countryCode != null && countryLocales.containsKey(userLocale.countryCode.hashCode)) {
+        matchesCountryCode = countryLocales[userLocale.countryCode.hashCode];
       }
     }
-    // When there is no languageCode only match. Fallback to matching countryCode only. Country
-    // fallback only applies on iOS. When there is no countryCode only match, we return first
+    // When there is no languageCode-only match. Fallback to matching countryCode only. Country
+    // fallback only applies on iOS. When there is no countryCode-only match, we return first
     // suported locale.
     final Locale resolvedLocale = matchesLanguageCode ?? matchesCountryCode ?? supportedLocales.first;
     return resolvedLocale;
