@@ -11,8 +11,8 @@ Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
     theme: ThemeData(
       platform: platform,
     ),
-    home: CustomScrollView(
-      slivers: const <Widget>[
+    home: const CustomScrollView(
+      slivers: <Widget>[
         SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
       ],
     ),

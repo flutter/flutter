@@ -132,19 +132,38 @@ class VsCode {
     final String progFiles = platform.environment['programfiles'];
     final String localAppData = platform.environment['localappdata'];
 
-    return _findInstalled(<_VsCodeInstallLocation>[
-      _VsCodeInstallLocation(fs.path.join(localAppData, 'Programs\\Microsoft VS Code'), '.vscode'),
-      _VsCodeInstallLocation(fs.path.join(progFiles86, 'Microsoft VS Code'), '.vscode',
-          edition: '32-bit edition'),
-      _VsCodeInstallLocation(fs.path.join(progFiles, 'Microsoft VS Code'), '.vscode',
-          edition: '64-bit edition'),
-      _VsCodeInstallLocation(fs.path.join(localAppData, 'Programs\\Microsoft VS Code Insiders'), '.vscode-insiders',
-          isInsiders: true),
-      _VsCodeInstallLocation(fs.path.join(progFiles86 , 'Microsoft VS Code Insiders'), '.vscode-insiders',
-          edition: '32-bit edition', isInsiders: true),
-      _VsCodeInstallLocation(fs.path.join(progFiles, 'Microsoft VS Code Insiders'), '.vscode-insiders',
-          edition: '64-bit edition', isInsiders: true),
-    ]);
+    final List<_VsCodeInstallLocation> searchLocations =
+        <_VsCodeInstallLocation>[];
+
+    if (localAppData != null) {
+      searchLocations.add(_VsCodeInstallLocation(
+          fs.path.join(localAppData, 'Programs\\Microsoft VS Code'),
+          '.vscode'));
+    }
+    searchLocations.add(_VsCodeInstallLocation(
+        fs.path.join(progFiles86, 'Microsoft VS Code'), '.vscode',
+        edition: '32-bit edition'));
+    searchLocations.add(_VsCodeInstallLocation(
+        fs.path.join(progFiles, 'Microsoft VS Code'), '.vscode',
+        edition: '64-bit edition'));
+    if (localAppData != null) {
+      searchLocations.add(_VsCodeInstallLocation(
+          fs.path.join(localAppData, 'Programs\\Microsoft VS Code Insiders'),
+          '.vscode-insiders',
+          isInsiders: true));
+    }
+    searchLocations.add(_VsCodeInstallLocation(
+        fs.path.join(progFiles86, 'Microsoft VS Code Insiders'),
+        '.vscode-insiders',
+        edition: '32-bit edition',
+        isInsiders: true));
+    searchLocations.add(_VsCodeInstallLocation(
+        fs.path.join(progFiles, 'Microsoft VS Code Insiders'),
+        '.vscode-insiders',
+        edition: '64-bit edition',
+        isInsiders: true));
+
+    return _findInstalled(searchLocations);
   }
 
   // Linux:

@@ -161,6 +161,8 @@ class PaintingContext extends ClipContext {
     assert(() {
       if (debugProfilePaintsEnabled)
         Timeline.startSync('${child.runtimeType}', arguments: timelineWhitelistArguments);
+      if (debugOnProfilePaint != null)
+        debugOnProfilePaint(child);
       return true;
     }());
 
@@ -198,6 +200,7 @@ class PaintingContext extends ClipContext {
         return true;
       }());
     }
+    assert(child._layer != null);
     child._layer.offset = offset;
     appendLayer(child._layer);
   }
@@ -488,7 +491,7 @@ class PaintingContext extends ClipContext {
   /// ancestor render objects that this render object will include a composited
   /// layer, which, for example, causes them to use composited clips.
   void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
-    pushLayer(OpacityLayer(alpha: alpha), painter, offset);
+    pushLayer(OpacityLayer(alpha: alpha, offset: offset), painter, Offset.zero);
   }
 
   @override
@@ -1526,18 +1529,18 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// required to obey the given constraints.
   ///
   /// If the parent reads information computed during the child's layout, the
-  /// parent must pass true for parentUsesSize. In that case, the parent will be
-  /// marked as needing layout whenever the child is marked as needing layout
+  /// parent must pass true for `parentUsesSize`. In that case, the parent will
+  /// be marked as needing layout whenever the child is marked as needing layout
   /// because the parent's layout information depends on the child's layout
   /// information. If the parent uses the default value (false) for
-  /// parentUsesSize, the child can change its layout information (subject to
+  /// `parentUsesSize`, the child can change its layout information (subject to
   /// the given constraints) without informing the parent.
   ///
   /// Subclasses should not override [layout] directly. Instead, they should
   /// override [performResize] and/or [performLayout]. The [layout] method
   /// delegates the actual work to [performResize] and [performLayout].
   ///
-  /// The parent's performLayout method should call the [layout] of all its
+  /// The parent's [performLayout] method should call the [layout] of all its
   /// children unconditionally. It is the [layout] method's responsibility (as
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
@@ -2411,17 +2414,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
 
     visitChildrenForSemantics((RenderObject renderChild) {
-      final _SemanticsFragment fragment = renderChild._getSemanticsForParent(
+      final _SemanticsFragment parentFragment = renderChild._getSemanticsForParent(
         mergeIntoParent: childrenMergeIntoParent,
       );
-      if (fragment.dropsSemanticsOfPreviousSiblings) {
+      if (parentFragment.dropsSemanticsOfPreviousSiblings) {
         fragments.clear();
         toBeMarkedExplicit.clear();
         if (!config.isSemanticBoundary)
           dropSemanticsOfPreviousSiblings = true;
       }
       // Figure out which child fragments are to be made explicit.
-      for (_InterestingSemanticsFragment fragment in fragment.interestingFragments) {
+      for (_InterestingSemanticsFragment fragment in parentFragment.interestingFragments) {
         fragments.add(fragment);
         fragment.addAncestor(this);
         fragment.addTags(config.tagsForChildren);

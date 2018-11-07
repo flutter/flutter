@@ -20,6 +20,7 @@ import 'theme.dart';
 // Examples can assume:
 // int _dollars = 0;
 // int _duelCommandment = 1;
+// void setState(VoidCallback fn) { }
 
 /// A callback that formats a numeric value from a [Slider] widget.
 ///
@@ -622,7 +623,7 @@ class _RenderSlider extends RenderBox {
       final double distance = (_value - _state.positionController.value).abs();
       _state.positionController.duration = distance != 0.0
         ? _positionAnimationDuration * (1.0 / distance)
-        : 0.0;
+        : Duration.zero;
       _state.positionController.animateTo(convertedValue, curve: Curves.easeInOut);
     } else {
       _state.positionController.value = convertedValue;

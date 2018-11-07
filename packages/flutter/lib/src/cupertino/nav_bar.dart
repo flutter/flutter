@@ -65,13 +65,33 @@ const TextStyle _kLargeTitleTextStyle = TextStyle(
 
 // There's a single tag for all instances of navigation bars because they can
 // all transition between each other (per Navigator) via Hero transitions.
-const _HeroTag _defaultHeroTag = _HeroTag();
+const _HeroTag _defaultHeroTag = _HeroTag(null);
 
 class _HeroTag {
-  const _HeroTag();
+  const _HeroTag(this.navigator);
+
+  final NavigatorState navigator;
+
   // Let the Hero tag be described in tree dumps.
   @override
-  String toString() => 'Default Hero tag for Cupertino navigation bars';
+  String toString() => 'Default Hero tag for Cupertino navigation bars with navigator $navigator';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    final _HeroTag otherTag = other;
+    return navigator == otherTag.navigator;
+  }
+
+  @override
+  int get hashCode {
+    return identityHashCode(navigator);
+  }
 }
 
 TextStyle _navBarItemStyle(Color color) {
@@ -316,6 +336,10 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// to also has a [CupertinoNavigationBar] or a [CupertinoSliverNavigationBar]
   /// with [transitionBetweenRoutes] set to true.
   ///
+  /// This transition will also occur on edge back swipe gestures like on iOS
+  /// but only if the previous page below has `maintainState` set to true on the
+  /// [PageRoute].
+  ///
   /// When set to true, only one navigation bar can be present per route unless
   /// [heroTag] is also set.
   ///
@@ -327,9 +351,13 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// Tag for the navigation bar's Hero widget if [transitionBetweenRoutes] is true.
   ///
   /// Defaults to a common tag between all [CupertinoNavigationBar] and
-  /// [CupertinoSliverNavigationBar] instances so they can all transition
-  /// between each other as long as there's only one per route. Use this tag
-  /// override with different tags to have multiple navigation bars per route.
+  /// [CupertinoSliverNavigationBar] instances of the same [Navigator]. With the
+  /// default tag, all navigation bars of the same navigator can transition
+  /// between each other as long as there's only one navigation bar per route.
+  ///
+  /// This [heroTag] can be overridden to manually handle having multiple
+  /// navigation bars per route or to transition between multiple
+  /// [Navigator]s.
   ///
   /// Cannot be null. To disable Hero transitions for this navigation bar,
   /// set [transitionBetweenRoutes] to false.
@@ -394,10 +422,13 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     }
 
     return Hero(
-      tag: widget.heroTag,
+      tag: widget.heroTag == _defaultHeroTag
+          ? _HeroTag(Navigator.of(context))
+          : widget.heroTag,
       createRectTween: _linearTranslateWithLargestRectSizeTween,
       placeholderBuilder: _navBarHeroLaunchPadBuilder,
       flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
+      transitionOnUserGestures: true,
       child: _TransitionableNavigationBar(
         componentsKeys: keys,
         backgroundColor: widget.backgroundColor,
@@ -728,10 +759,13 @@ class _LargeTitleNavigationBarSliverDelegate
     }
 
     return Hero(
-      tag: heroTag,
+      tag: heroTag == _defaultHeroTag
+          ? _HeroTag(Navigator.of(context))
+          : heroTag,
       createRectTween: _linearTranslateWithLargestRectSizeTween,
       flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
       placeholderBuilder: _navBarHeroLaunchPadBuilder,
+      transitionOnUserGestures: true,
       // This is all the way down here instead of being at the top level of
       // CupertinoSliverNavigationBar like CupertinoNavigationBar because it
       // needs to wrap the top level RenderBox rather than a RenderSliver.
@@ -1410,8 +1444,8 @@ class _TransitionableNavigationBar extends StatelessWidget {
 class _NavigationBarTransition extends StatelessWidget {
   _NavigationBarTransition({
     @required this.animation,
-    @required _TransitionableNavigationBar topNavBar,
-    @required _TransitionableNavigationBar bottomNavBar,
+    @required this.topNavBar,
+    @required this.bottomNavBar,
   }) : heightTween = Tween<double>(
          begin: bottomNavBar.renderBox.size.height,
          end: topNavBar.renderBox.size.height,
@@ -1423,15 +1457,11 @@ class _NavigationBarTransition extends StatelessWidget {
        borderTween = BorderTween(
          begin: bottomNavBar.border,
          end: topNavBar.border,
-       ),
-       componentsTransition = _NavigationBarComponentsTransition(
-         animation: animation,
-         bottomNavBar: bottomNavBar,
-         topNavBar: topNavBar,
        );
 
   final Animation<double> animation;
-  final _NavigationBarComponentsTransition componentsTransition;
+  final _TransitionableNavigationBar topNavBar;
+  final _TransitionableNavigationBar bottomNavBar;
 
   final Tween<double> heightTween;
   final ColorTween backgroundTween;
@@ -1439,6 +1469,13 @@ class _NavigationBarTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _NavigationBarComponentsTransition componentsTransition = _NavigationBarComponentsTransition(
+      animation: animation,
+      bottomNavBar: bottomNavBar,
+      topNavBar: topNavBar,
+      directionality: Directionality.of(context),
+    );
+
     final List<Widget> children = <Widget>[
       // Draw an empty navigation bar box with changing shape behind all the
       // moving components without any components inside it itself.
@@ -1516,6 +1553,7 @@ class _NavigationBarComponentsTransition {
     @required this.animation,
     @required _TransitionableNavigationBar bottomNavBar,
     @required _TransitionableNavigationBar topNavBar,
+    @required TextDirection directionality,
   }) : bottomComponents = bottomNavBar.componentsKeys,
        topComponents = topNavBar.componentsKeys,
        bottomNavBarBox = bottomNavBar.renderBox,
@@ -1528,7 +1566,8 @@ class _NavigationBarComponentsTransition {
        topLargeExpanded = topNavBar.largeExpanded,
        transitionBox =
            // paintBounds are based on offset zero so it's ok to expand the Rects.
-           bottomNavBar.renderBox.paintBounds.expandToInclude(topNavBar.renderBox.paintBounds);
+           bottomNavBar.renderBox.paintBounds.expandToInclude(topNavBar.renderBox.paintBounds),
+       forwardDirection = directionality == TextDirection.ltr ? 1.0 : -1.0;
 
   static final Animatable<double> fadeOut = Tween<double>(
     begin: 1.0,
@@ -1560,6 +1599,9 @@ class _NavigationBarComponentsTransition {
   // sizing component of RelativeRects will be based on this rect's size.
   final Rect transitionBox;
 
+  // x-axis unity number representing the direction of growth for text.
+  final double forwardDirection;
+
   // Take a widget it its original ancestor navigation bar render box and
   // translate it into a RelativeBox in the transition navigation bar box.
   RelativeRect positionInTransitionBox(
@@ -1579,8 +1621,8 @@ class _NavigationBarComponentsTransition {
   // ancestor navigation bar to another widget's position in that widget's
   // navigation bar.
   //
-  // Anchor their positions based on the center of their respective render
-  // boxes' leading edge.
+  // Anchor their positions based on the vertical middle of their respective
+  // render boxes' leading edge.
   //
   // Also produce RelativeRects with sizes that would preserve the constant
   // BoxConstraints of the 'from' widget so that animating font sizes etc don't
@@ -1595,7 +1637,11 @@ class _NavigationBarComponentsTransition {
 
     final RenderBox fromBox = fromKey.currentContext.findRenderObject();
     final RenderBox toBox = toKey.currentContext.findRenderObject();
-    final Rect toRect =
+
+    // We move a box with the size of the 'from' render object such that its
+    // upper left corner is at the upper left corner of the 'to' render object.
+    // With slight y axis adjustment for those render objects' height differences.
+    Rect toRect =
         toBox.localToGlobal(
           Offset.zero,
           ancestor: toNavBarBox,
@@ -1603,6 +1649,12 @@ class _NavigationBarComponentsTransition {
           0.0,
           - fromBox.size.height / 2 + toBox.size.height / 2
         ) & fromBox.size; // Keep the from render object's size.
+
+    if (forwardDirection < 0) {
+      // If RTL, move the center right to the center right instead of matching
+      // the center lefts.
+      toRect = toRect.translate(- fromBox.size.width + toBox.size.width, 0.0);
+    }
 
     return RelativeRectTween(
         begin: fromRect,
@@ -1666,10 +1718,15 @@ class _NavigationBarComponentsTransition {
 
     final RelativeRect from = positionInTransitionBox(bottomComponents.backLabelKey, from: bottomNavBarBox);
 
-    // Transition away by sliding horizontally to the left off of the screen.
+    // Transition away by sliding horizontally to the leading edge off of the screen.
     final RelativeRectTween positionTween = RelativeRectTween(
       begin: from,
-      end: from.shift(Offset(-bottomNavBarBox.size.width / 2.0, 0.0)),
+      end: from.shift(
+        Offset(
+          forwardDirection * (-bottomNavBarBox.size.width / 2.0),
+          0.0,
+        ),
+      ),
     );
 
     return PositionedTransition(
@@ -1696,6 +1753,7 @@ class _NavigationBarComponentsTransition {
     }
 
     if (bottomMiddle != null && topBackLabel != null) {
+      // Move from current position to the top page's back label position.
       return PositionedTransition(
         rect: animation.drive(slideFromLeadingEdge(
           fromKey: bottomComponents.middleKey,
@@ -1722,8 +1780,9 @@ class _NavigationBarComponentsTransition {
       );
     }
 
-    // When the top page has a leading widget override, don't move the bottom
-    // middle widget.
+    // When the top page has a leading widget override (one of the few ways to
+    // not have a top back label), don't move the bottom middle widget and just
+    // fade.
     if (bottomMiddle != null && topLeading != null) {
       return Positioned.fromRelativeRect(
         rect: positionInTransitionBox(bottomComponents.middleKey, from: bottomNavBarBox),
@@ -1751,6 +1810,7 @@ class _NavigationBarComponentsTransition {
     }
 
     if (bottomLargeTitle != null && topBackLabel != null) {
+      // Move from current position to the top page's back label position.
       return PositionedTransition(
         rect: animation.drive(slideFromLeadingEdge(
           fromKey: bottomComponents.largeTitleKey,
@@ -1779,15 +1839,22 @@ class _NavigationBarComponentsTransition {
     }
 
     if (bottomLargeTitle != null && topLeading != null) {
+      // Unlike bottom middle, the bottom large title moves when it can't
+      // transition to the top back label position.
       final RelativeRect from = positionInTransitionBox(bottomComponents.largeTitleKey, from: bottomNavBarBox);
 
       final RelativeRectTween positionTween = RelativeRectTween(
         begin: from,
-        end: from.shift(Offset(bottomNavBarBox.size.width / 4.0, 0.0)),
+        end: from.shift(
+          Offset(
+            forwardDirection * bottomNavBarBox.size.width / 4.0,
+            0.0,
+          ),
+        ),
       );
 
-      // Just shift slightly towards the right instead of moving to the back
-      // label position.
+      // Just shift slightly towards the trailing edge instead of moving to the
+      // back label position.
       return PositionedTransition(
         rect: animation.drive(positionTween),
         child: FadeTransition(
@@ -1851,7 +1918,12 @@ class _NavigationBarComponentsTransition {
     // right.
     if (bottomBackChevron == null) {
       final RenderBox topBackChevronBox = topComponents.backChevronKey.currentContext.findRenderObject();
-      from = to.shift(Offset(topBackChevronBox.size.width * 2.0, 0.0));
+      from = to.shift(
+        Offset(
+          forwardDirection * topBackChevronBox.size.width * 2.0,
+          0.0,
+        ),
+      );
     }
 
     final RelativeRectTween positionTween = RelativeRectTween(
@@ -1967,7 +2039,12 @@ class _NavigationBarComponentsTransition {
 
     // Shift in from the trailing edge of the screen.
     final RelativeRectTween positionTween = RelativeRectTween(
-      begin: to.shift(Offset(topNavBarBox.size.width / 2.0, 0.0)),
+      begin: to.shift(
+        Offset(
+          forwardDirection * topNavBarBox.size.width / 2.0,
+          0.0,
+        ),
+      ),
       end: to,
     );
 
@@ -2010,7 +2087,12 @@ class _NavigationBarComponentsTransition {
 
     // Shift in from the trailing edge of the screen.
     final RelativeRectTween positionTween = RelativeRectTween(
-      begin: to.shift(Offset(topNavBarBox.size.width, 0.0)),
+      begin: to.shift(
+        Offset(
+          forwardDirection * topNavBarBox.size.width,
+          0.0,
+        ),
+      ),
       end: to,
     );
 

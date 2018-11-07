@@ -65,6 +65,10 @@ export 'package:flutter/rendering.dart' show
 // Examples can assume:
 // class TestWidget extends StatelessWidget { @override Widget build(BuildContext context) => const Placeholder(); }
 // WidgetTester tester;
+// bool _visible;
+// class Sky extends CustomPainter { @override void paint(Canvas c, Size s) => null; @override bool shouldRepaint(Sky s) => false; }
+// BuildContext context;
+// dynamic userAvatarUrl;
 
 // BIDIRECTIONAL TEXT SUPPORT
 
@@ -143,7 +147,7 @@ class Directionality extends InheritedWidget {
 /// This is more efficient than adding and removing the child widget from the
 /// tree on demand.
 ///
-/// ## Opacity animation
+/// ## Performance considerations for opacity animation
 ///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using

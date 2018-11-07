@@ -78,21 +78,22 @@ cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/
 # Upload new API docs when running on Cirrus
 if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
   echo "This is not a pull request; considering whether to upload docs... (branch=$CIRRUS_BRANCH)"
-  if [[ "$CIRRUS_BRANCH" == "master" || "$CIRRUS_BRANCH" == "beta" ]]; then
-    if [[ "$CIRRUS_BRANCH" == "master" ]]; then
-      echo "Updating master docs: https://master-docs-flutter-io.firebaseapp.com/"
-      # Disable search indexing on the master staging site so searches get only
-      # the beta site.
-      echo -e "User-agent: *\nDisallow: /" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
-      export FIREBASE_TOKEN="$FIREBASE_MASTER_TOKEN"
-      deploy 5 master-docs-flutter-io
-    fi
+  if [[ "$CIRRUS_BRANCH" == "master" ]]; then
+    echo "Updating $CIRRUS_BRANCH docs: https://master-docs-flutter-io.firebaseapp.com/"
+    # Disable search indexing on the master staging site so searches get only
+    # the stable site.
+    echo -e "User-agent: *\nDisallow: /" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
+    export FIREBASE_TOKEN="$FIREBASE_MASTER_TOKEN"
+    deploy 5 master-docs-flutter-io
+  fi
 
-    if [[ "$CIRRUS_BRANCH" == "beta" ]]; then
-      echo "Updating beta docs: https://docs.flutter.io/"
-      export FIREBASE_TOKEN="$FIREBASE_PUBLIC_TOKEN"
-      deploy 5 docs-flutter-io
-    fi
+  if [[ "$CIRRUS_BRANCH" == "stable" ]]; then
+    # Enable search indexing on the master staging site so searches get only
+    # the stable site.
+    echo "Updating $CIRRUS_BRANCH docs: https://docs.flutter.io/"
+    echo -e "# All robots welcome!" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
+    export FIREBASE_TOKEN="$FIREBASE_PUBLIC_TOKEN"
+    deploy 5 docs-flutter-io
   fi
 fi
 

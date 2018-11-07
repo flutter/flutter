@@ -34,6 +34,11 @@ export 'package:flutter/gestures.dart' show
   TapUpDetails,
   Velocity;
 
+// Examples can assume:
+// bool _lights;
+// void setState(VoidCallback fn) { }
+// String _last;
+
 /// Factory for creating gesture recognizers.
 ///
 /// `T` is the type of gesture recognizer this class manages.

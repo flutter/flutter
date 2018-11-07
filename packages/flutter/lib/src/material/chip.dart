@@ -142,11 +142,13 @@ abstract class DeletableChipAttributes {
   ///
   /// The chip will not automatically remove itself: this just tells the app
   /// that the user tapped the delete button. In order to delete the chip, you
-  /// have to do something like the following:
+  /// have to do something similar to the following sample:
   ///
-  /// ## Sample code
+  /// {@tool snippet --template=stateful_widget}
+  /// This sample shows how to use [onDeleted] to remove an entry when the
+  /// delete button is tapped.
   ///
-  /// ```dart
+  /// ```dart preamble
   /// class Actor {
   ///   const Actor(this.name, this.initials);
   ///   final String name;
@@ -193,6 +195,14 @@ abstract class DeletableChipAttributes {
   ///   }
   /// }
   /// ```
+  ///
+  /// ```dart
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return CastList();
+  /// }
+  /// ```
+  /// {@end-tool}
   VoidCallback get onDeleted;
 
   /// The [Color] for the delete icon. The default is based on the ambient
@@ -247,7 +257,9 @@ abstract class SelectableChipAttributes {
   /// The [onSelected] and [TappableChipAttributes.onPressed] callbacks must not
   /// both be specified at the same time.
   ///
-  /// ## Sample code
+  /// {@tool sample}
+  ///
+  /// A [StatefulWidget] that illustrates use of onSelected in an [InputChip].
   ///
   /// ```dart
   /// class Wood extends StatefulWidget {
@@ -272,6 +284,7 @@ abstract class SelectableChipAttributes {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ValueChanged<bool> get onSelected;
 
   /// Elevation to be applied on the chip during the press motion.

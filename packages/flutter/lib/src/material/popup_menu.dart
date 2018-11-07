@@ -21,6 +21,9 @@ import 'theme.dart';
 // Examples can assume:
 // enum Commands { heroAndScholar, hurricaneCame }
 // dynamic _heroAndScholar;
+// dynamic _selection;
+// BuildContext context;
+// void setState(VoidCallback fn) { }
 
 const Duration _kMenuDuration = Duration(milliseconds: 300);
 const double _kBaselineOffsetFromBottom = 20.0;

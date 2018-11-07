@@ -237,6 +237,48 @@ void main() {
     expect(value, equals('two'));
   });
 
+  testWidgets('Dropdown form field', (WidgetTester tester) async {
+    String value = 'one';
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            home: Material(
+              child: DropdownButtonFormField<String>(
+                value: value,
+                hint: const Text('Select Value'),
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.fastfood)
+                ),
+                items: menuItems.map((String val) {
+                  return DropdownMenuItem<String>(
+                    value: val,
+                    child: Text(val)
+                  );
+                }).toList(),
+                onChanged: (String v) {
+                  setState(() {
+                    value = v;
+                  });
+                },
+                validator: (String v) => v == null ? 'Must select value' : null,
+              ),
+            ),
+          );
+        }
+      )
+    );
+
+    expect(value, equals('one'));
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('three').last);
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, equals('three'));
+  });
+
   testWidgets('Dropdown in ListView', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12053
     // Positions a DropdownButton at the left and right edges of the screen,

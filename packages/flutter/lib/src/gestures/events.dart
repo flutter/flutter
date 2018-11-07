@@ -108,12 +108,14 @@ abstract class PointerEvent {
     this.pressureMax = 1.0,
     this.distance = 0.0,
     this.distanceMax = 0.0,
+    this.size = 0.0,
     this.radiusMajor = 0.0,
     this.radiusMinor = 0.0,
     this.radiusMin = 0.0,
     this.radiusMax = 0.0,
     this.orientation = 0.0,
     this.tilt = 0.0,
+    this.platformData = 0,
     this.synthesized = false,
   });
 
@@ -183,6 +185,14 @@ abstract class PointerEvent {
   /// 0.0.
   final double distanceMax;
 
+  /// The area of the screen being pressed, scaled to a value between 0 and 1.
+  /// The value of size can be used to determine fat touch events. This value
+  /// is only set on Android, and is a device specific approximation within
+  /// the range of detectable values. So, for example, the value of 0.1 could
+  /// mean a touch with the tip of the finger, 0.2 a touch with full finger,
+  /// and 0.3 the full palm.
+  final double size;
+
   /// The radius of the contact ellipse along the major axis, in logical pixels.
   final double radiusMajor;
 
@@ -236,6 +246,9 @@ abstract class PointerEvent {
   /// the stylus is flat on that surface).
   final double tilt;
 
+  /// Opaque platform-specific data associated with the event.
+  final int platformData;
+
   /// We occasionally synthesize PointerEvents that aren't exact translations
   /// of [ui.PointerData] from the engine to cover small cross-OS discrepancies
   /// in pointer behaviors.
@@ -269,12 +282,14 @@ abstract class PointerEvent {
              'distance: $distance, '
              'distanceMin: $distanceMin, '
              'distanceMax: $distanceMax, '
+             'size: $size, '
              'radiusMajor: $radiusMajor, '
              'radiusMinor: $radiusMinor, '
              'radiusMin: $radiusMin, '
              'radiusMax: $radiusMax, '
              'orientation: $orientation, '
              'tilt: $tilt, '
+             'platformData: $platformData, '
              'synthesized: $synthesized'
            ')';
   }
@@ -374,6 +389,7 @@ class PointerHoverEvent extends PointerEvent {
     double pressureMax = 1.0,
     double distance = 0.0,
     double distanceMax = 0.0,
+    double size = 0.0,
     double radiusMajor = 0.0,
     double radiusMinor = 0.0,
     double radiusMin = 0.0,
@@ -394,6 +410,7 @@ class PointerHoverEvent extends PointerEvent {
     pressureMax: pressureMax,
     distance: distance,
     distanceMax: distanceMax,
+    size: size,
     radiusMajor: radiusMajor,
     radiusMinor: radiusMinor,
     radiusMin: radiusMin,
@@ -421,6 +438,7 @@ class PointerDownEvent extends PointerEvent {
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distanceMax = 0.0,
+    double size = 0.0,
     double radiusMajor = 0.0,
     double radiusMinor = 0.0,
     double radiusMin = 0.0,
@@ -441,6 +459,7 @@ class PointerDownEvent extends PointerEvent {
     pressureMax: pressureMax,
     distance: 0.0,
     distanceMax: distanceMax,
+    size: size,
     radiusMajor: radiusMajor,
     radiusMinor: radiusMinor,
     radiusMin: radiusMin,
@@ -474,12 +493,14 @@ class PointerMoveEvent extends PointerEvent {
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distanceMax = 0.0,
+    double size = 0.0,
     double radiusMajor = 0.0,
     double radiusMinor = 0.0,
     double radiusMin = 0.0,
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
+    int platformData = 0,
     bool synthesized = false,
   }) : super(
     timeStamp: timeStamp,
@@ -496,12 +517,14 @@ class PointerMoveEvent extends PointerEvent {
     pressureMax: pressureMax,
     distance: 0.0,
     distanceMax: distanceMax,
+    size: size,
     radiusMajor: radiusMajor,
     radiusMinor: radiusMinor,
     radiusMin: radiusMin,
     radiusMax: radiusMax,
     orientation: orientation,
     tilt: tilt,
+    platformData: platformData,
     synthesized: synthesized,
   );
 }
@@ -524,6 +547,7 @@ class PointerUpEvent extends PointerEvent {
     double pressureMax = 1.0,
     double distance = 0.0,
     double distanceMax = 0.0,
+    double size = 0.0,
     double radiusMajor = 0.0,
     double radiusMinor = 0.0,
     double radiusMin = 0.0,
@@ -544,6 +568,7 @@ class PointerUpEvent extends PointerEvent {
     pressureMax: pressureMax,
     distance: distance,
     distanceMax: distanceMax,
+    size: size,
     radiusMajor: radiusMajor,
     radiusMinor: radiusMinor,
     radiusMin: radiusMin,
@@ -570,6 +595,7 @@ class PointerCancelEvent extends PointerEvent {
     double pressureMax = 1.0,
     double distance = 0.0,
     double distanceMax = 0.0,
+    double size = 0.0,
     double radiusMajor = 0.0,
     double radiusMinor = 0.0,
     double radiusMin = 0.0,
@@ -589,6 +615,7 @@ class PointerCancelEvent extends PointerEvent {
     pressureMax: pressureMax,
     distance: distance,
     distanceMax: distanceMax,
+    size: size,
     radiusMajor: radiusMajor,
     radiusMinor: radiusMinor,
     radiusMin: radiusMin,

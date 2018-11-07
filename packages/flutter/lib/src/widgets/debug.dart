@@ -30,6 +30,26 @@ import 'table.dart';
 /// See also the discussion at [WidgetsBinding.drawFrame].
 bool debugPrintRebuildDirtyWidgets = false;
 
+/// Signature for [debugOnRebuildDirtyWidget] implementations.
+typedef RebuildDirtyWidgetCallback = void Function(Element e, bool builtOnce);
+
+/// Callback invoked for every dirty widget built each frame.
+///
+/// This callback is only invoked in debug builds.
+///
+/// See also:
+///
+///  * [debugPrintRebuildDirtyWidgets], which does something similar but logs
+///    to the console instead of invoking a callback.
+///  * [debugOnProfilePaint], which does something similar for [RenderObject]
+///    painting.
+///  * [WidgetInspectorService], which uses the [debugOnRebuildDirtyWidget]
+///    callback to generate aggregate profile statistics describing which widget
+///    rebuilds occurred when the
+///    `ext.flutter.inspector.trackRebuildDirtyWidgets` service extension is
+///    enabled.
+RebuildDirtyWidgetCallback debugOnRebuildDirtyWidget;
+
 /// Log all calls to [BuildOwner.buildScope].
 ///
 /// Combined with [debugPrintScheduleBuildForStacks], this allows you to track

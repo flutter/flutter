@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -276,6 +275,8 @@ class RunCommand extends RunCommandBase {
     // debug mode.
     final bool hotMode = shouldUseHotMode();
 
+    writePidFile(argResults['pid-file']);
+
     if (argResults['machine']) {
       if (devices.length > 1)
         throwToolExit('--machine does not support -d all.');
@@ -338,12 +339,6 @@ class RunCommand extends RunCommandBase {
         if (!device.supportsHotMode)
           throwToolExit('Hot mode is not supported by ${device.name}. Run with --no-hot.');
       }
-    }
-
-    final String pidFile = argResults['pid-file'];
-    if (pidFile != null) {
-      // Write our pid to the file.
-      fs.file(pidFile).writeAsStringSync(pid.toString());
     }
 
     final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {

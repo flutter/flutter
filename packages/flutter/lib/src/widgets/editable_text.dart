@@ -271,6 +271,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final TextAlign textAlign;
 
+  /// {@template flutter.widgets.editableText.textDirection}
   /// The directionality of the text.
   ///
   /// This decides how [textAlign] values like [TextAlign.start] and
@@ -284,6 +285,7 @@ class EditableText extends StatefulWidget {
   /// its left.
   ///
   /// Defaults to the ambient [Directionality], if any.
+  /// {@endtemplate}
   final TextDirection textDirection;
 
   /// {@template flutter.widgets.editableText.textCapitalization}
