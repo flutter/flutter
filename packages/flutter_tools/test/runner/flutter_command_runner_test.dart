@@ -98,10 +98,10 @@ void main() {
         when(processManager.runSync('git log -n 1 --pretty=format:%ad --date=iso'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
 
-        final FlutterVersion version = FlutterVersion();
+        final FakeFlutterVersion version = FakeFlutterVersion();
 
         // Because the hash depends on the time, we just use the 0.0.0-unknown here.
-        expect(version.toJson()['frameworkVersion'], '0.0.0-unknown');
+        expect(version.toJson()['frameworkVersion'], '0.10.3');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         Platform: () => platform,
@@ -181,6 +181,11 @@ void main() {
   });
 }
 class MockProcessManager extends Mock implements ProcessManager {}
+
+class FakeFlutterVersion extends FlutterVersion {
+  @override
+  String get frameworkVersion => '0.10.3';
+}
 
 class FakeCommand extends FlutterCommand {
   OutputPreferences preferences;
