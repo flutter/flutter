@@ -166,6 +166,9 @@ class FlutterDriver {
   /// this or the environment variable `FUCHSIA_MODULE_TARGET` must be set. This
   /// field will be ignored if [isolateNumber] is set, as this is already
   /// enough information to connect to an Isolate.
+  ///
+  /// [isolateCheckHealthTimeout] (optional) In the event that checkHealth times
+  /// out during a test, this can be changed to a different duration.
   static Future<FlutterDriver> connect({
     String dartVmServiceUrl,
     bool printCommunication = false,
@@ -173,6 +176,7 @@ class FlutterDriver {
     int isolateNumber,
     Duration isolateReadyTimeout = _kIsolateLoadRunnableTimeout,
     Pattern fuchsiaModuleTarget,
+    Duration isolateCheckHealthTimeout = _kShortTimeout,
   }) async {
     // If running on a Fuchsia device, connect to the first Isolate whose name
     // matches FUCHSIA_MODULE_TARGET.
@@ -339,10 +343,10 @@ class FlutterDriver {
 
     // Invoked checkHealth and try to fix delays in the registration of Service
     // extensions
-    Future<Health> checkHealth() async {
+    Future<Health> checkHealth(Duration timeout) async {
       try {
         // At this point the service extension must be installed. Verify it.
-        return await driver.checkHealth();
+        return await driver.checkHealth(timeout);
       } on rpc.RpcException catch (e) {
         if (e.code != error_code.METHOD_NOT_FOUND) {
           rethrow;
@@ -353,11 +357,11 @@ class FlutterDriver {
         );
         await enableIsolateStreams();
         await waitForServiceExtension().timeout(_kLongTimeout * 2);
-        return driver.checkHealth();
+        return driver.checkHealth(timeout);
       }
     }
 
-    final Health health = await checkHealth();
+    final Health health = await checkHealth(isolateCheckHealthTimeout);
     if (health.status != HealthStatus.ok) {
       await client.close();
       throw DriverError('Flutter application health check failed.');
