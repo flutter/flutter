@@ -202,22 +202,23 @@ class SampleChecker {
   // Precompiles the snippets tool if _snippetsSnapshotPath isn't set yet, and
   // runs the precompiled version if it is set.
   ProcessResult _runSnippetsScript(List<String> args) {
+    final String workingDirectory = path.join(_flutterRoot, 'dev', 'docs');
     if (_snippetsSnapshotPath == null) {
       _snippetsSnapshotPath = '$_snippetsExecutable.snapshot';
       return Process.runSync(
-        Platform.executable,
+        path.absolute(Platform.executable),
         <String>[
           '--snapshot=$_snippetsSnapshotPath',
           '--snapshot-kind=app-jit',
-          _snippetsExecutable,
+          path.absolute(_snippetsExecutable),
         ]..addAll(args),
-        workingDirectory: _flutterRoot,
+        workingDirectory: workingDirectory,
       );
     } else {
       return Process.runSync(
-        Platform.executable,
-        <String>[_snippetsSnapshotPath]..addAll(args),
-        workingDirectory: _flutterRoot,
+        path.absolute(Platform.executable),
+        <String>[path.absolute(_snippetsSnapshotPath)]..addAll(args),
+        workingDirectory: workingDirectory,
       );
     }
   }
