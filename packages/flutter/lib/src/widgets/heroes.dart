@@ -599,14 +599,14 @@ class HeroController extends NavigatorObserver {
       final Animation<double> animation = (flightType == HeroFlightDirection.push) ? to.animation : from.animation;
 
       // A user gesture may have already completed the pop, or we might be the initial route
-      switch(flightType) {
+      switch (flightType) {
         case HeroFlightDirection.pop:
-          if (animation.isDismissed) {
+          if (animation.value == 0.0) {
             return;
           }
           break;
         case HeroFlightDirection.push:
-          if (animation.isCompleted) {
+          if (animation.value == 1.0) {
             return;
           }
           break;
