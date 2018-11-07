@@ -30,7 +30,7 @@ source_set("gpu_surface_gl") {
     "$gpu_dir/gpu_surface_gl.h",
   ]
 
-  deps = gpu_common_deps + [ "//third_party/skia:gpu" ]
+  deps = gpu_common_deps + [ "//third_party/skia" ]
 }
 
 source_set("gpu_surface_vulkan") {
@@ -40,7 +40,7 @@ source_set("gpu_surface_vulkan") {
   ]
 
   deps = gpu_common_deps + [
-           "//third_party/skia:gpu",
+           "//third_party/skia",
            "$flutter_root/vulkan",
          ]
 }

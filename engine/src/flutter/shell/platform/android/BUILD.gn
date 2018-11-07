@@ -61,7 +61,6 @@ shared_library("flutter_shell_native") {
     "$flutter_root/runtime",
     "$flutter_root/shell/common",
     "//third_party/skia",
-    "//third_party/skia:gpu",
   ]
   if (flutter_runtime_mode == "debug" ||
       flutter_runtime_mode == "dynamic_profile" ||
