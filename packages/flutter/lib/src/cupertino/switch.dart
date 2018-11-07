@@ -284,6 +284,16 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
+  DragStartBehavior get dragStartBehavior => _dragStartBehavior;
+  DragStartBehavior _dragStartBehavior;
+  set dragStartBehavior(DragStartBehavior value) {
+    assert(value != null);
+    if(_dragStartBehavior == value)
+      return;
+    _dragStartBehavior = value;
+    _drag.dragStartBehavior = value;
+  }
+
   bool get isInteractive => onChanged != null;
 
   TapGestureRecognizer _tap;

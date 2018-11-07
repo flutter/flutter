@@ -335,6 +335,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChanged = onChanged
       ..textDirection = Directionality.of(context)
       ..additionalConstraints = additionalConstraints
+      .._drag.dragStartBehavior = dragStartBehavior
       ..vsync = vsync;
   }
 }
@@ -433,6 +434,16 @@ class _RenderSwitch extends RenderToggleable {
       return;
     _textDirection = value;
     markNeedsPaint();
+  }
+
+  DragStartBehavior get dragStartBehavior => _dragStartBehavior;
+  DragStartBehavior _dragStartBehavior;
+  set dragStartBehavior(DragStartBehavior value) {
+    assert(value != null);
+    if(_dragStartBehavior == value)
+      return;
+    _dragStartBehavior = value;
+    _drag.dragStartBehavior = value;
   }
 
   @override

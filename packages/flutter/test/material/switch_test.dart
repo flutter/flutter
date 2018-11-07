@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/gestures.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -87,6 +86,43 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
+  });
+
+  testWidgets('Changing dragStartBehavior affects the horizontal drag detector', (WidgetTester tester) async {
+    Switch materialSwitch = Switch(
+        dragStartBehavior: DragStartBehavior.down,
+        value: true,
+        onChanged: (bool newValue) {},
+    );
+    
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: materialSwitch,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    // Drag start behavior initialized to down in constructor.
+    RenderObject hdgr = tester.renderObject(find.byType());
+
+    expect(hdgr, true);
+
+//    materialSwitch = Switch(
+//      dragStartBehavior: DragStartBehavior.start,
+//      value: true,
+//      onChanged: (bool newValue) {},
+//    );
+//
+//    // Drag start behavior now initialized to start.
+//    hdgr = tester.firstWidget(find.byType(HorizontalDragGestureRecognizer));
+//    expect(hdgr.dragStartBehavior, DragStartBehavior.start);
   });
 
   testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
