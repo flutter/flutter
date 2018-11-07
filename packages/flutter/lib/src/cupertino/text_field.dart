@@ -420,8 +420,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   FocusNode _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
+  // Is shortly after a previous single tap when not null.
   Timer _doubleTapTimer;
   Offset _lastTapOffset;
+  // True if second tap down of a double tap is detected. Used to discard
+  // subsequent tap up / tap hold of the same tap.
   bool _isDoubleTap = false;
 
   @override
