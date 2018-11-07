@@ -581,7 +581,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     if (clamp)
       to = to.clamp(minScrollExtent, maxScrollExtent);
 
-    super.moveTo(to, duration: duration, curve: curve);
+    return super.moveTo(to, duration: duration, curve: curve);
   }
 
   @override
