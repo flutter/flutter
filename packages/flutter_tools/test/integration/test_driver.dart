@@ -474,7 +474,7 @@ Stream<String> _transformToLines(Stream<List<int>> byteStream) {
 
 class SourcePosition {
   SourcePosition(this.line, this.column);
-  
+
   final int line;
   final int column;
 }
