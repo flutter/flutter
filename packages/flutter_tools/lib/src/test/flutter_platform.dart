@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 
@@ -450,6 +451,22 @@ class _FlutterPlatform extends PlatformPlugin {
     return remoteChannel;
   }
 
+  Future<String> _compileExpressionService(String isolateId, String expression,
+      List<String> definitions, List<String> typeDefinitions,
+      String libraryUri, String klass, bool isStatic,
+      ) async {
+    if (compiler == null || compiler.compiler == null) {
+      throw 'Compiler is not set up properly to compile $expression';
+    }
+    final CompilerOutput compilerOutput =
+      await compiler.compiler.compileExpression(expression, definitions,
+        typeDefinitions, libraryUri, klass, isStatic);
+    if (compilerOutput != null && compilerOutput.outputFilename != null) {
+      return base64.encode(fs.file(compilerOutput.outputFilename).readAsBytesSync());
+    }
+    throw 'Failed to compile $expression';
+  }
+
   Future<_AsyncError> _startTest(
     String testPath,
     StreamChannel<dynamic> controller,
@@ -573,6 +590,14 @@ class _FlutterPlatform extends PlatformPlugin {
             printTrace('test $ourTestCount: using observatory uri $detectedUri from pid ${process.pid}');
           }
           processObservatoryUri = detectedUri;
+          {
+          printTrace('Connecting to service protocol: $processObservatoryUri');
+            final Future<VMService> localVmService = VMService.connect(processObservatoryUri,
+              compileExpression: _compileExpressionService);
+            localVmService.then((VMService vmservice) {
+              printTrace('Successfully connected to service protocol: $processObservatoryUri');
+            });
+          }
           gotProcessObservatoryUri.complete();
           watcher?.handleStartedProcess(
               ProcessEvent(ourTestCount, process, processObservatoryUri));
