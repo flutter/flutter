@@ -495,7 +495,7 @@ class RawGestureDetector extends StatefulWidget {
     this.gestures = const <Type, GestureRecognizerFactory>{},
     this.behavior,
     this.excludeFromSemantics = false,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
        super(key: key) ;
@@ -540,15 +540,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   @override
   void initState() {
-//    debugPrint(widget.dragStartBehavior.toString());
-    if(widget.dragStartBehavior == DragStartBehavior.start) {
-      debugPrintStack();
-//      widget.gestures.forEach((Type key, GestureRecognizerFactory value) => debugPrint(key.toString()));
-//      debugPrint(widget.child.toString());
-//      debugPrint('------------------');
-    }
     super.initState();
-
     _syncAll(widget.gestures);
   }
 
