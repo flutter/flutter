@@ -33,8 +33,9 @@ export 'dart:ui' show Locale;
 ///
 /// The [locales] list is the device's preferred locales when the app started, or the
 /// device's preferred locales the user selected after the app was started. This list
-/// is in order of preference. The [supportedLocales] parameter is just the value of
-/// [WidgetsApp.supportedLocales].
+/// is in order of preference. If this list is null or empty, then Flutter has not yet
+/// recieved the locale information from the platform. The [supportedLocales] parameter
+/// is just the value of [WidgetsApp.supportedLocales].
 ///
 /// See also:
 ///
@@ -60,7 +61,8 @@ typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Ite
 /// The [locale] is either the value of [WidgetsApp.locale], or the device's default
 /// locale when the app started, or the device locale the user selected after the app
 /// was started. The default locale is the first locale in the list of preferred
-/// locales. The [supportedLocales] parameter is just the value of
+/// locales. If [locale] is null, then Flutter has not yet recieved the locale
+/// information from the platform. The [supportedLocales] parameter is just the value of
 /// [WidgetsApp.supportedLocales].
 ///
 /// See also:
@@ -491,6 +493,9 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// This callback considers the entire list of preferred locales.
   ///
+  /// This algorithm should be able to handle a null or empty list of preferred locales,
+  /// which indicates Flutter has not yet recieved locale information from the platform.
+  ///
   /// See also:
   ///
   ///  * [MaterialApp.localeResolutionCallback], which sets the callback of the
@@ -501,6 +506,9 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// This callback considers only the default locale, which is the first locale
   /// in the preferred locales list.
+  ///
+  /// This algorithm should be able to handle a null locale, which indicates
+  /// Flutter has not yet recieved locale information from the platform.
   ///
   /// See also:
   ///
