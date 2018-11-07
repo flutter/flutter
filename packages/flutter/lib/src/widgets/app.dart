@@ -71,14 +71,41 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The boolean arguments, [color], and [navigatorObservers] must not be null.
   ///
-  /// If the [builder] is null, the [onGenerateRoute] and [pageRouteBuilder]
-  /// arguments are required. The [onGenerateRoute] parameter corresponds to
-  /// [Navigator.onGenerateRoute], and [pageRouteBuilder] will create a [PageRoute]
-  /// that wraps newly built routes. If the [builder] is non-null
-  /// and the [onGenerateRoute] argument is null, then the [builder] will not be
-  /// provided with a [Navigator]. If [onGenerateRoute] is not provided,
-  /// [navigatorKey], [onUnknownRoute], [navigatorObservers], and [initialRoute]
-  /// must have their default values, as they will have no effect.
+  /// Most callers will want to use the [home] or [routes] parameters, or both.
+  /// The [home] parameter is a convenience for the following [routes] map:
+  ///
+  /// ```dart
+  /// <String, WidgetBuilder>{ '/': (BuildContext context) => myWidget }
+  /// ```
+  ///
+  /// It is possible to specify both [home] and [routes], but only if [routes] does
+  ///  _not_ contain an entry for `'/'`.  Conversely, if [home] is omitted, [routes]
+  /// _must_ contain an entry for `'/'`.
+  ///
+  /// If [home] or [routes] are not null, then either the [pageRoutebuilder] or
+  /// the [builder] parameter is required. These parameters will be used so
+  /// that the default routing implementation in [WidgetsApp] can wrap routes in
+  /// appropriate transitions. For example, [MaterialApp] will provide a
+  /// [pageRoutebuilder] that creates Material compliant hero animations between
+  /// routes, whereas the [CupertinoApp] provides Cupertino compliant hero
+  /// animations. Other implementations can provide other custom transitions here.
+  ///
+  /// The [builder] parameter is optional in all cases. It can be used to ensure that
+  /// all route entries get wrapped in another widget. It is invoked during the build
+  /// phase of this widget.  If it is specified,
+  ///
+  /// It is also possible to provide a custom implementation of routing via the
+  /// [onGeneratedRoute] and [onUnknownRoute] parameters. These parameters correspond
+  /// to [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute]. If [home], [routes],
+  /// and [builder] are null, or if they fail to create a requested route,
+  /// [onGeneratedRoute] will be invoked.  If that fails, [onUnknownRoute] will be invoked.
+  ///
+  /// The [pageRouteBuilder] will create a [PageRoute] that wraps newly built routes.
+  /// If the [builder] is non-null and the [onGenerateRoute] argument is null, then the
+  /// [builder] will not be provided only with the context and the child widget, whereas
+  /// the [pageRouteBuilder] will be provided with [RouteSettings]. If [onGenerateRoute]
+  /// is not provided, [navigatorKey], [onUnknownRoute], [navigatorObservers], and
+  /// [initialRoute] must have their default values, as they will have no effect.
   ///
   /// The `supportedLocales` argument must be a list of one or more elements.
   /// By default supportedLocales is `[const Locale('en', 'US')]`.
@@ -148,10 +175,14 @@ class WidgetsApp extends StatefulWidget {
          'must have their initial values '
          '(null, null, and the empty list, respectively).'
        ),
-       assert(onGenerateRoute != null || pageRouteBuilder != null,
-         'If onGenerateRoute is not provided, the pageRouteBuilder must be specified '
-         'so that the default handler will know what kind of PageRoute transition '
-         'bo build.'),
+       assert(
+         builder != null ||
+         onGenerateRoute != null ||
+         pageRouteBuilder != null,
+         'If neither builder nor onGenerateRoute are provided, the '
+         'pageRouteBuilder must be specified so that the default handler '
+         'will know what kind of PageRoute transition to build.'
+       ),
        assert(title != null),
        assert(color != null),
        assert(supportedLocales != null && supportedLocales.isNotEmpty),
