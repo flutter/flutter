@@ -264,10 +264,10 @@
       }));
 }
 
-- (bool)runWithEntrypoint:(NSString*)entrypoint libraryURI:(NSString*)libraryURI {
+- (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryURI {
   if (_shell != nullptr) {
     FML_LOG(WARNING) << "This FlutterEngine was already invoked.";
-    return false;
+    return NO;
   }
 
   static size_t shellCount = 1;
@@ -351,13 +351,20 @@
                    << entrypoint.UTF8String;
   } else {
     [self maybeSetupPlatformViewChannels];
+  }
+
+  return _shell != nullptr;
+}
+
+- (BOOL)runWithEntrypoint:(NSString*)entrypoint libraryURI:(NSString*)libraryURI {
+  if ([self createShell:entrypoint libraryURI:libraryURI]) {
     [self launchEngine:entrypoint libraryURI:libraryURI];
   }
 
   return _shell != nullptr;
 }
 
-- (bool)runWithEntrypoint:(NSString*)entrypoint {
+- (BOOL)runWithEntrypoint:(NSString*)entrypoint {
   return [self runWithEntrypoint:entrypoint libraryURI:nil];
 }
 

@@ -78,7 +78,7 @@ FLUTTER_EXPORT
  *   tree-shaken by the Dart compiler.
  * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
  */
-- (bool)runWithEntrypoint:(NSString*)entrypoint;
+- (BOOL)runWithEntrypoint:(NSString*)entrypoint;
 
 /**
  * Runs a Dart program on an Isolate using the specified entrypoint and Dart library,
@@ -95,7 +95,7 @@ FLUTTER_EXPORT
  *   this will default to the same library as the `main()` function in the Dart program.
  * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
  */
-- (bool)runWithEntrypoint:(NSString*)entrypoint libraryURI:(NSString*)uri;
+- (BOOL)runWithEntrypoint:(NSString*)entrypoint libraryURI:(NSString*)uri;
 
 /**
  * Sets the `FlutterViewController` for this instance.  The FlutterEngine must be
