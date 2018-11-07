@@ -20,3 +20,4 @@ tags
 Thumbs.db
 .idea
 pubspec.lock
+.vscode/

@@ -37,6 +37,7 @@
   blink::ViewportMetrics _viewportMetrics;
   BOOL _initialized;
   BOOL _viewOpaque;
+  BOOL _engineNeedsLaunch;
 }
 
 #pragma mark - Manage and override all designated initializers
@@ -49,6 +50,7 @@
   if (self) {
     _viewOpaque = YES;
     _engine.reset([engine retain]);
+    _engineNeedsLaunch = NO;
     _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine opaque:self.isViewOpaque]);
     _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterViewController>>(self);
 
@@ -68,8 +70,8 @@
     _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterViewController>>(self);
     _engine.reset([[FlutterEngine alloc] initWithName:@"io.flutter" project:projectOrNil]);
     _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine opaque:self.isViewOpaque]);
-    [_engine.get() runWithEntrypoint:nil];
-    [_engine.get() setViewController:self];
+    [_engine.get() createShell:nil libraryURI:nil];
+    _engineNeedsLaunch = YES;
 
     [self performCommonViewControllerInitialization];
   }
@@ -370,6 +372,12 @@
 
 - (void)viewWillAppear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewWillAppear");
+
+  if (_engineNeedsLaunch) {
+    [_engine.get() launchEngine:nil libraryURI:nil];
+    [_engine.get() setViewController:self];
+    _engineNeedsLaunch = NO;
+  }
 
   // Only recreate surface on subsequent appearances when viewport metrics are known.
   // First time surface creation is done on viewDidLayoutSubviews.
