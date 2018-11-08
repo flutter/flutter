@@ -545,6 +545,9 @@ class HotRunner extends ResidentRunner {
   Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) async {
     final Stopwatch timer = Stopwatch()..start();
     if (fullRestart) {
+      if (!canHotRestart) {
+        return OperationResult(1, 'hotRestart not supported');
+      }
       final Status status = logger.startProgress(
         'Performing hot restart...',
         progressId: 'hot.restart',
