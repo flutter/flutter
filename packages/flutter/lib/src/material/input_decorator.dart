@@ -1646,8 +1646,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // then the label appears where the hint would.
   bool get _hasInlineLabel => !widget._labelShouldWithdraw && decoration.labelText != null;
 
-  // True if the label will be shown at all.
-  // If there should be an inline label, the label will show (see _hasInlineLabel).
   // If the label is a floating placeholder, it's always shown.
   bool get _shouldShowLabel => _hasInlineLabel || decoration.hasFloatingPlaceholder;
 
@@ -1680,7 +1678,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   InputBorder _getDefaultBorder(ThemeData themeData) {
-    if (decoration.border?.borderSide?.style == BorderStyle.none) {
+    if (decoration.border?.borderSide == BorderSide.none) {
       return decoration.border;
     }
 
@@ -2108,7 +2106,7 @@ class InputDecoration {
   /// of the [Text] widget used to display the error.
   final int errorMaxLines;
 
-  /// Whether the placeholder text floats to become a label on focus.
+  /// Whether the label on focus.
   ///
   /// If this is false, the placeholder disappears when the input has focus or
   /// inputted text.
