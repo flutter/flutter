@@ -282,6 +282,30 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     );
   }
 
+  /// Adds the appropriate opacity under the magnifier if the background
+  /// color is transparent (and therefore are not adding in a gradient).
+  Widget _buildUnderMagnifierScreen() {
+    if (widget.backgroundColor.alpha >= 255)
+      return Container();
+
+    final Color foreground = widget.backgroundColor?.withAlpha(
+        (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt()
+    );
+
+    return Column(
+      children: <Widget>[
+        Expanded(child: Container()),
+        Container(
+          color: foreground,
+          constraints: BoxConstraints.expand(
+            height: widget.itemExtent * widget.magnification,
+          ),
+        ),
+        Expanded(child: Container()),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget result = Stack(
@@ -308,11 +332,16 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       ],
     );
     if (widget.backgroundColor != null) {
-      result = DecoratedBox(
-        decoration: BoxDecoration(
-          color: widget.backgroundColor,
-        ),
-        child: result,
+      result = Stack(
+        children: <Widget> [
+          _buildUnderMagnifierScreen(),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: widget.backgroundColor,
+            ),
+            child: result,
+          ),
+        ]
       );
     }
     return result;
