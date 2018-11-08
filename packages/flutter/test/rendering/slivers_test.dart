@@ -657,6 +657,26 @@ void main() {
     expect(child.size.height, equals(600.0));
   });
 
+  test('RenderShrinkWrappingViewport shrinkwrap test - 1 child', () {
+    RenderBox child;
+    final RenderBox root = RenderPositionedBox(
+      child: child = RenderShrinkWrappingViewport(
+        axisDirection: AxisDirection.left,
+        crossAxisDirection: AxisDirection.down,
+        offset: ViewportOffset.fixed(200.0),
+        children: <RenderSliver>[
+          RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(400.0, 100.0))),
+        ],
+      ),
+    );
+    layout(root);
+
+    expect(root.size.width, equals(800.0));
+    expect(root.size.height, equals(600.0));
+    expect(child.size.width, equals(400.0));
+    expect(child.size.height, equals(600.0));
+  });
+
   test('RenderShrinkWrappingViewport shrinkwrap test - 2 children', () {
     RenderBox child;
     final RenderBox root = RenderPositionedBox(

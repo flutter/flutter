@@ -544,6 +544,45 @@ void main() {
     expect(find.text('FooBar 3'), findsNothing);
     expect(find.text('FooBar 73'), findsOneWidget);
   });
+
+  testWidgets('AutomaticKeepAlive with SliverKeepAliveWidget', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        addSemanticIndexes: false,
+        itemCount: 250,
+        itemBuilder: (BuildContext context, int index){
+          if (index % 2 == 0){
+            return _AlwaysKeepAlive(
+              key: GlobalObjectKey<_AlwaysKeepAliveState>(index),
+            );
+          }
+          return Container(
+            height: 44.0,
+            child: Text('FooBar $index'),
+          );
+        },
+      ),
+    ));
+
+    expect(find.text('keep me alive'), findsNWidgets(7));
+    expect(find.text('FooBar 1'), findsOneWidget);
+    expect(find.text('FooBar 3'), findsOneWidget);
+
+    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0)), findsOneWidget);
+
+    final ScrollableState state = tester.state(find.byType(Scrollable));
+    final ScrollPosition position = state.position;
+    position.jumpTo(3025.0);
+
+    await tester.pump();
+    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0), skipOffstage: false), findsOneWidget);
+
+    expect(find.text('keep me alive', skipOffstage: false), findsNWidgets(23));
+    expect(find.text('FooBar 1'), findsNothing);
+    expect(find.text('FooBar 3'), findsNothing);
+    expect(find.text('FooBar 73'), findsOneWidget);
+  });
 }
 
 class _AlwaysKeepAlive extends StatefulWidget {
@@ -592,11 +631,11 @@ class _SliverAlternativeToMultiBoxAdaptorElement extends RenderObjectElement{
   }
 
   @override
-  void insertChildRenderObject(RenderObject child,int slot) {
+  void insertChildRenderObject(RenderObject child, int slot) {
   }
 
   @override
-  void moveChildRenderObject(RenderObject child,int slot) {
+  void moveChildRenderObject(RenderObject child, int slot) {
   }
 
   @override

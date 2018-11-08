@@ -187,7 +187,7 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
 ///  * [RenderSliverGrid], which places its children in arbitrary positions.
 abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   with ContainerRenderObjectMixin<RenderBox, SliverMultiBoxAdaptorParentData>,
-       RenderSliverHelpers,RenderSliverWithKeepAliveMixin {
+       RenderSliverHelpers, RenderSliverWithKeepAliveMixin {
 
   /// Creates a sliver with multiple box children.
   ///
