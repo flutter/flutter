@@ -85,17 +85,17 @@ void main() {
           ),
         ),
       );
-      final Container container = tester.firstWidget(find.byType(Container));
+      final Container container = tester.widgetList(find.byType(Container)).toList()[1];
       final BoxDecoration boxDecoration = container.decoration;
       expect(boxDecoration.gradient.colors, <Color>[
-        backgroundColor.withOpacity(0),
+        backgroundColor,
         backgroundColor.withAlpha(0xF2),
         backgroundColor.withAlpha(0xDD),
         backgroundColor.withAlpha(0x00),
         backgroundColor.withAlpha(0x00),
         backgroundColor.withAlpha(0xDD),
         backgroundColor.withAlpha(0xF2),
-        backgroundColor.withOpacity(0),
+        backgroundColor,
       ]);
     });
   });
