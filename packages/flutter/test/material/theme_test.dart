@@ -415,12 +415,12 @@ void main() {
   });
 
   group('Cupertino theme', () {
-    int timesBuilt;
+    int buildCount;
     CupertinoThemeData actualTheme;
 
     final Widget child = Builder(
       builder: (BuildContext context) {
-        timesBuilt++;
+        buildCount++;
         actualTheme = CupertinoTheme.of(context);
         return const Placeholder();
       },
@@ -437,7 +437,7 @@ void main() {
     }
 
     setUp(() {
-      timesBuilt = 0;
+      buildCount = 0;
       actualTheme = null;
     });
 
@@ -498,14 +498,14 @@ void main() {
         primarySwatch: Colors.red,
       ));
 
-      expect(timesBuilt, 1);
+      expect(buildCount, 1);
       expect(theme.primaryColor, Colors.red);
 
       theme = await testTheme(tester, ThemeData(
         primarySwatch: Colors.orange,
       ));
 
-      expect(timesBuilt, 2);
+      expect(buildCount, 2);
       expect(theme.primaryColor, Colors.orange);
     });
 
@@ -516,14 +516,14 @@ void main() {
           primarySwatch: Colors.red,
         ));
 
-        expect(timesBuilt, 1);
+        expect(buildCount, 1);
         expect(theme.primaryContrastingColor, Colors.white);
 
         theme = await testTheme(tester, ThemeData(
           primarySwatch: Colors.orange,
         ));
 
-        expect(timesBuilt, 2);
+        expect(buildCount, 2);
         expect(theme.primaryContrastingColor, Colors.black);
       },
     );
@@ -535,14 +535,14 @@ void main() {
           primarySwatch: Colors.purple,
         ));
 
-        expect(timesBuilt, 1);
+        expect(buildCount, 1);
         expect(theme.primaryContrastingColor, Colors.white);
 
         theme = await testTheme(tester, ThemeData(
           primarySwatch: Colors.brown,
         ));
 
-        expect(timesBuilt, 1);
+        expect(buildCount, 1);
         expect(theme.primaryContrastingColor, Colors.white);
       },
     );
@@ -554,7 +554,7 @@ void main() {
           primarySwatch: Colors.purple,
         ));
 
-        expect(timesBuilt, 1);
+        expect(buildCount, 1);
         expect(theme.barBackgroundColor, const Color(0xCCF8F8F8));
 
         theme = await testTheme(tester, ThemeData(
@@ -562,7 +562,7 @@ void main() {
         ));
 
         // Bar color is independent of material theme except brightness.
-        expect(timesBuilt, 1);
+        expect(buildCount, 1);
         expect(theme.barBackgroundColor, const Color(0xCCF8F8F8));
       },
     );
@@ -577,7 +577,7 @@ void main() {
           ),
         ));
 
-        expect(timesBuilt, 1);
+        expect(buildCount, 1);
         expect(theme.primaryColor, CupertinoColors.activeOrange);
 
         theme = await testTheme(tester, ThemeData(
@@ -587,7 +587,7 @@ void main() {
           ),
         ));
 
-        expect(timesBuilt, 2);
+        expect(buildCount, 2);
         expect(theme.primaryColor, CupertinoColors.activeGreen);
       },
     );
@@ -602,7 +602,7 @@ void main() {
           ),
         ));
 
-        expect(timesBuilt, 1);
+        expect(buildCount, 1);
         expect(theme.primaryColor, CupertinoColors.activeOrange);
 
         // Change the upstream material primary color.
@@ -614,7 +614,7 @@ void main() {
           ),
         ));
 
-        expect(timesBuilt, 1);
+        expect(buildCount, 1);
         expect(theme.primaryColor, CupertinoColors.activeOrange);
       },
     );
@@ -629,7 +629,7 @@ void main() {
           ),
         ));
 
-        expect(timesBuilt, 1);
+        expect(buildCount, 1);
         expect(theme.textTheme.actionTextStyle.color, Colors.purple);
         expect(theme.primaryContrastingColor, CupertinoColors.destructiveRed);
 
@@ -640,7 +640,7 @@ void main() {
           ),
         ));
 
-        expect(timesBuilt, 2);
+        expect(buildCount, 2);
         expect(theme.textTheme.actionTextStyle.color, Colors.green);
         expect(theme.primaryContrastingColor, CupertinoColors.destructiveRed);
       },
