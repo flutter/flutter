@@ -1766,7 +1766,7 @@ abstract class RenderBox extends RenderObject {
           'Constraints: $constraints\n'
           'Size: $_size\n'
           'If you are not writing your own RenderBox subclass, then this is not '
-          'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
         );
       }
       if (debugCheckIntrinsicSizes) {
@@ -1815,7 +1815,7 @@ abstract class RenderBox extends RenderObject {
             'The following ${failureCount > 1 ? "failures" : "failure"} was detected:\n'
             '$failures'
             'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
           );
         }
       }
