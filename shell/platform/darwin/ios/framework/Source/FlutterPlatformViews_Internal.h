@@ -59,6 +59,9 @@ class FlutterPlatformViewsController {
                                   const flow::EmbeddedViewParams& params,
                                   IOSSurface& surface);
 
+  // Discards all platform views instances and auxiliary resources.
+  void Reset();
+
   bool Present();
 
   void OnMethodCall(FlutterMethodCall* call, FlutterResult& result);

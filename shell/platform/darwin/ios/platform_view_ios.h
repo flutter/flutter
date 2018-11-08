@@ -70,6 +70,9 @@ class PlatformViewIOS final : public PlatformView {
   // |shell::PlatformView|
   std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
 
+  // |shell::PlatformView|
+  void OnPreEngineRestart() const override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
 };
 

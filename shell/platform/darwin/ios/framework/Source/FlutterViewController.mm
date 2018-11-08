@@ -31,7 +31,6 @@
   fml::scoped_nsobject<FlutterView> _flutterView;
   fml::scoped_nsobject<UIView> _splashScreenView;
   fml::ScopedBlock<void (^)(void)> _flutterViewRenderedCallback;
-  std::unique_ptr<shell::FlutterPlatformViewsController> _platformViewsController;
   UIInterfaceOrientationMask _orientationPreferences;
   UIStatusBarStyle _statusBarStyle;
   blink::ViewportMetrics _viewportMetrics;
@@ -899,7 +898,7 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
 #pragma mark - Platform views
 
 - (shell::FlutterPlatformViewsController*)platformViewsController {
-  return _platformViewsController.get();
+  return [_engine.get() platformViewsController];
 }
 
 #pragma mark - FlutterBinaryMessenger

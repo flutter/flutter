@@ -167,6 +167,18 @@ SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(
   return canvas;
 }
 
+void FlutterPlatformViewsController::Reset() {
+  UIView* flutter_view = flutter_view_.get();
+  for (UIView* sub_view in [flutter_view subviews]) {
+    [sub_view removeFromSuperview];
+  }
+  views_.clear();
+  overlays_.clear();
+  composition_order_.clear();
+  active_composition_order_.clear();
+  composition_frames_.clear();
+}
+
 bool FlutterPlatformViewsController::Present() {
   bool did_submit = true;
   for (size_t i = 0; i < composition_order_.size(); i++) {
