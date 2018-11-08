@@ -18,7 +18,7 @@
 namespace shell {
 
 void FlutterPlatformViewsController::SetFlutterView(UIView* flutter_view) {
-  flutter_view_.reset(flutter_view);
+  flutter_view_.reset([flutter_view retain]);
 }
 
 void FlutterPlatformViewsController::OnMethodCall(FlutterMethodCall* call, FlutterResult& result) {
