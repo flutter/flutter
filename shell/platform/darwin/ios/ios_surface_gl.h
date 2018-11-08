@@ -46,6 +46,15 @@ class IOSSurfaceGL : public IOSSurface,
   flow::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
   // |flow::ExternalViewEmbedder|
+  void SetFrameSize(SkISize frame_size) override;
+
+  // |flow::ExternalViewEmbedder|
+  void PrerollCompositeEmbeddedView(int view_id) override;
+
+  // |flow::ExternalViewEmbedder|
+  std::vector<SkCanvas*> GetCurrentCanvases() override;
+
+  // |flow::ExternalViewEmbedder|
   SkCanvas* CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) override;
 
  private:

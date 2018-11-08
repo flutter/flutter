@@ -128,6 +128,25 @@ void FlutterPlatformViewsController::RegisterViewFactory(
       fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>([factory retain]);
 }
 
+void FlutterPlatformViewsController::SetFrameSize(SkISize frame_size) {
+  frame_size_ = frame_size;
+}
+
+void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(int view_id) {
+  EnsureOverlayInitialized(view_id);
+  composition_frames_[view_id] = (overlays_[view_id]->surface->AcquireFrame(frame_size_));
+  composition_order_.push_back(view_id);
+}
+
+std::vector<SkCanvas*> FlutterPlatformViewsController::GetCurrentCanvases() {
+  std::vector<SkCanvas*> canvases;
+  for (size_t i = 0; i < composition_order_.size(); i++) {
+    int64_t view_id = composition_order_[i];
+    canvases.push_back(composition_frames_[view_id]->SkiaCanvas());
+  }
+  return canvases;
+}
+
 SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(
     int view_id,
     const flow::EmbeddedViewParams& params,
@@ -135,7 +154,6 @@ SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(
   // TODO(amirh): assert that this is running on the platform thread once we support the iOS
   // embedded views thread configuration.
   // TODO(amirh): do nothing if the params didn't change.
-  EnsureOverlayInitialized(view_id);
   CGFloat screenScale = [[UIScreen mainScreen] scale];
   CGRect rect =
       CGRectMake(params.offsetPixels.x() / screenScale, params.offsetPixels.y() / screenScale,
@@ -143,19 +161,17 @@ SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(
 
   UIView* view = views_[view_id].get();
   [view setFrame:rect];
-  composition_order_.push_back(view_id);
 
-  composition_frames_.push_back(
-      overlays_[view_id]->surface->AcquireFrame(params.canvasBaseLayerSize));
-  SkCanvas* canvas = composition_frames_.back()->SkiaCanvas();
+  SkCanvas* canvas = composition_frames_[view_id]->SkiaCanvas();
   canvas->clear(SK_ColorTRANSPARENT);
   return canvas;
 }
 
 bool FlutterPlatformViewsController::Present() {
   bool did_submit = true;
-  for (size_t i = 0; i < composition_frames_.size(); i++) {
-    did_submit &= composition_frames_[i]->Submit();
+  for (size_t i = 0; i < composition_order_.size(); i++) {
+    int64_t view_id = composition_order_[i];
+    did_submit &= composition_frames_[view_id]->Submit();
   }
   composition_frames_.clear();
   if (composition_order_ == active_composition_order_) {

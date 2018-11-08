@@ -164,6 +164,11 @@ bool Rasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
 
   auto external_view_embedder = surface_->GetExternalViewEmbedder();
 
+  // TODO(amirh): uncomment this once external_view_embedder is populated.
+  // if (external_view_embedder != nullptr) {
+  //   external_view_embedder->SetFrameSize(layer_tree.frame_size());
+  // }
+
   auto compositor_frame = compositor_context_->AcquireFrame(
       surface_->GetContext(), canvas, external_view_embedder,
       surface_->GetRootTransformation(), true);

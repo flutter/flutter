@@ -156,7 +156,12 @@ void RasterCache::Prepare(PrerollContext* context,
     entry.image = Rasterize(context->gr_context, ctm, context->dst_color_space,
                             checkerboard_images_, layer->paint_bounds(),
                             [layer, context](SkCanvas* canvas) {
+                              SkISize canvas_size = canvas->getBaseLayerSize();
+                              SkNWayCanvas internal_nodes_canvas(
+                                  canvas_size.width(), canvas_size.height());
+                              internal_nodes_canvas.addCanvas(canvas);
                               Layer::PaintContext paintContext = {
+                                  (SkCanvas*)&internal_nodes_canvas,
                                   canvas,
                                   nullptr,
                                   context->frame_time,

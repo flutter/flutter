@@ -25,6 +25,7 @@
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkRect.h"
+#include "third_party/skia/include/utils/SkNWayCanvas.h"
 
 #if defined(OS_FUCHSIA)
 
@@ -44,6 +45,7 @@ class ContainerLayer;
 struct PrerollContext {
   RasterCache* raster_cache;
   GrContext* gr_context;
+  ExternalViewEmbedder* view_embedder;
   SkColorSpace* dst_color_space;
   SkRect child_paint_bounds;
 
@@ -64,6 +66,21 @@ class Layer {
   virtual void Preroll(PrerollContext* context, const SkMatrix& matrix);
 
   struct PaintContext {
+    // When splitting the scene into multiple canvases (e.g when embedding
+    // a platform view on iOS) during the paint traversal we apply the non leaf
+    // flow layers to all canvases, and leaf layers just to the "current"
+    // canvas. Applying the non leaf layers to all canvases ensures that when
+    // we switch a canvas (when painting a PlatformViewLayer) the next canvas
+    // has the exact same state as the current canvas.
+    // The internal_nodes_canvas is a SkNWayCanvas which is used by non leaf
+    // and applies the operations to all canvases.
+    // The leaf_nodes_canvas is the "current" canvas and is used by leaf
+    // layers.
+    SkCanvas* internal_nodes_canvas;
+    // I'm temporarily leaving the name of this field to be canvas to reduce
+    // noise in the incremental change. A followup change will rename this
+    // and use the corrrect canvas in each callsite.
+    // TODO(amirh) rename canvas to leaf_nodes_canvas.
     SkCanvas* canvas;
     ExternalViewEmbedder* view_embedder;
     const Stopwatch& frame_time;
