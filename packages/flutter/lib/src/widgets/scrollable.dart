@@ -513,7 +513,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       gestures: _gestureRecognizers,
       behavior: HitTestBehavior.opaque,
       excludeFromSemantics: widget.excludeFromSemantics,
-      dragStartBehavior: widget.dragStartBehavior,
       child: Semantics(
         explicitChildNodes: !widget.excludeFromSemantics,
         child: IgnorePointer(

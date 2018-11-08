@@ -173,11 +173,9 @@ class RenderEditable extends RenderBox {
     assert(!_showCursor.value || cursorColor != null);
     _tap = TapGestureRecognizer(debugOwner: this)
       ..onTapDown = _handleTapDown
-      ..onTap = _handleTap
-      ..dragStartBehavior = dragStartBehavior;
+      ..onTap = _handleTap;
     _longPress = LongPressGestureRecognizer(debugOwner: this)
-      ..onLongPress = _handleLongPress
-      ..dragStartBehavior = dragStartBehavior;
+      ..onLongPress = _handleLongPress;
   }
 
   /// Character used to obscure text if [obscureText] is true.

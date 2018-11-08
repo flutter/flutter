@@ -500,7 +500,6 @@ class RawGestureDetector extends StatefulWidget {
     this.gestures = const <Type, GestureRecognizerFactory>{},
     this.behavior,
     this.excludeFromSemantics = false,
-    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
        super(key: key) ;
@@ -531,9 +530,6 @@ class RawGestureDetector extends StatefulWidget {
   /// tree directly and so having a gesture to show it would result in
   /// duplication of information.
   final bool excludeFromSemantics;
-
-  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
-  final DragStartBehavior dragStartBehavior;
 
   @override
   RawGestureDetectorState createState() => RawGestureDetectorState();
@@ -631,14 +627,11 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     assert(_recognizers != null);
     final Map<Type, GestureRecognizer> oldRecognizers = _recognizers;
     _recognizers = <Type, GestureRecognizer>{};
-    for (GestureRecognizer recognizer in _recognizers.values)
-      recognizer.dragStartBehavior = widget.dragStartBehavior;
     for (Type type in gestures.keys) {
       assert(gestures[type] != null);
       assert(gestures[type]._debugAssertTypeMatches(type));
       assert(!_recognizers.containsKey(type));
       _recognizers[type] = oldRecognizers[type] ?? gestures[type].constructor();
-      _recognizers[type].dragStartBehavior = widget.dragStartBehavior;
       assert(_recognizers[type].runtimeType == type, 'GestureRecognizerFactory of type $type created a GestureRecognizer of type ${_recognizers[type].runtimeType}. The GestureRecognizerFactory must be specialized with the type of the class that it returns from its constructor method.');
       gestures[type].initializer(_recognizers[type]);
     }
