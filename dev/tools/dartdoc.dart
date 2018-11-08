@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 
 const String kDocsRoot = 'dev/docs';
 const String kPublishRoot = '$kDocsRoot/doc';
@@ -85,15 +86,15 @@ Future<void> main(List<String> arguments) async {
   final String pubExecutable = '$flutterRoot/bin/cache/dart-sdk/bin/pub';
 
   // Run pub.
-  Process process = await Process.start(
+  ProcessWrapper process = ProcessWrapper(await Process.start(
     pubExecutable,
     <String>['get'],
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
-  );
+  ));
   printStream(process.stdout, prefix: 'pub:stdout: ');
   printStream(process.stderr, prefix: 'pub:stderr: ');
-  final int code = await process.exitCode;
+  final int code = await process.done;
   if (code != 0)
     exit(code);
 
@@ -185,12 +186,12 @@ Future<void> main(List<String> arguments) async {
   String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
   print('Executing: (cd $kDocsRoot ; $pubExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
 
-  process = await Process.start(
+  process = ProcessWrapper(await Process.start(
     pubExecutable,
     dartdocArgs,
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
-  );
+  ));
   printStream(process.stdout, prefix: args['json'] ? '' : 'dartdoc:stdout: ',
     filter: args['verbose'] ? const <Pattern>[] : <Pattern>[
       RegExp(r'^generating docs for library '), // unnecessary verbosity
@@ -202,7 +203,7 @@ Future<void> main(List<String> arguments) async {
       RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
     ],
   );
-  final int exitCode = await process.exitCode;
+  final int exitCode = await process.done;
 
   if (exitCode != 0)
     exit(exitCode);
@@ -312,15 +313,15 @@ Future<File> precompileSnippetsTool(
     snapshotPath.deleteSync();
   }
 
-  Process process = await Process.start(
+  ProcessWrapper process = ProcessWrapper(await Process.start(
     pubExecutable,
     <String>['get'],
     workingDirectory: kSnippetsRoot,
     environment: pubEnvironment,
-  );
+  ));
   printStream(process.stdout, prefix: 'pub:stdout: ');
   printStream(process.stderr, prefix: 'pub:stderr: ');
-  final int code = await process.exitCode;
+  final int code = await process.done;
   if (code != 0)
     exit(code);
 
@@ -329,19 +330,26 @@ Future<File> precompileSnippetsTool(
   final Directory tempDir = Directory.systemTemp.createTempSync('dartdoc_snippet_');
   final File trainingFile = File(path.join(tempDir.path, 'snippet_training'));
   trainingFile.writeAsStringSync('```dart\nvoid foo(){}\n```');
-  ProcessResult result = Process.runSync(Platform.resolvedExecutable, <String>[
-    '--snapshot=${snapshotPath.absolute.path}',
-    '--snapshot_kind=app-jit',
-    path.join(
-      'lib',
-      'main.dart',
-    ),
-    '--type=sample',
-    '--input=${trainingFile.absolute.path}',
-    '--output=${path.join(tempDir.absolute.path, 'training_output.txt')}',
-  ], workingDirectory: path.absolute(kSnippetsRoot));
-  if (result.exitCode != 0)
-    throw Exception('Could not generate snippets snapshot:\n${result.stderr}');
+  try {
+    ProcessResult result = Process.runSync(Platform.resolvedExecutable, <String>[
+      '--snapshot=${snapshotPath.absolute.path}f',
+      '--snapshot_kind=app-jit',
+      path.join(
+        'lib',
+        'main.dart',
+      ),
+      '--type=sample',
+      '--input=${trainingFile.absolute.path}',
+      '--output=${path.join(tempDir.absolute.path, 'training_output.txt')}',
+    ], workingDirectory: path.absolute(kSnippetsRoot));
+    if (result.exitCode != 0) {
+      stdout.writeln(result.stdout);
+      stderr.writeln(result.stderr);
+      throw Exception('Could not generate snippets snapshot: process exited with code ${result.exitCode}');
+    }
+  } on ProcessException catch (error) {
+    throw Exception('Could not generate snippets snapshot:\n$error');
+  }
   tempDir.deleteSync(recursive: true);
   return snapshotPath;
 }
