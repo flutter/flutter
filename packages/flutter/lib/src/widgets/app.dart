@@ -641,17 +641,17 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
     final String name = settings.name;
-    final WidgetBuilder widgetBuilder = name == Navigator.defaultRouteName && widget.home != null
+    final WidgetBuilder pageContentBuilder = name == Navigator.defaultRouteName && widget.home != null
         ? (BuildContext context) => widget.home
         : widget.routes[name];
 
-    if (widgetBuilder != null) {
+    if (pageContentBuilder != null) {
       assert(widget.pageRouteBuilder != null,
         'The default onGenerateRoute handler for WidgetsApp must have a '
         'pageRouteBuilder set if the home or routes properties are set.');
       final Route<dynamic> route = widget.pageRouteBuilder(
         settings,
-        widgetBuilder,
+        pageContentBuilder,
       );
       assert(route != null,
         'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
