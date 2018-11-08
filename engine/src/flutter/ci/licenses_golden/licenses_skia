@@ -1,4 +1,4 @@
-Signature: 1e38091680d313d59e87eba0e29f3e67
+Signature: 0d532a482c297b3600bfa72396105ec9
 
 UNUSED LICENSES:
 
@@ -2942,7 +2942,6 @@ FILE: ../../../third_party/skia/src/pdf/SkPDFTypes.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFUtils.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFUtils.h
 FILE: ../../../third_party/skia/src/ports/SkGlobalInitialization_default.cpp
-FILE: ../../../third_party/skia/src/ports/SkGlobalInitialization_default_imagefilters.cpp
 FILE: ../../../third_party/skia/src/ports/SkImageEncoder_WIC.cpp
 FILE: ../../../third_party/skia/src/ports/SkMemory_malloc.cpp
 FILE: ../../../third_party/skia/src/ports/SkScalerContext_win_dw.cpp
@@ -4487,8 +4486,6 @@ FILE: ../../../third_party/skia/src/pdf/SkPDFGradientShader.h
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_custom_directory.cpp
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_custom_embedded.cpp
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_custom_empty.cpp
-FILE: ../../../third_party/skia/src/ports/SkGlobalInitialization_none.cpp
-FILE: ../../../third_party/skia/src/ports/SkGlobalInitialization_none_imagefilters.cpp
 FILE: ../../../third_party/skia/src/ports/SkOSFile_ios.h
 FILE: ../../../third_party/skia/src/sfnt/SkOTTable_fvar.h
 FILE: ../../../third_party/skia/src/shaders/SkShaderBase.h
