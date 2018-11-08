@@ -95,7 +95,26 @@ void main() {
 
   group('hotRestart', () {
     final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    final MockDevFs mockDevFs = MockDevFs();
     MockLocalEngineArtifacts mockArtifacts;
+
+    when(mockDevFs.update(
+      mainPath: anyNamed('mainPath'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      bundleDirty: anyNamed('bundleDirty'),
+      fileFilter: anyNamed('fileFilter'),
+      generator: anyNamed('generator'),
+      fullRestart: anyNamed('fullRestart'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+    )).thenAnswer((Invocation _) => Future<int>.value(1000));
+    when(mockDevFs.assetPathsToEvict).thenReturn(Set<String>());
+    when(mockDevFs.baseUri).thenReturn(Uri.file('test'));
 
     setUp(() {
       mockArtifacts = MockLocalEngineArtifacts();
@@ -117,26 +136,8 @@ void main() {
     testUsingContext('Does not hot restart when device does not support it', () async {
       // Setup mocks
       final MockDevice mockDevice = MockDevice();
-      final MockDevFs mockDevFs = MockDevFs();
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(false);
-      when(mockDevFs.update(
-        mainPath: anyNamed('mainPath'),
-        target: anyNamed('target'),
-        bundle: anyNamed('bundle'),
-        firstBuildTime: anyNamed('firstBuildTime'),
-        bundleFirstUpload: anyNamed('bundleFirstUpload'),
-        bundleDirty: anyNamed('bundleDirty'),
-        fileFilter: anyNamed('fileFilter'),
-        generator: anyNamed('generator'),
-        fullRestart: anyNamed('fullRestart'),
-        dillOutputPath: anyNamed('dillOutputPath'),
-        trackWidgetCreation: anyNamed('trackWidgetCreation'),
-        projectRootPath: anyNamed('projectRootPath'),
-        pathToReload: anyNamed('pathToReload'),
-      )).thenAnswer((Invocation _) => Future<int>.value(1000));
-      when(mockDevFs.assetPathsToEvict).thenReturn(Set<String>());
-      when(mockDevFs.baseUri).thenReturn(Uri.file('test'));
       // Trigger hot restart.
       final List<FlutterDevice> devices = <FlutterDevice>[
         FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)..devFS = mockDevFs
@@ -152,30 +153,12 @@ void main() {
 
     testUsingContext('Does not hot restart when one of many devices does not support it', () async {
       // Setup mocks
-      final MockDevFs mockDevFs = MockDevFs();
       final MockDevice mockDevice = MockDevice();
       final MockDevice mockHotDevice = MockDevice();
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(false);
       when(mockHotDevice.supportsHotReload).thenReturn(true);
       when(mockHotDevice.supportsHotRestart).thenReturn(true);
-      when(mockDevFs.update(
-        mainPath: anyNamed('mainPath'),
-        target: anyNamed('target'),
-        bundle: anyNamed('bundle'),
-        firstBuildTime: anyNamed('firstBuildTime'),
-        bundleFirstUpload: anyNamed('bundleFirstUpload'),
-        bundleDirty: anyNamed('bundleDirty'),
-        fileFilter: anyNamed('fileFilter'),
-        generator: anyNamed('generator'),
-        fullRestart: anyNamed('fullRestart'),
-        dillOutputPath: anyNamed('dillOutputPath'),
-        trackWidgetCreation: anyNamed('trackWidgetCreation'),
-        projectRootPath: anyNamed('projectRootPath'),
-        pathToReload: anyNamed('pathToReload'),
-      )).thenAnswer((Invocation _) => Future<int>.value(1000));
-      when(mockDevFs.assetPathsToEvict).thenReturn(Set<String>());
-      when(mockDevFs.baseUri).thenReturn(Uri.file('test'));
       // Trigger hot restart.
       final List<FlutterDevice> devices = <FlutterDevice>[
         FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)..devFS = mockDevFs,
@@ -192,30 +175,12 @@ void main() {
 
     testUsingContext('Does hot restarts when all devices support it', () async {
       // Setup mocks
-      final MockDevFs mockDevFs = MockDevFs();
       final MockDevice mockDevice = MockDevice();
       final MockDevice mockHotDevice = MockDevice();
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(true);
       when(mockHotDevice.supportsHotReload).thenReturn(true);
       when(mockHotDevice.supportsHotRestart).thenReturn(true);
-      when(mockDevFs.update(
-        mainPath: anyNamed('mainPath'),
-        target: anyNamed('target'),
-        bundle: anyNamed('bundle'),
-        firstBuildTime: anyNamed('firstBuildTime'),
-        bundleFirstUpload: anyNamed('bundleFirstUpload'),
-        bundleDirty: anyNamed('bundleDirty'),
-        fileFilter: anyNamed('fileFilter'),
-        generator: anyNamed('generator'),
-        fullRestart: anyNamed('fullRestart'),
-        dillOutputPath: anyNamed('dillOutputPath'),
-        trackWidgetCreation: anyNamed('trackWidgetCreation'),
-        projectRootPath: anyNamed('projectRootPath'),
-        pathToReload: anyNamed('pathToReload'),
-      )).thenAnswer((Invocation _) => Future<int>.value(1000));
-      when(mockDevFs.assetPathsToEvict).thenReturn(Set<String>());
-      when(mockDevFs.baseUri).thenReturn(Uri.file('test'));
       // Trigger a restart.
       final List<FlutterDevice> devices = <FlutterDevice>[
         FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)..devFS = mockDevFs,
@@ -247,27 +212,9 @@ void main() {
 
     testUsingContext('hot restart supported', () async {
       // Setup mocks
-      final MockDevFs mockDevFs = MockDevFs();
       final MockDevice mockDevice = MockDevice();
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(true);
-      when(mockDevFs.update(
-        mainPath: anyNamed('mainPath'),
-        target: anyNamed('target'),
-        bundle: anyNamed('bundle'),
-        firstBuildTime: anyNamed('firstBuildTime'),
-        bundleFirstUpload: anyNamed('bundleFirstUpload'),
-        bundleDirty: anyNamed('bundleDirty'),
-        fileFilter: anyNamed('fileFilter'),
-        generator: anyNamed('generator'),
-        fullRestart: anyNamed('fullRestart'),
-        dillOutputPath: anyNamed('dillOutputPath'),
-        trackWidgetCreation: anyNamed('trackWidgetCreation'),
-        projectRootPath: anyNamed('projectRootPath'),
-        pathToReload: anyNamed('pathToReload'),
-      )).thenAnswer((Invocation _) => Future<int>.value(1000));
-      when(mockDevFs.assetPathsToEvict).thenReturn(Set<String>());
-      when(mockDevFs.baseUri).thenReturn(Uri.file('test'));
       // Trigger hot restart.
       final List<FlutterDevice> devices = <FlutterDevice>[
         FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)..devFS = mockDevFs
