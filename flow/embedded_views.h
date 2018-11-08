@@ -5,6 +5,8 @@
 #ifndef FLUTTER_FLOW_EMBEDDED_VIEWS_H_
 #define FLUTTER_FLOW_EMBEDDED_VIEWS_H_
 
+#include <vector>
+
 #include "flutter/fml/memory/ref_counted.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPoint.h"
