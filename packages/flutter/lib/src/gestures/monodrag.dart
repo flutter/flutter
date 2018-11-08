@@ -9,6 +9,8 @@ import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
 
+import 'package:flutter/foundation.dart';
+
 enum _DragState {
   ready,
   possible,
@@ -51,8 +53,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   DragGestureRecognizer({
     Object debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) :  assert(dragStartBehavior != null),
-        super(debugOwner: debugOwner);
+  }) : super(debugOwner: debugOwner);
 
   /// Configure the behavior of offsets sent to [onStart].
   ///
@@ -262,6 +263,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     _velocityTrackers.clear();
     super.dispose();
   }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty<DragStartBehavior>('startBehavior', dragStartBehavior));
+  }
 }
 
 /// Recognizes movement in the vertical direction.
@@ -310,7 +316,8 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 ///    track each touch point independently.
 class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the horizontal axis.
-  HorizontalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  HorizontalDragGestureRecognizer({ Object debugOwner }) :
+        super(debugOwner: debugOwner);
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {

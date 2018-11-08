@@ -740,7 +740,7 @@ class RenderEditable extends RenderBox {
       }
       if (_textPainter.getOffsetAfter(_selection.extentOffset) != null) {
         config
-          ..onMoveCursorForwardByWord = _handleMoveCursorForwardByWord
+          ..onMoveCursorForwardByWord =  _handleMoveCursorForwardByWord
           ..onMoveCursorForwardByCharacter = _handleMoveCursorForwardByCharacter;
       }
     }

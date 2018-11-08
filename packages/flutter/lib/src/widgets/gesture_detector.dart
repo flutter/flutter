@@ -423,7 +423,8 @@ class GestureDetector extends StatelessWidget {
             ..onStart = onPanStart
             ..onUpdate = onPanUpdate
             ..onEnd = onPanEnd
-            ..onCancel = onPanCancel;
+            ..onCancel = onPanCancel
+            ..dragStartBehavior = startBehavior;
         },
       );
     }
@@ -446,6 +447,11 @@ class GestureDetector extends StatelessWidget {
       excludeFromSemantics: excludeFromSemantics,
       child: child,
     );
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty<DragStartBehavior>('startBehavior', startBehavior));
   }
 }
 
