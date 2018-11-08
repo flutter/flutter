@@ -85,7 +85,7 @@ void main() {
           ),
         ),
       );
-      final Container container = tester.widgetList(find.byType(Container)).toList()[1];
+      final Container container = tester.firstWidget(find.byType(Container));
       final BoxDecoration boxDecoration = container.decoration;
       expect(boxDecoration.gradient.colors, <Color>[
         backgroundColor,
