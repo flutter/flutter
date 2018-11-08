@@ -67,7 +67,7 @@
   return self;
 }
 
-- (void)dealloc {
+- (void)stopService {
 #if TARGET_IPHONE_SIMULATOR
   if (_dnsServiceRef) {
     DNSServiceRefDeallocate(_dnsServiceRef);
@@ -76,20 +76,17 @@
 #else   // TARGET_IPHONE_SIMULATOR
   [_netService.get() stop];
 #endif  // TARGET_IPHONE_SIMULATOR
+}
+
+- (void)dealloc {
+  [self stopService];
 
   blink::DartServiceIsolate::RemoveServerStatusCallback(std::move(_callbackHandle));
   [super dealloc];
 }
 
 - (void)publishServiceProtocolPort:(std::string)uri {
-#if TARGET_IPHONE_SIMULATOR
-  if (_dnsServiceRef) {
-    DNSServiceRefDeallocate(_dnsServiceRef);
-    _dnsServiceRef = NULL;
-  }
-#else   // TARGET_IPHONE_SIMULATOR
-  [_netService.get() stop];
-#endif  // TARGET_IPHONE_SIMULATOR
+  [self stopService];
   if (uri.empty()) {
     return;
   }
@@ -115,7 +112,7 @@
   if (err != 0) {
     FML_LOG(ERROR) << "Failed to register observatory port with mDNS.";
   } else {
-    DNSServiceProcessResult(_dnsServiceRef);
+    DNSServiceSetDispatchQueue(_dnsServiceRef, dispatch_get_main_queue());
   }
 #else   // TARGET_IPHONE_SIMULATOR
   _netService.reset([[NSNetService alloc] initWithDomain:@"local."
@@ -128,7 +125,7 @@
 }
 
 - (void)netServiceDidPublish:(NSNetService*)sender {
-  FML_LOG(INFO) << "FlutterObservatoryPublisher is ready!";
+  FML_DLOG(INFO) << "FlutterObservatoryPublisher is ready!";
 }
 
 - (void)netService:(NSNetService*)sender didNotPublish:(NSDictionary*)errorDict {
