@@ -567,11 +567,11 @@ void processBundle(File file, { @required String localeString }) {
         resources[key] = bundle[key];
     }
   }
-  // Only pre-assume script if there is a country or script code to assume off of.
-  if (localeString.split('_').length > 1)
-    localeString = assumeScriptCode(localeString);
+  // Only pre-assume scriptCode if there is a country or script code to assume off of.
+  // When we assume scriptCode based on languageCode-only, we want this initial pass
+  // to use the un-assumed version as a base class.
+  LocaleInfo locale = LocaleInfo.fromString(localeString, assume: localeString.split('_').length > 1);
   // Allow overwrite if the existing data is assumed.
-  LocaleInfo locale = LocaleInfo.fromString(localeString);
   if (assumedLocales.contains(locale)) {
     localeToResources[locale] = <String, String>{};
     localeToResourceAttributes[locale] = <String, dynamic>{};
@@ -582,8 +582,7 @@ void processBundle(File file, { @required String localeString }) {
   }
   populateResources(locale);
   // Add an assumed locale to default to when there is no info on scriptOnly locales.
-  localeString = assumeScriptCode(localeString);
-  locale = LocaleInfo.fromString(localeString);
+  locale = LocaleInfo.fromString(localeString, assume: true);
   if (locale.scriptCode != null) {
     final LocaleInfo scriptLocale = LocaleInfo.fromString(locale.languageCode + '_' + locale.scriptCode);
     if (!localeToResources.containsKey(scriptLocale)) {
@@ -592,45 +591,6 @@ void processBundle(File file, { @required String localeString }) {
       localeToResourceAttributes[scriptLocale] ??= <String, dynamic>{};
       populateResources(scriptLocale);
     }
-  }
-}
-
-
-/// Adds scriptCodes to locales where we are able to assume it to provide
-/// finer granularity when resolving locales.
-///
-/// The basis of the assumptions here are based off of known usage of scripts
-/// across various countries. For example, we know Taiwan uses traditional (Hant)
-/// script, so it is safe to apply (Hant) to Taiwanese languages.
-String assumeScriptCode(String localeString) {
-  final LocaleInfo localeInfo = LocaleInfo.fromString(localeString);
-  if (localeInfo.scriptCode != null)
-    return localeString;
-  switch (localeInfo.languageCode) {
-    case 'zh': {
-      switch (localeInfo.countryCode) {
-        case 'CN':
-          return localeInfo.languageCode + '_Hans_' + localeInfo.countryCode;
-        case 'SG':
-          return localeInfo.languageCode + '_Hans_' + localeInfo.countryCode;
-        case 'TW':
-          return localeInfo.languageCode + '_Hant_' + localeInfo.countryCode;
-        case 'HK':
-          return localeInfo.languageCode + '_Hant_' + localeInfo.countryCode;
-        case 'MO':
-          return localeInfo.languageCode + '_Hant_' + localeInfo.countryCode;
-      }
-      if (localeInfo.countryCode == null)
-        return localeInfo.languageCode + '_Hans';
-      return localeString;
-    }
-    case 'sr': {
-      if (localeInfo.countryCode == null)
-        return localeInfo.languageCode + '_Cyrl';
-      return localeString;
-    }
-    default:
-      return localeString;
   }
 }
 

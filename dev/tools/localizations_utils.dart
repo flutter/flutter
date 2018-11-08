@@ -16,7 +16,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     this.scriptCode,
     this.countryCode,
     this.length,
-    this.originalString
+    this.originalString,
   });
 
   /// Simple parser. Expects the locale string to be in the form of 'language_script_COUNTRY'
@@ -24,11 +24,13 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   /// and country is 2-3 characters and all uppercase.
   ///
   /// 'language_COUNTRY' or 'language_script' are also valid. Missing fields will be null.
-  factory LocaleInfo.fromString(String locale) {
+  factory LocaleInfo.fromString(String locale, {bool assume = false}) {
     final List<String> codes = locale.split('_'); // [language, script, country]
     assert(codes.isNotEmpty && codes.length < 4);
+    final String languageCode = codes[0];
     String scriptCode;
     String countryCode;
+    String originalString = locale;
     if (codes.length == 2) {
       scriptCode = codes[1].length >= 4 ? codes[1] : null;
       countryCode = codes[1].length < 4 ? codes[1] : null;
@@ -39,20 +41,74 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     assert(codes[0] != null && codes[0].isNotEmpty);
     assert(countryCode == null || countryCode.isNotEmpty);
     assert(scriptCode == null || scriptCode.isNotEmpty);
+
+    /// Adds scriptCodes to locales where we are able to assume it to provide
+    /// finer granularity when resolving locales.
+    ///
+    /// The basis of the assumptions here are based off of known usage of scripts
+    /// across various countries. For example, we know Taiwan uses traditional (Hant)
+    /// script, so it is safe to apply (Hant) to Taiwanese languages.
+    if (assume && scriptCode == null) {
+      switch (languageCode) {
+        case 'zh': {
+          switch (countryCode) {
+            case 'CN':
+              scriptCode = 'Hans';
+              break;
+            case 'SG':
+              scriptCode = 'Hans';
+              break;
+            case 'TW':
+              scriptCode = 'Hant';
+              break;
+            case 'HK':
+              scriptCode = 'Hant';
+              break;
+            case 'MO':
+              scriptCode = 'Hant';
+              break;
+          }
+          if (countryCode == null) {
+            scriptCode = 'Hans';
+          }
+          break;
+        }
+        case 'sr': {
+          if (countryCode == null) {
+            scriptCode = 'Cyrl';
+          }
+          break;
+        }
+      }
+      // Update the base string to reflect assumed scriptCodes.
+      originalString = languageCode;
+      if (scriptCode != null)
+        originalString += '_' + scriptCode;
+      if (countryCode != null)
+        originalString += '_' + countryCode;
+    }
+
     return LocaleInfo(
-      languageCode: codes[0],
+      languageCode: languageCode,
       scriptCode: scriptCode,
       countryCode: countryCode,
       length: codes.length,
-      originalString: locale,
+      originalString: originalString,
     );
   }
 
   final String languageCode;
   final String scriptCode;
   final String countryCode;
-  final int length;          // The number of fields. Ranges from 1-3.
-  final String originalString;   // Original un-parsed locale string.
+  final int length;             // The number of fields. Ranges from 1-3.
+  final String originalString;  // Original un-parsed locale string.
+
+  /// Parses a locale string into component codes, and returns them in a list
+  /// where the first element is the languageCode, the second is the scriptCode,
+  /// and the third is the countryCode.
+  static List<String> parseLocaleString(String locale) {
+
+  }
 
   @override
   bool operator ==(Object other) {
