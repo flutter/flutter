@@ -16,7 +16,6 @@ class EmbeddedViewParams {
  public:
   SkPoint offsetPixels;
   SkSize sizePoints;
-  SkISize canvasBaseLayerSize;
 };
 
 // This is only used on iOS when running in a non headless mode,
@@ -25,6 +24,12 @@ class EmbeddedViewParams {
 class ExternalViewEmbedder {
  public:
   ExternalViewEmbedder() = default;
+
+  virtual void SetFrameSize(SkISize frame_size) = 0;
+
+  virtual void PrerollCompositeEmbeddedView(int view_id) = 0;
+
+  virtual std::vector<SkCanvas*> GetCurrentCanvases() = 0;
 
   // Must be called on the UI thread.
   virtual SkCanvas* CompositeEmbeddedView(int view_id,

@@ -49,6 +49,12 @@ class FlutterPlatformViewsController {
 
   void RegisterViewFactory(NSObject<FlutterPlatformViewFactory>* factory, NSString* factoryId);
 
+  void SetFrameSize(SkISize frame_size);
+
+  void PrerollCompositeEmbeddedView(int view_id);
+
+  std::vector<SkCanvas*> GetCurrentCanvases();
+
   SkCanvas* CompositeEmbeddedView(int view_id,
                                   const flow::EmbeddedViewParams& params,
                                   IOSSurface& surface);
@@ -63,6 +69,7 @@ class FlutterPlatformViewsController {
   std::map<std::string, fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>> factories_;
   std::map<int64_t, fml::scoped_nsobject<FlutterTouchInterceptingView>> views_;
   std::map<int64_t, std::unique_ptr<FlutterPlatformViewLayer>> overlays_;
+  SkISize frame_size_;
 
   // A vector of embedded view IDs according to their composition order.
   // The last ID in this vector belond to the that is composited on top of all others.
@@ -71,7 +78,7 @@ class FlutterPlatformViewsController {
   // The latest composition order that was presented in Present().
   std::vector<int64_t> active_composition_order_;
 
-  std::vector<std::unique_ptr<SurfaceFrame>> composition_frames_;
+  std::map<int64_t, std::unique_ptr<SurfaceFrame>> composition_frames_;
 
   void OnCreate(FlutterMethodCall* call, FlutterResult& result);
   void OnDispose(FlutterMethodCall* call, FlutterResult& result);

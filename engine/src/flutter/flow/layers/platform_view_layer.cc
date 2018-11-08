@@ -14,6 +14,13 @@ void PlatformViewLayer::Preroll(PrerollContext* context,
                                 const SkMatrix& matrix) {
   set_paint_bounds(SkRect::MakeXYWH(offset_.x(), offset_.y(), size_.width(),
                                     size_.height()));
+
+  if (context->view_embedder == nullptr) {
+    FML_LOG(ERROR) << "Trying to embed a platform view but the PrerollContext "
+                      "does not support embedding";
+    return;
+  }
+  context->view_embedder->PrerollCompositeEmbeddedView(view_id_);
 }
 
 void PlatformViewLayer::Paint(PaintContext& context) const {
@@ -27,12 +34,9 @@ void PlatformViewLayer::Paint(PaintContext& context) const {
   params.offsetPixels =
       SkPoint::Make(transform.getTranslateX(), transform.getTranslateY());
   params.sizePoints = size_;
-  params.canvasBaseLayerSize = context.canvas->getBaseLayerSize();
 
   SkCanvas* canvas =
       context.view_embedder->CompositeEmbeddedView(view_id_, params);
-  // TODO(amirh): copy the full canvas state here
-  canvas->concat(context.canvas->getTotalMatrix());
   context.canvas = canvas;
 }
 }  // namespace flow

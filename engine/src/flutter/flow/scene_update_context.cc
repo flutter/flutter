@@ -188,6 +188,7 @@ SceneUpdateContext::ExecutePaintTasks(CompositorContext::ScopedFrame& frame) {
     FML_DCHECK(task.surface);
     SkCanvas* canvas = task.surface->GetSkiaSurface()->getCanvas();
     Layer::PaintContext context = {canvas,
+                                   canvas,
                                    nullptr,
                                    frame.context().frame_time(),
                                    frame.context().engine_time(),

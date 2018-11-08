@@ -7,6 +7,7 @@
 #include "flutter/flow/layers/layer.h"
 #include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "third_party/skia/include/utils/SkNWayCanvas.h"
 
 namespace flow {
 
@@ -28,6 +29,7 @@ void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
   PrerollContext context = {
       ignore_raster_cache ? nullptr : &frame.context().raster_cache(),
       frame.gr_context(),
+      frame.view_embedder(),
       color_space,
       SkRect::MakeEmpty(),
       frame.context().frame_time(),
@@ -66,7 +68,18 @@ void LayerTree::UpdateScene(SceneUpdateContext& context,
 void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
                       bool ignore_raster_cache) const {
   TRACE_EVENT0("flutter", "LayerTree::Paint");
+  SkISize canvas_size = frame.canvas()->getBaseLayerSize();
+  SkNWayCanvas internal_nodes_canvas(canvas_size.width(), canvas_size.height());
+  internal_nodes_canvas.addCanvas(frame.canvas());
+  if (frame.view_embedder() != nullptr) {
+    auto overlay_canvases = frame.view_embedder()->GetCurrentCanvases();
+    for (size_t i = 0; i < overlay_canvases.size(); i++) {
+      internal_nodes_canvas.addCanvas(overlay_canvases[i]);
+    }
+  }
+
   Layer::PaintContext context = {
+      (SkCanvas*)&internal_nodes_canvas,
       frame.canvas(),
       frame.view_embedder(),
       frame.context().frame_time(),
@@ -98,6 +111,7 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
   PrerollContext preroll_context{
       nullptr,                  // raster_cache (don't consult the cache)
       nullptr,                  // gr_context  (used for the raster cache)
+      nullptr,                  // external view embedder
       nullptr,                  // SkColorSpace* dst_color_space
       SkRect::MakeEmpty(),      // SkRect child_paint_bounds
       unused_stopwatch,         // frame time (dont care)
@@ -106,7 +120,12 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
       false,                    // checkerboard_offscreen_layers
   };
 
+  SkISize canvas_size = canvas->getBaseLayerSize();
+  SkNWayCanvas internal_nodes_canvas(canvas_size.width(), canvas_size.height());
+  internal_nodes_canvas.addCanvas(canvas);
+
   Layer::PaintContext paint_context = {
+      (SkCanvas*)&internal_nodes_canvas,
       canvas,  // canvas
       nullptr,
       unused_stopwatch,         // frame time (dont care)

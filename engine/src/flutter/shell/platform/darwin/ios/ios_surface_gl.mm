@@ -74,6 +74,24 @@ flow::ExternalViewEmbedder* IOSSurfaceGL::GetExternalViewEmbedder() {
   }
 }
 
+void IOSSurfaceGL::SetFrameSize(SkISize frame_size) {
+  FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
+  FML_CHECK(platform_views_controller != nullptr);
+  platform_views_controller->SetFrameSize(frame_size);
+}
+
+void IOSSurfaceGL::PrerollCompositeEmbeddedView(int view_id) {
+  FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
+  FML_CHECK(platform_views_controller != nullptr);
+  platform_views_controller->PrerollCompositeEmbeddedView(view_id);
+}
+
+std::vector<SkCanvas*> IOSSurfaceGL::GetCurrentCanvases() {
+  FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
+  FML_CHECK(platform_views_controller != nullptr);
+  return platform_views_controller->GetCurrentCanvases();
+}
+
 SkCanvas* IOSSurfaceGL::CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
