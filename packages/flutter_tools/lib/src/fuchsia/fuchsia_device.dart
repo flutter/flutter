@@ -97,7 +97,10 @@ class FuchsiaDevice extends Device {
   FuchsiaDevice(String id, { this.name }) : super(id);
 
   @override
-  bool get supportsHotMode => true;
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => false;
 
   @override
   final String name;

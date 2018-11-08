@@ -284,7 +284,16 @@ class HotRunner extends ResidentRunner {
   Future<void> handleTerminalCommand(String code) async {
     final String lower = code.toLowerCase();
     if (lower == 'r') {
-      final OperationResult result = await restart(fullRestart: code == 'R');
+      OperationResult result;
+      if (code == 'R') {
+        // If hot restart is not supported for all devices, ignore the command.
+        if (!canHotRestart) {
+          return;
+        }
+        result = await restart(fullRestart: true);
+      } else {
+        result = await restart(fullRestart: false);
+      }
       if (!result.isOk) {
         // TODO(johnmccutchan): Attempt to determine the number of errors that
         // occurred and tighten this message.
@@ -775,9 +784,12 @@ class HotRunner extends ResidentRunner {
   @override
   void printHelp({ @required bool details }) {
     const String fire = '🔥';
+    String rawMessage = '  To hot reload changes while running, press "r". ';
+    if (canHotRestart) {
+      rawMessage += 'To hot restart (and rebuild state), press "R".';
+    }
     final String message = terminal.color(
-      fire + terminal.bolden('  To hot reload changes while running, press "r". '
-          'To hot restart (and rebuild state), press "R".'),
+      fire + terminal.bolden(rawMessage),
       TerminalColor.red,
     );
     printStatus(message);

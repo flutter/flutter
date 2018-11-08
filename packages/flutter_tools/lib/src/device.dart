@@ -270,8 +270,11 @@ abstract class Device {
     bool ipv6 = false,
   });
 
-  /// Does this device implement support for hot reloading / restarting?
-  bool get supportsHotMode => true;
+  /// Whether this device implements support for hot reload.
+  bool get supportsHotReload => true;
+
+  /// Whether this device implements support for hot restart.
+  bool get supportsHotRestart => true;
 
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);
