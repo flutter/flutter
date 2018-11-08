@@ -109,10 +109,10 @@ class AndroidView extends StatefulWidget {
   /// The gesture recognizers built by factories in this set participate in the gesture arena for
   /// each pointer that was put down on the widget. If any of these recognizers win the
   /// gesture arena, the entire pointer event sequence starting from the pointer down event
-  /// will be dispatched to the Android view.
+  /// will be dispatched to the platform view.
   ///
   /// When null, an empty set of gesture recognizer factories is used, in which case a pointer event sequence
-  /// will only be dispatched to the Android view if no other member of the arena claimed it.
+  /// will only be dispatched to the platform view if no other member of the arena claimed it.
   /// {@endtemplate}
   ///
   /// For example, with the following setup vertical drags will not be dispatched to the Android
@@ -129,7 +129,7 @@ class AndroidView extends StatefulWidget {
   /// gesture recognizer factory in [gestureRecognizers] e.g:
   /// ```dart
   /// GestureDetector(
-  ///   onVerticalDragStart: (DragStartDetails d) {},
+  ///   onVerticalDragStart: (DragStartDetails details) {},
   ///   child: SizedBox(
   ///     width: 200.0,
   ///     height: 100.0,
@@ -189,6 +189,9 @@ class AndroidView extends StatefulWidget {
 /// {@macro flutter.widgets.platformViews.gestures}
 ///
 /// {@macro flutter.widgets.platformViews.lifetime}
+///
+/// Construction of UIViews is done asynchronously, before the UIView is ready this widget paints
+/// nothing while maintaining the same layout constraints.
 class UiKitView extends StatefulWidget {
   /// Creates a widget that embeds an iOS view.
   ///
@@ -244,7 +247,7 @@ class UiKitView extends StatefulWidget {
   /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
   /// ```dart
   /// GestureDetector(
-  ///   onVerticalDragStart: (DragStartDetails d) {},
+  ///   onVerticalDragStart: (DragStartDetails details) {},
   ///   child: UiKitView(
   ///     viewType: 'webview',
   ///   ),
@@ -254,7 +257,7 @@ class UiKitView extends StatefulWidget {
   /// gesture recognizer factory in [gestureRecognizers] e.g:
   /// ```dart
   /// GestureDetector(
-  ///   onVerticalDragStart: (DragStartDetails d) {},
+  ///   onVerticalDragStart: (DragStartDetails details) {},
   ///   child: SizedBox(
   ///     width: 200.0,
   ///     height: 100.0,

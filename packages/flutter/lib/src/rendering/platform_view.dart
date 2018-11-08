@@ -128,7 +128,10 @@ class RenderAndroidView extends RenderBox {
   /// set of gesture recognizers is changed.
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
     assert(gestureRecognizers != null);
-    assert(_factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length);
+    assert(
+    _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
+    'There were multiple gesture recognizer factories for the same type, there must only be a single '
+        'gesture recognizer factory for each gesture recognizer type.',);
     if (_factoryTypesSetEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
       return;
     }
@@ -256,7 +259,7 @@ class RenderAndroidView extends RenderBox {
 class RenderUiKitView extends RenderBox {
   /// Creates a render object for an iOS UIView.
   ///
-  /// The `viewId``, hitTestBehavior`, and `gestureRecognizers` parameters must not be null.
+  /// The `viewId`, `hitTestBehavior`, and `gestureRecognizers` parameters must not be null.
   RenderUiKitView({
     @required UiKitViewController viewController,
     @required this.hitTestBehavior,
@@ -289,7 +292,10 @@ class RenderUiKitView extends RenderBox {
   /// {@macro flutter.rendering.platformView.updateGestureRecognizers}
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
     assert(gestureRecognizers != null);
-    assert(_factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length);
+    assert(
+    _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
+    'There were multiple gesture recognizer factories for the same type, there must only be a single '
+        'gesture recognizer factory for each gesture recognizer type.',);
     if (_factoryTypesSetEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
       return;
     }
@@ -346,14 +352,19 @@ class RenderUiKitView extends RenderBox {
   }
 }
 
+// This recognizer constructs gesture recognizers from a set of gesture recognizer factories
+// it was give, adds all of them to a gesture arena team with the _UiKitViewGesturrRecognizer
+// as the team captain.
+// When the team wins a gesture the recognizer notifies the engine that it should release
+// the touch sequence to the embedded UIView.
 class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _UiKitViewGestureRecognizer(this.controller, this.gestureRecognizerFactories) {
     team = GestureArenaTeam();
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
-            (Factory<OneSequenceGestureRecognizer> factory) {
-          return factory.constructor()..team = team;
-        }
+      (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
+        return recognizerFactory.constructor()..team = team;
+      },
     ).toSet();
   }
 
@@ -404,14 +415,20 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 }
 
+// This recognizer constructs gesture recognizers from a set of gesture recognizer factories
+// it was give, adds all of them to a gesture arena team with the _AndroidViewGestureRecognizer
+// as the team captain.
+// As long as ta gesture arena is unresolved the recognizer caches all pointer events.
+// When the team wins the recognizer sends all the cached point events to the embedded Android view, and
+// sets itself to a "forwarding mode" where it will forward any new pointer event to the Android view.
 class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _AndroidViewGestureRecognizer(this.dispatcher, this.gestureRecognizerFactories) {
     team = GestureArenaTeam();
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
-      (Factory<OneSequenceGestureRecognizer> factory) {
-        return factory.constructor()..team = team;
-      }
+      (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
+        return recognizerFactory.constructor()..team = team;
+      },
     ).toSet();
   }
 
