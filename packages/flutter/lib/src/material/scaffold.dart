@@ -730,7 +730,7 @@ class Scaffold extends StatefulWidget {
     this.backgroundColor,
     this.resizeToAvoidBottomPadding = true,
     this.primary = true,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.drawerDragStartBehavior = DragStartBehavior.start,
   }) : assert(primary != null), super(key: key);
 
   /// An app bar to display at the top of the scaffold.
@@ -868,8 +868,10 @@ class Scaffold extends StatefulWidget {
   /// [AppBar.primary], is true.
   final bool primary;
 
-  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
-  final DragStartBehavior dragStartBehavior;
+  /// If set to [DragStartBehavior.start], drawer opening drag behavior will
+  /// begin upon the drag gesture winning the arena. If set to
+  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  final DragStartBehavior drawerDragStartBehavior;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -1505,7 +1507,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           alignment: DrawerAlignment.end,
           child: widget.endDrawer,
           drawerCallback: _endDrawerOpenedCallback,
-          dragStartBehavior: widget.dragStartBehavior,
+          dragStartBehavior: widget.drawerDragStartBehavior,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -1527,7 +1529,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           alignment: DrawerAlignment.start,
           child: widget.drawer,
           drawerCallback: _drawerOpenedCallback,
-          dragStartBehavior: widget.dragStartBehavior,
+          dragStartBehavior: widget.drawerDragStartBehavior,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
@@ -1701,7 +1703,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           onTap: _handleStatusBarTap,
           // iOS accessibility automatically adds scroll-to-top to the clock in the status bar
           excludeFromSemantics: true,
-          startBehavior: widget.dragStartBehavior,
         ),
         _ScaffoldSlot.statusBar,
         removeLeftPadding: false,

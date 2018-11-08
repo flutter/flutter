@@ -88,43 +88,6 @@ void main() {
     expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
   });
 
-//  testWidgets('Changing dragStartBehavior affects the horizontal drag detector', (WidgetTester tester) async {
-//    Switch materialSwitch = Switch(
-//        dragStartBehavior: DragStartBehavior.down,
-//        value: true,
-//        onChanged: (bool newValue) {},
-//    );
-//
-//    await tester.pumpWidget(
-//      Theme(
-//        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
-//        child: Directionality(
-//          textDirection: TextDirection.ltr,
-//          child: Material(
-//            child: Center(
-//              child: materialSwitch,
-//            ),
-//          ),
-//        ),
-//      ),
-//    );
-//    await tester.pumpAndSettle();
-//    // Drag start behavior initialized to down in constructor.
-//    RenderObject hdgr = tester.renderObject(find.byType());
-//
-//    expect(hdgr, true);
-//
-////    materialSwitch = Switch(
-////      dragStartBehavior: DragStartBehavior.start,
-////      value: true,
-////      onChanged: (bool newValue) {},
-////    );
-////
-////    // Drag start behavior now initialized to start.
-////    hdgr = tester.firstWidget(find.byType(HorizontalDragGestureRecognizer));
-////    expect(hdgr.dragStartBehavior, DragStartBehavior.start);
-//  });
-
   testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
     bool value = false;
 
@@ -169,6 +132,93 @@ void main() {
     await tester.pump();
     await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
 
+    expect(value, isFalse);
+  });
+
+  testWidgets('Switch can drag with dragStartBehavior', (WidgetTester tester) async {
+    bool value = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: Switch(
+                    dragStartBehavior: DragStartBehavior.down,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      }
+                    );
+                  }
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(value, isFalse);
+    await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+    expect(value, isFalse);
+
+    await tester.drag(find.byType(Switch), const Offset(30.0, 0.0));
+    expect(value, isTrue);
+    await tester.pump();
+    await tester.drag(find.byType(Switch), const Offset(30.0, 0.0));
+    expect(value, isTrue);
+    await tester.pump();
+    await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+    expect(value, isFalse);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: Switch(
+                    dragStartBehavior: DragStartBehavior.start,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    }
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final Rect switchRect = tester.getRect(find.byType(Switch));
+
+    TestGesture gesture = await tester.startGesture(switchRect.center);
+    // We have to execute the drag in two frames because the first update will
+    // just set the start position.
+    await gesture.moveBy(const Offset(20.0, 0.0));
+    await gesture.moveBy(const Offset(20.0, 0.0));
+    expect(value, isTrue);
+    await gesture.up();
+    await tester.pump();
+
+    gesture = await tester.startGesture(switchRect.center);
+    await gesture.moveBy(const Offset(20.0, 0.0));
+    await gesture.moveBy(const Offset(20.0, 0.0));
+    expect(value, isTrue);
+    await gesture.up();
+    await tester.pump();
+
+    gesture = await tester.startGesture(switchRect.center);
+    await gesture.moveBy(const Offset(-20.0, 0.0));
+    await gesture.moveBy(const Offset(-20.0, 0.0));
     expect(value, isFalse);
   });
 
