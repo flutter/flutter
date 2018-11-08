@@ -138,7 +138,7 @@ class _GalleryAppState extends State<GalleryApp> {
         return Directionality(
           textDirection: _options.textDirection,
           child: _applyTextScaleFactor(
-            // Specifically use a blank Cupertino theme here and not transfer
+            // Specifically use a blank Cupertino theme here and do not transfer
             // over the Material primary color etc except the brightness to
             // showcase standard iOS looks.
             CupertinoTheme(

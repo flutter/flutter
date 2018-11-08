@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show Brightness;
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -87,15 +88,16 @@ const TextStyle _kDefaultLargeTitleDarkTextStyle = TextStyle(
 class CupertinoTextTheme extends Diagnosticable {
   /// Create a [CupertinoTextTheme].
   ///
-  /// The [primaryColor] and [isLight] parameters are only used to derive
-  /// text style defaults when unspecified and themselves default to
-  /// [CupertinoColors.activeBlue] and [true] when unspecified.
+  /// The [primaryColor] and [isLight] parameters are used to derive TextStyle
+  /// defaults of other attributes such as [textStyle] and [actionTextStyle]
+  /// etc. The default value of [primaryColor] is [CupertinoColors.activeBlue]
+  /// and the default value of [isLight] is true.
   ///
-  /// Other [TextStyle] parameters default to default iOS text styles based on
-  /// the present [primaryColor] and [isLight] when unspecified.
+  /// Other [TextStyle] parameters default to default iOS text styles when
+  /// unspecified.
   const CupertinoTextTheme({
     Color primaryColor,
-    bool isLight,
+    Brightness brightness,
     TextStyle textStyle,
     TextStyle actionTextStyle,
     TextStyle tabLabelTextStyle,
@@ -103,7 +105,7 @@ class CupertinoTextTheme extends Diagnosticable {
     TextStyle navLargeTitleTextStyle,
     TextStyle navActionTextStyle,
   }) : _primaryColor = primaryColor ?? CupertinoColors.activeBlue,
-       _isLight = isLight ?? true,
+       _brightness = brightness,
        _textStyle = textStyle,
        _actionTextStyle = actionTextStyle,
        _tabLabelTextStyle = tabLabelTextStyle,
@@ -112,7 +114,8 @@ class CupertinoTextTheme extends Diagnosticable {
        _navActionTextStyle = navActionTextStyle;
 
   final Color _primaryColor;
-  final bool _isLight;
+  final Brightness _brightness;
+  bool get _isLight => _brightness != Brightness.dark;
 
   final TextStyle _textStyle;
   /// Typography of general text content for Cupertino widgets.
@@ -156,7 +159,7 @@ class CupertinoTextTheme extends Diagnosticable {
   /// specified overrides.
   CupertinoTextTheme copyWith({
     Color primaryColor,
-    bool isLight,
+    Brightness brightness,
     TextStyle textStyle,
     TextStyle actionTextStyle,
     TextStyle tabLabelTextStyle,
@@ -166,7 +169,7 @@ class CupertinoTextTheme extends Diagnosticable {
   }) {
     return CupertinoTextTheme(
       primaryColor: primaryColor ?? _primaryColor,
-      isLight: isLight ?? _isLight,
+      brightness: brightness ?? _brightness,
       textStyle: textStyle ?? _textStyle,
       actionTextStyle: actionTextStyle ?? _actionTextStyle,
       tabLabelTextStyle: tabLabelTextStyle ?? _tabLabelTextStyle,

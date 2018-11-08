@@ -639,7 +639,7 @@ class ThemeData extends Diagnosticable {
   /// [ThemeData] adaptation.
   ///
   /// By default, [cupertinoOverrideTheme] is null and Cupertino widgets
-  /// descendent to the Material [Theme] will adhere to a [CupertinoTheme]
+  /// descendant to the Material [Theme] will adhere to a [CupertinoTheme]
   /// derived from the Material [ThemeData]. e.g. [ThemeData]'s [ColorTheme]
   /// will also inform the [CupertinoThemeData]'s `primaryColor` etc.
   ///

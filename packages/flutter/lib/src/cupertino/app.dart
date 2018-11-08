@@ -108,8 +108,8 @@ class CupertinoApp extends StatefulWidget {
 
   /// The top-level [CupertinoTheme] styling.
   ///
-  /// A null [theme] or unspecified attributes in a [theme] default to iOS
-  /// defaults.
+  /// A null [theme] or unspecified [theme] attributes will default to iOS
+  /// system values.
   final CupertinoThemeData theme;
 
   /// The application's top-level routing table.
@@ -216,13 +216,11 @@ class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
 
 class _CupertinoAppState extends State<CupertinoApp> {
   HeroController _heroController;
-  CupertinoThemeData _themeData;
 
   @override
   void initState() {
     super.initState();
     _heroController = CupertinoApp.createCupertinoHeroController();
-    _themeData = widget.theme ?? const CupertinoThemeData();
     _updateNavigator();
   }
 
@@ -235,9 +233,6 @@ class _CupertinoAppState extends State<CupertinoApp> {
       // observers) until after the new one has been created (because the
       // Navigator has a GlobalKey).
       _heroController = CupertinoApp.createCupertinoHeroController();
-    }
-    if (widget.theme != oldWidget.theme && widget.theme != null) {
-      _themeData = widget.theme;
     }
     _updateNavigator();
   }
@@ -269,10 +264,12 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   @override
   Widget build(BuildContext context) {
+    final CupertinoThemeData effectiveThemeData = widget.theme ?? const CupertinoThemeData();
+
     return ScrollConfiguration(
       behavior: _AlwaysCupertinoScrollBehavior(),
       child: CupertinoTheme(
-        data: _themeData,
+        data: effectiveThemeData,
         child: WidgetsApp(
           key: GlobalObjectKey(this),
           navigatorKey: widget.navigatorKey,
@@ -289,7 +286,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
           builder: widget.builder,
           title: widget.title,
           onGenerateTitle: widget.onGenerateTitle,
-          textStyle: _themeData.textTheme.textStyle,
+          textStyle: effectiveThemeData.textTheme.textStyle,
           color: widget.color ?? CupertinoColors.activeBlue,
           locale: widget.locale,
           localizationsDelegates: _localizationsDelegates,

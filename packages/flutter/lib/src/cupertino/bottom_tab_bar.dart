@@ -139,7 +139,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
             size: iconSize,
           ),
           child: DefaultTextStyle( // Default with the inactive state.
-            style: CupertinoTheme.of(context).textTheme.tabLabelTextStyle,
+            style: CupertinoTheme.of(context).textTheme.tabLabelTextStyle.copyWith(color: inactiveColor),
             child: Padding(
               padding: EdgeInsets.only(bottom: bottomPadding),
               child: Row(

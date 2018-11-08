@@ -13,16 +13,14 @@ export 'package:flutter/services.dart' show Brightness;
 
 // Values derived from https://developer.apple.com/design/resources/.
 const Color _kDefaultBarLightBackgroundColor = Color(0xCCF8F8F8);
-
-// Values derived from https://developer.apple.com/design/resources/.
 const Color _kDefaultBarDarkBackgroundColor = Color(0xB7212121);
 
-/// Applies styling theme to descendent Cupertino widgets.
+/// Applies a visual styling theme to descendant Cupertino widgets.
 ///
-/// Affects the color and typography of Cupertino widgets whose styling
-/// are not overridden when constructing the respective widgets.
+/// Affects the color and text styles of Cupertino widgets whose styling
+/// are not overridden when constructing the respective widgets instances.
 ///
-/// Descendent widgets can retrieve the current [CupertinoThemeData] by calling
+/// Descendant widgets can retrieve the current [CupertinoThemeData] by calling
 /// [CupertinoThemeData.of]. A dependency for the [CupertinoThemeData]'s
 /// attribute is created when an attribute is read. Changes to that specific
 /// attribute in the [CupertinoThemeData] will trigger a rebuild in the
@@ -30,7 +28,7 @@ const Color _kDefaultBarDarkBackgroundColor = Color(0xB7212121);
 ///
 /// See also:
 ///
-///  * [CupertinoThemeData], which specifies the theme styling.
+///  * [CupertinoThemeData], specifies the theme's visual styling.
 ///  * [CupertinoApp], which will automatically add a [CupertinoTheme].
 ///  * [Theme], a Material theme which will automatically add a [CupertinoTheme]
 ///    with a [CupertinoThemeData] derived from the Material [ThemeData].
@@ -260,7 +258,7 @@ class CupertinoThemeData extends Diagnosticable {
   /// from the [BuildContext] to changes in this property.
   CupertinoTextTheme get textTheme {
     return _textTheme ?? CupertinoTextTheme(
-      isLight: _isLight,
+      brightness: brightness,
       primaryColor: primaryColor,
     );
   }
