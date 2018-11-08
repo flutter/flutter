@@ -184,7 +184,7 @@ translations for all the languages supported by this package.
 (Googlers, for more details see <go/flutter-l10n>.)
 
 If you have feedback about the translations please
-[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new).
+[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new?template=BUG.md).
 
 
 ### See Also
