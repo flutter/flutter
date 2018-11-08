@@ -617,6 +617,13 @@ class UiKitViewController {
     // TODO(amirh): invoke the iOS platform views channel direction method once available.
   }
 
+  Future<void> acceptGesture() {
+    final Map<String, dynamic> args = <String, dynamic> {
+      'id': id,
+    };
+    return SystemChannels.platform_views.invokeMethod('acceptGesture', args);
+  }
+
   /// Disposes the view.
   ///
   /// The [UiKitViewController] object is unusable after calling this.
