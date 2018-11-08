@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 int buildCount;
 CupertinoThemeData actualTheme;
 
-final Widget child = Builder(
+final Widget singletonThemeSubtree = Builder(
   builder: (BuildContext context) {
     buildCount++;
     actualTheme = CupertinoTheme.of(context);
@@ -22,7 +22,7 @@ Future<CupertinoThemeData> testTheme(WidgetTester tester, CupertinoThemeData the
   await tester.pumpWidget(
     CupertinoTheme(
       data: theme,
-      child: child,
+      child: singletonThemeSubtree,
     ),
   );
   return actualTheme;

@@ -418,7 +418,7 @@ void main() {
     int buildCount;
     CupertinoThemeData actualTheme;
 
-    final Widget child = Builder(
+    final Widget singletonThemeSubtree = Builder(
       builder: (BuildContext context) {
         buildCount++;
         actualTheme = CupertinoTheme.of(context);
@@ -430,7 +430,7 @@ void main() {
       await tester.pumpWidget(
         Theme(
           data: theme,
-          child: child,
+          child: singletonThemeSubtree,
         ),
       );
       return actualTheme;
