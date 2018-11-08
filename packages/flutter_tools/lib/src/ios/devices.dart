@@ -63,7 +63,7 @@ class IOSDeploy {
     final Map<String, String> iosDeployEnv = Map<String, String>.from(platform.environment);
     iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
 
-    return await runCommandAndStreamOutput(
+    return runCommandAndStreamOutput(
       launchCommand,
       mapFunction: _monitorInstallationFailure,
       trace: true,
@@ -337,7 +337,7 @@ class IOSDevice extends Device {
         }
 
         printTrace('Application launched on the device. Waiting for observatory port.');
-        return await forwardObservatoryUri;
+        return forwardObservatoryUri;
       }).whenComplete(() {
         observatoryDiscovery.cancel();
       });

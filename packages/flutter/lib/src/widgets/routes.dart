@@ -472,7 +472,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   Future<RoutePopDisposition> willPop() async {
     if (willHandlePopInternally)
       return RoutePopDisposition.pop;
-    return await super.willPop();
+    return super.willPop();
   }
 
   @override
@@ -1041,7 +1041,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       if (!await callback())
         return RoutePopDisposition.doNotPop;
     }
-    return await super.willPop();
+    return super.willPop();
   }
 
   /// Enables this route to veto attempts by the user to dismiss it.

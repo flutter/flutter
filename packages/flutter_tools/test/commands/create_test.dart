@@ -107,7 +107,7 @@ void main() {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);
     await projectDir.absolute.childFile('.metadata').writeAsString('project_type: blag\n');
     expect(
-        () async => await _createAndAnalyzeProject(projectDir, <String>[], <String>[], unexpectedPaths: <String>[
+        () async => _createAndAnalyzeProject(projectDir, <String>[], <String>[], unexpectedPaths: <String>[
               'android/',
               'ios/',
               '.android/',

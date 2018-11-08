@@ -40,7 +40,7 @@ Future<T> runInContext<T>(
   FutureOr<T> runner(), {
   Map<Type, Generator> overrides,
 }) async {
-  return await context.run<T>(
+  return context.run<T>(
     name: 'global fallbacks',
     body: runner,
     overrides: overrides,

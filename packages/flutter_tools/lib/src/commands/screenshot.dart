@@ -130,7 +130,7 @@ class ScreenshotCommand extends FlutterCommand {
     final Uri observatoryUri = Uri(scheme: 'http', host: '127.0.0.1',
         port: int.parse(argResults[_kObservatoryPort]));
     final VMService vmService = await VMService.connect(observatoryUri);
-    return await vmService.vm.invokeRpcRaw(method);
+    return vmService.vm.invokeRpcRaw(method);
   }
 
   Future<void> _ensureOutputIsNotJsonRpcError(File outputFile) async {

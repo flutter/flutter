@@ -274,7 +274,7 @@ class AOTSnapshotter {
     // (which causes it to not look into the other section and therefore not
     // find the correct unwinding information).
     final String assemblySo = fs.path.join(outputPath, 'app.so');
-    return await runCheckedAsync(<String>[androidSdk.ndk.compiler]
+    return runCheckedAsync(<String>[androidSdk.ndk.compiler]
         ..addAll(androidSdk.ndk.compilerArgs)
         ..addAll(<String>[ '-shared', '-nostdlib', '-o', assemblySo, assemblyPath ]));
   }

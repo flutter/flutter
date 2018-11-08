@@ -79,7 +79,7 @@ class PropertyList {
   }
 
   Future<ProcessResult> _runCommand(String command) async {
-    return await plistBuddy.run(<String>['-c', command, plistPath]);
+    return plistBuddy.run(<String>['-c', command, plistPath]);
   }
 }
 
@@ -118,7 +118,7 @@ class IMobileDevice {
       return true;
 
     // Check that we can look up the names of any attached devices.
-    return await exitsHappyAsync(<String>['idevicename']);
+    return exitsHappyAsync(<String>['idevicename']);
   }
 
   Future<String> getAvailableDeviceIDs() async {

@@ -61,7 +61,7 @@ Future<int> run(
       await _exit(0);
     } catch (error, stackTrace) {
       String getVersion() => flutterVersion ?? FlutterVersion.instance.getVersionString();
-      return await _handleToolError(error, stackTrace, verbose, args, reportCrashes, getVersion);
+      return _handleToolError(error, stackTrace, verbose, args, reportCrashes, getVersion);
     }
     return 0;
   }, overrides: overrides);

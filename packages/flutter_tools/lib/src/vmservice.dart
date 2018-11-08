@@ -510,10 +510,10 @@ abstract class ServiceObject {
         completer.completeError(e, st);
       }
       _inProgressReload = null;
-      return await completer.future;
+      return completer.future;
     }
 
-    return await _inProgressReload;
+    return _inProgressReload;
   }
 
   /// Update [this] using [map] as a source. [map] can be a service reference.

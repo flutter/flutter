@@ -1675,7 +1675,7 @@ Future<TimeOfDay> showTimePicker({
   assert(initialTime != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  return await showDialog<TimeOfDay>(
+  return showDialog<TimeOfDay>(
     context: context,
     builder: (BuildContext context) => _TimePickerDialog(initialTime: initialTime),
   );

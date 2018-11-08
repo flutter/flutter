@@ -174,7 +174,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
     stderrSubscription.cancel(),
   ]);
 
-  return await process.exitCode;
+  return process.exitCode;
 }
 
 /// Runs the [command] interactively, connecting the stdin/stdout/stderr
@@ -200,7 +200,7 @@ Future<int> runInteractively(List<String> command, {
     stdout.addStream(process.stdout),
     stderr.addStream(process.stderr),
   ]);
-  return await process.exitCode;
+  return process.exitCode;
 }
 
 Future<void> runAndKill(List<String> cmd, Duration timeout) {

@@ -80,7 +80,7 @@ Future<String> getServiceFromUrl(String url, String rootDir, String serviceName)
     return url.replaceAll('android-sdk:', '${androidSdk.directory}/');
   } else if (url.startsWith('http:') || url.startsWith('https:')) {
     // It's a regular file to download.
-    return await cache.getThirdPartyFile(url, serviceName);
+    return cache.getThirdPartyFile(url, serviceName);
   } else {
     // Assume url is a path relative to the service's root dir.
     return fs.path.join(rootDir, url);

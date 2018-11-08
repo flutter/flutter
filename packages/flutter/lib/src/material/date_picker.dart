@@ -1111,7 +1111,7 @@ Future<DateTime> showDatePicker({
     );
   }
 
-  return await showDialog<DateTime>(
+  return showDialog<DateTime>(
     context: context,
     builder: (BuildContext context) => child,
   );

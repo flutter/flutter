@@ -398,7 +398,7 @@ abstract class FlutterCommand extends Command<void> {
       flutterUsage.sendCommand(commandPath, parameters: additionalUsageValues);
     }
 
-    return await runCommand();
+    return runCommand();
   }
 
   /// Subclasses must implement this to execute the command.
