@@ -2,7 +2,8 @@
 
 set -o pipefail -e;
 
-out/host_debug_unopt/embedder_unittests
+# TODO(dnfield): Re-enable this when the upstream Dart changes that make it not be flaky land.
+# out/host_debug_unopt/embedder_unittests
 out/host_debug_unopt/flow_unittests
 out/host_debug_unopt/fml_unittests --gtest_filter="-*TimeSensitiveTest*"
 out/host_debug_unopt/runtime_unittests
