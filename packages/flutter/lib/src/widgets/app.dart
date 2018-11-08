@@ -83,15 +83,14 @@ class WidgetsApp extends StatefulWidget {
   /// _must_ contain an entry for `'/'`.
   ///
   /// If [home] or [routes] are not null, the routing implementation needs to know how
-  /// appropriately build [PageRoutes]. This can be achieved by supplying the 
-  /// [pageRouteBuilder] parameter or the [builder] parameter, or both.  The 
-  /// [pageRouteBuilder] is more appropriate if you will only be building [Route]
-  /// derived classes, such as a [MaterialPageRoute] or [CupertinoPageRoute]. 
-  /// 
-  /// The [builder] offers a more generic approach. It is designed to provide the ability
-  /// to wrap the visible content of the app in some other widget.  If it is specified,
-  /// it will override anything in the [pageRouteBuilder], but it will not get the
-  /// [RouteSettings] information that [pageRouteBuilder] gets.
+  /// appropriately build [PageRoutes]. This can be achieved by supplying the
+  /// [pageRouteBuilder] parameter.  The [pageRouteBuilder] is used by [MaterialApp]
+  /// and [CupertinoApp] to create [MaterialPageRoute]s and [CupertinoPageRoute],
+  /// respectively.
+  ///
+  /// The [builder] parameter is designed to provide the ability to wrap the visible
+  /// content of the app in some other widget. It is recommended that you use [home]
+  /// rather than [builder] if you intend to only display a single route in your app.
   ///
   /// [WidgetsApp] is also possible to provide a custom implementation of routing via the
   /// [onGeneratedRoute] and [onUnknownRoute] parameters. These parameters correspond
@@ -642,19 +641,17 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
     final String name = settings.name;
-    WidgetBuilder builder;
-    if (name == Navigator.defaultRouteName && widget.home != null) {
-      builder = (BuildContext context) => widget.home;
-    } else {
-      builder = widget.routes[name];
-    }
-    if (builder != null) {
+    final WidgetBuilder widgetBuilder = name == Navigator.defaultRouteName && widget.home != null
+        ? (BuildContext context) => widget.home
+        : widget.routes[name];
+
+    if (widgetBuilder != null) {
       assert(widget.pageRouteBuilder != null,
         'The default onGenerateRoute handler for WidgetsApp must have a '
         'pageRouteBuilder set if the home or routes properties are set.');
       final Route<dynamic> route = widget.pageRouteBuilder(
         settings,
-        builder,
+        widgetBuilder,
       );
       assert(route != null,
         'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
