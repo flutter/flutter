@@ -12,6 +12,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/io_manager.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #include "flutter/shell/platform/darwin/ios/ios_external_texture_gl.h"
 
@@ -116,6 +117,13 @@ void PlatformViewIOS::UpdateSemantics(blink::SemanticsNodeUpdates update,
 // |shell::PlatformView|
 std::unique_ptr<VsyncWaiter> PlatformViewIOS::CreateVSyncWaiter() {
   return std::make_unique<VsyncWaiterIOS>(task_runners_);
+}
+
+void PlatformViewIOS::OnPreEngineRestart() const {
+  if (!owner_controller_) {
+    return;
+  }
+  [owner_controller_.get() platformViewsController] -> Reset();
 }
 
 fml::scoped_nsprotocol<FlutterTextInputPlugin*> PlatformViewIOS::GetTextInputPlugin() const {
