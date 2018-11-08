@@ -37,6 +37,12 @@ class CupertinoPicker extends StatefulWidget {
   /// The [backgroundColor], [diameterRatio] and [itemExtent] arguments must not
   /// be null. The [itemExtent] must be greater than zero.
   ///
+  /// The [backgroundColor] is used to create the gradient of the picker. The
+  /// gradient is added on top of a background of solid [backgroundColor]. Due
+  /// to the way this gradient is currently created, any alpha value less than
+  /// 255 (fully opaque) will cause the removal of the gradient from the
+  /// rendering of the widget.
+  ///
   /// The [backgroundColor] defaults to light gray. It can be set to null to
   /// disable the background painting entirely; this is mildly more efficient
   /// than using [Colors.transparent].
@@ -103,6 +109,7 @@ class CupertinoPicker extends StatefulWidget {
        assert(magnification > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
+       assert(backgroundColor != null),
        childDelegate = ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount),
        super(key: key);
 
@@ -204,24 +211,28 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
   /// Makes the fade to [CupertinoPicker.backgroundColor] edge gradients.
   Widget _buildGradientScreen() {
-    // To account for the possibility that the background color is transparent
-    // we will factor in its opacity while calculating the gradient.
+    // Because BlendMode.dstOut doesn't work correctly with BoxDecoration we
+    // have to just do a color blend. And a due to the way we are layering
+    // the magnifier and the gradient on the background, using a transparent
+    // background color makes the picker look odd.
+    if (widget.backgroundColor.alpha < 255)
+      return Container();
+
     final Color widgetBackgroundColor = widget.backgroundColor;
-    final double opacity = widgetBackgroundColor.opacity;
     return Positioned.fill(
       child: IgnorePointer(
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: <Color>[
-                widgetBackgroundColor.withOpacity(opacity),
-                widgetBackgroundColor.withAlpha((0xF2 * opacity).floor()),
-                widgetBackgroundColor.withAlpha((0xDD * opacity).floor()),
+                widgetBackgroundColor,
+                widgetBackgroundColor.withAlpha(0xF2),
+                widgetBackgroundColor.withAlpha(0xDD),
                 widgetBackgroundColor.withAlpha(0),
                 widgetBackgroundColor.withAlpha(0),
-                widgetBackgroundColor.withAlpha((0xDD * opacity).floor()),
-                widgetBackgroundColor.withAlpha((0xF2 * opacity).floor()),
-                widgetBackgroundColor.withOpacity(opacity),
+                widgetBackgroundColor.withAlpha(0xDD),
+                widgetBackgroundColor.withAlpha(0xF2),
+                widgetBackgroundColor,
               ],
               stops: const <double>[
                 0.0, 0.05, 0.09, 0.22, 0.78, 0.91, 0.95, 1.0,
