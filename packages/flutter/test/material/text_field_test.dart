@@ -729,6 +729,7 @@ void main() {
     await tester.pumpWidget(
       overlay(
         child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
           controller: controller,
           style: const TextStyle(color: Colors.black, fontSize: 34.0),
           maxLines: 3,

@@ -529,7 +529,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
         type = _chooseType(endpoints[1], TextSelectionHandleType.right, TextSelectionHandleType.left);
         break;
     }
-  print(widget.dragStartBehavior.toString());
+
     return CompositedTransformFollower(
       link: widget.layerLink,
       showWhenUnlinked: false,
