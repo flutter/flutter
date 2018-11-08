@@ -32,7 +32,7 @@ import 'image_provider.dart';
 ///
 /// The [border] paints over the body; the [boxShadow], naturally, paints below it.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// The following example uses the [Container] widget from the widgets layer to
 /// draw an image with a border:
@@ -52,6 +52,7 @@ import 'image_provider.dart';
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
