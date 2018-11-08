@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection' show HashMap;
-import 'dart:ui' as ui show window, hashValues;
+import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -804,17 +804,17 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     }
     // Hash the supported locales because apps can support many locales and would
     // be expensive to search through them many times.
-    final Map<int, Locale> allSupportedLocales = HashMap<int, Locale>();
-    final Map<int, Locale> languageAndCountryLocales = HashMap<int, Locale>();
-    final Map<int, Locale> languageAndScriptLocales = HashMap<int, Locale>();
-    final Map<int, Locale> languageLocales = HashMap<int, Locale>();
-    final Map<int, Locale> countryLocales = HashMap<int, Locale>();
+    final Map<String, Locale> allSupportedLocales =       HashMap<String, Locale>();
+    final Map<String, Locale> languageAndCountryLocales = HashMap<String, Locale>();
+    final Map<String, Locale> languageAndScriptLocales =  HashMap<String, Locale>();
+    final Map<String, Locale> languageLocales =           HashMap<String, Locale>();
+    final Map<String, Locale> countryLocales =            HashMap<String, Locale>();
     for (Locale locale in supportedLocales) {
-      allSupportedLocales[ui.hashValues(locale.languageCode.hashCode, locale.scriptCode.hashCode, locale.countryCode.hashCode)] ??= locale;
-      languageAndCountryLocales[ui.hashValues(locale.languageCode.hashCode, locale.countryCode)] ??= locale;
-      languageAndScriptLocales[ui.hashValues(locale.languageCode.hashCode, locale.scriptCode.hashCode)] ??= locale;
-      languageLocales[locale.languageCode.hashCode] ??= locale;
-      countryLocales[locale.countryCode.hashCode] ??= locale;
+      allSupportedLocales['${locale.languageCode}_${locale.scriptCode}_${locale.countryCode}'] ??= locale;
+      languageAndScriptLocales['${locale.languageCode}_${locale.scriptCode}'] ??= locale;
+      languageAndCountryLocales['${locale.languageCode}_${locale.countryCode}'] ??= locale;
+      languageLocales[locale.languageCode] ??= locale;
+      countryLocales[locale.countryCode] ??= locale;
     }
 
     // Since languageCode-only matches are possibly low quality, we don't return
@@ -828,19 +828,19 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     for (int localeIndex = 0; localeIndex < preferredLocales.length; localeIndex += 1) {
       final Locale userLocale = preferredLocales[localeIndex];
       // Look for perfect match.
-      if (allSupportedLocales.containsKey(ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode, userLocale.countryCode.hashCode))) {
+      if (allSupportedLocales.containsKey('${userLocale.languageCode}_${userLocale.scriptCode}_${userLocale.countryCode}')) {
         return userLocale;
       }
       // Look for language+script match.
       if (userLocale.scriptCode != null) {
-        final Locale match = languageAndScriptLocales[ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode)];
+        final Locale match = languageAndScriptLocales['${userLocale.languageCode}_${userLocale.scriptCode}'];
         if (match != null) {
           return match;
         }
       }
       // Look for language+country match.
       if (userLocale.countryCode != null) {
-      final Locale match = languageAndCountryLocales[ui.hashValues(userLocale.languageCode.hashCode, userLocale.countryCode.hashCode)];
+      final Locale match = languageAndCountryLocales['${userLocale.languageCode}_${userLocale.countryCode}'];
         if (match != null) {
           return match;
         }
@@ -852,7 +852,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         return matchesLanguageCode;
       }
       // Look and store language-only match.
-      Locale match = languageLocales[userLocale.languageCode.hashCode];
+      Locale match = languageLocales[userLocale.languageCode];
       if (match != null) {
         matchesLanguageCode = match;
         // Since first (default) locale is usually highly preferred, we will allow
@@ -868,7 +868,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       // attempt to match by country only, as a user is likely to be familar with a
       // language from their listed country.
       if (matchesCountryCode == null && userLocale.countryCode != null) {
-        match = countryLocales[userLocale.countryCode.hashCode];
+        match = countryLocales[userLocale.countryCode];
         if (match != null) {
           matchesCountryCode = match;
         }
