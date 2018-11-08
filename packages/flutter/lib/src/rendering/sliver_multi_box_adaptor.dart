@@ -121,17 +121,38 @@ abstract class RenderSliverBoxChildManager {
   /// true without making any assertions.
   bool debugAssertChildListLocked() => true;
 }
-
-/// Parent data structure used by [RenderSliverMultiBoxAdaptor].
-class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with ContainerParentDataMixin<RenderBox> {
-  /// The index of this child according to the [RenderSliverBoxChildManager].
-  int index;
+/// Parent data structure used by [RenderSliverWithKeepAliveMixin].
+abstract class KeepAliveParentDataMixin extends ParentData {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory KeepAliveParentDataMixin._() => null;
 
   /// Whether to keep the child alive even when it is no longer visible.
   bool keepAlive = false;
 
   /// Whether the widget is currently being kept alive, i.e. has [keepAlive] set
   /// to true and is offscreen.
+  bool get keptAlive;
+}
+
+// This class exists to dissociate [KeepAlive] from [RenderSliverMultiBoxAdaptor].
+abstract class RenderSliverWithKeepAliveMixin extends RenderSliver {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory RenderSliverWithKeepAliveMixin._() => null;
+
+  @override
+  void setupParentData(RenderObject child) {
+    assert(child.parentData is KeepAliveParentDataMixin);
+  }
+}
+
+/// Parent data structure used by [RenderSliverMultiBoxAdaptor].
+class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with ContainerParentDataMixin<RenderBox>, KeepAliveParentDataMixin {
+  /// The index of this child according to the [RenderSliverBoxChildManager].
+  int index;
+
+  @override
   bool get keptAlive => _keptAlive;
   bool _keptAlive = false;
 
@@ -166,7 +187,7 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
 ///  * [RenderSliverGrid], which places its children in arbitrary positions.
 abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   with ContainerRenderObjectMixin<RenderBox, SliverMultiBoxAdaptorParentData>,
-       RenderSliverHelpers {
+       RenderSliverHelpers,RenderSliverWithKeepAliveMixin {
 
   /// Creates a sliver with multiple box children.
   ///

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -563,5 +564,52 @@ class _AlwaysKeepAliveState extends State<_AlwaysKeepAlive> with AutomaticKeepAl
       height: 48.0,
       child: const Text('keep me alive'),
     );
+  }
+}
+/// Theses classes are here to make sure that [KeepAlive] is dissociate from [RenderSliverMultiBoxAdaptor].
+class _SliverAlternativeToMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
+
+  @override
+  _SliverAlternativeToMultiBoxAdaptorElement createElement() =>
+      _SliverAlternativeToMultiBoxAdaptorElement(this);
+
+  @override
+  RenderSliverAlternativeToMultiBoxAdaptor createRenderObject(BuildContext context) => RenderSliverAlternativeToMultiBoxAdaptor();
+}
+
+class _SliverAlternativeToMultiBoxAdaptorElement extends RenderObjectElement{
+  _SliverAlternativeToMultiBoxAdaptorElement(_SliverAlternativeToMultiBoxAdaptorWidget widget)
+      : super(widget);
+
+  @override
+  _SliverAlternativeToMultiBoxAdaptorWidget get widget => super.widget;
+
+  @override
+  RenderSliverAlternativeToMultiBoxAdaptor get renderObject => super.renderObject;
+
+  @override
+  void forgetChild(Element child) {
+  }
+
+  @override
+  void insertChildRenderObject(RenderObject child,int slot) {
+  }
+
+  @override
+  void moveChildRenderObject(RenderObject child,int slot) {
+  }
+
+  @override
+  void removeChildRenderObject(RenderObject child) {
+  }
+}
+
+class RenderSliverAlternativeToMultiBoxAdaptor extends RenderSliver
+    with RenderSliverWithKeepAliveMixin,
+         RenderSliverHelpers {
+  @override
+  void performLayout() {
+    // Perform a layout where children are not laid out in the same order
+    // as they are defined.
   }
 }
