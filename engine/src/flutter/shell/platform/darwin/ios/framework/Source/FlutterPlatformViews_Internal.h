@@ -70,7 +70,8 @@ class FlutterPlatformViewsController {
   fml::scoped_nsobject<FlutterMethodChannel> channel_;
   fml::scoped_nsobject<UIView> flutter_view_;
   std::map<std::string, fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>> factories_;
-  std::map<int64_t, fml::scoped_nsobject<FlutterTouchInterceptingView>> views_;
+  std::map<int64_t, fml::scoped_nsobject<NSObject<FlutterPlatformView>>> views_;
+  std::map<int64_t, fml::scoped_nsobject<FlutterTouchInterceptingView>> touch_interceptors_;
   std::map<int64_t, std::unique_ptr<FlutterPlatformViewLayer>> overlays_;
   SkISize frame_size_;
 

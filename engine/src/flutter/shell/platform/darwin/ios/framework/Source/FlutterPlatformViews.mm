@@ -72,13 +72,17 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
     }
   }
 
-  UIView* embedded_view = [factory createWithFrame:CGRectZero
-                                    viewIdentifier:viewId
-                                         arguments:params];
-  FlutterTouchInterceptingView* view =
-      [[[FlutterTouchInterceptingView alloc] initWithEmbeddedView:embedded_view
+  NSObject<FlutterPlatformView>* embedded_view = [factory createWithFrame:CGRectZero
+                                                           viewIdentifier:viewId
+                                                                arguments:params];
+  views_[viewId] = fml::scoped_nsobject<NSObject<FlutterPlatformView>>([embedded_view retain]);
+
+  FlutterTouchInterceptingView* touch_interceptor =
+      [[[FlutterTouchInterceptingView alloc] initWithEmbeddedView:embedded_view.view
                                                       flutterView:flutter_view_] autorelease];
-  views_[viewId] = fml::scoped_nsobject<FlutterTouchInterceptingView>([view retain]);
+
+  touch_interceptors_[viewId] =
+      fml::scoped_nsobject<FlutterTouchInterceptingView>([touch_interceptor retain]);
 
   result(nil);
 }
@@ -94,9 +98,10 @@ void FlutterPlatformViewsController::OnDispose(FlutterMethodCall* call, FlutterR
     return;
   }
 
-  UIView* view = views_[viewId].get();
-  [view removeFromSuperview];
+  UIView* touch_interceptor = touch_interceptors_[viewId].get();
+  [touch_interceptor removeFromSuperview];
   views_.erase(viewId);
+  touch_interceptors_.erase(viewId);
   overlays_.erase(viewId);
   result(nil);
 }
@@ -113,7 +118,7 @@ void FlutterPlatformViewsController::OnAcceptGesture(FlutterMethodCall* call,
     return;
   }
 
-  FlutterTouchInterceptingView* view = views_[viewId].get();
+  FlutterTouchInterceptingView* view = touch_interceptors_[viewId].get();
   [view releaseGesture];
 
   result(nil);
@@ -159,8 +164,8 @@ SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(
       CGRectMake(params.offsetPixels.x() / screenScale, params.offsetPixels.y() / screenScale,
                  params.sizePoints.width(), params.sizePoints.height());
 
-  UIView* view = views_[view_id].get();
-  [view setFrame:rect];
+  UIView* touch_interceptor = touch_interceptors_[view_id].get();
+  [touch_interceptor setFrame:rect];
 
   SkCanvas* canvas = composition_frames_[view_id]->SkiaCanvas();
   canvas->clear(SK_ColorTRANSPARENT);
@@ -204,7 +209,7 @@ bool FlutterPlatformViewsController::Present() {
   active_composition_order_.clear();
   for (size_t i = 0; i < composition_order_.size(); i++) {
     int view_id = composition_order_[i];
-    [flutter_view addSubview:views_[view_id].get()];
+    [flutter_view addSubview:touch_interceptors_[view_id].get()];
     [flutter_view addSubview:overlays_[view_id]->overlay_view.get()];
     active_composition_order_.push_back(view_id);
   }
