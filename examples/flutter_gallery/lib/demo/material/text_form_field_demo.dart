@@ -169,7 +169,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      dragStartBehavior: DragStartBehavior.down,
+      drawerDragStartBehavior: DragStartBehavior.down,
       key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Text fields'),

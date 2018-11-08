@@ -83,7 +83,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          dragStartBehavior: DragStartBehavior.down,
+          drawerDragStartBehavior: DragStartBehavior.down,
           key: scaffoldKey,
           drawer: Drawer(
             child: ListView(
@@ -136,7 +136,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
-            dragStartBehavior: DragStartBehavior.down,
+            drawerDragStartBehavior: DragStartBehavior.down,
             key: scaffoldKey,
             drawer: Drawer(
               child: ListView(

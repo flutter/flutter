@@ -319,7 +319,7 @@ class StockHomeState extends State<StockHome> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        dragStartBehavior: DragStartBehavior.down,
+        drawerDragStartBehavior: DragStartBehavior.down,
         key: _scaffoldKey,
         appBar: _isSearching ? buildSearchBar() : buildAppBar(),
         floatingActionButton: buildFloatingActionButton(),

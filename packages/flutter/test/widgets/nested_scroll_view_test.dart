@@ -35,7 +35,7 @@ Widget buildTest({ ScrollController controller, String title ='TTTTTTTT' }) {
       child: MediaQuery(
         data: const MediaQueryData(),
         child: Scaffold(
-          dragStartBehavior: DragStartBehavior.down,
+          drawerDragStartBehavior: DragStartBehavior.down,
           body: DefaultTabController(
             length: 4,
             child: NestedScrollView(

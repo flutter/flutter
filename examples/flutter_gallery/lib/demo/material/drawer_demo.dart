@@ -80,7 +80,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      dragStartBehavior: DragStartBehavior.down,
+      drawerDragStartBehavior: DragStartBehavior.down,
       key: _scaffoldKey,
       appBar: AppBar(
         leading: IconButton(

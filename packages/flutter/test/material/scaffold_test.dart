@@ -632,7 +632,7 @@ void main() {
               viewInsets: EdgeInsets.only(bottom: 200.0),
             ),
             child: Scaffold(
-              dragStartBehavior: DragStartBehavior.down,
+              drawerDragStartBehavior: DragStartBehavior.down,
               appBar: PreferredSize(
                 preferredSize: const Size(11.0, 13.0),
                 child: Container(
