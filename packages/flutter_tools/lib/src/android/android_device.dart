@@ -633,7 +633,7 @@ void parseADBDeviceOutput(String text, {
       diagnostics?.add(
         'Unexpected failure parsing device information from adb output:\n'
         '$line\n'
-        'Please report a bug at https://github.com/flutter/flutter/issues/new');
+        'Please report a bug at https://github.com/flutter/flutter/issues/new/choose');
     }
   }
 }

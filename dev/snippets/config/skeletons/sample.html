@@ -3,10 +3,7 @@
   <button id="shortSnippetButton" selected>Sample</button>
 </div>
 <div class="snippet-container">
-  <div class="snippet">
-    <div class="snippet-description">{@end-inject-html}
-{{description}}{@inject-html}
-    </div>
+  <div class="snippet">{{description}}
     <div class="copyable-container">
       <button class="copy-button-overlay copy-button" title="Copy to clipboard"
               onclick="copyTextToClipboard(findSiblingWithId(this, 'sample-code'));">

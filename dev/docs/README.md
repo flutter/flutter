@@ -5,7 +5,10 @@ source.
 
 ### Documentation
 
+This site hosts Flutter's API documentation. Other documentation can be found at
+the following locations:
+
 * **Main site: [flutter.io](https://flutter.io/)**
-* [Install](https://flutter.io/setup/)
-* [Get started](https://flutter.io/getting-started/)
-* [Contribute](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md#contributing-to-flutter)
+* [Installation](https://flutter.io/docs/get-started/install)
+* [Codelabs](https://flutter.io/docs/codelabs)
+* [Contributing to Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)

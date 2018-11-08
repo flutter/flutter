@@ -58,13 +58,14 @@ class Divider extends StatelessWidget {
   /// Defaults to the current theme's divider color, given by
   /// [ThemeData.dividerColor].
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// Divider(
   ///   color: Colors.deepOrange,
   /// )
   /// ```
+  /// {@end-tool}
   final Color color;
 
   /// Computes the [BorderSide] that represents a divider of the specified
@@ -74,7 +75,7 @@ class Divider extends StatelessWidget {
   /// The `width` argument can be used to override the default width of the
   /// divider border, which is usually 0.0 (a hairline border).
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// This example uses this method to create a box that has a divider above and
   /// below it. This is sometimes useful with lists, for instance, to separate a
@@ -91,6 +92,7 @@ class Divider extends StatelessWidget {
   ///   // child: ...
   /// )
   /// ```
+  /// {@end-tool}
   static BorderSide createBorderSide(BuildContext context, { Color color, double width = 0.0 }) {
     assert(width != null);
     return BorderSide(
@@ -164,13 +166,14 @@ class VerticalDivider extends StatelessWidget {
   /// Defaults to the current theme's divider color, given by
   /// [ThemeData.dividerColor].
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// Divider(
   ///   color: Colors.deepOrange,
   /// )
   /// ```
+  /// {@end-tool}
   final Color color;
 
   @override

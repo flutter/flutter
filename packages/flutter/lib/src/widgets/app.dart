@@ -82,19 +82,17 @@ class WidgetsApp extends StatefulWidget {
   ///  _not_ contain an entry for `'/'`.  Conversely, if [home] is omitted, [routes]
   /// _must_ contain an entry for `'/'`.
   ///
-  /// If [home] or [routes] are not null, then either the [pageRoutebuilder] or
-  /// the [builder] parameter is required. These parameters will be used so
-  /// that the default routing implementation in [WidgetsApp] can wrap routes in
-  /// appropriate transitions. For example, [MaterialApp] will provide a
-  /// [pageRoutebuilder] that creates Material compliant hero animations between
-  /// routes, whereas the [CupertinoApp] provides Cupertino compliant hero
-  /// animations. Other implementations can provide other custom transitions here.
+  /// If [home] or [routes] are not null, the routing implementation needs to know how
+  /// appropriately build [PageRoutes]. This can be achieved by supplying the
+  /// [pageRouteBuilder] parameter.  The [pageRouteBuilder] is used by [MaterialApp]
+  /// and [CupertinoApp] to create [MaterialPageRoute]s and [CupertinoPageRoute],
+  /// respectively.
   ///
-  /// The [builder] parameter is optional in all cases. It can be used to ensure that
-  /// all route entries get wrapped in another widget. It is invoked during the build
-  /// phase of this widget.  If it is specified,
+  /// The [builder] parameter is designed to provide the ability to wrap the visible
+  /// content of the app in some other widget. It is recommended that you use [home]
+  /// rather than [builder] if you intend to only display a single route in your app.
   ///
-  /// It is also possible to provide a custom implementation of routing via the
+  /// [WidgetsApp] is also possible to provide a custom implementation of routing via the
   /// [onGeneratedRoute] and [onUnknownRoute] parameters. These parameters correspond
   /// to [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute]. If [home], [routes],
   /// and [builder] are null, or if they fail to create a requested route,
@@ -643,19 +641,17 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
     final String name = settings.name;
-    WidgetBuilder builder;
-    if (name == Navigator.defaultRouteName && widget.home != null) {
-      builder = (BuildContext context) => widget.home;
-    } else {
-      builder = widget.routes[name];
-    }
-    if (builder != null) {
+    final WidgetBuilder pageContentBuilder = name == Navigator.defaultRouteName && widget.home != null
+        ? (BuildContext context) => widget.home
+        : widget.routes[name];
+
+    if (pageContentBuilder != null) {
       assert(widget.pageRouteBuilder != null,
         'The default onGenerateRoute handler for WidgetsApp must have a '
         'pageRouteBuilder set if the home or routes properties are set.');
       final Route<dynamic> route = widget.pageRouteBuilder(
         settings,
-        builder,
+        pageContentBuilder,
       );
       assert(route != null,
         'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
