@@ -125,7 +125,7 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
   /// the parent [StatefulWidget] using the [State.setState] method, so that
   /// the parent gets rebuilt; for example:
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// class SegmentedControlExample extends StatefulWidget {
@@ -157,6 +157,7 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   final ValueChanged<T> onValueChanged;
 
   /// The color used to fill the backgrounds of unselected widgets and as the

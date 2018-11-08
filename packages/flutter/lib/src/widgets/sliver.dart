@@ -220,7 +220,7 @@ abstract class SliverChildDelegate {
 /// delegates where the first has 10 children contributing semantics, then the
 /// second delegate should offset its children by 10.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample code shows how to use `semanticIndexOffset` to handle multiple
 /// delegates in a single scroll view.
@@ -251,6 +251,7 @@ abstract class SliverChildDelegate {
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// In certain cases, only a subset of child widgets should be annotated
 /// with a semantic index. For example, in [new ListView.separated()] the
@@ -258,7 +259,7 @@ abstract class SliverChildDelegate {
 /// providing a `semanticIndexCallback` which returns null for separators
 /// indexes and rounds the non-separator indexes down by half.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample code shows how to use `semanticIndexCallback` to handle
 /// annotating a subset of child nodes with a semantic index. There is
@@ -290,6 +291,7 @@ abstract class SliverChildDelegate {
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -677,7 +679,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 /// [SliverFixedExtentList] does not need to perform layout on its children to
 /// obtain their extent in the main axis.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example, which would be inserted into a [CustomScrollView.slivers]
 /// list, shows an infinite number of items in varying shades of blue:
@@ -696,6 +698,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// {@macro flutter.widgets.sliverChildDelegate.lifecycle}
 ///
@@ -741,7 +744,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 /// The main axis direction of a grid is the direction in which it scrolls; the
 /// cross axis direction is the orthogonal direction.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example, which would be inserted into a [CustomScrollView.slivers]
 /// list, shows twenty boxes in a pretty teal grid:
@@ -766,6 +769,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// {@macro flutter.widgets.sliverChildDelegate.lifecycle}
 ///

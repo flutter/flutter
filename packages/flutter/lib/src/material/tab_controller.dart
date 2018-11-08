@@ -19,7 +19,7 @@ import 'constants.dart';
 /// ancestor, a [TabController] can be shared by providing a
 /// [DefaultTabController] inherited widget.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
 ///
@@ -69,6 +69,7 @@ import 'constants.dart';
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a [TabBarView].
   ///

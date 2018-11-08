@@ -106,7 +106,9 @@ void main() {
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
       expect(html, contains('  print(&#39;The actual \$name.&#39;);'));
-      expect(html, contains('A description of the snippet.\n\nOn several lines.\n'));
+      expect(html, contains('<div class="snippet-description">'
+          '{@end-inject-html}A description of the snippet.\n\n'
+          'On several lines.{@inject-html}</div>\n'));
       expect(html, contains('main() {'));
     });
   });

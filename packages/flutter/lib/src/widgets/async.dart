@@ -342,7 +342,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// * [StreamBuilderBase], which supports widget building based on a computation
 /// that spans all interactions made with the stream.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample shows a [StreamBuilder] configuring a text label to show the
 /// latest bid received for a lot in an auction. Assume the `_lot` field is
@@ -364,6 +364,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///   },
 /// )
 /// ```
+/// {@end-tool}
 // TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
 class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
@@ -473,7 +474,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// `future?.asStream()`, except that snapshots with `ConnectionState.active`
 /// may appear for the latter, depending on how the stream is implemented.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample shows a [FutureBuilder] configuring a text label to show the
 /// state of an asynchronous calculation returning a string. Assume the
@@ -498,6 +499,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///   },
 /// )
 /// ```
+/// {@end-tool}
 // TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of
