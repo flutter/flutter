@@ -30,6 +30,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     final String languageCode = codes[0];
     String scriptCode;
     String countryCode;
+    int length = codes.length;
     String originalString = locale;
     if (codes.length == 2) {
       scriptCode = codes[1].length >= 4 ? codes[1] : null;
@@ -80,6 +81,10 @@ class LocaleInfo implements Comparable<LocaleInfo> {
           break;
         }
       }
+      // Increment length if we were able to assume a scriptCode.
+      if (scriptCode != null) {
+        length += 1;
+      }
       // Update the base string to reflect assumed scriptCodes.
       originalString = languageCode;
       if (scriptCode != null)
@@ -92,7 +97,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
       languageCode: languageCode,
       scriptCode: scriptCode,
       countryCode: countryCode,
-      length: codes.length,
+      length: length,
       originalString: originalString,
     );
   }
