@@ -429,6 +429,7 @@ class _MaterialAppState extends State<MaterialApp> {
         locale: widget.locale,
         localizationsDelegates: _localizationsDelegates,
         localeResolutionCallback: widget.localeResolutionCallback,
+        localeListResolutionCallback: widget.localeListResolutionCallback,
         supportedLocales: widget.supportedLocales,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,

@@ -481,14 +481,14 @@ class WidgetsApp extends StatefulWidget {
   /// resolve the locale with the provided [localeListResolutionCallback]. If the
   /// callback or result is null, it will fallback to trying the [localeResolutionCallback].
   /// If both [localeResolutionCallback] and [localeListResolutionCallback] are left null
-  /// or fail to resolve (return null), the [WidgetsApp.defaultLocaleListResolution]
+  /// or fail to resolve (return null), the [WidgetsApp.basicLocaleListResolution]
   /// fallback algorithm will be used.
   ///
   /// The priority of each available fallback is:
   ///
   ///  1. [localeListResolutionCallback] is attempted first.
   ///  2. [localeResolutionCallback] is attempted second.
-  ///  3. Flutter's [WidgetsApp.defaultLocaleListResolution] algorithm is attempted last.
+  ///  3. Flutter's [WidgetsApp.basicLocaleListResolution] algorithm is attempted last.
   /// {@endtemplate}
   ///
   /// This callback considers the entire list of preferred locales.
@@ -505,7 +505,8 @@ class WidgetsApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
   ///
   /// This callback considers only the default locale, which is the first locale
-  /// in the preferred locales list.
+  /// in the preferred locales list. It is preferred to set [localeListResolutionCallback]
+  /// over [localeResolutionCallback] as it provides the full preferred locales list.
   ///
   /// This algorithm should be able to handle a null locale, which indicates
   /// Flutter has not yet recieved locale information from the platform.
@@ -759,7 +760,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         return locale;
     }
     // Both callbacks failed, falling back to default algorithm.
-    return defaultLocaleListResolution(preferredLocales, supportedLocales);
+    return basicLocaleListResolution(preferredLocales, supportedLocales);
   }
 
   /// The default locale resolution algorithm.
@@ -794,7 +795,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
   /// when `de` is not supported and `zh` is listed before `fr` (German is closer to French
   /// than Chinese).
-  static Locale defaultLocaleListResolution(List<Locale> preferredLocales, Iterable<Locale> supportedLocales) {
+  static Locale basicLocaleListResolution(List<Locale> preferredLocales, Iterable<Locale> supportedLocales) {
     // preferredLocales can be null when called before the platform has had a chance to
     // initialize the locales. Platforms without locale passing support will provide an empty list.
     // We default to the first supported locale in these cases.
@@ -833,14 +834,16 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       // Look for language+script match.
       if (userLocale.scriptCode != null) {
         final Locale match = languageAndScriptLocales[ui.hashValues(userLocale.languageCode.hashCode, userLocale.scriptCode.hashCode)];
-        if (match != null)
+        if (match != null) {
           return match;
+        }
       }
       // Look for language+country match.
       if (userLocale.countryCode != null) {
       final Locale match = languageAndCountryLocales[ui.hashValues(userLocale.languageCode.hashCode, userLocale.countryCode.hashCode)];
-        if (match != null)
+        if (match != null) {
           return match;
+        }
       }
       // If there was a languageCode-only match in the previous iteration's higher
       // ranked preferred locale, we return it if the current userLocale does not
@@ -849,28 +852,26 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         return matchesLanguageCode;
       }
       // Look and store language-only match.
-      {
-        final Locale match = languageLocales[userLocale.languageCode.hashCode];
-        if (match != null) {
-          matchesLanguageCode = match;
-          // Since first (default) locale is usually highly preferred, we will allow
-          // a languageCode-only match to be instantly matched. If the next preferred
-          // languageCode is the same, we defer hastily returning until the next iteration
-          // since at worst it is the same and at best an improved match.
-          if (localeIndex == 0 &&
-              !(localeIndex + 1 < preferredLocales.length &&
-              preferredLocales[localeIndex + 1].languageCode == userLocale.languageCode)) {
-            return matchesLanguageCode;
-          }
+      Locale match = languageLocales[userLocale.languageCode.hashCode];
+      if (match != null) {
+        matchesLanguageCode = match;
+        // Since first (default) locale is usually highly preferred, we will allow
+        // a languageCode-only match to be instantly matched. If the next preferred
+        // languageCode is the same, we defer hastily returning until the next iteration
+        // since at worst it is the same and at best an improved match.
+        if (localeIndex == 0 &&
+            !(localeIndex + 1 < preferredLocales.length && preferredLocales[localeIndex + 1].languageCode == userLocale.languageCode)) {
+          return matchesLanguageCode;
         }
       }
       // countryCode-only match. When all else except default supported locale fails,
       // attempt to match by country only, as a user is likely to be familar with a
       // language from their listed country.
       if (matchesCountryCode == null && userLocale.countryCode != null) {
-        final Locale match = countryLocales[userLocale.countryCode.hashCode];
-        if (match != null)
+        match = countryLocales[userLocale.countryCode.hashCode];
+        if (match != null) {
           matchesCountryCode = match;
+        }
       }
     }
     // When there is no languageCode-only match. Fallback to matching countryCode only. Country
