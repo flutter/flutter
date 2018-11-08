@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'arena.dart';
 import 'constants.dart';
 import 'drag_details.dart';
 import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
-
-import 'package:flutter/foundation.dart';
 
 enum _DragState {
   ready,
@@ -266,7 +266,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<DragStartBehavior>('startBehavior', dragStartBehavior));
+    properties.add(EnumProperty<DragStartBehavior>('Start Behavior', dragStartBehavior));
   }
 }
 

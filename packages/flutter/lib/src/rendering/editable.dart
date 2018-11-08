@@ -141,7 +141,6 @@ class RenderEditable extends RenderBox {
     Radius cursorRadius,
     bool enableInteractiveSelection = true,
     @required this.textSelectionDelegate,
-    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
@@ -212,9 +211,6 @@ class RenderEditable extends RenderBox {
   /// It must not be null. It will make cut, copy and paste functionality work
   /// with the most recently set [TextSelectionDelegate].
   TextSelectionDelegate textSelectionDelegate;
-
-  ///
-  DragStartBehavior dragStartBehavior;
 
   Rect _lastCaretRect;
 
