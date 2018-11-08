@@ -20,14 +20,16 @@ const double _kToolbarHeight = 36.0;
 
 const Color _kToolbarBackgroundColor = Color(0xFF2E2E2E);
 const Color _kToolbarDividerColor = Color(0xFFB9B9B9);
-const Color _kHandlesColor = Color(0xFF146DDE);
+// Read off from the output on iOS 12. This color does not vary with the
+// application's theme color.
+const Color _kHandlesColor = Color(0xFF136FE0);
 
 // This offset is used to determine the center of the selection during a drag.
 // It's slightly below the center of the text so the finger isn't entirely
 // covering the text being selected.
 const Size _kSelectionOffset = Size(20.0, 30.0);
 const Size _kToolbarTriangleSize = Size(18.0, 9.0);
-const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 21.0);
+const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
 const BorderRadius _kToolbarBorderRadius = BorderRadius.all(Radius.circular(7.5));
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
@@ -121,6 +123,7 @@ class _TextSelectionToolbar extends StatelessWidget {
         // avoid letting the triangle line up with any dividers.
         // https://github.com/flutter/flutter/issues/11274
         triangle,
+        const Padding(padding: EdgeInsets.only(bottom: 10.0)),
       ],
     );
   }

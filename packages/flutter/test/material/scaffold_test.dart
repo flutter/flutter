@@ -306,7 +306,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context).showBottomSheet<Null>((BuildContext context) {
+                  Scaffold.of(context).showBottomSheet<void>((BuildContext context) {
                     return Container(
                       key: sheetKey,
                       color: Colors.blue[500],
@@ -390,7 +390,7 @@ void main() {
   });
 
   group('back arrow', () {
-    Future<Null> expectBackIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon) async {
+    Future<void> expectBackIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon) async {
       final GlobalKey rootKey = GlobalKey();
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (_) => Container(key: rootKey, child: const Text('Home')),
@@ -425,7 +425,7 @@ void main() {
   });
 
   group('close button', () {
-    Future<Null> expectCloseIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon, PageRoute<void> routeBuilder()) async {
+    Future<void> expectCloseIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon, PageRoute<void> routeBuilder()) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: platform),
@@ -998,8 +998,60 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('Dual Drawer Opening', (WidgetTester tester) async {
+    testWidgets('Drawer state query correctly', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SafeArea(
+            left: false,
+            top: true,
+            right: false,
+            bottom: false,
+            child: Scaffold(
+              endDrawer: const Drawer(
+                child: Text('endDrawer'),
+              ),
+              drawer: const Drawer(
+                child: Text('drawer'),
+              ),
+              body: const Text('scaffold body'),
+              appBar: AppBar(
+                centerTitle: true,
+                title: const Text('Title')
+              ),
+            ),
+          ),
+        ),
+      );
 
+      final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+
+      final Finder drawerOpenButton = find.byType(IconButton).first;
+      final Finder endDrawerOpenButton = find.byType(IconButton).last;
+
+      await tester.tap(drawerOpenButton);
+      await tester.pumpAndSettle();
+      expect(true, scaffoldState.isDrawerOpen);
+      await tester.tap(endDrawerOpenButton);
+      await tester.pumpAndSettle();
+      expect(false, scaffoldState.isDrawerOpen);
+
+      await tester.tap(endDrawerOpenButton);
+      await tester.pumpAndSettle();
+      expect(true, scaffoldState.isEndDrawerOpen);
+      await tester.tap(drawerOpenButton);
+      await tester.pumpAndSettle();
+      expect(false, scaffoldState.isEndDrawerOpen);
+
+      scaffoldState.openDrawer();
+      expect(true, scaffoldState.isDrawerOpen);
+      await tester.tap(drawerOpenButton);
+      await tester.pumpAndSettle();
+
+      scaffoldState.openEndDrawer();
+      expect(true, scaffoldState.isEndDrawerOpen);
+    });
+
+    testWidgets('Dual Drawer Opening', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SafeArea(

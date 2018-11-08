@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:ui' as ui show window;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'banner.dart';
@@ -29,9 +30,13 @@ export 'dart:ui' show Locale;
 /// [Localizations] object when the app starts and when user changes the default
 /// locale for the device.
 ///
-/// The `locale` is the device's locale when the app started, or the device
-/// locale the user selected after the app was started. The `supportedLocales`
-/// parameter is just the value of [WidgetsApp.supportedLocales].
+/// This callback is also used if the app is created with a specific locale using
+/// the [new WidgetsApp] `locale` parameter.
+///
+/// The `locale` is either the value of [WidgetsApp.locale], or the device's
+/// locale when the app started, or the device locale the user selected after
+/// the app was started. The `supportedLocales` parameter is the value of
+/// [WidgetsApp.supportedLocales].
 typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
@@ -66,14 +71,41 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The boolean arguments, [color], and [navigatorObservers] must not be null.
   ///
-  /// If the [builder] is null, the [onGenerateRoute] and [pageRouteBuilder]
-  /// arguments are required. The [onGenerateRoute] parameter corresponds to
-  /// [Navigator.onGenerateRoute], and [pageRouteBuilder] will create a [PageRoute]
-  /// that wraps newly built routes. If the [builder] is non-null
-  /// and the [onGenerateRoute] argument is null, then the [builder] will not be
-  /// provided with a [Navigator]. If [onGenerateRoute] is not provided,
-  /// [navigatorKey], [onUnknownRoute], [navigatorObservers], and [initialRoute]
-  /// must have their default values, as they will have no effect.
+  /// Most callers will want to use the [home] or [routes] parameters, or both.
+  /// The [home] parameter is a convenience for the following [routes] map:
+  ///
+  /// ```dart
+  /// <String, WidgetBuilder>{ '/': (BuildContext context) => myWidget }
+  /// ```
+  ///
+  /// It is possible to specify both [home] and [routes], but only if [routes] does
+  ///  _not_ contain an entry for `'/'`.  Conversely, if [home] is omitted, [routes]
+  /// _must_ contain an entry for `'/'`.
+  ///
+  /// If [home] or [routes] are not null, then either the [pageRoutebuilder] or
+  /// the [builder] parameter is required. These parameters will be used so
+  /// that the default routing implementation in [WidgetsApp] can wrap routes in
+  /// appropriate transitions. For example, [MaterialApp] will provide a
+  /// [pageRoutebuilder] that creates Material compliant hero animations between
+  /// routes, whereas the [CupertinoApp] provides Cupertino compliant hero
+  /// animations. Other implementations can provide other custom transitions here.
+  ///
+  /// The [builder] parameter is optional in all cases. It can be used to ensure that
+  /// all route entries get wrapped in another widget. It is invoked during the build
+  /// phase of this widget.  If it is specified,
+  ///
+  /// It is also possible to provide a custom implementation of routing via the
+  /// [onGeneratedRoute] and [onUnknownRoute] parameters. These parameters correspond
+  /// to [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute]. If [home], [routes],
+  /// and [builder] are null, or if they fail to create a requested route,
+  /// [onGeneratedRoute] will be invoked.  If that fails, [onUnknownRoute] will be invoked.
+  ///
+  /// The [pageRouteBuilder] will create a [PageRoute] that wraps newly built routes.
+  /// If the [builder] is non-null and the [onGenerateRoute] argument is null, then the
+  /// [builder] will not be provided only with the context and the child widget, whereas
+  /// the [pageRouteBuilder] will be provided with [RouteSettings]. If [onGenerateRoute]
+  /// is not provided, [navigatorKey], [onUnknownRoute], [navigatorObservers], and
+  /// [initialRoute] must have their default values, as they will have no effect.
   ///
   /// The `supportedLocales` argument must be a list of one or more elements.
   /// By default supportedLocales is `[const Locale('en', 'US')]`.
@@ -143,10 +175,14 @@ class WidgetsApp extends StatefulWidget {
          'must have their initial values '
          '(null, null, and the empty list, respectively).'
        ),
-       assert(onGenerateRoute != null || pageRouteBuilder != null,
-         'If onGenerateRoute is not provided, the pageRouteBuilder must be specified '
-         'so that the default handler will know what kind of PageRoute transition '
-         'bo build.'),
+       assert(
+         builder != null ||
+         onGenerateRoute != null ||
+         pageRouteBuilder != null,
+         'If neither builder nor onGenerateRoute are provided, the '
+         'pageRouteBuilder must be specified so that the default handler '
+         'will know what kind of PageRoute transition to build.'
+       ),
        assert(title != null),
        assert(color != null),
        assert(supportedLocales != null && supportedLocales.isNotEmpty),
@@ -173,7 +209,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
   /// null, [navigatorKey] must also be null.
-  /// {@endTemplate}
+  /// {@endtemplate}
   final GlobalKey<NavigatorState> navigatorKey;
 
   /// {@template flutter.widgets.widgetsApp.onGenerateRoute}
@@ -233,7 +269,7 @@ class WidgetsApp extends StatefulWidget {
   /// APIs such as [Navigator.push] and [Navigator.pop] will work as expected.
   /// In contrast, the widget returned from [builder] is inserted _above_ the
   /// app's [Navigator] (if any).
-  /// {@endTemplate}
+  /// {@endtemplate}
   ///
   /// If this property is set, the [pageRouteBuilder] property must also be set
   /// so that the default route handler will know what kind of [PageRoute]s to
@@ -262,7 +298,7 @@ class WidgetsApp extends StatefulWidget {
   /// The [Navigator] is only built if routes are provided (either via [home],
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
   /// [builder] must not be null.
-  /// {@endTemplate}
+  /// {@endtemplate}
   ///
   /// If the routes map is not empty, the [pageRouteBuilder] property must be set
   /// so that the default route handler will know what kind of [PageRoute]s to
@@ -408,10 +444,22 @@ class WidgetsApp extends StatefulWidget {
   final Color color;
 
   /// {@template flutter.widgets.widgetsApp.locale}
-  /// The initial locale for this app's [Localizations] widget.
+  /// The initial locale for this app's [Localizations] widget is based
+  /// on this value.
   ///
-  /// If the 'locale' is null the system's locale value is used.
+  /// If the 'locale' is null then the system's locale value is used.
+  ///
+  /// The value of [Localizations.locale] will equal this locale if
+  /// it matches one of the [supportedLocales]. Otherwise it will be
+  /// the first [supportedLocale].
   /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [localeResolutionCallback], which can override the default
+  ///    [supportedLocales] matching algorithm.
+  ///  * [localizationsDelegates], which collectively define all of the localized
+  ///    resources used by this app.
   final Locale locale;
 
   /// {@template flutter.widgets.widgetsApp.localizationsDelegates}
@@ -467,10 +515,8 @@ class WidgetsApp extends StatefulWidget {
   ///
   ///  * [MaterialApp.supportedLocales], which sets the `supportedLocales`
   ///    of the [WidgetsApp] it creates.
-  ///
   ///  * [localeResolutionCallback], an app callback that resolves the app's locale
   ///    when the device's locale changes.
-  ///
   ///  * [localizationsDelegates], which collectively define all of the localized
   ///    resources used by this app.
   final Iterable<Locale> supportedLocales;
@@ -683,6 +729,11 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       if (locale != null)
         return locale;
     }
+    // newLocale can be null when called before the platform has had a chance to
+    // initialize the locales. We default to the first supported locale.
+    if (newLocale == null) {
+      return supportedLocales.first;
+    }
 
     Locale matchesLanguageCode;
     for (Locale locale in supportedLocales) {
@@ -749,6 +800,53 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
 
   // BUILDER
+
+  bool _debugCheckLocalizations(Locale appLocale) {
+    assert(() {
+      final Set<Type> unsupportedTypes =
+        _localizationsDelegates.map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type).toSet();
+      for (LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
+        if (!unsupportedTypes.contains(delegate.type))
+          continue;
+        if (delegate.isSupported(appLocale))
+          unsupportedTypes.remove(delegate.type);
+      }
+      if (unsupportedTypes.isEmpty)
+        return true;
+
+      // Currently the Cupertino library only provides english localizations.
+      // Remove this when https://github.com/flutter/flutter/issues/23847
+      // is fixed.
+      if (listEquals(unsupportedTypes.map((Type type) => type.toString()).toList(), <String>['CupertinoLocalizations']))
+        return true;
+
+      final StringBuffer message = StringBuffer();
+      message.writeln('\u2550' * 8);
+      message.writeln(
+        'Warning: This application\'s locale, $appLocale, is not supported by all of its\n'
+        'localization delegates.'
+      );
+      for (Type unsupportedType in unsupportedTypes) {
+        // Currently the Cupertino library only provides english localizations.
+        // Remove this when https://github.com/flutter/flutter/issues/23847
+        // is fixed.
+        if (unsupportedType.toString() == 'CupertinoLocalizations')
+          continue;
+        message.writeln(
+          '> A $unsupportedType delegate that supports the $appLocale locale was not found.'
+        );
+      }
+      message.writeln(
+        'See https://flutter.io/tutorials/internationalization/ for more\n'
+        'information about configuring an app\'s locale, supportedLocales,\n'
+        'and localizationsDelegates parameters.'
+      );
+      message.writeln('\u2550' * 8);
+      debugPrint(message.toString());
+      return true;
+    }());
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -855,10 +953,16 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       );
     }
 
+    final Locale appLocale = widget.locale != null
+      ? _resolveLocale(widget.locale, widget.supportedLocales)
+      : _locale;
+
+    assert(_debugCheckLocalizations(appLocale));
+
     return MediaQuery(
       data: MediaQueryData.fromWindow(ui.window),
       child: Localizations(
-        locale: widget.locale ?? _locale,
+        locale: appLocale,
         delegates: _localizationsDelegates.toList(),
         child: title,
       ),

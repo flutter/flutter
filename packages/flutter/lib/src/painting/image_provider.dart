@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui show instantiateImageCodec, Codec;
+import 'dart:ui' as ui show Codec;
 import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 
 import 'package:flutter/foundation.dart';
@@ -427,7 +427,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
     final ByteData data = await key.bundle.load(key.name);
     if (data == null)
       throw 'Unable to read data';
-    return await ui.instantiateImageCodec(data.buffer.asUint8List());
+    return await PaintingBinding.instance.instantiateImageCodec(data.buffer.asUint8List());
   }
 }
 
@@ -493,7 +493,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     if (bytes.lengthInBytes == 0)
       throw Exception('NetworkImage is an empty file: $resolved');
 
-    return await ui.instantiateImageCodec(bytes);
+    return await PaintingBinding.instance.instantiateImageCodec(bytes);
   }
 
   @override
@@ -555,7 +555,7 @@ class FileImage extends ImageProvider<FileImage> {
     if (bytes.lengthInBytes == 0)
       return null;
 
-    return await ui.instantiateImageCodec(bytes);
+    return await PaintingBinding.instance.instantiateImageCodec(bytes);
   }
 
   @override
@@ -616,7 +616,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   Future<ui.Codec> _loadAsync(MemoryImage key) {
     assert(key == this);
 
-    return ui.instantiateImageCodec(bytes);
+    return PaintingBinding.instance.instantiateImageCodec(bytes);
   }
 
   @override

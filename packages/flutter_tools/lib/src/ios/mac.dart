@@ -83,6 +83,17 @@ class PropertyList {
   }
 }
 
+/// Specialized exception for expected situations where the ideviceinfo
+/// tool responds with exit code 255 / 'No device found' message
+class IOSDeviceNotFoundError implements Exception {
+  IOSDeviceNotFoundError(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 class IMobileDevice {
   const IMobileDevice();
 
@@ -118,16 +129,18 @@ class IMobileDevice {
   Future<String> getInfoForDevice(String deviceID, String key) async {
     try {
       final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key, '--simple']);
+      if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
+        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
       if (result.exitCode != 0)
-        throw ToolExit('idevice_id returned an error:\n${result.stderr}');
+        throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
       return result.stdout.trim();
     } on ProcessException {
-      throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
+      throw ToolExit('Failed to invoke ideviceinfo. Run flutter doctor.');
     }
   }
 
   /// Starts `idevicesyslog` and returns the running process.
-  Future<Process> startLogger() => runCommand(<String>['idevicesyslog']);
+  Future<Process> startLogger(String deviceID) => runCommand(<String>['idevicesyslog', '-u', deviceID]);
 
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
@@ -317,6 +330,23 @@ Future<XcodeBuildResult> buildXcodeProject({
     printError('Flutter expects a build configuration named ${XcodeProjectInfo.expectedBuildConfigurationFor(buildInfo, scheme)} or similar.');
     printError('Open Xcode to fix the problem:');
     printError('  open ios/Runner.xcworkspace');
+    printError('1. Click on "Runner" in the project navigator.');
+    printError('2. Ensure the Runner PROJECT is selected, not the Runner TARGET.');
+    if (buildInfo.isDebug) {
+      printError('3. Click the Editor->Add Configuration->Duplicate "Debug" Configuration.');
+    } else {
+      printError('3. Click the Editor->Add Configuration->Duplicate "Release" Configuration.');
+    }
+    printError('');
+    printError('   If this option is disabled, it is likely you have the target selected instead');
+    printError('   of the project; see:');
+    printError('   https://stackoverflow.com/questions/19842746/adding-a-build-configuration-in-xcode');
+    printError('');
+    printError('   If you have created a completely custom set of build configurations,');
+    printError('   you can set the FLUTTER_BUILD_MODE=${buildInfo.modeName.toLowerCase()}');
+    printError('   in the .xcconfig file for that configuration and run from Xcode.');
+    printError('');
+    printError('4. If you are not using completely custom build configurations, name the newly created configuration ${buildInfo.modeName}.');
     return XcodeBuildResult(success: false);
   }
 
@@ -424,6 +454,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         if (line == 'done') {
           buildSubStatus?.stop();
           buildSubStatus = null;
+          return null;
         } else {
           initialBuildStatus.cancel();
           buildSubStatus = logger.startProgress(
@@ -530,7 +561,7 @@ String readGeneratedXcconfig(String appPath) {
   return generatedXcconfigFile.readAsStringSync();
 }
 
-Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
+Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.contains('BCEROR') == true &&
@@ -625,7 +656,7 @@ bool _checkXcodeVersion() {
   return true;
 }
 
-Future<Null> _addServicesToBundle(Directory bundle) async {
+Future<void> _addServicesToBundle(Directory bundle) async {
   final List<Map<String, String>> services = <Map<String, String>>[];
   printTrace('Trying to resolve native pub services.');
 
@@ -644,7 +675,7 @@ Future<Null> _addServicesToBundle(Directory bundle) async {
   _copyServiceDefinitionsManifest(services, manifestFile);
 }
 
-Future<Null> _copyServiceFrameworks(List<Map<String, String>> services, Directory frameworksDirectory) async {
+Future<void> _copyServiceFrameworks(List<Map<String, String>> services, Directory frameworksDirectory) async {
   printTrace("Copying service frameworks to '${fs.path.absolute(frameworksDirectory.path)}'.");
   frameworksDirectory.createSync(recursive: true);
   for (Map<String, String> service in services) {

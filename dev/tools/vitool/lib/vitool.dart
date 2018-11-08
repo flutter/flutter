@@ -386,7 +386,7 @@ class SvgPathCommand {
 }
 
 class SvgPathCommandBuilder {
-  static const Map<String, Null> kRelativeCommands = <String, Null> {
+  static const Map<String, void> kRelativeCommands = <String, void> {
     'c': null,
     'l': null,
     'm': null,
@@ -446,7 +446,7 @@ class _Transform {
 
   /// Constructs a new _Transform, default arguments create a no-op transform.
   _Transform({Matrix3 transformMatrix, this.opacity = 1.0}) :
-      this.transformMatrix = transformMatrix ?? Matrix3.identity();
+      transformMatrix = transformMatrix ?? Matrix3.identity();
 
   final Matrix3 transformMatrix;
   final double opacity;

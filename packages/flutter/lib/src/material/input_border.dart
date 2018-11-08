@@ -28,13 +28,6 @@ import 'package:flutter/widgets.dart';
 ///    rounded rectangle around the input decorator's container.
 ///  * [InputDecoration], which is used to configure an [InputDecorator].
 abstract class InputBorder extends ShapeBorder {
-  /// No input border.
-  ///
-  /// Use this value with [InputDecoration.border] to specify that no border
-  /// should be drawn. The [InputDecoration.shrinkWrap] constructor sets
-  /// its border to this value.
-  static const InputBorder none = _NoInputBorder();
-
   /// Creates a border for an [InputDecorator].
   ///
   /// The [borderSide] parameter must not be null. Applications typically do
@@ -44,6 +37,13 @@ abstract class InputBorder extends ShapeBorder {
   const InputBorder({
     this.borderSide = BorderSide.none,
   }) : assert(borderSide != null);
+
+  /// No input border.
+  ///
+  /// Use this value with [InputDecoration.border] to specify that no border
+  /// should be drawn. The [InputDecoration.shrinkWrap] constructor sets
+  /// its border to this value.
+  static const InputBorder none = _NoInputBorder();
 
   /// Defines the border line's color and weight.
   ///

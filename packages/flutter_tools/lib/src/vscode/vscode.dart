@@ -14,7 +14,7 @@ const bool _includeInsiders = false;
 
 class VsCode {
   VsCode._(this.directory, this.extensionDirectory, { Version version, this.edition })
-      : this.version = version ?? Version.unknown {
+      : version = version ?? Version.unknown {
 
     if (!fs.isDirectorySync(directory)) {
       _validationMessages.add('VS Code not found at $directory');
@@ -45,17 +45,6 @@ class VsCode {
     }
   }
 
-  final String directory;
-  final String extensionDirectory;
-  final Version version;
-  final String edition;
-
-  static const String extensionIdentifier = 'Dart-Code.flutter';
-
-  bool _isValid = false;
-  Version _extensionVersion;
-  final List<String> _validationMessages = <String>[];
-
   factory VsCode.fromDirectory(String installPath, String extensionDirectory,
       { String edition }) {
     final String packageJsonPath =
@@ -66,6 +55,17 @@ class VsCode {
       version = Version.parse(versionString);
     return VsCode._(installPath, extensionDirectory, version: version, edition: edition);
   }
+
+  final String directory;
+  final String extensionDirectory;
+  final Version version;
+  final String edition;
+
+  static const String extensionIdentifier = 'Dart-Code.flutter';
+
+  bool _isValid = false;
+  Version _extensionVersion;
+  final List<String> _validationMessages = <String>[];
 
   bool get isValid => _isValid;
   String get productName => 'VS Code' + (edition != null ? ', $edition' : '');
@@ -132,19 +132,38 @@ class VsCode {
     final String progFiles = platform.environment['programfiles'];
     final String localAppData = platform.environment['localappdata'];
 
-    return _findInstalled(<_VsCodeInstallLocation>[
-      _VsCodeInstallLocation(fs.path.join(localAppData, 'Programs\\Microsoft VS Code'), '.vscode'),
-      _VsCodeInstallLocation(fs.path.join(progFiles86, 'Microsoft VS Code'), '.vscode',
-          edition: '32-bit edition'),
-      _VsCodeInstallLocation(fs.path.join(progFiles, 'Microsoft VS Code'), '.vscode',
-          edition: '64-bit edition'),
-      _VsCodeInstallLocation(fs.path.join(localAppData, 'Programs\\Microsoft VS Code Insiders'), '.vscode-insiders',
-          isInsiders: true),
-      _VsCodeInstallLocation(fs.path.join(progFiles86 , 'Microsoft VS Code Insiders'), '.vscode-insiders',
-          edition: '32-bit edition', isInsiders: true),
-      _VsCodeInstallLocation(fs.path.join(progFiles, 'Microsoft VS Code Insiders'), '.vscode-insiders',
-          edition: '64-bit edition', isInsiders: true),
-    ]);
+    final List<_VsCodeInstallLocation> searchLocations =
+        <_VsCodeInstallLocation>[];
+
+    if (localAppData != null) {
+      searchLocations.add(_VsCodeInstallLocation(
+          fs.path.join(localAppData, 'Programs\\Microsoft VS Code'),
+          '.vscode'));
+    }
+    searchLocations.add(_VsCodeInstallLocation(
+        fs.path.join(progFiles86, 'Microsoft VS Code'), '.vscode',
+        edition: '32-bit edition'));
+    searchLocations.add(_VsCodeInstallLocation(
+        fs.path.join(progFiles, 'Microsoft VS Code'), '.vscode',
+        edition: '64-bit edition'));
+    if (localAppData != null) {
+      searchLocations.add(_VsCodeInstallLocation(
+          fs.path.join(localAppData, 'Programs\\Microsoft VS Code Insiders'),
+          '.vscode-insiders',
+          isInsiders: true));
+    }
+    searchLocations.add(_VsCodeInstallLocation(
+        fs.path.join(progFiles86, 'Microsoft VS Code Insiders'),
+        '.vscode-insiders',
+        edition: '32-bit edition',
+        isInsiders: true));
+    searchLocations.add(_VsCodeInstallLocation(
+        fs.path.join(progFiles, 'Microsoft VS Code Insiders'),
+        '.vscode-insiders',
+        edition: '64-bit edition',
+        isInsiders: true));
+
+    return _findInstalled(searchLocations);
   }
 
   // Linux:
@@ -195,7 +214,7 @@ class VsCode {
 
 class _VsCodeInstallLocation {
   const _VsCodeInstallLocation(this.installPath, this.extensionsFolder, { this.edition, bool isInsiders })
-    : this.isInsiders = isInsiders ?? false;
+    : isInsiders = isInsiders ?? false;
   final String installPath;
   final String extensionsFolder;
   final String edition;

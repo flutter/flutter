@@ -187,7 +187,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Switch(
+          Switch.adaptive(
             value: switchValue,
             onChanged: (bool value) {
               setState(() {
@@ -196,8 +196,8 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
             }
           ),
           // Disabled switches
-          const Switch(value: true, onChanged: null),
-          const Switch(value: false, onChanged: null)
+          const Switch.adaptive(value: true, onChanged: null),
+          const Switch.adaptive(value: false, onChanged: null),
         ],
       ),
     );

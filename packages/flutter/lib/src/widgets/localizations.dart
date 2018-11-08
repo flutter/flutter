@@ -14,7 +14,7 @@ import 'framework.dart';
 
 // Examples can assume:
 // class Intl { static String message(String s, { String name, String locale }) => ''; }
-// Future<Null> initializeMessages(String locale) => null;
+// Future<void> initializeMessages(String locale) => null;
 
 // Used by loadAll() to record LocalizationsDelegate.load() futures we're
 // waiting for.
@@ -181,6 +181,9 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
 
   @override
   bool shouldReload(_WidgetsLocalizationsDelegate old) => false;
+
+  @override
+  String toString() => 'DefaultWidgetsLocalizations.delegate(en_US)';
 }
 
 /// US English localizations for the widgets library.
@@ -308,7 +311,7 @@ class _LocalizationsScope extends InheritedWidget {
 ///
 ///   static Future<MyLocalizations> load(Locale locale) {
 ///     return initializeMessages(locale.toString())
-///       .then((Null _) {
+///       .then((void _) {
 ///         return MyLocalizations(locale);
 ///       });
 ///   }

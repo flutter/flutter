@@ -110,10 +110,10 @@ class FlutterProject {
     FlutterManifest.empty(),
   );
 
-  /// True, if this project is a Flutter module.
+  /// True if this project is a Flutter module project.
   bool get isModule => manifest.isModule;
 
-  /// True, if this project has an example application.
+  /// True if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
 
   /// The directory that will contain the example if an example exists.
@@ -146,16 +146,16 @@ class FlutterProject {
 /// Represents the iOS sub-project of a Flutter project.
 ///
 /// Instances will reflect the contents of the `ios/` sub-folder of
-/// Flutter applications and the `.ios/` sub-folder of Flutter modules.
+/// Flutter applications and the `.ios/` sub-folder of Flutter module projects.
 class IosProject {
-  static final RegExp _productBundleIdPattern = RegExp(r'^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(.*);\s*$');
-  static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
-  static const String _hostAppBundleName = 'Runner';
-
   IosProject._(this.parent);
 
   /// The parent of this project.
   final FlutterProject parent;
+
+  static final RegExp _productBundleIdPattern = RegExp(r'^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(.*);\s*$');
+  static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
+  static const String _hostAppBundleName = 'Runner';
 
   Directory get _ephemeralDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
@@ -178,7 +178,7 @@ class IosProject {
   /// The bundle name of the host app, `Runner.app`.
   String get hostAppBundleName => '$_hostAppBundleName.app';
 
-  /// True, if the parent Flutter project is a module.
+  /// True, if the parent Flutter project is a module project.
   bool get isModule => parent.isModule;
 
   /// The xcode config file for [mode].
@@ -319,15 +319,15 @@ class IosProject {
 /// Represents the Android sub-project of a Flutter project.
 ///
 /// Instances will reflect the contents of the `android/` sub-folder of
-/// Flutter applications and the `.android/` sub-folder of Flutter modules.
+/// Flutter applications and the `.android/` sub-folder of Flutter module projects.
 class AndroidProject {
-  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
-  static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
-
   AndroidProject._(this.parent);
 
   /// The parent of this project.
   final FlutterProject parent;
+
+  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
+  static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
   /// containing the `app/` subdirectory and the `settings.gradle` file that
@@ -346,7 +346,7 @@ class AndroidProject {
   Directory get _ephemeralDirectory => parent.directory.childDirectory('.android');
   Directory get _editableHostAppDirectory => parent.directory.childDirectory('android');
 
-  /// True, if the parent Flutter project is a module.
+  /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
 
   File get appManifestFile {

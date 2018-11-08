@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:math' as math;
 import 'dart:ui' as ui show window;
 
 import 'package:flutter/material.dart';
@@ -100,7 +101,7 @@ Widget boilerplate({ Widget child }) {
   );
 }
 
-Future<Null> skipPastScrollingAnimation(WidgetTester tester) async {
+Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 200));
 }
@@ -212,7 +213,7 @@ void main() {
     final RenderBox inputBox = findTextFieldBox();
     final Size emptyInputSize = inputBox.size;
 
-    Future<Null> checkText(String testValue) async {
+    Future<void> checkText(String testValue) async {
       return TestAsyncUtils.guard(() async {
         await tester.enterText(find.byType(TextField), testValue);
         // Check that the onChanged event handler fired.
@@ -246,7 +247,7 @@ void main() {
     final EditableTextState editableText = tester.state(find.byType(EditableText));
 
     // Check that the cursor visibility toggles after each blink interval.
-    Future<Null> checkCursorToggle() async {
+    Future<void> checkCursorToggle() async {
       final bool initialShowCursor = editableText.cursorCurrentlyVisible;
       await tester.pump(editableText.cursorBlinkInterval);
       expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
@@ -404,6 +405,34 @@ void main() {
     expect(controller.selection.extentOffset, tapIndex);
   });
 
+  testWidgets('enableInteractiveSelection = false, tap', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          controller: controller,
+          enableInteractiveSelection: false,
+        ),
+      )
+    );
+    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.extentOffset, -1);
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    // Tap would ordinarily reposition the caret.
+    final int tapIndex = testValue.indexOf('e');
+    final Offset ePos = textOffsetToPosition(tester, tapIndex);
+    await tester.tapAt(ePos);
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.extentOffset, -1);
+  });
+
   testWidgets('Can long press to select', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -432,6 +461,37 @@ void main() {
     // 'def' is selected.
     expect(controller.selection.baseOffset, testValue.indexOf('d'));
     expect(controller.selection.extentOffset, testValue.indexOf('f')+1);
+  });
+
+  testWidgets('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          controller: controller,
+          enableInteractiveSelection: false,
+        ),
+      )
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    expect(controller.value.text, testValue);
+    await skipPastScrollingAnimation(tester);
+
+    expect(controller.selection.isCollapsed, true);
+
+    // Long press the 'e' to select 'def'.
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.extentOffset, -1);
   });
 
   testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
@@ -682,6 +742,11 @@ void main() {
     final Offset firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
     final Offset secondPos = textOffsetToPosition(tester, testValue.indexOf('Second'));
     final Offset thirdPos = textOffsetToPosition(tester, testValue.indexOf('Third'));
+    final Offset middleStringPos = textOffsetToPosition(tester, testValue.indexOf('irst'));
+    expect(firstPos.dx, 0);
+    expect(secondPos.dx, 0);
+    expect(thirdPos.dx, 0);
+    expect(middleStringPos.dx, 34);
     expect(firstPos.dx, secondPos.dx);
     expect(firstPos.dx, thirdPos.dx);
     expect(firstPos.dy, lessThan(secondPos.dy));
@@ -764,6 +829,8 @@ void main() {
     // Check that the last line of text is not displayed.
     final Offset firstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
     final Offset fourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
+    expect(firstPos.dx, 0);
+    expect(fourthPos.dx, 0);
     expect(firstPos.dx, fourthPos.dx);
     expect(firstPos.dy, lessThan(fourthPos.dy));
     expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
@@ -840,7 +907,7 @@ void main() {
       ),
     );
 
-    Future<Null> checkText(String testValue) {
+    Future<void> checkText(String testValue) {
       return TestAsyncUtils.guard(() async {
         await tester.enterText(find.byType(TextField), testValue);
 
@@ -870,7 +937,7 @@ void main() {
       ),
     );
 
-    Future<Null> checkText(String testValue) async {
+    Future<void> checkText(String testValue) async {
       return TestAsyncUtils.guard(() async {
         await tester.enterText(find.byType(TextField), testValue);
 
@@ -915,7 +982,7 @@ void main() {
     );
     final Text helperText = tester.widget(find.text('helper text'));
     expect(helperText.style.color, themeData.hintColor);
-    expect(helperText.style.fontSize, MaterialTextGeometry.englishLike.caption.fontSize);
+    expect(helperText.style.fontSize, Typography.englishLike2014.caption.fontSize);
   });
 
   testWidgets('TextField with specified helperStyle', (WidgetTester tester) async {
@@ -2530,6 +2597,48 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('TextField semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          enableInteractiveSelection: false,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 1,
+          textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            // Absent the following because enableInteractiveSelection: false
+            // SemanticsAction.moveCursorBackwardByCharacter,
+            // SemanticsAction.moveCursorBackwardByWord,
+            // SemanticsAction.setSelection,
+            // SemanticsAction.paste,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+            SemanticsFlag.isFocused,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
   testWidgets('TextField semantics for selections', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = TextEditingController()
@@ -2820,6 +2929,48 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
   });
 
+  testWidgets('TextField displays text with text direction', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(
+            textDirection: TextDirection.rtl,
+          ),
+        ),
+      ),
+    );
+
+    RenderEditable editable = findRenderEditable(tester);
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    await tester.pumpAndSettle();
+    Offset topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 10)).topLeft,
+    );
+
+    expect(topLeft.dx, equals(701.0));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(
+            textDirection: TextDirection.ltr,
+          ),
+        ),
+      ),
+    );
+
+    editable = findRenderEditable(tester);
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    await tester.pumpAndSettle();
+    topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 10)).topLeft,
+    );
+
+    expect(topLeft.dx, equals(160.0));
+  });
+
   testWidgets('TextField semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = TextEditingController();
@@ -3031,5 +3182,149 @@ void main() {
     final Rect labelRect = tester.getRect(find.text('Label'));
     final Rect fieldRect = tester.getRect(find.text('Just some text'));
     expect(labelRect.bottom, lessThanOrEqualTo(fieldRect.top));
+  });
+
+  testWidgets('TextField scrolls into view but does not bounce (SingleChildScrollView)', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/20485
+
+    final Key textField1 = UniqueKey();
+    final Key textField2 = UniqueKey();
+    final ScrollController scrollController = ScrollController();
+
+    double minOffset;
+    double maxOffset;
+
+    scrollController.addListener(() {
+      final double offset = scrollController.offset;
+      minOffset = math.min(minOffset ?? offset, offset);
+      maxOffset = math.max(maxOffset ?? offset, offset);
+    });
+
+    Widget buildFrame(Axis scrollDirection) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              controller: scrollController,
+              child: Column(
+                children: <Widget>[
+                  SizedBox( // visible when scrollOffset is 0.0
+                    height: 100.0,
+                    width: 100.0,
+                    child: TextField(key: textField1, scrollPadding: const EdgeInsets.all(200.0)),
+                  ),
+                  const SizedBox(
+                    height: 600.0, // Same size as the frame. Initially
+                    width: 800.0,  // textField2 is not visible
+                  ),
+                  SizedBox( // visible when scrollOffset is 200.0
+                    height: 100.0,
+                    width: 100.0,
+                    child: TextField(key: textField2, scrollPadding: const EdgeInsets.all(200.0)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(Axis.vertical));
+    await tester.enterText(find.byKey(textField1), '1');
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField2), '2'); //scroll textField2 into view
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField1), '3'); //scroll textField1 back into view
+    await tester.pumpAndSettle();
+
+    expect(minOffset, 0.0);
+    expect(maxOffset, 200.0);
+
+    minOffset = null;
+    maxOffset = null;
+
+    await tester.pumpWidget(buildFrame(Axis.horizontal));
+    await tester.enterText(find.byKey(textField1), '1');
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField2), '2'); //scroll textField2 into view
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField1), '3'); //scroll textField1 back into view
+    await tester.pumpAndSettle();
+
+    expect(minOffset, 0.0);
+    expect(maxOffset, 200.0);
+  });
+
+  testWidgets('TextField scrolls into view but does not bounce (ListView)', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/20485
+
+    final Key textField1 = UniqueKey();
+    final Key textField2 = UniqueKey();
+    final ScrollController scrollController = ScrollController();
+
+    double minOffset;
+    double maxOffset;
+
+    scrollController.addListener(() {
+      final double offset = scrollController.offset;
+      minOffset = math.min(minOffset ?? offset, offset);
+      maxOffset = math.max(maxOffset ?? offset, offset);
+    });
+
+    Widget buildFrame(Axis scrollDirection) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: ListView(
+              physics: const BouncingScrollPhysics(),
+              controller: scrollController,
+              children: <Widget>[
+                SizedBox( // visible when scrollOffset is 0.0
+                  height: 100.0,
+                  width: 100.0,
+                  child: TextField(key: textField1, scrollPadding: const EdgeInsets.all(200.0)),
+                ),
+                const SizedBox(
+                  height: 450.0, // 50.0 smaller than the overall frame so that both
+                  width: 650.0,  // textfields are always partially visible.
+                ),
+                SizedBox( // visible when scrollOffset = 50.0
+                  height: 100.0,
+                  width: 100.0,
+                  child: TextField(key: textField2, scrollPadding: const EdgeInsets.all(200.0)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(Axis.vertical));
+    await tester.enterText(find.byKey(textField1), '1'); // textfield1 is visible
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField2), '2'); //scroll textField2 into view
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField1), '3'); //scroll textField1 back into view
+    await tester.pumpAndSettle();
+
+    expect(minOffset, 0.0);
+    expect(maxOffset, 50.0);
+
+    minOffset = null;
+    maxOffset = null;
+
+    await tester.pumpWidget(buildFrame(Axis.horizontal));
+    await tester.enterText(find.byKey(textField1), '1'); // textfield1 is visible
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField2), '2'); //scroll textField2 into view
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField1), '3'); //scroll textField1 back into view
+    await tester.pumpAndSettle();
+
+    expect(minOffset, 0.0);
+    expect(maxOffset, 50.0);
   });
 }

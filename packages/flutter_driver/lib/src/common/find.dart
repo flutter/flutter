@@ -191,8 +191,8 @@ class ByText extends SerializableFinder {
 class ByValueKey extends SerializableFinder {
   /// Creates a finder given the key value.
   ByValueKey(this.keyValue)
-    : this.keyValueString = '$keyValue',
-      this.keyValueType = '${keyValue.runtimeType}' {
+    : keyValueString = '$keyValue',
+      keyValueType = '${keyValue.runtimeType}' {
     if (!_supportedKeyValueTypes.contains(keyValue.runtimeType))
       throw _createInvalidKeyValueTypeError('$keyValue.runtimeType');
   }

@@ -35,4 +35,28 @@ void main() {
     expect(box.size.width, 16.0);
     expect(find.byType(VerticalDivider), paints..path(strokeWidth: 0.0));
   });
+
+  testWidgets('Vertical Divider Test 2', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Container(
+            height: 24.0,
+            child: Row(
+              children: const <Widget>[
+                Text('Hey.'),
+                VerticalDivider(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
+    final RenderBox containerBox = tester.firstRenderObject(find.byType(Container).last);
+
+    expect(box.size.width, 16.0);
+    expect(containerBox.size.height, 600.0);
+    expect(find.byType(VerticalDivider), paints..path(strokeWidth: 0.0));
+  });
 }

@@ -19,8 +19,8 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
+import 'text_theme.dart';
 import 'theme.dart';
-import 'typography.dart';
 
 // Examples can assume:
 // void _airDress() { }
@@ -168,6 +168,36 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// widget with an [IconButton] that opens the drawer (using [Icons.menu]). If
   /// there's no [Drawer] and the parent [Navigator] can go back, the [AppBar]
   /// will use a [BackButton] that calls [Navigator.maybePop].
+  ///
+  /// ## Sample code
+  ///
+  /// The following code shows how the drawer button could be manually specified
+  /// instead of relying on [automaticallyImplyLeading]:
+  ///
+  /// ```dart
+  /// AppBar(
+  ///   leading: Builder(
+  ///     builder: (BuildContext context) {
+  ///       return IconButton(
+  ///         icon: const Icon(Icons.menu),
+  ///         onPressed: () { Scaffold.of(context).openDrawer(); },
+  ///         tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+  ///       );
+  ///     },
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// The [Builder] is used in this example to ensure that the `context` refers
+  /// to that part of the subtree. That way this code snippet can be used even
+  /// inside the very code that is creating the [Scaffold] (in which case,
+  /// without the [Builder], the `context` wouldn't be able to see the
+  /// [Scaffold], since it would refer to an ancestor of that widget).
+  ///
+  /// See also:
+  ///
+  ///  * [Scaffold.appBar], in which an [AppBar] is usually placed.
+  ///  * [Scaffold.drawer], in which the [Drawer] is usually placed.
   final Widget leading;
 
   /// Controls whether we should try to imply the leading widget if null.
@@ -189,7 +219,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// ## Sample code
+  /// {@tool snippet --template=stateless_widget}
+  ///
+  /// This sample shows adding an action to an [AppBar] that opens a shopping cart.
   ///
   /// ```dart
   /// Scaffold(
@@ -205,8 +237,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///       ),
   ///     ],
   ///   ),
-  /// )
+  /// );
   /// ```
+  /// {@end-tool}
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will

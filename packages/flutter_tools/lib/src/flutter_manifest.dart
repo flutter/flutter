@@ -114,7 +114,7 @@ class FlutterManifest {
   ///
   /// A Flutter project is considered a module when it has a `module:`
   /// descriptor. A Flutter module project supports integration into an
-  /// existing host app.
+  /// existing host app, and has managed platform host code.
   ///
   /// Such a project can be created using `flutter create -t module`.
   bool get isModule => _flutterDescriptor.containsKey('module');
@@ -141,7 +141,7 @@ class FlutterManifest {
   }
 
   /// Returns the iOS bundle identifier declared by this manifest in its
-  /// module descriptor. Returns null, if there is no such declaration.
+  /// module descriptor. Returns null if there is no such declaration.
   String get iosBundleIdentifier {
     if (isModule)
       return _flutterDescriptor['module']['iosBundleIdentifier'];

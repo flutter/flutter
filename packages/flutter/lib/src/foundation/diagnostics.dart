@@ -6,6 +6,11 @@ import 'package:meta/meta.dart';
 
 import 'print.dart';
 
+// Examples can assume:
+// int rows, columns;
+// String _name;
+// bool inherit;
+
 /// The various priority levels used to filter which diagnostics are shown and
 /// omitted.
 ///
@@ -664,7 +669,7 @@ abstract class DiagnosticsNode {
   }) {
     assert(style != null);
     assert(level != null);
-    return DiagnosticsProperty<Null>(
+    return DiagnosticsProperty<void>(
       '',
       null,
       description: message,
@@ -1033,7 +1038,7 @@ abstract class DiagnosticsNode {
 ///  * [DiagnosticsNode.message], which serves the same role for messages
 ///    without a clear property name.
 ///  * [StringProperty], which is a better fit for properties with string values.
-class MessageProperty extends DiagnosticsProperty<Null> {
+class MessageProperty extends DiagnosticsProperty<void> {
   /// Create a diagnostics property that displays a message.
   ///
   /// Messages have no concrete [value] (so [value] will return null). The
@@ -2355,8 +2360,7 @@ abstract class Diagnosticable {
 ///
 /// See also:
 ///
-///  * [DiagnosticableTreeMixin], which provides a mixin that implements this
-///    class.
+///  * [DiagnosticableTreeMixin], a mixin that implements this class.
 ///  * [Diagnosticable], which should be used instead of this class to provide
 ///    diagnostics for objects without children.
 abstract class DiagnosticableTree extends Diagnosticable {
@@ -2455,16 +2459,10 @@ abstract class DiagnosticableTree extends Diagnosticable {
   List<DiagnosticsNode> debugDescribeChildren() => const <DiagnosticsNode>[];
 }
 
-/// A class that can be used as a mixin that helps dump string and
-/// [DiagnosticsNode] representations of trees.
+/// A mixin that helps dump string and [DiagnosticsNode] representations of trees.
 ///
-/// This class is identical to DiagnosticableTree except that it can be used as
-/// a mixin.
-abstract class DiagnosticableTreeMixin implements DiagnosticableTree {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory DiagnosticableTreeMixin._() => null;
-
+/// This mixin is identical to class [DiagnosticableTree].
+mixin DiagnosticableTreeMixin implements DiagnosticableTree {
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) {
     return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);

@@ -19,6 +19,7 @@ export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
 // Examples can assume:
 // AnimationController _controller, fadeAnimationController, sizeAnimationController;
 // bool dismissed;
+// void setState(VoidCallback fn) { }
 
 /// The direction in which an animation is running.
 enum _AnimationDirection {
@@ -176,7 +177,7 @@ enum AnimationBehavior {
 /// controllers using Dart's asynchronous syntax for awaiting [Future] objects:
 ///
 /// ```dart
-/// Future<Null> fadeOutAndUpdateState() async {
+/// Future<void> fadeOutAndUpdateState() async {
 ///   try {
 ///     await fadeAnimationController.forward().orCancel;
 ///     await sizeAnimationController.forward().orCancel;
@@ -615,7 +616,7 @@ class AnimationController extends Animation<double>
     _simulation = simulation;
     _lastElapsedDuration = Duration.zero;
     _value = simulation.x(0.0).clamp(lowerBound, upperBound);
-    final Future<Null> result = _ticker.start();
+    final TickerFuture result = _ticker.start();
     _status = (_direction == _AnimationDirection.forward) ?
       AnimationStatus.forward :
       AnimationStatus.reverse;

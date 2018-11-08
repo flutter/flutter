@@ -24,7 +24,7 @@ const Duration quitTimeout = Duration(seconds: 10);
 
 class FlutterTestDriver {
   FlutterTestDriver(this._projectFolder, {String logPrefix}):
-    this._logPrefix = logPrefix != null ? '$logPrefix: ' : '';
+    _logPrefix = logPrefix != null ? '$logPrefix: ' : '';
 
   final Directory _projectFolder;
   final String _logPrefix;
@@ -42,6 +42,7 @@ class FlutterTestDriver {
 
   VMServiceClient vmService;
   String get lastErrorInfo => _errorBuffer.toString();
+  Stream<String> get stdout => _stdout.stream;
   int get vmServicePort => _vmServicePort;
   bool get hasExited => _hasExited;
 
@@ -56,16 +57,25 @@ class FlutterTestDriver {
     return msg;
   }
 
-  Future<void> run({bool withDebugger = false, bool pauseOnExceptions = false}) async {
+  Future<void> run({
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    File pidFile,
+  }) async {
     await _setupProcess(<String>[
         'run',
         '--machine',
         '-d',
         'flutter-tester',
-    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions);
+    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile);
   }
 
-  Future<void> attach(int port, {bool withDebugger = false, bool pauseOnExceptions = false}) async {
+  Future<void> attach(
+    int port, {
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    File pidFile,
+  }) async {
     await _setupProcess(<String>[
         'attach',
         '--machine',
@@ -73,20 +83,28 @@ class FlutterTestDriver {
         'flutter-tester',
         '--debug-port',
         '$port',
-    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions);
+    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile);
   }
 
-  Future<void> _setupProcess(List<String> args, {bool withDebugger = false, bool pauseOnExceptions = false}) async {
+  Future<void> _setupProcess(
+    List<String> args, {
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    File pidFile,
+  }) async {
     final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final List<String> flutterArgs = withDebugger
-        ? args.followedBy(<String>['--start-paused']).toList()
-        : args;
-    _debugPrint('Spawning flutter $flutterArgs in ${_projectFolder.path}');
+    if (withDebugger) {
+        args.add('--start-paused');
+    }
+    if (pidFile != null) {
+        args.addAll(<String>['--pid-file', pidFile.path]);
+    }
+    _debugPrint('Spawning flutter $args in ${_projectFolder.path}');
 
     const ProcessManager _processManager = LocalProcessManager();
     _proc = await _processManager.start(
         <String>[flutterBin]
-            .followedBy(flutterArgs)
+            .followedBy(args)
             .toList(),
         workingDirectory: _projectFolder.path,
         environment: <String, String>{'FLUTTER_TEST': 'true'});
@@ -237,10 +255,10 @@ class FlutterTestDriver {
     return await vm.isolates.single.load();
   }
 
-  Future<void> addBreakpoint(String path, int line) async {
+  Future<void> addBreakpoint(Uri uri, int line) async {
     final VMIsolate isolate = await getFlutterIsolate();
-    _debugPrint('Sending breakpoint for $path:$line');
-    await isolate.addBreakpoint(path, line);
+    _debugPrint('Sending breakpoint for $uri:$line');
+    await isolate.addBreakpoint(uri, line);
   }
 
   Future<VMIsolate> waitForPause() async {
@@ -266,15 +284,15 @@ class FlutterTestDriver {
     return wait ? waitForPause() : null;
   }
 
-  Future<VMIsolate> breakAt(String path, int line, { bool restart = false }) async {
+  Future<VMIsolate> breakAt(Uri uri, int line, { bool restart = false }) async {
     if (restart) {
       // For a hot restart, we need to send the breakpoints after the restart
       // so we need to pause during the restart to avoid races.
       await hotRestart(pause: true);
-      await addBreakpoint(path, line);
+      await addBreakpoint(uri, line);
       return resume();
     } else {
-      await addBreakpoint(path, line);
+      await addBreakpoint(uri, line);
       await hotReload();
       return waitForPause();
     }
@@ -355,7 +373,9 @@ class FlutterTestDriver {
 
     return f().timeout(timeout ?? defaultTimeout, onTimeout: () {
       logMessage('<timed out>');
-      throw '$message\nReceived:\n${messages.toString()}';
+      throw '$message';
+    }).catchError((dynamic error) {
+      throw '$error\nReceived:\n${messages.toString()}';
     }).whenComplete(() => sub.cancel());
   }
 

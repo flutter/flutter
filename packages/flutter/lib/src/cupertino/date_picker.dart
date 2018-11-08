@@ -13,10 +13,14 @@ import 'picker.dart';
 const double _kItemExtent = 32.0;
 const double _kPickerWidth = 330.0;
 const bool _kUseMagnifier = true;
-const double _kMagnification = 1.1;
+const double _kMagnification = 1.05;
 const double _kDatePickerPadSize = 12.0;
 // Considers setting the default background color from the theme, in the future.
 const Color _kBackgroundColor = CupertinoColors.white;
+
+const TextStyle _kDefaultPickerTextStyle = TextStyle(
+  letterSpacing: -0.83,
+);
 
 // Lays out the date picker based on how much space each single column needs.
 //
@@ -172,7 +176,7 @@ class CupertinoDatePicker extends StatefulWidget {
     this.maximumYear,
     this.minuteInterval = 1,
     this.use24hFormat = false,
-  }) : this.initialDateTime = initialDateTime ?? DateTime.now(),
+  }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(mode != null),
        assert(onDateTimeChanged != null),
        assert(initialDateTime != null),
@@ -393,7 +397,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     super.didChangeDependencies();
 
     textDirectionFactor = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
-    localizations = CupertinoLocalizations.of(context) ?? const DefaultCupertinoLocalizations();
+    localizations = CupertinoLocalizations.of(context);
 
     alignCenterLeft = textDirectionFactor == 1 ? Alignment.centerLeft : Alignment.centerRight;
     alignCenterRight = textDirectionFactor == 1 ? Alignment.centerRight : Alignment.centerLeft;
@@ -639,12 +643,15 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     return MediaQuery(
       data: const MediaQueryData(textScaleFactor: 1.0),
-      child: CustomMultiChildLayout(
-        delegate: _DatePickerLayoutDelegate(
-          columnWidths: columnWidths,
-          textDirectionFactor: textDirectionFactor,
+      child: DefaultTextStyle.merge(
+        style: _kDefaultPickerTextStyle,
+        child: CustomMultiChildLayout(
+          delegate: _DatePickerLayoutDelegate(
+            columnWidths: columnWidths,
+            textDirectionFactor: textDirectionFactor,
+          ),
+          children: pickers,
         ),
-        children: pickers,
       ),
     );
   }
@@ -687,7 +694,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     super.didChangeDependencies();
 
     textDirectionFactor = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
-    localizations = CupertinoLocalizations.of(context) ?? const DefaultCupertinoLocalizations();
+    localizations = CupertinoLocalizations.of(context);
 
     alignCenterLeft = textDirectionFactor == 1 ? Alignment.centerLeft : Alignment.centerRight;
     alignCenterRight = textDirectionFactor == 1 ? Alignment.centerRight : Alignment.centerLeft;
@@ -872,12 +879,15 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       data: const MediaQueryData(textScaleFactor: 1.0),
       child: NotificationListener<ScrollEndNotification>(
         onNotification: _keepInValidRange,
-        child: CustomMultiChildLayout(
-          delegate: _DatePickerLayoutDelegate(
-            columnWidths: columnWidths,
-            textDirectionFactor: textDirectionFactor,
+        child: DefaultTextStyle.merge(
+          style: _kDefaultPickerTextStyle,
+          child: CustomMultiChildLayout(
+            delegate: _DatePickerLayoutDelegate(
+              columnWidths: columnWidths,
+              textDirectionFactor: textDirectionFactor,
+            ),
+            children: pickers,
           ),
-          children: pickers,
         ),
       ),
     );
@@ -948,13 +958,13 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// positive integer factor of 60.
   CupertinoTimerPicker({
     this.mode = CupertinoTimerPickerMode.hms,
-    this.initialTimerDuration = const Duration(),
+    this.initialTimerDuration = Duration.zero,
     this.minuteInterval = 1,
     this.secondInterval = 1,
     @required this.onTimerDurationChanged,
   }) : assert(mode != null),
        assert(onTimerDurationChanged != null),
-       assert(initialTimerDuration >= const Duration(seconds: 0)),
+       assert(initialTimerDuration >= Duration.zero),
        assert(initialTimerDuration < const Duration(days: 1)),
        assert(minuteInterval > 0 && 60 % minuteInterval == 0),
        assert(secondInterval > 0 && 60 % secondInterval == 0),
@@ -1023,7 +1033,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     super.didChangeDependencies();
 
     textDirectionFactor = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
-    localizations = CupertinoLocalizations.of(context) ?? const DefaultCupertinoLocalizations();
+    localizations = CupertinoLocalizations.of(context);
 
     alignCenterLeft = textDirectionFactor == 1 ? Alignment.centerLeft : Alignment.centerRight;
     alignCenterRight = textDirectionFactor == 1 ? Alignment.centerRight : Alignment.centerLeft;

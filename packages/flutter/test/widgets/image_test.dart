@@ -601,7 +601,7 @@ void main() {
 
   testWidgets('Precache', (WidgetTester tester) async {
     final TestImageProvider provider = TestImageProvider();
-    Future<Null> precache;
+    Future<void> precache;
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
@@ -632,7 +632,7 @@ void main() {
     final Exception testException = Exception('cannot resolve host');
     final StackTrace testStack = StackTrace.current;
     final TestImageProvider imageProvider = TestImageProvider();
-    Future<Null> precache;
+    Future<void> precache;
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
@@ -792,14 +792,14 @@ void main() {
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
-  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
-  ImageStreamCompleter _streamCompleter;
-  ImageConfiguration _lastResolvedConfiguration;
-
   TestImageProvider({ImageStreamCompleter streamCompleter}) {
     _streamCompleter = streamCompleter
       ?? OneFrameImageStreamCompleter(_completer.future);
   }
+
+  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
+  ImageStreamCompleter _streamCompleter;
+  ImageConfiguration _lastResolvedConfiguration;
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {

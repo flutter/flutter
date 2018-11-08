@@ -9,6 +9,8 @@ import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const TextTheme defaultGeometryTheme = Typography.englishLike2014;
+
   test('ThemeDataTween control test', () {
     final ThemeData light = ThemeData.light();
     final ThemeData dark = ThemeData.dark();
@@ -55,7 +57,7 @@ void main() {
       )
     );
 
-    expect(Theme.of(capturedContext), equals(ThemeData.localize(ThemeData.fallback(), MaterialTextGeometry.englishLike)));
+    expect(Theme.of(capturedContext), equals(ThemeData.localize(ThemeData.fallback(), defaultGeometryTheme)));
     expect(Theme.of(capturedContext, shadowThemeOnly: true), isNull);
   });
 
@@ -65,20 +67,20 @@ void main() {
 
     // Same input, same output.
     expect(
-      ThemeData.localize(light, MaterialTextGeometry.englishLike),
-      same(ThemeData.localize(light, MaterialTextGeometry.englishLike)),
+      ThemeData.localize(light, defaultGeometryTheme),
+      same(ThemeData.localize(light, defaultGeometryTheme)),
     );
 
     // Different text geometry, different output.
     expect(
-      ThemeData.localize(light, MaterialTextGeometry.englishLike),
-      isNot(same(ThemeData.localize(light, MaterialTextGeometry.tall))),
+      ThemeData.localize(light, defaultGeometryTheme),
+      isNot(same(ThemeData.localize(light, Typography.tall2014))),
     );
 
     // Different base theme, different output.
     expect(
-      ThemeData.localize(light, MaterialTextGeometry.englishLike),
-      isNot(same(ThemeData.localize(dark, MaterialTextGeometry.englishLike))),
+      ThemeData.localize(light, defaultGeometryTheme),
+      isNot(same(ThemeData.localize(dark, defaultGeometryTheme))),
     );
   });
 
@@ -408,7 +410,7 @@ void main() {
       }
     }
 
-    expect(theme.textTheme.display4.debugLabel, '(englishLike display4).merge(blackMountainView display4)');
+    expect(theme.textTheme.display4.debugLabel, '(englishLike display4 2014).merge(blackMountainView display4)');
   });
 }
 
@@ -458,6 +460,7 @@ class _TextStyleProxy implements TextStyle {
   @override double get letterSpacing => _delegate.letterSpacing;
   @override TextBaseline get textBaseline => _delegate.textBaseline;
   @override double get wordSpacing => _delegate.wordSpacing;
+  @override List<Shadow> get shadows => _delegate.shadows;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) =>
@@ -484,7 +487,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, Locale locale, ui.Paint foreground, ui.Paint background, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
+  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, Locale locale, ui.Paint foreground, ui.Paint background, List<Shadow> shadows, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
     throw UnimplementedError();
   }
 

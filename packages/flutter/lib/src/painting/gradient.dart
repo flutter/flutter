@@ -185,7 +185,7 @@ abstract class Gradient {
   /// function instead. If both return null, it returns `a` before `t == 0.5`
   /// and `b` after `t == 0.5`.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static Gradient lerp(Gradient a, Gradient b, double t) {
     assert(t != null);
     Gradient result;

@@ -204,7 +204,7 @@ class ShapeDecoration extends Decoration {
   /// fields are all null (including the [shape], which cannot normally be
   /// null).
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   ///
   /// See also:
   ///

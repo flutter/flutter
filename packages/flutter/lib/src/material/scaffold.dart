@@ -657,6 +657,34 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
 ///
+/// ## Sample code
+///
+/// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar]
+/// and a [FloatingActionButton]. The [body] is a [Text] placed in a [Center]
+/// in order to center the text within the [Scaffold] and the
+/// [FloatingActionButton] is centered and docked within the
+/// [BottomAppBar] using [FloatingActionButtonLocation.centerDocked].
+///
+/// ```dart
+/// Scaffold(
+///   appBar: AppBar(
+///     title: Text('Sample Code'),
+///   ),
+///   body: Center(
+///     child: Text('Scaffold'),
+///   ),
+///   bottomNavigationBar: BottomAppBar(
+///     child: Container(height: 50.0,),
+///   ),
+///   floatingActionButton: FloatingActionButton(
+///     onPressed: () {},
+///     tooltip: 'Increment',
+///     child: Icon(Icons.add),
+///   ),
+///   floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+/// )
+/// ```
+///
 /// See also:
 ///
 ///  * [AppBar], which is a horizontal bar typically shown at the top of an app
@@ -1017,6 +1045,22 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   bool _drawerOpened = false;
   bool _endDrawerOpened = false;
 
+  /// Whether the [Scaffold.drawer] is opened.
+  ///
+  /// See also:
+  ///
+  ///   * [ScaffoldState.openDrawer], which opens the [Scaffold.drawer] of a
+  ///   [Scaffold].
+  bool get isDrawerOpen => _drawerOpened;
+
+  /// Whether the [Scaffold.endDrawer] is opened.
+  ///
+  /// See also:
+  ///
+  ///   * [ScaffoldState.openEndDrawer], which opens the [Scaffold.endDrawer] of
+  ///     a [Scaffold].
+  bool get isEndDrawerOpen => _endDrawerOpened;
+
   void _drawerOpenedCallback(bool isOpened) {
     setState(() {
       _drawerOpened = isOpened;
@@ -1164,7 +1208,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _snackBarController.value = 0.0;
       completer.complete(reason);
     } else {
-      _snackBarController.reverse().then<void>((Null _) {
+      _snackBarController.reverse().then<void>((void value) {
         assert(mounted);
         if (!completer.isCompleted)
           completer.complete(reason);

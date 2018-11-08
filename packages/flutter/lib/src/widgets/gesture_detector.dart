@@ -34,6 +34,11 @@ export 'package:flutter/gestures.dart' show
   TapUpDetails,
   Velocity;
 
+// Examples can assume:
+// bool _lights;
+// void setState(VoidCallback fn) { }
+// String _last;
+
 /// Factory for creating gesture recognizers.
 ///
 /// `T` is the type of gesture recognizer this class manages.
@@ -150,6 +155,7 @@ class GestureDetector extends StatelessWidget {
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
+    this.onLongPressUp,
     this.onVerticalDragDown,
     this.onVerticalDragStart,
     this.onVerticalDragUpdate,
@@ -241,6 +247,9 @@ class GestureDetector extends StatelessWidget {
   /// A pointer has remained in contact with the screen at the same location for
   /// a long period of time.
   final GestureLongPressCallback onLongPress;
+
+  /// A pointer that has triggered a long-press has stopped contacting the screen.
+  final GestureLongPressUpCallback onLongPressUp;
 
   /// A pointer has contacted the screen and might begin to move vertically.
   final GestureDragDownCallback onVerticalDragDown;
@@ -348,12 +357,13 @@ class GestureDetector extends StatelessWidget {
       );
     }
 
-    if (onLongPress != null) {
+    if (onLongPress != null || onLongPressUp !=null) {
       gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
         () => LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
-            ..onLongPress = onLongPress;
+            ..onLongPress = onLongPress
+            ..onLongPressUp = onLongPressUp;
         },
       );
     }

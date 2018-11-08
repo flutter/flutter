@@ -49,16 +49,12 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
 
 /// Implementation of [RenderProxyBox].
 ///
-/// This class can be used as a mixin for situations where the proxying behavior
+/// Use this mixin in situations where the proxying behavior
 /// of [RenderProxyBox] is desired but inheriting from [RenderProxyBox] is
 /// impractical (e.g. because you want to mix in other classes as well).
 // TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/31543 is fixed
 @optionalTypeArgs
-abstract class RenderProxyBoxMixin<T extends RenderBox> extends RenderBox with RenderObjectWithChildMixin<T> {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory RenderProxyBoxMixin._() => null;
-
+mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChildMixin<T> {
   @override
   void setupParentData(RenderObject child) {
     // We don't actually use the offset argument in BoxParentData, so let's
@@ -4036,7 +4032,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     super.visitChildrenForSemantics(visitor);
   }
 
-
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -4327,6 +4322,49 @@ class RenderExcludeSemantics extends RenderProxyBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('excluding', excluding));
+  }
+}
+
+/// A render objects that annotates semantics with an index.
+///
+/// Certain widgets will automatically provide a child index for building
+/// semantics. For example, the [ScrollView] uses the index of the first
+/// visible child semantics node to determine the
+/// [SemanticsConfiguration.scrollIndex].
+///
+/// See also:
+///
+///  * [CustomScrollView], for an explanation of scroll semantics.
+class RenderIndexedSemantics extends RenderProxyBox {
+  /// Creates a render object that annotates the child semantics with an index.
+  RenderIndexedSemantics({
+    RenderBox child,
+    @required int index,
+  }) : assert(index != null),
+        _index = index,
+        super(child);
+
+  /// The index used to annotated child semantics.
+  int get index => _index;
+  int _index;
+  set index(int value) {
+    if (value == index)
+      return;
+    _index = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+    config.indexInParent = index;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<int>('index', index));
   }
 }
 

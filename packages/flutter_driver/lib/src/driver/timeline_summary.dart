@@ -107,7 +107,7 @@ class TimelineSummary {
   }
 
   /// Writes all of the recorded timeline data to a file.
-  Future<Null> writeTimelineToFile(
+  Future<void> writeTimelineToFile(
     String traceName, {
     String destinationDirectory,
     bool pretty = false,
@@ -119,7 +119,7 @@ class TimelineSummary {
   }
 
   /// Writes [summaryJson] to a file.
-  Future<Null> writeSummaryToFile(
+  Future<void> writeSummaryToFile(
     String traceName, {
     String destinationDirectory,
     bool pretty = false,
@@ -207,7 +207,7 @@ class TimelineSummary {
 class TimedEvent {
   /// Creates a timed event given begin and end timestamps in microseconds.
   TimedEvent(int beginTimeMicros, int endTimeMicros)
-    : this.duration = Duration(microseconds: endTimeMicros - beginTimeMicros);
+    : duration = Duration(microseconds: endTimeMicros - beginTimeMicros);
 
   /// The duration of the event.
   final Duration duration;

@@ -26,6 +26,8 @@ import 'devfs.dart';
 import 'device.dart';
 import 'doctor.dart';
 import 'emulator.dart';
+import 'fuchsia/fuchsia_sdk.dart';
+import 'fuchsia/fuchsia_workflow.dart';
 import 'ios/cocoapods.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
@@ -48,6 +50,7 @@ Future<T> runInContext<T>(
       AndroidStudio: AndroidStudio.latestValid,
       AndroidWorkflow: () => AndroidWorkflow(),
       AndroidValidator: () => AndroidValidator(),
+      AndroidLicenseValidator: () => AndroidLicenseValidator(),
       Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
       BotDetector: () => const BotDetector(),
@@ -61,6 +64,9 @@ Future<T> runInContext<T>(
       Doctor: () => const Doctor(),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(),
+      FuchsiaSdk: () => FuchsiaSdk(),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(),
+      FuchsiaWorkflow: () => FuchsiaWorkflow(),
       Flags: () => const EmptyFlags(),
       FlutterVersion: () => FlutterVersion(const Clock()),
       GenSnapshot: () => const GenSnapshot(),

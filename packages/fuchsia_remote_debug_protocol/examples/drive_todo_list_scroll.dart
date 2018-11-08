@@ -22,7 +22,7 @@ import 'package:fuchsia_remote_debug_protocol/logging.dart';
 ///
 /// $ dart examples/driver_todo_list_scroll.dart \
 ///     fe80::8eae:4cff:fef4:9247 eno1
-Future<Null> main(List<String> args) async {
+Future<void> main(List<String> args) async {
   // Log only at info level within the library. If issues arise, this can be
   // changed to [LoggingLevel.all] or [LoggingLevel.fine] to see more
   // information.
@@ -56,7 +56,7 @@ Future<Null> main(List<String> args) async {
     // Scrolls down 300px.
     await driver.scroll(find.byType('Scaffold'), 0.0, -300.0,
         const Duration(milliseconds: 300));
-    await Future<Null>.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     // Scrolls up 300px.
     await driver.scroll(find.byType('Scaffold'), 300.0, 300.0,
         const Duration(milliseconds: 300));
