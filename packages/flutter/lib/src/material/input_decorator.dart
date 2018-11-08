@@ -2106,7 +2106,7 @@ class InputDecoration {
   /// of the [Text] widget used to display the error.
   final int errorMaxLines;
 
-  /// Whether the label on focus.
+  /// Whether the label floats on focus.
   ///
   /// If this is false, the placeholder disappears when the input has focus or
   /// inputted text.
