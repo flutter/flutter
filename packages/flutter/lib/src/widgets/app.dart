@@ -82,19 +82,18 @@ class WidgetsApp extends StatefulWidget {
   ///  _not_ contain an entry for `'/'`.  Conversely, if [home] is omitted, [routes]
   /// _must_ contain an entry for `'/'`.
   ///
-  /// If [home] or [routes] are not null, then either the [pageRoutebuilder] or
-  /// the [builder] parameter is required. These parameters will be used so
-  /// that the default routing implementation in [WidgetsApp] can wrap routes in
-  /// appropriate transitions. For example, [MaterialApp] will provide a
-  /// [pageRoutebuilder] that creates Material compliant hero animations between
-  /// routes, whereas the [CupertinoApp] provides Cupertino compliant hero
-  /// animations. Other implementations can provide other custom transitions here.
+  /// If [home] or [routes] are not null, the routing implementation needs to know how
+  /// appropriately build [PageRoutes]. This can be achieved by supplying the 
+  /// [pageRouteBuilder] parameter or the [builder] parameter, or both.  The 
+  /// [pageRouteBuilder] is more appropriate if you will only be building [Route]
+  /// derived classes, such as a [MaterialPageRoute] or [CupertinoPageRoute]. 
+  /// 
+  /// The [builder] offers a more generic approach. It is designed to provide the ability
+  /// to wrap the visible content of the app in some other widget.  If it is specified,
+  /// it will override anything in the [pageRouteBuilder], but it will not get the
+  /// [RouteSettings] information that [pageRouteBuilder] gets.
   ///
-  /// The [builder] parameter is optional in all cases. It can be used to ensure that
-  /// all route entries get wrapped in another widget. It is invoked during the build
-  /// phase of this widget.  If it is specified,
-  ///
-  /// It is also possible to provide a custom implementation of routing via the
+  /// [WidgetsApp] is also possible to provide a custom implementation of routing via the
   /// [onGeneratedRoute] and [onUnknownRoute] parameters. These parameters correspond
   /// to [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute]. If [home], [routes],
   /// and [builder] are null, or if they fail to create a requested route,
