@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:vm_service_client/vm_service_client.dart';
+import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../src/common.dart';
 import 'test_data/hot_reload_project.dart';
@@ -55,10 +55,10 @@ void main() {
 
     test('reload hits breakpoints after reload', () async {
       await _flutter.run(withDebugger: true);
-      final VMIsolate isolate = await _flutter.breakAt(
+      final Isolate isolate = await _flutter.breakAt(
           _project.breakpointUri,
           _project.breakpointLine);
-      expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
+      expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
     });
   }, timeout: const Timeout.factor(6));
 }
