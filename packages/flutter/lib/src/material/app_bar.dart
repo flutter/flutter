@@ -89,7 +89,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// AppBar(
@@ -113,6 +113,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -169,7 +170,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// there's no [Drawer] and the parent [Navigator] can go back, the [AppBar]
   /// will use a [BackButton] that calls [Navigator.maybePop].
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// The following code shows how the drawer button could be manually specified
   /// instead of relying on [automaticallyImplyLeading]:
@@ -187,6 +188,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///   ),
   /// )
   /// ```
+  /// {@end-tool}
   ///
   /// The [Builder] is used in this example to ensure that the `context` refers
   /// to that part of the subtree. That way this code snippet can be used even
@@ -237,7 +239,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///       ),
   ///     ],
   ///   ),
-  /// );
+  /// )
   /// ```
   /// {@end-tool}
   final List<Widget> actions;
@@ -722,7 +724,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// [actions], above the [bottom] (if any). If a [flexibleSpace] widget is
 /// specified then it is stacked behind the toolbar and the bottom widget.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This is an example that could be included in a [CustomScrollView]'s
 /// [CustomScrollView.slivers] list:
@@ -742,6 +744,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///   ]
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -820,7 +823,7 @@ class SliverAppBar extends StatefulWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// Scaffold(
@@ -844,6 +847,7 @@ class SliverAppBar extends StatefulWidget {
   ///   ),
   /// )
   /// ```
+  /// {@end-tool}
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will

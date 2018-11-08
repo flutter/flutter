@@ -132,7 +132,7 @@ class Directionality extends InheritedWidget {
 /// buffer. For the value 0.0, the child is simply not painted at all. For the
 /// value 1.0, the child is painted immediately without an intermediate buffer.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example shows some [Text] when the `_visible` member field is true, and
 /// hides it when it is false:
@@ -143,6 +143,7 @@ class Directionality extends InheritedWidget {
 ///   child: const Text('Now you see me, now you don\'t!'),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// This is more efficient than adding and removing the child widget from the
 /// tree on demand.
@@ -158,7 +159,7 @@ class Directionality extends InheritedWidget {
 /// If only a single [Image] needs to be composited with an opacity between 0.0
 /// and 1.0, it's much faster to directly use [Image].
 ///
-/// ### Sample code
+/// {@tool sample}
 ///
 /// This example draws an [Image] with 0.5 opacity:
 ///
@@ -169,6 +170,7 @@ class Directionality extends InheritedWidget {
 ///   colorBlendMode: BlendMode.modulate
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -248,7 +250,7 @@ class Opacity extends SingleChildRenderObjectWidget {
 /// For example, [ShaderMask] can be used to gradually fade out the edge
 /// of a child by using a [new ui.Gradient.linear] mask.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example makes the text look like it is on fire:
 ///
@@ -265,6 +267,7 @@ class Opacity extends SingleChildRenderObjectWidget {
 ///   child: const Text('I’m burning the memories'),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -378,7 +381,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 /// [isComplex] and [willChange] are hints to the compositor's raster cache
 /// and must not be null.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example shows how the sample custom painter shown at [CustomPainter]
 /// could be used in a [CustomPaint] widget to display a background to some
@@ -399,6 +402,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -493,7 +497,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 ///  * [OverflowBox]
 ///  * [SizedOverflowBox]
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// For example, by combining a [ClipRect] with an [Align], one can show just
 /// the top half of an [Image]:
@@ -507,6 +511,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -887,7 +892,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 
 /// A widget that applies a transformation before painting its child.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example rotates and skews an orange box containing text, keeping the
 /// top right corner pinned to its original position.
@@ -906,6 +911,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -935,7 +941,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The `angle` argument must not be null. It gives the rotation in clockwise
   /// radians.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// This example rotates an orange box containing text around its center by
   /// fifteen degrees.
@@ -950,6 +956,7 @@ class Transform extends SingleChildRenderObjectWidget {
   ///   ),
   /// )
   /// ```
+  /// {@end-tool}
   Transform.rotate({
     Key key,
     @required double angle,
@@ -964,7 +971,7 @@ class Transform extends SingleChildRenderObjectWidget {
   ///
   /// The `offset` argument must not be null. It specifies the translation.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// This example shifts the silver-colored child down by fifteen pixels.
   ///
@@ -978,6 +985,7 @@ class Transform extends SingleChildRenderObjectWidget {
   ///   ),
   /// )
   /// ```
+  /// {@end-tool}
   Transform.translate({
     Key key,
     @required Offset offset,
@@ -996,7 +1004,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The [alignment] controls the origin of the scale; by default, this is
   /// the center of the box.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// This example shrinks an orange box containing text such that each dimension
   /// is half the size it would otherwise be.
@@ -1011,6 +1019,7 @@ class Transform extends SingleChildRenderObjectWidget {
   ///   ),
   /// )
   /// ```
+  /// {@end-tool}
   Transform.scale({
     Key key,
     @required double scale,
@@ -1327,7 +1336,7 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 /// this object applies its rotation prior to layout, which means the entire
 /// rotated box consumes only as much space as required by the rotated child.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This snippet rotates the child (some [Text]) so that it renders from bottom
 /// to top, like an axis label on a graph:
@@ -1338,6 +1347,7 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 ///   child: const Text('Hello World!'),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1375,7 +1385,7 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 /// size. Padding then sizes itself to its child's size, inflated by the
 /// padding, effectively creating empty space around the child.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This snippet indents the child (a [Card] with some [Text]) by eight pixels
 /// in each direction:
@@ -1386,6 +1396,7 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 ///   child: const Card(child: Text('Hello World!')),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ## Design discussion
 ///
@@ -1714,7 +1725,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// sizes itself to fit the parent. It is equivalent to setting [width] and
 /// [height] to [double.infinity].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This snippet makes the child widget (a [Card] with some [Text]) have the
 /// exact size 200x300, parental constraints permitting:
@@ -1726,6 +1737,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///   child: const Card(child: Text('Hello World!')),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1821,7 +1833,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 /// pixels, you could use `const BoxConstraints(minHeight: 50.0)` as the
 /// [constraints].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This snippet makes the child widget (a [Card] with some [Text]) fill the
 /// parent, by applying [BoxConstraints.expand] constraints:
@@ -1832,6 +1844,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 ///   child: const Card(child: Text('Hello World!')),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// The same behavior can be obtained using the [new SizedBox.expand] widget.
 ///
@@ -3545,7 +3558,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// If you only have one child, then consider using [Align] or [Center] to
 /// position the child.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example divides the available space into three (horizontally), and
 /// places text centered in the first two cells and the Flutter logo centered in
@@ -3569,6 +3582,7 @@ class Flex extends MultiChildRenderObjectWidget {
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ## Troubleshooting
 ///
@@ -3581,6 +3595,8 @@ class Flex extends MultiChildRenderObjectWidget {
 /// children. The row reports this by drawing a yellow and black striped
 /// warning box on the edge that is overflowing. If there is room on the outside
 /// of the row, the amount of overflow is printed in red lettering.
+///
+/// {@tool sample}
 ///
 /// #### Story time
 ///
@@ -3595,6 +3611,7 @@ class Flex extends MultiChildRenderObjectWidget {
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// The row first asks its first child, the [FlutterLogo], to lay out, at
 /// whatever size the logo would like. The logo is friendly and happily decides
@@ -3608,6 +3625,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// have no more room available for my other children!", and gets angry and
 /// sprouts a yellow and black strip.
 ///
+/// {@tool sample}
 /// The fix is to wrap the second child in an [Expanded] widget, which tells the
 /// row that the child should be given the remaining room:
 ///
@@ -3616,12 +3634,13 @@ class Flex extends MultiChildRenderObjectWidget {
 ///   children: <Widget>[
 ///     const FlutterLogo(),
 ///     const Expanded(
-///       child: const Text('Flutter\'s hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android.'),
+///       child: Text('Flutter\'s hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android.'),
 ///     ),
 ///     const Icon(Icons.sentiment_very_satisfied),
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// Now, the row first asks the logo to lay out, and then asks the _icon_ to lay
 /// out. The [Icon], like the logo, is happy to take on a reasonable size (also
@@ -3728,7 +3747,7 @@ class Row extends Flex {
 /// If you only have one child, then consider using [Align] or [Center] to
 /// position the child.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example uses a [Column] to arrange three widgets vertically, the last
 /// being made to fill all the remaining space.
@@ -3747,6 +3766,8 @@ class Row extends Flex {
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// In the sample above, the text and the logo are centered on each line. In the
 /// following example, the [crossAxisAlignment] is set to
@@ -3769,6 +3790,7 @@ class Row extends Flex {
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ## Troubleshooting
 ///
@@ -4022,7 +4044,7 @@ class Expanded extends Flexible {
 /// The runs themselves are then positioned in the cross axis according to the
 /// [runSpacing] and [runAlignment].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example renders some [Chip]s representing four contacts in a [Wrap] so
 /// that they flow across lines as necessary.
@@ -4051,6 +4073,7 @@ class Expanded extends Flexible {
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -4349,7 +4372,7 @@ class Flow extends MultiChildRenderObjectWidget {
 /// spans with the default text style while still allowing specified styles per
 /// span.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// RichText(
@@ -4363,6 +4386,7 @@ class Flow extends MultiChildRenderObjectWidget {
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -4701,7 +4725,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// For example, used by [Image] to determine which bundle to use for
 /// [AssetImage]s if no bundle is specified explicitly.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This can be used in tests to override what the current asset bundle is, thus
 /// allowing specific resources to be injected into the widget under test.
@@ -4718,6 +4742,8 @@ class RawImage extends LeafRenderObjectWidget {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// ...then wrap the widget under test with a [DefaultAssetBundle] using this
 /// bundle implementation:
@@ -4732,6 +4758,7 @@ class RawImage extends LeafRenderObjectWidget {
 ///   ),
 /// );
 /// ```
+/// {@end-tool}
 ///
 /// Assuming that `TestWidget` uses [DefaultAssetBundle.of] to obtain its
 /// [AssetBundle], it will now see the [TestAssetBundle]'s "Hello World!" data
@@ -5575,7 +5602,7 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 /// to manually provide semanitc indexes if not all child of the scrollable
 /// contribute semantics.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// The example below handles spacers in a scrollable that don't contribute
 /// semantics. The automatic indexes would give the spaces a semantic index,
@@ -5594,6 +5621,7 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///   * [CustomScrollView], for an explaination of index semantics.
