@@ -167,10 +167,10 @@ String generateTranslationBundles() {
   // the script sublcass (e.g. `MaterialLocalizationZhHant`) and the generated
   // subclass will also contain the script code (e.g. `MaterialLocalizationZhHantTW`).
 
-  // When scriptCodes are not defined for languages that uses scriptCode to distinguish
-  // between significantly differing scripts, we maintain the assumeScriptCode function
-  // that manually applies scriptCodes to the locale in question. We then generate the
-  // script classes based on the first locale that we assume to use the script.
+  // When scriptCodes are not defined for languages that use scriptCodes to distinguish
+  // between significantly differing scripts, we assume the scriptCodes in the
+  // [LocaleInfo.fromString] factory and add it to the [LocaleInfo]. We then generate
+  // the script classes based on the first locale that we assume to use the script.
 
   final List<String> allKeys = allResourceIdentifiers.toList()..sort();
   final List<String> languageCodes = languageToLocales.keys.toList()..sort();

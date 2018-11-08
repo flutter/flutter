@@ -52,25 +52,19 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     if (assume && scriptCode == null) {
       switch (languageCode) {
         case 'zh': {
+          if (countryCode == null) {
+            scriptCode = 'Hans';
+          }
           switch (countryCode) {
             case 'CN':
-              scriptCode = 'Hans';
-              break;
             case 'SG':
               scriptCode = 'Hans';
               break;
             case 'TW':
-              scriptCode = 'Hant';
-              break;
             case 'HK':
-              scriptCode = 'Hant';
-              break;
             case 'MO':
               scriptCode = 'Hant';
               break;
-          }
-          if (countryCode == null) {
-            scriptCode = 'Hans';
           }
           break;
         }
@@ -107,13 +101,6 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   final String countryCode;
   final int length;             // The number of fields. Ranges from 1-3.
   final String originalString;  // Original un-parsed locale string.
-
-  /// Parses a locale string into component codes, and returns them in a list
-  /// where the first element is the languageCode, the second is the scriptCode,
-  /// and the third is the countryCode.
-  static List<String> parseLocaleString(String locale) {
-
-  }
 
   @override
   bool operator ==(Object other) {
