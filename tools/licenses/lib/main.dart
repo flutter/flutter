@@ -1903,8 +1903,8 @@ class RepositoryVulkanDirectory extends RepositoryDirectory {
 
   @override
   bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != 'doc' // documentation
-        && entry.name != 'out' // documentation
+    // Flutter only uses the headers in the include directory.
+    return entry.name == 'include'
         && super.shouldRecurse(entry);
   }
 

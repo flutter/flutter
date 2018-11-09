@@ -1,4 +1,4 @@
-Signature: fedb7db24a1a6d3e75988ebfaa58fe5c
+Signature: fc569d77237ef4247eb7a93bb2c989be
 
 UNUSED LICENSES:
 
@@ -466,8 +466,19 @@ FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/qu
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/time/util.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/strings.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/time.dart
-FILE: ../../../third_party/vulkan/src/vulkan/vk_platform.h
-FILE: ../../../third_party/vulkan/src/vulkan/vulkan.h
+FILE: ../../../third_party/vulkan/include/vulkan/vk_platform.h
+FILE: ../../../third_party/vulkan/include/vulkan/vulkan.h
+FILE: ../../../third_party/vulkan/include/vulkan/vulkan_android.h
+FILE: ../../../third_party/vulkan/include/vulkan/vulkan_core.h
+FILE: ../../../third_party/vulkan/include/vulkan/vulkan_fuchsia.h
+FILE: ../../../third_party/vulkan/include/vulkan/vulkan_ios.h
+FILE: ../../../third_party/vulkan/include/vulkan/vulkan_macos.h
+FILE: ../../../third_party/vulkan/include/vulkan/vulkan_vi.h
+FILE: ../../../third_party/vulkan/include/vulkan/vulkan_wayland.h
+FILE: ../../../third_party/vulkan/include/vulkan/vulkan_win32.h
+FILE: ../../../third_party/vulkan/include/vulkan/vulkan_xcb.h
+FILE: ../../../third_party/vulkan/include/vulkan/vulkan_xlib.h
+FILE: ../../../third_party/vulkan/include/vulkan/vulkan_xlib_xrandr.h
 ----------------------------------------------------------------------------------------------------
 Apache License
 Version 2.0, January 2004

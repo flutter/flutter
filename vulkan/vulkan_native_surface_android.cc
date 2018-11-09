@@ -4,6 +4,8 @@
 
 #include "flutter/vulkan/vulkan_native_surface_android.h"
 
+#include <android/native_window.h>
+
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
 
 namespace vulkan {
