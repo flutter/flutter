@@ -127,7 +127,7 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
 }
 
 flow::ExternalViewEmbedder* IOSSurfaceSoftware::GetExternalViewEmbedder() {
-  if ([[[NSBundle mainBundle] objectForInfoDictionaryKey:@(kEmbeddedViewsPreview)] boolValue]) {
+  if (IsIosEmbeddedViewsPreviewEnabled()) {
     return this;
   } else {
     return nullptr;

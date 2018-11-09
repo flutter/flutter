@@ -11,6 +11,13 @@
 
 namespace shell {
 
+// The name of the Info.plist flag to enable the embedded iOS views preview.
+const char* const kEmbeddedViewsPreview = "io.flutter.embedded_views_preview";
+
+bool IsIosEmbeddedViewsPreviewEnabled() {
+  return [[[NSBundle mainBundle] objectForInfoDictionaryKey:@(kEmbeddedViewsPreview)] boolValue];
+}
+
 IOSSurface::IOSSurface(FlutterPlatformViewsController* platform_views_controller)
     : platform_views_controller_(platform_views_controller) {}
 
