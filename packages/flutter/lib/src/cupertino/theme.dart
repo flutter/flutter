@@ -161,8 +161,7 @@ class _CupertinoThemeInheritedData extends CupertinoThemeData {
 class CupertinoThemeData extends Diagnosticable {
   /// Create a [CupertinoTheme] styling specification.
   ///
-  /// Unspecified parameters can be derived from another parameter or default
-  /// to an iOS default style.
+  /// Unspecified parameters default to a reasonable iOS default style.
   const CupertinoThemeData({
     Brightness brightness,
     Color primaryColor,
@@ -216,7 +215,8 @@ class CupertinoThemeData extends Diagnosticable {
   /// A color used on interactive elements of the theme.
   ///
   /// This color is generally used on text and icons in buttons and tappable
-  /// elements. Defaults to blue or orange when [brightness] is light or dark.
+  /// elements. Defaults to [CupertinoColors.activeBlue] or
+  /// [CupertinoColors.activeOrange] when [brightness] is light or dark.
   ///
   /// If coming from a Material [Theme] and unspecified, [primaryColor] will be
   /// derived from the Material [ThemeData]'s `colorScheme.primary`. However, in
@@ -232,10 +232,10 @@ class CupertinoThemeData extends Diagnosticable {
   }
 
   final Color _primaryContrastingColor;
-  /// A color used on content that contrast against a [primaryColor] background.
+  /// A color used for content that must contrast against a [primaryColor] background.
   ///
-  /// This color is used on text and icons against a filled [CupertinoButton]
-  /// whose background is the [primaryColor] for instance.
+  /// For example, this color is used for a [CupertinoButton]'s text and icons
+  /// when the button's background is [primaryColor].
   ///
   /// If coming from a Material [Theme] and unspecified, [primaryContrastingColor]
   /// will be derived from the Material [ThemeData]'s `colorScheme.onPrimary`.
@@ -266,8 +266,8 @@ class CupertinoThemeData extends Diagnosticable {
   final Color _barBackgroundColor;
   /// Background color of the top nav bar and bottom tab bar.
   ///
-  /// Defaults to a light gray or a dark gray translucid color depending
-  /// on the [brightness] when unspecified.
+  /// Defaults to a light gray or a dark gray translucent color depending
+  /// on the [brightness].
   ///
   /// Reading this property from [CupertinoTheme.of] will create a dependency
   /// from the [BuildContext] to changes in this property.
@@ -279,9 +279,7 @@ class CupertinoThemeData extends Diagnosticable {
   final Color _scaffoldBackgroundColor;
   /// Background color of the scaffold.
   ///
-  /// Defaults to white or black depending on the [brightness] if unspecified,
-  /// including [brightness] from a Material [ThemeData] if coming from a
-  /// Material [Theme].
+  /// Defaults to white or black depending on the [brightness].
   ///
   /// Reading this property from [CupertinoTheme.of] will create a dependency
   /// from the [BuildContext] to changes in this property.
@@ -293,9 +291,8 @@ class CupertinoThemeData extends Diagnosticable {
   final Color _tableBackgroundColor;
   /// Background color of a table view behind cell groups.
   ///
-  /// Defaults to a light or dark gray on the [brightness] if unspecified,
-  /// including [brightness] from a Material [ThemeData] if coming from a
-  /// Material [Theme].
+  /// Defaults to a [CupertinoColors.extraLightBackgroundGray] or
+  /// [CupertinoColors.darkBackgroundGray] depending on the [brightness].
   ///
   /// Reading this property from [CupertinoTheme.of] will create a dependency
   /// from the [BuildContext] to changes in this property.
@@ -324,7 +321,7 @@ class CupertinoThemeData extends Diagnosticable {
   /// derived values. For instance, if the current [primaryColor] is implied
   /// to be [CupertinoColors.activeOrange] due to the current [brightness],
   /// copying with a different [brightness] will also change the copy's
-  /// derived [primaryColor].
+  /// implied [primaryColor].
   CupertinoThemeData copyWith({
     Brightness brightness,
     Color primaryColor,
