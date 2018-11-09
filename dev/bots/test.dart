@@ -230,7 +230,7 @@ Future<void> _pubRunTest(
   String testPath,
   bool enableFlutterToolAsserts = false
 }) {
-  final List<String> args = <String>['run', 'test', '-rcompact'];
+  final List<String> args = <String>['run', 'test', '-rexpanded', '--verbose-trace'];
   final int concurrency = math.max(1, Platform.numberOfProcessors - 1);
   args.add('-j$concurrency');
   if (!hasColor)
