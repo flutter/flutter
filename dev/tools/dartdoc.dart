@@ -313,7 +313,7 @@ Future<File> precompileSnippetsTool(
     snapshotPath.deleteSync();
   }
 
-  ProcessWrapper process = ProcessWrapper(await Process.start(
+  final ProcessWrapper process = ProcessWrapper(await Process.start(
     pubExecutable,
     <String>['get'],
     workingDirectory: kSnippetsRoot,
@@ -331,7 +331,7 @@ Future<File> precompileSnippetsTool(
   final File trainingFile = File(path.join(tempDir.path, 'snippet_training'));
   trainingFile.writeAsStringSync('```dart\nvoid foo(){}\n```');
   try {
-    ProcessResult result = Process.runSync(Platform.resolvedExecutable, <String>[
+    final ProcessResult result = Process.runSync(Platform.resolvedExecutable, <String>[
       '--snapshot=${snapshotPath.absolute.path}',
       '--snapshot_kind=app-jit',
       path.join(
