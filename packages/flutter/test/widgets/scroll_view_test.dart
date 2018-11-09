@@ -182,7 +182,7 @@ void main() {
   });
 
   testWidgets('Vertical CustomScrollViews are primary by default', (WidgetTester tester) async {
-    final CustomScrollView view = CustomScrollView(scrollDirection: Axis.vertical);
+    const CustomScrollView view = CustomScrollView(scrollDirection: Axis.vertical);
     expect(view.primary, isTrue);
   });
 
@@ -200,7 +200,7 @@ void main() {
   });
 
   testWidgets('Horizontal CustomScrollViews are non-primary by default', (WidgetTester tester) async {
-    final CustomScrollView view = CustomScrollView(scrollDirection: Axis.horizontal);
+    const CustomScrollView view = CustomScrollView(scrollDirection: Axis.horizontal);
     expect(view.primary, isFalse);
   });
 
@@ -249,7 +249,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: PrimaryScrollController(
           controller: primaryScrollController,
-          child: CustomScrollView(primary: true),
+          child: const CustomScrollView(primary: true),
         ),
       ),
     );

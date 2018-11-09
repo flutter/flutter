@@ -7,6 +7,9 @@ import 'package:flutter/painting.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 /// A one device pixel thick horizontal line, with padding on either
 /// side.
 ///

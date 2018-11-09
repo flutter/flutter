@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:ui' as ui show window;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'banner.dart';
@@ -769,6 +770,53 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   // BUILDER
 
+  bool _debugCheckLocalizations(Locale appLocale) {
+    assert(() {
+      final Set<Type> unsupportedTypes =
+        _localizationsDelegates.map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type).toSet();
+      for (LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
+        if (!unsupportedTypes.contains(delegate.type))
+          continue;
+        if (delegate.isSupported(appLocale))
+          unsupportedTypes.remove(delegate.type);
+      }
+      if (unsupportedTypes.isEmpty)
+        return true;
+
+      // Currently the Cupertino library only provides english localizations.
+      // Remove this when https://github.com/flutter/flutter/issues/23847
+      // is fixed.
+      if (listEquals(unsupportedTypes.map((Type type) => type.toString()).toList(), <String>['CupertinoLocalizations']))
+        return true;
+
+      final StringBuffer message = StringBuffer();
+      message.writeln('\u2550' * 8);
+      message.writeln(
+        'Warning: This application\'s locale, $appLocale, is not supported by all of its\n'
+        'localization delegates.'
+      );
+      for (Type unsupportedType in unsupportedTypes) {
+        // Currently the Cupertino library only provides english localizations.
+        // Remove this when https://github.com/flutter/flutter/issues/23847
+        // is fixed.
+        if (unsupportedType.toString() == 'CupertinoLocalizations')
+          continue;
+        message.writeln(
+          '> A $unsupportedType delegate that supports the $appLocale locale was not found.'
+        );
+      }
+      message.writeln(
+        'See https://flutter.io/tutorials/internationalization/ for more\n'
+        'information about configuring an app\'s locale, supportedLocales,\n'
+        'and localizationsDelegates parameters.'
+      );
+      message.writeln('\u2550' * 8);
+      debugPrint(message.toString());
+      return true;
+    }());
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget navigator;
@@ -874,12 +922,16 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       );
     }
 
+    final Locale appLocale = widget.locale != null
+      ? _resolveLocale(widget.locale, widget.supportedLocales)
+      : _locale;
+
+    assert(_debugCheckLocalizations(appLocale));
+
     return MediaQuery(
       data: MediaQueryData.fromWindow(ui.window),
       child: Localizations(
-        locale: widget.locale != null
-          ? _resolveLocale(widget.locale, widget.supportedLocales)
-          : _locale,
+        locale: appLocale,
         delegates: _localizationsDelegates.toList(),
         child: title,
       ),

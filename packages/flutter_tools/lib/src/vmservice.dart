@@ -951,7 +951,7 @@ class VM extends ServiceObjectOwner {
 
   Future<void> refreshViews() {
     if (!isFlutterEngine)
-      return null;
+      return Future<void>.value();
     _viewCache.clear();
     // Send one per-application request that refreshes all views in the app.
     return vmService.vm.invokeRpc<ServiceObject>('_flutter.listViews', timeout: kLongRequestTimeout);

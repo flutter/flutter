@@ -66,6 +66,14 @@ class UpdatePackagesCommand extends FlutterCommand {
         negatable: false,
       )
       ..addFlag(
+        'consumer-only',
+        help: 'Only prints the dependency graph that is the transitive closure'
+              'that a consumer of the Flutter SDK will observe (When combined '
+              'with transitive-closure)',
+        defaultsTo: false,
+        negatable: false,
+      )
+      ..addFlag(
         'verify-only',
         help: 'verifies the package checksum without changing or updating deps',
         defaultsTo: false,
@@ -107,6 +115,24 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isPrintPaths = argResults['paths'];
     final bool isPrintTransitiveClosure = argResults['transitive-closure'];
     final bool isVerifyOnly = argResults['verify-only'];
+    final bool isConsumerOnly = argResults['consumer-only'];
+
+    // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations).
+    if (isConsumerOnly) {
+      if (!isPrintTransitiveClosure) {
+        throwToolExit(
+          '--consumer-only can only be used with the --transitive-closure flag'
+        );
+      }
+      // Only retain flutter, flutter_test, flutter_driver, and flutter_localizations.
+      const List<String> consumerPackages = <String>['flutter', 'flutter_test', 'flutter_driver', 'flutter_localizations'];
+      // ensure we only get flutter/packages
+      packages.retainWhere((Directory directory) {
+        return consumerPackages.any((String package) {
+          return directory.path.endsWith('packages${fs.path.separator}$package');
+        });
+      });
+    }
 
     // The dev/integration_tests/android_views integration test depends on an assets
     // package that is in the goldens repository. We need to make sure that the goldens

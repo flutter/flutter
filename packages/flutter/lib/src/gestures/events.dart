@@ -115,6 +115,7 @@ abstract class PointerEvent {
     this.radiusMax = 0.0,
     this.orientation = 0.0,
     this.tilt = 0.0,
+    this.platformData = 0,
     this.synthesized = false,
   });
 
@@ -268,6 +269,9 @@ abstract class PointerEvent {
   /// the stylus is flat on that surface).
   final double tilt;
 
+  /// Opaque platform-specific data associated with the event.
+  final int platformData;
+
   /// Set if the event was synthesized by Flutter.
   ///
   /// We occasionally synthesize PointerEvents that aren't exact translations
@@ -310,6 +314,7 @@ abstract class PointerEvent {
              'radiusMax: $radiusMax, '
              'orientation: $orientation, '
              'tilt: $tilt, '
+             'platformData: $platformData, '
              'synthesized: $synthesized'
            ')';
   }
@@ -520,6 +525,7 @@ class PointerMoveEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
+    int platformData = 0,
     bool synthesized = false,
   }) : super(
     timeStamp: timeStamp,
@@ -543,6 +549,7 @@ class PointerMoveEvent extends PointerEvent {
     radiusMax: radiusMax,
     orientation: orientation,
     tilt: tilt,
+    platformData: platformData,
     synthesized: synthesized,
   );
 }

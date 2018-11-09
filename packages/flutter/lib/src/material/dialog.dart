@@ -20,6 +20,7 @@ import 'theme.dart';
 
 // Examples can assume:
 // enum Department { treasury, state }
+// BuildContext context;
 
 /// A material design dialog.
 ///

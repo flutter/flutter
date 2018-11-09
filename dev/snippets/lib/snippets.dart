@@ -55,9 +55,7 @@ class SnippetGenerator {
   /// "description" injection into a comment. Only used for
   /// [SnippetType.application] snippets.
   String interpolateTemplate(List<_ComponentTuple> injections, String template) {
-    final String injectionMatches =
-        injections.map<String>((_ComponentTuple tuple) => RegExp.escape(tuple.name)).join('|');
-    final RegExp moustacheRegExp = RegExp('{{($injectionMatches)}}');
+    final RegExp moustacheRegExp = RegExp('{{([^}]+)}}');
     return template.replaceAllMapped(moustacheRegExp, (Match match) {
       if (match[1] == 'description') {
         // Place the description into a comment.
@@ -77,9 +75,13 @@ class SnippetGenerator {
         }
         return description.join('\n').trim();
       } else {
+        // If the match isn't found in the injections, then just remove the
+        // moustache reference, since we want to allow the sections to be
+        // "optional" in the input: users shouldn't be forced to add an empty
+        // "```dart preamble" section if that section would be empty.
         return injections
-            .firstWhere((_ComponentTuple tuple) => tuple.name == match[1])
-            .mergedContent;
+            .firstWhere((_ComponentTuple tuple) => tuple.name == match[1], orElse: () => null)
+            ?.mergedContent ?? '';
       }
     }).trim();
   }
@@ -103,17 +105,11 @@ class SnippetGenerator {
     if (result.length > 3) {
       result.removeRange(result.length - 3, result.length);
     }
-    String formattedCode;
-    try {
-      formattedCode = formatter.format(result.join('\n'));
-    } on FormatterException catch (exception) {
-      errorExit('Unable to format snippet code: $exception');
-    }
     final Map<String, String> substitutions = <String, String>{
       'description': injections
           .firstWhere((_ComponentTuple tuple) => tuple.name == 'description')
           .mergedContent,
-      'code': formattedCode,
+      'code': result.join('\n'),
     }..addAll(type == SnippetType.application
         ? <String, String>{
             'id':
@@ -182,7 +178,7 @@ class SnippetGenerator {
   /// The [id] is a string ID to use for the output file, and to tell the user
   /// about in the `flutter create` hint. It must not be null if the [type] is
   /// [SnippetType.application].
-  String generate(File input, SnippetType type, {String template, String id}) {
+  String generate(File input, SnippetType type, {String template, String id, File output}) {
     assert(template != null || type != SnippetType.application);
     assert(id != null || type != SnippetType.application);
     assert(input != null);
@@ -207,11 +203,14 @@ class SnippetGenerator {
         try {
           app = formatter.format(app);
         } on FormatterException catch (exception) {
+          stderr.write('Code to format:\n$app\n');
           errorExit('Unable to format snippet app template: $exception');
         }
 
         snippetData.add(_ComponentTuple('app', app.split('\n')));
-        getOutputFile(id).writeAsStringSync(app);
+        final File outputFile = output ?? getOutputFile(id);
+        stderr.writeln('Writing to ${outputFile.absolute.path}');
+        outputFile.writeAsStringSync(app);
         break;
       case SnippetType.sample:
         break;

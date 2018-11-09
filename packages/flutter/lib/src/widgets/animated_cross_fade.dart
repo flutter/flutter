@@ -10,6 +10,9 @@ import 'framework.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
+// Examples can assume:
+// bool _first;
+
 /// Specifies which of two children to show. See [AnimatedCrossFade].
 ///
 /// The child that is shown will fade in, while the other will fade out.
