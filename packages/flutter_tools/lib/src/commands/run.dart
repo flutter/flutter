@@ -16,6 +16,7 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../time.dart';
 import 'daemon.dart';
 
 // TODO(flutter/flutter#23031): Test this.
@@ -300,7 +301,7 @@ class RunCommand extends RunCommandBase {
       } catch (error) {
         throwToolExit(error.toString());
       }
-      final DateTime appStartedTime = clock.now();
+      final DateTime appStartedTime = systemClock.now();
       final int result = await app.runner.waitForAppToFinish();
       if (result != 0)
         throwToolExit(null, exitCode: result);
@@ -391,7 +392,7 @@ class RunCommand extends RunCommandBase {
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
     appStartedTimeRecorder.future.then<void>( // ignore: unawaited_futures
-      (_) { appStartedTime = clock.now(); }
+      (_) { appStartedTime = systemClock.now(); }
     );
 
     final int result = await runner.run(
