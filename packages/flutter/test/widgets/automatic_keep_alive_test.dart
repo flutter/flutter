@@ -548,7 +548,7 @@ void main() {
   testWidgets('AutomaticKeepAlive with SliverKeepAliveWidget', (WidgetTester tester) async {
     RenderSliverMultiBoxAdaptorAlt alternate = RenderSliverMultiBoxAdaptorAlt();
     RenderBox child = RenderBoxKeepAlive();
-    alternate.add(child);
+    alternate.insert(child);
 
     AlwaysKeepAliveRenderBoxState state = tester.state(find.byType(RenderBoxKeepAlive));
     expect(state.wantKeepAlive, true);
