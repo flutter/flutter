@@ -1213,7 +1213,6 @@ class _CustomPageRoute<T> extends PageRoute<T> {
 }
 
 class TestHomePage extends StatefulWidget {
-
   @override
   _TestHomePageState createState() => _TestHomePageState();
 }
@@ -1226,7 +1225,7 @@ class _TestHomePageState extends State<TestHomePage>
   void initState() {
     super.initState();
     animationDouble = AnimationController(
-        vsync: this, value: 1.0, duration: Duration(milliseconds: 250));
+        vsync: this, value: 1.0, duration: const Duration(milliseconds: 250));
   }
 
   @override
@@ -1248,49 +1247,22 @@ class _TestHomePageState extends State<TestHomePage>
         child: ListView(
           children: const <Widget>[
             ListTile(
-              title: Text("Test 1"),
+              title: Text('Test 1'),
             ),
             ListTile(
-              title: Text("Test 2"),
+              title: Text('Test 2'),
             ),
             ListTile(
-              title: Text("Test 3"),
+              title: Text('Test 3'),
             ),
             ListTile(
-              title: Text("Test 4"),
+              title: Text('Test 4'),
             ),
             ListTile(
-              title: Text("Test 5"),
+              title: Text('Test 5'),
             ),
             ListTile(
-              title: Text("Test 6"),
-            ),
-            ListTile(
-              title: Text("Test 7"),
-            ),
-            ListTile(
-              title: Text("Test 8"),
-            ),
-            ListTile(
-              title: Text("Test 9"),
-            ),
-            ListTile(
-              title: Text("Test 1"),
-            ),
-            ListTile(
-              title: Text("Test 2"),
-            ),
-            ListTile(
-              title: Text("Test 3"),
-            ),
-            ListTile(
-              title: Text("Test 4"),
-            ),
-            ListTile(
-              title: Text("Test 5"),
-            ),
-            ListTile(
-              title: Text("Test 6"),
+              title: Text('Test 6'),
             ),
           ],
         ),
