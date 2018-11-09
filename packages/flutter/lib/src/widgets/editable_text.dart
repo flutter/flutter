@@ -417,6 +417,11 @@ class EditableText extends StatefulWidget {
   /// How thick the cursor will be.
   ///
   /// Defaults to 2.0
+  ///
+  /// The cursor will draw under the text. The cursor width will extend
+  /// to the right of the boundary between characters for right-to-left text
+  /// and to the left for left-to-right text. Negative values may be used
+  /// to reverse this behavior.
   /// {@endtemplate}
   final double cursorWidth;
 
