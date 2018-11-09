@@ -21,6 +21,7 @@ import '../src/context.dart';
 void main() {
   group('iOS Workflow validation', () {
     MockIMobileDevice iMobileDevice;
+    MockIMobileDevice iMobileDeviceUninstalled;
     MockXcode xcode;
     MockProcessManager processManager;
     MockCocoaPods cocoaPods;
@@ -28,6 +29,7 @@ void main() {
 
     setUp(() {
       iMobileDevice = MockIMobileDevice();
+      iMobileDeviceUninstalled = MockIMobileDevice(isInstalled: false);
       xcode = MockXcode();
       processManager = MockProcessManager();
       cocoaPods = MockCocoaPods();
@@ -45,11 +47,13 @@ void main() {
       final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget(
         hasHomebrew: false,
         hasIosDeploy: false,
+        hasIDeviceInstaller: false,
+        iosDeployVersionText: '0.0.0',
       );
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.missing);
     }, overrides: <Type, Generator>{
-      IMobileDevice: () => iMobileDevice,
+      IMobileDevice: () => iMobileDeviceUninstalled,
       Xcode: () => xcode,
       CocoaPods: () => cocoaPods,
     });
@@ -110,7 +114,7 @@ void main() {
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when homebrew not installed', () async {
+    testUsingContext('Emits installed status when homebrew not installed, but not needed', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
@@ -119,7 +123,7 @@ void main() {
       when(xcode.isSimctlInstalled).thenReturn(true);
       final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget(hasHomebrew: false);
       final ValidationResult result = await workflow.validate();
-      expect(result.type, ValidationType.partial);
+      expect(result.type, ValidationType.installed);
     }, overrides: <Type, Generator>{
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,

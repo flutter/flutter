@@ -246,9 +246,11 @@ dart_tool("fuchsia_tools") {
 
   disable_analysis = true
 
+  non_dart_deps = [
+    "//third_party/flutter/frontend_server:frontend_server_tool",
+  ]
+
   deps = [
     ":flutter_tools",
   ]
-
-  # TODO(jonahwilliams): add a frontend_server as a non dart dep.
 }

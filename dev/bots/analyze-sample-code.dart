@@ -715,7 +715,7 @@ class Line {
   final String code;
 
   String toStringWithColumn(int column) {
-    if (column != null) {
+    if (column != null && indent != null) {
       return '$filename:$line:${column + indent}: $code';
     }
     return toString();

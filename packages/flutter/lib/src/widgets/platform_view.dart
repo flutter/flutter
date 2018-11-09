@@ -26,11 +26,13 @@ import 'framework.dart';
 /// constraints.
 /// {@endtemplate}
 ///
-/// AndroidView participates in Flutter's [GestureArena]s, and dispatches touch events to the
-/// Android view iff it won the arena. Specific gestures that should be dispatched to the Android
-/// view can be specified in [AndroidView.gestureRecognizers]. If
-/// [AndroidView.gestureRecognizers] is empty, the gesture will be dispatched to the Android
+/// {@template flutter.widgets.platformViews.gestures}
+/// The widget participates in Flutter's [GestureArena]s, and dispatches touch events to the
+/// platform view iff it won the arena. Specific gestures that should be dispatched to the platform
+/// view can be specified in the `gestureRecognizers` constructor parameter. If
+/// the set of gesture recognizers is empty, a gesture will be dispatched to the platform
 /// view iff it was not claimed by any other gesture recognizer.
+/// {@endtemplate}
 ///
 /// The Android view object is created using a [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html).
 /// Plugins can register platform view factories with [PlatformViewRegistry#registerViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewRegistry.html#registerViewFactory-java.lang.String-io.flutter.plugin.platform.PlatformViewFactory-).
@@ -103,13 +105,15 @@ class AndroidView extends StatefulWidget {
 
   /// Which gestures should be forwarded to the Android view.
   ///
+  /// {@template flutter.widgets.platformViews.gestureRecognizersDescHead}
   /// The gesture recognizers built by factories in this set participate in the gesture arena for
   /// each pointer that was put down on the widget. If any of these recognizers win the
   /// gesture arena, the entire pointer event sequence starting from the pointer down event
-  /// will be dispatched to the Android view.
+  /// will be dispatched to the platform view.
   ///
   /// When null, an empty set of gesture recognizer factories is used, in which case a pointer event sequence
-  /// will only be dispatched to the Android view if no other member of the arena claimed it.
+  /// will only be dispatched to the platform view if no other member of the arena claimed it.
+  /// {@endtemplate}
   ///
   /// For example, with the following setup vertical drags will not be dispatched to the Android
   /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
@@ -125,7 +129,7 @@ class AndroidView extends StatefulWidget {
   /// gesture recognizer factory in [gestureRecognizers] e.g:
   /// ```dart
   /// GestureDetector(
-  ///   onVerticalDragStart: (DragStartDetails d) {},
+  ///   onVerticalDragStart: (DragStartDetails details) {},
   ///   child: SizedBox(
   ///     width: 200.0,
   ///     height: 100.0,
@@ -141,7 +145,8 @@ class AndroidView extends StatefulWidget {
   /// )
   /// ```
   ///
-  /// An [AndroidView] can be configured to consume all pointers that were put down in its bounds
+  /// {@template flutter.widgets.platformViews.gestureRecognizersDescFoot}
+  /// A platform view can be configured to consume all pointers that were put down in its bounds
   /// by passing a factory for an [EagerGestureRecognizer] in [gestureRecognizers].
   /// [EagerGestureRecognizer] is a special gesture recognizer that immediately claims the gesture
   /// after a pointer down event.
@@ -149,7 +154,8 @@ class AndroidView extends StatefulWidget {
   /// The `gestureRecognizers` property must not contain more than one factory with the same [Factory.type].
   ///
   /// Changing `gestureRecognizers` results in rejection of any active gesture arenas (if the
-  /// Android view is actively participating in an arena).
+  /// platform view is actively participating in an arena).
+  /// {@endtemplate}
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
   // TODO(amirh): get a list of GestureRecognizers here.
   // https://github.com/flutter/flutter/issues/20953
@@ -180,7 +186,12 @@ class AndroidView extends StatefulWidget {
 ///
 /// {@macro flutter.widgets.platformViews.layout}
 ///
+/// {@macro flutter.widgets.platformViews.gestures}
+///
 /// {@macro flutter.widgets.platformViews.lifetime}
+///
+/// Construction of UIViews is done asynchronously, before the UIView is ready this widget paints
+/// nothing while maintaining the same layout constraints.
 class UiKitView extends StatefulWidget {
   /// Creates a widget that embeds an iOS view.
   ///
@@ -194,6 +205,7 @@ class UiKitView extends StatefulWidget {
     this.layoutDirection,
     this.creationParams,
     this.creationParamsCodec,
+    this.gestureRecognizers,
   }) : assert(viewType != null),
         assert(hitTestBehavior != null),
         assert(creationParams == null || creationParamsCodec != null),
@@ -226,6 +238,46 @@ class UiKitView extends StatefulWidget {
   ///
   /// This must not be null if [creationParams] is not null.
   final MessageCodec<dynamic> creationParamsCodec;
+
+  /// Which gestures should be forwarded to the UIKit view.
+  ///
+  /// {@macro flutter.widgets.platformViews.gestureRecognizersDescHead}
+  ///
+  /// For example, with the following setup vertical drags will not be dispatched to the UIKit
+  /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   child: UiKitView(
+  ///     viewType: 'webview',
+  ///   ),
+  /// )
+  /// ```
+  /// To get the [UiKitView] to claim the vertical drag gestures we can pass a vertical drag
+  /// gesture recognizer factory in [gestureRecognizers] e.g:
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   child: SizedBox(
+  ///     width: 200.0,
+  ///     height: 100.0,
+  ///     child: UiKitView(
+  ///       viewType: 'webview',
+  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+  ///         new Factory<OneSequenceGestureRecognizer>(
+  ///           () => new EagerGestureRecognizer(),
+  ///         ),
+  ///       ].toSet(),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// {@macro flutter.widgets.platformViews.gestureRecognizersDescFoot}
+  // We use OneSequenceGestureRecognizers as they support gesture arena teams.
+  // TODO(amirh): get a list of GestureRecognizers here.
+  // https://github.com/flutter/flutter/issues/20953
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
 
   @override
   State<UiKitView> createState() => _UiKitViewState();
@@ -316,7 +368,6 @@ class _AndroidViewState extends State<AndroidView> {
 }
 
 class _UiKitViewState extends State<UiKitView> {
-  int _id;
   UiKitViewController _controller;
   TextDirection _layoutDirection;
   bool _initialized = false;
@@ -330,8 +381,9 @@ class _UiKitViewState extends State<UiKitView> {
       return const SizedBox.expand();
     }
     return _UiKitPlatformView(
-      viewId: _id,
+      controller: _controller,
       hitTestBehavior: widget.hitTestBehavior,
+      gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
     );
   }
 
@@ -389,9 +441,9 @@ class _UiKitViewState extends State<UiKitView> {
   }
 
   Future<void> _createNewUiKitView() async {
-    _id = platformViewsRegistry.getNextPlatformViewId();
+    final int id = platformViewsRegistry.getNextPlatformViewId();
     final UiKitViewController controller = await PlatformViewsService.initUiKitView(
-      id: _id,
+      id: id,
       viewType: widget.viewType,
       layoutDirection: _layoutDirection,
       creationParams: widget.creationParams,
@@ -402,7 +454,7 @@ class _UiKitViewState extends State<UiKitView> {
       return;
     }
     if (widget.onPlatformViewCreated != null) {
-      widget.onPlatformViewCreated(_id);
+      widget.onPlatformViewCreated(id);
     }
     setState(() { _controller = controller; });
   }
@@ -442,26 +494,31 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
 class _UiKitPlatformView extends LeafRenderObjectWidget {
   const _UiKitPlatformView({
     Key key,
-    @required this.viewId,
+    @required this.controller,
     @required this.hitTestBehavior,
-  }) : assert(viewId != null),
+    @required this.gestureRecognizers,
+  }) : assert(controller != null),
        assert(hitTestBehavior != null),
+       assert(gestureRecognizers != null),
        super(key: key);
 
-  final int viewId;
+  final UiKitViewController controller;
   final PlatformViewHitTestBehavior hitTestBehavior;
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return RenderUiKitView(
-      viewId: viewId,
+      viewController: controller,
       hitTestBehavior: hitTestBehavior,
+      gestureRecognizers: gestureRecognizers,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderUiKitView renderObject) {
-    renderObject.viewId = viewId;
+    renderObject.viewController = controller;
     renderObject.hitTestBehavior = hitTestBehavior;
+    renderObject.updateGestureRecognizers(gestureRecognizers);
   }
 }

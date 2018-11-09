@@ -102,7 +102,7 @@ class FittedSizes {
 /// convenience function, [Alignment.inscribe], for resolving the sizes to
 /// rects, as shown in the example below.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This function paints a [dart:ui.Image] `image` onto the [Rect] `outputRect` on a
 /// [Canvas] `canvas`, using a [Paint] `paint`, applying the [BoxFit] algorithm
@@ -117,6 +117,7 @@ class FittedSizes {
 ///   canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

@@ -85,7 +85,7 @@ enum OverlayVisibilityMode {
 /// [controller]. For example, to set the initial value of the text field, use
 /// a [controller] that already contains some text such as:
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// class MyPrefilledText extends StatefulWidget {
@@ -108,6 +108,7 @@ enum OverlayVisibilityMode {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// The [controller] can also control the selection and composing region (and to
 /// observe changes to the text, selection, and composing region).
