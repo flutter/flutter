@@ -70,6 +70,10 @@ d  2          0 .
         exitCode = Completer<int>();
       });
 
+      tearDown(() {
+        exitCode.complete(0);
+      });
+
       testUsingContext('can be parsed for an app', () async {
         final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
         final DeviceLogReader reader = device.getLogReader(app: FuchsiaModulePackage(name: 'example_app'));
@@ -84,7 +88,6 @@ d  2          0 .
           '[2018-11-09 01:27:45.000] Flutter: Error doing thing',
           '[2018-11-09 01:30:12.000] Flutter: Did thing this time',
         ]);
-
       }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
         SystemClock: () => SystemClock.fixed(DateTime(2018, 11, 9, 1, 25, 45)),
@@ -94,16 +97,20 @@ d  2          0 .
         final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
         final DeviceLogReader reader = device.getLogReader(app: FuchsiaModulePackage(name: 'example_app'));
         final List<String> logLines = <String>[];
-        reader.logLines.listen(logLines.add);
+        final Completer<void> lock = Completer<void>();
+        reader.logLines.listen((String line) {
+          logLines.add(line);
+          lock.complete();
+        });
         expect(logLines, isEmpty);
 
         stdout.add(utf8.encode(exampleUtcLogs));
         await stdout.close();
+        await lock.future;
 
         expect(logLines, <String>[
           '[2018-11-09 01:30:12.000] Flutter: Did thing this time',
         ]);
-
       }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
         SystemClock: () => SystemClock.fixed(DateTime(2018, 11, 9, 1, 29, 45)),
@@ -124,7 +131,6 @@ d  2          0 .
           '[2018-11-09 01:29:58.000] Flutter: Do thing',
           '[2018-11-09 01:30:12.000] Flutter: Did thing this time',
         ]);
-
       }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
         SystemClock: () => SystemClock.fixed(DateTime(2018, 11, 9, 1, 25, 45)),
