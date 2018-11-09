@@ -563,9 +563,10 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// When supporting languages with more than one script, it is recommended
   /// to specify the scriptCode explicitly. Locales may also be defined without
-  /// countryCode to specify a generic fallback for a script or language. Not
-  /// specifying scriptCode may lead to improperly resolved locales. This
-  /// may be achieved with the [Locale.fromSubtags] constructor:
+  /// countryCode to specify a generic fallback for a particular script. Not
+  /// specifying scriptCode where it is needed (such as Chinese) may lead to
+  /// improperly resolved locales. This may be achieved with the
+  /// [Locale.fromSubtags] constructor:
   ///
   /// ```dart
   /// // Full Chinese support for CN, TW, and HK
