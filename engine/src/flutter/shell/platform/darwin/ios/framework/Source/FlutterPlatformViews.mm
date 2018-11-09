@@ -6,6 +6,7 @@
 
 #import "FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
+#import "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 
 #include <map>
 #include <memory>
@@ -138,8 +139,9 @@ void FlutterPlatformViewsController::SetFrameSize(SkISize frame_size) {
 }
 
 void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(int view_id) {
-  EnsureOverlayInitialized(view_id);
-  composition_frames_[view_id] = (overlays_[view_id]->surface->AcquireFrame(frame_size_));
+  picture_recorders_[view_id] = std::make_unique<SkPictureRecorder>();
+  picture_recorders_[view_id]->beginRecording(SkRect::Make(frame_size_));
+  picture_recorders_[view_id]->getRecordingCanvas()->clear(SK_ColorTRANSPARENT);
   composition_order_.push_back(view_id);
 }
 
@@ -147,15 +149,14 @@ std::vector<SkCanvas*> FlutterPlatformViewsController::GetCurrentCanvases() {
   std::vector<SkCanvas*> canvases;
   for (size_t i = 0; i < composition_order_.size(); i++) {
     int64_t view_id = composition_order_[i];
-    canvases.push_back(composition_frames_[view_id]->SkiaCanvas());
+    canvases.push_back(picture_recorders_[view_id]->getRecordingCanvas());
   }
   return canvases;
 }
 
 SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(
     int view_id,
-    const flow::EmbeddedViewParams& params,
-    IOSSurface& ios_surface) {
+    const flow::EmbeddedViewParams& params) {
   // TODO(amirh): assert that this is running on the platform thread once we support the iOS
   // embedded views thread configuration.
   // TODO(amirh): do nothing if the params didn't change.
@@ -167,9 +168,7 @@ SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(
   UIView* touch_interceptor = touch_interceptors_[view_id].get();
   [touch_interceptor setFrame:rect];
 
-  SkCanvas* canvas = composition_frames_[view_id]->SkiaCanvas();
-  canvas->clear(SK_ColorTRANSPARENT);
-  return canvas;
+  return picture_recorders_[view_id]->getRecordingCanvas();
 }
 
 void FlutterPlatformViewsController::Reset() {
@@ -181,16 +180,27 @@ void FlutterPlatformViewsController::Reset() {
   overlays_.clear();
   composition_order_.clear();
   active_composition_order_.clear();
-  composition_frames_.clear();
+  picture_recorders_.clear();
 }
 
-bool FlutterPlatformViewsController::Present() {
+bool FlutterPlatformViewsController::SubmitFrame(bool gl_rendering,
+                                                 GrContext* gr_context,
+                                                 std::shared_ptr<IOSGLContext> gl_context) {
   bool did_submit = true;
   for (size_t i = 0; i < composition_order_.size(); i++) {
     int64_t view_id = composition_order_[i];
-    did_submit &= composition_frames_[view_id]->Submit();
+    if (gl_rendering) {
+      EnsureGLOverlayInitialized(view_id, gl_context, gr_context);
+    } else {
+      EnsureOverlayInitialized(view_id);
+    }
+    auto frame = overlays_[view_id]->surface->AcquireFrame(frame_size_);
+    SkCanvas* canvas = frame->SkiaCanvas();
+    canvas->drawPicture(picture_recorders_[view_id]->finishRecordingAsPicture());
+    canvas->flush();
+    did_submit &= frame->Submit();
   }
-  composition_frames_.clear();
+  picture_recorders_.clear();
   if (composition_order_ == active_composition_order_) {
     composition_order_.clear();
     return did_submit;
@@ -226,10 +236,28 @@ void FlutterPlatformViewsController::EnsureOverlayInitialized(int64_t overlay_id
   overlay_view.frame = flutter_view_.get().bounds;
   overlay_view.autoresizingMask =
       (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
-  std::unique_ptr<IOSSurface> ios_surface = overlay_view.createSurface;
+  std::unique_ptr<IOSSurface> ios_surface = overlay_view.createSoftwareSurface;
   std::unique_ptr<Surface> surface = ios_surface->CreateGPUSurface();
   overlays_[overlay_id] = std::make_unique<FlutterPlatformViewLayer>(
-      overlay_view, std::move(ios_surface), std::move(surface));
+      fml::scoped_nsobject<UIView>(overlay_view), std::move(ios_surface), std::move(surface));
+}
+
+void FlutterPlatformViewsController::EnsureGLOverlayInitialized(
+    int64_t overlay_id,
+    std::shared_ptr<IOSGLContext> gl_context,
+    GrContext* gr_context) {
+  if (overlays_.count(overlay_id) != 0) {
+    return;
+  }
+  FlutterOverlayView* overlay_view = [[FlutterOverlayView alloc] init];
+  overlay_view.frame = flutter_view_.get().bounds;
+  overlay_view.autoresizingMask =
+      (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
+  std::unique_ptr<IOSSurfaceGL> ios_surface =
+      [overlay_view createGLSurfaceWithContext:std::move(gl_context)];
+  std::unique_ptr<Surface> surface = ios_surface->CreateSecondaryGPUSurface(gr_context);
+  overlays_[overlay_id] = std::make_unique<FlutterPlatformViewLayer>(
+      fml::scoped_nsobject<UIView>(overlay_view), std::move(ios_surface), std::move(surface));
 }
 
 }  // namespace shell

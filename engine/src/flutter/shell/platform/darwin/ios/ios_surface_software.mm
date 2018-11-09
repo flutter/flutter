@@ -123,11 +123,7 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
 
   layer_.get().contents = reinterpret_cast<id>(static_cast<CGImageRef>(pixmap_image));
 
-  FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
-  if (platform_views_controller == nullptr) {
-    return true;
-  }
-  return platform_views_controller->Present();
+  return true;
 }
 
 flow::ExternalViewEmbedder* IOSSurfaceSoftware::GetExternalViewEmbedder() {
@@ -160,7 +156,15 @@ SkCanvas* IOSSurfaceSoftware::CompositeEmbeddedView(int view_id,
                                                     const flow::EmbeddedViewParams& params) {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
-  return platform_views_controller->CompositeEmbeddedView(view_id, params, *this);
+  return platform_views_controller->CompositeEmbeddedView(view_id, params);
+}
+
+bool IOSSurfaceSoftware::SubmitFrame(GrContext* context) {
+  FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
+  if (platform_views_controller == nullptr) {
+    return true;
+  }
+  return platform_views_controller->SubmitFrame(false, nullptr, nullptr);
 }
 
 }  // namespace shell

@@ -13,22 +13,18 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
+#include "ios_gl_render_target.h"
 
 namespace shell {
 
 class IOSGLContext {
  public:
-  IOSGLContext(fml::scoped_nsobject<CAEAGLLayer> layer);
+  IOSGLContext();
 
   ~IOSGLContext();
 
-  bool IsValid() const;
-
-  bool PresentRenderBuffer() const;
-
-  GLuint framebuffer() const { return framebuffer_; }
-
-  bool UpdateStorageSizeIfNecessary();
+  std::unique_ptr<IOSGLRenderTarget> CreateRenderTarget(
+      fml::scoped_nsobject<CAEAGLLayer> layer);
 
   bool MakeCurrent();
 
@@ -37,15 +33,9 @@ class IOSGLContext {
   sk_sp<SkColorSpace> ColorSpace() const { return color_space_; }
 
  private:
-  fml::scoped_nsobject<CAEAGLLayer> layer_;
   fml::scoped_nsobject<EAGLContext> context_;
   fml::scoped_nsobject<EAGLContext> resource_context_;
-  GLuint framebuffer_;
-  GLuint colorbuffer_;
-  GLint storage_size_width_;
-  GLint storage_size_height_;
   sk_sp<SkColorSpace> color_space_;
-  bool valid_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSGLContext);
 };
