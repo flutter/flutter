@@ -98,6 +98,40 @@ void main() {
         backgroundColor,
       ]);
     });
+
+    testWidgets('No gradient displays with transparent background color', (WidgetTester tester) async {
+      const Color backgroundColor = Color.fromRGBO(255, 0, 0, 0.5);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 300.0,
+              width: 300.0,
+              child: CupertinoPicker(
+                backgroundColor: backgroundColor,
+                itemExtent: 15.0,
+                children: const <Widget>[
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                ],
+                onSelectedItemChanged: (int i) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      final DecoratedBox decoratedBox = tester.firstWidget(find.byType(DecoratedBox));
+      final BoxDecoration boxDecoration = decoratedBox.decoration;
+      expect(boxDecoration.gradient, isNull);
+      expect(boxDecoration.color, isNotNull);
+    });
   });
 
   group('scroll', () {

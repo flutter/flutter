@@ -123,11 +123,8 @@ class CupertinoPicker extends StatefulWidget {
   /// This can be set to null to disable the background painting entirely; this
   /// is mildly more efficient than using [Colors.transparent].
   ///
-  /// The [backgroundColor] is used to create the gradient of the picker. The
-  /// gradient is added on top of a background of solid [backgroundColor]. Due
-  /// to the way this gradient is currently created, any alpha value less than
-  /// 255 (fully opaque) will cause the removal of the gradient from the
-  /// rendering of the widget.
+  /// Any alpha value less 255 (fully opaque) will cause the removal of the
+  /// wheel list edge fade gradient from rendering of the widget.
   final Color backgroundColor;
 
   /// {@macro flutter.rendering.wheelList.offAxisFraction}
@@ -335,8 +332,8 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         _buildMagnifierScreen(),
       ],
     );
-    //Adds the appropriate opacity under the magnifier if the background
-    // color is transparent (and therefore are not adding in a gradient).
+    // Adds the appropriate opacity under the magnifier if the background
+    // color is transparent.
     if (widget.backgroundColor != null && widget.backgroundColor.alpha < 255) {
       result = Stack(
         children: <Widget> [
