@@ -71,7 +71,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// onStart will be called at the time corresponding to the touch's position
   /// at (510.0, 500.0).
   DragStartBehavior dragStartBehavior;
-  
+
   /// A pointer has contacted the screen and might begin to move.
   ///
   /// The position of the pointer is provided in the callback's `details`
