@@ -4,7 +4,7 @@
 
 import 'package:flutter_tools/src/time.dart';
 
-import 'src/common.dart'
+import 'src/common.dart';
 
 void main() {
   group(SystemClock, () {
