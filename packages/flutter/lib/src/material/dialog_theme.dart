@@ -18,6 +18,10 @@ import 'theme.dart';
 /// When Shape is `null`, the dialog defaults to a [RoundedRectangleBorder] with
 /// a border radius of 2.0 on all corners.
 ///
+/// [titleTextStyle] and [contentTextStyle] are only used in [AlertDialogs].
+/// They default to `ThemeData.textTheme.title` and `ThemeData.textTheme.subhead`,
+/// respectively, when null in this [DialogTheme].
+///
 /// See also:
 ///
 ///  * [Dialog], a material dialog that can be customized using this [DialogTheme].
@@ -25,10 +29,13 @@ import 'theme.dart';
 ///    application.
 class DialogTheme extends Diagnosticable {
   /// Creates a dialog theme that can be used for [ThemeData.dialogTheme].
-  const DialogTheme({ this.backgroundColor, this.elevation, this.shape });
-
-  /// Default value for [Dialog.backgroundColor].
-  final Color backgroundColor;
+  const DialogTheme({
+  this.backgroundColor,
+    this.elevation,
+    this.shape,
+    this.titleTextStyle,
+    this.contentTextStyle,
+  });
 
   /// Default value for [Dialog.elevation].
   ///
@@ -38,13 +45,31 @@ class DialogTheme extends Diagnosticable {
   /// Default value for [Dialog.shape].
   final ShapeBorder shape;
 
+  /// Default value for [AlertDialog.titleTextStyle].
+  ///
+  /// Only used in [AlertDialog]s.
+  final TextStyle titleTextStyle;
+
+  /// Default value for [AlertDialog.contentTextStyle].
+  ///
+  /// Only used in [AlertDialog]s.
+  final TextStyle contentTextStyle;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
-  DialogTheme copyWith({ Color backgroundColor, double elevation, ShapeBorder shape }) {
+  DialogTheme copyWith({
+  Color backgroundColor,
+    double elevation,
+    ShapeBorder shape,
+    TextStyle titleTextStyle,
+    TextStyle contentTextStyle,
+  }) {
     return DialogTheme(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
+      titleTextStyle: titleTextStyle ?? this.titleTextStyle,
+      contentTextStyle: contentTextStyle ?? this.contentTextStyle,
     );
   }
 
@@ -64,6 +89,8 @@ class DialogTheme extends Diagnosticable {
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
+      titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
+      contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t)
     );
   }
 
@@ -78,8 +105,10 @@ class DialogTheme extends Diagnosticable {
       return false;
     final DialogTheme typedOther = other;
     return typedOther.backgroundColor == backgroundColor
-        && typedOther.elevation == elevation
-        && typedOther.shape == shape;
+    && typedOther.elevation == elevation
+        && typedOther.shape == shape
+        && typedOther.titleTextStyle == titleTextStyle
+        && typedOther.contentTextStyle == contentTextStyle;
   }
 
   @override
@@ -88,5 +117,7 @@ class DialogTheme extends Diagnosticable {
     properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation));
+    properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
   }
 }
