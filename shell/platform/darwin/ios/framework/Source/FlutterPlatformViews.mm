@@ -89,8 +89,8 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
 }
 
 void FlutterPlatformViewsController::OnDispose(FlutterMethodCall* call, FlutterResult& result) {
-  NSDictionary<NSString*, id>* args = [call arguments];
-  int64_t viewId = [args[@"id"] longLongValue];
+  NSNumber* arg = [call arguments];
+  int64_t viewId = [arg longLongValue];
 
   if (views_.count(viewId) == 0) {
     result([FlutterError errorWithCode:@"unknown_view"
