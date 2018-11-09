@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
+import 'package:flutter_tools/src/run_hot.dart';
 
 import 'runner.dart' as runner;
 
@@ -69,6 +70,8 @@ Future<void> main(List<String> args) async {
         parent: CachedArtifacts(),
         frontendServer: frontendServer,
         engineDartBinary: dartSdk,
-      )
+      ),
+      HotRunnerConfig: () => HotRunnerConfig()
+        ..computeDartDependencies = false,
      });
 }
