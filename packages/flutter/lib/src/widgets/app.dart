@@ -560,6 +560,24 @@ class WidgetsApp extends StatefulWidget {
   /// [supportedLocales] with a matching [Locale.languageCode] is used. If that
   /// fails then the first locale in [supportedLocales] is used. The default
   /// locale resolution algorithm can be overridden with [localeResolutionCallback].
+  ///
+  /// When supporting languages with more than one script, it is recommended
+  /// to specify the scriptCode explicitly. Locales may also be defined without
+  /// countryCode to specify a generic fallback for a script or language. Not
+  /// specifying scriptCode may lead to improperly resolved locales. This
+  /// may be achieved with the [Locale.fromSubtags] constructor:
+  ///
+  /// ```dart
+  /// // Full Chinese support for CN, TW, and HK
+  /// supportedLocales: [
+  ///   const Locale.fromSubtags(languageCode: 'zh'), // generic Chinese
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'), // generic simplified Chinese
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'), // generic traditional Chinese
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: 'CN'),
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW'),
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
+  /// ],
+  /// ```
   /// {@endtemplate}
   ///
   /// See also:
