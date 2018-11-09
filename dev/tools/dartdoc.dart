@@ -332,7 +332,7 @@ Future<File> precompileSnippetsTool(
   trainingFile.writeAsStringSync('```dart\nvoid foo(){}\n```');
   try {
     ProcessResult result = Process.runSync(Platform.resolvedExecutable, <String>[
-      '--snapshot=${snapshotPath.absolute.path}f',
+      '--snapshot=${snapshotPath.absolute.path}',
       '--snapshot_kind=app-jit',
       path.join(
         'lib',
