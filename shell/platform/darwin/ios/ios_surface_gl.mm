@@ -75,7 +75,7 @@ bool IOSSurfaceGL::GLContextPresent() {
 }
 
 flow::ExternalViewEmbedder* IOSSurfaceGL::GetExternalViewEmbedder() {
-  if ([[[NSBundle mainBundle] objectForInfoDictionaryKey:@(kEmbeddedViewsPreview)] boolValue]) {
+  if (IsIosEmbeddedViewsPreviewEnabled()) {
     return this;
   } else {
     return nullptr;

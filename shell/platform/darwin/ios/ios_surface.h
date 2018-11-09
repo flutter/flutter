@@ -15,8 +15,9 @@
 
 namespace shell {
 
-// The name of the Info.plist flag to enable the embedded iOS views preview.
-const char* const kEmbeddedViewsPreview = "io.flutter.embedded_views_preview";
+// Returns true if the app explicitly specified to use the iOS view embedding
+// mechanism which is still in a release preview.
+bool IsIosEmbeddedViewsPreviewEnabled();
 
 class IOSSurface {
  public:

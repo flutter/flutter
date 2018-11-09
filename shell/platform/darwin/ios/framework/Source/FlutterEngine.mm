@@ -296,8 +296,6 @@
       threadLabel.UTF8String,  // label
       shell::ThreadHost::Type::UI | shell::ThreadHost::Type::GPU | shell::ThreadHost::Type::IO};
 
-  bool embedded_views_preview_enabled = [[[NSBundle mainBundle]
-      objectForInfoDictionaryKey:@(shell::kEmbeddedViewsPreview)] boolValue];
   // Lambda captures by pointers to ObjC objects are fine here because the
   // create call is
   // synchronous.
@@ -310,7 +308,7 @@
     return std::make_unique<shell::Rasterizer>(shell.GetTaskRunners());
   };
 
-  if (embedded_views_preview_enabled) {
+  if (shell::IsIosEmbeddedViewsPreviewEnabled()) {
     // Embedded views requires the gpu and the platform views to be the same.
     // The plan is to eventually dynamically merge the threads when there's a
     // platform view in the layer tree.
