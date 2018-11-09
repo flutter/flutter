@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   json_rpc_2: 2.0.9
-  process: 3.0.5
+  process: 3.0.8
   web_socket_channel: 1.0.9
   flutter_test:
     sdk: flutter
@@ -43,4 +43,4 @@ dependencies:
 dev_dependencies:
   mockito: 4.0.0
 
-# PUBSPEC CHECKSUM: 6ecd
+# PUBSPEC CHECKSUM: b6d0
