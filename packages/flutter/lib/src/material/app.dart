@@ -98,6 +98,7 @@ class MaterialApp extends StatefulWidget {
     this.theme,
     this.locale,
     this.localizationsDelegates,
+    this.localeListResolutionCallback,
     this.localeResolutionCallback,
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.debugShowMaterialGrid = false,
@@ -264,6 +265,11 @@ class MaterialApp extends StatefulWidget {
   ///    <https://flutter.io/tutorials/internationalization/>.
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
 
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// This callback is passed along to the [WidgetsApp] built by this widget.
+  final LocaleListResolutionCallback localeListResolutionCallback;
+
   /// {@macro flutter.widgets.widgetsApp.localeResolutionCallback}
   ///
   /// This callback is passed along to the [WidgetsApp] built by this widget.
@@ -423,6 +429,7 @@ class _MaterialAppState extends State<MaterialApp> {
         locale: widget.locale,
         localizationsDelegates: _localizationsDelegates,
         localeResolutionCallback: widget.localeResolutionCallback,
+        localeListResolutionCallback: widget.localeListResolutionCallback,
         supportedLocales: widget.supportedLocales,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
