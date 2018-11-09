@@ -149,6 +149,79 @@ flutter:
     - packages/flutter_gallery_assets/people/square/sandra.png
     - packages/flutter_gallery_assets/people/square/stella.png
     - packages/flutter_gallery_assets/people/square/trevor.png
+
+    # Posse gallery transplant, we don't need all of them and
+    # this may not be the final location. 
+    - assets/backgrounds/bg_custom_hero.png
+    - assets/backgrounds/bg_flutter_welcome.png
+    - assets/backgrounds/bg_main_screen.png
+    - assets/backgrounds/bg_welcome.png
+    - assets/icons/ic_animation_chains.png
+    - assets/icons/ic_animation_gestures.png
+    - assets/icons/ic_animation_tweens.png
+    - assets/icons/ic_assets_diamond.png
+    - assets/icons/ic_assets_moon.png
+    - assets/icons/ic_assets_smiley.png
+    - assets/icons/ic_components.png
+    - assets/icons/ic_custom_circle_arrow.png
+    - assets/icons/ic_customized_book.png
+    - assets/icons/ic_customized_furniture.png
+    - assets/icons/ic_customized_runner.png
+    - assets/icons/ic_customized_assets.png
+    - assets/icons/ic_customized_brand_design.png
+    - assets/icons/ic_customized_painting.png
+    - assets/icons/ic_design_components_controls.png
+    - assets/icons/ic_design_components_material.png
+    - assets/icons/ic_flutter_logo.png
+    - assets/icons/ic_layout_flex.png
+    - assets/icons/ic_layout_scroll.png
+    - assets/icons/ic_layout_stack.png
+    - assets/icons/ic_pattern_edit_image.png
+    - assets/icons/ic_patterns_list.png
+    - assets/icons/ic_patterns_walkthrough.png
+    - assets/icons/ic_platform_heart.png
+    - assets/icons/ic_plug_in_location.png
+    - assets/icons/ic_plug_in_motion.png
+    - assets/icons/ic_plug_in_photo.png
+    - assets/icons/ic_plug_in_service.png
+    - assets/icons/ic_search.png
+    - assets/icons/ic_feed_flutter.png
+    - assets/icons/ic_feed_posse.png
+    - assets/icons/ic_feed_settings.png
+    - assets/icons/ic_feed_docs.png
+    - assets/images/brand_apple_pie.png
+    - assets/images/brand_cinnamon.png
+    - assets/images/brand_egg.png
+    - assets/images/brand_flour.png
+    - assets/images/brand_product.png
+    - assets/images/brand_profile.png
+    - assets/images/brand_salt.png
+    - assets/images/brand_star_gold.png
+    - assets/images/brand_star_gray.png
+    - assets/images/brand_stars.png
+    - assets/images/category_cell_left_shape.png
+    - assets/images/category_cell_right_shape.png
+    - assets/images/custom_hero.png
+    - assets/images/custom_path.png
+    - assets/images/custom_runner_bg.png
+    - assets/images/platform_hero.png
+    - assets/images/platform_hero_android.png
+    - assets/images/platform_detail_hero.png
+    - assets/images/platform_lamp.png
+    - assets/images/platform_table.png
+    - assets/images/welcome_explore_flutter.png
+    - assets/images/welcome_flutter_logo.png
+    - assets/images/welcome_iphone.png
+    - assets/images/welcome_phones.png
+    - assets/images/welcome_pixel.png
+    - assets/images/welcome_pie.png
+    - assets/images/welcome_recipe.png
+    - assets/images/welcome_widget_1.png
+    - assets/images/welcome_widget_2.png
+    - assets/images/welcome_widget_3.png
+    - assets/images/welcome_widget_4.png
+    - assets/images/welcome_widget_5.png
+    - assets/images/welcome_widget_collection.png
   fonts:
     - family: Raleway
       fonts:

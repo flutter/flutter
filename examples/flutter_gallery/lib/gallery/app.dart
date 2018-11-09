@@ -10,6 +10,8 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 
 import 'package:url_launcher/url_launcher.dart';
 
+import '../welcome/screen.dart';
+
 import 'demos.dart';
 import 'home.dart';
 import 'options.dart';
@@ -108,6 +110,11 @@ class _GalleryAppState extends State<GalleryApp> {
 
   @override
   Widget build(BuildContext context) {
+
+
+    const Widget welcome = WarmWelcomeScreen(isInitialScreen: true);
+
+
     Widget home = GalleryHome(
       testMode: widget.testMode,
       optionsPage: GalleryOptionsPage(
@@ -140,7 +147,7 @@ class _GalleryAppState extends State<GalleryApp> {
           child: _applyTextScaleFactor(child),
         );
       },
-      home: home,
+      home: welcome, // home,
     );
   }
 }
