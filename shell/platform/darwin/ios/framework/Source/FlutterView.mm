@@ -79,6 +79,15 @@ id<FlutterViewEngineDelegate> _delegate;
   if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
     fml::scoped_nsobject<CAEAGLLayer> eagl_layer(
         reinterpret_cast<CAEAGLLayer*>([self.layer retain]));
+    if (shell::IsIosEmbeddedViewsPreviewEnabled()) {
+      // TODO(amirh): We can lower this to iOS 8.0 once we have a Metal rendering backend.
+      // https://github.com/flutter/flutter/issues/24132
+      if (@available(iOS 9.0, *)) {
+        // TODO(amirh): only do this if there's an embedded view.
+        // https://github.com/flutter/flutter/issues/24133
+        eagl_layer.get().presentsWithTransaction = YES;
+      }
+    }
     return std::make_unique<shell::IOSSurfaceGL>(std::move(eagl_layer),
                                                  [_delegate platformViewsController]);
   } else {
