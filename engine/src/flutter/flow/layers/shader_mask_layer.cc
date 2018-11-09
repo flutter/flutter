@@ -21,8 +21,8 @@ void ShaderMaskLayer::Paint(PaintContext& context) const {
   SkPaint paint;
   paint.setBlendMode(blend_mode_);
   paint.setShader(shader_);
-  context.canvas->translate(mask_rect_.left(), mask_rect_.top());
-  context.canvas->drawRect(
+  context.leaf_nodes_canvas->translate(mask_rect_.left(), mask_rect_.top());
+  context.leaf_nodes_canvas->drawRect(
       SkRect::MakeWH(mask_rect_.width(), mask_rect_.height()), paint);
 }
 

@@ -23,7 +23,7 @@ void TextureLayer::Paint(PaintContext& context) const {
   if (!texture) {
     return;
   }
-  texture->Paint(*context.canvas, paint_bounds(), freeze_);
+  texture->Paint(*context.leaf_nodes_canvas, paint_bounds(), freeze_);
 }
 
 }  // namespace flow
