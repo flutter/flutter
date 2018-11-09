@@ -65,15 +65,6 @@ class ScaffoldPrelayoutGeometry {
     @required this.bottomPadding,
   });
 
-  /// The vertical padding for the bottom of the screen
-  /// [Scaffold.body].
-  ///
-  /// This is useful in a [FloatingActionButtonLocation] designed to
-  /// place the [FloatingActionButton] at the bottom of the screen in the
-  /// safe area when the [BottomSheet] had a size of 0 when the
-  /// [SizeTransition] is used.
-  final double bottomPadding;
-
   /// The [Size] of [Scaffold.floatingActionButton].
   ///
   /// If [Scaffold.floatingActionButton] is null, this will be [Size.zero].
@@ -145,6 +136,10 @@ class ScaffoldPrelayoutGeometry {
 
   /// The [TextDirection] of the [Scaffold]'s [BuildContext].
   final TextDirection textDirection;
+
+  /// The vertical padding from the bottom of the screen used to place the
+  /// [FloatingActionButton] when scrolled down to the bottom of a list.
+  final double bottomPadding;
 }
 
 /// A snapshot of a transition between two [FloatingActionButtonLocation]s.

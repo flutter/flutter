@@ -178,8 +178,7 @@ abstract class _DockedFloatingActionButtonLocation extends FloatingActionButtonL
 
     /// Subtracting the bottom padding raises the FloatingActionButton in the
     /// event that [BottomAppBar] has a size of 0 from [SizeTransition].
-    final double maxFabY =
-        scaffoldGeometry.scaffoldSize.height - fabHeight - bottomPadding;
+    final double maxFabY = scaffoldGeometry.scaffoldSize.height - fabHeight - bottomPadding;
     return math.min(maxFabY, fabY);
   }
 }
