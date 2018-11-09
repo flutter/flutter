@@ -1,4 +1,4 @@
-Signature: 0d532a482c297b3600bfa72396105ec9
+Signature: fe389c93e3525da74cfc573a37b46cfa
 
 UNUSED LICENSES:
 
@@ -860,8 +860,6 @@ FILE: ../../../third_party/skia/samplecode/SampleMegaStroke.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathOverstroke.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSVGFile.cpp
 FILE: ../../../third_party/skia/src/codec/SkCodecAnimationPriv.h
-FILE: ../../../third_party/skia/src/codec/SkRawAdapterCodec.cpp
-FILE: ../../../third_party/skia/src/codec/SkRawAdapterCodec.h
 FILE: ../../../third_party/skia/src/codec/SkRawCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkRawCodec.h
 FILE: ../../../third_party/skia/src/codec/SkStreamBuffer.cpp
@@ -3612,6 +3610,8 @@ FILE: ../../../third_party/skia/src/c/sk_c_from_to.h
 FILE: ../../../third_party/skia/src/c/sk_paint.cpp
 FILE: ../../../third_party/skia/src/c/sk_types_priv.h
 FILE: ../../../third_party/skia/src/codec/SkAndroidCodec.cpp
+FILE: ../../../third_party/skia/src/codec/SkAndroidCodecAdapter.cpp
+FILE: ../../../third_party/skia/src/codec/SkAndroidCodecAdapter.h
 FILE: ../../../third_party/skia/src/codec/SkBmpCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkBmpCodec.h
 FILE: ../../../third_party/skia/src/codec/SkBmpMaskCodec.cpp
@@ -3647,8 +3647,6 @@ FILE: ../../../third_party/skia/src/codec/SkSwizzler.cpp
 FILE: ../../../third_party/skia/src/codec/SkSwizzler.h
 FILE: ../../../third_party/skia/src/codec/SkWbmpCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkWbmpCodec.h
-FILE: ../../../third_party/skia/src/codec/SkWebpAdapterCodec.cpp
-FILE: ../../../third_party/skia/src/codec/SkWebpAdapterCodec.h
 FILE: ../../../third_party/skia/src/codec/SkWebpCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkWebpCodec.h
 FILE: ../../../third_party/skia/src/core/Sk4px.h
