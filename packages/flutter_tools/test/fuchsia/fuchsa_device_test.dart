@@ -56,13 +56,19 @@ d  2          0 .
 ''';
       final MockProcessManager mockProcessManager = MockProcessManager();
       final MockProcess mockProcess = MockProcess();
-      final Completer<int> exitCode = Completer<int>();
-      final StreamController<List<int>> stdout = StreamController<List<int>>(sync: true);
-      final StreamController<List<int>> stderr = StreamController<List<int>>(sync: true);
+      Completer<int> exitCode;
+      StreamController<List<int>> stdout;
+      StreamController<List<int>> stderr;
       when(mockProcessManager.start(any)).thenAnswer((Invocation _) => Future<Process>.value(mockProcess));
       when(mockProcess.exitCode).thenAnswer((Invocation _) => exitCode.future);
       when(mockProcess.stdout).thenAnswer((Invocation _) => stdout.stream);
       when(mockProcess.stderr).thenAnswer((Invocation _) => stderr.stream);
+
+      setUp(() {
+        stdout = StreamController<List<int>>(sync: true);
+        stderr = StreamController<List<int>>(sync: true);
+        exitCode = Completer<int>();
+      });
 
       testUsingContext('can be parsed for an app', () async {
         final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
