@@ -336,8 +336,8 @@ class RunCommand extends RunCommandBase {
 
     if (hotMode) {
       for (Device device in devices) {
-        if (!device.supportsHotMode)
-          throwToolExit('Hot mode is not supported by ${device.name}. Run with --no-hot.');
+        if (!device.supportsHotReload)
+          throwToolExit('Hot reload is not supported by ${device.name}. Run with --no-hot.');
       }
     }
 
