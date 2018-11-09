@@ -103,6 +103,81 @@ void main() {
     expect(avatarDTopRight.dx - avatarCTopRight.dx, equals(40.0 + 16.0)); // size + space between
   });
 
+  testWidgets('UserAccountsDrawerHeader icon rotation test', (WidgetTester tester) async {
+    await pumpTestWidget(tester);
+    Transform transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon is right side up.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(Duration(milliseconds: 10));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpAndSettle();
+    await tester.pump();
+    transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon has rotated 180 degrees.
+    expect(transformWidget.transform.getRotation()[0], -1.0);
+    expect(transformWidget.transform.getRotation()[4], -1.0);
+
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(Duration(milliseconds: 10));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpAndSettle();
+    await tester.pump();
+    transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon has rotated 180 degrees back to the original position.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+  });
+
+  testWidgets('UserAccountsDrawerHeader icon rotation test speeeeeedy', (WidgetTester tester) async {
+    await pumpTestWidget(tester);
+    Transform transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon is right side up.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+
+    // Icon starts to rotate down.
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(Duration(milliseconds: 100));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    // Icon starts to rotate up mid animation.
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(Duration(milliseconds: 100));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    // Icon starts to rotate down again still mid animation.
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(Duration(milliseconds: 100));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    // Icon starts to rotate up to its original position mid animation.
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(Duration(milliseconds: 100));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpAndSettle();
+    await tester.pump();
+    transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon has rotated 180 degrees back to the original position.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+  });
 
   testWidgets('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
     Widget buildFrame({

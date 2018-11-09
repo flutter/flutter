@@ -68,11 +68,14 @@ class IOSValidator extends DoctorValidator {
     }
   }
 
+  // Change this value if the number of checks for packages needed for installation changes
+  static const int totalChecks = 4;
+
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
-    ValidationType brewStatus = ValidationType.missing;
+    ValidationType packageManagerStatus = ValidationType.installed;
     String xcodeVersionInfo;
 
     if (xcode.isInstalled) {
@@ -125,76 +128,84 @@ class IOSValidator extends DoctorValidator {
       }
     }
 
-    // brew installed
-    if (hasHomebrew) {
-      brewStatus = ValidationType.installed;
+    int checksFailed = 0;
 
-      if (!iMobileDevice.isInstalled) {
-        brewStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(
-            'libimobiledevice and ideviceinstaller are not installed. To install, run:\n'
-            '  brew update\n'
-            '  brew install --HEAD usbmuxd\n'
-            '  brew link usbmuxd\n'
-            '  brew install --HEAD libimobiledevice\n'
-            '  brew install ideviceinstaller'
-        ));
-      } else if (!await iMobileDevice.isWorking) {
-        brewStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(
-            'Verify that all connected devices have been paired with this computer in Xcode.\n'
-            'If all devices have been paired, libimobiledevice and ideviceinstaller may require updating.\n'
-            'To update, run:\n'
-            '  brew update\n'
-            '  brew uninstall --ignore-dependencies libimobiledevice\n'
-            '  brew uninstall --ignore-dependencies usbmuxd\n'
-            '  brew install --HEAD usbmuxd\n'
-            '  brew unlink usbmuxd\n'
-            '  brew link usbmuxd\n'
-            '  brew install --HEAD libimobiledevice\n'
-            '  brew install ideviceinstaller'
-        ));
-      } else if (!await hasIDeviceInstaller) {
-        brewStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(
-          'ideviceinstaller is not installed; this is used to discover connected iOS devices.\n'
-          'To install, run:\n'
-          '  brew install --HEAD usbmuxd\n'
-          '  brew link usbmuxd\n'
-          '  brew install --HEAD libimobiledevice\n'
-          '  brew install ideviceinstaller'
-        ));
-      }
-
-      // Check ios-deploy is installed at meets version requirements.
-      if (await hasIosDeploy) {
-        messages.add(ValidationMessage('ios-deploy ${await iosDeployVersionText}'));
-      }
-      if (!await _iosDeployIsInstalledAndMeetsVersionCheck) {
-        brewStatus = ValidationType.partial;
-        if (await hasIosDeploy) {
-          messages.add(ValidationMessage.error(
-            'ios-deploy out of date ($iosDeployMinimumVersion is required). To upgrade:\n'
-            '  brew upgrade ios-deploy'
-          ));
-        } else {
-          messages.add(ValidationMessage.error(
-            'ios-deploy not installed. To install:\n'
-            '  brew install ios-deploy'
-          ));
-        }
-      }
-
-    } else {
-      brewStatus = ValidationType.missing;
+    if (!iMobileDevice.isInstalled) {
+      checksFailed += 3;
+      packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(
-          'Brew not installed; use this to install tools for iOS device development.\n'
-              'Download brew at https://brew.sh/.'
+        'libimobiledevice and ideviceinstaller are not installed. To install with Brew, run:\n'
+        '  brew update\n'
+        '  brew install --HEAD usbmuxd\n'
+        '  brew link usbmuxd\n'
+        '  brew install --HEAD libimobiledevice\n'
+        '  brew install ideviceinstaller'
+      ));
+    } else if (!await iMobileDevice.isWorking) {
+      checksFailed += 2;
+      packageManagerStatus = ValidationType.partial;
+      messages.add(ValidationMessage.error(
+        'Verify that all connected devices have been paired with this computer in Xcode.\n'
+        'If all devices have been paired, libimobiledevice and ideviceinstaller may require updating.\n'
+        'To update with Brew, run:\n'
+        '  brew update\n'
+        '  brew uninstall --ignore-dependencies libimobiledevice\n'
+        '  brew uninstall --ignore-dependencies usbmuxd\n'
+        '  brew install --HEAD usbmuxd\n'
+        '  brew unlink usbmuxd\n'
+        '  brew link usbmuxd\n'
+        '  brew install --HEAD libimobiledevice\n'
+        '  brew install ideviceinstaller'
+      ));
+    } else if (!await hasIDeviceInstaller) {
+      checksFailed += 1;
+      packageManagerStatus = ValidationType.partial;
+      messages.add(ValidationMessage.error(
+        'ideviceinstaller is not installed; this is used to discover connected iOS devices.\n'
+        'To install with Brew, run:\n'
+        '  brew install --HEAD usbmuxd\n'
+        '  brew link usbmuxd\n'
+        '  brew install --HEAD libimobiledevice\n'
+        '  brew install ideviceinstaller'
+      ));
+    }
+
+    final bool iHasIosDeploy = await hasIosDeploy;
+
+    // Check ios-deploy is installed at meets version requirements.
+    if (iHasIosDeploy) {
+      messages.add(
+        ValidationMessage('ios-deploy ${await iosDeployVersionText}'));
+    }
+    if (!await _iosDeployIsInstalledAndMeetsVersionCheck) {
+      packageManagerStatus = ValidationType.partial;
+      if (iHasIosDeploy) {
+        messages.add(ValidationMessage.error(
+          'ios-deploy out of date ($iosDeployMinimumVersion is required). To upgrade with Brew:\n'
+          '  brew upgrade ios-deploy'
+        ));
+      } else {
+        checksFailed += 1;
+        messages.add(ValidationMessage.error(
+          'ios-deploy not installed. To install with Brew:\n'
+          '  brew install ios-deploy'
+        ));
+      }
+    }
+
+    // If one of the checks for the packages failed, we may need brew so that we can install
+    // the necessary packages. If they're all there, however, we don't even need it.
+    if (checksFailed == totalChecks)
+      packageManagerStatus = ValidationType.missing;
+    if (checksFailed > 0 && !hasHomebrew) {
+      messages.add(ValidationMessage.error(
+        'Brew can be used to install tools for iOS device development.\n'
+        'Download brew at https://brew.sh/.'
       ));
     }
 
     return ValidationResult(
-        <ValidationType>[xcodeStatus, brewStatus].reduce(_mergeValidationTypes),
+        <ValidationType>[xcodeStatus, packageManagerStatus].reduce(_mergeValidationTypes),
         messages,
         statusInfo: xcodeVersionInfo
     );

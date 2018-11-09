@@ -113,10 +113,15 @@ class SnippetGenerator {
     if (result.length > 3) {
       result.removeRange(result.length - 3, result.length);
     }
+    // Only insert a div for the description if there actually is some text there.
+    // This means that the {{description}} marker in the skeleton needs to
+    // be inside of an {@inject-html} block.
+    String description = injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'description').mergedContent;
+    description = description.trim().isNotEmpty
+        ? '<div class="snippet-description">{@end-inject-html}$description{@inject-html}</div>'
+        : '';
     final Map<String, String> substitutions = <String, String>{
-      'description': injections
-          .firstWhere((_ComponentTuple tuple) => tuple.name == 'description')
-          .mergedContent,
+      'description': description,
       'code': htmlEscape.convert(result.join('\n')),
       'language': language ?? 'dart',
     }..addAll(type == SnippetType.application

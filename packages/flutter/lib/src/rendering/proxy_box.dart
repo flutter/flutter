@@ -2572,7 +2572,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   /// will give you a 1:1 mapping between logical pixels and the output pixels
   /// in the image.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// The following is an example of how to go from a `GlobalKey` on a
   /// `RepaintBoundary` to a PNG:
@@ -2610,6 +2610,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
