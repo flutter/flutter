@@ -51,7 +51,7 @@ class IOSSurfaceGL : public IOSSurface,
   flow::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
   // |flow::ExternalViewEmbedder|
-  void SetFrameSize(SkISize frame_size) override;
+  void BeginFrame(SkISize frame_size) override;
 
   // |flow::ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(int view_id) override;

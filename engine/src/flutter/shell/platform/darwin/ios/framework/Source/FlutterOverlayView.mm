@@ -71,6 +71,11 @@
 - (std::unique_ptr<shell::IOSSurfaceGL>)createGLSurfaceWithContext:
     (std::shared_ptr<shell::IOSGLContext>)gl_context {
   fml::scoped_nsobject<CAEAGLLayer> eagl_layer(reinterpret_cast<CAEAGLLayer*>([self.layer retain]));
+  // TODO(amirh): We can lower this to iOS 8.0 once we have a Metal rendering backend.
+  // https://github.com/flutter/flutter/issues/24132
+  if (@available(iOS 9.0, *)) {
+    eagl_layer.get().presentsWithTransaction = YES;
+  }
   return std::make_unique<shell::IOSSurfaceGL>(eagl_layer, std::move(gl_context));
 }
 

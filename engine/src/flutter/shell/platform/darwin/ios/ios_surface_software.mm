@@ -134,7 +134,7 @@ flow::ExternalViewEmbedder* IOSSurfaceSoftware::GetExternalViewEmbedder() {
   }
 }
 
-void IOSSurfaceSoftware::SetFrameSize(SkISize frame_size) {
+void IOSSurfaceSoftware::BeginFrame(SkISize frame_size) {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
   platform_views_controller->SetFrameSize(frame_size);

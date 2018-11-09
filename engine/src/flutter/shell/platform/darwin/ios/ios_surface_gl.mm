@@ -82,10 +82,11 @@ flow::ExternalViewEmbedder* IOSSurfaceGL::GetExternalViewEmbedder() {
   }
 }
 
-void IOSSurfaceGL::SetFrameSize(SkISize frame_size) {
+void IOSSurfaceGL::BeginFrame(SkISize frame_size) {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
   platform_views_controller->SetFrameSize(frame_size);
+  [CATransaction begin];
 }
 
 void IOSSurfaceGL::PrerollCompositeEmbeddedView(int view_id) {
@@ -111,7 +112,10 @@ bool IOSSurfaceGL::SubmitFrame(GrContext* context) {
   if (platform_views_controller == nullptr) {
     return true;
   }
-  return platform_views_controller->SubmitFrame(true, std::move(context), context_);
+
+  bool submitted = platform_views_controller->SubmitFrame(true, std::move(context), context_);
+  [CATransaction commit];
+  return submitted;
 }
 
 }  // namespace shell

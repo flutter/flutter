@@ -27,7 +27,7 @@ class ExternalViewEmbedder {
  public:
   ExternalViewEmbedder() = default;
 
-  virtual void SetFrameSize(SkISize frame_size) = 0;
+  virtual void BeginFrame(SkISize frame_size) = 0;
 
   virtual void PrerollCompositeEmbeddedView(int view_id) = 0;
 
