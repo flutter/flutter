@@ -62,7 +62,17 @@ class ScaffoldPrelayoutGeometry {
     @required this.scaffoldSize,
     @required this.snackBarSize,
     @required this.textDirection,
+    @required this.bottomPadding,
   });
+
+  /// The vertical padding for the bottom of the screen
+  /// [Scaffold.body].
+  ///
+  /// This is useful in a [FloatingActionButtonLocation] designed to
+  /// place the [FloatingActionButton] at the bottom of the screen in the
+  /// safe area when the [BottomSheet] had a size of 0 when the
+  /// [SizeTransition] is used.
+  final double bottomPadding;
 
   /// The [Size] of [Scaffold.floatingActionButton].
   ///
@@ -277,8 +287,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.currentFloatingActionButtonLocation,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
-  }) : assert(previousFloatingActionButtonLocation != null),
-       assert(currentFloatingActionButtonLocation != null);
+    @required this.bottomPadding,
+  })  : assert(previousFloatingActionButtonLocation != null),
+        assert(currentFloatingActionButtonLocation != null);
 
   final EdgeInsets minInsets;
   final TextDirection textDirection;
@@ -288,6 +299,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final FloatingActionButtonLocation currentFloatingActionButtonLocation;
   final double floatingActionButtonMoveAnimationProgress;
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
+  final double bottomPadding;
 
   @override
   void performLayout(Size size) {
@@ -384,6 +396,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         scaffoldSize: size,
         snackBarSize: snackBarSize,
         textDirection: textDirection,
+        bottomPadding: bottomPadding,
       );
       final Offset currentFabOffset = currentFloatingActionButtonLocation.getOffset(currentGeometry);
       final Offset previousFabOffset = previousFloatingActionButtonLocation.getOffset(currentGeometry);
@@ -1735,6 +1748,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 geometryNotifier: _geometryNotifier,
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
+                    bottomPadding: MediaQuery.of(context).padding.bottom,
               ),
             );
           }),

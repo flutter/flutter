@@ -166,6 +166,7 @@ abstract class _DockedFloatingActionButtonLocation extends FloatingActionButtonL
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
     final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
     final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
+    final double bottomPadding = scaffoldGeometry.bottomPadding;
 
     double fabY = contentBottom - fabHeight / 2.0;
     // The FAB should sit with a margin between it and the snack bar.
@@ -175,7 +176,10 @@ abstract class _DockedFloatingActionButtonLocation extends FloatingActionButtonL
     if (bottomSheetHeight > 0.0)
       fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
 
-    final double maxFabY = scaffoldGeometry.scaffoldSize.height - fabHeight;
+    /// Subtracting the bottom padding raises the FloatingActionButton in the
+    /// event that [BottomAppBar] has a size of 0 from [SizeTransition].
+    final double maxFabY =
+        scaffoldGeometry.scaffoldSize.height - fabHeight - bottomPadding;
     return math.min(maxFabY, fabY);
   }
 }
