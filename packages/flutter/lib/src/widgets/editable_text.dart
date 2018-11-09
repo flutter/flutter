@@ -420,7 +420,8 @@ class EditableText extends StatefulWidget {
   ///
   /// The cursor will draw under the text. The cursor width will extend
   /// to the right of the boundary between characters for right-to-left text
-  /// and to the left for left-to-right text. Negative values may be used
+  /// and to the left for left-to-right text. This corresponds to extending
+  /// downstream relative to the selected position. Negative values may be used
   /// to reverse this behavior.
   /// {@endtemplate}
   final double cursorWidth;
