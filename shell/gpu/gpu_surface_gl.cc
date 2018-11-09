@@ -89,6 +89,24 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
   delegate_->GLContextClearCurrent();
 
   valid_ = true;
+  context_owner_ = true;
+}
+
+GPUSurfaceGL::GPUSurfaceGL(sk_sp<GrContext> gr_context,
+                           GPUSurfaceGLDelegate* delegate)
+    : delegate_(delegate), context_(gr_context), weak_factory_(this) {
+  if (!delegate_->GLContextMakeCurrent()) {
+    FML_LOG(ERROR)
+        << "Could not make the context current to setup the gr context.";
+    return;
+  }
+
+  proc_resolver_ = delegate_->GetGLProcResolver();
+
+  delegate_->GLContextClearCurrent();
+
+  valid_ = true;
+  context_owner_ = false;
 }
 
 GPUSurfaceGL::~GPUSurfaceGL() {
@@ -103,7 +121,9 @@ GPUSurfaceGL::~GPUSurfaceGL() {
   }
 
   onscreen_surface_ = nullptr;
-  context_->releaseResourcesAndAbandonContext();
+  if (context_owner_) {
+    context_->releaseResourcesAndAbandonContext();
+  }
   context_ = nullptr;
 
   delegate_->GLContextClearCurrent();

@@ -37,6 +37,8 @@ class ExternalViewEmbedder {
   virtual SkCanvas* CompositeEmbeddedView(int view_id,
                                           const EmbeddedViewParams& params) = 0;
 
+  virtual bool SubmitFrame(GrContext* context) { return false; };
+
   virtual ~ExternalViewEmbedder() = default;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ExternalViewEmbedder);

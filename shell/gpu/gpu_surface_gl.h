@@ -49,6 +49,9 @@ class GPUSurfaceGL : public Surface {
  public:
   GPUSurfaceGL(GPUSurfaceGLDelegate* delegate);
 
+  // Creates a new GL surface reusing an existing GrContext.
+  GPUSurfaceGL(sk_sp<GrContext> gr_context, GPUSurfaceGLDelegate* delegate);
+
   ~GPUSurfaceGL() override;
 
   // |shell::Surface|
@@ -74,6 +77,7 @@ class GPUSurfaceGL : public Surface {
   sk_sp<SkSurface> offscreen_surface_;
   bool valid_ = false;
   fml::WeakPtrFactory<GPUSurfaceGL> weak_factory_;
+  bool context_owner_;
 
   bool CreateOrUpdateSurfaces(const SkISize& size);
 

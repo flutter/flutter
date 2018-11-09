@@ -26,13 +26,14 @@
 
 namespace shell {
 
+class IOSGLContext;
 class IOSSurface;
 
 struct FlutterPlatformViewLayer {
-  FlutterPlatformViewLayer(UIView* overlay_view,
+  FlutterPlatformViewLayer(fml::scoped_nsobject<UIView> overlay_view,
                            std::unique_ptr<IOSSurface> ios_surface,
                            std::unique_ptr<Surface> surface)
-      : overlay_view([overlay_view retain]),
+      : overlay_view(std::move(overlay_view)),
         ios_surface(std::move(ios_surface)),
         surface(std::move(surface)){};
 
@@ -55,14 +56,14 @@ class FlutterPlatformViewsController {
 
   std::vector<SkCanvas*> GetCurrentCanvases();
 
-  SkCanvas* CompositeEmbeddedView(int view_id,
-                                  const flow::EmbeddedViewParams& params,
-                                  IOSSurface& surface);
+  SkCanvas* CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params);
 
   // Discards all platform views instances and auxiliary resources.
   void Reset();
 
-  bool Present();
+  bool SubmitFrame(bool gl_rendering,
+                   GrContext* gr_context,
+                   std::shared_ptr<IOSGLContext> gl_context);
 
   void OnMethodCall(FlutterMethodCall* call, FlutterResult& result);
 
@@ -82,13 +83,16 @@ class FlutterPlatformViewsController {
   // The latest composition order that was presented in Present().
   std::vector<int64_t> active_composition_order_;
 
-  std::map<int64_t, std::unique_ptr<SurfaceFrame>> composition_frames_;
+  std::map<int64_t, std::unique_ptr<SkPictureRecorder>> picture_recorders_;
 
   void OnCreate(FlutterMethodCall* call, FlutterResult& result);
   void OnDispose(FlutterMethodCall* call, FlutterResult& result);
   void OnAcceptGesture(FlutterMethodCall* call, FlutterResult& result);
 
   void EnsureOverlayInitialized(int64_t overlay_id);
+  void EnsureGLOverlayInitialized(int64_t overlay_id,
+                                  std::shared_ptr<IOSGLContext> gl_context,
+                                  GrContext* gr_context);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterPlatformViewsController);
 };

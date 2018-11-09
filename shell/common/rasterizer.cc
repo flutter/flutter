@@ -178,6 +178,9 @@ bool Rasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
 
   if (compositor_frame && compositor_frame->Raster(layer_tree, false)) {
     frame->Submit();
+    if (external_view_embedder != nullptr) {
+      external_view_embedder->SubmitFrame(surface_->GetContext());
+    }
     FireNextFrameCallbackIfPresent();
     return true;
   }

@@ -63,14 +63,15 @@
 #endif  // TARGET_IPHONE_SIMULATOR
 }
 
-- (std::unique_ptr<shell::IOSSurface>)createSurface {
-  if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
-    // TODO(amirh): create a GL surface.
-    return nullptr;
-  } else {
-    fml::scoped_nsobject<CALayer> layer(reinterpret_cast<CALayer*>([self.layer retain]));
-    return std::make_unique<shell::IOSSurfaceSoftware>(std::move(layer), nullptr);
-  }
+- (std::unique_ptr<shell::IOSSurface>)createSoftwareSurface {
+  fml::scoped_nsobject<CALayer> layer(reinterpret_cast<CALayer*>([self.layer retain]));
+  return std::make_unique<shell::IOSSurfaceSoftware>(std::move(layer), nullptr);
+}
+
+- (std::unique_ptr<shell::IOSSurfaceGL>)createGLSurfaceWithContext:
+    (std::shared_ptr<shell::IOSGLContext>)gl_context {
+  fml::scoped_nsobject<CAEAGLLayer> eagl_layer(reinterpret_cast<CAEAGLLayer*>([self.layer retain]));
+  return std::make_unique<shell::IOSSurfaceGL>(eagl_layer, std::move(gl_context));
 }
 
 // TODO(amirh): implement drawLayer to suppoer snapshotting.

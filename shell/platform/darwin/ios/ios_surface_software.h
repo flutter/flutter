@@ -57,6 +57,9 @@ class IOSSurfaceSoftware final : public IOSSurface,
   // |flow::ExternalViewEmbedder|
   SkCanvas* CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) override;
 
+  // |flow::ExternalViewEmbedder|
+  virtual bool SubmitFrame(GrContext* context) override;
+
  private:
   fml::scoped_nsobject<CALayer> layer_;
   sk_sp<SkSurface> sk_surface_;
