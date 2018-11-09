@@ -201,10 +201,14 @@ abstract class PointerEvent {
   /// The area of the screen being pressed.
   ///
   /// This value is scaled to a range between 0 and 1. It can be used to
-  /// determine fat touch events. This value is only set on Android, and is
+  /// determine fat touch events. This value is only set on Android and is
   /// a device specific approximation within the range of detectable values.
   /// So, for example, the value of 0.1 could mean a touch with the tip of
   /// the finger, 0.2 a touch with full finger, and 0.3 the full palm.
+  ///
+  /// Because this value uses device-specific range and is uncalibrated,
+  /// it is of limited use and is primarily retained in order to be able
+  /// to reconstruct original pointer events for [AndroidView].
   final double size;
 
   /// The radius of the contact ellipse along the major axis, in logical pixels.
