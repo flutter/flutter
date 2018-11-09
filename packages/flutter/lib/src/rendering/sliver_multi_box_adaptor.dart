@@ -139,12 +139,9 @@ abstract class KeepAliveParentDataMixin extends ParentData {
 ///
 /// [RenderSliverWithKeepAliveMixin.setupParentData] must be implemented to use
 /// a parentData class that uses the right mixin or whatever is appropriate.
-abstract class RenderSliverWithKeepAliveMixin extends RenderSliver {
-  /// This class is intended to be used as a mixin, and should not be
-  /// extended directly.
-  factory RenderSliverWithKeepAliveMixin._() => null;
-
-  /// Alerts the developer that the child's parentData is
+mixin RenderSliverWithKeepAliveMixin implements RenderSliver {
+  /// Alerts the developer that the child's parentData needs to be of type
+  /// [KeepAliveParentDataMixin].
   @override
   void setupParentData(RenderObject child) {
     assert(child.parentData is KeepAliveParentDataMixin);
