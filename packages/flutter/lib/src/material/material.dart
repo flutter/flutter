@@ -194,6 +194,7 @@ class Material extends StatefulWidget {
   /// the shape is rectangular, and the default color.
   final MaterialType type;
 
+  /// {@template flutter.material.material.elevation}
   /// The z-coordinate at which to place this material. This controls the size
   /// of the shadow below the material.
   ///
@@ -202,6 +203,7 @@ class Material extends StatefulWidget {
   ///
   /// Defaults to 0. Changing this value will cause the shadow to animate over
   /// [animationDuration].
+  /// {@endtemplate}
   final double elevation;
 
   /// The color to paint the material.

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -23,15 +25,23 @@ import 'theme.dart';
 ///    application.
 class DialogTheme extends Diagnosticable {
   /// Creates a dialog theme that can be used for [ThemeData.dialogTheme].
-  const DialogTheme({ this.shape });
+  const DialogTheme({ this.elevation, this.shape });
+
+  /// Default value for [Dialog.elevation].
+  ///
+  /// If null, the [Dialog] elevation defaults to `24.0`.
+  final double elevation;
 
   /// Default value for [Dialog.shape].
   final ShapeBorder shape;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
-  DialogTheme copyWith({ ShapeBorder shape }) {
-    return DialogTheme(shape: shape ?? this.shape);
+  DialogTheme copyWith({ double elevation, ShapeBorder shape }) {
+    return DialogTheme(
+      elevation: elevation ?? this.elevation,
+      shape: shape ?? this.shape,
+    );
   }
 
   /// The data from the closest [DialogTheme] instance given the build context.
@@ -47,7 +57,8 @@ class DialogTheme extends Diagnosticable {
   static DialogTheme lerp(DialogTheme a, DialogTheme b, double t) {
     assert(t != null);
     return DialogTheme(
-        shape: ShapeBorder.lerp(a?.shape, b?.shape, t)
+      elevation: lerpDouble(a?.elevation, b?.elevation, t),
+      shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
     );
   }
 
@@ -61,12 +72,14 @@ class DialogTheme extends Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     final DialogTheme typedOther = other;
-    return typedOther.shape == shape;
+    return typedOther.elevation == elevation
+        && typedOther.shape == shape;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('elevation', elevation));
   }
 }

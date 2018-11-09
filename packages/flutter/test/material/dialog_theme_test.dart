@@ -35,6 +35,27 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeD
 final Key _painterKey = UniqueKey();
 
 void main() {
+  testWidgets('Custom dialog elevation', (WidgetTester tester) async {
+    const double customElevation = 12.0;
+    const AlertDialog dialog = AlertDialog(
+      title: Text('Title'),
+      actions: <Widget>[ ],
+    );
+    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(elevation: customElevation));
+
+    await tester.pumpWidget(
+        _appWithAlertDialog(tester, dialog, theme: theme)
+    );
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1));
+
+    final StatefulElement widget = tester.element(
+        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
+    final Material materialWidget = widget.state.widget;
+    expect(materialWidget.elevation, customElevation);
+  });
+
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
     const RoundedRectangleBorder customBorder =
       RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));

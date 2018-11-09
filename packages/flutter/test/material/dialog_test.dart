@@ -85,6 +85,24 @@ void main() {
     expect(materialWidget.shape, _defaultDialogShape);
   });
 
+  testWidgets('Custom dialog elevation', (WidgetTester tester) async {
+    const double customElevation = 12.0;
+    const AlertDialog dialog = AlertDialog(
+      actions: <Widget>[ ],
+      elevation: customElevation,
+    );
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1));
+
+    final StatefulElement widget = tester.element(
+        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
+    final Material materialWidget = widget.state.widget;
+    expect(materialWidget.elevation, customElevation);
+  });
+
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
     const RoundedRectangleBorder customBorder =
       RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
