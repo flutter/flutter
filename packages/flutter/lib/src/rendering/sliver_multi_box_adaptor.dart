@@ -135,10 +135,10 @@ abstract class KeepAliveParentDataMixin extends ParentData {
   bool get keptAlive;
 }
 
-// This class exists to dissociate [KeepAlive] from [RenderSliverMultiBoxAdaptor].
+/// This class exists to dissociate [KeepAlive] from [RenderSliverMultiBoxAdaptor].
 abstract class RenderSliverWithKeepAliveMixin extends RenderSliver {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
+  /// This class is intended to be used as a mixin, and should not be
+  /// extended directly.
   factory RenderSliverWithKeepAliveMixin._() => null;
 
   @override

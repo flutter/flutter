@@ -636,7 +636,6 @@ class _SliverAlternativeToMultiBoxAdaptorElement extends RenderObjectElement{
 
   @override
   void insertChildRenderObject(RenderObject child, int slot) {
-    renderObject.
   }
 
   @override
@@ -658,126 +657,46 @@ class RenderSliverAlternativeToMultiBoxAdaptor extends RenderSliver
   }
 }
 
-class _Theatre extends RenderObjectWidget {
-  _Theatre({
-    this.onstage,
-    @required this.offstage,
-  }) : assert(offstage != null),
-        assert(!offstage.any((Widget child) => child == null));
+ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver
+    with ContainerRenderObjectMixin<RenderBox, SliverMultiBoxAdaptorParentData>,
+        RenderSliverHelpers, RenderSliverWithKeepAliveMixin {
 
-  final Stack onstage;
+  RenderSliverMultiBoxAdaptorAlt({
+    RenderSliverBoxChildManager childManager
+  }) : _childManager = childManager;
 
-  final List<Widget> offstage;
+  @protected
+  RenderSliverBoxChildManager get childManager => _childManager;
+  final RenderSliverBoxChildManager _childManager;
 
-//  @override
-//   createElement() =>
+  /// The nodes being kept alive despite not being visible.
+  final Map<int, RenderBox> _keepAliveBucket = <int, RenderBox>{};
 
-  @override
-  _TheatreElement createRenderObject(BuildContext context) => _TheatreElement(this);
-}
-
-class _TheatreElement extends RenderObjectElement {
-  _TheatreElement(_Theatre widget)
-      : assert(!debugChildrenHaveDuplicateKeys(widget, widget.offstage)),
-        super(widget);
+  final List<RenderBox> children = <RenderBox>[];
 
   @override
-  _Theatre get widget => super.widget;
-
-  @override
-  _RenderTheatre get renderObject => super.renderObject;
-
-  Element _onstage;
-  static final Object _onstageSlot = Object();
-
-  List<Element> _offstage;
-  final Set<Element> _forgottenOffstageChildren = HashSet<Element>();
-
-  @override
-  void insertChildRenderObject(RenderBox child, dynamic slot) {
-    assert(renderObject.debugValidateChild(child));
-    if (slot == _onstageSlot) {
-      assert(child is RenderStack);
-      renderObject.child = child;
-    } else {
-      assert(slot == null || slot is Element);
-      renderObject.insert(child, after: slot?.renderObject);
-    }
+  void insert(RenderBox child, { RenderBox after }) {
+    children.add(child);
   }
 
   @override
-  void moveChildRenderObject(RenderBox child, dynamic slot) {
-    if (slot == _onstageSlot) {
-      renderObject.remove(child);
-      assert(child is RenderStack);
-      renderObject.child = child;
-    } else {
-      assert(slot == null || slot is Element);
-      if (renderObject.child == child) {
-        renderObject.child = null;
-        renderObject.insert(child, after: slot?.renderObject);
-      } else {
-        renderObject.move(child, after: slot?.renderObject);
-      }
-    }
+  void remove(RenderBox child) {
+    children.remove(child);
   }
 
   @override
-  void removeChildRenderObject(RenderBox child) {
-    if (renderObject.child == child) {
-      renderObject.child = null;
-    } else {
-      renderObject.remove(child);
-    }
+  void removeAll() {
+    children.clear();
+  }
+ 
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    children.forEach(visitor);
   }
 
   @override
-  void visitChildren(ElementVisitor visitor) {
-    if (_onstage != null)
-      visitor(_onstage);
-    for (Element child in _offstage) {
-      if (!_forgottenOffstageChildren.contains(child))
-        visitor(child);
-    }
-  }
-
-  @override
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
-    if (_onstage != null)
-      visitor(_onstage);
-  }
-
-  @override
-  bool forgetChild(Element child) {
-    if (child == _onstage) {
-      _onstage = null;
-    } else {
-      assert(_offstage.contains(child));
-      assert(!_forgottenOffstageChildren.contains(child));
-      _forgottenOffstageChildren.add(child);
-    }
-    return true;
-  }
-
-  @override
-  void mount(Element parent, dynamic newSlot) {
-    super.mount(parent, newSlot);
-    _onstage = updateChild(_onstage, widget.onstage, _onstageSlot);
-    _offstage = List<Element>(widget.offstage.length);
-    Element previousChild;
-    for (int i = 0; i < _offstage.length; i += 1) {
-      final Element newChild = inflateWidget(widget.offstage[i], previousChild);
-      _offstage[i] = newChild;
-      previousChild = newChild;
-    }
-  }
-
-  @override
-  void update(_Theatre newWidget) {
-    super.update(newWidget);
-    assert(widget == newWidget);
-    _onstage = updateChild(_onstage, widget.onstage, _onstageSlot);
-    _offstage = updateChildren(_offstage, widget.offstage, forgottenChildren: _forgottenOffstageChildren);
-    _forgottenOffstageChildren.clear();
+  void performLayout() {
+    // Perform a layout where children are not laid out in the same order
+    // as they are defined.
   }
 }
