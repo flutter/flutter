@@ -1748,7 +1748,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 geometryNotifier: _geometryNotifier,
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
-                    bottomPadding: MediaQuery.of(context).padding.bottom,
+                bottomPadding: MediaQuery.of(context).padding.bottom,
               ),
             );
           }),
