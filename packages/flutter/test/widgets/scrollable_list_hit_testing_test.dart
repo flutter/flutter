@@ -27,7 +27,7 @@ void main() {
                   child: GestureDetector(
                     onTap: () { tapped.add(item); },
                     child: Text('$item'),
-                    startBehavior: DragStartBehavior.down,
+                    dragStartBehavior: DragStartBehavior.down,
                   ),
                 );
               }).toList(),
@@ -71,7 +71,7 @@ void main() {
                   child: GestureDetector(
                     onTap: () { tapped.add(item); },
                     child: Text('$item'),
-                    startBehavior: DragStartBehavior.down,
+                    dragStartBehavior: DragStartBehavior.down,
                   ),
                 );
               }).toList(),

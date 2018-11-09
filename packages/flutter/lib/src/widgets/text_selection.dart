@@ -264,7 +264,9 @@ class TextSelectionOverlay {
   /// text field.
   final TextSelectionDelegate selectionDelegate;
 
-  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
+  /// If set to [DragStartBehavior.start], handle drag behavior will
+  /// begin upon the drag gesture winning the arena. If set to
+  /// [DragStartBehavior.down] it will begin when a down event is first detected.
   final DragStartBehavior dragStartBehavior;
 
   /// Controls the fade-in animations.
@@ -534,7 +536,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
       link: widget.layerLink,
       showWhenUnlinked: false,
       child: GestureDetector(
-        startBehavior: widget.dragStartBehavior,
+        dragStartBehavior: widget.dragStartBehavior,
         onPanStart: _handleDragStart,
         onPanUpdate: _handleDragUpdate,
         onTap: _handleTap,

@@ -254,7 +254,7 @@ class NestedScrollView extends StatefulWidget {
   /// the [PrimaryScrollController] provided by the [NestedScrollView].
   final Widget body;
 
-  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   /// Returns the [SliverOverlapAbsorberHandle] of the nearest ancestor

@@ -23,7 +23,7 @@ void main() {
         dragStartBehavior: DragStartBehavior.down,
         children: kStates.map<Widget>((String state) {
           return GestureDetector(
-            startBehavior: DragStartBehavior.down,
+            dragStartBehavior: DragStartBehavior.down,
             onTap: () {
               log.add(state);
             },

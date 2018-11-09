@@ -177,7 +177,7 @@ class GestureDetector extends StatelessWidget {
     this.onScaleEnd,
     this.behavior,
     this.excludeFromSemantics = false,
-    this.startBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(excludeFromSemantics != null),
        assert(() {
          final bool haveVerticalDrag = onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null;
@@ -332,8 +332,11 @@ class GestureDetector extends StatelessWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
-  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
-  final DragStartBehavior startBehavior;
+  /// If set to [DragStartBehavior.start], gesture drag behavior will
+  /// begin upon the drag gesture winning the arena. If set to
+  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  /// Only behavior for horizontal, vertical and pan drags will be affected.
+  final DragStartBehavior dragStartBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -387,7 +390,7 @@ class GestureDetector extends StatelessWidget {
             ..onUpdate = onVerticalDragUpdate
             ..onEnd = onVerticalDragEnd
             ..onCancel = onVerticalDragCancel
-            ..dragStartBehavior = startBehavior;
+            ..dragStartBehavior = dragStartBehavior;
         },
       );
     }
@@ -406,7 +409,7 @@ class GestureDetector extends StatelessWidget {
             ..onUpdate = onHorizontalDragUpdate
             ..onEnd = onHorizontalDragEnd
             ..onCancel = onHorizontalDragCancel
-            ..dragStartBehavior = startBehavior;
+            ..dragStartBehavior = dragStartBehavior;
         },
       );
     }
@@ -425,7 +428,7 @@ class GestureDetector extends StatelessWidget {
             ..onUpdate = onPanUpdate
             ..onEnd = onPanEnd
             ..onCancel = onPanCancel
-            ..dragStartBehavior = startBehavior;
+            ..dragStartBehavior = dragStartBehavior;
         },
       );
     }
@@ -452,7 +455,7 @@ class GestureDetector extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<DragStartBehavior>('startBehavior', startBehavior));
+    properties.add(EnumProperty<DragStartBehavior>('startBehavior', dragStartBehavior));
   }
 }
 

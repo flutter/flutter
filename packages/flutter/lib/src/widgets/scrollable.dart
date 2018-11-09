@@ -181,7 +181,11 @@ class Scrollable extends StatefulWidget {
   ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
   final int semanticChildCount;
 
-  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
+  /// {@template flutter.widgets.scrollable.dragStartBehavior}
+  /// If set to [DragStartBehavior.start], scrolling drag behavior will
+  /// begin upon the drag gesture winning the arena. If set to
+  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
   /// The axis along which the scroll view scrolls.

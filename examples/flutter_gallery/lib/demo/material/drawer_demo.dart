@@ -108,7 +108,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
               ),
               otherAccountsPictures: <Widget>[
                 GestureDetector(
-                  startBehavior: DragStartBehavior.down,
+                  dragStartBehavior: DragStartBehavior.down,
                   onTap: () {
                     _onOtherAccountsTap(context);
                   },
@@ -123,7 +123,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                   ),
                 ),
                 GestureDetector(
-                  startBehavior: DragStartBehavior.down,
+                  dragStartBehavior: DragStartBehavior.down,
                   onTap: () {
                     _onOtherAccountsTap(context);
                   },

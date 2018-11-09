@@ -172,7 +172,9 @@ class PaginatedDataTable extends StatefulWidget {
   /// [PaginatedDataTable] constructor is called.
   final DataTableSource source;
 
-  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
+  /// If set to [DragStartBehavior.start], scroll drag behavior will
+  /// begin upon the drag gesture winning the arena. If set to
+  /// [DragStartBehavior.down] it will begin when a down event is first detected.
   final DragStartBehavior dragStartBehavior;
 
   @override

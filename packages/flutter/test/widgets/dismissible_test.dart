@@ -22,7 +22,7 @@ Widget buildTest({ double startToEndThreshold, TextDirection textDirection = Tex
       builder: (BuildContext context, StateSetter setState) {
         Widget buildDismissibleItem(int item) {
           return Dismissible(
-            startBehavior: DragStartBehavior.down,
+            dragStartBehavior: DragStartBehavior.down,
             key: ValueKey<int>(item),
             direction: dismissDirection,
             onDismissed: (DismissDirection direction) {
@@ -202,7 +202,7 @@ class Test1215DismissibleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      startBehavior: DragStartBehavior.down,
+      dragStartBehavior: DragStartBehavior.down,
       key: ObjectKey(text),
       child: AspectRatio(
         aspectRatio: 1.0,

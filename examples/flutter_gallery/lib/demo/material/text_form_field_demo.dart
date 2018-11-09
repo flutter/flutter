@@ -68,7 +68,7 @@ class _PasswordFieldState extends State<PasswordField> {
         labelText: widget.labelText,
         helperText: widget.helperText,
         suffixIcon: GestureDetector(
-          startBehavior: DragStartBehavior.down,
+          dragStartBehavior: DragStartBehavior.down,
           onTap: () {
             setState(() {
               _obscureText = !_obscureText;

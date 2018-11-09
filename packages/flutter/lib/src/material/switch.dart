@@ -171,7 +171,9 @@ class Switch extends StatefulWidget {
 
   final _SwitchType _switchType;
 
-  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
+  /// If set to [DragStartBehavior.start], switching drag behavior will
+  /// begin upon the drag gesture winning the arena. If set to
+  /// [DragStartBehavior.down] it will begin when a down event is first detected.
   final DragStartBehavior dragStartBehavior;
 
   @override

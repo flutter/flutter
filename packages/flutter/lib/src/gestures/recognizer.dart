@@ -50,9 +50,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   ///
   /// The argument is optional and is only used for debug purposes (e.g. in the
   /// [toString] serialization).
-  GestureRecognizer({
-    this.debugOwner,
-  });
+  GestureRecognizer({ this.debugOwner });
 
   /// The recognizer's owner.
   ///

@@ -192,7 +192,9 @@ class DrawerController extends StatefulWidget {
   /// Optional callback that is called when a [Drawer] is opened or closed.
   final DrawerCallback drawerCallback;
 
-  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
+  /// If set to [DragStartBehavior.start], drawer opening drag behavior will
+  /// begin upon the drag gesture winning the arena. If set to
+  /// [DragStartBehavior.down] it will begin when a down event is first detected.
   final DragStartBehavior dragStartBehavior;
 
   @override
@@ -390,7 +392,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           behavior: HitTestBehavior.translucent,
           excludeFromSemantics: true,
           child: Container(width: _kEdgeDragWidth),
-          startBehavior: widget.dragStartBehavior,
+          dragStartBehavior: widget.dragStartBehavior,
         ),
       );
     } else {
@@ -401,7 +403,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         onHorizontalDragEnd: _settle,
         onHorizontalDragCancel: _handleDragCancel,
         excludeFromSemantics: true,
-        startBehavior: widget.dragStartBehavior,
+        dragStartBehavior: widget.dragStartBehavior,
         child: RepaintBoundary(
           child: Stack(
             children: <Widget>[

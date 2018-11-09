@@ -261,7 +261,7 @@ class SingleChildScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   AxisDirection _getDirection(BuildContext context) {

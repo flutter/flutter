@@ -281,7 +281,7 @@ class DayPicker extends StatelessWidget {
   final SelectableDayPredicate selectableDayPredicate;
 
   /// {@template material.date_picker]
-  /// If set to [DragStartBehavior.start], drag behavior will begin upon the
+  /// If set to [DragStartBehavior.start], picker drag behavior will begin upon the
   /// drag gesture winning the arena. If set to [DragStartBehavior.down] it will
   /// begin when a down event is first detected.
   /// {@endtemplate}
@@ -448,7 +448,7 @@ class DayPicker extends StatelessWidget {
               onChanged(dayToBuild);
             },
             child: dayWidget,
-            startBehavior: dragStartBehavior,
+            dragStartBehavior: dragStartBehavior,
           );
         }
 

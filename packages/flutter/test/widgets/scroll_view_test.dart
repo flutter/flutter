@@ -27,7 +27,7 @@ void main() {
                 color: const Color(0xFF0000FF),
                 child: Text(state),
               ),
-              startBehavior: DragStartBehavior.down,
+              dragStartBehavior: DragStartBehavior.down,
             );
           }).toList(),
         ),
@@ -94,7 +94,7 @@ void main() {
               delegate: SliverChildListDelegate(
                 kStates.map<Widget>((String state) {
                   return GestureDetector(
-                    startBehavior: DragStartBehavior.down,
+                    dragStartBehavior: DragStartBehavior.down,
                     onTap: () {
                       log.add(state);
                     },

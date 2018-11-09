@@ -84,7 +84,7 @@ class Dismissible extends StatefulWidget {
     this.dismissThresholds = const <DismissDirection, double>{},
     this.movementDuration = const Duration(milliseconds: 200),
     this.crossAxisEndOffset = 0.0,
-    this.startBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(key != null),
        assert(secondaryBackground != null ? background != null : true),
        super(key: key);
@@ -145,8 +145,10 @@ class Dismissible extends StatefulWidget {
   /// it is positive or negative.
   final double crossAxisEndOffset;
 
-  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
-  final DragStartBehavior startBehavior;
+  /// If set to [DragStartBehavior.start], dismissible closing drag behavior will
+  /// begin upon the drag gesture winning the arena. If set to
+  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  final DragStartBehavior dragStartBehavior;
 
   @override
   _DismissibleState createState() => _DismissibleState();
@@ -434,12 +436,12 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         _sizePriorToCollapse = context.size;
         _resizeAnimation = _resizeController.drive(
           CurveTween(
-              curve: _kResizeTimeCurve
+            curve: _kResizeTimeCurve
           ),
         ).drive(
           Tween<double>(
-              begin: 1.0,
-              end: 0.0
+            begin: 1.0,
+            end: 0.0
           ),
         );
       });
@@ -530,7 +532,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
       behavior: HitTestBehavior.opaque,
       child: content,
-      startBehavior: widget.startBehavior,
+      dragStartBehavior: widget.dragStartBehavior,
     );
   }
 }

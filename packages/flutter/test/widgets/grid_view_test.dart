@@ -34,7 +34,7 @@ void main() {
           crossAxisCount: 4,
           children: kStates.map<Widget>((String state) {
             return GestureDetector(
-              startBehavior: DragStartBehavior.down,
+              dragStartBehavior: DragStartBehavior.down,
               onTap: () {
                 log.add(state);
               },
@@ -107,7 +107,7 @@ void main() {
           maxCrossAxisExtent: 200.0,
           children: kStates.map<Widget>((String state) {
             return GestureDetector(
-              startBehavior: DragStartBehavior.down,
+              dragStartBehavior: DragStartBehavior.down,
               onTap: () {
                 log.add(state);
               },
