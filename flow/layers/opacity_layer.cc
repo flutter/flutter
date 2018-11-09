@@ -31,12 +31,12 @@ void OpacityLayer::Paint(PaintContext& context) const {
   SkPaint paint;
   paint.setAlpha(alpha_);
 
-  SkAutoCanvasRestore save(context.canvas, true);
-  context.canvas->translate(offset_.fX, offset_.fY);
+  SkAutoCanvasRestore save(context.internal_nodes_canvas, true);
+  context.internal_nodes_canvas->translate(offset_.fX, offset_.fY);
 
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  context.canvas->setMatrix(
-      RasterCache::GetIntegralTransCTM(context.canvas->getTotalMatrix()));
+  context.internal_nodes_canvas->setMatrix(RasterCache::GetIntegralTransCTM(
+      context.leaf_nodes_canvas->getTotalMatrix()));
 #endif
 
   // Embedded platform views are changing the canvas in the middle of the paint
@@ -45,11 +45,11 @@ void OpacityLayer::Paint(PaintContext& context) const {
   // don't use the cache.
   if (context.view_embedder == nullptr && layers().size() == 1 &&
       context.raster_cache) {
-    const SkMatrix& ctm = context.canvas->getTotalMatrix();
+    const SkMatrix& ctm = context.leaf_nodes_canvas->getTotalMatrix();
     RasterCacheResult child_cache =
         context.raster_cache->Get(layers()[0].get(), ctm);
     if (child_cache.is_valid()) {
-      child_cache.draw(*context.canvas, &paint);
+      child_cache.draw(*context.leaf_nodes_canvas, &paint);
       return;
     }
   }

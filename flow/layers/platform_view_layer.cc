@@ -30,13 +30,13 @@ void PlatformViewLayer::Paint(PaintContext& context) const {
     return;
   }
   EmbeddedViewParams params;
-  SkMatrix transform = context.canvas->getTotalMatrix();
+  SkMatrix transform = context.leaf_nodes_canvas->getTotalMatrix();
   params.offsetPixels =
       SkPoint::Make(transform.getTranslateX(), transform.getTranslateY());
   params.sizePoints = size_;
 
   SkCanvas* canvas =
       context.view_embedder->CompositeEmbeddedView(view_id_, params);
-  context.canvas = canvas;
+  context.leaf_nodes_canvas = canvas;
 }
 }  // namespace flow

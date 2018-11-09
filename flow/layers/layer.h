@@ -77,11 +77,7 @@ class Layer {
     // The leaf_nodes_canvas is the "current" canvas and is used by leaf
     // layers.
     SkCanvas* internal_nodes_canvas;
-    // I'm temporarily leaving the name of this field to be canvas to reduce
-    // noise in the incremental change. A followup change will rename this
-    // and use the corrrect canvas in each callsite.
-    // TODO(amirh) rename canvas to leaf_nodes_canvas.
-    SkCanvas* canvas;
+    SkCanvas* leaf_nodes_canvas;
     ExternalViewEmbedder* view_embedder;
     const Stopwatch& frame_time;
     const Stopwatch& engine_time;
