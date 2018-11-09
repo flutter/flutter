@@ -546,46 +546,12 @@ void main() {
   });
 
   testWidgets('AutomaticKeepAlive with SliverKeepAliveWidget', (WidgetTester tester) async {
-    RenderSliverAlternativeToMultiBoxAdaptor r = RenderSliverAlternativeToMultiBoxAdaptor();
+    RenderSliverMultiBoxAdaptorAlt alternate = RenderSliverMultiBoxAdaptorAlt();
+    RenderBox child = RenderBoxKeepAlive();
+    alternate.add(child);
 
-
-
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: ListView.builder(
-        addSemanticIndexes: false,
-        itemCount: 250,
-        itemBuilder: (BuildContext context, int index){
-          if (index % 2 == 0){
-            return _AlwaysKeepAlive(
-              key: GlobalObjectKey<_AlwaysKeepAliveState>(index),
-            );
-          }
-          return Container(
-            height: 44.0,
-            child: Text('FooBar $index'),
-          );
-        },
-      ),
-    ));
-
-    expect(find.text('keep me alive'), findsNWidgets(7));
-    expect(find.text('FooBar 1'), findsOneWidget);
-    expect(find.text('FooBar 3'), findsOneWidget);
-
-    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0)), findsOneWidget);
-
-    final ScrollableState state = tester.state(find.byType(Scrollable));
-    final ScrollPosition position = state.position;
-    position.jumpTo(3025.0);
-
-    await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0), skipOffstage: false), findsOneWidget);
-
-    expect(find.text('keep me alive', skipOffstage: false), findsNWidgets(23));
-    expect(find.text('FooBar 1'), findsNothing);
-    expect(find.text('FooBar 3'), findsNothing);
-    expect(find.text('FooBar 73'), findsOneWidget);
+    AlwaysKeepAliveRenderBoxState state = tester.state(find.byType(RenderBoxKeepAlive));
+    expect(state.wantKeepAlive, true);
   });
 }
 
@@ -609,57 +575,31 @@ class _AlwaysKeepAliveState extends State<_AlwaysKeepAlive> with AutomaticKeepAl
     );
   }
 }
-/// Theses classes are here to make sure that [KeepAlive] is dissociate from [RenderSliverMultiBoxAdaptor].
-class _SliverAlternativeToMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 
-  @override
-  _SliverAlternativeToMultiBoxAdaptorElement createElement() =>
-      _SliverAlternativeToMultiBoxAdaptorElement(this);
-
-  @override
-  RenderSliverAlternativeToMultiBoxAdaptor createRenderObject(BuildContext context) => RenderSliverAlternativeToMultiBoxAdaptor();
+class RenderBoxKeepAlive extends RenderBox {
+  State<StatefulWidget> createState() => AlwaysKeepAliveRenderBoxState();
 }
 
-class _SliverAlternativeToMultiBoxAdaptorElement extends RenderObjectElement{
-  _SliverAlternativeToMultiBoxAdaptorElement(_SliverAlternativeToMultiBoxAdaptorWidget widget)
-      : super(widget);
+class AlwaysKeepAliveRenderBoxState extends State<_AlwaysKeepAlive> with AutomaticKeepAliveClientMixin<_AlwaysKeepAlive> {
+  @override
+  bool get wantKeepAlive => true;
 
   @override
-  _SliverAlternativeToMultiBoxAdaptorWidget get widget => super.widget;
-
-  @override
-  RenderSliverAlternativeToMultiBoxAdaptor get renderObject => super.renderObject;
-
-  @override
-  void forgetChild(Element child) {
-  }
-
-  @override
-  void insertChildRenderObject(RenderObject child, int slot) {
-  }
-
-  @override
-  void moveChildRenderObject(RenderObject child, int slot) {
-  }
-
-  @override
-  void removeChildRenderObject(RenderObject child) {
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Container(
+      height: 48.0,
+      child: const Text('keep me alive'),
+    );
   }
 }
 
-class RenderSliverAlternativeToMultiBoxAdaptor extends RenderSliver
-    with RenderSliverWithKeepAliveMixin,
-         RenderSliverHelpers {
-  @override
-  void performLayout() {
-    // Perform a layout where children are not laid out in the same order
-    // as they are defined.
-  }
-}
 
- class RenderSliverMultiBoxAdaptorAlt extends RenderSliver
-    with ContainerRenderObjectMixin<RenderBox, SliverMultiBoxAdaptorParentData>,
-        RenderSliverHelpers, RenderSliverWithKeepAliveMixin {
+class RenderSliverMultiBoxAdaptorAlt extends RenderSliver
+    with ContainerRenderObjectMixin<RenderBox,
+        SliverMultiBoxAdaptorParentData>,
+        RenderSliverHelpers,
+        RenderSliverWithKeepAliveMixin {
 
   RenderSliverMultiBoxAdaptorAlt({
     RenderSliverBoxChildManager childManager
@@ -670,8 +610,6 @@ class RenderSliverAlternativeToMultiBoxAdaptor extends RenderSliver
   final RenderSliverBoxChildManager _childManager;
 
   /// The nodes being kept alive despite not being visible.
-  final Map<int, RenderBox> _keepAliveBucket = <int, RenderBox>{};
-
   final List<RenderBox> children = <RenderBox>[];
 
   @override
