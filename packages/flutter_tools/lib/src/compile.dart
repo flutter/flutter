@@ -221,8 +221,10 @@ class KernelCompiler {
     if (incrementalCompilerByteStorePath != null) {
       command.add('--incremental');
     }
+    Uri mainUri;
     if (packagesPath != null) {
       command.addAll(<String>['--packages', packagesPath]);
+       mainUri = _PackageUriMapper.findUri(mainPath, packagesPath);
     }
     if (outputFilePath != null) {
       command.addAll(<String>['--output-dill', outputFilePath]);
@@ -242,11 +244,6 @@ class KernelCompiler {
     if (extraFrontEndOptions != null)
       command.addAll(extraFrontEndOptions);
 
-    Uri mainUri;
-    if (packagesPath != null) {
-      command.addAll(<String>['--packages', packagesPath]);
-      mainUri = _PackageUriMapper.findUri(mainPath, packagesPath);
-    }
     command.add(mainUri?.toString() ?? mainPath);
 
     printTrace(command.join(' '));
