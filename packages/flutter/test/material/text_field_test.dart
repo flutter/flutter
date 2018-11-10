@@ -1808,6 +1808,29 @@ void main() {
     expect(find.text('5/10'), findsOneWidget);
   });
 
+  testWidgets(
+      'setting maxLength to TextField.noMaxLength shows only entered length',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: DefaultTextStyle(
+          style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+          child: Center(
+            child: TextField(
+              maxLength: TextField.noMaxLength,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('0'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '01234');
+    await tester.pump();
+
+    expect(find.text('5'), findsOneWidget);
+  });
   testWidgets('TextField identifies as text field in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
