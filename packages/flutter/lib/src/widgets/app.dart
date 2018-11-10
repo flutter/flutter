@@ -583,7 +583,7 @@ class WidgetsApp extends StatefulWidget {
   ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'), // 'zh_Hant_HK'
   /// ],
   /// ```
-  /// 
+  ///
   /// Omitting some these fallbacks may result in improperly resolved
   /// edge-cases, for example, a simplified Chinese user in Taiwan ('zh_Hans_TW')
   /// may resolve to traditional Chinese if 'zh_Hans' and 'zh_Hans_CN' are
