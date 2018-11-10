@@ -10,8 +10,7 @@ import 'colors.dart';
 import 'icons.dart';
 import 'text_selection.dart';
 
-export 'package:flutter/services.dart'
-    show TextInputType, TextInputAction, TextCapitalization;
+export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
 
 // Value extracted via color reader from iOS simulator.
 const BorderSide _kDefaultRoundedBorderSide = BorderSide(
@@ -176,20 +175,19 @@ class CupertinoTextField extends StatefulWidget {
     this.cursorColor = CupertinoColors.activeBlue,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
-  })  : assert(textAlign != null),
-        assert(autofocus != null),
-        assert(obscureText != null),
-        assert(autocorrect != null),
-        assert(maxLengthEnforced != null),
-        assert(scrollPadding != null),
-        assert(maxLines == null || maxLines > 0),
-        assert(maxLength == null || maxLength > 0),
-        assert(clearButtonMode != null),
-        assert(prefixMode != null),
-        assert(suffixMode != null),
-        keyboardType = keyboardType ??
-            (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-        super(key: key);
+  }) : assert(textAlign != null),
+       assert(autofocus != null),
+       assert(obscureText != null),
+       assert(autocorrect != null),
+       assert(maxLengthEnforced != null),
+       assert(scrollPadding != null),
+       assert(maxLines == null || maxLines > 0),
+       assert(maxLength == null || maxLength > 0),
+       assert(clearButtonMode != null),
+       assert(prefixMode != null),
+       assert(suffixMode != null),
+       keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+       super(key: key);
 
   /// Controls the text being edited.
   ///
@@ -288,18 +286,12 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.maxLines}
   final int maxLines;
 
-  /// If [maxLength] is set to this number, it disables the showing of the maximum length part of
-  /// the display, yet still gives a character counter.
-  static const int noMaxLength = 9007199254740992; // math.pow(2, 53);
-
   /// The maximum number of characters (Unicode scalar values) to allow in the
   /// text field.
   ///
   /// If set, a character counter will be displayed below the
   /// field, showing how many characters have been entered and how many are
-  /// allowed unless the value is set to [noMaxLength] in which case only the
-  /// current length is displayed and the maximum size is redacted.
-  /// After [maxLength] characters have been input, additional input
+  /// allowed. After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
   /// enforces the length with a [LengthLimitingTextInputFormatter], which is
   /// evaluated after the supplied [inputFormatters], if any.
@@ -397,51 +389,33 @@ class CupertinoTextField extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
 
-    properties.add(DiagnosticsProperty<TextEditingController>(
-        'controller', controller,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode,
-        defaultValue: null));
-    properties
-        .add(DiagnosticsProperty<BoxDecoration>('decoration', decoration));
+    properties.add(DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxDecoration>('decoration', decoration));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
     properties.add(StringProperty('placeholder', placeholder));
-    properties.add(DiagnosticsProperty<OverlayVisibilityMode>(
-        'prefix', prefix == null ? null : prefixMode));
-    properties.add(DiagnosticsProperty<OverlayVisibilityMode>(
-        'suffix', suffix == null ? null : suffixMode));
-    properties.add(DiagnosticsProperty<OverlayVisibilityMode>(
-        'clearButtonMode', clearButtonMode));
-    properties.add(DiagnosticsProperty<TextInputType>(
-        'keyboardType', keyboardType,
-        defaultValue: TextInputType.text));
-    properties.add(
-        DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('obscureText', obscureText,
-        defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect,
-        defaultValue: false));
+    properties.add(DiagnosticsProperty<OverlayVisibilityMode>('prefix', prefix == null ? null : prefixMode));
+    properties.add(DiagnosticsProperty<OverlayVisibilityMode>('suffix', suffix == null ? null : suffixMode));
+    properties.add(DiagnosticsProperty<OverlayVisibilityMode>('clearButtonMode', clearButtonMode));
+    properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
+    properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
-    properties.add(FlagProperty('maxLengthEnforced',
-        value: maxLengthEnforced, ifTrue: 'max length enforced'));
+    properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
   }
 }
 
-class _CupertinoTextFieldState extends State<CupertinoTextField>
-    with AutomaticKeepAliveClientMixin {
-  final GlobalKey<EditableTextState> _editableTextKey =
-      GlobalKey<EditableTextState>();
+class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticKeepAliveClientMixin {
+  final GlobalKey<EditableTextState> _editableTextKey = GlobalKey<EditableTextState>();
 
   TextEditingController _controller;
-  TextEditingController get _effectiveController =>
-      widget.controller ?? _controller;
+  TextEditingController get _effectiveController => widget.controller ?? _controller;
 
   FocusNode _focusNode;
-  FocusNode get _effectiveFocusNode =>
-      widget.focusNode ?? (_focusNode ??= FocusNode());
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
   @override
   void initState() {
@@ -479,8 +453,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
     _editableTextKey.currentState?.requestKeyboard();
   }
 
-  RenderEditable get _renderEditable =>
-      _editableTextKey.currentState.renderEditable;
+  RenderEditable get _renderEditable => _editableTextKey.currentState.renderEditable;
 
   void _handleTapDown(TapDownDetails details) {
     _renderEditable.handleTapDown(details);
@@ -517,19 +490,17 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
   }
 
   bool _showPrefixWidget(TextEditingValue text) {
-    return widget.prefix != null &&
-        _shouldShowAttachment(
-          attachment: widget.prefixMode,
-          hasText: text.text.isNotEmpty,
-        );
+    return widget.prefix != null && _shouldShowAttachment(
+      attachment: widget.prefixMode,
+      hasText: text.text.isNotEmpty,
+    );
   }
 
   bool _showSuffixWidget(TextEditingValue text) {
-    return widget.suffix != null &&
-        _shouldShowAttachment(
-          attachment: widget.suffixMode,
-          hasText: text.text.isNotEmpty,
-        );
+    return widget.suffix != null && _shouldShowAttachment(
+      attachment: widget.suffixMode,
+      hasText: text.text.isNotEmpty,
+    );
   }
 
   bool _showClearButton(TextEditingValue text) {
@@ -585,13 +556,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
           );
         }
 
-        rowChildren
-            .add(Expanded(child: Stack(children: stackChildren..add(child))));
+        rowChildren.add(Expanded(child: Stack(children: stackChildren..add(child))));
 
         // First add the explicit suffix if the suffix visibility mode matches.
         if (_showSuffixWidget(text)) {
           rowChildren.add(widget.suffix);
-          // Otherwise, try to show a clear button if its visibility mode matches.
+        // Otherwise, try to show a clear button if its visibility mode matches.
         } else if (_showClearButton(text)) {
           rowChildren.add(
             GestureDetector(
@@ -622,8 +592,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
     final Brightness keyboardAppearance = widget.keyboardAppearance;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
-    final List<TextInputFormatter> formatters =
-        widget.inputFormatters ?? <TextInputFormatter>[];
+    final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     final bool enabled = widget.enabled ?? true;
     if (widget.maxLength != null && widget.maxLengthEnforced) {
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
@@ -664,8 +633,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
     return Semantics(
       onTap: () {
         if (!controller.selection.isValid) {
-          controller.selection =
-              TextSelection.collapsed(offset: controller.text.length);
+          controller.selection = TextSelection.collapsed(offset: controller.text.length);
         }
         _requestKeyboard();
       },
