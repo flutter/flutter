@@ -34,7 +34,7 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
     with TickerProviderStateMixin {
   _WarmWelcomeScreenState({this.isInitialScreen});
 
-  static const int _kParallaxAnimationDuration = 400;
+  // static const int _kParallaxAnimationDuration = 400;
 
   // is the screen being displayed as a demo item or not?
   bool isInitialScreen = true;
@@ -63,7 +63,7 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
       parent: outAnimationController,
       curve: Curves.easeOut,
     );
-    final Animation<double> outScaleTween = Tween(
+    final Animation<double> outScaleTween = Tween<double>(
       begin: 1.0,
       end: 0.0,
     ).animate(outScaleAnimation);
@@ -71,7 +71,7 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
       parent: outAnimationController,
       curve: Curves.easeOut,
     );
-    final Animation<Offset> outSlideTween = Tween(
+    final Animation<Offset> outSlideTween = Tween<Offset>(
       begin: const Offset(0.0, 0.0),
       end: const Offset(1.0, 0.0),
     ).animate(slideAnimation);
@@ -86,7 +86,7 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
       parent: inAnimationController,
       curve: Curves.linear,
     );
-    final Animation<double> inScaleTween = Tween(
+    final Animation<double> inScaleTween = Tween<double>(
       begin: 0.6,
       end: 1.0,
     ).animate(inScaleAnimation);
@@ -161,25 +161,26 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
   }
 
   List<Widget> _secondaryWidgets(int index) {
-    var holders = <SecondaryWidgetHolder>[];
-    var widgets = <Widget>[];
+    List<SecondaryWidgetHolder> holders = <SecondaryWidgetHolder>[];
+    final List<Widget> widgets = <Widget>[];
 
     if (index == 2) {
-      AnimationController controller = AnimationController(
+      final AnimationController controller = AnimationController(
         duration: Duration(milliseconds: 750),
         vsync: this,
       );
       _secondaryAnimationControllers[index] = controller;
 
-      var begins = <double>[0.0, 0.55, 0.25, 0.75];
-      var ends = <double>[0.5, 1.0, 0.75, 1.0];
-      var scaleAnimations = <int, Animation<double>>{};
+      final List<double> begins = <double>[0.0, 0.55, 0.25, 0.75];
+      final List<double> ends = <double>[0.5, 1.0, 0.75, 1.0];
+      final Map<int, Animation<double>> scaleAnimations =
+          <int, Animation<double>>{};
       for (int a = 0; a < 4; a++) {
-        Animation<double> scaleAnimation = CurvedAnimation(
+        final Animation<double> scaleAnimation = CurvedAnimation(
           parent: controller,
           curve: Interval(begins[a], ends[a], curve: Curves.easeIn),
         );
-        final scaleTween = Tween(
+        final Animation<double> scaleTween = Tween<double>(
           begin: 0.0,
           end: 1.0,
         ).animate(scaleAnimation);
@@ -241,13 +242,14 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
 
       final List<double> begins = <double>[0.0, 0.55, 0.25, 0.75, 0.3];
       final List<double> ends = <double>[0.5, 1.0, 0.75, 1.0, 0.9];
-      final scaleAnimations = <int, Animation<double>>{};
+      final Map<int, Animation<double>> scaleAnimations =
+          <int, Animation<double>>{};
       for (int a = 0; a < 5; a++) {
-        Animation<double> scaleAnimation = CurvedAnimation(
+        final Animation<double> scaleAnimation = CurvedAnimation(
           parent: controller,
           curve: Interval(begins[a], ends[a], curve: Curves.easeIn),
         );
-        final Animation<double> scaleTween = Tween(
+        final Animation<double> scaleTween = Tween<double>(
           begin: 0.0,
           end: 1.0,
         ).animate(scaleAnimation);
@@ -314,7 +316,7 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
     }
 
     for (int i = 0; i < holders.length; i++) {
-      SecondaryWidgetHolder holder = holders[i];
+      final SecondaryWidgetHolder holder = holders[i];
       widgets.add(
         Positioned(
           top: holder.top,
@@ -338,11 +340,11 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
       width: 200.0,
       height: 54.0,
       child: RaisedButton(
-        color: Color(Constants.ColorPrimary),
-        child: Text(
+        color: const Color(Constants.ColorPrimary),
+        child: const Text(
           'START EXPLORING',
           style: TextStyle(
-            color: const Color(0xFFFFFFFF),
+            color: Color(0xFFFFFFFF),
             fontSize: 12.0,
           ),
         ),
@@ -380,76 +382,82 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
 
     _inAnimationControllers[0].value = 1.0;
 
-    return Material(
-      color: const Color(0xFFFFFFFF),
-      child: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification notification) {
-          if (notification is ScrollStartNotification) {
-            final PageMetrics metrics = notification.metrics;
-            startPixels = metrics.pixels;
-            final AnimationController secondaryAnimationController =
-                _secondaryAnimationControllers[_currentPage];
-            if (secondaryAnimationController != null &&
-                secondaryAnimationController.value != 0) {
-              secondaryAnimationController.duration =
-                  Duration(milliseconds: 150);
-              secondaryAnimationController.reverse();
-            }
-          } else if (notification is ScrollUpdateNotification) {
-            final PageMetrics metrics = notification.metrics;
-            final int page = (metrics.pixels / screenWidth).floor();
-            final num offset = (metrics.pixels - (page * screenWidth))
-                .clamp(0, double.maxFinite);
-            _outAnimationControllers[page].value = offset / screenWidth;
-            if (page < (_inAnimationControllers.length - 1)) {
-              _inAnimationControllers[page + 1].value = offset / screenWidth;
-            }
-            var moveDelta = startPixels < metrics.pixels ? 1 : -1;
-            _parallaxController.value += moveDelta * 0.001;
-          } else if (notification is ScrollEndNotification) {
-            final PageMetrics metrics = notification.metrics;
-            _currentPage = metrics.page.round();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Welcome!'),
+        actions: const <Widget>[],
+      ),
+      body: Material(
+        color: const Color(0xFFFFFFFF),
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification notification) {
+            if (notification is ScrollStartNotification) {
+              final PageMetrics metrics = notification.metrics;
+              startPixels = metrics.pixels;
+              final AnimationController secondaryAnimationController =
+                  _secondaryAnimationControllers[_currentPage];
+              if (secondaryAnimationController != null &&
+                  secondaryAnimationController.value != 0) {
+                secondaryAnimationController.duration =
+                    Duration(milliseconds: 150);
+                secondaryAnimationController.reverse();
+              }
+            } else if (notification is ScrollUpdateNotification) {
+              final PageMetrics metrics = notification.metrics;
+              final int page = (metrics.pixels / screenWidth).floor();
+              final num offset = (metrics.pixels - (page * screenWidth))
+                  .clamp(0, double.maxFinite);
+              _outAnimationControllers[page].value = offset / screenWidth;
+              if (page < (_inAnimationControllers.length - 1)) {
+                _inAnimationControllers[page + 1].value = offset / screenWidth;
+              }
+              final int moveDelta = startPixels < metrics.pixels ? 1 : -1;
+              _parallaxController.value += moveDelta * 0.001;
+            } else if (notification is ScrollEndNotification) {
+              final PageMetrics metrics = notification.metrics;
+              _currentPage = metrics.page.round();
 
-            var secondaryAnimationController =
-                _secondaryAnimationControllers[_currentPage];
+              final AnimationController secondaryAnimationController =
+                  _secondaryAnimationControllers[_currentPage];
 
-            if (secondaryAnimationController != null) {
-              secondaryAnimationController.value = 0.0;
-              secondaryAnimationController.duration =
-                  Duration(milliseconds: 450);
-              secondaryAnimationController.forward();
+              if (secondaryAnimationController != null) {
+                secondaryAnimationController.value = 0.0;
+                secondaryAnimationController.duration =
+                    Duration(milliseconds: 450);
+                secondaryAnimationController.forward();
+              }
+              _tabController.animateTo(_currentPage);
             }
-            _tabController.animateTo(_currentPage);
-          }
-          return false;
-        },
-        child: Stack(
-          children: <Widget>[
-            Positioned.fill(
-              child: _backgroundView(),
-            ),
-            Positioned.fill(
-              child: PageView(
-                children: children,
+            return false;
+          },
+          child: Stack(
+            children: <Widget>[
+              Positioned.fill(
+                child: _backgroundView(),
               ),
-            ),
-            Align(
-              alignment: FractionalOffset.bottomCenter,
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 40.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 20.0),
-                      child: _pageIndicator(),
-                    ),
-                    _continueButton()
-                  ],
+              Positioned.fill(
+                child: PageView(
+                  children: children,
                 ),
               ),
-            ),
-          ],
+              Align(
+                alignment: FractionalOffset.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 40.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20.0),
+                        child: _pageIndicator(),
+                      ),
+                      _continueButton()
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -464,24 +472,24 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
       parent: _parallaxController,
       curve: Curves.easeOut,
     );
-    final Animation<Offset> parallaxTween = Tween(
+    final Animation<Offset> parallaxTween = Tween<Offset>(
       begin: const Offset(0.0, 0.0),
       end: const Offset(-1.0, 0.0),
     ).animate(parallaxAnimation);
 
     return Stack(
-      children: [
+      children: <Widget>[
         const DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
+              colors: <Color>[
                 Color(0xFFD7D7D7),
                 Color(0xFFFAFAFA),
                 Color(0xFFFFFFFF),
               ],
               begin: FractionalOffset.topCenter,
               end: FractionalOffset.bottomCenter,
-              stops: [0.0, 0.35, 1.0],
+              stops: <double>[0.0, 0.35, 1.0],
             ),
           ),
         ),

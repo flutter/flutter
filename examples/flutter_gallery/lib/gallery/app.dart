@@ -111,18 +111,19 @@ class _GalleryAppState extends State<GalleryApp> {
   @override
   Widget build(BuildContext context) {
 
-
+    // TODO conditionally show - persistent settings?
     const Widget welcome = WarmWelcomeScreen(isInitialScreen: true);
-
 
     Widget home = GalleryHome(
       testMode: widget.testMode,
       optionsPage: GalleryOptionsPage(
         options: _options,
         onOptionsChanged: _handleOptionsChanged,
-        onSendFeedback: widget.onSendFeedback ?? () {
-          launch('https://github.com/flutter/flutter/issues/new/choose', forceSafariVC: false);
-        },
+        onSendFeedback: widget.onSendFeedback ??
+            () {
+              launch('https://github.com/flutter/flutter/issues/new/choose',
+                  forceSafariVC: false);
+            },
       ),
     );
 
@@ -147,7 +148,8 @@ class _GalleryAppState extends State<GalleryApp> {
           child: _applyTextScaleFactor(child),
         );
       },
-      home: welcome, // home,
+      home: welcome,
+      // home: home,
     );
   }
 }
