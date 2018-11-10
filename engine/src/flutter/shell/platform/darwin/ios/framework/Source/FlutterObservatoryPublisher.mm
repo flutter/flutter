@@ -142,7 +142,7 @@ static void DNSSD_API registrationCallback(DNSServiceRef sdRef,
                                            const char* domain,
                                            void* context) {
   if (errorCode == kDNSServiceErr_NoError) {
-    FML_LOG(ERROR) << "FlutterObservatoryPublisher is ready!";
+    FML_DLOG(INFO) << "FlutterObservatoryPublisher is ready!";
   } else {
     FML_LOG(ERROR) << "Could not register as server for FlutterObservatoryPublisher. Check your "
                       "network settings and relaunch the application.";
