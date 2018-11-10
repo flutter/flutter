@@ -13,6 +13,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
@@ -22,7 +23,6 @@ import '../device.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../time.dart';
 import '../usage.dart';
 import 'flutter_command_runner.dart';
 

@@ -17,6 +17,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/time.dart';
 import 'base/utils.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -32,7 +33,6 @@ import 'ios/mac.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
 import 'run_hot.dart';
-import 'time.dart';
 import 'usage.dart';
 import 'version.dart';
 

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/time.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:mockito/mockito.dart';
 
 import 'package:flutter_tools/src/base/file_system.dart';

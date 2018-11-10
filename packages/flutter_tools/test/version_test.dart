@@ -5,7 +5,7 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart' show ListEquality;
-import 'package:flutter_tools/src/time.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 

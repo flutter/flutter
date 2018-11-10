@@ -12,10 +12,10 @@ import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../time.dart';
 import '../vmservice.dart';
 
 import 'fuchsia_sdk.dart';
@@ -33,7 +33,6 @@ class _FuchsiaLogReader extends DeviceLogReader {
 
   FuchsiaDevice _device;
   ApplicationPackage _app;
-  RegExp _appPatternOutput;
 
   @override String get name => _device.name;
 
@@ -48,16 +47,12 @@ class _FuchsiaLogReader extends DeviceLogReader {
     // Get the starting time of the log processor to filter logs from before
     // the process attached.
     final DateTime startTime = systemClock.now();
-    await for (String line in lines) {
-      // Determine if line comes from flutter, and optionally whether it matches
-      // the correct fuchsia module.
-      RegExp matchRegExp;
-      if (_app == null) {
-        matchRegExp = _flutterLogOutput;
-      } else {
-        _appPatternOutput ??= RegExp('INFO: ${_app.name}\\(flutter\\): ');
-        matchRegExp = _appPatternOutput;
-      }
+    // Determine if line comes from flutter, and optionally whether it matches
+    // the correct fuchsia module.
+    final RegExp matchRegExp = _app == null
+      ? _flutterLogOutput
+      : RegExp('INFO: ${_app.name}\\(flutter\\): ');
+    await for (String line in lines.where(matchRegExp.hasMatch)) {
       if (!matchRegExp.hasMatch(line)) {
         continue;
       }

@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/time.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';

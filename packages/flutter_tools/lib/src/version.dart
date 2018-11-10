@@ -13,9 +13,9 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process.dart';
 import 'base/process_manager.dart';
+import 'base/time.dart';
 import 'cache.dart';
 import 'globals.dart';
-import 'time.dart';
 
 class FlutterVersion {
   @visibleForTesting

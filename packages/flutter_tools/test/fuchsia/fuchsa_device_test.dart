@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
-import 'package:flutter_tools/src/time.dart';
+import 'package:flutter_tools/src/base/time.dart';
 
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
