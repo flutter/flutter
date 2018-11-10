@@ -122,7 +122,7 @@ abstract class RenderSliverBoxChildManager {
   bool debugAssertChildListLocked() => true;
 }
 /// Parent data structure used by [RenderSliverWithKeepAliveMixin].
-abstract class KeepAliveParentDataMixin extends ParentData {
+abstract class KeepAliveParentDataMixin {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory KeepAliveParentDataMixin._() => null;
