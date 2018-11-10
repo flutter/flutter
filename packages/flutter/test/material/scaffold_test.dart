@@ -1224,8 +1224,7 @@ class _TestHomePageState extends State<TestHomePage>
   @override
   void initState() {
     super.initState();
-    animationDouble = AnimationController(
-        vsync: this, value: 1.0, duration: const Duration(milliseconds: 250));
+    animationDouble = AnimationController(vsync: this, value: 1.0, duration: const Duration(milliseconds: 250));
   }
 
   @override
@@ -1235,11 +1234,11 @@ class _TestHomePageState extends State<TestHomePage>
         title: const Text('this is the title'),
       ),
       body: NotificationListener<UserScrollNotification>(
-        onNotification: (UserScrollNotification t) {
-          if (t is UserScrollNotification) {
-            if (t.direction == ScrollDirection.reverse) {
+        onNotification: (UserScrollNotification userScrollNotification) {
+          if (userScrollNotification is UserScrollNotification) {
+            if (userScrollNotification.direction == ScrollDirection.reverse) {
               animationDouble.reverse();
-            } else if (t.direction == ScrollDirection.forward) {
+            } else if (userScrollNotification.direction == ScrollDirection.forward) {
               animationDouble.forward();
             }
           }
