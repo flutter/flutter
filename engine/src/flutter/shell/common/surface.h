@@ -58,6 +58,8 @@ class Surface {
 
   virtual flow::ExternalViewEmbedder* GetExternalViewEmbedder();
 
+  virtual bool MakeRenderContextCurrent();
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(Surface);
 };
