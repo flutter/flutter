@@ -134,8 +134,7 @@ Future<void> main() async {
 
       section('Add to existing iOS app');
 
-      final Directory hostApp =
-          Directory(path.join(tempDir.path, 'hello_host_app'));
+      final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
       mkdir(hostApp);
       recursiveCopy(
         Directory(path.join(
