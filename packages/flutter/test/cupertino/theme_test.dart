@@ -65,81 +65,43 @@ void main() {
   });
 
   testWidgets(
-    'Theme changes does not trigger any dependent builds if no attributes are read',
+    'Reading themes creates dependencies',
     (WidgetTester tester) async {
-      await testTheme(tester, const CupertinoThemeData());
-
-      expect(buildCount, 1);
-
-      await testTheme(tester, const CupertinoThemeData(
-        brightness: Brightness.dark,
-      ));
-
-      // The child shouldn't end up rebuilding again because the child doesn't
-      // care about the brightness.
-      expect(buildCount, 1);
-    },
-  );
-
-  testWidgets(
-    'Read attributes create dependencies when attributes change',
-    (WidgetTester tester) async {
+      // Reading the theme creates a dependency.
       CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData(
         // Default brightness is light,
         barBackgroundColor: Color(0x11223344),
         textTheme: CupertinoTextTheme(
-          textStyle: TextStyle(fontFamily: 'Schrödinger'),
+          textStyle: TextStyle(fontFamily: 'Skeuomorphic'),
         ),
       ));
 
       expect(buildCount, 1);
-      // By observing the result, we've changed reality and created a dependency.
-      expect(theme.textTheme.textStyle.fontFamily, 'Schrödinger');
+      expect(theme.textTheme.textStyle.fontFamily, 'Skeuomorphic');
 
-      // Changing an implicit value to an explicit value for brightness doesn't
-      // actually change anything.
+      // Changing another property also triggers a rebuild.
       theme = await testTheme(tester, const CupertinoThemeData(
         brightness: Brightness.light,
         barBackgroundColor: Color(0x11223344),
         textTheme: CupertinoTextTheme(
-          textStyle: TextStyle(fontFamily: 'Schrödinger'),
+          textStyle: TextStyle(fontFamily: 'Skeuomorphic'),
         ),
       ));
 
-      expect(buildCount, 1);
+      expect(buildCount, 2);
       // Re-reading the same value doesn't change anything.
-      expect(theme.textTheme.textStyle.fontFamily, 'Schrödinger');
+      expect(theme.textTheme.textStyle.fontFamily, 'Skeuomorphic');
 
       theme = await testTheme(tester, const CupertinoThemeData(
         brightness: Brightness.light,
         barBackgroundColor: Color(0x11223344),
         textTheme: CupertinoTextTheme(
-          textStyle: TextStyle(fontFamily: 'Cat'),
+          textStyle: TextStyle(fontFamily: 'Flat'),
         ),
       ));
 
-      expect(buildCount, 2);
-      // The builder was called again and got a new inherited value.
-      expect(theme.textTheme.textStyle.fontFamily, 'Cat');
-    },
-  );
-
-  testWidgets(
-    'Cascaded value changes also trigger rebuilds',
-    (WidgetTester tester) async {
-      CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData());
-
-      expect(buildCount, 1);
-      expect(theme.primaryColor, CupertinoColors.activeBlue);
-
-      theme = await testTheme(tester, const CupertinoThemeData(
-        brightness: Brightness.dark,
-      ));
-
-      // We haven't explicitly changed the primary color but implied it with a
-      // brightness change.
-      expect(buildCount, 2);
-      expect(theme.primaryColor, CupertinoColors.activeOrange);
+      expect(buildCount, 3);
+      expect(theme.textTheme.textStyle.fontFamily, 'Flat');
     },
   );
 

@@ -510,64 +510,6 @@ void main() {
     });
 
     testWidgets(
-      'Changing material theme triggers rebuilds when derivatives are read',
-      (WidgetTester tester) async {
-        CupertinoThemeData theme = await testTheme(tester, ThemeData(
-          primarySwatch: Colors.red,
-        ));
-
-        expect(buildCount, 1);
-        expect(theme.primaryContrastingColor, Colors.white);
-
-        theme = await testTheme(tester, ThemeData(
-          primarySwatch: Colors.orange,
-        ));
-
-        expect(buildCount, 2);
-        expect(theme.primaryContrastingColor, Colors.black);
-      },
-    );
-
-    testWidgets(
-      'Changing material theme does not trigger rebuilds when derivatives do not change',
-      (WidgetTester tester) async {
-        CupertinoThemeData theme = await testTheme(tester, ThemeData(
-          primarySwatch: Colors.purple,
-        ));
-
-        expect(buildCount, 1);
-        expect(theme.primaryContrastingColor, Colors.white);
-
-        theme = await testTheme(tester, ThemeData(
-          primarySwatch: Colors.brown,
-        ));
-
-        expect(buildCount, 1);
-        expect(theme.primaryContrastingColor, Colors.white);
-      },
-    );
-
-    testWidgets(
-      'Changing material theme does not trigger rebuilds read aspects are not derivatives',
-      (WidgetTester tester) async {
-        CupertinoThemeData theme = await testTheme(tester, ThemeData(
-          primarySwatch: Colors.purple,
-        ));
-
-        expect(buildCount, 1);
-        expect(theme.barBackgroundColor, const Color(0xCCF8F8F8));
-
-        theme = await testTheme(tester, ThemeData(
-          primarySwatch: Colors.brown,
-        ));
-
-        // Bar color is independent of material theme except brightness.
-        expect(buildCount, 1);
-        expect(theme.barBackgroundColor, const Color(0xCCF8F8F8));
-      },
-    );
-
-    testWidgets(
       'Changing cupertino theme override triggers rebuilds',
       (WidgetTester tester) async {
         CupertinoThemeData theme = await testTheme(tester, ThemeData(
@@ -614,7 +556,7 @@ void main() {
           ),
         ));
 
-        expect(buildCount, 1);
+        expect(buildCount, 2);
         expect(theme.primaryColor, CupertinoColors.activeOrange);
       },
     );

@@ -32,7 +32,7 @@ const Color _kDefaultBarDarkBackgroundColor = Color(0xB7212121);
 ///  * [CupertinoApp], which will automatically add a [CupertinoTheme].
 ///  * [Theme], a Material theme which will automatically add a [CupertinoTheme]
 ///    with a [CupertinoThemeData] derived from the Material [ThemeData].
-class CupertinoTheme extends InheritedModel<_ThemeDataProperties> {
+class CupertinoTheme extends InheritedWidget {
   /// Creates a [CupertinoTheme] to change downstream Cupertino widgets' styling.
   ///
   /// The [data] and [child] parameters must not be null.
@@ -50,17 +50,6 @@ class CupertinoTheme extends InheritedModel<_ThemeDataProperties> {
   @override
   bool updateShouldNotify(CupertinoTheme oldWidget) => data != oldWidget.data;
 
-  @override
-  bool updateShouldNotifyDependent(CupertinoTheme oldWidget, Set<_ThemeDataProperties> dependencies) {
-    return (data.barBackgroundColor != oldWidget.data.barBackgroundColor && dependencies.contains(_ThemeDataProperties.barBackgroundColor))
-      || (data.brightness != oldWidget.data.brightness && dependencies.contains(_ThemeDataProperties.brightness))
-      || (data.primaryColor != oldWidget.data.primaryColor && dependencies.contains(_ThemeDataProperties.primaryColor))
-      || (data.primaryContrastingColor != oldWidget.data.primaryContrastingColor && dependencies.contains(_ThemeDataProperties.primaryContrastingColor))
-      || (data.scaffoldBackgroundColor != oldWidget.data.scaffoldBackgroundColor && dependencies.contains(_ThemeDataProperties.scaffoldBackgroundColor))
-      || (data.tableBackgroundColor != oldWidget.data.tableBackgroundColor && dependencies.contains(_ThemeDataProperties.tableBackgroundColor))
-      || (data.textTheme != oldWidget.data.textTheme && dependencies.contains(_ThemeDataProperties.textTheme));
-  }
-
   /// Retrieve the [CupertinoThemeData] from an ancestor [CupertinoTheme] widget.
   ///
   /// May return a default [CupertinoThemeData] if no [CupertinoTheme] widgets
@@ -70,70 +59,9 @@ class CupertinoTheme extends InheritedModel<_ThemeDataProperties> {
   /// object is provided but a dependency is created when properties on the
   /// [CupertinoThemeData] are read. When a dependency is created, a rebuild
   /// is invoked on the reader when the read properties are changed.
-  static CupertinoThemeData of(BuildContext context) => _CupertinoThemeInheritedData(context);
-}
-
-enum _ThemeDataProperties {
-  barBackgroundColor,
-  brightness,
-  primaryColor,
-  primaryContrastingColor,
-  scaffoldBackgroundColor,
-  tableBackgroundColor,
-  textTheme,
-}
-
-class _CupertinoThemeInheritedData extends CupertinoThemeData {
-  const _CupertinoThemeInheritedData(this.context);
-
-  final BuildContext context;
-
-  @override
-  Color get barBackgroundColor => getData(_ThemeDataProperties.barBackgroundColor).barBackgroundColor;
-
-  @override
-  Brightness get brightness => getData(_ThemeDataProperties.brightness).brightness;
-
-  @override
-  Color get primaryColor => getData(_ThemeDataProperties.primaryColor).primaryColor;
-
-  @override
-  Color get primaryContrastingColor => getData(_ThemeDataProperties.primaryContrastingColor).primaryContrastingColor;
-
-  @override
-  Color get scaffoldBackgroundColor => getData(_ThemeDataProperties.scaffoldBackgroundColor).scaffoldBackgroundColor;
-
-  @override
-  Color get tableBackgroundColor => getData(_ThemeDataProperties.tableBackgroundColor).tableBackgroundColor;
-
-  @override
-  CupertinoTextTheme get textTheme => getData(_ThemeDataProperties.textTheme).textTheme;
-
-  CupertinoThemeData getData(_ThemeDataProperties property) {
-    return InheritedModel.inheritFrom<CupertinoTheme>(context, aspect: property)?.data
-        ?? const CupertinoThemeData();
-  }
-
-  @override
-  CupertinoThemeData copyWith({
-    Brightness brightness,
-    Color primaryColor,
-    Color primaryContrastingColor,
-    CupertinoTextTheme textTheme,
-    Color barBackgroundColor,
-    Color scaffoldBackgroundColor,
-    Color tableBackgroundColor,
-  }) {
-    // When you copyWith, you effectively are depending on everything.
-    return InheritedModel.inheritFrom<CupertinoTheme>(context)?.data?.copyWith(
-      brightness: brightness,
-      primaryColor: primaryColor,
-      primaryContrastingColor: primaryContrastingColor,
-      textTheme: textTheme,
-      barBackgroundColor: barBackgroundColor,
-      scaffoldBackgroundColor: scaffoldBackgroundColor,
-      tableBackgroundColor: tableBackgroundColor,
-    );
+  static CupertinoThemeData of(BuildContext context) {
+    final CupertinoTheme theme = context.inheritFromWidgetOfExactType(CupertinoTheme);
+    return theme?.data ?? const CupertinoThemeData();
   }
 }
 

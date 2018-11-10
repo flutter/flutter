@@ -301,8 +301,9 @@ class ThemeData extends Diagnosticable {
     );
   }
 
-  /// Create a [ThemeData] given a set of exact values. All the values except
-  /// cupertinoOverrideTheme must be specified.
+  /// Create a [ThemeData] given a set of exact values. All the values must be
+  /// specified. They all must also be non-null except for
+  /// [cupertinoOverrideTheme].
   ///
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes created with the
@@ -1049,9 +1050,9 @@ class ThemeData extends Diagnosticable {
 /// A [CupertinoThemeData] that defers unspecified theme attributes to an
 /// upstream Material [ThemeData].
 ///
-/// This type of [CupertinoThemeData] is used when using a Material [Theme]
-/// instead of a [CupertinoTheme] to harmonize Cupertino widgets and an ancestor
-/// Material [Theme]'s [ThemeData].
+/// This type of [CupertinoThemeData] is used by the Material [Theme] to
+/// harmonize the [CupertinoTheme] with the material theme's colors and text
+/// styles.
 ///
 /// For a [CupertinoThemeData] whose unspecified attributes default to iOS
 /// defaults rather than to an ancestor Material [ThemeData], insert another
