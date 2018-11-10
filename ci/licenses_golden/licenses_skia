@@ -1,4 +1,4 @@
-Signature: fe389c93e3525da74cfc573a37b46cfa
+Signature: 36be643c6f38266195bab130600ee40f
 
 UNUSED LICENSES:
 
@@ -2844,7 +2844,6 @@ FILE: ../../../third_party/skia/src/core/SkBitmapProcState_matrix.h
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_procs.h
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_sample.h
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_shaderproc.h
-FILE: ../../../third_party/skia/src/core/SkBlitMask.h
 FILE: ../../../third_party/skia/src/core/SkBlitRow.h
 FILE: ../../../third_party/skia/src/core/SkBlitRow_D32.cpp
 FILE: ../../../third_party/skia/src/core/SkClipStack.cpp
@@ -2925,7 +2924,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrAAHairLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDefaultPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDefaultPathRenderer.h
 FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts_none.cpp
-FILE: ../../../third_party/skia/src/opts/SkBlitRow_opts_none.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFConvertType1FontStream.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFDevice.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFDevice.h
@@ -3088,7 +3086,6 @@ FILE: ../../../third_party/skia/src/c/sk_surface.cpp
 FILE: ../../../third_party/skia/src/core/SkBBHFactory.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapCache.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapCache.h
-FILE: ../../../third_party/skia/src/core/SkBlitMask_D32.cpp
 FILE: ../../../third_party/skia/src/core/SkCachedData.cpp
 FILE: ../../../third_party/skia/src/core/SkCachedData.h
 FILE: ../../../third_party/skia/src/core/SkCanvasPriv.h
@@ -3184,8 +3181,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrSmallPathRenderer.h
 FILE: ../../../third_party/skia/src/image/SkReadPixelsRec.h
 FILE: ../../../third_party/skia/src/image/SkSurface_Gpu.h
 FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_matrix_neon.h
-FILE: ../../../third_party/skia/src/opts/SkBlitMask_opts_arm.cpp
-FILE: ../../../third_party/skia/src/opts/SkBlitMask_opts_none.cpp
 FILE: ../../../third_party/skia/src/pathops/SkOpBuilder.cpp
 FILE: ../../../third_party/skia/src/pathops/SkOpSpan.cpp
 FILE: ../../../third_party/skia/src/pathops/SkPathOpsTSect.cpp
@@ -3362,7 +3357,6 @@ FILE: ../../../third_party/skia/src/image/SkSurface_Base.h
 FILE: ../../../third_party/skia/src/image/SkSurface_Gpu.cpp
 FILE: ../../../third_party/skia/src/image/SkSurface_Raster.cpp
 FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_arm_neon.cpp
-FILE: ../../../third_party/skia/src/opts/SkBlitRow_opts_arm_neon.h
 FILE: ../../../third_party/skia/src/pathops/SkAddIntersections.cpp
 FILE: ../../../third_party/skia/src/pathops/SkAddIntersections.h
 FILE: ../../../third_party/skia/src/pathops/SkDCubicLineIntersection.cpp
@@ -3826,8 +3820,6 @@ FILE: ../../../third_party/skia/src/opts/Sk4px_NEON.h
 FILE: ../../../third_party/skia/src/opts/Sk4px_SSE2.h
 FILE: ../../../third_party/skia/src/opts/Sk4px_none.h
 FILE: ../../../third_party/skia/src/opts/SkBlitMask_opts.h
-FILE: ../../../third_party/skia/src/opts/SkBlitMask_opts_arm_neon.cpp
-FILE: ../../../third_party/skia/src/opts/SkBlitMask_opts_arm_neon.h
 FILE: ../../../third_party/skia/src/opts/SkBlitRow_opts.h
 FILE: ../../../third_party/skia/src/opts/SkColor_opts_neon.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_sse41.cpp
@@ -4587,9 +4579,6 @@ FILE: ../../../third_party/skia/src/images/SkImageEncoderFns.h
 FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_filter_neon.h
 FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts_SSSE3.cpp
 FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts_SSSE3.h
-FILE: ../../../third_party/skia/src/opts/SkBlitRow_opts_SSE2.cpp
-FILE: ../../../third_party/skia/src/opts/SkBlitRow_opts_arm.cpp
-FILE: ../../../third_party/skia/src/opts/SkBlitRow_opts_arm_neon.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2012 The Android Open Source Project
 
@@ -5438,7 +5427,6 @@ FILE: ../../../third_party/skia/src/core/SkQuadClipper.h
 FILE: ../../../third_party/skia/src/images/SkImageEncoder.cpp
 FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts_SSE2.cpp
 FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts_SSE2.h
-FILE: ../../../third_party/skia/src/opts/SkBlitRow_opts_SSE2.h
 FILE: ../../../third_party/skia/src/opts/opts_check_x86.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2009 The Android Open Source Project
