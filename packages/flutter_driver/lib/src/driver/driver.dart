@@ -407,7 +407,7 @@ class FlutterDriver {
   final bool _logCommunicationToFile;
 
   /// [FlutterDriver] multiplies all command timeouts by this number.
-  /// 
+  ///
   /// The right amount of time a driver command should be given to complete
   /// depends on various environmental factors, such as the speed of the
   /// device or the emulator, connection speed and latency, and others. Use
@@ -894,9 +894,9 @@ typedef VMServiceConnectFunction = Future<VMServiceClientConnection> Function(St
 ///
 /// Overwrite this function if you require a custom method for connecting to
 /// the VM service.
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [connectionTimeoutMultiplier], which controls the timeouts while
 ///    establishing a connection using the default connection function.
 VMServiceConnectFunction vmServiceConnectFunction = _waitAndConnect;
