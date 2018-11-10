@@ -53,9 +53,6 @@ class _FuchsiaLogReader extends DeviceLogReader {
       ? _flutterLogOutput
       : RegExp('INFO: ${_app.name}\\(flutter\\): ');
     await for (String line in lines.where(matchRegExp.hasMatch)) {
-      if (!matchRegExp.hasMatch(line)) {
-        continue;
-      }
       // Read out the date string from the log and compare it to the current time:
       // Example: 2018-11-09 01:27:45
       final String rawDate = _utcDateOutput.firstMatch(line)?.group(0);
