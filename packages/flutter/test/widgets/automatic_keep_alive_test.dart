@@ -601,10 +601,10 @@ abstract class KeepAliveParentDataMixin {
   bool keepAlive = false;
 }
 
-class RenderSliverMultiBoxAdaptorAlt extends RenderSliver
-    with KeepAliveParentDataMixin,
-         RenderSliverHelpers,
-         RenderSliverWithKeepAliveMixin {
+class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
+    KeepAliveParentDataMixin,
+    RenderSliverHelpers,
+    RenderSliverWithKeepAliveMixin {
 
   RenderSliverMultiBoxAdaptorAlt({
     RenderSliverBoxChildManager childManager
