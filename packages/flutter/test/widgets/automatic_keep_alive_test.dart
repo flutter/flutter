@@ -596,7 +596,7 @@ class AlwaysKeepAliveRenderBoxState extends State<_AlwaysKeepAlive> with Automat
   }
 }
 
-abstract class KeepAliveParentDataMixin {
+abstract class KeepAliveParentDataMixin implements ParentData {
   factory KeepAliveParentDataMixin._() => null;
   bool keepAlive = false;
 }
