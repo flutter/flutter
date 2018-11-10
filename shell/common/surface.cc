@@ -68,4 +68,8 @@ flow::ExternalViewEmbedder* Surface::GetExternalViewEmbedder() {
   return nullptr;
 }
 
+bool Surface::MakeRenderContextCurrent() {
+  return true;
+}
+
 }  // namespace shell

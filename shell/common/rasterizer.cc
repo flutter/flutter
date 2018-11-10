@@ -93,6 +93,10 @@ sk_sp<SkImage> Rasterizer::MakeRasterSnapshot(sk_sp<SkPicture> picture,
                                               SkISize picture_size) {
   TRACE_EVENT0("flutter", __FUNCTION__);
 
+  if (!surface_->MakeRenderContextCurrent()) {
+    return nullptr;
+  }
+
   sk_sp<SkSurface> surface;
   if (surface_ == nullptr || surface_->GetContext() == nullptr) {
     // Raster surface is fine if there is no on screen surface. This might

@@ -69,6 +69,9 @@ class GPUSurfaceGL : public Surface {
   // |shell::Surface|
   flow::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
+  // |shell::Surface|
+  bool MakeRenderContextCurrent() override;
+
  private:
   GPUSurfaceGLDelegate* delegate_;
   GPUSurfaceGLDelegate::GLProcResolver proc_resolver_;

@@ -363,4 +363,9 @@ flow::ExternalViewEmbedder* GPUSurfaceGL::GetExternalViewEmbedder() {
   return delegate_->GetExternalViewEmbedder();
 }
 
+// |shell::Surface|
+bool GPUSurfaceGL::MakeRenderContextCurrent() {
+  return delegate_->GLContextMakeCurrent();
+}
+
 }  // namespace shell
