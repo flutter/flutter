@@ -426,7 +426,7 @@ class _FlutterPlatform extends PlatformPlugin {
       if (err.toString().contains('type \'Declarer\' is not a subtype of type \'Declarer\'')) {
         throw UnsupportedError('Package incompatibility between flutter and test packages:\n'
           '  * flutter is incompatible with test <1.4.0.\n'
-          '  * flutter is incompatible with mockito <1.4.0\n'
+          '  * flutter is incompatible with mockito <4.0.0\n'
           'To fix this error, update test to at least \'^1.4.0\' and mockito to at least \'^4.0.0\'\n'
         );
       }
