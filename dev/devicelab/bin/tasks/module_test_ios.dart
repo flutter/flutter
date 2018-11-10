@@ -137,8 +137,7 @@ Future<void> main() async {
       final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
       mkdir(hostApp);
       recursiveCopy(
-        Directory(path.join(
-            flutterDirectory.path, 'dev', 'integration_tests', 'ios_host_app')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_host_app')),
         hostApp,
       );
 
