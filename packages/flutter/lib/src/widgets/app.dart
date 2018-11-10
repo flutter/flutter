@@ -563,28 +563,31 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// When supporting languages with more than one script, it is recommended
   /// to specify the [Locale.scriptCode] explicitly. Locales may also be defined without
-  /// [Locale.countryCode] to specify a generic fallback for a particular script. Not
-  /// specifying a [Locale.scriptCode] where it is needed (such as Chinese) may lead to
-  /// improperly resolved locales.
+  /// [Locale.countryCode] to specify a generic fallback for a particular script.
   ///
   /// A fully supported language with multiple scripts should define a generic language-only
   /// locale (eg. 'zh'), language+script only locales (eg. 'zh_Hans' and 'zh_Hant'),
   /// and any language+script+country locales (eg. 'zh_Hans_CN'). Fully defining all of
-  /// these locales as supported is not required but allows for proper locale resolution in
+  /// these locales as supported is not strictly required but allows for proper locale resolution in
   /// the most number of cases. These locales can be specified with the [Locale.fromSubtags]
   /// constructor:
   ///
   /// ```dart
   /// // Full Chinese support for CN, TW, and HK
   /// supportedLocales: [
-  ///   const Locale.fromSubtags(languageCode: 'zh'), // generic Chinese
-  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'), // generic simplified Chinese
-  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'), // generic traditional Chinese
-  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: 'CN'),
-  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW'),
-  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
+  ///   const Locale.fromSubtags(languageCode: 'zh'), // generic Chinese 'zh'
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'), // generic simplified Chinese 'zh_Hans'
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'), // generic traditional Chinese 'zh_Hant'
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: 'CN'), // 'zh_Hans_CN'
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW'), // 'zh_Hant_TW'
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'), // 'zh_Hant_HK'
   /// ],
   /// ```
+  /// 
+  /// Omitting some these fallbacks may result in improperly resolved
+  /// edge-cases, for example, a simplified Chinese user in Taiwan ('zh_Hans_TW')
+  /// may resolve to traditional Chinese if 'zh_Hans' and 'zh_Hans_CN' are
+  /// omitted.
   /// {@endtemplate}
   ///
   /// See also:
