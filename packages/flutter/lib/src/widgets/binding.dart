@@ -219,7 +219,7 @@ abstract class WidgetsBindingObserver {
   /// settings.
   ///
   /// This method exposes notifications from [Window.onLocaleChanged].
-  void didChangeLocale(Locale locale) { }
+  void didChangeLocales(List<Locale> locale) { }
 
   /// Called when the system puts the app in the background or returns
   /// the app to the foreground.
@@ -413,20 +413,20 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   @protected
   @mustCallSuper
   void handleLocaleChanged() {
-    dispatchLocaleChanged(ui.window.locale);
+    dispatchLocalesChanged(ui.window.locales);
   }
 
   /// Notify all the observers that the locale has changed (using
-  /// [WidgetsBindingObserver.didChangeLocale]), giving them the
-  /// `locale` argument.
+  /// [WidgetsBindingObserver.didChangeLocales]), giving them the
+  /// `locales` argument.
   ///
   /// This is called by [handleLocaleChanged] when the [Window.onLocaleChanged]
   /// notification is received.
   @protected
   @mustCallSuper
-  void dispatchLocaleChanged(Locale locale) {
+  void dispatchLocalesChanged(List<Locale> locales) {
     for (WidgetsBindingObserver observer in _observers)
-      observer.didChangeLocale(locale);
+      observer.didChangeLocales(locales);
   }
 
   /// Notify all the observers that the active set of [AccessibilityFeatures]
