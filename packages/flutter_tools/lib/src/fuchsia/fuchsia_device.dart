@@ -12,6 +12,7 @@ import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -25,21 +26,46 @@ final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 
 /// Read the log for a particular device.
 class _FuchsiaLogReader extends DeviceLogReader {
-  _FuchsiaLogReader(this._device);
+  _FuchsiaLogReader(this._device, [this._app]);
 
-  // TODO(jonahwilliams): handle filtering log output from different modules.
-  static final Pattern flutterLogOutput = RegExp(r'\[\d+\.\d+\]\[\d+\]\[\d+\]\[klog\] INFO: \w+\(flutter\): ');
+  static final RegExp _flutterLogOutput = RegExp(r'INFO: \w+\(flutter\): ');
+  static final RegExp _utcDateOutput = RegExp(r'\d+\-\d+\-\d+ \d+:\d+:\d+');
 
   FuchsiaDevice _device;
+  ApplicationPackage _app;
 
   @override String get name => _device.name;
 
   Stream<String> _logLines;
   @override
   Stream<String> get logLines {
-    _logLines ??= fuchsiaSdk.syslogs()
-      .where((String line) => flutterLogOutput.matchAsPrefix(line) != null);
+    _logLines ??= _processLogs(fuchsiaSdk.syslogs());
     return _logLines;
+  }
+
+  Stream<String> _processLogs(Stream<String> lines) async* {
+    // Get the starting time of the log processor to filter logs from before
+    // the process attached.
+    final DateTime startTime = systemClock.now();
+    // Determine if line comes from flutter, and optionally whether it matches
+    // the correct fuchsia module.
+    final RegExp matchRegExp = _app == null
+      ? _flutterLogOutput
+      : RegExp('INFO: ${_app.name}\\(flutter\\): ');
+    await for (String line in lines.where(matchRegExp.hasMatch)) {
+      // Read out the date string from the log and compare it to the current time:
+      // Example: 2018-11-09 01:27:45
+      final String rawDate = _utcDateOutput.firstMatch(line)?.group(0);
+      if (rawDate == null) {
+        continue;
+      }
+      final DateTime logTime = DateTime.parse(rawDate);
+      if (logTime.millisecondsSinceEpoch < startTime.millisecondsSinceEpoch) {
+        continue;
+      }
+      // Format log into a useful string:
+      yield '[${logTime.toLocal()}] Flutter: ${line.split(matchRegExp).last}';
+    }
   }
 
   @override
@@ -152,7 +178,7 @@ class FuchsiaDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'Fuchsia';
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader ??= _FuchsiaLogReader(this);
+  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader ??= _FuchsiaLogReader(this, app);
   _FuchsiaLogReader _logReader;
 
   @override
@@ -277,6 +303,13 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       await serverSocket.close();
     return port;
   }
+}
+
+class FuchsiaModulePackage extends ApplicationPackage {
+  FuchsiaModulePackage({@required this.name}) : super(id: name);
+
+  @override
+  final String name;
 }
 
 /// Parses output from `dart.services` output on a fuchsia device.
