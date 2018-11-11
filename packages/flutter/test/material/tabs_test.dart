@@ -1758,6 +1758,68 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('can override TabBar onTap behavior', (WidgetTester tester) async {
+    Widget buildFrame({
+      TabController controller,
+      List<String> tabs,
+      String value,
+      bool isScrollable = false,
+      Color indicatorColor,
+    }) {
+      return boilerplate(
+        child: Container(
+          child: TabBar(
+            controller: controller,
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+              onTap: (int index) {
+                if (controller.index != index) {
+                  controller.animateTo(index);
+                }
+              }
+          ),
+        ),
+      );
+    }
+
+    final List<String> tabs = <String>['A', 'B', 'C'];
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.indexOf('C'),
+    );
+
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false, controller: controller));
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
+    expect(controller, isNotNull);
+    expect(controller.index, 2);
+    expect(controller.previousIndex, 2);
+
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false, controller: controller));
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    expect(controller.indexIsChanging, true);
+    await tester.pump(const Duration(seconds: 1)); // finish the animation
+    expect(controller.index, 1);
+    expect(controller.previousIndex, 2);
+    expect(controller.indexIsChanging, false);
+
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false, controller: controller));
+    await tester.tap(find.text('C'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.index, 2);
+    expect(controller.previousIndex, 1);
+
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false, controller: controller));
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.index, 0);
+    expect(controller.previousIndex, 2);
+  });
+
   test('illegal constructor combinations', () {
     expect(() => Tab(icon: nonconst(null)), throwsAssertionError);
     expect(() => Tab(icon: Container(), text: 'foo', child: Container()), throwsAssertionError);
