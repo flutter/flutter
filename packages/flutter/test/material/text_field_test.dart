@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:math' as math;
 import 'dart:ui' as ui show window;
 
 import 'package:flutter/material.dart';
@@ -3181,5 +3182,149 @@ void main() {
     final Rect labelRect = tester.getRect(find.text('Label'));
     final Rect fieldRect = tester.getRect(find.text('Just some text'));
     expect(labelRect.bottom, lessThanOrEqualTo(fieldRect.top));
+  });
+
+  testWidgets('TextField scrolls into view but does not bounce (SingleChildScrollView)', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/20485
+
+    final Key textField1 = UniqueKey();
+    final Key textField2 = UniqueKey();
+    final ScrollController scrollController = ScrollController();
+
+    double minOffset;
+    double maxOffset;
+
+    scrollController.addListener(() {
+      final double offset = scrollController.offset;
+      minOffset = math.min(minOffset ?? offset, offset);
+      maxOffset = math.max(maxOffset ?? offset, offset);
+    });
+
+    Widget buildFrame(Axis scrollDirection) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              controller: scrollController,
+              child: Column(
+                children: <Widget>[
+                  SizedBox( // visible when scrollOffset is 0.0
+                    height: 100.0,
+                    width: 100.0,
+                    child: TextField(key: textField1, scrollPadding: const EdgeInsets.all(200.0)),
+                  ),
+                  const SizedBox(
+                    height: 600.0, // Same size as the frame. Initially
+                    width: 800.0,  // textField2 is not visible
+                  ),
+                  SizedBox( // visible when scrollOffset is 200.0
+                    height: 100.0,
+                    width: 100.0,
+                    child: TextField(key: textField2, scrollPadding: const EdgeInsets.all(200.0)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(Axis.vertical));
+    await tester.enterText(find.byKey(textField1), '1');
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField2), '2'); //scroll textField2 into view
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField1), '3'); //scroll textField1 back into view
+    await tester.pumpAndSettle();
+
+    expect(minOffset, 0.0);
+    expect(maxOffset, 200.0);
+
+    minOffset = null;
+    maxOffset = null;
+
+    await tester.pumpWidget(buildFrame(Axis.horizontal));
+    await tester.enterText(find.byKey(textField1), '1');
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField2), '2'); //scroll textField2 into view
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField1), '3'); //scroll textField1 back into view
+    await tester.pumpAndSettle();
+
+    expect(minOffset, 0.0);
+    expect(maxOffset, 200.0);
+  });
+
+  testWidgets('TextField scrolls into view but does not bounce (ListView)', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/20485
+
+    final Key textField1 = UniqueKey();
+    final Key textField2 = UniqueKey();
+    final ScrollController scrollController = ScrollController();
+
+    double minOffset;
+    double maxOffset;
+
+    scrollController.addListener(() {
+      final double offset = scrollController.offset;
+      minOffset = math.min(minOffset ?? offset, offset);
+      maxOffset = math.max(maxOffset ?? offset, offset);
+    });
+
+    Widget buildFrame(Axis scrollDirection) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: ListView(
+              physics: const BouncingScrollPhysics(),
+              controller: scrollController,
+              children: <Widget>[
+                SizedBox( // visible when scrollOffset is 0.0
+                  height: 100.0,
+                  width: 100.0,
+                  child: TextField(key: textField1, scrollPadding: const EdgeInsets.all(200.0)),
+                ),
+                const SizedBox(
+                  height: 450.0, // 50.0 smaller than the overall frame so that both
+                  width: 650.0,  // textfields are always partially visible.
+                ),
+                SizedBox( // visible when scrollOffset = 50.0
+                  height: 100.0,
+                  width: 100.0,
+                  child: TextField(key: textField2, scrollPadding: const EdgeInsets.all(200.0)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(Axis.vertical));
+    await tester.enterText(find.byKey(textField1), '1'); // textfield1 is visible
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField2), '2'); //scroll textField2 into view
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField1), '3'); //scroll textField1 back into view
+    await tester.pumpAndSettle();
+
+    expect(minOffset, 0.0);
+    expect(maxOffset, 50.0);
+
+    minOffset = null;
+    maxOffset = null;
+
+    await tester.pumpWidget(buildFrame(Axis.horizontal));
+    await tester.enterText(find.byKey(textField1), '1'); // textfield1 is visible
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField2), '2'); //scroll textField2 into view
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(textField1), '3'); //scroll textField1 back into view
+    await tester.pumpAndSettle();
+
+    expect(minOffset, 0.0);
+    expect(maxOffset, 50.0);
   });
 }

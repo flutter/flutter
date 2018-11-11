@@ -5,9 +5,9 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart' show ListEquality;
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:quiver/time.dart';
 
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -18,11 +18,11 @@ import 'package:flutter_tools/src/version.dart';
 import 'src/common.dart';
 import 'src/context.dart';
 
-final Clock _testClock = Clock.fixed(DateTime(2015, 1, 1));
-final DateTime _upToDateVersion = _testClock.agoBy(FlutterVersion.kVersionAgeConsideredUpToDate ~/ 2);
-final DateTime _outOfDateVersion = _testClock.agoBy(FlutterVersion.kVersionAgeConsideredUpToDate * 2);
-final DateTime _stampUpToDate = _testClock.agoBy(FlutterVersion.kCheckAgeConsideredUpToDate ~/ 2);
-final DateTime _stampOutOfDate = _testClock.agoBy(FlutterVersion.kCheckAgeConsideredUpToDate * 2);
+final SystemClock _testClock = SystemClock.fixed(DateTime(2015, 1, 1));
+final DateTime _upToDateVersion = _testClock.ago(FlutterVersion.kVersionAgeConsideredUpToDate ~/ 2);
+final DateTime _outOfDateVersion = _testClock.ago(FlutterVersion.kVersionAgeConsideredUpToDate * 2);
+final DateTime _stampUpToDate = _testClock.ago(FlutterVersion.kCheckAgeConsideredUpToDate ~/ 2);
+final DateTime _stampOutOfDate = _testClock.ago(FlutterVersion.kCheckAgeConsideredUpToDate * 2);
 
 void main() {
   MockProcessManager mockProcessManager;
@@ -161,7 +161,7 @@ void main() {
         localCommitDate: _outOfDateVersion,
         stamp: VersionCheckStamp(
             lastTimeVersionWasChecked: _stampOutOfDate,
-            lastKnownRemoteVersion: _testClock.ago(days: 2),
+            lastKnownRemoteVersion: _testClock.ago(const Duration(days: 2)),
         ),
         remoteCommitDate: _upToDateVersion,
         expectSetStamp: true,
@@ -287,15 +287,15 @@ void main() {
     testUsingContext('loads valid JSON', () async {
       fakeData(mockProcessManager, mockCache, stampJson: '''
       {
-        "lastKnownRemoteVersion": "${_testClock.ago(days: 1)}",
-        "lastTimeVersionWasChecked": "${_testClock.ago(days: 2)}",
+        "lastKnownRemoteVersion": "${_testClock.ago(const Duration(days: 1))}",
+        "lastTimeVersionWasChecked": "${_testClock.ago(const Duration(days: 2))}",
         "lastTimeWarningWasPrinted": "${_testClock.now()}"
       }
       ''');
 
       final VersionCheckStamp stamp = await VersionCheckStamp.load();
-      expect(stamp.lastKnownRemoteVersion, _testClock.ago(days: 1));
-      expect(stamp.lastTimeVersionWasChecked, _testClock.ago(days: 2));
+      expect(stamp.lastKnownRemoteVersion, _testClock.ago(const Duration(days: 1)));
+      expect(stamp.lastTimeVersionWasChecked, _testClock.ago(const Duration(days: 2)));
       expect(stamp.lastTimeWarningWasPrinted, _testClock.now());
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(_testClock),
@@ -309,15 +309,15 @@ void main() {
       _expectDefault(await VersionCheckStamp.load());
 
       final VersionCheckStamp stamp = VersionCheckStamp(
-        lastKnownRemoteVersion: _testClock.ago(days: 1),
-        lastTimeVersionWasChecked: _testClock.ago(days: 2),
+        lastKnownRemoteVersion: _testClock.ago(const Duration(days: 1)),
+        lastTimeVersionWasChecked: _testClock.ago(const Duration(days: 2)),
         lastTimeWarningWasPrinted: _testClock.now(),
       );
       await stamp.store();
 
       final VersionCheckStamp storedStamp = await VersionCheckStamp.load();
-      expect(storedStamp.lastKnownRemoteVersion, _testClock.ago(days: 1));
-      expect(storedStamp.lastTimeVersionWasChecked, _testClock.ago(days: 2));
+      expect(storedStamp.lastKnownRemoteVersion, _testClock.ago(const Duration(days: 1)));
+      expect(storedStamp.lastTimeVersionWasChecked, _testClock.ago(const Duration(days: 2)));
       expect(storedStamp.lastTimeWarningWasPrinted, _testClock.now());
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(_testClock),
@@ -331,19 +331,19 @@ void main() {
       _expectDefault(await VersionCheckStamp.load());
 
       final VersionCheckStamp stamp = VersionCheckStamp(
-        lastKnownRemoteVersion: _testClock.ago(days: 10),
-        lastTimeVersionWasChecked: _testClock.ago(days: 9),
-        lastTimeWarningWasPrinted: _testClock.ago(days: 8),
+        lastKnownRemoteVersion: _testClock.ago(const Duration(days: 10)),
+        lastTimeVersionWasChecked: _testClock.ago(const Duration(days: 9)),
+        lastTimeWarningWasPrinted: _testClock.ago(const Duration(days: 8)),
       );
       await stamp.store(
-        newKnownRemoteVersion: _testClock.ago(days: 1),
-        newTimeVersionWasChecked: _testClock.ago(days: 2),
+        newKnownRemoteVersion: _testClock.ago(const Duration(days: 1)),
+        newTimeVersionWasChecked: _testClock.ago(const Duration(days: 2)),
         newTimeWarningWasPrinted: _testClock.now(),
       );
 
       final VersionCheckStamp storedStamp = await VersionCheckStamp.load();
-      expect(storedStamp.lastKnownRemoteVersion, _testClock.ago(days: 1));
-      expect(storedStamp.lastTimeVersionWasChecked, _testClock.ago(days: 2));
+      expect(storedStamp.lastKnownRemoteVersion, _testClock.ago(const Duration(days: 1)));
+      expect(storedStamp.lastTimeVersionWasChecked, _testClock.ago(const Duration(days: 2)));
       expect(storedStamp.lastTimeWarningWasPrinted, _testClock.now());
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(_testClock),

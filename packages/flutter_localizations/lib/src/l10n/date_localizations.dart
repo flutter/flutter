@@ -6779,10 +6779,10 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       r'''S'''
     ],
     'SHORTQUARTERS': <dynamic>[
-      r'''1. cet.''',
-      r'''2. cet.''',
-      r'''3. cet.''',
-      r'''4. cet.'''
+      r'''1. cet.''',
+      r'''2. cet.''',
+      r'''3. cet.''',
+      r'''4. cet.'''
     ],
     'QUARTERS': <dynamic>[
       r'''1. ceturksnis''',
