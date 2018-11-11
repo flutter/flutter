@@ -135,7 +135,8 @@ class WindowPadding {
 ///    [Locale].
 class Locale {
   /// Creates a new Locale object. The first argument is the
-  /// primary language subtag, the second is the region subtag.
+  /// primary language subtag, the second is the region (also
+  /// referred to as 'country') subtag.
   ///
   /// For example:
   ///
@@ -145,7 +146,8 @@ class Locale {
   /// ```
   ///
   /// The primary language subtag must not be null. The region subtag is
-  /// optional.
+  /// optional. When there is no region/country subtag, the parameter should
+  /// be omitted or passed `null` instead of an empty-string.
   ///
   /// The subtag values are _case sensitive_ and must be one of the valid
   /// subtags according to CLDR supplemental data:
@@ -181,6 +183,9 @@ class Locale {
   /// [script](http://unicode.org/cldr/latest/common/validity/script.xml) and
   /// [region](http://unicode.org/cldr/latest/common/validity/region.xml) for
   /// each of languageCode, scriptCode and countryCode respectively.
+  ///
+  /// The [countryCode] subtag is optional. When there is no country subtag,
+  /// the parameter should be omitted or passed `null` instead of an empty-string.
   ///
   /// Validity is not checked by default, but some methods may throw away
   /// invalid data.
