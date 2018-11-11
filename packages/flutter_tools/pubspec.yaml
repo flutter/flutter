@@ -27,7 +27,7 @@ dependencies:
   package_config: 1.0.5
   platform: 2.2.0
   plugin: 0.2.0+3
-  process: 3.0.8
+  process: 3.0.9
   quiver: 2.0.1
   stack_trace: 1.9.3
   stream_channel: 1.6.8
@@ -94,4 +94,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 8467
+# PUBSPEC CHECKSUM: 1368
