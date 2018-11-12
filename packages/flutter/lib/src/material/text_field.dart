@@ -80,7 +80,7 @@ class TextField extends StatefulWidget {
   /// field, showing how many characters have been entered and how many are
   /// allowed unless the value is set to [noMaxLength] in which case only the
   /// current length is displayed and the maximum size is redacted.
-  /// 
+  ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
   /// enforces the length with a [LengthLimitingTextInputFormatter], which is
@@ -194,7 +194,7 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.maxLines}
   final int maxLines;
-  
+ 
   /// If [maxLength] is set to this number, it disables the showing of the maximum length part of
   /// the display, yet still gives a character counter.
   static const int noMaxLength = 9007199254740992; // math.pow(2, 53);
