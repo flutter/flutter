@@ -1104,19 +1104,40 @@ void main() {
       expect(find.text('drawer'), findsOneWidget);
     });
 
-    testWidgets('Floating Action Button has bottom padding', (WidgetTester tester) async {
+    testWidgets('Floating Action Button has bottom padding when Media Query has a bottom padding set', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: TestHomePage(),
+          home: Scaffold(
+            appBar: AppBar(title: const Text('title')),
+            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {},
+              tooltip: 'Add',
+              child: const Icon(Icons.add),
+            ),
+          ),
         ),
       );
 
-      expect(tester.getRect(find.byType(FloatingActionButton)).center.dy, 552.0);
-
-      // Drag all the way up so the floating action button is in its bottom most position.
-      await tester.drag(find.byType(ListTile).at(5), const Offset(0.0, -300.0));
-      await tester.pumpAndSettle();
       expect(tester.getRect(find.byType(FloatingActionButton)).center.dy, 572.0);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(data: const MediaQueryData(padding: EdgeInsets.fromLTRB(0, 0, 0, 40.0)),
+            child: Scaffold(
+              appBar: AppBar(title: const Text('title')),
+              floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {},
+                tooltip: 'Add',
+                child: const Icon(Icons.add),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.getRect(find.byType(FloatingActionButton)).center.dy, 532.0);
     });
   });
 }
@@ -1209,86 +1230,5 @@ class _CustomPageRoute<T> extends PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return child;
-  }
-}
-
-class TestHomePage extends StatefulWidget {
-  @override
-  _TestHomePageState createState() => _TestHomePageState();
-}
-
-class _TestHomePageState extends State<TestHomePage>
-    with SingleTickerProviderStateMixin {
-  AnimationController animationDouble;
-
-  @override
-  void initState() {
-    super.initState();
-    animationDouble = AnimationController(vsync: this, value: 1.0, duration: const Duration(milliseconds: 250));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('this is the title'),
-      ),
-      body: NotificationListener<UserScrollNotification>(
-        onNotification: (UserScrollNotification userScrollNotification) {
-          if (userScrollNotification is UserScrollNotification) {
-            if (userScrollNotification.direction == ScrollDirection.reverse) {
-              animationDouble.reverse();
-            } else if (userScrollNotification.direction == ScrollDirection.forward) {
-              animationDouble.forward();
-            }
-          }
-        },
-        child: ListView(
-          children: const <Widget>[
-            ListTile(
-              title: Text('Test 1'),
-            ),
-            ListTile(
-              title: Text('Test 2'),
-            ),
-            ListTile(
-              title: Text('Test 3'),
-            ),
-            ListTile(
-              title: Text('Test 4'),
-            ),
-            ListTile(
-              title: Text('Test 5'),
-            ),
-            ListTile(
-              title: Text('Test 6'),
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: SizeTransition(
-        sizeFactor: animationDouble,
-        child: BottomAppBar(
-          shape: const CircularNotchedRectangle(),
-          notchMargin: 8.0,
-          color: Colors.blueAccent,
-          child: Row(
-            children: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () {},
-                color: Colors.white,
-              )
-            ],
-          ),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Add',
-        child: const Icon(Icons.add),
-      ),
-    );
   }
 }
