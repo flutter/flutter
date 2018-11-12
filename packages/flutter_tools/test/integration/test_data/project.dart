@@ -23,7 +23,7 @@ abstract class Project {
     this.dir = dir;
     writeFile(fs.path.join(dir.path, 'pubspec.yaml'), pubspec);
     if (main != null) {
-    writeFile(fs.path.join(dir.path, 'lib', 'main.dart'), main);
+      writeFile(fs.path.join(dir.path, 'lib', 'main.dart'), main);
     }
     await getPackages(dir.path);
   }
