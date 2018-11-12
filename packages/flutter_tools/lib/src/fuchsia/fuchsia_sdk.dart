@@ -12,7 +12,6 @@ import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
-import '../globals.dart';
 
 /// The [FuchsiaSdk] instance.
 FuchsiaSdk get fuchsiaSdk => context[FuchsiaSdk];
@@ -27,7 +26,7 @@ FuchsiaArtifacts get fuchsiaArtifacts => context[FuchsiaArtifacts];
 class FuchsiaSdk {
   static const List<String> _netaddrCommand = <String>['fx', 'netaddr', '--fuchsia', '--nowait'];
   static const List<String> _netlsCommand = <String>['fx', 'netls', '--nowait'];
-  static const List<String> _syslogCommand = <String>['fx', 'syslog'];
+  static const List<String> _syslogCommand = <String>['fx', 'syslog', '--clock', 'Local'];
 
   /// Invokes the `netaddr` command.
   ///
@@ -57,12 +56,11 @@ class FuchsiaSdk {
         process.kill();
       });
       processManager.start(_syslogCommand).then((Process newProcess) {
-        printTrace('Running logs');
         if (controller.isClosed) {
           return;
         }
         process = newProcess;
-        process.exitCode.then((_) => controller.close);
+        process.exitCode.whenComplete(controller.close);
         controller.addStream(process.stdout.transform(utf8.decoder).transform(const LineSplitter()));
       });
       return controller.stream;

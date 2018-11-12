@@ -39,7 +39,8 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// The [backgroundColor] defaults to light gray. It can be set to null to
   /// disable the background painting entirely; this is mildly more efficient
-  /// than using [Colors.transparent].
+  /// than using [Colors.transparent]. Also, if it has transparency, no gradient
+  /// effect will be rendered.
   ///
   /// The [looping] argument decides whether the child list loops and can be
   /// scrolled infinitely.  If set to true, scrolling past the end of the list
@@ -121,6 +122,9 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// This can be set to null to disable the background painting entirely; this
   /// is mildly more efficient than using [Colors.transparent].
+  ///
+  /// Any alpha value less 255 (fully opaque) will cause the removal of the
+  /// wheel list edge fade gradient from rendering of the widget.
   final Color backgroundColor;
 
   /// {@macro flutter.rendering.wheelList.offAxisFraction}
@@ -202,24 +206,32 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     }
   }
 
-  /// Makes the fade to white edge gradients.
+  /// Makes the fade to [CupertinoPicker.backgroundColor] edge gradients.
   Widget _buildGradientScreen() {
+    // Because BlendMode.dstOut doesn't work correctly with BoxDecoration we
+    // have to just do a color blend. And a due to the way we are layering
+    // the magnifier and the gradient on the background, using a transparent
+    // background color makes the picker look odd.
+    if (widget.backgroundColor != null && widget.backgroundColor.alpha < 255)
+      return Container();
+
+    final Color widgetBackgroundColor = widget.backgroundColor;
     return Positioned.fill(
       child: IgnorePointer(
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: <Color>[
-                Color(0xFFFFFFFF),
-                Color(0xF2FFFFFF),
-                Color(0xDDFFFFFF),
-                Color(0x00FFFFFF),
-                Color(0x00FFFFFF),
-                Color(0xDDFFFFFF),
-                Color(0xF2FFFFFF),
-                Color(0xFFFFFFFF),
+                widgetBackgroundColor,
+                widgetBackgroundColor.withAlpha(0xF2),
+                widgetBackgroundColor.withAlpha(0xDD),
+                widgetBackgroundColor.withAlpha(0),
+                widgetBackgroundColor.withAlpha(0),
+                widgetBackgroundColor.withAlpha(0xDD),
+                widgetBackgroundColor.withAlpha(0xF2),
+                widgetBackgroundColor,
               ],
-              stops: <double>[
+              stops: const <double>[
                 0.0, 0.05, 0.09, 0.22, 0.78, 0.91, 0.95, 1.0,
               ],
               begin: Alignment.topCenter,
@@ -267,6 +279,34 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     );
   }
 
+  Widget _buildUnderMagnifierScreen() {
+    final Color foreground = widget.backgroundColor?.withAlpha(
+        (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt()
+    );
+
+    return Column(
+      children: <Widget>[
+        Expanded(child: Container()),
+        Container(
+          color: foreground,
+          constraints: BoxConstraints.expand(
+            height: widget.itemExtent * widget.magnification,
+          ),
+        ),
+        Expanded(child: Container()),
+      ],
+    );
+  }
+
+  Widget _addBackgroundToChild(Widget child) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: widget.backgroundColor,
+      ),
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget result = Stack(
@@ -292,13 +332,17 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         _buildMagnifierScreen(),
       ],
     );
-    if (widget.backgroundColor != null) {
-      result = DecoratedBox(
-        decoration: BoxDecoration(
-          color: widget.backgroundColor,
-        ),
-        child: result,
+    // Adds the appropriate opacity under the magnifier if the background
+    // color is transparent.
+    if (widget.backgroundColor != null && widget.backgroundColor.alpha < 255) {
+      result = Stack(
+        children: <Widget> [
+          _buildUnderMagnifierScreen(),
+          _addBackgroundToChild(result),
+        ]
       );
+    } else {
+      result = _addBackgroundToChild(result);
     }
     return result;
   }
