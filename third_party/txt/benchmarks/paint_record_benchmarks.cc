@@ -39,7 +39,7 @@ static void BM_PaintRecordInit(benchmark::State& state) {
   auto text_blob = builder.make();
 
   while (state.KeepRunning()) {
-    PaintRecord PaintRecord(style, text_blob, SkPaint::FontMetrics(), 0, 0);
+    PaintRecord PaintRecord(style, text_blob, SkFontMetrics(), 0, 0);
   }
 }
 BENCHMARK(BM_PaintRecordInit);

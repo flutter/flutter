@@ -310,14 +310,14 @@ class Paragraph {
     Range<size_t> code_units;
     Range<double> x_pos;
     size_t line_number;
-    SkPaint::FontMetrics font_metrics;
+    SkFontMetrics font_metrics;
     TextDirection direction;
 
     CodeUnitRun(std::vector<GlyphPosition>&& p,
                 Range<size_t> cu,
                 Range<double> x,
                 size_t line,
-                const SkPaint::FontMetrics& metrics,
+                const SkFontMetrics& metrics,
                 TextDirection dir);
 
     void Shift(double delta);

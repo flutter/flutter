@@ -37,13 +37,13 @@ class PaintRecord {
   PaintRecord(TextStyle style,
               SkPoint offset,
               sk_sp<SkTextBlob> text,
-              SkPaint::FontMetrics metrics,
+              SkFontMetrics metrics,
               size_t line,
               double run_width);
 
   PaintRecord(TextStyle style,
               sk_sp<SkTextBlob> text,
-              SkPaint::FontMetrics metrics,
+              SkFontMetrics metrics,
               size_t line,
               double run_width);
 
@@ -57,7 +57,7 @@ class PaintRecord {
 
   SkTextBlob* text() const { return text_.get(); }
 
-  const SkPaint::FontMetrics& metrics() const { return metrics_; }
+  const SkFontMetrics& metrics() const { return metrics_; }
 
   const TextStyle& style() const { return style_; }
 
@@ -72,7 +72,7 @@ class PaintRecord {
   // SkTextBlob stores the glyphs and coordinates to draw them.
   sk_sp<SkTextBlob> text_;
   // FontMetrics stores the measurements of the font used.
-  SkPaint::FontMetrics metrics_;
+  SkFontMetrics metrics_;
   size_t line_;
   double run_width_ = 0.0f;
 

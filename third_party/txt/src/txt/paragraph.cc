@@ -205,7 +205,7 @@ Paragraph::CodeUnitRun::CodeUnitRun(std::vector<GlyphPosition>&& p,
                                     Range<size_t> cu,
                                     Range<double> x,
                                     size_t line,
-                                    const SkPaint::FontMetrics& metrics,
+                                    const SkFontMetrics& metrics,
                                     TextDirection dir)
     : positions(std::move(p)),
       code_units(cu),
@@ -686,7 +686,7 @@ void Paragraph::Layout(double width, bool force) {
 
         if (glyph_positions.empty())
           continue;
-        SkPaint::FontMetrics metrics;
+        SkFontMetrics metrics;
         paint.getFontMetrics(&metrics);
         paint_records.emplace_back(run.style(), SkPoint::Make(run_x_offset, 0),
                                    builder.make(), metrics, line_number,
@@ -738,7 +738,7 @@ void Paragraph::Layout(double width, bool force) {
     double max_line_spacing = 0;
     double max_descent = 0;
     SkScalar max_unscaled_ascent = 0;
-    auto update_line_metrics = [&](const SkPaint::FontMetrics& metrics,
+    auto update_line_metrics = [&](const SkFontMetrics& metrics,
                                    const TextStyle& style) {
       // TODO(garyq): Multipling in the style.height on the first line is
       // probably wrong. Figure out how paragraph and line heights are supposed
@@ -768,7 +768,7 @@ void Paragraph::Layout(double width, bool force) {
     // If no fonts were actually rendered, then compute a baseline based on the
     // font of the paragraph style.
     if (paint_records.empty()) {
-      SkPaint::FontMetrics metrics;
+      SkFontMetrics metrics;
       TextStyle style(paragraph_style_.GetTextStyle());
       paint.setTypeface(GetDefaultSkiaTypeface(style));
       paint.setTextSize(style.font_size);
@@ -923,7 +923,7 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
   if (record.style().decoration == TextDecoration::kNone)
     return;
 
-  const SkPaint::FontMetrics& metrics = record.metrics();
+  const SkFontMetrics& metrics = record.metrics();
   SkPaint paint;
   paint.setStyle(SkPaint::kStroke_Style);
   if (record.style().decoration_color == SK_ColorTRANSPARENT) {
@@ -948,8 +948,8 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
   }
 
   SkScalar underline_thickness;
-  if ((metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
-                            kUnderlineThicknessIsValid_Flag) &&
+  if ((metrics.fFlags &
+       SkFontMetrics::FontMetricsFlags::kUnderlineThicknessIsValid_Flag) &&
       metrics.fUnderlineThickness > 0) {
     underline_thickness = metrics.fUnderlineThickness;
   } else {
@@ -1024,10 +1024,11 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
     double y_offset_original = y_offset;
     // Underline
     if (record.style().decoration & TextDecoration::kUnderline) {
-      y_offset += (metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
-                                        kUnderlinePositionIsValid_Flag)
-                      ? metrics.fUnderlinePosition
-                      : underline_thickness;
+      y_offset +=
+          (metrics.fFlags &
+           SkFontMetrics::FontMetricsFlags::kUnderlinePositionIsValid_Flag)
+              ? metrics.fUnderlinePosition
+              : underline_thickness;
       if (record.style().decoration_style != TextDecorationStyle::kWavy) {
         canvas->drawLine(x, y + y_offset, x + width, y + y_offset, paint);
       } else {
@@ -1053,19 +1054,20 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
     }
     // Strikethrough
     if (record.style().decoration & TextDecoration::kLineThrough) {
-      if (metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
-                               kStrikeoutThicknessIsValid_Flag)
+      if (metrics.fFlags &
+          SkFontMetrics::FontMetricsFlags::kStrikeoutThicknessIsValid_Flag)
         paint.setStrokeWidth(metrics.fStrikeoutThickness *
                              record.style().decoration_thickness_multiplier);
       // Make sure the double line is "centered" vertically.
       y_offset += (decoration_count - 1.0) * underline_thickness *
                   kDoubleDecorationSpacing / -2.0;
-      y_offset += (metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
-                                        kStrikeoutThicknessIsValid_Flag)
-                      ? metrics.fStrikeoutPosition
-                      // Backup value if the strikeoutposition metric is not
-                      // available:
-                      : metrics.fXHeight / -2.0;
+      y_offset +=
+          (metrics.fFlags &
+           SkFontMetrics::FontMetricsFlags::kStrikeoutThicknessIsValid_Flag)
+              ? metrics.fStrikeoutPosition
+              // Backup value if the strikeoutposition metric is not
+              // available:
+              : metrics.fXHeight / -2.0;
       if (record.style().decoration_style != TextDecorationStyle::kWavy) {
         canvas->drawLine(x, y + y_offset, x + width, y + y_offset, paint);
       } else {
@@ -1084,7 +1086,7 @@ void Paragraph::PaintBackground(SkCanvas* canvas,
   if (!record.style().has_background)
     return;
 
-  const SkPaint::FontMetrics& metrics = record.metrics();
+  const SkFontMetrics& metrics = record.metrics();
   SkRect rect(SkRect::MakeLTRB(0, metrics.fAscent, record.GetRunWidth(),
                                metrics.fDescent));
   rect.offset(base_offset + record.offset());
