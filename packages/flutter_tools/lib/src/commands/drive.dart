@@ -64,6 +64,12 @@ class DriveCommand extends RunCommandBase {
               'extension, so e.g. if the target is "lib/main.dart", the driver will be '
               '"test_driver/main_test.dart".',
         valueHelp: 'path',
+      )
+      ..addFlag('use-test-core',
+        help: 'Run the driver script through the test_core entrypoing instead of'
+              ' invoking it directly.',
+        defaultsTo: false,
+        negatable: true,
       );
   }
 
@@ -86,6 +92,7 @@ class DriveCommand extends RunCommandBase {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final String testFile = _getTestFile();
+    final bool useTestCore = argResults['use-test-core'];
     if (testFile == null)
       throwToolExit(null);
 
@@ -122,7 +129,7 @@ class DriveCommand extends RunCommandBase {
     Cache.releaseLockEarly();
 
     try {
-      await testRunner(<String>[testFile], observatoryUri);
+      await testRunner(<String>[testFile], observatoryUri, useTestCore);
     } catch (error, stackTrace) {
       if (error is ToolExit)
         rethrow;
@@ -276,26 +283,38 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef TestRunner = Future<void> Function(List<String> testArgs, String observatoryUri);
+typedef TestRunner = Future<void> Function(List<String> testArgs, String observatoryUri, bool useTestCore);
 TestRunner testRunner = _runTests;
 void restoreTestRunner() {
   testRunner = _runTests;
 }
 
-Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
+Future<void> _runTests(List<String> testArgs, String observatoryUri, bool useTestCore) async {
   printTrace('Running driver tests.');
 
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
   final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
   final String testScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'test', 'drive_executable.dart');
-  final int result = await runCommandAndStreamOutput(
-    <String>[dartVmPath]
-      ..addAll(dartVmFlags)
-      ..addAll(<String>['--packages=${PackageMap.globalPackagesPath}', testScript])
-      ..addAll(testArgs)
-      ..add('-rexpanded'),
-    environment: <String, String>{ 'VM_SERVICE_URL': observatoryUri }
-  );
+  int result;
+  if (useTestCore) {
+    result = await runCommandAndStreamOutput(
+      <String>[dartVmPath]
+        ..addAll(dartVmFlags)
+        ..addAll(<String>['--packages=${PackageMap.globalPackagesPath}', testScript])
+        ..addAll(testArgs)
+        ..add('-rexpanded'),
+      environment: <String, String>{ 'VM_SERVICE_URL': observatoryUri });
+  } else {
+    result = await runCommandAndStreamOutput(
+      <String>[dartVmPath]
+        ..addAll(dartVmFlags)
+        ..addAll(testArgs)
+        ..addAll(<String>[
+          '--packages=${PackageMap.globalPackagesPath}',
+           '-rexpanded',
+        ]),
+      environment: <String, String>{ 'VM_SERVICE_URL': observatoryUri });
+  }
   if (result != 0)
     throwToolExit('Driver tests failed: $result', exitCode: result);
 }
