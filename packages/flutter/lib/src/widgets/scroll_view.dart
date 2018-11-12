@@ -889,9 +889,28 @@ class ListView extends BoxScrollView {
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
-           return index.isEven
-             ? itemBuilder(context, itemIndex)
-             : separatorBuilder(context, itemIndex);
+           if (index.isEven) {
+             return itemBuilder(context, itemIndex);
+           } else {
+             Widget separator;
+             try {
+               separator = separatorBuilder(context, itemIndex);
+               if (separator == null) {
+                 throw FlutterError('separatorBuilder cannot return null.');
+               }
+             } catch (exception, stack) {
+               final FlutterErrorDetails details = FlutterErrorDetails(
+                 exception: exception,
+                 stack: stack,
+                 library: 'widgets library',
+                 context: 'building',
+                 informationCollector: null,
+               );
+               FlutterError.reportError(details);
+               separator = ErrorWidget.builder(details);
+             }
+             return separator;
+           }
          },
          childCount: _computeSemanticChildCount(itemCount),
          addAutomaticKeepAlives: addAutomaticKeepAlives,

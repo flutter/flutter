@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import 'states.dart';
 
@@ -409,5 +410,42 @@ void main() {
     );
     await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
     expect(scrolled, isFalse);
+  });
+
+  testWidgets('separatorBuilder must return something', (WidgetTester tester) async {
+    final List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+
+    Widget buildFrame(Widget firstSeparator) {
+      return MaterialApp(
+        home: Material(
+          child: ListView.separated(
+            itemBuilder: (BuildContext context, int index) {
+              return ListTile(
+                title: Text(
+                  listOfValues[index],
+                  textAlign: TextAlign.center,
+                ),
+              );
+            },
+            separatorBuilder: (BuildContext context, int index) {
+              if (index == 0) {
+                return firstSeparator;
+              } else  {
+                return const Divider();
+              }
+            },
+            itemCount: listOfValues.length,
+          ),
+        ),
+      );
+    }
+
+    // A separatorBuilder that always returns a Divider is fine
+    await tester.pumpWidget(buildFrame(const Divider()));
+    expect(tester.takeException(), isNull);
+
+    // A separatorBuilder that returns null throws a FlutterError
+    await tester.pumpWidget(buildFrame(null));
+    expect(tester.takeException(), isInstanceOf<FlutterError>());
   });
 }
