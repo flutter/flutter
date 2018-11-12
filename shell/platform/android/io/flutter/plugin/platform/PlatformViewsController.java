@@ -179,7 +179,7 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
         VirtualDisplayController vdController = VirtualDisplayController.create(
                 mContext,
                 viewFactory,
-                textureEntry.surfaceTexture(),
+                textureEntry,
                 toPhysicalPixels(logicalWidth),
                 toPhysicalPixels(logicalHeight),
                 id,
