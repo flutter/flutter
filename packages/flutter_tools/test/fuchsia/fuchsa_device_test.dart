@@ -48,7 +48,7 @@ d  2          0 .
     });
   });
 
-  group('displays friendly error when no observatories found', () {
+  group('displays friendly error when', () {
     final MockProcessManager mockProcessManager = MockProcessManager();
     final MockProcessResult mockProcessResult = MockProcessResult();
     final MockFuchsiaArtifacts mockFuchsiaArtifacts = MockFuchsiaArtifacts();
