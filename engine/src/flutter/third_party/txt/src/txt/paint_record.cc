@@ -24,7 +24,7 @@ PaintRecord::~PaintRecord() = default;
 PaintRecord::PaintRecord(TextStyle style,
                          SkPoint offset,
                          sk_sp<SkTextBlob> text,
-                         SkPaint::FontMetrics metrics,
+                         SkFontMetrics metrics,
                          size_t line,
                          double run_width)
     : style_(style),
@@ -36,7 +36,7 @@ PaintRecord::PaintRecord(TextStyle style,
 
 PaintRecord::PaintRecord(TextStyle style,
                          sk_sp<SkTextBlob> text,
-                         SkPaint::FontMetrics metrics,
+                         SkFontMetrics metrics,
                          size_t line,
                          double run_width)
     : style_(style),
