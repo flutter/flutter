@@ -1,4 +1,4 @@
-Signature: 8c147e63983e38eb86ab5e87c56a62cb
+Signature: df483882f00582d8a804e6d63503cf82
 
 UNUSED LICENSES:
 
@@ -1313,6 +1313,7 @@ FILE: ../../../third_party/skia/gm/crbug_847759.cpp
 FILE: ../../../third_party/skia/gm/crbug_884166.cpp
 FILE: ../../../third_party/skia/gm/crbug_887103.cpp
 FILE: ../../../third_party/skia/gm/drawimageset.cpp
+FILE: ../../../third_party/skia/gm/gradients_degenerate.cpp
 FILE: ../../../third_party/skia/gm/hugepath.cpp
 FILE: ../../../third_party/skia/gm/localmatrixshader.cpp
 FILE: ../../../third_party/skia/gm/makeRasterImage.cpp
@@ -1370,6 +1371,8 @@ FILE: ../../../third_party/skia/modules/skottie/src/SkottieShapeLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTest.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTextLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTool.cpp
+FILE: ../../../third_party/skia/modules/skottie/utils/SkottieUtils.cpp
+FILE: ../../../third_party/skia/modules/skottie/utils/SkottieUtils.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGClipEffect.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGColorFilter.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGGeometryTransform.h
