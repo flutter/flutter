@@ -1831,6 +1831,7 @@ void main() {
 
     expect(find.text('5'), findsOneWidget);
   });
+
   testWidgets('TextField identifies as text field in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
