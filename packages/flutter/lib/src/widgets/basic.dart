@@ -172,6 +172,12 @@ class Directionality extends InheritedWidget {
 /// ```
 /// {@end-tool}
 ///
+/// Directly drawing an [Image] with opacity is faster than using [Opacity]
+/// because [Opacity] could apply the opacity to a group of widgets and
+/// therefore a costly offscreen buffer will be used. Drawing content into the
+/// offscreen buffer may also trigger render target switches and such switching
+/// is particularly slow in older GPUs.
+///
 /// See also:
 ///
 ///  * [Visibility], which can hide a child more efficiently (albeit less
