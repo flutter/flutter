@@ -14,6 +14,7 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   SkMatrix child_matrix = matrix;
   child_matrix.postTranslate(offset_.fX, offset_.fY);
   ContainerLayer::Preroll(context, child_matrix);
+  set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
   if (context->raster_cache && layers().size() == 1) {
     Layer* child = layers()[0].get();
     SkMatrix ctm = child_matrix;
@@ -54,8 +55,22 @@ void OpacityLayer::Paint(PaintContext& context) const {
     }
   }
 
+  // Skia may clip the content with saveLayerBounds (although it's not a
+  // guaranteed clip). So we have to provide a big enough saveLayerBounds. To do
+  // so, we first remove the offset from paint bounds since it's already in the
+  // matrix. Then we round out the bounds because of our
+  // RasterCache::GetIntegralTransCTM optimization.
+  //
+  // Note that the following lines are only accessible when the raster cache is
+  // not available (e.g., when we're using the software backend in golden
+  // tests).
+  SkRect saveLayerBounds;
+  paint_bounds()
+      .makeOffset(-offset_.fX, -offset_.fY)
+      .roundOut(&saveLayerBounds);
+
   Layer::AutoSaveLayer save_layer =
-      Layer::AutoSaveLayer::Create(context, paint_bounds(), &paint);
+      Layer::AutoSaveLayer::Create(context, saveLayerBounds, &paint);
   PaintChildren(context);
 }
 
