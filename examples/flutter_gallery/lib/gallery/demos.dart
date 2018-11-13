@@ -112,12 +112,12 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => const AnimationDemo(),
     ),
     GalleryDemo(
-      title: 'Customize Design',
+      title: 'Customized Design',
       subtitle: 'Activity Tracker',
-      icon: GalleryIcons.animation,
+      icon: GalleryIcons.animation, // TODO use correct icon
       category: _kDemos,
-      routeName: CustomizeDesignDemo.routeName,
-      buildRoute: (BuildContext context) => const CustomizeDesignDemo(),
+      routeName: CustomizedDemo.routeName,
+      buildRoute: (BuildContext context) => const CustomizedDemo(),
     ),
 
     // Style

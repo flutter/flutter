@@ -4,12 +4,12 @@
 
 import 'package:flutter/material.dart';
 
-import 'customize/home.dart';
+import 'customized/home.dart';
 
-class CustomizeDesignDemo extends StatelessWidget {
-  const CustomizeDesignDemo({Key key}) : super(key: key);
+class CustomizedDemo extends StatelessWidget {
+  const CustomizedDemo({Key key}) : super(key: key);
 
-  static const String routeName = '/customize';
+  static const String routeName = '/customized';
 
   @override
   Widget build(BuildContext context) => CustomizedDesign();
