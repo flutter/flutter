@@ -443,9 +443,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   Status initialBuildStatus;
   Directory tempDir;
 
+  File scriptOutputPipeFile;
   if (logger.hasTerminal) {
     tempDir = fs.systemTempDirectory.createTempSync('flutter_build_log_pipe.');
-    final File scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
+    scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
     os.makePipe(scriptOutputPipeFile.path);
 
     Future<void> listenToScriptOutputLine() async {
@@ -484,6 +485,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     workingDirectory: app.project.hostAppRoot.path,
     allowReentrantFlutter: true
   );
+  // Notifies listener that no more output is coming.
+  scriptOutputPipeFile?.writeAsStringSync('all done');
   buildSubStatus?.stop();
   initialBuildStatus?.cancel();
   buildStopwatch.stop();
