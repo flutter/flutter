@@ -15,7 +15,7 @@ void main() {
 
     test('can find a time ago', () {
       final SystemClock clock = SystemClock.fixed(DateTime(1991, 8, 23));
-      expect(clock.ago(Duration(days: 10)), DateTime(1991, 8, 13));
+      expect(clock.ago(const Duration(days: 10)), DateTime(1991, 8, 13));
     });
   });
 }
