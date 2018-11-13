@@ -1,4 +1,4 @@
-Signature: c4e7b4f8a81112a90807c1aaaf44d004
+Signature: acce6a16686bcb1848d41bfb833dde5a
 
 UNUSED LICENSES:
 
@@ -1313,6 +1313,7 @@ FILE: ../../../third_party/skia/gm/crbug_847759.cpp
 FILE: ../../../third_party/skia/gm/crbug_884166.cpp
 FILE: ../../../third_party/skia/gm/crbug_887103.cpp
 FILE: ../../../third_party/skia/gm/drawimageset.cpp
+FILE: ../../../third_party/skia/gm/fwidth_squircle.cpp
 FILE: ../../../third_party/skia/gm/gradients_degenerate.cpp
 FILE: ../../../third_party/skia/gm/hugepath.cpp
 FILE: ../../../third_party/skia/gm/localmatrixshader.cpp
