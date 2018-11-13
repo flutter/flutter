@@ -223,7 +223,7 @@ class Stepper extends StatefulWidget {
   /// ```
   final ControlsWidgetBuilder controlsBuilder;
 
-  /// The configuration to determine whether Stepper has default controlls.
+  /// The configuration to define whether Stepper has the default 'continue' and 'cancel' control.
   ///
   /// If true, the 'continue' and 'cancel' button will be build.
   final bool useControl;
