@@ -62,6 +62,7 @@ shared_library("create_flutter_framework_dylib") {
     "framework/Source/FlutterPlatformPlugin.h",
     "framework/Source/FlutterPlatformPlugin.mm",
     "framework/Source/FlutterPlatformViews_Internal.h",
+    "framework/Source/FlutterPlatformViews_Internal.mm",
     "framework/Source/FlutterPlatformViews.mm",
     "framework/Source/FlutterPluginAppLifeCycleDelegate.mm",
     "framework/Source/FlutterStandardCodec.mm",

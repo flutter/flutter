@@ -20,24 +20,15 @@ namespace shell {
 
 class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
  public:
-  void Complete(std::unique_ptr<fml::Mapping> data) override {
-    fml::RefPtr<PlatformMessageResponseDarwin> self(this);
-    platform_task_runner_->PostTask(fml::MakeCopyable([self, data = std::move(data)]() mutable {
-      self->callback_.get()(shell::GetNSDataFromMapping(std::move(data)));
-    }));
-  }
+  void Complete(std::unique_ptr<fml::Mapping> data) override;
 
-  void CompleteEmpty() override {
-    fml::RefPtr<PlatformMessageResponseDarwin> self(this);
-    platform_task_runner_->PostTask(
-        fml::MakeCopyable([self]() mutable { self->callback_.get()(nil); }));
-  }
+  void CompleteEmpty() override;
 
  private:
   explicit PlatformMessageResponseDarwin(PlatformMessageResponseCallback callback,
-                                         fml::RefPtr<fml::TaskRunner> platform_task_runner)
-      : callback_(callback, fml::OwnershipPolicy::Retain),
-        platform_task_runner_(std::move(platform_task_runner)) {}
+                                         fml::RefPtr<fml::TaskRunner> platform_task_runner);
+
+  ~PlatformMessageResponseDarwin() override;
 
   fml::ScopedBlock<PlatformMessageResponseCallback> callback_;
   fml::RefPtr<fml::TaskRunner> platform_task_runner_;

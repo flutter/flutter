@@ -49,7 +49,7 @@ class Paragraph : public RefCountedDartWrappable<Paragraph> {
   Dart_Handle getPositionForOffset(double dx, double dy);
   Dart_Handle getWordBoundary(unsigned offset);
 
-  virtual size_t GetAllocationSize() override;
+  size_t GetAllocationSize() override;
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 

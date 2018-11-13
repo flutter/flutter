@@ -20,6 +20,8 @@ class TaskRunners {
               fml::RefPtr<fml::TaskRunner> ui,
               fml::RefPtr<fml::TaskRunner> io);
 
+  TaskRunners(const TaskRunners& other);
+
   ~TaskRunners();
 
   const std::string& GetLabel() const;

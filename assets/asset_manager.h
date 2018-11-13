@@ -19,7 +19,7 @@ class AssetManager final : public AssetResolver {
  public:
   AssetManager();
 
-  ~AssetManager();
+  ~AssetManager() override;
 
   void PushFront(std::unique_ptr<AssetResolver> resolver);
 

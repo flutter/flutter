@@ -15,6 +15,9 @@ using tonic::ToDart;
 
 namespace blink {
 
+EngineLayer::EngineLayer(std::shared_ptr<flow::ContainerLayer> layer)
+    : layer_(layer) {}
+
 EngineLayer::~EngineLayer() = default;
 
 size_t EngineLayer::GetAllocationSize() {

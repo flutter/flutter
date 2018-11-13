@@ -25,9 +25,9 @@ class FrameInfo final : public RefCountedDartWrappable<FrameInfo> {
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
-  FrameInfo(fml::RefPtr<CanvasImage> image, int durationMillis)
-      : image_(std::move(image)), durationMillis_(durationMillis) {}
-  ~FrameInfo(){};
+  FrameInfo(fml::RefPtr<CanvasImage> image, int durationMillis);
+
+  ~FrameInfo() override;
 
   const fml::RefPtr<CanvasImage> image_;
   const int durationMillis_;

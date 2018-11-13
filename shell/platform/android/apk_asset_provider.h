@@ -19,7 +19,7 @@ class APKAssetProvider final : public AssetResolver {
   explicit APKAssetProvider(JNIEnv* env,
                             jobject assetManager,
                             std::string directory);
-  virtual ~APKAssetProvider();
+  ~APKAssetProvider() override;
 
  private:
   fml::jni::ScopedJavaGlobalRef<jobject> java_asset_manager_;

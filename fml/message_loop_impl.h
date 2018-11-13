@@ -57,8 +57,11 @@ class MessageLoopImpl : public fml::RefCountedThreadSafe<MessageLoopImpl> {
 
     DelayedTask(size_t p_order,
                 fml::closure p_task,
-                fml::TimePoint p_target_time)
-        : order(p_order), task(std::move(p_task)), target_time(p_target_time) {}
+                fml::TimePoint p_target_time);
+
+    DelayedTask(const DelayedTask& other);
+
+    ~DelayedTask();
   };
 
   struct DelayedTaskCompare {

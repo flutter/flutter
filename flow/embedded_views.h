@@ -37,7 +37,7 @@ class ExternalViewEmbedder {
   virtual SkCanvas* CompositeEmbeddedView(int view_id,
                                           const EmbeddedViewParams& params) = 0;
 
-  virtual bool SubmitFrame(GrContext* context) { return false; };
+  virtual bool SubmitFrame(GrContext* context);
 
   virtual ~ExternalViewEmbedder() = default;
 

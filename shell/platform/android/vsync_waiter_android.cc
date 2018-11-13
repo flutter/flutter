@@ -84,7 +84,7 @@ bool VsyncWaiterAndroid::Register(JNIEnv* env) {
 static void ConsumePendingCallback(jlong java_baton,
                                    fml::TimePoint frame_start_time,
                                    fml::TimePoint frame_target_time) {
-  auto weak_this = reinterpret_cast<std::weak_ptr<VsyncWaiter>*>(java_baton);
+  auto* weak_this = reinterpret_cast<std::weak_ptr<VsyncWaiter>*>(java_baton);
   auto shared_this = weak_this->lock();
   delete weak_this;
 

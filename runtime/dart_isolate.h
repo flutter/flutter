@@ -98,12 +98,9 @@ class DartIsolate : public UIDartState {
 
   class AutoFireClosure {
    public:
-    AutoFireClosure(fml::closure closure) : closure_(std::move(closure)) {}
-    ~AutoFireClosure() {
-      if (closure_) {
-        closure_();
-      }
-    }
+    AutoFireClosure(fml::closure closure);
+
+    ~AutoFireClosure();
 
    private:
     fml::closure closure_;

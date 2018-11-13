@@ -17,7 +17,9 @@ namespace blink {
 
 class IsolateNameServer {
  public:
-  IsolateNameServer() {}
+  IsolateNameServer();
+
+  ~IsolateNameServer();
 
   // Looks up the Dart_Port associated with a given name. Returns ILLEGAL_PORT
   // if the name does not exist.

@@ -96,7 +96,7 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
   TRACE_EVENT0("flutter", "LayerTree::Flatten");
 
   SkPictureRecorder recorder;
-  auto canvas = recorder.beginRecording(bounds);
+  auto* canvas = recorder.beginRecording(bounds);
 
   if (!canvas) {
     return nullptr;

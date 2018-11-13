@@ -38,7 +38,7 @@ class RuntimeController final : public WindowClient {
                     std::string advisory_script_uri,
                     std::string advisory_script_entrypoint);
 
-  ~RuntimeController();
+  ~RuntimeController() override;
 
   std::unique_ptr<RuntimeController> Clone() const;
 
@@ -83,11 +83,9 @@ class RuntimeController final : public WindowClient {
     Locale(std::string language_code_,
            std::string country_code_,
            std::string script_code_,
-           std::string variant_code_)
-        : language_code(language_code_),
-          country_code(country_code_),
-          script_code(script_code_),
-          variant_code(variant_code_) {}
+           std::string variant_code_);
+
+    ~Locale();
 
     std::string language_code;
     std::string country_code;
@@ -96,6 +94,12 @@ class RuntimeController final : public WindowClient {
   };
 
   struct WindowData {
+    WindowData();
+
+    WindowData(const WindowData& other);
+
+    ~WindowData();
+
     ViewportMetrics viewport_metrics;
     std::string language_code;
     std::string country_code;

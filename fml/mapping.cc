@@ -22,4 +22,12 @@ const uint8_t* DataMapping::GetMapping() const {
   return data_.data();
 }
 
+size_t NonOwnedMapping::GetSize() const {
+  return size_;
+}
+
+const uint8_t* NonOwnedMapping::GetMapping() const {
+  return data_;
+}
+
 }  // namespace fml

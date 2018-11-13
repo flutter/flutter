@@ -164,9 +164,9 @@ bool Rasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
   // for instrumentation.
   compositor_context_->engine_time().SetLapTime(layer_tree.construction_time());
 
-  auto canvas = frame->SkiaCanvas();
+  auto* canvas = frame->SkiaCanvas();
 
-  auto external_view_embedder = surface_->GetExternalViewEmbedder();
+  auto* external_view_embedder = surface_->GetExternalViewEmbedder();
 
   if (external_view_embedder != nullptr) {
     external_view_embedder->BeginFrame(layer_tree.frame_size());
@@ -253,7 +253,7 @@ static sk_sp<SkData> ScreenshotLayerTreeAsImage(
   }
 
   // Draw the current layer tree into the snapshot surface.
-  auto canvas = snapshot_surface->getCanvas();
+  auto* canvas = snapshot_surface->getCanvas();
 
   // There is no root surface transformation for the screenshot layer. Reset the
   // matrix to identity.
@@ -299,7 +299,7 @@ static sk_sp<SkData> ScreenshotLayerTreeAsImage(
 Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
     Rasterizer::ScreenshotType type,
     bool base64_encode) {
-  auto layer_tree = GetLastLayerTree();
+  auto* layer_tree = GetLastLayerTree();
   if (layer_tree == nullptr) {
     FML_LOG(ERROR) << "Last layer tree was null when screenshotting.";
     return {};
@@ -351,5 +351,14 @@ void Rasterizer::FireNextFrameCallbackIfPresent() {
   next_frame_callback_ = nullptr;
   callback();
 }
+
+Rasterizer::Screenshot::Screenshot() {}
+
+Rasterizer::Screenshot::Screenshot(sk_sp<SkData> p_data, SkISize p_size)
+    : data(std::move(p_data)), frame_size(p_size) {}
+
+Rasterizer::Screenshot::Screenshot(const Screenshot& other) = default;
+
+Rasterizer::Screenshot::~Screenshot() = default;
 
 }  // namespace shell

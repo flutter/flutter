@@ -23,7 +23,7 @@ class PictureRecorder : public RefCountedDartWrappable<PictureRecorder> {
  public:
   static fml::RefPtr<PictureRecorder> Create();
 
-  ~PictureRecorder();
+  ~PictureRecorder() override;
 
   SkCanvas* BeginRecording(SkRect bounds);
   fml::RefPtr<Picture> endRecording();

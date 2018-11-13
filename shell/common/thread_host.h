@@ -27,7 +27,7 @@ struct ThreadHost {
 
   ThreadHost();
 
-  ThreadHost(ThreadHost&&) = default;
+  ThreadHost(ThreadHost&&);
 
   ThreadHost& operator=(ThreadHost&&) = default;
 

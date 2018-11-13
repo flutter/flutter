@@ -10,6 +10,8 @@ namespace blink {
 
 SemanticsNode::SemanticsNode() = default;
 
+SemanticsNode::SemanticsNode(const SemanticsNode& other) = default;
+
 SemanticsNode::~SemanticsNode() = default;
 
 bool SemanticsNode::HasAction(SemanticsAction action) {
