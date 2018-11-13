@@ -1006,12 +1006,14 @@ class RenderEditable extends RenderBox {
   }
 
   /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
-  /// This does not required the layout to be updated.
+  /// This does not required the layout to be updated. This value may change depending
+  /// on the text being entered.
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
-  /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
-  /// This does not required the layout to be updated.
+  /// Attempts to provide the measured height of a line in the text at the selected
+  /// position. See [TextPainter.preferredLineHeight] and [TextPainter.preferredLineHeightAtOffset].
   double get _preferredCursorLineHeight {
+    if (_selection == null) return preferredLineHeight;
     return _textPainter.preferredLineHeightAtOffset(_selection.extentOffset);
   }
 
