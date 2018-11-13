@@ -5,13 +5,16 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
-import 'package:flutter_tools/src/base/time.dart';
-
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+
+import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
+import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -43,6 +46,51 @@ d  2          0 .
       expect(ports.length, 1);
       expect(ports.single, 36780);
     });
+  });
+
+  group('displays friendly error when', () {
+    final MockProcessManager mockProcessManager = MockProcessManager();
+    final MockProcessResult mockProcessResult = MockProcessResult();
+    final MockFuchsiaArtifacts mockFuchsiaArtifacts = MockFuchsiaArtifacts();
+    final MockFile mockFile = MockFile();
+    when(mockProcessManager.run(
+      any,
+      environment: anyNamed('environment'),
+      workingDirectory: anyNamed('workingDirectory'),
+    )).thenAnswer((Invocation invocation) => Future<ProcessResult>.value(mockProcessResult));
+    when(mockProcessResult.exitCode).thenReturn(1);
+    when<String>(mockProcessResult.stdout).thenReturn('');
+    when<String>(mockProcessResult.stderr).thenReturn('ls: lstat /tmp/dart.services: No such file or directory');
+    when(mockFuchsiaArtifacts.sshConfig).thenReturn(mockFile);
+    when(mockFile.absolute).thenReturn(mockFile);
+    when(mockFile.path).thenReturn('');
+
+    testUsingContext('No BUILD_DIR set', () async {
+      final FuchsiaDevice device = FuchsiaDevice('id');
+      ToolExit toolExit;
+      try {
+        await device.servicePorts();
+      } on ToolExit catch (err) {
+        toolExit = err;
+      }
+      expect(toolExit.message, contains('BUILD_DIR must be supplied to locate SSH keys'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('with BUILD_DIR set', () async {
+      final FuchsiaDevice device = FuchsiaDevice('id');
+      ToolExit toolExit;
+      try {
+        await device.servicePorts();
+      } on ToolExit catch (err) {
+        toolExit = err;
+      }
+      expect(toolExit.message, 'No Dart Observatories found. Are you running a debug build?');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      FuchsiaArtifacts: () => mockFuchsiaArtifacts,
+    });
 
     group('device logs', () {
       const String exampleUtcLogs = '''
@@ -53,7 +101,7 @@ d  2          0 .
 [2018-11-09 01:30:02][41175][41187][bar] INFO: Invoking a bar
 [2018-11-09 01:30:12][52580][52983][log] INFO: example_app(flutter): Did thing this time
 
-''';
+  ''';
       final MockProcessManager mockProcessManager = MockProcessManager();
       final MockProcess mockProcess = MockProcess();
       Completer<int> exitCode;
@@ -139,6 +187,12 @@ d  2          0 .
   });
 }
 
+class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
+
 class MockProcessManager extends Mock implements ProcessManager {}
+
+class MockProcessResult extends Mock implements ProcessResult {}
+
+class MockFile extends Mock implements File {}
 
 class MockProcess extends Mock implements Process {}

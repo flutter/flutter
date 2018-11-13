@@ -105,6 +105,10 @@ class FuchsiaArtifacts {
   File get sshConfig {
     if (_sshConfig == null) {
       final String buildDirectory = platform.environment['BUILD_DIR'];
+      if (buildDirectory == null) {
+        throwToolExit('BUILD_DIR must be supplied to locate SSH keys. For example:\n'
+          '  export BUILD_DIR=path/to/fuchsia/out/x64\n');
+      }
       _sshConfig = fs.file('$buildDirectory/ssh-keys/ssh_config');
     }
     return _sshConfig;
