@@ -101,30 +101,15 @@ class ThreadLocal {
 
 class ThreadLocal {
  public:
-  ThreadLocal() : ThreadLocal(nullptr) {}
+  ThreadLocal();
 
-  ThreadLocal(ThreadLocalDestroyCallback destroy)
-      : destroy_(destroy), value_(0) {}
+  ThreadLocal(ThreadLocalDestroyCallback destroy);
 
-  void Set(intptr_t value) {
-    if (value_ == value) {
-      return;
-    }
+  void Set(intptr_t value);
 
-    if (value_ != 0 && destroy_) {
-      destroy_(value_);
-    }
+  intptr_t Get();
 
-    value_ = value;
-  }
-
-  intptr_t Get() { return value_; }
-
-  ~ThreadLocal() {
-    if (value_ != 0 && destroy_) {
-      destroy_(value_);
-    }
-  }
+  ~ThreadLocal();
 
  private:
   ThreadLocalDestroyCallback destroy_;

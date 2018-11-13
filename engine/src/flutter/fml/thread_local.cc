@@ -6,6 +6,8 @@
 
 namespace fml {
 
+#if FML_THREAD_LOCAL_PTHREADS
+
 ThreadLocal::ThreadLocal() : ThreadLocal(nullptr) {}
 
 ThreadLocal::ThreadLocal(ThreadLocalDestroyCallback destroy)
@@ -32,5 +34,36 @@ ThreadLocal::Box::Box(ThreadLocalDestroyCallback destroy, intptr_t value)
     : destroy_(destroy), value_(value) {}
 
 ThreadLocal::Box::~Box() = default;
+
+#else  // FML_THREAD_LOCAL_PTHREADS
+
+ThreadLocal::ThreadLocal() : ThreadLocal(nullptr) {}
+
+ThreadLocal::ThreadLocal(ThreadLocalDestroyCallback destroy)
+    : destroy_(destroy), value_(0) {}
+
+void ThreadLocal::Set(intptr_t value) {
+  if (value_ == value) {
+    return;
+  }
+
+  if (value_ != 0 && destroy_) {
+    destroy_(value_);
+  }
+
+  value_ = value;
+}
+
+intptr_t ThreadLocal::Get() {
+  return value_;
+}
+
+ThreadLocal::~ThreadLocal() {
+  if (value_ != 0 && destroy_) {
+    destroy_(value_);
+  }
+}
+
+#endif  // FML_THREAD_LOCAL_PTHREADS
 
 }  // namespace fml
