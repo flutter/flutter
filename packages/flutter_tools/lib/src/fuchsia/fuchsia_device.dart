@@ -203,6 +203,9 @@ class FuchsiaDevice extends Device {
     final RunResult result = await runAsync(<String>[
       'ssh', '-F', fuchsiaArtifacts.sshConfig.absolute.path, id, command]);
     if (result.exitCode != 0) {
+      if (result.stderr.contains('/tmp/dart.services: No such file or directory')) {
+        throwToolExit('No Dart Observatories found. Are you running a debug build?');
+      }
       throwToolExit('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
       return null;
     }
