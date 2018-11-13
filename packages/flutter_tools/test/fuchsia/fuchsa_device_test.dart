@@ -126,11 +126,18 @@ d  2          0 .
         final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
         final DeviceLogReader reader = device.getLogReader(app: FuchsiaModulePackage(name: 'example_app'));
         final List<String> logLines = <String>[];
-        reader.logLines.listen(logLines.add);
+        final Completer<void> lock = Completer<void>();
+        reader.logLines.listen((String line) {
+          logLines.add(line);
+          if (logLines.length == 2) {
+            lock.complete();
+          }
+        });
         expect(logLines, isEmpty);
 
         stdout.add(utf8.encode(exampleUtcLogs));
         await stdout.close();
+        await lock.future.timeout(const Duration(seconds: 1));
 
         expect(logLines, <String>[
           '[2018-11-09 01:27:45.000] Flutter: Error doing thing',
@@ -154,7 +161,7 @@ d  2          0 .
 
         stdout.add(utf8.encode(exampleUtcLogs));
         await stdout.close();
-        await lock.future;
+        await lock.future.timeout(const Duration(seconds: 1));
 
         expect(logLines, <String>[
           '[2018-11-09 01:30:12.000] Flutter: Did thing this time',
@@ -168,11 +175,18 @@ d  2          0 .
         final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
         final DeviceLogReader reader = device.getLogReader();
         final List<String> logLines = <String>[];
-        reader.logLines.listen(logLines.add);
+        final Completer<void> lock = Completer<void>();
+        reader.logLines.listen((String line) {
+          logLines.add(line);
+          if (logLines.length == 3) {
+            lock.complete();
+          }
+        });
         expect(logLines, isEmpty);
 
         stdout.add(utf8.encode(exampleUtcLogs));
         await stdout.close();
+        await lock.future.timeout(const Duration(seconds: 1));
 
         expect(logLines, <String>[
           '[2018-11-09 01:27:45.000] Flutter: Error doing thing',
