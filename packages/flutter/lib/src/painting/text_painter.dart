@@ -253,7 +253,7 @@ class TextPainter {
   // shrinking smaller than it.
   double _maxLineHeight = 0;
 
-  /// The actual height of the line after layout.
+  /// Attempt to get the actual height of the line after layout.
   ///
   /// This returns the max height of the line that the character at [offset]
   /// belongs in. When the paragraph has not been laid out, this returns the
@@ -263,11 +263,9 @@ class TextPainter {
   /// be queried at.
   ///
   /// This method may produce different heights than [preferredLineHeight] as
-  /// this is the actual height of the laid out text. This means that the height
-  /// of each line can vary, and the height of the each line can vary depending
-  /// on the heights of the characters in the line.
-  ///
-  /// The height of any additional line spacing is not included.
+  /// this is the actual measured height of the laid out text. This means that
+  /// the height of each line can vary depending on the maximum heights of
+  /// the characters in the line.
   double preferredLineHeightAtOffset(int offset) {
     if (_needsLayout) {
       return preferredLineHeight;
