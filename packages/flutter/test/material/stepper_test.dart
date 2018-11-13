@@ -182,6 +182,57 @@ void main() {
     expect(find.text('B'), findsOneWidget);
   });
 
+
+  testWidgets('Stepper control visibility test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            useControl: false,
+            type: StepperType.horizontal,
+            steps: const <Step>[
+              Step(
+                title: Text('Step 1'),
+                content: Text('A'),
+              ),
+              Step(
+                title: Text('Step 2'),
+                content: Text('B'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('CONTINUE'), findsNothing);
+    expect(find.text('CANCEL'), findsNothing);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            currentStep: 1,
+            type: StepperType.horizontal,
+            steps: const <Step>[
+              Step(
+                title: Text('Step 1'),
+                content: Text('A'),
+              ),
+              Step(
+                title: Text('Step 2'),
+                content: Text('B'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('CONTINUE'), findsOneWidget);
+    expect(find.text('CANCEL'), findsOneWidget);
+  });
+
   testWidgets('Stepper button test', (WidgetTester tester) async {
     bool continuePressed = false;
     bool cancelPressed = false;

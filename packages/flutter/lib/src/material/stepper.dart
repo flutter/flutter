@@ -141,7 +141,7 @@ class Stepper extends StatefulWidget {
     this.onStepContinue,
     this.onStepCancel,
     this.controlsBuilder,
-    this.useControl,
+    this.useControl = true,
   }) : assert(steps != null),
        assert(type != null),
        assert(currentStep != null),
