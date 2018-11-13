@@ -338,6 +338,7 @@ class AppDomain extends Domain {
     String packagesFilePath,
     String dillOutputPath,
     bool ipv6 = false,
+    String isolateFilter,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
       throw '${toTitleCase(options.buildInfo.modeName)} mode is not supported for emulators.';
@@ -351,6 +352,7 @@ class AppDomain extends Domain {
       device,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
+      viewFilter: isolateFilter,
     );
 
     ResidentRunner runner;
@@ -456,7 +458,7 @@ class AppDomain extends Domain {
   }
 
   bool isRestartSupported(bool enableHotReload, Device device) =>
-      enableHotReload && device.supportsHotMode;
+      enableHotReload && device.supportsHotRestart;
 
   Future<OperationResult> _inProgressHotReload;
 
@@ -464,6 +466,7 @@ class AppDomain extends Domain {
     final String appId = _getStringArg(args, 'appId', required: true);
     final bool fullRestart = _getBoolArg(args, 'fullRestart') ?? false;
     final bool pauseAfterRestart = _getBoolArg(args, 'pause') ?? false;
+    final String restartReason = _getStringArg(args, 'reason');
 
     final AppInstance app = _getApp(appId);
     if (app == null)
@@ -473,7 +476,7 @@ class AppDomain extends Domain {
       throw 'hot restart already in progress';
 
     _inProgressHotReload = app._runInZone<OperationResult>(this, () {
-      return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
+      return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: restartReason);
     });
     return _inProgressHotReload.whenComplete(() {
       _inProgressHotReload = null;
@@ -755,6 +758,7 @@ class NotifyingLogger extends Logger {
       TerminalColor color,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     _messageController.add(LogMessage('error', message, stackTrace));
   }
@@ -767,6 +771,7 @@ class NotifyingLogger extends Logger {
       bool newline = true,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     _messageController.add(LogMessage('status', message));
   }
@@ -803,8 +808,8 @@ class AppInstance {
 
   _AppRunLogger _logger;
 
-  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false }) {
-    return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {
+    return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: reason);
   }
 
   Future<void> stop() => runner.stop();
@@ -889,6 +894,7 @@ class _AppRunLogger extends Logger {
       TerminalColor color,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     if (parent != null) {
       parent.printError(
@@ -897,6 +903,7 @@ class _AppRunLogger extends Logger {
         emphasis: emphasis,
         indent: indent,
         hangingIndent: hangingIndent,
+        wrap: wrap,
       );
     } else {
       if (stackTrace != null) {
@@ -922,6 +929,7 @@ class _AppRunLogger extends Logger {
       bool newline = true,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     if (parent != null) {
       parent.printStatus(
@@ -931,6 +939,7 @@ class _AppRunLogger extends Logger {
         newline: newline,
         indent: indent,
         hangingIndent: hangingIndent,
+        wrap: wrap,
       );
     } else {
       _sendLogEvent(<String, dynamic>{'log': message});

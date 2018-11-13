@@ -495,6 +495,8 @@ void main() {
         textDirection: TextDirection.ltr,
         rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         textSelection: null,
+        scrollIndex: null,
+        scrollChildCount: null,
         scrollPosition: null,
         scrollExtentMax: null,
         scrollExtentMin: null,

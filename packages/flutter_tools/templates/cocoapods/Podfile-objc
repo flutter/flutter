@@ -4,6 +4,12 @@
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
 def parse_KV_file(file, separator='=')
   file_abs_path = File.expand_path(file)
   if !File.exists? file_abs_path

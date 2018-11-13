@@ -440,7 +440,7 @@ class AndroidDevice extends Device {
     final String result = (await runCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
     if (result.contains('Error: ')) {
-      printError(result.trim());
+      printError(result.trim(), wrap: false);
       return LaunchResult.failed();
     }
 
@@ -469,7 +469,10 @@ class AndroidDevice extends Device {
   }
 
   @override
-  bool get supportsHotMode => true;
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => true;
 
   @override
   Future<bool> stopApp(ApplicationPackage app) {
@@ -633,7 +636,7 @@ void parseADBDeviceOutput(String text, {
       diagnostics?.add(
         'Unexpected failure parsing device information from adb output:\n'
         '$line\n'
-        'Please report a bug at https://github.com/flutter/flutter/issues/new');
+        'Please report a bug at https://github.com/flutter/flutter/issues/new/choose');
     }
   }
 }

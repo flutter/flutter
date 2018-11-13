@@ -90,6 +90,7 @@ class CupertinoApp extends StatefulWidget {
     this.color,
     this.locale,
     this.localizationsDelegates,
+    this.localeListResolutionCallback,
     this.localeResolutionCallback,
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.showPerformanceOverlay = false,
@@ -156,6 +157,11 @@ class CupertinoApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.localizationsDelegates}
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
+
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// This callback is passed along to the [WidgetsApp] built by this widget.
+  final LocaleListResolutionCallback localeListResolutionCallback;
 
   /// {@macro flutter.widgets.widgetsApp.localeResolutionCallback}
   ///
@@ -243,7 +249,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
       _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
         ..add(_heroController);
     } else {
-      _navigatorObservers = null;
+      _navigatorObservers = const <NavigatorObserver>[];
     }
   }
 
@@ -283,6 +289,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         locale: widget.locale,
         localizationsDelegates: _localizationsDelegates,
         localeResolutionCallback: widget.localeResolutionCallback,
+        localeListResolutionCallback: widget.localeListResolutionCallback,
         supportedLocales: widget.supportedLocales,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,

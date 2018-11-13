@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
-import 'package:quiver/time.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -14,12 +13,13 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process.dart';
 import 'base/process_manager.dart';
+import 'base/time.dart';
 import 'cache.dart';
 import 'globals.dart';
 
 class FlutterVersion {
   @visibleForTesting
-  FlutterVersion(this._clock) {
+  FlutterVersion([this._clock = const SystemClock()]) {
     _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
     final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
     _branch = branch == 'HEAD' ? _channel : branch;
@@ -38,7 +38,7 @@ class FlutterVersion {
     _frameworkVersion = GitTagVersion.determine().frameworkVersionFor(_frameworkRevision);
   }
 
-  final Clock _clock;
+  final SystemClock _clock;
 
   String _repositoryUrl;
   String get repositoryUrl => _repositoryUrl;
@@ -47,7 +47,7 @@ class FlutterVersion {
     'master',
     'dev',
     'beta',
-    'release',
+    'stable',
   ]);
 
   /// This maps old branch names to the names of branches that replaced them.
@@ -63,7 +63,7 @@ class FlutterVersion {
 
   String _channel;
   /// The channel is the upstream branch.
-  /// `master`, `dev`, `beta`, `release`; or old ones, like `alpha`, `hackathon`, ...
+  /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
   String get channel => _channel;
 
   /// The name of the local branch.
@@ -82,7 +82,7 @@ class FlutterVersion {
 
   String get frameworkDate => frameworkCommitDate;
 
-  String get dartSdkVersion => Cache.instance.dartSdkVersion.split(' ')[0];
+  String get dartSdkVersion => Cache.instance.dartSdkVersion;
 
   String get engineRevision => Cache.instance.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
@@ -99,15 +99,16 @@ class FlutterVersion {
     final String engineText = 'Engine • revision $engineRevisionShort';
     final String toolsText = 'Tools • Dart $dartSdkVersion';
 
-    // Flutter 1.3.922-pre.2 • channel master • https://github.com/flutter/flutter.git
-    // Framework • revision 2259c59be8 • 19 minutes ago • 2016-08-15 22:51:40
-    // Engine • revision fe509b0d96
-    // Tools • Dart 1.19.0-dev.5.0
+    // Flutter 1.10.2-pre.69 • channel master • https://github.com/flutter/flutter.git
+    // Framework • revision 340c158f32 (84 minutes ago) • 2018-10-26 11:27:22 -0400
+    // Engine • revision 9c46333e14
+    // Tools • Dart 2.1.0 (build 2.1.0-dev.8.0 bf26f760b1)
 
     return '$flutterText\n$frameworkText\n$engineText\n$toolsText';
   }
 
   Map<String, Object> toJson() => <String, Object>{
+        'frameworkVersion': frameworkVersion ?? 'unknown',
         'channel': channel,
         'repositoryUrl': repositoryUrl ?? 'unknown source',
         'frameworkRevision': frameworkRevision,
@@ -272,7 +273,7 @@ class FlutterVersion {
 
     // Do not load the stamp before the above server check as it may modify the stamp file.
     final VersionCheckStamp stamp = await VersionCheckStamp.load();
-    final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? _clock.agoBy(kMaxTimeSinceLastWarning * 2);
+    final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? _clock.ago(kMaxTimeSinceLastWarning * 2);
     final bool beenAWhileSinceWarningWasPrinted = _clock.now().difference(lastTimeWarningWasPrinted) > kMaxTimeSinceLastWarning;
 
     // We show a warning if either we know there is a new remote version, or we couldn't tell but the local

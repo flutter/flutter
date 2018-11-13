@@ -14,16 +14,18 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
+final Generator _kNoAnsiPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+
 void main() {
   final String red = RegExp.escape(AnsiTerminal.red);
   final String bold = RegExp.escape(AnsiTerminal.bold);
-  final String reset = RegExp.escape(AnsiTerminal.reset);
+  final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
+  final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
 
   group('AppContext', () {
-    test('error', () async {
+    testUsingContext('error', () async {
       final BufferLogger mockLogger = BufferLogger();
       final VerboseLogger verboseLogger = VerboseLogger(mockLogger);
-      verboseLogger.supportsColor = false;
 
       verboseLogger.printStatus('Hey Hey Hey Hey');
       verboseLogger.printTrace('Oooh, I do I do I do');
@@ -33,12 +35,14 @@ void main() {
                                              r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Oooh, I do I do I do\n$'));
       expect(mockLogger.traceText, '');
       expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Helpless!\n$'));
+    }, overrides: <Type, Generator> {
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Platform: _kNoAnsiPlatform,
     });
 
-    test('ANSI colored errors', () async {
+    testUsingContext('ANSI colored errors', () async {
       final BufferLogger mockLogger = BufferLogger();
       final VerboseLogger verboseLogger = VerboseLogger(mockLogger);
-      verboseLogger.supportsColor = true;
 
       verboseLogger.printStatus('Hey Hey Hey Hey');
       verboseLogger.printTrace('Oooh, I do I do I do');
@@ -46,12 +50,15 @@ void main() {
 
       expect(
           mockLogger.statusText,
-          matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Hey Hey Hey Hey$reset'
+          matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Hey Hey Hey Hey$resetBold'
                   r'\n\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Oooh, I do I do I do\n$'));
       expect(mockLogger.traceText, '');
       expect(
           mockLogger.errorText,
-          matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Helpless!$reset' r'\n$'));
+          matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Helpless!$resetBold$resetColor' r'\n$'));
+    }, overrides: <Type, Generator> {
+      OutputPreferences: () => OutputPreferences(showColor: true),
+      Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
     });
   });
 
@@ -109,8 +116,8 @@ void main() {
           ansiSpinner.cancel();
         }, throwsA(isInstanceOf<AssertionError>()));
       }, overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
         Platform: () => FakePlatform(operatingSystem: testOs),
+        Stdio: () => mockStdio,
       });
 
       testUsingContext('Stdout startProgress handle null inputs on colored terminal for $testOs', () async {
@@ -125,9 +132,10 @@ void main() {
         expect(outputStderr().first, isEmpty);
         expect(lines[0], matches(platform.isWindows ? r'[ ]{64} [\b]-' : r'[ ]{64} [\b]⣾'));
       }, overrides: <Type, Generator>{
+        Logger: () => StdoutLogger(),
+        OutputPreferences: () => OutputPreferences(showColor: true),
+        Platform: () => FakePlatform(operatingSystem: testOs)..stdoutSupportsAnsi = true,
         Stdio: () => mockStdio,
-        Platform: () => FakePlatform(operatingSystem: testOs),
-        Logger: () => StdoutLogger()..supportsColor = true,
       });
 
       testUsingContext('AnsiStatus works when cancelled for $testOs', () async {
@@ -154,8 +162,8 @@ void main() {
         expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
         expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
       }, overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
         Platform: () => FakePlatform(operatingSystem: testOs),
+        Stdio: () => mockStdio,
       });
 
       testUsingContext('AnsiStatus works when stopped for $testOs', () async {
@@ -183,8 +191,8 @@ void main() {
         expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
         expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
       }, overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
         Platform: () => FakePlatform(operatingSystem: testOs),
+        Stdio: () => mockStdio,
       });
     }
   });
@@ -218,9 +226,10 @@ void main() {
       expect(lines[2], equals('0123456789' * 4));
       expect(lines[3], equals('0123456789' * 3));
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
-      Logger: () => StdoutLogger()..supportsColor = false,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Error logs are wrapped and can be indented.', () async {
@@ -236,9 +245,10 @@ void main() {
       expect(lines[4], equals('     0123456789'));
       expect(lines[5], isEmpty);
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
-      Logger: () => StdoutLogger()..supportsColor = false,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Error logs are wrapped and can have hanging indent.', () async {
@@ -254,9 +264,10 @@ void main() {
       expect(lines[4], equals('     56789'));
       expect(lines[5], isEmpty);
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
-      Logger: () => StdoutLogger()..supportsColor = false,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Error logs are wrapped, indented, and can have hanging indent.', () async {
@@ -272,9 +283,10 @@ void main() {
       expect(lines[4], equals('         901234567890123456789'));
       expect(lines[5], isEmpty);
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
-      Logger: () => StdoutLogger()..supportsColor = false,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Stdout logs are wrapped', () async {
@@ -287,9 +299,10 @@ void main() {
       expect(lines[2], equals('0123456789' * 4));
       expect(lines[3], equals('0123456789' * 3));
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
-      Logger: () => StdoutLogger()..supportsColor = false,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Stdout logs are wrapped and can be indented.', () async {
@@ -305,9 +318,10 @@ void main() {
       expect(lines[4], equals('     0123456789'));
       expect(lines[5], isEmpty);
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
-      Logger: () => StdoutLogger()..supportsColor = false,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Stdout logs are wrapped and can have hanging indent.', () async {
@@ -323,9 +337,10 @@ void main() {
       expect(lines[4], equals('     56789'));
       expect(lines[5], isEmpty);
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
-      Logger: () => StdoutLogger()..supportsColor = false,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Stdout logs are wrapped, indented, and can have hanging indent.', () async {
@@ -341,9 +356,10 @@ void main() {
       expect(lines[4], equals('         901234567890123456789'));
       expect(lines[5], isEmpty);
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
-      Logger: () => StdoutLogger()..supportsColor = false,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Error logs are red', () async {
@@ -351,10 +367,12 @@ void main() {
       final List<String> lines = outputStderr();
       expect(outputStdout().length, equals(1));
       expect(outputStdout().first, isEmpty);
-      expect(lines[0], equals('${AnsiTerminal.red}Pants on fire!${AnsiTerminal.reset}'));
+      expect(lines[0], equals('${AnsiTerminal.red}Pants on fire!${AnsiTerminal.resetColor}'));
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(showColor: true),
+      Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
       Stdio: () => mockStdio,
-      Logger: () => StdoutLogger()..supportsColor = true,
     });
 
     testUsingContext('Stdout logs are not colored', () async {
@@ -364,8 +382,9 @@ void main() {
       expect(outputStderr().first, isEmpty);
       expect(lines[0], equals('All good.'));
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(showColor: true),
       Stdio: () => mockStdio,
-      Logger: () => StdoutLogger()..supportsColor = true,
     });
 
     testUsingContext('Stdout printStatus handle null inputs on colored terminal', () async {
@@ -375,8 +394,9 @@ void main() {
       expect(outputStderr().first, isEmpty);
       expect(lines[0], equals(''));
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(showColor: true),
       Stdio: () => mockStdio,
-      Logger: () => StdoutLogger()..supportsColor = true,
     });
 
     testUsingContext('Stdout printStatus handle null inputs on regular terminal', () async {
@@ -386,8 +406,10 @@ void main() {
       expect(outputStderr().first, isEmpty);
       expect(lines[0], equals(''));
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(showColor: false),
       Stdio: () => mockStdio,
-      Logger: () => StdoutLogger()..supportsColor = false,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Stdout startProgress handle null inputs on regular terminal', () async {
@@ -402,8 +424,10 @@ void main() {
       expect(outputStderr().first, isEmpty);
       expect(lines[0], matches('[ ]{64}'));
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(showColor: false),
       Stdio: () => mockStdio,
-      Logger: () => StdoutLogger()..supportsColor = false,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('SummaryStatus works when cancelled', () async {
@@ -426,7 +450,7 @@ void main() {
       // Verify that stopping or canceling multiple times throws.
       expect(() { summaryStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
       expect(() { summaryStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio, Platform: _kNoAnsiPlatform});
 
     testUsingContext('SummaryStatus works when stopped', () async {
       summaryStatus.start();
@@ -449,7 +473,7 @@ void main() {
       // Verify that stopping or canceling multiple times throws.
       expect(() { summaryStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
       expect(() { summaryStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio, Platform: _kNoAnsiPlatform});
 
     testUsingContext('sequential startProgress calls with StdoutLogger', () async {
       context[Logger].startProgress('AAA')..stop();
@@ -458,8 +482,10 @@ void main() {
       expect(outputStdout()[0], matches(RegExp(r'AAA[ ]{60}[\d ]{3}[\d]ms')));
       expect(outputStdout()[1], matches(RegExp(r'BBB[ ]{60}[\d ]{3}[\d]ms')));
     }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      OutputPreferences: () => OutputPreferences(showColor: false),
       Stdio: () => mockStdio,
-      Logger: () => StdoutLogger()..supportsColor = false,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('sequential startProgress calls with VerboseLogger and StdoutLogger', () async {
@@ -473,8 +499,9 @@ void main() {
         matches(r'^$'),
       ]);
     }, overrides: <Type, Generator>{
-      Stdio: () => mockStdio,
       Logger: () => VerboseLogger(StdoutLogger()),
+      Stdio: () => mockStdio,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('sequential startProgress calls with BufferLogger', () async {
@@ -484,6 +511,7 @@ void main() {
       expect(logger.statusText, 'AAA\nBBB\n');
     }, overrides: <Type, Generator>{
       Logger: () => BufferLogger(),
+      Platform: _kNoAnsiPlatform,
     });
   });
 }

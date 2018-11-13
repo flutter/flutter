@@ -30,15 +30,20 @@ import 'vmservice.dart';
 
 class FlutterDevice {
   FlutterDevice(this.device, {
-    @required bool trackWidgetCreation,
+    @required this.trackWidgetCreation,
     this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
+    this.viewFilter,
+    TargetModel targetModel = TargetModel.flutter,
     ResidentCompiler generator,
-  }) : generator = generator ?? ResidentCompiler(
+  }) : assert(trackWidgetCreation != null),
+       generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
          trackWidgetCreation: trackWidgetCreation,
-         fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
+         fileSystemRoots: fileSystemRoots,
+         fileSystemScheme: fileSystemScheme,
+         targetModel: targetModel,
        );
 
   final Device device;
@@ -51,7 +56,8 @@ class FlutterDevice {
   List<String> fileSystemRoots;
   String fileSystemScheme;
   StreamSubscription<String> _loggingSubscription;
-  String viewFilter;
+  final String viewFilter;
+  final bool trackWidgetCreation;
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered.
@@ -78,9 +84,11 @@ class FlutterDevice {
 
   Future<void> refreshViews() async {
     if (vmServices == null || vmServices.isEmpty)
-      return;
+      return Future<void>.value(null);
+    final List<Future<void>> futures = <Future<void>>[];
     for (VMService service in vmServices)
-      await service.vm.refreshViews();
+      futures.add(service.vm.refreshViews(waitForViews: true));
+    await Future.wait(futures);
   }
 
   List<FlutterView> get views {
@@ -233,7 +241,7 @@ class FlutterDevice {
       return;
     _loggingSubscription = device.getLogReader(app: package).logLines.listen((String line) {
       if (!line.contains('Observatory listening on http'))
-        printStatus(line);
+        printStatus(line, wrap: false);
     });
   }
 
@@ -389,6 +397,7 @@ class FlutterDevice {
         generator: generator,
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
+        trackWidgetCreation: trackWidgetCreation,
         projectRootPath: projectRootPath,
         pathToReload: pathToReload
       );
@@ -442,6 +451,7 @@ abstract class ResidentRunner {
   String _mainPath;
   String get mainPath => _mainPath;
   String getReloadPath({bool fullRestart}) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
+
   AssetBundle _assetBundle;
   AssetBundle get assetBundle => _assetBundle;
 
@@ -449,6 +459,17 @@ abstract class ResidentRunner {
   bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
+
+  /// Whether this runner can hot restart.
+  ///
+  /// To prevent scenarios where only a subset of devices are hot restarted,
+  /// the runner requires that all attached devices can support hot restart
+  /// before enabling it.
+  bool get canHotRestart {
+    return flutterDevices.every((FlutterDevice device) {
+      return device.device.supportsHotRestart;
+    });
+  }
 
   /// Start the app and keep the process running during its lifetime.
   Future<int> run({
@@ -460,7 +481,7 @@ abstract class ResidentRunner {
 
   bool get supportsRestart => false;
 
-  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false }) {
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {
     throw 'unsupported';
   }
 
@@ -478,8 +499,10 @@ abstract class ResidentRunner {
   }
 
   Future<void> refreshViews() async {
+    final List<Future<void>> futures = <Future<void>>[];
     for (FlutterDevice device in flutterDevices)
-      await device.refreshViews();
+      futures.add(device.refreshViews());
+    await Future.wait(futures);
   }
 
   Future<void> _debugDumpApp() async {
@@ -618,14 +641,12 @@ abstract class ResidentRunner {
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered
-  Future<void> connectToServiceProtocol({String viewFilter,
-      ReloadSources reloadSources, CompileExpression compileExpression}) async {
+  Future<void> connectToServiceProtocol({ReloadSources reloadSources, CompileExpression compileExpression}) async {
     if (!debuggingOptions.debuggingEnabled)
       return Future<void>.error('Error the service protocol is not enabled.');
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
-      device.viewFilter = viewFilter;
       await device._connect(reloadSources: reloadSources,
           compileExpression: compileExpression);
       await device.getVMs();

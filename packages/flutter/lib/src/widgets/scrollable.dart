@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -79,6 +80,7 @@ class Scrollable extends StatefulWidget {
     this.physics,
     @required this.viewportBuilder,
     this.excludeFromSemantics = false,
+    this.semanticChildCount,
   }) : assert(axisDirection != null),
        assert(viewportBuilder != null),
        assert(excludeFromSemantics != null),
@@ -161,6 +163,23 @@ class Scrollable extends StatefulWidget {
   ///    exclusion.
   final bool excludeFromSemantics;
 
+  /// The number of children that will contribute semantic information.
+  ///
+  /// The value will be null if the number of children is unknown or unbounded.
+  ///
+  /// Some subtypes of [ScrollView] can infer this value automatically. For
+  /// example [ListView] will use the number of widgets in the child list,
+  /// while the [new ListView.separated] constructor will use half that amount.
+  ///
+  /// For [CustomScrollView] and other types which do not receive a builder
+  /// or list of widgets, the child count must be explicitly provided.
+  ///
+  /// See also:
+  ///
+  ///  * [CustomScrollView], for an explanation of scroll semantics.
+  ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
+  final int semanticChildCount;
+
   /// The axis along which the scroll view scrolls.
   ///
   /// Determined by the [axisDirection].
@@ -190,12 +209,12 @@ class Scrollable extends StatefulWidget {
 
   /// Scrolls the scrollables that enclose the given context so as to make the
   /// given context visible.
-  static Future<Null> ensureVisible(BuildContext context, {
+  static Future<void> ensureVisible(BuildContext context, {
     double alignment = 0.0,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
-    final List<Future<Null>> futures = <Future<Null>>[];
+    final List<Future<void>> futures = <Future<void>>[];
 
     ScrollableState scrollable = Scrollable.of(context);
     while (scrollable != null) {
@@ -210,10 +229,10 @@ class Scrollable extends StatefulWidget {
     }
 
     if (futures.isEmpty || duration == Duration.zero)
-      return Future<Null>.value();
+      return Future<void>.value();
     if (futures.length == 1)
       return futures.single;
-    return Future.wait<Null>(futures).then<Null>((List<Null> _) => null);
+    return Future.wait<void>(futures).then<void>((List<void> _) => null);
   }
 }
 
@@ -509,6 +528,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
         child: result,
         position: position,
         allowImplicitScrolling: widget?.physics?.allowImplicitScrolling ?? false,
+        semanticChildCount: widget.semanticChildCount,
       );
     }
 
@@ -541,17 +561,20 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     Key key,
     @required this.position,
     @required this.allowImplicitScrolling,
+    @required this.semanticChildCount,
     Widget child
   }) : assert(position != null), super(key: key, child: child);
 
   final ScrollPosition position;
   final bool allowImplicitScrolling;
+  final int semanticChildCount;
 
   @override
   _RenderScrollSemantics createRenderObject(BuildContext context) {
     return _RenderScrollSemantics(
       position: position,
       allowImplicitScrolling: allowImplicitScrolling,
+      semanticChildCount: semanticChildCount,
     );
   }
 
@@ -559,7 +582,8 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderScrollSemantics renderObject) {
     renderObject
       ..allowImplicitScrolling = allowImplicitScrolling
-      ..position = position;
+      ..position = position
+      ..semanticChildCount = semanticChildCount;
   }
 }
 
@@ -567,9 +591,11 @@ class _RenderScrollSemantics extends RenderProxyBox {
   _RenderScrollSemantics({
     @required ScrollPosition position,
     @required bool allowImplicitScrolling,
+    @required int semanticChildCount,
     RenderBox child,
   }) : _position = position,
        _allowImplicitScrolling = allowImplicitScrolling,
+       _semanticChildCount = semanticChildCount,
        assert(position != null), super(child) {
     position.addListener(markNeedsSemanticsUpdate);
   }
@@ -597,6 +623,15 @@ class _RenderScrollSemantics extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  int get semanticChildCount => _semanticChildCount;
+  int _semanticChildCount;
+  set semanticChildCount(int value) {
+    if (value == semanticChildCount)
+      return;
+    _semanticChildCount = value;
+    markNeedsSemanticsUpdate();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -606,7 +641,8 @@ class _RenderScrollSemantics extends RenderProxyBox {
           ..hasImplicitScrolling = allowImplicitScrolling
           ..scrollPosition = _position.pixels
           ..scrollExtentMax = _position.maxScrollExtent
-          ..scrollExtentMin = _position.minScrollExtent;
+          ..scrollExtentMin = _position.minScrollExtent
+          ..scrollChildCount = semanticChildCount;
     }
   }
 
@@ -624,15 +660,20 @@ class _RenderScrollSemantics extends RenderProxyBox {
       ..isMergedIntoParent = node.isPartOfNodeMerging
       ..rect = Offset.zero & node.rect.size;
 
+    int firstVisibleIndex;
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
     final List<SemanticsNode> included = <SemanticsNode>[];
     for (SemanticsNode child in children) {
       assert(child.isTagged(RenderViewport.useTwoPaneSemantics));
       if (child.isTagged(RenderViewport.excludeFromScrolling))
         excluded.add(child);
-      else
+      else {
+        if (!child.hasFlag(SemanticsFlag.isHidden))
+          firstVisibleIndex ??= child.indexInParent;
         included.add(child);
+      }
     }
+    config.scrollIndex = firstVisibleIndex;
     node.updateWith(config: null, childrenInInversePaintOrder: excluded);
     _innerNode.updateWith(config: config, childrenInInversePaintOrder: included);
   }

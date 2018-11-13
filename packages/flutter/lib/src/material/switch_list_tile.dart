@@ -9,6 +9,10 @@ import 'switch.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// void setState(VoidCallback fn) { }
+// bool _lights;
+
 /// A [ListTile] with a [Switch]. In other words, a switch with a label.
 ///
 /// The entire list tile is interactive: tapping anywhere in the tile toggles
@@ -35,7 +39,7 @@ import 'theme_data.dart';
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This widget shows a switch that, when toggled, changes the state of a [bool]
 /// member field called `_lights`.
@@ -48,6 +52,7 @@ import 'theme_data.dart';
 ///   secondary: const Icon(Icons.lightbulb_outline),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -74,6 +79,9 @@ class SwitchListTile extends StatelessWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
+    this.activeTrackColor,
+    this.inactiveThumbColor,
+    this.inactiveTrackColor,
     this.activeThumbImage,
     this.inactiveThumbImage,
     this.title,
@@ -122,6 +130,21 @@ class SwitchListTile extends StatelessWidget {
   ///
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
+
+  /// The color to use on the track when this switch is on.
+  ///
+  /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
+  final Color activeTrackColor;
+
+  /// The color to use on the thumb when this switch is off.
+  ///
+  /// Defaults to the colors described in the Material design specification.
+  final Color inactiveThumbColor;
+
+  /// The color to use on the track when this switch is off.
+  ///
+  /// Defaults to the colors described in the Material design specification.
+  final Color inactiveTrackColor;
 
   /// An image to use on the thumb of this switch when the switch is on.
   final ImageProvider activeThumbImage;
@@ -173,6 +196,9 @@ class SwitchListTile extends StatelessWidget {
       activeThumbImage: activeThumbImage,
       inactiveThumbImage: inactiveThumbImage,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      activeTrackColor: activeTrackColor,
+      inactiveTrackColor: inactiveTrackColor,
+      inactiveThumbColor: inactiveThumbColor,
     );
     return MergeSemantics(
       child: ListTileTheme.merge(

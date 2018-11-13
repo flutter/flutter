@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 import '../rendering/mock_canvas.dart';
 
-Future<Null> test(WidgetTester tester, double offset) {
+Future<void> test(WidgetTester tester, double offset) {
   return tester.pumpWidget(
     Directionality(
       textDirection: TextDirection.ltr,

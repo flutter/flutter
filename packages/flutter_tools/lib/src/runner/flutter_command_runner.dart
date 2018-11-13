@@ -69,8 +69,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
         defaultsTo: true);
     argParser.addOption('wrap-column',
         hide: !verboseHelp,
-        help: 'Sets the output wrap column. If not set, uses the width of the terminal, or 100 if '
-            'the output is not a terminal. Use --no-wrap to turn off wrapping entirely.',
+        help: 'Sets the output wrap column. If not set, uses the width of the terminal. No '
+            'wrapping occurs if not writing to a terminal. Use --no-wrap to turn off wrapping '
+            'when connected to a terminal.',
         defaultsTo: null);
     argParser.addOption('device-id',
         abbr: 'd',
@@ -182,6 +183,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     try {
       if (platform.script.scheme == 'data')
         return '../..'; // we're running as a test
+
+      if (platform.script.scheme == 'package') {
+        final String packageConfigPath = Uri.parse(platform.packageConfig).toFilePath();
+        return fs.path.dirname(fs.path.dirname(fs.path.dirname(packageConfigPath)));
+      }
+
       final String script = platform.script.toFilePath();
       if (fs.path.basename(script) == kSnapshotFileName)
         return fs.path.dirname(fs.path.dirname(fs.path.dirname(script)));
@@ -246,8 +253,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
       contextOverrides[Logger] = VerboseLogger(logger);
     }
 
-    int wrapColumn = const io.Stdio().terminalColumns ?? kDefaultTerminalColumns;
-    if (topLevelResults['wrap-column'] != null) {
+    // Don't set wrapColumns unless the user said to: if it's set, then all
+    // wrapping will occur at this width explicitly, and won't adapt if the
+    // terminal size changes during a run.
+    int wrapColumn;
+    if (topLevelResults.wasParsed('wrap-column')) {
       try {
         wrapColumn = int.parse(topLevelResults['wrap-column']);
         if (wrapColumn < 0) {
@@ -260,8 +270,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
     }
 
+    // If we're not writing to a terminal with a defined width, then don't wrap
+    // anything, unless the user explicitly said to.
+    final bool useWrapping = topLevelResults.wasParsed('wrap')
+        ? topLevelResults['wrap']
+        : io.stdio.terminalColumns == null ? false : topLevelResults['wrap'];
     contextOverrides[OutputPreferences] = OutputPreferences(
-      wrapText: topLevelResults['wrap'],
+      wrapText: useWrapping,
       showColor: topLevelResults['color'],
       wrapColumn: wrapColumn,
     );
@@ -383,7 +398,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
         if (topLevelResults['machine']) {
           throwToolExit('The --machine flag is only valid with the --version flag.', exitCode: 2);
         }
-
         await super.runCommand(topLevelResults);
       },
     );

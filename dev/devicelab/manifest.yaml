@@ -263,9 +263,9 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  application_test:
+  module_test:
     description: >
-      Checks that the application project template works and supports add2app on Android.
+      Checks that the module project template works and supports add2app on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
@@ -283,6 +283,30 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  named_isolates_test:
+    description: >
+      Tests naming and attaching to specific isolates.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  flutter_create_offline_test_linux:
+    description: >
+      Tests the `flutter create --offline` command.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  flutter_create_offline_test_windows:
+    description: >
+      Tests the `flutter create --offline` command.
+    stage: devicelab
+    required_agent_capabilities: ["windows/android"]
+
+  flutter_create_offline_test_mac:
+    description: >
+      Tests the `flutter create --offline` command.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   # iOS on-device tests
 
   flavors_test_ios:
@@ -297,11 +321,12 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  application_test_ios:
+  module_test_ios:
     description: >
-      Checks that the application project template works and supports add2app on iOS.
+      Checks that the module project template works and supports add2app on iOS.
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
+    flaky: true
 
   external_ui_integration_test_ios:
     description: >
@@ -384,6 +409,7 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 20
+    flaky: true
 
   ios_sample_catalog_generator:
     description: >

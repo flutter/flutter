@@ -169,7 +169,6 @@ void main() {
 
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -192,11 +191,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
-        '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         '--no-sim-use-hardfp',
@@ -213,7 +208,6 @@ void main() {
 
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -236,11 +230,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
-        '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         'main.dill',
@@ -258,7 +248,6 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'vm_snapshot_instr'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -280,11 +269,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
-        '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -307,7 +292,6 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'vm_snapshot_instr'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -329,11 +313,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
-        '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -351,7 +331,6 @@ void main() {
 
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -374,11 +353,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
-        '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         '--no-sim-use-hardfp',
@@ -395,7 +370,6 @@ void main() {
 
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -418,11 +392,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
-        '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         'main.dill',
@@ -458,7 +428,6 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'vm_snapshot_instr'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -480,11 +449,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
-        '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -507,7 +472,6 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'vm_snapshot_instr'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -529,11 +493,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
-        '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -599,7 +559,6 @@ void main() {
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -618,9 +577,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.debug);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--enable_asserts',
         '--snapshot_kind=app-jit',
         '--load_compilation_trace=$kTrace',
@@ -643,7 +600,6 @@ void main() {
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -662,9 +618,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.debug);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--enable_asserts',
         '--snapshot_kind=app-jit',
         '--load_compilation_trace=$kTrace',
@@ -698,7 +652,6 @@ void main() {
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -717,9 +670,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--snapshot_kind=app-jit',
         '--load_compilation_trace=$kTrace',
         '--load_vm_snapshot_data=$kEngineVmSnapshotData',
@@ -741,7 +692,6 @@ void main() {
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -760,9 +710,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--snapshot_kind=app-jit',
         '--load_compilation_trace=$kTrace',
         '--load_vm_snapshot_data=$kEngineVmSnapshotData',
@@ -795,7 +743,6 @@ void main() {
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -814,9 +761,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--snapshot_kind=app-jit',
         '--load_compilation_trace=$kTrace',
         '--load_vm_snapshot_data=$kEngineVmSnapshotData',
@@ -838,7 +783,6 @@ void main() {
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'isolate_snapshot_data'): '',
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -857,9 +801,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--snapshot_kind=app-jit',
         '--load_compilation_trace=$kTrace',
         '--load_vm_snapshot_data=$kEngineVmSnapshotData',
@@ -898,9 +840,7 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
+        '--deterministic',
         '--snapshot_kind=app-jit',
         '--load_compilation_trace=$kTrace',
         '--load_vm_snapshot_data=$kEngineVmSnapshotData',

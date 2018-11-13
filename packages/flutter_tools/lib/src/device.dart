@@ -11,6 +11,8 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'fuchsia/fuchsia_device.dart';
+
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
@@ -27,6 +29,7 @@ class DeviceManager {
     _deviceDiscoverers.add(AndroidDevices());
     _deviceDiscoverers.add(IOSDevices());
     _deviceDiscoverers.add(IOSSimulators());
+    _deviceDiscoverers.add(FuchsiaDevices());
     _deviceDiscoverers.add(FlutterTesterDevices());
   }
 
@@ -267,8 +270,11 @@ abstract class Device {
     bool ipv6 = false,
   });
 
-  /// Does this device implement support for hot reloading / restarting?
-  bool get supportsHotMode => true;
+  /// Whether this device implements support for hot reload.
+  bool get supportsHotReload => true;
+
+  /// Whether this device implements support for hot restart.
+  bool get supportsHotRestart => true;
 
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);

@@ -44,6 +44,13 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.activeColor = CupertinoColors.activeBlue,
     this.inactiveColor = CupertinoColors.inactiveGray,
     this.iconSize = 30.0,
+    this.border = const Border(
+      top: BorderSide(
+        color: _kDefaultTabBarBorderColor,
+        width: 0.0, // One physical pixel.
+        style: BorderStyle.solid,
+      ),
+    ),
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(currentIndex != null),
@@ -90,6 +97,11 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Must not be null.
   final double iconSize;
 
+  /// The border of the [CupertinoTabBar].
+  ///
+  /// The default value is a one physical pixel top border with grey color.
+  final Border border;
+
   /// True if the tab bar's background color has no transparency.
   bool get opaque => backgroundColor.alpha == 0xFF;
 
@@ -101,16 +113,9 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
     Widget result = DecoratedBox(
       decoration: BoxDecoration(
-        border: const Border(
-          top: BorderSide(
-            color: _kDefaultTabBarBorderColor,
-            width: 0.0, // One physical pixel.
-            style: BorderStyle.solid,
-          ),
-        ),
+        border: border,
         color: backgroundColor,
       ),
-      // TODO(xster): allow icons-only versions of the tab bar too.
       child: SizedBox(
         height: _kTabBarHeight + bottomPadding,
         child: IconTheme.merge( // Default with the inactive state.
@@ -171,15 +176,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
                   padding: const EdgeInsets.only(bottom: 4.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget> [
-                      Expanded(child:
-                        Center(child: active
-                            ? items[index].activeIcon
-                            : items[index].icon
-                        ),
-                      ),
-                      items[index].title,
-                    ],
+                    children: _buildSingleTabItem(items[index], active),
                   ),
                 ),
               ),
@@ -191,6 +188,20 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     }
 
     return result;
+  }
+
+  List<Widget> _buildSingleTabItem(BottomNavigationBarItem item, bool active) {
+    final List<Widget> components = <Widget>[
+      Expanded(
+        child: Center(child: active ? item.activeIcon : item.icon),
+      )
+    ];
+
+    if (item.title != null) {
+      components.add(item.title);
+    }
+
+    return components;
   }
 
   /// Change the active tab item's icon and title colors to active.
@@ -216,18 +227,20 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Color activeColor,
     Color inactiveColor,
     Size iconSize,
+    Border border,
     int currentIndex,
     ValueChanged<int> onTap,
   }) {
     return CupertinoTabBar(
-       key: key ?? this.key,
-       items: items ?? this.items,
-       backgroundColor: backgroundColor ?? this.backgroundColor,
-       activeColor: activeColor ?? this.activeColor,
-       inactiveColor: inactiveColor ?? this.inactiveColor,
-       iconSize: iconSize ?? this.iconSize,
-       currentIndex: currentIndex ?? this.currentIndex,
-       onTap: onTap ?? this.onTap,
+      key: key ?? this.key,
+      items: items ?? this.items,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      activeColor: activeColor ?? this.activeColor,
+      inactiveColor: inactiveColor ?? this.inactiveColor,
+      iconSize: iconSize ?? this.iconSize,
+      border: border ?? this.border,
+      currentIndex: currentIndex ?? this.currentIndex,
+      onTap: onTap ?? this.onTap,
     );
   }
 }

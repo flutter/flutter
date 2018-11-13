@@ -148,7 +148,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
         if (trace)
           printTrace(message);
         else
-          printStatus(message);
+          printStatus(message, wrap: false);
       }
     });
   final StreamSubscription<String> stderrSubscription = process.stderr
@@ -159,7 +159,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
       if (mapFunction != null)
         line = mapFunction(line);
       if (line != null)
-        printError('$prefix$line');
+        printError('$prefix$line', wrap: false);
     });
 
   // Wait for stdout to be fully processed
@@ -247,8 +247,10 @@ Future<RunResult> runCheckedAsync(List<String> cmd, {
     allowReentrantFlutter: allowReentrantFlutter,
     environment: environment,
   );
-  if (result.exitCode != 0)
-    throw 'Exit code ${result.exitCode} from: ${cmd.join(' ')}:\n$result';
+  if (result.exitCode != 0) {
+    throw ProcessException(cmd[0], cmd.sublist(1),
+      'Process "${cmd[0]}" exited abnormally:\n$result', result.exitCode);
+  }
   return result;
 }
 

@@ -45,7 +45,7 @@ class ProcessRunnerException implements Exception {
   }
 }
 
-enum Branch { dev, beta, release }
+enum Branch { dev, beta, stable }
 
 String getBranchName(Branch branch) {
   switch (branch) {
@@ -53,8 +53,8 @@ String getBranchName(Branch branch) {
       return 'beta';
     case Branch.dev:
       return 'dev';
-    case Branch.release:
-      return 'release';
+    case Branch.stable:
+      return 'stable';
   }
   return null;
 }
@@ -65,8 +65,8 @@ Branch fromBranchName(String name) {
       return Branch.beta;
     case 'dev':
       return Branch.dev;
-    case 'release':
-      return Branch.release;
+    case 'stable':
+      return Branch.stable;
     default:
       throw ArgumentError('Invalid branch name.');
   }
@@ -569,7 +569,7 @@ class ArchivePublisher {
 ///
 /// Archives contain the executables and customizations for the platform that
 /// they are created on.
-Future<void> main(List<String> argList) async {
+Future<void> main(List<String> rawArguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp_dir',
@@ -612,9 +612,9 @@ Future<void> main(List<String> argList) async {
     help: 'Print help for this command.',
   );
 
-  final ArgResults args = argParser.parse(argList);
+  final ArgResults parsedArguments = argParser.parse(rawArguments);
 
-  if (args['help']) {
+  if (parsedArguments['help']) {
     print(argParser.usage);
     exit(0);
   }
@@ -625,7 +625,7 @@ Future<void> main(List<String> argList) async {
     exit(exitCode);
   }
 
-  final String revision = args['revision'];
+  final String revision = parsedArguments['revision'];
   if (revision.isEmpty) {
     errorExit('Invalid argument: --revision must be specified.');
   }
@@ -633,40 +633,40 @@ Future<void> main(List<String> argList) async {
     errorExit('Invalid argument: --revision must be the entire hash, not just a prefix.');
   }
 
-  if (args['branch'].isEmpty) {
+  if (parsedArguments['branch'].isEmpty) {
     errorExit('Invalid argument: --branch must be specified.');
   }
 
   Directory tempDir;
   bool removeTempDir = false;
-  if (args['temp_dir'] == null || args['temp_dir'].isEmpty) {
+  if (parsedArguments['temp_dir'] == null || parsedArguments['temp_dir'].isEmpty) {
     tempDir = Directory.systemTemp.createTempSync('flutter_package.');
     removeTempDir = true;
   } else {
-    tempDir = Directory(args['temp_dir']);
+    tempDir = Directory(parsedArguments['temp_dir']);
     if (!tempDir.existsSync()) {
-      errorExit("Temporary directory ${args['temp_dir']} doesn't exist.");
+      errorExit("Temporary directory ${parsedArguments['temp_dir']} doesn't exist.");
     }
   }
 
   Directory outputDir;
-  if (args['output'] == null) {
+  if (parsedArguments['output'] == null) {
     outputDir = tempDir;
   } else {
-    outputDir = Directory(args['output']);
+    outputDir = Directory(parsedArguments['output']);
     if (!outputDir.existsSync()) {
       outputDir.createSync(recursive: true);
     }
   }
 
-  final Branch branch = fromBranchName(args['branch']);
+  final Branch branch = fromBranchName(parsedArguments['branch']);
   final ArchiveCreator creator = ArchiveCreator(tempDir, outputDir, revision, branch);
   int exitCode = 0;
   String message;
   try {
     final String version = await creator.initializeRepo();
     final File outputFile = await creator.createArchive();
-    if (args['publish']) {
+    if (parsedArguments['publish']) {
       final ArchivePublisher publisher = ArchivePublisher(
         tempDir,
         revision,

@@ -593,13 +593,11 @@ class _DragAvatar<T> extends Drag {
         _enteredTargets.add(target);
         return target.didEnter(this);
       },
-      orElse: _null
+      orElse: () => null
     );
 
     _activeTarget = newTarget;
   }
-
-  static Null _null() => null;
 
   Iterable<_DragTargetState<T>> _getDragTargets(List<HitTestEntry> path) sync* {
     // Look for the RenderBoxes that corresponds to the hit target (the hit target

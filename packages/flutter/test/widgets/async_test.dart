@@ -327,7 +327,7 @@ void main() {
   });
 }
 
-Future<Null> eventFiring(WidgetTester tester) async {
+Future<void> eventFiring(WidgetTester tester) async {
   await tester.pump(Duration.zero);
 }
 

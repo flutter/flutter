@@ -230,7 +230,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 Future<void> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[]
 }) {
-  return runCommand(flutter, <String>['analyze']..addAll(options),
+  return runCommand(flutter, <String>['analyze', '--dartdocs']..addAll(options),
     workingDirectory: workingDirectory,
   );
 }
@@ -266,6 +266,7 @@ Future<void> _verifyNoTestPackageImports(String workingDirectory) async {
         if (path.split(file.path).contains('test_driver') ||
             name.startsWith('dev/missing_dependency_tests/') ||
             name.startsWith('dev/automated_tests/') ||
+            name.startsWith('dev/snippets/') ||
             name.startsWith('packages/flutter/test/engine/') ||
             name.startsWith('examples/layers/test/smoketests/raw/') ||
             name.startsWith('examples/layers/test/smoketests/rendering/') ||
