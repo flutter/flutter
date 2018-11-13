@@ -48,11 +48,11 @@ class TestImageProvider extends ImageProvider<int> {
 }
 
 class FailingTestImageProvider extends TestImageProvider {
-  const FailingTestImageProvider(key, imageValue, { image }) : super(key, imageValue, image: image);
+  const FailingTestImageProvider(int key, int imageValue, { ui.Image image }) : super(key, imageValue, image: image);
 
   @override
   ImageStreamCompleter load(int key) {
-    return OneFrameImageStreamCompleter(Future.sync(() => Future.error("loading failed!")));
+    return OneFrameImageStreamCompleter(Future<ImageInfo>.sync(() => Future<ImageInfo>.error('loading failed!')));
   }
 }
 
