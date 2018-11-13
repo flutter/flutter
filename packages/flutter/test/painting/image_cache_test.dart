@@ -184,5 +184,14 @@ void main() {
       expect(resultingCompleter1, completer1);
       expect(resultingCompleter2, completer2);
     });
+
+    test('failed image can successfully be removed from the cache\'s pending images', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      const FailingTestImageProvider(1, 1, image: testImage).resolve(ImageConfiguration.empty).addListener((_,__){}, onError: (_,__) {
+        bool evicationResult = imageCache.evict(1);
+        expect(evicationResult, isTrue);
+      });
+    });
   });
 }

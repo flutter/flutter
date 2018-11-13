@@ -26,7 +26,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// Generally this class is not used directly. The [ImageProvider] class and its
 /// subclasses automatically handle the caching of images.
 class ImageCache {
-  final Map<Object, ImageStreamCompleter> _pendingImages = <Object, ImageStreamCompleter>{};
+  final Map<Object, _PendingImage> _pendingImages = <Object, _PendingImage>{};
   final Map<Object, _CachedImage> _cache = <Object, _CachedImage>{};
 
   /// Maximum number of entries to store in the cache.
@@ -101,6 +101,10 @@ class ImageCache {
   }
 
   /// Evicts a single entry from the cache, returning true if successful.
+  /// Pending images waiting for completion are removed as well, returning true if successful.
+  ///
+  /// When a pending image is removed the listener on it is removed as well to prevent
+  /// it from adding itself to the cache if it eventually completes.
   ///
   /// The [key] must be equal to an object used to cache an image in
   /// [ImageCache.putIfAbsent].
@@ -113,12 +117,19 @@ class ImageCache {
   ///   * [ImageProvider], for providing images to the [Image] widget.
   bool evict(Object key) {
     final _CachedImage image = _cache.remove(key);
-    _pendingImages.remove(key);
+    final _PendingImage pendingImage = _pendingImages.remove(key);
+
+    if (image == null && pendingImage == null) {
+      return false;
+    }
+
     if (image != null) {
       _currentSizeBytes -= image.sizeBytes;
-      return true;
     }
-    return false;
+    if (pendingImage != null) {
+      pendingImage.removeListener();
+    }
+    return true;
   }
 
   /// Returns the previously cached [ImageStream] for the given key, if available;
@@ -129,7 +140,7 @@ class ImageCache {
   ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader()) {
     assert(key != null);
     assert(loader != null);
-    ImageStreamCompleter result = _pendingImages[key];
+    ImageStreamCompleter result = _pendingImages[key]?.completer;
     // Nothing needs to be done because the image hasn't loaded yet.
     if (result != null)
       return result;
@@ -152,13 +163,16 @@ class ImageCache {
         _maximumSizeBytes = imageSize + 1000;
       }
       _currentSizeBytes += imageSize;
-      _pendingImages.remove(key);
+      final _PendingImage pendingImage = _pendingImages.remove(key);
+      if(pendingImage != null) {
+        pendingImage.removeListener();
+      }
+
       _cache[key] = image;
-      result.removeListener(listener);
       _checkCacheSize();
     }
     if (maximumSize > 0 && maximumSizeBytes > 0) {
-      _pendingImages[key] = result;
+      _pendingImages[key] = _PendingImage(result, listener);
       result.addListener(listener);
     }
     return result;
@@ -184,4 +198,15 @@ class _CachedImage {
 
   final ImageStreamCompleter completer;
   final int sizeBytes;
+}
+
+class _PendingImage {
+  _PendingImage(this.completer, this.listener);
+
+  final ImageStreamCompleter completer;
+  final ImageListener listener;
+
+  void removeListener() {
+    completer.removeListener(listener);
+  }
 }
