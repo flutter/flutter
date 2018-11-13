@@ -1789,16 +1789,14 @@ void main() {
   testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
-        child: DefaultTextStyle(
-          style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
-          child: Center(
+        child: Center(
             child: TextField(
               maxLength: 10,
             ),
           ),
         ),
       ),
-    ));
+    );
 
     expect(find.text('0/10'), findsOneWidget);
 
@@ -1813,16 +1811,14 @@ void main() {
       (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
-        child: DefaultTextStyle(
-          style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
-          child: Center(
+        child: Center(
             child: TextField(
               maxLength: TextField.noMaxLength,
             ),
           ),
         ),
       ),
-    ));
+    );
 
     expect(find.text('0'), findsOneWidget);
 
@@ -1838,16 +1834,13 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
-          child: DefaultTextStyle(
-            style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
-            child: Center(
+          child: Center(
               child: TextField(
                 maxLength: 10,
               ),
             ),
           ),
         ),
-      ),
     );
 
     expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
@@ -3185,9 +3178,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: DefaultTextStyle(
-            style: const TextStyle(fontSize: 12.0, fontFamily: 'Ahem'),
-            child: MediaQuery(
+          body: MediaQuery(
               data: MediaQueryData.fromWindow(ui.window).copyWith(textScaleFactor: 4.0),
               child: Center(
                 child: TextField(
@@ -3198,7 +3189,6 @@ void main() {
             ),
           ),
         ),
-      ),
     );
 
     await tester.tap(find.byType(TextField));

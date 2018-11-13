@@ -195,8 +195,9 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.maxLines}
   final int maxLines;
 
-  /// If [maxLength] is set to this number, it disables the showing of the maximum length part of
-  /// the display, yet still gives a character counter.
+  /// If [maxLength] is set to this number, it disables the showing
+  /// of the maximum length part of the display, yet still gives
+  /// a character counter.
   static const int noMaxLength = 9007199254740992; // math.pow(2, 53);
 
   /// The maximum number of characters (Unicode scalar values) to allow in the
@@ -346,12 +347,19 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       return effectiveDecoration;
 
     final int currentLength = _effectiveController.value.text.runes.length;
-    final String counterText = '$currentLength' +
-        ((widget.maxLength == TextField.noMaxLength)
-            ? ''
-            : '/${widget.maxLength}');
-    final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength);
-    final String semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
+    String counterText = '$currentLength';
+    String semanticCounterText = '';
+
+    // See if we are showing the maxLength or hiding it and therefore
+    // if not hiding the semanticCounterText should be the remaining length
+    if (widget.maxLength != TextField.noMaxLength) {
+      // Show the maxLength on display and semanticCounterText
+      counterText += '/${widget.maxLength}';
+      final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength);
+      semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
+    }
+
+    // Handle length exceeds maxLength
     if (_effectiveController.value.text.runes.length > widget.maxLength) {
       final ThemeData themeData = Theme.of(context);
       return effectiveDecoration.copyWith(
