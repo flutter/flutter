@@ -69,7 +69,7 @@ Dart_Handle Scene::toImage(uint32_t width,
     return tonic::ToDart("Image dimensions for scene were invalid.");
   }
 
-  auto dart_state = UIDartState::Current();
+  auto* dart_state = UIDartState::Current();
   auto image_callback = std::make_unique<tonic::DartPersistentValue>(
       dart_state, raw_image_callback);
   auto unref_queue = dart_state->GetSkiaUnrefQueue();
@@ -114,7 +114,7 @@ Dart_Handle Scene::toImage(uint32_t width,
 
       auto dart_image = CanvasImage::Create();
       dart_image->set_image({std::move(raster_image), std::move(unref_queue)});
-      auto raw_dart_image = tonic::ToDart(std::move(dart_image));
+      auto* raw_dart_image = tonic::ToDart(std::move(dart_image));
 
       // All done!
       tonic::DartInvoke(image_callback->Get(), {raw_dart_image});

@@ -31,8 +31,9 @@ class ThreadLocal {
  private:
   class Box {
    public:
-    Box(ThreadLocalDestroyCallback destroy, intptr_t value)
-        : destroy_(destroy), value_(value) {}
+    Box(ThreadLocalDestroyCallback destroy, intptr_t value);
+
+    ~Box();
 
     intptr_t Value() const { return value_; }
 
@@ -60,22 +61,18 @@ class ThreadLocal {
 
   static inline void ThreadLocalDestroy(void* value) {
     FML_CHECK(value != nullptr);
-    auto box = reinterpret_cast<Box*>(value);
+    auto* box = reinterpret_cast<Box*>(value);
     box->DestroyValue();
     delete box;
   }
 
  public:
-  ThreadLocal() : ThreadLocal(nullptr) {}
+  ThreadLocal();
 
-  ThreadLocal(ThreadLocalDestroyCallback destroy) : destroy_(destroy) {
-    auto callback =
-        reinterpret_cast<void (*)(void*)>(&ThreadLocal::ThreadLocalDestroy);
-    FML_CHECK(pthread_key_create(&_key, callback) == 0);
-  }
+  ThreadLocal(ThreadLocalDestroyCallback destroy);
 
   void Set(intptr_t value) {
-    auto box = reinterpret_cast<Box*>(pthread_getspecific(_key));
+    auto* box = reinterpret_cast<Box*>(pthread_getspecific(_key));
     if (box == nullptr) {
       box = new Box(destroy_, value);
       FML_CHECK(pthread_setspecific(_key, box) == 0);
@@ -85,22 +82,11 @@ class ThreadLocal {
   }
 
   intptr_t Get() {
-    auto box = reinterpret_cast<Box*>(pthread_getspecific(_key));
+    auto* box = reinterpret_cast<Box*>(pthread_getspecific(_key));
     return box != nullptr ? box->Value() : 0;
   }
 
-  ~ThreadLocal() {
-    // This will NOT call the destroy callbacks on thread local values still
-    // active in other threads. Those must be cleared manually. The usage
-    // of this class should be similar to the thread_local keyword but with
-    // with a static storage specifier
-
-    // Collect the container
-    delete reinterpret_cast<Box*>(pthread_getspecific(_key));
-
-    // Finally, collect the key
-    FML_CHECK(pthread_key_delete(_key) == 0);
-  }
+  ~ThreadLocal();
 
  private:
   pthread_key_t _key;

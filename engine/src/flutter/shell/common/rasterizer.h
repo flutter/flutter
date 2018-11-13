@@ -54,10 +54,13 @@ class Rasterizer final : public blink::SnapshotDelegate {
     sk_sp<SkData> data;
     SkISize frame_size = SkISize::MakeEmpty();
 
-    Screenshot() {}
+    Screenshot();
 
-    Screenshot(sk_sp<SkData> p_data, SkISize p_size)
-        : data(std::move(p_data)), frame_size(p_size) {}
+    Screenshot(sk_sp<SkData> p_data, SkISize p_size);
+
+    Screenshot(const Screenshot& other);
+
+    ~Screenshot();
   };
 
   Screenshot ScreenshotLastLayerTree(ScreenshotType type, bool base64_encode);

@@ -75,20 +75,9 @@ bool WriteAtomically(const fml::UniqueFD& base_directory,
 
 class ScopedTemporaryDirectory {
  public:
-  ScopedTemporaryDirectory() {
-    path_ = CreateTemporaryDirectory();
-    if (path_ != "") {
-      dir_fd_ = OpenDirectory(path_.c_str(), false, FilePermission::kRead);
-    }
-  }
+  ScopedTemporaryDirectory();
 
-  ~ScopedTemporaryDirectory() {
-    if (path_ != "") {
-      if (!UnlinkDirectory(path_.c_str())) {
-        FML_LOG(ERROR) << "Could not remove directory: " << path_;
-      }
-    }
-  }
+  ~ScopedTemporaryDirectory();
 
   const UniqueFD& fd() { return dir_fd_; }
 

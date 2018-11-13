@@ -31,7 +31,7 @@ class Picture : public RefCountedDartWrappable<Picture> {
 
   void dispose();
 
-  virtual size_t GetAllocationSize() override;
+  size_t GetAllocationSize() override;
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 

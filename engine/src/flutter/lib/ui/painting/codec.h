@@ -36,15 +36,15 @@ class Codec : public RefCountedDartWrappable<Codec> {
 
 class MultiFrameCodec : public Codec {
  public:
-  int frameCount() { return frameInfos_.size(); }
-  int repetitionCount() { return repetitionCount_; }
-  Dart_Handle getNextFrame(Dart_Handle args);
+  int frameCount() override;
+  int repetitionCount() override;
+  Dart_Handle getNextFrame(Dart_Handle args) override;
 
  private:
   MultiFrameCodec(std::unique_ptr<SkCodec> codec,
                   const float decodedCacheRatioCap);
 
-  ~MultiFrameCodec() {}
+  ~MultiFrameCodec() override;
 
   sk_sp<SkImage> GetNextFrameImage(fml::WeakPtr<GrContext> resourceContext);
 
@@ -71,7 +71,8 @@ class MultiFrameCodec : public Codec {
     std::unique_ptr<SkBitmap> bitmap_ = nullptr;
     const bool required_;
 
-    DecodedFrame(bool required) : required_(required) {}
+    DecodedFrame(bool required);
+    ~DecodedFrame();
   };
 
   // A cache of previously loaded bitmaps, indexed by the frame they belong to.
@@ -86,13 +87,13 @@ class MultiFrameCodec : public Codec {
 
 class SingleFrameCodec : public Codec {
  public:
-  int frameCount() { return 1; }
-  int repetitionCount() { return 0; }
-  Dart_Handle getNextFrame(Dart_Handle args);
+  int frameCount() override;
+  int repetitionCount() override;
+  Dart_Handle getNextFrame(Dart_Handle args) override;
 
  private:
-  SingleFrameCodec(fml::RefPtr<FrameInfo> frame) : frame_(std::move(frame)) {}
-  ~SingleFrameCodec() {}
+  SingleFrameCodec(fml::RefPtr<FrameInfo> frame);
+  ~SingleFrameCodec() override;
 
   fml::RefPtr<FrameInfo> frame_;
 

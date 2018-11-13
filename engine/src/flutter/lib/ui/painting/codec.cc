@@ -283,7 +283,7 @@ void InstantiateImageCodec(Dart_NativeArguments args) {
 
   auto buffer = SkData::MakeWithCopy(list.data(), list.num_elements());
 
-  auto dart_state = UIDartState::Current();
+  auto* dart_state = UIDartState::Current();
 
   const auto& task_runners = dart_state->GetTaskRunners();
   task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
@@ -387,6 +387,16 @@ MultiFrameCodec::MultiFrameCodec(std::unique_ptr<SkCodec> codec,
   nextFrameIndex_ = 0;
 }
 
+MultiFrameCodec::~MultiFrameCodec() {}
+
+int MultiFrameCodec::frameCount() {
+  return frameInfos_.size();
+}
+
+int MultiFrameCodec::repetitionCount() {
+  return repetitionCount_;
+}
+
 sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage(
     fml::WeakPtr<GrContext> resourceContext) {
   // Populate this bitmap from the cache if it exists
@@ -481,7 +491,7 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
     return ToDart("Callback must be a function");
   }
 
-  auto dart_state = UIDartState::Current();
+  auto* dart_state = UIDartState::Current();
 
   const auto& task_runners = dart_state->GetTaskRunners();
 
@@ -497,6 +507,24 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
       }));
 
   return Dart_Null();
+}
+
+MultiFrameCodec::DecodedFrame::DecodedFrame(bool required)
+    : required_(required) {}
+
+MultiFrameCodec::DecodedFrame::~DecodedFrame() = default;
+
+SingleFrameCodec::SingleFrameCodec(fml::RefPtr<FrameInfo> frame)
+    : frame_(std::move(frame)) {}
+
+SingleFrameCodec::~SingleFrameCodec() {}
+
+int SingleFrameCodec::frameCount() {
+  return 1;
+}
+
+int SingleFrameCodec::repetitionCount() {
+  return 0;
 }
 
 Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {

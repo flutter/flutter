@@ -152,7 +152,7 @@ bool DartIsolate::Initialize(Dart_Isolate dart_isolate, bool is_root_isolate) {
     return false;
   }
 
-  auto isolate_data = static_cast<std::shared_ptr<DartIsolate>*>(
+  auto* isolate_data = static_cast<std::shared_ptr<DartIsolate>*>(
       Dart_IsolateData(dart_isolate));
   if (isolate_data->get() != this) {
     return false;
@@ -620,7 +620,7 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
   DartVM* const vm = (*embedder_isolate)->GetDartVM();
 
   if (!is_root_isolate) {
-    auto raw_embedder_isolate = embedder_isolate.release();
+    auto* raw_embedder_isolate = embedder_isolate.release();
 
     blink::TaskRunners null_task_runners(advisory_script_uri, nullptr, nullptr,
                                          nullptr, nullptr);
@@ -728,6 +728,15 @@ std::weak_ptr<DartIsolate> DartIsolate::GetWeakIsolatePtr() {
 void DartIsolate::AddIsolateShutdownCallback(fml::closure closure) {
   shutdown_callbacks_.emplace_back(
       std::make_unique<AutoFireClosure>(std::move(closure)));
+}
+
+DartIsolate::AutoFireClosure::AutoFireClosure(fml::closure closure)
+    : closure_(std::move(closure)) {}
+
+DartIsolate::AutoFireClosure::~AutoFireClosure() {
+  if (closure_) {
+    closure_();
+  }
 }
 
 }  // namespace blink

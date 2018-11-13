@@ -84,9 +84,9 @@ class NonOwnedMapping : public Mapping {
   NonOwnedMapping(const uint8_t* data, size_t size)
       : data_(data), size_(size) {}
 
-  size_t GetSize() const override { return size_; }
+  size_t GetSize() const override;
 
-  const uint8_t* GetMapping() const override { return data_; }
+  const uint8_t* GetMapping() const override;
 
  private:
   const uint8_t* const data_;

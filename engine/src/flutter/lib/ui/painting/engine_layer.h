@@ -35,8 +35,7 @@ class EngineLayer : public RefCountedDartWrappable<EngineLayer> {
   std::shared_ptr<flow::ContainerLayer> Layer() const { return layer_; }
 
  private:
-  explicit EngineLayer(std::shared_ptr<flow::ContainerLayer> layer)
-      : layer_(layer) {}
+  explicit EngineLayer(std::shared_ptr<flow::ContainerLayer> layer);
   std::shared_ptr<flow::ContainerLayer> layer_;
 
   FML_FRIEND_MAKE_REF_COUNTED(EngineLayer);

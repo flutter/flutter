@@ -19,6 +19,8 @@ TaskRunners::TaskRunners(std::string label,
       ui_(std::move(ui)),
       io_(std::move(io)) {}
 
+TaskRunners::TaskRunners(const TaskRunners& other) = default;
+
 TaskRunners::~TaskRunners() = default;
 
 const std::string& TaskRunners::GetLabel() const {

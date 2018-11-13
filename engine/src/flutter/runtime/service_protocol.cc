@@ -177,7 +177,7 @@ bool ServiceProtocol::HandleMessage(fml::StringView method,
   // Find the handler by its "viewId" in the params.
   auto view_id_param_found = params.find(fml::StringView{"viewId"});
   if (view_id_param_found != params.end()) {
-    auto handler = reinterpret_cast<Handler*>(std::stoull(
+    auto* handler = reinterpret_cast<Handler*>(std::stoull(
         view_id_param_found->second.data() + kViewIdPrefx.size(), nullptr, 16));
     auto handler_found = handlers_.find(handler);
     if (handler_found != handlers_.end()) {
@@ -239,7 +239,7 @@ bool ServiceProtocol::HandleListViewsMethod(
   // Collect handler descriptions on their respective task runners.
   std::lock_guard<std::mutex> lock(handlers_mutex_);
   std::vector<std::pair<intptr_t, Handler::Description>> descriptions;
-  for (const auto& handler : handlers_) {
+  for (auto* const handler : handlers_) {
     fml::AutoResetWaitableEvent latch;
     Handler::Description description;
 

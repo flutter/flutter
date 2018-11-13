@@ -123,4 +123,12 @@ SkTypeface* AssetManagerFontStyleSet::matchStyle(const SkFontStyle& pattern) {
   return SkRef(assets_[0].typeface.get());
 }
 
+AssetManagerFontStyleSet::TypefaceAsset::TypefaceAsset(std::string a)
+    : asset(std::move(a)) {}
+
+AssetManagerFontStyleSet::TypefaceAsset::TypefaceAsset(
+    const AssetManagerFontStyleSet::TypefaceAsset& other) = default;
+
+AssetManagerFontStyleSet::TypefaceAsset::~TypefaceAsset() = default;
+
 }  // namespace blink

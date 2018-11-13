@@ -27,7 +27,7 @@ class PlatformViewIOS final : public PlatformView {
  public:
   explicit PlatformViewIOS(PlatformView::Delegate& delegate, blink::TaskRunners task_runners);
 
-  ~PlatformViewIOS();
+  ~PlatformViewIOS() override;
 
   PlatformMessageRouter& GetPlatformMessageRouter();
 

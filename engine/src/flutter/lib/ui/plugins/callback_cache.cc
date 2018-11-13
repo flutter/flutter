@@ -134,7 +134,7 @@ void DartCallbackCache::LoadCacheFromDisk() {
     return;
   }
   const auto entries = d.GetArray();
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
+  for (auto* it = entries.begin(); it != entries.end(); ++it) {
     const auto root_obj = it->GetObject();
     const auto representation = root_obj[kRepresentationKey].GetObject();
 

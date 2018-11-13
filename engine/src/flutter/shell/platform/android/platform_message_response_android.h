@@ -26,6 +26,8 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
       fml::jni::JavaObjectWeakGlobalRef weak_java_object,
       fml::RefPtr<fml::TaskRunner> platform_task_runner);
 
+  ~PlatformMessageResponseAndroid() override;
+
   int response_id_;
   fml::jni::JavaObjectWeakGlobalRef weak_java_object_;
   fml::RefPtr<fml::TaskRunner> platform_task_runner_;

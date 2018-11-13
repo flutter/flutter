@@ -8,6 +8,8 @@ namespace shell {
 
 ThreadHost::ThreadHost() = default;
 
+ThreadHost::ThreadHost(ThreadHost&&) = default;
+
 ThreadHost::ThreadHost(std::string name_prefix, uint64_t mask) {
   if (mask & ThreadHost::Type::Platform) {
     platform_thread = std::make_unique<fml::Thread>(name_prefix + ".platform");

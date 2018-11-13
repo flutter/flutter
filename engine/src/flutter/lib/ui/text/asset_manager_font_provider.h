@@ -42,7 +42,12 @@ class AssetManagerFontStyleSet : public SkFontStyleSet {
   std::shared_ptr<blink::AssetManager> asset_manager_;
 
   struct TypefaceAsset {
-    TypefaceAsset(std::string a) : asset(std::move(a)) {}
+    TypefaceAsset(std::string a);
+
+    TypefaceAsset(const TypefaceAsset& other);
+
+    ~TypefaceAsset();
+
     std::string asset;
     sk_sp<SkTypeface> typeface;
   };

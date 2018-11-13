@@ -27,6 +27,7 @@ FILE: ../../../flutter/flow/compositor_context.cc
 FILE: ../../../flutter/flow/compositor_context.h
 FILE: ../../../flutter/flow/debug_print.cc
 FILE: ../../../flutter/flow/debug_print.h
+FILE: ../../../flutter/flow/embedded_views.cc
 FILE: ../../../flutter/flow/embedded_views.h
 FILE: ../../../flutter/flow/export_node.cc
 FILE: ../../../flutter/flow/export_node.h
@@ -189,6 +190,7 @@ FILE: ../../../flutter/fml/task_runner.cc
 FILE: ../../../flutter/fml/task_runner.h
 FILE: ../../../flutter/fml/thread.cc
 FILE: ../../../flutter/fml/thread.h
+FILE: ../../../flutter/fml/thread_local.cc
 FILE: ../../../flutter/fml/thread_local.h
 FILE: ../../../flutter/fml/thread_local_unittests.cc
 FILE: ../../../flutter/fml/thread_unittests.cc
@@ -311,6 +313,7 @@ FILE: ../../../flutter/lib/ui/window/pointer_data.cc
 FILE: ../../../flutter/lib/ui/window/pointer_data.h
 FILE: ../../../flutter/lib/ui/window/pointer_data_packet.cc
 FILE: ../../../flutter/lib/ui/window/pointer_data_packet.h
+FILE: ../../../flutter/lib/ui/window/viewport_metrics.cc
 FILE: ../../../flutter/lib/ui/window/viewport_metrics.h
 FILE: ../../../flutter/lib/ui/window/window.cc
 FILE: ../../../flutter/lib/ui/window/window.h
@@ -496,6 +499,7 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatfor
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterStandardCodec.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterStandardCodec_Internal.h

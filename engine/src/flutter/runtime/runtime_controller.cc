@@ -75,7 +75,7 @@ RuntimeController::RuntimeController(
   root_isolate->SetReturnCodeCallback([this](uint32_t code) {
     root_isolate_return_code_ = {true, code};
   });
-  if (auto window = GetWindowIfAvailable()) {
+  if (auto* window = GetWindowIfAvailable()) {
     tonic::DartState::Scope scope(root_isolate);
     window->DidCreateIsolate();
     if (!FlushRuntimeStateToIsolate()) {
@@ -134,7 +134,7 @@ bool RuntimeController::FlushRuntimeStateToIsolate() {
 bool RuntimeController::SetViewportMetrics(const ViewportMetrics& metrics) {
   window_data_.viewport_metrics = metrics;
 
-  if (auto window = GetWindowIfAvailable()) {
+  if (auto* window = GetWindowIfAvailable()) {
     window->UpdateWindowMetrics(metrics);
     return true;
   }
@@ -145,7 +145,7 @@ bool RuntimeController::SetLocales(
     const std::vector<std::string>& locale_data) {
   window_data_.locale_data = locale_data;
 
-  if (auto window = GetWindowIfAvailable()) {
+  if (auto* window = GetWindowIfAvailable()) {
     window->UpdateLocales(locale_data);
     return true;
   }
@@ -155,7 +155,7 @@ bool RuntimeController::SetLocales(
 bool RuntimeController::SetUserSettingsData(const std::string& data) {
   window_data_.user_settings_data = data;
 
-  if (auto window = GetWindowIfAvailable()) {
+  if (auto* window = GetWindowIfAvailable()) {
     window->UpdateUserSettingsData(window_data_.user_settings_data);
     return true;
   }
@@ -166,7 +166,7 @@ bool RuntimeController::SetUserSettingsData(const std::string& data) {
 bool RuntimeController::SetSemanticsEnabled(bool enabled) {
   window_data_.semantics_enabled = enabled;
 
-  if (auto window = GetWindowIfAvailable()) {
+  if (auto* window = GetWindowIfAvailable()) {
     window->UpdateSemanticsEnabled(window_data_.semantics_enabled);
     return true;
   }
@@ -176,7 +176,7 @@ bool RuntimeController::SetSemanticsEnabled(bool enabled) {
 
 bool RuntimeController::SetAccessibilityFeatures(int32_t flags) {
   window_data_.accessibility_feature_flags_ = flags;
-  if (auto window = GetWindowIfAvailable()) {
+  if (auto* window = GetWindowIfAvailable()) {
     window->UpdateAccessibilityFeatures(
         window_data_.accessibility_feature_flags_);
     return true;
@@ -186,7 +186,7 @@ bool RuntimeController::SetAccessibilityFeatures(int32_t flags) {
 }
 
 bool RuntimeController::BeginFrame(fml::TimePoint frame_time) {
-  if (auto window = GetWindowIfAvailable()) {
+  if (auto* window = GetWindowIfAvailable()) {
     window->BeginFrame(frame_time);
     return true;
   }
@@ -206,7 +206,7 @@ bool RuntimeController::NotifyIdle(int64_t deadline) {
 
 bool RuntimeController::DispatchPlatformMessage(
     fml::RefPtr<PlatformMessage> message) {
-  if (auto window = GetWindowIfAvailable()) {
+  if (auto* window = GetWindowIfAvailable()) {
     TRACE_EVENT1("flutter", "RuntimeController::DispatchPlatformMessage",
                  "mode", "basic");
     window->DispatchPlatformMessage(std::move(message));
@@ -217,7 +217,7 @@ bool RuntimeController::DispatchPlatformMessage(
 
 bool RuntimeController::DispatchPointerDataPacket(
     const PointerDataPacket& packet) {
-  if (auto window = GetWindowIfAvailable()) {
+  if (auto* window = GetWindowIfAvailable()) {
     TRACE_EVENT1("flutter", "RuntimeController::DispatchPointerDataPacket",
                  "mode", "basic");
     window->DispatchPointerDataPacket(packet);
@@ -231,7 +231,7 @@ bool RuntimeController::DispatchSemanticsAction(int32_t id,
                                                 std::vector<uint8_t> args) {
   TRACE_EVENT1("flutter", "RuntimeController::DispatchSemanticsAction", "mode",
                "basic");
-  if (auto window = GetWindowIfAvailable()) {
+  if (auto* window = GetWindowIfAvailable()) {
     window->DispatchSemanticsAction(id, action, std::move(args));
     return true;
   }
@@ -309,5 +309,22 @@ std::weak_ptr<DartIsolate> RuntimeController::GetRootIsolate() {
 std::pair<bool, uint32_t> RuntimeController::GetRootIsolateReturnCode() {
   return root_isolate_return_code_;
 }
+
+RuntimeController::Locale::Locale(std::string language_code_,
+                                  std::string country_code_,
+                                  std::string script_code_,
+                                  std::string variant_code_)
+    : language_code(language_code_),
+      country_code(country_code_),
+      script_code(script_code_),
+      variant_code(variant_code_) {}
+
+RuntimeController::Locale::~Locale() = default;
+
+RuntimeController::WindowData::WindowData() = default;
+
+RuntimeController::WindowData::WindowData(const WindowData& other) = default;
+
+RuntimeController::WindowData::~WindowData() = default;
 
 }  // namespace blink

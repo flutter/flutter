@@ -32,10 +32,9 @@ class IOSSurface;
 struct FlutterPlatformViewLayer {
   FlutterPlatformViewLayer(fml::scoped_nsobject<UIView> overlay_view,
                            std::unique_ptr<IOSSurface> ios_surface,
-                           std::unique_ptr<Surface> surface)
-      : overlay_view(std::move(overlay_view)),
-        ios_surface(std::move(ios_surface)),
-        surface(std::move(surface)){};
+                           std::unique_ptr<Surface> surface);
+
+  ~FlutterPlatformViewLayer();
 
   fml::scoped_nsobject<UIView> overlay_view;
   std::unique_ptr<IOSSurface> ios_surface;
@@ -44,7 +43,9 @@ struct FlutterPlatformViewLayer {
 
 class FlutterPlatformViewsController {
  public:
-  FlutterPlatformViewsController() = default;
+  FlutterPlatformViewsController();
+
+  ~FlutterPlatformViewsController();
 
   void SetFlutterView(UIView* flutter_view);
 

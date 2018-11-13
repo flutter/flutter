@@ -17,6 +17,8 @@ PlatformMessageResponseAndroid::PlatformMessageResponseAndroid(
       weak_java_object_(weak_java_object),
       platform_task_runner_(std::move(platform_task_runner)) {}
 
+PlatformMessageResponseAndroid::~PlatformMessageResponseAndroid() = default;
+
 // |blink::PlatformMessageResponse|
 void PlatformMessageResponseAndroid::Complete(
     std::unique_ptr<fml::Mapping> data) {
@@ -27,7 +29,7 @@ void PlatformMessageResponseAndroid::Complete(
   ]() {
         // We are on the platform thread. Attempt to get the strong reference to
         // the Java object.
-        auto env = fml::jni::AttachCurrentThread();
+        auto* env = fml::jni::AttachCurrentThread();
         auto java_object = weak_java_object.get(env);
 
         if (java_object.is_null()) {
@@ -57,7 +59,7 @@ void PlatformMessageResponseAndroid::CompleteEmpty() {
   ]() {
         // We are on the platform thread. Attempt to get the strong reference to
         // the Java object.
-        auto env = fml::jni::AttachCurrentThread();
+        auto* env = fml::jni::AttachCurrentThread();
         auto java_object = weak_java_object.get(env);
 
         if (java_object.is_null()) {

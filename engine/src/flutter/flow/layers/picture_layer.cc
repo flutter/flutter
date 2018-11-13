@@ -15,7 +15,7 @@ PictureLayer::~PictureLayer() = default;
 void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   SkPicture* sk_picture = picture();
 
-  if (auto cache = context->raster_cache) {
+  if (auto* cache = context->raster_cache) {
     SkMatrix ctm = matrix;
     ctm.postTranslate(offset_.x(), offset_.y());
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION

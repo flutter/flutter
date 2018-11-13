@@ -8,6 +8,10 @@
 
 namespace fml {
 
+size_t MessageSerializable::GetSerializableTag() const {
+  return 0;
+};
+
 Message::Message() = default;
 
 Message::~Message() = default;
@@ -96,7 +100,7 @@ uint8_t* Message::PrepareDecode(size_t size) {
   if ((size + size_read_) > buffer_length_) {
     return nullptr;
   }
-  auto buffer = buffer_ + size_read_;
+  auto* buffer = buffer_ + size_read_;
   size_read_ += size;
   return buffer;
 }

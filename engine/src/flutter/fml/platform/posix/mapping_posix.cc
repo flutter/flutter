@@ -69,7 +69,7 @@ FileMapping::FileMapping(const fml::UniqueFD& handle,
 
   const auto is_writable = IsWritable(protection);
 
-  auto mapping =
+  auto* mapping =
       ::mmap(nullptr, stat_buffer.st_size, ToPosixProtectionFlags(protection),
              is_writable ? MAP_SHARED : MAP_PRIVATE, handle.get(), 0);
 

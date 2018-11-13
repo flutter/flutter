@@ -63,7 +63,7 @@ class IOSSurfaceGL : public IOSSurface,
   SkCanvas* CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) override;
 
   // |flow::ExternalViewEmbedder|
-  virtual bool SubmitFrame(GrContext* context) override;
+  bool SubmitFrame(GrContext* context) override;
 
  private:
   std::shared_ptr<IOSGLContext> context_;

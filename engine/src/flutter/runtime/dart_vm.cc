@@ -313,7 +313,7 @@ DartVM::DartVM(const Settings& settings,
   // it does not recognize, it exits immediately.
   args.push_back("--ignore-unrecognized-flags");
 
-  for (const auto& profiler_flag :
+  for (auto* const profiler_flag :
        ProfilingFlags(settings.enable_dart_profiling)) {
     args.push_back(profiler_flag);
   }

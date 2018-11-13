@@ -26,23 +26,17 @@ class GPUSurfaceGLDelegate {
 
   virtual intptr_t GLContextFBO() const = 0;
 
-  virtual bool GLContextFBOResetAfterPresent() const { return false; }
+  virtual bool GLContextFBOResetAfterPresent() const;
 
-  virtual bool UseOffscreenSurface() const { return false; }
+  virtual bool UseOffscreenSurface() const;
 
-  virtual SkMatrix GLContextSurfaceTransformation() const {
-    SkMatrix matrix;
-    matrix.setIdentity();
-    return matrix;
-  }
+  virtual SkMatrix GLContextSurfaceTransformation() const;
 
-  virtual flow::ExternalViewEmbedder* GetExternalViewEmbedder() {
-    return nullptr;
-  }
+  virtual flow::ExternalViewEmbedder* GetExternalViewEmbedder();
 
   using GLProcResolver =
       std::function<void* /* proc name */ (const char* /* proc address */)>;
-  virtual GLProcResolver GetGLProcResolver() const { return nullptr; }
+  virtual GLProcResolver GetGLProcResolver() const;
 };
 
 class GPUSurfaceGL : public Surface {

@@ -47,7 +47,7 @@ class MessageSerializable {
 
   virtual bool Deserialize(Message& message) = 0;
 
-  virtual size_t GetSerializableTag() const { return 0; };
+  virtual size_t GetSerializableTag() const;
 };
 
 // The traits passed to the encode/decode calls that accept traits should be
@@ -88,7 +88,7 @@ class Message {
   template <typename T,
             typename = std::enable_if_t<std::is_trivially_copyable<T>::value>>
   FML_WARN_UNUSED_RESULT bool Encode(const T& value) {
-    if (auto buffer = PrepareEncode(sizeof(T))) {
+    if (auto* buffer = PrepareEncode(sizeof(T))) {
       ::memcpy(buffer, &value, sizeof(T));
       return true;
     }
@@ -131,7 +131,7 @@ class Message {
   template <typename T,
             typename = std::enable_if_t<std::is_trivially_copyable<T>::value>>
   FML_WARN_UNUSED_RESULT bool Decode(T& value) {
-    if (auto buffer = PrepareDecode(sizeof(T))) {
+    if (auto* buffer = PrepareDecode(sizeof(T))) {
       ::memcpy(&value, buffer, sizeof(T));
       return true;
     }

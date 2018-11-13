@@ -39,7 +39,7 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
     image_ = std::move(image);
   }
 
-  virtual size_t GetAllocationSize() override;
+  size_t GetAllocationSize() override;
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 

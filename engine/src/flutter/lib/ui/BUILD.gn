@@ -92,6 +92,7 @@ source_set("ui") {
     "window/pointer_data.h",
     "window/pointer_data_packet.cc",
     "window/pointer_data_packet.h",
+    "window/viewport_metrics.cc",
     "window/viewport_metrics.h",
     "window/window.cc",
     "window/window.h",
