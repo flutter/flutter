@@ -31,12 +31,22 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// The [value] argument can be either null (corresponding to an indeterminate
   /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
+  ///
+  /// The [semanticsEnabled] argument must not be null. It defaults to false. If
+  /// this widget provides information that should be announced by screen reading
+  /// software, it should be set to true. If it is true, at least one of
+  /// [semanticsLabel] or [semanticsValue] must be specified.
   const ProgressIndicator({
     Key key,
     this.value,
     this.backgroundColor,
     this.valueColor,
-  }) : super(key: key);
+    this.semanticsEnabled = false,
+    this.semanticsLabel,
+    this.semanticsValue,
+  }) : assert(semanticsEnabled != null),
+       assert(!semanticsEnabled || semanticsLabel != null || semanticsValue != null),
+       super(key: key);
 
   /// If non-null, the value of this progress indicator with 0.0 corresponding
   /// to no progress having been made and 1.0 corresponding to all the progress
@@ -58,6 +68,27 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// [ThemeData.accentColor].
   final Animation<Color> valueColor;
 
+  /// The [Semantics.label] for this progress indicator.
+  ///
+  /// This will be ignored if [semanticsEnabled] is false.
+  final String semanticsLabel;
+
+  /// The [Semantics.value] for this progress indicator.
+  ///
+  /// This will be ignored if [semanticsEnabled] is false.
+  final String semanticsValue;
+
+  /// Whether the indicator will be given its own semantics node in the semantics
+  /// tree. Defaults to false.
+  ///
+  /// This should be set to true if it would be beneficial for accessibility
+  /// users to receive feedback about this indicator. For example, if this
+  /// indicator represents a loading state for a primary action that blocks
+  /// other activity, semantics should be enabled for it; but if it is
+  /// one of many indicators representing multiple images loading in a
+  /// [GridView], it should likely not have semantics enabled.
+  final bool semanticsEnabled;
+
   Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context).backgroundColor;
   Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context).accentColor;
 
@@ -65,6 +96,20 @@ abstract class ProgressIndicator extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(PercentProperty('value', value, showName: false, ifNull: '<indeterminate>'));
+  }
+
+  Widget _buildSemanticsWrapper({
+    @required BuildContext context,
+    @required Widget child,
+  }) {
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      enabled: semanticsEnabled,
+      label: semanticsLabel,
+      value: semanticsValue,
+      child: child,
+    );
   }
 }
 
@@ -179,12 +224,28 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// The [value] argument can be either null (corresponding to an indeterminate
   /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
+  ///
+  /// The [semanticsEnabled] argument must not be null. It defaults to false. If
+  /// this widget provides information that should be announced by screen reading
+  /// software, it should be set to true. If it is `true`, at least one of
+  /// [semanticsLabel] or [semanticsValue] must be specified.
   const LinearProgressIndicator({
     Key key,
     double value,
     Color backgroundColor,
     Animation<Color> valueColor,
-  }) : super(key: key, value: value, backgroundColor: backgroundColor, valueColor: valueColor);
+    String semanticsLabel,
+    String semanticsValue,
+    bool semanticsEnabled = false,
+  }) : super(
+         key: key,
+         value: value,
+         backgroundColor: backgroundColor,
+         valueColor: valueColor,
+         semanticsLabel: semanticsLabel,
+         semanticsValue: semanticsValue,
+         semanticsEnabled: semanticsEnabled,
+       );
 
   @override
   _LinearProgressIndicatorState createState() => _LinearProgressIndicatorState();
@@ -220,18 +281,21 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
   }
 
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
-    return Container(
-      constraints: const BoxConstraints(
-        minWidth: double.infinity,
-        minHeight: _kLinearProgressIndicatorHeight,
-      ),
-      child: CustomPaint(
-        painter: _LinearProgressIndicatorPainter(
-          backgroundColor: widget._getBackgroundColor(context),
-          valueColor: widget._getValueColor(context),
-          value: widget.value, // may be null
-          animationValue: animationValue, // ignored if widget.value is not null
-          textDirection: textDirection,
+    return widget._buildSemanticsWrapper(
+      context: context,
+      child: Container(
+        constraints: const BoxConstraints(
+          minWidth: double.infinity,
+          minHeight: _kLinearProgressIndicatorHeight,
+        ),
+        child: CustomPaint(
+          painter: _LinearProgressIndicatorPainter(
+            backgroundColor: widget._getBackgroundColor(context),
+            valueColor: widget._getValueColor(context),
+            value: widget.value, // may be null
+            animationValue: animationValue, // ignored if widget.value is not null
+            textDirection: textDirection,
+          ),
         ),
       ),
     );
@@ -335,13 +399,29 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// The [value] argument can be either null (corresponding to an indeterminate
   /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
+  ///
+  /// The [semanticsEnabled] argument must not be null. It defaults to false. If
+  /// this widget provides information that should be announced by screen reading
+  /// software, it should be set to true. If it is `true`, at least one of
+  /// [semanticsLabel] or [semanticsValue] must be specified.
   const CircularProgressIndicator({
     Key key,
     double value,
     Color backgroundColor,
     Animation<Color> valueColor,
     this.strokeWidth = 4.0,
-  }) : super(key: key, value: value, backgroundColor: backgroundColor, valueColor: valueColor);
+    String semanticsLabel,
+    String semanticsValue,
+    bool semanticsEnabled = false,
+  }) : super(
+         key: key,
+         value: value,
+         backgroundColor: backgroundColor,
+         valueColor: valueColor,
+         semanticsLabel: semanticsLabel,
+         semanticsValue: semanticsValue,
+         semanticsEnabled: semanticsEnabled,
+       );
 
   /// The width of the line used to draw the circle.
   final double strokeWidth;
@@ -397,20 +477,23 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   }
 
   Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
-    return Container(
-      constraints: const BoxConstraints(
-        minWidth: _kMinCircularProgressIndicatorSize,
-        minHeight: _kMinCircularProgressIndicatorSize,
-      ),
-      child: CustomPaint(
-        painter: _CircularProgressIndicatorPainter(
-          valueColor: widget._getValueColor(context),
-          value: widget.value, // may be null
-          headValue: headValue, // remaining arguments are ignored if widget.value is not null
-          tailValue: tailValue,
-          stepValue: stepValue,
-          rotationValue: rotationValue,
-          strokeWidth: widget.strokeWidth,
+    return widget._buildSemanticsWrapper(
+      context: context,
+      child: Container(
+        constraints: const BoxConstraints(
+          minWidth: _kMinCircularProgressIndicatorSize,
+          minHeight: _kMinCircularProgressIndicatorSize,
+        ),
+        child: CustomPaint(
+          painter: _CircularProgressIndicatorPainter(
+            valueColor: widget._getValueColor(context),
+            value: widget.value, // may be null
+            headValue: headValue, // remaining arguments are ignored if widget.value is not null
+            tailValue: tailValue,
+            stepValue: stepValue,
+            rotationValue: rotationValue,
+            strokeWidth: widget.strokeWidth,
+          ),
         ),
       ),
     );
@@ -510,18 +593,29 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   ///
   /// Rather than creating a refresh progress indicator directly, consider using
   /// a [RefreshIndicator] together with a [Scrollable] widget.
+  ///
+  /// The [semanticsEnabled] argument must not be null. It defaults to false. If
+  /// this widget provides information that should be announced by screen reading
+  /// software, it should be set to true. If it is `true`, at least one of
+  /// [semanticsLabel] or [semanticsValue] must be specified.
   const RefreshProgressIndicator({
     Key key,
     double value,
     Color backgroundColor,
     Animation<Color> valueColor,
     double strokeWidth = 2.0, // Different default than CircularProgressIndicator.
+    bool semanticsEnabled = false,
+    String semanticsLabel,
+    String semanticsValue,
   }) : super(
     key: key,
     value: value,
     backgroundColor: backgroundColor,
     valueColor: valueColor,
     strokeWidth: strokeWidth,
+    semanticsEnabled: semanticsEnabled,
+    semanticsLabel: semanticsLabel,
+    semanticsValue: semanticsValue,
   );
 
   @override
@@ -547,26 +641,29 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   @override
   Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
     final double arrowheadScale = widget.value == null ? 0.0 : (widget.value * 2.0).clamp(0.0, 1.0);
-    return Container(
-      width: _indicatorSize,
-      height: _indicatorSize,
-      margin: const EdgeInsets.all(4.0), // accommodate the shadow
-      child: Material(
-        type: MaterialType.circle,
-        color: widget.backgroundColor ?? Theme.of(context).canvasColor,
-        elevation: 2.0,
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: CustomPaint(
-            painter: _RefreshProgressIndicatorPainter(
-              valueColor: widget._getValueColor(context),
-              value: null, // Draw the indeterminate progress indicator.
-              headValue: headValue,
-              tailValue: tailValue,
-              stepValue: stepValue,
-              rotationValue: rotationValue,
-              strokeWidth: widget.strokeWidth,
-              arrowheadScale: arrowheadScale,
+    return widget._buildSemanticsWrapper(
+      context: context,
+      child: Container(
+        width: _indicatorSize,
+        height: _indicatorSize,
+        margin: const EdgeInsets.all(4.0), // accommodate the shadow
+        child: Material(
+          type: MaterialType.circle,
+          color: widget.backgroundColor ?? Theme.of(context).canvasColor,
+          elevation: 2.0,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: CustomPaint(
+              painter: _RefreshProgressIndicatorPainter(
+                valueColor: widget._getValueColor(context),
+                value: null, // Draw the indeterminate progress indicator.
+                headValue: headValue,
+                tailValue: tailValue,
+                stepValue: stepValue,
+                rotationValue: rotationValue,
+                strokeWidth: widget.strokeWidth,
+                arrowheadScale: arrowheadScale,
+              ),
             ),
           ),
         ),

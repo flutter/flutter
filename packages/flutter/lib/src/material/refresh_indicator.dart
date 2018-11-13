@@ -85,6 +85,12 @@ class RefreshIndicator extends StatefulWidget {
   /// The [onRefresh], [child], and [notificationPredicate] arguments must be
   /// non-null. The default
   /// [displacement] is 40.0 logical pixels.
+  ///   
+  /// The [semanticsEnabled] argument must not be null. It defaults to true.
+  /// It may be set to false if it is used in a way that is primarily meant for
+  /// visual flair and would not add value if read by screen reading software.
+  /// At least one of [semanticsLabel] or [semanticsValue] must be specified if
+  /// [semanticsEnabled] is set to true.
   const RefreshIndicator({
     Key key,
     @required this.child,
@@ -93,9 +99,14 @@ class RefreshIndicator extends StatefulWidget {
     this.color,
     this.backgroundColor,
     this.notificationPredicate = defaultScrollNotificationPredicate,
+    this.semanticsEnabled = true,
+    this.semanticsLabel = 'Refresh',
+    this.semanticsValue,
   }) : assert(child != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
+       assert(semanticsEnabled != null),
+       assert(!semanticsEnabled || semanticsLabel != null || semanticsValue != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -130,6 +141,24 @@ class RefreshIndicator extends StatefulWidget {
   /// By default, checks whether `notification.depth == 0`. Set it to something
   /// else for more complicated layouts.
   final ScrollNotificationPredicate notificationPredicate;
+
+  /// The [Semantics.label] for this indicator.
+  ///
+  /// This will be ignored if [semanticsEnabled] is false.
+  final String semanticsLabel;
+
+  /// The [Semantics.value] for this indicator.
+  ///
+  /// This will be ignored if [semanticsEnabled] is false.
+  final String semanticsValue;
+
+  /// Whether the indicator will be given its own semantics node in the semantics
+  /// tree.  Defaults to true.
+  ///
+  /// This may be set to false if it would be distracting for a screen reader to
+  /// announce the label and value of this widget, for example if it is used in
+  /// some secondary manner as visual flair.
+  final bool semanticsEnabled;
 
   @override
   RefreshIndicatorState createState() => RefreshIndicatorState();
@@ -434,6 +463,9 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                   animation: _positionController,
                   builder: (BuildContext context, Widget child) {
                     return RefreshProgressIndicator(
+                      semanticsEnabled: widget.semanticsEnabled,
+                      semanticsLabel: widget.semanticsLabel,
+                      semanticsValue: widget.semanticsValue,
                       value: showIndeterminateIndicator ? null : _value.value,
                       valueColor: _valueColor,
                       backgroundColor: widget.backgroundColor,
