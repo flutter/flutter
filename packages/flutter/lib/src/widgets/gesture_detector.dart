@@ -335,7 +335,7 @@ class GestureDetector extends StatelessWidget {
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], gesture drag behavior will
-  /// begin upon the drag gesture winning the arena. If set to
+  /// begin upon the detection of a drag gesture. If set to
   /// [DragStartBehavior.down] it will begin when a down event is first detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
