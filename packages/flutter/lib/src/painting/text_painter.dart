@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextBox, BoxHeightStyle;
+import 'dart:math' show max;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -235,15 +236,69 @@ class TextPainter {
   double get preferredLineHeight {
     if (_layoutTemplate == null) {
       final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
-        _createParagraphStyle(TextDirection.rtl),
-      ); // direction doesn't matter, text is just a space
+        _createParagraphStyle(TextDirection.ltr),
+      ); // direction doesn't matter, text is just a space, ltr is more common.
       if (text?.style != null)
         builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
       builder.addText(' ');
       _layoutTemplate = builder.build()
         ..layout(ui.ParagraphConstraints(width: double.infinity));
     }
-    return _layoutTemplate.height;
+    return max(_layoutTemplate.height, _maxLineHeight);
+  }
+
+  // Tracks the max line height to prevent jitter in text box size.
+  //
+  // When a taller-than-existing glyph is typed, prevent the height from
+  // shrinking smaller than it.
+  double _maxLineHeight = 0;
+
+  /// The actual height of the line after layout.
+  ///
+  /// This returns the max height of the line that the character at [offset]
+  /// belongs in. When the paragraph has not been laid out, this returns the
+  /// estimate given by [preferredLineHeight] as a fallback.
+  ///
+  /// The [offset] parameter is the byte index of the text the height should
+  /// be queried at.
+  ///
+  /// This method may produce different heights than [preferredLineHeight] as
+  /// this is the actual height of the laid out text. This means that the height
+  /// of each line can vary, and the height of the each line can vary depending
+  /// on the heights of the characters in the line.
+  ///
+  /// The height of any additional line spacing is not included.
+  double preferredLineHeightAtOffset(int offset) {
+    if (_needsLayout) {
+      return preferredLineHeight;
+    }
+    double height = _getHeightFromUpstream(offset)
+        ?? _getHeightFromDownstream(offset)
+        ?? preferredLineHeight;
+    _maxLineHeight = max(height, _maxLineHeight);
+    return height;
+  }
+
+  double _getHeightFromUpstream(int offset) {
+    final int prevCodeUnit = _text.codeUnitAt(offset - 1);
+    if (prevCodeUnit == null)
+      return null;
+    final int prevRuneOffset = _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
+    final List<TextBox> boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset, boxHeightStyle: ui.BoxHeightStyle.max);
+    if (boxes.isEmpty)
+      return null;
+    return boxes.last.bottom - boxes.last.top;
+  }
+
+  double _getHeightFromDownstream(int offset) {
+    final int nextCodeUnit = _text.codeUnitAt(offset + 1);
+    if (nextCodeUnit == null)
+      return null;
+    final int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
+    final List<TextBox> boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset, boxHeightStyle: ui.BoxHeightStyle.max);
+    if (boxes.isEmpty)
+      return null;
+    return boxes.last.bottom - boxes.last.top;
   }
 
   // Unfortunately, using full precision floating point here causes bad layouts
@@ -416,7 +471,7 @@ class TextPainter {
     if (prevCodeUnit == null)
       return null;
     final int prevRuneOffset = _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
-    final List<TextBox> boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
+    final List<TextBox> boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset, boxHeightStyle: ui.BoxHeightStyle.max);
     if (boxes.isEmpty)
       return null;
     final TextBox box = boxes[0];
@@ -426,11 +481,11 @@ class TextPainter {
   }
 
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
-    final int nextCodeUnit = _text.codeUnitAt(offset - 1);
+    final int nextCodeUnit = _text.codeUnitAt(offset + 1);
     if (nextCodeUnit == null)
       return null;
     final int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
-    final List<TextBox> boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
+    final List<TextBox> boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset, boxHeightStyle: ui.BoxHeightStyle.max);
     if (boxes.isEmpty)
       return null;
     final TextBox box = boxes[0];
