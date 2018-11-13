@@ -255,6 +255,7 @@ BuildApp() {
   StreamOutput " └─Compiling, linking and signing..."
 
   RunCommand popd > /dev/null
+  StreamOutput "all done"
 
   echo "Project ${project_path} built and packaged successfully."
   return 0
