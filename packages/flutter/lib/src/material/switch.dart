@@ -171,9 +171,7 @@ class Switch extends StatefulWidget {
 
   final _SwitchType _switchType;
 
-  /// If set to [DragStartBehavior.start], switching drag behavior will
-  /// begin upon the drag gesture winning the arena. If set to
-  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  /// {@macro flutter.cupertino.switch.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   @override
@@ -337,7 +335,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChanged = onChanged
       ..textDirection = Directionality.of(context)
       ..additionalConstraints = additionalConstraints
-      .._drag.dragStartBehavior = dragStartBehavior
+      ..dragStartBehavior = dragStartBehavior
       ..vsync = vsync;
   }
 }
@@ -438,13 +436,11 @@ class _RenderSwitch extends RenderToggleable {
     markNeedsPaint();
   }
 
-  DragStartBehavior get dragStartBehavior => _dragStartBehavior;
-  DragStartBehavior _dragStartBehavior;
+  DragStartBehavior get dragStartBehavior => _drag.dragStartBehavior;
   set dragStartBehavior(DragStartBehavior value) {
     assert(value != null);
-    if(_dragStartBehavior == value)
+    if(_drag.dragStartBehavior == value)
       return;
-    _dragStartBehavior = value;
     _drag.dragStartBehavior = value;
   }
 

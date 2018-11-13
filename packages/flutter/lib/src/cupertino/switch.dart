@@ -92,9 +92,17 @@ class CupertinoSwitch extends StatefulWidget {
   /// Defaults to [CupertinoColors.activeGreen].
   final Color activeColor;
 
+  /// {@template flutter.cupertino.switch.dragStartBehavior}
+  /// Determines the way that drag start behavior is handled.
+  ///
   /// If set to [DragStartBehavior.start], switching drag behavior will
   /// begin upon the drag gesture winning the arena. If set to
   /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
+  /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
   @override
@@ -156,7 +164,8 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..activeColor = activeColor
       ..onChanged = onChanged
       ..textDirection = Directionality.of(context)
-      ..vsync = vsync;
+      ..vsync = vsync
+      ..dragStartBehavior = dragStartBehavior;
   }
 }
 
@@ -199,7 +208,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd
-      ..dragStartBehavior  = dragStartBehavior;
+      ..dragStartBehavior = dragStartBehavior;
     _positionController = AnimationController(
       duration: _kToggleDuration,
       value: value ? 1.0 : 0.0,
@@ -287,13 +296,11 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
-  DragStartBehavior get dragStartBehavior => _dragStartBehavior;
-  DragStartBehavior _dragStartBehavior;
+  DragStartBehavior get dragStartBehavior => _drag.dragStartBehavior;
   set dragStartBehavior(DragStartBehavior value) {
     assert(value != null);
-    if(_dragStartBehavior == value)
+    if (_drag.dragStartBehavior == value)
       return;
-    _dragStartBehavior = value;
     _drag.dragStartBehavior = value;
   }
 

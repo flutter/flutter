@@ -145,9 +145,15 @@ class Dismissible extends StatefulWidget {
   /// it is positive or negative.
   final double crossAxisEndOffset;
 
+  /// Determines the way that drag start behavior is handled.
+  ///
   /// If set to [DragStartBehavior.start], dismissible closing drag behavior will
   /// begin upon the drag gesture winning the arena. If set to
   /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
   final DragStartBehavior dragStartBehavior;
 
   @override

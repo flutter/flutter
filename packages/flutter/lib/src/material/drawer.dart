@@ -192,9 +192,17 @@ class DrawerController extends StatefulWidget {
   /// Optional callback that is called when a [Drawer] is opened or closed.
   final DrawerCallback drawerCallback;
 
+  /// {@template flutter.material.drawer.dragStartBehavior}
+  /// Determines the way that drag start behavior is handled.
+  ///
   /// If set to [DragStartBehavior.start], drawer opening drag behavior will
   /// begin upon the drag gesture winning the arena. If set to
   /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
+  /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
   @override

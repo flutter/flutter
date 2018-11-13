@@ -662,9 +662,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// is null then the text style of the theme's body2 definition is used.
   final TextStyle unselectedLabelStyle;
 
-  /// If set to [DragStartBehavior.start], scrolling drag behavior will
-  /// begin upon the drag gesture winning the arena. If set to
-  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   /// A size whose height depends on if the tabs have both icons and text.
@@ -1050,7 +1048,7 @@ class TabBarView extends StatefulWidget {
   /// Defaults to matching platform conventions.
   final ScrollPhysics physics;
 
-  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   @override

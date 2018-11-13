@@ -264,9 +264,15 @@ class TextSelectionOverlay {
   /// text field.
   final TextSelectionDelegate selectionDelegate;
 
+  /// Determines the way that drag start behavior is handled.
+  ///
   /// If set to [DragStartBehavior.start], handle drag behavior will
   /// begin upon the drag gesture winning the arena. If set to
   /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
   final DragStartBehavior dragStartBehavior;
 
   /// Controls the fade-in animations.

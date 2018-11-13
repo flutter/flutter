@@ -869,9 +869,7 @@ class Scaffold extends StatefulWidget {
   /// [AppBar.primary], is true.
   final bool primary;
 
-  /// If set to [DragStartBehavior.start], drawer opening drag behavior will
-  /// begin upon the drag gesture winning the arena. If set to
-  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  /// {@macro flutter.material.drawer.dragStartBehavior}
   final DragStartBehavior drawerDragStartBehavior;
 
   /// The state from the closest instance of this class that encloses the given context.

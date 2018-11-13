@@ -280,11 +280,9 @@ class DayPicker extends StatelessWidget {
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate selectableDayPredicate;
 
-  /// {@template material.date_picker]
   /// If set to [DragStartBehavior.start], picker drag behavior will begin upon the
   /// drag gesture winning the arena. If set to [DragStartBehavior.down] it will
   /// begin when a down event is first detected.
-  /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
   /// Builds widgets showing abbreviated days of week. The first widget in the
@@ -531,7 +529,7 @@ class MonthPicker extends StatefulWidget {
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate selectableDayPredicate;
 
-  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   @override
@@ -788,7 +786,7 @@ class YearPicker extends StatefulWidget {
   /// The latest date the user is permitted to pick.
   final DateTime lastDate;
 
-  /// {@macro flutter.gestures.recognizer.dragStartBehavior}
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   @override
