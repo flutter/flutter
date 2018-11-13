@@ -29,7 +29,6 @@ class _FuchsiaLogReader extends DeviceLogReader {
   _FuchsiaLogReader(this._device, [this._app]);
 
   static final RegExp _flutterLogOutput = RegExp(r'INFO: \w+\(flutter\): ');
-  static final RegExp _utcDateOutput = RegExp(r'\d+\-\d+\-\d+ \d+:\d+:\d+');
 
   FuchsiaDevice _device;
   ApplicationPackage _app;
@@ -43,7 +42,7 @@ class _FuchsiaLogReader extends DeviceLogReader {
     return _logLines;
   }
 
-  Stream<String> _processLogs(Stream<String> lines) async* {
+  Stream<String> _processLogs(Stream<String> lines) {
     // Get the starting time of the log processor to filter logs from before
     // the process attached.
     final DateTime startTime = systemClock.now();
@@ -52,24 +51,47 @@ class _FuchsiaLogReader extends DeviceLogReader {
     final RegExp matchRegExp = _app == null
       ? _flutterLogOutput
       : RegExp('INFO: ${_app.name}\\(flutter\\): ');
-    await for (String line in lines.where(matchRegExp.hasMatch)) {
-      // Read out the date string from the log and compare it to the current time:
-      // Example: 2018-11-09 01:27:45
-      final String rawDate = _utcDateOutput.firstMatch(line)?.group(0);
-      if (rawDate == null) {
-        continue;
-      }
-      final DateTime logTime = DateTime.parse(rawDate);
-      if (logTime.millisecondsSinceEpoch < startTime.millisecondsSinceEpoch) {
-        continue;
-      }
-      // Format log into a useful string:
-      yield '[${logTime.toLocal()}] Flutter: ${line.split(matchRegExp).last}';
-    }
+    return Stream<String>.eventTransformed(
+      lines,
+      (Sink<String> outout) => _FuchsiaLogSink(outout, matchRegExp, startTime),
+    );
   }
 
   @override
   String toString() => name;
+}
+
+class _FuchsiaLogSink implements EventSink<String> {
+  _FuchsiaLogSink(this._outputSink, this._matchRegExp, this._startTime);
+
+  static final RegExp _utcDateOutput = RegExp(r'\d+\-\d+\-\d+ \d+:\d+:\d+');
+  final EventSink<String> _outputSink;
+  final RegExp _matchRegExp;
+  final DateTime _startTime;
+
+  @override
+  void add(String line) {
+    if (!_matchRegExp.hasMatch(line)) {
+      return;
+    }
+    final String rawDate = _utcDateOutput.firstMatch(line)?.group(0);
+    if (rawDate == null) {
+      return;
+    }
+    final DateTime logTime = DateTime.parse(rawDate);
+    if (logTime.millisecondsSinceEpoch < _startTime.millisecondsSinceEpoch) {
+      return;
+    }
+    _outputSink.add('[${logTime.toLocal()}] Flutter: ${line.split(_matchRegExp).last}');
+  }
+
+  @override
+  void addError(Object error, [StackTrace stackTrace]) {
+    _outputSink.addError(error, stackTrace);
+  }
+
+  @override
+  void close() { _outputSink.close(); }
 }
 
 class FuchsiaDevices extends PollingDeviceDiscovery {
