@@ -279,6 +279,7 @@ void main() {
         'ios/Classes/FlutterProjectPlugin.m',
         'ios/Classes/SwiftFlutterProjectPlugin.swift',
         'lib/flutter_project.dart',
+        '.idea/libraries/KotlinJavaRuntime.xml',
       ],
       unexpectedPaths: <String>[
         'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
