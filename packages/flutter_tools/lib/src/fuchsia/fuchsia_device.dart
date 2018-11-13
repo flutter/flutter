@@ -12,6 +12,7 @@ import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -144,7 +145,10 @@ class FuchsiaDevice extends Device {
   FuchsiaDevice(String id, { this.name }) : super(id);
 
   @override
-  bool get supportsHotMode => true;
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => false;
 
   @override
   final String name;
@@ -196,7 +200,7 @@ class FuchsiaDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'Fuchsia';
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader ??= _FuchsiaLogReader(this);
+  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader ??= _FuchsiaLogReader(this, app);
   _FuchsiaLogReader _logReader;
 
   @override
@@ -321,6 +325,13 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       await serverSocket.close();
     return port;
   }
+}
+
+class FuchsiaModulePackage extends ApplicationPackage {
+  FuchsiaModulePackage({@required this.name}) : super(id: name);
+
+  @override
+  final String name;
 }
 
 /// Parses output from `dart.services` output on a fuchsia device.

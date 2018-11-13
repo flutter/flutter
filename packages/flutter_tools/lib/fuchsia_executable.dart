@@ -16,6 +16,7 @@ import 'src/commands/attach.dart';
 import 'src/commands/devices.dart';
 import 'src/commands/shell_completion.dart';
 import 'src/fuchsia/fuchsia_sdk.dart';
+import 'src/run_hot.dart';
 import 'src/runner/flutter_command.dart';
 
  final ArgParser parser = ArgParser.allowAnything()
@@ -69,6 +70,8 @@ Future<void> main(List<String> args) async {
         parent: CachedArtifacts(),
         frontendServer: frontendServer,
         engineDartBinary: dartSdk,
-      )
+      ),
+      HotRunnerConfig: () => HotRunnerConfig()
+        ..computeDartDependencies = false,
      });
 }

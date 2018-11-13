@@ -469,7 +469,10 @@ class AndroidDevice extends Device {
   }
 
   @override
-  bool get supportsHotMode => true;
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => true;
 
   @override
   Future<bool> stopApp(ApplicationPackage app) {
