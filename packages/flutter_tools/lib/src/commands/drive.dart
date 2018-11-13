@@ -296,28 +296,28 @@ Future<void> _runTests(List<String> testArgs, String observatoryUri, bool useTes
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
   final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
   final String testScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'test', 'drive_executable.dart');
-  int result;
+  final List<String> command = <String>[dartVmPath]
+    ..addAll(dartVmFlags);
   if (useTestCore) {
-    result = await runCommandAndStreamOutput(
-      <String>[dartVmPath]
-        ..addAll(dartVmFlags)
-        ..addAll(<String>['--packages=${PackageMap.globalPackagesPath}', testScript])
-        ..addAll(testArgs)
-        ..add('-rexpanded'),
-      environment: <String, String>{ 'VM_SERVICE_URL': observatoryUri });
+    command
+      ..addAll(<String>['--packages=${PackageMap.globalPackagesPath}', testScript])
+      ..addAll(testArgs)
+      ..add('-rexpanded');
   } else {
-    result = await runCommandAndStreamOutput(
-      <String>[dartVmPath]
-        ..addAll(dartVmFlags)
-        ..addAll(testArgs)
-        ..addAll(<String>[
-          '--packages=${PackageMap.globalPackagesPath}',
-           '-rexpanded',
-        ]),
-      environment: <String, String>{ 'VM_SERVICE_URL': observatoryUri });
+    command
+      ..addAll(testArgs)
+      ..addAll(<String>[
+        '--packages=${PackageMap.globalPackagesPath}',
+        '-rexpanded',
+      ]);
   }
-  if (result != 0)
+  final int result = await runCommandAndStreamOutput(
+    command,
+    environment: <String, String>{ 'VM_SERVICE_URL': observatoryUri },
+  );
+  if (result != 0) {
     throwToolExit('Driver tests failed: $result', exitCode: result);
+  }
 }
 
 
