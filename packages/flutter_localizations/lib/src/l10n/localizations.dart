@@ -6108,7 +6108,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get nextPageTooltip => r'Halaman berikutnya';
 
   @override
-  String get okButtonLabel => r'Oke';
+  String get okButtonLabel => r'OKE';
 
   @override
   String get openAppDrawerTooltip => r'Buka menu navigasi';
