@@ -66,8 +66,9 @@ class DriveCommand extends RunCommandBase {
         valueHelp: 'path',
       )
       ..addFlag('use-test-core',
-        help: 'Run the driver script through the test_core entrypoing instead of'
-              ' invoking it directly.',
+        help: 'Run the driver script through the package:test_core entrypoint instead of'
+              ' invoking it directly. This is only required if the driver script does not'
+              ' import package:test.',
         defaultsTo: false,
         negatable: true,
       );
