@@ -141,6 +141,7 @@ class Stepper extends StatefulWidget {
     this.onStepContinue,
     this.onStepCancel,
     this.controlsBuilder,
+    this.useControl,
   }) : assert(steps != null),
        assert(type != null),
        assert(currentStep != null),
@@ -221,6 +222,11 @@ class Stepper extends StatefulWidget {
   /// )
   /// ```
   final ControlsWidgetBuilder controlsBuilder;
+
+  /// The configuration to determine whether Stepper has default controlls.
+  ///
+  /// If true, the 'continue' and 'cancel' button will be build.
+  final bool useControl;
 
   @override
   _StepperState createState() => _StepperState();
@@ -547,10 +553,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               bottom: 24.0,
             ),
             child: Column(
-              children: <Widget>[
-                widget.steps[index].content,
-                _buildVerticalControls(),
-              ],
+              children: _buildVerticalControlsBody(index),
             ),
           ),
           firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
@@ -561,6 +564,12 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         ),
       ],
     );
+  }
+
+  List<Widget> _buildVerticalControlsBody(int index) {
+    return widget.useControl
+        ? <Widget>[widget.steps[index].content, _buildVerticalControls()]
+        : <Widget>[Row(children: <Widget>[Container(child: widget.steps[index].content)])];
   }
 
   Widget _buildVertical() {
@@ -652,19 +661,28 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         Expanded(
           child: ListView(
             padding: const EdgeInsets.all(24.0),
-            children: <Widget>[
-              AnimatedSize(
-                curve: Curves.fastOutSlowIn,
-                duration: kThemeAnimationDuration,
-                vsync: this,
-                child: widget.steps[widget.currentStep].content,
-              ),
-              _buildVerticalControls(),
-            ],
+            children: _buildHorizontalBody(),
           ),
         ),
       ],
     );
+  }
+
+  List<Widget> _buildHorizontalBody() {
+    final List<Widget> horizontalBody = <Widget>[
+      AnimatedSize(
+        curve: Curves.fastOutSlowIn,
+        duration: kThemeAnimationDuration,
+        vsync: this,
+        child: widget.steps[widget.currentStep].content,
+      )
+    ];
+
+    if (widget.useControl) {
+      horizontalBody.add(_buildVerticalControls());
+    }
+
+    return horizontalBody;
   }
 
   @override
