@@ -1054,9 +1054,16 @@ class ThemeData extends Diagnosticable {
 /// harmonize the [CupertinoTheme] with the material theme's colors and text
 /// styles.
 ///
-/// For a [CupertinoThemeData] whose unspecified attributes default to iOS
-/// defaults rather than to an ancestor Material [ThemeData], insert another
-/// [CupertinoTheme] as the `child` of the Material [Theme].
+/// In the most basic case, [ThemeData]'s `cupertinoOverrideTheme` is null and
+/// and descendant Cupertino widgets' styling is derived from the Material theme.
+///
+/// To override individual parts of the Material-derived Cupertino styling,
+/// `cupertinoOverrideTheme`'s construction parameters can be used.
+///
+/// To completely decouple the Cupertino styling from Material theme derivation,
+/// another [CupertinoTheme] widget can be inserted as a descendant of the
+/// Material [Theme]. On a [MaterialApp], this can be done using the `builder`
+/// parameter on the constructor.
 ///
 /// See also:
 ///
@@ -1069,7 +1076,6 @@ class ThemeData extends Diagnosticable {
 // _is_ a CupertinoThemeData with partially altered behavior. e.g. its textTheme
 // is from the superclass and based on the primaryColor but the primaryColor
 // comes from the Material theme unless overridden.
-@immutable
 class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   /// Create a [MaterialBasedCupertinoThemeData] based on a Material [ThemeData]
   /// and its `cupertinoOverrideTheme`.

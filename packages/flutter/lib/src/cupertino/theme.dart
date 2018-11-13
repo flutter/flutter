@@ -126,7 +126,6 @@ class CupertinoThemeData extends Diagnosticable {
 
   bool get _isLight => brightness == Brightness.light;
 
-  final Brightness _brightness;
   /// The general brightness theme of the [CupertinoThemeData].
   ///
   /// Affects all other theme properties when unspecified. Defaults to
@@ -138,8 +137,8 @@ class CupertinoThemeData extends Diagnosticable {
   /// Reading this property from [CupertinoTheme.of] will create a dependency
   /// from the [BuildContext] to changes in this property.
   Brightness get brightness => _brightness ?? Brightness.light;
+  final Brightness _brightness;
 
-  final Color _primaryColor;
   /// A color used on interactive elements of the theme.
   ///
   /// This color is generally used on text and icons in buttons and tappable
@@ -158,8 +157,8 @@ class CupertinoThemeData extends Diagnosticable {
     return _primaryColor ??
         (_isLight ? CupertinoColors.activeBlue : CupertinoColors.activeOrange);
   }
+  final Color _primaryColor;
 
-  final Color _primaryContrastingColor;
   /// A color used for content that must contrast against a [primaryColor] background.
   ///
   /// For example, this color is used for a [CupertinoButton]'s text and icons
@@ -174,8 +173,8 @@ class CupertinoThemeData extends Diagnosticable {
     return _primaryContrastingColor ??
         (_isLight ? CupertinoColors.white : CupertinoColors.black);
   }
+  final Color _primaryContrastingColor;
 
-  final CupertinoTextTheme _textTheme;
   /// Text styles used by Cupertino widgets.
   ///
   /// Derived from [brightness] and [primaryColor] if unspecified, including
@@ -190,8 +189,8 @@ class CupertinoThemeData extends Diagnosticable {
       primaryColor: primaryColor,
     );
   }
+  final CupertinoTextTheme _textTheme;
 
-  final Color _barBackgroundColor;
   /// Background color of the top nav bar and bottom tab bar.
   ///
   /// Defaults to a light gray or a dark gray translucent color depending
@@ -203,8 +202,8 @@ class CupertinoThemeData extends Diagnosticable {
     return _barBackgroundColor ??
         (_isLight ? _kDefaultBarLightBackgroundColor : _kDefaultBarDarkBackgroundColor);
   }
+  final Color _barBackgroundColor;
 
-  final Color _scaffoldBackgroundColor;
   /// Background color of the scaffold.
   ///
   /// Defaults to white or black depending on the [brightness].
@@ -215,8 +214,8 @@ class CupertinoThemeData extends Diagnosticable {
     return _scaffoldBackgroundColor ??
         (_isLight ? CupertinoColors.white : CupertinoColors.black);
   }
+  final Color _scaffoldBackgroundColor;
 
-  final Color _tableBackgroundColor;
   /// Background color of a table view behind cell groups.
   ///
   /// Defaults to a [CupertinoColors.extraLightBackgroundGray] or
@@ -228,6 +227,7 @@ class CupertinoThemeData extends Diagnosticable {
     return _tableBackgroundColor ??
         (_isLight ? CupertinoColors.extraLightBackgroundGray : CupertinoColors.darkBackgroundGray);
   }
+  final Color _tableBackgroundColor;
 
   /// Return an instance of the [CupertinoThemeData] whose property getters
   /// only return the construction time specifications with no derived values.
@@ -284,7 +284,6 @@ class CupertinoThemeData extends Diagnosticable {
   }
 }
 
-@immutable
 class _RawCupertinoThemeData extends CupertinoThemeData {
   const _RawCupertinoThemeData(
     this.brightness,
