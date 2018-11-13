@@ -509,6 +509,8 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
 
   // actions
   void _tappedContinue() {
+
+    // TODO route to the actual gallery
     if (isInitialScreen) {
       // Navigator.pushReplacement(
       //   context,

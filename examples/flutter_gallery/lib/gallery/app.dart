@@ -110,7 +110,6 @@ class _GalleryAppState extends State<GalleryApp> {
 
   @override
   Widget build(BuildContext context) {
-
     // TODO conditionally show - persistent settings?
     const Widget welcome = WarmWelcomeScreen(isInitialScreen: true);
 
@@ -148,8 +147,8 @@ class _GalleryAppState extends State<GalleryApp> {
           child: _applyTextScaleFactor(child),
         );
       },
-      home: welcome,
-      // home: home,
+      // home: welcome,
+      home: home,
     );
   }
 }
