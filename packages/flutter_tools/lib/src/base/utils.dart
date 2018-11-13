@@ -8,7 +8,6 @@ import 'dart:math' show Random, max;
 
 import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
-import 'package:quiver/time.dart';
 
 import '../globals.dart';
 import 'context.dart';
@@ -250,8 +249,6 @@ Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
   final Map<dynamic, dynamic> map = untyped;
   return map.cast<String, dynamic>();
 }
-
-Clock get clock => context[Clock];
 
 typedef AsyncCallback = Future<void> Function();
 

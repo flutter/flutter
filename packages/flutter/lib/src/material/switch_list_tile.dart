@@ -9,6 +9,10 @@ import 'switch.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// void setState(VoidCallback fn) { }
+// bool _lights;
+
 /// A [ListTile] with a [Switch]. In other words, a switch with a label.
 ///
 /// The entire list tile is interactive: tapping anywhere in the tile toggles
@@ -35,7 +39,7 @@ import 'theme_data.dart';
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This widget shows a switch that, when toggled, changes the state of a [bool]
 /// member field called `_lights`.
@@ -48,6 +52,7 @@ import 'theme_data.dart';
 ///   secondary: const Icon(Icons.lightbulb_outline),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

@@ -78,7 +78,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
               Builder(
                 builder: (BuildContext context) {
                   return IconButton(
-                    icon: const Icon(Icons.library_books),
+                    icon: const Icon(Icons.library_books, semanticLabel: 'Show documentation'),
                     onPressed: () => _showApiDocumentation(context),
                   );
                 },

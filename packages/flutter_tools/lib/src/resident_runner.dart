@@ -35,12 +35,15 @@ class FlutterDevice {
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.viewFilter,
+    TargetModel targetModel = TargetModel.flutter,
     ResidentCompiler generator,
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
          trackWidgetCreation: trackWidgetCreation,
-         fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
+         fileSystemRoots: fileSystemRoots,
+         fileSystemScheme: fileSystemScheme,
+         targetModel: targetModel,
        );
 
   final Device device;
@@ -79,15 +82,13 @@ class FlutterDevice {
     vmServices = localVmServices;
   }
 
-  Future<void> refreshViews() {
+  Future<void> refreshViews() async {
     if (vmServices == null || vmServices.isEmpty)
       return Future<void>.value(null);
     final List<Future<void>> futures = <Future<void>>[];
     for (VMService service in vmServices)
-      futures.add(service.vm.refreshViews());
-    final Completer<void> completer = Completer<void>();
-    Future.wait(futures).whenComplete(() => completer.complete(null)); // ignore: unawaited_futures
-    return completer.future;
+      futures.add(service.vm.refreshViews(waitForViews: true));
+    await Future.wait(futures);
   }
 
   List<FlutterView> get views {
@@ -459,6 +460,17 @@ abstract class ResidentRunner {
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
 
+  /// Whether this runner can hot restart.
+  ///
+  /// To prevent scenarios where only a subset of devices are hot restarted,
+  /// the runner requires that all attached devices can support hot restart
+  /// before enabling it.
+  bool get canHotRestart {
+    return flutterDevices.every((FlutterDevice device) {
+      return device.device.supportsHotRestart;
+    });
+  }
+
   /// Start the app and keep the process running during its lifetime.
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
@@ -487,8 +499,10 @@ abstract class ResidentRunner {
   }
 
   Future<void> refreshViews() async {
+    final List<Future<void>> futures = <Future<void>>[];
     for (FlutterDevice device in flutterDevices)
-      await device.refreshViews();
+      futures.add(device.refreshViews());
+    await Future.wait(futures);
   }
 
   Future<void> _debugDumpApp() async {

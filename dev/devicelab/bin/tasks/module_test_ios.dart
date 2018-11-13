@@ -14,7 +14,6 @@ import 'package:path/path.dart' as path;
 /// adding Flutter to an existing iOS app.
 Future<void> main() async {
   await task(() async {
-
     section('Create Flutter module project');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
@@ -23,7 +22,12 @@ Future<void> main() async {
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
-          options: <String>['--org', 'io.flutter.devicelab', '--template=module', 'hello'],
+          options: <String>[
+            '--org',
+            'io.flutter.devicelab',
+            '--template=module',
+            'hello'
+          ],
         );
       });
       await prepareProvisioningCertificates(projectDir.path);
@@ -127,11 +131,51 @@ Future<void> main() async {
       if (!editableHostAppBuilt) {
         return TaskResult.failure('Failed to build editable host .app');
       }
+
+      section('Add to existing iOS app');
+
+      final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
+      mkdir(hostApp);
+      recursiveCopy(
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_host_app')),
+        hostApp,
+      );
+
+      await inDirectory(hostApp, () async {
+        await exec('pod', <String>['install']);
+        await exec(
+          'xcodebuild',
+          <String>[
+            '-workspace',
+            'Host.xcworkspace',
+            '-scheme',
+            'Host',
+            '-configuration',
+            'Debug',
+            'CODE_SIGNING_ALLOWED=NO',
+            'CODE_SIGNING_REQUIRED=NO',
+            'CODE_SIGNING_IDENTITY=""',
+            'EXPANDED_CODE_SIGN_IDENTITY=""',
+            'CONFIGURATION_BUILD_DIR=${tempDir.path}',
+          ],
+        );
+      });
+
+      final bool existingAppBuilt = exists(File(path.join(
+        tempDir.path,
+        'Host.app',
+        'Host',
+      )));
+
+      if (!existingAppBuilt) {
+        return TaskResult.failure('Failed to build existing app .app');
+      }
+
       return TaskResult.success(null);
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
-      //rmTree(tempDir);
+      rmTree(tempDir);
     }
   });
 }

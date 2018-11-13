@@ -81,10 +81,10 @@ double getBorderWeight(WidgetTester tester) => getBorderSide(tester)?.width;
 
 Color getBorderColor(WidgetTester tester) => getBorderSide(tester)?.color;
 
-double getHintOpacity(WidgetTester tester) {
+double getOpacity(WidgetTester tester, String textValue) {
   final FadeTransition opacityWidget = tester.widget<FadeTransition>(
     find.ancestor(
-      of: find.text('hint'),
+      of: find.text(textValue),
       matching: find.byType(FadeTransition),
     ).first
   );
@@ -304,7 +304,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
-    expect(getHintOpacity(tester), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
 
@@ -324,10 +324,10 @@ void main() {
     // The animation's duration is 200ms.
     {
       await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getHintOpacity(tester);
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
       expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
       await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getHintOpacity(tester);
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
       expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
     }
 
@@ -339,7 +339,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 28.0);
     expect(tester.getBottomLeft(find.text('hint')).dy, 44.0);
-    expect(getHintOpacity(tester), 1.0);
+    expect(getOpacity(tester, 'hint'), 1.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
 
@@ -358,10 +358,10 @@ void main() {
     // The animation's duration is 200ms.
     {
       await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getHintOpacity(tester);
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
       expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
       await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getHintOpacity(tester);
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
       expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
     }
 
@@ -373,7 +373,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 28.0);
     expect(tester.getBottomLeft(find.text('hint')).dy, 44.0);
-    expect(getHintOpacity(tester), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
   });
@@ -413,7 +413,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 16.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 32.0);
-    expect(getHintOpacity(tester), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 1.0);
 
@@ -435,7 +435,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 8.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 20.0);
-    expect(getHintOpacity(tester), 1.0);
+    expect(getOpacity(tester, 'hint'), 1.0);
     expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 2.0);
   });
@@ -1167,7 +1167,7 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getTopLeft(find.text('text')).dy, 0.0);
-    expect(getHintOpacity(tester), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderWeight(tester), 0.0);
 
     // The hint should appear
@@ -1270,6 +1270,58 @@ void main() {
     expect(getBorderWeight(tester), 1.0);
     expect(tester.getTopLeft(find.text('helper')), const Offset(12.0, 64.0));
     expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 64.0));
+  });
+
+  testWidgets('InputDecoration outline shape with no border and no floating placeholder', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+      // isFocused: false (default)
+      isEmpty: true,
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(borderSide: BorderSide.none),
+        hasFloatingPlaceholder: false,
+        labelText: 'label',
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 56dps. Layout is:
+    //   20 - top padding
+    //   16 - label (ahem font size 16dps)
+    //   20 - bottom padding
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
+    expect(getBorderBottom(tester), 56.0);
+    expect(getBorderWeight(tester), 0.0);
+  });
+
+  testWidgets('InputDecoration outline shape with no border and no floating placeholder not empty', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(borderSide: BorderSide.none),
+          hasFloatingPlaceholder: false,
+          labelText: 'label',
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 56dps. Layout is:
+    //   20 - top padding
+    //   16 - label (ahem font size 16dps)
+    //   20 - bottom padding
+    //    expect(tester.widget<Text>(find.text('prefix')).style.color, prefixStyle.color);
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
+    expect(getBorderBottom(tester), 56.0);
+    expect(getBorderWeight(tester), 0.0);
+
+    // The label should not be seen.
+    expect(getOpacity(tester, 'label'), 0.0);
   });
 
   testWidgets('InputDecorationTheme outline border', (WidgetTester tester) async {
@@ -1878,4 +1930,46 @@ void main() {
     await tester.pumpAndSettle(); // border changes are animated
     expect(getBorder(tester), disabledBorder);
   });
+
+  test('InputBorder equality', () {
+    // OutlineInputBorder's equality is defined by the borderRadius, borderSide, & gapPadding
+    const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      borderSide: BorderSide(color: Colors.blue),
+      gapPadding: 32.0,
+    );
+    expect(outlineInputBorder, const OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      gapPadding: 32.0,
+    ));
+    expect(outlineInputBorder, isNot(const OutlineInputBorder()));
+
+    // UnderlineInputBorder's equality is defined only by the borderSide
+    const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue));
+    expect(underlineInputBorder, const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)));
+    expect(underlineInputBorder, isNot(const UnderlineInputBorder()));
+  });
+
+
+  test('InputBorder hashCodes', () {
+    // OutlineInputBorder's hashCode is defined by the borderRadius, borderSide, & gapPadding
+    const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      borderSide: BorderSide(color: Colors.blue),
+      gapPadding: 32.0,
+    );
+    expect(outlineInputBorder.hashCode, const OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      gapPadding: 32.0,
+    ).hashCode);
+    expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder().hashCode));
+
+    // UnderlineInputBorder's hashCode is defined only by the borderSide
+    const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue));
+    expect(underlineInputBorder.hashCode, const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)).hashCode);
+    expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder().hashCode));
+  });
+
 }
