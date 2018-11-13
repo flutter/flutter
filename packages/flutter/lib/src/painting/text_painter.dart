@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextBox, BoxHeightStyle;
 import 'dart:math' show max;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, BoxHeightStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -272,7 +272,7 @@ class TextPainter {
     if (_needsLayout) {
       return preferredLineHeight;
     }
-    double height = _getHeightFromUpstream(offset)
+    final double height = _getHeightFromUpstream(offset)
         ?? _getHeightFromDownstream(offset)
         ?? preferredLineHeight;
     _maxLineHeight = max(height, _maxLineHeight);
@@ -481,7 +481,7 @@ class TextPainter {
   }
 
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
-    final int nextCodeUnit = _text.codeUnitAt(offset + 1);
+    final int nextCodeUnit = _text.codeUnitAt(offset - 1);
     if (nextCodeUnit == null)
       return null;
     final int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;

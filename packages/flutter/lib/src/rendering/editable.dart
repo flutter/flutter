@@ -333,7 +333,7 @@ class RenderEditable extends RenderBox {
     // The caret offset gives a location in the upper left hand corner of
     // the caret so the middle of the line above is a half line above that
     // point and the line below is 1.5 lines below that point.
-    final double plh = _textPainter.preferredLineHeight;
+    final double plh = _preferredCursorLineHeight;
     final double verticalOffset = upArrow ? -0.5 * plh : 1.5 * plh;
 
     final Offset caretOffset = _textPainter.getOffsetForCaret(TextPosition(offset: _extentOffset), _caretPrototype);
@@ -948,7 +948,7 @@ class RenderEditable extends RenderBox {
     if (selection.isCollapsed) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       final Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
-      final Offset start = Offset(0.0, preferredLineHeight) + caretOffset + paintOffset;
+      final Offset start = Offset(0.0, _preferredCursorLineHeight) + caretOffset + paintOffset;
       return <TextSelectionPoint>[TextSelectionPoint(start, null)];
     } else {
       final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
@@ -990,7 +990,7 @@ class RenderEditable extends RenderBox {
     _layoutText(constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
     // This rect is the same as _caretPrototype but without the vertical padding.
-    return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight).shift(caretOffset + _paintOffset);
+    return Rect.fromLTWH(0.0, 0.0, cursorWidth, _preferredCursorLineHeight).shift(caretOffset + _paintOffset);
   }
 
   @override
@@ -1143,7 +1143,7 @@ class RenderEditable extends RenderBox {
   @override
   void performLayout() {
     _layoutText(constraints.maxWidth);
-    _caretPrototype = Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
+    _caretPrototype = Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, _preferredCursorLineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
