@@ -85,7 +85,7 @@ class RefreshIndicator extends StatefulWidget {
   /// The [onRefresh], [child], and [notificationPredicate] arguments must be
   /// non-null. The default
   /// [displacement] is 40.0 logical pixels.
-  ///   
+  ///
   /// The [semanticsEnabled] argument must not be null. It defaults to true.
   /// It may be set to false if it is used in a way that is primarily meant for
   /// visual flair and would not add value if read by screen reading software.
