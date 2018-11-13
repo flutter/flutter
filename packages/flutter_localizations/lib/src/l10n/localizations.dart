@@ -132,6 +132,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'الصفحة السابقة';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => r'$remainingCount أحرف متبقية';
 
   @override
@@ -331,6 +334,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Предишната страница';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -534,6 +540,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Prethodna stranica';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => r'Preostala su $remainingCount znaka';
 
   @override
@@ -733,6 +742,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Pàgina anterior';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -936,6 +948,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Předchozí stránka';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => r'Zbývají $remainingCount znaky';
 
   @override
@@ -1137,6 +1152,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Forrige side';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -1336,6 +1354,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Vorherige Seite';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -1569,6 +1590,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Προηγούμενη σελίδα';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -1768,6 +1792,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Previous page';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Refresh';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -2272,6 +2299,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Página anterior';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -4098,6 +4128,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Eelmine leht';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -4297,6 +4330,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'صفحه قبل';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -4500,6 +4536,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Edellinen sivu';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -4701,6 +4740,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Nakaraang page';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -4900,6 +4942,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Page précédente';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -5130,6 +5175,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Vorherige Seite';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -5329,6 +5377,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'הדף הקודם';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -5532,6 +5583,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'पिछला पेज';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -5731,6 +5785,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Prethodna stranica';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => r'Preostala su $remainingCount znaka';
@@ -5934,6 +5991,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Előző oldal';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -6133,6 +6193,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Halaman sebelumnya';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -6336,6 +6399,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Pagina precedente';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -6535,6 +6601,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'前のページ';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -6738,6 +6807,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'ទំព័រមុន';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -6937,6 +7009,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'이전 페이지';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -7140,6 +7215,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Ankstesnis puslapis';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => r'Liko $remainingCount simboliai';
 
   @override
@@ -7339,6 +7417,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Iepriekšējā lapa';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -7542,6 +7623,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Өмнөх хуудас';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -7741,6 +7825,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Halaman sebelumnya';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -7944,6 +8031,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Forrige side';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -8143,6 +8233,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Vorige pagina';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -8346,6 +8439,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Poprzednia strona';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => r'Jeszcze $remainingCount znaki';
 
   @override
@@ -8547,6 +8643,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'مخکینی مخ';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -8746,6 +8845,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Página anterior';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -9033,6 +9135,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Pagina anterioară';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => r'$remainingCount caractere rămase';
 
   @override
@@ -9232,6 +9337,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Предыдущая страница';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => r'Осталось $remainingCount символа';
@@ -9435,6 +9543,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Predchádzajúca stránka';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => r'Zostávajú $remainingCount znaky';
 
   @override
@@ -9636,6 +9747,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Prejšnja stran';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => r'Še $remainingCount znaki';
 
   @override
@@ -9835,6 +9949,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Претходна страница';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => r'Преостала су $remainingCount знака';
@@ -10239,6 +10356,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Föregående sida';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -10438,6 +10558,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'หน้าก่อน';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -10641,6 +10764,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Nakaraang page';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -10840,6 +10966,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Önceki sayfa';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -11043,6 +11172,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Попередня сторінка';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => r'Залишилося $remainingCount символи';
 
   @override
@@ -11242,6 +11374,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'گزشتہ صفحہ';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -11445,6 +11580,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Trang trước';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
@@ -11644,6 +11782,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'上一页';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;

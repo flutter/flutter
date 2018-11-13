@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import 'material_localizations.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
 
@@ -100,13 +101,12 @@ class RefreshIndicator extends StatefulWidget {
     this.backgroundColor,
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.semanticsEnabled = true,
-    this.semanticsLabel = 'Refresh',
+    this.semanticsLabel,
     this.semanticsValue,
   }) : assert(child != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
        assert(semanticsEnabled != null),
-       assert(!semanticsEnabled || semanticsLabel != null || semanticsValue != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -464,7 +464,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                   builder: (BuildContext context, Widget child) {
                     return RefreshProgressIndicator(
                       semanticsEnabled: widget.semanticsEnabled,
-                      semanticsLabel: widget.semanticsLabel,
+                      semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
                       semanticsValue: widget.semanticsValue,
                       value: showIndeterminateIndicator ? null : _value.value,
                       valueColor: _valueColor,
