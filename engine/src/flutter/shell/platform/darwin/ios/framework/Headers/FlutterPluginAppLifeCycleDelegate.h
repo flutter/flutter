@@ -86,6 +86,21 @@ FLUTTER_EXPORT
           fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
 
 /**
+ * Calls all plugins registered for `UIApplicationDelegate` callbacks.
+ */
+- (void)application:(UIApplication*)application
+    didReceiveLocalNotification:(UILocalNotification*)notification;
+
+/**
+ * Calls all plugins registered for `UNUserNotificationCenterDelegate` callbacks.
+ */
+- (void)userNotificationCenter:(UNUserNotificationCenter*)center
+       willPresentNotification:(UNNotification*)notification
+         withCompletionHandler:
+             (void (^)(UNNotificationPresentationOptions options))completionHandler
+    API_AVAILABLE(ios(10));
+
+/**
  * Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until
  * some plugin handles the request.
  *

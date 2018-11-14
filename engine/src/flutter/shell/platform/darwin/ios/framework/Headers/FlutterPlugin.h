@@ -6,6 +6,7 @@
 #define FLUTTER_FLUTTERPLUGIN_H_
 
 #import <UIKit/UIKit.h>
+#import <UserNotifications/UNUserNotificationCenter.h>
 
 #include "FlutterBinaryMessenger.h"
 #include "FlutterChannels.h"
@@ -115,6 +116,21 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)application:(UIApplication*)application
     didReceiveRemoteNotification:(NSDictionary*)userInfo
           fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
+
+/**
+ * Calls all plugins registered for `UIApplicationDelegate` callbacks.
+ */
+- (void)application:(UIApplication*)application
+    didReceiveLocalNotification:(UILocalNotification*)notification;
+
+/**
+ * Calls all plugins registered for `UNUserNotificationCenterDelegate` callbacks.
+ */
+- (void)userNotificationCenter:(UNUserNotificationCenter*)center
+       willPresentNotification:(UNNotification*)notification
+         withCompletionHandler:
+             (void (^)(UNNotificationPresentationOptions options))completionHandler
+    API_AVAILABLE(ios(10));
 
 /**
  * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.

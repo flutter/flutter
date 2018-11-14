@@ -94,6 +94,23 @@
             fetchCompletionHandler:completionHandler];
 }
 
+- (void)application:(UIApplication*)application
+    didReceiveLocalNotification:(UILocalNotification*)notification {
+  [_lifeCycleDelegate application:application didReceiveLocalNotification:notification];
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter*)center
+       willPresentNotification:(UNNotification*)notification
+         withCompletionHandler:
+             (void (^)(UNNotificationPresentationOptions options))completionHandler
+    API_AVAILABLE(ios(10)) {
+  if (@available(iOS 10.0, *)) {
+    [_lifeCycleDelegate userNotificationCenter:center
+                       willPresentNotification:notification
+                         withCompletionHandler:completionHandler];
+  }
+}
+
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
