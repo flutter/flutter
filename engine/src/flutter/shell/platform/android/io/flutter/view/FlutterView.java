@@ -877,7 +877,9 @@ public class FlutterView extends SurfaceView
             ensureAccessibilityEnabled();
         }
         if (mTouchExplorationEnabled) {
-            mAccessibilityFeatureFlags ^= AccessibilityFeature.ACCESSIBLE_NAVIGATION.value;
+            mAccessibilityFeatureFlags |= AccessibilityFeature.ACCESSIBLE_NAVIGATION.value;
+        } else {
+            mAccessibilityFeatureFlags &= ~AccessibilityFeature.ACCESSIBLE_NAVIGATION.value;
         }
         // Apply additional accessibility settings
         updateAccessibilityFeatures();
@@ -896,7 +898,7 @@ public class FlutterView extends SurfaceView
             String transitionAnimationScale = Settings.Global.getString(getContext().getContentResolver(),
                 Settings.Global.TRANSITION_ANIMATION_SCALE);
             if (transitionAnimationScale != null && transitionAnimationScale.equals("0")) {
-                mAccessibilityFeatureFlags ^= AccessibilityFeature.DISABLE_ANIMATIONS.value;
+                mAccessibilityFeatureFlags |= AccessibilityFeature.DISABLE_ANIMATIONS.value;
             } else {
                 mAccessibilityFeatureFlags &= ~AccessibilityFeature.DISABLE_ANIMATIONS.value;
             }
@@ -966,7 +968,7 @@ public class FlutterView extends SurfaceView
             String value = Settings.Global.getString(getContext().getContentResolver(),
                     Settings.Global.TRANSITION_ANIMATION_SCALE);
             if (value != null && value.equals("0")) {
-                mAccessibilityFeatureFlags ^= AccessibilityFeature.DISABLE_ANIMATIONS.value;
+                mAccessibilityFeatureFlags |= AccessibilityFeature.DISABLE_ANIMATIONS.value;
             } else {
                 mAccessibilityFeatureFlags &= ~AccessibilityFeature.DISABLE_ANIMATIONS.value;
             }
@@ -980,7 +982,7 @@ public class FlutterView extends SurfaceView
             if (enabled) {
                 mTouchExplorationEnabled = true;
                 ensureAccessibilityEnabled();
-                mAccessibilityFeatureFlags ^= AccessibilityFeature.ACCESSIBLE_NAVIGATION.value;
+                mAccessibilityFeatureFlags |= AccessibilityFeature.ACCESSIBLE_NAVIGATION.value;
                 nativeSetAccessibilityFeatures(mNativeView.get(), mAccessibilityFeatureFlags);
             } else {
                 mTouchExplorationEnabled = false;

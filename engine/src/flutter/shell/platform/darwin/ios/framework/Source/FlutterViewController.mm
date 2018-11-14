@@ -716,11 +716,11 @@ static blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) {
   auto platformView = [_engine.get() platformView];
   int32_t flags = 0;
   if (UIAccessibilityIsInvertColorsEnabled())
-    flags ^= static_cast<int32_t>(blink::AccessibilityFeatureFlag::kInvertColors);
+    flags |= static_cast<int32_t>(blink::AccessibilityFeatureFlag::kInvertColors);
   if (UIAccessibilityIsReduceMotionEnabled())
-    flags ^= static_cast<int32_t>(blink::AccessibilityFeatureFlag::kReduceMotion);
+    flags |= static_cast<int32_t>(blink::AccessibilityFeatureFlag::kReduceMotion);
   if (UIAccessibilityIsBoldTextEnabled())
-    flags ^= static_cast<int32_t>(blink::AccessibilityFeatureFlag::kBoldText);
+    flags |= static_cast<int32_t>(blink::AccessibilityFeatureFlag::kBoldText);
 #if TARGET_OS_SIMULATOR
   // There doesn't appear to be any way to determine whether the accessibility
   // inspector is enabled on the simulator. We conservatively always turn on the
@@ -729,8 +729,8 @@ static blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) {
   platformView->SetAccessibilityFeatures(flags);
 #else
   bool enabled = UIAccessibilityIsVoiceOverRunning() || UIAccessibilityIsSwitchControlRunning();
-  if (UIAccessibilityIsVoiceOverRunning() || UIAccessibilityIsSwitchControlRunning())
-    flags ^= static_cast<int32_t>(blink::AccessibilityFeatureFlag::kAccessibleNavigation);
+  if (enabled)
+    flags |= static_cast<int32_t>(blink::AccessibilityFeatureFlag::kAccessibleNavigation);
   platformView->SetSemanticsEnabled(enabled || UIAccessibilityIsSpeakScreenEnabled());
   platformView->SetAccessibilityFeatures(flags);
 #endif
