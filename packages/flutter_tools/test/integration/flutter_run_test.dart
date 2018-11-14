@@ -53,6 +53,7 @@ void main() {
       final File pidFile = tempDir.childFile('test.pid');
       await _flutter.run(pidFile: pidFile);
       expect(pidFile.existsSync(), isTrue);
+      await _flutter?.stop();
     });
   }, timeout: const Timeout.factor(6));
 }
