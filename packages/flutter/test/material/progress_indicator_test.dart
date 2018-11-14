@@ -48,9 +48,7 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics(
-      isEnabled: false,
-      hasEnabledState: true,
-      isLiveRegion: true,
+      isLiveRegion: false,
     ));
     handle.dispose();
   });
@@ -180,7 +178,7 @@ void main() {
     );
   });
 
-  testWidgets('CircularProgressIndicator(value: 0.0) can be constructed and has disabled semantics by default', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator(value: 0.0) can be constructed and has disabled liveRegion by default', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Center(
@@ -189,14 +187,12 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics(
-      isEnabled: false,
-      hasEnabledState: true,
-      isLiveRegion: true,
+      isLiveRegion: false,
     ));
     handle.dispose();
   });
 
-  testWidgets('CircularProgressIndicator(value: null) can be constructed and has disabled semantics by default', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator(value: null) can be constructed and has disabled liveRegion by default', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Center(
@@ -205,9 +201,7 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics(
-      isEnabled: false,
-      hasEnabledState: true,
-      isLiveRegion: true,
+      isLiveRegion: false,
     ));
     handle.dispose();
   });
