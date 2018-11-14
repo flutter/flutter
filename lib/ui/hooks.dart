@@ -68,6 +68,9 @@ void _updateLocales(List<String> locales) {
 @pragma('vm:entry-point')
 void _updateUserSettingsData(String jsonData) {
   final Map<String, dynamic> data = json.decode(jsonData);
+  if (data.isEmpty) {
+    return;
+  }
   _updateTextScaleFactor(data['textScaleFactor'].toDouble());
   _updateAlwaysUse24HourFormat(data['alwaysUse24HourFormat']);
 }
