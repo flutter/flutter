@@ -344,6 +344,19 @@
 }
 
 - (void)setSplashScreenView:(UIView*)view {
+  if (!view) {
+    // Special case: user wants to remove the splash screen view.
+    [self removeSplashScreenViewIfPresent];
+  } else if (_splashScreenView) {
+    FML_LOG(ERROR) << "Attempt to set the FlutterViewController's splash screen multiple times was "
+                      "ignored. The FlutterViewController's splash screen can only be set once. "
+                      "This condition can occur if a running FlutterEngine instance has been "
+                      "passed into the FlutterViewController and a consumer later called "
+                      "[FlutterViewController setSplashScreen:]. Setting the splash screen on a "
+                      "FlutterViewController with an already running engine is not supported, as "
+                      "the rasterizer will already be running by the time the view is shown.";
+    return;
+  }
   _splashScreenView.reset([view retain]);
   _splashScreenView.get().autoresizingMask =
       UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
