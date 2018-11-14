@@ -89,9 +89,8 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// intended for use with determinate progress indicators to announce
   /// how far along they are.
   ///
-  /// For determinate progress indicators that have a non-null [semanticsLabel],
-  /// this will be defaulted to [value] expressed as a percentage, i.e. `0.1`
-  /// will become '10%'.
+  /// For determinate progress indicators, this will be defaulted to [value]
+  /// expressed as a percentage, i.e. `0.1` will become '10%'.
   /// {@endtemplate}
   final String semanticsValue;
 
@@ -118,7 +117,7 @@ abstract class ProgressIndicator extends StatefulWidget {
     @required Widget child,
   }) {
     String expandedSemanticsValue = semanticsValue;
-    if (semanticsLabel != null && value != null) {
+    if (value != null) {
       expandedSemanticsValue ??= '${(value * 100).round()}%';
     }
     return Semantics(
