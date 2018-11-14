@@ -1,4 +1,4 @@
-Signature: acce6a16686bcb1848d41bfb833dde5a
+Signature: daf1c9b7d0575576123e91c273e5c085
 
 UNUSED LICENSES:
 
@@ -5235,6 +5235,7 @@ FILE: ../../../third_party/skia/src/gpu/GrRectanizer.h
 FILE: ../../../third_party/skia/src/gpu/GrRectanizer_pow2.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRenderTargetOpList.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRenderTargetOpList.h
+FILE: ../../../third_party/skia/src/gpu/GrVertexWriter.h
 FILE: ../../../third_party/skia/src/gpu/SkGpuDevice.h
 FILE: ../../../third_party/skia/src/gpu/SkGr.cpp
 FILE: ../../../third_party/skia/src/ports/SkDebug_win.cpp
