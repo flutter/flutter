@@ -120,6 +120,9 @@ std::unique_ptr<VsyncWaiter> PlatformViewIOS::CreateVSyncWaiter() {
 }
 
 void PlatformViewIOS::OnPreEngineRestart() const {
+  if (accessibility_bridge_) {
+    accessibility_bridge_->clearState();
+  }
   if (!owner_controller_) {
     return;
   }
