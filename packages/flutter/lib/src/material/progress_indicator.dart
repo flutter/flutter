@@ -108,7 +108,6 @@ abstract class ProgressIndicator extends StatefulWidget {
       expandedSemanticsValue ??= '${(value * 100).round()}%';
     }
     return Semantics(
-      container: true,
       label: semanticsLabel,
       value: expandedSemanticsValue,
       child: child,
