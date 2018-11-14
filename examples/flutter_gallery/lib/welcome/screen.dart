@@ -436,9 +436,6 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
           child: Stack(
             children: <Widget>[
               Positioned.fill(
-                child: _backgroundView(),
-              ),
-              Positioned.fill(
                 child: PageView(
                   children: children,
                 ),
@@ -463,50 +460,6 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
           ),
         ),
       ),
-    );
-  }
-
-  Widget _backgroundView() {
-    _parallaxController = AnimationController(
-      duration: Duration(milliseconds: 200),
-      vsync: this,
-    );
-    final CurvedAnimation parallaxAnimation = CurvedAnimation(
-      parent: _parallaxController,
-      curve: Curves.easeOut,
-    );
-    final Animation<Offset> parallaxTween = Tween<Offset>(
-      begin: const Offset(0.0, 0.0),
-      end: const Offset(-1.0, 0.0),
-    ).animate(parallaxAnimation);
-
-    return Stack(
-      children: <Widget>[
-        const DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: <Color>[
-                Color(0xFFD7D7D7),
-                Color(0xFFFAFAFA),
-                Color(0xFFFFFFFF),
-              ],
-              begin: FractionalOffset.topCenter,
-              end: FractionalOffset.bottomCenter,
-              stops: <double>[0.0, 0.35, 1.0],
-            ),
-          ),
-        ),
-        SlideTransition(
-          position: parallaxTween,
-          child: Image(
-            height: MediaQuery.of(context).size.height,
-            fit: BoxFit.cover,
-            alignment: FractionalOffset.topLeft,
-            image:
-                const AssetImage('assets/backgrounds/bg_flutter_welcome.png'),
-          ),
-        ),
-      ],
     );
   }
 
