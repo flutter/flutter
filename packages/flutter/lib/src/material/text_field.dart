@@ -103,7 +103,7 @@ class TextField extends StatefulWidget {
   ///   // provide login logic
   /// }
   ///
-  /// ...
+  /// // ...
   ///
   /// TextField(
   ///   decoration: const InputDecoration(labelText: 'Password'),
