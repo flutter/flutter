@@ -79,7 +79,7 @@ class TextField extends StatefulWidget {
   /// [maxLength] is set, a character counter will be displayed below the
   /// field, showing how many characters have been entered and how many are
   /// allowed unless the value is set to [noMaxLength] in which case only the
-  /// current length is displayed and the maximum size is redacted.
+  /// current length is displayed.
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
@@ -195,9 +195,8 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.maxLines}
   final int maxLines;
 
-  /// If [maxLength] is set to this number, it disables the showing
-  /// of the maximum length part of the display, yet still gives
-  /// a character counter.
+  /// If [maxLength] is set to this value, only the "current input length"
+  /// part of the character counter is shown.
   static const int noMaxLength = 9007199254740992; // math.pow(2, 53);
 
   /// The maximum number of characters (Unicode scalar values) to allow in the
@@ -350,10 +349,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     String counterText = '$currentLength';
     String semanticCounterText = '';
 
-    // See if we are showing the maxLength or hiding it and therefore
-    // if not hiding the semanticCounterText should be the remaining length
     if (widget.maxLength != TextField.noMaxLength) {
-      // Show the maxLength on display and semanticCounterText
       counterText += '/${widget.maxLength}';
       final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength);
       semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
