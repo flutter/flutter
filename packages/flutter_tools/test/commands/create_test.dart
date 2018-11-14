@@ -279,7 +279,7 @@ void main() {
         'ios/Classes/FlutterProjectPlugin.h',
         'ios/Classes/FlutterProjectPlugin.m',
         'ios/Classes/SwiftFlutterProjectPlugin.swift',
-        'lib/flutter_project.dart'
+        'lib/flutter_project.dart',
       ],
       unexpectedPaths: <String>[
         'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
