@@ -202,6 +202,36 @@ static BOOL isPowerOfTwo(NSUInteger x) {
   }
 }
 
+- (void)application:(UIApplication*)application
+    didReceiveLocalNotification:(UILocalNotification*)notification {
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if (!plugin) {
+      continue;
+    }
+    if ([plugin respondsToSelector:_cmd]) {
+      [plugin application:application didReceiveLocalNotification:notification];
+    }
+  }
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter*)center
+       willPresentNotification:(UNNotification*)notification
+         withCompletionHandler:
+             (void (^)(UNNotificationPresentationOptions options))completionHandler {
+  if (@available(iOS 10.0, *)) {
+    for (id<FlutterPlugin> plugin in _pluginDelegates) {
+      if (!plugin) {
+        continue;
+      }
+      if ([plugin respondsToSelector:_cmd]) {
+        [plugin userNotificationCenter:center
+               willPresentNotification:notification
+                 withCompletionHandler:completionHandler];
+      }
+    }
+  }
+}
+
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
