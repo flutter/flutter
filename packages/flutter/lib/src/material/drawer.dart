@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -375,6 +377,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   Widget _buildDrawer(BuildContext context) {
+    double dragAreaWidth = widget.alignment == DrawerAlignment.start ?
+                           MediaQuery.of(context).padding.left :
+                           MediaQuery.of(context).padding.right;
+    dragAreaWidth = max(dragAreaWidth, _kEdgeDragWidth);
     if (_controller.status == AnimationStatus.dismissed) {
       return Align(
         alignment: _drawerOuterAlignment,
@@ -384,7 +390,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           onHorizontalDragEnd: _settle,
           behavior: HitTestBehavior.translucent,
           excludeFromSemantics: true,
-          child: Container(width: _kEdgeDragWidth)
+          child: Container(width: dragAreaWidth),
         ),
       );
     } else {
@@ -420,7 +426,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                     child: FocusScope(
                       key: _drawerKey,
                       node: _focusScopeNode,
-                      child: widget.child
+                      child: widget.child,
                     ),
                   ),
                 ),
