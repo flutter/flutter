@@ -752,6 +752,7 @@ enum TextDirection {
 /// A rectangle enclosing a run of text.
 ///
 /// This is similar to [Rect] but includes an inherent [TextDirection].
+@pragma('vm:entry-point')
 class TextBox {
   /// Creates an object that describes a box containing text.
   const TextBox.fromLTRBD(
