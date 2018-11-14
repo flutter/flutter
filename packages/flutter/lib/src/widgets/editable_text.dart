@@ -665,6 +665,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                   : TextInputAction.done
               ),
               textCapitalization: widget.textCapitalization,
+              keyboardAppearance: widget.keyboardAppearance,
           )
       )..setEditingState(localValue);
     }
