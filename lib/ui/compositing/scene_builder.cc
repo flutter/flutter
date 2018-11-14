@@ -76,11 +76,15 @@ void SceneBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
 SceneBuilder::SceneBuilder() = default;
 SceneBuilder::~SceneBuilder() = default;
 
-void SceneBuilder::pushTransform(const tonic::Float64List& matrix4) {
+fml::RefPtr<EngineLayer> SceneBuilder::pushTransform(
+    tonic::Float64List& matrix4) {
   SkMatrix sk_matrix = ToSkMatrix(matrix4);
-  auto layer = std::make_unique<flow::TransformLayer>();
+  auto layer = std::make_shared<flow::TransformLayer>();
   layer->set_transform(sk_matrix);
-  PushLayer(std::move(layer));
+  PushLayer(layer);
+  // matrix4 has to be released before we can return another Dart object
+  matrix4.Release();
+  return EngineLayer::MakeRetained(layer);
 }
 
 fml::RefPtr<EngineLayer> SceneBuilder::pushOffset(double dx, double dy) {
@@ -91,66 +95,78 @@ fml::RefPtr<EngineLayer> SceneBuilder::pushOffset(double dx, double dy) {
   return EngineLayer::MakeRetained(layer);
 }
 
-void SceneBuilder::pushClipRect(double left,
-                                double right,
-                                double top,
-                                double bottom,
-                                int clipBehavior) {
+fml::RefPtr<EngineLayer> SceneBuilder::pushClipRect(double left,
+                                                    double right,
+                                                    double top,
+                                                    double bottom,
+                                                    int clipBehavior) {
   SkRect clipRect = SkRect::MakeLTRB(left, top, right, bottom);
   flow::Clip clip_behavior = static_cast<flow::Clip>(clipBehavior);
-  auto layer = std::make_unique<flow::ClipRectLayer>(clip_behavior);
+  auto layer = std::make_shared<flow::ClipRectLayer>(clip_behavior);
   layer->set_clip_rect(clipRect);
-  PushLayer(std::move(layer));
+  PushLayer(layer);
+  return EngineLayer::MakeRetained(layer);
 }
 
-void SceneBuilder::pushClipRRect(const RRect& rrect, int clipBehavior) {
+fml::RefPtr<EngineLayer> SceneBuilder::pushClipRRect(const RRect& rrect,
+                                                     int clipBehavior) {
   flow::Clip clip_behavior = static_cast<flow::Clip>(clipBehavior);
-  auto layer = std::make_unique<flow::ClipRRectLayer>(clip_behavior);
+  auto layer = std::make_shared<flow::ClipRRectLayer>(clip_behavior);
   layer->set_clip_rrect(rrect.sk_rrect);
-  PushLayer(std::move(layer));
+  PushLayer(layer);
+  return EngineLayer::MakeRetained(layer);
 }
 
-void SceneBuilder::pushClipPath(const CanvasPath* path, int clipBehavior) {
+fml::RefPtr<EngineLayer> SceneBuilder::pushClipPath(const CanvasPath* path,
+                                                    int clipBehavior) {
   flow::Clip clip_behavior = static_cast<flow::Clip>(clipBehavior);
   FML_DCHECK(clip_behavior != flow::Clip::none);
-  auto layer = std::make_unique<flow::ClipPathLayer>(clip_behavior);
+  auto layer = std::make_shared<flow::ClipPathLayer>(clip_behavior);
   layer->set_clip_path(path->path());
-  PushLayer(std::move(layer));
+  PushLayer(layer);
+  return EngineLayer::MakeRetained(layer);
 }
 
-void SceneBuilder::pushOpacity(int alpha, double dx, double dy) {
-  auto layer = std::make_unique<flow::OpacityLayer>();
+fml::RefPtr<EngineLayer> SceneBuilder::pushOpacity(int alpha,
+                                                   double dx,
+                                                   double dy) {
+  auto layer = std::make_shared<flow::OpacityLayer>();
   layer->set_alpha(alpha);
   layer->set_offset(SkPoint::Make(dx, dy));
-  PushLayer(std::move(layer));
+  PushLayer(layer);
+  return EngineLayer::MakeRetained(layer);
 }
 
-void SceneBuilder::pushColorFilter(int color, int blendMode) {
-  auto layer = std::make_unique<flow::ColorFilterLayer>();
+fml::RefPtr<EngineLayer> SceneBuilder::pushColorFilter(int color,
+                                                       int blendMode) {
+  auto layer = std::make_shared<flow::ColorFilterLayer>();
   layer->set_color(static_cast<SkColor>(color));
   layer->set_blend_mode(static_cast<SkBlendMode>(blendMode));
-  PushLayer(std::move(layer));
+  PushLayer(layer);
+  return EngineLayer::MakeRetained(layer);
 }
 
-void SceneBuilder::pushBackdropFilter(ImageFilter* filter) {
-  auto layer = std::make_unique<flow::BackdropFilterLayer>();
+fml::RefPtr<EngineLayer> SceneBuilder::pushBackdropFilter(ImageFilter* filter) {
+  auto layer = std::make_shared<flow::BackdropFilterLayer>();
   layer->set_filter(filter->filter());
-  PushLayer(std::move(layer));
+  PushLayer(layer);
+  return EngineLayer::MakeRetained(layer);
 }
 
-void SceneBuilder::pushShaderMask(Shader* shader,
-                                  double maskRectLeft,
-                                  double maskRectRight,
-                                  double maskRectTop,
-                                  double maskRectBottom,
-                                  int blendMode) {
+fml::RefPtr<EngineLayer> SceneBuilder::pushShaderMask(Shader* shader,
+                                                      double maskRectLeft,
+                                                      double maskRectRight,
+                                                      double maskRectTop,
+                                                      double maskRectBottom,
+                                                      int blendMode) {
   SkRect rect = SkRect::MakeLTRB(maskRectLeft, maskRectTop, maskRectRight,
                                  maskRectBottom);
-  auto layer = std::make_unique<flow::ShaderMaskLayer>();
+  auto layer = std::make_shared<flow::ShaderMaskLayer>();
   layer->set_shader(shader->shader());
   layer->set_mask_rect(rect);
   layer->set_blend_mode(static_cast<SkBlendMode>(blendMode));
-  PushLayer(std::move(layer));
+  PushLayer(layer);
+  return EngineLayer::MakeRetained(layer);
 }
 
 fml::RefPtr<EngineLayer> SceneBuilder::pushPhysicalShape(const CanvasPath* path,

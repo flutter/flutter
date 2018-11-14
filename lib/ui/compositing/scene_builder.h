@@ -33,24 +33,25 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
 
   ~SceneBuilder() override;
 
-  void pushTransform(const tonic::Float64List& matrix4);
+  fml::RefPtr<EngineLayer> pushTransform(tonic::Float64List& matrix4);
   fml::RefPtr<EngineLayer> pushOffset(double dx, double dy);
-  void pushClipRect(double left,
-                    double right,
-                    double top,
-                    double bottom,
-                    int clipBehavior);
-  void pushClipRRect(const RRect& rrect, int clipBehavior);
-  void pushClipPath(const CanvasPath* path, int clipBehavior);
-  void pushOpacity(int alpha, double dx = 0, double dy = 0);
-  void pushColorFilter(int color, int blendMode);
-  void pushBackdropFilter(ImageFilter* filter);
-  void pushShaderMask(Shader* shader,
-                      double maskRectLeft,
-                      double maskRectRight,
-                      double maskRectTop,
-                      double maskRectBottom,
-                      int blendMode);
+  fml::RefPtr<EngineLayer> pushClipRect(double left,
+                                        double right,
+                                        double top,
+                                        double bottom,
+                                        int clipBehavior);
+  fml::RefPtr<EngineLayer> pushClipRRect(const RRect& rrect, int clipBehavior);
+  fml::RefPtr<EngineLayer> pushClipPath(const CanvasPath* path,
+                                        int clipBehavior);
+  fml::RefPtr<EngineLayer> pushOpacity(int alpha, double dx = 0, double dy = 0);
+  fml::RefPtr<EngineLayer> pushColorFilter(int color, int blendMode);
+  fml::RefPtr<EngineLayer> pushBackdropFilter(ImageFilter* filter);
+  fml::RefPtr<EngineLayer> pushShaderMask(Shader* shader,
+                                          double maskRectLeft,
+                                          double maskRectRight,
+                                          double maskRectTop,
+                                          double maskRectBottom,
+                                          int blendMode);
   fml::RefPtr<EngineLayer> pushPhysicalShape(const CanvasPath* path,
                                              double elevation,
                                              int color,
