@@ -30,42 +30,6 @@ function script_location() {
   echo "$(cd -P "$(dirname "$script_location")" >/dev/null && pwd)"
 }
 
-# Zip up the docs so people can download them for offline usage.
-function create_offline_zip() {
-  # Must be run from "$FLUTTER_ROOT/dev/docs"
-  echo "Zipping Flutter offline docs archive."
-  rm -rf flutter.docs.zip doc/offline
-  (cd ./doc; zip -r -9 -q ../flutter.docs.zip .)
-}
-
-# Generate the docset for Flutter docs for use with Dash, Zeal, and Velocity.
-function create_docset() {
-  # Must be run from "$FLUTTER_ROOT/dev/docs" Must have dashing installed: go
-  # get -u github.com/technosophos/dashing Dashing produces a LOT of output
-  # (~30MB), so we redirect it, and just show the end of it if there was a
-  # problem.
-  echo "Building Flutter docset."
-  rm -rf flutter.docset
-  sed -e "s/{{VERSION}}/$FLUTTER_VERSION/g" dashing.json.tmpl > dashing.json && \
-  (dashing build --source ./doc --config ./dashing.json > /tmp/dashing.log 2>&1 || (tail -100 /tmp/dashing.log; false)) && \
-  tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset
-}
-
-function move_offline_into_place() {
-  # Must be run from "$FLUTTER_ROOT/dev/docs"
-  echo "Moving offline data into place."
-  mkdir -p doc/offline
-  mv flutter.docs.zip doc/offline/flutter.docs.zip
-  du -sh doc/offline/flutter.docs.zip
-  if [[ "$CIRRUS_BRANCH" == "stable" ]]; then
-    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://docs.flutter.io/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
-  else
-    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://master-docs-flutter-io.firebaseapp.com/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
-  fi
-  mv flutter.docset.tar.gz doc/offline/flutter.docset.tar.gz
-  du -sh doc/offline/flutter.docset.tar.gz
-}
-
 # So that users can run this script from anywhere and it will work as expected.
 SCRIPT_LOCATION="$(script_location)"
 # Sets the Flutter root to be "$(script_location)/../..": This script assumes
@@ -89,13 +53,12 @@ export PATH="$FLUTTER_BIN:$DART_BIN:$PATH"
 
 # Make sure dart is installed by invoking flutter to download it.
 "$FLUTTER" --version
-FLUTTER_VERSION=$(cat "$FLUTTER_ROOT/version")
 
 # If the pub cache directory exists in the root, then use that.
 FLUTTER_PUB_CACHE="$FLUTTER_ROOT/.pub-cache"
 if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
-  # This has to be exported, because pub interprets setting it to the empty
-  # string in the same way as setting it to ".".
+  # This has to be exported, because pub interprets setting it
+  # to the empty string in the same way as setting it to ".".
   export PUB_CACHE="${PUB_CACHE:-"$FLUTTER_PUB_CACHE"}"
 fi
 
@@ -108,17 +71,6 @@ fi
 (cd "$FLUTTER_ROOT/dev/tools" && "$PUB" get)
 (cd "$FLUTTER_ROOT" && "$DART" "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
 (cd "$FLUTTER_ROOT" && "$DART" "$FLUTTER_ROOT/dev/tools/java_and_objc_doc.dart")
-
-# Zip up the docs so people can download them for offline usage.
-(cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
-
-# Generate the docset for Flutter docs for use with Dash, Zeal, and Velocity.
-(cd "$FLUTTER_ROOT/dev/docs"; create_docset)
-
-# Move the offline archives into place, now that all the processing of the doc
-# directory is done. This avoids the tools recursively processing the archives
-# as part of their process.
-(cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
 
 # Ensure google webmaster tools can verify our site.
 cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
