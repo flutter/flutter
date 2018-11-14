@@ -129,11 +129,12 @@ class AccessibilityBridge final {
 
   fml::WeakPtr<AccessibilityBridge> GetWeakPtr();
 
+  void clearState();
+
  private:
   SemanticsObject* GetOrCreateObject(int32_t id, blink::SemanticsNodeUpdates& updates);
   void VisitObjectsRecursivelyAndRemove(SemanticsObject* object,
                                         NSMutableArray<NSNumber*>* doomed_uids);
-  void ReleaseObjects(std::unordered_map<int, SemanticsObject*>& objects);
   void HandleEvent(NSDictionary<NSString*, id>* annotatedEvent);
 
   UIView* view_;

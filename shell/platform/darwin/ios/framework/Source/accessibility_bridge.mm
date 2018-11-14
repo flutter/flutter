@@ -687,4 +687,10 @@ fml::WeakPtr<AccessibilityBridge> AccessibilityBridge::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
+void AccessibilityBridge::clearState() {
+  [objects_ removeAllObjects];
+  previous_route_id_ = 0;
+  previous_routes_.clear();
+}
+
 }  // namespace shell

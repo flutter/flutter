@@ -205,7 +205,8 @@ public class FlutterNativeView implements BinaryMessenger {
 
     // Called by native to update the semantics/accessibility tree.
     private void updateSemantics(ByteBuffer buffer, String[] strings) {
-        if (mFlutterView == null) return;
+        if (mFlutterView == null)
+            return;
         mFlutterView.updateSemantics(buffer, strings);
     }
 
@@ -218,13 +219,17 @@ public class FlutterNativeView implements BinaryMessenger {
 
     // Called by native to notify first Flutter frame rendered.
     private void onFirstFrame() {
-        if (mFlutterView == null) return;
+        if (mFlutterView == null)
+            return;
         mFlutterView.onFirstFrame();
     }
 
-    // Called by native to notify when the engine is restarted (cold reload).
+    // Called by native to notify when the engine is restarted (hot restart).
     @SuppressWarnings("unused")
     private void onPreEngineRestart() {
+        if (mFlutterView != null) {
+            mFlutterView.resetAccessibilityTree();
+        }
         if (mPluginRegistry == null)
             return;
         mPluginRegistry.onPreEngineRestart();
