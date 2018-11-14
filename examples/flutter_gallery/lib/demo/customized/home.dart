@@ -159,7 +159,7 @@ class _CustomizedDesignState extends State<CustomizedDesign>
         color: const Color(0xFF212024),
         height: 70.0,
         child: Stack(
-          children: <Positioned>[
+          children: <Widget>[
             const Positioned(
               left: 26.0,
               top: 0.0,
@@ -353,9 +353,9 @@ class _CustomizedDesignState extends State<CustomizedDesign>
             scale: _statsAnimationOne,
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.timer, color: Colors.white),
-                const Padding(
+              children: const <Widget>[
+                Icon(Icons.timer, color: Colors.white),
+                Padding(
                   padding: EdgeInsets.only(left: 4.0),
                   child: Text(
                     '00:26:13',
@@ -368,9 +368,9 @@ class _CustomizedDesignState extends State<CustomizedDesign>
           ScaleTransition(
             scale: _statsAnimationTwo,
             child: Row(
-              children: [
-                const Icon(Icons.access_time, color: Colors.white),
-                const Padding(
+              children: const <Widget>[
+                Icon(Icons.access_time, color: Colors.white),
+                Padding(
                   padding: EdgeInsets.only(left: 4.0),
                   child: Text(
                     "7'13\"",
@@ -383,9 +383,9 @@ class _CustomizedDesignState extends State<CustomizedDesign>
           ScaleTransition(
             scale: _statsAnimationThree,
             child: Row(
-              children: [
-                const Icon(Icons.landscape, color: Colors.white),
-                const Padding(
+              children: const <Widget>[
+                Icon(Icons.landscape, color: Colors.white),
+                Padding(
                   padding: EdgeInsets.only(left: 4.0),
                   child: Text(
                     '120ft',
@@ -403,8 +403,8 @@ class _CustomizedDesignState extends State<CustomizedDesign>
                   scale: _heartAnimation,
                   child: const Icon(Icons.favorite, color: Colors.white),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 4.0),
+                const Padding(
+                  padding: EdgeInsets.only(left: 4.0),
                   child: Text(
                     '97bpm',
                     style: statsTextStyle,
@@ -419,12 +419,12 @@ class _CustomizedDesignState extends State<CustomizedDesign>
   }
 
   Container _buildStatsBox() {
-    final TextStyle figureStyle = TextStyle(
+    const TextStyle figureStyle = TextStyle(
       fontSize: 24.0,
       fontWeight: FontWeight.bold,
       color: Colors.black,
     );
-    final TextStyle titleStyle = TextStyle(
+    const TextStyle titleStyle = TextStyle(
       fontSize: 9.0,
       fontWeight: FontWeight.w400,
       color: Colors.black,
@@ -442,19 +442,19 @@ class _CustomizedDesignState extends State<CustomizedDesign>
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Column(
-                  children: [
+                  children: <Widget>[
                     Text(
                       _runCounter.toString(),
                       style: figureStyle,
                     ),
-                    Text(
+                    const Text(
                       'TOTAL RUNS',
                       style: titleStyle,
                     ),
                   ],
                 ),
                 Column(
-                  children: [
+                  children: const <Widget>[
                     Text(
                       "6'45\"",
                       style: figureStyle,
@@ -466,12 +466,12 @@ class _CustomizedDesignState extends State<CustomizedDesign>
                   ],
                 ),
                 Column(
-                  children: [
+                  children: <Widget>[
                     Text(
                       elevation.format(_elevationCounter).toString(),
                       style: figureStyle,
                     ),
-                    Text(
+                    const Text(
                       'TOTAL ELEVATION',
                       style: titleStyle,
                     ),
@@ -558,20 +558,11 @@ class _CustomizedDesignState extends State<CustomizedDesign>
         color: Colors.white,
       ),
     );
-    // final Text secondText = Text(
-    //   'ACTIVITY',
-    //   style: const TextStyle(
-    //     fontStyle: FontStyle.italic,
-    //     fontSize: 40.0,
-    //     fontWeight: FontWeight.w900,
-    //     color: Color(0xFFF6F309),
-    //   ),
-    // );
     final Text combinedText = firstText;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
+      children: <Widget>[
         Padding(
           padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
           child: combinedText,
