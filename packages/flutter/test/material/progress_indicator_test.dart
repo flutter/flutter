@@ -13,7 +13,7 @@ void main() {
   // The "can be constructed" tests that follow are primarily to ensure that any
   // animations started by the progress indicators are stopped at dispose() time.
 
-  testWidgets('LinearProgressIndicator(value: 0.0) can be constructed and has disabled semantics by default', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator(value: 0.0) can be constructed and has disabled liveRegion by default', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Directionality(
@@ -28,9 +28,7 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics(
-      isEnabled: false,
-      hasEnabledState: true,
-      isLiveRegion: true,
+      isLiveRegion: false,
     ));
     handle.dispose();
   });
@@ -365,7 +363,6 @@ void main() {
         child: LinearProgressIndicator(
           key: key,
           value: 0.25,
-          semanticsEnabled: true,
           semanticsLabel: label,
           semanticsValue: value,
         ),
@@ -373,9 +370,7 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
-      isLiveRegion: true,
-      isEnabled: true,
-      hasEnabledState: true,
+      isLiveRegion: false,
       textDirection: TextDirection.ltr,
       label: label,
       value: value,
@@ -395,7 +390,7 @@ void main() {
         child: CircularProgressIndicator(
           key: key,
           value: 0.25,
-          semanticsEnabled: true,
+          semanticsLiveRegion: true,
           semanticsLabel: label,
           semanticsValue: value,
         ),
@@ -404,8 +399,6 @@ void main() {
 
     expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
       isLiveRegion: true,
-      isEnabled: true,
-      hasEnabledState: true,
       textDirection: TextDirection.ltr,
       label: label,
       value: value,
@@ -424,7 +417,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: RefreshProgressIndicator(
           key: key,
-          semanticsEnabled: true,
+          semanticsLiveRegion: false,
           semanticsLabel: label,
           semanticsValue: value,
         ),
@@ -432,9 +425,7 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
-      isLiveRegion: true,
-      isEnabled: true,
-      hasEnabledState: true,
+      isLiveRegion: false,
       textDirection: TextDirection.ltr,
       label: label,
       value: value,

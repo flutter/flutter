@@ -32,21 +32,24 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
   ///
-  /// The [semanticsEnabled] argument must not be null. It defaults to false. If
-  /// this widget provides information that should be announced by screen reading
-  /// software, it should be set to true. If it is true, at least one of
-  /// [semanticsLabel] or [semanticsValue] must be specified.
+  /// {@template flutter.material.progressIndicator.semantics}
+  /// The [semanticsLabel] can be used to identify the purpose of this progress
+  /// bar for screen reading software. The [semanticsValue] property may be used
+  /// for determinate progress indicators to indicate how much progress has been made.
+  /// The [semanticsLiveRegion] parameter corresponds to [Semantics.liveRegion],
+  /// and should only be set to true if this progress indicator is a primary item
+  /// on the screen, as it will cause the screen reader to continuously and politely
+  /// read the status of this indicator.
+  /// {@endtemplate}
   const ProgressIndicator({
     Key key,
     this.value,
     this.backgroundColor,
     this.valueColor,
-    this.semanticsEnabled = false,
     this.semanticsLabel,
     this.semanticsValue,
-  }) : assert(semanticsEnabled != null),
-       assert(!semanticsEnabled || semanticsLabel != null || semanticsValue != null),
-       super(key: key);
+    this.semanticsLiveRegion = false,
+  }) : super(key: key);
 
   /// If non-null, the value of this progress indicator with 0.0 corresponding
   /// to no progress having been made and 1.0 corresponding to all the progress
@@ -70,24 +73,24 @@ abstract class ProgressIndicator extends StatefulWidget {
 
   /// The [Semantics.label] for this progress indicator.
   ///
-  /// This will be ignored if [semanticsEnabled] is false.
+  /// This value indicates the purpose of the progress bar, and is used
+  /// by screen reading software to identify the widget.
   final String semanticsLabel;
 
   /// The [Semantics.value] for this progress indicator.
   ///
-  /// This will be ignored if [semanticsEnabled] is false.
+  /// This will be used in conjunction with the [semanticsLabel] by
+  /// screen reading software to identify the widget.
   final String semanticsValue;
 
-  /// Whether the indicator will be given its own semantics node in the semantics
-  /// tree. Defaults to false.
-  ///
-  /// This should be set to true if it would be beneficial for accessibility
-  /// users to receive feedback about this indicator. For example, if this
-  /// indicator represents a loading state for a primary action that blocks
-  /// other activity, semantics should be enabled for it; but if it is
-  /// one of many indicators representing multiple images loading in a
-  /// [GridView], it should likely not have semantics enabled.
-  final bool semanticsEnabled;
+  /// The [Semantics.liveRegion] for this progress indicator.
+  /// 
+  /// This value should only be set to true for progress indicators
+  /// that are primary on the screen. For example, a [GridView] of
+  /// progress indicator placeholders should not all be marked as
+  /// live regions, as it would cause the screen reading software
+  /// to continuously read multiple updates at once.
+  final bool semanticsLiveRegion;
 
   Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context).backgroundColor;
   Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context).accentColor;
@@ -104,8 +107,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   }) {
     return Semantics(
       container: true,
-      liveRegion: true,
-      enabled: semanticsEnabled,
+      liveRegion: semanticsLiveRegion,
       label: semanticsLabel,
       value: semanticsValue,
       child: child,
@@ -225,10 +227,7 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
   ///
-  /// The [semanticsEnabled] argument must not be null. It defaults to false. If
-  /// this widget provides information that should be announced by screen reading
-  /// software, it should be set to true. If it is `true`, at least one of
-  /// [semanticsLabel] or [semanticsValue] must be specified.
+  /// {@macro flutter.material.progressIndicator.semantics}
   const LinearProgressIndicator({
     Key key,
     double value,
@@ -236,7 +235,7 @@ class LinearProgressIndicator extends ProgressIndicator {
     Animation<Color> valueColor,
     String semanticsLabel,
     String semanticsValue,
-    bool semanticsEnabled = false,
+    bool semanticsLiveRegion = false,
   }) : super(
          key: key,
          value: value,
@@ -244,7 +243,7 @@ class LinearProgressIndicator extends ProgressIndicator {
          valueColor: valueColor,
          semanticsLabel: semanticsLabel,
          semanticsValue: semanticsValue,
-         semanticsEnabled: semanticsEnabled,
+         semanticsLiveRegion: semanticsLiveRegion,
        );
 
   @override
@@ -400,10 +399,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
   ///
-  /// The [semanticsEnabled] argument must not be null. It defaults to false. If
-  /// this widget provides information that should be announced by screen reading
-  /// software, it should be set to true. If it is `true`, at least one of
-  /// [semanticsLabel] or [semanticsValue] must be specified.
+  /// {@macro flutter.material.progressIndicator.semantics}
   const CircularProgressIndicator({
     Key key,
     double value,
@@ -412,7 +408,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.strokeWidth = 4.0,
     String semanticsLabel,
     String semanticsValue,
-    bool semanticsEnabled = false,
+    bool semanticsLiveRegion,
   }) : super(
          key: key,
          value: value,
@@ -420,7 +416,7 @@ class CircularProgressIndicator extends ProgressIndicator {
          valueColor: valueColor,
          semanticsLabel: semanticsLabel,
          semanticsValue: semanticsValue,
-         semanticsEnabled: semanticsEnabled,
+         semanticsLiveRegion: semanticsLiveRegion,
        );
 
   /// The width of the line used to draw the circle.
@@ -594,28 +590,25 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   /// Rather than creating a refresh progress indicator directly, consider using
   /// a [RefreshIndicator] together with a [Scrollable] widget.
   ///
-  /// The [semanticsEnabled] argument must not be null. It defaults to false. If
-  /// this widget provides information that should be announced by screen reading
-  /// software, it should be set to true. If it is `true`, at least one of
-  /// [semanticsLabel] or [semanticsValue] must be specified.
+  /// {@macro flutter.material.progressIndicator.semantics}
   const RefreshProgressIndicator({
     Key key,
     double value,
     Color backgroundColor,
     Animation<Color> valueColor,
     double strokeWidth = 2.0, // Different default than CircularProgressIndicator.
-    bool semanticsEnabled = false,
     String semanticsLabel,
     String semanticsValue,
+    bool semanticsLiveRegion,
   }) : super(
     key: key,
     value: value,
     backgroundColor: backgroundColor,
     valueColor: valueColor,
     strokeWidth: strokeWidth,
-    semanticsEnabled: semanticsEnabled,
     semanticsLabel: semanticsLabel,
     semanticsValue: semanticsValue,
+    semanticsLiveRegion: semanticsLiveRegion,
   );
 
   @override

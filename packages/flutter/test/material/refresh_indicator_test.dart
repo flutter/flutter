@@ -45,9 +45,7 @@ void main() {
     await tester.pump();
 
     expect(tester.getSemantics(find.byType(RefreshProgressIndicator)), matchesSemantics(
-      isEnabled: true,
       isLiveRegion: true,
-      hasEnabledState: true,
       label: 'Refresh',
     ));
 

@@ -87,11 +87,12 @@ class RefreshIndicator extends StatefulWidget {
   /// non-null. The default
   /// [displacement] is 40.0 logical pixels.
   ///
-  /// The [semanticsEnabled] argument must not be null. It defaults to true.
-  /// It may be set to false if it is used in a way that is primarily meant for
-  /// visual flair and would not add value if read by screen reading software.
-  /// At least one of [semanticsLabel] or [semanticsValue] must be specified if
-  /// [semanticsEnabled] is set to true.
+  /// The [semanticsLabel] is used to specify an accessibility label for this widget.
+  /// If it is null, it will be defaulted to [MaterialLocalizations.refreshIndicatorSemanticLabel].
+  /// An empty string may be passed to avoid having anything read by screen reading software.
+  /// The [semanticsValue] may be used to specify progress on the widget. The
+  /// [semanticsLiveRegion] parameter corresponds to [Semantics.liveRegion], and defaults
+  /// to true, as this widget will normally be a primary indicator for the UI.
   const RefreshIndicator({
     Key key,
     @required this.child,
@@ -100,13 +101,12 @@ class RefreshIndicator extends StatefulWidget {
     this.color,
     this.backgroundColor,
     this.notificationPredicate = defaultScrollNotificationPredicate,
-    this.semanticsEnabled = true,
     this.semanticsLabel,
     this.semanticsValue,
+    this.semanticsLiveRegion = true,
   }) : assert(child != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
-       assert(semanticsEnabled != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -144,21 +144,21 @@ class RefreshIndicator extends StatefulWidget {
 
   /// The [Semantics.label] for this indicator.
   ///
-  /// This will be ignored if [semanticsEnabled] is false.
+  /// This will be defaulted to [MaterialLocalizations.refreshIndicatorSemanticLabel]
+  /// if it is null.
   final String semanticsLabel;
 
   /// The [Semantics.value] for this indicator.
-  ///
-  /// This will be ignored if [semanticsEnabled] is false.
   final String semanticsValue;
 
-  /// Whether the indicator will be given its own semantics node in the semantics
-  /// tree.  Defaults to true.
-  ///
-  /// This may be set to false if it would be distracting for a screen reader to
-  /// announce the label and value of this widget, for example if it is used in
-  /// some secondary manner as visual flair.
-  final bool semanticsEnabled;
+  /// The [Semantics.liveRegion] for this indicator.
+  /// 
+  /// This should be set to false if this indicator is being used in
+  /// a way such that it would be undesirable for the screen reader to
+  /// provide live polite updates about its status, e.g. if it is
+  /// one of multiple indicators on the screen and not one that is important
+  /// for users to receive continual updates about.
+  final bool semanticsLiveRegion;
 
   @override
   RefreshIndicatorState createState() => RefreshIndicatorState();
@@ -463,9 +463,9 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                   animation: _positionController,
                   builder: (BuildContext context, Widget child) {
                     return RefreshProgressIndicator(
-                      semanticsEnabled: widget.semanticsEnabled,
                       semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
                       semanticsValue: widget.semanticsValue,
+                      semanticsLiveRegion: widget.semanticsLiveRegion,
                       value: showIndeterminateIndicator ? null : _value.value,
                       valueColor: _valueColor,
                       backgroundColor: widget.backgroundColor,
