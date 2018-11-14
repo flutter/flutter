@@ -33,6 +33,8 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// indicator). See [value] for details.
   ///
   /// {@template flutter.material.progressIndicator.semantics}
+  /// ## Accessibility
+  /// 
   /// The [semanticsLabel] can be used to identify the purpose of this progress
   /// bar for screen reading software. The [semanticsValue] property may be used
   /// for determinate progress indicators to indicate how much progress has been made.
@@ -71,16 +73,26 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// [ThemeData.accentColor].
   final Animation<Color> valueColor;
 
+  /// {@template flutter.material.progressIndicator.semanticsLabel}
   /// The [Semantics.label] for this progress indicator.
   ///
   /// This value indicates the purpose of the progress bar, and is used
   /// by screen reading software to identify the widget.
+  /// {@endtemplate}
   final String semanticsLabel;
 
+  /// {@template flutter.material.progressIndicator.semanticsValue}
   /// The [Semantics.value] for this progress indicator.
   ///
   /// This will be used in conjunction with the [semanticsLabel] by
-  /// screen reading software to identify the widget.
+  /// screen reading software to identify the widget, and is primarily
+  /// intended for use with determinate progress indicators to announce
+  /// how far along they are.
+  /// 
+  /// For determinate progress indicators that have a non-null [semanticsLabel],
+  /// this will be defaulted to [value] expressed as a percentage, i.e. `0.1`
+  /// will become '10%'.
+  /// {@endtemplate}
   final String semanticsValue;
 
   /// The [Semantics.liveRegion] for this progress indicator.
@@ -105,11 +117,15 @@ abstract class ProgressIndicator extends StatefulWidget {
     @required BuildContext context,
     @required Widget child,
   }) {
+    String expandedSemanticsValue = semanticsValue;
+    if (semanticsLabel != null && value != null) {
+      expandedSemanticsValue ??= '${(value * 100).round()}%';
+    }
     return Semantics(
       container: true,
       liveRegion: semanticsLiveRegion,
       label: semanticsLabel,
-      value: semanticsValue,
+      value: expandedSemanticsValue,
       child: child,
     );
   }
