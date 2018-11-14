@@ -147,8 +147,11 @@ class _GalleryAppState extends State<GalleryApp> {
           child: _applyTextScaleFactor(child),
         );
       },
-      // home: welcome,
-      home: home,
+
+      // TODO not the correct way to do this, should be 
+      // another route potentially added to the main?
+      home: welcome,
+      // home: home,
     );
   }
 }

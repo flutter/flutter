@@ -388,7 +388,7 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
         actions: const <Widget>[],
       ),
       body: Material(
-        color: const Color(0xFFFFFFFF),
+        color: Colors.blue, // const Color(0xFFFFFFFF),
         child: NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification notification) {
             if (notification is ScrollStartNotification) {
