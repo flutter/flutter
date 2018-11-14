@@ -413,18 +413,14 @@ void main() {
   });
 
   testWidgets('separatorBuilder must return something', (WidgetTester tester) async {
-    final List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+    const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
 
     Widget buildFrame(Widget firstSeparator) {
       return MaterialApp(
         home: Material(
           child: ListView.separated(
             itemBuilder: (BuildContext context, int index) {
-              return ListTile(
-                title: Text(
-                  listOfValues[index],
-                ),
-              );
+              return Text(listOfValues[index]);
             },
             separatorBuilder: (BuildContext context, int index) {
               if (index == 0) {
@@ -446,31 +442,24 @@ void main() {
     // A separatorBuilder that returns null throws a FlutterError
     await tester.pumpWidget(buildFrame(null));
     expect(tester.takeException(), isInstanceOf<FlutterError>());
+    expect(find.byType(ErrorWidget), findsOneWidget);
   });
 
   testWidgets('itemBuilder can return null', (WidgetTester tester) async {
-    final List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+    const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
     const Key key = Key('list');
-    const int RENDER_NULL_AT = 2;
+    const int RENDER_NULL_AT = 2; // only render the first 2 values
 
     Widget buildFrame() {
       return MaterialApp(
         home: Material(
-          child: ListView.separated(
+          child: ListView.builder(
             key: key,
             itemBuilder: (BuildContext context, int index) {
               if (index == RENDER_NULL_AT) {
                 return null;
-              } else  {
-                return ListTile(
-                  title: Text(
-                    listOfValues[index],
-                  ),
-                );
               }
-            },
-            separatorBuilder: (BuildContext context, int index) {
-              return const Divider();
+              return Text(listOfValues[index]);
             },
             itemCount: listOfValues.length,
           ),
@@ -478,43 +467,26 @@ void main() {
       );
     }
 
-    // An itemBuilder that returns null stops rendering items, but it does not
-    // throw an error or render an ErrorWidget
+    // The length of a list is itemCount or the index of the first itemBuilder
+    // that returns null, whichever is smaller
     await tester.pumpWidget(buildFrame());
     expect(tester.takeException(), isNull);
-    final Finder errorFinder = find.descendant(
-      of: find.byKey(key),
-      matching: find.byType(ErrorWidget),
-    );
-    expect(errorFinder, findsNothing);
-    final Finder itemFinder = find.descendant(
-      of: find.byKey(key),
-      matching: find.byType(ListTile),
-    );
-    expect(itemFinder, findsNWidgets(RENDER_NULL_AT));
+    expect(find.byType(ErrorWidget), findsNothing);
+    expect(find.byType(Text), findsNWidgets(RENDER_NULL_AT));
   });
 
   testWidgets('when itemBuilder throws, creates Error Widget', (WidgetTester tester) async {
-    final List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
-    const Key key = Key('list');
+    const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
 
     Widget buildFrame(bool throwOnFirstItem) {
       return MaterialApp(
         home: Material(
-          child: ListView.separated(
-            key: key,
+          child: ListView.builder(
             itemBuilder: (BuildContext context, int index) {
               if (index == 0 && throwOnFirstItem) {
                 throw Exception('itemBuilder fail');
               }
-              return ListTile(
-                title: Text(
-                  listOfValues[index],
-                ),
-              );
-            },
-            separatorBuilder: (BuildContext context, int index) {
-              return const Divider();
+              return Text(listOfValues[index]);
             },
             itemCount: listOfValues.length,
           ),
@@ -525,11 +497,8 @@ void main() {
     // When itemBuilder doesn't throw, no ErrorWidget
     await tester.pumpWidget(buildFrame(false));
     expect(tester.takeException(), isNull);
-    final Finder finder = find.descendant(
-      of: find.byKey(key),
-      matching: find.byType(ErrorWidget),
-    );
-    expect(finder, findsNothing);
+    final Finder finder = find.byType(ErrorWidget);
+    expect(find.byType(ErrorWidget), findsNothing);
 
     // When it does throw, one error widget is rendered in the item's place
     await tester.pumpWidget(buildFrame(true));
@@ -538,7 +507,7 @@ void main() {
   });
 
   testWidgets('when separatorBuilder throws, creates ErrorWidget', (WidgetTester tester) async {
-    final List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+    const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
     const Key key = Key('list');
 
     Widget buildFrame(bool throwOnFirstSeparator) {
@@ -547,11 +516,7 @@ void main() {
           child: ListView.separated(
             key: key,
             itemBuilder: (BuildContext context, int index) {
-              return ListTile(
-                title: Text(
-                  listOfValues[index],
-                ),
-              );
+              return Text(listOfValues[index]);
             },
             separatorBuilder: (BuildContext context, int index) {
               if (index == 0 && throwOnFirstSeparator) {
@@ -568,11 +533,8 @@ void main() {
     // When separatorBuilder doesn't throw, no ErrorWidget
     await tester.pumpWidget(buildFrame(false));
     expect(tester.takeException(), isNull);
-    final Finder finder = find.descendant(
-      of: find.byKey(key),
-      matching: find.byType(ErrorWidget),
-    );
-    expect(finder, findsNothing);
+    final Finder finder = find.byType(ErrorWidget);
+    expect(find.byType(ErrorWidget), findsNothing);
 
     // When it does throw, one error widget is rendered in the separator's place
     await tester.pumpWidget(buildFrame(true));
