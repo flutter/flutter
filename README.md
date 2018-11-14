@@ -36,7 +36,6 @@ Quickly ship features with a focus on native end-user experiences.
 Layered architecture allows full customization, which results in incredibly
 fast rendering and expressive and flexible designs.
 
-
 Delight your users with Flutter's built-in
 beautiful Material Design and
 Cupertino (iOS-flavor) widgets, rich motion APIs,

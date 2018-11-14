@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
-import 'package:quiver/time.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -14,12 +13,13 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process.dart';
 import 'base/process_manager.dart';
+import 'base/time.dart';
 import 'cache.dart';
 import 'globals.dart';
 
 class FlutterVersion {
   @visibleForTesting
-  FlutterVersion([this._clock = const Clock()]) {
+  FlutterVersion([this._clock = const SystemClock()]) {
     _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
     final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
     _branch = branch == 'HEAD' ? _channel : branch;
@@ -38,7 +38,7 @@ class FlutterVersion {
     _frameworkVersion = GitTagVersion.determine().frameworkVersionFor(_frameworkRevision);
   }
 
-  final Clock _clock;
+  final SystemClock _clock;
 
   String _repositoryUrl;
   String get repositoryUrl => _repositoryUrl;
@@ -273,7 +273,7 @@ class FlutterVersion {
 
     // Do not load the stamp before the above server check as it may modify the stamp file.
     final VersionCheckStamp stamp = await VersionCheckStamp.load();
-    final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? _clock.agoBy(kMaxTimeSinceLastWarning * 2);
+    final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? _clock.ago(kMaxTimeSinceLastWarning * 2);
     final bool beenAWhileSinceWarningWasPrinted = _clock.now().difference(lastTimeWarningWasPrinted) > kMaxTimeSinceLastWarning;
 
     // We show a warning if either we know there is a new remote version, or we couldn't tell but the local

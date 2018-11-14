@@ -13,6 +13,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
@@ -320,7 +321,7 @@ abstract class FlutterCommand extends Command<void> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<void> run() {
-    final DateTime startTime = clock.now();
+    final DateTime startTime = systemClock.now();
 
     return context.run<void>(
       name: 'command',
@@ -336,7 +337,7 @@ abstract class FlutterCommand extends Command<void> {
           commandResult = const FlutterCommandResult(ExitStatus.fail);
           rethrow;
         } finally {
-          final DateTime endTime = clock.now();
+          final DateTime endTime = systemClock.now();
           printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
           // This is checking the result of the call to 'usagePath'
           // (a Future<String>), and not the result of evaluating the Future.

@@ -460,6 +460,17 @@ abstract class ResidentRunner {
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
 
+  /// Whether this runner can hot restart.
+  ///
+  /// To prevent scenarios where only a subset of devices are hot restarted,
+  /// the runner requires that all attached devices can support hot restart
+  /// before enabling it.
+  bool get canHotRestart {
+    return flutterDevices.every((FlutterDevice device) {
+      return device.device.supportsHotRestart;
+    });
+  }
+
   /// Start the app and keep the process running during its lifetime.
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
