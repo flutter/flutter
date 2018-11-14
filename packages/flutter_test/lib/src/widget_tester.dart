@@ -56,8 +56,7 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 ///     });
 /// ```
 @isTest
-void
-testWidgets(String description, WidgetTesterCallback callback, {
+void testWidgets(String description, WidgetTesterCallback callback, {
   bool skip = false,
   test_package.Timeout timeout
 }) {
