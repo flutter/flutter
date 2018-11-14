@@ -84,7 +84,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   final String semanticsValue;
 
   /// The [Semantics.liveRegion] for this progress indicator.
-  /// 
+  ///
   /// This value should only be set to true for progress indicators
   /// that are primary on the screen. For example, a [GridView] of
   /// progress indicator placeholders should not all be marked as

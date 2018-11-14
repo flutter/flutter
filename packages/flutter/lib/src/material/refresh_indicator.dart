@@ -152,7 +152,7 @@ class RefreshIndicator extends StatefulWidget {
   final String semanticsValue;
 
   /// The [Semantics.liveRegion] for this indicator.
-  /// 
+  ///
   /// This should be set to false if this indicator is being used in
   /// a way such that it would be undesirable for the screen reader to
   /// provide live polite updates about its status, e.g. if it is
