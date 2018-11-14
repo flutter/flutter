@@ -16,6 +16,10 @@
 
 namespace shell {
 
+// The rasterizer will tell Skia to purge cached resources that have not been
+// used within this interval.
+static constexpr std::chrono::milliseconds kSkiaCleanupExpiration(15000);
+
 Rasterizer::Rasterizer(blink::TaskRunners task_runners)
     : Rasterizer(std::move(task_runners),
                  std::make_unique<flow::CompositorContext>()) {}
@@ -186,6 +190,9 @@ bool Rasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
       external_view_embedder->SubmitFrame(surface_->GetContext());
     }
     FireNextFrameCallbackIfPresent();
+
+    surface_->GetContext()->performDeferredCleanup(kSkiaCleanupExpiration);
+
     return true;
   }
 
