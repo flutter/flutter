@@ -13,7 +13,7 @@ void main() {
   // The "can be constructed" tests that follow are primarily to ensure that any
   // animations started by the progress indicators are stopped at dispose() time.
 
-  testWidgets('LinearProgressIndicator(value: 0.0) can be constructed and has disabled liveRegion by default', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator(value: 0.0) can be constructed and has empty semantics by default', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Directionality(
@@ -27,13 +27,11 @@ void main() {
       ),
     );
 
-    expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics(
-      isLiveRegion: false,
-    ));
+    expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics());
     handle.dispose();
   });
 
-  testWidgets('LinearProgressIndicator(value: null) can be constructed and has disabled semantics by default', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator(value: null) can be constructed and has empty semantics by default', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Directionality(
@@ -47,9 +45,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics(
-      isLiveRegion: false,
-    ));
+    expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics());
     handle.dispose();
   });
 
@@ -178,21 +174,25 @@ void main() {
     );
   });
 
-  testWidgets('CircularProgressIndicator(value: 0.0) can be constructed and has disabled liveRegion by default', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator(value: 0.0) can be constructed and has value semantics by default', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
-      const Center(
-        child: CircularProgressIndicator(value: 0.0)
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CircularProgressIndicator(value: 0.0)
+        )
       )
     );
 
     expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics(
-      isLiveRegion: false,
+      value: '0%',
+      textDirection: TextDirection.ltr,
     ));
     handle.dispose();
   });
 
-  testWidgets('CircularProgressIndicator(value: null) can be constructed and has disabled liveRegion by default', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator(value: null) can be constructed and has empty semantics by default', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Center(
@@ -200,9 +200,7 @@ void main() {
       )
     );
 
-    expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics(
-      isLiveRegion: false,
-    ));
+    expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics());
     handle.dispose();
   });
 
@@ -364,7 +362,6 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
-      isLiveRegion: false,
       textDirection: TextDirection.ltr,
       label: label,
       value: value,
@@ -389,7 +386,6 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
-      isLiveRegion: false,
       textDirection: TextDirection.ltr,
       label: label,
       value: '25%',
@@ -411,9 +407,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
-      isLiveRegion: false,
-    ));
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics());
 
     handle.dispose();
   });
@@ -434,7 +428,6 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
-      isLiveRegion: false,
       textDirection: TextDirection.ltr,
       label: label,
     ));
@@ -453,7 +446,6 @@ void main() {
         child: CircularProgressIndicator(
           key: key,
           value: 0.25,
-          semanticsLiveRegion: true,
           semanticsLabel: label,
           semanticsValue: value,
         ),
@@ -461,7 +453,6 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
-      isLiveRegion: true,
       textDirection: TextDirection.ltr,
       label: label,
       value: value,
@@ -480,7 +471,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: RefreshProgressIndicator(
           key: key,
-          semanticsLiveRegion: false,
           semanticsLabel: label,
           semanticsValue: value,
         ),
@@ -488,7 +478,6 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
-      isLiveRegion: false,
       textDirection: TextDirection.ltr,
       label: label,
       value: value,

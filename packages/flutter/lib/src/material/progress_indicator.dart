@@ -38,10 +38,6 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// The [semanticsLabel] can be used to identify the purpose of this progress
   /// bar for screen reading software. The [semanticsValue] property may be used
   /// for determinate progress indicators to indicate how much progress has been made.
-  /// The [semanticsLiveRegion] parameter corresponds to [Semantics.liveRegion],
-  /// and should only be set to true if this progress indicator is a primary item
-  /// on the screen, as it will cause the screen reader to continuously and politely
-  /// read the status of this indicator.
   /// {@endtemplate}
   const ProgressIndicator({
     Key key,
@@ -50,7 +46,6 @@ abstract class ProgressIndicator extends StatefulWidget {
     this.valueColor,
     this.semanticsLabel,
     this.semanticsValue,
-    this.semanticsLiveRegion = false,
   }) : super(key: key);
 
   /// If non-null, the value of this progress indicator with 0.0 corresponding
@@ -95,15 +90,6 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// {@endtemplate}
   final String semanticsValue;
 
-  /// The [Semantics.liveRegion] for this progress indicator.
-  ///
-  /// This value should only be set to true for progress indicators
-  /// that are primary on the screen. For example, a [GridView] of
-  /// progress indicator placeholders should not all be marked as
-  /// live regions, as it would cause the screen reading software
-  /// to continuously read multiple updates at once.
-  final bool semanticsLiveRegion;
-
   Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context).backgroundColor;
   Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context).accentColor;
 
@@ -123,7 +109,6 @@ abstract class ProgressIndicator extends StatefulWidget {
     }
     return Semantics(
       container: true,
-      liveRegion: semanticsLiveRegion,
       label: semanticsLabel,
       value: expandedSemanticsValue,
       child: child,
@@ -251,7 +236,6 @@ class LinearProgressIndicator extends ProgressIndicator {
     Animation<Color> valueColor,
     String semanticsLabel,
     String semanticsValue,
-    bool semanticsLiveRegion = false,
   }) : super(
          key: key,
          value: value,
@@ -259,7 +243,6 @@ class LinearProgressIndicator extends ProgressIndicator {
          valueColor: valueColor,
          semanticsLabel: semanticsLabel,
          semanticsValue: semanticsValue,
-         semanticsLiveRegion: semanticsLiveRegion,
        );
 
   @override
@@ -424,7 +407,6 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.strokeWidth = 4.0,
     String semanticsLabel,
     String semanticsValue,
-    bool semanticsLiveRegion,
   }) : super(
          key: key,
          value: value,
@@ -432,7 +414,6 @@ class CircularProgressIndicator extends ProgressIndicator {
          valueColor: valueColor,
          semanticsLabel: semanticsLabel,
          semanticsValue: semanticsValue,
-         semanticsLiveRegion: semanticsLiveRegion,
        );
 
   /// The width of the line used to draw the circle.
@@ -615,7 +596,6 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     double strokeWidth = 2.0, // Different default than CircularProgressIndicator.
     String semanticsLabel,
     String semanticsValue,
-    bool semanticsLiveRegion,
   }) : super(
     key: key,
     value: value,
@@ -624,7 +604,6 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     strokeWidth: strokeWidth,
     semanticsLabel: semanticsLabel,
     semanticsValue: semanticsValue,
-    semanticsLiveRegion: semanticsLiveRegion,
   );
 
   @override

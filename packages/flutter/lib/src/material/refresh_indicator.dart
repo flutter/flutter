@@ -91,8 +91,6 @@ class RefreshIndicator extends StatefulWidget {
   /// If it is null, it will be defaulted to [MaterialLocalizations.refreshIndicatorSemanticLabel].
   /// An empty string may be passed to avoid having anything read by screen reading software.
   /// The [semanticsValue] may be used to specify progress on the widget. The
-  /// [semanticsLiveRegion] parameter corresponds to [Semantics.liveRegion], and defaults
-  /// to true, as this widget will normally be a primary indicator for the UI.
   const RefreshIndicator({
     Key key,
     @required this.child,
@@ -103,7 +101,6 @@ class RefreshIndicator extends StatefulWidget {
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.semanticsLabel,
     this.semanticsValue,
-    this.semanticsLiveRegion = true,
   }) : assert(child != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
@@ -150,15 +147,6 @@ class RefreshIndicator extends StatefulWidget {
 
   /// {@macro flutter.material.progressIndicator.semanticsValue}
   final String semanticsValue;
-
-  /// The [Semantics.liveRegion] for this indicator.
-  ///
-  /// This should be set to false if this indicator is being used in
-  /// a way such that it would be undesirable for the screen reader to
-  /// provide live polite updates about its status, e.g. if it is
-  /// one of multiple indicators on the screen and not one that is important
-  /// for users to receive continual updates about.
-  final bool semanticsLiveRegion;
 
   @override
   RefreshIndicatorState createState() => RefreshIndicatorState();
@@ -465,7 +453,6 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                     return RefreshProgressIndicator(
                       semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
                       semanticsValue: widget.semanticsValue,
-                      semanticsLiveRegion: widget.semanticsLiveRegion,
                       value: showIndeterminateIndicator ? null : _value.value,
                       valueColor: _valueColor,
                       backgroundColor: widget.backgroundColor,
