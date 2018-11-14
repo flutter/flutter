@@ -128,7 +128,8 @@ bool RuntimeController::FlushRuntimeStateToIsolate() {
   return SetViewportMetrics(window_data_.viewport_metrics) &&
          SetLocales(window_data_.locale_data) &&
          SetSemanticsEnabled(window_data_.semantics_enabled) &&
-         SetAccessibilityFeatures(window_data_.accessibility_feature_flags_);
+         SetAccessibilityFeatures(window_data_.accessibility_feature_flags_) &&
+         SetUserSettingsData(window_data_.user_settings_data);
 }
 
 bool RuntimeController::SetViewportMetrics(const ViewportMetrics& metrics) {

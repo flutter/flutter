@@ -67,6 +67,12 @@ void main() {
       window.onTextScaleFactorChanged = originalOnTextScaleFactorChanged;
     });
 
+    test('updateUserSettings can handle an empty object', () {
+      // this should now throw.
+      _updateUserSettingsData('{}');
+      expect(true, equals(true));
+    });
+
     test('onMetricsChanged preserves callback zone', () {
       Zone innerZone;
       Zone runZone;
