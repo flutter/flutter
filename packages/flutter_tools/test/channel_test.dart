@@ -188,7 +188,7 @@ void main() {
       )).thenAnswer((_) => Future<Process>.value(createMockProcess()));
 
       final File versionCheckFile = Cache.instance.getStampFileFor(
-        VersionCheckStamp.kFlutterVersionCheckStampFile,
+        VersionCheckStamp.flutterVersionCheckStampFile,
       );
 
       /// Create a bogus "leftover" version check file to make sure it gets
