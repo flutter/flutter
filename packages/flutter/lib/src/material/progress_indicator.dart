@@ -34,7 +34,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   ///
   /// {@template flutter.material.progressIndicator.semantics}
   /// ## Accessibility
-  /// 
+  ///
   /// The [semanticsLabel] can be used to identify the purpose of this progress
   /// bar for screen reading software. The [semanticsValue] property may be used
   /// for determinate progress indicators to indicate how much progress has been made.
@@ -88,7 +88,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// screen reading software to identify the widget, and is primarily
   /// intended for use with determinate progress indicators to announce
   /// how far along they are.
-  /// 
+  ///
   /// For determinate progress indicators that have a non-null [semanticsLabel],
   /// this will be defaulted to [value] expressed as a percentage, i.e. `0.1`
   /// will become '10%'.
