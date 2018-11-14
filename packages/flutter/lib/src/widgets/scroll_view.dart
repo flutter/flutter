@@ -889,28 +889,22 @@ class ListView extends BoxScrollView {
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
-           if (index.isEven) {
-             return itemBuilder(context, itemIndex);
-           } else {
-             Widget separator;
-             try {
-               separator = separatorBuilder(context, itemIndex);
-               if (separator == null) {
+           Widget widget;
+           try {
+             if (index.isEven) {
+               widget = itemBuilder(context, itemIndex);
+             } else {
+               widget = separatorBuilder(context, itemIndex);
+               if (widget == null) {
                  throw FlutterError('separatorBuilder cannot return null.');
                }
-             } catch (exception, stack) {
-               final FlutterErrorDetails details = FlutterErrorDetails(
-                 exception: exception,
-                 stack: stack,
-                 library: 'widgets library',
-                 context: 'building',
-                 informationCollector: null,
-               );
-               FlutterError.reportError(details);
-               separator = ErrorWidget.builder(details);
              }
-             return separator;
+           } catch (exception) {
+             // If there was an error, use an ErrorWidget
+             widget = _createErrorWidget(exception);
            }
+
+           return widget;
          },
          childCount: _computeSemanticChildCount(itemCount),
          addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -1407,4 +1401,25 @@ class GridView extends BoxScrollView {
       gridDelegate: gridDelegate,
     );
   }
+}
+
+// Return an ErrorWidget for the given Exception
+ErrorWidget _createErrorWidget(dynamic exception) {
+  // Get the stack trace by throwing
+  StackTrace stackTrace;
+  try {
+    throw exception;
+  } catch(thrownException, thrownStackTrace) {
+    stackTrace = thrownStackTrace;
+  }
+
+  final FlutterErrorDetails details = FlutterErrorDetails(
+    exception: exception,
+    stack: stackTrace,
+    library: 'widgets library',
+    context: 'building',
+    informationCollector: null,
+  );
+  FlutterError.reportError(details);
+  return ErrorWidget.builder(details);
 }
