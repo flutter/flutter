@@ -7632,6 +7632,207 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'ЛИЦЕНЗҮҮДИЙГ ХАРАХ';
 }
 
+/// The translations for Marathi (`mr`).
+class MaterialLocalizationMr extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Marathi.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationMr({
+    String localeName = 'mr',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName बद्दल';
+
+  @override
+  String get alertDialogLabel => r'अलर्ट';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'मागे';
+
+  @override
+  String get cancelButtonLabel => r'रद्द';
+
+  @override
+  String get closeButtonLabel => r'बंद';
+
+  @override
+  String get closeButtonTooltip => r'बंद';
+
+  @override
+  String get collapsedIconTapHint => r'विस्तृत';
+
+  @override
+  String get continueButtonLabel => r'सुरू';
+
+  @override
+  String get copyButtonLabel => r'कॉपी';
+
+  @override
+  String get cutButtonLabel => r'कट';
+
+  @override
+  String get deleteButtonTooltip => r'मिटवा';
+
+  @override
+  String get dialogLabel => r'संवाद';
+
+  @override
+  String get drawerLabel => r'नेव्हिगेशन मेनू';
+
+  @override
+  String get expandedIconTapHint => r'संकुचित';
+
+  @override
+  String get hideAccountsLabel => r'खाती लपवा';
+
+  @override
+  String get licensesPageTitle => r'परवाने';
+
+  @override
+  String get modalBarrierDismissLabel => r'हटवा';
+
+  @override
+  String get nextMonthTooltip => r'पुढील महिना';
+
+  @override
+  String get nextPageTooltip => r'पुढील पृष्ठ';
+
+  @override
+  String get okButtonLabel => r'ठीक';
+
+  @override
+  String get openAppDrawerTooltip => r'नेव्हिगेशन मेनू उघडा';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow मधून $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow मधून अंदाजे $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'पेस्ट';
+
+  @override
+  String get popupMenuLabel => r'पॉपअप मेनू';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'मागील महिना';
+
+  @override
+  String get previousPageTooltip => r'मागील पृष्ठ';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 वर्ण उर्वरित';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount वर्ण उर्वरित';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'कोणतेही वर्ण शिल्लक नाहीत';
+
+  @override
+  String get reorderItemDown => r'खाली हलवा';
+
+  @override
+  String get reorderItemLeft => r'डावीकडे हलवा';
+
+  @override
+  String get reorderItemRight => r'उजवीकडे हलवा';
+
+  @override
+  String get reorderItemToEnd => r'शेवटी हलवा';
+
+  @override
+  String get reorderItemToStart => r'सुरूवातीस हलवा';
+
+  @override
+  String get reorderItemUp => r'वर हलवा';
+
+  @override
+  String get rowsPerPageTitle => r'ओळी प्रति पृष्ठ :';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.dense;
+
+  @override
+  String get searchFieldLabel => r'शोध';
+
+  @override
+  String get selectAllButtonLabel => r'सर्व निवडा';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'१ आयटम निवडला';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount निवडलेले';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => r'कोणतेही आयटम निवडलेले नाहीत';
+
+  @override
+  String get showAccountsLabel => r'खाती दाखवा';
+
+  @override
+  String get showMenuTooltip => r'मेनू दर्शवा';
+
+  @override
+  String get signedInLabel => r'साइन इन झालेले';
+
+  @override
+  String get tabLabelRaw => r'Tab $tabIndex मधून $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'तास निवडा';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'मिनिटे निवडा';
+
+  @override
+  String get viewLicensesButtonLabel => r'परवाने पहा';
+}
+
 /// The translations for Malay (`ms`).
 class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Malay.
@@ -12007,6 +12208,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
   'lt', // Lithuanian
   'lv', // Latvian
   'mn', // Mongolian
+  'mr', // Marathi
   'ms', // Malay
   'nb', // Norwegian Bokmål
   'nl', // Dutch Flemish
@@ -12066,6 +12268,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `lt` - Lithuanian
 ///  * `lv` - Latvian
 ///  * `mn` - Mongolian
+///  * `mr` - Marathi
 ///  * `ms` - Malay
 ///  * `nb` - Norwegian Bokmål
 ///  * `nl` - Dutch Flemish
@@ -12225,6 +12428,8 @@ GlobalMaterialLocalizations getTranslation(
       return MaterialLocalizationLv(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'mn':
       return MaterialLocalizationMn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'mr':
+      return MaterialLocalizationMr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ms':
       return MaterialLocalizationMs(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'nb':
