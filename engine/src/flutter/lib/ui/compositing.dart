@@ -56,14 +56,14 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// The objects are transformed by the given matrix before rasterization.
   ///
   /// See [pop] for details about the operation stack.
-  void pushTransform(Float64List matrix4) {
+  EngineLayer pushTransform(Float64List matrix4) {
     if (matrix4 == null)
       throw new ArgumentError('"matrix4" argument cannot be null');
     if (matrix4.length != 16)
       throw new ArgumentError('"matrix4" must have 16 entries.');
-    _pushTransform(matrix4);
+    return _pushTransform(matrix4);
   }
-  void _pushTransform(Float64List matrix4) native 'SceneBuilder_pushTransform';
+  EngineLayer _pushTransform(Float64List matrix4) native 'SceneBuilder_pushTransform';
 
   /// Pushes an offset operation onto the operation stack.
   ///
@@ -78,16 +78,16 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   ///
   /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
   /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
-  void pushClipRect(Rect rect, {Clip clipBehavior = Clip.antiAlias}) {
+  EngineLayer pushClipRect(Rect rect, {Clip clipBehavior = Clip.antiAlias}) {
     assert(clipBehavior != null);
     assert(clipBehavior != Clip.none);
-    _pushClipRect(rect.left, rect.right, rect.top, rect.bottom, clipBehavior.index);
+    return _pushClipRect(rect.left, rect.right, rect.top, rect.bottom, clipBehavior.index);
   }
-  void _pushClipRect(double left,
-                     double right,
-                     double top,
-                     double bottom,
-                     int clipBehavior) native 'SceneBuilder_pushClipRect';
+  EngineLayer _pushClipRect(double left,
+                            double right,
+                            double top,
+                            double bottom,
+                            int clipBehavior) native 'SceneBuilder_pushClipRect';
 
   /// Pushes a rounded-rectangular clip operation onto the operation stack.
   ///
@@ -95,12 +95,12 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   ///
   /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
   /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
-  void pushClipRRect(RRect rrect, {Clip clipBehavior = Clip.antiAlias}) {
+  EngineLayer pushClipRRect(RRect rrect, {Clip clipBehavior = Clip.antiAlias}) {
     assert(clipBehavior != null);
     assert(clipBehavior != Clip.none);
-    _pushClipRRect(rrect._value, clipBehavior.index);
+    return _pushClipRRect(rrect._value, clipBehavior.index);
   }
-  void _pushClipRRect(Float32List rrect, int clipBehavior) native 'SceneBuilder_pushClipRRect';
+  EngineLayer _pushClipRRect(Float32List rrect, int clipBehavior) native 'SceneBuilder_pushClipRRect';
 
   /// Pushes a path clip operation onto the operation stack.
   ///
@@ -108,12 +108,12 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   ///
   /// See [pop] for details about the operation stack. See [Clip] for different clip modes.
   /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
-  void pushClipPath(Path path, {Clip clipBehavior = Clip.antiAlias}) {
+  EngineLayer pushClipPath(Path path, {Clip clipBehavior = Clip.antiAlias}) {
     assert(clipBehavior != null);
     assert(clipBehavior != Clip.none);
-    _pushClipPath(path, clipBehavior.index);
+    return _pushClipPath(path, clipBehavior.index);
   }
-  void _pushClipPath(Path path, int clipBehavior) native 'SceneBuilder_pushClipPath';
+  EngineLayer _pushClipPath(Path path, int clipBehavior) native 'SceneBuilder_pushClipPath';
 
   /// Pushes an opacity operation onto the operation stack.
   ///
@@ -123,10 +123,10 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// opacity).
   ///
   /// See [pop] for details about the operation stack.
-  void pushOpacity(int alpha, {Offset offset = Offset.zero}) {
-    _pushOpacity(alpha, offset.dx, offset.dy);
+  EngineLayer pushOpacity(int alpha, {Offset offset = Offset.zero}) {
+    return _pushOpacity(alpha, offset.dx, offset.dy);
   }
-  void _pushOpacity(int alpha, double dx, double dy) native 'SceneBuilder_pushOpacity';
+  EngineLayer _pushOpacity(int alpha, double dx, double dy) native 'SceneBuilder_pushOpacity';
 
   /// Pushes a color filter operation onto the operation stack.
   ///
@@ -134,10 +134,10 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// blend mode.
   ///
   /// See [pop] for details about the operation stack.
-  void pushColorFilter(Color color, BlendMode blendMode) {
-    _pushColorFilter(color.value, blendMode.index);
+  EngineLayer pushColorFilter(Color color, BlendMode blendMode) {
+    return _pushColorFilter(color.value, blendMode.index);
   }
-  void _pushColorFilter(int color, int blendMode) native 'SceneBuilder_pushColorFilter';
+  EngineLayer _pushColorFilter(int color, int blendMode) native 'SceneBuilder_pushColorFilter';
 
   /// Pushes a backdrop filter operation onto the operation stack.
   ///
@@ -145,7 +145,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// rasterizing the given objects.
   ///
   /// See [pop] for details about the operation stack.
-  void pushBackdropFilter(ImageFilter filter) native 'SceneBuilder_pushBackdropFilter';
+  EngineLayer pushBackdropFilter(ImageFilter filter) native 'SceneBuilder_pushBackdropFilter';
 
   /// Pushes a shader mask operation onto the operation stack.
   ///
@@ -153,20 +153,20 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// rectangle using the given blend mode.
   ///
   /// See [pop] for details about the operation stack.
-  void pushShaderMask(Shader shader, Rect maskRect, BlendMode blendMode) {
-    _pushShaderMask(shader,
-                    maskRect.left,
-                    maskRect.right,
-                    maskRect.top,
-                    maskRect.bottom,
-                    blendMode.index);
+  EngineLayer pushShaderMask(Shader shader, Rect maskRect, BlendMode blendMode) {
+    return _pushShaderMask(shader,
+                           maskRect.left,
+                           maskRect.right,
+                           maskRect.top,
+                           maskRect.bottom,
+                           blendMode.index);
   }
-  void _pushShaderMask(Shader shader,
-                       double maskRectLeft,
-                       double maskRectRight,
-                       double maskRectTop,
-                       double maskRectBottom,
-                       int blendMode) native 'SceneBuilder_pushShaderMask';
+  EngineLayer _pushShaderMask(Shader shader,
+                              double maskRectLeft,
+                              double maskRectRight,
+                              double maskRectTop,
+                              double maskRectBottom,
+                              int blendMode) native 'SceneBuilder_pushShaderMask';
 
   /// Pushes a physical layer operation for an arbitrary shape onto the
   /// operation stack.
