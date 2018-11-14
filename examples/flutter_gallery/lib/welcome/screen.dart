@@ -19,11 +19,14 @@ class SecondaryWidgetHolder {
 }
 
 class WarmWelcomeScreen extends StatefulWidget {
-  const WarmWelcomeScreen({Key key, this.isInitialScreen = true})
+  const WarmWelcomeScreen({Key key, this.isInitialScreen = true, this.onSkipPressed})
       : super(key: key);
 
   // is the screen being displayed as a demo item or not?
   final bool isInitialScreen;
+
+  // callback when button is pressed
+  final VoidCallback onSkipPressed;
 
   @override
   _WarmWelcomeScreenState createState() =>
@@ -509,19 +512,11 @@ class _WarmWelcomeScreenState extends State<WarmWelcomeScreen>
 
   // actions
   void _tappedContinue() {
-
     // TODO route to the actual gallery
     if (isInitialScreen) {
-      // Navigator.pushReplacement(
-      //   context,
-      //   PageRouteBuilder<Null>(
-      //     settings: const RouteSettings(name: "/main"),
-      //     pageBuilder: (BuildContext context, Animation<double> _,
-      //         Animation<double> __) {
-      //       return MainScreen();
-      //     },
-      //   ),
-      // );
+      if (widget.onSkipPressed != null) {
+        widget.onSkipPressed();
+      }
     } else {
       Navigator.of(context).pop();
     }

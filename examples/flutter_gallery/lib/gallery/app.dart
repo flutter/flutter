@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../welcome/screen.dart';
@@ -44,6 +45,9 @@ class GalleryApp extends StatefulWidget {
 class _GalleryAppState extends State<GalleryApp> {
   GalleryOptions _options;
   Timer _timeDilationTimer;
+  SharedPreferences _prefs;
+  Future<bool> _checkWelcomeFuture;
+  bool _showWelcome;
 
   Map<String, WidgetBuilder> _buildRoutes() {
     // For a different example of how to set up an application routing table
@@ -65,6 +69,7 @@ class _GalleryAppState extends State<GalleryApp> {
       timeDilation: timeDilation,
       platform: defaultTargetPlatform,
     );
+    _checkWelcomeFuture = _checkWelcomeState();
   }
 
   @override
@@ -111,28 +116,6 @@ class _GalleryAppState extends State<GalleryApp> {
   @override
   Widget build(BuildContext context) {
     // TODO conditionally show - persistent settings?
-    const Widget welcome = WarmWelcomeScreen(isInitialScreen: true);
-
-    Widget home = GalleryHome(
-      testMode: widget.testMode,
-      optionsPage: GalleryOptionsPage(
-        options: _options,
-        onOptionsChanged: _handleOptionsChanged,
-        onSendFeedback: widget.onSendFeedback ??
-            () {
-              launch('https://github.com/flutter/flutter/issues/new/choose',
-                  forceSafariVC: false);
-            },
-      ),
-    );
-
-    if (widget.updateUrlFetcher != null) {
-      home = Updater(
-        updateUrlFetcher: widget.updateUrlFetcher,
-        child: home,
-      );
-    }
-
     return MaterialApp(
       theme: _options.theme.data.copyWith(platform: _options.platform),
       title: 'Flutter Gallery',
@@ -147,11 +130,61 @@ class _GalleryAppState extends State<GalleryApp> {
           child: _applyTextScaleFactor(child),
         );
       },
+      home: FutureBuilder<bool>(
+        future: _checkWelcomeFuture,
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            _showWelcome ??= snapshot.data;
+            return _homeWidget();
+          } else {
+            return Container();
+          }
+        },
+      ),
+    );
+  }
 
-      // TODO not the correct way to do this, should be 
-      // another route potentially added to the main?
-      home: welcome,
-      // home: home,
+  Future<bool> _checkWelcomeState() async {
+    _prefs = await SharedPreferences.getInstance();
+    final bool hasSeenWelcome = _prefs.getBool('hasSeenWelcome') ?? false;
+    return !hasSeenWelcome;
+  }
+
+  Widget _homeWidget() {
+    final Widget welcome = WarmWelcomeScreen(
+      isInitialScreen: true,
+      onSkipPressed: () async {
+        await _prefs.setBool('hasSeenWelcome', true);
+        setState(() {
+          _showWelcome = false;
+        });
+      },
+    );
+    Widget home = GalleryHome(
+      testMode: widget.testMode,
+      optionsPage: GalleryOptionsPage(
+        options: _options,
+        onOptionsChanged: _handleOptionsChanged,
+        onSendFeedback: widget.onSendFeedback ??
+            () {
+              launch('https://github.com/flutter/flutter/issues/new/choose',
+                  forceSafariVC: false);
+            },
+      ),
+    );
+    if (widget.updateUrlFetcher != null) {
+      home = Updater(
+        updateUrlFetcher: widget.updateUrlFetcher,
+        child: home,
+      );
+    }
+
+    final List<Widget> stackWidgets = <Widget>[home];
+    if (_showWelcome) {
+      stackWidgets.add(welcome);
+    }
+    return Stack(
+      children: stackWidgets,
     );
   }
 }
