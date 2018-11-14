@@ -111,6 +111,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: AnimationDemo.routeName,
       buildRoute: (BuildContext context) => const AnimationDemo(),
     ),
+    GalleryDemo(
+      title: 'Pan & Zoom',
+      subtitle: 'Section organizer',
+      icon: GalleryIcons.chips,
+      category: _kDemos,
+      routeName: PanAndZoomDemo.routeName,
+      buildRoute: (BuildContext context) => const PanAndZoomDemo(),
+    ),
 
     // Style
     GalleryDemo(

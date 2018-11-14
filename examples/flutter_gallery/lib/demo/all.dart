@@ -9,6 +9,7 @@ export 'contacts_demo.dart';
 export 'cupertino/cupertino.dart';
 export 'images_demo.dart';
 export 'material/material.dart';
+export 'pan_and_zoom_demo.dart';
 export 'pesto_demo.dart';
 export 'shrine_demo.dart';
 export 'typography_demo.dart';
