@@ -76,8 +76,9 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// {@template flutter.material.progressIndicator.semanticsLabel}
   /// The [Semantics.label] for this progress indicator.
   ///
-  /// This value indicates the purpose of the progress bar, and is used
-  /// by screen reading software to identify the widget.
+  /// This value indicates the purpose of the progress bar, and will be
+  /// read out by screen readers to indicate the purpose of this progress
+  /// indicator.
   /// {@endtemplate}
   final String semanticsLabel;
 
