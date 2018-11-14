@@ -114,7 +114,7 @@ class DartIsolate : public UIDartState {
   const fml::RefPtr<DartSnapshot> shared_snapshot_;
   std::vector<std::shared_ptr<const fml::Mapping>> kernel_buffers_;
   std::vector<std::unique_ptr<AutoFireClosure>> shutdown_callbacks_;
-  ChildIsolatePreparer child_isolate_preparer_;
+  ChildIsolatePreparer child_isolate_preparer_ = nullptr;
 
   FML_WARN_UNUSED_RESULT
   bool Initialize(Dart_Isolate isolate, bool is_root_isolate);

@@ -348,9 +348,22 @@ bool DartIsolate::PrepareForRunningFromKernel(
     return false;
   }
 
-  child_isolate_preparer_ = [mapping](DartIsolate* isolate) {
-    return isolate->PrepareForRunningFromKernel(mapping);
-  };
+  // Child isolate shares root isolate embedder_isolate (lines 691 and 693
+  // below). Re-initializing child_isolate_preparer_ lambda while it is being
+  // executed leads to crashes.
+  if (child_isolate_preparer_ == nullptr) {
+    child_isolate_preparer_ = [buffers =
+                                   kernel_buffers_](DartIsolate* isolate) {
+      for (unsigned long i = 0; i < buffers.size(); i++) {
+        bool last_piece = i + 1 == buffers.size();
+        const std::shared_ptr<const fml::Mapping>& buffer = buffers.at(i);
+        if (!isolate->PrepareForRunningFromKernel(buffer, last_piece)) {
+          return false;
+        }
+      }
+      return true;
+    };
+  }
   phase_ = Phase::Ready;
   return true;
 }
