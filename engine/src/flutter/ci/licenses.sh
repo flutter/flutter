@@ -8,6 +8,7 @@ echo "Verifying license script is still happy..."
 for f in out/license_script_output/licenses_*; do
     if ! cmp -s flutter/ci/licenses_golden/$(basename $f) $f
     then
+        echo "============================= ERROR ============================="
         echo "License script got different results than expected for $f."
         echo "Please rerun the licenses script locally to verify that it is"
         echo "correctly catching any new licenses for anything you may have"
@@ -20,6 +21,25 @@ for f in out/license_script_output/licenses_*; do
         exit 1
     fi
 done
+
+echo "Checking license count in licenses_flutter..."
+actualLicenseCount=`tail -n 1 flutter/ci/licenses_golden/licenses_flutter | tr -dc '0-9'`
+expectedLicenseCount=2 # When changing this number: Update the error message below as well describing all expected license types.
+
+if [ "$actualLicenseCount" -ne "$expectedLicenseCount" ]
+then
+    echo "=============================== ERROR ==============================="
+    echo "The total license count in flutter/ci/licenses_golden/licenses_flutter"
+    echo "changed from $expectedLicenseCount to $actualLicenseCount."
+    echo "It's very likely that this is an unintentional change. Please"
+    echo "double-check that all newly added files have a BSD-style license"
+    echo "header with the following copyright:"
+    echo "    Copyright 2013 The Flutter Authors. All rights reserved."
+    echo "Files in 'third_party/txt' may have an Apache license header instead."
+    echo "If you're absolutely sure that the change in license count is"
+    echo "intentional, update 'flutter/ci/licenses.sh' with the new count."
+    exit 1
+fi
 
 echo "Licenses are as expected."
 exit 0
