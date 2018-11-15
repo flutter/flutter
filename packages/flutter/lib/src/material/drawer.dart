@@ -377,9 +377,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   Widget _buildDrawer(BuildContext context) {
-    double dragAreaWidth = widget.alignment == DrawerAlignment.start ?
-                           MediaQuery.of(context).padding.left :
-                           MediaQuery.of(context).padding.right;
+    final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
+    final EdgeInsets padding = MediaQuery.of(context).padding;
+    double dragAreaWidth = drawerIsStart ? padding.left : padding.right;
+
+    if (Directionality.of(context) == TextDirection.rtl)
+      dragAreaWidth = drawerIsStart ? padding.right : padding.left;
+
     dragAreaWidth = max(dragAreaWidth, _kEdgeDragWidth);
     if (_controller.status == AnimationStatus.dismissed) {
       return Align(

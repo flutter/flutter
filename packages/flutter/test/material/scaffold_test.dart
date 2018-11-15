@@ -1160,6 +1160,42 @@ void main() {
 
       expect(scaffoldState.isDrawerOpen, true);
     });
+
+    testWidgets('Drawer opens correctly with padding from MediaQuer (RTL)', (WidgetTester tester) async {
+      // The padding described by MediaQuery is larger than the default
+      // drawer drag zone width which is 20.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.fromLTRB(0, 0, 40, 0)
+            ),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Scaffold(
+                drawer: const Drawer(
+                  child: Text('drawer'),
+                ),
+                body: const Text('scaffold body'),
+                appBar: AppBar(
+                  centerTitle: true,
+                  title: const Text('Title')
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+
+      expect(scaffoldState.isDrawerOpen, false);
+
+      await tester.dragFrom(const Offset(765, 100), const Offset(-300, 0));
+      await tester.pumpAndSettle();
+
+      expect(scaffoldState.isDrawerOpen, true);
+    });
   });
 }
 
