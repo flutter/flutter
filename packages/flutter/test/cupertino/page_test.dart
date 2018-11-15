@@ -29,11 +29,11 @@ void main() {
       CupertinoApp(
         onGenerateRoute: (RouteSettings settings) {
           return CupertinoPageRoute<void>(
-              settings: settings,
-              builder: (BuildContext context) {
-                final String pageNumber = settings.name == '/' ? '1' : '2';
-                return Center(child: Text('Page $pageNumber'));
-              }
+            settings: settings,
+            builder: (BuildContext context) {
+              final String pageNumber = settings.name == '/' ? '1' : '2';
+              return Center(child: Text('Page $pageNumber'));
+            }
           );
         },
       ),
@@ -99,11 +99,11 @@ void main() {
         ],
         onGenerateRoute: (RouteSettings settings) {
           return CupertinoPageRoute<void>(
-              settings: settings,
-              builder: (BuildContext context) {
-                final String pageNumber = settings.name == '/' ? '1' : '2';
-                return Center(child: Text('Page $pageNumber'));
-              }
+            settings: settings,
+            builder: (BuildContext context) {
+              final String pageNumber = settings.name == '/' ? '1' : '2';
+              return Center(child: Text('Page $pageNumber'));
+            }
           );
         },
       ),
@@ -227,11 +227,11 @@ void main() {
       CupertinoApp(
         onGenerateRoute: (RouteSettings settings) {
           return CupertinoPageRoute<void>(
-              settings: settings,
-              builder: (BuildContext context) {
-                final String pageNumber = settings.name == '/' ? '1' : '2';
-                return Center(child: Text('Page $pageNumber'));
-              }
+            settings: settings,
+            builder: (BuildContext context) {
+              final String pageNumber = settings.name == '/' ? '1' : '2';
+              return Center(child: Text('Page $pageNumber'));
+            }
           );
         },
       ),
@@ -390,11 +390,11 @@ void main() {
         ],
         onGenerateRoute: (RouteSettings settings) {
           return CupertinoPageRoute<void>(
-              settings: settings,
-              builder: (BuildContext context) {
-                final String pageNumber = settings.name == '/' ? '1' : '2';
-                return Center(child: Text('Page $pageNumber'));
-              }
+            settings: settings,
+            builder: (BuildContext context) {
+              final String pageNumber = settings.name == '/' ? '1' : '2';
+              return Center(child: Text('Page $pageNumber'));
+            }
           );
         },
       ),
