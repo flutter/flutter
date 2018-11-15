@@ -3331,7 +3331,7 @@ void main() {
   testWidgets('text field size handles tall glyphs', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate (
-        child: Center(
+        child: const Center(
           child: TextField(
             maxLines: 4,
           ),
@@ -3402,7 +3402,7 @@ void main() {
   testWidgets('text field size handles one line maxLines', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate (
-        child: Center(
+        child: const Center(
           child: TextField(
             maxLines: 1,
           ),
@@ -3475,25 +3475,25 @@ void main() {
     // metrics. This rounding is slated to be removed as it is no longer
     // needed. This test should be fixed when the rounding is removed.
     expect(caretRect.height, 16.00000023841858);
-    expect(caretRect.topLeft, Offset(32, -2.384185791015625e-7));
+    expect(caretRect.topLeft, const Offset(32, -2.384185791015625e-7));
 
     caretRect = editable.getLocalRectForCaret(const TextPosition(offset: 4));
     // TODO(garyq): Not a round number because of rounding in LibTxt height
     // metrics. This rounding is slated to be removed as it is no longer
     // needed. This test should be fixed when the rounding is removed.
     expect(caretRect.height, 16.00000023841858);
-    expect(caretRect.topLeft, Offset(64, -2.384185791015625e-7));
+    expect(caretRect.topLeft, const Offset(64, -2.384185791015625e-7));
 
     caretRect = editable.getLocalRectForCaret(const TextPosition(offset: 6));
     expect(caretRect.height, 16);
-    expect(caretRect.topLeft, Offset(16, 16));
+    expect(caretRect.topLeft, const Offset(16, 16));
 
     caretRect = editable.getLocalRectForCaret(const TextPosition(offset: 12));
     expect(caretRect.height, 16);
-    expect(caretRect.topLeft, Offset(32, 32));
+    expect(caretRect.topLeft, const Offset(32, 32));
 
     caretRect = editable.getLocalRectForCaret(const TextPosition(offset: 13));
     expect(caretRect.height, 16);
-    expect(caretRect.topLeft, Offset(48, 32));
+    expect(caretRect.topLeft, const Offset(48, 32));
   });
 }
