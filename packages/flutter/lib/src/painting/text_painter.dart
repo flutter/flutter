@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' show max;
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, BoxHeightStyle;
 
 import 'package:flutter/foundation.dart';
@@ -62,6 +61,13 @@ class TextPainter {
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
+
+  /// True when the text has not been laid out, false after layout.
+  ///
+  /// Many methods and properties are not valid until this becomes false
+  /// such as [height].
+  ///
+  /// Call [layout] to lay out the text and set this to true.
   bool get needsLayout => _needsLayout;
 
   /// The (potentially styled) text to paint.
@@ -237,8 +243,8 @@ class TextPainter {
   double get preferredLineHeight {
     if (_layoutTemplate == null) {
       final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
-        _createParagraphStyle(TextDirection.ltr),
-      ); // direction doesn't matter, text is just a space, ltr is more common.
+        _createParagraphStyle(TextDirection.rtl),
+      ); // direction doesn't matter, text is just a space
       if (text?.style != null)
         builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
       // TODO(garyq): using an alphabetic space character is English bias, and should be
@@ -258,7 +264,7 @@ class TextPainter {
   /// belongs in. When the paragraph has not been laid out, this returns the
   /// estimate given by [preferredLineHeight] as a fallback.
   ///
-  /// The [offset] parameter is the byte index of the text the height should
+  /// The [offset] parameter is the index of the text buffer the height should
   /// be queried at.
   ///
   /// This method may produce different heights than [preferredLineHeight] as
