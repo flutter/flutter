@@ -105,6 +105,7 @@ class DriverTest {
         testTarget,
         '-d',
         deviceId,
+        '--use-test-core',
       ];
       options.addAll(extraOptions);
       await flutter('drive', options: options);
