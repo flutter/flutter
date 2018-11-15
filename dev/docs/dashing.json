@@ -1,7 +1,6 @@
 {
   "name": "flutter",
   "package": "flutter",
-  "version": "{{VERSION}}",
   "author": {
     "name": "The Flutter Team",
     "link": "https://flutter.io"
