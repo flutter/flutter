@@ -253,7 +253,7 @@ class TextPainter {
   /// Attempt to get the actual height of the line after layout.
   ///
   /// This returns the max height of the line that the character at [offset]
-  /// belongs in. When the paragraph has not been laid out, this returns the
+  /// belongs in. When the paragraph is empty, this returns the
   /// estimate given by [preferredLineHeight] as a fallback.
   ///
   /// The [offset] parameter is the index of the text buffer the height should

@@ -3327,4 +3327,173 @@ void main() {
     expect(minOffset, 0.0);
     expect(maxOffset, 50.0);
   });
+
+  testWidgets('text field size handles tall glyphs', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate (
+        child: Center(
+          child: TextField(
+            maxLines: 4,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSize(find.byType(TextField)).height,
+      // Initially 4 lines high, based off of extrapolating
+      // the height of one english space (' ') character.
+      88.0,
+    );
+
+    await tester.enterText(find.byType(TextField), '一\n');
+    await tester.pump();
+    expect(
+      tester.getSize(find.byType(TextField)).height,
+      88.0,
+    );
+
+    await tester.enterText(find.byType(TextField), '一\n二\n三');
+    await tester.pump();
+    expect(
+      tester.getSize(find.byType(TextField)).height,
+      88.0,
+    );
+
+    await tester.enterText(find.byType(TextField), '一\n二\n三\n四');
+    await tester.pump();
+    expect(
+      tester.getSize(find.byType(TextField)).height,
+      // When taller than typical characters are used, the height
+      // exapnds to accomodate the taller characters to prevent
+      // clipping.
+      //
+      // TODO(garyq): Not a round number because of rounding in LibTxt height
+      // metrics. This rounding is slated to be removed as it is no longer
+      // needed. This test should be fixed when the rounding is removed.
+      88.00000047683716,
+    );
+
+    await tester.enterText(find.byType(TextField), 'a\nb\nc\nd');
+    await tester.pump();
+    expect(
+      tester.getSize(find.byType(TextField)).height,
+      /// Use actual measured heights of the paragraph when available.
+      //
+      // TODO(garyq): Not a round number because of rounding in LibTxt height
+      // metrics. This rounding is slated to be removed as it is no longer
+      // needed. This test should be fixed when the rounding is removed.
+      88.00000047683716,
+    );
+
+    await tester.enterText(find.byType(TextField), 'a\nb\nc\nd\ne');
+    await tester.pump();
+    expect(
+      tester.getSize(find.byType(TextField)).height,
+      /// Do not expand past maxLines.
+      //
+      // TODO(garyq): Not a round number because of rounding in LibTxt height
+      // metrics. This rounding is slated to be removed as it is no longer
+      // needed. This test should be fixed when the rounding is removed.
+      88.00000047683716,
+    );
+  });
+
+  testWidgets('text field size handles one line maxLines', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate (
+        child: Center(
+          child: TextField(
+            maxLines: 1,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSize(find.byType(TextField)).height,
+      // Initially 4 lines high, based off of extrapolating
+      // the height of one english space (' ') character. Since this
+      // is only one line, the first line should be overriden by the
+      // actual height.
+      //
+      // TODO(garyq): Not a round number because of rounding in LibTxt height
+      // metrics. This rounding is slated to be removed as it is no longer
+      // needed. This test should be fixed when the rounding is removed.
+      40.00000023841858,
+    );
+
+    await tester.enterText(find.byType(TextField), '一\n');
+    await tester.pump();
+    expect(
+      tester.getSize(find.byType(TextField)).height,
+      // TODO(garyq): Not a round number because of rounding in LibTxt height
+      // metrics. This rounding is slated to be removed as it is no longer
+      // needed. This test should be fixed when the rounding is removed.
+      40.00000023841858,
+    );
+
+    await tester.enterText(find.byType(TextField), '一\n二\n三');
+    await tester.pump();
+    expect(
+      tester.getSize(find.byType(TextField)).height,
+      // TODO(garyq): Not a round number because of rounding in LibTxt height
+      // metrics. This rounding is slated to be removed as it is no longer
+      // needed. This test should be fixed when the rounding is removed.
+      40.00000023841858,
+    );
+
+    await tester.enterText(find.byType(TextField), '一\n二\n三\n四');
+    await tester.pump();
+    expect(
+      tester.getSize(find.byType(TextField)).height,
+      // TODO(garyq): Not a round number because of rounding in LibTxt height
+      // metrics. This rounding is slated to be removed as it is no longer
+      // needed. This test should be fixed when the rounding is removed.
+      40.00000023841858,
+    );
+  });
+
+  testWidgets('caret size and position', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      overlay(
+        child: Container(
+          width: 300.0,
+          child: const TextField(
+            maxLines: 5,
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable editable = findRenderEditable(tester);
+    await tester.enterText(find.byType(TextField), 'abcd\n一二三四\n一b三d');
+    await tester.pump();
+
+    Rect caretRect = editable.getLocalRectForCaret(const TextPosition(offset: 2));
+    // TODO(garyq): Not a round number because of rounding in LibTxt height
+    // metrics. This rounding is slated to be removed as it is no longer
+    // needed. This test should be fixed when the rounding is removed.
+    expect(caretRect.height, 16.00000023841858);
+    expect(caretRect.topLeft, Offset(32, -2.384185791015625e-7));
+
+    caretRect = editable.getLocalRectForCaret(const TextPosition(offset: 4));
+    // TODO(garyq): Not a round number because of rounding in LibTxt height
+    // metrics. This rounding is slated to be removed as it is no longer
+    // needed. This test should be fixed when the rounding is removed.
+    expect(caretRect.height, 16.00000023841858);
+    expect(caretRect.topLeft, Offset(64, -2.384185791015625e-7));
+
+    caretRect = editable.getLocalRectForCaret(const TextPosition(offset: 6));
+    expect(caretRect.height, 16);
+    expect(caretRect.topLeft, Offset(16, 16));
+
+    caretRect = editable.getLocalRectForCaret(const TextPosition(offset: 12));
+    expect(caretRect.height, 16);
+    expect(caretRect.topLeft, Offset(32, 32));
+
+    caretRect = editable.getLocalRectForCaret(const TextPosition(offset: 13));
+    expect(caretRect.height, 16);
+    expect(caretRect.topLeft, Offset(48, 32));
+  });
 }

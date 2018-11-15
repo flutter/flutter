@@ -1150,8 +1150,6 @@ class RenderEditable extends RenderBox {
 
   Rect _caretPrototype;
   void _computeCaretPrototype() {
-    // TODO(garyq): Detect that the cursor height is a guess (not laid out),
-    // and recalculate when actual line heights become available after layout.
     _caretPrototype = Rect.fromLTWH(0.0, 0, cursorWidth, _preferredCursorLineHeight);
   }
 
