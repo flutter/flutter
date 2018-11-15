@@ -23,6 +23,8 @@ export 'dart:ui' show AppLifecycleState, Locale;
 
 /// Interface for classes that register with the Widgets layer binding.
 ///
+/// When used as a mixin, provides noop method implementations.
+///
 /// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
 ///
 /// This class can be extended directly, to get default behaviors for all of the
@@ -30,7 +32,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// handlers must be implemented (and the analyzer will list those that have
 /// been omitted).
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This [StatefulWidget] implements the parts of the [State] and
 /// [WidgetsBindingObserver] protocols necessary to react to application
@@ -70,6 +72,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// To respond to other notifications, replace the [didChangeAppLifecycleState]
 /// method above with other methods from this class.
@@ -107,7 +110,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from [Window.onMetricsChanged].
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// This [StatefulWidget] implements the parts of the [State] and
   /// [WidgetsBindingObserver] protocols necessary to react when the device is
@@ -147,6 +150,7 @@ abstract class WidgetsBindingObserver {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// In general, this is unnecessary as the layout system takes care of
   /// automatically recomputing the application geometry when the application
@@ -166,7 +170,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from [Window.onTextScaleFactorChanged].
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// class TextScaleFactorReactor extends StatefulWidget {
@@ -202,6 +206,7 @@ abstract class WidgetsBindingObserver {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -214,7 +219,7 @@ abstract class WidgetsBindingObserver {
   /// settings.
   ///
   /// This method exposes notifications from [Window.onLocaleChanged].
-  void didChangeLocale(Locale locale) { }
+  void didChangeLocales(List<Locale> locale) { }
 
   /// Called when the system puts the app in the background or returns
   /// the app to the foreground.
@@ -239,11 +244,7 @@ abstract class WidgetsBindingObserver {
 }
 
 /// The glue between the widgets layer and the Flutter engine.
-abstract class WidgetsBinding extends BindingBase with SchedulerBinding, GestureBinding, RendererBinding {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory WidgetsBinding._() => null;
-
+mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -283,7 +284,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
         Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
         setter: (bool value) {
           if (WidgetsApp.showPerformanceOverlayOverride == value)
-            return Future<Null>.value();
+            return Future<void>.value();
           WidgetsApp.showPerformanceOverlayOverride = value;
           return _forceRebuild();
         },
@@ -296,7 +297,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
         getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
         setter: (bool value) {
           if (WidgetsApp.debugAllowBannerOverride == value)
-            return Future<Null>.value();
+            return Future<void>.value();
           WidgetsApp.debugAllowBannerOverride = value;
           return _forceRebuild();
         },
@@ -312,18 +313,31 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
         },
       );
 
+      // This service extension is deprecated and will be removed by 12/1/2018.
+      // Use ext.flutter.inspector.show instead.
+      registerBoolServiceExtension(
+          name: 'debugWidgetInspector',
+          getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
+          setter: (bool value) {
+            if (WidgetsApp.debugShowWidgetInspectorOverride == value)
+              return Future<void>.value();
+            WidgetsApp.debugShowWidgetInspectorOverride = value;
+            return _forceRebuild();
+          }
+      );
+
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
 
       return true;
     }());
   }
 
-  Future<Null> _forceRebuild() {
+  Future<void> _forceRebuild() {
     if (renderViewElement != null) {
       buildOwner.reassemble(renderViewElement);
       return endOfFrame;
     }
-    return Future<Null>.value();
+    return Future<void>.value();
   }
 
   /// The [BuildOwner] in charge of executing the build pipeline for the
@@ -399,20 +413,20 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   @protected
   @mustCallSuper
   void handleLocaleChanged() {
-    dispatchLocaleChanged(ui.window.locale);
+    dispatchLocalesChanged(ui.window.locales);
   }
 
   /// Notify all the observers that the locale has changed (using
-  /// [WidgetsBindingObserver.didChangeLocale]), giving them the
-  /// `locale` argument.
+  /// [WidgetsBindingObserver.didChangeLocales]), giving them the
+  /// `locales` argument.
   ///
   /// This is called by [handleLocaleChanged] when the [Window.onLocaleChanged]
   /// notification is received.
   @protected
   @mustCallSuper
-  void dispatchLocaleChanged(Locale locale) {
+  void dispatchLocalesChanged(List<Locale> locales) {
     for (WidgetsBindingObserver observer in _observers)
-      observer.didChangeLocale(locale);
+      observer.didChangeLocales(locales);
   }
 
   /// Notify all the observers that the active set of [AccessibilityFeatures]
@@ -443,7 +457,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   /// This method exposes the `popRoute` notification from
   /// [SystemChannels.navigation].
   @protected
-  Future<Null> handlePopRoute() async {
+  Future<void> handlePopRoute() async {
     for (WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPopRoute())
         return;
@@ -463,7 +477,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   /// [SystemChannels.navigation].
   @protected
   @mustCallSuper
-  Future<Null> handlePushRoute(String route) async {
+  Future<void> handlePushRoute(String route) async {
     for (WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPushRoute(route))
         return;
@@ -477,7 +491,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       case 'pushRoute':
         return handlePushRoute(methodCall.arguments);
     }
-    return Future<Null>.value();
+    return Future<dynamic>.value();
   }
 
   @override
@@ -500,7 +514,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       observer.didHaveMemoryPressure();
   }
 
-  Future<Null> _handleSystemMessage(Object systemMessage) async {
+  Future<void> _handleSystemMessage(Object systemMessage) async {
     final Map<String, dynamic> message = systemMessage;
     final String type = message['type'];
     switch (type) {
@@ -508,7 +522,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
         handleMemoryPressure();
         break;
     }
-    return null;
+    return;
   }
 
   bool _needToReportFirstFrame = true;
@@ -699,11 +713,16 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   }
 
   @override
-  Future<Null> performReassemble() {
+  Future<void> performReassemble() {
+    assert(() {
+      WidgetInspectorService.instance.performReassemble();
+      return true;
+    }());
+
     deferFirstFrameReport();
     if (renderViewElement != null)
       buildOwner.reassemble(renderViewElement);
-    return super.performReassemble().then((Null value) {
+    return super.performReassemble().then((void value) {
       allowFirstFrameReport();
     });
   }
@@ -925,6 +944,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
 }
 
 /// A concrete binding for applications based on the Widgets framework.
+///
 /// This is the glue that binds the framework to the Flutter engine.
 class WidgetsFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding {
 

@@ -15,7 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
-import 'package:test/test.dart' as test_package;
+import 'package:test_api/test_api.dart' as test_package;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vector_math/vector_math_64.dart';
 
@@ -84,11 +84,11 @@ const Size _kDefaultTestViewportSize = Size(800.0, 600.0);
 /// When using these bindings, certain features are disabled. For
 /// example, [timeDilation] is reset to 1.0 on initialization.
 abstract class TestWidgetsFlutterBinding extends BindingBase
-  with SchedulerBinding,
+  with ServicesBinding,
+       SchedulerBinding,
        GestureBinding,
        SemanticsBinding,
        RendererBinding,
-       ServicesBinding,
        PaintingBinding,
        WidgetsBinding {
 
@@ -225,13 +225,25 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     Duration additionalTime = const Duration(milliseconds: 250),
   });
 
-  /// Artificially calls dispatchLocaleChanged on the Widget binding,
+  /// Artificially calls dispatchLocalesChanged on the Widget binding,
   /// then flushes microtasks.
+  ///
+  /// Passes only one single Locale. Use [setLocales] to pass a full preferred
+  /// locales list.
   Future<void> setLocale(String languageCode, String countryCode) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
-      final Locale locale = Locale(languageCode, countryCode);
-      dispatchLocaleChanged(locale);
+      final Locale locale = Locale(languageCode, countryCode == '' ? null : countryCode);
+      dispatchLocalesChanged(<Locale>[locale]);
+    });
+  }
+
+  /// Artificially calls dispatchLocalesChanged on the Widget binding,
+  /// then flushes microtasks.
+  Future<void> setLocales(List<Locale> locales) {
+    return TestAsyncUtils.guard<void>(() async {
+      assert(inTest);
+      dispatchLocalesChanged(locales);
     });
   }
 
@@ -568,7 +580,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
     assert(inTest);
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
-    return null;
   }
 
   void _verifyInvariants() {
@@ -774,7 +785,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   Future<void> idle() {
     final Future<void> result = super.idle();
-    _currentFakeAsync.elapse(const Duration());
+    _currentFakeAsync.elapse(Duration.zero);
     return result;
   }
 
@@ -1601,7 +1612,7 @@ class _MockHttpRequest extends HttpClientRequest {
   List<Cookie> get cookies => null;
 
   @override
-  Future<HttpClientResponse> get done => null;
+  Future<HttpClientResponse> get done async => null;
 
   @override
   Future<void> flush() {

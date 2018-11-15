@@ -223,7 +223,10 @@ class IOSSimulator extends Device {
   Future<bool> get isLocalEmulator async => true;
 
   @override
-  bool get supportsHotMode => true;
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => true;
 
   Map<ApplicationPackage, _IOSSimulatorLogReader> _logReaders;
   _IOSSimulatorDevicePortForwarder _portForwarder;
@@ -360,22 +363,9 @@ class IOSSimulator extends Device {
     }
   }
 
-  Future<bool> _applicationIsInstalledAndRunning(ApplicationPackage app) async {
-    final List<bool> criteria = await Future.wait<bool>(<Future<bool>>[
-      isAppInstalled(app),
-      exitsHappyAsync(<String>['/usr/bin/killall', 'Runner']),
-    ]);
-    return criteria.reduce((bool a, bool b) => a && b);
-  }
-
   Future<void> _setupUpdatedApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath, bool usesTerminalUi) async {
     await _sideloadUpdatedAssetsForInstalledApplicationBundle(app, buildInfo, mainPath);
 
-    if (!await _applicationIsInstalledAndRunning(app))
-      return _buildAndInstallApplicationBundle(app, buildInfo, mainPath, usesTerminalUi);
-  }
-
-  Future<void> _buildAndInstallApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath, bool usesTerminalUi) async {
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
 

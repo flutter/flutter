@@ -176,7 +176,7 @@ class TextTheme extends Diagnosticable {
   /// the typography styles in the material design specification, as a starting
   /// point.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// /// A Widget that sets the ambient theme's title text color for its
@@ -203,6 +203,7 @@ class TextTheme extends Diagnosticable {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -259,7 +260,7 @@ class TextTheme extends Diagnosticable {
   /// [TextTheme] has only some fields defined, and you want to define the rest
   /// by merging it with a default theme.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// /// A Widget that sets the ambient theme's title text color for its
@@ -284,6 +285,7 @@ class TextTheme extends Diagnosticable {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -331,7 +333,7 @@ class TextTheme extends Diagnosticable {
     TextDecorationStyle decorationStyle,
   }) {
     return TextTheme(
-      display4: display4.apply(
+      display4: display4?.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -340,7 +342,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      display3: display3.apply(
+      display3: display3?.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -349,7 +351,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      display2: display2.apply(
+      display2: display2?.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -358,7 +360,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      display1: display1.apply(
+      display1: display1?.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -367,7 +369,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      headline: headline.apply(
+      headline: headline?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -376,7 +378,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      title: title.apply(
+      title: title?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -385,7 +387,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      subhead: subhead.apply(
+      subhead: subhead?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -394,7 +396,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      body2: body2.apply(
+      body2: body2?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -403,7 +405,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      body1: body1.apply(
+      body1: body1?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -412,7 +414,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      caption: caption.apply(
+      caption: caption?.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -421,7 +423,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      button: button.apply(
+      button: button?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -430,7 +432,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      subtitle: subtitle.apply(
+      subtitle: subtitle?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -439,7 +441,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      overline: overline.apply(
+      overline: overline?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,

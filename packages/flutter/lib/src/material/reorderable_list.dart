@@ -25,9 +25,7 @@ import 'material_localizations.dart';
 /// [ReorderableListView] will need to account for this when inserting before
 /// [newIndex].
 ///
-/// ## Sample code
-///
-/// Example implementation:
+/// {@tool sample}
 ///
 /// ```dart
 /// final List<MyDataObject> backingList = <MyDataObject>[/* ... */];
@@ -41,6 +39,7 @@ import 'material_localizations.dart';
 ///   backingList.insert(newIndex, element);
 /// }
 /// ```
+/// {@end-tool}
 typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 
 /// A list whose items the user can interactively reorder by dragging.
@@ -159,7 +158,7 @@ class _ReorderableListContent extends StatefulWidget {
   _ReorderableListContentState createState() => _ReorderableListContentState();
 }
 
-class _ReorderableListContentState extends State<_ReorderableListContent> with TickerProviderStateMixin {
+class _ReorderableListContentState extends State<_ReorderableListContent> with TickerProviderStateMixin<_ReorderableListContent> {
 
   // The extent along the [widget.scrollDirection] axis to allow a child to
   // drop into when the user reorders list children.
@@ -301,7 +300,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         scrollOffset < bottomOffset ? bottomOffset : topOffset,
         duration: _scrollAnimationDuration,
         curve: Curves.easeInOut,
-      ).then((Null none) {
+      ).then((void value) {
         setState(() {
           _scrolling = false;
         });

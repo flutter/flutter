@@ -14,7 +14,7 @@ import 'framework.dart';
 
 // Examples can assume:
 // class Intl { static String message(String s, { String name, String locale }) => ''; }
-// Future<Null> initializeMessages(String locale) => null;
+// Future<void> initializeMessages(String locale) => null;
 
 // Used by loadAll() to record LocalizationsDelegate.load() futures we're
 // waiting for.
@@ -181,6 +181,9 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
 
   @override
   bool shouldReload(_WidgetsLocalizationsDelegate old) => false;
+
+  @override
+  String toString() => 'DefaultWidgetsLocalizations.delegate(en_US)';
 }
 
 /// US English localizations for the widgets library.
@@ -294,7 +297,7 @@ class _LocalizationsScope extends InheritedWidget {
 /// `Localizations.of(context)` will be rebuilt after the resources
 /// for the new locale have been loaded.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This following class is defined in terms of the
 /// [Dart `intl` package](https://github.com/dart-lang/intl). Using the `intl`
@@ -308,7 +311,7 @@ class _LocalizationsScope extends InheritedWidget {
 ///
 ///   static Future<MyLocalizations> load(Locale locale) {
 ///     return initializeMessages(locale.toString())
-///       .then((Null _) {
+///       .then((void _) {
 ///         return MyLocalizations(locale);
 ///       });
 ///   }
@@ -321,6 +324,7 @@ class _LocalizationsScope extends InheritedWidget {
 ///   // ... more Intl.message() methods like title()
 /// }
 /// ```
+/// {@end-tool}
 /// A class based on the `intl` package imports a generated message catalog that provides
 /// the `initializeMessages()` function and the per-locale backing store for `Intl.message()`.
 /// The message catalog is produced by an `intl` tool that analyzes the source code for

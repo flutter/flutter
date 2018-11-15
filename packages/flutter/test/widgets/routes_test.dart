@@ -12,7 +12,7 @@ final List<String> results = <String>[];
 
 Set<TestRoute> routes = HashSet<TestRoute>();
 
-class TestRoute extends LocalHistoryRoute<String> {
+class TestRoute extends Route<String> with LocalHistoryRoute<String> {
   TestRoute(this.name);
   final String name;
 
@@ -89,7 +89,7 @@ class TestRoute extends LocalHistoryRoute<String> {
 
 }
 
-Future<Null> runNavigatorTest(
+Future<void> runNavigatorTest(
   WidgetTester tester,
   NavigatorState host,
   VoidCallback test,

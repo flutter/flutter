@@ -23,7 +23,8 @@ void main() {
       final NoAndroidStudioValidator validator = NoAndroidStudioValidator();
       expect((await validator.validate()).type, equals(ValidationType.notAvailable));
     }, overrides: <Type, Generator>{
-      // Note that custom home paths are not supported on macOS nor Windows yet:
+      // Custom home paths are not supported on macOS nor Windows yet,
+      // so we force the platform to fake Linux here.
       Platform: () => linuxPlatform(),
     });
   });

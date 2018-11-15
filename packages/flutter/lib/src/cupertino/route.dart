@@ -253,7 +253,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   }
 
   // Called by _CupertinoBackGestureDetector when a pop ("back") drag start
-  // gesture is detected. The returned controller handles all of the subsquent
+  // gesture is detected. The returned controller handles all of the subsequent
   // drag events.
   static _CupertinoBackGestureController<T> _startPopGesture<T>(PageRoute<T> route) {
     assert(!_popGestureInProgress.contains(route));

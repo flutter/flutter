@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_test/flutter_test.dart' as flutter_test show expect;
-import 'package:test/test.dart' as real_test show expect;
+import 'package:test_api/test_api.dart' as real_test show expect;
 
 // We have to use real_test's expect because the flutter_test expect() goes
 // out of its way to check that we're not leaking APIs and the whole point

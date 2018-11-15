@@ -27,7 +27,7 @@ typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<Str
 /// Base class for mixins that provide singleton services (also known as
 /// "bindings").
 ///
-/// To use this class in a mixin, inherit from it and implement
+/// To use this class in an `on` clause of a mixin, inherit from it and implement
 /// [initInstances()]. The mixin is guaranteed to only be constructed once in
 /// the lifetime of the app (more precisely, it will assert if constructed twice
 /// in checked mode).
@@ -172,13 +172,13 @@ abstract class BindingBase {
   ///
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
   @protected
-  Future<Null> lockEvents(Future<Null> callback()) {
+  Future<void> lockEvents(Future<void> callback()) {
     developer.Timeline.startSync('Lock events');
 
     assert(callback != null);
     _lockCount += 1;
-    final Future<Null> future = callback();
-    assert(future != null, 'The lockEvents() callback returned null; it should return a Future<Null> that completes when the lock is to expire.');
+    final Future<void> future = callback();
+    assert(future != null, 'The lockEvents() callback returned null; it should return a Future<void> that completes when the lock is to expire.');
     future.whenComplete(() {
       _lockCount -= 1;
       if (!locked) {
@@ -216,7 +216,7 @@ abstract class BindingBase {
   ///
   /// Subclasses (binding classes) should override [performReassemble] to react
   /// to this method being called. This method itself should not be overridden.
-  Future<Null> reassembleApplication() {
+  Future<void> reassembleApplication() {
     return lockEvents(performReassemble);
   }
 
@@ -232,9 +232,9 @@ abstract class BindingBase {
   /// Do not call this method directly. Instead, use [reassembleApplication].
   @mustCallSuper
   @protected
-  Future<Null> performReassemble() {
+  Future<void> performReassemble() {
     FlutterError.resetErrorCount();
-    return Future<Null>.value();
+    return Future<void>.value();
   }
 
   /// Registers a service extension method with the given name (full
@@ -400,7 +400,7 @@ abstract class BindingBase {
   ///
   /// Both guards ensure that Dart's tree shaker can remove the code for the
   /// service extension in release builds.
-  /// {@endTemplate}
+  /// {@endtemplate}
   @protected
   void registerServiceExtension({
     @required String name,
@@ -467,6 +467,6 @@ abstract class BindingBase {
 }
 
 /// Terminate the Flutter application.
-Future<Null> _exitApplication() async {
+Future<void> _exitApplication() async {
   exit(0);
 }

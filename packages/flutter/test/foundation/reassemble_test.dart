@@ -11,7 +11,7 @@ class TestFoundationFlutterBinding extends BindingBase {
   bool wasLocked;
 
   @override
-  Future<Null> performReassemble() async {
+  Future<void> performReassemble() async {
     wasLocked = locked;
     return super.performReassemble();
   }

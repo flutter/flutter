@@ -42,7 +42,7 @@ class MakeHostAppEditableCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     await _project.ensureReadyForPlatformSpecificTooling();
 
     final bool isAndroidRequested = argResults['android'];
@@ -58,5 +58,7 @@ class MakeHostAppEditableCommand extends FlutterCommand {
     } else if (isIOSRequested) {
       await _project.ios.makeHostAppEditable();
     }
+
+    return null;
   }
 }

@@ -306,16 +306,14 @@ class LocalHistoryEntry {
   }
 }
 
-/// A route that can handle back navigations internally by popping a list.
+/// A mixin used by routes to handle back navigations internally by popping a list.
 ///
 /// When a [Navigator] is instructed to pop, the current route is given an
-/// opportunity to handle the pop internally. A LocalHistoryRoute handles the
+/// opportunity to handle the pop internally. A `LocalHistoryRoute` handles the
 /// pop internally if its list of local history entries is non-empty. Rather
 /// than being removed as the current route, the most recent [LocalHistoryEntry]
 /// is removed from the list and its [LocalHistoryEntry.onRemove] is called.
-///
-/// This class is typically used as a mixin.
-abstract class LocalHistoryRoute<T> extends Route<T> {
+mixin LocalHistoryRoute<T> on Route<T> {
   List<LocalHistoryEntry> _localHistory;
 
   /// Adds a local history entry to this route.
@@ -327,7 +325,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   /// The given local history entry must not already be part of another local
   /// history route.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// The following example is an app with 2 pages: `HomePage` and `SecondPage`.
   /// The `HomePage` can navigate to the `SecondPage`.
@@ -444,6 +442,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   void addLocalHistoryEntry(LocalHistoryEntry entry) {
     assert(entry._owner == null);
     entry._owner = this;
@@ -1269,7 +1268,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// than only specific subtypes. For example, to watch for all [PageRoute]
 /// variants, the `RouteObserver<PageRoute<dynamic>>` type may be used.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// To make a [StatefulWidget] aware of its current [Route] state, implement
 /// [RouteAware] in its [State] and subscribe it to a [RouteObserver]:
@@ -1318,6 +1317,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 /// }
 /// ```
+/// {@end-tool}
 class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   final Map<R, Set<RouteAware>> _listeners = <R, Set<RouteAware>>{};
 

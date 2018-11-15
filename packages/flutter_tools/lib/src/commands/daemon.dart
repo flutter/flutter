@@ -338,6 +338,7 @@ class AppDomain extends Domain {
     String packagesFilePath,
     String dillOutputPath,
     bool ipv6 = false,
+    String isolateFilter,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
       throw '${toTitleCase(options.buildInfo.modeName)} mode is not supported for emulators.';
@@ -351,6 +352,7 @@ class AppDomain extends Domain {
       device,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
+      viewFilter: isolateFilter,
     );
 
     ResidentRunner runner;
@@ -456,7 +458,7 @@ class AppDomain extends Domain {
   }
 
   bool isRestartSupported(bool enableHotReload, Device device) =>
-      enableHotReload && device.supportsHotMode;
+      enableHotReload && device.supportsHotRestart;
 
   Future<OperationResult> _inProgressHotReload;
 
@@ -756,6 +758,7 @@ class NotifyingLogger extends Logger {
       TerminalColor color,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     _messageController.add(LogMessage('error', message, stackTrace));
   }
@@ -768,6 +771,7 @@ class NotifyingLogger extends Logger {
       bool newline = true,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     _messageController.add(LogMessage('status', message));
   }
@@ -890,6 +894,7 @@ class _AppRunLogger extends Logger {
       TerminalColor color,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     if (parent != null) {
       parent.printError(
@@ -898,6 +903,7 @@ class _AppRunLogger extends Logger {
         emphasis: emphasis,
         indent: indent,
         hangingIndent: hangingIndent,
+        wrap: wrap,
       );
     } else {
       if (stackTrace != null) {
@@ -923,6 +929,7 @@ class _AppRunLogger extends Logger {
       bool newline = true,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     if (parent != null) {
       parent.printStatus(
@@ -932,6 +939,7 @@ class _AppRunLogger extends Logger {
         newline: newline,
         indent: indent,
         hangingIndent: hangingIndent,
+        wrap: wrap,
       );
     } else {
       _sendLogEvent(<String, dynamic>{'log': message});

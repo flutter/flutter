@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -28,6 +29,7 @@ void main() {
     MemoryFileSystem fs;
     Platform platform;
     FlutterCommandRunner runner;
+    ProcessManager processManager;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -39,11 +41,15 @@ void main() {
       fs.directory(_kProjectRoot).createSync(recursive: true);
       fs.currentDirectory = _kProjectRoot;
 
-      platform = FakePlatform(environment: <String, String>{
-        'FLUTTER_ROOT': _kFlutterRoot,
-      });
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+        },
+        version: '1 2 3 4 5',
+      );
 
       runner = createTestCommandRunner(DummyFlutterCommand());
+      processManager = MockProcessManager();
     });
 
     group('run', () {
@@ -70,6 +76,36 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         Platform: () => platform,
+      }, initializeFlutterRoot: false);
+    });
+
+    group('version', () {
+      testUsingContext('checks that Flutter toJson output reports the flutter framework version', () async {
+        final ProcessResult result = ProcessResult(0, 0, 'random', '0');
+
+        when(processManager.runSync('git log -n 1 --pretty=format:%H'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+        when(processManager.runSync('git rev-parse --abbrev-ref --symbolic @{u}'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+        when(processManager.runSync('git rev-parse --abbrev-ref HEAD'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+        when(processManager.runSync('git ls-remote --get-url master'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+        when(processManager.runSync('git log -n 1 --pretty=format:%ar'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+        when(processManager.runSync('git describe --match v*.*.* --first-parent --long --tags'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+        when(processManager.runSync('git log -n 1 --pretty=format:%ad --date=iso'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+
+        final FakeFlutterVersion version = FakeFlutterVersion();
+
+        // Because the hash depends on the time, we just use the 0.0.0-unknown here.
+        expect(version.toJson()['frameworkVersion'], '0.10.3');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        Platform: () => platform,
+        ProcessManager: () => processManager,
       }, initializeFlutterRoot: false);
     });
 
@@ -143,6 +179,12 @@ void main() {
       }, initializeFlutterRoot: false);
     });
   });
+}
+class MockProcessManager extends Mock implements ProcessManager {}
+
+class FakeFlutterVersion extends FlutterVersion {
+  @override
+  String get frameworkVersion => '0.10.3';
 }
 
 class FakeCommand extends FlutterCommand {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, lerpDouble;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, lerpDouble, Shadow;
 
 import 'package:flutter/foundation.dart';
 
@@ -13,9 +13,12 @@ const String _kDefaultDebugLabel = 'unknown';
 const String _kColorForegroundWarning = 'Cannot provide both a color and a foreground\n'
          'The color argument is just a shorthand for "foreground: new Paint()..color = color".';
 
+// Examples can assume:
+// BuildContext context;
+
 /// An immutable style in which paint text.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ### Bold
 ///
@@ -29,6 +32,8 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 ///   style: TextStyle(fontWeight: FontWeight.bold),
 /// )
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// ### Italics
 ///
@@ -41,6 +46,7 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 ///   style: TextStyle(fontStyle: FontStyle.italic),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ### Opacity and Color
 ///
@@ -238,6 +244,7 @@ class TextStyle extends Diagnosticable {
     this.locale,
     this.foreground,
     this.background,
+    this.shadows,
     this.decoration,
     this.decorationColor,
     this.decorationStyle,
@@ -368,6 +375,15 @@ class TextStyle extends Diagnosticable {
   /// [compareTo], and it does not affect [hashCode].
   final String debugLabel;
 
+  /// A list of [Shadow]s that will be painted underneath the text.
+  ///
+  /// Multiple shadows are supported to replicate lighting from multiple light
+  /// sources.
+  ///
+  /// Shadows must be in the same order for [TextStyle] to be considered as
+  /// equivalent as order produces differing transparency.
+  final List<ui.Shadow> shadows;
+
   /// Creates a copy of this text style but with the given fields replaced with
   /// the new values.
   ///
@@ -386,6 +402,7 @@ class TextStyle extends Diagnosticable {
     Locale locale,
     Paint foreground,
     Paint background,
+    List<ui.Shadow> shadows,
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,
@@ -412,6 +429,7 @@ class TextStyle extends Diagnosticable {
       locale: locale ?? this.locale,
       foreground: foreground ?? this.foreground,
       background: background ?? this.background,
+      shadows: shadows ?? this.shadows,
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
@@ -497,6 +515,7 @@ class TextStyle extends Diagnosticable {
       locale: locale,
       foreground: foreground != null ? foreground : null,
       background: background,
+      shadows: shadows,
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
@@ -547,6 +566,7 @@ class TextStyle extends Diagnosticable {
       locale: other.locale,
       foreground: other.foreground,
       background: other.background,
+      shadows: other.shadows,
       decoration: other.decoration,
       decorationColor: other.decorationColor,
       decorationStyle: other.decorationStyle,
@@ -558,7 +578,7 @@ class TextStyle extends Diagnosticable {
   ///
   /// This will not work well if the styles don't set the same fields.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   ///
   /// If [foreground] is specified on either of `a` or `b`, both will be treated
   /// as if they have a [foreground] paint (creating a new [Paint] if necessary
@@ -592,6 +612,7 @@ class TextStyle extends Diagnosticable {
         foreground: t < 0.5 ? null : b.foreground,
         background: t < 0.5 ? null : b.background,
         decoration: t < 0.5 ? null : b.decoration,
+        shadows: t < 0.5 ? null : b.shadows,
         decorationColor: Color.lerp(null, b.decorationColor, t),
         decorationStyle: t < 0.5 ? null : b.decorationStyle,
         debugLabel: lerpDebugLabel,
@@ -613,6 +634,7 @@ class TextStyle extends Diagnosticable {
         locale: t < 0.5 ? a.locale : null,
         foreground: t < 0.5 ? a.foreground : null,
         background: t < 0.5 ? a.background : null,
+        shadows: t < 0.5 ? a.shadows : null,
         decoration: t < 0.5 ? a.decoration : null,
         decorationColor: Color.lerp(a.decorationColor, null, t),
         decorationStyle: t < 0.5 ? a.decorationStyle : null,
@@ -638,6 +660,7 @@ class TextStyle extends Diagnosticable {
           : b.foreground ?? (Paint()..color = b.color)
         : null,
       background: t < 0.5 ? a.background : b.background,
+      shadows: t < 0.5 ? a.shadows : b.shadows,
       decoration: t < 0.5 ? a.decoration : b.decoration,
       decorationColor: Color.lerp(a.decorationColor, b.decorationColor, t),
       decorationStyle: t < 0.5 ? a.decorationStyle : b.decorationStyle,
@@ -663,6 +686,7 @@ class TextStyle extends Diagnosticable {
       locale: locale,
       foreground: foreground,
       background: background,
+      shadows: shadows,
     );
   }
 
@@ -718,7 +742,8 @@ class TextStyle extends Diagnosticable {
         height != other.height ||
         locale != other.locale ||
         foreground != other.foreground ||
-        background != other.background)
+        background != other.background ||
+        !listEquals(shadows, other.shadows))
       return RenderComparison.layout;
     if (color != other.color ||
         decoration != other.decoration ||
@@ -750,7 +775,8 @@ class TextStyle extends Diagnosticable {
            background == typedOther.background &&
            decoration == typedOther.decoration &&
            decorationColor == typedOther.decorationColor &&
-           decorationStyle == typedOther.decorationStyle;
+           decorationStyle == typedOther.decorationStyle &&
+           listEquals(shadows, typedOther.shadows);
   }
 
   @override
@@ -771,7 +797,8 @@ class TextStyle extends Diagnosticable {
       background,
       decoration,
       decorationColor,
-      decorationStyle
+      decorationStyle,
+      shadows
     );
   }
 
