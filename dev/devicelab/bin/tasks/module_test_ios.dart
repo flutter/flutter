@@ -32,105 +32,105 @@ Future<void> main() async {
       });
       await prepareProvisioningCertificates(projectDir.path);
 
-      section('Build ephemeral host app without CocoaPods');
+      // section('Build ephemeral host app without CocoaPods');
 
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'build',
-          options: <String>['ios'],
-        );
-      });
+      // await inDirectory(projectDir, () async {
+      //   await flutter(
+      //     'build',
+      //     options: <String>['ios'],
+      //   );
+      // });
 
-      final bool ephemeralHostAppBuilt = exists(Directory(path.join(
-        projectDir.path,
-        'build',
-        'ios',
-        'iphoneos',
-        'Runner.app',
-      )));
+      // final bool ephemeralHostAppBuilt = exists(Directory(path.join(
+      //   projectDir.path,
+      //   'build',
+      //   'ios',
+      //   'iphoneos',
+      //   'Runner.app',
+      // )));
 
-      if (!ephemeralHostAppBuilt) {
-        return TaskResult.failure('Failed to build ephemeral host .app');
-      }
+      // if (!ephemeralHostAppBuilt) {
+      //   return TaskResult.failure('Failed to build ephemeral host .app');
+      // }
 
-      section('Clean build');
+      // section('Clean build');
 
-      await inDirectory(projectDir, () async {
-        await flutter('clean');
-      });
+      // await inDirectory(projectDir, () async {
+      //   await flutter('clean');
+      // });
 
-      section('Add plugins');
+      // section('Add plugins');
 
-      final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
-      String content = await pubspec.readAsString();
-      content = content.replaceFirst(
-        '\ndependencies:\n',
-        '\ndependencies:\n  battery:\n  package_info:\n',
-      );
-      await pubspec.writeAsString(content, flush: true);
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'packages',
-          options: <String>['get'],
-        );
-      });
+      // final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
+      // String content = await pubspec.readAsString();
+      // content = content.replaceFirst(
+      //   '\ndependencies:\n',
+      //   '\ndependencies:\n  battery:\n  package_info:\n',
+      // );
+      // await pubspec.writeAsString(content, flush: true);
+      // await inDirectory(projectDir, () async {
+      //   await flutter(
+      //     'packages',
+      //     options: <String>['get'],
+      //   );
+      // });
 
-      section('Build ephemeral host app with CocoaPods');
+      // section('Build ephemeral host app with CocoaPods');
 
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'build',
-          options: <String>['ios'],
-        );
-      });
+      // await inDirectory(projectDir, () async {
+      //   await flutter(
+      //     'build',
+      //     options: <String>['ios'],
+      //   );
+      // });
 
-      final bool ephemeralHostAppWithCocoaPodsBuilt = exists(Directory(path.join(
-        projectDir.path,
-        'build',
-        'ios',
-        'iphoneos',
-        'Runner.app',
-      )));
+      // final bool ephemeralHostAppWithCocoaPodsBuilt = exists(Directory(path.join(
+      //   projectDir.path,
+      //   'build',
+      //   'ios',
+      //   'iphoneos',
+      //   'Runner.app',
+      // )));
 
-      if (!ephemeralHostAppWithCocoaPodsBuilt) {
-        return TaskResult.failure('Failed to build ephemeral host .app with CocoaPods');
-      }
+      // if (!ephemeralHostAppWithCocoaPodsBuilt) {
+      //   return TaskResult.failure('Failed to build ephemeral host .app with CocoaPods');
+      // }
 
-      section('Clean build');
+      // section('Clean build');
 
-      await inDirectory(projectDir, () async {
-        await flutter('clean');
-      });
+      // await inDirectory(projectDir, () async {
+      //   await flutter('clean');
+      // });
 
-      section('Make iOS host app editable');
+      // section('Make iOS host app editable');
 
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'make-host-app-editable',
-          options: <String>['ios'],
-        );
-      });
+      // await inDirectory(projectDir, () async {
+      //   await flutter(
+      //     'make-host-app-editable',
+      //     options: <String>['ios'],
+      //   );
+      // });
 
-      section('Build editable host app');
+      // section('Build editable host app');
 
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'build',
-          options: <String>['ios'],
-        );
-      });
+      // await inDirectory(projectDir, () async {
+      //   await flutter(
+      //     'build',
+      //     options: <String>['ios'],
+      //   );
+      // });
 
-      final bool editableHostAppBuilt = exists(Directory(path.join(
-        projectDir.path,
-        'build',
-        'ios',
-        'iphoneos',
-        'Runner.app',
-      )));
+      // final bool editableHostAppBuilt = exists(Directory(path.join(
+      //   projectDir.path,
+      //   'build',
+      //   'ios',
+      //   'iphoneos',
+      //   'Runner.app',
+      // )));
 
-      if (!editableHostAppBuilt) {
-        return TaskResult.failure('Failed to build editable host .app');
-      }
+      // if (!editableHostAppBuilt) {
+      //   return TaskResult.failure('Failed to build editable host .app');
+      // }
 
       section('Add to existing iOS app');
 
@@ -154,8 +154,8 @@ Future<void> main() async {
             'Debug',
             'CODE_SIGNING_ALLOWED=NO',
             'CODE_SIGNING_REQUIRED=NO',
-            'CODE_SIGNING_IDENTITY=""',
-            'EXPANDED_CODE_SIGN_IDENTITY=""',
+            'CODE_SIGN_IDENTITY=',
+            'EXPANDED_CODE_SIGN_IDENTITY=',
             'CONFIGURATION_BUILD_DIR=${tempDir.path}',
           ],
         );
