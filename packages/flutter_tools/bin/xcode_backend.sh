@@ -367,7 +367,7 @@ EmbedFlutterFrameworks() {
 
   # Sign the binaries we moved.
   local identity="${EXPANDED_CODE_SIGN_IDENTITY_NAME:-$CODE_SIGN_IDENTITY}"
-  if [[ ! -z "$identity" ]]; then
+  if [[ -n "$identity" ]]; then
     RunCommand codesign --force --verbose --sign "${identity}" -- "${xcode_frameworks_dir}/App.framework/App"
     RunCommand codesign --force --verbose --sign "${identity}" -- "${xcode_frameworks_dir}/Flutter.framework/Flutter"
   fi
