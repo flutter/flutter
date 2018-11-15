@@ -154,8 +154,8 @@ Future<void> main() async {
             'Debug',
             'CODE_SIGNING_ALLOWED=NO',
             'CODE_SIGNING_REQUIRED=NO',
-            'CODE_SIGNING_IDENTITY=""',
-            'EXPANDED_CODE_SIGN_IDENTITY=""',
+            'CODE_SIGN_IDENTITY=',
+            'EXPANDED_CODE_SIGN_IDENTITY=',
             'CONFIGURATION_BUILD_DIR=${tempDir.path}',
           ],
         );
