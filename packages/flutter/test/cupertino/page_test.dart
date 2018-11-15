@@ -5,24 +5,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class OnTapPage extends StatelessWidget {
-  const OnTapPage({ Key key, this.id}) : super(key: key);
-
-  final String id;
-
-  @override
-  Widget build(BuildContext context) {
-    return MediaQuery(
-      data: const MediaQueryData(padding: EdgeInsets.fromLTRB(40, 0, 0, 0)),
-      child: Container(
-        child: Center(
-          child: Text(id),
-        ),
-      ),
-    );
-  }
-}
-
 void main() {
   testWidgets('test iOS page transition (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -288,7 +270,7 @@ void main() {
       CupertinoApp(
         builder: (BuildContext context, Widget navigator) {
           return MediaQuery(
-            data: const MediaQueryData(padding: EdgeInsets.fromLTRB(40, 0, 0, 0)),
+            data: const MediaQueryData(padding: EdgeInsets.only(left: 40)),
             child: navigator,
           );
         },
@@ -296,23 +278,20 @@ void main() {
       ),
     );
 
-    tester
-        .state<NavigatorState>(find.byType(Navigator))
-        .push(CupertinoPageRoute<void>(
-      title: 'title',
-      builder: (BuildContext context) => const OnTapPage(id: 'Page 1'),
-    ));
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) => const Center(child: Text('Page 1')),
+      ),
+    );
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    tester
-        .state<NavigatorState>(find.byType(Navigator))
-        .push(CupertinoPageRoute<void>(
-      title: 'title',
-      builder: (BuildContext context) => const OnTapPage(id: 'Page 2'),
-    ));
-
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) => const Center(child: Text('Page 2')),
+      ),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
@@ -329,41 +308,37 @@ void main() {
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), isOnstage);
   });
-
-
+  
   testWidgets('test edge swipes work with media query padding (RLT)', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         builder: (BuildContext context, Widget navigator) {
-          return
-            Directionality(
-              textDirection: TextDirection.rtl,
-              child: MediaQuery(
-                data: const MediaQueryData(padding: EdgeInsets.fromLTRB(0, 0, 40, 0)),
-                child: navigator,
-              ),
-            );
+          return Directionality(
+            textDirection: TextDirection.rtl,
+            child: MediaQuery(
+              data: const MediaQueryData(padding: EdgeInsets.only(right: 40)),
+              child: navigator,
+            ),
+          );
         },
         home: const Placeholder(),
       ),
     );
 
-    tester
-        .state<NavigatorState>(find.byType(Navigator))
-        .push(CupertinoPageRoute<void>(
-      title: 'title',
-      builder: (BuildContext context) => const OnTapPage(id: 'Page 1'),
-    ));
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) => const Center(child: Text('Page 1')),
+      ),
+    );
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    tester
-        .state<NavigatorState>(find.byType(Navigator))
-        .push(CupertinoPageRoute<void>(
-      title: 'title',
-      builder: (BuildContext context) => const OnTapPage(id: 'Page 2'),
-    ));
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) => const Center(child: Text('Page 2')),
+      ),
+    );
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));

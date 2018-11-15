@@ -519,6 +519,8 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
+    // For devices with notches, the drag area needs to be larger on the side
+    // that has the notch.
     double dragAreaWidth = Directionality.of(context) == TextDirection.ltr ?
                            MediaQuery.of(context).padding.left :
                            MediaQuery.of(context).padding.right;
