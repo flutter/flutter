@@ -220,8 +220,11 @@ class FlutterTestDriver {
       );
       _currentRunningAppId = null;
     }
-    _debugPrint('Waiting for process to end');
-    return _proc.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
+    if (_proc != null) {
+      _debugPrint('Waiting for process to end');
+      return _proc.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
+    }
+    return 0;
   }
 
   Future<int> quit() => _killGracefully();
