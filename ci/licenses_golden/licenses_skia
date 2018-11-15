@@ -1,4 +1,4 @@
-Signature: a30315b80bd15bf7c3180e2491775441
+Signature: 8fd52f2d0f938b0a8ae2ab6815640e54
 
 UNUSED LICENSES:
 
@@ -5141,6 +5141,8 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/docs/SkPDFDocument.h
 FILE: ../../../third_party/skia/src/gpu/GrPathRendering_none.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFGlyphUse.h
+FILE: ../../../third_party/skia/src/pdf/SkPDFSubsetFont.cpp
+FILE: ../../../third_party/skia/src/pdf/SkPDFSubsetFont.h
 FILE: ../../../third_party/skia/src/utils/SkUTF.cpp
 FILE: ../../../third_party/skia/src/utils/SkUTF.h
 ----------------------------------------------------------------------------------------------------
