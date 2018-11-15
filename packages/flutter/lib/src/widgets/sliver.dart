@@ -392,7 +392,12 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     assert(builder != null);
     if (index < 0 || (childCount != null && index >= childCount))
       return null;
-    Widget child = builder(context, index);
+    Widget child;
+    try {
+      child = builder(context, index);
+    } catch (exception, stackTrace) {
+      child = _createErrorWidget(exception, stackTrace);
+    }
     if (child == null)
       return null;
     if (addRepaintBoundaries)
@@ -1266,4 +1271,17 @@ class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('keepAlive', keepAlive));
   }
+}
+
+// Return an ErrorWidget for the given Exception
+ErrorWidget _createErrorWidget(dynamic exception, StackTrace stackTrace) {
+  final FlutterErrorDetails details = FlutterErrorDetails(
+    exception: exception,
+    stack: stackTrace,
+    library: 'widgets library',
+    context: 'building',
+    informationCollector: null,
+  );
+  FlutterError.reportError(details);
+  return ErrorWidget.builder(details);
 }
