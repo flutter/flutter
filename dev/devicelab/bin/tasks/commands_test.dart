@@ -111,7 +111,7 @@ class DriveHelper {
     print('drive: running commands_$name check...');
     final Process drive = await startProcess(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
-      <String>['drive', '--use-existing-app', 'http://127.0.0.1:$vmServicePort/', '--keep-app-running', '--driver', 'test_driver/commands_${name}_test.dart'],
+      <String>['drive', '--use-test-core', '--use-existing-app', 'http://127.0.0.1:$vmServicePort/', '--keep-app-running', '--driver', 'test_driver/commands_${name}_test.dart'],
     );
     drive.stdout
         .transform<String>(utf8.decoder)

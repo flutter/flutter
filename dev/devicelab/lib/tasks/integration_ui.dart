@@ -29,7 +29,7 @@ Future<TaskResult> runEndToEndTests() async {
     ];
 
     for (final String entryPoint in entryPoints) {
-      await flutter('drive', options: <String>['--verbose', '-d', deviceId, entryPoint]);
+      await flutter('drive', options: <String>['--verbose', '-d', deviceId, '--use-test-core', entryPoint]);
     }
   });
 
