@@ -23,7 +23,7 @@ void main() {
     await inDirectory(appDir, () async {
       return await flutter(
         'drive',
-        options: <String>['--verbose', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
+        options: <String>['--verbose', '--use-test-core', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
         canFail: false,
       );
     });
@@ -64,7 +64,7 @@ void main() {
       print('drive: starting...');
       final Process drive = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['drive', '--use-existing-app', 'http://127.0.0.1:$vmServicePort/', '--no-keep-app-running', 'lib/route.dart'],
+        <String>['drive', '--use-test-core', '--use-existing-app', 'http://127.0.0.1:$vmServicePort/', '--no-keep-app-running', 'lib/route.dart'],
       );
       drive.stdout
         .transform<String>(utf8.decoder)
