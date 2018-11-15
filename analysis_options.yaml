@@ -66,7 +66,7 @@ linter:
     - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
     # - avoid_returning_null # there are plenty of valid reasons to return null
-    # - avoid_returning_null_for_void # not yet tested
+    - avoid_returning_null_for_void
     # - avoid_returning_this # there are plenty of valid reasons to return this
     # - avoid_setters_without_getters # not yet tested
     # - avoid_single_cascade_in_expression_statements # not yet tested
