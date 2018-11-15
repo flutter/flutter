@@ -308,7 +308,7 @@ void main() {
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), isOnstage);
   });
-  
+
   testWidgets('test edge swipes work with media query padding (RLT)', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
