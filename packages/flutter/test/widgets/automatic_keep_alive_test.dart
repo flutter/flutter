@@ -596,13 +596,16 @@ class AlwaysKeepAliveRenderBoxState extends State<_AlwaysKeepAlive> with Automat
   }
 }
 
-abstract class KeepAliveParentDataMixin implements ParentData {
-  factory KeepAliveParentDataMixin._() => null;
+abstract class KeepAliveParentDataMixinAlt implements KeepAliveParentDataMixin {
+  @override
+  bool keptAlive = false;
+
+  @override
   bool keepAlive = false;
 }
 
 class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
-    KeepAliveParentDataMixin,
+    KeepAliveParentDataMixinAlt,
     RenderSliverHelpers,
     RenderSliverWithKeepAliveMixin {
 
