@@ -62,6 +62,7 @@ class TextPainter {
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
+  bool get needsLayout => _needsLayout;
 
   /// The (potentially styled) text to paint.
   ///
@@ -240,18 +241,16 @@ class TextPainter {
       ); // direction doesn't matter, text is just a space, ltr is more common.
       if (text?.style != null)
         builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
+      // TODO(garyq): using an alphabetic space character is English bias, and should be
+      // removed and replaced with a less biased alternative. We can choose what
+      // character to use based of the locale and the ScriptCategory field of
+      // MaterialLocalization.
       builder.addText(' ');
       _layoutTemplate = builder.build()
         ..layout(ui.ParagraphConstraints(width: double.infinity));
     }
-    return max(_layoutTemplate.height, _maxLineHeight);
+    return _layoutTemplate.height;
   }
-
-  // Tracks the max line height to prevent jitter in text box size.
-  //
-  // When a taller-than-existing glyph is typed, prevent the height from
-  // shrinking smaller than it.
-  double _maxLineHeight = 0;
 
   /// Attempt to get the actual height of the line after layout.
   ///
@@ -266,34 +265,25 @@ class TextPainter {
   /// this is the actual measured height of the laid out text. This means that
   /// the height of each line can vary depending on the maximum heights of
   /// the characters in the line.
-  double preferredLineHeightAtOffset(int offset) {
+  double preferredLineHeightAtOffset(int offset, {ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.max}) {
     if (_needsLayout) {
       return preferredLineHeight;
     }
-    final double height = _getHeightFromUpstream(offset)
-        ?? _getHeightFromDownstream(offset)
+    final double height = _getHeightFromUpstream(offset, boxHeightStyle)
+        ?? _getHeightFromDownstream(offset, boxHeightStyle)
         ?? preferredLineHeight;
-    _maxLineHeight = max(height, _maxLineHeight);
     return height;
   }
 
-  double _getHeightFromUpstream(int offset) {
-    final int prevCodeUnit = _text.codeUnitAt(offset - 1);
-    if (prevCodeUnit == null)
-      return null;
-    final int prevRuneOffset = _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
-    final List<TextBox> boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset, boxHeightStyle: ui.BoxHeightStyle.max);
+  double _getHeightFromUpstream(int offset, ui.BoxHeightStyle boxHeightStyle) {
+    final List<TextBox> boxes = _paragraph.getBoxesForRange(offset - 1, offset, boxHeightStyle: boxHeightStyle);
     if (boxes.isEmpty)
       return null;
     return boxes.last.bottom - boxes.last.top;
   }
 
-  double _getHeightFromDownstream(int offset) {
-    final int nextCodeUnit = _text.codeUnitAt(offset + 1);
-    if (nextCodeUnit == null)
-      return null;
-    final int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
-    final List<TextBox> boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset, boxHeightStyle: ui.BoxHeightStyle.max);
+  double _getHeightFromDownstream(int offset, ui.BoxHeightStyle boxHeightStyle) {
+    final List<TextBox> boxes = _paragraph.getBoxesForRange(offset, offset + 1, boxHeightStyle: boxHeightStyle);
     if (boxes.isEmpty)
       return null;
     return boxes.last.bottom - boxes.last.top;

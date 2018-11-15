@@ -5,7 +5,7 @@
 //ignore: Remove this once Google catches up with dev.4 Dart.
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui show TextBox;
+import 'dart:ui' as ui show TextBox, BoxHeightStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -17,7 +17,6 @@ import 'object.dart';
 import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
-const double _kCaretHeightOffset = 2.0; // pixels
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -653,6 +652,7 @@ class RenderEditable extends RenderBox {
     if (_selection == value)
       return;
     _selection = value;
+    _computeCaretPrototype();
     _selectionRects = null;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
@@ -1013,14 +1013,32 @@ class RenderEditable extends RenderBox {
   /// Attempts to provide the measured height of a line in the text at the selected
   /// position. See [TextPainter.preferredLineHeight] and [TextPainter.preferredLineHeightAtOffset].
   double get _preferredCursorLineHeight {
-    if (_selection == null)
+    if (_selection == null) {
       return preferredLineHeight;
-    return _textPainter.preferredLineHeightAtOffset(_selection.extentOffset);
+    }
+    return _textPainter.preferredLineHeightAtOffset(_selection.extentOffset, boxHeightStyle: ui.BoxHeightStyle.max);
   }
 
+  // This provides an expanded height when tall glyphs (eg. ideographic) are
+  // used. This prevents clipping of tall glyphs and stops the size of the box
+  // from shrinking, which looks bad.
   double _preferredHeight(double width) {
-    if (maxLines != null)
-      return preferredLineHeight * maxLines;
+    if (maxLines != null) {
+      // Calculate the actual measured line heights.
+      final String text = _textPainter.text.toPlainText();
+      int lines = 1;
+      double height = 0;
+      int index = 0;
+      for (; index < text.length && lines < maxLines; index += 1) {
+        if (text.codeUnitAt(index) == 0x0A) { // count explicit line breaks
+          lines += 1;
+          height += _textPainter.preferredLineHeightAtOffset(index - 1, boxHeightStyle: ui.BoxHeightStyle.max);
+        }
+      }
+      height += _textPainter.preferredLineHeightAtOffset(index, boxHeightStyle: ui.BoxHeightStyle.max);
+      // Actual measured height from _textPainter is preferred over guesses.
+      return math.max(preferredLineHeight * maxLines, height);//math.max(preferredLineHeight * maxLines, _textPainter.height);
+    }
     if (width == double.infinity) {
       final String text = _textPainter.text.toPlainText();
       int lines = 1;
@@ -1028,7 +1046,7 @@ class RenderEditable extends RenderBox {
         if (text.codeUnitAt(index) == 0x0A) // count explicit line breaks
           lines += 1;
       }
-      return preferredLineHeight * lines;
+      return math.max(preferredLineHeight * lines, _textPainter.needsLayout ? 0 : _textPainter.height);
     }
     _layoutText(width);
     return math.max(preferredLineHeight, _textPainter.height);
@@ -1131,6 +1149,11 @@ class RenderEditable extends RenderBox {
   }
 
   Rect _caretPrototype;
+  void _computeCaretPrototype() {
+    // TODO(garyq): Detect that the cursor height is a guess (not laid out),
+    // and recalculate when actual line heights become available after layout.
+    _caretPrototype = Rect.fromLTWH(0.0, 0, cursorWidth, _preferredCursorLineHeight);
+  }
 
   void _layoutText(double constraintWidth) {
     assert(constraintWidth != null);
@@ -1146,7 +1169,7 @@ class RenderEditable extends RenderBox {
   @override
   void performLayout() {
     _layoutText(constraints.maxWidth);
-    _caretPrototype = Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, _preferredCursorLineHeight - 2.0 * _kCaretHeightOffset);
+    _computeCaretPrototype();
     _selectionRects = null;
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
