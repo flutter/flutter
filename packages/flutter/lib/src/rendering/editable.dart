@@ -1013,7 +1013,7 @@ class RenderEditable extends RenderBox {
   /// Attempts to provide the measured height of a line in the text at the selected
   /// position. See [TextPainter.preferredLineHeight] and [TextPainter.preferredLineHeightAtOffset].
   double get _preferredCursorLineHeight {
-    if (_selection == null) {
+    if (_selection == null || _textPainter.text.toPlainText().isEmpty) {
       return preferredLineHeight;
     }
     return _textPainter.preferredLineHeightAtOffset(_selection.extentOffset, boxHeightStyle: ui.BoxHeightStyle.max);

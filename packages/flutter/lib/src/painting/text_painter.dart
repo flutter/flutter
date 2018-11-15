@@ -265,8 +265,9 @@ class TextPainter {
   /// the characters in the line.
   double preferredLineHeightAtOffset(int offset, {ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.max}) {
     if (_needsLayout) {
-      return preferredLineHeight;
+      layout(); // Perform layout with maxWidth of infinity.
     }
+    assert(!_needsLayout);
     final double height = _getHeightFromUpstream(offset, boxHeightStyle)
         ?? _getHeightFromDownstream(offset, boxHeightStyle)
         ?? preferredLineHeight;
