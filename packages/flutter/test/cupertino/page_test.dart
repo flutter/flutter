@@ -5,17 +5,35 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class OnTapPage extends StatelessWidget {
+  const OnTapPage({ Key key, this.id}) : super(key: key);
+
+  final String id;
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: const MediaQueryData(padding: EdgeInsets.fromLTRB(40, 0, 0, 0)),
+      child: Container(
+        child: Center(
+          child: Text(id),
+        ),
+      ),
+    );
+  }
+}
+
 void main() {
   testWidgets('test iOS page transition (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         onGenerateRoute: (RouteSettings settings) {
           return CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              final String pageNumber = settings.name == '/' ? '1' : '2';
-              return Center(child: Text('Page $pageNumber'));
-            }
+              settings: settings,
+              builder: (BuildContext context) {
+                final String pageNumber = settings.name == '/' ? '1' : '2';
+                return Center(child: Text('Page $pageNumber'));
+              }
           );
         },
       ),
@@ -81,11 +99,11 @@ void main() {
         ],
         onGenerateRoute: (RouteSettings settings) {
           return CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              final String pageNumber = settings.name == '/' ? '1' : '2';
-              return Center(child: Text('Page $pageNumber'));
-            }
+              settings: settings,
+              builder: (BuildContext context) {
+                final String pageNumber = settings.name == '/' ? '1' : '2';
+                return Center(child: Text('Page $pageNumber'));
+              }
           );
         },
       ),
@@ -209,11 +227,11 @@ void main() {
       CupertinoApp(
         onGenerateRoute: (RouteSettings settings) {
           return CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              final String pageNumber = settings.name == '/' ? '1' : '2';
-              return Center(child: Text('Page $pageNumber'));
-            }
+              settings: settings,
+              builder: (BuildContext context) {
+                final String pageNumber = settings.name == '/' ? '1' : '2';
+                return Center(child: Text('Page $pageNumber'));
+              }
           );
         },
       ),
@@ -265,6 +283,105 @@ void main() {
     expect(find.text('Page 2'), isOnstage);
   });
 
+  testWidgets('test edge swipes work with media query padding (LTR)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        builder: (BuildContext context, Widget navigator) {
+          return MediaQuery(
+            data: const MediaQueryData(padding: EdgeInsets.fromLTRB(40, 0, 0, 0)),
+            child: navigator,
+          );
+        },
+        home: const Placeholder(),
+      ),
+    );
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(CupertinoPageRoute<void>(
+      title: 'title',
+      builder: (BuildContext context) => const OnTapPage(id: 'Page 1'),
+    ));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(CupertinoPageRoute<void>(
+      title: 'title',
+      builder: (BuildContext context) => const OnTapPage(id: 'Page 2'),
+    ));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    // Now drag from the left edge.
+    final TestGesture gesture = await tester.startGesture(const Offset(35.0, 200.0));
+    await gesture.moveBy(const Offset(300.0, 0.0));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // Page 1 is now visible.
+    expect(find.text('Page 1'), isOnstage);
+    expect(find.text('Page 2'), isOnstage);
+  });
+
+
+  testWidgets('test edge swipes work with media query padding (RLT)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        builder: (BuildContext context, Widget navigator) {
+          return
+            Directionality(
+              textDirection: TextDirection.rtl,
+              child: MediaQuery(
+                data: const MediaQueryData(padding: EdgeInsets.fromLTRB(0, 0, 40, 0)),
+                child: navigator,
+              ),
+            );
+        },
+        home: const Placeholder(),
+      ),
+    );
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(CupertinoPageRoute<void>(
+      title: 'title',
+      builder: (BuildContext context) => const OnTapPage(id: 'Page 1'),
+    ));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(CupertinoPageRoute<void>(
+      title: 'title',
+      builder: (BuildContext context) => const OnTapPage(id: 'Page 2'),
+    ));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    // Now drag from the left edge.
+    final TestGesture gesture = await tester.startGesture(const Offset(765.0, 200.0));
+    await gesture.moveBy(const Offset(-300.0, 0.0));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // Page 1 is now visible.
+    expect(find.text('Page 1'), isOnstage);
+    expect(find.text('Page 2'), isOnstage);
+  });
+
   testWidgets('test only edge swipes work (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -273,11 +390,11 @@ void main() {
         ],
         onGenerateRoute: (RouteSettings settings) {
           return CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              final String pageNumber = settings.name == '/' ? '1' : '2';
-              return Center(child: Text('Page $pageNumber'));
-            }
+              settings: settings,
+              builder: (BuildContext context) {
+                final String pageNumber = settings.name == '/' ? '1' : '2';
+                return Center(child: Text('Page $pageNumber'));
+              }
           );
         },
       ),
