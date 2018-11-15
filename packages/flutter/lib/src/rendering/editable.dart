@@ -1023,6 +1023,7 @@ class RenderEditable extends RenderBox {
   // used. This prevents clipping of tall glyphs and stops the size of the box
   // from shrinking, which looks bad.
   double _preferredHeight(double width) {
+    _layoutText(width);
     if (maxLines != null) {
       // Calculate the actual measured line heights.
       final String text = _textPainter.text.toPlainText();
@@ -1037,7 +1038,7 @@ class RenderEditable extends RenderBox {
       }
       height += _textPainter.preferredLineHeightAtOffset(index, boxHeightStyle: ui.BoxHeightStyle.max);
       // Actual measured height from _textPainter is preferred over guesses.
-      return math.max(preferredLineHeight * maxLines, height);//math.max(preferredLineHeight * maxLines, _textPainter.height);
+      return math.max(preferredLineHeight * maxLines, height);
     }
     if (width == double.infinity) {
       final String text = _textPainter.text.toPlainText();
@@ -1046,9 +1047,8 @@ class RenderEditable extends RenderBox {
         if (text.codeUnitAt(index) == 0x0A) // count explicit line breaks
           lines += 1;
       }
-      return math.max(preferredLineHeight * lines, _textPainter.needsLayout ? 0 : _textPainter.height);
+      return math.max(preferredLineHeight * lines, _textPainter.height);
     }
-    _layoutText(width);
     return math.max(preferredLineHeight, _textPainter.height);
   }
 

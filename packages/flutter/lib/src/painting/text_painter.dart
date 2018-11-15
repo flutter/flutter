@@ -62,14 +62,6 @@ class TextPainter {
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
 
-  /// True when the text has not been laid out, false after layout.
-  ///
-  /// Many methods and properties are not valid until this becomes false
-  /// such as [height].
-  ///
-  /// Call [layout] to lay out the text and set this to true.
-  bool get needsLayout => _needsLayout;
-
   /// The (potentially styled) text to paint.
   ///
   /// After this is set, you must call [layout] before the next call to [paint].

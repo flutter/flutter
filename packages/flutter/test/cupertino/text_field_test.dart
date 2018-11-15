@@ -43,8 +43,9 @@ void main() {
         ),
       );
 
-      // Not a round number because of floating point error from adding
-      // multiple heights, but should be negligible.
+      // TODO(garyq): Not a round number because of rounding in LibTxt height
+      // metrics. This rounding is slated to be removed as it is no longer
+      // needed. This test should be fixed when the rounding is removed.
       expect(
         tester.getSize(find.byType(CupertinoTextField)),
         const Size(200, 29.000000476837158), // 29 is the height of the default font + padding etc.
@@ -350,8 +351,9 @@ void main() {
         // Size of prefix + padding.
         100.0 + 20.0,
       );
-      // Not a round number because of floating point error from adding
-      // multiple heights, but should be negligible.
+      // TODO(garyq): Not a round number because of rounding in LibTxt height
+      // metrics. This rounding is slated to be removed as it is no longer
+      // needed. This test should be fixed when the rounding is removed.
       expect(tester.getTopLeft(find.byType(EditableText)).dy, 291.4999997615814);
 
       expect(
@@ -379,8 +381,9 @@ void main() {
       // Since the highest component, the prefix box, is higher than
       // the text + paddings, the text's vertical position isn't affected.
       //
-      // Not a round number because of floating point error from adding
-      // multiple heights, but should be negligible.
+      // TODO(garyq): Not a round number because of rounding in LibTxt height
+      // metrics. This rounding is slated to be removed as it is no longer
+      // needed. This test should be fixed when the rounding is removed.
       expect(tester.getTopLeft(find.byType(EditableText)).dy, 291.4999997615814);
 
       expect(
@@ -539,8 +542,9 @@ void main() {
           ),
         ),
       );
-      // Not a round number because of floating point error from adding
-      // multiple heights, but should be negligible.
+      // TODO(garyq): Not a round number because of rounding in LibTxt height
+      // metrics. This rounding is slated to be removed as it is no longer
+      // needed. This test should be fixed when the rounding is removed.
       expect(
         tester.getSize(find.byType(CupertinoTextField)).height,
         29.000000476837158,
