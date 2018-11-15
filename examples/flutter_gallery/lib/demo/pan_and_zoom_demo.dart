@@ -1,5 +1,7 @@
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'dart:ui' show Gradient;
+import 'package:flutter/material.dart' hide Gradient;
+import 'package:vector_math/vector_math.dart' show Vector2;
 
 class PanAndZoomDemo extends StatelessWidget {
   const PanAndZoomDemo({Key key}) : super(key: key);
@@ -28,6 +30,7 @@ class PanAndZoom extends StatelessWidget {
   }
 }
 
+// This StatefulWidget handles all user interaction
 class MapInteraction extends StatefulWidget {
   const MapInteraction({
     @required this.child,
@@ -39,12 +42,12 @@ class MapInteraction extends StatefulWidget {
 
   @override _MapInteractionState createState() => _MapInteractionState();
 }
-
 class _MapInteractionState extends State<MapInteraction> {
   static const double MAX_SCALE = 2.5;
   static const double MIN_SCALE = 0.25;
   Point<double> _offset;
-  Point<double> _translateFrom;
+  Point<double> _translateFrom; // Point where a single translation began
+  // TODO scale at point where user's fingers are?
   double _scaleStart = 1.0; // Scale value at start of scaling gesture
   double _scale = 1.0;
 
@@ -53,14 +56,18 @@ class _MapInteractionState extends State<MapInteraction> {
     super.initState();
 
     // Start out looking at the center
-    // TODO should accept this in the constructor
-    _offset = const Point<double>(0.0, 0.0);
+    // A positive x offset moves the scene right, viewport left.
+    // A positive y offset moves the scene down, viewport up.
+    _offset = Point<double>(
+      widget.screenSize.width / 2,
+      widget.screenSize.height / 2,
+    );
   }
 
   @override
   Widget build (BuildContext context) {
     return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+      behavior: HitTestBehavior.opaque, // Necessary when translating off screen
       onScaleEnd: onScaleEnd,
       onScaleStart: onScaleStart,
       onScaleUpdate: onScaleUpdate,
@@ -74,35 +81,42 @@ class _MapInteractionState extends State<MapInteraction> {
   }
 
   Matrix4 getTransformationMatrix() {
-    final Matrix4 translateToOrigin = Matrix4(
-      1, 0, 0, 0,
-      0, 1, 0, 0,
-      0, 0, 1, 0,
-      widget.screenSize.width / 2, widget.screenSize.height / 2, 0, 1,
-    );
+    // Scaling happens first in matrix multiplication, centered on the origin,
+    // while our canvas is at its original position with zero translation.
     final Matrix4 scale = Matrix4(
       _scale, 0, 0, 0,
       0, _scale, 0, 0,
       0, 0, 1, 0,
       0, 0, 0, 1,
     );
-    final Matrix4 translateFromOrigin = Matrix4(
-      1, 0, 0, 0,
-      0, 1, 0, 0,
-      0, 0, 1, 0,
-      - widget.screenSize.width / 2, - widget.screenSize.height / 2, 0, 1,
+
+    // Original center of the screen with no transformations applied.
+    final Point<double> originalCenterOfScreen = Point<double>(
+      widget.screenSize.width / 2,
+      widget.screenSize.height / 2,
+    );
+    // Center after scale has been applied.
+    // Imagine the scene scaling underneath the viewport while the viewport
+    // stays fixed, then this is the new point under the center of the viewport.
+    final Point<double> scaledCenterOfScreen = originalCenterOfScreen * (1 / _scale);
+    // Center after scale and offset have been applied.
+    final Point<double> finalCenterOfScreen = scaledCenterOfScreen + _offset;
+    // Translate the original center of the screen to the final center.
+    final Vector2 translationVector = Vector2(
+        finalCenterOfScreen.x - originalCenterOfScreen.x,
+        finalCenterOfScreen.y - originalCenterOfScreen.y,
     );
     final Matrix4 translate = Matrix4(
       1, 0, 0, 0,
       0, 1, 0, 0,
       0, 0, 1, 0,
-      _offset.x, _offset.y, 0, 1,
+      translationVector.x, translationVector.y, 0, 1,
     );
-    final Matrix4 transform = translateToOrigin * scale * translateFromOrigin * translate;
-    return transform;
+
+    return scale * translate;
   }
 
-  // Handle panning and pinch zooming
+  // Handle panning and pinch zooming events
   void onScaleStart(ScaleStartDetails details) {
     setState(() {
       _scaleStart = _scale;
@@ -121,9 +135,13 @@ class _MapInteractionState extends State<MapInteraction> {
         }
       }
       if (_translateFrom != null && details.scale == 1.0) {
+        // The coordinates given by details.focalPoint are screen coordinates
+        // that are not affected by _scale. So, dividing by scale here properly
+        // gives us more distance when zoomed out and less when zoomed in so
+        // that the point under the user's finger stays constant during a drag.
         _offset = Point<double>(
-          _offset.x + details.focalPoint.dx - _translateFrom.x,
-          _offset.y + details.focalPoint.dy - _translateFrom.y,
+          _offset.x + (details.focalPoint.dx - _translateFrom.x) / _scale,
+          _offset.y + (details.focalPoint.dy - _translateFrom.y) / _scale,
         );
         _translateFrom = Point<double>(
           details.focalPoint.dx,
@@ -141,63 +159,23 @@ class _MapInteractionState extends State<MapInteraction> {
 }
 
 class MapPainter extends CustomPainter {
-  static const Color SHADOW_COLOR = Colors.grey[700];
-  static const double RADIUS = 64.0;
+  static const double SIZE = 256.0;
 
   @override
   void paint(Canvas canvas, Size size) {
-    drawMap(canvas, size, 4);
-  }
-
-  // Draw the game map with the given radius
-  void drawMap(Canvas canvas, Size size, int radius) {
-    final Path hexagon = createHexagonAt(size);
-    canvas.drawPath(
-      hexagon,
+    canvas.drawRect(
+      Rect.fromPoints(const Offset(-SIZE, -SIZE), const Offset(SIZE, SIZE)),
       Paint()
-        ..color = Colors.grey
         ..style = PaintingStyle.fill
+        ..shader = Gradient.linear(
+          const Offset(0, 0),
+          const Offset(100, 100),
+          <Color>[Colors.lightBlue[700], Colors.lightBlue[100], Colors.lightBlue[700]],
+          <double>[0.0, 0.5, 1.0],
+          TileMode.repeated,
+        )
         ..strokeWidth = 2.0,
     );
-    canvas.drawPath(
-      Path.from(hexagon),
-      Paint()
-        ..color = Colors.grey[800]
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0,
-    );
-  }
-
-  Path createHexagonAt(Size size) {
-    // Center of hexagon with the proper canvas center
-    final Point<double> center = Point<double>(size.width / 2, size.height / 2);
-    /*
-    Point<double> centerOfHex = Point<double>(
-      centerOfHexZeroCenter.x + center.x,
-      centerOfHexZeroCenter.y + center.y,
-    );
-    */
-
-    // Start point of hexagon (top vertex)
-    final Point<double> hexStart = Point<double>(
-      center.x,
-      center.y - RADIUS,
-    );
-
-    return createHexagonAtPixels(hexStart);
-  }
-
-  // Return a hexagon where the top vertex is at the given point in pixels
-  Path createHexagonAtPixels(Point<double> point) {
-    final Path hexagon = Path();
-    hexagon.moveTo(point.x, point.y);
-    hexagon.lineTo(point.x + sqrt(3) / 2 * RADIUS, point.y + 0.5 * RADIUS);
-    hexagon.lineTo(point.x + sqrt(3) / 2 * RADIUS, point.y + 1.5 * RADIUS);
-    hexagon.lineTo(point.x, point.y + 2 * RADIUS);
-    hexagon.lineTo(point.x - sqrt(3) / 2 * RADIUS, point.y + 1.5 * RADIUS);
-    hexagon.lineTo(point.x - sqrt(3) / 2 * RADIUS, point.y + 0.5 * RADIUS);
-    hexagon.close();
-    return hexagon;
   }
 
   @override
