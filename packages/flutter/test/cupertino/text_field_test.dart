@@ -687,7 +687,7 @@ void main() {
   });
 
   testWidgets(
-    'tap moves cursor',
+    'tap moves cursor to the edge of the word it tapped on',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -710,7 +710,7 @@ void main() {
       // We moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.upstream),
+        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
 
       // But don't trigger the toolbar.
@@ -744,7 +744,7 @@ void main() {
       // Plain collapsed selection.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.upstream),
+        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
 
       // No toolbar.
@@ -778,7 +778,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.upstream),
+        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
       await tester.pump();
@@ -862,7 +862,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.upstream),
+        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
@@ -870,10 +870,13 @@ void main() {
       await tester.tapAt(textfieldStart + const Offset(100.0, 5.0));
       await tester.pump();
 
-      // Plain collapsed selection.
+      // Plain collapsed selection at the edge of first word. In iOS 12, the
+      // the first tap after a double tap ends up putting the cursor at where
+      // you tapped instead of the edge like every other single tap. This is
+      // likely a bug in iOS 12 and not present in other versions.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 6, affinity: TextAffinity.upstream),
+        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
 
       // No toolbar.
@@ -882,7 +885,7 @@ void main() {
   );
 
   testWidgets(
-    'long press moves cursor and shows toolbar',
+    'long press moves cursor to the exact long press position and shows toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -937,10 +940,11 @@ void main() {
       await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
       await tester.pump();
 
-      // We just ended up selecting the same place but dismissed the toolbar on the second tap.
+      // We ended up moving the cursor to the edge of the same word and dismissed
+      // the toolbar.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.upstream),
+        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
 
       // Collapsed toolbar shows 2 buttons.
@@ -968,10 +972,10 @@ void main() {
 
       await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
-      // First tap moved the cursor.
+      // First tap moved the cursor to the beginning of the second word.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.upstream),
+        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
@@ -979,7 +983,7 @@ void main() {
       await tester.longPressAt(textfieldStart + const Offset(100.0, 5.0));
       await tester.pump();
 
-      // Plain collapsed selection.
+      // Plain collapsed selection at the exact tap position.
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 6, affinity: TextAffinity.upstream),
@@ -1016,7 +1020,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.upstream),
+        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
       await tester.pump();
@@ -1052,7 +1056,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.upstream),
+        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -1068,7 +1072,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 6, affinity: TextAffinity.upstream),
+        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(textfieldStart + const Offset(100.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -1083,7 +1087,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.upstream),
+        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));

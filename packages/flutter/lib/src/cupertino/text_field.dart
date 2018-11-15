@@ -486,7 +486,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
   void _handleTapUp(TapUpDetails details) {
     if (!_isDoubleTap) {
-      _renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+      _renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
       _lastTapOffset = details.globalPosition;
       _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
       _requestKeyboard();

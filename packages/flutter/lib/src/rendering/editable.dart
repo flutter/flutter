@@ -1138,6 +1138,30 @@ class RenderEditable extends RenderBox {
     }
   }
 
+  /// Move the selection to the beginning or end of a word.
+  void selectWordEdge({@required SelectionChangedCause cause}) {
+    assert(cause != null);
+    _layoutText(constraints.maxWidth);
+    assert(_lastTapDownPosition != null);
+    if (onSelectionChanged != null) {
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
+      final TextRange word = _textPainter.getWordBoundary(position);
+      if (position.offset - word.start <= 1) {
+        onSelectionChanged(
+          TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream),
+          this,
+          cause,
+        );
+      } else {
+        onSelectionChanged(
+          TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream),
+          this,
+          cause,
+        );
+      }
+    }
+  }
+
   TextSelection _selectWordAtOffset(TextPosition position) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final TextRange word = _textPainter.getWordBoundary(position);
