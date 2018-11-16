@@ -122,6 +122,7 @@ Future<GradleProject> _readGradleProject() async {
     project = GradleProject(
       <String>['debug', 'profile', 'release'],
       <String>[], flutterProject.android.gradleAppOutV1Directory,
+        flutterProject.android.gradleAppBundleOutV1Directory
     );
   }
   status.stop();
@@ -276,6 +277,7 @@ Future<void> buildGradleProject({
   @required FlutterProject project,
   @required BuildInfo buildInfo,
   @required String target,
+  @required bool isBuildingBundle,
 }) async {
   // Update the local.properties file with the build mode, version name and code.
   // FlutterPlugin v1 reads local.properties to determine build mode. Plugin v2
@@ -297,7 +299,7 @@ Future<void> buildGradleProject({
     case FlutterPluginVersion.managed:
       // Fall through. Managed plugin builds the same way as plugin v2.
     case FlutterPluginVersion.v2:
-      return _buildGradleProjectV2(project, gradle, buildInfo, target);
+      return _buildGradleProjectV2(project, gradle, buildInfo, target,isBuildingBundle);
   }
 }
 
@@ -326,9 +328,19 @@ Future<void> _buildGradleProjectV2(
     FlutterProject flutterProject,
     String gradle,
     BuildInfo buildInfo,
-    String target) async {
+    String target,bool isBuildingBundle) async {
   final GradleProject project = await _gradleProject();
-  final String assembleTask = project.assembleTaskFor(buildInfo);
+
+  String assembleTask;
+
+  if(isBuildingBundle){
+    assembleTask = project.bundleTaskFor(buildInfo);
+  }else{
+    assembleTask = project.assembleTaskFor(buildInfo);
+  }
+
+  printStatus("going via assemble task "+assembleTask);
+
   if (assembleTask == null) {
     printError('');
     printError('The Gradle project does not define a task suitable for the requested build.');
@@ -346,7 +358,7 @@ Future<void> _buildGradleProjectV2(
     }
   }
   final Status status = logger.startProgress(
-    "Gradle task '$assembleTask'...",
+    "Gradle task'$assembleTask'...",
     expectSlowOperation: true,
     multilineOutput: true,
   );
@@ -398,27 +410,52 @@ Future<void> _buildGradleProjectV2(
   if (exitCode != 0)
     throwToolExit('Gradle task $assembleTask failed with exit code $exitCode', exitCode: exitCode);
 
-  final File apkFile = _findApkFile(project, buildInfo);
-  if (apkFile == null)
-    throwToolExit('Gradle build failed to produce an Android package.');
-  // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
-  apkFile.copySync(project.apkDirectory.childFile('app.apk').path);
+  if(!isBuildingBundle) {
+    final File apkFile = _findApkFile(project, buildInfo);
+    if (apkFile == null)
+      throwToolExit('Gradle build failed to produce an Android package.');
+    // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
+    apkFile.copySync(project.apkDirectory
+        .childFile('app.apk')
+        .path);
 
-  printTrace('calculateSha: ${project.apkDirectory}/app.apk');
-  final File apkShaFile = project.apkDirectory.childFile('app.apk.sha1');
-  apkShaFile.writeAsStringSync(calculateSha(apkFile));
+    printTrace('calculateSha: ${project.apkDirectory}/app.apk');
+    final File apkShaFile = project.apkDirectory.childFile('app.apk.sha1');
+    apkShaFile.writeAsStringSync(calculateSha(apkFile));
 
-  String appSize;
-  if (buildInfo.mode == BuildMode.debug) {
-    appSize = '';
-  } else {
-    appSize = ' (${getSizeAsMB(apkFile.lengthSync())})';
+    String appSize;
+    if (buildInfo.mode == BuildMode.debug) {
+      appSize = '';
+    } else {
+      appSize = ' (${getSizeAsMB(apkFile.lengthSync())})';
+    }
+    printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.');
+  }else{
+    final File bundleFile = _findBundleFile(project, buildInfo);
+    if (bundleFile == null)
+      throwToolExit('Gradle build failed to produce an Android bundle package.');
+    // Copy the bundle to app.aab, so `flutter run`, `flutter install`, etc. can find it.
+    bundleFile.copySync(project.bundleDirectory
+        .childFile('app.aab')
+        .path);
+
+    printTrace('calculateSha: ${project.bundleDirectory}/app.aab');
+    final File bundleShaFile = project.bundleDirectory.childFile('app.aab.sha1');
+    bundleShaFile.writeAsStringSync(calculateSha(bundleFile));
+
+    String appSize;
+    if (buildInfo.mode == BuildMode.debug) {
+      appSize = '';
+    } else {
+      appSize = ' (${getSizeAsMB(bundleFile.lengthSync())})';
+    }
+    printStatus('Built ${fs.path.relative(bundleFile.path)}$appSize.');
   }
-  printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.');
 }
 
 File _findApkFile(GradleProject project, BuildInfo buildInfo) {
   final String apkFileName = project.apkFileFor(buildInfo);
+
   if (apkFileName == null)
     return null;
   File apkFile = fs.file(fs.path.join(project.apkDirectory.path, apkFileName));
@@ -437,6 +474,28 @@ File _findApkFile(GradleProject project, BuildInfo buildInfo) {
   return null;
 }
 
+File _findBundleFile(GradleProject project, BuildInfo buildInfo) {
+  final String bundleFileName = project.bundleFileFor(buildInfo);
+
+  if (bundleFileName == null)
+    return null;
+  File bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, bundleFileName));
+  if (bundleFile.existsSync()) {
+    return bundleFile;
+  }
+  final String modeName = camelCase(buildInfo.modeName);
+  bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, modeName, bundleFileName));
+  if (bundleFile.existsSync())
+    return bundleFile;
+  if (buildInfo.flavor != null) {
+    // Android Studio Gradle plugin v3 adds flavor to path. for bundle the folder name is flavorModename
+    bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, buildInfo.flavor+modeName, bundleFileName));
+    if (bundleFile.existsSync())
+      return bundleFile;
+  }
+  return null;
+}
+
 Map<String, String> get _gradleEnv {
   final Map<String, String> env = Map<String, String>.from(platform.environment);
   if (javaPath != null) {
@@ -447,7 +506,7 @@ Map<String, String> get _gradleEnv {
 }
 
 class GradleProject {
-  GradleProject(this.buildTypes, this.productFlavors, this.apkDirectory);
+  GradleProject(this.buildTypes, this.productFlavors, this.apkDirectory,this.bundleDirectory);
 
   factory GradleProject.fromAppProperties(String properties, String tasks) {
     // Extract build directory.
@@ -486,12 +545,14 @@ class GradleProject {
       buildTypes.toList(),
       productFlavors.toList(),
       fs.directory(fs.path.join(buildDir, 'outputs', 'apk')),
+      fs.directory(fs.path.join(buildDir, 'outputs', 'bundle')),
     );
   }
 
   final List<String> buildTypes;
   final List<String> productFlavors;
   final Directory apkDirectory;
+  final Directory bundleDirectory;
 
   String _buildTypeFor(BuildInfo buildInfo) {
     final String modeName = camelCase(buildInfo.modeName);
@@ -524,5 +585,18 @@ class GradleProject {
       return null;
     final String flavorString = productFlavor.isEmpty ? '' : '-' + productFlavor;
     return 'app$flavorString-$buildType.apk';
+  }
+
+  String bundleTaskFor(BuildInfo buildInfo) {
+    final String buildType = _buildTypeFor(buildInfo);
+    final String productFlavor = _productFlavorFor(buildInfo);
+    if (buildType == null || productFlavor == null)
+      return null;
+    return 'bundle${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
+  }
+
+  String bundleFileFor(BuildInfo buildInfo) {
+    // for bundle all bundle names are called as app.aab
+    return 'app.aab';
   }
 }
