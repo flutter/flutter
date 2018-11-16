@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 import 'dart:async';
 
-import 'package:flutter/gestures.dart' show kDoubleTapTimeout, kDoubleTapSlop;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -412,13 +411,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   FocusNode _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
-  // Is shortly after a previous single tap when not null.
-  Timer _doubleTapTimer;
-  Offset _lastTapOffset;
-  // True if second tap down of a double tap is detected. Used to discard
-  // subsequent tap up / tap hold of the same tap.
-  bool _isDoubleTap = false;
-
   @override
   void initState() {
     super.initState();
@@ -448,7 +440,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   void dispose() {
     _focusNode?.dispose();
     _controller?.removeListener(updateKeepAlive);
-    _doubleTapTimer?.cancel();
     super.dispose();
   }
 
@@ -458,54 +449,21 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
   RenderEditable get _renderEditable => _editableTextKey.currentState.renderEditable;
 
-  // The down handler is force-run on success of a single tap and optimistically
-  // run before a long press success.
   void _handleTapDown(TapDownDetails details) {
     _renderEditable.handleTapDown(details);
-    // This isn't detected as a double tap gesture in the gesture recognizer
-    // because it's 2 single taps, each of which may do different things depending
-    // on whether it's a single tap, the first tap of a double tap, the second
-    // tap held down, a clean double tap etc.
-    if (_doubleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
-      // If there was already a previous tap, the second down hold/tap is a
-      // double tap.
-      _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
-      _doubleTapTimer.cancel();
-      _doubleTapTimeout();
-      _isDoubleTap = true;
-    }
   }
 
-  void _handleTapUp(TapUpDetails details) {
-    if (!_isDoubleTap) {
-      _renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-      _lastTapOffset = details.globalPosition;
-      _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
-      _requestKeyboard();
-    }
-    _isDoubleTap = false;
+  void _handleSingleTapUp(TapUpDetails details) {
+    _renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+    _requestKeyboard();
   }
 
-  void _handleLongPress() {
-    if (!_isDoubleTap) {
-      _renderEditable.selectPosition(cause: SelectionChangedCause.longPress);
-    }
-    _isDoubleTap = false;
+  void _handleSingleLongTapDown() {
+    _renderEditable.selectPosition(cause: SelectionChangedCause.longPress);
   }
 
-  void _doubleTapTimeout() {
-    _doubleTapTimer = null;
-    _lastTapOffset = null;
-  }
-
-  bool _isWithinDoubleTapTolerance(Offset secondTapOffset) {
-    assert(secondTapOffset != null);
-    if (_lastTapOffset == null) {
-      return false;
-    }
-
-    final Offset difference = secondTapOffset - _lastTapOffset;
-    return difference.distance <= kDoubleTapSlop;
+  void _handleDoubleTapDown(TapDownDetails details) {
+    _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
   }
 
   @override
@@ -690,13 +648,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                 : CupertinoTheme.of(context).brightness == Brightness.light
                     ? _kDisabledBackground
                     : CupertinoColors.darkBackgroundGray,
-            child: GestureDetector(
+            child: TextSelectionGestureDetector(
               behavior: HitTestBehavior.translucent,
               onTapDown: _handleTapDown,
-              onTapUp: _handleTapUp,
-              onLongPress: _handleLongPress,
-              excludeFromSemantics: true,
-              child: _addTextDependentAttachments(paddedEditable, textStyle),
+              onSingleTapUp: _handleSingleTapUp,
+              onSingleLongTapDown: _handleSingleLongTapDown,
+              onDoubleTapDown: _handleDoubleTapDown,
+              child: _addTextDependentAttachments(paddedEditable),
             ),
           ),
         ),

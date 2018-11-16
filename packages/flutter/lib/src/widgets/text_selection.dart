@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/gestures.dart' show kDoubleTapTimeout, kDoubleTapSlop;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
@@ -566,5 +567,111 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
         return rtlType;
     }
     return null;
+  }
+}
+
+class TextSelectionGestureDetector extends StatefulWidget {
+  const TextSelectionGestureDetector({
+    this.onTapDown,
+    this.onSingleTapUp,
+    this.onSingleLongTapDown,
+    this.onDoubleTapDown,
+    @required this.child,
+  });
+
+  final GestureTapDownCallback onTapDown;
+
+  final GestureTapUpCallback onSingleTapUp;
+
+  final GestureLongPressCallback onSingleLongTapDown;
+
+  final GestureTapDownCallback onDoubleTapDown;
+
+  final Widget child;
+
+  @override
+  State<StatefulWidget> createState() => _TextSelectionGestureDetectorState();
+}
+
+class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
+  // Is shortly after a previous single tap when not null.
+  Timer _doubleTapTimer;
+  Offset _lastTapOffset;
+  // True if second tap down of a double tap is detected. Used to discard
+  // subsequent tap up / tap hold of the same tap.
+  bool _isDoubleTap = false;
+
+  @override
+  void dispose() {
+    _doubleTapTimer?.cancel();
+    super.dispose();
+  }
+
+  // The down handler is force-run on success of a single tap and optimistically
+  // run before a long press success.
+  void _handleTapDown(TapDownDetails details) {
+    if (widget.onTapDown != null) {
+      widget.onTapDown(details);
+    }
+    // This isn't detected as a double tap gesture in the gesture recognizer
+    // because it's 2 single taps, each of which may do different things depending
+    // on whether it's a single tap, the first tap of a double tap, the second
+    // tap held down, a clean double tap etc.
+    if (_doubleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
+      // If there was already a previous tap, the second down hold/tap is a
+      // double tap down.
+      if (widget.onDoubleTapDown != null) {
+        widget.onDoubleTapDown(details);
+      }
+
+      _doubleTapTimer.cancel();
+      _doubleTapTimeout();
+      _isDoubleTap = true;
+    }
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    if (!_isDoubleTap) {
+      if (widget.onSingleTapUp != null) {
+        widget.onSingleTapUp(details);
+      }
+      _lastTapOffset = details.globalPosition;
+      _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
+    }
+    _isDoubleTap = false;
+  }
+
+  void _handleLongPress() {
+    if (!_isDoubleTap && widget.onSingleLongTapDown != null) {
+      widget.onSingleLongTapDown();
+    }
+    _isDoubleTap = false;
+  }
+
+  void _doubleTapTimeout() {
+    _doubleTapTimer = null;
+    _lastTapOffset = null;
+  }
+
+  bool _isWithinDoubleTapTolerance(Offset secondTapOffset) {
+    assert(secondTapOffset != null);
+    if (_lastTapOffset == null) {
+      return false;
+    }
+
+    final Offset difference = secondTapOffset - _lastTapOffset;
+    return difference.distance <= kDoubleTapSlop;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTapDown: _handleTapDown,
+      onTapUp: _handleTapUp,
+      onLongPress: _handleLongPress,
+      excludeFromSemantics: true,
+      child: widget.child,
+    );
   }
 }
