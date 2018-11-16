@@ -207,6 +207,7 @@ void main() {
         'ios/Runner/AppDelegate.swift',
         'ios/Runner/Runner-Bridging-Header.h',
         'lib/main.dart',
+        '.idea/libraries/KotlinJavaRuntime.xml',
       ],
       unexpectedPaths: <String>[
         'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
