@@ -239,7 +239,7 @@
 - (void)installSplashScreenViewIfNecessary {
   // Show the launch screen view again on top of the FlutterView if available.
   // This launch screen view will be removed once the first Flutter frame is rendered.
-  if (self.isBeingPresented || self.isMovingToParentViewController) {
+  if (_splashScreenView && (self.isBeingPresented || self.isMovingToParentViewController)) {
     [_splashScreenView.get() removeFromSuperview];
     _splashScreenView.reset();
     return;
@@ -305,19 +305,27 @@
 }
 
 - (UIView*)splashScreenView {
-  if (_splashScreenView == nullptr) {
-    NSString* launchscreenName =
-        [[[NSBundle mainBundle] infoDictionary] objectForKey:@"UILaunchStoryboardName"];
-    if (launchscreenName == nil) {
-      return nil;
-    }
-    UIView* splashView = [self splashScreenFromStoryboard:launchscreenName];
-    if (!splashView) {
-      splashView = [self splashScreenFromXib:launchscreenName];
-    }
-    self.splashScreenView = splashView;
+  if (!_splashScreenView) {
+    return nil;
   }
   return _splashScreenView.get();
+}
+
+- (BOOL)loadDefaultSplashScreenView {
+  NSString* launchscreenName =
+      [[[NSBundle mainBundle] infoDictionary] objectForKey:@"UILaunchStoryboardName"];
+  if (launchscreenName == nil) {
+    return NO;
+  }
+  UIView* splashView = [self splashScreenFromStoryboard:launchscreenName];
+  if (!splashView) {
+    splashView = [self splashScreenFromXib:launchscreenName];
+  }
+  if (!splashView) {
+    return NO;
+  }
+  self.splashScreenView = splashView;
+  return YES;
 }
 
 - (UIView*)splashScreenFromStoryboard:(NSString*)name {
@@ -347,16 +355,10 @@
   if (!view) {
     // Special case: user wants to remove the splash screen view.
     [self removeSplashScreenViewIfPresent];
-  } else if (_splashScreenView) {
-    FML_LOG(ERROR) << "Attempt to set the FlutterViewController's splash screen multiple times was "
-                      "ignored. The FlutterViewController's splash screen can only be set once. "
-                      "This condition can occur if a running FlutterEngine instance has been "
-                      "passed into the FlutterViewController and a consumer later called "
-                      "[FlutterViewController setSplashScreen:]. Setting the splash screen on a "
-                      "FlutterViewController with an already running engine is not supported, as "
-                      "the rasterizer will already be running by the time the view is shown.";
+    _splashScreenView.reset();
     return;
   }
+
   _splashScreenView.reset([view retain]);
   _splashScreenView.get().autoresizingMask =
       UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
