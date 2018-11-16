@@ -41,19 +41,29 @@ class Dialog extends StatelessWidget {
   /// Typically used in conjunction with [showDialog].
   const Dialog({
     Key key,
-    this.child,
+    this.backgroundColor,
     this.elevation,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
     this.shape,
+    this.child,
   }) : super(key: key);
 
-  /// The widget below this widget in the tree.
+  /// {@template flutter.material.dialog.backgroundColor}
+  /// The background color of the surface of this [Dialog].
   ///
-  /// {@macro flutter.widgets.child}
-  final Widget child;
+  /// This sets the [Material.color] on this [Dialog]'s [Material].
+  ///
+  /// If `null`, [ThemeData.cardColor] is used (this is the default for
+  /// [MaterialType.card]).
+  /// {@endtemplate}
+  final Color backgroundColor;
 
   /// The z-coordinate of this [Dialog].
+  ///
+  /// If this is `null`, [DialogTheme.elevation] will be used, if
+  /// [DialogTheme.elevation] is not set, the default value [_defaultElevation]
+  /// is used.
   ///
   /// {@macro flutter.material.material.elevation}
   final double elevation;
@@ -79,8 +89,13 @@ class Dialog extends StatelessWidget {
   /// {@endtemplate}
   final ShapeBorder shape;
 
-  Color _getColor(BuildContext context) {
-    return Theme.of(context).dialogBackgroundColor;
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
+
+  Color _getColor(BuildContext context, DialogTheme dialogTheme) {
+    return backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor;
   }
 
   // TODO(johnsonmh): Update default dialog border radius to 4.0 to match material spec.
@@ -105,11 +120,11 @@ class Dialog extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 280.0),
             child: Material(
-              child: child,
-              color: _getColor(context),
+              color: _getColor(context, dialogTheme),
               elevation: elevation ?? dialogTheme.elevation ?? _defaultElevation,
               shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
               type: MaterialType.card,
+              child: child,
             ),
           ),
         ),
@@ -197,6 +212,7 @@ class AlertDialog extends StatelessWidget {
     this.content,
     this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
     this.actions,
+    this.backgroundColor,
     this.elevation,
     this.semanticLabel,
     this.shape,
@@ -250,7 +266,15 @@ class AlertDialog extends StatelessWidget {
   /// from the [actions].
   final List<Widget> actions;
 
+  /// {@macro flutter.material.dialog.backgroundColor}
+  final Color backgroundColor;
+
   /// The z-coordinate of this [Dialog].
+  ///
+  /// If this is `null`, [DialogTheme.elevation] will be used, if
+  /// [DialogTheme.elevation] is not set, the default value
+  /// [Dialog._defaultElevation] is used.
+  ///
   ///
   /// {@macro flutter.material.material.elevation}
   final double elevation;
@@ -331,7 +355,12 @@ class AlertDialog extends StatelessWidget {
         child: dialogChild
       );
 
-    return Dialog(child: dialogChild, elevation: elevation, shape: shape);
+    return Dialog(
+      backgroundColor: backgroundColor,
+      elevation: elevation,
+      shape: shape,
+      child: dialogChild,
+    );
   }
 }
 
@@ -477,6 +506,7 @@ class SimpleDialog extends StatelessWidget {
     this.titlePadding = const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
     this.children,
     this.contentPadding = const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
+    this.backgroundColor,
     this.elevation,
     this.semanticLabel,
     this.shape,
@@ -521,7 +551,14 @@ class SimpleDialog extends StatelessWidget {
   /// the top padding ends up being 24 pixels.
   final EdgeInsetsGeometry contentPadding;
 
+  /// {@macro flutter.material.dialog.backgroundColor}
+  final Color backgroundColor;
+
   /// The z-coordinate of this [Dialog].
+  ///
+  /// If this is `null`, [DialogTheme.elevation] will be used, if
+  /// [DialogTheme.elevation] is not set, the default value
+  /// [Dialog._defaultElevation] is used.
   ///
   /// {@macro flutter.material.material.elevation}
   final double elevation;
@@ -594,7 +631,12 @@ class SimpleDialog extends StatelessWidget {
         label: label,
         child: dialogChild,
       );
-    return Dialog(child: dialogChild, elevation: elevation, shape: shape);
+    return Dialog(
+      backgroundColor: backgroundColor,
+      elevation: elevation,
+      shape: shape,
+      child: dialogChild,
+    );
   }
 }
 

@@ -25,7 +25,10 @@ import 'theme.dart';
 ///    application.
 class DialogTheme extends Diagnosticable {
   /// Creates a dialog theme that can be used for [ThemeData.dialogTheme].
-  const DialogTheme({ this.elevation, this.shape });
+  const DialogTheme({ this.backgroundColor, this.elevation, this.shape });
+
+  /// Default value for [Dialog.backgroundColor].
+  final Color backgroundColor;
 
   /// Default value for [Dialog.elevation].
   ///
@@ -37,8 +40,9 @@ class DialogTheme extends Diagnosticable {
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
-  DialogTheme copyWith({ double elevation, ShapeBorder shape }) {
+  DialogTheme copyWith({ Color backgroundColor, double elevation, ShapeBorder shape }) {
     return DialogTheme(
+      backgroundColor: backgroundColor ?? this.backgroundColor,
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
     );
@@ -57,6 +61,7 @@ class DialogTheme extends Diagnosticable {
   static DialogTheme lerp(DialogTheme a, DialogTheme b, double t) {
     assert(t != null);
     return DialogTheme(
+      backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
     );
@@ -72,13 +77,15 @@ class DialogTheme extends Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     final DialogTheme typedOther = other;
-    return typedOther.elevation == elevation
+    return typedOther.backgroundColor == backgroundColor
+        && typedOther.elevation == elevation
         && typedOther.shape == shape;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation));
   }

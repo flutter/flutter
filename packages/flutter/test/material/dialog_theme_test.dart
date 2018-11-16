@@ -34,7 +34,29 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeD
 
 final Key _painterKey = UniqueKey();
 
+Material _getMaterialFromDialog(WidgetTester tester) {
+  final StatefulElement widget = tester.element(
+      find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
+  return widget.state.widget;
+}
+
 void main() {
+  testWidgets('Dialog background color', (WidgetTester tester) async {
+    const Color customColor = Colors.pink;
+    const AlertDialog dialog = AlertDialog(
+      title: Text('Title'),
+      actions: <Widget>[ ],
+    );
+    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(backgroundColor: customColor));
+
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.color, customColor);
+  });
+
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {
     const double customElevation = 12.0;
     const AlertDialog dialog = AlertDialog(
@@ -47,12 +69,9 @@ void main() {
         _appWithAlertDialog(tester, dialog, theme: theme)
     );
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
-    final StatefulElement widget = tester.element(
-        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
-    final Material materialWidget = widget.state.widget;
+    final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.elevation, customElevation);
   });
 
@@ -69,12 +88,9 @@ void main() {
       _appWithAlertDialog(tester, dialog, theme: theme)
     );
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
-    final StatefulElement widget = tester.element(
-        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
-    final Material materialWidget = widget.state.widget;
+    final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.shape, customBorder);
   });
 
