@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/src/rendering/binding.dart';
+import 'package:flutter/src/semantics/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -499,5 +501,38 @@ void main() {
     );
 
     expect(find.byType(Viewport), isNot(paints..clipRect()));
+  });
+
+  testWidgets('ListView.horizontal has implicit scrolling by default', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              itemExtent: 100.0,
+              children: <Widget>[
+                Container(
+                  height: 100.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.byType(Scrollable)), matchesSemantics(
+      children: <Matcher>[
+        matchesSemantics(
+          children: <Matcher>[
+            matchesSemantics(hasImplicitScrolling: true)
+          ],
+        ),
+      ],
+    ));
+    handle.dispose();
   });
 }
