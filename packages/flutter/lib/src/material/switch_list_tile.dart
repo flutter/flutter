@@ -232,7 +232,6 @@ class SwitchListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget control;
-    // TODO any way to not duplicate params like this?
     if (_switchListTileType == _SwitchListTileType.adaptive) {
       control = Switch.adaptive(
         value: value,
