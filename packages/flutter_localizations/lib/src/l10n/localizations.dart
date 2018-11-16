@@ -7827,6 +7827,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'मागील पृष्ठ';
 
   @override
+  String get refreshIndicatorSemanticLabel => r'TBD';
+
+  @override
   String get remainingTextFieldCharacterCountFew => null;
 
   @override
