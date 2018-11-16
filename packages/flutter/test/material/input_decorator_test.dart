@@ -77,6 +77,14 @@ BorderSide getBorderSide(WidgetTester tester) {
   return getBorder(tester)?.borderSide;
 }
 
+BorderRadius getBorderRadius(WidgetTester tester) {
+  final InputBorder border = getBorder(tester);
+  if (border is UnderlineInputBorder) {
+    return border.borderRadius;
+  }
+  return null;
+}
+
 double getBorderWeight(WidgetTester tester) => getBorderSide(tester)?.width;
 
 Color getBorderColor(WidgetTester tester) => getBorderSide(tester)?.color;
@@ -1931,6 +1939,44 @@ void main() {
     expect(getBorder(tester), disabledBorder);
   });
 
+  testWidgets('OutlineInputBorder radius carries over when lerping', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/23982
+    const Key key = Key('textField');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: TextField(
+              key: key,
+              decoration: InputDecoration(
+                fillColor: Colors.white,
+                filled: true,
+                border: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                  borderRadius: BorderRadius.zero,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // TextField has the given border
+    expect(getBorderRadius(tester), BorderRadius.zero);
+
+    // Focusing does not change the border
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+    expect(getBorderRadius(tester), BorderRadius.zero);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(getBorderRadius(tester), BorderRadius.zero);
+    await tester.pumpAndSettle();
+    expect(getBorderRadius(tester), BorderRadius.zero);
+  });
+
   test('InputBorder equality', () {
     // OutlineInputBorder's equality is defined by the borderRadius, borderSide, & gapPadding
     const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
@@ -1971,5 +2017,4 @@ void main() {
     expect(underlineInputBorder.hashCode, const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)).hashCode);
     expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder().hashCode));
   });
-
 }
