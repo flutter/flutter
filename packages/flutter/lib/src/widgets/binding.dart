@@ -105,6 +105,17 @@ abstract class WidgetsBindingObserver {
   /// [SystemChannels.navigation].
   Future<bool> didPushRoute(String route) => Future<bool>.value(false);
 
+  /// Called when the host tells the app to reset navigation state to the
+  /// specified route.
+  ///
+  /// Observers are expected to return true if they were able to
+  /// handle the notification. Observers are notified in registration
+  /// order until one returns true.
+  ///
+  /// This method exposes the `didSetInitialRoute` notification from
+  /// [SystemChannels.navigation].
+  Future<bool> didSetInitialRoute(String route) => Future<bool>.value(false);
+
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
   ///
@@ -484,12 +495,34 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     }
   }
 
+  /// Called when the host tells the app to reset navigation state to the specified
+  /// route.
+  ///
+  /// This notifies the binding observers (using
+  /// [WidgetsBindingObserver.didSetInitialRoute]), in registration order, until one
+  /// returns true, meaning that it was able to handle the request (e.g. rebuilding the
+  /// app at the specified route). If none return true, then nothing happens.
+  ///
+  /// This method exposes the `setInitialRoute` notification from
+  /// [SystemChannels.navigation].
+  @protected
+  @mustCallSuper
+  @visibleForTesting
+  Future<void> handleSetInitialRoute(String route) async {
+    for (WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+      if (await observer.didSetInitialRoute(route))
+        return;
+    }
+  }
+
   Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
     switch (methodCall.method) {
       case 'popRoute':
         return handlePopRoute();
       case 'pushRoute':
         return handlePushRoute(methodCall.arguments);
+      case 'setInitialRoute':
+        return handleSetInitialRoute(methodCall.arguments);
     }
     return Future<dynamic>.value();
   }

@@ -98,6 +98,7 @@ class CupertinoApp extends StatefulWidget {
     this.checkerboardOffscreenLayers = false,
     this.showSemanticsDebugger = false,
     this.debugShowCheckedModeBanner = true,
+    this.onSetInitialRoute,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -107,6 +108,9 @@ class CupertinoApp extends StatefulWidget {
        assert(showSemanticsDebugger != null),
        assert(debugShowCheckedModeBanner != null),
        super(key: key);
+
+  /// {@macro flutter.widgets.widgetsApp.onSetInitialRoute}
+  final ValueChanged<String> onSetInitialRoute;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorKey}
   final GlobalKey<NavigatorState> navigatorKey;
@@ -308,6 +312,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
             onPressed: onPressed,
           );
         },
+        onSetInitialRoute: widget.onSetInitialRoute,
       ),
     );
   }
