@@ -32,6 +32,10 @@ enum SelectionChangedCause {
   /// of the cursor) to change.
   tap,
 
+  /// The user tapped twice in quick succession on the text and that caused
+  /// the selection (or the location of the cursor) to change.
+  doubleTap,
+
   /// The user long-pressed the text and that caused the selection (or the
   /// location of the cursor) to change.
   longPress,
@@ -190,7 +194,7 @@ class RenderEditable extends RenderBox {
 
   /// If true [handleEvent] does nothing and it's assumed that this
   /// renderer will be notified of input gestures via [handleTapDown],
-  /// [handleTap], and [handleLongPress].
+  /// [handleTap], [handleDoubleTap], and [handleLongPress].
   ///
   /// The default value of this property is false.
   bool ignorePointer;
@@ -1081,16 +1085,21 @@ class RenderEditable extends RenderBox {
   /// When [ignorePointer] is true, an ancestor widget must respond to tap
   /// events by calling this method.
   void handleTap() {
-    _layoutText(constraints.maxWidth);
-    assert(_lastTapDownPosition != null);
-    if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
-      onSelectionChanged(TextSelection.fromPosition(position), this, SelectionChangedCause.tap);
-    }
+    selectPosition(cause: SelectionChangedCause.tap);
   }
   void _handleTap() {
     assert(!ignorePointer);
     handleTap();
+  }
+
+  /// If [ignorePointer] is false (the default) then this method is called by
+  /// the internal gesture recognizer's [DoubleTapGestureRecognizer.onDoubleTap]
+  /// callback.
+  ///
+  /// When [ignorePointer] is true, an ancestor widget must respond to double
+  /// tap events by calling this method.
+  void handleDoubleTap() {
+    selectWord(cause: SelectionChangedCause.doubleTap);
   }
 
   /// If [ignorePointer] is false (the default) then this method is called by
@@ -1100,16 +1109,57 @@ class RenderEditable extends RenderBox {
   /// When [ignorePointer] is true, an ancestor widget must respond to long
   /// press events by calling this method.
   void handleLongPress() {
-    _layoutText(constraints.maxWidth);
-    assert(_lastTapDownPosition != null);
-    if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
-      onSelectionChanged(_selectWordAtOffset(position), this, SelectionChangedCause.longPress);
-    }
+    selectWord(cause: SelectionChangedCause.longPress);
   }
   void _handleLongPress() {
     assert(!ignorePointer);
     handleLongPress();
+  }
+
+  /// Move selection to the location of the last tap down.
+  void selectPosition({@required SelectionChangedCause cause}) {
+    assert(cause != null);
+    _layoutText(constraints.maxWidth);
+    assert(_lastTapDownPosition != null);
+    if (onSelectionChanged != null) {
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
+      onSelectionChanged(TextSelection.fromPosition(position), this, cause);
+    }
+  }
+
+  /// Select a word around the location of the last tap down.
+  void selectWord({@required SelectionChangedCause cause}) {
+    assert(cause != null);
+    _layoutText(constraints.maxWidth);
+    assert(_lastTapDownPosition != null);
+    if (onSelectionChanged != null) {
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
+      onSelectionChanged(_selectWordAtOffset(position), this, cause);
+    }
+  }
+
+  /// Move the selection to the beginning or end of a word.
+  void selectWordEdge({@required SelectionChangedCause cause}) {
+    assert(cause != null);
+    _layoutText(constraints.maxWidth);
+    assert(_lastTapDownPosition != null);
+    if (onSelectionChanged != null) {
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
+      final TextRange word = _textPainter.getWordBoundary(position);
+      if (position.offset - word.start <= 1) {
+        onSelectionChanged(
+          TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream),
+          this,
+          cause,
+        );
+      } else {
+        onSelectionChanged(
+          TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream),
+          this,
+          cause,
+        );
+      }
+    }
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
