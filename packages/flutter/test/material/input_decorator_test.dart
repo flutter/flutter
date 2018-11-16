@@ -1940,6 +1940,7 @@ void main() {
   });
 
   testWidgets('OutlineInputBorder radius carries over when lerping', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/23982
     const Key key = Key('textField');
 
     await tester.pumpWidget(
