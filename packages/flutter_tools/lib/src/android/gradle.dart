@@ -333,9 +333,9 @@ Future<void> _buildGradleProjectV2(
 
   String assembleTask;
 
-  if(isBuildingBundle){
+  if (isBuildingBundle) {
     assembleTask = project.bundleTaskFor(buildInfo);
-  }else{
+  } else {
     assembleTask = project.assembleTaskFor(buildInfo);
   }
 
@@ -356,7 +356,7 @@ Future<void> _buildGradleProjectV2(
     }
   }
   final Status status = logger.startProgress(
-    "Gradle task'$assembleTask'...",
+    "Gradle task '$assembleTask'...",
     expectSlowOperation: true,
     multilineOutput: true,
   );
