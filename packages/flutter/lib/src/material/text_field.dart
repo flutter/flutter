@@ -78,7 +78,10 @@ class TextField extends StatefulWidget {
   /// number of characters allowed in the text field is not restricted. If
   /// [maxLength] is set, a character counter will be displayed below the
   /// field, showing how many characters have been entered and how many are
-  /// allowed. After [maxLength] characters have been input, additional input
+  /// allowed unless the value is set to [noMaxLength] in which case only the
+  /// current length is displayed.
+  ///
+  /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
   /// enforces the length with a [LengthLimitingTextInputFormatter], which is
   /// evaluated after the supplied [inputFormatters], if any. The [maxLength]
@@ -191,6 +194,10 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.maxLines}
   final int maxLines;
+
+  /// If [maxLength] is set to this value, only the "current input length"
+  /// part of the character counter is shown.
+  static const int noMaxLength = 9007199254740992; // math.pow(2, 53);
 
   /// The maximum number of characters (Unicode scalar values) to allow in the
   /// text field.
@@ -339,9 +346,16 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       return effectiveDecoration;
 
     final int currentLength = _effectiveController.value.text.runes.length;
-    final String counterText = '$currentLength/${widget.maxLength}';
-    final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength);
-    final String semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
+    String counterText = '$currentLength';
+    String semanticCounterText = '';
+
+    if (widget.maxLength != TextField.noMaxLength) {
+      counterText += '/${widget.maxLength}';
+      final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength);
+      semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
+    }
+
+    // Handle length exceeds maxLength
     if (_effectiveController.value.text.runes.length > widget.maxLength) {
       final ThemeData themeData = Theme.of(context);
       return effectiveDecoration.copyWith(
