@@ -527,7 +527,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
         key: _scrollSemanticsKey,
         child: result,
         position: position,
-        allowImplicitScrolling: _physics.allowImplicitScrolling,
+        allowImplicitScrolling: widget?.physics?.allowImplicitScrolling ?? _physics.allowImplicitScrolling,
         semanticChildCount: widget.semanticChildCount,
       );
     }

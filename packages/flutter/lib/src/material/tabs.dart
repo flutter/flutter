@@ -993,16 +993,27 @@ class _TabBarState extends State<TabBar> {
     );
 
     if (widget.isScrollable) {
+      final ScrollBehavior configuration = ScrollConfiguration.of(context);
+      final ScrollPhysics physics = configuration.getScrollPhysics(context);
       _scrollController ??= _TabBarScrollController(this);
       tabBar = SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         controller: _scrollController,
         child: tabBar,
+        physics: _NoImplicitScrollingPhysics(physics),
       );
     }
 
     return tabBar;
   }
+}
+
+// Removes implicit scrolling from the tab bar.
+class _NoImplicitScrollingPhysics extends ScrollPhysics {
+  const _NoImplicitScrollingPhysics(ScrollPhysics parent) : super(parent: parent);
+
+  @override
+  bool get allowImplicitScrolling => false;
 }
 
 /// A page view that displays the widget which corresponds to the currently
