@@ -1,4 +1,4 @@
-Signature: 54d705b960946cbc1179ab2b41eadbed
+Signature: 7dde42ec112a3ff03045b09e57e4ba89
 
 UNUSED LICENSES:
 
@@ -1312,6 +1312,7 @@ FILE: ../../../third_party/skia/gm/clockwise.cpp
 FILE: ../../../third_party/skia/gm/crbug_847759.cpp
 FILE: ../../../third_party/skia/gm/crbug_884166.cpp
 FILE: ../../../third_party/skia/gm/crbug_887103.cpp
+FILE: ../../../third_party/skia/gm/crbug_892988.cpp
 FILE: ../../../third_party/skia/gm/drawimageset.cpp
 FILE: ../../../third_party/skia/gm/fwidth_squircle.cpp
 FILE: ../../../third_party/skia/gm/gradients_degenerate.cpp
@@ -1613,6 +1614,7 @@ FILE: ../../../third_party/skia/src/image/SkImage_GpuBase.h
 FILE: ../../../third_party/skia/src/image/SkImage_GpuYUVA.cpp
 FILE: ../../../third_party/skia/src/image/SkImage_GpuYUVA.h
 FILE: ../../../third_party/skia/src/image/SkImage_Lazy.h
+FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_hsw.cpp
 FILE: ../../../third_party/skia/src/opts/SkRasterPipeline_opts.h
 FILE: ../../../third_party/skia/src/pathops/SkPathOpsAsWinding.cpp
@@ -3360,7 +3362,6 @@ FILE: ../../../third_party/skia/src/image/SkSurface.cpp
 FILE: ../../../third_party/skia/src/image/SkSurface_Base.h
 FILE: ../../../third_party/skia/src/image/SkSurface_Gpu.cpp
 FILE: ../../../third_party/skia/src/image/SkSurface_Raster.cpp
-FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_arm_neon.cpp
 FILE: ../../../third_party/skia/src/pathops/SkAddIntersections.cpp
 FILE: ../../../third_party/skia/src/pathops/SkAddIntersections.h
 FILE: ../../../third_party/skia/src/pathops/SkDCubicLineIntersection.cpp
@@ -4580,9 +4581,6 @@ FILE: ../../../third_party/skia/src/effects/imagefilters/SkMergeImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkMorphologyImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkOffsetImageFilter.cpp
 FILE: ../../../third_party/skia/src/images/SkImageEncoderFns.h
-FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_filter_neon.h
-FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts_SSSE3.cpp
-FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts_SSSE3.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2012 The Android Open Source Project
 
@@ -5423,7 +5421,6 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/src/codec/SkColorTable.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/src/codec/SkColorTable.cpp
-FILE: ../../../third_party/skia/src/core/SkBitmapProcState_filter.h
 FILE: ../../../third_party/skia/src/core/SkCubicClipper.cpp
 FILE: ../../../third_party/skia/src/core/SkCubicClipper.h
 FILE: ../../../third_party/skia/src/core/SkEdgeClipper.cpp
