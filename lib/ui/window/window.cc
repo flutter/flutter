@@ -62,7 +62,7 @@ void SetIsolateDebugName(Dart_NativeArguments args) {
     Dart_ThrowException(exception);
     return;
   }
-  UIDartState::Current()->window()->client()->SetIsolateDebugName(name);
+  UIDartState::Current()->SetDebugName(name);
 }
 
 Dart_Handle SendPlatformMessage(Dart_Handle window,

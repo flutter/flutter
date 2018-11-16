@@ -33,6 +33,9 @@ class RuntimeDelegate {
 
   virtual FontCollection& GetFontCollection() = 0;
 
+  virtual void UpdateIsolateDescription(const std::string isolate_name,
+                                        int64_t isolate_port) = 0;
+
  protected:
   virtual ~RuntimeDelegate();
 };

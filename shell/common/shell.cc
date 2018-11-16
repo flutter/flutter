@@ -373,7 +373,7 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   is_setup_ = true;
 
   if (auto vm = blink::DartVM::ForProcessIfInitialized()) {
-    vm->GetServiceProtocol().AddHandler(this);
+    vm->GetServiceProtocol().AddHandler(this, GetServiceProtocolDescription());
   }
 
   PersistentCache::GetCacheForProcess()->AddWorkerTaskRunner(
@@ -747,6 +747,15 @@ void Shell::OnPreEngineRestart() {
   // This is blocking as any embedded platform views has to be flushed before
   // we re-run the Dart code.
   latch.Wait();
+}
+
+// |shell::Engine::Delegate|
+void Shell::UpdateIsolateDescription(const std::string isolate_name,
+                                     int64_t isolate_port) {
+  if (auto vm = blink::DartVM::ForProcessIfInitialized()) {
+    Handler::Description description(isolate_port, isolate_name);
+    vm->GetServiceProtocol().SetHandlerDescription(this, description);
+  }
 }
 
 // |blink::ServiceProtocol::Handler|

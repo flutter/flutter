@@ -158,10 +158,11 @@ class RuntimeController final : public WindowClient {
   void HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) override;
 
   // |blink::WindowClient|
-  void SetIsolateDebugName(const std::string name) override;
+  FontCollection& GetFontCollection() override;
 
   // |blink::WindowClient|
-  FontCollection& GetFontCollection() override;
+  void UpdateIsolateDescription(const std::string isolate_name,
+                                int64_t isolate_port) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RuntimeController);
 };

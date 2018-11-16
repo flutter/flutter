@@ -51,14 +51,23 @@ ServiceProtocol::~ServiceProtocol() {
   ToggleHooks(false);
 }
 
-void ServiceProtocol::AddHandler(Handler* handler) {
+void ServiceProtocol::AddHandler(Handler* handler,
+                                 Handler::Description description) {
   std::lock_guard<std::mutex> lock(handlers_mutex_);
-  handlers_.emplace(handler);
+  handlers_.emplace(handler, description);
 }
 
 void ServiceProtocol::RemoveHandler(Handler* handler) {
   std::lock_guard<std::mutex> lock(handlers_mutex_);
   handlers_.erase(handler);
+}
+
+void ServiceProtocol::SetHandlerDescription(Handler* handler,
+                                            Handler::Description description) {
+  std::lock_guard<std::mutex> lock(handlers_mutex_);
+  auto it = handlers_.find(handler);
+  if (it != handlers_.end())
+    it->second = description;
 }
 
 void ServiceProtocol::ToggleHooks(bool set) {
@@ -191,7 +200,8 @@ bool ServiceProtocol::HandleMessage(fml::StringView method,
   if (method == kScreenshotExtensionName ||
       method == kScreenshotSkpExtensionName ||
       method == kFlushUIThreadTasksExtensionName) {
-    return HandleMessageOnHandler(*handlers_.begin(), method, params, response);
+    return HandleMessageOnHandler(handlers_.begin()->first, method, params,
+                                  response);
   }
 
   WriteServerErrorResponse(
@@ -239,23 +249,9 @@ bool ServiceProtocol::HandleListViewsMethod(
   // Collect handler descriptions on their respective task runners.
   std::lock_guard<std::mutex> lock(handlers_mutex_);
   std::vector<std::pair<intptr_t, Handler::Description>> descriptions;
-  for (auto* const handler : handlers_) {
-    fml::AutoResetWaitableEvent latch;
-    Handler::Description description;
-
-    fml::TaskRunner::RunNowOrPostTask(
-        handler->GetServiceProtocolHandlerTaskRunner(
-            kListViewsExtensionName),  // task runner
-        [&latch,                       //
-         &description,                 //
-         &handler                      //
-    ]() {
-          description = handler->GetServiceProtocolDescription();
-          latch.Signal();
-        });
-    latch.Wait();
-    descriptions.emplace_back(std::make_pair<intptr_t, Handler::Description>(
-        reinterpret_cast<intptr_t>(handler), std::move(description)));
+  for (const auto& handler : handlers_) {
+    descriptions.emplace_back(reinterpret_cast<intptr_t>(handler.first),
+                              handler.second);
   }
 
   auto& allocator = response.GetAllocator();

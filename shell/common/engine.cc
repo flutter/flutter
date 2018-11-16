@@ -416,6 +416,11 @@ void Engine::HandlePlatformMessage(
   }
 }
 
+void Engine::UpdateIsolateDescription(const std::string isolate_name,
+                                      int64_t isolate_port) {
+  delegate_.UpdateIsolateDescription(isolate_name, isolate_port);
+}
+
 blink::FontCollection& Engine::GetFontCollection() {
   return font_collection_;
 }

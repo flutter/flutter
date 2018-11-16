@@ -182,6 +182,10 @@ class Shell final : public PlatformView::Delegate,
   // |shell::Engine::Delegate|
   void OnPreEngineRestart() override;
 
+  // |shell::Engine::Delegate|
+  void UpdateIsolateDescription(const std::string isolate_name,
+                                int64_t isolate_port) override;
+
   // |blink::ServiceProtocol::Handler|
   fml::RefPtr<fml::TaskRunner> GetServiceProtocolHandlerTaskRunner(
       fml::StringView method) const override;
