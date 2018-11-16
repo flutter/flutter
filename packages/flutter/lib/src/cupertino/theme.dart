@@ -21,10 +21,8 @@ const Color _kDefaultBarDarkBackgroundColor = Color(0xB7212121);
 /// are not overridden when constructing the respective widgets instances.
 ///
 /// Descendant widgets can retrieve the current [CupertinoThemeData] by calling
-/// [CupertinoThemeData.of]. A dependency for the [CupertinoThemeData]'s
-/// attribute is created when an attribute is read. Changes to that specific
-/// attribute in the [CupertinoThemeData] will trigger a rebuild in the
-/// dependent widget.
+/// [CupertinoTheme.of]. An [InheritedWidget] dependency is created when
+/// an ancestor [CupertinoThemeData] is retrieved via [CupertinoTheme.of].
 ///
 /// See also:
 ///
@@ -33,7 +31,7 @@ const Color _kDefaultBarDarkBackgroundColor = Color(0xB7212121);
 ///  * [Theme], a Material theme which will automatically add a [CupertinoTheme]
 ///    with a [CupertinoThemeData] derived from the Material [ThemeData].
 class CupertinoTheme extends InheritedWidget {
-  /// Creates a [CupertinoTheme] to change downstream Cupertino widgets' styling.
+  /// Creates a [CupertinoTheme] to change descendant Cupertino widgets' styling.
   ///
   /// The [data] and [child] parameters must not be null.
   const CupertinoTheme({
@@ -52,13 +50,8 @@ class CupertinoTheme extends InheritedWidget {
 
   /// Retrieve the [CupertinoThemeData] from an ancestor [CupertinoTheme] widget.
   ///
-  /// May return a default [CupertinoThemeData] if no [CupertinoTheme] widgets
+  /// Returns a default [CupertinoThemeData] if no [CupertinoTheme] widgets
   /// exist in the ancestry tree.
-  ///
-  /// No [InheritedModel] dependency is created when the [CupertinoThemeData]
-  /// object is provided but a dependency is created when properties on the
-  /// [CupertinoThemeData] are read. When a dependency is created, a rebuild
-  /// is invoked on the reader when the read properties are changed.
   static CupertinoThemeData of(BuildContext context) {
     final CupertinoTheme theme = context.inheritFromWidgetOfExactType(CupertinoTheme);
     return theme?.data ?? const CupertinoThemeData();
@@ -75,10 +68,6 @@ class CupertinoTheme extends InheritedWidget {
 /// visual effect. For instance, if a [primaryColor] is specified, it would
 /// cascade down to affect some fonts in [textTheme] if [textTheme] is not
 /// specified.
-///
-/// When retrieved using [CupertinoTheme.of], reading each property will create
-/// a dependency in the [BuildContext] given to [CupertinoTheme.of]. The
-/// given [BuildContext] will rebuild when that property changes.
 ///
 /// See also:
 ///
@@ -108,11 +97,10 @@ class CupertinoThemeData extends Diagnosticable {
         tableBackgroundColor,
       );
 
-  /// A raw constructor used by subclasses to populate the superclass's fields
-  /// to get superclass behaviors not overriden by subclasses.
-  ///
   /// Same as the default constructor but with positional arguments to avoid
-  /// forgetting any.
+  /// forgetting any and to specify all arguments.
+  ///
+  /// Used by subclasses to get the superclass's defaulting behaviors.
   @protected
   const CupertinoThemeData.raw(
     this._brightness,
@@ -133,9 +121,6 @@ class CupertinoThemeData extends Diagnosticable {
   ///
   /// If coming from a Material [Theme] and unspecified, [brightness] will be
   /// derived from the Material [ThemeData]'s `brightness`.
-  ///
-  /// Reading this property from [CupertinoTheme.of] will create a dependency
-  /// from the [BuildContext] to changes in this property.
   Brightness get brightness => _brightness ?? Brightness.light;
   final Brightness _brightness;
 
@@ -150,9 +135,6 @@ class CupertinoThemeData extends Diagnosticable {
   /// iOS styling, the [primaryColor] is more sparsely used than in Material
   /// Design where the [primaryColor] can appear on non-interactive surfaces like
   /// the [AppBar] background, [TextField] borders etc.
-  ///
-  /// Reading this property from [CupertinoTheme.of] will create a dependency
-  /// from the [BuildContext] to changes in this property.
   Color get primaryColor {
     return _primaryColor ??
         (_isLight ? CupertinoColors.activeBlue : CupertinoColors.activeOrange);
@@ -166,9 +148,6 @@ class CupertinoThemeData extends Diagnosticable {
   ///
   /// If coming from a Material [Theme] and unspecified, [primaryContrastingColor]
   /// will be derived from the Material [ThemeData]'s `colorScheme.onPrimary`.
-  ///
-  /// Reading this property from [CupertinoTheme.of] will create a dependency
-  /// from the [BuildContext] to changes in this property.
   Color get primaryContrastingColor {
     return _primaryContrastingColor ??
         (_isLight ? CupertinoColors.white : CupertinoColors.black);
@@ -180,9 +159,6 @@ class CupertinoThemeData extends Diagnosticable {
   /// Derived from [brightness] and [primaryColor] if unspecified, including
   /// [brightness] and [primaryColor] of a Material [ThemeData] if coming
   /// from a Material [Theme].
-  ///
-  /// Reading this property from [CupertinoTheme.of] will create a dependency
-  /// from the [BuildContext] to changes in this property.
   CupertinoTextTheme get textTheme {
     return _textTheme ?? CupertinoTextTheme(
       brightness: brightness,
@@ -195,9 +171,6 @@ class CupertinoThemeData extends Diagnosticable {
   ///
   /// Defaults to a light gray or a dark gray translucent color depending
   /// on the [brightness].
-  ///
-  /// Reading this property from [CupertinoTheme.of] will create a dependency
-  /// from the [BuildContext] to changes in this property.
   Color get barBackgroundColor {
     return _barBackgroundColor ??
         (_isLight ? _kDefaultBarLightBackgroundColor : _kDefaultBarDarkBackgroundColor);
@@ -207,9 +180,6 @@ class CupertinoThemeData extends Diagnosticable {
   /// Background color of the scaffold.
   ///
   /// Defaults to white or black depending on the [brightness].
-  ///
-  /// Reading this property from [CupertinoTheme.of] will create a dependency
-  /// from the [BuildContext] to changes in this property.
   Color get scaffoldBackgroundColor {
     return _scaffoldBackgroundColor ??
         (_isLight ? CupertinoColors.white : CupertinoColors.black);
@@ -220,9 +190,6 @@ class CupertinoThemeData extends Diagnosticable {
   ///
   /// Defaults to a [CupertinoColors.extraLightBackgroundGray] or
   /// [CupertinoColors.darkBackgroundGray] depending on the [brightness].
-  ///
-  /// Reading this property from [CupertinoTheme.of] will create a dependency
-  /// from the [BuildContext] to changes in this property.
   Color get tableBackgroundColor {
     return _tableBackgroundColor ??
         (_isLight ? CupertinoColors.extraLightBackgroundGray : CupertinoColors.darkBackgroundGray);
@@ -231,8 +198,11 @@ class CupertinoThemeData extends Diagnosticable {
 
   /// Return an instance of the [CupertinoThemeData] whose property getters
   /// only return the construction time specifications with no derived values.
-  CupertinoThemeData raw() {
-    return _RawCupertinoThemeData(
+  ///
+  /// Used in Material themes to let unspecified properties fallback to Material
+  /// theme properties instead of iOS defaults.
+  CupertinoThemeData noDefault() {
+    return _NoDefaultCupertinoThemeData(
       _brightness,
       _primaryColor,
       _primaryContrastingColor,
@@ -284,8 +254,8 @@ class CupertinoThemeData extends Diagnosticable {
   }
 }
 
-class _RawCupertinoThemeData extends CupertinoThemeData {
-  const _RawCupertinoThemeData(
+class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
+  const _NoDefaultCupertinoThemeData(
     this.brightness,
     this.primaryColor,
     this.primaryContrastingColor,

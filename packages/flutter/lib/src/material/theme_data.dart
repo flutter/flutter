@@ -248,7 +248,7 @@ class ThemeData extends Diagnosticable {
       labelStyle: textTheme.body2,
     );
     dialogTheme ??= const DialogTheme();
-    cupertinoOverrideTheme = cupertinoOverrideTheme?.raw();
+    cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
 
     return ThemeData.raw(
       brightness: brightness,
@@ -698,7 +698,7 @@ class ThemeData extends Diagnosticable {
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
   }) {
-    cupertinoOverrideTheme = cupertinoOverrideTheme?.raw();
+    cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
       brightness: brightness ?? this.brightness,
       primaryColor: primaryColor ?? this.primaryColor,
