@@ -101,6 +101,9 @@ class SwitchListTile extends StatelessWidget {
 
   /// Creates the wrapped switch with [Switch.adaptive].
   ///
+  /// Creates a [CupertinoSwitch] if the target platform is iOS, creates a
+  /// material design switch otherwise.
+  ///
   /// If a [CupertinoSwitch] is created, the following parameters are
   /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
   /// [activeThumbImage], [inactiveThumbImage], [materialTapTargetSize].
@@ -232,30 +235,33 @@ class SwitchListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget control;
-    if (_switchListTileType == _SwitchListTileType.adaptive) {
-      control = Switch.adaptive(
-        value: value,
-        onChanged: onChanged,
-        activeColor: activeColor,
-        activeThumbImage: activeThumbImage,
-        inactiveThumbImage: inactiveThumbImage,
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        activeTrackColor: activeTrackColor,
-        inactiveTrackColor: inactiveTrackColor,
-        inactiveThumbColor: inactiveThumbColor,
-      );
-    } else {
-      control = Switch(
-        value: value,
-        onChanged: onChanged,
-        activeColor: activeColor,
-        activeThumbImage: activeThumbImage,
-        inactiveThumbImage: inactiveThumbImage,
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        activeTrackColor: activeTrackColor,
-        inactiveTrackColor: inactiveTrackColor,
-        inactiveThumbColor: inactiveThumbColor,
-      );
+    switch (_switchListTileType) {
+      case _SwitchListTileType.adaptive:
+        control = Switch.adaptive(
+          value: value,
+          onChanged: onChanged,
+          activeColor: activeColor,
+          activeThumbImage: activeThumbImage,
+          inactiveThumbImage: inactiveThumbImage,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          activeTrackColor: activeTrackColor,
+          inactiveTrackColor: inactiveTrackColor,
+          inactiveThumbColor: inactiveThumbColor,
+        );
+        break;
+
+      case _SwitchListTileType.material:
+        control = Switch(
+          value: value,
+          onChanged: onChanged,
+          activeColor: activeColor,
+          activeThumbImage: activeThumbImage,
+          inactiveThumbImage: inactiveThumbImage,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          activeTrackColor: activeTrackColor,
+          inactiveTrackColor: inactiveTrackColor,
+          inactiveThumbColor: inactiveThumbColor,
+        );
     }
     return MergeSemantics(
       child: ListTileTheme.merge(
