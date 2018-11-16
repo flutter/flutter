@@ -107,6 +107,7 @@ class MaterialApp extends StatefulWidget {
     this.checkerboardOffscreenLayers = false,
     this.showSemanticsDebugger = false,
     this.debugShowCheckedModeBanner = true,
+    this.onSetInitialRoute,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -117,6 +118,9 @@ class MaterialApp extends StatefulWidget {
        assert(showSemanticsDebugger != null),
        assert(debugShowCheckedModeBanner != null),
        super(key: key);
+
+  /// {@macro flutter.widgets.widgetsApp.onSetInitialRoute}
+  final ValueChanged<String> onSetInitialRoute;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorKey}
   final GlobalKey<NavigatorState> navigatorKey;
@@ -443,6 +447,7 @@ class _MaterialAppState extends State<MaterialApp> {
             mini: true,
           );
         },
+        onSetInitialRoute: widget.onSetInitialRoute,
       )
     );
 

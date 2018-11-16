@@ -139,6 +139,9 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The `supportedLocales` argument must be a list of one or more elements.
   /// By default supportedLocales is `[const Locale('en', 'US')]`.
+  ///
+  /// The `onSetInitialRoute` argument can be used to handle the `setInitialRoute` message
+  /// on the [SystemChannels.navigation] channel.
   WidgetsApp({ // can't be const because the asserts use methods on Iterable :-(
     Key key,
     this.navigatorKey,
@@ -166,6 +169,7 @@ class WidgetsApp extends StatefulWidget {
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
     this.inspectorSelectButtonBuilder,
+    this.onSetInitialRoute,
   }) : assert(navigatorObservers != null),
        assert(routes != null),
        assert(
@@ -224,6 +228,15 @@ class WidgetsApp extends StatefulWidget {
        assert(debugShowCheckedModeBanner != null),
        assert(debugShowWidgetInspector != null),
        super(key: key);
+
+  /// {@template flutter.widgets.widgetsApp.onSetInitialRoute}
+  /// The callback to invoke when the `setInitialRoute` method is
+  /// invoked on the [SystemChannels.navigation] channel. Calls to
+  /// that method made before the current isolate starts will be
+  /// available on [ui.window.defaultRouteName]. Listeners interested
+  /// in calls after that point should set a callback here.
+  /// {@endtemplate}
+  final ValueChanged<String> onSetInitialRoute;
 
   /// {@template flutter.widgets.widgetsApp.navigatorKey}
   /// A key to use when building the [Navigator].
@@ -793,6 +806,15 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       return false;
     navigator.pushNamed(route);
     return true;
+  }
+
+  @override
+  Future<bool> didSetInitialRoute(String route) async {
+    if (widget.onSetInitialRoute != null) {
+      widget.onSetInitialRoute(route);
+      return true;
+    }
+    return false;
   }
 
 

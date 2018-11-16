@@ -22,10 +22,16 @@ class SystemChannels {
   ///  * `pushRoute`, which is called with a single string argument when the
   ///    operating system instructs the application to open a particular page.
   ///
+  ///  * `setInitialRoute`, which is called with a single string argument when
+  ///    the system wants the routing state to be reset to a specific. The last
+  ///    call made to this before the Dart Isolate started running is available
+  ///    as the [dart:ui.Window.defaultRouteName] property.
+  ///
   /// See also:
   ///
-  ///  * [WidgetsBindingObserver.didPopRoute] and
-  ///    [WidgetsBindingObserver.didPushRoute], which expose this channel's
+  ///  * [WidgetsBindingObserver.didPopRoute],
+  ///    [WidgetsBindingObserver.didPushRoute], and
+  ///    [WidgetsBindingObserver.didSetInitialRoute] which expose this channel's
   ///    methods.
   static const MethodChannel navigation = MethodChannel(
       'flutter/navigation',
