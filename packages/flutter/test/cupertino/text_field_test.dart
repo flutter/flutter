@@ -47,8 +47,12 @@ void main() {
       // metrics. This rounding is slated to be removed as it is no longer
       // needed. This test should be fixed when the rounding is removed.
       expect(
-        tester.getSize(find.byType(CupertinoTextField)),
-        const Size(200, 29.000000476837158), // 29 is the height of the default font + padding etc.
+        tester.getSize(find.byType(CupertinoTextField)).height,
+        closeTo(29.000000476837158, 0.000001), // 29 is the height of the default font + padding etc.
+      );
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)).width,
+        200, // 29 is the height of the default font + padding etc.
       );
     },
   );
@@ -354,7 +358,7 @@ void main() {
       // TODO(garyq): Not a round number because of rounding in LibTxt height
       // metrics. This rounding is slated to be removed as it is no longer
       // needed. This test should be fixed when the rounding is removed.
-      expect(tester.getTopLeft(find.byType(EditableText)).dy, 291.4999997615814);
+      expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(291.4999997615814, 0.000001));
 
       expect(
         tester.getTopRight(find.byType(EditableText)).dx,
@@ -384,7 +388,7 @@ void main() {
       // TODO(garyq): Not a round number because of rounding in LibTxt height
       // metrics. This rounding is slated to be removed as it is no longer
       // needed. This test should be fixed when the rounding is removed.
-      expect(tester.getTopLeft(find.byType(EditableText)).dy, 291.4999997615814);
+      expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(291.4999997615814, 0.000001));
 
       expect(
         tester.getTopRight(find.byType(EditableText)).dx,
@@ -547,7 +551,7 @@ void main() {
       // needed. This test should be fixed when the rounding is removed.
       expect(
         tester.getSize(find.byType(CupertinoTextField)).height,
-        29.000000476837158,
+        closeTo(29.000000476837158, 0.000001),
       );
 
       await tester.pumpWidget(

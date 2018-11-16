@@ -3385,7 +3385,7 @@ void main() {
       // TODO(garyq): Not a round number because of rounding in LibTxt height
       // metrics. This rounding is slated to be removed as it is no longer
       // needed. This test should be fixed when the rounding is removed.
-      88.00000047683716,
+      closeTo(88.00000047683716, 0.000001),
     );
 
     await tester.enterText(find.byType(TextField), 'a\nb\nc\nd');
@@ -3397,7 +3397,7 @@ void main() {
       // TODO(garyq): Not a round number because of rounding in LibTxt height
       // metrics. This rounding is slated to be removed as it is no longer
       // needed. This test should be fixed when the rounding is removed.
-      88.00000047683716,
+      closeTo(88.00000047683716, 0.000001),
     );
 
     await tester.enterText(find.byType(TextField), 'a\nb\nc\nd\ne');
@@ -3409,7 +3409,7 @@ void main() {
       // TODO(garyq): Not a round number because of rounding in LibTxt height
       // metrics. This rounding is slated to be removed as it is no longer
       // needed. This test should be fixed when the rounding is removed.
-      88.00000047683716,
+      closeTo(88.00000047683716, 0.000001),
     );
   });
 
@@ -3434,7 +3434,7 @@ void main() {
       // TODO(garyq): Not a round number because of rounding in LibTxt height
       // metrics. This rounding is slated to be removed as it is no longer
       // needed. This test should be fixed when the rounding is removed.
-      40.00000023841858,
+      closeTo(40.00000023841858, 0.000001),
     );
 
     await tester.enterText(find.byType(TextField), '一\n');
@@ -3444,7 +3444,7 @@ void main() {
       // TODO(garyq): Not a round number because of rounding in LibTxt height
       // metrics. This rounding is slated to be removed as it is no longer
       // needed. This test should be fixed when the rounding is removed.
-      40.00000023841858,
+      closeTo(40.00000023841858, 0.000001),
     );
 
     await tester.enterText(find.byType(TextField), '一\n二\n三');
@@ -3454,7 +3454,7 @@ void main() {
       // TODO(garyq): Not a round number because of rounding in LibTxt height
       // metrics. This rounding is slated to be removed as it is no longer
       // needed. This test should be fixed when the rounding is removed.
-      40.00000023841858,
+      closeTo(40.00000023841858, 0.000001),
     );
 
     await tester.enterText(find.byType(TextField), '一\n二\n三\n四');
@@ -3464,7 +3464,7 @@ void main() {
       // TODO(garyq): Not a round number because of rounding in LibTxt height
       // metrics. This rounding is slated to be removed as it is no longer
       // needed. This test should be fixed when the rounding is removed.
-      40.00000023841858,
+      closeTo(40.00000023841858, 0.000001),
     );
   });
 
@@ -3488,15 +3488,17 @@ void main() {
     // TODO(garyq): Not a round number because of rounding in LibTxt height
     // metrics. This rounding is slated to be removed as it is no longer
     // needed. This test should be fixed when the rounding is removed.
-    expect(caretRect.height, 16.00000023841858);
-    expect(caretRect.topLeft, const Offset(32, -2.384185791015625e-7));
+    expect(caretRect.height, closeTo(16.00000023841858, 0.000001));
+    expect(caretRect.topLeft.dx, 32);
+    expect(caretRect.topLeft.dy, closeTo(-2.384185791015625e-7, 0.000001));
 
     caretRect = editable.getLocalRectForCaret(const TextPosition(offset: 4));
     // TODO(garyq): Not a round number because of rounding in LibTxt height
     // metrics. This rounding is slated to be removed as it is no longer
     // needed. This test should be fixed when the rounding is removed.
-    expect(caretRect.height, 16.00000023841858);
-    expect(caretRect.topLeft, const Offset(64, -2.384185791015625e-7));
+    expect(caretRect.height, closeTo(16.00000023841858, 0.000001));
+    expect(caretRect.topLeft.dx, 64);
+    expect(caretRect.topLeft.dy, closeTo(-2.384185791015625e-7, 0.000001));
 
     caretRect = editable.getLocalRectForCaret(const TextPosition(offset: 6));
     expect(caretRect.height, 16);
