@@ -508,7 +508,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     // assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     final ThemeData themeData = Theme.of(context);
-    final TextStyle style = widget.style ?? themeData.textTheme.subhead;
+    final TextStyle style = widget.style != null
+      ? themeData.textTheme.subhead.merge(widget.style)
+      : themeData.textTheme.subhead;
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
