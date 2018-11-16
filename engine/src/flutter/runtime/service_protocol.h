@@ -63,14 +63,17 @@ class ServiceProtocol {
 
   void ToggleHooks(bool set);
 
-  void AddHandler(Handler* handler);
+  void AddHandler(Handler* handler, Handler::Description description);
 
   void RemoveHandler(Handler* handler);
+
+  void SetHandlerDescription(Handler* handler,
+                             Handler::Description description);
 
  private:
   const std::set<fml::StringView> endpoints_;
   mutable std::mutex handlers_mutex_;
-  std::set<Handler*> handlers_;
+  std::map<Handler*, Handler::Description> handlers_;
 
   FML_WARN_UNUSED_RESULT
   static bool HandleMessage(const char* method,
