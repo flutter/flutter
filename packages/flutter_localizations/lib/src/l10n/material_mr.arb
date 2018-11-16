@@ -51,5 +51,6 @@
   "collapsedIconTapHint": "विस्तृत",
   "remainingTextFieldCharacterCountZero": "कोणतेही वर्ण शिल्लक नाहीत",
   "remainingTextFieldCharacterCountOne": "1 वर्ण उर्वरित",
-  "remainingTextFieldCharacterCountOther": "$remainingCount वर्ण उर्वरित"
+  "remainingTextFieldCharacterCountOther": "$remainingCount वर्ण उर्वरित",
+  "refreshIndicatorSemanticLabel": "TBD"
 }
