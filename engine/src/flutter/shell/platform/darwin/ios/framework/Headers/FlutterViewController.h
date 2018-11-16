@@ -88,7 +88,7 @@ FLUTTER_EXPORT
  *
  * @param asset The name of the asset. The name can be hierarchical.
  * @param package The name of the package from which the asset originates.
- * @returns: The file name to be used for lookup in the main bundle.
+ * @return The file name to be used for lookup in the main bundle.
  */
 - (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package;
 
@@ -129,14 +129,18 @@ FLUTTER_EXPORT
  * a replacement until the first frame is rendered.
  *
  * The view used should be appropriate for multiple sizes; an autoresizing mask to
- * have a flexible
- * width and height will be applied automatically.
- *
- * If not specified, uses a view generated from `UILaunchStoryboardName` from the
- * main bundle's
- * `Info.plist` file.
+ * have a flexible width and height will be applied automatically.
  */
 @property(strong, nonatomic) UIView* splashScreenView;
+
+/**
+ * Attempts to set the `splashScreenView` property from the `UILaunchStoryboardName` from the
+ * main bundle's `Info.plist` file.  This method will not change the value of `splashScreenView`
+ * if it cannot find a default one from a storyboard or nib.
+ *
+ * @return `YES` if successful, `NO` otherwise.
+ */
+- (BOOL)loadDefaultSplashScreenView;
 
 /**
  * Controls whether the created view will be opaque or not.
