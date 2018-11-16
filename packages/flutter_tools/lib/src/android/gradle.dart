@@ -339,8 +339,6 @@ Future<void> _buildGradleProjectV2(
     assembleTask = project.assembleTaskFor(buildInfo);
   }
 
-  printStatus("going via assemble task "+assembleTask);
-
   if (assembleTask == null) {
     printError('');
     printError('The Gradle project does not define a task suitable for the requested build.');
