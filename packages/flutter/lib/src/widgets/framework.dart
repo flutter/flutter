@@ -594,7 +594,7 @@ abstract class StatelessWidget extends Widget {
   ///
   ///  * The discussion on performance considerations at [StatelessWidget].
   @protected
-  Widget build(BuildContext context);
+  Widget build(covariant BuildContext context);
 }
 
 /// A widget that has mutable state.
@@ -1295,7 +1295,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   ///
   ///  * The discussion on performance considerations at [StatefulWidget].
   @protected
-  Widget build(BuildContext context);
+  Widget build(covariant BuildContext context);
 
   /// Called when a dependency of this [State] object changes.
   ///
