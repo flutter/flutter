@@ -3370,6 +3370,11 @@ void main() {
     await tester.pumpWidget(buildFrame(TextStyle()));
     EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.style.color, themeData.textTheme.subhead.color);
+    expect(editableText.style.background, themeData.textTheme.subhead.background);
+    expect(editableText.style.shadows, themeData.textTheme.subhead.shadows);
+    expect(editableText.style.decoration, themeData.textTheme.subhead.decoration);
+    expect(editableText.style.locale, themeData.textTheme.subhead.locale);
+    expect(editableText.style.wordSpacing, themeData.textTheme.subhead.wordSpacing);
 
     // Properties set on TextStyle override theme
     const Color setColor = Colors.red;
