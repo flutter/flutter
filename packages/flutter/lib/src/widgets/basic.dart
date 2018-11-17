@@ -3137,11 +3137,11 @@ class Positioned extends ParentDataWidget<Stack> {
   final double height;
 
   /// Whether the child is positioned relatively to the [Stack]'s size.
-  /// 
+  ///
   /// For example if the [Stack]'s width is 200.0 pixels, [left] is 0.25
   /// and [isRelative] is true, then the left edge of the child will be inset
   /// 50.0 pixels from the left edge of the [Stack].
-  /// 
+  ///
   /// Defaults to false.
   final bool isRelative;
 

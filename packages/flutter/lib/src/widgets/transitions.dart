@@ -491,6 +491,7 @@ class PositionedTransition extends AnimatedWidget {
     Key key,
     @required Animation<RelativeRect> rect,
     @required this.child,
+    this.isRelative = false,
   }) : super(key: key, listenable: rect);
 
   /// The animation that controls the child's size and position.
@@ -501,11 +502,17 @@ class PositionedTransition extends AnimatedWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// Whether the child is positioned relatively to the [Stack]'s size.
+  ///
+  /// Defaults to false.
+  final bool isRelative;
+
   @override
   Widget build(BuildContext context) {
     return Positioned.fromRelativeRect(
       rect: rect.value,
       child: child,
+      isRelative: isRelative,
     );
   }
 }
@@ -543,6 +550,7 @@ class RelativePositionedTransition extends AnimatedWidget {
     @required Animation<Rect> rect,
     @required this.size,
     @required this.child,
+    this.isRelative = false,
   }) : super(key: key, listenable: rect);
 
   /// The animation that controls the child's size and position.
@@ -559,6 +567,11 @@ class RelativePositionedTransition extends AnimatedWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// Whether the child is positioned relatively to the [Stack]'s size.
+  ///
+  /// Defaults to false.
+  final bool isRelative;
+
   @override
   Widget build(BuildContext context) {
     final RelativeRect offsets = RelativeRect.fromSize(rect.value, size);
@@ -568,6 +581,7 @@ class RelativePositionedTransition extends AnimatedWidget {
       bottom: offsets.bottom,
       left: offsets.left,
       child: child,
+      isRelative: isRelative,
     );
   }
 }

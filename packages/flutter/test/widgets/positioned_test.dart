@@ -130,4 +130,80 @@ void main() {
     await tester.pump();
     expect(completer.isCompleted, isTrue);
   });
+
+  testWidgets('Can animate relative position data', (WidgetTester tester) async {
+    final RelativeRectTween rect = RelativeRectTween(
+      begin: RelativeRect.fromRect(
+        Rect.fromLTRB(0.0, 0.0, 0.5, 0.5),
+        Rect.fromLTRB(0.0, 0.0, 1.0, 1.0),
+      ),
+      end: RelativeRect.fromRect(
+        Rect.fromLTRB(0.5, 0.5, 1.0, 1.0),
+        Rect.fromLTRB(0.0, 0.0, 1.0, 1.0),
+      )
+    );
+    final AnimationController controller = AnimationController(
+      duration: const Duration(seconds: 10),
+      vsync: tester,
+    );
+    final List<Size> sizes = <Size>[];
+    final List<Offset> positions = <Offset>[];
+    final GlobalKey key = GlobalKey();
+
+    void recordMetrics() {
+      final RenderBox box = key.currentContext.findRenderObject();
+      final BoxParentData boxParentData = box.parentData;
+      sizes.add(box.size);
+      positions.add(boxParentData.offset);
+    }
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 100.0,
+            width: 100.0,
+            child: Stack(
+              children: <Widget>[
+                PositionedTransition(
+                  rect: rect.animate(controller),
+                  isRelative: true,
+                  child: Container(
+                    key: key,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ); // t=0
+    recordMetrics();
+    final Completer<void> completer = Completer<void>();
+    controller.forward().whenComplete(completer.complete);
+    expect(completer.isCompleted, isFalse);
+    await tester.pump(); // t=0 again
+    expect(completer.isCompleted, isFalse);
+    recordMetrics();
+    await tester.pump(const Duration(seconds: 1)); // t=1
+    expect(completer.isCompleted, isFalse);
+    recordMetrics();
+    await tester.pump(const Duration(seconds: 1)); // t=2
+    expect(completer.isCompleted, isFalse);
+    recordMetrics();
+    await tester.pump(const Duration(seconds: 3)); // t=5
+    expect(completer.isCompleted, isFalse);
+    recordMetrics();
+    await tester.pump(const Duration(seconds: 5)); // t=10
+    expect(completer.isCompleted, isFalse);
+    recordMetrics();
+
+    expect(sizes, equals(<Size>[const Size(50.0, 50.0), const Size(50.0, 50.0), const Size(50.0, 50.0), const Size(50.0, 50.0), const Size(50.0, 50.0), const Size(50.0, 50.0)]));
+    expect(positions, equals(<Offset>[const Offset(0.0, 10.0), const Offset(0.0, 10.0), const Offset(5.0, 5.0), const Offset(10.0, 10.0), const Offset(25.0, 25.0), const Offset(50.0, 50.0)]));
+
+    controller.stop(canceled: false);
+    await tester.pump();
+    expect(completer.isCompleted, isTrue);
+  });
 }
