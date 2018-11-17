@@ -786,7 +786,7 @@ void main() {
         textDirection: TextDirection.rtl,
         child: Stack(
           alignment: Alignment.topLeft,
-          children: const <Widget>[            
+          children: const <Widget>[
             Positioned(left: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
             Positioned(right: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
             Positioned(top: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
