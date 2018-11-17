@@ -53,21 +53,21 @@ ServiceProtocol::~ServiceProtocol() {
 
 void ServiceProtocol::AddHandler(Handler* handler,
                                  Handler::Description description) {
-  std::unique_lock<std::shared_timed_mutex> lock(handlers_mutex_);
+  std::lock_guard<std::mutex> lock(handlers_mutex_);
   handlers_.emplace(handler, description);
 }
 
 void ServiceProtocol::RemoveHandler(Handler* handler) {
-  std::unique_lock<std::shared_timed_mutex> lock(handlers_mutex_);
+  std::lock_guard<std::mutex> lock(handlers_mutex_);
   handlers_.erase(handler);
 }
 
 void ServiceProtocol::SetHandlerDescription(Handler* handler,
                                             Handler::Description description) {
-  std::shared_lock<std::shared_timed_mutex> lock(handlers_mutex_);
+  std::lock_guard<std::mutex> lock(handlers_mutex_);
   auto it = handlers_.find(handler);
   if (it != handlers_.end())
-    it->second.Store(description);
+    it->second = description;
 }
 
 void ServiceProtocol::ToggleHooks(bool set) {
@@ -175,7 +175,7 @@ bool ServiceProtocol::HandleMessage(fml::StringView method,
     return HandleListViewsMethod(response);
   }
 
-  std::shared_lock<std::shared_timed_mutex> lock(handlers_mutex_);
+  std::lock_guard<std::mutex> lock(handlers_mutex_);
 
   if (handlers_.size() == 0) {
     WriteServerErrorResponse(response,
@@ -246,11 +246,12 @@ void ServiceProtocol::Handler::Description::Write(
 
 bool ServiceProtocol::HandleListViewsMethod(
     rapidjson::Document& response) const {
-  std::shared_lock<std::shared_timed_mutex> lock(handlers_mutex_);
+  // Collect handler descriptions on their respective task runners.
+  std::lock_guard<std::mutex> lock(handlers_mutex_);
   std::vector<std::pair<intptr_t, Handler::Description>> descriptions;
   for (const auto& handler : handlers_) {
     descriptions.emplace_back(reinterpret_cast<intptr_t>(handler.first),
-                              handler.second.Load());
+                              handler.second);
   }
 
   auto& allocator = response.GetAllocator();
