@@ -570,23 +570,50 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
   }
 }
 
+/// A gesture detector to detect concurrent gesture events for a text field.
+///
+/// Unlike a plain [GestureDetector] where a single gesture wins the gesture
+/// arena, text fields supports chains of concurrent events.
+///
+/// See also:
+///
+///  * [TextField], a Material text field which uses this gesture detector.
+///  * [CupertinoTextField], a Cupertino text field which uses this gesture
+///    detector.
 class TextSelectionGestureDetector extends StatefulWidget {
+  /// Create a [TextSelectionGestureDetector].
+  ///
+  /// Multiple callbacks can be called from the same sequence of gesture.
+  /// The [child] parameter must not be null.
   const TextSelectionGestureDetector({
     this.onTapDown,
     this.onSingleTapUp,
+    this.onSingleTapCancel,
     this.onSingleLongTapDown,
     this.onDoubleTapDown,
     @required this.child,
-  });
+  }) : assert(child != null);
 
+  /// Called each distinct time a tap was held momentarily or on a short tap.
   final GestureTapDownCallback onTapDown;
 
+  /// Called for each distinct short tap. Also called on the first tap of a
+  /// double tap but not on the second tap.
   final GestureTapUpCallback onSingleTapUp;
 
+  /// Called for each tap down that does not become a short tap such as a long
+  /// tap or drag.
+  final GestureTapCancelCallback onSingleTapCancel;
+
+  /// Called for a single long tap that's sustained but not necessarily lifted.
+  /// Not called for a double-tap-hold.
   final GestureLongPressCallback onSingleLongTapDown;
 
+  /// Called after a momentary hold or a short tap that is close in space and
+  /// time to a previous short tap.
   final GestureTapDownCallback onDoubleTapDown;
 
+  /// Child below this widget.
   final Widget child;
 
   @override
@@ -641,6 +668,12 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     _isDoubleTap = false;
   }
 
+  void _handleTapCancel() {
+    if (widget.onSingleTapCancel != null) {
+      widget.onSingleTapCancel();
+    }
+  }
+
   void _handleLongPress() {
     if (!_isDoubleTap && widget.onSingleLongTapDown != null) {
       widget.onSingleLongTapDown();
@@ -669,6 +702,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       behavior: HitTestBehavior.translucent,
       onTapDown: _handleTapDown,
       onTapUp: _handleTapUp,
+      onTapCancel: _handleTapCancel,
       onLongPress: _handleLongPress,
       excludeFromSemantics: true,
       child: widget.child,
