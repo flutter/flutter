@@ -3367,7 +3367,7 @@ void main() {
     }
 
     // Empty TextStyle is overridden by theme
-    await tester.pumpWidget(buildFrame(TextStyle()));
+    await tester.pumpWidget(buildFrame(const TextStyle()));
     EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.style.color, themeData.textTheme.subhead.color);
     expect(editableText.style.background, themeData.textTheme.subhead.background);
@@ -3383,7 +3383,7 @@ void main() {
     expect(editableText.style.color, setColor);
 
     // inherit: false causes nothing to be merged in from theme
-    await tester.pumpWidget(buildFrame(TextStyle(
+    await tester.pumpWidget(buildFrame(const TextStyle(
       fontSize: 24.0,
       textBaseline: TextBaseline.alphabetic,
       inherit: false,
