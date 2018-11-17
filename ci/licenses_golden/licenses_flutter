@@ -176,6 +176,7 @@ FILE: ../../../flutter/fml/platform/win/wstring_conversion.h
 FILE: ../../../flutter/fml/string_view.cc
 FILE: ../../../flutter/fml/string_view.h
 FILE: ../../../flutter/fml/string_view_unittest.cc
+FILE: ../../../flutter/fml/synchronization/atomic_object.h
 FILE: ../../../flutter/fml/synchronization/count_down_latch.cc
 FILE: ../../../flutter/fml/synchronization/count_down_latch.h
 FILE: ../../../flutter/fml/synchronization/count_down_latch_unittests.cc
