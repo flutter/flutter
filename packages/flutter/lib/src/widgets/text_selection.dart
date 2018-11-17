@@ -4,11 +4,12 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout, kDoubleTapSlop;
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'container.dart';
@@ -16,6 +17,7 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
+import 'ticker_provider.dart';
 import 'transitions.dart';
 
 export 'package:flutter/services.dart' show TextSelectionDelegate;
@@ -253,8 +255,7 @@ class TextSelectionOverlay {
        _value = value {
     final OverlayState overlay = Overlay.of(context);
     assert(overlay != null);
-    _handleController = AnimationController(duration: _fadeDuration, vsync: overlay);
-    _toolbarController = AnimationController(duration: _fadeDuration, vsync: overlay);
+    _toolbarController = AnimationController(duration: fadeDuration, vsync: overlay);
   }
 
   /// The context in which the selection handles should appear.
@@ -299,11 +300,10 @@ class TextSelectionOverlay {
   ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
   final DragStartBehavior dragStartBehavior;
 
-  /// Controls the fade-in animations.
-  static const Duration _fadeDuration = Duration(milliseconds: 150);
-  AnimationController _handleController;
+  /// Controls the fade-in and fade-out animations for the toolbar and handles.
+  static const Duration fadeDuration = Duration(milliseconds: 150);
+
   AnimationController _toolbarController;
-  Animation<double> get _handleOpacity => _handleController.view;
   Animation<double> get _toolbarOpacity => _toolbarController.view;
 
   TextEditingValue _value;
@@ -325,7 +325,6 @@ class TextSelectionOverlay {
       OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.end)),
     ];
     Overlay.of(context, debugRequiredFor: debugRequiredFor).insertAll(_handles);
-    _handleController.forward(from: 0.0);
   }
 
   /// Shows the toolbar by inserting it into the [context]'s overlay.
@@ -388,14 +387,12 @@ class TextSelectionOverlay {
     _toolbar?.remove();
     _toolbar = null;
 
-    _handleController.stop();
     _toolbarController.stop();
   }
 
   /// Final cleanup.
   void dispose() {
     hide();
-    _handleController.dispose();
     _toolbarController.dispose();
   }
 
@@ -403,18 +400,15 @@ class TextSelectionOverlay {
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
          selectionControls == null)
       return Container(); // hide the second handle when collapsed
-    return FadeTransition(
-      opacity: _handleOpacity,
-      child: _TextSelectionHandleOverlay(
-        onSelectionHandleChanged: (TextSelection newSelection) { _handleSelectionHandleChanged(newSelection, position); },
-        onSelectionHandleTapped: _handleSelectionHandleTapped,
-        layerLink: layerLink,
-        renderObject: renderObject,
-        selection: _selection,
-        selectionControls: selectionControls,
-        position: position,
-        dragStartBehavior: dragStartBehavior,
-      ),
+    return _TextSelectionHandleOverlay(
+      onSelectionHandleChanged: (TextSelection newSelection) { _handleSelectionHandleChanged(newSelection, position); },
+      onSelectionHandleTapped: _handleSelectionHandleTapped,
+      layerLink: layerLink,
+      renderObject: renderObject,
+      selection: _selection,
+      selectionControls: selectionControls,
+      position: position,
+      dragStartBehavior: dragStartBehavior,
     );
   }
 
@@ -498,10 +492,57 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
 
   @override
   _TextSelectionHandleOverlayState createState() => _TextSelectionHandleOverlayState();
+
+  ValueListenable<bool> get _visibility {
+    switch (position) {
+      case _TextSelectionHandlePosition.start:
+        return renderObject.selectionStartInViewport;
+      case _TextSelectionHandlePosition.end:
+        return renderObject.selectionEndInViewport;
+    }
+    return null;
+  }
 }
 
-class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay> {
+class _TextSelectionHandleOverlayState
+    extends State<_TextSelectionHandleOverlay> with SingleTickerProviderStateMixin {
   Offset _dragPosition;
+
+  AnimationController _controller;
+  Animation<double> get _opacity => _controller.view;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(duration: TextSelectionOverlay.fadeDuration, vsync: this);
+
+    _handleVisibilityChanged();
+    widget._visibility.addListener(_handleVisibilityChanged);
+  }
+
+  void _handleVisibilityChanged() {
+    if (widget._visibility.value) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  @override
+  void didUpdateWidget(_TextSelectionHandleOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    oldWidget._visibility.removeListener(_handleVisibilityChanged);
+    _handleVisibilityChanged();
+    widget._visibility.addListener(_handleVisibilityChanged);
+  }
+
+  @override
+  void dispose() {
+    widget._visibility.removeListener(_handleVisibilityChanged);
+    _controller.dispose();
+    super.dispose();
+  }
 
   void _handleDragStart(DragStartDetails details) {
     _dragPosition = details.globalPosition + Offset(0.0, -widget.selectionControls.handleSize.height);
@@ -562,31 +603,42 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
         break;
     }
 
+    final Size viewport = widget.renderObject.size;
+    if (!viewport.contains(point)) {
+      point = Offset(
+        point.dx.clamp(0.0, viewport.width),
+        point.dy.clamp(0.0, viewport.height),
+      );
+    }
+
     return CompositedTransformFollower(
       link: widget.layerLink,
       showWhenUnlinked: false,
-      child: GestureDetector(
-        dragStartBehavior: widget.dragStartBehavior,
-        onPanStart: _handleDragStart,
-        onPanUpdate: _handleDragUpdate,
-        onTap: _handleTap,
-        child: Stack(
-          // Always let the selection handles draw outside of the conceptual
-          // box where (0,0) is the top left corner of the RenderEditable.
-          overflow: Overflow.visible,
-          children: <Widget>[
-            Positioned(
-              left: point.dx,
-              top: point.dy,
-              child: widget.selectionControls.buildHandle(
-                context,
-                type,
-                widget.renderObject.preferredLineHeight,
+      child: FadeTransition(
+        opacity: _opacity,
+        child: GestureDetector(
+          dragStartBehavior: widget.dragStartBehavior,
+          onPanStart: _handleDragStart,
+          onPanUpdate: _handleDragUpdate,
+          onTap: _handleTap,
+          child: Stack(
+            // Always let the selection handles draw outside of the conceptual
+            // box where (0,0) is the top left corner of the RenderEditable.
+            overflow: Overflow.visible,
+            children: <Widget>[
+              Positioned(
+                left: point.dx,
+                top: point.dy,
+                child: widget.selectionControls.buildHandle(
+                  context,
+                  type,
+                  widget.renderObject.preferredLineHeight,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+      )
     );
   }
 
