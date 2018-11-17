@@ -200,7 +200,7 @@ void main() {
     recordMetrics();
 
     expect(sizes, equals(<Size>[const Size(50.0, 50.0), const Size(50.0, 50.0), const Size(50.0, 50.0), const Size(50.0, 50.0), const Size(50.0, 50.0), const Size(50.0, 50.0)]));
-    expect(positions, equals(<Offset>[const Offset(0.0, 10.0), const Offset(0.0, 10.0), const Offset(5.0, 5.0), const Offset(10.0, 10.0), const Offset(25.0, 25.0), const Offset(50.0, 50.0)]));
+    expect(positions, equals(<Offset>[const Offset(0.0, 0.0), const Offset(0.0, 0.0), const Offset(5.0, 5.0), const Offset(10.0, 10.0), const Offset(25.0, 25.0), const Offset(50.0, 50.0)]));
 
     controller.stop(canceled: false);
     await tester.pump();
