@@ -194,6 +194,9 @@ class StackParentData extends ContainerBoxParentData<RenderBox> {
   /// Ignored if both top and bottom are non-null.
   double height;
 
+  /// Whether the postioned values are considered as a fraction of the [Stack] size.
+  bool isRelative;
+
   /// Get or set the current values in terms of a RelativeRect object.
   RelativeRect get rect => RelativeRect.fromLTRB(left, top, right, bottom);
   set rect(RelativeRect value) {
@@ -210,6 +213,24 @@ class StackParentData extends ContainerBoxParentData<RenderBox> {
   /// of the stack but are instead placed relative to the non-positioned
   /// children in the stack.
   bool get isPositioned => top != null || right != null || bottom != null || left != null || width != null || height != null;
+
+  void _resolve(Size size){
+    if (isRelative){
+      if (top != null)
+        top *= size.height;
+      if (right != null)
+        right *= size.width;
+      if (bottom != null)
+        bottom *= size.height;
+      if (left != null)
+        left *= size.width;
+      if (width != null)
+        width *= size.width;
+      if (height != null)
+        height *= size.height;
+      isRelative = false;
+    }
+  }
 
   @override
   String toString() {
@@ -312,8 +333,8 @@ enum Overflow {
 ///
 /// Once the child is laid out, the stack positions the child
 /// according to the top, right, bottom, and left properties of their
-/// [StackParentData]. For example, if the bottom value is 10.0, the
-/// bottom edge of the child will be inset 10.0 pixels from the bottom
+/// [StackParentData]. For example, if the bottom value is 10.0 and isRelative
+/// is false, the bottom edge of the child will be inset 10.0 pixels from the bottom
 /// edge of the stack. If the child extends beyond the bounds of the
 /// stack, the stack will clip the child's painting to the bounds of
 /// the stack.
@@ -534,6 +555,7 @@ class RenderStack extends RenderBox
       if (!childParentData.isPositioned) {
         childParentData.offset = _resolvedAlignment.alongOffset(size - child.size);
       } else {
+        childParentData._resolve(size);
         BoxConstraints childConstraints = const BoxConstraints();
 
         if (childParentData.left != null && childParentData.right != null)

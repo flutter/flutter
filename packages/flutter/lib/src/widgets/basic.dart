@@ -2776,7 +2776,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// If you want to lay a number of children out in a particular pattern, or if
 /// you want to make a custom layout manager, you probably want to use
 /// [CustomMultiChildLayout] instead. In particular, when using a [Stack] you
-/// can't position children relative to their size or the stack's own size.
+/// can't position children relative to their size.
 ///
 /// See also:
 ///
@@ -2943,6 +2943,9 @@ class IndexedStack extends Stack {
 /// If all six values are null, the child is a non-positioned child. The [Stack]
 /// uses only the non-positioned children to size itself.
 ///
+/// If [isRelative] is true, the child will be positioned relatively to the
+/// [Stack]'s size.
+///
 /// See also:
 ///
 ///  * [PositionedDirectional], which adapts to the ambient [Directionality].
@@ -2968,6 +2971,7 @@ class Positioned extends ParentDataWidget<Stack> {
     this.bottom,
     this.width,
     this.height,
+    this.isRelative = false,
     @required Widget child,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
@@ -2981,6 +2985,7 @@ class Positioned extends ParentDataWidget<Stack> {
   Positioned.fromRect({
     Key key,
     Rect rect,
+    this.isRelative = false,
     @required Widget child,
   }) : left = rect.left,
        top = rect.top,
@@ -2997,6 +3002,7 @@ class Positioned extends ParentDataWidget<Stack> {
   Positioned.fromRelativeRect({
     Key key,
     RelativeRect rect,
+    this.isRelative = false,
     @required Widget child,
   }) : left = rect.left,
        top = rect.top,
@@ -3014,6 +3020,7 @@ class Positioned extends ParentDataWidget<Stack> {
     this.top = 0.0,
     this.right = 0.0,
     this.bottom = 0.0,
+    this.isRelative = false,
     @required Widget child,
   }) : width = null,
        height = null,
@@ -3046,6 +3053,7 @@ class Positioned extends ParentDataWidget<Stack> {
     double bottom,
     double width,
     double height,
+    bool isRelative = false,
     @required Widget child,
   }) {
     assert(textDirection != null);
@@ -3069,6 +3077,7 @@ class Positioned extends ParentDataWidget<Stack> {
       bottom: bottom,
       width: width,
       height: height,
+      isRelative: isRelative,
       child: child,
     );
   }
@@ -3127,6 +3136,15 @@ class Positioned extends ParentDataWidget<Stack> {
   /// vertically.
   final double height;
 
+  /// Whether the child is positioned relatively to the [Stack]'s size.
+  /// 
+  /// For example if the [Stack]'s width is 200.0 pixels, [left] is 0.25
+  /// and [isRelative] is true, then the left edge of the child will be inset
+  /// 50.0 pixels from the left edge of the [Stack].
+  /// 
+  /// Defaults to false.
+  final bool isRelative;
+
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
@@ -3163,6 +3181,11 @@ class Positioned extends ParentDataWidget<Stack> {
       needsLayout = true;
     }
 
+    if (parentData.isRelative != isRelative) {
+      parentData.isRelative = isRelative;
+      needsLayout = true;
+    }
+
     if (needsLayout) {
       final AbstractNode targetParent = renderObject.parent;
       if (targetParent is RenderObject)
@@ -3179,6 +3202,7 @@ class Positioned extends ParentDataWidget<Stack> {
     properties.add(DoubleProperty('bottom', bottom, defaultValue: null));
     properties.add(DoubleProperty('width', width, defaultValue: null));
     properties.add(DoubleProperty('height', height, defaultValue: null));
+    properties.add(FlagProperty('isRelative', value:isRelative, ifTrue: 'enabled', ifFalse: 'disabled', showName: true, defaultValue: false));
   }
 }
 

@@ -646,19 +646,27 @@ void main() {
             PositionedDirectional(end: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             PositionedDirectional(top: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             PositionedDirectional(bottom: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(left: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(right: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(top: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(bottom: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
           ],
         ),
       ),
     );
-    expect(tester.getRect(find.byType(SizedBox).at(0)), Rect.fromLTWH(350.0, 250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(1)), Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(2)), Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(3)), Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(4)), Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(5)), Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(6)), Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(7)), Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(8)), Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(0)),  Rect.fromLTWH(350.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(1)),  Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(2)),  Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(3)),  Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(4)),  Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(5)),  Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(6)),  Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(7)),  Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(8)),  Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(9)),  Rect.fromLTWH(200.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(10)), Rect.fromLTWH(500.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(11)), Rect.fromLTWH(350.0, 150.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(12)), Rect.fromLTWH(350.0, 350.0, 100.0, 100.0));
 
     await tester.pumpWidget(
       Directionality(
@@ -675,19 +683,27 @@ void main() {
             PositionedDirectional(end: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             PositionedDirectional(top: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             PositionedDirectional(bottom: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(left: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(right: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(top: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(bottom: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
           ],
         ),
       ),
     );
-    expect(tester.getRect(find.byType(SizedBox).at(0)), Rect.fromLTWH(350.0, 250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(1)), Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(2)), Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(3)), Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(4)), Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(5)), Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(6)), Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(7)), Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(8)), Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(0)),  Rect.fromLTWH(350.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(1)),  Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(2)),  Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(3)),  Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(4)),  Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(5)),  Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(6)),  Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(7)),  Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(8)),  Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(9)),  Rect.fromLTWH(200.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(10)), Rect.fromLTWH(500.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(11)), Rect.fromLTWH(350.0, 150.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(12)), Rect.fromLTWH(350.0, 350.0, 100.0, 100.0));
 
     await tester.pumpWidget(
       Directionality(
@@ -704,19 +720,27 @@ void main() {
             PositionedDirectional(end: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             PositionedDirectional(top: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             PositionedDirectional(bottom: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(left: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(right: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(top: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(bottom: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
           ],
         ),
       ),
     );
-    expect(tester.getRect(find.byType(SizedBox).at(0)), Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(1)), Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(2)), Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(3)), Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(4)), Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(5)), Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(6)), Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(7)), Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(8)), Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(0)),  Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(1)),  Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(2)),  Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(3)),  Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(4)),  Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(5)),  Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(6)),  Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(7)),  Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(8)),  Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(9)),  Rect.fromLTWH(200.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(10)), Rect.fromLTWH(500.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(11)), Rect.fromLTWH(700.0, 150.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(12)), Rect.fromLTWH(700.0, 350.0, 100.0, 100.0));
 
     await tester.pumpWidget(
       Directionality(
@@ -733,18 +757,52 @@ void main() {
             PositionedDirectional(end: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             PositionedDirectional(top: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             PositionedDirectional(bottom: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(left: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(right: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(top: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(bottom: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
           ],
         ),
       ),
     );
-    expect(tester.getRect(find.byType(SizedBox).at(0)), Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(1)), Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(2)), Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(3)), Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(4)), Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(5)), Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(6)), Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(7)), Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(8)), Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(0)),  Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(1)),  Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(2)),  Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(3)),  Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(4)),  Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(5)),  Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(6)),  Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(7)),  Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(8)),  Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(9)),  Rect.fromLTWH(200.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(10)), Rect.fromLTWH(500.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(11)), Rect.fromLTWH(0.0, 150.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(12)), Rect.fromLTWH(0.0, 350.0,   100.0, 100.0));
+  });
+
+  testWidgets('Relative positioned children', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: Stack(
+          alignment: Alignment.topLeft,
+          children: const <Widget>[            
+            Positioned(left: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(right: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(top: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(bottom: 0.25, isRelative: true, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(left: 0.25, width: 0.5, isRelative: true, child: SizedBox()),
+            Positioned(top: 0.25, height: 0.5, isRelative: true, child: SizedBox()),
+          ],
+        ),
+      ),
+    );
+    
+    expect(tester.getRect(find.byType(SizedBox).at(0)), Rect.fromLTWH(200.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(1)), Rect.fromLTWH(500.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(2)), Rect.fromLTWH(0.0,   150.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(3)), Rect.fromLTWH(0.0,   350.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(4)), Rect.fromLTWH(200.0, 0.0,   400.0, 0.0  ));
+    expect(tester.getRect(find.byType(SizedBox).at(5)), Rect.fromLTWH(0.0,   150.0, 0.0,   300.0));
   });
 }
