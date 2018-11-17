@@ -215,6 +215,7 @@ class StackParentData extends ContainerBoxParentData<RenderBox> {
   bool get isPositioned => top != null || right != null || bottom != null || left != null || width != null || height != null;
 
   void _resolve(Size size){
+    assert(isRelative != null);
     if (isRelative){
       if (top != null)
         top *= size.height;
