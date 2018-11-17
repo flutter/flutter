@@ -797,7 +797,7 @@ void main() {
         ),
       ),
     );
-    
+
     expect(tester.getRect(find.byType(SizedBox).at(0)), Rect.fromLTWH(200.0, 0.0,   100.0, 100.0));
     expect(tester.getRect(find.byType(SizedBox).at(1)), Rect.fromLTWH(500.0, 0.0,   100.0, 100.0));
     expect(tester.getRect(find.byType(SizedBox).at(2)), Rect.fromLTWH(0.0,   150.0, 100.0, 100.0));
