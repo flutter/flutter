@@ -164,8 +164,6 @@ FILE: ../../../flutter/fml/platform/posix/file_posix.cc
 FILE: ../../../flutter/fml/platform/posix/mapping_posix.cc
 FILE: ../../../flutter/fml/platform/posix/native_library_posix.cc
 FILE: ../../../flutter/fml/platform/posix/paths_posix.cc
-FILE: ../../../flutter/fml/platform/posix/shared_mutex_posix.cc
-FILE: ../../../flutter/fml/platform/posix/shared_mutex_posix.h
 FILE: ../../../flutter/fml/platform/win/errors_win.cc
 FILE: ../../../flutter/fml/platform/win/errors_win.h
 FILE: ../../../flutter/fml/platform/win/file_win.cc
@@ -178,13 +176,9 @@ FILE: ../../../flutter/fml/platform/win/wstring_conversion.h
 FILE: ../../../flutter/fml/string_view.cc
 FILE: ../../../flutter/fml/string_view.h
 FILE: ../../../flutter/fml/string_view_unittest.cc
-FILE: ../../../flutter/fml/synchronization/atomic_object.h
 FILE: ../../../flutter/fml/synchronization/count_down_latch.cc
 FILE: ../../../flutter/fml/synchronization/count_down_latch.h
 FILE: ../../../flutter/fml/synchronization/count_down_latch_unittests.cc
-FILE: ../../../flutter/fml/synchronization/shared_mutex.h
-FILE: ../../../flutter/fml/synchronization/shared_mutex_std.cc
-FILE: ../../../flutter/fml/synchronization/shared_mutex_std.h
 FILE: ../../../flutter/fml/synchronization/thread_annotations.h
 FILE: ../../../flutter/fml/synchronization/thread_annotations_unittest.cc
 FILE: ../../../flutter/fml/synchronization/thread_checker.h
