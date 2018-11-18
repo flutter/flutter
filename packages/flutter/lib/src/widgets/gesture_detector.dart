@@ -27,6 +27,10 @@ export 'package:flutter/gestures.dart' show
   GestureScaleStartCallback,
   GestureScaleUpdateCallback,
   GestureScaleEndCallback,
+  GestureForcePressStartCallback,
+  GestureForcePressPeakCallback,
+  GestureForcePressEndCallback,
+  GestureForcePressUpdateCallback,
   ScaleStartDetails,
   ScaleUpdateDetails,
   ScaleEndDetails,
@@ -167,6 +171,10 @@ class GestureDetector extends StatelessWidget {
     this.onHorizontalDragUpdate,
     this.onHorizontalDragEnd,
     this.onHorizontalDragCancel,
+    this.onForcePressStart,
+    this.onForcePressPeak,
+    this.onForcePressUpdate,
+    this.onForcePressEnd,
     this.onPanDown,
     this.onPanStart,
     this.onPanUpdate,
@@ -307,7 +315,7 @@ class GestureDetector extends StatelessWidget {
   /// The pointer that previously triggered [onPanDown] did not complete.
   final GestureDragCancelCallback onPanCancel;
 
-  /// The pointers in contact with the screen have established a focal point and
+  /// The pointer is in contact with the screen have established a focal point and
   /// initial scale of 1.0.
   final GestureScaleStartCallback onScaleStart;
 
@@ -317,6 +325,19 @@ class GestureDetector extends StatelessWidget {
 
   /// The pointers are no longer in contact with the screen.
   final GestureScaleEndCallback onScaleEnd;
+
+  /// The pointer is in contact with the screen and has pressed with sufficient
+  /// force to initiate a force press.
+  final GestureForcePressStartCallback onForcePressStart;
+
+  /// The pointer is in contact with the screen and has pressed with the maximum
+  /// force. The amount of force is [ForcePressGestureRecognizer.peakPressure].
+  final GestureForcePressPeakCallback onForcePressPeak;
+
+  final GestureForcePressUpdateCallback onForcePressUpdate;
+
+  /// The pointer is no longer in contact with the screen.
+  final GestureForcePressEndCallback onForcePressEnd;
 
   /// How this gesture detector should behave during hit testing.
   ///
@@ -431,6 +452,22 @@ class GestureDetector extends StatelessWidget {
             ..onStart = onScaleStart
             ..onUpdate = onScaleUpdate
             ..onEnd = onScaleEnd;
+        },
+      );
+    }
+
+    if (onForcePressStart != null ||
+        onForcePressPeak != null ||
+        onForcePressUpdate != null ||
+        onForcePressEnd != null) {
+      gestures[ForcePressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
+            () => ForcePressGestureRecognizer(debugOwner: this),
+            (ForcePressGestureRecognizer instance) {
+          instance
+            ..onStart = onForcePressStart
+            ..onPeak = onForcePressPeak
+            ..onUpdate = onForcePressUpdate
+            ..onEnd = onForcePressEnd;
         },
       );
     }
