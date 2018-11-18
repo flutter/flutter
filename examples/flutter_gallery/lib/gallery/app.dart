@@ -10,6 +10,8 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 
 import 'package:url_launcher/url_launcher.dart';
 
+import '../demo/playground_demo.dart';
+
 import 'demos.dart';
 import 'home.dart';
 import 'options.dart';
@@ -47,11 +49,17 @@ class _GalleryAppState extends State<GalleryApp> {
     // For a different example of how to set up an application routing table
     // using named routes, consider the example in the Navigator class documentation:
     // https://docs.flutter.io/flutter/widgets/Navigator-class.html
-    return Map<String, WidgetBuilder>.fromIterable(
+    final Map<String, WidgetBuilder> routes = Map<String, WidgetBuilder>.fromIterable(
       kAllGalleryDemos,
       key: (dynamic demo) => '${demo.routeName}',
       value: (dynamic demo) => demo.buildRoute,
     );
+
+    // Add special playground demo cases directly to router
+    routes[MaterialPlaygroundDemo.routeName] = MaterialPlaygroundDemo.buildRoute();
+    routes[CupertinoPlaygroundDemo.routeName] = CupertinoPlaygroundDemo.buildRoute();
+
+    return routes;
   }
 
   @override
