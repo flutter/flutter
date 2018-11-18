@@ -46,8 +46,10 @@ source_set("fml") {
     "paths.h",
     "string_view.cc",
     "string_view.h",
+    "synchronization/atomic_object.h",
     "synchronization/count_down_latch.cc",
     "synchronization/count_down_latch.h",
+    "synchronization/shared_mutex.h",
     "synchronization/thread_annotations.h",
     "synchronization/thread_checker.h",
     "synchronization/waitable_event.cc",
@@ -82,6 +84,12 @@ source_set("fml") {
   public_configs = [ "$flutter_root:config" ]
 
   libs = []
+
+  if (is_ios || is_mac) {
+    sources += [ "platform/posix/shared_mutex_posix.cc" ]
+  } else {
+    sources += [ "synchronization/shared_mutex_std.cc" ]
+  }
 
   if (is_ios || is_mac) {
     sources += [
