@@ -6,13 +6,14 @@
 #define FLUTTER_RUNTIME_SERVICE_PROTOCOL_H_
 
 #include <map>
-#include <mutex>
 #include <set>
 #include <string>
 
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/string_view.h"
+#include "flutter/fml/synchronization/atomic_object.h"
+#include "flutter/fml/synchronization/shared_mutex.h"
 #include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/task_runner.h"
 #include "rapidjson/document.h"
@@ -72,8 +73,8 @@ class ServiceProtocol {
 
  private:
   const std::set<fml::StringView> endpoints_;
-  mutable std::mutex handlers_mutex_;
-  std::map<Handler*, Handler::Description> handlers_;
+  std::unique_ptr<fml::SharedMutex> handlers_mutex_;
+  std::map<Handler*, fml::AtomicObject<Handler::Description>> handlers_;
 
   FML_WARN_UNUSED_RESULT
   static bool HandleMessage(const char* method,

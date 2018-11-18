@@ -45,7 +45,8 @@ ServiceProtocol::ServiceProtocol()
           kRunInViewExtensionName,
           kFlushUIThreadTasksExtensionName,
           kSetAssetBundlePathExtensionName,
-      }) {}
+      }),
+      handlers_mutex_(fml::SharedMutex::Create()) {}
 
 ServiceProtocol::~ServiceProtocol() {
   ToggleHooks(false);
@@ -53,21 +54,21 @@ ServiceProtocol::~ServiceProtocol() {
 
 void ServiceProtocol::AddHandler(Handler* handler,
                                  Handler::Description description) {
-  std::lock_guard<std::mutex> lock(handlers_mutex_);
+  fml::UniqueLock lock(*handlers_mutex_);
   handlers_.emplace(handler, description);
 }
 
 void ServiceProtocol::RemoveHandler(Handler* handler) {
-  std::lock_guard<std::mutex> lock(handlers_mutex_);
+  fml::UniqueLock lock(*handlers_mutex_);
   handlers_.erase(handler);
 }
 
 void ServiceProtocol::SetHandlerDescription(Handler* handler,
                                             Handler::Description description) {
-  std::lock_guard<std::mutex> lock(handlers_mutex_);
+  fml::SharedLock lock(*handlers_mutex_);
   auto it = handlers_.find(handler);
   if (it != handlers_.end())
-    it->second = description;
+    it->second.Store(description);
 }
 
 void ServiceProtocol::ToggleHooks(bool set) {
@@ -175,7 +176,7 @@ bool ServiceProtocol::HandleMessage(fml::StringView method,
     return HandleListViewsMethod(response);
   }
 
-  std::lock_guard<std::mutex> lock(handlers_mutex_);
+  fml::SharedLock lock(*handlers_mutex_);
 
   if (handlers_.size() == 0) {
     WriteServerErrorResponse(response,
@@ -246,12 +247,11 @@ void ServiceProtocol::Handler::Description::Write(
 
 bool ServiceProtocol::HandleListViewsMethod(
     rapidjson::Document& response) const {
-  // Collect handler descriptions on their respective task runners.
-  std::lock_guard<std::mutex> lock(handlers_mutex_);
+  fml::SharedLock lock(*handlers_mutex_);
   std::vector<std::pair<intptr_t, Handler::Description>> descriptions;
   for (const auto& handler : handlers_) {
     descriptions.emplace_back(reinterpret_cast<intptr_t>(handler.first),
-                              handler.second);
+                              handler.second.Load());
   }
 
   auto& allocator = response.GetAllocator();
