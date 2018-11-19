@@ -185,10 +185,10 @@ class AttachCommand extends FlutterCommand {
     } else {
       ipv6 = argResults['ipv6'];
       // int.tryParse will throw if it is passed null, so we need to do this.
-      final int argObservatoryPort = argResults['observatory-port'] == null 
+      final int argObservatoryPort = argResults['observatory-port'] == null
         ? null
         : int.tryParse(argResults['observatory-port']);
-      final int localPort = argObservatoryPort 
+      final int localPort = argObservatoryPort
         ?? await device.portForwarder.forward(devicePort);
       observatoryUri = ipv6
         ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
