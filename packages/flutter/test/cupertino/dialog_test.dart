@@ -92,12 +92,18 @@ void main() {
                     label: 'Alert',
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasImplicitScrolling,
+                        ],
                         children: <TestSemantics>[
                           TestSemantics(label: 'The Title'),
                           TestSemantics(label: 'Content'),
                         ],
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasImplicitScrolling,
+                        ],
                         children: <TestSemantics>[
                           TestSemantics(
                             flags: <SemanticsFlag>[SemanticsFlag.isButton],
