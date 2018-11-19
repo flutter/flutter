@@ -297,6 +297,7 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
 
+  /// Whether or not this field allows text selection.
   bool get selectionEnabled {
     // An obscured field (like a password field) is not selectable by default
     return enableInteractiveSelection ?? !obscureText;
