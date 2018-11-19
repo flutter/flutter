@@ -555,11 +555,15 @@ class WidgetsApp extends StatefulWidget {
   /// This list must not null. Its default value is just
   /// `[const Locale('en', 'US')]`.
   ///
-  /// The order of the list matters. By default, if the device's locale doesn't
-  /// exactly match a locale in [supportedLocales] then the first locale in
-  /// [supportedLocales] with a matching [Locale.languageCode] is used. If that
-  /// fails then the first locale in [supportedLocales] is used. The default
-  /// locale resolution algorithm can be overridden with [localeResolutionCallback].
+  /// The order of the list matters. The default locale resolution algorithm, 
+  /// [basicLocaleListResolution], uses a variation of the truncation algorithm where
+  /// it attempts to match by all subtags, language+script, language+country,
+  /// language-only, and the [supportedLocales.first] as a fallback. When more
+  /// than one supported locale matches one of these criteria, only the first one
+  /// is used.
+  ///
+  /// The default locale resolution algorithm can be overridden with [localeListResolutionCallback]
+  /// and/or [localeResolutionCallback].
   ///
   /// When supporting languages with more than one script, it is recommended
   /// to specify the [Locale.scriptCode] explicitly. Locales may also be defined without
