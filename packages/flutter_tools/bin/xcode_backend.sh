@@ -55,7 +55,7 @@ BuildApp() {
     release*) build_mode="release"; artifact_variant="ios-release";;
     profile*) build_mode="profile"; artifact_variant="ios-profile";;
     debug*) build_mode="debug"; artifact_variant="ios";;
-    *) 
+    *)
       EchoError "========================================================================"
       EchoError "ERROR: Unknown FLUTTER_BUILD_MODE: ${build_mode}."
       EchoError "Valid values are 'Debug', 'Profile', or 'Release' (case insensitive)."
@@ -83,8 +83,8 @@ BuildApp() {
   fi
 
   local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
-  
-  AssertExists "${framework_path}"  
+
+  AssertExists "${framework_path}"
   AssertExists "${project_path}"
 
   local derived_dir="${SOURCE_ROOT}/Flutter"
@@ -360,14 +360,14 @@ EmbedFlutterFrameworks() {
 
   # Embed the actual Flutter.framework that the Flutter app expects to run against,
   # which could be a local build or an arch/type specific build.
-  # Remove it first since Xcode might be trying to hold some of these files - this way we're 
+  # Remove it first since Xcode might be trying to hold some of these files - this way we're
   # sure to get a clean copy.
   RunCommand rm -rf -- "${xcode_frameworks_dir}/Flutter.framework"
   RunCommand cp -Rv -- "${flutter_ios_engine_folder}/Flutter.framework" "${xcode_frameworks_dir}/"
-  
+
   # Sign the binaries we moved.
   local identity="${EXPANDED_CODE_SIGN_IDENTITY_NAME:-$CODE_SIGN_IDENTITY}"
-  if (${identity} != ""); then
+  if [[ -n "$identity" && "$identity" != "\"\"" ]]; then
     RunCommand codesign --force --verbose --sign "${identity}" -- "${xcode_frameworks_dir}/App.framework/App"
     RunCommand codesign --force --verbose --sign "${identity}" -- "${xcode_frameworks_dir}/Flutter.framework/Flutter"
   fi

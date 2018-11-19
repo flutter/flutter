@@ -443,18 +443,23 @@ Future<XcodeBuildResult> buildXcodeProject({
   Status initialBuildStatus;
   Directory tempDir;
 
+  File scriptOutputPipeFile;
   if (logger.hasTerminal) {
     tempDir = fs.systemTempDirectory.createTempSync('flutter_build_log_pipe.');
-    final File scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
+    scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
     os.makePipe(scriptOutputPipeFile.path);
 
     Future<void> listenToScriptOutputLine() async {
       final List<String> lines = await scriptOutputPipeFile.readAsLines();
       for (String line in lines) {
-        if (line == 'done') {
+        if (line == 'done' || line == 'all done') {
           buildSubStatus?.stop();
           buildSubStatus = null;
-          return null;
+          if (line == 'all done') {
+            // Free pipe file.
+            tempDir?.deleteSync(recursive: true);
+            return null;
+          }
         } else {
           initialBuildStatus.cancel();
           buildSubStatus = logger.startProgress(
@@ -480,11 +485,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     workingDirectory: app.project.hostAppRoot.path,
     allowReentrantFlutter: true
   );
+  // Notifies listener that no more output is coming.
+  scriptOutputPipeFile?.writeAsStringSync('all done');
   buildSubStatus?.stop();
   initialBuildStatus?.cancel();
   buildStopwatch.stop();
-  // Free pipe file.
-  tempDir?.deleteSync(recursive: true);
   printStatus(
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
         + '${getElapsedAsSeconds(buildStopwatch.elapsed).padLeft(5)}',

@@ -52,7 +52,11 @@ void main() {
     test('writes pid-file', () async {
       final File pidFile = tempDir.childFile('test.pid');
       await _flutter.run(pidFile: pidFile);
-      expect(pidFile.existsSync(), isTrue);
+      try {
+        expect(pidFile.existsSync(), isTrue);
+      } finally {
+        await _flutter.stop();
+      }
     });
   }, timeout: const Timeout.factor(6));
 }
