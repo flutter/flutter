@@ -201,6 +201,9 @@ void main() {
       TestSemantics(
         children: <TestSemantics>[
           TestSemantics(
+            flags: <SemanticsFlag>[
+              SemanticsFlag.hasImplicitScrolling,
+            ],
             actions: <SemanticsAction>[
               SemanticsAction.scrollUp,
             ],
@@ -244,6 +247,9 @@ void main() {
       TestSemantics(
         children: <TestSemantics>[
           TestSemantics(
+            flags: <SemanticsFlag>[
+              SemanticsFlag.hasImplicitScrolling,
+            ],
             actions: <SemanticsAction>[
               SemanticsAction.scrollUp,
               SemanticsAction.scrollDown,
@@ -303,6 +309,9 @@ void main() {
       TestSemantics(
         children: <TestSemantics>[
           TestSemantics(
+            flags: <SemanticsFlag>[
+              SemanticsFlag.hasImplicitScrolling,
+            ],
             actions: <SemanticsAction>[
               SemanticsAction.scrollDown,
             ],
