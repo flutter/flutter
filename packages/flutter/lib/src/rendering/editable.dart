@@ -122,8 +122,6 @@ class RenderEditable extends RenderBox {
   ///
   /// The [offset] is required and must not be null. You can use [new
   /// ViewportOffset.zero] if you have no need for scrolling.
-  ///
-  /// The [enableInteractiveSelection] argument must not be null.
   RenderEditable({
     TextSpan text,
     @required TextDirection textDirection,
@@ -143,7 +141,7 @@ class RenderEditable extends RenderBox {
     Locale locale,
     double cursorWidth = 1.0,
     Radius cursorRadius,
-    bool enableInteractiveSelection = true,
+    bool enableInteractiveSelection,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
@@ -152,7 +150,6 @@ class RenderEditable extends RenderBox {
        assert(offset != null),
        assert(ignorePointer != null),
        assert(obscureText != null),
-       assert(enableInteractiveSelection != null),
        assert(textSelectionDelegate != null),
        _textPainter = TextPainter(
          text: text,
@@ -715,6 +712,19 @@ class RenderEditable extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// {@template flutter.widgets.editable.selectionEnabled}
+  /// Decides if selection is enabled based on [enableInteractiveSelection] and
+  /// [obscureText] to make the common use case of password fields simple while
+  /// still allowing selection of obscured text.
+  ///
+  /// Just setting [obscureText] to true will create a typical Material password
+  /// field where text is obscured and not selectable.
+  /// Setting neither will create a normal visible and selectable text field.
+  /// {@endtemplate}
+  bool get selectionEnabled {
+    return enableInteractiveSelection ?? !obscureText;
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -728,10 +738,10 @@ class RenderEditable extends RenderBox {
       ..isFocused = hasFocus
       ..isTextField = true;
 
-    if (hasFocus && enableInteractiveSelection)
+    if (hasFocus && selectionEnabled)
       config.onSetSelection = _handleSetSelection;
 
-    if (enableInteractiveSelection && _selection?.isValid == true) {
+    if (selectionEnabled && _selection?.isValid == true) {
       config.textSelection = _selection;
       if (_textPainter.getOffsetBefore(_selection.extentOffset) != null) {
         config

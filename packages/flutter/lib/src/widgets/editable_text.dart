@@ -183,8 +183,7 @@ class EditableText extends StatefulWidget {
   /// default to [TextInputType.multiline].
   ///
   /// The [controller], [focusNode], [style], [cursorColor], [textAlign],
-  /// [rendererIgnoresPointer], and [enableInteractiveSelection] arguments must
-  /// not be null.
+  /// [rendererIgnoresPointer] arguments must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -214,7 +213,7 @@ class EditableText extends StatefulWidget {
     this.cursorRadius,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
-    this.enableInteractiveSelection = true,
+    this.enableInteractiveSelection,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -226,7 +225,6 @@ class EditableText extends StatefulWidget {
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
-       assert(enableInteractiveSelection != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
            ? (
@@ -452,15 +450,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final EdgeInsets scrollPadding;
 
-  /// {@template flutter.widgets.editableText.enableInteractiveSelection}
-  /// If true, then long-pressing this TextField will select text and show the
-  /// cut/copy/paste menu, and tapping will move the text caret.
-  ///
-  /// True by default.
-  ///
-  /// If false, most of the accessibility support for selecting text, copy
-  /// and paste, and moving the caret will be disabled.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
 
   /// Setting this property to true makes the cursor stop blinking and stay visible on the screen continually.
@@ -468,6 +458,11 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to false, resulting in a typical blinking cursor.
   static bool debugDeterministicCursor = false;
+
+  /// {@macro flutter.widgets.editable.selectionEnabled}
+  bool get selectionEnabled {
+    return enableInteractiveSelection ?? !obscureText;
+  }
 
   @override
   EditableTextState createState() => EditableTextState();
@@ -929,19 +924,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {
-    return widget.enableInteractiveSelection && _hasFocus && controls?.canCopy(this) == true
+    return widget.selectionEnabled && _hasFocus && controls?.canCopy(this) == true
       ? () => controls.handleCopy(this)
       : null;
   }
 
   VoidCallback _semanticsOnCut(TextSelectionControls controls) {
-    return widget.enableInteractiveSelection && _hasFocus && controls?.canCut(this) == true
+    return widget.selectionEnabled && _hasFocus && controls?.canCut(this) == true
       ? () => controls.handleCut(this)
       : null;
   }
 
   VoidCallback _semanticsOnPaste(TextSelectionControls controls) {
-    return widget.enableInteractiveSelection &&_hasFocus && controls?.canPaste(this) == true
+    return widget.selectionEnabled &&_hasFocus && controls?.canPaste(this) == true
       ? () => controls.handlePaste(this)
       : null;
   }
@@ -1050,11 +1045,10 @@ class _Editable extends LeafRenderObjectWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth,
     this.cursorRadius,
-    this.enableInteractiveSelection = true,
+    this.enableInteractiveSelection,
     this.textSelectionDelegate,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
-       assert(enableInteractiveSelection != null),
        super(key: key);
 
   final TextSpan textSpan;

@@ -294,24 +294,10 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scrollPadding}
   final EdgeInsets scrollPadding;
 
-  /// {@template flutter.widgets.text_field.enableInteractiveSelection}
-  /// If true, then long-pressing this TextField will select text and show the
-  /// cut/copy/paste menu, and tapping will move the text caret.
-  ///
-  /// By default false if obscureText is true, otherwise true.
-  ///
-  /// If false, most of the accessibility support for selecting text, copy
-  /// and paste, and moving the caret will be disabled.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
 
-  /// Decides if selection is enabled based on [enableInteractiveSelection] and
-  /// [obscureText] to make the common use case of password fields simple while
-  /// still allowing selection of obscured text.
-  ///
-  /// Just setting [obscureText] to true will create a typical Material password
-  /// field where text is obscured and not selectable.
-  /// Setting neither will create a normal visible and selectable text field.
+  /// {@macro flutter.widgets.editable.selectionEnabled}
   bool get selectionEnabled {
     return enableInteractiveSelection ?? !obscureText;
   }
@@ -566,7 +552,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
-        enableInteractiveSelection: widget.selectionEnabled,
+        enableInteractiveSelection: widget.enableInteractiveSelection,
       ),
     );
 
