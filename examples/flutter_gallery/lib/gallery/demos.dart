@@ -603,7 +603,23 @@ Set<GalleryDemoCategory> _buildCategories(List<GalleryDemo> kAllGalleryDemos) {
       .toSet();
 
   // Add these special cases since they do not have child demos
-  // TODO add these by platform
+  // TODO order these by platform
+  // Android:
+  // - studies
+  // - style
+  // - material playground
+  // - material
+  // - cupertino playground
+  // - cupertino
+  // - media
+  // iOS:
+  // - studies
+  // - style
+  // - cupertino playground
+  // - cupertino
+  // - material playground
+  // - material
+  // - media
   kAllGalleryDemoCategories.add(kMaterialPlayground);
   kAllGalleryDemoCategories.add(kCupertinoPlayGround);
 
