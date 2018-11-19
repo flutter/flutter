@@ -297,7 +297,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (!_checkXcodeVersion())
     return XcodeBuildResult(success: false);
 
-  // TODO(cbracken) remove when https://github.com/flutter/flutter/issues/20685 is fixed.
+  // TODO(cbracken): remove when https://github.com/flutter/flutter/issues/20685 is fixed.
   await setXcodeWorkspaceBuildSystem(
     workspaceDirectory: app.project.xcodeWorkspace,
     workspaceSettings: app.project.xcodeWorkspaceSharedSettings,
@@ -458,7 +458,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           if (line == 'all done') {
             // Free pipe file.
             tempDir?.deleteSync(recursive: true);
-            return null;
+            return;
           }
         } else {
           initialBuildStatus.cancel();
@@ -469,7 +469,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           );
         }
       }
-      return listenToScriptOutputLine();
+      await listenToScriptOutputLine();
     }
 
     // Trigger the start of the pipe -> stdout loop. Ignore exceptions.

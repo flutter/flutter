@@ -17,12 +17,12 @@ void main() {
   group('hot', () {
     Directory tempDir;
     final HotReloadProject _project = HotReloadProject();
-    FlutterTestDriver _flutter;
+    FlutterRunTestDriver _flutter;
 
     setUp(() async {
       tempDir = createResolvedTempDirectorySync();
       await _project.setUpIn(tempDir);
-      _flutter = FlutterTestDriver(tempDir);
+      _flutter = FlutterRunTestDriver(tempDir);
     });
 
     tearDown(() async {
