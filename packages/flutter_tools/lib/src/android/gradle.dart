@@ -428,7 +428,7 @@ Future<void> _buildGradleProjectV2(
       appSize = ' (${getSizeAsMB(apkFile.lengthSync())})';
     }
     printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.');
-  }else{
+  } else {
     final File bundleFile = _findBundleFile(project, buildInfo);
     if (bundleFile == null)
       throwToolExit('Gradle build failed to produce an Android bundle package.');
@@ -486,8 +486,8 @@ File _findBundleFile(GradleProject project, BuildInfo buildInfo) {
   if (bundleFile.existsSync())
     return bundleFile;
   if (buildInfo.flavor != null) {
-    // Android Studio Gradle plugin v3 adds flavor to path. for bundle the folder name is flavorModename
-    bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, buildInfo.flavor+modeName, bundleFileName));
+    // Android Studio Gradle plugin v3 adds the flavor to the path. For the bundle the folder name is the flavor plus the mode name.
+    bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, buildInfo.flavor + modeName, bundleFileName));
     if (bundleFile.existsSync())
       return bundleFile;
   }
@@ -504,7 +504,7 @@ Map<String, String> get _gradleEnv {
 }
 
 class GradleProject {
-  GradleProject(this.buildTypes, this.productFlavors, this.apkDirectory,this.bundleDirectory);
+  GradleProject(this.buildTypes, this.productFlavors, this.apkDirectory, this.bundleDirectory);
 
   factory GradleProject.fromAppProperties(String properties, String tasks) {
     // Extract build directory.
@@ -594,7 +594,8 @@ class GradleProject {
   }
 
   String bundleFileFor(BuildInfo buildInfo) {
-    // for bundle all bundle names are called as app.aab
+    // For app bundle all bundle names are called as app.aab. Product flavors
+    // and build types are differentiated as folders, where the aab will be added.
     return 'app.aab';
   }
 }
