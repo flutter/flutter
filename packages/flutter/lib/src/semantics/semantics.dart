@@ -3172,7 +3172,7 @@ class SemanticsConfiguration {
 
   /// Whether the owning [RenderObject] is selected (true) or not (false).
   ///
-  /// This is different from having accessibility focus.  The element that is
+  /// This is different from having accessibility focus. The element that is
   /// accessibility focused may or may not be selected; e.g. a [ListTile] can have
   /// accessibility focus but have its [ListTile.selected] property set to false,
   /// in which case it will not be flagged as selected.
@@ -3193,7 +3193,7 @@ class SemanticsConfiguration {
   /// The getter will return null if the owning [RenderObject] doesn't support
   /// the concept of being enabled/disabled.
   ///
-  /// This property does not control whether semnatics are enabled. If you wish to
+  /// This property does not control whether semantics are enabled. If you wish to
   /// disable semantics for a particular widget, you should use an [ExcludeSemantics]
   /// widget.
   bool get isEnabled => _hasFlag(SemanticsFlag.hasEnabledState) ? _hasFlag(SemanticsFlag.isEnabled) : null;
