@@ -632,6 +632,31 @@ if (custom_toolchain != "") {
   }
 }
 
+# Sets default dependencies for executable and shared_library targets.
+#
+# Variables
+#   no_default_deps: If true, no standard dependencies will be added.
+if (is_android) {
+  foreach(_target_type,
+          [
+            "executable",
+            "loadable_module",
+            "shared_library",
+          ]) {
+    template(_target_type) {
+      target(_target_type, target_name) {
+        forward_variables_from(invoker, "*", [ "no_default_deps" ])
+        if (!defined(deps)) {
+          deps = []
+        }
+        if (!defined(invoker.no_default_deps) || !invoker.no_default_deps) {
+          deps += [ "//third_party/libcxx" ]
+        }
+      }
+    }
+  }
+}
+
 # ==============================================================================
 # COMPONENT SETUP
 # ==============================================================================

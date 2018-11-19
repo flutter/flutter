@@ -520,10 +520,6 @@ config("runtime_library") {
     # strange errors. The include ordering here is important; change with
     # caution.
     cflags += [
-      "-isystem" + rebase_path("$android_libcpp_root/include", root_build_dir),
-      "-isystem" + rebase_path(
-              "$android_ndk_root/sources/cxx-stl/llvm-libc++abi/include",
-              root_build_dir),
       "-isystem" +
           rebase_path("$android_ndk_root/sources/android/support/include",
                       root_build_dir),
@@ -533,12 +529,13 @@ config("runtime_library") {
       "-D__ANDROID_API__=$android_api_level",
     ]
 
-    lib_dirs += [ "$android_libcpp_root/libs/$android_app_abi" ]
-
-    libs += [
-      "$android_libcpp_library",
-      "c++abi",
+    include_dirs = [
+      "//third_party/libcxx/include",
+      "//third_party/libcxxabi/include",
     ]
+
+    # libunwind and libandroid_support also live in $android_libcpp_root.
+    lib_dirs += [ "$android_libcpp_root/libs/$android_app_abi" ]
 
     if (android_api_level < 21) {
       libs += [ "android_support" ]
