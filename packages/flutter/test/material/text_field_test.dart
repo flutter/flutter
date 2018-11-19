@@ -3348,7 +3348,7 @@ void main() {
     int tapCount = 0;
     await tester.pumpWidget(
       overlay(
-        child: new TextField(
+        child: TextField(
           onTap: () {
             tapCount += 1;
           },
@@ -3367,7 +3367,7 @@ void main() {
     int tapCount = 0;
     await tester.pumpWidget(
       overlay(
-        child: new TextField(
+        child: TextField(
           enabled: false,
           onTap: () {
             tapCount += 1;
