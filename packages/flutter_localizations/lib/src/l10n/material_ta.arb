@@ -30,7 +30,7 @@
   "licensesPageTitle": "உரிமங்கள்", 
   "pageRowsInfoTitle": "$rowCount-யில் $firstRow–$lastRow", 
   "pageRowsInfoTitleApproximate": "கிட்டத்தட்ட $rowCount-யில் $firstRow–$lastRow", 
-  "rowsPerPageTitle:" "பக்கத்திற்கு வரிசைகள்:", 
+  "rowsPerPageTitle": "பக்கத்திற்கு வரிசைகள்:", 
   "tabLabel": "$tabCount தாவலில் $tabIndex", 
   "selectedRowCountTitleZero": "எந்த வரிசையும் தேர்ந்தெடுக்கவில்லை", 
   "selectedRowCountTitleOne": "1 வரிசை தேர்ந்தெடுக்கப்பட்டது", 
