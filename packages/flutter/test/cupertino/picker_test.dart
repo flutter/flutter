@@ -160,6 +160,7 @@ void main() {
           ),
         ),
       );
+      // If the background color is null, the gradient color should be white.
       const Color backgroundColor = Color(0xFFFFFFFF);
       final Container container = tester.firstWidget(find.byType(Container));
       final BoxDecoration boxDecoration = container.decoration;
