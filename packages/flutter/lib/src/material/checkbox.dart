@@ -59,10 +59,14 @@ class Checkbox extends StatefulWidget {
     this.tristate = false,
     @required this.onChanged,
     this.activeColor,
-    this.checkColor,
+    this.decoration,
     this.materialTapTargetSize,
-  }) : assert(tristate != null),
+  })  : assert(tristate != null),
         assert(tristate || value != null),
+        assert(
+            activeColor == null || decoration == null,
+            'Cannot provide both a color and a decoration\n'
+            'The activeColor argument is just a shorthand for "decoration: new CheckDecoration(activeColor: color)'),
         super(key: key);
 
   /// Whether this checkbox is checked.
@@ -104,11 +108,8 @@ class Checkbox extends StatefulWidget {
   /// Defaults to [ThemeData.toggleableActiveColor].
   final Color activeColor;
 
-
-  /// The color to use when this checkbox is checked, and the color is check mark's color.
-  ///
-  /// Defaults to [Color(0xFFFFFFFF)]
-  final Color checkColor;
+  /// The decoration to paint behind the checkbox.
+  final CheckBoxDecoration decoration;
 
   /// If true the checkbox's [value] can be true, false, or null.
   ///
@@ -153,12 +154,24 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
         break;
     }
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
+
+    Color activeColor = widget.activeColor ??
+        widget.decoration?.activeColor ??
+        Theme.of(context).toggleableActiveColor;
+
+    Color checkColor = widget.decoration?.checkColor ?? const Color(0xFFFFFFFF);
+
+    Color inactiveColor = widget.decoration?.inactiveColor ??
+        (widget.onChanged != null
+            ? themeData.unselectedWidgetColor
+            : themeData.disabledColor);
+
     return _CheckboxRenderObjectWidget(
       value: widget.value,
       tristate: widget.tristate,
-      activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
-      checkColor: widget.checkColor ?? const Color(0xFFFFFFFF),
-      inactiveColor: widget.onChanged != null ? themeData.unselectedWidgetColor : themeData.disabledColor,
+      activeColor: activeColor,
+      checkColor: checkColor,
+      inactiveColor: inactiveColor,
       onChanged: widget.onChanged,
       additionalConstraints: additionalConstraints,
       vsync: this,
@@ -177,7 +190,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     @required this.onChanged,
     @required this.vsync,
     @required this.additionalConstraints,
-  }) : assert(tristate != null),
+  })  : assert(tristate != null),
         assert(tristate || value != null),
         assert(activeColor != null),
         assert(checkColor != null),
@@ -196,15 +209,15 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   _RenderCheckbox createRenderObject(BuildContext context) => _RenderCheckbox(
-    value: value,
-    tristate: tristate,
-    activeColor: activeColor,
-    checkColor: checkColor,
-    inactiveColor: inactiveColor,
-    onChanged: onChanged,
-    vsync: vsync,
-    additionalConstraints: additionalConstraints,
-  );
+        value: value,
+        tristate: tristate,
+        activeColor: activeColor,
+        checkColor: checkColor,
+        inactiveColor: inactiveColor,
+        onChanged: onChanged,
+        vsync: vsync,
+        additionalConstraints: additionalConstraints,
+      );
 
   @override
   void updateRenderObject(BuildContext context, _RenderCheckbox renderObject) {
@@ -233,16 +246,16 @@ class _RenderCheckbox extends RenderToggleable {
     BoxConstraints additionalConstraints,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
-  }): _oldValue = value,
+  })  : _oldValue = value,
         super(
-        value: value,
-        tristate: tristate,
-        activeColor: activeColor,
-        inactiveColor: inactiveColor,
-        onChanged: onChanged,
-        additionalConstraints: additionalConstraints,
-        vsync: vsync,
-      ) {
+          value: value,
+          tristate: tristate,
+          activeColor: activeColor,
+          inactiveColor: inactiveColor,
+          onChanged: onChanged,
+          additionalConstraints: additionalConstraints,
+          vsync: vsync,
+        ) {
     _checkColor = (checkColor ??= const Color(0xFFFFFFFF));
   }
 
@@ -251,8 +264,7 @@ class _RenderCheckbox extends RenderToggleable {
 
   @override
   set value(bool newValue) {
-    if (newValue == value)
-      return;
+    if (newValue == value) return;
     _oldValue = value;
     super.value = newValue;
   }
@@ -270,7 +282,8 @@ class _RenderCheckbox extends RenderToggleable {
   RRect _outerRectAt(Offset origin, double t) {
     final double inset = 1.0 - (t - 0.5).abs() * 2.0;
     final double size = _kEdgeSize - inset * _kStrokeWidth;
-    final Rect rect = Rect.fromLTWH(origin.dx + inset, origin.dy + inset, size, size);
+    final Rect rect =
+        Rect.fromLTWH(origin.dx + inset, origin.dy + inset, size, size);
     return RRect.fromRectAndRadius(rect, _kEdgeRadius);
   }
 
@@ -384,4 +397,23 @@ class _RenderCheckbox extends RenderToggleable {
       }
     }
   }
+}
+
+/// [Checkbox] decorator, all the decorative attributes about [Checkbox] added later will be wrapped in this class
+///  to prevent [Checkbox] itself from having too many parameter lists.
+class CheckBoxDecoration {
+  /// checkbox's color of active.
+  final Color activeColor;
+
+  /// checkbox's color of active of check.
+  final Color checkColor;
+
+  /// checkbox's color of decoration on inactive state
+  final Color inactiveColor;
+
+  const CheckBoxDecoration({
+    this.activeColor,
+    this.checkColor,
+    this.inactiveColor,
+  });
 }

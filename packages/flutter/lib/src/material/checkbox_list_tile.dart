@@ -85,6 +85,7 @@ class CheckboxListTile extends StatelessWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
+    this.decoration,
     this.title,
     this.subtitle,
     this.isThreeLine = false,
@@ -92,12 +93,12 @@ class CheckboxListTile extends StatelessWidget {
     this.secondary,
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
-  }) : assert(value != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(controlAffinity != null),
-       super(key: key);
+  })  : assert(value != null),
+        assert(isThreeLine != null),
+        assert(!isThreeLine || subtitle != null),
+        assert(selected != null),
+        assert(controlAffinity != null),
+        super(key: key);
 
   /// Whether this checkbox is checked.
   ///
@@ -133,6 +134,9 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
+
+  /// The decoration to paint behind the checkbox.
+  final CheckBoxDecoration decoration;
 
   /// The primary content of the list tile.
   ///
@@ -178,6 +182,7 @@ class CheckboxListTile extends StatelessWidget {
       value: value,
       onChanged: onChanged,
       activeColor: activeColor,
+      decoration: decoration,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
     Widget leading, trailing;
