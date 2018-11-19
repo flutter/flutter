@@ -48,7 +48,7 @@ class ProductCard extends StatelessWidget {
         return GestureDetector(
           onTap: () {
             model.addProductToCart(product.id);
-            // TODO: Add Snackbar
+            // TODO(redbrogdon): Add Snackbar
           },
           child: child,
         );
