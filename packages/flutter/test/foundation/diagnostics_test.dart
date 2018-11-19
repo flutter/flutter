@@ -563,10 +563,10 @@ void main() {
       golden: 'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
     );
 
+    // TODO(jacobr): this is an ugly test case.
     // There isn't anything interesting for this case as the children look the
-    // same with and without children. TODO(jacobr): this is an ugly test case.
-    // only difference is odd not clearly desirable density of B3 being right
-    // next to node C.
+    // same with and without children. Only difference is odd not clearly
+    // desirable density of B3 being right next to node C.
     goldenStyleTest(
       'single line last child',
       style: DiagnosticsTreeStyle.sparse,
