@@ -92,8 +92,8 @@ class TextField extends StatefulWidget {
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
   /// The [textAlign], [autofocus], [obscureText], [autocorrect],
-  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
-  /// and [enableInteractiveSelection] arguments must not be null.
+  /// [maxLengthEnforced], [scrollPadding], [maxLines], and [maxLength]
+  /// arguments must not be null.
   ///
   /// See also:
   ///
@@ -294,12 +294,25 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scrollPadding}
   final EdgeInsets scrollPadding;
 
-  /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
+  /// {@template flutter.widgets.text_field.enableInteractiveSelection}
+  /// If true, then long-pressing this TextField will select text and show the
+  /// cut/copy/paste menu, and tapping will move the text caret.
+  ///
+  /// By default false if obscureText is true, otherwise true.
+  ///
+  /// If false, most of the accessibility support for selecting text, copy
+  /// and paste, and moving the caret will be disabled.
+  /// {@endtemplate}
   final bool enableInteractiveSelection;
 
-  /// Whether or not this field allows text selection.
+  /// Decides if selection is enabled based on [enableInteractiveSelection] and
+  /// [obscureText] to make the common use case of password fields simple while
+  /// still allowing selection of obscured text.
+  ///
+  /// Just setting [obscureText] to true will create a typical Material password
+  /// field where text is obscured and not selectable.
+  /// Setting neither will create a normal visible and selectable text field.
   bool get selectionEnabled {
-    // An obscured field (like a password field) is not selectable by default
     return enableInteractiveSelection ?? !obscureText;
   }
 
