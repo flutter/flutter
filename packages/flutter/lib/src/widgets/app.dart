@@ -518,6 +518,10 @@ class WidgetsApp extends StatefulWidget {
   ///  1. [localeListResolutionCallback] is attempted first.
   ///  2. [localeResolutionCallback] is attempted second.
   ///  3. Flutter's [WidgetsApp.basicLocaleListResolution] algorithm is attempted last.
+  ///
+  /// Properly localized projects should provide a more advanced algorithm than
+  /// [basicLocaleListResolution] as it does not implement a complete BCP47 algorithm and
+  /// is optimized for speed at the detriment of some uncommon edge-cases.
   /// {@endtemplate}
   ///
   /// This callback considers the entire list of preferred locales.
@@ -527,7 +531,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [MaterialApp.localeResolutionCallback], which sets the callback of the
+  ///  * [MaterialApp.localeListResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
   ///  * [basicLocaleListResolution], the locale resolution algorithm that is used
   ///    when no custom locale resolution algorithm is provided.
@@ -544,7 +548,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [MaterialApp.localeListResolutionCallback], which sets the callback of the
+  ///  * [MaterialApp.localeResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
   ///  * [basicLocaleListResolution], the locale resolution algorithm that is used
   ///    when no custom locale resolution algorithm is provided.
