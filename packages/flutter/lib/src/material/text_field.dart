@@ -126,7 +126,7 @@ class TextField extends StatefulWidget {
     this.cursorColor,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
-    this.enableInteractiveSelection = true,
+    this.enableInteractiveSelection,
   }) : assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
@@ -136,7 +136,6 @@ class TextField extends StatefulWidget {
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       assert(enableInteractiveSelection != null),
        super(key: key);
 
   /// Controls the text being edited.
@@ -298,6 +297,11 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
 
+  bool get selectionEnabled {
+    // An obscured field (like a password field) is not selectable by default
+    return enableInteractiveSelection ?? !obscureText;
+  }
+
   @override
   _TextFieldState createState() => _TextFieldState();
 
@@ -449,7 +453,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleTap() {
-    if (widget.enableInteractiveSelection)
+    if (widget.selectionEnabled)
       _renderEditable.handleTap();
     _requestKeyboard();
     _confirmCurrentSplash();
@@ -460,7 +464,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleLongPress() {
-    if (widget.enableInteractiveSelection)
+    if (widget.selectionEnabled)
       _renderEditable.handleLongPress();
     _confirmCurrentSplash();
   }
@@ -532,7 +536,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
         selectionColor: themeData.textSelectionColor,
-        selectionControls: widget.enableInteractiveSelection
+        selectionControls: widget.selectionEnabled
           ? (themeData.platform == TargetPlatform.iOS
              ? cupertinoTextSelectionControls
              : materialTextSelectionControls)
@@ -548,7 +552,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
-        enableInteractiveSelection: widget.enableInteractiveSelection,
+        enableInteractiveSelection: widget.selectionEnabled,
       ),
     );
 
