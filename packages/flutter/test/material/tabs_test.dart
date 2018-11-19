@@ -1465,6 +1465,7 @@ void main() {
                 TestSemantics(
                     id: 3,
                     rect: TestSemantics.fullScreen,
+                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
@@ -1728,6 +1729,7 @@ void main() {
                 TestSemantics(
                     id: 3,
                     rect: TestSemantics.fullScreen,
+                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
