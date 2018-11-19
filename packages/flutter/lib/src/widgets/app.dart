@@ -810,7 +810,10 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     }
     // localeListResolutionCallback failed, falling back to localeResolutionCallback.
     if (widget.localeResolutionCallback != null) {
-      final Locale locale = widget.localeResolutionCallback(preferredLocales.first, widget.supportedLocales);
+      final Locale locale = widget.localeResolutionCallback(
+        preferredLocales != null && preferredLocales.isNotEmpty ? preferredLocales.first : null,
+        widget.supportedLocales,
+      );
       if (locale != null)
         return locale;
     }
