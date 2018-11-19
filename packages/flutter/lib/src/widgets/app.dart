@@ -529,6 +529,8 @@ class WidgetsApp extends StatefulWidget {
   ///
   ///  * [MaterialApp.localeResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
+  ///  * [basicLocaleListResolution], the locale resolution algorithm that is used
+  ///    when no custom locale resolution algorithm is provided.
   final LocaleListResolutionCallback localeListResolutionCallback;
 
   /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
@@ -544,6 +546,8 @@ class WidgetsApp extends StatefulWidget {
   ///
   ///  * [MaterialApp.localeListResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
+  ///  * [basicLocaleListResolution], the locale resolution algorithm that is used
+  ///    when no custom locale resolution algorithm is provided.
   final LocaleResolutionCallback localeResolutionCallback;
 
   /// {@template flutter.widgets.widgetsApp.supportedLocales}
@@ -557,10 +561,11 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The order of the list matters. The default locale resolution algorithm, 
   /// [basicLocaleListResolution], uses a variation of the truncation algorithm where
-  /// it attempts to match by all subtags, language+script, language+country,
-  /// language-only, and the [supportedLocales.first] as a fallback. When more
-  /// than one supported locale matches one of these criteria, only the first one
-  /// is used.
+  /// it attempts to match by the following priority: all subtags, language+script,
+  /// language+country, language-only, and finally [supportedLocales.first] as a fallback.
+  /// When more than one supported locale matches one of these criteria, only the first
+  /// matching locale is returned. See [basicLocaleListResolution] for a complete
+  /// description of the algorithm.
   ///
   /// The default locale resolution algorithm can be overridden with [localeListResolutionCallback]
   /// and/or [localeResolutionCallback].
@@ -602,6 +607,8 @@ class WidgetsApp extends StatefulWidget {
   ///    when the device's locale changes.
   ///  * [localizationsDelegates], which collectively define all of the localized
   ///    resources used by this app.
+  ///  * [basicLocaleListResolution], the locale resolution algorithm that is used
+  ///    when no custom locale resolution algorithm is provided.
   final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
