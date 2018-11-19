@@ -1,4 +1,4 @@
-Signature: 53187ede3cb68929e620d188862f5253
+Signature: eb8485a5ac957ff52e9b6d426c643673
 
 UNUSED LICENSES:
 
@@ -1313,6 +1313,7 @@ FILE: ../../../third_party/skia/gm/crbug_847759.cpp
 FILE: ../../../third_party/skia/gm/crbug_884166.cpp
 FILE: ../../../third_party/skia/gm/crbug_887103.cpp
 FILE: ../../../third_party/skia/gm/crbug_892988.cpp
+FILE: ../../../third_party/skia/gm/crbug_899512.cpp
 FILE: ../../../third_party/skia/gm/drawimageset.cpp
 FILE: ../../../third_party/skia/gm/fwidth_squircle.cpp
 FILE: ../../../third_party/skia/gm/gradients_degenerate.cpp
@@ -2847,9 +2848,6 @@ FILE: ../../../third_party/skia/src/core/SkAAClip.h
 FILE: ../../../third_party/skia/src/core/SkAdvancedTypefaceMetrics.h
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_matrix.h
-FILE: ../../../third_party/skia/src/core/SkBitmapProcState_procs.h
-FILE: ../../../third_party/skia/src/core/SkBitmapProcState_sample.h
-FILE: ../../../third_party/skia/src/core/SkBitmapProcState_shaderproc.h
 FILE: ../../../third_party/skia/src/core/SkBlitRow.h
 FILE: ../../../third_party/skia/src/core/SkBlitRow_D32.cpp
 FILE: ../../../third_party/skia/src/core/SkClipStack.cpp
