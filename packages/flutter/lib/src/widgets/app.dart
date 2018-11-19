@@ -567,8 +567,10 @@ class WidgetsApp extends StatefulWidget {
   /// matching locale is returned. See [basicLocaleListResolution] for a complete
   /// description of the algorithm.
   ///
-  /// The default locale resolution algorithm can be overridden with [localeListResolutionCallback]
-  /// and/or [localeResolutionCallback].
+  /// The default locale resolution algorithm can be overridden by providing a value for 
+  /// [localeListResolutionCallback]. The provided [basicLocaleListResolution] is optimized
+  /// for speed and does not implement a full BCP47 algorithm that takes distances between
+  /// languages into account.
   ///
   /// When supporting languages with more than one script, it is recommended
   /// to specify the [Locale.scriptCode] explicitly. Locales may also be defined without
