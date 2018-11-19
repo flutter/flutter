@@ -68,8 +68,8 @@ abstract class InteractiveInkFeature extends InkFeature {
   }
 }
 
-/// An encapsulation of an [InteractiveInkFeature] constructor used by [InkWell]
-/// [InkResponse] and [ThemeData].
+/// An encapsulation of an [InteractiveInkFeature] constructor used by
+/// [InkWell], [InkResponse], and [ThemeData].
 ///
 /// Interactive ink feature implementations should provide a static const
 /// `splashFactory` value that's an instance of this class. The `splashFactory`
@@ -405,7 +405,7 @@ class InkResponse extends StatefulWidget {
   }
 }
 
-class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKeepAliveClientMixin {
+class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKeepAliveClientMixin<T> {
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
   InkHighlight _lastHighlight;

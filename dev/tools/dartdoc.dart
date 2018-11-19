@@ -9,8 +9,11 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 
-const String kDocRoot = 'dev/docs/doc';
+const String kDocsRoot = 'dev/docs';
+const String kPublishRoot = '$kDocsRoot/doc';
+const String kSnippetsRoot = 'dev/snippets';
 
 /// This script expects to run with the cwd as the root of the flutter repo. It
 /// will generate documentation for the packages in `//packages/` and write the
@@ -25,7 +28,7 @@ const String kDocRoot = 'dev/docs/doc';
 /// in your path. It requires that 'flutter' has been run previously. It uses
 /// the version of Dart downloaded by the 'flutter' tool in this repository and
 /// will crash if that is absent.
-Future<Null> main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   final ArgParser argParser = _createArgsParser();
   final ArgResults args = argParser.parse(arguments);
   if (args['help']) {
@@ -57,17 +60,17 @@ Future<Null> main(List<String> arguments) async {
   buf.writeln('dependency_overrides:');
   buf.writeln('  platform_integration:');
   buf.writeln('    path: platform_integration');
-  File('dev/docs/pubspec.yaml').writeAsStringSync(buf.toString());
+  File('$kDocsRoot/pubspec.yaml').writeAsStringSync(buf.toString());
 
   // Create the library file.
-  final Directory libDir = Directory('dev/docs/lib');
+  final Directory libDir = Directory('$kDocsRoot/lib');
   libDir.createSync();
 
   final StringBuffer contents = StringBuffer('library temp_doc;\n\n');
   for (String libraryRef in libraryRefs()) {
     contents.writeln('import \'package:$libraryRef\';');
   }
-  File('dev/docs/lib/temp_doc.dart').writeAsStringSync(contents.toString());
+  File('$kDocsRoot/lib/temp_doc.dart').writeAsStringSync(contents.toString());
 
   final String flutterRoot = Directory.current.path;
   final Map<String, String> pubEnvironment = <String, String>{
@@ -83,19 +86,22 @@ Future<Null> main(List<String> arguments) async {
   final String pubExecutable = '$flutterRoot/bin/cache/dart-sdk/bin/pub';
 
   // Run pub.
-  Process process = await Process.start(
+  ProcessWrapper process = ProcessWrapper(await Process.start(
     pubExecutable,
     <String>['get'],
-    workingDirectory: 'dev/docs',
+    workingDirectory: kDocsRoot,
     environment: pubEnvironment,
-  );
+  ));
   printStream(process.stdout, prefix: 'pub:stdout: ');
   printStream(process.stderr, prefix: 'pub:stderr: ');
-  final int code = await process.exitCode;
+  final int code = await process.done;
   if (code != 0)
     exit(code);
 
-  createFooter('dev/docs/lib/footer.html');
+  createFooter('$kDocsRoot/lib/footer.html');
+  copyAssets();
+  cleanOutSnippets();
+  await precompileSnippetsTool(pubExecutable, pubEnvironment);
 
   final List<String> dartdocBaseArgs = <String>['global', 'run'];
   if (args['checked']) {
@@ -107,7 +113,7 @@ Future<Null> main(List<String> arguments) async {
   final ProcessResult result = Process.runSync(
     pubExecutable,
     <String>[]..addAll(dartdocBaseArgs)..add('--version'),
-    workingDirectory: 'dev/docs',
+    workingDirectory: kDocsRoot,
     environment: pubEnvironment,
   );
   print('\n${result.stdout}flutter version: $version\n');
@@ -124,36 +130,68 @@ Future<Null> main(List<String> arguments) async {
   // We don't need to exclude flutter_tools in this list because it's not in the
   // recursive dependencies of the package defined at dev/docs/pubspec.yaml
   final List<String> dartdocArgs = <String>[]..addAll(dartdocBaseArgs)..addAll(<String>[
+    '--inject-html',
     '--header', 'styles.html',
     '--header', 'analytics.html',
     '--header', 'survey.html',
+    '--header', 'snippets.html',
     '--footer-text', 'lib/footer.html',
     '--exclude-packages',
-'analyzer,args,barback,cli_util,csslib,flutter_goldens,front_end,fuchsia_remote_debug_protocol,glob,html,http_multi_server,io,isolate,js,kernel,logging,mime,mockito,node_preamble,plugin,shelf,shelf_packages_handler,shelf_static,shelf_web_socket,utf,watcher,yaml',
+    <String>[
+      'analyzer',
+      'args',
+      'barback',
+      'cli_util',
+      'csslib',
+      'flutter_goldens',
+      'flutter_goldens_client',
+      'front_end',
+      'fuchsia_remote_debug_protocol',
+      'glob',
+      'html',
+      'http_multi_server',
+      'io',
+      'isolate',
+      'js',
+      'kernel',
+      'logging',
+      'mime',
+      'mockito',
+      'node_preamble',
+      'plugin',
+      'shelf',
+      'shelf_packages_handler',
+      'shelf_static',
+      'shelf_web_socket',
+      'utf',
+      'watcher',
+      'yaml',
+    ].join(','),
     '--exclude',
-  'package:Flutter/temp_doc.dart,package:http/browser_client.dart,package:intl/intl_browser.dart,package:matcher/mirror_matchers.dart,package:quiver/mirrors.dart,package:quiver/io.dart,package:vm_service_client/vm_service_client.dart,package:web_socket_channel/html.dart',
+    <String>[
+      'package:Flutter/temp_doc.dart',
+      'package:http/browser_client.dart',
+      'package:intl/intl_browser.dart',
+      'package:matcher/mirror_matchers.dart',
+      'package:quiver/io.dart',
+      'package:quiver/mirrors.dart',
+      'package:vm_service_client/vm_service_client.dart',
+      'package:web_socket_channel/html.dart',
+    ].join(','),
     '--favicon=favicon.ico',
-    '--package-order', 'flutter,Dart,flutter_test,flutter_driver',
-    '--show-warnings',
+    '--package-order', 'flutter,Dart,platform_integration,flutter_test,flutter_driver',
     '--auto-include-dependencies',
   ]);
 
-  // Explicitly list all the packages in //flutter/packages/* that are
-  // not listed 'nodoc' in their pubspec.yaml.
-  for (String libraryRef in libraryRefs(diskPath: true)) {
-    dartdocArgs.add('--include-external');
-    dartdocArgs.add(libraryRef);
-  }
-
   String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
-  print('Executing: (cd dev/docs ; $pubExecutable ${dartdocArgs.map(quote).join(' ')})');
+  print('Executing: (cd $kDocsRoot ; $pubExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
 
-  process = await Process.start(
+  process = ProcessWrapper(await Process.start(
     pubExecutable,
     dartdocArgs,
-    workingDirectory: 'dev/docs',
+    workingDirectory: kDocsRoot,
     environment: pubEnvironment,
-  );
+  ));
   printStream(process.stdout, prefix: args['json'] ? '' : 'dartdoc:stdout: ',
     filter: args['verbose'] ? const <Pattern>[] : <Pattern>[
       RegExp(r'^generating docs for library '), // unnecessary verbosity
@@ -162,11 +200,10 @@ Future<Null> main(List<String> arguments) async {
   );
   printStream(process.stderr, prefix: args['json'] ? '' : 'dartdoc:stderr: ',
     filter: args['verbose'] ? const <Pattern>[] : <Pattern>[
-      RegExp(r'^[ ]+warning: generic type handled as HTML:'), // https://github.com/dart-lang/dartdoc/issues/1475
       RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
     ],
   );
-  final int exitCode = await process.exitCode;
+  final int exitCode = await process.done;
 
   if (exitCode != 0)
     exit(exitCode);
@@ -220,16 +257,114 @@ void createFooter(String footerPath) {
     gitBranchOut].join(' '));
 }
 
+/// Recursively copies `srcDir` to `destDir`, invoking [onFileCopied], if
+/// specified, for each source/destination file pair.
+///
+/// Creates `destDir` if needed.
+void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(File srcFile, File destFile)]) {
+  if (!srcDir.existsSync())
+    throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
+
+  if (!destDir.existsSync())
+    destDir.createSync(recursive: true);
+
+  for (FileSystemEntity entity in srcDir.listSync()) {
+    final String newPath = path.join(destDir.path, path.basename(entity.path));
+    if (entity is File) {
+      final File newFile = File(newPath);
+      entity.copySync(newPath);
+      onFileCopied?.call(entity, newFile);
+    } else if (entity is Directory) {
+      copyDirectorySync(entity, Directory(newPath));
+    } else {
+      throw Exception('${entity.path} is neither File nor Directory');
+    }
+  }
+}
+
+void copyAssets() {
+  final Directory assetsDir = Directory(path.join(kPublishRoot, 'assets'));
+  if (assetsDir.existsSync()) {
+    assetsDir.deleteSync(recursive: true);
+  }
+  copyDirectorySync(
+      Directory(path.join(kDocsRoot, 'assets')),
+      Directory(path.join(kPublishRoot, 'assets')),
+          (File src, File dest) => print('Copied ${src.path} to ${dest.path}'));
+}
+
+
+void cleanOutSnippets() {
+  final Directory snippetsDir = Directory(path.join(kPublishRoot, 'snippets'));
+  if (snippetsDir.existsSync()) {
+    snippetsDir
+      ..deleteSync(recursive: true)
+      ..createSync(recursive: true);
+  }
+}
+
+Future<File> precompileSnippetsTool(
+  String pubExecutable,
+  Map<String, String> pubEnvironment,
+) async {
+  final File snapshotPath = File(path.join('bin', 'cache', 'snippets.snapshot'));
+  print('Precompiling snippets tool into ${snapshotPath.absolute.path}');
+  if (snapshotPath.existsSync()) {
+    snapshotPath.deleteSync();
+  }
+
+  final ProcessWrapper process = ProcessWrapper(await Process.start(
+    pubExecutable,
+    <String>['get'],
+    workingDirectory: kSnippetsRoot,
+    environment: pubEnvironment,
+  ));
+  printStream(process.stdout, prefix: 'pub:stdout: ');
+  printStream(process.stderr, prefix: 'pub:stderr: ');
+  final int code = await process.done;
+  if (code != 0)
+    exit(code);
+
+  // In order to be able to optimize properly, we need to provide a training set
+  // of arguments, and an input file to process.
+  final Directory tempDir = Directory.systemTemp.createTempSync('dartdoc_snippet_');
+  final File trainingFile = File(path.join(tempDir.path, 'snippet_training'));
+  trainingFile.writeAsStringSync('```dart\nvoid foo(){}\n```');
+  try {
+    final ProcessResult result = Process.runSync(Platform.resolvedExecutable, <String>[
+      '--snapshot=${snapshotPath.absolute.path}',
+      '--snapshot_kind=app-jit',
+      path.join(
+        'lib',
+        'main.dart',
+      ),
+      '--type=sample',
+      '--input=${trainingFile.absolute.path}',
+      '--output=${path.join(tempDir.absolute.path, 'training_output.txt')}',
+    ], workingDirectory: path.absolute(kSnippetsRoot));
+    if (result.exitCode != 0) {
+      stdout.writeln(result.stdout);
+      stderr.writeln(result.stderr);
+      throw Exception('Could not generate snippets snapshot: process exited with code ${result.exitCode}');
+    }
+  } on ProcessException catch (error) {
+    throw Exception('Could not generate snippets snapshot:\n$error');
+  }
+  tempDir.deleteSync(recursive: true);
+  return snapshotPath;
+}
+
 void sanityCheckDocs() {
   final List<String> canaries = <String>[
-    '$kDocRoot/api/dart-io/File-class.html',
-    '$kDocRoot/api/dart-ui/Canvas-class.html',
-    '$kDocRoot/api/dart-ui/Canvas/drawRect.html',
-    '$kDocRoot/api/flutter_driver/FlutterDriver/FlutterDriver.connectedTo.html',
-    '$kDocRoot/api/flutter_test/WidgetTester/pumpWidget.html',
-    '$kDocRoot/api/material/Material-class.html',
-    '$kDocRoot/api/material/Tooltip-class.html',
-    '$kDocRoot/api/widgets/Widget-class.html',
+    '$kPublishRoot/assets/overrides.css',
+    '$kPublishRoot/api/dart-io/File-class.html',
+    '$kPublishRoot/api/dart-ui/Canvas-class.html',
+    '$kPublishRoot/api/dart-ui/Canvas/drawRect.html',
+    '$kPublishRoot/api/flutter_driver/FlutterDriver/FlutterDriver.connectedTo.html',
+    '$kPublishRoot/api/flutter_test/WidgetTester/pumpWidget.html',
+    '$kPublishRoot/api/material/Material-class.html',
+    '$kPublishRoot/api/material/Tooltip-class.html',
+    '$kPublishRoot/api/widgets/Widget-class.html',
   ];
   for (String canary in canaries) {
     if (!File(canary).existsSync())
@@ -240,7 +375,7 @@ void sanityCheckDocs() {
 /// Creates a custom index.html because we try to maintain old
 /// paths. Cleanup unused index.html files no longer needed.
 void createIndexAndCleanup() {
-  print('\nCreating a custom index.html in $kDocRoot/index.html');
+  print('\nCreating a custom index.html in $kPublishRoot/index.html');
   removeOldFlutterDocsDir();
   renameApiDir();
   copyIndexToRootOfDocs();
@@ -252,22 +387,22 @@ void createIndexAndCleanup() {
 
 void removeOldFlutterDocsDir() {
   try {
-    Directory('$kDocRoot/flutter').deleteSync(recursive: true);
+    Directory('$kPublishRoot/flutter').deleteSync(recursive: true);
   } on FileSystemException {
     // If the directory does not exist, that's OK.
   }
 }
 
 void renameApiDir() {
-  Directory('$kDocRoot/api').renameSync('$kDocRoot/flutter');
+  Directory('$kPublishRoot/api').renameSync('$kPublishRoot/flutter');
 }
 
 void copyIndexToRootOfDocs() {
-  File('$kDocRoot/flutter/index.html').copySync('$kDocRoot/index.html');
+  File('$kPublishRoot/flutter/index.html').copySync('$kPublishRoot/index.html');
 }
 
 void changePackageToSdkInTitlebar() {
-  final File indexFile = File('$kDocRoot/index.html');
+  final File indexFile = File('$kPublishRoot/index.html');
   String indexContents = indexFile.readAsStringSync();
   indexContents = indexContents.replaceFirst(
     '<li><a href="https://flutter.io">Flutter package</a></li>',
@@ -278,7 +413,7 @@ void changePackageToSdkInTitlebar() {
 }
 
 void addHtmlBaseToIndex() {
-  final File indexFile = File('$kDocRoot/index.html');
+  final File indexFile = File('$kPublishRoot/index.html');
   String indexContents = indexFile.readAsStringSync();
   indexContents = indexContents.replaceFirst(
     '</title>\n',
@@ -298,11 +433,11 @@ void addHtmlBaseToIndex() {
 
 void putRedirectInOldIndexLocation() {
   const String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
-  File('$kDocRoot/flutter/index.html').writeAsStringSync(metaTag);
+  File('$kPublishRoot/flutter/index.html').writeAsStringSync(metaTag);
 }
 
 List<String> findPackageNames() {
-  return findPackages().map((FileSystemEntity file) => path.basename(file.path)).toList();
+  return findPackages().map<String>((FileSystemEntity file) => path.basename(file.path)).toList();
 }
 
 /// Finds all packages in the Flutter SDK
@@ -321,37 +456,27 @@ List<FileSystemEntity> findPackages() {
 }
 
 /// Returns import or on-disk paths for all libraries in the Flutter SDK.
-///
-/// diskPath toggles between import paths vs. disk paths.
-Iterable<String> libraryRefs({ bool diskPath = false }) sync* {
+Iterable<String> libraryRefs() sync* {
   for (Directory dir in findPackages()) {
     final String dirName = path.basename(dir.path);
     for (FileSystemEntity file in Directory('${dir.path}/lib').listSync()) {
       if (file is File && file.path.endsWith('.dart')) {
-        if (diskPath)
-          yield '$dirName/lib/${path.basename(file.path)}';
-        else
-          yield '$dirName/${path.basename(file.path)}';
-       }
+        yield '$dirName/${path.basename(file.path)}';
+      }
     }
   }
 
   // Add a fake package for platform integration APIs.
-  if (diskPath) {
-    yield 'platform_integration/lib/android.dart';
-    yield 'platform_integration/lib/ios.dart';
-  } else {
-    yield 'platform_integration/android.dart';
-    yield 'platform_integration/ios.dart';
-  }
+  yield 'platform_integration/android.dart';
+  yield 'platform_integration/ios.dart';
 }
 
 void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> filter = const <Pattern>[] }) {
   assert(prefix != null);
   assert(filter != null);
   stream
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
     .listen((String line) {
       if (!filter.any((Pattern pattern) => line.contains(pattern)))
         print('$prefix$line'.trim());

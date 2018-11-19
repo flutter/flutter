@@ -180,7 +180,7 @@ class DialogDemoState extends State<DialogDemo> {
                 context: context,
                 initialTime: _selectedTime
               )
-              .then<Null>((TimeOfDay value) {
+              .then<void>((TimeOfDay value) {
                 if (value != null && value != _selectedTime) {
                   _selectedTime = value;
                   _scaffoldKey.currentState.showSnackBar(SnackBar(
@@ -201,7 +201,7 @@ class DialogDemoState extends State<DialogDemo> {
           ),
         ]
         // Add a little space between the buttons
-        .map((Widget button) {
+        .map<Widget>((Widget button) {
           return Container(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: button

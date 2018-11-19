@@ -78,7 +78,7 @@ Widget buildFrame({
       length: tabs.length,
       child: TabBar(
         key: tabBarKey,
-        tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+        tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
         isScrollable: isScrollable,
         indicatorColor: indicatorColor,
       ),
@@ -134,7 +134,7 @@ Widget buildLeftRightApp({ List<String> tabs, String value }) {
         appBar: AppBar(
           title: const Text('tabs'),
           bottom: TabBar(
-            tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
           ),
         ),
         body: const TabBarView(
@@ -295,7 +295,7 @@ void main() {
           initialIndex: tabs.indexOf(value),
           length: tabs.length,
           child: TabBarView(
-            children: tabs.map((String name) {
+            children: tabs.map<Widget>((String name) {
               return StateMarker(
                 child: Text(name)
               );
@@ -483,11 +483,11 @@ void main() {
                   title: const Text('tabs'),
                   bottom: TabBar(
                     isScrollable: true,
-                    tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                    tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
                   ),
                 ),
                 body: TabBarView(
-                  children: tabs.map((String name) => Text('${index++}')).toList(),
+                  children: tabs.map<Widget>((String name) => Text('${index++}')).toList(),
                 ),
               ),
             ),
@@ -550,7 +550,7 @@ void main() {
             title: const Text('tabs'),
             bottom: TabBar(
               controller: controller,
-              tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
             ),
           ),
           body: TabBarView(
@@ -609,7 +609,7 @@ void main() {
             title: const Text('tabs'),
             bottom: TabBar(
               controller: controller,
-              tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
             ),
           ),
           body: TabBarView(
@@ -1866,7 +1866,7 @@ void main() {
                 title: const Text('tabs'),
                 bottom: TabBar(
                   controller: controller,
-                  tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                  tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
                 ),
               ),
               body: TabBarView(

@@ -75,8 +75,8 @@ TaskFunction createBasicMaterialCompileTest() {
 
     rmTree(sampleDir);
 
-    await inDirectory(Directory.systemTemp, () async {
-      await flutter('create', options: <String>[sampleAppName]);
+    await inDirectory<void>(Directory.systemTemp, () async {
+      await flutter('create', options: <String>['--template=app', sampleAppName]);
     });
 
     if (!(await sampleDir.exists()))
@@ -95,7 +95,7 @@ class StartupTest {
   final bool reportMetrics;
 
   Future<TaskResult> run() async {
-    return await inDirectory(testDirectory, () async {
+    return await inDirectory<TaskResult>(testDirectory, () async {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
@@ -131,7 +131,7 @@ class PerfTest {
   final String timelineFileName;
 
   Future<TaskResult> run() {
-    return inDirectory(testDirectory, () async {
+    return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
       final String deviceId = device.deviceId;
@@ -183,7 +183,7 @@ class CompileTest {
   final bool reportPackageContentSizes;
 
   Future<TaskResult> run() async {
-    return await inDirectory(testDirectory, () async {
+    return await inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
       await flutter('packages', options: <String>['get']);
@@ -357,6 +357,7 @@ class CompileTest {
     final _UnzipListEntry isolateSnapshotInstr = fileToMetadata['assets/isolate_snapshot_instr'];
     final _UnzipListEntry vmSnapshotData = fileToMetadata['assets/vm_snapshot_data'];
     final _UnzipListEntry vmSnapshotInstr = fileToMetadata['assets/vm_snapshot_instr'];
+    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/LICENSE'];
 
     return <String, dynamic>{
       'icudtl_uncompressed_bytes': icudtl.uncompressedSize,
@@ -371,6 +372,8 @@ class CompileTest {
           isolateSnapshotInstr.compressedSize +
           vmSnapshotData.compressedSize +
           vmSnapshotInstr.compressedSize,
+      'license_uncompressed_bytes': license.uncompressedSize,
+      'license_compressed_bytes': license.compressedSize,
     };
   }
 }
@@ -402,7 +405,7 @@ class MemoryTest {
   Device _device;
 
   Future<TaskResult> run() {
-    return inDirectory(project, () async {
+    return inDirectory<TaskResult>(project, () async {
       // This test currently only works on Android, because device.logcat,
       // device.getMemoryStats, etc, aren't implemented for iOS.
 

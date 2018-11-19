@@ -1,7 +1,8 @@
 {
   "scriptCategory": "English-like",
   "@scriptCategory": {
-    "description": "The name of the language's script category (see https://material.io/go/design-typography#typography-language-categories-reference)."
+    "description": "The name of the language's script category (see https://material.io/design/typography/language-support.html#language-categories-reference).",
+    "x-flutter-type": "scriptCategory"
   },
 
   "timeOfDayFormat": "h:mm a",
@@ -253,5 +254,10 @@
   "@remainingTextFieldCharacterCount": {
     "description": "The label for the TextField's character counter. remainingCharacters is a integer representing how many more characters the user can type into the text field before using up a given budget. All values are greater than or equal to zero.",
     "plural": "remainingCount"
+  },
+
+  "refreshIndicatorSemanticLabel": "Refresh",
+  "@refreshIndicatorSemanticLabel": {
+    "description": "The verb which describes what happens when a RefreshIndicator is displayed on screen.  This is used by TalkBack on Android to announce that a refresh is happening."
   }
 }

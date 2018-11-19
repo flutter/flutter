@@ -224,8 +224,8 @@ void main() {
           || widgetType == '_PopupMenu'; // for old versions of Dart that don't reify method type arguments
     };
 
-    Future<Null> openMenu(TextDirection textDirection, Alignment alignment) async {
-      return TestAsyncUtils.guard(() async {
+    Future<void> openMenu(TextDirection textDirection, Alignment alignment) async {
+      return TestAsyncUtils.guard<void>(() async {
         await tester.pumpWidget(Container()); // reset in case we had a menu up already
         await tester.pumpWidget(TestApp(
           textDirection: textDirection,
@@ -239,14 +239,14 @@ void main() {
       });
     }
 
-    Future<Null> testPositioningDown(
+    Future<void> testPositioningDown(
       WidgetTester tester,
       TextDirection textDirection,
       Alignment alignment,
       TextDirection growthDirection,
       Rect startRect,
     ) {
-      return TestAsyncUtils.guard(() async {
+      return TestAsyncUtils.guard<void>(() async {
         await openMenu(textDirection, alignment);
         Rect rect = tester.getRect(find.byWidgetPredicate(popupMenu));
         expect(rect, startRect);
@@ -296,14 +296,14 @@ void main() {
       });
     }
 
-    Future<Null> testPositioningDownThenUp(
+    Future<void> testPositioningDownThenUp(
       WidgetTester tester,
       TextDirection textDirection,
       Alignment alignment,
       TextDirection growthDirection,
       Rect startRect,
     ) {
-      return TestAsyncUtils.guard(() async {
+      return TestAsyncUtils.guard<void>(() async {
         await openMenu(textDirection, alignment);
         Rect rect = tester.getRect(find.byWidgetPredicate(popupMenu));
         expect(rect, startRect);
@@ -428,6 +428,45 @@ void main() {
     await tester.pump();
 
     expect(MediaQuery.of(popupContext).padding, EdgeInsets.zero);
+  });
+
+  testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
+    const Offset offset = Offset(100.0, 100.0);
+
+    final PopupMenuButton<int> popupMenuButton =
+      PopupMenuButton<int>(
+        offset: offset,
+        itemBuilder: (BuildContext context) {
+          return <PopupMenuItem<int>>[
+            PopupMenuItem<int>(
+              value: 1,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return const Text('AAA');
+                },
+              ),
+            ),
+          ];
+        },
+      );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Material(
+              child: popupMenuButton,
+            ),
+          )
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    // The position is different than the offset because the default position isn't at the origin.
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int>')), const Offset(364.0, 324.0));
   });
 
   testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {

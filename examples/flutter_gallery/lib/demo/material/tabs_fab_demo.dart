@@ -69,7 +69,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   }
 
   void _showExplanatoryText() {
-    _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
+    _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
       return Container(
         decoration: BoxDecoration(
           border: Border(top: BorderSide(color: Theme.of(context).dividerColor))
@@ -136,12 +136,12 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
         title: const Text('FAB per tab'),
         bottom: TabBar(
           controller: _controller,
-          tabs: _allPages.map((_Page page) => Tab(text: page.label.toUpperCase())).toList(),
+          tabs: _allPages.map<Widget>((_Page page) => Tab(text: page.label.toUpperCase())).toList(),
         ),
         actions: <Widget>[
           MaterialDemoDocumentationButton(TabsFabDemo.routeName),
           IconButton(
-            icon: const Icon(Icons.sentiment_very_satisfied),
+            icon: const Icon(Icons.sentiment_very_satisfied, semanticLabel: 'Toggle extended buttons'),
             onPressed: () {
               setState(() {
                 _extendedButtons = !_extendedButtons;
@@ -153,7 +153,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
       floatingActionButton: buildFloatingActionButton(_selectedPage),
       body: TabBarView(
         controller: _controller,
-        children: _allPages.map(buildTabView).toList()
+        children: _allPages.map<Widget>(buildTabView).toList()
       ),
     );
   }

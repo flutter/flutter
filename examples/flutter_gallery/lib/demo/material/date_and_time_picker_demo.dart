@@ -64,7 +64,7 @@ class _DateTimePicker extends StatelessWidget {
   final ValueChanged<DateTime> selectDate;
   final ValueChanged<TimeOfDay> selectTime;
 
-  Future<Null> _selectDate(BuildContext context) async {
+  Future<void> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
       context: context,
       initialDate: selectedDate,
@@ -75,7 +75,7 @@ class _DateTimePicker extends StatelessWidget {
       selectDate(picked);
   }
 
-  Future<Null> _selectTime(BuildContext context) async {
+  Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay picked = await showTimePicker(
       context: context,
       initialTime: selectedTime
@@ -201,7 +201,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                       _activity = newValue;
                     });
                   },
-                  items: _allActivities.map((String value) {
+                  items: _allActivities.map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),

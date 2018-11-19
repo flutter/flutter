@@ -50,14 +50,14 @@ class DaemonCommand extends FlutterCommand {
   final bool hidden;
 
   @override
-  Future<Null> runCommand() {
+  Future<FlutterCommandResult> runCommand() async {
     printStatus('Starting device daemon...');
 
     final NotifyingLogger notifyingLogger = NotifyingLogger();
 
     Cache.releaseLockEarly();
 
-    return context.run<Null>(
+    await context.run<void>(
       body: () async {
         final Daemon daemon = Daemon(
             stdinCommandStream, stdoutCommandResponse,
@@ -71,6 +71,7 @@ class DaemonCommand extends FlutterCommand {
         Logger: () => notifyingLogger,
       },
     );
+    return null;
   }
 }
 
@@ -295,9 +296,9 @@ class DaemonDomain extends Domain {
     return Future<String>.value(protocolVersion);
   }
 
-  Future<Null> shutdown(Map<String, dynamic> args) {
+  Future<void> shutdown(Map<String, dynamic> args) {
     Timer.run(daemon.shutdown);
-    return Future<Null>.value();
+    return Future<void>.value();
   }
 
   @override
@@ -337,6 +338,7 @@ class AppDomain extends Domain {
     String packagesFilePath,
     String dillOutputPath,
     bool ipv6 = false,
+    String isolateFilter,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
       throw '${toTitleCase(options.buildInfo.modeName)} mode is not supported for emulators.';
@@ -350,6 +352,7 @@ class AppDomain extends Domain {
       device,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
+      viewFilter: isolateFilter,
     );
 
     ResidentRunner runner;
@@ -413,7 +416,7 @@ class AppDomain extends Domain {
       connectionInfoCompleter = Completer<DebugConnectionInfo>();
       // We don't want to wait for this future to complete and callbacks won't fail.
       // As it just writes to stdout.
-      connectionInfoCompleter.future.then<Null>((DebugConnectionInfo info) { // ignore: unawaited_futures
+      connectionInfoCompleter.future.then<void>((DebugConnectionInfo info) { // ignore: unawaited_futures
         final Map<String, dynamic> params = <String, dynamic>{
           'port': info.httpUri.port,
           'wsUri': info.wsUri.toString(),
@@ -426,7 +429,7 @@ class AppDomain extends Domain {
     final Completer<void> appStartedCompleter = Completer<void>();
     // We don't want to wait for this future to complete and callbacks won't fail.
     // As it just writes to stdout.
-    appStartedCompleter.future.timeout(const Duration(minutes: 1), onTimeout: () { // ignore: unawaited_futures
+    appStartedCompleter.future.timeout(const Duration(minutes: 3), onTimeout: () { // ignore: unawaited_futures
       _sendAppEvent(app, 'log', <String, dynamic>{
         'log': 'timeout waiting for the application to start',
         'error': true,
@@ -435,7 +438,7 @@ class AppDomain extends Domain {
       _sendAppEvent(app, 'started');
     });
 
-    await app._runInZone<Null>(this, () async {
+    await app._runInZone<void>(this, () async {
       try {
         await runOrAttach(
             connectionInfoCompleter: connectionInfoCompleter,
@@ -455,7 +458,7 @@ class AppDomain extends Domain {
   }
 
   bool isRestartSupported(bool enableHotReload, Device device) =>
-      enableHotReload && device.supportsHotMode;
+      enableHotReload && device.supportsHotRestart;
 
   Future<OperationResult> _inProgressHotReload;
 
@@ -463,6 +466,7 @@ class AppDomain extends Domain {
     final String appId = _getStringArg(args, 'appId', required: true);
     final bool fullRestart = _getBoolArg(args, 'fullRestart') ?? false;
     final bool pauseAfterRestart = _getBoolArg(args, 'pause') ?? false;
+    final String restartReason = _getStringArg(args, 'reason');
 
     final AppInstance app = _getApp(appId);
     if (app == null)
@@ -472,7 +476,7 @@ class AppDomain extends Domain {
       throw 'hot restart already in progress';
 
     _inProgressHotReload = app._runInZone<OperationResult>(this, () {
-      return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
+      return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: restartReason);
     });
     return _inProgressHotReload.whenComplete(() {
       _inProgressHotReload = null;
@@ -599,11 +603,11 @@ class DeviceDomain extends Domain {
     discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
   }
 
-  Future<Null> _serializeDeviceEvents = Future<Null>.value();
+  Future<void> _serializeDeviceEvents = Future<void>.value();
 
   _DeviceEventHandler _onDeviceEvent(String eventName) {
     return (Device device) {
-      _serializeDeviceEvents = _serializeDeviceEvents.then((_) async {
+      _serializeDeviceEvents = _serializeDeviceEvents.then<void>((_) async {
         sendEvent(eventName, await _deviceToMap(device));
       });
     };
@@ -620,17 +624,17 @@ class DeviceDomain extends Domain {
   }
 
   /// Enable device events.
-  Future<Null> enable(Map<String, dynamic> args) {
+  Future<void> enable(Map<String, dynamic> args) {
     for (PollingDeviceDiscovery discoverer in _discoverers)
       discoverer.startPolling();
-    return Future<Null>.value();
+    return Future<void>.value();
   }
 
   /// Disable device events.
-  Future<Null> disable(Map<String, dynamic> args) {
+  Future<void> disable(Map<String, dynamic> args) {
     for (PollingDeviceDiscovery discoverer in _discoverers)
       discoverer.stopPolling();
-    return Future<Null>.value();
+    return Future<void>.value();
   }
 
   /// Forward a host port to a device port.
@@ -649,7 +653,7 @@ class DeviceDomain extends Domain {
   }
 
   /// Removes a forwarded port.
-  Future<Null> unforward(Map<String, dynamic> args) async {
+  Future<void> unforward(Map<String, dynamic> args) async {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final int devicePort = _getIntArg(args, 'devicePort', required: true);
     final int hostPort = _getIntArg(args, 'hostPort', required: true);
@@ -679,10 +683,10 @@ class DeviceDomain extends Domain {
 }
 
 Stream<Map<String, dynamic>> get stdinCommandStream => stdin
-  .transform(utf8.decoder)
-  .transform(const LineSplitter())
+  .transform<String>(utf8.decoder)
+  .transform<String>(const LineSplitter())
   .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
-  .map((String line) {
+  .map<Map<String, dynamic>>((String line) {
     line = line.substring(1, line.length - 1);
     return json.decode(line);
   });
@@ -747,18 +751,28 @@ class NotifyingLogger extends Logger {
   Stream<LogMessage> get onMessage => _messageController.stream;
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis = false, TerminalColor color }) {
+  void printError(
+      String message, {
+      StackTrace stackTrace,
+      bool emphasis = false,
+      TerminalColor color,
+      int indent,
+      int hangingIndent,
+      bool wrap,
+    }) {
     _messageController.add(LogMessage('error', message, stackTrace));
   }
 
   @override
   void printStatus(
       String message, {
-        bool emphasis = false,
-        TerminalColor color,
-        bool newline = true,
-        int indent,
-      }) {
+      bool emphasis = false,
+      TerminalColor color,
+      bool newline = true,
+      int indent,
+      int hangingIndent,
+      bool wrap,
+    }) {
     _messageController.add(LogMessage('status', message));
   }
 
@@ -794,12 +808,12 @@ class AppInstance {
 
   _AppRunLogger _logger;
 
-  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false }) {
-    return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {
+    return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: reason);
   }
 
-  Future<Null> stop() => runner.stop();
-  Future<Null> detach() => runner.detach();
+  Future<void> stop() => runner.stop();
+  Future<void> detach() => runner.detach();
 
   void closeLogger() {
     _logger.close();
@@ -819,20 +833,20 @@ class AppInstance {
 
 /// This domain responds to methods like [getEmulators] and [launch].
 class EmulatorDomain extends Domain {
-  EmulatorManager emulators = EmulatorManager();
-
   EmulatorDomain(Daemon daemon) : super(daemon, 'emulator') {
     registerHandler('getEmulators', getEmulators);
     registerHandler('launch', launch);
     registerHandler('create', create);
   }
 
+  EmulatorManager emulators = EmulatorManager();
+
   Future<List<Map<String, dynamic>>> getEmulators([Map<String, dynamic> args]) async {
     final List<Emulator> list = await emulators.getAllAvailableEmulators();
-    return list.map(_emulatorToMap).toList();
+    return list.map<Map<String, dynamic>>(_emulatorToMap).toList();
   }
 
-  Future<Null> launch(Map<String, dynamic> args) async {
+  Future<void> launch(Map<String, dynamic> args) async {
     final String emulatorId = _getStringArg(args, 'emulatorId', required: true);
     final List<Emulator> matches =
         await emulators.getEmulatorsMatching(emulatorId);
@@ -873,9 +887,24 @@ class _AppRunLogger extends Logger {
   int _nextProgressId = 0;
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis, TerminalColor color}) {
+  void printError(
+      String message, {
+      StackTrace stackTrace,
+      bool emphasis,
+      TerminalColor color,
+      int indent,
+      int hangingIndent,
+      bool wrap,
+    }) {
     if (parent != null) {
-      parent.printError(message, stackTrace: stackTrace, emphasis: emphasis);
+      parent.printError(
+        message,
+        stackTrace: stackTrace,
+        emphasis: emphasis,
+        indent: indent,
+        hangingIndent: hangingIndent,
+        wrap: wrap,
+      );
     } else {
       if (stackTrace != null) {
         _sendLogEvent(<String, dynamic>{
@@ -895,11 +924,13 @@ class _AppRunLogger extends Logger {
   @override
   void printStatus(
       String message, {
-        bool emphasis = false,
-        TerminalColor color,
-        bool newline = true,
-        int indent,
-      }) {
+      bool emphasis = false,
+      TerminalColor color,
+      bool newline = true,
+      int indent,
+      int hangingIndent,
+      bool wrap,
+    }) {
     if (parent != null) {
       parent.printStatus(
         message,
@@ -907,6 +938,8 @@ class _AppRunLogger extends Logger {
         color: color,
         newline: newline,
         indent: indent,
+        hangingIndent: hangingIndent,
+        wrap: wrap,
       );
     } else {
       _sendLogEvent(<String, dynamic>{'log': message});
@@ -971,9 +1004,9 @@ class _AppRunLogger extends Logger {
 }
 
 class LogMessage {
+  LogMessage(this.level, this.message, [this.stackTrace]);
+
   final String level;
   final String message;
   final StackTrace stackTrace;
-
-  LogMessage(this.level, this.message, [this.stackTrace]);
 }

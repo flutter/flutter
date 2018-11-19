@@ -32,7 +32,7 @@ import 'image_provider.dart';
 ///
 /// The [border] paints over the body; the [boxShadow], naturally, paints below it.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// The following example uses the [Container] widget from the widgets layer to
 /// draw an image with a border:
@@ -52,6 +52,7 @@ import 'image_provider.dart';
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -83,11 +84,10 @@ class BoxDecoration extends Decoration {
     this.backgroundBlendMode,
     this.shape = BoxShape.rectangle,
   }) : assert(shape != null),
-       // TODO(mattcarroll): Use "backgroundBlendMode == null" when https://github.com/dart-lang/sdk/issues/34180 is in.
        assert(
-         identical(backgroundBlendMode, null) || color != null || gradient != null,
+         backgroundBlendMode == null || color != null || gradient != null,
          'backgroundBlendMode applies to BoxDecoration\'s background color or '
-         'gradient, but no color or gradient were provided.'
+         'gradient, but no color or gradient was provided.'
        );
 
   @override
@@ -216,7 +216,7 @@ class BoxDecoration extends Decoration {
   /// unmodified. Otherwise, the values are computed by interpolating the
   /// properties appropriately.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   ///
   /// See also:
   ///

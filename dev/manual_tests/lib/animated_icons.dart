@@ -22,7 +22,7 @@ class IconsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      children: samples.map((IconSample s) => IconSampleRow(s)).toList(),
+      children: samples.map<IconSampleRow>((IconSample s) => IconSampleRow(s)).toList(),
     );
   }
 }

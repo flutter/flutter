@@ -34,6 +34,11 @@ export 'package:flutter/gestures.dart' show
   TapUpDetails,
   Velocity;
 
+// Examples can assume:
+// bool _lights;
+// void setState(VoidCallback fn) { }
+// String _last;
+
 /// Factory for creating gesture recognizers.
 ///
 /// `T` is the type of gesture recognizer this class manages.
@@ -108,7 +113,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// effects. The [InkWell] class implements this effect and can be used in place
 /// of a [GestureDetector] for handling taps.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example makes a rectangle react to being tapped by setting the
 /// `_lights` field:
@@ -124,6 +129,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ## Debugging
 ///
@@ -150,6 +156,7 @@ class GestureDetector extends StatelessWidget {
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
+    this.onLongPressUp,
     this.onVerticalDragDown,
     this.onVerticalDragStart,
     this.onVerticalDragUpdate,
@@ -241,6 +248,9 @@ class GestureDetector extends StatelessWidget {
   /// A pointer has remained in contact with the screen at the same location for
   /// a long period of time.
   final GestureLongPressCallback onLongPress;
+
+  /// A pointer that has triggered a long-press has stopped contacting the screen.
+  final GestureLongPressUpCallback onLongPressUp;
 
   /// A pointer has contacted the screen and might begin to move vertically.
   final GestureDragDownCallback onVerticalDragDown;
@@ -348,12 +358,13 @@ class GestureDetector extends StatelessWidget {
       );
     }
 
-    if (onLongPress != null) {
+    if (onLongPress != null || onLongPressUp !=null) {
       gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
         () => LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
-            ..onLongPress = onLongPress;
+            ..onLongPress = onLongPress
+            ..onLongPressUp = onLongPressUp;
         },
       );
     }
@@ -443,7 +454,7 @@ class GestureDetector extends StatelessWidget {
 /// Configuring the gesture recognizers requires a carefully constructed map, as
 /// described in [gestures] and as shown in the example below.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example shows how to hook up a [TapGestureRecognizer]. It assumes that
 /// the code is being used inside a [State] object with a `_last` field that is
@@ -466,6 +477,7 @@ class GestureDetector extends StatelessWidget {
 ///   child: Container(width: 300.0, height: 300.0, color: Colors.yellow, child: Text(_last)),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

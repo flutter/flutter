@@ -7,6 +7,9 @@ import 'package:flutter/painting.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 /// A one device pixel thick horizontal line, with padding on either
 /// side.
 ///
@@ -55,13 +58,14 @@ class Divider extends StatelessWidget {
   /// Defaults to the current theme's divider color, given by
   /// [ThemeData.dividerColor].
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// Divider(
   ///   color: Colors.deepOrange,
   /// )
   /// ```
+  /// {@end-tool}
   final Color color;
 
   /// Computes the [BorderSide] that represents a divider of the specified
@@ -71,7 +75,7 @@ class Divider extends StatelessWidget {
   /// The `width` argument can be used to override the default width of the
   /// divider border, which is usually 0.0 (a hairline border).
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// This example uses this method to create a box that has a divider above and
   /// below it. This is sometimes useful with lists, for instance, to separate a
@@ -88,6 +92,7 @@ class Divider extends StatelessWidget {
   ///   // child: ...
   /// )
   /// ```
+  /// {@end-tool}
   static BorderSide createBorderSide(BuildContext context, { Color color, double width = 0.0 }) {
     assert(width != null);
     return BorderSide(
@@ -161,46 +166,15 @@ class VerticalDivider extends StatelessWidget {
   /// Defaults to the current theme's divider color, given by
   /// [ThemeData.dividerColor].
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// Divider(
   ///   color: Colors.deepOrange,
   /// )
   /// ```
+  /// {@end-tool}
   final Color color;
-
-  /// Computes the [BorderSide] that represents a divider of the specified
-  /// color, or, if there is no specified color, of the default
-  /// [ThemeData.dividerColor] specified in the ambient [Theme].
-  ///
-  /// The `width` argument can be used to override the default width of the
-  /// divider border, which is usually 0.0 (a hairline border).
-  ///
-  /// ## Sample code
-  ///
-  /// This example uses this method to create a box that has a divider above and
-  /// below it. This is sometimes useful with lists, for instance, to separate a
-  /// scrollable section from the rest of the interface.
-  ///
-  /// ```dart
-  /// DecoratedBox(
-  ///   decoration: BoxDecoration(
-  ///     border: Border(
-  ///       top: Divider.createBorderSide(context),
-  ///       bottom: Divider.createBorderSide(context),
-  ///     ),
-  ///   ),
-  ///   // child: ...
-  /// )
-  /// ```
-  static BorderSide createBorderSide(BuildContext context, { Color color, double width = 0.0 }) {
-    assert(width != null);
-    return BorderSide(
-      color: color ?? Theme.of(context).dividerColor,
-      width: width,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -208,11 +182,11 @@ class VerticalDivider extends StatelessWidget {
       width: width,
       child: Center(
         child: Container(
-          height: 0.0,
+          width: 0.0,
           margin: EdgeInsetsDirectional.only(start: indent),
           decoration: BoxDecoration(
             border: Border(
-              left: createBorderSide(context, color: color),
+              left: Divider.createBorderSide(context, color: color),
             ),
           ),
         ),

@@ -13,6 +13,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
@@ -65,7 +66,7 @@ class FlutterOptions {
   static const String kFileSystemScheme = 'filesystem-scheme';
 }
 
-abstract class FlutterCommand extends Command<Null> {
+abstract class FlutterCommand extends Command<void> {
   /// The currently executing command (or sub-command).
   ///
   /// Will be `null` until the top-most command has begun execution.
@@ -100,7 +101,7 @@ abstract class FlutterCommand extends Command<Null> {
       abbr: 't',
       defaultsTo: bundle.defaultMainPath,
       help: 'The main entry-point file of the application, as run on the device.\n'
-            'If the --target option is omitted, but a file name is provided on\n'
+            'If the --target option is omitted, but a file name is provided on '
             'the command line, then that is used instead.',
       valueHelp: 'path');
     _usesTargetOption = true;
@@ -166,6 +167,14 @@ abstract class FlutterCommand extends Command<Null> {
         valueHelp: 'x.y.z');
   }
 
+  void usesIsolateFilterOption({@required bool hide}) {
+    argParser.addOption('isolate-filter',
+      defaultsTo: null,
+      hide: hide,
+      help: 'Restricts commands to a subset of the available isolates (running instances of Flutter).\n'
+            'Normally there\'s only one, but when adding Flutter to a pre-existing app it\'s possible to create multiple.');
+  }
+
   void addBuildModeFlags({bool defaultToRelease = true, bool verboseHelp = false}) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
@@ -183,6 +192,23 @@ abstract class FlutterCommand extends Command<Null> {
       negatable: false,
       help: 'Enable dynamic code. This flag is intended for use with\n'
             '--release or --profile; --debug always has this enabled.');
+  }
+
+  void usesFuchsiaOptions({bool hide = false}) {
+    argParser.addOption(
+      'target-model',
+      help: 'Target model that determines what core libraries are available',
+      defaultsTo: 'flutter',
+      hide: hide,
+      allowed: const <String>['flutter', 'flutter_runner'],
+    );
+    argParser.addOption(
+      'module',
+      abbr: 'm',
+      hide: hide,
+      help: 'The name of the module (required if attaching to a fuchsia device)',
+      valueHelp: 'module-name',
+    );
   }
 
   set defaultBuildMode(BuildMode value) {
@@ -294,10 +320,10 @@ abstract class FlutterCommand extends Command<Null> {
   /// and [runCommand] to execute the command
   /// so that this method can record and report the overall time to analytics.
   @override
-  Future<Null> run() {
-    final DateTime startTime = clock.now();
+  Future<void> run() {
+    final DateTime startTime = systemClock.now();
 
-    return context.run<Null>(
+    return context.run<void>(
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
@@ -311,7 +337,7 @@ abstract class FlutterCommand extends Command<Null> {
           commandResult = const FlutterCommandResult(ExitStatus.fail);
           rethrow;
         } finally {
-          final DateTime endTime = clock.now();
+          final DateTime endTime = systemClock.now();
           printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
           // This is checking the result of the call to 'usagePath'
           // (a Future<String>), and not the result of evaluating the Future.
@@ -451,7 +477,7 @@ abstract class FlutterCommand extends Command<Null> {
 
   @protected
   @mustCallSuper
-  Future<Null> validateCommand() async {
+  Future<void> validateCommand() async {
     if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {

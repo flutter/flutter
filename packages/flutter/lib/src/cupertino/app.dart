@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'icons.dart';
+import 'localizations.dart';
 import 'route.dart';
 
 // Based on specs from https://developer.apple.com/design/resources/ for
@@ -89,6 +90,7 @@ class CupertinoApp extends StatefulWidget {
     this.color,
     this.locale,
     this.localizationsDelegates,
+    this.localeListResolutionCallback,
     this.localeResolutionCallback,
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.showPerformanceOverlay = false,
@@ -155,6 +157,11 @@ class CupertinoApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.localizationsDelegates}
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
+
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// This callback is passed along to the [WidgetsApp] built by this widget.
+  final LocaleListResolutionCallback localeListResolutionCallback;
 
   /// {@macro flutter.widgets.widgetsApp.localeResolutionCallback}
   ///
@@ -242,8 +249,19 @@ class _CupertinoAppState extends State<CupertinoApp> {
       _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
         ..add(_heroController);
     } else {
-      _navigatorObservers = null;
+      _navigatorObservers = const <NavigatorObserver>[];
     }
+  }
+
+  // Combine the default localization for Cupertino with the ones contributed
+  // by the localizationsDelegates parameter, if any. Only the first delegate
+  // of a particular LocalizationsDelegate.type is loaded so the
+  // localizationsDelegate parameter can be used to override
+  // _CupertinoLocalizationsDelegate.
+  Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
+    if (widget.localizationsDelegates != null)
+      yield* widget.localizationsDelegates;
+    yield DefaultCupertinoLocalizations.delegate;
   }
 
   @override
@@ -269,8 +287,9 @@ class _CupertinoAppState extends State<CupertinoApp> {
         textStyle: _kDefaultTextStyle,
         color: widget.color ?? CupertinoColors.activeBlue,
         locale: widget.locale,
-        localizationsDelegates: widget.localizationsDelegates,
+        localizationsDelegates: _localizationsDelegates,
         localeResolutionCallback: widget.localeResolutionCallback,
+        localeListResolutionCallback: widget.localeListResolutionCallback,
         supportedLocales: widget.supportedLocales,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,

@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter_devicelab/tasks/plugin_tests.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
-Future<Null> main() async {
+Future<void> main() async {
   await task(combine(<TaskFunction>[
     PluginTest('apk', <String>['-a', 'java']),
     PluginTest('apk', <String>['-a', 'kotlin']),

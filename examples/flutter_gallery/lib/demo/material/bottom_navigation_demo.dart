@@ -153,9 +153,6 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
       )
     ];
 
-    for (NavigationIconView view in _navigationViews)
-      view.controller.addListener(_rebuild);
-
     _navigationViews[_currentIndex].controller.value = 1.0;
   }
 
@@ -164,12 +161,6 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
     for (NavigationIconView view in _navigationViews)
       view.controller.dispose();
     super.dispose();
-  }
-
-  void _rebuild() {
-    setState(() {
-      // Rebuild in order to animate views.
-    });
   }
 
   Widget _buildTransitionsStack() {
@@ -194,7 +185,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   Widget build(BuildContext context) {
     final BottomNavigationBar botNavBar = BottomNavigationBar(
       items: _navigationViews
-          .map((NavigationIconView navigationView) => navigationView.item)
+          .map<BottomNavigationBarItem>((NavigationIconView navigationView) => navigationView.item)
           .toList(),
       currentIndex: _currentIndex,
       type: _type,

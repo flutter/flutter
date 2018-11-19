@@ -124,7 +124,10 @@ class IOSDevice extends Device {
   final String _sdkVersion;
 
   @override
-  bool get supportsHotMode => true;
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => true;
 
   @override
   final String name;
@@ -149,9 +152,14 @@ class IOSDevice extends Device {
       if (id.isEmpty)
         continue;
 
-      final String deviceName = await iMobileDevice.getInfoForDevice(id, 'DeviceName');
-      final String sdkVersion = await iMobileDevice.getInfoForDevice(id, 'ProductVersion');
-      devices.add(IOSDevice(id, name: deviceName, sdkVersion: sdkVersion));
+      try {
+        final String deviceName = await iMobileDevice.getInfoForDevice(id, 'DeviceName');
+        final String sdkVersion = await iMobileDevice.getInfoForDevice(id, 'ProductVersion');
+        devices.add(IOSDevice(id, name: deviceName, sdkVersion: sdkVersion));
+      } on IOSDeviceNotFoundError catch (error) {
+        // Unable to find device with given udid. Possibly a network device.
+        printTrace('Error getting attached iOS device: $error');
+      }
     }
     return devices;
   }
@@ -376,7 +384,7 @@ class IOSDevice extends Device {
   bool get supportsScreenshot => iMobileDevice.isInstalled;
 
   @override
-  Future<Null> takeScreenshot(File outputFile) async {
+  Future<void> takeScreenshot(File outputFile) async {
     await iMobileDevice.takeScreenshot(outputFile);
   }
 }
@@ -440,11 +448,6 @@ String decodeSyslog(String line) {
 }
 
 class _IOSDeviceLogReader extends DeviceLogReader {
-  // Matches a syslog line from the runner.
-  RegExp _runnerLineRegex;
-  // Matches a syslog line from any app.
-  RegExp _anyLineRegex;
-
   _IOSDeviceLogReader(this.device, ApplicationPackage app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
@@ -465,6 +468,11 @@ class _IOSDeviceLogReader extends DeviceLogReader {
 
   final IOSDevice device;
 
+  // Matches a syslog line from the runner.
+  RegExp _runnerLineRegex;
+  // Matches a syslog line from any app.
+  RegExp _anyLineRegex;
+
   StreamController<String> _linesController;
   Process _process;
 
@@ -475,10 +483,10 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   String get name => device.name;
 
   void _start() {
-    iMobileDevice.startLogger().then<Null>((Process process) {
+    iMobileDevice.startLogger(device.id).then<void>((Process process) {
       _process = process;
-      _process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_newLineHandler());
-      _process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_newLineHandler());
+      _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
+      _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
       _process.exitCode.whenComplete(() {
         if (_linesController.hasListener)
           _linesController.close();
@@ -576,10 +584,10 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
   }
 
   @override
-  Future<Null> unforward(ForwardedPort forwardedPort) async {
+  Future<void> unforward(ForwardedPort forwardedPort) async {
     if (!_forwardedPorts.remove(forwardedPort)) {
       // Not in list. Nothing to remove.
-      return null;
+      return;
     }
 
     printTrace('Unforwarding port $forwardedPort');
@@ -591,7 +599,5 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     } else {
       printError('Forwarded port did not have a valid process');
     }
-
-    return null;
   }
 }

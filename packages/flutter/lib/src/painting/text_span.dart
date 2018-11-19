@@ -27,7 +27,7 @@ import 'text_style.dart';
 /// span in a widget, use a [RichText]. For text with a single style, consider
 /// using the [Text] widget.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// The text "Hello world!", in black:
 ///
@@ -37,6 +37,7 @@ import 'text_style.dart';
 ///   style: TextStyle(color: Colors.black),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// _There is some more detailed sample code in the documentation for the
 /// [recognizer] property._
@@ -93,7 +94,7 @@ class TextSpan extends DiagnosticableTree {
   /// The code that owns the [GestureRecognizer] object must call
   /// [GestureRecognizer.dispose] when the [TextSpan] object is no longer used.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// This example shows how to manage the lifetime of a gesture recognizer
   /// provided to a [TextSpan] object. It defines a `BuzzingText` widget which
@@ -152,6 +153,7 @@ class TextSpan extends DiagnosticableTree {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   final GestureRecognizer recognizer;
 
   /// Apply the [style], [text], and [children] of this object to the
@@ -355,7 +357,7 @@ class TextSpan extends DiagnosticableTree {
   List<DiagnosticsNode> debugDescribeChildren() {
     if (children == null)
       return const <DiagnosticsNode>[];
-    return children.map((TextSpan child) {
+    return children.map<DiagnosticsNode>((TextSpan child) {
       if (child != null) {
         return child.toDiagnosticsNode();
       } else {

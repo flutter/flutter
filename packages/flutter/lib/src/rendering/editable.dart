@@ -32,6 +32,10 @@ enum SelectionChangedCause {
   /// of the cursor) to change.
   tap,
 
+  /// The user tapped twice in quick succession on the text and that caused
+  /// the selection (or the location of the cursor) to change.
+  doubleTap,
+
   /// The user long-pressed the text and that caused the selection (or the
   /// location of the cursor) to change.
   longPress,
@@ -118,6 +122,8 @@ class RenderEditable extends RenderBox {
   ///
   /// The [offset] is required and must not be null. You can use [new
   /// ViewportOffset.zero] if you have no need for scrolling.
+  ///
+  /// The [enableInteractiveSelection] argument must not be null.
   RenderEditable({
     TextSpan text,
     @required TextDirection textDirection,
@@ -137,6 +143,7 @@ class RenderEditable extends RenderBox {
     Locale locale,
     double cursorWidth = 1.0,
     Radius cursorRadius,
+    bool enableInteractiveSelection = true,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
@@ -145,8 +152,9 @@ class RenderEditable extends RenderBox {
        assert(offset != null),
        assert(ignorePointer != null),
        assert(obscureText != null),
+       assert(enableInteractiveSelection != null),
        assert(textSelectionDelegate != null),
-  _textPainter = TextPainter(
+       _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
          textDirection: textDirection,
@@ -162,6 +170,7 @@ class RenderEditable extends RenderBox {
        _offset = offset,
        _cursorWidth = cursorWidth,
        _cursorRadius = cursorRadius,
+       _enableInteractiveSelection = enableInteractiveSelection,
        _obscureText = obscureText {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
@@ -185,7 +194,7 @@ class RenderEditable extends RenderBox {
 
   /// If true [handleEvent] does nothing and it's assumed that this
   /// renderer will be notified of input gestures via [handleTapDown],
-  /// [handleTap], and [handleLongPress].
+  /// [handleTap], [handleDoubleTap], and [handleLongPress].
   ///
   /// The default value of this property is false.
   bool ignorePointer;
@@ -692,6 +701,20 @@ class RenderEditable extends RenderBox {
     markNeedsPaint();
   }
 
+  /// If false, [describeSemanticsConfiguration] will not set the
+  /// configuration's cursor motion or set selection callbacks.
+  ///
+  /// True by default.
+  bool get enableInteractiveSelection => _enableInteractiveSelection;
+  bool _enableInteractiveSelection;
+  set enableInteractiveSelection(bool value) {
+    if (_enableInteractiveSelection == value)
+      return;
+    _enableInteractiveSelection = value;
+    markNeedsTextLayout();
+    markNeedsSemanticsUpdate();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -705,10 +728,10 @@ class RenderEditable extends RenderBox {
       ..isFocused = hasFocus
       ..isTextField = true;
 
-    if (hasFocus)
+    if (hasFocus && enableInteractiveSelection)
       config.onSetSelection = _handleSetSelection;
 
-    if (_selection?.isValid == true) {
+    if (enableInteractiveSelection && _selection?.isValid == true) {
       config.textSelection = _selection;
       if (_textPainter.getOffsetBefore(_selection.extentOffset) != null) {
         config
@@ -902,7 +925,11 @@ class RenderEditable extends RenderBox {
     return null;
   }
 
-  bool _hasVisualOverflow = false;
+  double _maxScrollExtent = 0;
+
+  // We need to check the paint offset here because during animation, the start of
+  // the text may position outside the visible region even when the text fits.
+  bool get _hasVisualOverflow => _maxScrollExtent > 0 || _paintOffset != Offset.zero;
 
   /// Returns the local coordinates of the endpoints of the given selection.
   ///
@@ -1058,16 +1085,21 @@ class RenderEditable extends RenderBox {
   /// When [ignorePointer] is true, an ancestor widget must respond to tap
   /// events by calling this method.
   void handleTap() {
-    _layoutText(constraints.maxWidth);
-    assert(_lastTapDownPosition != null);
-    if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
-      onSelectionChanged(TextSelection.fromPosition(position), this, SelectionChangedCause.tap);
-    }
+    selectPosition(cause: SelectionChangedCause.tap);
   }
   void _handleTap() {
     assert(!ignorePointer);
     handleTap();
+  }
+
+  /// If [ignorePointer] is false (the default) then this method is called by
+  /// the internal gesture recognizer's [DoubleTapGestureRecognizer.onDoubleTap]
+  /// callback.
+  ///
+  /// When [ignorePointer] is true, an ancestor widget must respond to double
+  /// tap events by calling this method.
+  void handleDoubleTap() {
+    selectWord(cause: SelectionChangedCause.doubleTap);
   }
 
   /// If [ignorePointer] is false (the default) then this method is called by
@@ -1077,16 +1109,57 @@ class RenderEditable extends RenderBox {
   /// When [ignorePointer] is true, an ancestor widget must respond to long
   /// press events by calling this method.
   void handleLongPress() {
-    _layoutText(constraints.maxWidth);
-    assert(_lastTapDownPosition != null);
-    if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
-      onSelectionChanged(_selectWordAtOffset(position), this, SelectionChangedCause.longPress);
-    }
+    selectWord(cause: SelectionChangedCause.longPress);
   }
   void _handleLongPress() {
     assert(!ignorePointer);
     handleLongPress();
+  }
+
+  /// Move selection to the location of the last tap down.
+  void selectPosition({@required SelectionChangedCause cause}) {
+    assert(cause != null);
+    _layoutText(constraints.maxWidth);
+    assert(_lastTapDownPosition != null);
+    if (onSelectionChanged != null) {
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
+      onSelectionChanged(TextSelection.fromPosition(position), this, cause);
+    }
+  }
+
+  /// Select a word around the location of the last tap down.
+  void selectWord({@required SelectionChangedCause cause}) {
+    assert(cause != null);
+    _layoutText(constraints.maxWidth);
+    assert(_lastTapDownPosition != null);
+    if (onSelectionChanged != null) {
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
+      onSelectionChanged(_selectWordAtOffset(position), this, cause);
+    }
+  }
+
+  /// Move the selection to the beginning or end of a word.
+  void selectWordEdge({@required SelectionChangedCause cause}) {
+    assert(cause != null);
+    _layoutText(constraints.maxWidth);
+    assert(_lastTapDownPosition != null);
+    if (onSelectionChanged != null) {
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
+      final TextRange word = _textPainter.getWordBoundary(position);
+      if (position.offset - word.start <= 1) {
+        onSelectionChanged(
+          TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream),
+          this,
+          cause,
+        );
+      } else {
+        onSelectionChanged(
+          TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream),
+          this,
+          cause,
+        );
+      }
+    }
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
@@ -1127,8 +1200,7 @@ class RenderEditable extends RenderBox {
     final Size textPainterSize = _textPainter.size;
     size = Size(constraints.maxWidth, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
     final Size contentSize = Size(textPainterSize.width + _kCaretGap + cursorWidth, textPainterSize.height);
-    final double _maxScrollExtent = _getMaxScrollExtent(contentSize);
-    _hasVisualOverflow = _maxScrollExtent > 0.0;
+    _maxScrollExtent = _getMaxScrollExtent(contentSize);
     offset.applyViewportDimension(_viewportExtent);
     offset.applyContentDimensions(0.0, _maxScrollExtent);
   }

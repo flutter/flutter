@@ -8,12 +8,16 @@ import 'dart:convert';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
+
+final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 
 void main() {
   group('batch compile', () {
@@ -47,14 +51,17 @@ void main() {
             ))
           ));
       final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
-        mainPath: '/path/to/main.dart'
+        mainPath: '/path/to/main.dart',
+        trackWidgetCreation: false,
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
       expect(output.outputFilename, equals('/path/to/main.dart.dill'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
 
     testUsingContext('single dart failed compilation', () async {
@@ -68,14 +75,17 @@ void main() {
           ));
 
       final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
-        mainPath: '/path/to/main.dart'
+        mainPath: '/path/to/main.dart',
+        trackWidgetCreation: false,
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
       expect(output, equals(null));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
 
     testUsingContext('single dart abnormal compiler termination', () async {
@@ -90,15 +100,19 @@ void main() {
           ))
       ));
 
-      final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
-          mainPath: '/path/to/main.dart'
+      final CompilerOutput output = await kernelCompiler.compile(
+        sdkRoot: '/path/to/sdkroot',
+        mainPath: '/path/to/main.dart',
+        trackWidgetCreation: false,
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
       expect(output, equals(null));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
   });
 
@@ -145,7 +159,9 @@ void main() {
           ));
 
       final CompilerOutput output = await generator.recompile(
-        '/path/to/main.dart', null /* invalidatedFiles */
+        '/path/to/main.dart',
+          null /* invalidatedFiles */,
+        outputPath: '/build/',
       );
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
       verifyNoMoreInteractions(mockFrontendServerStdIn);
@@ -153,7 +169,9 @@ void main() {
       expect(output.outputFilename, equals('/path/to/main.dart.dill'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
 
     testUsingContext('single dart compile abnormally terminates', () async {
@@ -162,12 +180,16 @@ void main() {
       );
 
       final CompilerOutput output = await generator.recompile(
-          '/path/to/main.dart', null /* invalidatedFiles */
+        '/path/to/main.dart',
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
       );
       expect(output, equals(null));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
 
     testUsingContext('compile and recompile', () async {
@@ -177,7 +199,11 @@ void main() {
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => streamController.stream);
       streamController.add(utf8.encode('result abc\nline0\nline1\nabc /path/to/main.dart.dill 0\n'));
-      await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */);
+      await generator.recompile(
+        '/path/to/main.dart',
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
+      );
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
       await _recompile(streamController, generator, mockFrontendServerStdIn,
@@ -191,7 +217,9 @@ void main() {
       ));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
 
     testUsingContext('compile and recompile twice', () async {
@@ -203,7 +231,7 @@ void main() {
       streamController.add(utf8.encode(
         'result abc\nline0\nline1\nabc /path/to/main.dart.dill 0\n'
       ));
-      await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */);
+      await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */, outputPath: '/build/');
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
       await _recompile(streamController, generator, mockFrontendServerStdIn,
@@ -220,7 +248,9 @@ void main() {
       ));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
   });
 
@@ -284,7 +314,9 @@ void main() {
       )));
 
       await generator.recompile(
-          '/path/to/main.dart', null /* invalidatedFiles */
+        '/path/to/main.dart',
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
       ).then((CompilerOutput output) {
         expect(mockFrontendServerStdIn.getAndClear(),
             'compile /path/to/main.dart\n');
@@ -309,7 +341,9 @@ void main() {
 
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
 
     testUsingContext('compile expressions without awaiting', () async {
@@ -330,7 +364,9 @@ void main() {
 
       // The test manages timing via completers.
       generator.recompile( // ignore: unawaited_futures
-          '/path/to/main.dart', null /* invalidatedFiles */
+        '/path/to/main.dart',
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
       ).then((CompilerOutput outputCompile) {
         expect(logger.errorText,
             equals('\nCompiler message:\nline1\nline2\n'));
@@ -371,12 +407,14 @@ void main() {
       expect(await lastExpressionCompleted.future, isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Logger: () => BufferLogger()..supportsColor = false,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
   });
 }
 
-Future<Null> _recompile(StreamController<List<int>> streamController,
+Future<void> _recompile(StreamController<List<int>> streamController,
   ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
   String mockCompilerOutput) async {
   // Put content into the output stream after generator.recompile gets
@@ -384,7 +422,11 @@ Future<Null> _recompile(StreamController<List<int>> streamController,
   scheduleMicrotask(() {
     streamController.add(utf8.encode(mockCompilerOutput));
   });
-  final CompilerOutput output = await generator.recompile(null /* mainPath */, <String>['/path/to/main.dart']);
+  final CompilerOutput output = await generator.recompile(
+    null /* mainPath */,
+    <String>['/path/to/main.dart'],
+    outputPath: '/build/',
+  );
   expect(output.outputFilename, equals('/path/to/main.dart.dill'));
   final String commands = mockFrontendServerStdIn.getAndClear();
   final RegExp re = RegExp('^recompile (.*)\\n/path/to/main.dart\\n(.*)\\n\$');

@@ -35,7 +35,7 @@ class ConfigCommand extends FlutterCommand {
   final String description =
     'Configure Flutter settings.\n\n'
     'To remove a setting, configure it to an empty string.\n\n'
-    'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve\n'
+    'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve '
     'Flutter tools over time. See Google\'s privacy policy: https://www.google.com/intl/en/policies/privacy/';
 
   @override
@@ -47,7 +47,7 @@ class ConfigCommand extends FlutterCommand {
   @override
   String get usageFooter {
     // List all config settings.
-    String values = config.keys.map((String key) {
+    String values = config.keys.map<String>((String key) {
       return '  $key: ${config.getValue(key)}';
     }).join('\n');
     if (values.isNotEmpty)
@@ -59,12 +59,14 @@ class ConfigCommand extends FlutterCommand {
 
   /// Return null to disable analytics recording of the `config` command.
   @override
-  Future<String> get usagePath => null;
+  Future<String> get usagePath async => null;
 
   @override
-  Future<Null> runCommand() async {
-    if (argResults['machine'])
-      return handleMachine();
+  Future<FlutterCommandResult> runCommand() async {
+    if (argResults['machine']) {
+      await handleMachine();
+      return null;
+    }
 
     if (argResults.wasParsed('analytics')) {
       final bool value = argResults['analytics'];
@@ -86,9 +88,11 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults.arguments.isEmpty)
       printStatus(usage);
+
+    return null;
   }
 
-  Future<Null> handleMachine() async {
+  Future<void> handleMachine() async {
     // Get all the current values.
     final Map<String, dynamic> results = <String, dynamic>{};
     for (String key in config.keys) {

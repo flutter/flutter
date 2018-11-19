@@ -12,44 +12,48 @@ import 'theme.dart';
 /// A card is a sheet of [Material] used to represent some related information,
 /// for example an album, a geographical location, a meal, contact details, etc.
 ///
-/// ## Sample code
-///
-/// Here is an example of using a [Card] widget.
-///
-/// ```dart
-/// Card(
-///   child: Column(
-///     mainAxisSize: MainAxisSize.min,
-///     children: <Widget>[
-///       const ListTile(
-///         leading: Icon(Icons.album),
-///         title: Text('The Enchanted Nightingale'),
-///         subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
-///       ),
-///       ButtonTheme.bar( // make buttons use the appropriate styles for cards
-///         child: ButtonBar(
-///           children: <Widget>[
-///             FlatButton(
-///               child: const Text('BUY TICKETS'),
-///               onPressed: () { /* ... */ },
-///             ),
-///             FlatButton(
-///               child: const Text('LISTEN'),
-///               onPressed: () { /* ... */ },
-///             ),
-///           ],
-///         ),
-///       ),
-///     ],
-///   ),
-/// )
-/// ```
-///
-/// This is what it would look like:
+/// This is what it looks like when run:
 ///
 /// ![A card with a slight shadow, consisting of two rows, one with an icon and
 /// some text describing a musical, and the other with buttons for buying
 /// tickets or listening to the show.](https://flutter.github.io/assets-for-api-docs/assets/material/card.png)
+///
+/// {@tool snippet --template=stateless_widget}
+///
+/// This sample shows creation of a [Card] widget that shows album information
+/// and two actions.
+///
+/// ```dart
+/// Center(
+///   child: Card(
+///     child: Column(
+///       mainAxisSize: MainAxisSize.min,
+///       children: <Widget>[
+///         const ListTile(
+///           leading: Icon(Icons.album),
+///           title: Text('The Enchanted Nightingale'),
+///           subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
+///         ),
+///         ButtonTheme.bar( // make buttons use the appropriate styles for cards
+///           child: ButtonBar(
+///             children: <Widget>[
+///               FlatButton(
+///                 child: const Text('BUY TICKETS'),
+///                 onPressed: () { /* ... */ },
+///               ),
+///               FlatButton(
+///                 child: const Text('LISTEN'),
+///                 onPressed: () { /* ... */ },
+///               ),
+///             ],
+///           ),
+///         ),
+///       ],
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

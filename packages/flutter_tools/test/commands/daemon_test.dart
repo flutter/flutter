@@ -73,7 +73,7 @@ void main() {
     testUsingContext('printStatus should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = StringBuffer();
 
-      await runZoned(() async {
+      await runZoned<Future<void>>(() async {
         final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
         final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
         daemon = Daemon(
@@ -84,7 +84,7 @@ void main() {
         );
         printStatus('daemon.logMessage test');
         // Service the event loop.
-        await Future<Null>.value();
+        await Future<void>.value();
       }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
         buffer.writeln(line);
       }));
@@ -103,7 +103,7 @@ void main() {
         notifyingLogger: notifyingLogger
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.shutdown'});
-      return daemon.onExit.then<Null>((int code) async {
+      return daemon.onExit.then<void>((int code) async {
         await commands.close();
         expect(code, 0);
       });
@@ -228,7 +228,7 @@ void main() {
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(MockAndroidDevice());
 
-      return await responses.stream.skipWhile(_isConnectedEvent).first.then((Map<String, dynamic> response) async {
+      return await responses.stream.skipWhile(_isConnectedEvent).first.then<void>((Map<String, dynamic> response) async {
         expect(response['event'], 'device.added');
         expect(response['params'], isMap);
 

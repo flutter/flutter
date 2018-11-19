@@ -83,6 +83,14 @@ import 'framework.dart';
 /// If a widget depends on the model but doesn't specify an aspect,
 /// then changes in the model will cause the widget to be rebuilt
 /// unconditionally.
+///
+/// See also:
+///
+///  * [InheritedWidget], an inherited widget that only notifies dependents
+///    when its value is different.
+///  * [InheritedNotifier], an inherited widget whose value can be a
+///    [Listenable], and which will notify dependents whenever the value
+///    sends notifications.
 abstract class InheritedModel<T> extends InheritedWidget {
   /// Creates an inherited widget that supports dependencies qualified by
   /// "aspects", i.e. a descendant widget can indicate that it should

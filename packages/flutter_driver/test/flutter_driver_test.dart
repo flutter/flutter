@@ -17,6 +17,7 @@ import 'common.dart';
 /// Magical timeout value that's different from the default.
 const Duration _kTestTimeout = Duration(milliseconds: 1234);
 const String _kSerializedTestTimeout = '1234';
+const Duration _kDefaultCommandTimeout = Duration(seconds: 5);
 
 void main() {
   group('FlutterDriver.connect', () {
@@ -28,7 +29,7 @@ void main() {
     MockPeer mockPeer;
 
     void expectLogContains(String message) {
-      expect(log.map((LogRecord r) => '$r'), anyElement(contains(message)));
+      expect(log.map<String>((LogRecord r) => '$r'), anyElement(contains(message)));
     }
 
     setUp(() {
@@ -64,7 +65,7 @@ void main() {
       when(mockIsolate.pauseEvent).thenReturn(MockVMPauseStartEvent());
       when(mockIsolate.resume()).thenAnswer((Invocation invocation) {
         connectionLog.add('resume');
-        return Future<Null>.value();
+        return Future<dynamic>.value(null);
       });
       when(mockIsolate.onExtensionAdded).thenAnswer((Invocation invocation) {
         connectionLog.add('onExtensionAdded');
@@ -79,7 +80,7 @@ void main() {
 
     test('connects to isolate paused mid-flight', () async {
       when(mockIsolate.pauseEvent).thenReturn(MockVMPauseBreakpointEvent());
-      when(mockIsolate.resume()).thenAnswer((Invocation invocation) => Future<Null>.value());
+      when(mockIsolate.resume()).thenAnswer((Invocation invocation) => Future<dynamic>.value(null));
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
@@ -95,7 +96,7 @@ void main() {
       when(mockIsolate.resume()).thenAnswer((Invocation invocation) {
         // This needs to be wrapped in a closure to not be considered uncaught
         // by package:test
-        return Future<Null>.error(rpc.RpcException(101, ''));
+        return Future<dynamic>.error(rpc.RpcException(101, ''));
       });
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
@@ -132,7 +133,7 @@ void main() {
     });
 
     test('closes connection', () async {
-      when(mockClient.close()).thenAnswer((Invocation invocation) => Future<Null>.value());
+      when(mockClient.close()).thenAnswer((Invocation invocation) => Future<dynamic>.value(null));
       await driver.close();
     });
 
@@ -384,6 +385,43 @@ void main() {
           expect(error.message, 'Error in Flutter application: {message: This is a failure}');
         }
       });
+    });
+  });
+
+  group('FlutterDriver with custom timeout', () {
+    const double kTestMultiplier = 3.0;
+    MockVMServiceClient mockClient;
+    MockPeer mockPeer;
+    MockIsolate mockIsolate;
+    FlutterDriver driver;
+
+    setUp(() {
+      mockClient = MockVMServiceClient();
+      mockPeer = MockPeer();
+      mockIsolate = MockIsolate();
+      driver = FlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate, timeoutMultiplier: kTestMultiplier);
+    });
+
+    test('multiplies the timeout', () async {
+      when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+        expect(i.positionalArguments[1], <String, String>{
+          'command': 'get_health',
+          'timeout': '${(_kDefaultCommandTimeout * kTestMultiplier).inMilliseconds}',
+        });
+        return makeMockResponse(<String, dynamic>{'status': 'ok'});
+      });
+      await driver.checkHealth();
+    });
+
+    test('does not multiply explicit timeouts', () async {
+      when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+        expect(i.positionalArguments[1], <String, String>{
+          'command': 'get_health',
+          'timeout': _kSerializedTestTimeout,
+        });
+        return makeMockResponse(<String, dynamic>{'status': 'ok'});
+      });
+      await driver.checkHealth(timeout: _kTestTimeout);
     });
   });
 }

@@ -39,12 +39,12 @@ class _ListItem {
 class _ListDemoState extends State<ReorderableListDemo> {
   static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  PersistentBottomSheetController<Null> _bottomSheet;
+  PersistentBottomSheetController<void> _bottomSheet;
   _ReorderableListType _itemType = _ReorderableListType.threeLine;
   bool _reverseSort = false;
   final List<_ListItem> _items = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-  ].map((String item) => _ListItem(item, false)).toList();
+  ].map<_ListItem>((String item) => _ListItem(item, false)).toList();
 
   void changeItemType(_ReorderableListType type) {
     setState(() {
@@ -58,7 +58,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
 
   void _showConfigurationSheet() {
     setState(() {
-      _bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
+      _bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((BuildContext bottomSheetContext) {
         return DecoratedBox(
           decoration: const BoxDecoration(
             border: Border(top: BorderSide(color: Colors.black26)),
@@ -191,7 +191,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
           onReorder: _onReorder,
           scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
-          children: _items.map(buildListTile).toList(),
+          children: _items.map<Widget>(buildListTile).toList(),
         ),
       ),
     );

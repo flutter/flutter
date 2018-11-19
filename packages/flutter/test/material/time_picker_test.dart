@@ -57,7 +57,7 @@ Future<Offset> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChange
   return tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial')));
 }
 
-Future<Null> finishPicker(WidgetTester tester) async {
+Future<void> finishPicker(WidgetTester tester) async {
   final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(RaisedButton)));
   await tester.tap(find.text(materialLocalizations.okButtonLabel));
   await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -223,7 +223,7 @@ void _tests() {
   const List<String> labels12To11TwoDigit = <String>['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
   const List<String> labels00To23 = <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
 
-  Future<Null> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat,
+  Future<void> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat,
       { TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0) }) async {
     await tester.pumpWidget(
       Localizations(
@@ -397,7 +397,7 @@ void _tests() {
   testWidgets('can increment and decrement hours', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    Future<Null> actAndExpect({ String initialValue, SemanticsAction action, String finalValue }) async {
+    Future<void> actAndExpect({ String initialValue, SemanticsAction action, String finalValue }) async {
       final SemanticsNode elevenHours = semantics.nodesWith(
         value: initialValue,
         ancestor: tester.renderObject(_hourControl).debugSemantics,
@@ -463,7 +463,7 @@ void _tests() {
   testWidgets('can increment and decrement minutes', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    Future<Null> actAndExpect({ String initialValue, SemanticsAction action, String finalValue }) async {
+    Future<void> actAndExpect({ String initialValue, SemanticsAction action, String finalValue }) async {
       final SemanticsNode elevenHours = semantics.nodesWith(
         value: initialValue,
         ancestor: tester.renderObject(_minuteControl).debugSemantics,
@@ -513,13 +513,13 @@ final Finder findDialPaint = find.descendant(
 );
 
 class _SemanticsNodeExpectation {
+  _SemanticsNodeExpectation(this.label, this.left, this.top, this.right, this.bottom);
+
   final String label;
   final double left;
   final double top;
   final double right;
   final double bottom;
-
-  _SemanticsNodeExpectation(this.label, this.left, this.top, this.right, this.bottom);
 }
 
 class _CustomPainterSemanticsTester {

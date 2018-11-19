@@ -9,20 +9,25 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
+import 'test_driver.dart';
+import 'test_utils.dart';
 
 void main() {
   group('flutter_run', () {
     Directory tempDir;
     final BasicProject _project = BasicProject();
+    FlutterTestDriver _flutter;
 
     setUp(() async {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_run_integration_test.');
+      tempDir = createResolvedTempDirectorySync();
       await _project.setUpIn(tempDir);
+      _flutter = FlutterTestDriver(tempDir);
     });
 
     tearDown(() async {
       tryToDelete(tempDir);
     });
+
     test('reports an error if an invalid device is supplied', () async {
       // This test forces flutter to check for all possible devices to catch issues
       // like https://github.com/flutter/flutter/issues/21418 which were skipped
@@ -42,6 +47,16 @@ void main() {
         && !_proc.stdout.toString().contains('No devices found with name or id matching')) {
           fail("'flutter run -d invalid-device-id' did not produce the expected error");
         }
+    });
+
+    test('writes pid-file', () async {
+      final File pidFile = tempDir.childFile('test.pid');
+      await _flutter.run(pidFile: pidFile);
+      try {
+        expect(pidFile.existsSync(), isTrue);
+      } finally {
+        await _flutter.stop();
+      }
     });
   }, timeout: const Timeout.factor(6));
 }
