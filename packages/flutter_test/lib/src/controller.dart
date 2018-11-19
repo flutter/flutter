@@ -414,7 +414,7 @@ abstract class WidgetController {
   ///
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [fling] instead.
-  Future<void> drag(Finder finder, Offset offset, { int pointer }) {
+  Future<void> drag(Finder finder, Offset offset, { int pointer, double pressure, double pressureMin, double pressureMax }) {
     return dragFrom(getCenter(finder), offset, pointer: pointer);
   }
 
@@ -424,11 +424,11 @@ abstract class WidgetController {
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [flingFrom]
   /// instead.
-  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer }) {
+  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double pressure, double pressureMin, double pressureMax }) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       assert(gesture != null);
-      await gesture.moveBy(offset);
+      await gesture.moveBy(offset, pressure: pressure, pressureMin: pressureMin, pressureMax: pressureMax);
       await gesture.up();
     });
   }

@@ -48,14 +48,19 @@ class TestPointer {
   /// By default, the time stamp on the event is [Duration.zero]. You
   /// can give a specific time stamp by passing the `timeStamp`
   /// argument.
-  PointerDownEvent down(Offset newLocation, { Duration timeStamp = Duration.zero }) {
+  PointerDownEvent down(Offset newLocation, { Duration timeStamp = Duration.zero, double pressure,
+                                                                                  double pressureMin,
+                                                                                  double pressureMax }) {
     assert(!isDown);
     _isDown = true;
     _location = newLocation;
     return PointerDownEvent(
       timeStamp: timeStamp,
       pointer: pointer,
-      position: location
+      position: location,
+      pressure: pressure,
+      pressureMin: pressureMin,
+      pressureMax: pressureMax,
     );
   }
 
@@ -64,7 +69,9 @@ class TestPointer {
   /// By default, the time stamp on the event is [Duration.zero]. You
   /// can give a specific time stamp by passing the `timeStamp`
   /// argument.
-  PointerMoveEvent move(Offset newLocation, { Duration timeStamp = Duration.zero }) {
+  PointerMoveEvent move(Offset newLocation, { Duration timeStamp = Duration.zero, double pressure,
+                                                                                  double pressureMin,
+                                                                                  double pressureMax }) {
     assert(isDown);
     final Offset delta = newLocation - location;
     _location = newLocation;
@@ -72,7 +79,10 @@ class TestPointer {
       timeStamp: timeStamp,
       pointer: pointer,
       position: newLocation,
-      delta: delta
+      delta: delta,
+      pressure: pressure,
+      pressureMin: pressureMin,
+      pressureMax: pressureMax
     );
   }
 
@@ -162,16 +172,24 @@ class TestGesture {
   final TestPointer _pointer;
 
   /// Send a move event moving the pointer by the given offset.
-  Future<void> moveBy(Offset offset, { Duration timeStamp = Duration.zero }) {
+  Future<void> moveBy(Offset offset, { Duration timeStamp = Duration.zero, double pressure,
+                                                                           double pressureMin,
+                                                                           double pressureMax }) {
     assert(_pointer._isDown);
-    return moveTo(_pointer.location + offset, timeStamp: timeStamp);
+    return moveTo(_pointer.location + offset, timeStamp: timeStamp, pressure: pressure,
+                                                                    pressureMin: pressureMin,
+                                                                    pressureMax: pressureMax);
   }
 
   /// Send a move event moving the pointer to the given location.
-  Future<void> moveTo(Offset location, { Duration timeStamp = Duration.zero }) {
+  Future<void> moveTo(Offset location, { Duration timeStamp = Duration.zero, double pressure,
+                                                                             double pressureMin,
+                                                                             double pressureMax }) {
     return TestAsyncUtils.guard<void>(() {
       assert(_pointer._isDown);
-      return _dispatcher(_pointer.move(location, timeStamp: timeStamp), _result);
+      return _dispatcher(_pointer.move(location, timeStamp: timeStamp, pressure: pressure,
+                                                                       pressureMin: pressureMin,
+                                                                       pressureMax: pressureMax), _result);
     });
   }
 
