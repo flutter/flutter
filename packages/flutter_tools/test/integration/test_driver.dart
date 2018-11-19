@@ -20,7 +20,7 @@ const Duration defaultTimeout = Duration(seconds: 40);
 const Duration appStartTimeout = Duration(seconds: 120);
 const Duration quitTimeout = Duration(seconds: 10);
 
-class FlutterTestDriver {
+abstract class FlutterTestDriver {
   FlutterTestDriver(this._projectFolder, {String logPrefix}):
     _logPrefix = logPrefix != null ? '$logPrefix: ' : '';
 
@@ -33,7 +33,6 @@ class FlutterTestDriver {
   final StreamController<String> _allMessages = StreamController<String>.broadcast();
   final StringBuffer _errorBuffer = StringBuffer();
   String _lastResponse;
-  String _currentRunningAppId;
   Uri _vmServiceWsUri;
   bool _hasExited = false;
 
@@ -52,35 +51,6 @@ class FlutterTestDriver {
       print('$_logPrefix$truncatedMsg');
     }
     return msg;
-  }
-
-  Future<void> run({
-    bool withDebugger = false,
-    bool pauseOnExceptions = false,
-    File pidFile,
-  }) async {
-    await _setupProcess(<String>[
-        'run',
-        '--machine',
-        '-d',
-        'flutter-tester',
-    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile);
-  }
-
-  Future<void> attach(
-    int port, {
-    bool withDebugger = false,
-    bool pauseOnExceptions = false,
-    File pidFile,
-  }) async {
-    await _setupProcess(<String>[
-        'attach',
-        '--machine',
-        '-d',
-        'flutter-tester',
-        '--debug-port',
-        '$port',
-    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile);
   }
 
   Future<void> _setupProcess(
@@ -121,110 +91,6 @@ class FlutterTestDriver {
     // This is just debug printing to aid running/debugging tests locally.
     _stdout.stream.listen(_debugPrint);
     _stderr.stream.listen(_debugPrint);
-
-    // Stash the PID so that we can terminate the VM more reliably than using
-    // _proc.kill() (because _proc is a shell, because `flutter` is a shell
-    // script).
-    final Map<String, dynamic> connected = await _waitFor(event: 'daemon.connected');
-    _procPid = connected['params']['pid'];
-
-    // Set this up now, but we don't wait it yet. We want to make sure we don't
-    // miss it while waiting for debugPort below.
-    final Future<Map<String, dynamic>> started = _waitFor(event: 'app.started',
-        timeout: appStartTimeout);
-
-    if (withDebugger) {
-      final Map<String, dynamic> debugPort = await _waitFor(event: 'app.debugPort',
-          timeout: appStartTimeout);
-      final String wsUriString = debugPort['params']['wsUri'];
-      _vmServiceWsUri = Uri.parse(wsUriString);
-      _vmService =
-          await vmServiceConnectUri(_vmServiceWsUri.toString());
-      _vmService.onSend.listen((String s) => _debugPrint('==> $s'));
-      _vmService.onReceive.listen((String s) => _debugPrint('<== $s'));
-      await Future.wait(<Future<Success>>[
-        _vmService.streamListen('Isolate'),
-        _vmService.streamListen('Debug'),
-      ]);
-
-      // Because we start paused, resume so the app is in a "running" state as
-      // expected by tests. Tests will reload/restart as required if they need
-      // to hit breakpoints, etc.
-      await waitForPause();
-      if (pauseOnExceptions) {
-        await _vmService.setExceptionPauseMode(await _getFlutterIsolateId(), ExceptionPauseMode.kUnhandled);
-      }
-      await resume(wait: false);
-    }
-
-    // Now await the started event; if it had already happened the future will
-    // have already completed.
-    _currentRunningAppId = (await started)['params']['appId'];
-  }
-
-  Future<void> hotRestart({bool pause = false}) => _restart(fullRestart: true, pause: pause);
-  Future<void> hotReload() => _restart(fullRestart: false);
-
-  Future<void> _restart({bool fullRestart = false, bool pause = false}) async {
-    if (_currentRunningAppId == null)
-      throw Exception('App has not started yet');
-
-    final dynamic hotReloadResp = await _sendRequest(
-        'app.restart',
-        <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause},
-    );
-
-    if (hotReloadResp == null || hotReloadResp['code'] != 0)
-      _throwErrorResponse('Hot ${fullRestart ? 'restart' : 'reload'} request failed');
-  }
-
-  Future<int> detach() async {
-    if (_vmService != null) {
-      _debugPrint('Closing VM service');
-      _vmService.dispose();
-    }
-    if (_currentRunningAppId != null) {
-      _debugPrint('Detaching from app');
-      await Future.any<void>(<Future<void>>[
-        _proc.exitCode,
-        _sendRequest(
-          'app.detach',
-          <String, dynamic>{'appId': _currentRunningAppId},
-        ),
-      ]).timeout(
-        quitTimeout,
-        onTimeout: () { _debugPrint('app.detach did not return within $quitTimeout'); },
-      );
-      _currentRunningAppId = null;
-    }
-    _debugPrint('Waiting for process to end');
-    return _proc.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
-  }
-
-  Future<int> stop() async {
-    if (_vmService != null) {
-      _debugPrint('Closing VM service');
-      _vmService.dispose();
-    }
-    if (_currentRunningAppId != null) {
-      _debugPrint('Stopping app');
-      await Future.any<void>(<Future<void>>[
-        _proc.exitCode,
-        _sendRequest(
-          'app.stop',
-          <String, dynamic>{'appId': _currentRunningAppId},
-        ),
-      ]).timeout(
-        quitTimeout,
-        onTimeout: () { _debugPrint('app.stop did not return within $quitTimeout'); },
-      );
-      _currentRunningAppId = null;
-    }
-    if (_proc != null) {
-      _debugPrint('Waiting for process to end');
-      return _proc.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
-    }
-    return 0;
   }
 
   Future<int> quit() => _killGracefully();
@@ -307,20 +173,6 @@ class FlutterTestDriver {
     await _timeoutWithMessages<dynamic>(() async => _vmService.resume(await _getFlutterIsolateId(), step: step),
         message: 'Isolate did not respond to resume ($step)');
     return wait ? waitForPause() : null;
-  }
-
-  Future<Isolate> breakAt(Uri uri, int line, {bool restart = false}) async {
-    if (restart) {
-      // For a hot restart, we need to send the breakpoints after the restart
-      // so we need to pause during the restart to avoid races.
-      await hotRestart(pause: true);
-      await addBreakpoint(uri, line);
-      return resume();
-    } else {
-      await addBreakpoint(uri, line);
-      await hotReload();
-      return waitForPause();
-    }
   }
 
   Future<InstanceRef> evaluateInFrame(String expression) async {
@@ -437,6 +289,175 @@ class FlutterTestDriver {
       }
     }
     return null;
+  }
+}
+
+class FlutterRunTestDriver extends FlutterTestDriver {
+  FlutterRunTestDriver(Directory _projectFolder, {String logPrefix}):
+    super(_projectFolder, logPrefix: logPrefix);
+
+  String _currentRunningAppId;
+
+   Future<void> run({
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    File pidFile,
+  }) async {
+    await _setupProcess(<String>[
+        'run',
+        '--machine',
+        '-d',
+        'flutter-tester',
+    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile);
+  }
+
+  Future<void> attach(
+    int port, {
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    File pidFile,
+  }) async {
+    await _setupProcess(<String>[
+        'attach',
+        '--machine',
+        '-d',
+        'flutter-tester',
+        '--debug-port',
+        '$port',
+    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile);
+  }
+
+  @override
+  Future<void> _setupProcess(
+    List<String> args, {
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    File pidFile,
+  }) async {
+    await super._setupProcess(
+      args,
+      withDebugger: withDebugger,
+      pauseOnExceptions: pauseOnExceptions,
+      pidFile: pidFile,
+    );
+
+    // Stash the PID so that we can terminate the VM more reliably than using
+    // _proc.kill() (because _proc is a shell, because `flutter` is a shell
+    // script).
+    final Map<String, dynamic> connected = await _waitFor(event: 'daemon.connected');
+    _procPid = connected['params']['pid'];
+
+    // Set this up now, but we don't wait it yet. We want to make sure we don't
+    // miss it while waiting for debugPort below.
+    final Future<Map<String, dynamic>> started = _waitFor(event: 'app.started',
+        timeout: appStartTimeout);
+
+    if (withDebugger) {
+      final Map<String, dynamic> debugPort = await _waitFor(event: 'app.debugPort',
+          timeout: appStartTimeout);
+      final String wsUriString = debugPort['params']['wsUri'];
+      _vmServiceWsUri = Uri.parse(wsUriString);
+      _vmService =
+          await vmServiceConnectUri(_vmServiceWsUri.toString());
+      _vmService.onSend.listen((String s) => _debugPrint('==> $s'));
+      _vmService.onReceive.listen((String s) => _debugPrint('<== $s'));
+      await Future.wait(<Future<Success>>[
+        _vmService.streamListen('Isolate'),
+        _vmService.streamListen('Debug'),
+      ]);
+
+      // Because we start paused, resume so the app is in a "running" state as
+      // expected by tests. Tests will reload/restart as required if they need
+      // to hit breakpoints, etc.
+      await waitForPause();
+      if (pauseOnExceptions) {
+        await _vmService.setExceptionPauseMode(await _getFlutterIsolateId(), ExceptionPauseMode.kUnhandled);
+      }
+      await resume(wait: false);
+    }
+
+    // Now await the started event; if it had already happened the future will
+    // have already completed.
+    _currentRunningAppId = (await started)['params']['appId'];
+  }
+
+  Future<void> hotRestart({bool pause = false}) => _restart(fullRestart: true, pause: pause);
+  Future<void> hotReload() => _restart(fullRestart: false);
+
+  Future<void> _restart({bool fullRestart = false, bool pause = false}) async {
+    if (_currentRunningAppId == null)
+      throw Exception('App has not started yet');
+
+    final dynamic hotReloadResp = await _sendRequest(
+        'app.restart',
+        <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause},
+    );
+
+    if (hotReloadResp == null || hotReloadResp['code'] != 0)
+      _throwErrorResponse('Hot ${fullRestart ? 'restart' : 'reload'} request failed');
+  }
+
+  Future<int> detach() async {
+    if (_vmService != null) {
+      _debugPrint('Closing VM service');
+      _vmService.dispose();
+    }
+    if (_currentRunningAppId != null) {
+      _debugPrint('Detaching from app');
+      await Future.any<void>(<Future<void>>[
+        _proc.exitCode,
+        _sendRequest(
+          'app.detach',
+          <String, dynamic>{'appId': _currentRunningAppId},
+        ),
+      ]).timeout(
+        quitTimeout,
+        onTimeout: () { _debugPrint('app.detach did not return within $quitTimeout'); },
+      );
+      _currentRunningAppId = null;
+    }
+    _debugPrint('Waiting for process to end');
+    return _proc.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
+  }
+
+  Future<int> stop() async {
+    if (_vmService != null) {
+      _debugPrint('Closing VM service');
+      _vmService.dispose();
+    }
+    if (_currentRunningAppId != null) {
+      _debugPrint('Stopping app');
+      await Future.any<void>(<Future<void>>[
+        _proc.exitCode,
+        _sendRequest(
+          'app.stop',
+          <String, dynamic>{'appId': _currentRunningAppId},
+        ),
+      ]).timeout(
+        quitTimeout,
+        onTimeout: () { _debugPrint('app.stop did not return within $quitTimeout'); },
+      );
+      _currentRunningAppId = null;
+    }
+    if (_proc != null) {
+      _debugPrint('Waiting for process to end');
+      return _proc.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
+    }
+    return 0;
+  }
+
+  Future<Isolate> breakAt(Uri uri, int line, { bool restart = false }) async {
+    if (restart) {
+      // For a hot restart, we need to send the breakpoints after the restart
+      // so we need to pause during the restart to avoid races.
+      await hotRestart(pause: true);
+      await addBreakpoint(uri, line);
+      return resume();
+    } else {
+      await addBreakpoint(uri, line);
+      await hotReload();
+      return waitForPause();
+    }
   }
 
   int id = 1;
