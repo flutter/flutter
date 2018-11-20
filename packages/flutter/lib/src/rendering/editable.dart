@@ -712,14 +712,17 @@ class RenderEditable extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// {@template flutter.widgets.editable.selectionEnabled}
-  /// Decides if selection is enabled based on [enableInteractiveSelection] and
-  /// [obscureText] to make the common use case of password fields simple while
-  /// still allowing selection of obscured text.
+  /// {@template flutter.rendering.editable.selectionEnabled}
+  /// True if interactive selection is enabled based on the values of
+  /// [enableInteractiveSelection] and [obscureText].
   ///
-  /// Just setting [obscureText] to true will create a typical Material password
-  /// field where text is obscured and not selectable.
-  /// Setting neither will create a normal visible and selectable text field.
+  /// By default [enableInteractiveSelection] is null, obscureText is false,
+  /// and this method returns true.
+  /// If [enableInteractiveSelection] is null and obscureText is true, then this
+  /// method returns false. This is the common case for password fields.
+  /// If [enableInteractiveSelection] is non-null then its value is returned. An
+  /// app might set it to true to enable interactive selection for a password
+  /// field, or to false to unconditionally disable interactive selection.
   /// {@endtemplate}
   bool get selectionEnabled {
     return enableInteractiveSelection ?? !obscureText;

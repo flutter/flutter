@@ -450,7 +450,15 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final EdgeInsets scrollPadding;
 
-  /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
+  /// {@template flutter.widgets.editableText.enableInteractiveSelection}
+  /// If true, then long-pressing this TextField will select text and show the
+  /// cut/copy/paste menu, and tapping will move the text caret.
+  ///
+  /// True by default.
+  ///
+  /// If false, most of the accessibility support for selecting text, copy
+  /// and paste, and moving the caret will be disabled.
+  /// {@endtemplate}
   final bool enableInteractiveSelection;
 
   /// Setting this property to true makes the cursor stop blinking and stay visible on the screen continually.
@@ -459,7 +467,7 @@ class EditableText extends StatefulWidget {
   /// Defaults to false, resulting in a typical blinking cursor.
   static bool debugDeterministicCursor = false;
 
-  /// {@macro flutter.widgets.editable.selectionEnabled}
+  /// {@macro flutter.rendering.editable.selectionEnabled}
   bool get selectionEnabled {
     return enableInteractiveSelection ?? !obscureText;
   }
