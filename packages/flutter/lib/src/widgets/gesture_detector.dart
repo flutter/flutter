@@ -315,7 +315,7 @@ class GestureDetector extends StatelessWidget {
   /// The pointer that previously triggered [onPanDown] did not complete.
   final GestureDragCancelCallback onPanCancel;
 
-  /// The pointer is in contact with the screen have established a focal point and
+  /// The pointers in contact with the screen have established a focal point and
   /// initial scale of 1.0.
   final GestureScaleStartCallback onScaleStart;
 
@@ -327,11 +327,13 @@ class GestureDetector extends StatelessWidget {
   final GestureScaleEndCallback onScaleEnd;
 
   /// The pointer is in contact with the screen and has pressed with sufficient
-  /// force to initiate a force press.
+  /// force to initiate a force press. The amount of force is at least
+  /// [ForcePressGestureRecognizer.startPressure].
   final GestureForcePressStartCallback onForcePressStart;
 
   /// The pointer is in contact with the screen and has pressed with the maximum
-  /// force. The amount of force is [ForcePressGestureRecognizer.peakPressure].
+  /// force. The amount of force is at least
+  /// [ForcePressGestureRecognizer.peakPressure].
   final GestureForcePressPeakCallback onForcePressPeak;
 
   /// A pointer is in contact with the screen, has previously passed the
