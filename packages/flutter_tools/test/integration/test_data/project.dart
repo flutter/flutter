@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../test_utils.dart';
 
-abstract class TestProject {
+abstract class Project {
   Directory dir;
 
   String get pubspec;
@@ -22,7 +22,9 @@ abstract class TestProject {
   Future<void> setUpIn(Directory dir) async {
     this.dir = dir;
     writeFile(fs.path.join(dir.path, 'pubspec.yaml'), pubspec);
-    writeFile(fs.path.join(dir.path, 'lib', 'main.dart'), main);
+    if (main != null) {
+      writeFile(fs.path.join(dir.path, 'lib', 'main.dart'), main);
+    }
     await getPackages(dir.path);
   }
 
