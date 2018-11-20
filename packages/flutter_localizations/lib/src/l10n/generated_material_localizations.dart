@@ -17,9 +17,9 @@ import '../material_localizations.dart';
 // The classes defined here encode all of the translations found in the
 // `flutter_localizations/lib/src/l10n/*.arb` files.
 //
-// These classes are constructed by the [getTranslation] method at the bottom of
-// this file, and used by the [_MaterialLocalizationsDelegate.load] method defined
-// in `flutter_localizations/lib/src/material_localizations.dart`.
+// These classes are constructed by the [getMaterialTranslation] method at the
+// bottom of this file, and used by the [_MaterialLocalizationsDelegate.load]
+// method defined in `flutter_localizations/lib/src/material_localizations.dart`.
 
 /// The translations for Arabic (`ar`).
 class MaterialLocalizationAr extends GlobalMaterialLocalizations {
@@ -13144,7 +13144,7 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
 ///
 /// See also:
 ///
-///  * [getTranslation], whose documentation describes these values.
+///  * [getMaterialTranslation], whose documentation describes these values.
 final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
   'ar', // Arabic
   'bg', // Bulgarian
@@ -13266,7 +13266,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///
 /// Generally speaking, this method is only intended to be used by
 /// [GlobalMaterialLocalizations.delegate].
-GlobalMaterialLocalizations getTranslation(
+GlobalMaterialLocalizations getMaterialTranslation(
   Locale locale,
   intl.DateFormat fullYearFormat,
   intl.DateFormat mediumDateFormat,
@@ -13486,6 +13486,6 @@ GlobalMaterialLocalizations getTranslation(
       return MaterialLocalizationZh(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     }
   }
-  assert(false, 'getTranslation() called for unsupported locale "$locale"');
+  assert(false, 'getMaterialTranslation() called for unsupported locale "$locale"');
   return null;
 }

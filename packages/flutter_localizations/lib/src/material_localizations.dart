@@ -11,7 +11,7 @@ import 'package:intl/date_symbols.dart' as intl;
 import 'package:intl/date_symbol_data_custom.dart' as date_symbol_data_custom;
 import 'l10n/date_localizations.dart' as date_localizations;
 
-import 'l10n/localizations.dart';
+import 'l10n/generated_material_localizations.dart';
 import 'widgets_localizations.dart';
 
 /// Implementation of localized strings for the material widgets using the
@@ -647,7 +647,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 
       assert(locale.toString() == localeName, 'comparing "$locale" to "$localeName"');
 
-      return SynchronousFuture<MaterialLocalizations>(getTranslation(
+      return SynchronousFuture<MaterialLocalizations>(getMaterialTranslation(
         locale,
         fullYearFormat,
         mediumDateFormat,

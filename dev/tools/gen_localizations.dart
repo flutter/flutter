@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This program generates a getTranslation() function that looks up the
+// This program generates a getMaterialTranslation() function that looks up the
 // translations contained by the arb files. The returned value is an
 // instance of GlobalMaterialLocalizations that corresponds to a single
 // locale.
@@ -32,7 +32,7 @@
 // ```
 //
 // If the data looks good, use the `-w` or `--overwrite` option to overwrite the
-// packages/flutter_localizations/lib/src/l10n/localizations.dart file:
+// packages/flutter_localizations/lib/src/l10n/generated_material_localizations.dart file:
 //
 // ```
 // dart dev/tools/gen_localizations.dart --overwrite
@@ -144,9 +144,9 @@ String generateTranslationBundles() {
 // The classes defined here encode all of the translations found in the
 // `flutter_localizations/lib/src/l10n/*.arb` files.
 //
-// These classes are constructed by the [getTranslation] method at the bottom of
-// this file, and used by the [_MaterialLocalizationsDelegate.load] method defined
-// in `flutter_localizations/lib/src/material_localizations.dart`.''');
+// These classes are constructed by the [getMaterialTranslation] method at the
+// bottom of this file, and used by the [_MaterialLocalizationsDelegate.load]
+// method defined in `flutter_localizations/lib/src/material_localizations.dart`.''');
 
   // We generate one class per supported language (e.g.
   // `MaterialLocalizationEn`). These implement everything that is needed by
@@ -256,7 +256,7 @@ String generateTranslationBundles() {
     }
   }
 
-  // Generate the getTranslation function. Given a Locale it returns the
+  // Generate the getMaterialTranslation function. Given a Locale it returns the
   // corresponding const GlobalMaterialLocalizations.
   output.writeln('''
 
@@ -270,7 +270,7 @@ String generateTranslationBundles() {
 ///
 /// See also:
 ///
-///  * [getTranslation], whose documentation describes these values.
+///  * [getMaterialTranslation], whose documentation describes these values.
 final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ${languageCodes.map<String>((String value) => "  '$value', // ${describeLocale(value)}").toList().join('\n')}
 ]);
@@ -289,7 +289,7 @@ $supportedLocales/// {@endtemplate}
 ///
 /// Generally speaking, this method is only intended to be used by
 /// [GlobalMaterialLocalizations.delegate].
-GlobalMaterialLocalizations getTranslation(
+GlobalMaterialLocalizations getMaterialTranslation(
   Locale locale,
   intl.DateFormat fullYearFormat,
   intl.DateFormat mediumDateFormat,
@@ -404,7 +404,7 @@ GlobalMaterialLocalizations getTranslation(
   }
   output.writeln('''
   }
-  assert(false, 'getTranslation() called for unsupported locale "\$locale"');
+  assert(false, 'getMaterialTranslation() called for unsupported locale "\$locale"');
   return null;
 }''');
 
@@ -631,8 +631,8 @@ Future<void> main(List<String> rawArgs) async {
   buffer.write(generateTranslationBundles());
 
   if (options.writeToFile) {
-    final File localizationsFile = File(path.join(directory.path, 'localizations.dart'));
-    localizationsFile.writeAsStringSync(buffer.toString());
+    final File localizationsFile = File(path.join(directory.path, 'generated_material_localizations.dart'));
+    localizationsFile.writeAsStringSync(buffer.toString(), flush: true);
   } else {
     stdout.write(buffer.toString());
   }
