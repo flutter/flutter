@@ -14,7 +14,6 @@ enum _ForceState {
   peaked,
 }
 
-
 /// Details object for callbacks that use [GestureForcePressStartCallback],
 /// [GestureForcePressPeakCallback] or [GestureForcePressEndCallback].
 ///
