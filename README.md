@@ -29,7 +29,7 @@ without losing state, on
 emulators, simulators, and hardware for iOS
 and Android.
 
-<img src="https://raw.githubusercontent.com/flutter/website/master/src/images/intellij/hot-reload.gif" alt="Make a change in your code, and your app changes instantly.">
+<img src="https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/tools/android-studio/hot-reload.gif" alt="Make a change in your code, and your app changes instantly.">
 
 ## Expressive and flexible UI
 Quickly ship features with a focus on native end-user experiences.
