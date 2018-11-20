@@ -569,6 +569,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     assert(debugCheckHasDirectionality(context));
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;
+
+    if (style.inherit == false && (style.fontSize == null || style.textBaseline == null)) {
+      throw FlutterError('Style must supply fontSize and textBaseline when inherit is false.');
+    }
+
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;

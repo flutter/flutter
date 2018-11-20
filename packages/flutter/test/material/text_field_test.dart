@@ -3382,4 +3382,36 @@ void main() {
     await tester.tap(find.byType(TextField));
     expect(tapCount, 0);
   });
+
+  testWidgets('style enforces required fields', (WidgetTester tester) async {
+
+    Widget buildFrame(TextStyle style) {
+      return MaterialApp(
+        home: Material(
+          child: TextField(
+            style: style,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TextStyle(
+      inherit: false,
+      fontSize: 12.0,
+      textBaseline: TextBaseline.alphabetic,
+    )));
+    expect(tester.takeException(), isNull);
+
+    // With inherit not set to false, will pickup required fields from theme
+    await tester.pumpWidget(buildFrame(TextStyle(
+      fontSize: 12.0,
+    )));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildFrame(TextStyle(
+      inherit: false,
+      fontSize: 12.0,
+    )));
+    expect(tester.takeException(), isInstanceOf<FlutterError>());
+  });
 }
