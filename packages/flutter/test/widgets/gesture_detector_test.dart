@@ -343,4 +343,67 @@ void main() {
     await longPress(kLongPressTimeout + const Duration(seconds: 1)); // To make sure the time for long press has occurred
     expect(longPressUp, 1);
   });
+
+  testWidgets('Force Press Callback called after force press', (WidgetTester tester) async {
+    int forcePressStart = 0;
+    int forcePressPeaked = 0;
+    int forcePressUpdate = 0;
+    int forcePressEnded = 0;
+
+    await tester.pumpWidget(
+      Container(
+        alignment: Alignment.topLeft,
+        child: Container(
+          alignment: Alignment.center,
+          height: 100.0,
+          color: const Color(0xFF00FF00),
+          child: GestureDetector(
+            onForcePressStart: (_) => forcePressStart += 1,
+            onForcePressEnd: (_) => forcePressEnded += 1,
+            onForcePressPeak: (_) => forcePressPeaked += 1,
+            onForcePressUpdate: (_) => forcePressUpdate += 1,
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
+    await gesture.moveBy(const Offset(0.0, 0.0), pressure: 0.3);
+
+    expect(forcePressStart, 0);
+    expect(forcePressPeaked, 0);
+    expect(forcePressUpdate, 0);
+    expect(forcePressEnded, 0);
+
+    await gesture.moveBy(const Offset(0.0, 0.0), pressure: 0.5);
+
+    expect(forcePressStart, 1);
+    expect(forcePressPeaked, 0);
+    expect(forcePressUpdate, 1);
+    expect(forcePressEnded, 0);
+
+    await gesture.moveBy(const Offset(0.0, 0.0), pressure: 0.6);
+    await gesture.moveBy(const Offset(0.0, 0.0), pressure: 0.7);
+    await gesture.moveBy(const Offset(0.0, 0.0), pressure: 0.2);
+    await gesture.moveBy(const Offset(0.0, 0.0), pressure: 0.3);
+
+    expect(forcePressStart, 1);
+    expect(forcePressPeaked, 0);
+    expect(forcePressUpdate, 5);
+    expect(forcePressEnded, 0);
+
+    await gesture.moveBy(const Offset(0.0, 0.0), pressure: 0.9);
+
+    expect(forcePressStart, 1);
+    expect(forcePressPeaked, 1);
+    expect(forcePressUpdate, 6);
+    expect(forcePressEnded, 0);
+
+    await gesture.up();
+
+    expect(forcePressStart, 1);
+    expect(forcePressPeaked, 1);
+    expect(forcePressUpdate, 6);
+    expect(forcePressEnded, 1);
+  });
 }

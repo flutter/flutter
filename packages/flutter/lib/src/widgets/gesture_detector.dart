@@ -334,6 +334,7 @@ class GestureDetector extends StatelessWidget {
   /// force. The amount of force is [ForcePressGestureRecognizer.peakPressure].
   final GestureForcePressPeakCallback onForcePressPeak;
 
+  ///
   final GestureForcePressUpdateCallback onForcePressUpdate;
 
   /// The pointer is no longer in contact with the screen.
@@ -461,13 +462,14 @@ class GestureDetector extends StatelessWidget {
         onForcePressUpdate != null ||
         onForcePressEnd != null) {
       gestures[ForcePressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
-            () => ForcePressGestureRecognizer(debugOwner: this),
-            (ForcePressGestureRecognizer instance) {
-          instance
-            ..onStart = onForcePressStart
-            ..onPeak = onForcePressPeak
-            ..onUpdate = onForcePressUpdate
-            ..onEnd = onForcePressEnd;
+          () => ForcePressGestureRecognizer(debugOwner: this),
+          (ForcePressGestureRecognizer instance) {
+            print('adding force press');
+            instance
+              ..onStart = onForcePressStart
+              ..onPeak = onForcePressPeak
+              ..onUpdate = onForcePressUpdate
+              ..onEnd = onForcePressEnd;
         },
       );
     }
