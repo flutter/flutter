@@ -1,14 +1,5 @@
 import 'package:flutter/material.dart';
-
-class PlaygroundDemo {
-  PlaygroundDemo({
-    this.demoWidget,
-    this.tabName,
-  });
-
-  final Widget demoWidget;
-  final String tabName;
-}
+import 'playground_demo.dart';
 
 class PlaygroundPage extends StatelessWidget {
   const PlaygroundPage({
@@ -22,9 +13,8 @@ class PlaygroundPage extends StatelessWidget {
   final String title;
   final List<PlaygroundDemo> demos;
 
-  PlaygroundDemo _currentDemo(BuildContext context) {
-    return demos[DefaultTabController.of(context).index];
-  }
+  PlaygroundDemo _currentDemo(BuildContext context) =>
+      demos[DefaultTabController.of(context).index];
 
   @override
   Widget build(BuildContext context) {
@@ -43,15 +33,16 @@ class PlaygroundPage extends StatelessWidget {
           bottom: TabBar(
             isScrollable: true,
             tabs: demos.map<Widget>((PlaygroundDemo demo) {
-              return Tab(text: demo.tabName);
+              return Tab(text: demo.tabName());
             }).toList(),
           ),
         ),
         body: TabBarView(
             children: demos.map<Widget>((PlaygroundDemo demo) {
-          return demo.demoWidget;
+          return demo.widget(context);
         }).toList()),
       ),
     );
   }
 }
+

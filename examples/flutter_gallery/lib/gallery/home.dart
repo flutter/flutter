@@ -157,7 +157,16 @@ class _CategoriesPage extends StatelessWidget {
                         child: _CategoryItem(
                           category: category,
                           onTap: () {
-                            onCategoryTap(category);
+                            if (category.routePath != null) {
+                              Timeline.instantSync('Start Transition',
+                                  arguments: <String, String>{
+                                    'from': '/',
+                                    'to': category.routePath,
+                                  });
+                              Navigator.pushNamed(context, category.routePath);
+                            } else {
+                              onCategoryTap(category);
+                            }
                           },
                         ),
                       );
@@ -365,14 +374,7 @@ class _GalleryHomeState extends State<GalleryHome>
         return _CategoriesPage(
           categories: kAllGalleryDemoCategories,
           onCategoryTap: (GalleryDemoCategory category) {
-            // Handle special cases of Playground demo categories where we don't want
-            // to change change the `_category` state so that Navigation can be used
-            // to route back to the home gallery state.
-            if (_kPlayergroundDemoCategories.contains(category)) {
-              _navigateToPlaygroundDemo(category);
-            } else {
-              setState(() => _category = category);
-            }
+            setState(() => _category = category);
           },
         );
       }

@@ -8,11 +8,12 @@ import '../demo/all.dart';
 import 'icons.dart';
 
 class GalleryDemoCategory {
-  const GalleryDemoCategory._({this.name, this.icon});
+  const GalleryDemoCategory._({this.name, this.icon, this.routePath});
   @required
   final String name;
   @required
   final IconData icon;
+  final String routePath;
 
   @override
   bool operator ==(dynamic other) {
@@ -59,11 +60,13 @@ const GalleryDemoCategory _kMedia = GalleryDemoCategory._(
 const GalleryDemoCategory kMaterialPlayground = GalleryDemoCategory._(
   name: 'Material Playground',
   icon: GalleryIcons.animation,
+  isPlayground: true,
 );
 
 const GalleryDemoCategory kCupertinoPlayGround = GalleryDemoCategory._(
-  name: 'Cuptertino Playground',
+  name: 'Cupertino Playground',
   icon: GalleryIcons.animation,
+  isPlayground: true,
 );
 
 class GalleryDemo {
