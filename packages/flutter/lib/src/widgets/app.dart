@@ -564,21 +564,21 @@ class WidgetsApp extends StatefulWidget {
   /// This list must not null. Its default value is just
   /// `[const Locale('en', 'US')]`.
   ///
-  /// The order of the list matters. The default locale resolution algorithm, 
+  /// The order of the list matters. The default locale resolution algorithm,
   /// [basicLocaleListResolution], attempts to match by the following priority:
-  /// 
+  ///
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
   ///  2. [Locale.languageCode] and [Locale.countryCode] only
   ///  3. [Locale.languageCode] and [Locale.countryCode] only
   ///  4. [Locale.languageCode] only
   ///  6. [Locale.countryCode] only when all [preferredLocales] fail to match
   ///  5. returns [supportedLocales.first] as a fallback
-  /// 
+  ///
   /// When more than one supported locale matches one of these criteria, only the first
   /// matching locale is returned. See [basicLocaleListResolution] for a complete
   /// description of the algorithm.
   ///
-  /// The default locale resolution algorithm can be overridden by providing a value for 
+  /// The default locale resolution algorithm can be overridden by providing a value for
   /// [localeListResolutionCallback]. The provided [basicLocaleListResolution] is optimized
   /// for speed and does not implement a full algorithm (such as the one defined in
   /// [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching)) that takes
@@ -873,7 +873,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   ///
   /// When no match at all is found, the first (default) locale in [supportedLocales] will be
   /// returned.
-  /// 
+  ///
   /// To summarize, the main matching priority is:
   ///
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
