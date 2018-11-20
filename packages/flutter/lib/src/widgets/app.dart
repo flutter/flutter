@@ -521,7 +521,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// Properly localized projects should provide a more advanced algorithm than
   /// [basicLocaleListResolution] as it does not implement a complete algorithm
-  /// (such as the one defined in [Unicode TR35](http://unicode.org/reports/tr35/#LanguageMatching))
+  /// (such as the one defined in [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching))
   /// and is optimized for speed at the detriment of some uncommon edge-cases.
   /// {@endtemplate}
   ///
@@ -580,7 +580,7 @@ class WidgetsApp extends StatefulWidget {
   /// The default locale resolution algorithm can be overridden by providing a value for 
   /// [localeListResolutionCallback]. The provided [basicLocaleListResolution] is optimized
   /// for speed and does not implement a full algorithm (such as the one defined in
-  /// [Unicode TR35](http://unicode.org/reports/tr35/#LanguageMatching)) that takes
+  /// [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching)) that takes
   /// distances between languages into account.
   ///
   /// When supporting languages with more than one script, it is recommended
