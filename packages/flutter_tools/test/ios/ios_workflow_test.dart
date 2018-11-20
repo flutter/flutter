@@ -318,7 +318,7 @@ class IOSWorkflowTestTarget extends IOSValidator {
   IOSWorkflowTestTarget({
     this.hasHomebrew = true,
     bool hasIosDeploy = true,
-    String iosDeployVersionText = '1.9.2',
+    String iosDeployVersionText = '1.9.4',
     bool hasIDeviceInstaller = true,
   }) : hasIosDeploy = Future<bool>.value(hasIosDeploy),
        iosDeployVersionText = Future<String>.value(iosDeployVersionText),
