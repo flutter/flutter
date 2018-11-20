@@ -156,12 +156,17 @@ class Directionality extends InheritedWidget {
 ///
 /// ## Transparent image
 ///
-/// If only a single [Image] needs to be composited with an opacity between 0.0
-/// and 1.0, it's much faster to directly use [Image].
+/// If only a single [Image] or [Color] needs to be composited with an opacity
+/// between 0.0 and 1.0, it's much faster to directly use them without [Opacity]
+/// widgets.
+///
+/// For example, `Container(color: Color.fromRGBO(255, 0, 0, 0.5))` is much
+/// faster than `Opacity(opacity: 0.5, child: Container(color: Colors.red))`.
 ///
 /// {@tool sample}
 ///
-/// This example draws an [Image] with 0.5 opacity:
+/// The following example draws an [Image] with 0.5 opacity without using
+/// [Opacity]:
 ///
 /// ```dart
 /// Image.network(
@@ -170,7 +175,14 @@ class Directionality extends InheritedWidget {
 ///   colorBlendMode: BlendMode.modulate
 /// )
 /// ```
+///
 /// {@end-tool}
+///
+/// Directly drawing an [Image] or [Color] with opacity is faster than using
+/// [Opacity] on top of them because [Opacity] could apply the opacity to a
+/// group of widgets and therefore a costly offscreen buffer will be used.
+/// Drawing content into the offscreen buffer may also trigger render target
+/// switches and such switching is particularly slow in older GPUs.
 ///
 /// See also:
 ///
