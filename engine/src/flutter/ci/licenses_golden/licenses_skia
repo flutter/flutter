@@ -1,4 +1,4 @@
-Signature: f4f22bd51d62c5d5455499d472069612
+Signature: d743c750c31db65e8ba714b02e51934b
 
 UNUSED LICENSES:
 
@@ -4021,7 +4021,6 @@ FILE: ../../../third_party/skia/samplecode/SampleStringArt.cpp
 FILE: ../../../third_party/skia/samplecode/SampleUnpremul.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapDevice.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapDevice.h
-FILE: ../../../third_party/skia/src/core/SkBitmapProcState_matrix_template.h
 FILE: ../../../third_party/skia/src/core/SkDataTable.cpp
 FILE: ../../../third_party/skia/src/core/SkDiscardableMemory.h
 FILE: ../../../third_party/skia/src/core/SkDocument.cpp
@@ -4572,7 +4571,6 @@ FILE: ../../../third_party/skia/include/effects/SkMorphologyImageFilter.h
 FILE: ../../../third_party/skia/include/effects/SkOffsetImageFilter.h
 FILE: ../../../third_party/skia/src/core/SkImageFilter.cpp
 FILE: ../../../third_party/skia/src/core/SkUtilsArm.cpp
-FILE: ../../../third_party/skia/src/core/SkUtilsArm.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkColorFilterImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkLightingImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkMagnifierImageFilter.cpp
