@@ -88,7 +88,14 @@ class AttachCommand extends FlutterCommand {
   @override
   final String description = 'Attach to a running application.';
 
-  // TODO(djshuckerow): this is now a confusing name, I would like to rename this.
+  // TODO(djshuckerow): this is now a confusing name. An explanation:
+  // The --observatory-port flag passed to `flutter run` is used to
+  // set up the port on the development macine that the Dart observatory
+  // listens to. This flag serves the same purpose in this command.
+  //
+  // The --debug-port flag passed only to `flutter attach` is used to
+  // set up the port on the device running a Flutter app to connect back
+  // to the host development machine.
   int get observatoryPort {
     if (argResults['debug-port'] == null)
       return null;
