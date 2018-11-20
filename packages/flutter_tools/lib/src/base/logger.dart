@@ -40,6 +40,8 @@ abstract class Logger {
   /// If [hangingIndent] is specified, then any wrapped lines will be indented
   /// by this much more than the first line, if wrapping is enabled in
   /// [outputPreferences].
+  /// If [wrap] is specified, then it overrides the
+  /// [outputPreferences.wrapText] setting.
   void printError(
     String message, {
     StackTrace stackTrace,
@@ -47,6 +49,7 @@ abstract class Logger {
     TerminalColor color,
     int indent,
     int hangingIndent,
+    bool wrap,
   });
 
   /// Display normal output of the command. This should be used for things like
@@ -68,6 +71,8 @@ abstract class Logger {
   /// If [hangingIndent] is specified, then any wrapped lines will be indented
   /// by this much more than the first line, if wrapping is enabled in
   /// [outputPreferences].
+  /// If [wrap] is specified, then it overrides the
+  /// [outputPreferences.wrapText] setting.
   void printStatus(
     String message, {
     bool emphasis,
@@ -75,6 +80,7 @@ abstract class Logger {
     bool newline,
     int indent,
     int hangingIndent,
+    bool wrap,
   });
 
   /// Use this for verbose tracing output. Users can turn this output on in order
@@ -111,9 +117,10 @@ class StdoutLogger extends Logger {
     TerminalColor color,
     int indent,
     int hangingIndent,
+    bool wrap,
   }) {
     message ??= '';
-    message = wrapText(message, indent: indent, hangingIndent: hangingIndent);
+    message = wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap);
     _status?.cancel();
     _status = null;
     if (emphasis == true)
@@ -133,9 +140,10 @@ class StdoutLogger extends Logger {
     bool newline,
     int indent,
     int hangingIndent,
+    bool wrap,
   }) {
     message ??= '';
-    message = wrapText(message, indent: indent, hangingIndent: hangingIndent);
+    message = wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap);
     _status?.cancel();
     _status = null;
     if (emphasis == true)
@@ -232,9 +240,10 @@ class BufferLogger extends Logger {
     TerminalColor color,
     int indent,
     int hangingIndent,
+    bool wrap,
   }) {
     _error.writeln(terminal.color(
-      wrapText(message, indent: indent, hangingIndent: hangingIndent),
+      wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap),
       color ?? TerminalColor.red,
     ));
   }
@@ -247,11 +256,12 @@ class BufferLogger extends Logger {
     bool newline,
     int indent,
     int hangingIndent,
+    bool wrap,
   }) {
     if (newline != false)
-      _status.writeln(wrapText(message, indent: indent, hangingIndent: hangingIndent));
+      _status.writeln(wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
     else
-      _status.write(wrapText(message, indent: indent, hangingIndent: hangingIndent));
+      _status.write(wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
   }
 
   @override
@@ -297,10 +307,11 @@ class VerboseLogger extends Logger {
     TerminalColor color,
     int indent,
     int hangingIndent,
+    bool wrap,
   }) {
     _emit(
       _LogType.error,
-      wrapText(message, indent: indent, hangingIndent: hangingIndent),
+      wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap),
       stackTrace,
     );
   }
@@ -313,8 +324,9 @@ class VerboseLogger extends Logger {
     bool newline,
     int indent,
     int hangingIndent,
+    bool wrap,
   }) {
-    _emit(_LogType.status, wrapText(message, indent: indent, hangingIndent: hangingIndent));
+    _emit(_LogType.status, wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
   }
 
   @override

@@ -269,6 +269,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final TextAlign textAlign;
 
+  /// {@template flutter.widgets.editableText.textDirection}
   /// The directionality of the text.
   ///
   /// This decides how [textAlign] values like [TextAlign.start] and
@@ -282,6 +283,7 @@ class EditableText extends StatefulWidget {
   /// its left.
   ///
   /// Defaults to the ambient [Directionality], if any.
+  /// {@endtemplate}
   final TextDirection textDirection;
 
   /// {@template flutter.widgets.editableText.textCapitalization}
@@ -415,6 +417,12 @@ class EditableText extends StatefulWidget {
   /// How thick the cursor will be.
   ///
   /// Defaults to 2.0
+  ///
+  /// The cursor will draw under the text. The cursor width will extend
+  /// to the right of the boundary between characters for left-to-right text
+  /// and to the left for right-to-left text. This corresponds to extending
+  /// downstream relative to the selected position. Negative values may be used
+  /// to reverse this behavior.
   /// {@endtemplate}
   final double cursorWidth;
 
@@ -732,7 +740,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final bool longPress = cause == SelectionChangedCause.longPress;
       if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
         _selectionOverlay.showHandles();
-      if (longPress)
+      if (longPress || cause == SelectionChangedCause.doubleTap)
         _selectionOverlay.showToolbar();
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);

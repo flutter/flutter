@@ -35,6 +35,7 @@ const Map<String, _HardwareType> _knownHardware = <String, _HardwareType>{
   'qcom': _HardwareType.physical,
   'ranchu': _HardwareType.emulator,
   'samsungexynos7420': _HardwareType.physical,
+  'samsungexynos7580': _HardwareType.physical,
   'samsungexynos7870': _HardwareType.physical,
   'samsungexynos8890': _HardwareType.physical,
   'samsungexynos8895': _HardwareType.physical,
@@ -440,7 +441,7 @@ class AndroidDevice extends Device {
     final String result = (await runCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
     if (result.contains('Error: ')) {
-      printError(result.trim());
+      printError(result.trim(), wrap: false);
       return LaunchResult.failed();
     }
 
@@ -469,7 +470,10 @@ class AndroidDevice extends Device {
   }
 
   @override
-  bool get supportsHotMode => true;
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => true;
 
   @override
   Future<bool> stopApp(ApplicationPackage app) {
@@ -633,7 +637,7 @@ void parseADBDeviceOutput(String text, {
       diagnostics?.add(
         'Unexpected failure parsing device information from adb output:\n'
         '$line\n'
-        'Please report a bug at https://github.com/flutter/flutter/issues/new');
+        'Please report a bug at https://github.com/flutter/flutter/issues/new/choose');
     }
   }
 }

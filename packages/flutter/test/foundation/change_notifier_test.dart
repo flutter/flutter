@@ -11,6 +11,24 @@ class TestNotifier extends ChangeNotifier {
   }
 }
 
+class HasListenersTester<T> extends ValueNotifier<T> {
+  HasListenersTester(T value) : super(value);
+  bool get testHasListeners => hasListeners;
+}
+
+class A {
+  bool result = false;
+  void test() { result = true; }
+}
+
+class B extends A with ChangeNotifier {
+  @override
+  void test() {
+    notifyListeners();
+    super.test();
+  }
+}
+
 void main() {
   testWidgets('ChangeNotifier', (WidgetTester tester) async {
     final List<String> log = <String>[];
@@ -258,9 +276,18 @@ void main() {
     notifier.removeListener(test2);
     expect(notifier.testHasListeners, isFalse);
   });
-}
 
-class HasListenersTester<T> extends ValueNotifier<T> {
-  HasListenersTester(T value) : super(value);
-  bool get testHasListeners => hasListeners;
+  test('ChangeNotifier as a mixin', () {
+    // We document that this is a valid way to use this class.
+    final B b = B();
+    int notifications = 0;
+    b.addListener(() {
+      notifications += 1;
+    });
+    expect(b.result, isFalse);
+    expect(notifications, 0);
+    b.test();
+    expect(b.result, isTrue);
+    expect(notifications, 1);
+  });
 }

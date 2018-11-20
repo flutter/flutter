@@ -1437,4 +1437,12 @@ void main() {
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), findsNothing);
   });
+
+  testWidgets('Handles transitions when a non-default initial route is set', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      routes: routes,
+      initialRoute: '/two',
+    ));
+    expect(find.text('two'), findsOneWidget);
+  });
 }

@@ -429,12 +429,7 @@ class AppDomain extends Domain {
     final Completer<void> appStartedCompleter = Completer<void>();
     // We don't want to wait for this future to complete and callbacks won't fail.
     // As it just writes to stdout.
-    appStartedCompleter.future.timeout(const Duration(minutes: 3), onTimeout: () { // ignore: unawaited_futures
-      _sendAppEvent(app, 'log', <String, dynamic>{
-        'log': 'timeout waiting for the application to start',
-        'error': true,
-      });
-    }).then<void>((_) {
+    appStartedCompleter.future.then<void>((_) { // ignore: unawaited_futures
       _sendAppEvent(app, 'started');
     });
 
@@ -458,7 +453,7 @@ class AppDomain extends Domain {
   }
 
   bool isRestartSupported(bool enableHotReload, Device device) =>
-      enableHotReload && device.supportsHotMode;
+      enableHotReload && device.supportsHotRestart;
 
   Future<OperationResult> _inProgressHotReload;
 
@@ -758,6 +753,7 @@ class NotifyingLogger extends Logger {
       TerminalColor color,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     _messageController.add(LogMessage('error', message, stackTrace));
   }
@@ -770,6 +766,7 @@ class NotifyingLogger extends Logger {
       bool newline = true,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     _messageController.add(LogMessage('status', message));
   }
@@ -892,6 +889,7 @@ class _AppRunLogger extends Logger {
       TerminalColor color,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     if (parent != null) {
       parent.printError(
@@ -900,6 +898,7 @@ class _AppRunLogger extends Logger {
         emphasis: emphasis,
         indent: indent,
         hangingIndent: hangingIndent,
+        wrap: wrap,
       );
     } else {
       if (stackTrace != null) {
@@ -925,6 +924,7 @@ class _AppRunLogger extends Logger {
       bool newline = true,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     if (parent != null) {
       parent.printStatus(
@@ -934,6 +934,7 @@ class _AppRunLogger extends Logger {
         newline: newline,
         indent: indent,
         hangingIndent: hangingIndent,
+        wrap: wrap,
       );
     } else {
       _sendLogEvent(<String, dynamic>{'log': message});

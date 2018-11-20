@@ -19,8 +19,7 @@ import 'theme.dart';
 ///
 /// Typically used with a [Scaffold] and a [FloatingActionButton].
 ///
-/// ## Sample code
-///
+/// {@tool sample}
 /// ```dart
 /// Scaffold(
 ///   bottomNavigationBar: BottomAppBar(
@@ -30,6 +29,7 @@ import 'theme.dart';
 ///   floatingActionButton: FloatingActionButton(onPressed: null),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

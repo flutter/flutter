@@ -20,13 +20,13 @@ const Duration requiredLifespan = Duration(seconds: 5);
 void main() {
   group('flutter run', () {
     final BasicProject _project = BasicProject();
-    FlutterTestDriver _flutter;
+    FlutterRunTestDriver _flutter;
     Directory tempDir;
 
     setUp(() async {
       tempDir = createResolvedTempDirectorySync();
       await _project.setUpIn(tempDir);
-      _flutter = FlutterTestDriver(tempDir);
+      _flutter = FlutterRunTestDriver(tempDir);
     });
 
     tearDown(() async {

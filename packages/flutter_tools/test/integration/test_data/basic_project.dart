@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'test_project.dart';
+import 'project.dart';
 
-class BasicProject extends TestProject {
+class BasicProject extends Project {
 
   @override
   final String pubspec = '''

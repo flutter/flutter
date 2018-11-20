@@ -12,6 +12,7 @@ import 'framework.dart';
 
 // Examples can assume:
 // dynamic _lot;
+// Future<String> _calculation;
 
 /// Base class for widgets that build themselves based on interaction with
 /// a specified [Stream].
@@ -336,7 +337,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// as the builder will always be called before the stream listener has a chance
 /// to be processed.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample shows a [StreamBuilder] configuring a text label to show the
 /// latest bid received for a lot in an auction. Assume the `_lot` field is
@@ -358,6 +359,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///   },
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -483,7 +485,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// `future?.asStream()`, except that snapshots with `ConnectionState.active`
 /// may appear for the latter, depending on how the stream is implemented.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample shows a [FutureBuilder] configuring a text label to show the
 /// state of an asynchronous calculation returning a string. Assume the
@@ -508,6 +510,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///   },
 /// )
 /// ```
+/// {@end-tool}
 // TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of

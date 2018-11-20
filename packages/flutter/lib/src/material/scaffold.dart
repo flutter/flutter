@@ -657,33 +657,41 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
 ///
-/// ## Sample code
+/// {@tool snippet --template=stateful_widget}
 ///
-/// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar]
-/// and a [FloatingActionButton]. The [body] is a [Text] placed in a [Center]
-/// in order to center the text within the [Scaffold] and the
-/// [FloatingActionButton] is centered and docked within the
-/// [BottomAppBar] using [FloatingActionButtonLocation.centerDocked].
+/// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] and a
+/// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
+/// to center the text within the [Scaffold] and the [FloatingActionButton] is
+/// centered and docked within the [BottomAppBar] using
+/// [FloatingActionButtonLocation.centerDocked]. The [FloatingActionButton] is
+/// connected to a callback that increments a counter.
 ///
 /// ```dart
-/// Scaffold(
-///   appBar: AppBar(
-///     title: Text('Sample Code'),
-///   ),
-///   body: Center(
-///     child: Text('Scaffold'),
-///   ),
-///   bottomNavigationBar: BottomAppBar(
-///     child: Container(height: 50.0,),
-///   ),
-///   floatingActionButton: FloatingActionButton(
-///     onPressed: () {},
-///     tooltip: 'Increment',
-///     child: Icon(Icons.add),
-///   ),
-///   floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-/// )
+/// int _count = 0;
+///
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Sample Code'),
+///     ),
+///     body: Center(
+///       child: Text('You have pressed the button $_count times.'),
+///     ),
+///     bottomNavigationBar: BottomAppBar(
+///       child: Container(height: 50.0,),
+///     ),
+///     floatingActionButton: FloatingActionButton(
+///       onPressed: () => setState(() {
+///         _count++;
+///       }),
+///       tooltip: 'Increment Counter',
+///       child: Icon(Icons.add),
+///     ),
+///     floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+///   );
+/// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1044,6 +1052,22 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   bool _drawerOpened = false;
   bool _endDrawerOpened = false;
+
+  /// Whether the [Scaffold.drawer] is opened.
+  ///
+  /// See also:
+  ///
+  ///   * [ScaffoldState.openDrawer], which opens the [Scaffold.drawer] of a
+  ///   [Scaffold].
+  bool get isDrawerOpen => _drawerOpened;
+
+  /// Whether the [Scaffold.endDrawer] is opened.
+  ///
+  /// See also:
+  ///
+  ///   * [ScaffoldState.openEndDrawer], which opens the [Scaffold.endDrawer] of
+  ///     a [Scaffold].
+  bool get isEndDrawerOpen => _endDrawerOpened;
 
   void _drawerOpenedCallback(bool isOpened) {
     setState(() {

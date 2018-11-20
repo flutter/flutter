@@ -38,6 +38,28 @@ import 'theme.dart';
 ///    integration.
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
+///
+/// {@tool sample}
+///
+/// Creates a [TextFormField] with an [InputDecoration] and validator function.
+///
+/// ```dart
+/// TextFormField(
+///   decoration: const InputDecoration(
+///     icon: Icon(Icons.person),
+///     hintText: 'What do people call you?',
+///     labelText: 'Name *',
+///   ),
+///   onSaved: (String value) {
+///     // This optional block of code can be used to run
+///     // code when the user saves the form.
+///   },
+///   validator: (String value) {
+///     return value.contains('@') ? 'Do not use the @ char.' : null;
+///   },
+/// )
+/// ```
+/// {@end-tool}
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
   ///
@@ -58,6 +80,7 @@ class TextFormField extends FormField<String> {
     TextCapitalization textCapitalization = TextCapitalization.none,
     TextInputAction textInputAction,
     TextStyle style,
+    TextDirection textDirection,
     TextAlign textAlign = TextAlign.start,
     bool autofocus = false,
     bool obscureText = false,
@@ -105,6 +128,7 @@ class TextFormField extends FormField<String> {
         textInputAction: textInputAction,
         style: style,
         textAlign: textAlign,
+        textDirection: textDirection,
         textCapitalization: textCapitalization,
         autofocus: autofocus,
         obscureText: obscureText,

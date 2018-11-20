@@ -89,7 +89,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// AppBar(
@@ -113,6 +113,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -168,6 +169,37 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// widget with an [IconButton] that opens the drawer (using [Icons.menu]). If
   /// there's no [Drawer] and the parent [Navigator] can go back, the [AppBar]
   /// will use a [BackButton] that calls [Navigator.maybePop].
+  ///
+  /// {@tool sample}
+  ///
+  /// The following code shows how the drawer button could be manually specified
+  /// instead of relying on [automaticallyImplyLeading]:
+  ///
+  /// ```dart
+  /// AppBar(
+  ///   leading: Builder(
+  ///     builder: (BuildContext context) {
+  ///       return IconButton(
+  ///         icon: const Icon(Icons.menu),
+  ///         onPressed: () { Scaffold.of(context).openDrawer(); },
+  ///         tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+  ///       );
+  ///     },
+  ///   ),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// The [Builder] is used in this example to ensure that the `context` refers
+  /// to that part of the subtree. That way this code snippet can be used even
+  /// inside the very code that is creating the [Scaffold] (in which case,
+  /// without the [Builder], the `context` wouldn't be able to see the
+  /// [Scaffold], since it would refer to an ancestor of that widget).
+  ///
+  /// See also:
+  ///
+  ///  * [Scaffold.appBar], in which an [AppBar] is usually placed.
+  ///  * [Scaffold.drawer], in which the [Drawer] is usually placed.
   final Widget leading;
 
   /// Controls whether we should try to imply the leading widget if null.
@@ -189,7 +221,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// ## Sample code
+  /// {@tool snippet --template=stateless_widget}
+  ///
+  /// This sample shows adding an action to an [AppBar] that opens a shopping cart.
   ///
   /// ```dart
   /// Scaffold(
@@ -207,6 +241,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///   ),
   /// )
   /// ```
+  /// {@end-tool}
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will
@@ -689,7 +724,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// [actions], above the [bottom] (if any). If a [flexibleSpace] widget is
 /// specified then it is stacked behind the toolbar and the bottom widget.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This is an example that could be included in a [CustomScrollView]'s
 /// [CustomScrollView.slivers] list:
@@ -709,6 +744,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///   ]
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -787,7 +823,7 @@ class SliverAppBar extends StatefulWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// Scaffold(
@@ -811,6 +847,7 @@ class SliverAppBar extends StatefulWidget {
   ///   ),
   /// )
   /// ```
+  /// {@end-tool}
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will

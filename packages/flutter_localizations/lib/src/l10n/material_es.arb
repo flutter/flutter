@@ -51,5 +51,6 @@
   "collapsedIconTapHint": "Mostrar",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Queda 1 carácter.",
-  "remainingTextFieldCharacterCountOther": "Quedan $remainingCount caracteres"
+  "remainingTextFieldCharacterCountOther": "Quedan $remainingCount caracteres",
+  "refreshIndicatorSemanticLabel": "TBD"
 }

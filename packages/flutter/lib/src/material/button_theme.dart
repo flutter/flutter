@@ -447,7 +447,7 @@ class ButtonThemeData extends Diagnosticable {
   ///
   /// Returns the button's [MaterialButton.disabledColor] if it is non-null.
   ///
-  /// Otherwise the the value of the `disabledColor` constructor parameter
+  /// Otherwise the value of the `disabledColor` constructor parameter
   /// is returned, if it is non-null.
   ///
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned

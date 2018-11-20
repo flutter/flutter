@@ -12,6 +12,7 @@ import 'button_bar.dart';
 import 'button_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'dialog_theme.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -19,6 +20,7 @@ import 'theme.dart';
 
 // Examples can assume:
 // enum Department { treasury, state }
+// BuildContext context;
 
 /// A material design dialog.
 ///
@@ -81,6 +83,7 @@ class Dialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final DialogTheme dialogTheme = DialogTheme.of(context);
     return AnimatedPadding(
       padding: MediaQuery.of(context).viewInsets + const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
       duration: insetAnimationDuration,
@@ -99,7 +102,7 @@ class Dialog extends StatelessWidget {
               color: _getColor(context),
               type: MaterialType.card,
               child: child,
-              shape: shape ?? _defaultDialogShape,
+              shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
             ),
           ),
         ),
@@ -130,7 +133,7 @@ class Dialog extends StatelessWidget {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This snippet shows a method in a [State] which, when called, displays a dialog box
 /// and returns a [Future] that completes when the dialog is dismissed.
@@ -164,6 +167,7 @@ class Dialog extends StatelessWidget {
 ///   );
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -331,7 +335,7 @@ class AlertDialog extends StatelessWidget {
 /// title and the first option, and 24 pixels of spacing between the last option
 /// and the bottom of the dialog.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// SimpleDialogOption(
@@ -339,6 +343,7 @@ class AlertDialog extends StatelessWidget {
 ///   child: const Text('Treasury department'),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -395,7 +400,7 @@ class SimpleDialogOption extends StatelessWidget {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// In this example, the user is asked to select between two options. These
 /// options are represented as an enum. The [showDialog] method here returns
@@ -438,6 +443,7 @@ class SimpleDialogOption extends StatelessWidget {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
