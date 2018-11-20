@@ -1442,30 +1442,6 @@ class RepositoryAndroidNdkSourcesAndroidDirectory extends RepositoryDirectory {
   }
 }
 
-class RepositoryAndroidNdkSourcesCxxStlSubsubdirectory extends RepositoryDirectory {
-  RepositoryAndroidNdkSourcesCxxStlSubsubdirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  RepositoryFile createFile(fs.IoNode entry) {
-    if (entry.name == 'LICENSE.TXT')
-      return new RepositoryCxxStlDualLicenseFile(this, entry);
-    return super.createFile(entry);
-  }
-}
-
-class RepositoryAndroidNdkSourcesCxxStlSubdirectory extends RepositoryDirectory {
-  RepositoryAndroidNdkSourcesCxxStlSubdirectory(RepositoryDirectory parent, fs.Directory io, this.subdirectoryName) : super(parent, io);
-
-  final String subdirectoryName;
-
-  @override
-  RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == subdirectoryName)
-      return new RepositoryAndroidNdkSourcesCxxStlSubsubdirectory(this, entry);
-    return super.createSubdirectory(entry);
-  }
-}
-
 class RepositoryAndroidNdkSourcesCxxStlDirectory extends RepositoryDirectory {
   RepositoryAndroidNdkSourcesCxxStlDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -1476,16 +1452,10 @@ class RepositoryAndroidNdkSourcesCxxStlDirectory extends RepositoryDirectory {
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'gabi++' // abarth says jamesr says we don't use these two
         && entry.name != 'stlport'
+        && entry.name != 'llvm-libc++' // we ship our own custom-compiled libcxx/libcxxabi
+        && entry.name != 'llvm-libc++abi'
+        && entry.name != 'gnu-libstdc++'
         && super.shouldRecurse(entry);
-  }
-
-  @override
-  RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == 'llvm-libc++abi')
-      return new RepositoryAndroidNdkSourcesCxxStlSubdirectory(this, entry, 'libcxxabi');
-    if (entry.name == 'llvm-libc++')
-      return new RepositoryAndroidNdkSourcesCxxStlSubdirectory(this, entry, 'libcxx');
-    return super.createSubdirectory(entry);
   }
 }
 
@@ -1755,6 +1725,62 @@ class RepositoryJSR305SrcDirectory extends RepositoryDirectory {
   }
 }
 
+class RepositoryLibcxxDirectory extends RepositoryDirectory {
+  RepositoryLibcxxDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'utils'
+        && super.shouldRecurse(entry);
+  }
+
+  @override
+  RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'src')
+      return new RepositoryLibcxxSrcDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+
+  @override
+  RepositoryFile createFile(fs.IoNode entry) {
+    if (entry.name == 'LICENSE.TXT')
+      return new RepositoryCxxStlDualLicenseFile(this, entry);
+    return super.createFile(entry);
+  }
+}
+
+class RepositoryLibcxxSrcDirectory extends RepositoryDirectory {
+  RepositoryLibcxxSrcDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'support')
+      return new RepositoryLibcxxSrcSupportDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class RepositoryLibcxxSrcSupportDirectory extends RepositoryDirectory {
+  RepositoryLibcxxSrcSupportDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'solaris'
+        && super.shouldRecurse(entry);
+  }
+}
+
+class RepositoryLibcxxabiDirectory extends RepositoryDirectory {
+  RepositoryLibcxxabiDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  RepositoryFile createFile(fs.IoNode entry) {
+    if (entry.name == 'LICENSE.TXT')
+      return new RepositoryCxxStlDualLicenseFile(this, entry);
+    return super.createFile(entry);
+  }
+}
+
 class RepositoryLibJpegDirectory extends RepositoryDirectory {
   RepositoryLibJpegDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -1966,6 +1992,10 @@ class RepositoryRootThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
       return new RepositoryIcuDirectory(this, entry);
     if (entry.name == 'jsr-305')
       return new RepositoryJSR305Directory(this, entry);
+    if (entry.name == 'libcxx')
+      return new RepositoryLibcxxDirectory(this, entry);
+    if (entry.name == 'libcxxabi')
+      return new RepositoryLibcxxabiDirectory(this, entry);
     if (entry.name == 'libjpeg')
       return new RepositoryLibJpegDirectory(this, entry);
     if (entry.name == 'libjpeg_turbo' || entry.name == 'libjpeg-turbo')
