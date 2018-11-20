@@ -749,4 +749,78 @@ void main() {
     expect(sliver.paintBounds, expectedRect);
     expect(sliver.semanticBounds, expectedRect);
   });
+
+  test('consumedScrollExtent is 0.0 for first Sliver in list', () {
+    const double viewportWidth = 800.0;
+    final RenderSliver sliver = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      children: <RenderSliver>[
+        sliver,
+      ],
+    );
+    layout(root);
+
+    expect(sliver.constraints.consumedScrollExtent, 0.0);
+  });
+
+  test('consumedScrollExtent accumulates over multiple Slivers', () {
+    const double viewportWidth = 800.0;
+    final RenderSliver sliver1 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderSliver sliver2 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderSliver sliver3 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      children: <RenderSliver>[
+        sliver1,
+        sliver2,
+        sliver3,
+      ],
+    );
+    layout(root);
+
+    // The 3rd Sliver comes after 300.0px of consumed scroll extent by first 2 Slivers.
+    expect(sliver3.constraints.consumedScrollExtent, 300.0);
+  });
+
+  test('consumedScrollExtent is not impacted by scrollOffset', () {
+    const double viewportWidth = 800.0;
+    final RenderSliver sliver1 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderSliver sliver2 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderSliver sliver3 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.fixed(100.0),
+      children: <RenderSliver>[
+        sliver1,
+        sliver2,
+        sliver3,
+      ],
+    );
+    layout(root);
+
+    // The 3rd Sliver comes after 300.0px of consumed scroll extent by first 2 Slivers.
+    // In this test a ViewportOffset is applied to simulate a scrollOffset. That
+    // offset is not expected to impact the consumedScrollExtent.
+    expect(sliver3.constraints.consumedScrollExtent, 300.0);
+  });
 }
