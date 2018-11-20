@@ -105,6 +105,12 @@ class IMobileDevice {
   Future<bool> get isWorking async {
     if (!isInstalled)
       return false;
+    // If usage info is printed in a hyphenated id, we need to update.
+    const String fakeIphoneId = '00008020-001C2D903C42002E';
+    final ProcessResult ideviceResult = (await runAsync(<String>['ideviceinfo', '-u', fakeIphoneId])).processResult;
+    if (ideviceResult.stdout.contains('Usage: ideviceinfo')) {
+      return false;
+    }
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
     final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
