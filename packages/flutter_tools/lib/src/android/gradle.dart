@@ -595,7 +595,7 @@ class GradleProject {
 
   String bundleFileFor(BuildInfo buildInfo) {
     // For app bundle all bundle names are called as app.aab. Product flavors
-    // and build types are differentiated as folders, where the aab will be added.
+    // & build types are differentiated as folders, where the aab will be added.
     return 'app.aab';
   }
 }
