@@ -520,8 +520,9 @@ class WidgetsApp extends StatefulWidget {
   ///  3. Flutter's [WidgetsApp.basicLocaleListResolution] algorithm is attempted last.
   ///
   /// Properly localized projects should provide a more advanced algorithm than
-  /// [basicLocaleListResolution] as it does not implement a complete BCP47 algorithm and
-  /// is optimized for speed at the detriment of some uncommon edge-cases.
+  /// [basicLocaleListResolution] as it does not implement a complete algorithm
+  /// (such as the one defined in [Unicode TR35](http://unicode.org/reports/tr35/#LanguageMatching))
+  /// and is optimized for speed at the detriment of some uncommon edge-cases.
   /// {@endtemplate}
   ///
   /// This callback considers the entire list of preferred locales.
@@ -533,8 +534,8 @@ class WidgetsApp extends StatefulWidget {
   ///
   ///  * [MaterialApp.localeListResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
-  ///  * [basicLocaleListResolution], the locale resolution algorithm that is used
-  ///    when no custom locale resolution algorithm is provided.
+  ///  * [basicLocaleListResolution], a static method that implements the locale resolution
+  ///    algorithm that is used when no custom locale resolution algorithm is provided.
   final LocaleListResolutionCallback localeListResolutionCallback;
 
   /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
@@ -550,8 +551,8 @@ class WidgetsApp extends StatefulWidget {
   ///
   ///  * [MaterialApp.localeResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
-  ///  * [basicLocaleListResolution], the locale resolution algorithm that is used
-  ///    when no custom locale resolution algorithm is provided.
+  ///  * [basicLocaleListResolution], a static method that implements the locale resolution
+  ///    algorithm that is used when no custom locale resolution algorithm is provided.
   final LocaleResolutionCallback localeResolutionCallback;
 
   /// {@template flutter.widgets.widgetsApp.supportedLocales}
@@ -564,17 +565,23 @@ class WidgetsApp extends StatefulWidget {
   /// `[const Locale('en', 'US')]`.
   ///
   /// The order of the list matters. The default locale resolution algorithm, 
-  /// [basicLocaleListResolution], uses a variation of the truncation algorithm where
-  /// it attempts to match by the following priority: all subtags, language+script,
-  /// language+country, language-only, and finally [supportedLocales.first] as a fallback.
+  /// [basicLocaleListResolution], attempts to match by the following priority:
+  /// 
+  ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
+  ///  2. [Locale.languageCode] and [Locale.countryCode] only
+  ///  3. [Locale.languageCode] and [Locale.countryCode] only
+  ///  4. [Locale.languageCode] only
+  ///  5. returns [supportedLocales.first] as a fallback
+  /// 
   /// When more than one supported locale matches one of these criteria, only the first
   /// matching locale is returned. See [basicLocaleListResolution] for a complete
   /// description of the algorithm.
   ///
   /// The default locale resolution algorithm can be overridden by providing a value for 
   /// [localeListResolutionCallback]. The provided [basicLocaleListResolution] is optimized
-  /// for speed and does not implement a full BCP47 algorithm that takes distances between
-  /// languages into account.
+  /// for speed and does not implement a full algorithm (such as the one defined in
+  /// [Unicode TR35](http://unicode.org/reports/tr35/#LanguageMatching)) that takes
+  /// distances between languages into account.
   ///
   /// When supporting languages with more than one script, it is recommended
   /// to specify the [Locale.scriptCode] explicitly. Locales may also be defined without
@@ -613,8 +620,8 @@ class WidgetsApp extends StatefulWidget {
   ///    when the device's locale changes.
   ///  * [localizationsDelegates], which collectively define all of the localized
   ///    resources used by this app.
-  ///  * [basicLocaleListResolution], the locale resolution algorithm that is used
-  ///    when no custom locale resolution algorithm is provided.
+  ///  * [basicLocaleListResolution], a static method that implements the locale resolution
+  ///    algorithm that is used when no custom locale resolution algorithm is provided.
   final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
@@ -865,6 +872,14 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   ///
   /// When no match at all is found, the first (default) locale in [supportedLocales] will be
   /// returned.
+  /// 
+  /// To summarize, the main matching priority is:
+  ///
+  ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
+  ///  2. [Locale.languageCode] and [Locale.countryCode] only
+  ///  3. [Locale.languageCode] and [Locale.countryCode] only
+  ///  4. [Locale.languageCode] only
+  ///  5. returns [supportedLocales.first] as a fallback
   ///
   /// This algorithm does not take language distance (how similar languages are to each other)
   /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
