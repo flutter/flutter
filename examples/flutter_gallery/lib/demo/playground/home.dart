@@ -39,7 +39,7 @@ class PlaygroundPage extends StatelessWidget {
         ),
         body: TabBarView(
             children: demos.map<Widget>((PlaygroundDemo demo) {
-          return demo.widget(context);
+          return demo;
         }).toList()),
       ),
     );

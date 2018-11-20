@@ -19,9 +19,6 @@ const Color _kFlutterBlue = Color(0xFF003D75);
 const double _kDemoItemHeight = 64.0;
 const Duration _kFrontLayerSwitchDuration = Duration(milliseconds: 300);
 
-const List<GalleryDemoCategory> _kPlayergroundDemoCategories =
-    <GalleryDemoCategory>[kCupertinoPlayGround, kMaterialPlayground];
-
 class _FlutterLogo extends StatelessWidget {
   const _FlutterLogo({Key key}) : super(key: key);
 
@@ -357,17 +354,6 @@ class _GalleryHomeState extends State<GalleryHome>
         Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
     const Curve switchInCurve = Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
 
-    void _navigateToPlaygroundDemo(GalleryDemoCategory category) {
-      final String route = category == kCupertinoPlayGround
-          ? CupertinoPlaygroundDemo.routeName
-          : MaterialPlaygroundDemo.routeName;
-
-      Timeline.instantSync('Start Transition', arguments: <String, String>{
-        'from': '/',
-        'to': route,
-      });
-      Navigator.pushNamed(context, route);
-    }
 
     Widget _frontLayerChild() {
       if (_category == null) {

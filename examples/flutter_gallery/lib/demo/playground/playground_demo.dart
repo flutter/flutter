@@ -1,36 +1,41 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
-abstract class PlaygroundDemo {
-  
+abstract class PlaygroundDemo extends StatefulWidget {
+  final _PlaygroundWidgetState _state = _PlaygroundWidgetState();
+
+  @override
+  _PlaygroundWidgetState createState() => _state;
+
   String tabName();
-  Widget widget(BuildContext context);
+  Widget previewWidget(BuildContext context);
+  Widget configWidget(BuildContext context);
   String code();
 
+  void updateConfiguration(VoidCallback updates) => _state.updateState(updates);
 }
 
-
-class PlaygroundDemoHolder extends StatefulWidget {
-  @override
-  PlaygroundDemoHolderState createState() => PlaygroundDemoHolderState();
-}
-
-class PlaygroundDemoHolderState extends State<PlaygroundDemoHolder> {
+class _PlaygroundWidgetState extends State<PlaygroundDemo> {
   @override
   Widget build(BuildContext context) {
     return Column(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Container(
-                height: 240.0,
-                child: demo.previewWidget(this),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: demo.configWidget(this),
-                ),
-              ),
-            ],
-          );
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Container(
+          height: 200.0,
+          child: widget.previewWidget(context),
+        ),
+        const Divider(
+          height: 1.0,
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            child: widget.configWidget(context),
+          ),
+        ),
+      ],
+    );
   }
+
+  void updateState(VoidCallback stateCallback) => setState(stateCallback);
 }

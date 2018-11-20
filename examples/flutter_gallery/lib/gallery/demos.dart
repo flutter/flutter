@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../demo/all.dart';
@@ -57,16 +59,16 @@ const GalleryDemoCategory _kMedia = GalleryDemoCategory._(
   icon: GalleryIcons.drive_video,
 );
 
-const GalleryDemoCategory kMaterialPlayground = GalleryDemoCategory._(
+const GalleryDemoCategory _kMaterialPlayground = GalleryDemoCategory._(
   name: 'Material Playground',
   icon: GalleryIcons.animation,
-  isPlayground: true,
+  routePath: '/playground/material',
 );
 
-const GalleryDemoCategory kCupertinoPlayGround = GalleryDemoCategory._(
+const GalleryDemoCategory _kCupertinoPlayground = GalleryDemoCategory._(
   name: 'Cupertino Playground',
   icon: GalleryIcons.animation,
-  isPlayground: true,
+  routePath: '/playground/cupertino',
 );
 
 class GalleryDemo {
@@ -96,7 +98,6 @@ class GalleryDemo {
     return '$runtimeType($title $routeName)';
   }
 }
-
 
 List<GalleryDemo> _buildGalleryDemos() {
   final List<GalleryDemo> galleryDemos = <GalleryDemo>[
@@ -600,38 +601,29 @@ List<GalleryDemo> _buildGalleryDemos() {
   return galleryDemos;
 }
 
-Set<GalleryDemoCategory> _buildCategories(List<GalleryDemo> kAllGalleryDemos) {
-  final Set<GalleryDemoCategory> kAllGalleryDemoCategories = kAllGalleryDemos
-      .map<GalleryDemoCategory>((GalleryDemo demo) => demo.category)
-      .toSet();
-
-  // Add these special cases since they do not have child demos
-  // TODO order these by platform
-  // Android:
-  // - studies
-  // - style
-  // - material playground
-  // - material
-  // - cupertino playground
-  // - cupertino
-  // - media
-  // iOS:
-  // - studies
-  // - style
-  // - cupertino playground
-  // - cupertino
-  // - material playground
-  // - material
-  // - media
-  kAllGalleryDemoCategories.add(kMaterialPlayground);
-  kAllGalleryDemoCategories.add(kCupertinoPlayGround);
-
-  return kAllGalleryDemoCategories;
+Set<GalleryDemoCategory> _buildCategories() {
+  final Set<GalleryDemoCategory> categories = Set<GalleryDemoCategory>();
+  if (Platform.isIOS) {
+    categories.addAll([
+      _kCupertinoPlayground,
+      _kCupertinoComponents,
+      _kMaterialPlayground,
+      _kMaterialComponents
+    ]);
+  } else {
+    categories.addAll([
+      _kMaterialPlayground,
+      _kMaterialComponents,
+      _kCupertinoPlayground,
+      _kCupertinoComponents
+    ]);
+  }
+  categories.addAll([_kDemos, _kStyle, _kMedia]);
+  return categories;
 }
 
 final List<GalleryDemo> kAllGalleryDemos = _buildGalleryDemos();
-final Set<GalleryDemoCategory> kAllGalleryDemoCategories =
-    _buildCategories(kAllGalleryDemos);
+final Set<GalleryDemoCategory> kAllGalleryDemoCategories = _buildCategories();
 
 final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
     Map<GalleryDemoCategory, List<GalleryDemo>>.fromIterable(

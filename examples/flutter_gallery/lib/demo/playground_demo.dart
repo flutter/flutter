@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'playground/cupertino/cupertino.dart';
+import 'playground/home.dart';
 import 'playground/material/material.dart';
-import 'playground/playground.dart';
+import 'playground/playground_demo.dart';
 
 class MaterialPlaygroundDemo extends StatelessWidget {
   const MaterialPlaygroundDemo({Key key}) : super(key: key);
@@ -38,22 +39,22 @@ class CupertinoPlaygroundDemo extends StatelessWidget {
     return PlaygroundPage(
         title: 'Cupertino Widget Playground',
         demos: <PlaygroundDemo>[
-          PlaygroundDemo(
-            tabName: 'CUPERTINOBUTTON',
-            demoWidget: Center(child: Text('CupertinoButton')),
-          ),
-          PlaygroundDemo(
-            tabName: 'CUPERTINOSEGMENTCONTROL',
-            demoWidget: Center(child: Text('CupetinoSegmentControl')),
-          ),
-          PlaygroundDemo(
-            tabName: 'CUPERTINOSLIDER',
-            demoWidget: Center(child: Text('CupertinoSlider')),
-          ),
-          PlaygroundDemo(
-            tabName: 'CUPERTINOSWITCH',
-            demoWidget: Center(child: Text('CupertinoSwitch')),
-          ),
+          // PlaygroundDemo(
+          //   tabName: 'CUPERTINOBUTTON',
+          //   demoWidget: Center(child: Text('CupertinoButton')),
+          // ),
+          // PlaygroundDemo(
+          //   tabName: 'CUPERTINOSEGMENTCONTROL',
+          //   demoWidget: Center(child: Text('CupetinoSegmentControl')),
+          // ),
+          // PlaygroundDemo(
+          //   tabName: 'CUPERTINOSLIDER',
+          //   demoWidget: Center(child: Text('CupertinoSlider')),
+          // ),
+          // PlaygroundDemo(
+          //   tabName: 'CUPERTINOSWITCH',
+          //   demoWidget: Center(child: Text('CupertinoSwitch')),
+          // ),
         ]);
   }
 }
