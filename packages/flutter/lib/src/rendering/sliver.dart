@@ -232,15 +232,17 @@ class SliverConstraints extends Constraints {
   /// The scroll distance that has been consumed by all [Sliver]s that came
   /// before this [Sliver].
   ///
-  /// [Sliver]s are often created lazily as layout occurs, e.g., [SliverList].
-  /// In this case, when [Sliver]s exceed the viewport and are built lazily,
-  /// [consumedScrollExtent] will be [double.infinity] for all [Sliver]s that
-  /// appear after the lazily constructed child. This is because a total
-  /// [scrollExtent] cannot be calculated until all inner children have been
-  /// created and sized. Once the lazily constructed child has created all of
-  /// its internal content then it will begin reporting a finite [scrollExtent]
-  /// and the [double.infinity] [consumedScrollExtent] will adjust itself to
-  /// become a finite value.
+  /// [Sliver]s often lazily create their internal content as layout occurs,
+  /// e.g., [SliverList]. In this case, when [Sliver]s exceed the viewport,
+  /// their children are built lazily, and the [Sliver] does not have enough
+  /// information to estimate its total extent, [consumedScrollExtent] will be
+  /// [double.infinity] for all [Sliver]s that appear after the lazily
+  /// constructed child. This is because a total [scrollExtent] cannot be
+  /// calculated unless all inner children have been created and sized, or the
+  /// number of children and estimated extents are provided. The infinite
+  /// [scrollExtent] will become finite as soon as enough information is
+  /// available to estimate the overall extent of all children within the given
+  /// [Sliver].
   ///
   /// [Sliver]s may legitimately be infinite, meaning that they can scroll
   /// content forever without reaching the end. For any [Sliver]s that appear
