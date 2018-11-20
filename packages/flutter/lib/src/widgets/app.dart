@@ -571,6 +571,7 @@ class WidgetsApp extends StatefulWidget {
   ///  2. [Locale.languageCode] and [Locale.countryCode] only
   ///  3. [Locale.languageCode] and [Locale.countryCode] only
   ///  4. [Locale.languageCode] only
+  ///  6. [Locale.countryCode] only when all [preferredLocales] fail to match
   ///  5. returns [supportedLocales.first] as a fallback
   /// 
   /// When more than one supported locale matches one of these criteria, only the first
@@ -878,7 +879,8 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
   ///  2. [Locale.languageCode] and [Locale.countryCode] only
   ///  3. [Locale.languageCode] and [Locale.countryCode] only
-  ///  4. [Locale.languageCode] only
+  ///  4. [Locale.languageCode] only (with caveats, see above)
+  ///  6. [Locale.countryCode] only when all [preferredLocales] fail to match
   ///  5. returns [supportedLocales.first] as a fallback
   ///
   /// This algorithm does not take language distance (how similar languages are to each other)
