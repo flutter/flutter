@@ -1,8 +1,6 @@
 # Specify analysis options.
 
 analyzer:
-  language:
-    enableSuperMixins: true
   strong-mode:
     implicit-dynamic: false
   errors:

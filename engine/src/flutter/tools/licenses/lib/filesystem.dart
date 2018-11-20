@@ -308,8 +308,7 @@ abstract class TextFile extends File {
   String readString();
 }
 
-// mixin
-abstract class UTF8TextFile extends TextFile {
+mixin UTF8TextFile implements TextFile {
   @override
   String readString() {
     try {
@@ -321,8 +320,7 @@ abstract class UTF8TextFile extends TextFile {
   }
 }
 
-// mixin
-abstract class Latin1TextFile extends TextFile {
+mixin Latin1TextFile implements TextFile {
   @override
   String readString() {
     return cache(new Latin1Of(this), () {
@@ -350,8 +348,7 @@ abstract class Directory extends IoNode {
 // interface
 abstract class Link extends IoNode { }
 
-// mixin
-abstract class ZipFile extends File implements Directory {
+mixin ZipFile on File implements Directory {
   ArchiveDirectory _root;
 
   @override
@@ -366,8 +363,7 @@ abstract class ZipFile extends File implements Directory {
   }
 }
 
-// mixin
-abstract class TarFile extends File implements Directory {
+mixin TarFile on File implements Directory {
   ArchiveDirectory _root;
 
   @override
@@ -382,8 +378,7 @@ abstract class TarFile extends File implements Directory {
   }
 }
 
-// mixin
-abstract class GZipFile extends File implements Directory {
+mixin GZipFile on File implements Directory {
   InMemoryFile _data;
 
   @override
@@ -400,8 +395,7 @@ abstract class GZipFile extends File implements Directory {
   }
 }
 
-// mixin
-abstract class BZip2File extends File implements Directory {
+mixin BZip2File on File implements Directory {
   InMemoryFile _data;
 
   @override
