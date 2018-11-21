@@ -1,8 +1,12 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'playground_demo.dart';
 
-class PlaygroundPage extends StatelessWidget {
-  const PlaygroundPage({
+class PlaygroundScaffold extends StatelessWidget {
+  const PlaygroundScaffold({
     this.title,
     this.demos,
   });

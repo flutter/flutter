@@ -61,14 +61,14 @@ const GalleryDemoCategory _kMedia = GalleryDemoCategory._(
 
 const GalleryDemoCategory _kMaterialPlayground = GalleryDemoCategory._(
   name: 'Material Playground',
-  icon: GalleryIcons.animation,
-  routePath: '/playground/material',
+  icon: GalleryIcons.animation, // TODO use correct icon
+  routePath: MaterialPlaygroundDemo.routeName,
 );
 
 const GalleryDemoCategory _kCupertinoPlayground = GalleryDemoCategory._(
   name: 'Cupertino Playground',
-  icon: GalleryIcons.animation,
-  routePath: '/playground/cupertino',
+  icon: GalleryIcons.animation, // TODO use correct icon
+  routePath: CupertinoPlaygroundDemo.routeName,
 );
 
 class GalleryDemo {

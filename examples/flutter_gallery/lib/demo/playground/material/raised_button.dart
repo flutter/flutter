@@ -1,3 +1,7 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gallery/demo/playground/playground_demo.dart';
 import 'package:flutter_gallery/demo/playground/configuration/material_helpers.dart';
@@ -7,10 +11,6 @@ class RaisedButtonDemo extends PlaygroundDemo {
   String _borderShape = 'rounded';
   Color _color = Colors.blue;
   Color _splashColor = Colors.lightBlue;
-
-  static const double _labelFontSize = 16.0;
-  static const double _controlHeight = 40.0;
-  static const Color _labelColor = Colors.blue;
 
   @override
   String tabName() => 'RAISEDBUTTON';

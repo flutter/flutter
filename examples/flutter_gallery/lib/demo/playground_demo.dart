@@ -1,3 +1,7 @@
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 
 import 'playground/cupertino/cupertino.dart';
@@ -16,11 +20,11 @@ class MaterialPlaygroundDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlaygroundPage(
+    return PlaygroundScaffold(
         title: 'Material Widget Playground',
         demos: <PlaygroundDemo>[
           RaisedButtonDemo(),
-          RaisedButtonDemo(),
+          FlatButtonDemo(),
         ]);
   }
 }
@@ -36,7 +40,7 @@ class CupertinoPlaygroundDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlaygroundPage(
+    return PlaygroundScaffold(
         title: 'Cupertino Widget Playground',
         demos: <PlaygroundDemo>[
           // PlaygroundDemo(
