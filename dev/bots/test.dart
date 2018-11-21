@@ -206,8 +206,8 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
   // and build ios doesn't take care of it automatically.
   final File podfile = File(path.join(flutterRoot, relativePathToApplication, 'ios', 'Podfile'));
   if (podfile.existsSync()) {
-    await runCommand(flutter,
-      <String>['pod', 'install'],
+    await runCommand('pod',
+      <String>['install'],
       workingDirectory: path.join(flutterRoot, relativePathToApplication),
       expectNonZeroExit: false,
       timeout: _kShortTimeout,
