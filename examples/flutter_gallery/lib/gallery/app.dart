@@ -7,11 +7,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:flutter_gallery/welcome/home.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../welcome/screen.dart';
 
 import 'demos.dart';
 import 'home.dart';
@@ -19,6 +18,7 @@ import 'options.dart';
 import 'scales.dart';
 import 'themes.dart';
 import 'updater.dart';
+import 'welcome.dart';
 
 class GalleryApp extends StatefulWidget {
   const GalleryApp({
@@ -151,15 +151,7 @@ class _GalleryAppState extends State<GalleryApp> {
   }
 
   Widget _homeWidget() {
-    final Widget welcome = WarmWelcomeScreen(
-      isInitialScreen: true,
-      onSkipPressed: () async {
-        await _prefs.setBool('hasSeenWelcome', true);
-        setState(() {
-          _showWelcome = false;
-        });
-      },
-    );
+    const Widget welcome = Welcome();
     Widget home = GalleryHome(
       testMode: widget.testMode,
       optionsPage: GalleryOptionsPage(
