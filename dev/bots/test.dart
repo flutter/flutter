@@ -204,7 +204,7 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
   print('Running IPA build tests...');
   // Install Cocoapods.  We don't have these checked in for the examples,
   // and build ios doesn't take care of it automatically.
-  final File podfile = File(path.join(flutterRoot, relativePathToApplication, 'ios', 'Podfile');
+  final File podfile = File(path.join(flutterRoot, relativePathToApplication, 'ios', 'Podfile'));
   if (podfile.existsSync()) {
     await runCommand(flutter,
       <String>['pod', 'install'],
