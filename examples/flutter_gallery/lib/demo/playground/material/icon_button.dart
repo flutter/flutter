@@ -40,16 +40,12 @@ class IconButtonDemo extends PlaygroundDemo {
   @override
   Widget previewWidget(BuildContext context) {
     return Center(
-      child: ButtonTheme(
-        minWidth: 500.0,
-        height: 400.0,
-        child: IconButton(
-          iconSize: 50.0,
-          icon: Icon(_icon),
-          onPressed: () {},
-          color: _color,
-          splashColor: _color.withOpacity(0.2),
-        ),
+      child: IconButton(
+        iconSize: 50.0,
+        icon: Icon(_icon),
+        onPressed: () {},
+        color: _color,
+        splashColor: _color.withOpacity(0.2),
       ),
     );
   }
@@ -92,7 +88,7 @@ class IconButtonDemo extends PlaygroundDemo {
         height: 46.0,
         child: Row(
           mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: buttonChildren,
         ),

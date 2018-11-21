@@ -6,7 +6,15 @@ const double _pickerRowHeight = 46.0;
 
 typedef IndexedValueCallback<T> = Function(int index, T value);
 
-// pickers
+final List<Color> kColorOptions = <Color>[
+  Colors.white,
+  Colors.orange,
+  Colors.cyan[200],
+  Colors.lightBlue[300],
+  Colors.blue,
+  Colors.blue[800],
+];
+
 Widget sliderPicker({
   @required String label,
   double value = 0.0,
@@ -130,6 +138,7 @@ Widget shapePicker({
 Widget colorButton({
   @required Color color,
   Size size = const Size(_pickerRowHeight, _pickerRowHeight),
+  bool inverse = false,
   bool isSelected = false,
   VoidCallback onTapped,
 }) {
@@ -139,11 +148,12 @@ Widget colorButton({
     child: RaisedButton(
       shape: StadiumBorder(
         side: BorderSide(
-          color: isSelected ? Colors.white : Colors.grey[350],
+          color:
+              inverse ? color : (isSelected ? Colors.white : Colors.grey[350]),
           width: 2.0,
         ),
       ),
-      color: color,
+      color: inverse ? Colors.white : color,
       elevation: isSelected ? _pickerSelectedElevation : 0.0,
       onPressed: onTapped,
     ),
@@ -152,25 +162,24 @@ Widget colorButton({
 
 Widget colorPicker({
   double pickerHeight = _pickerRowHeight,
+  bool inverse = false,
   String label = 'Color',
   Color selectedValue,
   List<Color> colors,
   IndexedValueCallback<Color> onItemTapped,
 }) {
-  final List<Color> colorOptions = colors ??
-      <Color>[
-        Colors.white,
-        Colors.orange,
-        Colors.cyan[200],
-        Colors.lightBlue[300],
-        Colors.blue,
-        Colors.blue[800],
-      ];
+  final List<Color> colorOptions = colors ?? kColorOptions;
   final List<Widget> buttonChildren = <Widget>[];
   for (int i = 0; i < colorOptions.length; i++) {
     final Color color = colorOptions[i];
+
+    print(color);
+    print(selectedValue);
+    print(selectedValue == color);
+
     Widget button = colorButton(
       color: color,
+      inverse: inverse,
       isSelected: selectedValue == color,
       onTapped: () {
         if (onItemTapped != null) {
@@ -201,7 +210,8 @@ Widget colorPicker({
   );
 }
 
-Widget buttonListContainer(List<Widget> children, {double height = _pickerRowHeight}) {
+Widget buttonListContainer(List<Widget> children,
+    {double height = _pickerRowHeight}) {
   return Container(
     padding: const EdgeInsets.only(bottom: 20.0),
     height: height,

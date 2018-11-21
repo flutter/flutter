@@ -47,10 +47,10 @@ class CupertinoPlaygroundDemo extends StatelessWidget {
     return PlaygroundScaffold(
         title: 'Cupertino Widget Playground',
         demos: <PlaygroundDemo>[
-          // CupertinoButton(),
-          // CupertinoSegmentControl(),
-          // CupertinoSlider(),
-          // CupertinoSwitch(),
+          CupertinoSliderDemo(),
+          CupertinoButtonDemo(),
+          CupertinoSegmentControlDemo(),
+          CupertinoSwitchDemo(),
         ]);
   }
 }

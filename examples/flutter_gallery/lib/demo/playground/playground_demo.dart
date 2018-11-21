@@ -26,6 +26,7 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      key: GlobalKey(),
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[

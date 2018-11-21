@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Colors;
 import 'package:flutter_gallery/demo/playground/playground_demo.dart';
 import 'package:flutter_gallery/demo/playground/configuration/material_helpers.dart';
 
-const String _demoWidgetName = 'Slider';
+const String _demoWidgetName = 'CupertinoSlider';
 
-class SliderDemo extends PlaygroundDemo {
+class CupertinoSliderDemo extends PlaygroundDemo {
   Color _activeColor = Colors.blue;
-  Color _inactiveColor = Colors.blue;
   double _value = 5.0;
 
   @override
@@ -21,19 +21,21 @@ class SliderDemo extends PlaygroundDemo {
 
   @override
   Widget configWidget(BuildContext context) {
+    final List<Color> colors =
+        kColorOptions.where((Color c) => c != Colors.white).toList();
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         colorPicker(
-          label: 'Active Color',
-          selectedValue: _activeColor,
-          onItemTapped: (int index, Color color) {
-            updateConfiguration(() {
-              _activeColor = color;
-            });
-          }
-        ),
+            label: 'Active Color',
+            selectedValue: _activeColor,
+            colors: colors,
+            onItemTapped: (int index, Color color) {
+              updateConfiguration(() {
+                _activeColor = color;
+              });
+            }),
       ],
     );
   }
@@ -42,19 +44,17 @@ class SliderDemo extends PlaygroundDemo {
   Widget previewWidget(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 25.0).copyWith(right: 25.0),
-      child: Slider(
-        value: _value,
-        min: 0.0,
-        max: 10.0,
-        divisions: 10,
-        activeColor: _activeColor,
-        inactiveColor: _inactiveColor,
-        onChanged: (double value) {
-          updateConfiguration(() {
-            _value = value;
-          });
-        },
-      ),
+      child: CupertinoSlider(
+          value: _value,
+          activeColor: _activeColor,
+          min: 0.0,
+          max: 10.0,
+          divisions: 10,
+          onChanged: (double value) {
+            updateConfiguration(() {
+              _value = value;
+            });
+          }),
     );
   }
 }
