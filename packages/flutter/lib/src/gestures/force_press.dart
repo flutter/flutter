@@ -154,6 +154,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   double peakPressure;
 
   Offset _lastPosition;
+  double _lastPressure;
   _ForceState _state = _ForceState.ready;
 
   @override
@@ -172,6 +173,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     if (event is PointerMoveEvent || event is PointerDownEvent) {
       final double pressure = _inverseLerp(event.pressureMin, event.pressureMax, event.pressure);
       _lastPosition = event.position;
+      _lastPressure = pressure;
 
       if (_state == _ForceState.possible) {
         if (pressure > startPressure) {
@@ -214,6 +216,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
       _state = _ForceState.accepted;
       if (onStart != null && _state == _ForceState.started) {
         invokeCallback<void>('onStart', () => onStart(ForcePressDetails(
+          pressure: _lastPressure,
           globalPosition: _lastPosition,
         )));
       }
@@ -231,6 +234,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
 
     if (wasAccepted && onEnd != null) {
       invokeCallback<void>('onEnd', () => onEnd(ForcePressDetails(
+        pressure: 0.0,
         globalPosition: _lastPosition,
       )));
     }
