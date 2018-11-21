@@ -2451,7 +2451,7 @@ abstract class DiagnosticableTree extends Diagnosticable {
   /// [DiagnosticsTreeStyle.offstage] to indicate that they are offstage.
   ///
   /// The list must not contain any null entries. If there are explicit null
-  /// children to report, consider [new DiagnosticsNode.message] or
+  /// children to report, consider [DiagnosticsNode.message] or
   /// [DiagnosticsProperty<Object>] as possible [DiagnosticsNode] objects to
   /// provide.
   ///

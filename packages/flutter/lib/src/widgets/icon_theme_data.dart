@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart';
 /// widget subtree.
 ///
 /// To obtain the current icon theme, use [IconTheme.of]. To convert an icon
-/// theme to a version with all the fields filled in, use [new
+/// theme to a version with all the fields filled in, use
 /// IconThemeData.fallback].
 class IconThemeData extends Diagnosticable {
   /// Creates an icon theme data.

@@ -207,7 +207,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [new MediaQuery.removePadding], which uses this method to remove padding
+  ///  * [MediaQuery.removePadding], which uses this method to remove padding
   ///    from the ambient [MediaQuery].
   ///  * [SafeArea], which both removes the padding from the [MediaQuery] and
   ///    adds a [Padding] widget.
@@ -248,8 +248,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [new MediaQuery.removeViewInsets], which uses this method to remove
-  ///    padding from the ambient [MediaQuery].
+  ///  * [MediaQuery.removeViewInsets], which uses this method to remove padding
+  ///    from the ambient [MediaQuery].
   ///  * [removePadding], the same thing but for [padding].
   MediaQueryData removeViewInsets({
     bool removeLeft = false,
@@ -382,7 +382,7 @@ class MediaQuery extends InheritedWidget {
   ///  * [SafeArea], which both removes the padding from the [MediaQuery] and
   ///    adds a [Padding] widget.
   ///  * [MediaQueryData.padding], the affected property of the [MediaQueryData].
-  ///  * [new removeViewInsets], the same thing but for removing view insets.
+  ///  * [removeViewInsets()], the same thing but for removing view insets.
   factory MediaQuery.removePadding({
     Key key,
     @required BuildContext context,
@@ -424,7 +424,7 @@ class MediaQuery extends InheritedWidget {
   /// See also:
   ///
   ///  * [MediaQueryData.viewInsets], the affected property of the [MediaQueryData].
-  ///  * [new removePadding], the same thing but for removing paddings.
+  ///  * [removePadding()], the same thing but for removing paddings.
   factory MediaQuery.removeViewInsets({
     Key key,
     @required BuildContext context,

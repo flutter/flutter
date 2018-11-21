@@ -73,8 +73,8 @@ class Theme extends StatelessWidget {
   /// [MaterialLocalizations], the returned data is localized according to the
   /// nearest available [MaterialLocalizations].
   ///
-  /// Defaults to [new ThemeData.fallback] if there is no [Theme] in the given
-  /// build context.
+  /// Defaults to [ThemeData.fallback] if there is no [Theme] in the given build
+  /// context.
   ///
   /// If [shadowThemeOnly] is true and the closest [Theme] ancestor was
   /// installed by the [MaterialApp] — in other words if the closest [Theme]

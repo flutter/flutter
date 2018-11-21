@@ -134,8 +134,8 @@ class SystemChannels {
   ///
   ///  * `TextInputClient.updateEditingState`: The user has changed the contents
   ///    of the text control. The second argument is a [String] containing a
-  ///    JSON-encoded object with seven keys, in the form expected by [new
-  ///    TextEditingValue.fromJSON].
+  ///    JSON-encoded object with seven keys, in the form expected by
+  ///    [TextEditingValue.fromJSON].
   ///
   ///  * `TextInputClient.performAction`: The user has triggered an action. The
   ///    second argument is a [String] consisting of the stringification of one
@@ -166,7 +166,7 @@ class SystemChannels {
   /// See also:
   ///
   ///  * [RawKeyboard], which uses this channel to expose key data.
-  ///  * [new RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
+  ///  * [RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
   ///    subclasses mentioned above.
   static const BasicMessageChannel<dynamic> keyEvent = BasicMessageChannel<dynamic>(
       'flutter/keyevent',

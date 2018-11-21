@@ -56,7 +56,7 @@ typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Ite
 /// locale for the device after [LocaleListResolutionCallback] fails or is not provided.
 ///
 /// This callback is also used if the app is created with a specific locale using
-/// the [new WidgetsApp] `locale` parameter.
+/// the [WidgetsApp()] `locale` parameter.
 ///
 /// The [locale] is either the value of [WidgetsApp.locale], or the device's default
 /// locale when the app started, or the device locale the user selected after the app

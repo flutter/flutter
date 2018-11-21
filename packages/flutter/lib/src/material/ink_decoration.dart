@@ -136,7 +136,7 @@ class Ink extends StatefulWidget {
   /// a [Material].
   ///
   /// This argument is a shorthand for passing a [BoxDecoration] that has only
-  /// its [BoxDecoration.image] property set to the [new Ink] constructor. The
+  /// its [BoxDecoration.image] property set to the [Ink()] constructor. The
   /// properties of the [DecorationImage] of that [BoxDecoration] are set
   /// according to the arguments passed to this method.
   ///
@@ -194,8 +194,8 @@ class Ink extends StatefulWidget {
   /// constructor: set the `color` argument instead of the `decoration`
   /// argument.
   ///
-  /// A shorthand for specifying just an image is also available using the [new
-  /// Ink.image] constructor.
+  /// A shorthand for specifying just an image is also available using the
+  /// [Ink.image] constructor.
   final Decoration decoration;
 
   /// A width to apply to the [decoration] and the [child]. The width includes

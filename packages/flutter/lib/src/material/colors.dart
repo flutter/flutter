@@ -19,9 +19,9 @@ class MaterialColor extends ColorSwatch<int> {
   /// Creates a color swatch with a variety of shades.
   ///
   /// The `primary` argument should be the 32 bit ARGB value of one of the
-  /// values in the swatch, as would be passed to the [new Color] constructor
-  /// for that same color, and as is exposed by [value]. (This is distinct from
-  /// the specific index of the color in the swatch.)
+  /// values in the swatch, as would be passed to the [Color()] constructor for
+  /// that same color, and as is exposed by [value]. (This is distinct from the
+  /// specific index of the color in the swatch.)
   const MaterialColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
 
   /// The lightest shade.

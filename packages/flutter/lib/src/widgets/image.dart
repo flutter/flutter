@@ -108,12 +108,12 @@ Future<void> precacheImage(
 /// Several constructors are provided for the various ways that an image can be
 /// specified:
 ///
-///  * [new Image], for obtaining an image from an [ImageProvider].
-///  * [new Image.asset], for obtaining an image from an [AssetBundle]
+///  * [Image()], for obtaining an image from an [ImageProvider].
+///  * [Image.asset()], for obtaining an image from an [AssetBundle]
 ///    using a key.
-///  * [new Image.network], for obtaining an image from a URL.
-///  * [new Image.file], for obtaining an image from a [File].
-///  * [new Image.memory], for obtaining an image from a [Uint8List].
+///  * [Image.network()], for obtaining an image from a URL.
+///  * [Image.file()], for obtaining an image from a [File].
+///  * [Image.memory()], for obtaining an image from a [Uint8List].
 ///
 /// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
@@ -127,14 +127,14 @@ Future<void> precacheImage(
 /// See also:
 ///
 ///  * [Icon], which shows an image from a font.
-///  * [new Ink.image], which is the preferred way to show an image in a
+///  * [Ink.image], which is the preferred way to show an image in a
 ///    material application (especially if the image is in a [Material] and will
 ///    have an [InkWell] on top of it).
 class Image extends StatefulWidget {
   /// Creates a widget that displays an image.
   ///
   /// To show an image from the network or from an asset bundle, consider using
-  /// [new Image.network] and [new Image.asset] respectively.
+  /// [Image.network] and [Image.asset] respectively.
   ///
   /// The [image], [alignment], [repeat], and [matchTextDirection] arguments
   /// must not be null.

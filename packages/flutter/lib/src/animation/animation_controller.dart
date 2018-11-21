@@ -289,9 +289,9 @@ class AnimationController extends Animation<double>
   /// The behavior of the controller when [AccessibilityFeatures.disableAnimations]
   /// is true.
   ///
-  /// Defaults to [AnimationBehavior.normal] for the [new AnimationController]
+  /// Defaults to [AnimationBehavior.normal] for the [AnimationController()]
   /// constructor, and [AnimationBehavior.preserve] for the
-  /// [new AnimationController.unbounded] constructor.
+  /// [AnimationController.unbounded] constructor.
   final AnimationBehavior animationBehavior;
 
   /// Returns an [Animation<double>] for this animation controller, so that a

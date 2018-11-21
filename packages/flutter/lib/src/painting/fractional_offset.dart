@@ -77,8 +77,8 @@ class FractionalOffset extends Alignment {
   ///
   /// The offset is assumed to be relative to the same origin as the rectangle.
   ///
-  /// If the offset is relative to the top left of the rectangle, use [new
-  /// FractionalOffset.fromOffsetAndSize] instead, passing `rect.size`.
+  /// If the offset is relative to the top left of the rectangle, use
+  /// [FractionalOffset.fromOffsetAndSize] instead, passing `rect.size`.
   ///
   /// The returned [FractionalOffset] describes the position of the
   /// [Offset] in the [Rect], as a fraction of the [Rect].

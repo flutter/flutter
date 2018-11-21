@@ -254,7 +254,7 @@ abstract class SliverChildDelegate {
 /// {@end-tool}
 ///
 /// In certain cases, only a subset of child widgets should be annotated
-/// with a semantic index. For example, in [new ListView.separated()] the
+/// with a semantic index. For example, in [ListView.separated()] the
 /// separators do not have an index assocaited with them. This is done by
 /// providing a `semanticIndexCallback` which returns null for separators
 /// indexes and rounds the non-separator indexes down by half.
@@ -458,10 +458,10 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 /// second delegate should offset its children by 10.
 ///
 /// In certain cases, only a subset of child widgets should be annotated
-/// with a semantic index. For example, in [new ListView.separated()] the
-/// separators do not have an index assocaited with them. This is done by
-/// providing a `semanticIndexCallback` which returns null for separators
-/// indexes and rounds the non-separator indexes down by half.
+/// with a semantic index. For example, in [ListView.separated()] the separators
+/// do not have an index assocaited with them. This is done by providing a
+/// `semanticIndexCallback` which returns null for separators indexes and rounds
+/// the non-separator indexes down by half.
 ///
 /// See [SliverChildBuilderDelegate] for sample code using
 /// `semanticIndexOffset` and `semanticIndexCallback`.
@@ -814,7 +814,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   ///
   /// See also:
   ///
-  ///  * [new GridView.count], the equivalent constructor for [GridView] widgets.
+  ///  * [GridView.count], the equivalent constructor for [GridView] widgets.
   SliverGrid.count({
     Key key,
     @required int crossAxisCount,
@@ -838,7 +838,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   ///
   /// See also:
   ///
-  ///  * [new GridView.extent], the equivalent constructor for [GridView] widgets.
+  ///  * [GridView.extent], the equivalent constructor for [GridView] widgets.
   SliverGrid.extent({
     Key key,
     @required double maxCrossAxisExtent,
