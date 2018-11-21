@@ -1641,12 +1641,13 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     assert(correctedOffset.isFinite);
     _maxScrollExtent = 0.0;
     _shrinkWrapExtent = 0.0;
-    _hasVisualOverflow = false;
+    // bounce at start always overflows when shrink wrapped
+    _hasVisualOverflow = correctedOffset < 0;
     return layoutChildSequence(
       child: firstChild,
       scrollOffset: math.max(0.0, correctedOffset),
       overlap: math.min(0.0, correctedOffset),
-      layoutOffset: 0.0,
+      layoutOffset: math.max(0.0, -correctedOffset),
       remainingPaintExtent: mainAxisExtent,
       mainAxisExtent: mainAxisExtent,
       crossAxisExtent: crossAxisExtent,
