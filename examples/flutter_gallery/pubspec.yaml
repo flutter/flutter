@@ -155,6 +155,7 @@ flutter:
     - assets/images/customized/fg_hero.png
     - assets/images/customized/ic_circle_arrow.png
     - assets/images/customized/run_path.png
+    - assets/images/welcome/welcome_hello.png
     - assets/images/welcome/welcome_explore_flutter.png
     - assets/images/welcome/welcome_flutter_logo.png
     - assets/images/welcome/welcome_documentation.png

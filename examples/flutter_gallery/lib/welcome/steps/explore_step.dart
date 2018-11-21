@@ -19,7 +19,7 @@ class ExploreWelcomeStep extends WelcomeStep {
   String title() => 'Explore Flutter!';
   @override
   String subtitle() =>
-      'Be highly productive by doing more with less code. Jump in and explore what Flutter can do!';
+      'Start being highly productive and do more with less code. Explore what you can do with Flutter!';
 
   @override
   Widget imageWidget() {

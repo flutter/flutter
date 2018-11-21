@@ -9,12 +9,12 @@ class FlutterWelcomeStep extends WelcomeStep {
   String title() => 'Welcome to Flutter!';
   @override
   String subtitle() =>
-      'Flutter is a mobile app SDK for building high-performance, high-fidelity, apps for iOS and Android.';
+      'Flutter allows you to build beautiful native apps on iOS and Android from a single codebase.';
 
   @override
   Widget imageWidget() {
     return Image.asset(
-      'assets/images/welcome/welcome_flutter_logo.png',
+      'assets/images/welcome/welcome_hello.png',
     );
   }
 

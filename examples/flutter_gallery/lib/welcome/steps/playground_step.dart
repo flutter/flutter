@@ -8,7 +8,7 @@ class PlaygroundWelcomeStep extends WelcomeStep {
   @override
   String title() => 'Interactive widget playground';
   @override
-  String subtitle() => 'Explore the rich native UI widgets';
+  String subtitle() => 'Explore the rich native UI widgets in real-time. See and share the code to get up and running, fast.';
 
   @override
   Widget imageWidget() {

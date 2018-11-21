@@ -16,7 +16,7 @@ class DocumentationWelcomeStep extends WelcomeStep {
   @override
   String title() => 'Complete, flexible APIs';
   @override
-  String subtitle() => 'View full API documentation';
+  String subtitle() => 'View full API documentation, when you need it, with a quick tap. Look for the documentation icon in the app bar.';
 
   @override
   Widget imageWidget() {
