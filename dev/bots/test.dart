@@ -172,12 +172,14 @@ Future<void> _runBuildTests() async {
 }
 
 Future<void> _flutterBuildAot(String relativePathToApplication) async {
+  print('Running AOT build tests...');
   await runCommand(flutter,
-    <String>['build', 'aot'],
+    <String>['build', 'aot', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
     expectNonZeroExit: false,
     timeout: _kShortTimeout,
   );
+  print('Done.');
 }
 
 Future<void> _flutterBuildApk(String relativePathToApplication) async {
@@ -185,24 +187,39 @@ Future<void> _flutterBuildApk(String relativePathToApplication) async {
   if (Platform.environment['ANDROID_HOME'] == null || Platform.environment['ANDROID_HOME'] == '') {
     return;
   }
+  print('Running APK build tests...');
   await runCommand(flutter,
-    <String>['build', 'apk', '--debug'],
+    <String>['build', 'apk', '--debug', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
     expectNonZeroExit: false,
     timeout: _kShortTimeout,
   );
+  print('Done.');
 }
 
 Future<void> _flutterBuildIpa(String relativePathToApplication) async {
   if (!Platform.isMacOS) {
     return;
   }
+  print('Running IPA build tests...');
+  // Install Cocoapods.  We don't have these checked in for the examples,
+  // and build ios doesn't take care of it automatically.
+  final File podfile = File(path.join(flutterRoot, relativePathToApplication, 'ios', 'Podfile');
+  if (podfile.existsSync()) {
+    await runCommand(flutter,
+      <String>['pod', 'install'],
+      workingDirectory: path.join(flutterRoot, relativePathToApplication),
+      expectNonZeroExit: false,
+      timeout: _kShortTimeout,
+    );
+  }
   await runCommand(flutter,
-    <String>['build', 'ios', '--no-codesign', '--debug'],
+    <String>['build', 'ios', '--no-codesign', '--debug', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
     expectNonZeroExit: false,
     timeout: _kShortTimeout,
   );
+  print('Done.');
 }
 
 Future<void> _runTests() async {

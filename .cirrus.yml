@@ -191,6 +191,7 @@ task:
     - name: build_tests-macos
       env:
         SHARD: build_tests
+        COCOAPODS_DISABLE_STATS: true
       test_script:
         - dart ./dev/bots/test.dart
       container:
