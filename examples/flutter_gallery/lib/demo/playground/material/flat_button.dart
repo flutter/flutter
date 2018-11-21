@@ -6,13 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gallery/demo/playground/playground_demo.dart';
 import 'package:flutter_gallery/demo/playground/configuration/material_helpers.dart';
 
+const String _demoWidgetName = 'FlatButton';
+
 class FlatButtonDemo extends PlaygroundDemo {
   String _borderShape = 'rounded';
   Color _color = Colors.blue;
-  Color _splashColor = Colors.lightBlue;
 
   @override
-  String tabName() => 'FLATBUTTON';
+  String tabName() => _demoWidgetName.toUpperCase();
 
   @override
   String code() => '';
@@ -63,7 +64,6 @@ class FlatButtonDemo extends PlaygroundDemo {
               ? RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30.0))
               : borderShapeFromString(_borderShape, false),
-          splashColor: _splashColor,
           onPressed: () {},
         ),
       ),

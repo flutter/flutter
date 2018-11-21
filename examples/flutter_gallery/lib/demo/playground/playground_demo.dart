@@ -4,11 +4,15 @@
 
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 abstract class PlaygroundDemo extends StatefulWidget {
-  final _PlaygroundWidgetState _state = _PlaygroundWidgetState();
+  _PlaygroundWidgetState _state;
 
   @override
-  _PlaygroundWidgetState createState() => _state;
+  _PlaygroundWidgetState createState() {
+    _state = _PlaygroundWidgetState();
+    return _state;
+  }
 
   String tabName();
   Widget previewWidget(BuildContext context);

@@ -119,7 +119,7 @@ Widget shapePicker({
       height: pickerHeight,
       child: Row(
         mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: buttonChildren,
       ),
@@ -152,6 +152,7 @@ Widget colorButton({
 
 Widget colorPicker({
   double pickerHeight = _pickerRowHeight,
+  String label = 'Color',
   Color selectedValue,
   List<Color> colors,
   IndexedValueCallback<Color> onItemTapped,
@@ -186,13 +187,13 @@ Widget colorPicker({
     buttonChildren.add(button);
   }
   return PropertyColumn(
-    label: 'Color',
+    label: label,
     widget: Container(
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
       height: pickerHeight,
       child: Row(
         mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: buttonChildren,
       ),

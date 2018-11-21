@@ -25,6 +25,10 @@ class MaterialPlaygroundDemo extends StatelessWidget {
         demos: <PlaygroundDemo>[
           RaisedButtonDemo(),
           FlatButtonDemo(),
+          IconButtonDemo(),
+          CheckboxDemo(),
+          SwitchDemo(),
+          SliderDemo(),
         ]);
   }
 }
@@ -43,22 +47,10 @@ class CupertinoPlaygroundDemo extends StatelessWidget {
     return PlaygroundScaffold(
         title: 'Cupertino Widget Playground',
         demos: <PlaygroundDemo>[
-          // PlaygroundDemo(
-          //   tabName: 'CUPERTINOBUTTON',
-          //   demoWidget: Center(child: Text('CupertinoButton')),
-          // ),
-          // PlaygroundDemo(
-          //   tabName: 'CUPERTINOSEGMENTCONTROL',
-          //   demoWidget: Center(child: Text('CupetinoSegmentControl')),
-          // ),
-          // PlaygroundDemo(
-          //   tabName: 'CUPERTINOSLIDER',
-          //   demoWidget: Center(child: Text('CupertinoSlider')),
-          // ),
-          // PlaygroundDemo(
-          //   tabName: 'CUPERTINOSWITCH',
-          //   demoWidget: Center(child: Text('CupertinoSwitch')),
-          // ),
+          // CupertinoButton(),
+          // CupertinoSegmentControl(),
+          // CupertinoSlider(),
+          // CupertinoSwitch(),
         ]);
   }
 }

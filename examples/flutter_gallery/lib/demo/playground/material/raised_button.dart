@@ -6,14 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gallery/demo/playground/playground_demo.dart';
 import 'package:flutter_gallery/demo/playground/configuration/material_helpers.dart';
 
+const String _demoWidgetName = 'RaisedButton';
+
 class RaisedButtonDemo extends PlaygroundDemo {
   double _elevation = 8.0;
   String _borderShape = 'rounded';
   Color _color = Colors.blue;
-  Color _splashColor = Colors.lightBlue;
 
   @override
-  String tabName() => 'RAISEDBUTTON';
+  String tabName() => _demoWidgetName.toUpperCase();
 
   @override
   String code() => '';
@@ -66,7 +67,6 @@ class RaisedButtonDemo extends PlaygroundDemo {
                   borderRadius: BorderRadius.circular(30.0))
               : borderShapeFromString(_borderShape, false),
           elevation: _elevation,
-          splashColor: _splashColor,
           onPressed: () {},
         ),
       ),
