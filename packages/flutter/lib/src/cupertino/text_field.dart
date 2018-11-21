@@ -46,14 +46,6 @@ const Color _kSelectionHighlightColor = Color(0x667FAACF);
 const Color _kInactiveTextColor = Color(0xFFC2C2C2);
 const Color _kDisabledBackground = Color(0xFFFAFAFA);
 
-// Default iOS placeholder style.
-const TextStyle _kDefaultPlaceholderStyle = _kDefaultTextStyle.merge(
-  const TextStyle(
-    color: _kInactiveTextColor,
-    fontWeight: FontWeight.w300,
-  ),
-);
-
 /// Visibility of text field overlays based on the state of the current text entry.
 ///
 /// Used to toggle the visibility behavior of the optional decorating widgets
@@ -160,7 +152,12 @@ class CupertinoTextField extends StatefulWidget {
     this.decoration = _kDefaultRoundedBorderDecoration,
     this.padding = const EdgeInsets.all(6.0),
     this.placeholder,
-    this.placeholderStyle = _kDefaultPlaceholderStyle,
+    this.placeholderStyle = _kDefaultTextStyle.merge(
+      const TextStyle(
+        color: _kInactiveTextColor,
+        fontWeight: FontWeight.w300,
+      ),
+    ),
     this.prefix,
     this.prefixMode = OverlayVisibilityMode.always,
     this.suffix,
