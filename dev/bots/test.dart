@@ -198,6 +198,7 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) {
       timeout: _kShortTimeout,
     );
   }
+  return null;
 }
 
 Future<void> _runTests() async {
