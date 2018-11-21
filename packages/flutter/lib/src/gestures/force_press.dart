@@ -1,5 +1,10 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import 'dart:ui' show Offset;
+
+import 'package:flutter/foundation.dart';
 
 import 'arena.dart';
 import 'constants.dart';
@@ -7,20 +12,36 @@ import 'events.dart';
 import 'recognizer.dart';
 
 enum _ForceState {
+  // No pointer has touched down and the detector is ready for a pointer down to occur.
   ready,
+
+  // A pointer has touched down, but a force press gesture has not yet been detected.
   possible,
+
+  // A pointer is down and a force press gesture has been detected. However, if
+  // ForcePressGestureRecognizer the only recognizer in the arena, the gesture
+  // will not yet have started.
   accepted,
+
+  // A pointer is down and the gesture has started, ie. the pressure of the pointer
+  // has just become greater than the ForcePressGestureRecognizer.startPressure.
   started,
+
+  // A pointer is down and the pressure of the pointer has just become greater
+  // than the ForcePressGestureRecognizer.peakPressure. Even after a pointer
+  // crosses this threshold, onUpdate callbacks will still be sent.
   peaked,
 }
 
 /// Details object for callbacks that use [GestureForcePressStartCallback],
-/// [GestureForcePressPeakCallback] or [GestureForcePressEndCallback].
+/// [GestureForcePressPeakCallback], [GestureForcePressEndCallback] or
+/// [GestureForcePressUpdateCallback].
 ///
 /// See also:
 ///
 ///  * [ForcePressGestureRecognizer.onStart], [ForcePressGestureRecognizer.onPeak],
-///    and [ForcePressGestureRecognizer.onEnd] which use [ForcePressDetails].
+///    [ForcePressGestureRecognizer.onEnd], and [ForcePressGestureRecognizer.onUpdate]
+///    which use [ForcePressDetails].
 ///  * [ForcePressUpdateDetails], the details for [ForcePressUpdateCallback].
 class ForcePressDetails {
   /// Creates details for a [GestureForcePressStartCallback],
@@ -28,49 +49,16 @@ class ForcePressDetails {
   ///
   /// The [globalPosition] argument must not be null.
   ForcePressDetails({
-    this.globalPosition = Offset.zero,
-    this.sourceTimeStamp,
-  }) : assert(globalPosition != null);
+    @required this.globalPosition,
+    @required this.pressure,
+  }) : assert(globalPosition != null),
+       assert(pressure != null);
 
   /// The global position at which the function was called.
   final Offset globalPosition;
 
-  /// Recorded timestamp of the source pointer event that triggered the drag
-  /// event.
-  ///
-  /// Could be null if triggered from proxied events such as accessibility.
-  final Duration sourceTimeStamp;
-}
-
-/// Details object for callbacks that use [GestureForcePressUpdateCallback].
-///
-/// See also:
-///
-///  * [ForcePressGestureRecognizer.onUpdate], which uses [ForcePressUpdateCallback].
-///  * [ForcePressDetails], the details for [GestureForcePressStartCallback],
-///    [GestureForcePressPeakCallback] and [GestureForcePressEndCallback].
-class ForcePressUpdateDetails {
-  /// Creates details for a [GestureForcePressUpdateCallback].
-  ///
-  /// The [globalPosition] argument must not be null.
-  ForcePressUpdateDetails({
-    this.globalPosition = Offset.zero,
-    this.pressure = 0.0,
-    this.sourceTimeStamp,
-  }) : assert(globalPosition != null),
-       assert(pressure != null);
-
-  /// The global position at which the pointer contacted the screen.
-  final Offset globalPosition;
-
   /// The pressure of the pointer on the screen.
   final double pressure;
-
-  /// Recorded timestamp of the source pointer event that triggered the drag
-  /// event.
-  ///
-  /// Could be null if triggered from proxied events such as accessibility.
-  final Duration sourceTimeStamp;
 }
 
 /// Signature used by a [ForcePressGestureRecognizer] for when a pointer has
@@ -83,7 +71,7 @@ typedef GestureForcePressPeakCallback = void Function(ForcePressDetails details)
 
 /// Signature used by [ForcePressGestureRecognizer] during the frames
 /// after the triggering of a [ForcePressGestureRecognizer.onStart] callback.
-typedef GestureForcePressUpdateCallback = void Function(ForcePressUpdateDetails details);
+typedef GestureForcePressUpdateCallback = void Function(ForcePressDetails details);
 
 /// Signature for when the pointer that previously triggered a
 /// [ForcePressGestureRecognizer.onStart] callback is no longer in contact
@@ -92,7 +80,19 @@ typedef GestureForcePressEndCallback = void Function(ForcePressDetails details);
 
 /// Recognizes a force press on devices that have force sensors.
 ///
-/// Only the force from a single pointer is used to invoke events.
+/// Only the force from a single pointer is used to invoke events. A tap
+/// recognizer will win against this recognizer on pointer up as long as the
+/// pointer has not pressed with a force greater than
+/// [ForcePressGestureRecognizer.startPressure]. A long press recognizer will
+/// win when the press down time exceeds the threshold time as long as the
+/// pointer's pressure was never greater than
+/// [ForcePressGestureRecognizer.startPressure] in that duration.
+///
+/// As of 11-21-18 only iPhone 6S devices and higher numbered devices have force
+/// touch, with the exception of the iPhone XR.
+///
+/// Reported pressure will always be in the range [0.0, 1.0], where 1.0 is
+/// maximum pressure and 0.0 is minimum pressure.
 class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Creates a force press gesture recognizer.
   ///
@@ -104,10 +104,13 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     Object debugOwner,
   }) : assert(startPressure != null),
        assert(peakPressure != null),
+       assert(peakPressure > startPressure),
        super(debugOwner: debugOwner);
 
   /// A pointer is in contact with the screen and has just pressed with a force
-  /// exceeding the [startPressure].
+  /// exceeding the [startPressure]. Consequently, if there were other gesture
+  /// detectors, only the force press gesture will be detected and all others
+  /// will be rejected.
   ///
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [ForcePressDetails] object.
@@ -118,13 +121,16 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// simultaneously.
   ///
   /// This callback will be invoked for every frame after the invocation of
-  /// [onStart] no matter what the pressure is during this time period. The
-  /// position and pressure of the pointer is provided in the callback's
-  /// `details` argument, which is a [ForcePressUpdateDetails] object.
+  /// [onStart] and before the invocation of [onEnd], no matter what the
+  /// pressure is during this time period. The position and pressure of the
+  /// pointer is provided in the callback's `details` argument, which is a
+  /// [ForcePressUpdateDetails] object.
   GestureForcePressUpdateCallback onUpdate;
 
   /// A pointer is in contact with the screen and has just pressed with a force
-  /// exceeding the [peakPressure].
+  /// exceeding the [peakPressure]. This is an arbitrary second level action
+  /// threshold and isn't necessarily the maximum possible device pressure
+  /// (which is 1.0).
   ///
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [ForcePressDetails] object.
@@ -143,10 +149,10 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
 
   /// The pressure of the press required to peak a force press.
   ///
-  /// A value of 0.0 is no pressure, and 1.0 is maximum pressure.
+  /// A value of 0.0 is no pressure, and 1.0 is maximum pressure. This value
+  /// must be greater than [startPressure].
   double peakPressure;
 
-  Duration _lastTimeStamp;
   Offset _lastPosition;
   _ForceState _state = _ForceState.ready;
 
@@ -165,53 +171,41 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     // A static pointer with changes in pressure creates PointerMoveEvent events.
     if (event is PointerMoveEvent || event is PointerDownEvent) {
       final double pressure = _inverseLerp(event.pressureMin, event.pressureMax, event.pressure);
+      _lastPosition = event.position;
+
       if (_state == _ForceState.possible) {
-        _lastTimeStamp = event.timeStamp;
-        _lastPosition = event.position;
         if (pressure > startPressure) {
           _state = _ForceState.started;
           resolve(GestureDisposition.accepted);
         } else if (event.delta.distanceSquared > kTouchSlop)
           resolve(GestureDisposition.rejected);
-      } else if (_state == _ForceState.accepted || _state == _ForceState.peaked || _state == _ForceState.started) {
-        // Two separate if conditionals so that update will be called during the same frame as start.
-        if (pressure > startPressure && _state != _ForceState.started && _state != _ForceState.peaked) {
-          _state = _ForceState.started;
-          _gestureStarted();
-        }
-        if (_state == _ForceState.started || _state == _ForceState.peaked) {
-          if (onPeak != null && pressure > peakPressure && _state != _ForceState.peaked) {
-            _state = _ForceState.peaked;
-            invokeCallback<void>('onPeak', () => onPeak(ForcePressDetails(
-              globalPosition: event.position,
-              sourceTimeStamp: event.timeStamp,
-            )));
-          }
-          if (onUpdate != null) {
-            invokeCallback<void>('onUpdate', () => onUpdate(ForcePressUpdateDetails(
-              sourceTimeStamp: event.timeStamp,
-              pressure: pressure,
-              globalPosition: event.position,
-            )));
-          }
-        }
+      }
+      // In case this is the only gesture detector we still don't want to start
+      // the gesture until the pressure is greater than the startPressure.
+      if (pressure > startPressure && _state == _ForceState.accepted) {
+        _state = _ForceState.started;
+        invokeCallback<void>('onStart', () => onStart(ForcePressDetails(
+          pressure: pressure,
+          globalPosition: _lastPosition,
+        )));
+      }
+      if (onPeak != null && pressure > peakPressure &&
+         (_state == _ForceState.started)) {
+        _state = _ForceState.peaked;
+        invokeCallback<void>('onPeak', () => onPeak(ForcePressDetails(
+          pressure: pressure,
+          globalPosition: event.position,
+        )));
+      }
+      if (onUpdate != null &&
+         (_state == _ForceState.started || _state == _ForceState.peaked)) {
+        invokeCallback<void>('onUpdate', () => onUpdate(ForcePressDetails(
+          pressure: pressure,
+          globalPosition: event.position,
+        )));
       }
     }
     stopTrackingIfPointerNoLongerDown(event);
-    _lastTimeStamp = event.timeStamp;
-    _lastPosition = event.position;
-  }
-
-  void _gestureStarted() {
-    final Duration timestamp = _lastTimeStamp;
-    final Offset position = _lastPosition;
-    _lastTimeStamp = null;
-    _lastPosition = null;
-
-    invokeCallback<void>('onStart', () => onStart(ForcePressDetails(
-      sourceTimeStamp: timestamp,
-      globalPosition: position,
-    )));
   }
 
   @override
@@ -219,7 +213,9 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_state != _ForceState.accepted) {
       _state = _ForceState.accepted;
       if (onStart != null && _state == _ForceState.started) {
-        _gestureStarted();
+        invokeCallback<void>('onStart', () => onStart(ForcePressDetails(
+          globalPosition: _lastPosition,
+        )));
       }
     }
   }
@@ -233,14 +229,9 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
       return;
     }
 
-    final Duration timestamp = _lastTimeStamp;
-    final Offset position = _lastPosition;
-    _lastTimeStamp = null;
-    _lastPosition = null;
     if (wasAccepted && onEnd != null) {
       invokeCallback<void>('onEnd', () => onEnd(ForcePressDetails(
-        sourceTimeStamp: timestamp,
-        globalPosition: position,
+        globalPosition: _lastPosition,
       )));
     }
   }

@@ -406,4 +406,80 @@ void main() {
     expect(forcePressUpdate, 6);
     expect(forcePressEnded, 1);
   });
+
+  testWidgets('Force Press Callback not called if long press triggered before force press', (WidgetTester tester) async {
+    int forcePressStart = 0;
+    int longPressTimes = 0;
+
+    await tester.pumpWidget(
+      Container(
+        alignment: Alignment.topLeft,
+        child: Container(
+          alignment: Alignment.center,
+          height: 100.0,
+          color: const Color(0xFF00FF00),
+          child: GestureDetector(
+            onForcePressStart: (_) => forcePressStart += 1,
+            onLongPress: () => longPressTimes += 1,
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
+    await gesture.moveBy(const Offset(0.0, 0.0), pressure: 0.3);
+
+    expect(forcePressStart, 0);
+    expect(longPressTimes, 0);
+
+    // Trigger the long press.
+    await tester.pump(kLongPressTimeout + const Duration(seconds: 1));
+
+    expect(longPressTimes, 1);
+    expect(forcePressStart, 0);
+
+    // Failed attempt to trigger the force press.
+    await gesture.moveBy(const Offset(0.0, 0.0), pressure: 0.5);
+
+    expect(longPressTimes, 1);
+    expect(forcePressStart, 0);
+  });
+
+  testWidgets('Force Press Callback not called if drag triggered before force press', (WidgetTester tester) async {
+    int forcePressStart = 0;
+    int horizontalDragStart = 0;
+
+    await tester.pumpWidget(
+      Container(
+        alignment: Alignment.topLeft,
+        child: Container(
+          alignment: Alignment.center,
+          height: 100.0,
+          color: const Color(0xFF00FF00),
+          child: GestureDetector(
+            onForcePressStart: (_) => forcePressStart += 1,
+            onHorizontalDragStart: (_) => horizontalDragStart += 1,
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+    await gesture.moveBy(const Offset(0.0, 0.0), pressure: 0.3);
+
+    expect(forcePressStart, 0);
+    expect(horizontalDragStart, 0);
+
+    // Trigger horizontal drag.
+    await gesture.moveBy(const Offset(100, 0));
+
+    expect(horizontalDragStart, 1);
+    expect(forcePressStart, 0);
+
+    // Failed attempt to trigger the force press.
+    await gesture.moveBy(const Offset(0.0, 0.0), pressure: 0.5);
+
+    expect(horizontalDragStart, 1);
+    expect(forcePressStart, 0);
+  });
 }
