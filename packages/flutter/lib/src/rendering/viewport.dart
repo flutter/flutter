@@ -408,7 +408,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         growthDirection: growthDirection,
         userScrollDirection: adjustedUserScrollDirection,
         scrollOffset: sliverScrollOffset,
-        consumedScrollExtent: consumedScrollExtent,
+        precedingScrollExtent: consumedScrollExtent,
         overlap: maxPaintOffset - layoutOffset,
         remainingPaintExtent: math.max(0.0, remainingPaintExtent - layoutOffset + initialLayoutOffset),
         crossAxisExtent: crossAxisExtent,

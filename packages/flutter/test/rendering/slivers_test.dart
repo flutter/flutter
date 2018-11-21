@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -750,7 +751,7 @@ void main() {
     expect(sliver.semanticBounds, expectedRect);
   });
 
-  test('consumedScrollExtent is 0.0 for first Sliver in list', () {
+  test('precedingScrollExtent is 0.0 for first Sliver in list', () {
     const double viewportWidth = 800.0;
     final RenderSliver sliver = RenderSliverToBoxAdapter(
       child: RenderSizedBox(const Size(viewportWidth, 150.0)),
@@ -765,10 +766,10 @@ void main() {
     );
     layout(root);
 
-    expect(sliver.constraints.consumedScrollExtent, 0.0);
+    expect(sliver.constraints.precedingScrollExtent, 0.0);
   });
 
-  test('consumedScrollExtent accumulates over multiple Slivers', () {
+  test('precedingScrollExtent accumulates over multiple Slivers', () {
     const double viewportWidth = 800.0;
     final RenderSliver sliver1 = RenderSliverToBoxAdapter(
       child: RenderSizedBox(const Size(viewportWidth, 150.0)),
@@ -791,11 +792,11 @@ void main() {
     );
     layout(root);
 
-    // The 3rd Sliver comes after 300.0px of consumed scroll extent by first 2 Slivers.
-    expect(sliver3.constraints.consumedScrollExtent, 300.0);
+    // The 3rd Sliver comes after 300.0px of preceding scroll extent by first 2 Slivers.
+    expect(sliver3.constraints.precedingScrollExtent, 300.0);
   });
 
-  test('consumedScrollExtent is not impacted by scrollOffset', () {
+  test('precedingScrollExtent is not impacted by scrollOffset', () {
     const double viewportWidth = 800.0;
     final RenderSliver sliver1 = RenderSliverToBoxAdapter(
       child: RenderSizedBox(const Size(viewportWidth, 150.0)),
@@ -818,9 +819,9 @@ void main() {
     );
     layout(root);
 
-    // The 3rd Sliver comes after 300.0px of consumed scroll extent by first 2 Slivers.
+    // The 3rd Sliver comes after 300.0px of preceding scroll extent by first 2 Slivers.
     // In this test a ViewportOffset is applied to simulate a scrollOffset. That
-    // offset is not expected to impact the consumedScrollExtent.
-    expect(sliver3.constraints.consumedScrollExtent, 300.0);
+    // offset is not expected to impact the precedingScrollExtent.
+    expect(sliver3.constraints.precedingScrollExtent, 300.0);
   });
 }
