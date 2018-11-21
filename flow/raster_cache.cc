@@ -246,6 +246,7 @@ void RasterCache::SweepAfterFrame() {
 
 void RasterCache::Clear() {
   picture_cache_.clear();
+  layer_cache_.clear();
 }
 
 void RasterCache::SetCheckboardCacheImages(bool checkerboard) {
