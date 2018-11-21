@@ -163,6 +163,9 @@ task:
     - analyze
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
+  install_cocoapods:
+    only_if: $SHARD == 'build_tests'
+    - gem install cocoapods
   git_fetch_script:
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
@@ -192,8 +195,6 @@ task:
       env:
         SHARD: build_tests
         COCOAPODS_DISABLE_STATS: true
-      test_script:
-        - dart ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 12G
