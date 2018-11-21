@@ -3395,7 +3395,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildFrame(TextStyle(
+    await tester.pumpWidget(buildFrame(const TextStyle(
       inherit: false,
       fontSize: 12.0,
       textBaseline: TextBaseline.alphabetic,
@@ -3403,12 +3403,12 @@ void main() {
     expect(tester.takeException(), isNull);
 
     // With inherit not set to false, will pickup required fields from theme
-    await tester.pumpWidget(buildFrame(TextStyle(
+    await tester.pumpWidget(buildFrame(const TextStyle(
       fontSize: 12.0,
     )));
     expect(tester.takeException(), isNull);
 
-    await tester.pumpWidget(buildFrame(TextStyle(
+    await tester.pumpWidget(buildFrame(const TextStyle(
       inherit: false,
       fontSize: 12.0,
     )));
