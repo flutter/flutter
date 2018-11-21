@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:io' show Platform;
-import 'dart:ui' show TextAffinity, hashValues;
+import 'dart:ui' show TextAffinity, hashValues, Offset;
 
 import 'package:flutter/foundation.dart';
 
@@ -439,6 +439,33 @@ TextAffinity _toTextAffinity(String affinity) {
   return null;
 }
 
+///
+enum TextCursorAction {
+  ///
+  Start,
+
+  ///
+  Update,
+
+  ///
+  End,
+}
+
+///
+class TextEditingPoint {
+  ///
+  const TextEditingPoint({
+    this.point = const Offset(0, 0),
+    this.action,
+  }) : assert(point != null);
+
+  ///
+  final Offset point;
+
+  ///
+  final TextCursorAction action;
+}
+
 /// The current text, selection, and composing state for editing a run of text.
 @immutable
 class TextEditingValue {
@@ -566,6 +593,9 @@ abstract class TextInputClient {
 
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
+
+  ///
+  void updateCursor(TextEditingPoint point);
 }
 
 /// An interface for interacting with a text input control.
@@ -648,6 +678,23 @@ TextInputAction _toTextInputAction(String action) {
   throw FlutterError('Unknown text input action: $action');
 }
 
+TextCursorAction _toTextCursorAction(String action) {
+  switch (action) {
+    case 'TextCursorAction.start':
+      return TextCursorAction.Start;
+    case 'TextCursorAction.update':
+      return TextCursorAction.Update;
+    case 'TextCursorAction.end':
+      return TextCursorAction.End;
+  }
+  throw FlutterError('Unknown text cursor action: $action');
+}
+
+TextEditingPoint _toTextPoint(TextCursorAction action, Map<String, dynamic> encoded) {
+  final Offset offset = action == TextCursorAction.Update ? Offset(encoded['X'], encoded['Y']) : const Offset(0, 0);
+  return TextEditingPoint(point: offset, action: action);
+}
+
 class _TextInputClientHandler {
   _TextInputClientHandler() {
     SystemChannels.textInput.setMethodCallHandler(_handleTextInputInvocation);
@@ -670,6 +717,9 @@ class _TextInputClientHandler {
         break;
       case 'TextInputClient.performAction':
         _currentConnection._client.performAction(_toTextInputAction(args[1]));
+        break;
+      case 'TextInputClient.updateCursor':
+        _currentConnection._client.updateCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
         break;
       default:
         throw MissingPluginException();

@@ -498,6 +498,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextInputConnection _textInputConnection;
   TextSelectionOverlay _selectionOverlay;
+  TextEditingPoint _textEditingPoint;
 
   final ScrollController _scrollController = ScrollController();
   final LayerLink _layerLink = LayerLink();
@@ -593,6 +594,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _finalizeEditing(false);
         break;
     }
+  }
+
+  @override
+  void updateCursor(TextEditingPoint point) {
+    print(point.action.toString() + ' ' + point.point.toString());
+    _textEditingPoint = point;
   }
 
   void _finalizeEditing(bool shouldUnfocus) {
@@ -987,6 +994,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               cursorRadius: widget.cursorRadius,
               enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
+              textEditingPoint: _textEditingPoint,
             ),
           ),
         );
@@ -1052,6 +1060,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.cursorRadius,
     this.enableInteractiveSelection = true,
     this.textSelectionDelegate,
+    this.textEditingPoint,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        assert(enableInteractiveSelection != null),
@@ -1078,6 +1087,7 @@ class _Editable extends LeafRenderObjectWidget {
   final Radius cursorRadius;
   final bool enableInteractiveSelection;
   final TextSelectionDelegate textSelectionDelegate;
+  final TextEditingPoint textEditingPoint;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -1102,6 +1112,7 @@ class _Editable extends LeafRenderObjectWidget {
       cursorRadius: cursorRadius,
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
+      textEditingPoint: textEditingPoint,
     );
   }
 
