@@ -163,7 +163,7 @@ task:
     - analyze
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
-  install_cocoapods:
+  install_cocoapods_script:
     only_if: $SHARD == 'build_tests'
     - gem install cocoapods
   git_fetch_script:
