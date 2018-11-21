@@ -71,7 +71,7 @@
     _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine opaque:self.isViewOpaque]);
     [_engine.get() createShell:nil libraryURI:nil];
     _engineNeedsLaunch = YES;
-
+    [self loadDefaultSplashScreenView];
     [self performCommonViewControllerInitialization];
   }
 
