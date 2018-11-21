@@ -164,14 +164,20 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
 
   // Running from kernel divided into several pieces (for sharing).
   {
+    if (settings.application_kernel_list_asset.empty()) {
+      FML_LOG(ERROR) << "Application kernel list asset not set";
+      return nullptr;
+    }
     std::unique_ptr<fml::Mapping> kernel_list =
         asset_manager->GetAsMapping(settings.application_kernel_list_asset);
-    if (kernel_list) {
-      auto kernel_pieces_paths = ParseKernelListPaths(std::move(kernel_list));
-      auto kernel_mappings = PrepareKernelMappings(
-          std::move(kernel_pieces_paths), asset_manager, io_worker);
-      return CreateForKernelList(std::move(kernel_mappings));
+    if (!kernel_list) {
+      FML_LOG(ERROR) << "Failed to load: " << settings.application_kernel_asset;
+      return nullptr;
     }
+    auto kernel_pieces_paths = ParseKernelListPaths(std::move(kernel_list));
+    auto kernel_mappings = PrepareKernelMappings(std::move(kernel_pieces_paths),
+                                                 asset_manager, io_worker);
+    return CreateForKernelList(std::move(kernel_mappings));
   }
 
   return nullptr;
