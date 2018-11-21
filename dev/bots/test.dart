@@ -171,8 +171,8 @@ Future<void> _runBuildTests() async {
   print('${bold}DONE: All build tests successful.$reset');
 }
 
-Future<void> _flutterBuildAot(String relativePathToApplication) {
-  return runCommand(flutter,
+Future<void> _flutterBuildAot(String relativePathToApplication) async {
+  await runCommand(flutter,
     <String>['build', 'aot'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
     expectNonZeroExit: false,
@@ -180,8 +180,8 @@ Future<void> _flutterBuildAot(String relativePathToApplication) {
   );
 }
 
-Future<void> _flutterBuildApk(String relativePathToApplication) {
-  return runCommand(flutter,
+Future<void> _flutterBuildApk(String relativePathToApplication) async {
+  await runCommand(flutter,
     <String>['build', 'apk', '--debug'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
     expectNonZeroExit: false,
@@ -189,16 +189,16 @@ Future<void> _flutterBuildApk(String relativePathToApplication) {
   );
 }
 
-Future<void> _flutterBuildIpa(String relativePathToApplication) {
-  if (Platform.isMacOS) {
-    return runCommand(flutter,
-      <String>['build', 'ios', '--no-codesign', '--debug'],
-      workingDirectory: path.join(flutterRoot, relativePathToApplication),
-      expectNonZeroExit: false,
-      timeout: _kShortTimeout,
-    );
+Future<void> _flutterBuildIpa(String relativePathToApplication) async {
+  if (!Platform.isMacOS) {
+    return;
   }
-  return null;
+  await runCommand(flutter,
+    <String>['build', 'ios', '--no-codesign', '--debug'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
 }
 
 Future<void> _runTests() async {
