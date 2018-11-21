@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 const Color _kWelcomeBlue = Color(0xFF0175c2);
 
 abstract class WelcomeStep {
-
   WelcomeStep({this.tickerProvider});
   final TickerProvider tickerProvider;
 

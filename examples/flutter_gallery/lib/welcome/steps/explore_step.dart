@@ -39,8 +39,13 @@ class ExploreWelcomeStep extends WelcomeStep {
       }
     }
     stackChildren.addAll(_popAnimationWidgets);
-    return Stack(
-      children: stackChildren,
+    return Center(
+      child: Container(
+        width: 300.0,
+        child: Stack(
+            children: stackChildren,
+          ),
+      ),
     );
   }
 
