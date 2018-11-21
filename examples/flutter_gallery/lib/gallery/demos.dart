@@ -33,7 +33,7 @@ class GalleryDemoCategory {
 
 const GalleryDemoCategory _kDemos = GalleryDemoCategory._(
   name: 'Studies',
-  icon: GalleryIcons.animation,
+  icon: GalleryIcons.playground,
 );
 
 const GalleryDemoCategory _kStyle = GalleryDemoCategory._(
@@ -114,7 +114,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     GalleryDemo(
       title: 'Customized Design',
       subtitle: 'Activity Tracker',
-      icon: GalleryIcons.animation, // TODO use correct icon
+      icon: GalleryIcons.running, // TODO use correct icon
       category: _kDemos,
       routeName: CustomizedDemo.routeName,
       buildRoute: (BuildContext context) => const CustomizedDemo(),

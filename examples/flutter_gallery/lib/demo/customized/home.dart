@@ -184,7 +184,7 @@ class _CustomizedDesignState extends State<CustomizedDesign>
                 child: const RotatedBox(
                   quarterTurns: 2,
                   child: ImageIcon(
-                    AssetImage('assets/icons/ic_custom_circle_arrow.png'),
+                    AssetImage('assets/images/customized/ic_circle_arrow.png'),
                     color: Colors.white,
                   ),
                 ),
@@ -228,9 +228,9 @@ class _CustomizedDesignState extends State<CustomizedDesign>
               maxHeight: 1000.0,
               child: Image(
                 height: MediaQuery.of(context).size.height,
-                fit: BoxFit.fill,
+                fit: BoxFit.cover,
                 image: const AssetImage(
-                  'assets/images/custom_hero.png',
+                  'assets/images/customized/fg_hero.png',
                 ),
               ),
             ),
@@ -259,7 +259,7 @@ class _CustomizedDesignState extends State<CustomizedDesign>
             child: FadeTransition(
               opacity: _runnerFadeAnimation,
               child: const Image(
-                image: AssetImage('assets/images/custom_runner_bg.png'),
+                image: AssetImage('assets/images/customized/bg_runner.png'),
               ),
             ),
           ),
@@ -303,7 +303,7 @@ class _CustomizedDesignState extends State<CustomizedDesign>
             child: FadeTransition(
               opacity: _statsAnimationTwo,
               child: const Image(
-                image: AssetImage('assets/images/custom_path.png'),
+                image: AssetImage('assets/images/customized/run_path.png'),
               ),
             ),
           ),

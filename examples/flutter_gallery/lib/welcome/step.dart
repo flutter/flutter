@@ -4,22 +4,20 @@
 
 import 'package:flutter/material.dart';
 
+const Color _kWelcomeBlue = Color(0xFF0175c2);
+
 abstract class WelcomeStep {
+
+  WelcomeStep({this.tickerProvider});
+  final TickerProvider tickerProvider;
+
   String title();
   String subtitle();
-  List<String> imageUris();
 
-  double _startPixels = 0.0;
-
-  AnimationController _inAnimationController;
-  AnimationController _outAnimationController;
-
-  AnimationController get inAnimation => _inAnimationController;
-  AnimationController get outAnimation => _outAnimationController;
-
+  void animate({bool restart});
   Widget imageWidget();
   Widget contentWidget() => Material(
-        color: Colors.blue, // const Color(0xFFFFFFFF),
+        color: _kWelcomeBlue,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40.0),
           child: Column(
@@ -29,7 +27,7 @@ abstract class WelcomeStep {
             children: <Widget>[
               Container(
                 height: 240.0,
-                child: Image.asset(imageUris().first),
+                child: imageWidget(),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 50.0),
