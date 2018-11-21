@@ -3384,7 +3384,6 @@ void main() {
   });
 
   testWidgets('style enforces required fields', (WidgetTester tester) async {
-
     Widget buildFrame(TextStyle style) {
       return MaterialApp(
         home: Material(
@@ -3412,6 +3411,6 @@ void main() {
       inherit: false,
       fontSize: 12.0,
     )));
-    expect(tester.takeException(), isInstanceOf<FlutterError>());
+    expect(tester.takeException(), isNotNull);
   });
 }
