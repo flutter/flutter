@@ -223,6 +223,7 @@ flutter:
     - assets/images/welcome_widget_4.png
     - assets/images/welcome_widget_5.png
     - assets/images/welcome_widget_collection.png
+    - assets/images/welcome_playground.png
   fonts:
     - family: Raleway
       fonts:

@@ -15,9 +15,9 @@ class Welcome extends StatefulWidget {
 }
 
 class _WelcomeState extends State<Welcome> with TickerProviderStateMixin {
+  
   final List<WelcomeStep> _steps = WelcomeManager().steps();
   TabController _tabController;
-  int _currentPage = 0; // for page indicator
 
   @override
   void initState() {

@@ -5,7 +5,8 @@ class FlutterWelcomeStep extends WelcomeStep {
   @override
   String title() => 'Welcome to Flutter!';
   @override
-  String subtitle() => 'Flutter is a mobile app SDK for building high-performance, high-fidelity, apps for iOS and Android.';
+  String subtitle() =>
+      'Flutter is a mobile app SDK for building high-performance, high-fidelity, apps for iOS and Android.';
 
   @override
   List<String> imageUris() => <String>[
@@ -19,7 +20,6 @@ class FlutterWelcomeStep extends WelcomeStep {
   }
 }
 
-
 class PlaygroundWelcomeStep extends WelcomeStep {
   @override
   String title() => 'Interactive widget playground';
@@ -28,7 +28,7 @@ class PlaygroundWelcomeStep extends WelcomeStep {
 
   @override
   List<String> imageUris() => <String>[
-        'assets/images/welcome_phones.png',
+        'assets/images/welcome_playground.png',
       ];
 
   @override
@@ -60,11 +60,12 @@ class WidgetWelcomeStep extends WelcomeStep {
   @override
   String title() => 'Everything\'s a Widget';
   @override
-  String subtitle() => 'Widgets are the basic building blocks of every Flutter app.';
+  String subtitle() =>
+      'Widgets are the basic building blocks of every Flutter app.';
 
   @override
   List<String> imageUris() => <String>[
-                'assets/images/welcome_pie.png',
+        'assets/images/welcome_pie.png',
         'assets/images/welcome_widget_1.png',
         'assets/images/welcome_widget_2.png',
         'assets/images/welcome_widget_3.png',
