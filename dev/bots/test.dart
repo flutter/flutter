@@ -181,6 +181,10 @@ Future<void> _flutterBuildAot(String relativePathToApplication) async {
 }
 
 Future<void> _flutterBuildApk(String relativePathToApplication) async {
+  // TODO(dnfield): See if we can get Android SDK on all Cirrus platforms.
+  if (Platform.environment['ANDROID_HOME'] == null || Platform.environment['ANDROID_HOME'] == '') {
+    return;
+  }
   await runCommand(flutter,
     <String>['build', 'apk', '--debug'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
