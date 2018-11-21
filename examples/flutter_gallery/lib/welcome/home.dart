@@ -68,6 +68,7 @@ class _WelcomeState extends State<Welcome> with TickerProviderStateMixin {
               child: Padding(
                 padding: EdgeInsets.only(bottom: footerHeight),
                 child: PageView.builder(
+                  itemCount: _steps.length,
                   itemBuilder: (BuildContext context, int index) =>
                       _steps[index].contentWidget(),
                   controller: _pageController,
