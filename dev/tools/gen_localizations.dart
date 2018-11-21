@@ -603,10 +603,12 @@ Future<void> main(List<String> rawArgs) async {
   // code. In most cases both codes are just two characters.
 
   final Directory directory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
-  final RegExp filenameRE = RegExp(r'material_(\w+)\.arb$');
+  final RegExp materialFilenameRE = RegExp(r'material_(\w+)\.arb$');
+  final RegExp cupertinoFilenameRE = RegExp(r'cupertino_(\w+)\.arb$');
 
   try {
     validateEnglishLocalizations(File(path.join(directory.path, 'material_en.arb')));
+    validateEnglishLocalizations(File(path.join(directory.path, 'cupertino_en.arb')));
   } on ValidationError catch (exception) {
     exitWithError('$exception');
   }
@@ -615,8 +617,8 @@ Future<void> main(List<String> rawArgs) async {
 
   for (FileSystemEntity entity in directory.listSync()) {
     final String entityPath = entity.path;
-    if (FileSystemEntity.isFileSync(entityPath) && filenameRE.hasMatch(entityPath)) {
-      processBundle(File(entityPath), localeString: filenameRE.firstMatch(entityPath)[1]);
+    if (FileSystemEntity.isFileSync(entityPath) && materialFilenameRE.hasMatch(entityPath)) {
+      processBundle(File(entityPath), localeString: materialFilenameRE.firstMatch(entityPath)[1]);
     }
   }
 
