@@ -206,10 +206,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   /// Renders the UI from the given [widget].
   ///
-  /// Calls [runApp] with the given widget, then triggers a frame and flushes
-  /// microtasks, by calling [pump] with the same `duration` (if any). The
-  /// supplied [EnginePhase] is the final phase reached during the pump pass; if
-  /// not supplied, the whole pass is executed.
+  /// Calls [runApp] with the given widget and calls [pump] with the specified
+  /// `duration` to trigger a frame and, if `duration` is non-null, to flush
+  /// microtasks. (See [TestWidgetsFlutterBinding.pump] for more details.)
+  ///
+  /// The supplied [EnginePhase] is the final phase reached during the pump
+  /// pass; if not supplied, the whole pass is executed.
   ///
   /// Subsequent calls to this is different from [pump] in that it forces a full
   /// rebuild of the tree, even if [widget] is the same as the previous call.
@@ -234,8 +236,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// frames) for `duration` amount of time, and then received a v-sync signal
   /// to paint the application.
   ///
+  /// Flushes microtasks if `duration` is non-null.
+  ///
   /// This is a convenience function that just calls
-  /// [TestWidgetsFlutterBinding.pump].
+  /// [TestWidgetsFlutterBinding.pump]; refer to it for more details.
   ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.

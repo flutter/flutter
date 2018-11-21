@@ -186,14 +186,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// actual current wall-clock time.
   Clock get clock;
 
-  /// Triggers a frame sequence (build/layout/paint/etc),
-  /// then flushes microtasks.
+  /// Triggers a frame sequence (build/layout/paint/etc).
   ///
-  /// If duration is set, then advances the clock by that much first.
-  /// Doing this flushes microtasks.
+  /// If `duration` is non-null, then advances the clock by that much first.
+  /// Doing this flushes microtasks, even if `duration` is [Duration.zero].
   ///
-  /// The supplied EnginePhase is the final phase reached during the pump pass;
-  /// if not supplied, the whole pass is executed.
+  /// The supplied [EnginePhase] is the final phase reached during the pump
+  /// pass; if not supplied, the whole pass is executed.
   ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
