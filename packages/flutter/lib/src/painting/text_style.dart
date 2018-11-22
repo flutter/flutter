@@ -241,6 +241,7 @@ class TextStyle extends Diagnosticable {
     this.wordSpacing,
     this.textBaseline,
     this.height,
+    this.leading,
     this.locale,
     this.foreground,
     this.background,
@@ -313,12 +314,19 @@ class TextStyle extends Diagnosticable {
   /// parent text span, or, for the root text spans, with the line box.
   final TextBaseline textBaseline;
 
-  /// The height of this text span, as a multiple of the font size.
+  /// The height of this text span, as a multiple of the sum of font size and leading.
   ///
   /// If applied to the root [TextSpan], this value sets the line height, which
   /// is the minimum distance between subsequent text baselines, as multiple of
   /// the font size.
   final double height;
+
+  /// Custom leading to use instead of the font-provided leading as a multiple
+  /// of font size.
+  ///
+  /// When null, default font leading will be used. Leading is the additional
+  /// spacing between lines.
+  final double leading;
 
   /// The locale used to select region-specific glyphs.
   ///
@@ -399,6 +407,7 @@ class TextStyle extends Diagnosticable {
     double wordSpacing,
     TextBaseline textBaseline,
     double height,
+    double leading,
     Locale locale,
     Paint foreground,
     Paint background,
@@ -426,6 +435,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing: wordSpacing ?? this.wordSpacing,
       textBaseline: textBaseline ?? this.textBaseline,
       height: height ?? this.height,
+      leading: leading ?? this.leading,
       locale: locale ?? this.locale,
       foreground: foreground ?? this.foreground,
       background: background ?? this.background,
@@ -478,6 +488,8 @@ class TextStyle extends Diagnosticable {
     double wordSpacingDelta = 0.0,
     double heightFactor = 1.0,
     double heightDelta = 0.0,
+    double leadingFactor = 1.0,
+    double leadingDelta = 0.0,
   }) {
     assert(fontSizeFactor != null);
     assert(fontSizeDelta != null);
@@ -512,6 +524,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing: wordSpacing == null ? null : wordSpacing * wordSpacingFactor + wordSpacingDelta,
       textBaseline: textBaseline,
       height: height == null ? null : height * heightFactor + heightDelta,
+      leading: leading == null ? null : leading * leadingFactor + leadingDelta,
       locale: locale,
       foreground: foreground != null ? foreground : null,
       background: background,
@@ -563,6 +576,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing: other.wordSpacing,
       textBaseline: other.textBaseline,
       height: other.height,
+      leading: other.leading,
       locale: other.locale,
       foreground: other.foreground,
       background: other.background,
@@ -608,6 +622,7 @@ class TextStyle extends Diagnosticable {
         wordSpacing: t < 0.5 ? null : b.wordSpacing,
         textBaseline: t < 0.5 ? null : b.textBaseline,
         height: t < 0.5 ? null : b.height,
+        leading: t < 0.5 ? null : b.leading,
         locale: t < 0.5 ? null : b.locale,
         foreground: t < 0.5 ? null : b.foreground,
         background: t < 0.5 ? null : b.background,
@@ -631,6 +646,7 @@ class TextStyle extends Diagnosticable {
         wordSpacing: t < 0.5 ? a.wordSpacing : null,
         textBaseline: t < 0.5 ? a.textBaseline : null,
         height: t < 0.5 ? a.height : null,
+        leading: t < 0.5 ? a.leading : null,
         locale: t < 0.5 ? a.locale : null,
         foreground: t < 0.5 ? a.foreground : null,
         background: t < 0.5 ? a.background : null,
@@ -653,6 +669,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing: ui.lerpDouble(a.wordSpacing ?? b.wordSpacing, b.wordSpacing ?? a.wordSpacing, t),
       textBaseline: t < 0.5 ? a.textBaseline : b.textBaseline,
       height: ui.lerpDouble(a.height ?? b.height, b.height ?? a.height, t),
+      leading: ui.lerpDouble(a.leading ?? b.leading, b.leading ?? a.leading, t),
       locale: t < 0.5 ? a.locale : b.locale,
       foreground: (a.foreground != null || b.foreground != null)
         ? t < 0.5
@@ -683,6 +700,7 @@ class TextStyle extends Diagnosticable {
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
       height: height,
+      leading: leading,
       locale: locale,
       foreground: foreground,
       background: background,
@@ -740,6 +758,7 @@ class TextStyle extends Diagnosticable {
         wordSpacing != other.wordSpacing ||
         textBaseline != other.textBaseline ||
         height != other.height ||
+        leading != other.leading ||
         locale != other.locale ||
         foreground != other.foreground ||
         background != other.background ||
@@ -770,6 +789,7 @@ class TextStyle extends Diagnosticable {
            wordSpacing == typedOther.wordSpacing &&
            textBaseline == typedOther.textBaseline &&
            height == typedOther.height &&
+           leading == typedOther.leading &&
            locale == typedOther.locale &&
            foreground == typedOther.foreground &&
            background == typedOther.background &&
@@ -792,6 +812,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing,
       textBaseline,
       height,
+      leading,
       locale,
       foreground,
       background,
@@ -861,6 +882,7 @@ class TextStyle extends Diagnosticable {
     styles.add(DoubleProperty('${prefix}wordSpacing', wordSpacing, defaultValue: null));
     styles.add(EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
     styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
+    styles.add(DoubleProperty('${prefix}leading', height, unit: 'x', defaultValue: null));
     styles.add(DiagnosticsProperty<Locale>('${prefix}locale', locale, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}foreground', foreground, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}background', background, defaultValue: null));
