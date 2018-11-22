@@ -42,20 +42,36 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo> {
             child: widget.configWidget(context),
           ),
         ),
-        Center(
-            child: FlatButton(
-                child: const Text('GET SOURCE CODE'),
-                onPressed: () {
-                  showModalBottomSheet<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return Container(
-                            child: Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: Container(
-                            padding: const EdgeInsets.all(5.0),
-                            child: RichText(
-                              text: TextSpan(text: widget.code(),
+        Container(
+          height: 60.0,
+          child: FlatButton(
+              child: Text('GET SOURCE CODE', 
+                style: TextStyle(
+                  color: Colors.grey[700],
+                  fontSize: 14.0, 
+                )),
+              shape: BeveledRectangleBorder(
+                side: BorderSide(
+                  color: Colors.grey[300],
+                  width: 1.0,
+                ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16.0),
+                  topRight: Radius.circular(16.0),
+                ),
+              ),
+              onPressed: () {
+                showModalBottomSheet<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return Container(
+                          child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: Container(
+                          padding: const EdgeInsets.all(5.0),
+                          child: RichText(
+                            text: TextSpan(
+                                text: widget.code(),
                                 style: TextStyle(
                                   color: Colors.grey[850],
                                   fontSize: 14.0,
@@ -63,10 +79,11 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo> {
                                   fontFamily: 'monospace',
                                 )),
                           ),
-                          ),
-                        ));
-                      });
-                }))
+                        ),
+                      ));
+                    });
+              }),
+        ),
       ],
     );
   }
