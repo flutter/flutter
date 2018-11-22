@@ -5,9 +5,9 @@
 import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../test_utils.dart';
-import 'test_project.dart';
+import 'project.dart';
 
-class HotReloadProject extends TestProject {
+class HotReloadProject extends Project {
   @override
   final String pubspec = '''
   name: test

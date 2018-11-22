@@ -970,7 +970,7 @@ mixin WidgetInspectorService {
         getter: () async => _trackRebuildDirtyWidgets,
         setter: (bool value) async {
           if (value == _trackRebuildDirtyWidgets) {
-            return null;
+            return;
           }
           _rebuildStats.resetCounts();
           _trackRebuildDirtyWidgets = value;
@@ -979,10 +979,11 @@ mixin WidgetInspectorService {
             debugOnRebuildDirtyWidget = _onRebuildWidget;
             // Trigger a rebuild so there are baseline stats for rebuilds
             // performed by the app.
-            return forceRebuild();
+            await forceRebuild();
+            return;
           } else {
             debugOnRebuildDirtyWidget = null;
-            return null;
+            return;
           }
         },
       );

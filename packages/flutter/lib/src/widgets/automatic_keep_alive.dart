@@ -80,7 +80,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     handle.addListener(_handles[handle]);
     if (!_keepingAlive) {
       _keepingAlive = true;
-      final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = _getChildElement();
+      final ParentDataElement<SliverWithKeepAliveWidget> childElement = _getChildElement();
       if (childElement != null) {
         // If the child already exists, update it synchronously.
         _updateParentDataOfChild(childElement);
@@ -92,7 +92,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
           if (!mounted) {
             return;
           }
-          final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = _getChildElement();
+          final ParentDataElement<SliverWithKeepAliveWidget> childElement = _getChildElement();
           assert(childElement != null);
           _updateParentDataOfChild(childElement);
         });
@@ -105,7 +105,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   ///
   /// While this widget is guaranteed to have a child, this may return null if
   /// the first build of that child has not completed yet.
-  ParentDataElement<SliverMultiBoxAdaptorWidget> _getChildElement() {
+  ParentDataElement<SliverWithKeepAliveWidget> _getChildElement() {
     assert(mounted);
     final Element element = context;
     Element childElement;
@@ -131,11 +131,11 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     element.visitChildren((Element child) {
       childElement = child;
     });
-    assert(childElement == null || childElement is ParentDataElement<SliverMultiBoxAdaptorWidget>);
+    assert(childElement == null || childElement is ParentDataElement<SliverWithKeepAliveWidget>);
     return childElement;
   }
 
-  void _updateParentDataOfChild(ParentDataElement<SliverMultiBoxAdaptorWidget> childElement) {
+  void _updateParentDataOfChild(ParentDataElement<SliverWithKeepAliveWidget> childElement) {
     childElement.applyWidgetOutOfTurn(build(context));
   }
 
