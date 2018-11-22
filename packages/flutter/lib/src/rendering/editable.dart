@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/cupertino.dart' show CupertinoColors;
 
 import 'box.dart';
 import 'object.dart';
@@ -144,7 +145,6 @@ class RenderEditable extends RenderBox {
     double cursorWidth = 1.0,
     Radius cursorRadius,
     bool enableInteractiveSelection = true,
-    TextEditingPoint textEditingPoint,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
@@ -170,7 +170,6 @@ class RenderEditable extends RenderBox {
        _selection = selection,
        _offset = offset,
        _cursorWidth = cursorWidth,
-       _textEditingPoint = textEditingPoint,
        _cursorRadius = cursorRadius,
        _enableInteractiveSelection = enableInteractiveSelection,
        _obscureText = obscureText {
@@ -217,8 +216,6 @@ class RenderEditable extends RenderBox {
   /// It must not be null. It will make cut, copy and paste functionality work
   /// with the most recently set [TextSelectionDelegate].
   TextSelectionDelegate textSelectionDelegate;
-
-  TextEditingPoint _textEditingPoint;
 
   Rect _lastCaretRect;
 
@@ -704,6 +701,9 @@ class RenderEditable extends RenderBox {
     _cursorRadius = value;
     markNeedsPaint();
   }
+
+  bool _floatingCursorOn = false;
+  Offset _floatingCursorOffset;
 
   /// If false, [describeSemanticsConfiguration] will not set the
   /// configuration's cursor motion or set selection callbacks.
@@ -1213,7 +1213,7 @@ class RenderEditable extends RenderBox {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(_selection.extent, _caretPrototype);
     final Paint paint = Paint()
-      ..color = _cursorColor;
+      ..color = _floatingCursorOn ? CupertinoColors.inactiveGray : _cursorColor;
 
     final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset);
 
@@ -1231,6 +1231,125 @@ class RenderEditable extends RenderBox {
     }
   }
 
+  /// Bounded cursor offset.
+  Offset get boundedCursorOffset {
+    // Painting requires an offset of - preferredLineHeight / 2 so we need to add it back
+    // so that the offset used to determine the text position is calculated correctly.
+    final Offset offset = Offset(_floatingCursorOffset.dx, math.max(0, _floatingCursorOffset.dy + preferredLineHeight / 2));
+    return offset;
+  }
+
+  /// Stops cursor blinking and paints in the on state.
+  ///
+  /// Used to leave the cursor on while moving the cursor in the floating cursor
+  /// mode.
+  void setFloatingCursorOffset(TextCursorAction action, Offset rawCursorOffset) {
+    if (action == TextCursorAction.Start) {
+      _relativeOrigin = const Offset(0, 0);
+      _previousOffset = null;
+      _resetOriginOnBottom = false;
+      _resetOriginOnTop = false;
+      _resetOriginOnRight = false;
+      _resetOriginOnBottom = false;
+    }
+    _floatingCursorOn = action != TextCursorAction.End;
+    _floatingCursorOffset = _calculateBoundedCursorOffset(rawCursorOffset);
+  }
+
+  void _paintFloatingCaret(Canvas canvas, Offset effectiveOffset) {
+    assert(_textLayoutLastWidth == constraints.maxWidth);
+    final Paint paint = Paint()
+      ..color = _cursorColor;
+
+//    Offset deltaPosition = const Offset(0, 0);
+//    if (_previousOffset != null)
+//      deltaPosition = effectiveOffset - _previousOffset;
+//
+//    // We are off the left end of text field.
+//    if (_resetOriginOnLeft && deltaPosition.dx > 0 || _resetOriginOnRight && deltaPosition.dx < 0) {
+//      _relativeOrigin = Offset(effectiveOffset.dx, _relativeOrigin.dy);
+//      _resetOriginOnLeft = false;
+//      _resetOriginOnRight = false;
+//    }
+//    if (_resetOriginOnTop && deltaPosition.dy > 0 || _resetOriginOnBottom && deltaPosition.dy < 0) {
+//      _relativeOrigin = Offset(_relativeOrigin.dx, effectiveOffset.dy);
+//      _resetOriginOnBottom = false;
+//      _resetOriginOnTop = false;
+//    }
+//
+//    final double currentX = effectiveOffset.dx - _relativeOrigin.dx;
+//    final double currentY = effectiveOffset.dy - _relativeOrigin.dy - preferredLineHeight / 2;
+//    final double adjustedX = math.min(math.max(currentX, 0), _textPainter.width);
+//    final double adjustedY = math.min(math.max(currentY, 0), _textPainter.height);
+//    final Offset adjustedOffset = Offset(adjustedX, adjustedY);
+//
+//    if (currentX < 0 && deltaPosition.dx < 0)
+//      _resetOriginOnLeft = true;
+//    else if(currentX > 0 && deltaPosition.dx > 0)
+//      _resetOriginOnRight = true;
+//    if (currentY < 0 && deltaPosition.dy < 0)
+//      _resetOriginOnTop = true;
+//    else if (currentY > 0 && deltaPosition.dy > 0)
+//      _resetOriginOnBottom = true;
+
+    final Rect caretPrototype = Rect.fromLTRB(_caretPrototype.left, _caretPrototype.top - 2, _caretPrototype.right, _caretPrototype.bottom + 2);
+    final Rect caretRect = caretPrototype.shift(effectiveOffset);
+
+    const Radius floatingCursorRadius = Radius.circular(3);
+    final RRect caretRRect = RRect.fromRectAndRadius(caretRect, floatingCursorRadius);
+    canvas.drawRRect(caretRRect, paint);
+//    _previousOffset = effectiveOffset;
+  }
+
+  Offset _relativeOrigin = const Offset(0, 0);
+  Offset _previousOffset;
+  bool _resetOriginOnLeft = false;
+  bool _resetOriginOnRight = false;
+  bool _resetOriginOnTop = false;
+  bool _resetOriginOnBottom = false;
+
+  Offset _calculateBoundedCursorOffset(Offset rawCursorOffset) {
+    Offset deltaPosition = const Offset(0, 0);
+    if (_previousOffset != null)
+      deltaPosition = rawCursorOffset - _previousOffset;
+
+    print(_resetOriginOnLeft.toString() + ' and ' + _resetOriginOnRight.toString());
+    // We are off the left end of text field.
+    if (_resetOriginOnLeft && deltaPosition.dx > 0) {
+      _relativeOrigin = Offset(rawCursorOffset.dx, _relativeOrigin.dy);
+      _resetOriginOnLeft = false;
+    } else if (_resetOriginOnRight && deltaPosition.dx < 0) {
+      _relativeOrigin = Offset(rawCursorOffset.dx - _textPainter.width, _relativeOrigin.dy);
+      _resetOriginOnRight = false;
+    }
+    if (_resetOriginOnTop && deltaPosition.dy > 0) {
+      _relativeOrigin = Offset(_relativeOrigin.dx, rawCursorOffset.dy);
+      _resetOriginOnTop = false;
+    } else if (_resetOriginOnBottom && deltaPosition.dy < 0) {
+      _relativeOrigin = Offset(_relativeOrigin.dx, rawCursorOffset.dy - _textPainter.height);
+      _resetOriginOnBottom = false;
+    }
+
+    final double currentX = rawCursorOffset.dx - _relativeOrigin.dx;
+    final double currentY = rawCursorOffset.dy - _relativeOrigin.dy;
+    final double adjustedX = math.min(math.max(currentX, 0), _textPainter.width);
+    final double adjustedY = math.min(math.max(currentY - preferredLineHeight / 2, 0), _textPainter.height);
+    final Offset adjustedOffset = Offset(adjustedX, adjustedY);
+
+    if (currentX < 0 && deltaPosition.dx < 0) {
+      _resetOriginOnLeft = true;
+    } else if(currentX > _textPainter.width && deltaPosition.dx > 0)
+      _resetOriginOnRight = true;
+    if (currentY < 0 && deltaPosition.dy < 0)
+      _resetOriginOnTop = true;
+    else if (currentY > _textPainter.height && deltaPosition.dy > 0)
+      _resetOriginOnBottom = true;
+
+    _previousOffset = rawCursorOffset;
+
+    return adjustedOffset;
+  }
+
   void _paintSelection(Canvas canvas, Offset effectiveOffset) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     assert(_selectionRects != null);
@@ -1242,17 +1361,18 @@ class RenderEditable extends RenderBox {
   void _paintContents(PaintingContext context, Offset offset) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset effectiveOffset = offset + _paintOffset;
-
     if (_selection != null) {
-      if (_selection.isCollapsed && _showCursor.value && cursorColor != null) {
+      if (_selection.isCollapsed && _showCursor.value && cursorColor != null || _floatingCursorOn) {
         _paintCaret(context.canvas, effectiveOffset);
       } else if (!_selection.isCollapsed && _selectionColor != null) {
         _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
         _paintSelection(context.canvas, effectiveOffset);
       }
     }
-
     _textPainter.paint(context.canvas, effectiveOffset);
+    if (_floatingCursorOn) {
+      _paintFloatingCaret(context.canvas, _floatingCursorOffset);
+    }
   }
 
   @override
