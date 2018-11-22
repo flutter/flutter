@@ -1,3 +1,7 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gallery/welcome/step.dart';
 
@@ -16,7 +20,8 @@ class DocumentationWelcomeStep extends WelcomeStep {
   @override
   String title() => 'Complete, flexible APIs';
   @override
-  String subtitle() => 'View full API documentation, when you need it, with a quick tap. Look for the documentation icon in the app bar.';
+  String subtitle() =>
+      'View full API documentation, when you need it, with a quick tap. Look for the documentation icon in the app bar.';
 
   @override
   Widget imageWidget() {

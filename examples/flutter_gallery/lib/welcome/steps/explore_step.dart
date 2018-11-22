@@ -1,3 +1,7 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gallery/welcome/step.dart';
 
@@ -43,8 +47,8 @@ class ExploreWelcomeStep extends WelcomeStep {
       child: Container(
         width: 300.0,
         child: Stack(
-            children: stackChildren,
-          ),
+          children: stackChildren,
+        ),
       ),
     );
   }
@@ -91,12 +95,12 @@ class ExploreWelcomeStep extends WelcomeStep {
       PopPosition popPosition, AnimationController animationController) {
     final Animation<double> scaleAnimation =
         Tween<double>(begin: 0.6, end: 1.0).animate(
-          CurvedAnimation(parent: animationController, curve: Curves.easeInOut),
-        );
+      CurvedAnimation(parent: animationController, curve: Curves.easeInOut),
+    );
     final Animation<double> opacityAnimation =
         Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(parent: animationController, curve: Curves.easeInOut),
-        );
+      CurvedAnimation(parent: animationController, curve: Curves.easeInOut),
+    );
     _popScaleAnimations.add(scaleAnimation);
     _popOpacityAnimations.add(opacityAnimation);
     return Positioned(

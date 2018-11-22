@@ -42,12 +42,15 @@ class GalleryApp extends StatefulWidget {
   _GalleryAppState createState() => _GalleryAppState();
 }
 
-class _GalleryAppState extends State<GalleryApp> {
+class _GalleryAppState extends State<GalleryApp>
+    with SingleTickerProviderStateMixin {
   GalleryOptions _options;
   Timer _timeDilationTimer;
   SharedPreferences _prefs;
   Future<bool> _checkWelcomeFuture;
   bool _showWelcome;
+  AnimationController _welcomeContentAnimationController;
+  Animation<Offset> _welcomeContentAnimation;
 
   Map<String, WidgetBuilder> _buildRoutes() {
     // For a different example of how to set up an application routing table
@@ -70,6 +73,10 @@ class _GalleryAppState extends State<GalleryApp> {
       platform: defaultTargetPlatform,
     );
     _checkWelcomeFuture = _checkWelcomeState();
+    _welcomeContentAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
   }
 
   @override
@@ -95,7 +102,6 @@ class _GalleryAppState extends State<GalleryApp> {
           timeDilation = newOptions.timeDilation;
         }
       }
-
       _options = newOptions;
     });
   }
@@ -115,7 +121,6 @@ class _GalleryAppState extends State<GalleryApp> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO conditionally show - persistent settings?
     return MaterialApp(
       theme: _options.theme.data.copyWith(platform: _options.platform),
       title: 'Flutter Gallery',
@@ -135,7 +140,7 @@ class _GalleryAppState extends State<GalleryApp> {
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             _showWelcome ??= snapshot.data;
-            return _homeWidget();
+            return _homeWidget(context);
           } else {
             return Container();
           }
@@ -150,8 +155,13 @@ class _GalleryAppState extends State<GalleryApp> {
     return !hasSeenWelcome;
   }
 
-  Widget _homeWidget() {
-    const Widget welcome = Welcome();
+  Widget _homeWidget(BuildContext context) {
+    final Widget welcome = Welcome(
+      onDismissed: () {
+        _welcomeContentAnimationController.forward();
+        _prefs.setBool('hasSeenWelcome', true);
+      },
+    );
     Widget home = GalleryHome(
       testMode: widget.testMode,
       optionsPage: GalleryOptionsPage(
@@ -170,13 +180,22 @@ class _GalleryAppState extends State<GalleryApp> {
         child: home,
       );
     }
-
-    final List<Widget> stackWidgets = <Widget>[home];
     if (_showWelcome) {
-      stackWidgets.add(welcome);
+      _welcomeContentAnimation = Tween<Offset>(
+        begin: const Offset(0.0, 1.0),
+        end: const Offset(0.0, 0.0),
+      ).animate(_welcomeContentAnimationController);
+      return Stack(
+        children: <Widget>[
+          welcome,
+          SlideTransition(
+            position: _welcomeContentAnimation,
+            child: home,
+          )
+        ],
+      );
+    } else {
+      return home;
     }
-    return Stack(
-      children: stackWidgets,
-    );
   }
 }

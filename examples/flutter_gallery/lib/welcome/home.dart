@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gallery/welcome/steps/playground_step.dart';
 
@@ -16,7 +15,8 @@ const int _kAutoProgressSeconds = 6;
 const int _kAutoProgressTransitionMilliseconds = 520;
 
 class Welcome extends StatefulWidget {
-  const Welcome({Key key}) : super(key: key);
+  const Welcome({Key key, this.onDismissed}) : super(key: key);
+  final VoidCallback onDismissed;
   @override
   _WelcomeState createState() => _WelcomeState();
 }
@@ -108,7 +108,12 @@ class _WelcomeState extends State<Welcome> with TickerProviderStateMixin {
                         'START EXPLORING',
                         style: footerButtonTextStyle,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        _autoProgressTimer.cancel();
+                        if (widget.onDismissed != null) {
+                          widget.onDismissed();
+                        }
+                      },
                     ),
                   ),
                   Container(
