@@ -6,14 +6,26 @@ const double _pickerRowHeight = 46.0;
 
 typedef IndexedValueCallback<T> = Function(int index, T value);
 
-final List<Color> kColorOptions = <Color>[
-  Colors.white,
-  Colors.orange,
-  Colors.cyan[200],
-  Colors.lightBlue[300],
-  Colors.blue,
-  Colors.blue[800],
+class ColorChoice {
+  ColorChoice({@required this.color, @required this.code});
+  Color color;
+  String code;
+}
+
+final List<ColorChoice> kColors = <ColorChoice>[
+  ColorChoice(color: Colors.white, code: 'Colors.white'),
+  ColorChoice(color: Colors.orange, code: 'Colors.orange'),
+  ColorChoice(color: Colors.cyan[200], code: 'Colors.cyan[200]'),
+  ColorChoice(color: Colors.lightBlue[300], code: 'Colors.lightBlue[300]'),
+  ColorChoice(color: Colors.blue, code: 'Colors.blue'),
+  ColorChoice(color: Colors.blue[800], code: 'Colors.blue[800]'),
 ];
+
+final List<Color> kColorOptions = kColors.map((ColorChoice c) => c.color).toList();
+
+String codeSnippetForColor(Color color) {
+  return kColors.where((ColorChoice c) => c.color == color).toList()[0].code;
+}
 
 Widget sliderPicker({
   @required String label,
@@ -172,11 +184,6 @@ Widget colorPicker({
   final List<Widget> buttonChildren = <Widget>[];
   for (int i = 0; i < colorOptions.length; i++) {
     final Color color = colorOptions[i];
-
-    print(color);
-    print(selectedValue);
-    print(selectedValue == color);
-
     Widget button = colorButton(
       color: color,
       inverse: inverse,

@@ -17,7 +17,17 @@ class SliderDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '';
+  String code() => '''
+Slider(
+  value: $_value,
+  min: 0.0,
+  max: 10.0,
+  divisions: 10,
+  activeColor: ${codeSnippetForColor(_activeColor)},
+  inactiveColor: ${codeSnippetForColor(_inactiveColor)},
+  onChanged: (double value) {},
+)
+''';
 
   @override
   Widget configWidget(BuildContext context) {

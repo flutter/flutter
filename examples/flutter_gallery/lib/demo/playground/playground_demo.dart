@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-// ignore: must_be_immutable
+/// ignore: must_be_immutable
 abstract class PlaygroundDemo extends StatefulWidget {
   _PlaygroundWidgetState _state;
 
@@ -42,6 +42,31 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo> {
             child: widget.configWidget(context),
           ),
         ),
+        Center(
+            child: FlatButton(
+                child: const Text('GET SOURCE CODE'),
+                onPressed: () {
+                  showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                            child: Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Container(
+                            padding: const EdgeInsets.all(5.0),
+                            child: RichText(
+                              text: TextSpan(text: widget.code(),
+                                style: TextStyle(
+                                  color: Colors.grey[850],
+                                  fontSize: 14.0,
+                                  height: 1.4,
+                                  fontFamily: 'monospace',
+                                )),
+                          ),
+                          ),
+                        ));
+                      });
+                }))
       ],
     );
   }

@@ -17,7 +17,13 @@ class CupertinoSwitchDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '';
+  String code() => '''
+CupertinoSwitch(
+  value: $_value,
+  activeColor: ${codeSnippetForColor(_activeColor)},
+  onChanged: (bool value) {},
+)
+''';
 
   @override
   Widget configWidget(BuildContext context) {

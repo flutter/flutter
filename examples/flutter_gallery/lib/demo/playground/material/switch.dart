@@ -18,7 +18,15 @@ class SwitchDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '';
+  String code() => '''
+Switch(
+  value: $_previewValue,
+  activeColor: ${codeSnippetForColor(_activeColor)},
+  activeTrackColor: ${codeSnippetForColor(_activeTrackColor)},
+  inactiveTrackColor: ${codeSnippetForColor(_inactiveTrackColor)},
+  onChanged: (bool value) {},
+)
+''';
 
   @override
   Widget configWidget(BuildContext context) {

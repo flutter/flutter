@@ -10,13 +10,19 @@ const String _demoWidgetName = 'Checkbox';
 
 class CheckboxDemo extends PlaygroundDemo {
   Color _activeColor = Colors.blue;
-  bool _previewValue = true;
+  bool _value = true;
 
   @override
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '';
+  String code() => '''
+Checkbox(
+  value: $_value,
+  activeColor: ${codeSnippetForColor(_activeColor)},
+  onChanged: (bool value) {},
+)
+''';
 
   @override
   Widget configWidget(BuildContext context) {
@@ -41,11 +47,11 @@ class CheckboxDemo extends PlaygroundDemo {
   Widget previewWidget(BuildContext context) {
     return Center(
       child: Checkbox(
-        value: _previewValue,
+        value: _value,
         activeColor: _activeColor,
         onChanged: (bool value) {
           updateConfiguration(() {
-            _previewValue = value;
+            _value = value;
           });
         },
       ),

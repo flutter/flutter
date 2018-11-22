@@ -17,7 +17,22 @@ class RaisedButtonDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '';
+  String code() => '''
+RaisedButton(
+  color: ${codeSnippetForColor(_color)},
+  child: Text(
+    'BUTTON',
+    style: TextStyle(
+      fontSize: 16.0,
+    ),
+  ),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(30.0)
+  ),
+  elevation: $_elevation,
+  onPressed: () {},
+)
+''';
 
   @override
   Widget configWidget(BuildContext context) {
@@ -53,7 +68,6 @@ class RaisedButtonDemo extends PlaygroundDemo {
         minWidth: 160.0,
         height: 50.0,
         child: RaisedButton(
-          padding: const EdgeInsets.all(5.0),
           color: _color,
           child: Text(
             'BUTTON',

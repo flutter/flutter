@@ -17,7 +17,16 @@ class CupertinoSliderDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '';
+  String code() => '''
+CupertinoSlider(
+  value: $_value,
+  activeColor: ${codeSnippetForColor(_activeColor)},
+  min: 0.0,
+  max: 10.0,
+  divisions: 10,
+  onChanged: (double value) {}
+)
+''';
 
   @override
   Widget configWidget(BuildContext context) {

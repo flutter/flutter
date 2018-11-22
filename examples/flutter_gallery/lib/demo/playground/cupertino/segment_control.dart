@@ -18,13 +18,25 @@ class CupertinoSegmentControlDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => """
-    
-  """;
+  String code() => '''
+CupertinoSegmentedControl<int>(
+  children: <Widget>[
+    Text('A'),
+    Text('B'),
+    Text('C'),
+  ],
+  selectedColor: ${codeSnippetForColor(_selectedColor)},
+  borderColor: ${codeSnippetForColor(_borderColor)},
+  pressedColor: ${codeSnippetForColor(_selectedColor)}.withOpacity(0.4),
+  onValueChanged: (int value) {},
+  groupValue: $_groupValue,
+) 
+''';
 
   @override
   Widget configWidget(BuildContext context) {
-    final List<Color> colors = kColorOptions.where((Color c) => c != Colors.white).toList();
+    final List<Color> colors =
+        kColorOptions.where((Color c) => c != Colors.white).toList();
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -48,6 +60,7 @@ class CupertinoSegmentControlDemo extends PlaygroundDemo {
                 _borderColor = color;
               });
             }),
+        
       ],
     );
   }

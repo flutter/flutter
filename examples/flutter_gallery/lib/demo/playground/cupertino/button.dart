@@ -16,7 +16,13 @@ class CupertinoButtonDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '';
+  String code() => '''
+CupertinoButton(
+  child: const Text('BUTTON'),
+  color: ${codeSnippetForColor(_color)},
+  onPressed: () {},
+)
+''';
 
   @override
   Widget configWidget(BuildContext context) {
@@ -41,10 +47,6 @@ class CupertinoButtonDemo extends PlaygroundDemo {
       child: CupertinoButton(
         child: const Text('BUTTON'),
         color: _color,
-        // padding: const EdgeInsets.all(5.0),
-        // disabledColor: ,
-        // minSize: 44.0,
-        // pressedOpacity: 0.1,
         // borderRadius: const BorderRadius.all(Radius.circular(8.0)),
         onPressed: () {},
       ),
