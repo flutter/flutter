@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/cupertino/colors.dart';
+import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 @visibleForTesting
 const double kDefaultTableViewCellHeight = 44.0;
@@ -23,13 +25,13 @@ const double kDefaultDividerHeight = 1.0;
 /// equivalent of Android's `ListView` and `RecyclerView`. [CupertinoTableView]
 /// is Flutter's iOS-styled alternative to [ListView].
 ///
-/// #Cells
+/// # Cells
 ///
 /// To achieve complete iOS style parity, consider filling [CupertinoTableView]s
 /// with [CupertinoTableViewCell]s. If custom cells are desired, any widget
 /// can be added to a [CupertinoTableView].
 ///
-/// #Dividers
+/// # Dividers
 ///
 /// By default, [CupertinoTableView]s render dividers between each cell. For
 /// custom cells, the divider beneath the cell is rendered with a standard inset
@@ -44,7 +46,7 @@ const double kDefaultDividerHeight = 1.0;
 /// end, too. The gap between extra dividers is equal to the height of the
 /// last cell in the [CupertinoTableView].
 ///
-/// #Styles
+/// # Styles
 ///
 /// A [CupertinoTableView] may be rendered either in a "plain" style or a
 /// "grouped" style.
@@ -55,7 +57,7 @@ const double kDefaultDividerHeight = 1.0;
 /// A grouped [CupertinoTableView] subdivides cells into sections. Sections
 /// are rendered with gaps between them and optional headers before each section.
 ///
-/// #Section Index
+/// # Section Index
 ///
 /// If a [CupertinoTableView] is in a grouped style, it can optionally display
 /// a section "index". This index is a thin strip that appears on the right side
@@ -140,37 +142,41 @@ class _CupertinoTableViewState extends State<CupertinoTableView> {
 
   IndexedWidgetBuilder _createCellDecorator() {
     if (widget.plainChildren != null) {
-      return (BuildContext context, int index) {
-        if (index >= widget.plainChildren.length) {
-          return null;
-        }
-
-        final bool isLastCell = index == widget.plainChildren.length - 1;
-        return _decorateCell(widget.plainChildren[index], isLastCell);
-      };
+      return _buildPlainChildFromList;
     } else if (widget.plainChildrenBuilder != null) {
-      return (BuildContext context, int index) {
-        final Widget cell = widget.plainChildrenBuilder(context, index);
-        if (cell == null) {
-          return null;
-        }
-
-        bool isLastCell;
-        if (widget.plainChildCount != null) {
-          // The child count was provided so we will simply compare cell indices.
-          isLastCell = index == widget.plainChildCount - 1;
-        } else {
-          // No child count was provided, so the only way to know if this is the
-          // last cell is to build the next cell and check for null.
-          final Widget nextCell = widget.plainChildrenBuilder(context, index + 1);
-          isLastCell =  nextCell == null;
-        }
-
-        return _decorateCell(cell, isLastCell);
-      };
+      return _buildPlainChildFromBuilder;
     } else {
       throw Exception('No children found.');
     }
+  }
+
+  Widget _buildPlainChildFromList(BuildContext context, int index) {
+    if (index >= widget.plainChildren.length) {
+      return null;
+    }
+
+    final bool isLastCell = index == widget.plainChildren.length - 1;
+    return _decorateCell(widget.plainChildren[index], isLastCell);
+  }
+
+  Widget _buildPlainChildFromBuilder(BuildContext context, int index) {
+    final Widget cell = widget.plainChildrenBuilder(context, index);
+    if (cell == null) {
+      return null;
+    }
+
+    bool isLastCell;
+    if (widget.plainChildCount != null) {
+      // The child count was provided so we will simply compare cell indices.
+      isLastCell = index == widget.plainChildCount - 1;
+    } else {
+      // No child count was provided, so the only way to know if this is the
+      // last cell is to build the next cell and check for null.
+      final Widget nextCell = widget.plainChildrenBuilder(context, index + 1);
+      isLastCell =  nextCell == null;
+    }
+
+    return _decorateCell(cell, isLastCell);
   }
 
   // Decorates an individual cell with a divider beneath it. If this cell
@@ -339,9 +345,9 @@ class CupertinoTableViewExtraDividersRenderObject extends RenderSliver {
     double cellHeight,
     double dividerThickness = kDefaultDividerHeight,
   }) : _cellHeight = cellHeight ?? kDefaultTableViewCellHeight,
-        _linePaint = Paint()
-          ..color = CupertinoColors.lightBackgroundGray
-          ..strokeWidth = dividerThickness;
+       _linePaint = Paint()
+         ..color = CupertinoColors.lightBackgroundGray
+         ..strokeWidth = dividerThickness;
 
   double get cellHeight => _cellHeight;
   double _cellHeight;

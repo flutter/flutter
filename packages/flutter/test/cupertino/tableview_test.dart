@@ -26,13 +26,13 @@ void main() {
       // and with a top-edge y-value that corresponds to the cells being stacked
       // vertically.
       final Offset box1TopRight = tester.getTopRight(find.byKey(const Key('cell1')));
-      expect(box1TopRight, Size(viewportSize.width, 0.0));
+      expect(box1TopRight, Offset(viewportSize.width, 0.0));
 
       final Offset box2TopRight = tester.getTopRight(find.byKey(const Key('cell2')));
-      expect(box2TopRight.dy, Size(viewportSize.width, 100.0));
+      expect(box2TopRight, Offset(viewportSize.width, 100.0));
 
       final Offset box3TopRight = tester.getTopRight(find.byKey(const Key('cell3')));
-      expect(box3TopRight.dy, Size(viewportSize.width, 200.0));
+      expect(box3TopRight, Offset(viewportSize.width, 200.0));
     });
 
     testWidgets('CupertinoTableView lays out lazily built cells vertically like a list', (WidgetTester tester) async {
