@@ -2718,13 +2718,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// |  **child != null**  |  Old child is removed, returns null. | Old child updated if possible, returns child or new [Element]. |
   @protected
   Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
-    assert(() {
-      if (newWidget != null && newWidget.key is GlobalKey) {
-        final GlobalKey key = newWidget.key;
-        key._debugReserveFor(this);
-      }
-      return true;
-    }());
     if (newWidget == null) {
       if (child != null)
         deactivateChild(child);
@@ -2750,6 +2743,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       deactivateChild(child);
       assert(child._parent == null);
     }
+    assert(() {
+      if (newWidget != null && newWidget.key is GlobalKey) {
+        final GlobalKey key = newWidget.key;
+        key._debugReserveFor(this);
+      }
+      return true;
+    }());
     return inflateWidget(newWidget, newSlot);
   }
 
