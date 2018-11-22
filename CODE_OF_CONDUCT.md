@@ -38,7 +38,7 @@ shave](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#lazy
 
 ## Questions
 
-It's always ok to ask questions. Our systems are large, nobody will be
+It's always ok to ask questions. Our systems are large, and nobody will be
 an expert in all the systems. Once you find the answer, document it in
 the first place you looked. That way, the next person will be brought
 up to speed even quicker.
