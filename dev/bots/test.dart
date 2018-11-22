@@ -208,7 +208,7 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
   if (podfile.existsSync()) {
     await runCommand('pod',
       <String>['install'],
-      workingDirectory: path.join(flutterRoot, relativePathToApplication),
+      workingDirectory: podfile.parent.path,
       expectNonZeroExit: false,
       timeout: _kShortTimeout,
     );
