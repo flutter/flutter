@@ -1235,7 +1235,7 @@ class RenderEditable extends RenderBox {
   Offset get boundedCursorOffset {
     // Painting requires an offset of - preferredLineHeight / 2 so we need to add it back
     // so that the offset used to determine the text position is calculated correctly.
-    final Offset offset = Offset(_floatingCursorOffset.dx, math.max(0, _floatingCursorOffset.dy + preferredLineHeight / 2));
+    final Offset offset = Offset(_floatingCursorOffset.dx, _floatingCursorOffset.dy + preferredLineHeight / 2);
     return offset;
   }
 
@@ -1253,7 +1253,8 @@ class RenderEditable extends RenderBox {
       _resetOriginOnBottom = false;
     }
     _floatingCursorOn = action != TextCursorAction.End;
-    _floatingCursorOffset = _calculateBoundedCursorOffset(rawCursorOffset);
+    if(_floatingCursorOn)
+      _floatingCursorOffset = _calculateBoundedCursorOffset(rawCursorOffset);
   }
 
   void _paintFloatingCaret(Canvas canvas, Offset effectiveOffset) {
@@ -1261,44 +1262,12 @@ class RenderEditable extends RenderBox {
     final Paint paint = Paint()
       ..color = _cursorColor;
 
-//    Offset deltaPosition = const Offset(0, 0);
-//    if (_previousOffset != null)
-//      deltaPosition = effectiveOffset - _previousOffset;
-//
-//    // We are off the left end of text field.
-//    if (_resetOriginOnLeft && deltaPosition.dx > 0 || _resetOriginOnRight && deltaPosition.dx < 0) {
-//      _relativeOrigin = Offset(effectiveOffset.dx, _relativeOrigin.dy);
-//      _resetOriginOnLeft = false;
-//      _resetOriginOnRight = false;
-//    }
-//    if (_resetOriginOnTop && deltaPosition.dy > 0 || _resetOriginOnBottom && deltaPosition.dy < 0) {
-//      _relativeOrigin = Offset(_relativeOrigin.dx, effectiveOffset.dy);
-//      _resetOriginOnBottom = false;
-//      _resetOriginOnTop = false;
-//    }
-//
-//    final double currentX = effectiveOffset.dx - _relativeOrigin.dx;
-//    final double currentY = effectiveOffset.dy - _relativeOrigin.dy - preferredLineHeight / 2;
-//    final double adjustedX = math.min(math.max(currentX, 0), _textPainter.width);
-//    final double adjustedY = math.min(math.max(currentY, 0), _textPainter.height);
-//    final Offset adjustedOffset = Offset(adjustedX, adjustedY);
-//
-//    if (currentX < 0 && deltaPosition.dx < 0)
-//      _resetOriginOnLeft = true;
-//    else if(currentX > 0 && deltaPosition.dx > 0)
-//      _resetOriginOnRight = true;
-//    if (currentY < 0 && deltaPosition.dy < 0)
-//      _resetOriginOnTop = true;
-//    else if (currentY > 0 && deltaPosition.dy > 0)
-//      _resetOriginOnBottom = true;
-
     final Rect caretPrototype = Rect.fromLTRB(_caretPrototype.left, _caretPrototype.top - 2, _caretPrototype.right, _caretPrototype.bottom + 2);
     final Rect caretRect = caretPrototype.shift(effectiveOffset);
 
     const Radius floatingCursorRadius = Radius.circular(3);
     final RRect caretRRect = RRect.fromRectAndRadius(caretRect, floatingCursorRadius);
     canvas.drawRRect(caretRRect, paint);
-//    _previousOffset = effectiveOffset;
   }
 
   Offset _relativeOrigin = const Offset(0, 0);
@@ -1313,7 +1282,6 @@ class RenderEditable extends RenderBox {
     if (_previousOffset != null)
       deltaPosition = rawCursorOffset - _previousOffset;
 
-    print(_resetOriginOnLeft.toString() + ' and ' + _resetOriginOnRight.toString());
     // We are off the left end of text field.
     if (_resetOriginOnLeft && deltaPosition.dx > 0) {
       _relativeOrigin = Offset(rawCursorOffset.dx, _relativeOrigin.dy);
