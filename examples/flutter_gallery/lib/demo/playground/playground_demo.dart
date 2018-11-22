@@ -45,11 +45,11 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo> {
         Container(
           height: 60.0,
           child: FlatButton(
-              child: Text('GET SOURCE CODE', 
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontSize: 14.0, 
-                )),
+              child: Text('GET SOURCE CODE',
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 14.0,
+                  )),
               shape: BeveledRectangleBorder(
                 side: BorderSide(
                   color: Colors.grey[300],
