@@ -8,6 +8,7 @@ import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/widgets/focus_manager.dart';
 
 import 'banner.dart';
 import 'basic.dart';
@@ -731,7 +732,29 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) { }
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // When the application moves to the background, any focus nodes
+    // need to lose focus. When the application is restored to the
+    // foreground state, any focused node should regain focus (including)
+    // restoring the keyboard. This is only important in cases where
+    // applications in the background are partially visible. For example,
+    // split-screen on Android or a backgrounded app on a desktop environment.
+    switch (state) {
+      case AppLifecycleState.inactive: {
+        final FocusManager focusManager = WidgetsBinding.instance.focusManager;
+        focusManager.windowDidLoseFocus();
+        break;
+      }
+      case AppLifecycleState.resumed: {
+        final FocusManager focusManager = WidgetsBinding.instance.focusManager;
+        focusManager.windowDidGainFocus();
+        break;
+      }
+      case AppLifecycleState.suspending:
+      case AppLifecycleState.paused:
+        break;
+    }
+  }
 
   @override
   void didHaveMemoryPressure() { }

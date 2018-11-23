@@ -417,6 +417,45 @@ class FocusManager {
   final FocusScopeNode rootScope = FocusScopeNode();
 
   FocusNode _currentFocus;
+  bool _windowHasFocus = true;
+  FocusNode _cachedFocus;
+  FocusScopeNode _cachedScope;
+
+  /// Call when the window loses focus.
+  ///
+  /// The currently focused node and containg scope is cached, then the current
+  /// focus is removed. For example, this ensures that cursors do not blink
+  /// while in the background.
+  ///
+  /// This method is safe to call multiple times.
+  void windowDidLoseFocus() {
+    if (!_windowHasFocus) {
+      return;
+    }
+    _windowHasFocus = false;
+    _cachedFocus = _currentFocus;
+    _cachedScope = _cachedFocus._parent;
+    _currentFocus?.unfocus();
+  }
+
+  /// Call when the window regains focus.
+  ///
+  /// If there is a cached focus node from when the window lost focus, this
+  /// method will restore focus to that node. For example, this ensures that
+  /// a focused text node will re-request the keyboard.
+  ///
+  /// This method is safe to call multiple times.
+  void windowDidGainFocus() {
+    if (_windowHasFocus) {
+      return;
+    }
+    _windowHasFocus = true;
+    if (_cachedFocus != null) {
+      _cachedScope._setFocus(_cachedFocus);
+      _cachedFocus = null;
+      _cachedScope = null;
+    }
+  }
 
   void _willDisposeFocusNode(FocusNode node) {
     assert(node != null);
@@ -434,16 +473,18 @@ class FocusManager {
 
   FocusNode _findNextFocus() {
     FocusScopeNode scope = rootScope;
-    while (scope._firstChild != null)
+    while (scope._firstChild != null) {
       scope = scope._firstChild;
+    }
     return scope._focus;
   }
 
   void _update() {
     _haveScheduledUpdate = false;
     final FocusNode nextFocus = _findNextFocus();
-    if (_currentFocus == nextFocus)
+    if (_currentFocus == nextFocus) {
       return;
+    }
     final FocusNode previousFocus = _currentFocus;
     _currentFocus = nextFocus;
     previousFocus?._notify();
