@@ -17,7 +17,7 @@ class SliderDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '''
+  String codePreview() => '''
 Slider(
   value: $_value,
   min: 0.0,

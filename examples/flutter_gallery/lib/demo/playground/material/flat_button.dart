@@ -16,7 +16,7 @@ class FlatButtonDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '''
+  String codePreview() => '''
 FlatButton(
   color: ${codeSnippetForColor(_color)},
   child: Text(

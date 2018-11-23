@@ -18,7 +18,7 @@ class SwitchDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '''
+  String codePreview() => '''
 Switch(
   value: $_previewValue,
   activeColor: ${codeSnippetForColor(_activeColor)},

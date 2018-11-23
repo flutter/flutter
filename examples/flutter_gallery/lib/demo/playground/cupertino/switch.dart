@@ -17,7 +17,7 @@ class CupertinoSwitchDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '''
+  String codePreview() => '''
 CupertinoSwitch(
   value: $_value,
   activeColor: ${codeSnippetForColor(_activeColor)},

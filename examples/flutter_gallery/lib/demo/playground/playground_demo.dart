@@ -17,7 +17,7 @@ abstract class PlaygroundDemo extends StatefulWidget {
   String tabName();
   Widget previewWidget(BuildContext context);
   Widget configWidget(BuildContext context);
-  String code();
+  String codePreview();
 
   void updateConfiguration(VoidCallback updates) => _state.updateState(updates);
 }
@@ -45,44 +45,40 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo> {
         Container(
           height: 60.0,
           child: FlatButton(
-              child: Text('GET SOURCE CODE',
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 14.0,
-                  )),
-              shape: BeveledRectangleBorder(
-                side: BorderSide(
-                  color: Colors.grey[300],
-                  width: 1.0,
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16.0),
-                  topRight: Radius.circular(16.0),
-                ),
+            child: Text('GET SOURCE CODE',
+                style: TextStyle(
+                  color: Colors.grey[700],
+                  fontSize: 14.0,
+                )),
+            shape: BeveledRectangleBorder(
+              side: BorderSide(
+                color: Colors.grey[300],
+                width: 1.0,
               ),
-              onPressed: () {
-                showModalBottomSheet<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return Container(
-                          child: Padding(
-                        padding: const EdgeInsets.all(32.0),
-                        child: Container(
-                          padding: const EdgeInsets.all(5.0),
-                          child: RichText(
-                            text: TextSpan(
-                                text: widget.code(),
-                                style: TextStyle(
-                                  color: Colors.grey[850],
-                                  fontSize: 14.0,
-                                  height: 1.4,
-                                  fontFamily: 'monospace',
-                                )),
-                          ),
-                        ),
-                      ));
-                    });
-              }),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16.0),
+                topRight: Radius.circular(16.0),
+              ),
+            ),
+            onPressed: () {
+              showModalBottomSheet<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return SingleChildScrollView(
+                        padding: const EdgeInsets.all(20.0),
+                        child: RichText(
+                          text: TextSpan(
+                              text: widget.codePreview(),
+                              style: TextStyle(
+                                color: Colors.grey[850],
+                                fontSize: 14.0,
+                                height: 1.6,
+                                fontFamily: 'Monospace',
+                              )),
+                        ));
+                  });
+            },
+          ),
         ),
       ],
     );

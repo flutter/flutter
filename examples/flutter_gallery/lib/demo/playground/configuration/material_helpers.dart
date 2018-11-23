@@ -6,11 +6,40 @@ const double _pickerRowHeight = 46.0;
 
 typedef IndexedValueCallback<T> = Function(int index, T value);
 
+class BorderChoice {
+  BorderChoice({@required this.type, @required this.code});
+  String type;
+  String code;
+}
+
 class ColorChoice {
   ColorChoice({@required this.color, @required this.code});
   Color color;
   String code;
 }
+
+class IconChoice {
+  IconChoice({@required this.icon, @required this.code});
+  IconData icon;
+  String code;
+}
+
+final List<BorderChoice> kBorders = <BorderChoice>[
+  BorderChoice(type: 'square', code: '''
+RoundedRectangleBorder(
+  borderRadius: BorderRadius.zero
+)'''),
+  BorderChoice(type: 'rounded', code: '''
+RoundedRectangleBorder(
+  borderRadius: BorderRadius.circular(10.0)'
+)'''),
+  BorderChoice(type: 'beveled', code: '''
+BeveledRectangleBorder(
+  borderRadius: BorderRadius.circular(10.0)
+)'''),
+  BorderChoice(type: 'stadium', code: '''
+StadiumBorder()'''),
+];
 
 final List<ColorChoice> kColors = <ColorChoice>[
   ColorChoice(color: Colors.white, code: 'Colors.white'),
@@ -21,10 +50,34 @@ final List<ColorChoice> kColors = <ColorChoice>[
   ColorChoice(color: Colors.blue[800], code: 'Colors.blue[800]'),
 ];
 
-final List<Color> kColorOptions = kColors.map((ColorChoice c) => c.color).toList();
+final List<IconChoice> kIcons = <IconChoice>[
+  IconChoice(icon: Icons.thumb_up, code: 'Icons.thumb_up'),
+  IconChoice(icon: Icons.android, code: 'Icons.android'),
+  IconChoice(icon: Icons.alarm, code: 'Icons.alarm'),
+  IconChoice(icon: Icons.accessibility, code: 'Icons.accessibility'),
+  IconChoice(icon: Icons.call, code: 'Icons.call'),
+  IconChoice(icon: Icons.camera, code: 'Icons.camera'),
+];
+
+final List<String> kBorderOptions =
+    kBorders.map((BorderChoice b) => b.type).toList();
+
+final List<Color> kColorOptions =
+    kColors.map((ColorChoice c) => c.color).toList();
+
+final List<IconData> kIconOptions =
+    kIcons.map((IconChoice i) => i.icon).toList();
 
 String codeSnippetForColor(Color color) {
   return kColors.where((ColorChoice c) => c.color == color).toList()[0].code;
+}
+
+String codeSnippetForBorder(String type) {
+  return kBorders.where((BorderChoice b) => b.type == type).toList()[0].code;
+}
+
+String codeSnippetForIcon(IconData icon) {
+  return kIcons.where((IconChoice b) => b.icon == icon).toList()[0].code;
 }
 
 Widget sliderPicker({
@@ -61,7 +114,7 @@ ShapeBorder borderShapeFromString(String type, [bool side = true]) {
   borderSide = side ? borderSide : BorderSide.none;
 
   switch (type) {
-    case 'box':
+    case 'square':
       shape = RoundedRectangleBorder(
           borderRadius: BorderRadius.zero, side: borderSide);
       break;
@@ -74,8 +127,8 @@ ShapeBorder borderShapeFromString(String type, [bool side = true]) {
           borderRadius: BorderRadius.circular(10.0),
           side: borderSide.copyWith(width: 1.0));
       break;
-    case 'circle':
-      shape = CircleBorder(side: borderSide);
+    case 'stadium':
+      shape = StadiumBorder(side: borderSide);
       break;
   }
   return shape;
@@ -107,10 +160,10 @@ Widget shapePicker({
 }) {
   final List<String> shapeNameOptions = shapeNames ??
       <String>[
-        'box',
+        'square',
         'beveled',
         'rounded',
-        'circle',
+        'stadium',
       ];
   final List<Widget> buttonChildren = <Widget>[];
   for (int i = 0; i < shapeNameOptions.length; i++) {

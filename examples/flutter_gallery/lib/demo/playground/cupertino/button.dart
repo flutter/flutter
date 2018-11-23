@@ -16,7 +16,7 @@ class CupertinoButtonDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '''
+  String codePreview() => '''
 CupertinoButton(
   child: const Text('BUTTON'),
   color: ${codeSnippetForColor(_color)},

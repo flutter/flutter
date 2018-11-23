@@ -9,17 +9,6 @@ import 'package:flutter_gallery/demo/playground/configuration/property_column.da
 
 const String _demoWidgetName = 'IconButton';
 
-final Map<IconData, String> _iconOptionsMap = <IconData, String>{
-  Icons.thumb_up: 'Icons.thumb_up',
-  Icons.android: 'Icons.android',
-  Icons.alarm: 'Icons.alarm',
-  Icons.accessibility: 'Icons.accessibility',
-  Icons.call: 'Icons.call',
-  Icons.camera: 'Icons.camera',
-};
-
-// final List<IconData> _iconOptions = _iconOptionsMap.keys; 
-
 class IconButtonDemo extends PlaygroundDemo {
   Color _color = Colors.blue;
   IconData _icon = Icons.thumb_up;
@@ -28,7 +17,7 @@ class IconButtonDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '''
+  String codePreview() => '''
 IconButton(
   iconSize: 50.0,
   icon: Icon($_icon),
@@ -70,10 +59,9 @@ IconButton(
   }
 
   Widget _iconPicker(BuildContext context) {
-    final List<IconData> iconOptions = _iconOptionsMap.keys.toList(); 
     final List<Widget> buttonChildren = <Widget>[];
-    for (int i = 0; i < iconOptions.length; i++) {
-      final IconData icon = iconOptions[i];
+    for (int i = 0; i < kIconOptions.length; i++) {
+      final IconData icon = kIconOptions[i];
       Widget button = IconButton(
         iconSize: 30.0,
         icon: Icon(icon),
@@ -85,7 +73,7 @@ IconButton(
         color: _icon == icon ? _color : Colors.grey[400],
         splashColor: _color.withOpacity(0.2),
       );
-      if (i < iconOptions.length - 1) {
+      if (i < kIconOptions.length - 1) {
         button = Padding(
           padding: const EdgeInsets.only(right: 10.0),
           child: button,

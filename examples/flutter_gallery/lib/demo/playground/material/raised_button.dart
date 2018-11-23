@@ -17,7 +17,7 @@ class RaisedButtonDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '''
+  String codePreview() => '''
 RaisedButton(
   color: ${codeSnippetForColor(_color)},
   child: Text(
@@ -26,9 +26,7 @@ RaisedButton(
       fontSize: 16.0,
     ),
   ),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(30.0)
-  ),
+  shape: ${codeSnippetForBorder(_borderShape)}
   elevation: $_elevation,
   onPressed: () {},
 )
@@ -76,10 +74,7 @@ RaisedButton(
               color: _color == Colors.white ? Colors.grey[900] : Colors.white,
             ),
           ),
-          shape: _borderShape == 'circle'
-              ? RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.0))
-              : borderShapeFromString(_borderShape, false),
+          shape: borderShapeFromString(_borderShape, false),
           elevation: _elevation,
           onPressed: () {},
         ),

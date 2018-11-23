@@ -18,7 +18,7 @@ class CupertinoSegmentControlDemo extends PlaygroundDemo {
   String tabName() => _demoWidgetName.toUpperCase();
 
   @override
-  String code() => '''
+  String codePreview() => '''
 CupertinoSegmentedControl<int>(
   children: <Widget>[
     Text('A'),
