@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -286,7 +287,7 @@ class DefaultTabController extends StatefulWidget {
   _DefaultTabControllerState createState() => _DefaultTabControllerState();
 }
 
-class _DefaultTabControllerState extends State<DefaultTabController> with SingleTickerProviderStateMixin {
+class _DefaultTabControllerState extends State<DefaultTabController> with TickerProviderStateMixin {
   TabController _controller;
 
   @override
@@ -297,6 +298,19 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
       length: widget.length,
       initialIndex: widget.initialIndex,
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant DefaultTabController oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.length != oldWidget.length) {
+      final int oldIndex = _controller._index;
+      _controller = TabController(
+        vsync: this,
+        length: widget.length,
+        initialIndex: math.min(oldIndex, widget.length - 1),
+      );
+    }
   }
 
   @override
