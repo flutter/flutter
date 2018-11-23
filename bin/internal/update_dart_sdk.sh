@@ -48,7 +48,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
 
   # install the new sdk
   rm -rf -- "$DART_SDK_PATH"
-  mkdir -p -- "$DART_SDK_PATH"
+  mkdir -m 755 -p -- "$DART_SDK_PATH"
   DART_SDK_ZIP="$FLUTTER_ROOT/bin/cache/$DART_ZIP_NAME"
 
   curl --continue-at - --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1 || {
@@ -70,6 +70,8 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     exit 1
   }
   rm -f -- "$DART_SDK_ZIP"
+  find "$DART_SDK_PATH" -type d -exec chmod 755 {} \;
+  find "$DART_SDK_PATH" -type f -perm +100 -exec chmod a+x,a+r {} \;
   echo "$ENGINE_VERSION" > "$ENGINE_STAMP"
 
   # delete any temporary sdk path
