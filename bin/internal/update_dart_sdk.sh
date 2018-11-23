@@ -27,9 +27,11 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
   case "$(uname -s)" in
     Darwin)
       DART_ZIP_NAME="dart-sdk-darwin-x64.zip"
+      IS_USER_EXECUTABLE="-perm +100"
       ;;
     Linux)
       DART_ZIP_NAME="dart-sdk-linux-x64.zip"
+      IS_USER_EXECUTABLE="-perm /u+x"
       ;;
     *)
       echo "Unknown operating system. Cannot install Dart SDK."
@@ -71,7 +73,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
   }
   rm -f -- "$DART_SDK_ZIP"
   find "$DART_SDK_PATH" -type d -exec chmod 755 {} \;
-  find "$DART_SDK_PATH" -type f -perm +100 -exec chmod a+x,a+r {} \;
+  find "$DART_SDK_PATH" -type f $IS_USER_EXECUTABLE -exec chmod a+x,a+r {} \;
   echo "$ENGINE_VERSION" > "$ENGINE_STAMP"
 
   # delete any temporary sdk path
