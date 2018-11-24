@@ -11,14 +11,12 @@ class PlaygroundScaffold extends StatelessWidget {
     this.demos,
   });
 
-  static final GlobalKey<ScaffoldState> _scaffoldKey =
-      GlobalKey<ScaffoldState>();
-
   final String title;
   final List<PlaygroundDemo> demos;
 
-  PlaygroundDemo _currentDemo(BuildContext context) =>
-      demos[DefaultTabController.of(context).index];
+  static final GlobalKey<ScaffoldState> _scaffoldKey =
+      GlobalKey<ScaffoldState>();
+
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +41,9 @@ class PlaygroundScaffold extends StatelessWidget {
         ),
         body: TabBarView(
             children: demos.map<Widget>((PlaygroundDemo demo) {
-          return demo;
+          return demo; // .setController(controller);
         }).toList()),
       ),
     );
   }
 }
-
