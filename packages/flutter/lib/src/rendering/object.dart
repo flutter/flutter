@@ -2232,7 +2232,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// asynchronous computation) will at best have no useful effect and at worse
   /// will cause crashes as the data will be in an inconsistent state.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// The following snippet will describe the node as a button that responds to
   /// tap actions.
@@ -2253,6 +2253,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   @protected
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     // Nothing to do by default.
@@ -2414,17 +2415,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
 
     visitChildrenForSemantics((RenderObject renderChild) {
-      final _SemanticsFragment fragment = renderChild._getSemanticsForParent(
+      final _SemanticsFragment parentFragment = renderChild._getSemanticsForParent(
         mergeIntoParent: childrenMergeIntoParent,
       );
-      if (fragment.dropsSemanticsOfPreviousSiblings) {
+      if (parentFragment.dropsSemanticsOfPreviousSiblings) {
         fragments.clear();
         toBeMarkedExplicit.clear();
         if (!config.isSemanticBoundary)
           dropSemanticsOfPreviousSiblings = true;
       }
       // Figure out which child fragments are to be made explicit.
-      for (_InterestingSemanticsFragment fragment in fragment.interestingFragments) {
+      for (_InterestingSemanticsFragment fragment in parentFragment.interestingFragments) {
         fragments.add(fragment);
         fragment.addAncestor(this);
         fragment.addTags(config.tagsForChildren);

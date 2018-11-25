@@ -59,7 +59,7 @@ class ConfigCommand extends FlutterCommand {
 
   /// Return null to disable analytics recording of the `config` command.
   @override
-  Future<String> get usagePath => null;
+  Future<String> get usagePath async => null;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

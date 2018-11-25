@@ -13,6 +13,10 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'thumb_painter.dart';
 
+// Examples can assume:
+// bool _lights;
+// void setState(VoidCallback fn) { }
+
 /// An iOS-style switch.
 ///
 /// Used to toggle the on/off state of a single setting.
@@ -22,7 +26,7 @@ import 'thumb_painter.dart';
 /// that use a switch will listen for the [onChanged] callback and rebuild the
 /// switch with a new [value] to update the visual appearance of the switch.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample shows how to use a [CupertinoSwitch] in a [ListTile]. The
 /// [MergeSemantics] is used to turn the entire [ListTile] into a single item
@@ -40,6 +44,7 @@ import 'thumb_painter.dart';
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

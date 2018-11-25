@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:mockito/mockito.dart';
@@ -15,6 +16,8 @@ import 'package:process/process.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
+
+final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 
 void main() {
   group('batch compile', () {
@@ -58,6 +61,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       OutputPreferences: () => OutputPreferences(showColor: false),
       Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
 
     testUsingContext('single dart failed compilation', () async {
@@ -81,6 +85,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       OutputPreferences: () => OutputPreferences(showColor: false),
       Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
 
     testUsingContext('single dart abnormal compiler termination', () async {
@@ -107,6 +112,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       OutputPreferences: () => OutputPreferences(showColor: false),
       Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
   });
 
@@ -165,6 +171,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       OutputPreferences: () => OutputPreferences(showColor: false),
       Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
 
     testUsingContext('single dart compile abnormally terminates', () async {
@@ -182,6 +189,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       OutputPreferences: () => OutputPreferences(showColor: false),
       Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
 
     testUsingContext('compile and recompile', () async {
@@ -211,6 +219,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       OutputPreferences: () => OutputPreferences(showColor: false),
       Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
 
     testUsingContext('compile and recompile twice', () async {
@@ -241,6 +250,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       OutputPreferences: () => OutputPreferences(showColor: false),
       Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
   });
 
@@ -333,6 +343,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       OutputPreferences: () => OutputPreferences(showColor: false),
       Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
 
     testUsingContext('compile expressions without awaiting', () async {
@@ -398,6 +409,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       OutputPreferences: () => OutputPreferences(showColor: false),
       Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
     });
   });
 }

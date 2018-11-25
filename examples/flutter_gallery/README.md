@@ -1,6 +1,7 @@
 # Flutter gallery
 
-Demo app for the material design widgets and other features provided by Flutter.
+A demo app for Flutter's material design and cupertino widgets, as
+well as many other features of the Flutter SDK.
 
 ## Building
 

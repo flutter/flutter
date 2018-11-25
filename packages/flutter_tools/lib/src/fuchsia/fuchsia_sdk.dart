@@ -12,10 +12,12 @@ import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
-import '../globals.dart';
 
 /// The [FuchsiaSdk] instance.
 FuchsiaSdk get fuchsiaSdk => context[FuchsiaSdk];
+
+/// The [FuchsiaArtifacts] instance.
+FuchsiaArtifacts get fuchsiaArtifacts => context[FuchsiaArtifacts];
 
 /// The Fuchsia SDK shell commands.
 ///
@@ -24,20 +26,7 @@ FuchsiaSdk get fuchsiaSdk => context[FuchsiaSdk];
 class FuchsiaSdk {
   static const List<String> _netaddrCommand = <String>['fx', 'netaddr', '--fuchsia', '--nowait'];
   static const List<String> _netlsCommand = <String>['fx', 'netls', '--nowait'];
-  static const List<String> _syslogCommand = <String>['fx', 'syslog'];
-
-  /// The location of the SSH configuration file used to interact with a
-  /// fuchsia device.
-  ///
-  /// Requires the env variable `BUILD_DIR` to be set.
-  File get sshConfig {
-    if (_sshConfig == null) {
-      final String buildDirectory = platform.environment['BUILD_DIR'];
-      _sshConfig = fs.file('$buildDirectory/ssh-keys/ssh_config');
-    }
-    return _sshConfig;
-  }
-  File _sshConfig;
+  static const List<String> _syslogCommand = <String>['fx', 'syslog', '--clock', 'Local'];
 
   /// Invokes the `netaddr` command.
   ///
@@ -67,12 +56,11 @@ class FuchsiaSdk {
         process.kill();
       });
       processManager.start(_syslogCommand).then((Process newProcess) {
-        printTrace('Running logs');
         if (controller.isClosed) {
           return;
         }
         process = newProcess;
-        process.exitCode.then((_) => controller.close);
+        process.exitCode.whenComplete(controller.close);
         controller.addStream(process.stdout.transform(utf8.decoder).transform(const LineSplitter()));
       });
       return controller.stream;
@@ -99,4 +87,31 @@ class FuchsiaSdk {
     }
     return null;
   }
+}
+
+/// Fuchsia-specific artifacts used to interact with a device.
+class FuchsiaArtifacts {
+  /// Creates a new [FuchsiaArtifacts].
+  ///
+  /// May optionally provide a file `sshConfig` file.
+  FuchsiaArtifacts({File sshConfig})
+    : _sshConfig = sshConfig;
+
+  /// The location of the SSH configuration file used to interact with a
+  /// fuchsia device.
+  ///
+  /// Requires the env variable `BUILD_DIR` to be set if not provided by
+  /// the constructor.
+  File get sshConfig {
+    if (_sshConfig == null) {
+      final String buildDirectory = platform.environment['BUILD_DIR'];
+      if (buildDirectory == null) {
+        throwToolExit('BUILD_DIR must be supplied to locate SSH keys. For example:\n'
+          '  export BUILD_DIR=path/to/fuchsia/out/x64\n');
+      }
+      _sshConfig = fs.file('$buildDirectory/ssh-keys/ssh_config');
+    }
+    return _sshConfig;
+  }
+  File _sshConfig;
 }
