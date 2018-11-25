@@ -21,6 +21,7 @@ import shutil
 import stat
 import subprocess
 import sys
+
 from gn_helpers import ToGNString
 
 
@@ -63,9 +64,14 @@ def SetEnvironmentAndGetRuntimeDllDirs():
       win_sdk = toolchain_data['win8sdk']
     wdk = toolchain_data['wdk']
     # TODO(scottmg): The order unfortunately matters in these. They should be
-    # split into separate keys for x86 and x64. (See CopyDlls call below).
+    # split into separate keys for x64/x86/arm64. (See CopyDlls call below).
     # http://crbug.com/345992
     vs_runtime_dll_dirs = toolchain_data['runtime_dirs']
+    # The number of runtime_dirs in the toolchain_data was two (x64/x86) but
+    # changed to three (x64/x86/arm64) and this code needs to handle both
+    # possibilities, which can change independently from this code.
+    if len(vs_runtime_dll_dirs) == 2:
+      vs_runtime_dll_dirs.append('Arm64Unused')
 
     os.environ['GYP_MSVS_OVERRIDE_PATH'] = toolchain
     os.environ['GYP_MSVS_VERSION'] = version
@@ -87,9 +93,12 @@ def SetEnvironmentAndGetRuntimeDllDirs():
     # directory ensures that they are available when needed.
     bitness = platform.architecture()[0]
     # When running 64-bit python the x64 DLLs will be in System32
+    # ARM64 binaries will not be available in the system directories because we
+    # don't build on ARM64 machines.
     x64_path = 'System32' if bitness == '64bit' else 'Sysnative'
     x64_path = os.path.join(os.path.expandvars('%windir%'), x64_path)
-    vs_runtime_dll_dirs = [x64_path, os.path.expandvars('%windir%/SysWOW64')]
+    vs_runtime_dll_dirs = [x64_path, os.path.expandvars('%windir%/SysWOW64'),
+                           'Arm64Unused']
 
   return vs_runtime_dll_dirs
 
@@ -141,7 +150,6 @@ def DetectVisualStudioPath():
     raise Exception(('Visual Studio version %s (from GYP_MSVS_VERSION)'
                      ' not supported. Supported versions are: %s') % (
                        version_as_year, ', '.join(year_to_version.keys())))
-  version = year_to_version[version_as_year]
   if version_as_year == '2017':
     # The VC++ 2017 install location needs to be located using COM instead of
     # the registry. For details see:
@@ -201,16 +209,21 @@ def _CopyUCRTRuntime(target_dir, source_dir, target_cpu, dll_pattern, suffix):
       os.environ.get('WINDOWSSDKDIR',
                      os.path.expandvars('%ProgramFiles(x86)%'
                                         '\\Windows Kits\\10')))
-  ucrt_dll_dirs = os.path.join(win_sdk_dir, 'Redist', 'ucrt', 'DLLs',
-                               target_cpu)
-  ucrt_files = glob.glob(os.path.join(ucrt_dll_dirs, 'api-ms-win-*.dll'))
-  assert len(ucrt_files) > 0
-  for ucrt_src_file in ucrt_files:
-    file_part = os.path.basename(ucrt_src_file)
-    ucrt_dst_file = os.path.join(target_dir, file_part)
-    _CopyRuntimeImpl(ucrt_dst_file, ucrt_src_file, False)
-  _CopyRuntimeImpl(os.path.join(target_dir, 'ucrtbase' + suffix),
-                    os.path.join(source_dir, 'ucrtbase' + suffix))
+  # ARM64 doesn't have a redist for the ucrt DLLs because they are always
+  # present in the OS.
+  if target_cpu != 'arm64':
+    ucrt_dll_dirs = os.path.join(win_sdk_dir, 'Redist', 'ucrt', 'DLLs',
+                                 target_cpu)
+    ucrt_files = glob.glob(os.path.join(ucrt_dll_dirs, 'api-ms-win-*.dll'))
+    assert len(ucrt_files) > 0
+    for ucrt_src_file in ucrt_files:
+      file_part = os.path.basename(ucrt_src_file)
+      ucrt_dst_file = os.path.join(target_dir, file_part)
+      _CopyRuntimeImpl(ucrt_dst_file, ucrt_src_file, False)
+  # We must copy ucrtbase.dll for x64/x86, and ucrtbased.dll for all CPU types.
+  if target_cpu != 'arm64' or not suffix.startswith('.'):
+    _CopyRuntimeImpl(os.path.join(target_dir, 'ucrtbase' + suffix),
+                     os.path.join(source_dir, 'ucrtbase' + suffix))
 
 
 def FindVCToolsRoot():
@@ -249,6 +262,7 @@ def _CopyPGORuntime(target_dir, target_cpu):
     # from HostX86/x86.
     pgo_x86_runtime_dir = os.path.join(pgo_runtime_root, 'HostX86', 'x86')
     pgo_x64_runtime_dir = os.path.join(pgo_runtime_root, 'HostX64', 'x64')
+    pgo_arm64_runtime_dir = os.path.join(pgo_runtime_root, 'arm64')
   else:
     raise Exception('Unexpected toolchain version: %s.' % env_version)
 
@@ -261,8 +275,10 @@ def _CopyPGORuntime(target_dir, target_cpu):
       source = os.path.join(pgo_x86_runtime_dir, runtime)
     elif target_cpu == 'x64':
       source = os.path.join(pgo_x64_runtime_dir, runtime)
+    elif target_cpu == 'arm64':
+      source = os.path.join(pgo_arm64_runtime_dir, runtime)
     else:
-      raise NotImplementedError("Unexpected target_cpu value: " + target_cpu)
+      raise NotImplementedError('Unexpected target_cpu value: ' + target_cpu)
     if not os.path.exists(source):
       raise Exception('Unable to find %s.' % source)
     _CopyRuntimeImpl(os.path.join(target_dir, runtime), source)
@@ -271,7 +287,7 @@ def _CopyPGORuntime(target_dir, target_cpu):
 def _CopyRuntime(target_dir, source_dir, target_cpu, debug):
   """Copy the VS runtime DLLs, only if the target doesn't exist, but the target
   directory does exist. Handles VS 2015 and VS 2017."""
-  suffix = "d.dll" if debug else ".dll"
+  suffix = 'd.dll' if debug else '.dll'
   # VS 2017 uses the same CRT DLLs as VS 2015.
   _CopyUCRTRuntime(target_dir, source_dir, target_cpu, '%s140' + suffix,
                     suffix)
@@ -290,8 +306,15 @@ def CopyDlls(target_dir, configuration, target_cpu):
   if not vs_runtime_dll_dirs:
     return
 
-  x64_runtime, x86_runtime = vs_runtime_dll_dirs
-  runtime_dir = x64_runtime if target_cpu == 'x64' else x86_runtime
+  x64_runtime, x86_runtime, arm64_runtime = vs_runtime_dll_dirs
+  if target_cpu == 'x64':
+    runtime_dir = x64_runtime
+  elif target_cpu == 'x86':
+    runtime_dir = x86_runtime
+  elif target_cpu == 'arm64':
+    runtime_dir = arm64_runtime
+  else:
+    raise Exception('Unknown target_cpu: ' + target_cpu)
   _CopyRuntime(target_dir, runtime_dir, target_cpu, debug=False)
   if configuration == 'Debug':
     _CopyRuntime(target_dir, runtime_dir, target_cpu, debug=True)
@@ -424,7 +447,7 @@ def Update(force=False):
 
 
 def NormalizePath(path):
-  while path.endswith("\\"):
+  while path.endswith('\\'):
     path = path[:-1]
   return path
 
