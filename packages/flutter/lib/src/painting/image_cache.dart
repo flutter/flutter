@@ -164,7 +164,7 @@ class ImageCache {
       }
       _currentSizeBytes += imageSize;
       final _PendingImage pendingImage = _pendingImages.remove(key);
-      if(pendingImage != null) {
+      if (pendingImage != null) {
         pendingImage.removeListener();
       }
 
