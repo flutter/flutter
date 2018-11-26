@@ -116,20 +116,17 @@ class ImageCache {
   ///
   ///   * [ImageProvider], for providing images to the [Image] widget.
   bool evict(Object key) {
-    final _CachedImage image = _cache.remove(key);
     final _PendingImage pendingImage = _pendingImages.remove(key);
-
-    if (image == null && pendingImage == null) {
-      return false;
-    }
-
-    if (image != null) {
-      _currentSizeBytes -= image.sizeBytes;
-    }
     if (pendingImage != null) {
       pendingImage.removeListener();
+      return true;
     }
-    return true;
+    final _CachedImage image = _cache.remove(key);
+    if (image != null) {
+      _currentSizeBytes -= image.sizeBytes;
+      return true;
+    }
+    return false;
   }
 
   /// Returns the previously cached [ImageStream] for the given key, if available;
