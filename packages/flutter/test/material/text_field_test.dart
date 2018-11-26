@@ -67,11 +67,13 @@ Widget overlay({ Widget child }) {
         child: Overlay(
           initialEntries: <OverlayEntry>[
             OverlayEntry(
-              builder: (BuildContext context) => Center(
-                child: Material(
-                  child: child,
-                ),
-              ),
+              builder: (BuildContext context) {
+                return Center(
+                  child: Material(
+                    child: child,
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -3340,5 +3342,44 @@ void main() {
 
     expect(minOffset, 0.0);
     expect(maxOffset, 50.0);
+  });
+
+  testWidgets('onTap is called upon tap', (WidgetTester tester) async {
+    int tapCount = 0;
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          onTap: () {
+            tapCount += 1;
+          },
+        ),
+      ),
+    );
+
+    expect(tapCount, 0);
+    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(TextField));
+    expect(tapCount, 3);
+  });
+
+  testWidgets('onTap is not called, field is disabled', (WidgetTester tester) async {
+    int tapCount = 0;
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          enabled: false,
+          onTap: () {
+            tapCount += 1;
+          },
+        ),
+      ),
+    );
+
+    expect(tapCount, 0);
+    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(TextField));
+    expect(tapCount, 0);
   });
 }
