@@ -153,6 +153,13 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
     return nullptr;
   }
 
+  if (settings.application_kernel_asset.empty() &&
+      settings.application_kernel_list_asset.empty()) {
+    FML_DLOG(ERROR) << "application_kernel_asset or "
+                       "application_kernel_list_asset must be set";
+    return nullptr;
+  }
+
   // Running from kernel snapshot.
   {
     std::unique_ptr<fml::Mapping> kernel =
@@ -164,10 +171,6 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
 
   // Running from kernel divided into several pieces (for sharing).
   {
-    if (settings.application_kernel_list_asset.empty()) {
-      FML_LOG(ERROR) << "Application kernel list asset not set";
-      return nullptr;
-    }
     std::unique_ptr<fml::Mapping> kernel_list =
         asset_manager->GetAsMapping(settings.application_kernel_list_asset);
     if (!kernel_list) {
