@@ -174,7 +174,7 @@ class AndroidDevice extends Device {
       if (majorVersion == 1 && minorVersion > 0) {
         return true;
       }
-      if (majorVersion == 1 && minorVersion == 0 && patchVersion >= 32) {
+      if (majorVersion == 1 && minorVersion == 0 && patchVersion >= 39) {
         return true;
       }
       return false;
@@ -192,7 +192,7 @@ class AndroidDevice extends Device {
       final RunResult adbVersion = await runCheckedAsync(<String>[getAdbPath(androidSdk), 'version']);
       if (_isValidAdbVersion(adbVersion.stdout))
         return true;
-      printError('The ADB at "${getAdbPath(androidSdk)}" is too old; please install version 1.0.32 or later.');
+      printError('The ADB at "${getAdbPath(androidSdk)}" is too old; please install version 1.0.39 or later.');
     } catch (error, trace) {
       printError('Error running ADB: $error', stackTrace: trace);
     }
