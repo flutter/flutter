@@ -212,7 +212,6 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   validator: _validatePhoneNumber,
                   // TextInputFormatters are applied in sequence.
                   inputFormatters: <TextInputFormatter> [
-                    WhitelistingTextInputFormatter.digitsOnly,
                     // Fit the validating format.
                     _phoneNumberFormatter,
                   ],
@@ -298,11 +297,17 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
 
 /// Format incoming numeric text to fit the format of (###) ###-#### ##...
 class _UsNumberTextInputFormatter extends TextInputFormatter {
+  static final WhitelistingTextInputFormatter _formatter = WhitelistingTextInputFormatter(RegExp(r'\d+'));
+
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue
   ) {
+    if (oldValue.text == newValue.text) {
+      return newValue;
+    }
+    newValue = _formatter.formatEditUpdate(oldValue, newValue);
     final int newTextLength = newValue.text.length;
     int selectionIndex = newValue.selection.end;
     int usedSubstringIndex = 0;
@@ -328,8 +333,9 @@ class _UsNumberTextInputFormatter extends TextInputFormatter {
         selectionIndex++;
     }
     // Dump the rest.
-    if (newTextLength >= usedSubstringIndex)
+    if (newTextLength >= usedSubstringIndex) {
       newText.write(newValue.text.substring(usedSubstringIndex));
+    }
     return TextEditingValue(
       text: newText.toString(),
       selection: TextSelection.collapsed(offset: selectionIndex),
