@@ -63,8 +63,13 @@ class _CustomizedDesignState extends State<CustomizedDesign>
   final ScrollController _scrollController = ScrollController();
 
   @override
+    void didChangeDependencies() {
+      super.didChangeDependencies();
+      _configureThemes();
+    }
+
+  @override
   Widget build(BuildContext context) {
-    _configureThemes();
     _stats = <Widget>[_buildStatsContentWidget()];
     return Theme(
       data: _themeData,

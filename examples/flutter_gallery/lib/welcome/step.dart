@@ -15,43 +15,45 @@ abstract class WelcomeStep {
 
   void animate({bool restart});
   Widget imageWidget();
-  Widget contentWidget() => Material(
-        color: _kWelcomeBlue,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Container(
-                height: 240.0,
-                child: imageWidget(),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 50.0),
-                child: Text(
-                  title(),
-                  style: const TextStyle(
-                    fontFamily: 'GoogleSans',
-                    fontSize: 24.0,
-                    color: Colors.white,
-                    height: 0.8,
-                  ),
+  Widget contentWidget() {
+    return Material(
+      color: _kWelcomeBlue,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Container(
+              height: 240.0,
+              child: imageWidget(),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 50.0),
+              child: Text(
+                title(),
+                style: const TextStyle(
+                  fontFamily: 'GoogleSans',
+                  fontSize: 24.0,
+                  color: Colors.white,
+                  height: 0.8,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  subtitle(),
-                  style: const TextStyle(
-                    fontSize: 16.0,
-                    color: Colors.white70,
-                  ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                subtitle(),
+                style: const TextStyle(
+                  fontSize: 16.0,
+                  color: Colors.white70,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }

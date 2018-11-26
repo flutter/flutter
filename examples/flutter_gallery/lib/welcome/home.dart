@@ -5,14 +5,19 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/welcome/steps/playground_step.dart';
-
 import 'step.dart';
 import 'steps/all.dart';
 
 const Color _kWelcomeBlue = Color(0xFF0175c2);
-const int _kAutoProgressSeconds = 6;
+const int _kAutoProgressSeconds = 10;
 const int _kAutoProgressTransitionMilliseconds = 520;
+const Color footerColor = Color(0xffffffff);
+const TextStyle footerButtonTextStyle = TextStyle(
+  fontSize: 16.0,
+  fontWeight: FontWeight.bold,
+  color: _kWelcomeBlue,
+);
+const double footerButtonHeight = 60.0;
 
 class Welcome extends StatefulWidget {
   const Welcome({Key key, this.onDismissed}) : super(key: key);
@@ -41,14 +46,6 @@ class _WelcomeState extends State<Welcome> with TickerProviderStateMixin {
     _pageController = PageController();
     _autoProgressTimer = _scheduleAutoProgressStepTimer();
   }
-
-  final Color footerColor = const Color(0xffffffff);
-  final TextStyle footerButtonTextStyle = const TextStyle(
-    fontSize: 16.0,
-    fontWeight: FontWeight.bold,
-    color: _kWelcomeBlue,
-  );
-  final double footerButtonHeight = 60.0;
 
   @override
   Widget build(BuildContext context) {
@@ -129,11 +126,13 @@ class _WelcomeState extends State<Welcome> with TickerProviderStateMixin {
     );
   }
 
-  TabPageSelector _pageIndicator() => TabPageSelector(
-        controller: _tabController,
-        color: const Color(0x99ffffff),
-        selectedColor: const Color(0xffffffff),
-      );
+  TabPageSelector _pageIndicator() {
+    return TabPageSelector(
+      controller: _tabController,
+      color: const Color(0x99ffffff),
+      selectedColor: const Color(0xffffffff),
+    );
+  }
 
   Timer _scheduleAutoProgressStepTimer() {
     return Timer.periodic(Duration(seconds: _kAutoProgressSeconds), (_) {
