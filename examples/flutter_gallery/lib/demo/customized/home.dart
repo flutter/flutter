@@ -5,18 +5,21 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gallery/demo/customized/stats_row.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 
 import 'snapping_scroll_physics.dart';
 
+// the duration of each of the stat item's animation
+const int _kStatsAnimationDuration = 175;
+const int _kHeartAnimationDuration = 250;
+const int _kTopSectionAnimationDuration = 1500;
+
 const int _kAnimateHeroFadeDuration = 1000;
 const int _kAnimateTextDuration = 400;
 const double _kDetailTabHeight = 70.0;
-const int _kStatsFirstAnimationDuration = 500;
-const int _kStatsAnimationDuration = 175;
 const int _kRotationAnimationDuration = 100;
-const int _kAnimateRunnerHeroFadeDuration = 450;
 const int _kAnimateNumberCounterDuration = 1000;
 
 const int _kStartingElevationCount = 8365;
@@ -31,37 +34,32 @@ class CustomizedDesign extends StatefulWidget {
 
 class _CustomizedDesignState extends State<CustomizedDesign>
     with TickerProviderStateMixin {
-  List<Widget> _stats;
+
   TargetPlatform _targetPlatform;
   TextAlign _platformTextAlignment;
   ThemeData _themeData;
-  double _statsOpacity = 1.0;
-  int _elevationCounter = _kStartingElevationCount;
-  int _runCounter = _kStartingRunCount;
-  bool _isStatsBoxFullScreen = false;
-  bool _hasRunAnimation = false;
+  Widget _mainContentWidget;
+  final int _elevationCounter = _kStartingElevationCount;
 
   Animation<double> _heroFadeInAnimation;
   Animation<double> _textFadeInAnimation;
-  Animation<double> _statsAnimationOne;
-  Animation<double> _statsAnimationTwo;
-  Animation<double> _statsAnimationThree;
-  Animation<double> _statsAnimationFour;
   Animation<double> _rotationAnimation;
   Animation<double> _runnerFadeAnimation;
+  Animation<double> _pathFadeAnimation;
+  Animation<double> _statsSummaryAnimation;
   Animation<double> _numberCounterAnimation;
-  Animation<double> _heartAnimation;
 
   AnimationController _heroAnimationController;
   AnimationController _textAnimationController;
-  AnimationController _statsAnimationControllerOne;
-  AnimationController _statsAnimationControllerTwo;
-  AnimationController _statsAnimationControllerThree;
-  AnimationController _statsAnimationControllerFour;
   AnimationController _rotationAnimationController;
-  AnimationController _runnerAnimationController;
+  AnimationController _topSectionAnimationController;
   AnimationController _numberCounterAnimationController;
+  AnimationController _statsRowAnimationController;
   AnimationController _heartAnimationController;
+  Timer _heartTimer;
+
+  StatsRow _statsRow;
+  bool animatedStats = false;
 
   final ScrollController _scrollController = ScrollController();
 
@@ -78,41 +76,30 @@ class _CustomizedDesignState extends State<CustomizedDesign>
     _heroAnimationController.forward().whenComplete(() {
       _textAnimationController.forward();
     });
+    _statsRowAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: _kStatsAnimationDuration * 5),
+    );
+    _heartAnimationController = AnimationController(
+      duration: const Duration(milliseconds: _kHeartAnimationDuration),
+      vsync: this,
+    );
+    _statsRow = StatsRow(
+      statsAnimationController: _statsRowAnimationController,
+      heartAnimationController: _heartAnimationController,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    _stats = <Widget>[_buildStatsContentWidget()];
+    _mainContentWidget ??= _contentWidget();
     return Theme(
       data: _themeData,
       child: Material(
         color: const Color(0x00FFFFFF),
-        child: _contentWidget(),
+        child: _mainContentWidget,
       ),
     );
-  }
-
-  void _animateCounters() {
-    if (!_hasRunAnimation) {
-      _animateRunCounter();
-      _animateElevationCounter();
-      _animateMileCounter();
-      _hasRunAnimation = true;
-    }
-  }
-
-  Timer _animateElevationCounter() {
-    const Duration duration = Duration(milliseconds: 500);
-    return Timer(duration, _updateElevationCounter);
-  }
-
-  void _animateMileCounter() {
-    _numberCounterAnimationController.forward(from: 0.0);
-  }
-
-  Timer _animateRunCounter() {
-    const Duration duration = Duration(milliseconds: 300);
-    return Timer(duration, _updateRunCounter);
   }
 
   GestureDetector _buildAppBar() {
@@ -160,34 +147,31 @@ class _CustomizedDesignState extends State<CustomizedDesign>
   }
 
   Widget _buildBody() {
-    return Opacity(
-      opacity: _statsOpacity,
-      child: Stack(
-        children: <Widget>[
-          FadeTransition(
-            opacity: _heroFadeInAnimation,
-            child: OverflowBox(
-              alignment: FractionalOffset.topLeft,
-              maxHeight: 1000.0,
-              child: Image(
-                height: MediaQuery.of(context).size.height,
-                fit: BoxFit.cover,
-                image: const AssetImage(
-                  'assets/images/customized/fg_hero.png',
-                ),
+    return Stack(
+      children: <Widget>[
+        FadeTransition(
+          opacity: _heroFadeInAnimation,
+          child: OverflowBox(
+            alignment: FractionalOffset.topLeft,
+            maxHeight: 1000.0,
+            child: Image(
+              height: MediaQuery.of(context).size.height,
+              fit: BoxFit.cover,
+              image: const AssetImage(
+                'assets/images/customized/fg_hero.png',
               ),
             ),
           ),
-          Positioned.fill(
-            child: Center(
-              child: FadeTransition(
-                opacity: _textFadeInAnimation,
-                child: _buildTextBody(),
-              ),
+        ),
+        Positioned.fill(
+          child: Center(
+            child: FadeTransition(
+              opacity: _textFadeInAnimation,
+              child: _buildTextBody(),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -213,28 +197,31 @@ class _CustomizedDesignState extends State<CustomizedDesign>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <ScaleTransition>[
                 ScaleTransition(
-                  scale: _statsAnimationThree,
-                  child: const Text(
-                    '3.5mi',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      color: Color(0xFFF6FB09),
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                ScaleTransition(
-                  scale: _statsAnimationThree,
-                  child: const Text(
-                    '974 calories',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11.0,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
+                  scale: _statsSummaryAnimation,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const <Widget>[
+                      Text(
+                        '3.5mi',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          color: Color(0xFFF6FB09),
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      Text(
+                        '974 calories',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11.0,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  )
                 ),
               ],
             ),
@@ -244,25 +231,9 @@ class _CustomizedDesignState extends State<CustomizedDesign>
             right: 5.0,
             top: 15.0,
             child: FadeTransition(
-              opacity: _statsAnimationTwo,
+              opacity: _pathFadeAnimation,
               child: const Image(
                 image: AssetImage('assets/images/customized/run_path.png'),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 14.0,
-            bottom: 50.0,
-            child: ScaleTransition(
-              scale: _statsAnimationOne,
-              child: const Text(
-                '4/9/17 Run',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontStyle: FontStyle.italic,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16.0,
-                ),
               ),
             ),
           ),
@@ -272,88 +243,24 @@ class _CustomizedDesignState extends State<CustomizedDesign>
             right: 0.0,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 5.0),
-              child: _buildPathStatsRow(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Padding _buildPathStatsRow() {
-    const TextStyle statsTextStyle = TextStyle(
-      fontSize: 12.0,
-      fontWeight: FontWeight.w500,
-      fontStyle: FontStyle.italic,
-      color: Colors.white,
-    );
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          ScaleTransition(
-            scale: _statsAnimationOne,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const <Widget>[
-                Icon(Icons.timer, color: Colors.white),
-                Padding(
-                  padding: EdgeInsets.only(left: 4.0),
-                  child: Text(
-                    '00:26:13',
-                    style: statsTextStyle,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Padding(
+                    padding: EdgeInsets.only(left: 25.0, bottom: 15.0),
+                    child: Text(
+                      '4/9/17 Run',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.0,
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          ScaleTransition(
-            scale: _statsAnimationTwo,
-            child: Row(
-              children: const <Widget>[
-                Icon(Icons.access_time, color: Colors.white),
-                Padding(
-                  padding: EdgeInsets.only(left: 4.0),
-                  child: Text(
-                    "7'13\"",
-                    style: statsTextStyle,
-                  ),
-                )
-              ],
-            ),
-          ),
-          ScaleTransition(
-            scale: _statsAnimationThree,
-            child: Row(
-              children: const <Widget>[
-                Icon(Icons.landscape, color: Colors.white),
-                Padding(
-                  padding: EdgeInsets.only(left: 4.0),
-                  child: Text(
-                    '120ft',
-                    style: statsTextStyle,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ScaleTransition(
-            scale: _statsAnimationFour,
-            child: Row(
-              children: <Widget>[
-                ScaleTransition(
-                  scale: _heartAnimation,
-                  child: const Icon(Icons.favorite, color: Colors.white),
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(left: 4.0),
-                  child: Text(
-                    '97bpm',
-                    style: statsTextStyle,
-                  ),
-                ),
-              ],
+                  _statsRow,
+                ],
+              ),
             ),
           ),
         ],
@@ -387,7 +294,7 @@ class _CustomizedDesignState extends State<CustomizedDesign>
                 Column(
                   children: <Widget>[
                     Text(
-                      _runCounter.toString(),
+                      _kStartingRunCount.toString(),
                       style: figureStyle,
                     ),
                     const Text(
@@ -551,32 +458,12 @@ class _CustomizedDesignState extends State<CustomizedDesign>
       duration: const Duration(milliseconds: _kAnimateTextDuration),
       vsync: this,
     );
-    _statsAnimationControllerOne = AnimationController(
-      duration: const Duration(milliseconds: _kStatsFirstAnimationDuration),
-      vsync: this,
-    );
-    _statsAnimationControllerTwo = AnimationController(
-      duration: const Duration(milliseconds: _kStatsAnimationDuration),
-      vsync: this,
-    );
-    _statsAnimationControllerThree = AnimationController(
-      duration: const Duration(milliseconds: _kStatsAnimationDuration),
-      vsync: this,
-    );
-    _statsAnimationControllerFour = AnimationController(
-      duration: const Duration(milliseconds: _kStatsAnimationDuration),
-      vsync: this,
-    );
-    _heartAnimationController = AnimationController(
-      duration: const Duration(milliseconds: _kStatsAnimationDuration),
-      vsync: this,
-    );
     _rotationAnimationController = AnimationController(
       duration: const Duration(milliseconds: _kRotationAnimationDuration),
       vsync: this,
     );
-    _runnerAnimationController = AnimationController(
-      duration: const Duration(milliseconds: _kAnimateRunnerHeroFadeDuration),
+    _topSectionAnimationController = AnimationController(
+      duration: const Duration(milliseconds: _kTopSectionAnimationDuration),
       vsync: this,
     );
     _numberCounterAnimationController = AnimationController(
@@ -595,31 +482,6 @@ class _CustomizedDesignState extends State<CustomizedDesign>
       curve: Curves.easeIn,
       controller: _textAnimationController,
     );
-    _statsAnimationOne = _initAnimation(
-        from: 0.01,
-        to: 1.0,
-        curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
-        controller: _statsAnimationControllerOne);
-    _statsAnimationTwo = _initAnimation(
-        from: 0.01,
-        to: 1.0,
-        curve: Curves.easeOut,
-        controller: _statsAnimationControllerTwo);
-    _statsAnimationThree = _initAnimation(
-        from: 0.01,
-        to: 1.0,
-        curve: Curves.easeOut,
-        controller: _statsAnimationControllerThree);
-    _statsAnimationFour = _initAnimation(
-        from: 0.01,
-        to: 1.0,
-        curve: Curves.easeOut,
-        controller: _statsAnimationControllerFour);
-    _heartAnimation = _initAnimation(
-        from: 1.0,
-        to: 1.25,
-        curve: Curves.easeOut,
-        controller: _heartAnimationController);
     _rotationAnimation = _initAnimation(
         from: 0.0,
         to: 0.5,
@@ -629,7 +491,7 @@ class _CustomizedDesignState extends State<CustomizedDesign>
         from: 0.0,
         to: 1.0,
         curve: Curves.easeOut,
-        controller: _runnerAnimationController);
+        controller: _topSectionAnimationController);
     _numberCounterAnimation = _numberCounterAnimationController;
     _numberCounterAnimation = Tween<double>(
       begin: 0.0,
@@ -640,6 +502,18 @@ class _CustomizedDesignState extends State<CustomizedDesign>
         parent: _numberCounterAnimationController,
       ),
     );
+    _pathFadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _topSectionAnimationController,
+      curve: const Interval(0.4, 1.0, curve: Curves.easeInOut),
+    ));
+    _statsSummaryAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _topSectionAnimationController,
+      curve: const Interval(0.4, 0.55, curve: Curves.easeInOut),
+    ));
   }
 
   void _configureThemes() {
@@ -658,18 +532,17 @@ class _CustomizedDesignState extends State<CustomizedDesign>
 
   Widget _contentWidget() {
     final double screenHeight = MediaQuery.of(context).size.height;
-    final TargetPlatform platform = Theme.of(context).platform;
     final String backTitle =
-        platform == TargetPlatform.android ? 'TrackFit' : '';
+        _targetPlatform == TargetPlatform.android ? 'TrackFit' : '';
     return Scaffold(
       backgroundColor: const Color(0xFF212024),
-      body: NotificationListener<Notification>(
-        onNotification: _handleScrollNotification,
-        child: GlowingOverscrollIndicator(
-          color: const Color(0x00FFFFFF),
-          axisDirection: AxisDirection.down,
-          showLeading: false,
-          showTrailing: false,
+      body: GlowingOverscrollIndicator(
+        color: const Color(0x00FFFFFF),
+        axisDirection: AxisDirection.down,
+        showLeading: false,
+        showTrailing: false,
+        child: NotificationListener<ScrollNotification>(
+          onNotification: _handleScrollNotification,
           child: CustomScrollView(
             controller: _scrollController,
             physics: SnappingScrollPhysics(midScrollOffset: screenHeight),
@@ -691,53 +564,14 @@ class _CustomizedDesignState extends State<CustomizedDesign>
                   background: _buildBody(),
                 ),
               ),
-              SliverList(
-                delegate: SliverChildListDelegate(_stats),
+              SliverToBoxAdapter(
+                child: _buildStatsContentWidget(),
               ),
             ],
           ),
         ),
       ),
     );
-  }
-
-  bool _handleScrollNotification(Notification notification) {
-    if (notification is OverscrollIndicatorNotification) {
-      notification.disallowGlow();
-    }
-    if (notification is ScrollNotification) {
-      final double visibleStatsHeight = notification.metrics.pixels;
-      final double screenHeight = MediaQuery.of(context).size.height -
-          _kDetailTabHeight -
-          MediaQuery.of(context).padding.top;
-      final double opacity = visibleStatsHeight / screenHeight;
-      final double calculatedOpacity = 1.0 - opacity;
-      if (calculatedOpacity > 1.0) {
-        _statsOpacity = 1.0;
-      } else if (calculatedOpacity < 0.0) {
-        _statsOpacity = 0.0;
-      } else {
-        _statsOpacity = calculatedOpacity;
-      }
-    }
-    if (_statsOpacity == 0.0) {
-      _startAnimation();
-    } else if (_statsOpacity == 1.0) {
-      _rotationAnimationController.reverse().whenComplete(() {
-        _isStatsBoxFullScreen = false;
-      });
-      _statsAnimationControllerOne.value = 0.0;
-      _statsAnimationControllerTwo.value = 0.0;
-      _statsAnimationControllerThree.value = 0.0;
-      _statsAnimationControllerFour.value = 0.0;
-      _runnerAnimationController.value = 0.0;
-      _numberCounterAnimationController.value = 0.0;
-      _runCounter = _kStartingRunCount;
-      _elevationCounter = _kStartingElevationCount;
-      _hasRunAnimation = false;
-    }
-    setState(() {});
-    return false;
   }
 
   Animation<double> _initAnimation({
@@ -753,53 +587,30 @@ class _CustomizedDesignState extends State<CustomizedDesign>
     return Tween<double>(begin: from, end: to).animate(animation);
   }
 
-  void _startAnimation() {
-    _rotationAnimationController.forward().whenComplete(() {
-      _isStatsBoxFullScreen = true;
-    });
-    _runnerAnimationController.forward();
-    _statsAnimationControllerOne.forward().whenComplete(() {
-      _statsAnimationControllerTwo.forward().whenComplete(() {
-        _statsAnimationControllerThree.forward().whenComplete(() {
-          _statsAnimationControllerFour.forward().whenComplete(() {
-            _heartAnimationController.forward().whenComplete(() {
-              _heartAnimationController.reverse();
-            });
-            _animateCounters();
-          });
-        });
-      });
-    });
+  bool _handleScrollNotification(ScrollNotification notification) {
+    final double scrollPosition = notification.metrics.pixels;
+    final double screenHeight = MediaQuery.of(context).size.height -
+        _kDetailTabHeight - MediaQuery.of(context).padding.top;
+    final double screenOffset = scrollPosition / screenHeight;
+    if (screenOffset >= 0.75 && !animatedStats) {
+      animatedStats = true;
+      _textAnimationController.reset();
+      _rotationAnimationController.forward();
+      _animateAllStatsControllers();
+    } else if (screenOffset < 0.2) {
+      animatedStats = false;
+      _rotationAnimationController.reverse();
+      _resetStatsAnimationControllers();
+      _textAnimationController.forward();
+    }
+    return true;
   }
-
-  void _updateElevationCounter() {
-    setState(() {
-      _elevationCounter += 356;
-    });
-  }
-
-  void _updateRunCounter() {
-    setState(() {
-      _runCounter += 1;
-    });
-  }
-
-  // callbacks
 
   /// display the 'stats' content when the 'view my stats' bar is tapped
   void tappedStatsBar() {
-    double screenHeight =
-        MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
-      screenHeight -= 70.0;
-    }
-    final double halfScreen = screenHeight * 0.5;
-    double scrollToOffset =
-        _scrollController.offset <= halfScreen ? 0.0 : screenHeight;
-    if (_scrollController.offset == 0) {
-      scrollToOffset = screenHeight;
-    } else if (_isStatsBoxFullScreen) {
-      scrollToOffset = 0.0;
+    double scrollToOffset = 0.0;
+    if (_scrollController.offset == 0.0) {
+      scrollToOffset = _scrollController.position.maxScrollExtent;
     }
     _scrollController.animateTo(
       scrollToOffset,
@@ -808,18 +619,49 @@ class _CustomizedDesignState extends State<CustomizedDesign>
     );
   }
 
+  void _resetStatsAnimationControllers() {
+    _topSectionAnimationController.reset();
+    _numberCounterAnimationController.reset();
+    _statsRowAnimationController.reset();
+  }
+
+  void _animateAllStatsControllers() {
+    _numberCounterAnimationController.forward();
+    _topSectionAnimationController.forward();
+    _statsRowAnimationController.forward().whenComplete(() {
+      _animateHeart().then((_) {
+        if (_heartTimer != null) {
+          _heartTimer.cancel();
+        }
+        _heartTimer =
+            Timer.periodic(const Duration(seconds: 3), (Timer timer) {
+              _animateHeart();
+            });
+      });
+    });
+  }
+
+  Future<void> _animateHeart() {
+    if (!mounted) {
+      return null;
+    }
+    return _heartAnimationController.forward().whenComplete(() {
+      _heartAnimationController.reverse();
+    });
+  }
+
   @override
   void dispose() {
     _heroAnimationController.dispose();
     _textAnimationController.dispose();
-    _statsAnimationControllerOne.dispose();
-    _statsAnimationControllerTwo.dispose();
-    _statsAnimationControllerThree.dispose();
-    _statsAnimationControllerFour.dispose();
     _rotationAnimationController.dispose();
-    _runnerAnimationController.dispose();
     _numberCounterAnimationController.dispose();
+    _topSectionAnimationController.dispose();
     _heartAnimationController.dispose();
+    if (_heartTimer != null) {
+      _heartTimer.cancel();
+      _heartTimer = null;
+    }
     super.dispose();
   }
 }
