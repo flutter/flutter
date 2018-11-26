@@ -440,7 +440,7 @@ TextAffinity _toTextAffinity(String affinity) {
 }
 
 ///
-enum TextCursorAction {
+enum TextCursorState {
   ///
   Start,
 
@@ -456,14 +456,14 @@ class TextEditingPoint {
   ///
   const TextEditingPoint({
     this.point = const Offset(0, 0),
-    this.action,
+    this.state,
   }) : assert(point != null);
 
   ///
   final Offset point;
 
   ///
-  final TextCursorAction action;
+  final TextCursorState state;
 }
 
 /// The current text, selection, and composing state for editing a run of text.
@@ -678,21 +678,21 @@ TextInputAction _toTextInputAction(String action) {
   throw FlutterError('Unknown text input action: $action');
 }
 
-TextCursorAction _toTextCursorAction(String action) {
-  switch (action) {
-    case 'TextCursorAction.start':
-      return TextCursorAction.Start;
-    case 'TextCursorAction.update':
-      return TextCursorAction.Update;
-    case 'TextCursorAction.end':
-      return TextCursorAction.End;
+TextCursorState _toTextCursorAction(String state) {
+  switch (state) {
+    case 'TextCursorState.start':
+      return TextCursorState.Start;
+    case 'TextCursorState.update':
+      return TextCursorState.Update;
+    case 'TextCursorState.end':
+      return TextCursorState.End;
   }
-  throw FlutterError('Unknown text cursor action: $action');
+  throw FlutterError('Unknown text cursor action: $state');
 }
 
-TextEditingPoint _toTextPoint(TextCursorAction action, Map<String, dynamic> encoded) {
-  final Offset offset = action == TextCursorAction.Update ? Offset(encoded['X'], encoded['Y']) : const Offset(0, 0);
-  return TextEditingPoint(point: offset, action: action);
+TextEditingPoint _toTextPoint(TextCursorState state, Map<String, dynamic> encoded) {
+  final Offset offset = state == TextCursorState.Update ? Offset(encoded['X'], encoded['Y']) : const Offset(0, 0);
+  return TextEditingPoint(point: offset, state: state);
 }
 
 class _TextInputClientHandler {
@@ -718,7 +718,7 @@ class _TextInputClientHandler {
       case 'TextInputClient.performAction':
         _currentConnection._client.performAction(_toTextInputAction(args[1]));
         break;
-      case 'TextInputClient.updateCursor':
+      case 'TextInputClient.updateFloatingCursor':
         _currentConnection._client.updateCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
         break;
       default:
