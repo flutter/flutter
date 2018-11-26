@@ -184,7 +184,8 @@ class _CupertinoTableViewState extends State<CupertinoTableView> {
   // [_LayoutSizeReport] so that the height of this last cell can be reported
   // to the extra dividers sliver.
   Widget _decorateCell(Widget cell, bool isLastCell) {
-    final Widget cellWithDivider = _CupertinoTableViewDivider(
+    final Widget cellWithDivider = Container(
+      foregroundDecoration: CupertinoDividerDecoration(),
       child: cell,
     );
 
@@ -234,25 +235,40 @@ class _CupertinoTableViewState extends State<CupertinoTableView> {
   }
 }
 
-// TODO(mattcarroll): replace Painter with a Decoration
-class _CupertinoTableViewDivider extends StatelessWidget {
-  const _CupertinoTableViewDivider({
-    this.child,
+/// [Decoration] that paints a Cupertino-style divider at the bottom of its content.
+///
+/// The [dividerThickness], [dividerInset], and [dividerColor] are all customizable.
+/// They default to the standard iOS values.
+class CupertinoDividerDecoration extends Decoration {
+  /// Constructs a [CupertinoDividerDecoration] with default iOS values for
+  /// omitted parameters.
+  const CupertinoDividerDecoration({
+    this.dividerThickness = kDefaultDividerHeight,
+    this.dividerInset = kDefaultCellInset,
+    this.dividerColor = CupertinoColors.lightBackgroundGray,
   });
 
-  final Widget child;
+  /// Thickness of the painted divider.
+  final double dividerThickness;
+
+  /// Gap from the starting horizontal edge to the start of the painted divider.
+  final double dividerInset;
+
+  /// Color of the painted divider.
+  final Color dividerColor;
 
   @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      foregroundPainter: _CupertinoTableViewDividerPainter(),
-      child: child,
+  BoxPainter createBoxPainter([VoidCallback onChanged]) {
+    return _CupertinoDividerDecorationPainter(
+      dividerThickness: dividerThickness,
+      dividerInset: dividerInset,
+      dividerColor: dividerColor,
     );
   }
 }
 
-class _CupertinoTableViewDividerPainter extends CustomPainter {
-  _CupertinoTableViewDividerPainter({
+class _CupertinoDividerDecorationPainter extends BoxPainter {
+  _CupertinoDividerDecorationPainter({
     this.dividerThickness = kDefaultDividerHeight,
     this.dividerInset = kDefaultCellInset,
     this.dividerColor = CupertinoColors.lightBackgroundGray,
@@ -266,25 +282,19 @@ class _CupertinoTableViewDividerPainter extends CustomPainter {
   final Paint _dividerPaint;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    final Size size = configuration.size;
+
     canvas.drawRect(
       Rect.fromLTRB(
         dividerInset,
         size.height - dividerThickness,
         size.width,
         size.height,
-      ),
+      ).shift(offset),
       _dividerPaint,
     );
   }
-
-  @override
-  bool shouldRepaint(_CupertinoTableViewDividerPainter oldPainter) {
-    return  dividerThickness != oldPainter.dividerThickness ||
-        dividerColor != oldPainter.dividerColor ||
-        dividerInset != oldPainter.dividerInset;
-  }
-
 }
 
 /// Widget that renders a [Sliver] that draws extra dividers after the last cell
