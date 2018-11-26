@@ -86,17 +86,17 @@ Future<File> getGradleAppOut(AndroidProject androidProject) async {
   return null;
 }
 
-Future<GradleProject> _gradleProject() async {
-  _cachedGradleProject ??= await _readGradleProject();
+Future<GradleProject> _gradleProject({BuildInfo buildInfo}) async {
+  _cachedGradleProject ??= await _readGradleProject(buildInfo);
   return _cachedGradleProject;
 }
 
 // Note: Dependencies are resolved and possibly downloaded as a side-effect
 // of calculating the app properties using Gradle. This may take minutes.
-Future<GradleProject> _readGradleProject() async {
+Future<GradleProject> _readGradleProject(BuildInfo buildInfo) async {
   final FlutterProject flutterProject = await FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
-  updateLocalProperties(project: flutterProject);
+  updateLocalProperties(project: flutterProject,buildInfo: buildInfo);
   final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
   GradleProject project;
   try {
@@ -338,7 +338,7 @@ Future<void> _buildGradleProjectV2(
     BuildInfo buildInfo,
     String target,
     bool isBuildingBundle) async {
-  final GradleProject project = await _gradleProject();
+  final GradleProject project = await _gradleProject(buildInfo:buildInfo);
 
   String assembleTask;
 
