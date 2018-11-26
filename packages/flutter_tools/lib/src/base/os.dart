@@ -27,7 +27,7 @@ abstract class OperatingSystemUtils {
   /// Make the given file executable. This may be a no-op on some platforms.
   void makeExecutable(File file);
 
-  /// Updates the file system entity located at [path] to have the file mode
+  /// Updates the specified file system [entity] to have the file mode
   /// bits set to the value defined by [mode], which can be specified in octal
   /// (e.g. `644`) or symbolically (e.g. `u+x`).
   ///
