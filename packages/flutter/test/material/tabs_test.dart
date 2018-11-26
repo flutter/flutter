@@ -1917,7 +1917,7 @@ void main() {
                 ),
               ),
               body: TabBarView(
-                children: tabs.take(tabCount).map((Tab tab) => Center(child: Text(tab.text))).toList(),    
+                children: tabs.take(tabCount).map((Tab tab) => Center(child: Text(tab.text))).toList(),
               ),
             ),
           );
