@@ -1895,4 +1895,44 @@ void main() {
     expect(find.text(AlwaysKeepAliveWidget.text, skipOffstage: false), findsOneWidget);
     expect(find.text('4'), findsOneWidget);
   });
+
+  testWidgets('The number of tabs can be updated', (WidgetTester tester) async {
+    Function _setState;
+    int tabCount = 3;
+    const List<Tab> tabs = <Tab>[
+      Tab(text: 'LEFT'),
+      Tab(text: 'MIDDLE'),
+      Tab(text: 'RIGHT'),
+    ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(builder: (BuildContext context, Function setState) {
+          _setState = setState;
+          return DefaultTabController(
+            length: tabCount,
+            child: Scaffold(
+              appBar: AppBar(
+                bottom: TabBar(
+                  tabs: tabs.take(tabCount).toList(),
+                ),
+              ),
+              body: TabBarView(
+                children: tabs.take(tabCount).map((Tab tab) => Center(child: Text(tab.text))).toList(),    
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+    await tester.tap(find.text('RIGHT'));
+    // Without the additional logic in _DefaultTabControllerState.didUpdateWidget, this
+    // will throw an index out of bounds error.
+    await tester.pumpAndSettle();
+    _setState(() {
+      tabCount = 2;
+    });
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text('MIDDLE'), findsNWidgets(2));
+  });
 }
