@@ -71,6 +71,34 @@ void main() {
     expect(textFieldWidget.onEditingComplete, onEditingComplete);
   });
 
+  testWidgets('Passes cursor attributes to underlying TextField', (WidgetTester tester) async {
+    const double cursorWidth = 3.14;
+    const Radius cursorRadius = Radius.circular(4);
+    const Color cursorColor = Colors.purple;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              cursorWidth: cursorWidth,
+              cursorRadius: cursorRadius,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.cursorWidth, cursorWidth);
+    expect(textFieldWidget.cursorRadius, cursorRadius);
+    expect(textFieldWidget.cursorColor, cursorColor);
+  });
+
   testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
     bool _called = false;
 
