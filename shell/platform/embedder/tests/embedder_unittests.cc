@@ -16,19 +16,18 @@ TEST(EmbedderTest, MustNotRunWithInvalidArgs) {
 }
 
 TEST(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
-  FlutterOpenGLRendererConfig renderer = {};
-  renderer.struct_size = sizeof(FlutterOpenGLRendererConfig);
-  renderer.make_current = [](void*) { return false; };
-  renderer.clear_current = [](void*) { return false; };
-  renderer.present = [](void*) { return false; };
-  renderer.fbo_callback = [](void*) -> uint32_t { return 0; };
+  FlutterSoftwareRendererConfig renderer;
+  renderer.struct_size = sizeof(FlutterSoftwareRendererConfig);
+  renderer.surface_present_callback = [](void*, const void*, size_t, size_t) {
+    return false;
+  };
 
   std::string main =
       std::string(testing::GetFixturesPath()) + "/simple_main.dart";
 
   FlutterRendererConfig config = {};
-  config.type = FlutterRendererType::kOpenGL;
-  config.open_gl = renderer;
+  config.type = FlutterRendererType::kSoftware;
+  config.software = renderer;
 
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
