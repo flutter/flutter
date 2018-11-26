@@ -7,27 +7,30 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
+
 import 'snapping_scroll_physics.dart';
 
+const int _kAnimateHeroFadeDuration = 1000;
+const int _kAnimateTextDuration = 400;
+const double _kDetailTabHeight = 70.0;
+const int _kStatsFirstAnimationDuration = 500;
+const int _kStatsAnimationDuration = 175;
+const int _kRotationAnimationDuration = 100;
+const int _kAnimateRunnerHeroFadeDuration = 450;
+const int _kAnimateNumberCounterDuration = 1000;
+
+const int _kStartingElevationCount = 8365;
+const int _kStartingRunCount = 158;
+
 class CustomizedDesign extends StatefulWidget {
+  static const String routeName = '/customized';
+
   @override
   _CustomizedDesignState createState() => _CustomizedDesignState();
 }
 
 class _CustomizedDesignState extends State<CustomizedDesign>
     with TickerProviderStateMixin {
-  static const int _kAnimateHeroFadeDuration = 1000;
-  static const int _kAnimateTextDuration = 400;
-  static const double _kDetailTabHeight = 70.0;
-  static const int _kStatsFirstAnimationDuration = 500;
-  static const int _kStatsAnimationDuration = 175;
-  static const int _kRotationAnimationDuration = 100;
-  static const int _kAnimateRunnerHeroFadeDuration = 450;
-  static const int _kAnimateNumberCounterDuration = 1000;
-
-  static const int _kStartingElevationCount = 8365;
-  static const int _kStartingRunCount = 158;
-
   List<Widget> _stats;
   TargetPlatform _targetPlatform;
   TextAlign _platformTextAlignment;
@@ -63,10 +66,19 @@ class _CustomizedDesignState extends State<CustomizedDesign>
   final ScrollController _scrollController = ScrollController();
 
   @override
-    void didChangeDependencies() {
-      super.didChangeDependencies();
-      _configureThemes();
-    }
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _configureThemes();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _configureAnimation();
+    _heroAnimationController.forward().whenComplete(() {
+      _textAnimationController.forward();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,30 +90,6 @@ class _CustomizedDesignState extends State<CustomizedDesign>
         child: _contentWidget(),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _heroAnimationController.dispose();
-    _textAnimationController.dispose();
-    _statsAnimationControllerOne.dispose();
-    _statsAnimationControllerTwo.dispose();
-    _statsAnimationControllerThree.dispose();
-    _statsAnimationControllerFour.dispose();
-    _rotationAnimationController.dispose();
-    _runnerAnimationController.dispose();
-    _numberCounterAnimationController.dispose();
-    _heartAnimationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _configureAnimation();
-    _heroAnimationController.forward().whenComplete(() {
-      _textAnimationController.forward();
-    });
   }
 
   void _animateCounters() {
@@ -119,17 +107,6 @@ class _CustomizedDesignState extends State<CustomizedDesign>
   }
 
   void _animateMileCounter() {
-    setState(() {
-      _numberCounterAnimation = Tween<double>(
-        begin: 0.0,
-        end: 646.3,
-      ).animate(
-        CurvedAnimation(
-          curve: Curves.fastOutSlowIn,
-          parent: _numberCounterAnimationController,
-        ),
-      );
-    });
     _numberCounterAnimationController.forward(from: 0.0);
   }
 
@@ -140,26 +117,7 @@ class _CustomizedDesignState extends State<CustomizedDesign>
 
   GestureDetector _buildAppBar() {
     return GestureDetector(
-      onTap: () {
-        double screenHeight = MediaQuery.of(context).size.height -
-            MediaQuery.of(context).padding.top;
-        if (Theme.of(context).platform == TargetPlatform.iOS) {
-          screenHeight -= 70.0;
-        }
-        final double halfScreen = screenHeight * 0.5;
-        double scrollToOffset =
-            _scrollController.offset <= halfScreen ? 0.0 : screenHeight;
-        if (_scrollController.offset == 0) {
-          scrollToOffset = screenHeight;
-        } else if (_isStatsBoxFullScreen) {
-          scrollToOffset = 0.0;
-        }
-        _scrollController.animateTo(
-          scrollToOffset,
-          curve: Curves.easeOut,
-          duration: const Duration(milliseconds: 300),
-        );
-      },
+      onTap: tappedStatsBar,
       child: Container(
         color: const Color(0xFF212024),
         height: 70.0,
@@ -196,26 +154,6 @@ class _CustomizedDesignState extends State<CustomizedDesign>
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBackButton() {
-    final TargetPlatform platform = Theme.of(context).platform;
-    final IconData backIcon = platform == TargetPlatform.android
-        ? Icons.arrow_back
-        : Icons.arrow_back_ios;
-    return Container(
-      height: 70.0,
-      width: 70.0,
-      child: Material(
-        color: const Color(0x00FFFFFF),
-        child: IconButton(
-          icon: Icon(backIcon, color: Colors.white),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
         ),
       ),
     );
@@ -353,7 +291,7 @@ class _CustomizedDesignState extends State<CustomizedDesign>
       padding: const EdgeInsets.symmetric(horizontal: 5.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
+        children: <Widget>[
           ScaleTransition(
             scale: _statsAnimationOne,
             child: Row(
@@ -403,7 +341,7 @@ class _CustomizedDesignState extends State<CustomizedDesign>
           ScaleTransition(
             scale: _statsAnimationFour,
             child: Row(
-              children: [
+              children: <Widget>[
                 ScaleTransition(
                   scale: _heartAnimation,
                   child: const Icon(Icons.favorite, color: Colors.white),
@@ -439,13 +377,13 @@ class _CustomizedDesignState extends State<CustomizedDesign>
       height: MediaQuery.of(context).size.height * 0.4,
       color: const Color(0xFFF6FB09),
       child: Stack(
-        children: [
+        children: <Widget>[
           Padding(
             padding: const EdgeInsets.only(top: 30.0),
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
+              children: <Widget>[
                 Column(
                   children: <Widget>[
                     Text(
@@ -493,7 +431,7 @@ class _CustomizedDesignState extends State<CustomizedDesign>
             child: Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+              children: <Widget>[
                 AnimatedBuilder(
                   animation: _numberCounterAnimation,
                   builder: (BuildContext context, Widget child) {
@@ -532,7 +470,7 @@ class _CustomizedDesignState extends State<CustomizedDesign>
           MediaQuery.of(context).padding.top,
       width: MediaQuery.of(context).size.width,
       child: Stack(
-        children: [
+        children: <Widget>[
           _buildAppBar(),
           Positioned(
             left: 0.0,
@@ -693,6 +631,15 @@ class _CustomizedDesignState extends State<CustomizedDesign>
         curve: Curves.easeOut,
         controller: _runnerAnimationController);
     _numberCounterAnimation = _numberCounterAnimationController;
+    _numberCounterAnimation = Tween<double>(
+      begin: 0.0,
+      end: 646.3,
+    ).animate(
+      CurvedAnimation(
+        curve: Curves.fastOutSlowIn,
+        parent: _numberCounterAnimationController,
+      ),
+    );
   }
 
   void _configureThemes() {
@@ -727,7 +674,7 @@ class _CustomizedDesignState extends State<CustomizedDesign>
             controller: _scrollController,
             physics: SnappingScrollPhysics(midScrollOffset: screenHeight),
             shrinkWrap: true,
-            slivers: [
+            slivers: <Widget>[
               SliverAppBar(
                 pinned: false,
                 title: Text(
@@ -736,7 +683,9 @@ class _CustomizedDesignState extends State<CustomizedDesign>
                 expandedHeight: screenHeight -
                     _kDetailTabHeight -
                     MediaQuery.of(context).padding.top,
-                leading: _buildBackButton(),
+                leading: const BackButton(
+                  color: Colors.white,
+                ),
                 backgroundColor: const Color(0xFF212024),
                 flexibleSpace: FlexibleSpaceBar(
                   background: _buildBody(),
@@ -791,11 +740,12 @@ class _CustomizedDesignState extends State<CustomizedDesign>
     return false;
   }
 
-  Animation<double> _initAnimation(
-      {@required double from,
-      @required double to,
-      @required Curve curve,
-      @required AnimationController controller}) {
+  Animation<double> _initAnimation({
+    @required double from,
+    @required double to,
+    @required Curve curve,
+    @required AnimationController controller,
+  }) {
     final CurvedAnimation animation = CurvedAnimation(
       parent: controller,
       curve: curve,
@@ -822,11 +772,6 @@ class _CustomizedDesignState extends State<CustomizedDesign>
     });
   }
 
-  // Timer _startAnimationDelay() {
-  //   Duration duration = Duration(milliseconds: 1000);
-  //   return Timer(duration, _startAnimation());
-  // }
-
   void _updateElevationCounter() {
     setState(() {
       _elevationCounter += 356;
@@ -837,5 +782,44 @@ class _CustomizedDesignState extends State<CustomizedDesign>
     setState(() {
       _runCounter += 1;
     });
+  }
+
+  // callbacks
+
+  /// display the 'stats' content when the 'view my stats' bar is tapped
+  void tappedStatsBar() {
+    double screenHeight =
+        MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
+      screenHeight -= 70.0;
+    }
+    final double halfScreen = screenHeight * 0.5;
+    double scrollToOffset =
+        _scrollController.offset <= halfScreen ? 0.0 : screenHeight;
+    if (_scrollController.offset == 0) {
+      scrollToOffset = screenHeight;
+    } else if (_isStatsBoxFullScreen) {
+      scrollToOffset = 0.0;
+    }
+    _scrollController.animateTo(
+      scrollToOffset,
+      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 300),
+    );
+  }
+
+  @override
+  void dispose() {
+    _heroAnimationController.dispose();
+    _textAnimationController.dispose();
+    _statsAnimationControllerOne.dispose();
+    _statsAnimationControllerTwo.dispose();
+    _statsAnimationControllerThree.dispose();
+    _statsAnimationControllerFour.dispose();
+    _rotationAnimationController.dispose();
+    _runnerAnimationController.dispose();
+    _numberCounterAnimationController.dispose();
+    _heartAnimationController.dispose();
+    super.dispose();
   }
 }

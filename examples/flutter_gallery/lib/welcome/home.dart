@@ -4,7 +4,9 @@
 
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
+
 import 'step.dart';
 import 'steps/all.dart';
 
@@ -22,6 +24,9 @@ const double footerButtonHeight = 60.0;
 class Welcome extends StatefulWidget {
   const Welcome({Key key, this.onDismissed}) : super(key: key);
   final VoidCallback onDismissed;
+
+  static const String routeName = '/welcome';
+
   @override
   _WelcomeState createState() => _WelcomeState();
 }
@@ -101,7 +106,7 @@ class _WelcomeState extends State<Welcome> with TickerProviderStateMixin {
                         ),
                       ),
                       color: footerColor,
-                      child: Text(
+                      child: const Text(
                         'START EXPLORING',
                         style: footerButtonTextStyle,
                       ),

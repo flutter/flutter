@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter_gallery/welcome/home.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -18,7 +17,6 @@ import 'options.dart';
 import 'scales.dart';
 import 'themes.dart';
 import 'updater.dart';
-import 'welcome.dart';
 
 class GalleryApp extends StatefulWidget {
   const GalleryApp({
@@ -83,6 +81,8 @@ class _GalleryAppState extends State<GalleryApp>
   void dispose() {
     _timeDilationTimer?.cancel();
     _timeDilationTimer = null;
+    _checkWelcomeFuture = null;
+    _welcomeContentAnimationController.dispose();
     super.dispose();
   }
 
@@ -140,7 +140,7 @@ class _GalleryAppState extends State<GalleryApp>
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             _showWelcome ??= snapshot.data;
-            return _homeWidget(context);
+            return _buildHomeWidget(context);
           } else {
             return Container();
           }
@@ -155,7 +155,7 @@ class _GalleryAppState extends State<GalleryApp>
     return !hasSeenWelcome;
   }
 
-  Widget _homeWidget(BuildContext context) {
+  Widget _buildHomeWidget(BuildContext context) {
     final Widget welcome = Welcome(
       onDismissed: () {
         _welcomeContentAnimationController.forward();
