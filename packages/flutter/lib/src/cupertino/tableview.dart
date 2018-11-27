@@ -184,8 +184,9 @@ class _CupertinoTableViewState extends State<CupertinoTableView> {
   // [_LayoutSizeReport] so that the height of this last cell can be reported
   // to the extra dividers sliver.
   Widget _decorateCell(Widget cell, bool isLastCell) {
-    final Widget cellWithDivider = Container(
-      foregroundDecoration: CupertinoDividerDecoration(),
+    final Widget cellWithDivider = DecoratedBox(
+      decoration: const CupertinoDividerDecoration(),
+      position: DecorationPosition.foreground,
       child: cell,
     );
 
