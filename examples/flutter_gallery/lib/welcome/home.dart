@@ -22,7 +22,7 @@ const TextStyle footerButtonTextStyle = TextStyle(
 const double footerButtonHeight = 60.0;
 
 class Welcome extends StatefulWidget {
-  const Welcome({Key key, this.onDismissed}) : super(key: key);
+  const Welcome({ Key key, this.onDismissed }) : super(key: key);
   final VoidCallback onDismissed;
 
   static const String routeName = '/welcome';
@@ -88,10 +88,8 @@ class _WelcomeState extends State<Welcome> with TickerProviderStateMixin {
                 child: _pageIndicator(),
               ),
             ),
-            Positioned(
-              bottom: 0.0,
-              left: 0.0,
-              right: 0.0,
+            Positioned.fill(
+              top: null,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,

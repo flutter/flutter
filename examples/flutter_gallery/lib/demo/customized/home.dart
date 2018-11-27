@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_gallery/demo/customized/stats_row.dart';
 import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
 
 import 'snapping_scroll_physics.dart';
 
@@ -24,6 +23,8 @@ const int _kAnimateNumberCounterDuration = 1000;
 
 const int _kStartingElevationCount = 8365;
 const int _kStartingRunCount = 158;
+
+const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class CustomizedDesign extends StatefulWidget {
   static const String routeName = '/customized';
@@ -110,10 +111,9 @@ class _CustomizedDesignState extends State<CustomizedDesign>
         height: 70.0,
         child: Stack(
           children: <Widget>[
-            const Positioned(
+            const Positioned.fill(
               left: 26.0,
-              top: 0.0,
-              bottom: 0.0,
+              right: null,
               child: Center(
                 child: Text(
                   'VIEW MY STATS',
@@ -125,16 +125,18 @@ class _CustomizedDesignState extends State<CustomizedDesign>
                 ),
               ),
             ),
-            Positioned(
+            Positioned.fill(
               right: 20.0,
-              top: 0.0,
-              bottom: 0.0,
+              left: null,
               child: RotationTransition(
                 turns: _rotationAnimation,
                 child: const RotatedBox(
                   quarterTurns: 2,
                   child: ImageIcon(
-                    AssetImage('assets/images/customized/ic_circle_arrow.png'),
+                    AssetImage(
+                      'customized/ic_circle_arrow.png',
+                      package: _kGalleryAssetsPackage,
+                    ),
                     color: Colors.white,
                   ),
                 ),
@@ -158,7 +160,8 @@ class _CustomizedDesignState extends State<CustomizedDesign>
               height: MediaQuery.of(context).size.height,
               fit: BoxFit.cover,
               image: const AssetImage(
-                'assets/images/customized/fg_hero.png',
+                'customized/fg_hero.png',
+                package: _kGalleryAssetsPackage,
               ),
             ),
           ),
@@ -186,7 +189,10 @@ class _CustomizedDesignState extends State<CustomizedDesign>
             child: FadeTransition(
               opacity: _runnerFadeAnimation,
               child: const Image(
-                image: AssetImage('assets/images/customized/bg_runner.png'),
+                image: AssetImage(
+                  'customized/bg_runner.png',
+                  package: _kGalleryAssetsPackage,
+                ),
               ),
             ),
           ),
@@ -233,14 +239,16 @@ class _CustomizedDesignState extends State<CustomizedDesign>
             child: FadeTransition(
               opacity: _pathFadeAnimation,
               child: const Image(
-                image: AssetImage('assets/images/customized/run_path.png'),
+                image: AssetImage(
+                  'customized/run_path.png',
+                  package: _kGalleryAssetsPackage,
+                ),
               ),
             ),
           ),
-          Positioned(
-            left: 0.0,
+          Positioned.fill(
             bottom: 15.0,
-            right: 0.0,
+            top: null,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 5.0),
               child: Column(
@@ -330,11 +338,8 @@ class _CustomizedDesignState extends State<CustomizedDesign>
               ],
             ),
           ),
-          Positioned(
+          Positioned.fill(
             top: 45.0,
-            left: 0.0,
-            right: 0.0,
-            bottom: 0.0,
             child: Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -379,17 +384,13 @@ class _CustomizedDesignState extends State<CustomizedDesign>
       child: Stack(
         children: <Widget>[
           _buildAppBar(),
-          Positioned(
-            left: 0.0,
-            right: 0.0,
+          Positioned.fill(
             top: 70.0,
             bottom: MediaQuery.of(context).size.height * 0.4,
             child: _buildPathContent(),
           ),
-          Positioned(
-            left: 0.0,
-            right: 0.0,
-            bottom: 0.0,
+          Positioned.fill(
+            top: null,
             child: _buildStatsBox(),
           ),
         ],

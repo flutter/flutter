@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gallery/welcome/step.dart';
 
+const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
+
 class PopPosition {
   PopPosition(
       {this.top, this.right, this.bottom, this.left, @required this.child});
@@ -31,7 +33,8 @@ class ExploreWelcomeStep extends WelcomeStep {
     final List<Widget> stackChildren = <Widget>[
       Positioned.fill(
         child: Image.asset(
-          'assets/images/welcome/welcome_flutter_logo.png',
+          'welcome/welcome_flutter_logo.png',
+          package: _kGalleryAssetsPackage,
         ),
       ),
     ];
@@ -124,7 +127,8 @@ class ExploreWelcomeStep extends WelcomeStep {
       top: 0.0,
       right: 30.0,
       child: Image.asset(
-        'assets/images/welcome/welcome_pop_1.png',
+        'welcome/welcome_pop_1.png',
+        package: _kGalleryAssetsPackage,
         width: 80.0,
       ),
     ),
@@ -132,7 +136,8 @@ class ExploreWelcomeStep extends WelcomeStep {
       top: 60.0,
       left: 20.0,
       child: Image.asset(
-        'assets/images/welcome/welcome_pop_2.png',
+        'welcome/welcome_pop_2.png',
+        package: _kGalleryAssetsPackage,
         width: 54.0,
       ),
     ),
@@ -140,7 +145,8 @@ class ExploreWelcomeStep extends WelcomeStep {
       bottom: 70.0,
       right: 40.0,
       child: Image.asset(
-        'assets/images/welcome/welcome_pop_3.png',
+        'welcome/welcome_pop_3.png',
+        package: _kGalleryAssetsPackage,
         width: 40.0,
       ),
     ),
@@ -148,7 +154,8 @@ class ExploreWelcomeStep extends WelcomeStep {
       bottom: 8.0,
       left: 30.0,
       child: Image.asset(
-        'assets/images/welcome/welcome_pop_4.png',
+        'welcome/welcome_pop_4.png',
+        package: _kGalleryAssetsPackage,
         width: 45.0,
       ),
     ),

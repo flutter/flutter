@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gallery/welcome/step.dart';
 
+const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
+
 class PlaygroundWelcomeStep extends WelcomeStep {
   PlaygroundWelcomeStep({TickerProvider tickerProvider})
       : super(tickerProvider: tickerProvider);
@@ -18,7 +20,8 @@ class PlaygroundWelcomeStep extends WelcomeStep {
   @override
   Widget imageWidget() {
     return Image.asset(
-      'assets/images/welcome/welcome_playground.png',
+      'welcome/welcome_playground.png',
+      package: _kGalleryAssetsPackage,
     );
   }
 

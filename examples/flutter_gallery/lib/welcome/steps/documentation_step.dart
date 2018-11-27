@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gallery/welcome/step.dart';
 
+const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
+
 class DocumentationWelcomeStep extends WelcomeStep {
   DocumentationWelcomeStep({TickerProvider tickerProvider})
       : super(tickerProvider: tickerProvider);
@@ -47,7 +49,8 @@ class DocumentationWelcomeStep extends WelcomeStep {
         Tween<double>(begin: 1.0, end: 0.0).animate(_quickAnimationController);
 
     final Image barImage = Image.asset(
-      'assets/images/welcome/welcome_documentation.png',
+      'welcome/welcome_documentation.png',
+      package: _kGalleryAssetsPackage,
     );
     return Stack(
       children: <Widget>[
@@ -67,7 +70,8 @@ class DocumentationWelcomeStep extends WelcomeStep {
             child: Padding(
               padding: const EdgeInsets.only(right: 20.0),
               child: Image.asset(
-                'assets/images/welcome/ic_documentation.png',
+                'welcome/ic_documentation.png',
+                package: _kGalleryAssetsPackage,
                 width: 20.0,
                 height: 20.0,
               ),
@@ -81,7 +85,8 @@ class DocumentationWelcomeStep extends WelcomeStep {
             child: FadeTransition(
               opacity: _focusOpacityAnimation,
               child: Image.asset(
-                'assets/images/welcome/welcome_documentation_focus.png',
+                'welcome/welcome_documentation_focus.png',
+                package: _kGalleryAssetsPackage,
                 width: 85.0,
                 height: 85.0,
               ),
