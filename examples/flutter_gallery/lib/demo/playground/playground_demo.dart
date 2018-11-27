@@ -173,17 +173,14 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo>
   }
 
   Widget _modalContainer() {
-    return AnimatedOpacity(
-        opacity: _isCodeOpen ? 0.6 : 0.0,
-        duration: Duration(milliseconds: _animationInterval),
-        child: GestureDetector(
-          onTap: () {
-            _toggleCode();
-          },
-          child: Container(
-            color: Colors.blue[700],
-          ),
-        ));
+    return GestureDetector(
+      onTap: () {
+        _toggleCode();
+      },
+      child: Container(
+        color: Colors.blue[700].withOpacity(0.6),
+      ),
+    );
   }
 
   Widget _shareButton() {
