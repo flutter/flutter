@@ -115,6 +115,12 @@ class ChangeNotifier implements Listenable {
     return true;
   }
 
+  /// Whether the resources held by this object have been disposed.
+  ///
+  /// This can be used to check if it is safe to continue using the object in
+  /// circumstances where the lifecycle is dynamic.
+  bool get isDisposed => _listeners == null;
+
   /// Whether any listeners are currently registered.
   ///
   /// Clients should not depend on this value for their behavior, because having

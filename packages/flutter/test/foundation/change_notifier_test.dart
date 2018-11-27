@@ -202,11 +202,13 @@ void main() {
 
   test('Cannot use a disposed ChangeNotifier', () {
     final TestNotifier source = TestNotifier();
+    expect(source.isDisposed, false);
     source.dispose();
     expect(() { source.addListener(null); }, throwsFlutterError);
     expect(() { source.removeListener(null); }, throwsFlutterError);
     expect(() { source.dispose(); }, throwsFlutterError);
     expect(() { source.notify(); }, throwsFlutterError);
+    expect(source.isDisposed, true);
   });
 
   test('Value notifier', () {
