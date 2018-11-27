@@ -71,7 +71,7 @@ void main() {
 
       // Ensure that only 9 cells have been built (the 6 on screen + 3 more
       // due to cache extent).
-      expect(trackingWidgetBuilder.didBuildAllWidgetsInRange(0, 9), true);
+      expect(trackingWidgetBuilder.didBuildAllWidgetsInRange(0, 9, buildCount: 1), true);
       expect(trackingWidgetBuilder.didNotBuildAnyWidgetsInRange(9, 20), true);
 
       // Ensure that the 6 on-screen cells have the correct width and y-values
@@ -95,8 +95,8 @@ void main() {
 
       // Scroll all the way to the bottom and ensure that all 20 cells were built.
       scrollController.jumpTo(1400.0);
-      await tester.pumpAndSettle();
-      expect(trackingWidgetBuilder.didBuildAllWidgetsInRange(0, 20), true);
+      await tester.pump();
+      expect(trackingWidgetBuilder.didBuildAllWidgetsInRange(0, 20, buildCount: 1), true);
     });
 
     testWidgets('Empty CupertinoTableView draws dividers throughout the viewport', (WidgetTester tester) async {
@@ -230,35 +230,65 @@ class _TrackingIndexedWidgetBuilder {
     this.builder,
   });
 
-  final Set<int> builtIndices = Set<int>();
+  // The number of times each cell's widget was built. The index corresponds to
+  // the cell's index in the CupertinoTableView. The value is the number of builds.
+  final List<int> cellBuildCount = <int>[];
+
+  // The "real" builder that builds cells. _TrackingIndexedWidgetBuilder is a
+  // proxy around this builder that tracks what is built.
   final IndexedWidgetBuilder builder;
 
   Widget buildWithTracking(BuildContext context, int index) {
     final Widget builtWidget = builder(context, index);
 
     if (builtWidget != null) {
-      builtIndices.add(index);
+      // Ensure that we have an entry in our tracker for every widget up to
+      // the current "index"
+      while (index >= cellBuildCount.length) {
+        cellBuildCount.add(0);
+      }
+
+      // Increment the build count for the given cell.
+      cellBuildCount[index] += 1;
     }
 
     return builtWidget;
   }
 
-  bool didBuildWidget(int index) {
-    return builtIndices.contains(index);
+  int buildCountForWidget(int index) {
+    if (index >= cellBuildCount.length) {
+      return 0;
+    }
+
+    return cellBuildCount[index];
   }
 
-  bool didBuildAllWidgetsInRange(int startIndex, int endIndexExclusive) {
+  bool didBuildWidget(int index) {
+    return buildCountForWidget(index) > 0;
+  }
+
+  bool didBuildAllWidgetsInRange(int startIndex, int endIndexExclusive, {int buildCount}) {
     for (int i = startIndex; i < endIndexExclusive; i += 1) {
-      if (!builtIndices.contains(i)) {
+      // If the i'th widget wasn't built, then not all widgets in the range were built.
+      if (!didBuildWidget(i)) {
+        return false;
+      }
+
+      // If an exact buildCount was provided, and the i'th widget wasn't built
+      // exactly that many times, then return false.
+      if (buildCount != null && buildCountForWidget(i) != buildCount) {
         return false;
       }
     }
+
+    // All widgets in the range were built. If buildCount was provided, each
+    // widget in the range was built exactly buildCount times.
     return true;
   }
 
   bool didNotBuildAnyWidgetsInRange(int startIndex, int endIndexExclusive) {
     for (int i = startIndex; i < endIndexExclusive; i += 1) {
-      if (builtIndices.contains(i)) {
+      if (didBuildWidget(i)) {
         return false;
       }
     }

@@ -114,13 +114,19 @@ class CupertinoTableView extends StatefulWidget {
 }
 
 class _CupertinoTableViewState extends State<CupertinoTableView> {
-  // The size of the last cell in the table, used to determine the desired gap
-  // between all extra dividers below it.
-  Size _lastItemSize;
+  // Controller that reports the size of the last cell in the table, used to
+  // determine the desired gap between all extra dividers below it.
+  final _CellHeightController _cellHeightController = _CellHeightController();
 
   // Decorator that builds cell widgets with extra chrome and/or functionality,
   // e.g., adding a divider to a cell.
   IndexedWidgetBuilder _cellDecorator;
+
+  // Cache of undecorated cell widgets. The cache is cleared every time this
+  // widget runs `build()`. The purpose of this cache is to avoid repeatedly
+  // building every cell twice while searching for the last cell in the list.
+  // This cache map structure is "index of cell" => "widget for cell".
+  final Map<int, Widget> _cellWidgetCache = <int, Widget>{};
 
   @override
   void initState() {
@@ -160,11 +166,24 @@ class _CupertinoTableViewState extends State<CupertinoTableView> {
   }
 
   Widget _buildPlainChildFromBuilder(BuildContext context, int index) {
+    // If this cell has already been built since the last time `build()` was
+    // called, return that cached cell widget.
+    if (_cellWidgetCache[index] != null) {
+      return _cellWidgetCache[index];
+    }
+
+    // We do not have a cached version of this cell. Build the cell's widget
+    // and cache it.
     final Widget cell = widget.plainChildrenBuilder(context, index);
+    _cellWidgetCache[index] = cell;
+
+    // If the cell doesn't exist, return null.
     if (cell == null) {
       return null;
     }
 
+    // Determine if this cell is the last cell in the CupertinoTableView so that
+    // we can report its height for the sake of drawing extra dividers.
     bool isLastCell;
     if (widget.plainChildCount != null) {
       // The child count was provided so we will simply compare cell indices.
@@ -172,8 +191,13 @@ class _CupertinoTableViewState extends State<CupertinoTableView> {
     } else {
       // No child count was provided, so the only way to know if this is the
       // last cell is to build the next cell and check for null.
-      final Widget nextCell = widget.plainChildrenBuilder(context, index + 1);
-      isLastCell =  nextCell == null;
+      //
+      // First, try to find the next cell in the cell widget cache. If it's not
+      // there then create the next cell and cache it.
+      final Widget nextCell = _cellWidgetCache[index + 1] ?? widget.plainChildrenBuilder(context, index + 1);
+      _cellWidgetCache[index + 1] = nextCell;
+
+      isLastCell = nextCell == null;
     }
 
     return _decorateCell(cell, isLastCell);
@@ -193,13 +217,7 @@ class _CupertinoTableViewState extends State<CupertinoTableView> {
     if (isLastCell) {
       return _LayoutSizeReport(
         sizeCallback: (Size size) {
-          if (size != _lastItemSize) {
-            WidgetsBinding.instance.addPostFrameCallback((Duration dt) {
-              setState(() {
-                _lastItemSize = size;
-              });
-            });
-          }
+          _cellHeightController.cellHeight = size.height;
         },
         child: cellWithDivider,
       );
@@ -210,6 +228,10 @@ class _CupertinoTableViewState extends State<CupertinoTableView> {
 
   @override
   Widget build(BuildContext context) {
+    // Clear the cell widget cache because our state has changed and therefore
+    // our cells may have changed.
+    _cellWidgetCache.clear();
+
     // Visual list of cells.
     final Widget sliverList = SliverList(
       delegate: SliverChildBuilderDelegate(
@@ -224,7 +246,7 @@ class _CupertinoTableViewState extends State<CupertinoTableView> {
       slivers: <Widget>[]
         ..add(sliverList)
         ..add(CupertinoTableViewExtraDividers(
-          cellHeight: _lastItemSize?.height,
+          cellHeightController: _cellHeightController,
         )),
     );
 
@@ -308,11 +330,11 @@ class _CupertinoDividerDecorationPainter extends BoxPainter {
 /// the [CupertinoTableView], as per iOS behavior.
 @visibleForTesting
 class CupertinoTableViewExtraDividers extends RenderObjectWidget {
-  const CupertinoTableViewExtraDividers({
-    double cellHeight,
-  }) : cellHeight = cellHeight ?? kDefaultTableViewCellHeight;
+  CupertinoTableViewExtraDividers({
+    @required this.cellHeightController,
+  });
 
-  final double cellHeight;
+  final _CellHeightController cellHeightController;
 
   @override
   RenderObjectElement createElement() {
@@ -322,13 +344,22 @@ class CupertinoTableViewExtraDividers extends RenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return CupertinoTableViewExtraDividersRenderObject(
-      cellHeight: cellHeight,
+      cellHeightController: cellHeightController,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, CupertinoTableViewExtraDividersRenderObject renderObject) {
-    renderObject.cellHeight = cellHeight;
+    renderObject.cellHeightController = cellHeightController;
+  }
+}
+
+class _CellHeightController with ChangeNotifier {
+  double get cellHeight => _cellHeight;
+  double _cellHeight = kDefaultTableViewCellHeight;
+  set cellHeight(double newHeight) {
+    _cellHeight = newHeight;
+    notifyListeners();
   }
 }
 
@@ -353,18 +384,25 @@ class CupertinoTableViewExtraDividersElement extends RenderObjectElement {
 @visibleForTesting
 class CupertinoTableViewExtraDividersRenderObject extends RenderSliver {
   CupertinoTableViewExtraDividersRenderObject({
-    double cellHeight,
+    @required _CellHeightController cellHeightController,
     double dividerThickness = kDefaultDividerHeight,
-  }) : _cellHeight = cellHeight ?? kDefaultTableViewCellHeight,
+  }) : _cellHeightController = cellHeightController,
        _linePaint = Paint()
          ..color = CupertinoColors.lightBackgroundGray
          ..strokeWidth = dividerThickness;
 
-  double get cellHeight => _cellHeight;
-  double _cellHeight;
-  set cellHeight(double newCellHeight) {
-    _cellHeight = newCellHeight;
-    markNeedsLayout();
+  double get cellHeight => _cellHeightController.cellHeight;
+  _CellHeightController _cellHeightController;
+  set cellHeightController(_CellHeightController newController) {
+    _cellHeightController.removeListener(markNeedsLayout);
+
+    double oldCellHeight = _cellHeightController?.cellHeight ?? kDefaultTableViewCellHeight;
+    _cellHeightController = newController;
+    _cellHeightController.addListener(markNeedsLayout);
+
+    if (oldCellHeight != _cellHeightController.cellHeight) {
+      markNeedsLayout();
+    }
   }
 
   final Paint _linePaint;
