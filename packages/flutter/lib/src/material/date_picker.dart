@@ -956,10 +956,12 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           FlatButton(
             child: Text(localizations.cancelButtonLabel),
             onPressed: _handleCancel,
+            textColor: theme.accentColor,
           ),
           FlatButton(
             child: Text(localizations.okButtonLabel),
             onPressed: _handleOk,
+            textColor: theme.accentColor,
           ),
         ],
       ),
