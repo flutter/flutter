@@ -15,7 +15,7 @@ Future<void> main() async {
     final Stopwatch clock = Stopwatch()..start();
     final Process analysis = await startProcess(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
-      <String>['analyze', '--no-preamble', '--flutter-repo', '--dartdocs'],
+      <String>['analyze', '--no-preamble', '--no-congratulate', '--flutter-repo', '--dartdocs'],
       workingDirectory: flutterDirectory.path,
     );
     int publicMembers = 0;
@@ -34,24 +34,18 @@ Future<void> main() async {
         // ignore this line
       } else if (entry.isNotEmpty) {
         otherLines += 1;
-        print('^ not sure what to do with that line ^');
       }
     }
-    bool sawFinalLine = false;
     await for (String entry in analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
       print('analyzer stderr: $entry');
-      if (entry.contains('(ran in ') && !sawFinalLine) {
-        // ignore this line once
-        sawFinalLine = true;
+      if (entry.startsWith('[lint] ')) {
+        // ignore this line
       } else {
         otherLines += 1;
-        print('^ not sure what to do with that line ^');
       }
     }
     final int result = await analysis.exitCode;
     clock.stop();
-    if (!sawFinalLine)
-      throw Exception('flutter analyze did not output final message');
     if (publicMembers == 0 && otherErrors == 0 && result != 0)
       throw Exception('flutter analyze exited with unexpected error code $result');
     if (publicMembers != 0 && otherErrors != 0 && result == 0)
