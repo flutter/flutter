@@ -427,6 +427,8 @@ class TextPainter {
       boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
       if (boxes.isEmpty) {
         graphemeClusterLength *= 2;
+        if (prevRuneOffset < 0)
+          break;
         continue;
       }
       final TextBox box = boxes[0];
@@ -453,6 +455,8 @@ class TextPainter {
       boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
       if (boxes.isEmpty) {
         graphemeClusterLength *= 2;
+        if (nextRuneOffset < 0)
+          break;
         continue;
       }
     final TextBox box = boxes[0];
