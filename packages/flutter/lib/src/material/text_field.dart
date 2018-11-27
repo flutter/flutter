@@ -567,10 +567,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     // TODO(jonahwilliams): uncomment out this check once we have migrated tests.
     // assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
-    final bool styleNotInherited = widget.style != null && widget.style.inherit == false;
     assert(
-      !(styleNotInherited && (widget.style.fontSize == null || widget.style.textBaseline == null)),
-      'Style must supply fontSize and textBaseline',
+      !(widget.style != null && widget.style.inherit == false &&
+         (widget.style.fontSize == null || widget.style.textBaseline == null)),
+      'inherit false style must supply fontSize and textBaseline',
     );
 
     final ThemeData themeData = Theme.of(context);
