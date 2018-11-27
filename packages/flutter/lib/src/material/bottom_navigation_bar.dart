@@ -373,6 +373,11 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   // Last splash circle's color, and the final color of the control after
   // animation is complete.
   Color _backgroundColor;
+  // Assert that list of bottom navigation bar items is not mutated.
+  int _debugLastLength;
+  // Errors thrown during didUpdateWidget do not cause the widget to become an
+  // error widget.
+  FlutterError _debugCapturedFlutterError;
 
   static final Animatable<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
 
@@ -396,6 +401,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         reverseCurve: Curves.fastOutSlowIn.flipped,
       );
     });
+    assert(() {
+      _debugLastLength = widget.items.length;
+      return true;
+    }());
     _controllers[widget.currentIndex].value = 1.0;
     _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
   }
@@ -456,6 +465,20 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   @override
   void didUpdateWidget(BottomNavigationBar oldWidget) {
     super.didUpdateWidget(oldWidget);
+    assert(() {
+      if (_debugLastLength != oldWidget.items.length) {
+        _debugCapturedFlutterError = FlutterError(
+          'The list of BottomNavigationBarItems was mutated by a parent widget. '
+          'Ensure that if the number of items in the BottomNavigationBar is changed, '
+          'a new List of items is passed in.'
+        );
+      }
+      return true;
+    }());
+    assert(() {
+      _debugLastLength = widget.items.length;
+      return true;
+    }());
 
     // No animated segue if the length of the items list changes.
     if (widget.items.length != oldWidget.items.length) {
@@ -555,6 +578,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
+    assert(() {
+      if (_debugCapturedFlutterError != null) {
+        throw _debugCapturedFlutterError;
+      }
+      return true;
+    }());
 
     // Labels apply up to _bottomMargin padding. Remainder is media padding.
     final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - _kBottomMargin, 0.0);

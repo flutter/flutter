@@ -833,6 +833,50 @@ void main() {
     }
   });
 
+  testWidgets('mutating the list of BottomNavigationBarItems throws a FluterError', (WidgetTester tester) async {
+    final List<BottomNavigationBarItem> items = [
+      const BottomNavigationBarItem(
+        title: Text('Red'),
+        backgroundColor: Colors.red,
+        icon: Icon(Icons.dashboard),
+      ),
+      const BottomNavigationBarItem(
+        title: Text('Green'),
+        backgroundColor: Colors.green,
+        icon: Icon(Icons.menu),
+      ),
+    ];
+    Function _setState;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            _setState = setState;
+            return Scaffold(
+              bottomNavigationBar: RepaintBoundary(
+                child: BottomNavigationBar(
+                  type: BottomNavigationBarType.shifting,
+                  currentIndex: 0,
+                  onTap: (int index) {},
+                  items: items,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    _setState(() {
+      items.add(const BottomNavigationBarItem(
+        title: Text('Blue'),
+        backgroundColor: Colors.purple,
+        icon: Icon(Icons.adb)
+      ));
+    });
+    await tester.pump();
+    expect(tester.takeException(), isInstanceOf<FlutterError>());
+  });
+
   testWidgets('BottomNavigationBar item title should not be nullable',
       (WidgetTester tester) async {
     expect(() {
