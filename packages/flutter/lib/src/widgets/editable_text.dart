@@ -609,7 +609,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (point.state == TextCursorState.Start) {
       final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);
        _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-       _pointOffsetOrigin = null;
+      _pointOffsetOrigin = null;
        renderEditable.setFloatingCursor(point.state, _startCaretRect.center - _floatingCursorOffset, currentTextPosition);
     } else if (point.state == TextCursorState.Update) {
       // We want to send in points that are centered around a (0,0) origin, so we cache

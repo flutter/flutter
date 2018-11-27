@@ -1756,6 +1756,151 @@ testWidgets(
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, text.length);
   });
+
+  RenderEditable findRenderEditable(WidgetTester tester) {
+    final RenderObject root = tester.renderObject(find.byType(EditableText));
+    expect(root, isNotNull);
+
+    RenderEditable renderEditable;
+    void recursiveFinder(RenderObject child) {
+      if (child is RenderEditable) {
+        renderEditable = child;
+        return;
+      }
+      child.visitChildren(recursiveFinder);
+    }
+    root.visitChildren(recursiveFinder);
+    expect(renderEditable, isNotNull);
+    return renderEditable;
+  }
+
+  testWidgets('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
+    const String text = 'hello world this is fun and cool and awesome!';
+    controller.text = text;
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FocusScope(
+          node: focusScopeNode,
+          autofocus: true,
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+
+    expect(controller.selection.baseOffset, 29);
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Start));
+
+    expect(controller.selection.baseOffset, 29);
+
+    // Sets the origin.
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Update,
+                                                                  point: Offset(20, 20)));
+
+    expect(controller.selection.baseOffset, 29);
+
+    // Moves the cursor right a few characters.
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Update,
+                                                                  point: Offset(-250, 20)));
+
+    // But we have not yet set the offset because the user is not done placing the cursor.
+    expect(controller.selection.baseOffset, 29);
+
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.End));
+
+    // The cursor has been set.
+    expect(controller.selection.baseOffset, 10);
+  });
+
+  testWidgets('Cursor gets placed correctly after going out of bounds', (WidgetTester tester) async {
+    const String text = 'hello world this is fun and cool and awesome!';
+    controller.text = text;
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FocusScope(
+          node: focusScopeNode,
+          autofocus: true,
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+
+    expect(controller.selection.baseOffset, 29);
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Start));
+
+    expect(controller.selection.baseOffset, 29);
+
+    // Sets the origin.
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Update,
+        point: Offset(20, 20)));
+
+    expect(controller.selection.baseOffset, 29);
+
+    // Moves the cursor super far right
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Update,
+        point: Offset(2090, 20)));
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Update,
+        point: Offset(2100, 20)));
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Update,
+        point: Offset(2090, 20)));
+
+    // After peaking the cursor, we move in the opposite direction.
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Update,
+        point: Offset(1400, 20)));
+
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.End));
+
+    // The cursor has been set.
+    expect(controller.selection.baseOffset, 8);
+
+    // Go in the other direction.
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Start));
+    // Sets the origin.
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Update,
+        point: Offset(20, 20)));
+
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Update,
+        point: Offset(-5000, 20)));
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Update,
+        point: Offset(-5010, 20)));
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Update,
+        point: Offset(-5000, 20)));
+
+    // Move back in the opposite direction only a few hundred.
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.Update,
+        point: Offset(-4850, 20)));
+
+    editableTextState.updateFloatingCursor(const TextEditingPoint(state: TextCursorState.End));
+
+    expect(controller.selection.baseOffset, 11);
+  });
 }
 
 class MockTextSelectionControls extends Mock implements TextSelectionControls {}
