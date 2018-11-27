@@ -1,4 +1,4 @@
-Signature: 03ade9bd1ada22cf66f97d26b1b89935
+Signature: 10d7fd3dea1dbbff3b5eb68f87673a6b
 
 UNUSED LICENSES:
 
@@ -4192,7 +4192,6 @@ FILE: ../../../third_party/skia/gm/srgb.cpp
 FILE: ../../../third_party/skia/gm/testgradient.cpp
 FILE: ../../../third_party/skia/gm/text_scale_skew.cpp
 FILE: ../../../third_party/skia/gm/thinconcavepaths.cpp
-FILE: ../../../third_party/skia/gm/tonalshadows.cpp
 FILE: ../../../third_party/skia/gm/tosrgb_colorfilter.cpp
 FILE: ../../../third_party/skia/include/android/SkAndroidFrameworkUtils.h
 FILE: ../../../third_party/skia/include/atlastext/SkAtlasTextContext.h
