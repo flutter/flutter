@@ -19,6 +19,7 @@ import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
+const Offset _kFloatingCaretSizeOffset = Offset(0.5, 2.0); // pixels
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -144,6 +145,7 @@ class RenderEditable extends RenderBox {
     Locale locale,
     double cursorWidth = 1.0,
     Radius cursorRadius,
+    EdgeInsets cursorPadding = const EdgeInsets.fromLTRB(3, 6, 3, 6),
     bool enableInteractiveSelection = true,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
@@ -171,6 +173,7 @@ class RenderEditable extends RenderBox {
        _offset = offset,
        _cursorWidth = cursorWidth,
        _cursorRadius = cursorRadius,
+       _cursorPadding = cursorPadding,
        _enableInteractiveSelection = enableInteractiveSelection,
        _obscureText = obscureText {
     assert(_showCursor != null);
@@ -699,6 +702,19 @@ class RenderEditable extends RenderBox {
     if (_cursorRadius == value)
       return;
     _cursorRadius = value;
+    markNeedsPaint();
+  }
+
+  /// The padding applied to text field. Used to determine the bounds when
+  /// moving the floating cursor.
+  ///
+  /// Defaults to a padding with left, right set to 3 and top, bottom to 6.
+  EdgeInsets get cursorPadding => _cursorPadding;
+  EdgeInsets _cursorPadding;
+  set cursorPadding(EdgeInsets value) {
+    if (_cursorPadding == value)
+      return;
+    _cursorPadding = value;
     markNeedsPaint();
   }
 
@@ -1232,10 +1248,8 @@ class RenderEditable extends RenderBox {
     }
   }
 
-  /// Stops cursor blinking and paints in the on state.
-  ///
-  /// Used to leave the cursor on while moving the cursor in the floating cursor
-  /// mode.
+  /// Sets the screen position of the floating cursor and the text position
+  /// closest to the cursor.
   void setFloatingCursor(TextCursorState state, Offset boundedOffset, TextPosition lastTextPosition) {
     if (state == TextCursorState.Start) {
       _relativeOrigin = const Offset(0, 0);
@@ -1258,7 +1272,10 @@ class RenderEditable extends RenderBox {
     final Paint paint = Paint()
       ..color = _cursorColor;
 
-    final Rect caretPrototype = Rect.fromLTRB(_caretPrototype.left - .5, _caretPrototype.top - 2, _caretPrototype.right + .5, _caretPrototype.bottom + 2);
+    final Rect caretPrototype = Rect.fromLTRB(_caretPrototype.left - _kFloatingCaretSizeOffset.dx,
+                                              _caretPrototype.top - _kFloatingCaretSizeOffset.dy,
+                                              _caretPrototype.right + _kFloatingCaretSizeOffset.dx,
+                                              _caretPrototype.bottom + _kFloatingCaretSizeOffset.dy);
     final Rect caretRect = caretPrototype.shift(effectiveOffset);
 
     const Radius floatingCursorRadius = Radius.circular(3);
@@ -1273,21 +1290,19 @@ class RenderEditable extends RenderBox {
   bool _resetOriginOnTop = false;
   bool _resetOriginOnBottom = false;
 
-  ///
+  /// Returns the position within the text field closest to the raw cursor offset.
   Offset calculateBoundedCursorOffset(Offset rawCursorOffset) {
     Offset deltaPosition = const Offset(0, 0);
-    const EdgeInsets padding = EdgeInsets.fromLTRB(3, 6, 0, 6);
+    final double topBound = -cursorPadding.top;
+    final double bottomBound = _textPainter.height - preferredLineHeight + cursorPadding.bottom;
+    final double leftBound = -cursorPadding.left;
+    final double rightBound = _textPainter.width + cursorPadding.right;
 
-    final double topBound = -padding.top;
-    final double bottomBound = _textPainter.height - preferredLineHeight + padding.bottom;
-    final double leftBound = -padding.left;
-    final double rightBound = _textPainter.width + padding.right;
-
-//    print(rawCursorOffset.toString() + ' and ' + _relativeOrigin.toString());
     if (_previousOffset != null)
       deltaPosition = rawCursorOffset - _previousOffset;
 
-    // We are off the left end of text field.
+    // If the raw cursor offset has gone off an edge, we want to reset the relative
+    // origin of the dragging when the user drags back into the field.
     if (_resetOriginOnLeft && deltaPosition.dx > 0) {
       _relativeOrigin = Offset(rawCursorOffset.dx - leftBound, _relativeOrigin.dy);
       _resetOriginOnLeft = false;

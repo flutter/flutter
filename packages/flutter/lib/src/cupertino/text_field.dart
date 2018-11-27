@@ -608,7 +608,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
         // First add the explicit suffix if the suffix visibility mode matches.
         if (_showSuffixWidget(text)) {
-          rowChildren.add(Align(alignment: FractionalOffset.bottomRight, child: widget.suffix));
+          rowChildren.add(widget.suffix);
         // Otherwise, try to show a clear button if its visibility mode matches.
         } else if (_showClearButton(text)) {
           rowChildren.add(

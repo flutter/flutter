@@ -439,19 +439,20 @@ TextAffinity _toTextAffinity(String affinity) {
   return null;
 }
 
-///
+/// A floating cursor state the user has induced by force pressing an iOS
+/// keyboard.
 enum TextCursorState {
-  ///
+  /// A user has just activated a floating cursor.
   Start,
 
-  ///
+  /// A user is dragging a floating cursor.
   Update,
 
-  ///
+  /// A user has lifted their finger off the screen after using a floating cursor.
   End,
 }
 
-///
+/// The current state and position of the floating cursor.
 class TextEditingPoint {
   ///
   const TextEditingPoint({
@@ -459,10 +460,10 @@ class TextEditingPoint {
     this.state,
   }) : assert(point != null);
 
-  ///
+  /// The raw position of the floating cursor as determined by the iOS sdk.
   final Offset point;
 
-  ///
+  /// The state of the floating cursor.
   final TextCursorState state;
 }
 
@@ -594,8 +595,8 @@ abstract class TextInputClient {
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
 
-  ///
-  void updateCursor(TextEditingPoint point);
+  /// Updates the floating cursor position and state.
+  void updateFloatingCursor(TextEditingPoint point);
 }
 
 /// An interface for interacting with a text input control.
@@ -719,7 +720,7 @@ class _TextInputClientHandler {
         _currentConnection._client.performAction(_toTextInputAction(args[1]));
         break;
       case 'TextInputClient.updateFloatingCursor':
-        _currentConnection._client.updateCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
+        _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
         break;
       default:
         throw MissingPluginException();

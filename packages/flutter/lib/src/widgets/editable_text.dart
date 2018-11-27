@@ -599,13 +599,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextPosition _lastTextPosition;
   Offset _pointOffsetOrigin;
 
-  // Painting requires an offset of - preferredLineHeight / 2 so we need to add it back
-  // so that the offset used to determine the text position is calculated correctly.
+  // Because the center of the cursor is preferredLineHeight / 2 below the touch
+  // origin, but the touch origin is used to determine which line the cursor is
+  // on, we need this offset to correctly render and move the cursor.
   Offset get _floatingCursorOffset { return Offset(0, renderEditable.preferredLineHeight / 2); }
 
   @override
-  void updateCursor(TextEditingPoint point) {
-//    print('editing point ' + point.point.toString());
+  void updateFloatingCursor(TextEditingPoint point) {
     if (point.state == TextCursorState.Start) {
       final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);
        _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
@@ -625,8 +625,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     } else {
       if (_lastTextPosition.offset != renderEditable.selection.baseOffset)
-        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable,
-          SelectionChangedCause.tap);
+        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable, SelectionChangedCause.tap);
       renderEditable.setFloatingCursor(point.state, null, null);
       renderEditable.markNeedsPaint();
     }
