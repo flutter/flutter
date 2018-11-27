@@ -22,7 +22,7 @@ class IconButtonDemo extends PlaygroundDemo {
   String codePreview() => '''
 IconButton(
   iconSize: 50.0,
-  icon: Icon($_icon),
+  icon: Icon(${codeSnippetForIcon(_icon)}),
   onPressed: () {},
   color: ${codeSnippetForColor(_color)},
   splashColor: ${codeSnippetForColor(_color)}.withOpacity(0.2),
