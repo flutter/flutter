@@ -606,28 +606,32 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void updateFloatingCursor(TextEditingPoint point) {
-    if (point.state == TextCursorState.Start) {
-      final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);
-       _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-       _pointOffsetOrigin = null;
-       renderEditable.setFloatingCursor(point.state, _startCaretRect.center - _floatingCursorOffset, currentTextPosition);
-    } else if (point.state == TextCursorState.Update) {
-      // We want to send in points that are centered around a (0,0) origin, so we cache
-      // position on the first update call.
-      if (_pointOffsetOrigin != null) {
-        final Offset centeredPoint = point.point - _pointOffsetOrigin;
-        final Offset rawCursorOffset = _startCaretRect.center + centeredPoint - _floatingCursorOffset;
-        final Offset boundedOffset = renderEditable.calculateBoundedCursorOffset(rawCursorOffset);
-        _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(boundedOffset + _floatingCursorOffset));
-        renderEditable.setFloatingCursor(point.state, boundedOffset, _lastTextPosition);
-      } else {
-        _pointOffsetOrigin = point.point;
-      }
-    } else {
-      if (_lastTextPosition.offset != renderEditable.selection.baseOffset)
-        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable, SelectionChangedCause.tap);
-      renderEditable.setFloatingCursor(point.state, null, null);
-      renderEditable.markNeedsPaint();
+    switch(point.state){
+      case TextCursorState.Start:
+        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);
+        _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+        _pointOffsetOrigin = null;
+        renderEditable.setFloatingCursor(point.state, _startCaretRect.center - _floatingCursorOffset, currentTextPosition);
+        break;
+      case TextCursorState.Update:
+        // We want to send in points that are centered around a (0,0) origin, so we cache
+        // position on the first update call.
+        if (_pointOffsetOrigin != null) {
+          final Offset centeredPoint = point.point - _pointOffsetOrigin;
+          final Offset rawCursorOffset = _startCaretRect.center + centeredPoint - _floatingCursorOffset;
+          final Offset boundedOffset = renderEditable.calculateBoundedCursorOffset(rawCursorOffset);
+          _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(boundedOffset + _floatingCursorOffset));
+          renderEditable.setFloatingCursor(point.state, boundedOffset, _lastTextPosition);
+        } else {
+          _pointOffsetOrigin = point.point;
+        }
+        break;
+      case TextCursorState.End:
+        if (_lastTextPosition.offset != renderEditable.selection.baseOffset)
+          _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable, SelectionChangedCause.tap);
+        renderEditable.setFloatingCursor(point.state, null, null);
+        renderEditable.markNeedsPaint();
+        break;
     }
   }
 
