@@ -448,17 +448,21 @@ enum TextCursorState {
   /// A user is dragging a floating cursor.
   Update,
 
-  /// A user has lifted their finger off the screen after using a floating cursor.
+  /// A user has lifted their finger off the screen after using a floating
+  /// cursor.
   End,
 }
 
 /// The current state and position of the floating cursor.
 class TextEditingPoint {
+  /// Creates information for setting the position and state of a floating
+  /// cursor.
   ///
+  /// [state] must not be null.
   const TextEditingPoint({
     this.point = const Offset(0, 0),
-    this.state,
-  }) : assert(point != null);
+    @required this.state,
+  }) : assert(state != null);
 
   /// The raw position of the floating cursor as determined by the iOS sdk.
   final Offset point;

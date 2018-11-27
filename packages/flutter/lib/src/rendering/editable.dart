@@ -20,6 +20,7 @@ import 'viewport_offset.dart';
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
 const Offset _kFloatingCaretSizeOffset = Offset(0.5, 2.0); // pixels
+const double _kFloatingCaretRadius = 1.0; // pixels
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -1277,8 +1278,7 @@ class RenderEditable extends RenderBox {
                                               _caretPrototype.right + _kFloatingCaretSizeOffset.dx,
                                               _caretPrototype.bottom + _kFloatingCaretSizeOffset.dy);
     final Rect caretRect = caretPrototype.shift(effectiveOffset);
-
-    const Radius floatingCursorRadius = Radius.circular(3);
+    const Radius floatingCursorRadius = Radius.circular(_kFloatingCaretRadius);
     final RRect caretRRect = RRect.fromRectAndRadius(caretRect, floatingCursorRadius);
     canvas.drawRRect(caretRRect, paint);
   }
