@@ -4,11 +4,13 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/demo/playground/playground_demo.dart';
-import 'package:flutter_gallery/demo/playground/configuration/material_helpers.dart';
+
+import '../configuration/material_helpers.dart';
+import '../playground_demo.dart';
 
 const String _demoWidgetName = 'CupertinoSegmentControl';
 
+/// ignore: must_be_immutable
 class CupertinoSegmentControlDemo extends PlaygroundDemo {
   Color _selectedColor = Colors.blue;
   Color _borderColor = Colors.blue;
@@ -36,7 +38,7 @@ CupertinoSegmentedControl<int>(
   @override
   Widget configWidget(BuildContext context) {
     final List<Color> colors =
-        kColorOptions.where((Color c) => c != Colors.white).toList();
+        colorOptions.where((Color c) => c != Colors.white).toList();
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -60,7 +62,6 @@ CupertinoSegmentedControl<int>(
                 _borderColor = color;
               });
             }),
-        
       ],
     );
   }

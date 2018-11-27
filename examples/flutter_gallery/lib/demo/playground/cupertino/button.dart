@@ -4,11 +4,13 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors;
-import 'package:flutter_gallery/demo/playground/playground_demo.dart';
-import 'package:flutter_gallery/demo/playground/configuration/material_helpers.dart';
+
+import '../configuration/material_helpers.dart';
+import '../playground_demo.dart';
 
 const String _demoWidgetName = 'CupertinoButton';
 
+/// ignore: must_be_immutable
 class CupertinoButtonDemo extends PlaygroundDemo {
   Color _color = Colors.blue;
 

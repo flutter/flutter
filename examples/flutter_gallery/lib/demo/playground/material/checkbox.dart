@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/demo/playground/playground_demo.dart';
-import 'package:flutter_gallery/demo/playground/configuration/material_helpers.dart';
+
+import '../configuration/material_helpers.dart';
+import '../playground_demo.dart';
 
 const String _demoWidgetName = 'Checkbox';
 
+/// ignore: must_be_immutable
 class CheckboxDemo extends PlaygroundDemo {
   Color _activeColor = Colors.blue;
   bool _value = true;
@@ -31,14 +33,13 @@ Checkbox(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         colorPicker(
-          label: 'Active Color',
-          selectedValue: _activeColor,
-          onItemTapped: (int index, Color color) {
-            updateConfiguration(() {
-              _activeColor = color;
-            });
-          }
-        ),
+            label: 'Active Color',
+            selectedValue: _activeColor,
+            onItemTapped: (int index, Color color) {
+              updateConfiguration(() {
+                _activeColor = color;
+              });
+            }),
       ],
     );
   }

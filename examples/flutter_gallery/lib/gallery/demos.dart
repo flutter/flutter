@@ -19,8 +19,12 @@ class GalleryDemoCategory {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (runtimeType != other.runtimeType) return false;
+    if (identical(this, other)) {
+      return true;
+    }
+    if (runtimeType != other.runtimeType) {
+      return false;
+    }
     final GalleryDemoCategory typedOther = other;
     return typedOther.name == name && typedOther.icon == icon;
   }
@@ -44,32 +48,32 @@ const GalleryDemoCategory _kStyle = GalleryDemoCategory._(
   icon: GalleryIcons.custom_typography,
 );
 
-const GalleryDemoCategory _kMaterialComponents = GalleryDemoCategory._(
-  name: 'Material',
-  icon: GalleryIcons.category_mdc,
-);
-
-const GalleryDemoCategory _kCupertinoComponents = GalleryDemoCategory._(
-  name: 'Cupertino',
-  icon: GalleryIcons.phone_iphone,
-);
-
-const GalleryDemoCategory _kMedia = GalleryDemoCategory._(
-  name: 'Media',
-  icon: GalleryIcons.drive_video,
-);
-
 const GalleryDemoCategory _kMaterialPlayground = GalleryDemoCategory._(
   name: 'Material Playground',
-  icon: GalleryIcons.animation, // TODO use correct icon
+  icon: GalleryIcons.category_mdc,
   routePath: MaterialPlaygroundDemo.routeName,
+);
+
+const GalleryDemoCategory _kMaterialWidgets = GalleryDemoCategory._(
+  name: 'Material Widgets',
+  icon: GalleryIcons.category_mdc,
 );
 
 const GalleryDemoCategory _kCupertinoPlayground = GalleryDemoCategory._(
   name: 'Cupertino Playground',
-  icon: GalleryIcons.animation, // TODO use correct icon
+  icon: GalleryIcons.phone_iphone,
   routePath: CupertinoPlaygroundDemo.routeName,
 );
+
+const GalleryDemoCategory _kCupertinoWidgets = GalleryDemoCategory._(
+  name: 'Cupertino Widgets',
+  icon: GalleryIcons.phone_iphone,
+);
+
+// const GalleryDemoCategory _kMedia = GalleryDemoCategory._(
+//   name: 'Media',
+//   icon: GalleryIcons.drive_video,
+// );
 
 class GalleryDemo {
   const GalleryDemo({
@@ -150,7 +154,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Backdrop',
       subtitle: 'Select a front layer from back layer',
       icon: GalleryIcons.backdrop,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: BackdropDemo.routeName,
       buildRoute: (BuildContext context) => BackdropDemo(),
     ),
@@ -158,7 +162,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Bottom app bar',
       subtitle: 'Optional floating action button notch',
       icon: GalleryIcons.bottom_app_bar,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: BottomAppBarDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/BottomAppBar-class.html',
@@ -168,7 +172,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Bottom navigation',
       subtitle: 'Bottom navigation with cross-fading views',
       icon: GalleryIcons.bottom_navigation,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: BottomNavigationDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/BottomNavigationBar-class.html',
@@ -178,7 +182,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Bottom sheet: Modal',
       subtitle: 'A dismissable bottom sheet',
       icon: GalleryIcons.bottom_sheets,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: ModalBottomSheetDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/showModalBottomSheet.html',
@@ -188,7 +192,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Bottom sheet: Persistent',
       subtitle: 'A bottom sheet that sticks around',
       icon: GalleryIcons.bottom_sheet_persistent,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: PersistentBottomSheetDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/ScaffoldState/showBottomSheet.html',
@@ -198,7 +202,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Buttons',
       subtitle: 'Flat, raised, dropdown, and more',
       icon: GalleryIcons.generic_buttons,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: ButtonsDemo.routeName,
       buildRoute: (BuildContext context) => ButtonsDemo(),
     ),
@@ -206,7 +210,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Buttons: Floating Action Button',
       subtitle: 'FAB with transitions',
       icon: GalleryIcons.buttons,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: TabsFabDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/FloatingActionButton-class.html',
@@ -216,7 +220,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Cards',
       subtitle: 'Baseline cards with rounded corners',
       icon: GalleryIcons.cards,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: CardsDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/Card-class.html',
@@ -226,7 +230,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Chips',
       subtitle: 'Labeled with delete buttons and avatars',
       icon: GalleryIcons.chips,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: ChipDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/Chip-class.html',
@@ -236,7 +240,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Data tables',
       subtitle: 'Rows and columns',
       icon: GalleryIcons.data_table,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: DataTableDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/PaginatedDataTable-class.html',
@@ -246,7 +250,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Dialogs',
       subtitle: 'Simple, alert, and fullscreen',
       icon: GalleryIcons.dialogs,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: DialogDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/showDialog.html',
@@ -257,7 +261,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       subtitle: 'Shadow values on cards',
       // TODO(larche): Change to custom icon for elevations when one exists.
       icon: GalleryIcons.cupertino_progress,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: ElevationDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/Material/elevation.html',
@@ -267,7 +271,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Expand/collapse list control',
       subtitle: 'A list with one sub-list level',
       icon: GalleryIcons.expand_all,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: TwoLevelListDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/ExpansionTile-class.html',
@@ -277,7 +281,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Expansion panels',
       subtitle: 'List of expanding panels',
       icon: GalleryIcons.expand_all,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: ExpansionPanelsDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/ExpansionPanel-class.html',
@@ -287,7 +291,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Grid',
       subtitle: 'Row and column layout',
       icon: GalleryIcons.grid_on,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: GridListDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/widgets/GridView-class.html',
@@ -297,7 +301,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Icons',
       subtitle: 'Enabled and disabled icons with opacity',
       icon: GalleryIcons.sentiment_very_satisfied,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: IconsDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/IconButton-class.html',
@@ -307,7 +311,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Lists',
       subtitle: 'Scrolling list layouts',
       icon: GalleryIcons.list_alt,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: ListDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/ListTile-class.html',
@@ -317,7 +321,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Lists: leave-behind list items',
       subtitle: 'List items with hidden actions',
       icon: GalleryIcons.lists_leave_behind,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: LeaveBehindDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/widgets/Dismissible-class.html',
@@ -327,7 +331,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Lists: reorderable',
       subtitle: 'Reorderable lists',
       icon: GalleryIcons.list_alt,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: ReorderableListDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/ReorderableListView-class.html',
@@ -337,7 +341,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Menus',
       subtitle: 'Menu buttons and simple menus',
       icon: GalleryIcons.more_vert,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: MenuDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/PopupMenuButton-class.html',
@@ -347,7 +351,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Navigation drawer',
       subtitle: 'Navigation drawer with standard header',
       icon: GalleryIcons.menu,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: DrawerDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/Drawer-class.html',
@@ -357,7 +361,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Pagination',
       subtitle: 'PageView with indicator',
       icon: GalleryIcons.page_control,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: PageSelectorDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/TabBarView-class.html',
@@ -367,7 +371,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Pickers',
       subtitle: 'Date and time selection widgets',
       icon: GalleryIcons.event,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: DateAndTimePickerDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/showDatePicker.html',
@@ -377,7 +381,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Progress indicators',
       subtitle: 'Linear, circular, indeterminate',
       icon: GalleryIcons.progress_activity,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: ProgressIndicatorDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/LinearProgressIndicator-class.html',
@@ -387,7 +391,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Pull to refresh',
       subtitle: 'Refresh indicators',
       icon: GalleryIcons.refresh,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: OverscrollDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/RefreshIndicator-class.html',
@@ -397,7 +401,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Search',
       subtitle: 'Expandable search',
       icon: Icons.search,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: SearchDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/showSearch.html',
@@ -407,7 +411,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Selection controls',
       subtitle: 'Checkboxes, radio buttons, and switches',
       icon: GalleryIcons.check_box,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: SelectionControlsDemo.routeName,
       buildRoute: (BuildContext context) => SelectionControlsDemo(),
     ),
@@ -415,7 +419,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Sliders',
       subtitle: 'Widgets for selecting a value by swiping',
       icon: GalleryIcons.sliders,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: SliderDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/Slider-class.html',
@@ -425,7 +429,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Snackbar',
       subtitle: 'Temporary messaging',
       icon: GalleryIcons.snackbar,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: SnackBarDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/ScaffoldState/showSnackBar.html',
@@ -435,7 +439,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Tabs',
       subtitle: 'Tabs with independently scrollable views',
       icon: GalleryIcons.tabs,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: TabsDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/TabBarView-class.html',
@@ -444,7 +448,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     GalleryDemo(
       title: 'Tabs: Scrolling',
       subtitle: 'Tab bar that scrolls',
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       icon: GalleryIcons.tabs,
       routeName: ScrollableTabsDemo.routeName,
       documentationUrl:
@@ -455,7 +459,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Text fields',
       subtitle: 'Single line of editable text and numbers',
       icon: GalleryIcons.text_fields_alt,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: TextFormFieldDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/TextFormField-class.html',
@@ -465,7 +469,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Tooltips',
       subtitle: 'Short message displayed on long-press',
       icon: GalleryIcons.tooltip,
-      category: _kMaterialComponents,
+      category: _kMaterialWidgets,
       routeName: TooltipDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/material/Tooltip-class.html',
@@ -476,7 +480,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     GalleryDemo(
       title: 'Activity Indicator',
       icon: GalleryIcons.cupertino_progress,
-      category: _kCupertinoComponents,
+      category: _kCupertinoWidgets,
       routeName: CupertinoProgressIndicatorDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/cupertino/CupertinoActivityIndicator-class.html',
@@ -485,7 +489,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     GalleryDemo(
       title: 'Alerts',
       icon: GalleryIcons.dialogs,
-      category: _kCupertinoComponents,
+      category: _kCupertinoWidgets,
       routeName: CupertinoAlertDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/cupertino/showCupertinoDialog.html',
@@ -494,7 +498,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     GalleryDemo(
       title: 'Buttons',
       icon: GalleryIcons.generic_buttons,
-      category: _kCupertinoComponents,
+      category: _kCupertinoWidgets,
       routeName: CupertinoButtonsDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/cupertino/CupertinoButton-class.html',
@@ -503,7 +507,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     GalleryDemo(
       title: 'Navigation',
       icon: GalleryIcons.bottom_navigation,
-      category: _kCupertinoComponents,
+      category: _kCupertinoWidgets,
       routeName: CupertinoNavigationDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/cupertino/CupertinoTabScaffold-class.html',
@@ -512,7 +516,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     GalleryDemo(
       title: 'Pickers',
       icon: GalleryIcons.event,
-      category: _kCupertinoComponents,
+      category: _kCupertinoWidgets,
       routeName: CupertinoPickerDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/cupertino/CupertinoPicker-class.html',
@@ -521,7 +525,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     GalleryDemo(
       title: 'Pull to refresh',
       icon: GalleryIcons.cupertino_pull_to_refresh,
-      category: _kCupertinoComponents,
+      category: _kCupertinoWidgets,
       routeName: CupertinoRefreshControlDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/cupertino/CupertinoSliverRefreshControl-class.html',
@@ -530,7 +534,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     GalleryDemo(
       title: 'Segmented Control',
       icon: GalleryIcons.tabs,
-      category: _kCupertinoComponents,
+      category: _kCupertinoWidgets,
       routeName: CupertinoSegmentedControlDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/cupertino/CupertinoSegmentedControl-class.html',
@@ -539,7 +543,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     GalleryDemo(
       title: 'Sliders',
       icon: GalleryIcons.sliders,
-      category: _kCupertinoComponents,
+      category: _kCupertinoWidgets,
       routeName: CupertinoSliderDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/cupertino/CupertinoSlider-class.html',
@@ -548,7 +552,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     GalleryDemo(
       title: 'Switches',
       icon: GalleryIcons.cupertino_switch,
-      category: _kCupertinoComponents,
+      category: _kCupertinoWidgets,
       routeName: CupertinoSwitchDemo.routeName,
       documentationUrl:
           'https://docs.flutter.io/flutter/cupertino/CupertinoSwitch-class.html',
@@ -557,17 +561,15 @@ List<GalleryDemo> _buildGalleryDemos() {
     GalleryDemo(
       title: 'Text Fields',
       icon: GalleryIcons.text_fields_alt,
-      category: _kCupertinoComponents,
+      category: _kCupertinoWidgets,
       routeName: CupertinoTextFieldDemo.routeName,
       buildRoute: (BuildContext context) => CupertinoTextFieldDemo(),
     ),
-
-    // Media
     GalleryDemo(
       title: 'Animated images',
       subtitle: 'GIF and WebP animations',
       icon: GalleryIcons.animation,
-      category: _kMedia,
+      category: _kStyle,
       routeName: ImagesDemo.routeName,
       buildRoute: (BuildContext context) => ImagesDemo(),
     ),
@@ -575,7 +577,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       title: 'Video',
       subtitle: 'Video playback',
       icon: GalleryIcons.drive_video,
-      category: _kMedia,
+      category: _kStyle,
       routeName: VideoDemo.routeName,
       buildRoute: (BuildContext context) => const VideoDemo(),
     ),
@@ -604,21 +606,21 @@ List<GalleryDemo> _buildGalleryDemos() {
 Set<GalleryDemoCategory> _buildCategories() {
   final Set<GalleryDemoCategory> categories = Set<GalleryDemoCategory>();
   if (Platform.isIOS) {
-    categories.addAll([
+    categories.addAll(<GalleryDemoCategory>[
       _kCupertinoPlayground,
-      _kCupertinoComponents,
+      _kCupertinoWidgets,
       _kMaterialPlayground,
-      _kMaterialComponents
+      _kMaterialWidgets
     ]);
   } else {
-    categories.addAll([
+    categories.addAll(<GalleryDemoCategory>[
       _kMaterialPlayground,
-      _kMaterialComponents,
+      _kMaterialWidgets,
       _kCupertinoPlayground,
-      _kCupertinoComponents
+      _kCupertinoWidgets
     ]);
   }
-  categories.addAll([_kDemos, _kStyle, _kMedia]);
+  categories.addAll(<GalleryDemoCategory>[_kDemos, _kStyle,]);
   return categories;
 }
 

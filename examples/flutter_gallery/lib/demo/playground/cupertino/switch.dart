@@ -4,11 +4,13 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors;
-import 'package:flutter_gallery/demo/playground/playground_demo.dart';
-import 'package:flutter_gallery/demo/playground/configuration/material_helpers.dart';
+
+import '../configuration/material_helpers.dart';
+import '../playground_demo.dart';
 
 const String _demoWidgetName = 'CupertinoSwitch';
 
+/// ignore: must_be_immutable
 class CupertinoSwitchDemo extends PlaygroundDemo {
   Color _activeColor = Colors.blue;
   bool _value = true;
@@ -28,7 +30,7 @@ CupertinoSwitch(
   @override
   Widget configWidget(BuildContext context) {
     final List<Color> colors =
-        kColorOptions.where((Color c) => c != Colors.white).toList();
+        colorOptions.where((Color c) => c != Colors.white).toList();
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -21,7 +21,7 @@ class MaterialPlaygroundDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PlaygroundScaffold(
-        title: 'Material Widget Playground',
+        title: 'Material Playground',
         demos: <PlaygroundDemo>[
           RaisedButtonDemo(),
           FlatButtonDemo(),
@@ -45,7 +45,7 @@ class CupertinoPlaygroundDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PlaygroundScaffold(
-        title: 'Cupertino Widget Playground',
+        title: 'Cupertino Playground',
         demos: <PlaygroundDemo>[
           CupertinoSegmentControlDemo(),
           CupertinoSliderDemo(),

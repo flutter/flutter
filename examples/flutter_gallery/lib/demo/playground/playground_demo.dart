@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:share/share.dart';
 import 'package:flutter/material.dart';
+
+const int _animationInterval = 100;
 
 /// ignore: must_be_immutable
 abstract class PlaygroundDemo extends StatefulWidget {
-  // PlaygroundDemo({this.controller});
-
   _PlaygroundWidgetState _state;
 
   @override
@@ -26,45 +27,49 @@ abstract class PlaygroundDemo extends StatefulWidget {
 
 class _PlaygroundWidgetState extends State<PlaygroundDemo>
     with SingleTickerProviderStateMixin {
-  static const double headerHeight = 60.0;
+  final double _headerHeight = 60.0;
+  final double _codePadding = 15.0;
+  final Color _codeTextColor = Colors.grey[800];
 
-  bool _open = false;
+  bool _isCodeOpen = false;
 
-  AnimationController controller;
+  AnimationController _backdropAnimationController;
 
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 100), value: 1.0);
+    _backdropAnimationController = AnimationController(
+        vsync: this,
+        duration: Duration(milliseconds: _animationInterval),
+        value: 1.0);
   }
 
   @override
   void dispose() {
     super.dispose();
-    controller.dispose();
+    _backdropAnimationController.dispose();
   }
 
-  bool get isCodeVisible {
-    final AnimationStatus status = controller.status;
-    return status == AnimationStatus.completed ||
-        status == AnimationStatus.forward;
+  void _toggleCode() {
+    setState(() => _isCodeOpen = !_isCodeOpen);
+    _backdropAnimationController.fling(velocity: _isCodeOpen ? -1.0 : 1.0);
   }
 
-  Animation<RelativeRect> getPanelAnimation(BoxConstraints constraints) {
+  Animation<RelativeRect> _getLayerAnimation(BoxConstraints constraints) {
     final double maxHeight = constraints.biggest.height;
-    final double backPanelHeight = maxHeight - headerHeight;
-    const double frontPanelHeight = -headerHeight;
+    final double backPanelHeight = maxHeight - _headerHeight;
+    final double frontPanelHeight = -_headerHeight;
     const double offsetTop = 130.0;
 
     return RelativeRectTween(
             begin: const RelativeRect.fromLTRB(0.0, offsetTop, 0.0, 0.0),
             end: RelativeRect.fromLTRB(
                 0.0, backPanelHeight, 0.0, frontPanelHeight))
-        .animate(CurvedAnimation(parent: controller, curve: Curves.linear));
+        .animate(CurvedAnimation(
+            parent: _backdropAnimationController, curve: Curves.linear));
   }
 
-  Widget widgetPreviewConfigurationLayer() {
+  Widget _widgetPreviewConfigurationLayer() {
     return Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -84,24 +89,48 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo>
         ]);
   }
 
-  Widget codePreviewLayer(BoxConstraints constraints) {
+  Widget _codePreviewLayer(BoxConstraints constraints) {
     return PositionedTransition(
-      rect: getPanelAnimation(constraints),
+      rect: _getLayerAnimation(constraints),
       child: Container(
-        color: Colors.white,
+        color: Colors.transparent,
         child: Column(
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Container(
-              height: headerHeight,
+              height: _headerHeight,
               child: FlatButton(
-                  child: Text('GET SOURCE CODE',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        fontSize: 14.0,
-                      )),
+                  color: Colors.white,
+                  padding: EdgeInsets.fromLTRB(_codePadding, 2.0, 0.0, 0.0),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    child: Stack(
+                      children: <Widget>[
+                        Align(
+                            alignment: const Alignment(-1.0, 0.0),
+                            child: Text('GET SOURCE CODE',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  color: _codeTextColor,
+                                  fontSize: 14.0,
+                                ))),
+                        Align(
+                            alignment: const Alignment(1.0, 0.0),
+                            child: RotatedBox(
+                              quarterTurns: _isCodeOpen ? 1 : -1,
+                              child: IconButton(
+                                icon: const Icon(Icons.chevron_right),
+                                color: _codeTextColor,
+                                onPressed: () {
+                                  _toggleCode();
+                                },
+                              ),
+                            )),
+                      ],
+                    ),
+                  ),
                   splashColor: Colors.white,
                   shape: BeveledRectangleBorder(
                     side: BorderSide(
@@ -109,91 +138,85 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo>
                       width: 1.0,
                     ),
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16.0),
-                      topRight: Radius.circular(16.0),
+                      topLeft: Radius.circular(13.0),
+                      topRight: Radius.circular(13.0),
                     ),
                   ),
                   onPressed: () {
-                    setState(() {
-                      _open = _open ? false : true;             
-                    });
-                    controller.fling(velocity: isCodeVisible ? -1.0 : 1.0);
+                    _toggleCode();
                   }),
             ),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20.0),
-                child: Text(widget.codePreview(),
-                    style: TextStyle(
-                      color: Colors.grey[850],
-                      fontSize: 14.0,
-                      height: 1.6,
-                      fontFamily: 'Monospace',
-                    )),
+              child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  return SingleChildScrollView(
+                    child: Container(
+                      height: constraints.maxHeight,
+                      padding: EdgeInsets.all(_codePadding).copyWith(top: 12.0),
+                      color: Colors.white,
+                      child: Text(widget.codePreview(),
+                          style: TextStyle(
+                            color: _codeTextColor,
+                            fontSize: 14.0,
+                            height: 1.6,
+                            fontFamily: 'Courier',
+                          )),
+                    ),
+                  );
+                },
               ),
             ),
           ],
         ),
       ),
-      // ),
     );
   }
 
-  Widget codeContainer() {
-    return Container(
-      height: 60.0,
-      child: FlatButton(
-        child: Text('GET SOURCE CODE',
-            style: TextStyle(
-              color: Colors.grey[700],
-              fontSize: 14.0,
-            )),
-        shape: BeveledRectangleBorder(
-          side: BorderSide(
-            color: Colors.grey[300],
-            width: 1.0,
+  Widget _modalContainer() {
+    return AnimatedOpacity(
+        opacity: _isCodeOpen ? 0.6 : 0.0,
+        duration: Duration(milliseconds: _animationInterval),
+        child: GestureDetector(
+          onTap: () {
+            _toggleCode();
+          },
+          child: Container(
+            color: Colors.blue[700],
           ),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(16.0),
-            topRight: Radius.circular(16.0),
-          ),
-        ),
-        onPressed: () {
-          showModalBottomSheet<void>(
-              context: context,
-              builder: (BuildContext context) {
-                return SingleChildScrollView(
-                    padding: const EdgeInsets.all(20.0),
-                    child: RichText(
-                      text: TextSpan(
-                          text: widget.codePreview(),
-                          style: TextStyle(
-                            color: Colors.grey[850],
-                            fontSize: 14.0,
-                            height: 1.6,
-                            fontFamily: 'Monospace',
-                          )),
-                    ));
-              });
-        },
-      ),
-    );
+        ));
   }
 
-  List<Widget> layersStack(BoxConstraints constraints) {
-    List<Widget> stack = <Widget>[];
-    stack.add(widgetPreviewConfigurationLayer());
+  Widget _shareButton() {
+    return Positioned(
+        bottom: 15.0,
+        right: 20.0,
+        child: RaisedButton(
+            splashColor: Colors.white,
+            child: const Text('SHARE',
+                style: TextStyle(
+                  fontSize: 16.0,
+                )),
+            onPressed: () {
+              Share.share(widget.codePreview());
+            }));
+  }
 
-    if (_open) {
-      stack.add(Opacity(
-        opacity: 0.6,
-        child: Container(
-          color: Colors.blue[700],
-        ),
-      ));
+  List<Widget> _layersStack(BoxConstraints constraints) {
+    final List<Widget> stack = <Widget>[
+      _widgetPreviewConfigurationLayer(),
+    ];
+
+    // If code layer is open, add modal
+    if (_isCodeOpen) {
+      stack.add(_modalContainer());
     }
 
-    stack.add(codePreviewLayer(constraints));
+    stack.add(_codePreviewLayer(constraints));
+
+    // If code layer is open, add share button
+    if (_isCodeOpen) {
+      stack.add(_shareButton());
+    }
     return stack;
   }
 
@@ -203,11 +226,7 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo>
         builder: (BuildContext context, BoxConstraints constraints) {
       return Container(
         child: Stack(
-          children: layersStack(constraints),
-          // <Widget>[
-          //   // widgetPreviewConfigurationLayer(),
-          //   // codePreviewLayer(constraints),
-          // ],
+          children: _layersStack(constraints),
         ),
       );
     });

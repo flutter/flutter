@@ -4,11 +4,13 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors;
-import 'package:flutter_gallery/demo/playground/playground_demo.dart';
-import 'package:flutter_gallery/demo/playground/configuration/material_helpers.dart';
+
+import '../configuration/material_helpers.dart';
+import '../playground_demo.dart';
 
 const String _demoWidgetName = 'CupertinoSlider';
 
+/// ignore: must_be_immutable
 class CupertinoSliderDemo extends PlaygroundDemo {
   Color _activeColor = Colors.blue;
   double _value = 5.0;
@@ -31,7 +33,7 @@ CupertinoSlider(
   @override
   Widget configWidget(BuildContext context) {
     final List<Color> colors =
-        kColorOptions.where((Color c) => c != Colors.white).toList();
+        colorOptions.where((Color c) => c != Colors.white).toList();
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,

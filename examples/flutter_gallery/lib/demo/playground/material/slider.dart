@@ -3,15 +3,17 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/demo/playground/playground_demo.dart';
-import 'package:flutter_gallery/demo/playground/configuration/material_helpers.dart';
+
+import '../configuration/material_helpers.dart';
+import '../playground_demo.dart';
 
 const String _demoWidgetName = 'Slider';
 
+/// ignore: must_be_immutable
 class SliderDemo extends PlaygroundDemo {
   Color _activeColor = Colors.blue;
-  Color _inactiveColor = Colors.blue;
   double _value = 5.0;
+  final Color _inactiveColor = Colors.blue;
 
   @override
   String tabName() => _demoWidgetName.toUpperCase();
@@ -36,14 +38,13 @@ Slider(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         colorPicker(
-          label: 'Active Color',
-          selectedValue: _activeColor,
-          onItemTapped: (int index, Color color) {
-            updateConfiguration(() {
-              _activeColor = color;
-            });
-          }
-        ),
+            label: 'Active Color',
+            selectedValue: _activeColor,
+            onItemTapped: (int index, Color color) {
+              updateConfiguration(() {
+                _activeColor = color;
+              });
+            }),
       ],
     );
   }

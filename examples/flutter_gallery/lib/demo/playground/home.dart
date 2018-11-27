@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import 'playground_demo.dart';
 
 class PlaygroundScaffold extends StatelessWidget {
@@ -16,7 +17,6 @@ class PlaygroundScaffold extends StatelessWidget {
 
   static final GlobalKey<ScaffoldState> _scaffoldKey =
       GlobalKey<ScaffoldState>();
-
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class PlaygroundScaffold extends StatelessWidget {
         ),
         body: TabBarView(
             children: demos.map<Widget>((PlaygroundDemo demo) {
-          return demo; // .setController(controller);
+          return demo;
         }).toList()),
       ),
     );

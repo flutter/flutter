@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/demo/playground/configuration/property_column.dart';
+import '../configuration/property_column.dart';
 
 const double _pickerSelectedElevation = 3.0;
 const double _pickerRowHeight = 46.0;
@@ -28,7 +28,7 @@ class IconChoice {
   String code;
 }
 
-final List<BorderChoice> kBorders = <BorderChoice>[
+final List<BorderChoice> borderChoices = <BorderChoice>[
   BorderChoice(type: 'square', code: '''
 RoundedRectangleBorder(
   borderRadius: BorderRadius.zero
@@ -45,7 +45,7 @@ BeveledRectangleBorder(
 StadiumBorder()'''),
 ];
 
-final List<ColorChoice> kColors = <ColorChoice>[
+final List<ColorChoice> colorChoices = <ColorChoice>[
   ColorChoice(color: Colors.white, code: 'Colors.white'),
   ColorChoice(color: Colors.orange, code: 'Colors.orange'),
   ColorChoice(color: Colors.cyan[200], code: 'Colors.cyan[200]'),
@@ -54,7 +54,7 @@ final List<ColorChoice> kColors = <ColorChoice>[
   ColorChoice(color: Colors.blue[800], code: 'Colors.blue[800]'),
 ];
 
-final List<IconChoice> kIcons = <IconChoice>[
+final List<IconChoice> iconChoices = <IconChoice>[
   IconChoice(icon: Icons.thumb_up, code: 'Icons.thumb_up'),
   IconChoice(icon: Icons.android, code: 'Icons.android'),
   IconChoice(icon: Icons.alarm, code: 'Icons.alarm'),
@@ -63,25 +63,31 @@ final List<IconChoice> kIcons = <IconChoice>[
   IconChoice(icon: Icons.camera, code: 'Icons.camera'),
 ];
 
-final List<String> kBorderOptions =
-    kBorders.map((BorderChoice b) => b.type).toList();
+final List<String> borderOptions =
+    borderChoices.map((BorderChoice b) => b.type).toList();
 
-final List<Color> kColorOptions =
-    kColors.map((ColorChoice c) => c.color).toList();
+final List<Color> colorOptions =
+    colorChoices.map((ColorChoice c) => c.color).toList();
 
-final List<IconData> kIconOptions =
-    kIcons.map((IconChoice i) => i.icon).toList();
+final List<IconData> iconOptions =
+    iconChoices.map((IconChoice i) => i.icon).toList();
 
 String codeSnippetForColor(Color color) {
-  return kColors.where((ColorChoice c) => c.color == color).toList()[0].code;
+  return colorChoices
+      .where((ColorChoice c) => c.color == color)
+      .toList()[0]
+      .code;
 }
 
 String codeSnippetForBorder(String type) {
-  return kBorders.where((BorderChoice b) => b.type == type).toList()[0].code;
+  return borderChoices
+      .where((BorderChoice b) => b.type == type)
+      .toList()[0]
+      .code;
 }
 
 String codeSnippetForIcon(IconData icon) {
-  return kIcons.where((IconChoice b) => b.icon == icon).toList()[0].code;
+  return iconChoices.where((IconChoice b) => b.icon == icon).toList()[0].code;
 }
 
 Widget sliderPicker({
@@ -223,6 +229,9 @@ Widget colorButton({
         ),
       ),
       color: inverse ? Colors.white : color,
+      splashColor: color == Colors.white
+          ? Colors.grey[400].withOpacity(0.3)
+          : Colors.white.withOpacity(0.3),
       elevation: isSelected ? _pickerSelectedElevation : 0.0,
       onPressed: onTapped,
     ),
@@ -237,10 +246,10 @@ Widget colorPicker({
   List<Color> colors,
   IndexedValueCallback<Color> onItemTapped,
 }) {
-  final List<Color> colorOptions = colors ?? kColorOptions;
+  final List<Color> options = colors ?? colorOptions;
   final List<Widget> buttonChildren = <Widget>[];
-  for (int i = 0; i < colorOptions.length; i++) {
-    final Color color = colorOptions[i];
+  for (int i = 0; i < options.length; i++) {
+    final Color color = options[i];
     Widget button = colorButton(
       color: color,
       inverse: inverse,
@@ -251,7 +260,7 @@ Widget colorPicker({
         }
       },
     );
-    if (i < colorOptions.length - 1) {
+    if (i < options.length - 1) {
       button = Padding(
         padding: const EdgeInsets.only(right: 10.0),
         child: button,

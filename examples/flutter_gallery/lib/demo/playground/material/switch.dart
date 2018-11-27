@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/demo/playground/playground_demo.dart';
-import 'package:flutter_gallery/demo/playground/configuration/material_helpers.dart';
+
+import '../configuration/material_helpers.dart';
+import '../playground_demo.dart';
 
 const String _demoWidgetName = 'Switch';
 
+/// ignore: must_be_immutable
 class SwitchDemo extends PlaygroundDemo {
   Color _activeColor = Colors.blue;
   Color _activeTrackColor = Colors.blue;
@@ -35,32 +37,29 @@ Switch(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         colorPicker(
-          label: 'Active Color',
-          selectedValue: _activeColor,
-          onItemTapped: (int index, Color color) {
-            updateConfiguration(() {
-              _activeColor = color;
-            });
-          }
-        ),
+            label: 'Active Color',
+            selectedValue: _activeColor,
+            onItemTapped: (int index, Color color) {
+              updateConfiguration(() {
+                _activeColor = color;
+              });
+            }),
         colorPicker(
-          label: 'Active Track Color',
-          selectedValue: _activeTrackColor,
-          onItemTapped: (int index, Color color) {
-            updateConfiguration(() {
-              _activeTrackColor = color;
-            });
-          }
-        ),
+            label: 'Active Track Color',
+            selectedValue: _activeTrackColor,
+            onItemTapped: (int index, Color color) {
+              updateConfiguration(() {
+                _activeTrackColor = color;
+              });
+            }),
         colorPicker(
-          label: 'Inactive Track Color',
-          selectedValue: _inactiveTrackColor,
-          onItemTapped: (int index, Color color) {
-            updateConfiguration(() {
-              _inactiveTrackColor = color;
-            });
-          }
-        ),
+            label: 'Inactive Track Color',
+            selectedValue: _inactiveTrackColor,
+            onItemTapped: (int index, Color color) {
+              updateConfiguration(() {
+                _inactiveTrackColor = color;
+              });
+            }),
       ],
     );
   }

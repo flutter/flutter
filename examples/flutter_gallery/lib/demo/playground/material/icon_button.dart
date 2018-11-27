@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/demo/playground/playground_demo.dart';
-import 'package:flutter_gallery/demo/playground/configuration/material_helpers.dart';
-import 'package:flutter_gallery/demo/playground/configuration/property_column.dart';
+
+import '../configuration/material_helpers.dart';
+import '../configuration/property_column.dart';
+import '../playground_demo.dart';
 
 const String _demoWidgetName = 'IconButton';
 
+/// ignore: must_be_immutable
 class IconButtonDemo extends PlaygroundDemo {
   Color _color = Colors.blue;
   IconData _icon = Icons.thumb_up;
@@ -60,8 +62,8 @@ IconButton(
 
   Widget _iconPicker(BuildContext context) {
     final List<Widget> buttonChildren = <Widget>[];
-    for (int i = 0; i < kIconOptions.length; i++) {
-      final IconData icon = kIconOptions[i];
+    for (int i = 0; i < iconOptions.length; i++) {
+      final IconData icon = iconOptions[i];
       Widget button = IconButton(
         iconSize: 30.0,
         icon: Icon(icon),
@@ -73,7 +75,7 @@ IconButton(
         color: _icon == icon ? _color : Colors.grey[400],
         splashColor: _color.withOpacity(0.2),
       );
-      if (i < kIconOptions.length - 1) {
+      if (i < iconOptions.length - 1) {
         button = Padding(
           padding: const EdgeInsets.only(right: 10.0),
           child: button,

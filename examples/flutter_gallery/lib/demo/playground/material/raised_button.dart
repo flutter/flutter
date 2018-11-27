@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/demo/playground/playground_demo.dart';
-import 'package:flutter_gallery/demo/playground/configuration/material_helpers.dart';
+
+import '../configuration/material_helpers.dart';
+import '../playground_demo.dart';
 
 const String _demoWidgetName = 'RaisedButton';
 
+/// ignore: must_be_immutable
 class RaisedButtonDemo extends PlaygroundDemo {
   double _elevation = 8.0;
   String _borderShape = 'rounded';
@@ -48,13 +50,12 @@ RaisedButton(
           },
         ),
         colorPicker(
-          selectedValue: _color,
-          onItemTapped: (int index, Color color) {
-            updateConfiguration(() {
-              _color = color;
-            });
-          }
-        ),
+            selectedValue: _color,
+            onItemTapped: (int index, Color color) {
+              updateConfiguration(() {
+                _color = color;
+              });
+            }),
       ],
     );
   }
