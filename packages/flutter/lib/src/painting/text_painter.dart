@@ -411,32 +411,56 @@ class TextPainter {
     return _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
   }
 
+  // TODO(garyq): Use extended grapheme cluster length instead of an increasing
+  // cluster length amount to achieve deterministic performance.
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
     final int prevCodeUnit = _text.codeUnitAt(offset - 1);
     if (prevCodeUnit == null)
       return null;
-    final int prevRuneOffset = _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
-    final List<TextBox> boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
-    if (boxes.isEmpty)
-      return null;
-    final TextBox box = boxes[0];
-    final double caretEnd = box.end;
-    final double dx = box.direction == TextDirection.rtl ? caretEnd - caretPrototype.width : caretEnd;
-    return Offset(dx, box.top);
+    bool isSurrogate = _isUtf16Surrogate(prevCodeUnit);
+    // Hard cap cluster length to 16 to maximize performance.
+    final int maxGraphemeClusterLength = isSurrogate ? 16 : 1;
+    int graphemeClusterLength = isSurrogate ? 2 : 1;
+    List<TextBox> boxes = [];
+    while (boxes.isEmpty && graphemeClusterLength <= maxGraphemeClusterLength) {
+      final int prevRuneOffset = offset - graphemeClusterLength;
+      boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
+      if (boxes.isEmpty) {
+        graphemeClusterLength *= 2;
+        continue;
+      }
+      final TextBox box = boxes[0];
+      final double caretEnd = box.end;
+      final double dx = box.direction == TextDirection.rtl ? caretEnd - caretPrototype.width : caretEnd;
+      return Offset(dx, box.top);
+    }
+    return null;
   }
 
+  // TODO(garyq): Use extended grapheme cluster length instead of an increasing
+  // cluster length amount to achieve deterministic performance.
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
     final int nextCodeUnit = _text.codeUnitAt(offset - 1);
     if (nextCodeUnit == null)
       return null;
-    final int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
-    final List<TextBox> boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
-    if (boxes.isEmpty)
-      return null;
+    bool isSurrogate = _isUtf16Surrogate(nextCodeUnit);
+    // Hard cap cluster length to 16 to maximize performance.
+    final int maxGraphemeClusterLength = isSurrogate ? 16 : 1;
+    int graphemeClusterLength = isSurrogate ? 2 : 1;
+    List<TextBox> boxes = [];
+    while (boxes.isEmpty && graphemeClusterLength <= maxGraphemeClusterLength) {
+      final int nextRuneOffset = offset + graphemeClusterLength;
+      boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
+      if (boxes.isEmpty) {
+        graphemeClusterLength *= 2;
+        continue;
+      }
     final TextBox box = boxes[0];
     final double caretStart = box.start;
     final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
     return Offset(dx, box.top);
+    }
+    return null;
   }
 
   Offset get _emptyOffset {
