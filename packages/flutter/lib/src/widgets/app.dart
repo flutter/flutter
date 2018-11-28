@@ -8,11 +8,11 @@ import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/focus_manager.dart';
 
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'focus_manager.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
