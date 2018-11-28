@@ -74,7 +74,7 @@ class TestPointer {
     return PointerDownEvent(
       timeStamp: timeStamp,
       pointer: pointer,
-      position: location,
+      position: location
     );
   }
 
@@ -91,7 +91,7 @@ class TestPointer {
       timeStamp: timeStamp,
       pointer: pointer,
       position: newLocation,
-      delta: delta,
+      delta: delta
     );
   }
 
