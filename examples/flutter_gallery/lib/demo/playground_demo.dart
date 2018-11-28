@@ -5,9 +5,9 @@
 import 'package:flutter/material.dart';
 
 import 'playground/cupertino/cupertino.dart';
-import 'playground/home.dart';
 import 'playground/material/material.dart';
 import 'playground/playground_demo.dart';
+import 'playground/playground_scaffold.dart';
 
 class MaterialPlaygroundDemo extends StatelessWidget {
   const MaterialPlaygroundDemo({Key key}) : super(key: key);

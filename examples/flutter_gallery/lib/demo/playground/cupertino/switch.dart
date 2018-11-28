@@ -5,12 +5,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors;
 
-import '../configuration/material_helpers.dart';
+import '../configuration/choices.dart';
+import '../configuration/constants.dart';
+import '../configuration/helpers.dart';
+import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
 const String _demoWidgetName = 'CupertinoSwitch';
 
-/// ignore: must_be_immutable
 class CupertinoSwitchDemo extends PlaygroundDemo {
   Color _activeColor = Colors.blue;
   bool _value = true;
@@ -27,23 +29,26 @@ CupertinoSwitch(
 )
 ''';
 
+  final List<Color> _colors = kColorChoices
+      .map((ColorChoice c) => c.color)
+      .where((Color c) => c != Colors.white)
+      .toList();
+
   @override
   Widget configWidget(BuildContext context) {
-    final List<Color> colors =
-        colorOptions.where((Color c) => c != Colors.white).toList();
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        colorPicker(
-            label: 'Active Color',
-            selectedValue: _activeColor,
-            colors: colors,
-            onItemTapped: (int index, Color color) {
-              updateConfiguration(() {
-                _activeColor = color;
-              });
-            }),
+        ColorPicker(
+          label: 'Active Color',
+          selectedValue: _activeColor,
+          colors: _colors,
+          onItemTapped: (Color color) {
+            updateConfiguration(() {
+              _activeColor = color;
+            });
+          }),
       ],
     );
   }

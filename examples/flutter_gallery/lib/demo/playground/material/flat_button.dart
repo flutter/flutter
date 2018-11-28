@@ -4,12 +4,12 @@
 
 import 'package:flutter/material.dart';
 
-import '../configuration/material_helpers.dart';
+import '../configuration/helpers.dart';
+import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
 const String _demoWidgetName = 'FlatButton';
 
-/// ignore: must_be_immutable
 class FlatButtonDemo extends PlaygroundDemo {
   String _borderShape = 'rounded';
   Color _color = Colors.blue;
@@ -27,9 +27,7 @@ FlatButton(
       fontSize: 16.0,
     ),
   ),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(30.0)
-  ),
+  shape: ${codeSnippetForBorder(_borderShape)},
   onPressed: () {},
 )
 ''';
@@ -40,17 +38,17 @@ FlatButton(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        shapePicker(
+        BorderPicker(
           selectedValue: _borderShape,
-          onItemTapped: (int index, String shapeName) {
+          onItemTapped: (String shapeName) {
             updateConfiguration(() {
               _borderShape = shapeName;
             });
           },
         ),
-        colorPicker(
+        ColorPicker(
             selectedValue: _color,
-            onItemTapped: (int index, Color color) {
+            onItemTapped: (Color color) {
               updateConfiguration(() {
                 _color = color;
               });

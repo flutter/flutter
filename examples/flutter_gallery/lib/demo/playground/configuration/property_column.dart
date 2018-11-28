@@ -27,9 +27,7 @@ class PropertyColumn extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.only(left: 15.0)
-              .copyWith(top: 15.0)
-              .copyWith(bottom: 20.0),
+          padding: const EdgeInsets.only(left: 15.0, top: 15.0, bottom: 20.0),
           child: Text(
             label,
             style: TextStyle(

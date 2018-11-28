@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 const int _animationInterval = 100;
 
-/// ignore: must_be_immutable
 abstract class PlaygroundDemo extends StatefulWidget {
   _PlaygroundWidgetState _state;
 
@@ -108,26 +107,26 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo>
                     child: Stack(
                       children: <Widget>[
                         Align(
-                            alignment: const Alignment(-1.0, 0.0),
-                            child: Text('GET SOURCE CODE',
-                                textAlign: TextAlign.left,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  color: _codeTextColor,
-                                  fontSize: 14.0,
-                                ))),
+                          alignment: const Alignment(-1.0, 0.0),
+                          child: Text('GET SOURCE CODE',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              color: _codeTextColor,
+                              fontSize: 14.0,
+                            ))),
                         Align(
-                            alignment: const Alignment(1.0, 0.0),
-                            child: RotatedBox(
-                              quarterTurns: _isCodeOpen ? 1 : -1,
-                              child: IconButton(
-                                icon: const Icon(Icons.chevron_right),
-                                color: _codeTextColor,
-                                onPressed: () {
-                                  _toggleCode();
-                                },
-                              ),
-                            )),
+                          alignment: const Alignment(1.0, 0.0),
+                          child: RotatedBox(
+                            quarterTurns: _isCodeOpen ? 1 : -1,
+                            child: IconButton(
+                              icon: const Icon(Icons.chevron_right),
+                              color: _codeTextColor,
+                              onPressed: () {
+                                _toggleCode();
+                              },
+                            ),
+                          )),
                       ],
                     ),
                   ),
@@ -155,12 +154,12 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo>
                       padding: EdgeInsets.all(_codePadding).copyWith(top: 12.0),
                       color: Colors.white,
                       child: Text(widget.codePreview(),
-                          style: TextStyle(
-                            color: _codeTextColor,
-                            fontSize: 14.0,
-                            height: 1.6,
-                            fontFamily: 'Courier',
-                          )),
+                        style: TextStyle(
+                          color: _codeTextColor,
+                          fontSize: 14.0,
+                          height: 1.6,
+                          fontFamily: 'Courier',
+                        )),
                     ),
                   );
                 },
@@ -185,17 +184,17 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo>
 
   Widget _shareButton() {
     return Positioned(
-        bottom: 15.0,
-        right: 20.0,
-        child: RaisedButton(
-            splashColor: Colors.white,
-            child: const Text('SHARE',
-                style: TextStyle(
-                  fontSize: 16.0,
-                )),
-            onPressed: () {
-              Share.share(widget.codePreview());
-            }));
+      bottom: 15.0,
+      right: 20.0,
+      child: RaisedButton(
+        splashColor: Colors.white,
+        child: const Text('SHARE',
+          style: TextStyle(
+            fontSize: 14.0,
+          )),
+        onPressed: () {
+          Share.share(widget.codePreview());
+        }));
   }
 
   List<Widget> _layersStack(BoxConstraints constraints) {

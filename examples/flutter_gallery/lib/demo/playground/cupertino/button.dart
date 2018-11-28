@@ -5,12 +5,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors;
 
-import '../configuration/material_helpers.dart';
+import '../configuration/helpers.dart';
+import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
 const String _demoWidgetName = 'CupertinoButton';
 
-/// ignore: must_be_immutable
 class CupertinoButtonDemo extends PlaygroundDemo {
   Color _color = Colors.blue;
 
@@ -32,13 +32,13 @@ CupertinoButton(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        colorPicker(
-            selectedValue: _color,
-            onItemTapped: (int index, Color color) {
-              updateConfiguration(() {
-                _color = color;
-              });
-            }),
+        ColorPicker(
+          selectedValue: _color,
+          onItemTapped: (Color color) {
+            updateConfiguration(() {
+              _color = color;
+            });
+          }),
       ],
     );
   }

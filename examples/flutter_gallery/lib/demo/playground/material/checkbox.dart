@@ -4,12 +4,12 @@
 
 import 'package:flutter/material.dart';
 
-import '../configuration/material_helpers.dart';
+import '../configuration/helpers.dart';
+import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
 const String _demoWidgetName = 'Checkbox';
 
-/// ignore: must_be_immutable
 class CheckboxDemo extends PlaygroundDemo {
   Color _activeColor = Colors.blue;
   bool _value = true;
@@ -32,14 +32,14 @@ Checkbox(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        colorPicker(
-            label: 'Active Color',
-            selectedValue: _activeColor,
-            onItemTapped: (int index, Color color) {
-              updateConfiguration(() {
-                _activeColor = color;
-              });
-            }),
+        ColorPicker(
+          label: 'Active Color',
+          selectedValue: _activeColor,
+          onItemTapped: (Color color) {
+            updateConfiguration(() {
+              _activeColor = color;
+            });
+          }),
       ],
     );
   }

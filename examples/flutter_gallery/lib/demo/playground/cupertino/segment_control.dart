@@ -5,16 +5,23 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../configuration/material_helpers.dart';
+import '../configuration/choices.dart';
+import '../configuration/constants.dart';
+import '../configuration/helpers.dart';
+import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
 const String _demoWidgetName = 'CupertinoSegmentControl';
 
-/// ignore: must_be_immutable
 class CupertinoSegmentControlDemo extends PlaygroundDemo {
   Color _selectedColor = Colors.blue;
   Color _borderColor = Colors.blue;
   int _groupValue = 0;
+
+  final List<Color> _colors = kColorChoices
+      .map((ColorChoice c) => c.color)
+      .where((Color c) => c != Colors.white)
+      .toList();
 
   @override
   String tabName() => _demoWidgetName.toUpperCase();
@@ -37,31 +44,29 @@ CupertinoSegmentedControl<int>(
 
   @override
   Widget configWidget(BuildContext context) {
-    final List<Color> colors =
-        colorOptions.where((Color c) => c != Colors.white).toList();
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        colorPicker(
-            label: 'Selected Color',
-            colors: colors,
-            selectedValue: _selectedColor,
-            onItemTapped: (int index, Color color) {
-              updateConfiguration(() {
-                _selectedColor = color;
-              });
-            }),
-        colorPicker(
-            label: 'Border Color',
-            colors: colors,
-            inverse: true,
-            selectedValue: _borderColor,
-            onItemTapped: (int index, Color color) {
-              updateConfiguration(() {
-                _borderColor = color;
-              });
-            }),
+        ColorPicker(
+          label: 'Selected Color',
+          colors: _colors,
+          selectedValue: _selectedColor,
+          onItemTapped: (Color color) {
+            updateConfiguration(() {
+              _selectedColor = color;
+            });
+          }),
+        ColorPicker(
+          label: 'Border Color',
+          colors: _colors,
+          inverse: true,
+          selectedValue: _borderColor,
+          onItemTapped: (Color color) {
+            updateConfiguration(() {
+              _borderColor = color;
+            });
+          }),
       ],
     );
   }
@@ -75,7 +80,7 @@ CupertinoSegmentedControl<int>(
   @override
   Widget previewWidget(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 15.0).copyWith(right: 15.0),
+      padding: const EdgeInsets.only(left: 15.0, right: 15.0),
       child: CupertinoSegmentedControl<int>(
         children: children,
         selectedColor: _selectedColor,

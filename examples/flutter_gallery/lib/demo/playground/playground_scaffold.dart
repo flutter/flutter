@@ -8,30 +8,27 @@ import 'playground_demo.dart';
 
 class PlaygroundScaffold extends StatelessWidget {
   const PlaygroundScaffold({
-    this.title,
-    this.demos,
+    Key key,
+    @required this.title,
+    @required this.demos,
   });
 
   final String title;
   final List<PlaygroundDemo> demos;
-
-  static final GlobalKey<ScaffoldState> _scaffoldKey =
-      GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: demos.length,
       child: Scaffold(
-        key: _scaffoldKey,
         appBar: AppBar(
           title: Text(title),
           leading: IconButton(
-              icon: const BackButtonIcon(),
-              tooltip: 'Back',
-              onPressed: () {
-                Navigator.maybePop(context);
-              }),
+            icon: const BackButtonIcon(),
+            tooltip: 'Back',
+            onPressed: () {
+              Navigator.maybePop(context);
+            }),
           bottom: TabBar(
             isScrollable: true,
             tabs: demos.map<Widget>((PlaygroundDemo demo) {
@@ -39,10 +36,7 @@ class PlaygroundScaffold extends StatelessWidget {
             }).toList(),
           ),
         ),
-        body: TabBarView(
-            children: demos.map<Widget>((PlaygroundDemo demo) {
-          return demo;
-        }).toList()),
+        body: TabBarView(children: demos),
       ),
     );
   }

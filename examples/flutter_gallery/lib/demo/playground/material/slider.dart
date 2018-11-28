@@ -4,12 +4,12 @@
 
 import 'package:flutter/material.dart';
 
-import '../configuration/material_helpers.dart';
+import '../configuration/helpers.dart';
+import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
 const String _demoWidgetName = 'Slider';
 
-/// ignore: must_be_immutable
 class SliderDemo extends PlaygroundDemo {
   Color _activeColor = Colors.blue;
   double _value = 5.0;
@@ -37,14 +37,14 @@ Slider(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        colorPicker(
-            label: 'Active Color',
-            selectedValue: _activeColor,
-            onItemTapped: (int index, Color color) {
-              updateConfiguration(() {
-                _activeColor = color;
-              });
-            }),
+        ColorPicker(
+          label: 'Active Color',
+          selectedValue: _activeColor,
+          onItemTapped: (Color color) {
+            updateConfiguration(() {
+              _activeColor = color;
+            });
+          }),
       ],
     );
   }
@@ -52,7 +52,7 @@ Slider(
   @override
   Widget previewWidget(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 25.0).copyWith(right: 25.0),
+      padding: const EdgeInsets.only(left: 25.0, right: 25.0),
       child: Slider(
         value: _value,
         min: 0.0,

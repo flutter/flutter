@@ -5,12 +5,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors;
 
-import '../configuration/material_helpers.dart';
+import '../configuration/choices.dart';
+import '../configuration/constants.dart';
+import '../configuration/helpers.dart';
+import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
 const String _demoWidgetName = 'CupertinoSlider';
 
-/// ignore: must_be_immutable
 class CupertinoSliderDemo extends PlaygroundDemo {
   Color _activeColor = Colors.blue;
   double _value = 5.0;
@@ -30,23 +32,26 @@ CupertinoSlider(
 )
 ''';
 
+  final List<Color> _colors = kColorChoices
+      .map((ColorChoice c) => c.color)
+      .where((Color c) => c != Colors.white)
+      .toList();
+
   @override
   Widget configWidget(BuildContext context) {
-    final List<Color> colors =
-        colorOptions.where((Color c) => c != Colors.white).toList();
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        colorPicker(
-            label: 'Active Color',
-            selectedValue: _activeColor,
-            colors: colors,
-            onItemTapped: (int index, Color color) {
-              updateConfiguration(() {
-                _activeColor = color;
-              });
-            }),
+        ColorPicker(
+          label: 'Active Color',
+          selectedValue: _activeColor,
+          colors: _colors,
+          onItemTapped: (Color color) {
+            updateConfiguration(() {
+              _activeColor = color;
+            });
+          }),
       ],
     );
   }
@@ -54,18 +59,18 @@ CupertinoSlider(
   @override
   Widget previewWidget(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 25.0).copyWith(right: 25.0),
+      padding: const EdgeInsets.only(left: 25.0, right: 25.0),
       child: CupertinoSlider(
-          value: _value,
-          activeColor: _activeColor,
-          min: 0.0,
-          max: 10.0,
-          divisions: 10,
-          onChanged: (double value) {
-            updateConfiguration(() {
-              _value = value;
-            });
-          }),
+        value: _value,
+        activeColor: _activeColor,
+        min: 0.0,
+        max: 10.0,
+        divisions: 10,
+        onChanged: (double value) {
+          updateConfiguration(() {
+            _value = value;
+          });
+        }),
     );
   }
 }

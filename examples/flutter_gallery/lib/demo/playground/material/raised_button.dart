@@ -4,12 +4,12 @@
 
 import 'package:flutter/material.dart';
 
-import '../configuration/material_helpers.dart';
+import '../configuration/helpers.dart';
+import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
 const String _demoWidgetName = 'RaisedButton';
 
-/// ignore: must_be_immutable
 class RaisedButtonDemo extends PlaygroundDemo {
   double _elevation = 8.0;
   String _borderShape = 'rounded';
@@ -34,6 +34,19 @@ RaisedButton(
 )
 ''';
 
+  Widget _elevationPicker() => SliderPicker(
+    label: 'Elevation',
+    value: _elevation,
+    minValue: 0.0,
+    maxValue: 24.0,
+    divisions: 6,
+    onValueChanged: (double value) {
+      updateConfiguration(() {
+        _elevation = value;
+      });
+    },
+  );
+
   @override
   Widget configWidget(BuildContext context) {
     return Column(
@@ -41,21 +54,21 @@ RaisedButton(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         _elevationPicker(),
-        shapePicker(
+        BorderPicker(
           selectedValue: _borderShape,
-          onItemTapped: (int index, String shapeName) {
+          onItemTapped: (String borderShape) {
             updateConfiguration(() {
-              _borderShape = shapeName;
+              _borderShape = borderShape;
             });
           },
         ),
-        colorPicker(
-            selectedValue: _color,
-            onItemTapped: (int index, Color color) {
-              updateConfiguration(() {
-                _color = color;
-              });
-            }),
+        ColorPicker(
+          selectedValue: _color,
+          onItemTapped: (Color color) {
+            updateConfiguration(() {
+              _color = color;
+            });
+          }),
       ],
     );
   }
@@ -82,17 +95,4 @@ RaisedButton(
       ),
     );
   }
-
-  Widget _elevationPicker() => sliderPicker(
-        label: 'Elevation',
-        value: _elevation,
-        minValue: 0.0,
-        maxValue: 24.0,
-        divisions: 6,
-        onValueChanged: (double value) {
-          updateConfiguration(() {
-            _elevation = value;
-          });
-        },
-      );
 }
