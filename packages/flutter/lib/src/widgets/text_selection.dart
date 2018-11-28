@@ -351,8 +351,10 @@ class TextSelectionOverlay {
     }
     if (toolbarIsVisible && defaultTargetPlatform == TargetPlatform.iOS)
       _toolbarController.reverse(from: _toolbarController.upperBound).whenCompleteOrCancel ((){_hideToolbar();});
-    else
+    else {
       _hideToolbar();
+      _toolbarController.stop();
+    }
     _handleController.stop();
   }
 
