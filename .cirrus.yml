@@ -194,7 +194,7 @@ task:
       env:
         SHARD: build_tests
         COCOAPODS_DISABLE_STATS: true
-        FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/flutter"
+        FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/flutter/bin/cache/artifacts/engine/ios/"
       container:
         cpu: 4
         memory: 12G
