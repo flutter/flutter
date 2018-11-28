@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:mockito/mockito.dart';
+import 'package:flutter/foundation.dart';
 
 import 'semantics_tester.dart';
 
@@ -441,6 +442,65 @@ void main() {
         equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs['inputAction'],
         equals('TextInputAction.done'));
+  });
+
+  testWidgets('Shows toolbar after two taps in the same place only on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    Widget widget = MaterialApp(
+      home: EditableText(
+        controller: TextEditingController(),
+        focusNode: FocusNode(),
+        style: Typography(platform: TargetPlatform.android).black.subhead,
+        cursorColor: Colors.blue,
+        selectionControls: materialTextSelectionControls,
+        keyboardType: TextInputType.text,
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    EditableTextState state = tester.firstState(find.byType(EditableText));
+
+    expect(state.selectionOverlay, null);
+    Finder textFinder = find.byType(EditableText);
+    await tester.tap(textFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(textFinder);
+
+    // The text selection controls should appear.
+    expect(state.selectionOverlay.toolbarIsVisible, true);
+
+    await tester.tap(textFinder);
+    await tester.pumpAndSettle();
+
+    // After another tap it should be invisible.
+    expect(state.selectionOverlay.toolbarIsVisible, false);
+
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    widget = MaterialApp(
+      home: EditableText(
+        controller: TextEditingController(),
+        focusNode: FocusNode(),
+        style: Typography(platform: TargetPlatform.android).black.subhead,
+        cursorColor: Colors.blue,
+        selectionControls: materialTextSelectionControls,
+        keyboardType: TextInputType.text,
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    state = tester.firstState(find.byType(EditableText));
+
+    expect(state.selectionOverlay.toolbarIsVisible, false);
+
+    textFinder = find.byType(EditableText);
+    await tester.tap(textFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(textFinder);
+
+    // The text selection controls should not appear.
+    expect(state.selectionOverlay.toolbarIsVisible, false);
+
+    debugDefaultTargetPlatformOverride = null;
   });
 
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay',

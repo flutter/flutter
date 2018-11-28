@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'container.dart';
@@ -348,14 +349,16 @@ class TextSelectionOverlay {
       _handles[1].remove();
       _handles = null;
     }
-    _toolbarController.reverse(from: _toolbarController.upperBound).whenCompleteOrCancel ((){_hideToolbar();});
+    if (toolbarIsVisible && defaultTargetPlatform == TargetPlatform.iOS)
+      _toolbarController.reverse(from: _toolbarController.upperBound).whenCompleteOrCancel ((){_hideToolbar();});
+    else
+      _hideToolbar();
     _handleController.stop();
   }
 
   void _hideToolbar() {
     _toolbar?.remove();
     _toolbar = null;
-    _toolbarController.stop();
   }
 
   /// Final cleanup.

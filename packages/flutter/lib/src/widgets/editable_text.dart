@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -743,8 +744,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _selectionOverlay.showHandles();
       if (longPress || cause == SelectionChangedCause.doubleTap)
         _selectionOverlay.showToolbar();
-      if (renderObject.selection.isCollapsed && renderObject.selection.baseOffset == selection.baseOffset &&
-          cause == SelectionChangedCause.tap && !toolbarVisible)
+      if (defaultTargetPlatform == TargetPlatform.iOS && renderObject.selection.isCollapsed &&
+          renderObject.selection.baseOffset == selection.baseOffset && cause == SelectionChangedCause.tap && !toolbarVisible)
         _selectionOverlay.showToolbar();
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);
