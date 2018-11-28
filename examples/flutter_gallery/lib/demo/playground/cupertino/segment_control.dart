@@ -15,7 +15,6 @@ const String _demoWidgetName = 'CupertinoSegmentControl';
 
 class CupertinoSegmentControlDemo extends PlaygroundDemo {
   Color _selectedColor = Colors.blue;
-  Color _borderColor = Colors.blue;
   int _groupValue = 0;
 
   final List<Color> _colors = kColorChoices
@@ -35,7 +34,7 @@ CupertinoSegmentedControl<int>(
     Text('C'),
   ],
   selectedColor: ${codeSnippetForColor(_selectedColor)},
-  borderColor: ${codeSnippetForColor(_borderColor)},
+  borderColor: ${codeSnippetForColor(_selectedColor)},
   pressedColor: ${codeSnippetForColor(_selectedColor)}.withOpacity(0.4),
   onValueChanged: (int value) {},
   groupValue: $_groupValue,
@@ -58,17 +57,6 @@ CupertinoSegmentedControl<int>(
             });
           },
         ),
-        ColorPicker(
-          label: 'Border Color',
-          colors: _colors,
-          inverse: true,
-          selectedValue: _borderColor,
-          onItemTapped: (Color color) {
-            updateConfiguration(() {
-              _borderColor = color;
-            });
-          },
-        ),
       ],
     );
   }
@@ -86,7 +74,7 @@ CupertinoSegmentedControl<int>(
       child: CupertinoSegmentedControl<int>(
         children: children,
         selectedColor: _selectedColor,
-        borderColor: _borderColor,
+        borderColor: _selectedColor,
         pressedColor: _selectedColor.withOpacity(0.4),
         groupValue: _groupValue,
         onValueChanged: (int value) {
