@@ -348,10 +348,13 @@ class TextSelectionOverlay {
       _handles[1].remove();
       _handles = null;
     }
+    _toolbarController.reverse(from: _toolbarController.upperBound).whenCompleteOrCancel ((){_hideToolbar();});
+    _handleController.stop();
+  }
+
+  void _hideToolbar() {
     _toolbar?.remove();
     _toolbar = null;
-
-    _handleController.stop();
     _toolbarController.stop();
   }
 
@@ -381,12 +384,20 @@ class TextSelectionOverlay {
     );
   }
 
+  List<TextSelectionPoint> _toolbarCreationEndpoints;
+
   Widget _buildToolbar(BuildContext context) {
     if (selectionControls == null)
       return Container();
 
     // Find the horizontal midpoint, just above the selected text.
-    final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
+    List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
+
+    if (_toolbarController.isAnimatingForward())
+      _toolbarCreationEndpoints = endpoints;
+    else if (_toolbarCreationEndpoints != null)
+      endpoints = _toolbarCreationEndpoints;
+
     final Offset midpoint = Offset(
       (endpoints.length == 1) ?
         endpoints[0].point.dx :

@@ -393,6 +393,10 @@ class AnimationController extends Animation<double>
     }
   }
 
+  /// Whether the animation has most recently begun going forward or in reverse.
+  bool isAnimatingForward() {
+    return _direction == _AnimationDirection.forward;
+  }
   /// The amount of time that has passed between the time the animation started
   /// and the most recent tick of the animation.
   ///

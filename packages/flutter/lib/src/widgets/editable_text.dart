@@ -725,8 +725,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // EditableWidget, not just changes triggered by user gestures.
     requestKeyboard();
 
-    _hideSelectionOverlayIfNeeded();
+    final bool toolbarVisible = selectionOverlay?.toolbarIsVisible ?? false;
 
+    _hideSelectionOverlayIfNeeded();
     if (widget.selectionControls != null) {
       _selectionOverlay = TextSelectionOverlay(
         context: context,
@@ -741,6 +742,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
         _selectionOverlay.showHandles();
       if (longPress || cause == SelectionChangedCause.doubleTap)
+        _selectionOverlay.showToolbar();
+      if (renderObject.selection.isCollapsed && renderObject.selection.baseOffset == selection.baseOffset &&
+          cause == SelectionChangedCause.tap && !toolbarVisible)
         _selectionOverlay.showToolbar();
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);
