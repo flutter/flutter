@@ -209,7 +209,6 @@ def to_gn_args(args):
       gn_args['shell_enable_vulkan'] = True
       # Configure Skia for Vulkan support.
       gn_args['skia_use_vulkan'] = True
-      gn_args['skia_vulkan_header'] = "flutter/vulkan/skia_vulkan_header.h"
 
     # We should not need a special case for x86, but this seems to introduce text relocations
     # even with -fPIC everywhere.
