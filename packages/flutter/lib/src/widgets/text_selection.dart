@@ -398,6 +398,8 @@ class TextSelectionOverlay {
     // Find the horizontal midpoint, just above the selected text.
     List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
 
+    // If the the animation is going in reverse, we want to use the old endpoints,
+    // not the ones from the new selection.
     if (_toolbarController.isAnimatingForward())
       _toolbarCreationEndpoints = endpoints;
     else if (_toolbarCreationEndpoints != null)
