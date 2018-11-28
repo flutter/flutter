@@ -44,7 +44,8 @@ Slider(
             updateConfiguration(() {
               _activeColor = color;
             });
-          }),
+          },
+        ),
       ],
     );
   }

@@ -38,7 +38,8 @@ CupertinoButton(
             updateConfiguration(() {
               _color = color;
             });
-          }),
+          },
+        ),
       ],
     );
   }
@@ -49,7 +50,6 @@ CupertinoButton(
       child: CupertinoButton(
         child: const Text('BUTTON'),
         color: _color,
-        // borderRadius: const BorderRadius.all(Radius.circular(8.0)),
         onPressed: () {},
       ),
     );

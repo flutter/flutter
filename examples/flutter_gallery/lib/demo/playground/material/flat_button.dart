@@ -47,12 +47,13 @@ FlatButton(
           },
         ),
         ColorPicker(
-            selectedValue: _color,
-            onItemTapped: (Color color) {
-              updateConfiguration(() {
-                _color = color;
-              });
-            }),
+          selectedValue: _color,
+          onItemTapped: (Color color) {
+            updateConfiguration(() {
+              _color = color;
+            });
+          },
+        ),
       ],
     );
   }
@@ -74,7 +75,8 @@ FlatButton(
           ),
           shape: _borderShape == 'circle'
               ? RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.0))
+                  borderRadius: BorderRadius.circular(30.0),
+                )
               : borderShapeFromString(_borderShape, false),
           onPressed: () {},
         ),

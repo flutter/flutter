@@ -48,7 +48,8 @@ CupertinoSwitch(
             updateConfiguration(() {
               _activeColor = color;
             });
-          }),
+          },
+        ),
       ],
     );
   }

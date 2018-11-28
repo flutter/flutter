@@ -56,7 +56,8 @@ CupertinoSegmentedControl<int>(
             updateConfiguration(() {
               _selectedColor = color;
             });
-          }),
+          },
+        ),
         ColorPicker(
           label: 'Border Color',
           colors: _colors,
@@ -66,7 +67,8 @@ CupertinoSegmentedControl<int>(
             updateConfiguration(() {
               _borderColor = color;
             });
-          }),
+          },
+        ),
       ],
     );
   }
@@ -86,12 +88,12 @@ CupertinoSegmentedControl<int>(
         selectedColor: _selectedColor,
         borderColor: _borderColor,
         pressedColor: _selectedColor.withOpacity(0.4),
+        groupValue: _groupValue,
         onValueChanged: (int value) {
           updateConfiguration(() {
             _groupValue = value;
           });
         },
-        groupValue: _groupValue,
       ),
     );
   }

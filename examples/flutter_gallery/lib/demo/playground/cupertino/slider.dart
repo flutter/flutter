@@ -51,7 +51,8 @@ CupertinoSlider(
             updateConfiguration(() {
               _activeColor = color;
             });
-          }),
+          },
+        ),
       ],
     );
   }
@@ -70,7 +71,8 @@ CupertinoSlider(
           updateConfiguration(() {
             _value = value;
           });
-        }),
+        },
+      ),
     );
   }
 }

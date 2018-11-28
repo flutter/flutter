@@ -39,7 +39,8 @@ Checkbox(
             updateConfiguration(() {
               _activeColor = color;
             });
-          }),
+          },
+        ),
       ],
     );
   }

@@ -21,12 +21,10 @@ String codeSnippetForIcon(IconData icon) {
 
 ShapeBorder borderShapeFromString(String type, [bool side = true]) {
   
-  BorderSide borderSide = const BorderSide(
+  final BorderSide borderSide = side ? const BorderSide(
     color: Colors.grey,
     width: 2.0,
-  );
-
-  borderSide = side ? borderSide : BorderSide.none;
+  ) : BorderSide.none;
 
   switch (type) {
     case 'square':

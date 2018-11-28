@@ -43,7 +43,8 @@ Switch(
             updateConfiguration(() {
               _activeColor = color;
             });
-          }),
+          },
+        ),
         ColorPicker(
           label: 'Active Track Color',
           selectedValue: _activeTrackColor,
@@ -51,7 +52,8 @@ Switch(
             updateConfiguration(() {
               _activeTrackColor = color;
             });
-          }),
+          },
+        ),
         ColorPicker(
           label: 'Inactive Track Color',
           selectedValue: _inactiveTrackColor,
@@ -59,7 +61,8 @@ Switch(
             updateConfiguration(() {
               _inactiveTrackColor = color;
             });
-          }),
+          },
+        ),
       ],
     );
   }

@@ -28,12 +28,15 @@ class PlaygroundScaffold extends StatelessWidget {
             tooltip: 'Back',
             onPressed: () {
               Navigator.maybePop(context);
-            }),
+            },
+          ),
           bottom: TabBar(
             isScrollable: true,
-            tabs: demos.map<Widget>((PlaygroundDemo demo) {
-              return Tab(text: demo.tabName());
-            }).toList(),
+            tabs: demos.map<Widget>(
+              (PlaygroundDemo demo) {
+                return Tab(text: demo.tabName());
+              },
+            ).toList(),
           ),
         ),
         body: TabBarView(children: demos),

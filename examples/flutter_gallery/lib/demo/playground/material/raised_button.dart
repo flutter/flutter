@@ -35,17 +35,17 @@ RaisedButton(
 ''';
 
   Widget _elevationPicker() => SliderPicker(
-    label: 'Elevation',
-    value: _elevation,
-    minValue: 0.0,
-    maxValue: 24.0,
-    divisions: 6,
-    onValueChanged: (double value) {
-      updateConfiguration(() {
-        _elevation = value;
-      });
-    },
-  );
+        label: 'Elevation',
+        value: _elevation,
+        minValue: 0.0,
+        maxValue: 24.0,
+        divisions: 6,
+        onValueChanged: (double value) {
+          updateConfiguration(() {
+            _elevation = value;
+          });
+        },
+      );
 
   @override
   Widget configWidget(BuildContext context) {
@@ -68,7 +68,8 @@ RaisedButton(
             updateConfiguration(() {
               _color = color;
             });
-          }),
+          },
+        ),
       ],
     );
   }
