@@ -898,6 +898,12 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     _vibrate();
     setState(() {
       _mode = DatePickerMode.day;
+      if (widget.firstDate != null && value.compareTo(widget.firstDate) < 0) {
+        value = widget.firstDate;
+      }
+      if (widget.lastDate != null && value.compareTo(widget.lastDate) > 0) {
+        value = widget.lastDate;
+      }
       _selectedDate = value;
     });
   }
