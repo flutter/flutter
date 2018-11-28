@@ -662,8 +662,6 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   final TextStyle unselectedLabelStyle;
 
   /// An option callback when the [TabBar] is tapped.
-  ///
-  /// If this property is null, the [TabBar] handles taps automatically.
   final ValueChanged<int> onTap;
 
   /// A size whose height depends on if the tabs have both icons and text.
@@ -889,6 +887,9 @@ class _TabBarState extends State<TabBar> {
   void _handleTap(int index) {
     assert(index >= 0 && index < widget.tabs.length);
     _controller.animateTo(index);
+    if (widget.onTap != null) {
+      widget.onTap(index);
+    }
   }
 
   Widget _buildStyledTab(Widget child, bool selected, Animation<double> animation) {
@@ -964,7 +965,7 @@ class _TabBarState extends State<TabBar> {
     final int tabCount = widget.tabs.length;
     for (int index = 0; index < tabCount; index += 1) {
       wrappedTabs[index] = InkWell(
-        onTap: () { widget.onTap != null ? widget.onTap(index) : _handleTap(index); },
+        onTap: () { _handleTap(index); },
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
           child: Stack(
