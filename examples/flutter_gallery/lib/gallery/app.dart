@@ -18,6 +18,8 @@ import 'scales.dart';
 import 'themes.dart';
 import 'updater.dart';
 
+const _kPrefsHasSeenWelcome = 'hasSeenWelcome';
+
 class GalleryApp extends StatefulWidget {
   const GalleryApp({
     Key key,
@@ -151,7 +153,7 @@ class _GalleryAppState extends State<GalleryApp>
 
   Future<bool> _checkWelcomeState() async {
     _prefs = await SharedPreferences.getInstance();
-    final bool hasSeenWelcome = _prefs.getBool('hasSeenWelcome') ?? false;
+    final bool hasSeenWelcome = _prefs.getBool(_kPrefsHasSeenWelcome) ?? false;
     return !hasSeenWelcome;
   }
 
@@ -159,7 +161,7 @@ class _GalleryAppState extends State<GalleryApp>
     final Widget welcome = Welcome(
       onDismissed: () {
         _welcomeContentAnimationController.forward();
-        _prefs.setBool('hasSeenWelcome', true);
+        _prefs.setBool(_kPrefsHasSeenWelcome, true);
       },
     );
     Widget home = GalleryHome(

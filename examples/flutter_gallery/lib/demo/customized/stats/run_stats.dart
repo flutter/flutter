@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+
+// animation durations
+const int _kAnimationDuration = 175;
+const int _kHeartAnimationDuration = 250;
 
 // the stat item text style
 const TextStyle _statsTextStyle = TextStyle(
@@ -12,30 +18,40 @@ const TextStyle _statsTextStyle = TextStyle(
   color: Colors.white,
 );
 
-class StatsRow extends StatefulWidget {
-  const StatsRow({@required this.statsAnimationController, @required this.heartAnimationController});
-  final AnimationController statsAnimationController;
-  final AnimationController heartAnimationController;
+class RunStats extends StatefulWidget {
+
+  const RunStats({ Key key }) : super(key: key);
 
   @override
-  _StatsRowState createState() => _StatsRowState();
+  RunStatsState createState() => RunStatsState();
 }
 
-class _StatsRowState extends State<StatsRow>
-    with TickerProviderStateMixin {
-  List<Animation<double>> _statsAnimations = <Animation<double>>[];
+class RunStatsState extends State<RunStats> with TickerProviderStateMixin {
+
+  AnimationController _animationController;
+  AnimationController _heartAnimationController;
+  List<Animation<double>> _statsAnimations;
   Animation<double> _heartAnimation;
+  Timer _heartTimer;
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: _kAnimationDuration * 5),
+    );
+    _heartAnimationController = AnimationController(
+      duration: const Duration(milliseconds: _kHeartAnimationDuration),
+      vsync: this,
+    );
     _statsAnimations = <Animation<double>>[
       _statsAnimation(0.2, 0.4),
       _statsAnimation(0.4, 0.6),
       _statsAnimation(0.6, 0.8),
       _statsAnimation(0.8, 1.0),
     ];
-    _heartAnimation = Tween<double>(begin: 1.0, end: 1.4).animate(widget.heartAnimationController);
+    _heartAnimation = Tween<double>(begin: 1.0, end: 1.4).animate(_heartAnimationController);
   }
 
   @override
@@ -119,7 +135,51 @@ class _StatsRowState extends State<StatsRow>
       begin, end, curve: Curves.easeInOut
     );
     return Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: widget.statsAnimationController, curve: curve),
+      CurvedAnimation(parent: _animationController, curve: curve),
     );
   }
+
+  void animate() {
+    _animationController.forward().whenComplete(() {
+      animateHeart().then((_) {
+        if (_heartTimer != null && _heartTimer.isActive) {
+          _heartTimer.cancel();
+        }
+        _heartTimer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
+          animateHeart();
+        });
+      });
+    });
+  }
+
+  void reverse() {
+    _animationController.reverse();
+  }
+
+  Future<void> animateHeart() {
+    if (!mounted) {
+      return null;
+    }
+    return _heartAnimationController.forward().whenComplete(() {
+      _heartAnimationController.reverse();
+    });
+  }
+
+  void reset() {
+    if (_heartTimer != null && _heartTimer.isActive) {
+      _heartTimer.cancel();
+      _heartTimer = null;
+    }
+    _heartAnimationController.reset();
+    _animationController.reset();
+  }
+
+  @override
+  void dispose() {
+    reset();
+    _heartAnimationController.dispose();
+    _animationController.dispose();
+    super.dispose();
+  }
+
 }

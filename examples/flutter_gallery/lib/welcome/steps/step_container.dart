@@ -1,23 +1,20 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'package:flutter/material.dart';
+import '../constants.dart';
 
-const Color _kWelcomeBlue = Color(0xFF0175c2);
+typedef StepImageBuilder = Widget Function();
 
-abstract class WelcomeStep {
-  WelcomeStep({this.tickerProvider});
-  final TickerProvider tickerProvider;
+class StepContainer extends StatelessWidget {
 
-  String title();
-  String subtitle();
+  const StepContainer({ @required this.title, @required this.subtitle, @required this.imageContentBuilder });
 
-  void animate({bool restart});
-  Widget imageWidget();
-  Widget contentWidget() {
+  final String title;
+  final String subtitle;
+  final StepImageBuilder imageContentBuilder;
+
+  @override
+  Widget build(BuildContext context) {
     return Material(
-      color: _kWelcomeBlue,
+      color: kWelcomeBlue,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40.0),
         child: Column(
@@ -27,12 +24,12 @@ abstract class WelcomeStep {
           children: <Widget>[
             Container(
               height: 240.0,
-              child: imageWidget(),
+              child: imageContentBuilder(),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 50.0),
               child: Text(
-                title(),
+                title,
                 style: const TextStyle(
                   fontFamily: 'GoogleSans',
                   fontSize: 24.0,
@@ -44,7 +41,7 @@ abstract class WelcomeStep {
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
-                subtitle(),
+                subtitle,
                 style: const TextStyle(
                   fontSize: 16.0,
                   color: Colors.white70,

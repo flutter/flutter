@@ -3,28 +3,32 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/welcome/step.dart';
 
-const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
+import '../constants.dart';
+import '../welcome_step_state.dart';
+import 'step_container.dart';
 
-class FlutterWelcomeStep extends WelcomeStep {
-  FlutterWelcomeStep({TickerProvider tickerProvider})
-      : super(tickerProvider: tickerProvider);
+const String _kTitle = 'Welcome to Flutter!';
+const String _kSubtitle = 'Flutter allows you to build beautiful native apps on iOS and Android from a single codebase.';
 
+class FlutterWelcomeStep extends StatefulWidget {
+  const FlutterWelcomeStep({Key key}) : super(key: key);
   @override
-  String title() => 'Welcome to Flutter!';
-  @override
-  String subtitle() =>
-      'Flutter allows you to build beautiful native apps on iOS and Android from a single codebase.';
+  FlutterWelcomeStepState createState() => FlutterWelcomeStepState();
+}
 
+class FlutterWelcomeStepState extends WelcomeStepState<FlutterWelcomeStep> {
   @override
-  Widget imageWidget() {
-    return Image.asset(
-      'welcome/welcome_hello.png',
-      package: _kGalleryAssetsPackage,
+  Widget build(BuildContext context) {
+    return StepContainer(
+      title: _kTitle,
+      subtitle: _kSubtitle,
+      imageContentBuilder: () {
+        return Image.asset('welcome/welcome_hello.png', package: kWelcomeGalleryAssetsPackage);
+      },
     );
   }
 
   @override
-  void animate({bool restart}) {}
+  void animate({bool restart = false}) {}
 }

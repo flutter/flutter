@@ -127,11 +127,9 @@ List<GalleryDemo> _buildGalleryDemos() {
       icon: GalleryIcons.refresh,
       category: _kDemos,
       routeName: Welcome.routeName,
-      buildRoute: (BuildContext context) => Welcome(
-            onDismissed: () {
-              Navigator.of(context).pop();
-            },
-          ),
+      buildRoute: (BuildContext context) {
+        return Welcome(onDismissed: () => Navigator.of(context).pop());
+      },
     ),
 
     // Style

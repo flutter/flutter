@@ -3,28 +3,32 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/welcome/step.dart';
+import '../constants.dart';
+import '../welcome_step_state.dart';
+import 'step_container.dart';
 
-const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
+const String _kTitle = 'Interactive widget playground';
+const String _kSubtitle = 'Explore the rich native UI widgets in real-time. See and share the code to get up and running, fast.';
 
-class PlaygroundWelcomeStep extends WelcomeStep {
-  PlaygroundWelcomeStep({TickerProvider tickerProvider})
-      : super(tickerProvider: tickerProvider);
+class PlaygroundWelcomeStep extends StatefulWidget {
+  const PlaygroundWelcomeStep({Key key}) : super(key: key);
+  @override
+  PlaygroundWelcomeStepState createState() => PlaygroundWelcomeStepState();
+}
+
+class PlaygroundWelcomeStepState extends WelcomeStepState<PlaygroundWelcomeStep> {
 
   @override
-  String title() => 'Interactive widget playground';
-  @override
-  String subtitle() =>
-      'Explore the rich native UI widgets in real-time. See and share the code to get up and running, fast.';
-
-  @override
-  Widget imageWidget() {
-    return Image.asset(
-      'welcome/welcome_playground.png',
-      package: _kGalleryAssetsPackage,
+  Widget build(BuildContext context) {
+    return StepContainer(
+      title: _kTitle,
+      subtitle: _kSubtitle,
+      imageContentBuilder: () {
+        return Image.asset('welcome/welcome_playground.png', package: kWelcomeGalleryAssetsPackage);
+      },
     );
   }
 
   @override
-  void animate({bool restart}) {}
+  void animate({bool restart = false}) {}
 }

@@ -3,38 +3,40 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/welcome/step.dart';
+import '../constants.dart';
+import '../welcome_step_state.dart';
+import 'step_container.dart';
 
-const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
+const String _kTitle = 'Explore Flutter!';
+const String _kSubtitle = 'Start being highly productive and do more with less code. Explore what you can do with Flutter!';
 
-class PopPosition {
-  PopPosition(
-      {this.top, this.right, this.bottom, this.left, @required this.child});
-  final double top;
-  final double right;
-  final double bottom;
-  final double left;
-  final Widget child;
+class ExploreWelcomeStep extends StatefulWidget {
+  const ExploreWelcomeStep({Key key}) : super(key: key);
+  @override
+  ExploreWelcomeStepState createState() => ExploreWelcomeStepState();
 }
 
-class ExploreWelcomeStep extends WelcomeStep {
-  ExploreWelcomeStep({TickerProvider tickerProvider})
-      : super(tickerProvider: tickerProvider);
+class ExploreWelcomeStepState extends WelcomeStepState<ExploreWelcomeStep> with TickerProviderStateMixin {
+
+  Widget _imageWidget;
 
   @override
-  String title() => 'Explore Flutter!';
-  @override
-  String subtitle() =>
-      'Start being highly productive and do more with less code. Explore what you can do with Flutter!';
+  Widget build(BuildContext context) {
+    _imageWidget ??= imageWidget();
+    return StepContainer(
+      title: _kTitle,
+      subtitle: _kSubtitle,
+      imageContentBuilder: () => _imageWidget,
+    );
+  }
 
-  @override
   Widget imageWidget() {
     _setupAnimations();
     final List<Widget> stackChildren = <Widget>[
       Positioned.fill(
         child: Image.asset(
           'welcome/welcome_flutter_logo.png',
-          package: _kGalleryAssetsPackage,
+          package: kWelcomeGalleryAssetsPackage,
         ),
       ),
     ];
@@ -59,14 +61,12 @@ class ExploreWelcomeStep extends WelcomeStep {
   @override
   void animate({bool restart = false}) {
     if (restart) {
-      for (AnimationController animationController
-          in _popAnimationControllers) {
+      for (AnimationController animationController in _popAnimationControllers) {
         animationController.reset();
       }
     }
     Future<void>.delayed(Duration(milliseconds: 500), () {
-      for (AnimationController animationController
-          in _popAnimationControllers) {
+      for (AnimationController animationController in _popAnimationControllers) {
         animationController.forward();
       }
     });
@@ -83,25 +83,21 @@ class ExploreWelcomeStep extends WelcomeStep {
       return;
     }
     _popAnimationControllers = <AnimationController>[
-      AnimationController(
-          vsync: tickerProvider, duration: Duration(milliseconds: 60)),
-      AnimationController(
-          vsync: tickerProvider, duration: Duration(milliseconds: 280)),
-      AnimationController(
-          vsync: tickerProvider, duration: Duration(milliseconds: 170)),
-      AnimationController(
-          vsync: tickerProvider, duration: Duration(milliseconds: 120)),
+      AnimationController(vsync: this, duration: Duration(milliseconds: 60)),
+      AnimationController(vsync: this, duration: Duration(milliseconds: 280)),
+      AnimationController(vsync: this, duration: Duration(milliseconds: 170)),
+      AnimationController(vsync: this, duration: Duration(milliseconds: 120)),
     ];
   }
 
   Widget _addAnimationWidget(
-      PopPosition popPosition, AnimationController animationController) {
+      _PopPosition popPosition, AnimationController animationController) {
     final Animation<double> scaleAnimation =
-        Tween<double>(begin: 0.6, end: 1.0).animate(
+    Tween<double>(begin: 0.6, end: 1.0).animate(
       CurvedAnimation(parent: animationController, curve: Curves.easeInOut),
     );
     final Animation<double> opacityAnimation =
-        Tween<double>(begin: 0.0, end: 1.0).animate(
+    Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: animationController, curve: Curves.easeInOut),
     );
     _popScaleAnimations.add(scaleAnimation);
@@ -122,42 +118,51 @@ class ExploreWelcomeStep extends WelcomeStep {
   }
 
   // pop widgets
-  final List<PopPosition> _popWidgets = <PopPosition>[
-    PopPosition(
+  final List<_PopPosition> _popWidgets = <_PopPosition>[
+    _PopPosition(
       top: 0.0,
       right: 30.0,
       child: Image.asset(
         'welcome/welcome_pop_1.png',
-        package: _kGalleryAssetsPackage,
+        package: kWelcomeGalleryAssetsPackage,
         width: 80.0,
       ),
     ),
-    PopPosition(
+    _PopPosition(
       top: 60.0,
       left: 20.0,
       child: Image.asset(
         'welcome/welcome_pop_2.png',
-        package: _kGalleryAssetsPackage,
+        package: kWelcomeGalleryAssetsPackage,
         width: 54.0,
       ),
     ),
-    PopPosition(
+    _PopPosition(
       bottom: 70.0,
       right: 40.0,
       child: Image.asset(
         'welcome/welcome_pop_3.png',
-        package: _kGalleryAssetsPackage,
+        package: kWelcomeGalleryAssetsPackage,
         width: 40.0,
       ),
     ),
-    PopPosition(
+    _PopPosition(
       bottom: 8.0,
       left: 30.0,
       child: Image.asset(
         'welcome/welcome_pop_4.png',
-        package: _kGalleryAssetsPackage,
+        package: kWelcomeGalleryAssetsPackage,
         width: 45.0,
       ),
     ),
   ];
+}
+
+class _PopPosition {
+  _PopPosition({ this.top, this.right, this.bottom, this.left, @required this.child });
+  final double top;
+  final double right;
+  final double bottom;
+  final double left;
+  final Widget child;
 }
