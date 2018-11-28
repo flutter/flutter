@@ -88,7 +88,7 @@ typedef GestureForcePressEndCallback = void Function(ForcePressDetails details);
 /// pointer's pressure was never greater than
 /// [ForcePressGestureRecognizer.startPressure] in that duration.
 ///
-/// As of 11-21-18 only iPhone 6S devices and higher numbered devices have force
+/// As of November, 2018 only iPhone 6S devices and higher numbered devices have force
 /// touch, with the exception of the iPhone XR.
 ///
 /// Reported pressure will always be in the range [0.0, 1.0], where 1.0 is
@@ -120,8 +120,8 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// of the screen, pressing the screen with varying forces or both
   /// simultaneously.
   ///
-  /// This callback will be invoked for every frame after the invocation of
-  /// [onStart] and before the invocation of [onEnd], no matter what the
+  /// This callback will be invoked for every pointer event after the invocation
+  /// of [onStart] and before the invocation of [onEnd], no matter what the
   /// pressure is during this time period. The position and pressure of the
   /// pointer is provided in the callback's `details` argument, which is a
   /// [ForcePressUpdateDetails] object.
@@ -145,13 +145,13 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// The pressure of the press required to initiate a force press.
   ///
   /// A value of 0.0 is no pressure, and 1.0 is maximum pressure.
-  double startPressure;
+  final double startPressure;
 
   /// The pressure of the press required to peak a force press.
   ///
   /// A value of 0.0 is no pressure, and 1.0 is maximum pressure. This value
   /// must be greater than [startPressure].
-  double peakPressure;
+  final double peakPressure;
 
   Offset _lastPosition;
   double _lastPressure;
@@ -186,25 +186,31 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
       // the gesture until the pressure is greater than the startPressure.
       if (pressure > startPressure && _state == _ForceState.accepted) {
         _state = _ForceState.started;
-        invokeCallback<void>('onStart', () => onStart(ForcePressDetails(
-          pressure: pressure,
-          globalPosition: _lastPosition,
-        )));
+        if (onStart != null) {
+          invokeCallback<void>('onStart', () => onStart(ForcePressDetails(
+            pressure: pressure,
+            globalPosition: _lastPosition,
+          )));
+        }
       }
       if (onPeak != null && pressure > peakPressure &&
          (_state == _ForceState.started)) {
         _state = _ForceState.peaked;
-        invokeCallback<void>('onPeak', () => onPeak(ForcePressDetails(
-          pressure: pressure,
-          globalPosition: event.position,
-        )));
+        if (onPeak != null) {
+          invokeCallback<void>('onPeak', () => onPeak(ForcePressDetails(
+            pressure: pressure,
+            globalPosition: event.position,
+          )));
+        }
       }
       if (onUpdate != null &&
          (_state == _ForceState.started || _state == _ForceState.peaked)) {
-        invokeCallback<void>('onUpdate', () => onUpdate(ForcePressDetails(
-          pressure: pressure,
-          globalPosition: event.position,
-        )));
+        if (onUpdate != null) {
+          invokeCallback<void>('onUpdate', () => onUpdate(ForcePressDetails(
+            pressure: pressure,
+            globalPosition: event.position,
+          )));
+        }
       }
     }
     stopTrackingIfPointerNoLongerDown(event);
@@ -212,32 +218,33 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void acceptGesture(int pointer) {
-    if (_state != _ForceState.accepted) {
+    if (_state == _ForceState.possible)
       _state = _ForceState.accepted;
-      if (onStart != null && _state == _ForceState.started) {
-        invokeCallback<void>('onStart', () => onStart(ForcePressDetails(
-          pressure: _lastPressure,
-          globalPosition: _lastPosition,
-        )));
-      }
+
+    if (onStart != null && _state == _ForceState.started) {
+      invokeCallback<void>('onStart', () => onStart(ForcePressDetails(
+        pressure: _lastPressure,
+        globalPosition: _lastPosition,
+      )));
     }
   }
 
   @override
   void didStopTrackingLastPointer(int pointer) {
     final bool wasAccepted = _state == _ForceState.started || _state == _ForceState.peaked;
-    _state = _ForceState.ready;
     if (_state == _ForceState.possible) {
       resolve(GestureDisposition.rejected);
       return;
     }
-
     if (wasAccepted && onEnd != null) {
-      invokeCallback<void>('onEnd', () => onEnd(ForcePressDetails(
-        pressure: 0.0,
-        globalPosition: _lastPosition,
-      )));
+      if (onEnd != null) {
+        invokeCallback<void>('onEnd', () => onEnd(ForcePressDetails(
+          pressure: 0.0,
+          globalPosition: _lastPosition,
+        )));
+      }
     }
+    _state = _ForceState.ready;
   }
 
   @override
