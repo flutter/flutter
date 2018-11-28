@@ -8,18 +8,17 @@ import '../configuration/helpers.dart';
 import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
-const String _demoWidgetName = 'Slider';
+class SliderDemo extends StatefulWidget {
+  @override
+  _SliderDemoState createState() => _SliderDemoState();
+}
 
-class SliderDemo extends PlaygroundDemo {
+class _SliderDemoState extends State<SliderDemo> {
   Color _activeColor = Colors.blue;
   double _value = 5.0;
   final Color _inactiveColor = Colors.blue;
 
-  @override
-  String tabName() => _demoWidgetName.toUpperCase();
-
-  @override
-  String codePreview() => '''
+  String get codePreview => '''
 Slider(
   value: $_value,
   min: 0.0,
@@ -32,41 +31,40 @@ Slider(
 ''';
 
   @override
-  Widget configWidget(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        ColorPicker(
-          label: 'Active Color',
-          selectedValue: _activeColor,
-          onItemTapped: (Color color) {
-            updateConfiguration(() {
-              _activeColor = color;
+  Widget build(BuildContext context) {
+    return PlaygroundDemo(
+      previewWidget: Padding(
+        padding: const EdgeInsets.only(left: 25.0, right: 25.0),
+        child: Slider(
+          value: _value,
+          min: 0.0,
+          max: 10.0,
+          divisions: 10,
+          activeColor: _activeColor,
+          inactiveColor: _inactiveColor,
+          onChanged: (double value) {
+            setState(() {
+              _value = value;
             });
           },
         ),
-      ],
-    );
-  }
-
-  @override
-  Widget previewWidget(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 25.0, right: 25.0),
-      child: Slider(
-        value: _value,
-        min: 0.0,
-        max: 10.0,
-        divisions: 10,
-        activeColor: _activeColor,
-        inactiveColor: _inactiveColor,
-        onChanged: (double value) {
-          updateConfiguration(() {
-            _value = value;
-          });
-        },
       ),
+      configWidget: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          ColorPicker(
+            label: 'Active Color',
+            selectedValue: _activeColor,
+            onItemTapped: (Color color) {
+              setState(() {
+                _activeColor = color;
+              });
+            },
+          ),
+        ],
+      ),
+      codePreview: codePreview,
     );
   }
 }

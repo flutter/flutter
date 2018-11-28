@@ -11,22 +11,21 @@ import '../configuration/helpers.dart';
 import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
-const String _demoWidgetName = 'CupertinoSegmentControl';
+class CupertinoSegmentControlDemo extends StatefulWidget {
+  @override
+  _CupertinoSegmentControlDemoState createState() => _CupertinoSegmentControlDemoState();
+}
 
-class CupertinoSegmentControlDemo extends PlaygroundDemo {
-  Color _selectedColor = Colors.blue;
-  int _groupValue = 0;
-
-  final List<Color> _colors = kColorChoices
+class _CupertinoSegmentControlDemoState extends State<CupertinoSegmentControlDemo> {
+  static final List<Color> _colors = kColorChoices
       .map((ColorChoice c) => c.color)
       .where((Color c) => c != Colors.white)
       .toList();
 
-  @override
-  String tabName() => _demoWidgetName.toUpperCase();
+  Color _selectedColor = Colors.blue;
+  int _groupValue = 0;
 
-  @override
-  String codePreview() => '''
+  String get codePreview => '''
 CupertinoSegmentedControl<int>(
   children: <Widget>[
     Text('A'),
@@ -42,47 +41,44 @@ CupertinoSegmentedControl<int>(
 ''';
 
   @override
-  Widget configWidget(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        ColorPicker(
-          label: 'Selected Color',
-          colors: _colors,
-          selectedValue: _selectedColor,
-          onItemTapped: (Color color) {
-            updateConfiguration(() {
-              _selectedColor = color;
+  Widget build(BuildContext context) {
+    return PlaygroundDemo(
+      previewWidget: Padding(
+        padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+        child: CupertinoSegmentedControl<int>(
+          selectedColor: _selectedColor,
+          borderColor: _selectedColor,
+          pressedColor: _selectedColor.withOpacity(0.4),
+          onValueChanged: (int value) {
+            setState(() {
+              _groupValue = value;
             });
           },
+          groupValue: _groupValue,
+          children: const <int, Widget>{
+              0: Text('A'),
+              1: Text('B'),
+              2: Text('C'),
+            },
         ),
-      ],
-    );
-  }
-
-  final Map<int, Widget> children = const <int, Widget>{
-    0: Text('A'),
-    1: Text('B'),
-    2: Text('C'),
-  };
-
-  @override
-  Widget previewWidget(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 15.0, right: 15.0),
-      child: CupertinoSegmentedControl<int>(
-        children: children,
-        selectedColor: _selectedColor,
-        borderColor: _selectedColor,
-        pressedColor: _selectedColor.withOpacity(0.4),
-        groupValue: _groupValue,
-        onValueChanged: (int value) {
-          updateConfiguration(() {
-            _groupValue = value;
-          });
-        },
       ),
+      configWidget: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          ColorPicker(
+            label: 'Selected Color',
+            colors: _colors,
+            selectedValue: _selectedColor,
+            onItemTapped: (Color color) {
+              setState(() {
+                _selectedColor = color;
+              });
+            },
+          ),
+        ],
+      ),
+      codePreview: codePreview,
     );
   }
 }

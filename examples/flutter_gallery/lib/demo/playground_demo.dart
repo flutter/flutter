@@ -21,15 +21,16 @@ class MaterialPlaygroundDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PlaygroundScaffold(
-        title: 'Material Playground',
-        demos: <PlaygroundDemo>[
-          RaisedButtonDemo(),
-          FlatButtonDemo(),
-          IconButtonDemo(),
-          CheckboxDemo(),
-          SwitchDemo(),
-          SliderDemo(),
-        ]);
+      title: 'Material Playground',
+      demos: <String, Widget>{
+        'RAISEDBUTTON': RaisedButtonDemo(),
+        'FLATBUTTON': FlatButtonDemo(),
+        'ICONBUTTON': IconButtonDemo(),
+        'CHECKBOX': CheckboxDemo(),
+        'SWITCH': SwitchDemo(),
+        'SLIDER': SliderDemo(),
+      },
+    );
   }
 }
 
@@ -45,12 +46,13 @@ class CupertinoPlaygroundDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PlaygroundScaffold(
-        title: 'Cupertino Playground',
-        demos: <PlaygroundDemo>[
-          CupertinoSegmentControlDemo(),
-          CupertinoSliderDemo(),
-          CupertinoButtonDemo(),
-          CupertinoSwitchDemo(),
-        ]);
+      title: 'Cupertino Playground',
+      demos: <String, Widget>{
+        'SEGEMENTEDCONTROL': CupertinoSegmentControlDemo(),
+        'SLIDER': CupertinoSliderDemo(),
+        'BUTTON': CupertinoButtonDemo(),
+        'SWITCH': CupertinoSwitchDemo(),
+      },
+    );
   }
 }

@@ -8,17 +8,16 @@ import '../configuration/helpers.dart';
 import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
-const String _demoWidgetName = 'FlatButton';
+class FlatButtonDemo extends StatefulWidget {
+  @override
+  _FlatButtonDemoState createState() => _FlatButtonDemoState();
+}
 
-class FlatButtonDemo extends PlaygroundDemo {
+class _FlatButtonDemoState extends State<FlatButtonDemo> {
   String _borderShape = 'rounded';
   Color _color = Colors.blue;
 
-  @override
-  String tabName() => _demoWidgetName.toUpperCase();
-
-  @override
-  String codePreview() => '''
+  String get codePreview => '''
 FlatButton(
   color: ${codeSnippetForColor(_color)},
   child: Text(
@@ -33,54 +32,49 @@ FlatButton(
 ''';
 
   @override
-  Widget configWidget(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        BorderPicker(
-          selectedValue: _borderShape,
-          onItemTapped: (String shapeName) {
-            updateConfiguration(() {
-              _borderShape = shapeName;
-            });
-          },
-        ),
-        ColorPicker(
-          selectedValue: _color,
-          onItemTapped: (Color color) {
-            updateConfiguration(() {
-              _color = color;
-            });
-          },
-        ),
-      ],
-    );
-  }
-
-  @override
-  Widget previewWidget(BuildContext context) {
-    return Center(
-      child: ButtonTheme(
-        minWidth: 160.0,
-        height: 50.0,
-        child: FlatButton(
-          color: _color,
-          child: Text(
-            'BUTTON',
-            style: TextStyle(
-              fontSize: 16.0,
-              color: _color == Colors.white ? Colors.grey[900] : Colors.white,
+  Widget build(BuildContext context) {
+    return PlaygroundDemo(
+      previewWidget: Center(
+        child: ButtonTheme(
+          minWidth: 160.0,
+          height: 50.0,
+          child: FlatButton(
+            color: _color,
+            child: Text(
+              'BUTTON',
+              style: TextStyle(
+                fontSize: 16.0,
+                color: _color == Colors.white ? Colors.grey[900] : Colors.white,
+              ),
             ),
+            shape: borderShapeFromString(_borderShape, false),
+            onPressed: () {},
           ),
-          shape: _borderShape == 'circle'
-              ? RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                )
-              : borderShapeFromString(_borderShape, false),
-          onPressed: () {},
         ),
       ),
+      configWidget: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          BorderPicker(
+            selectedValue: _borderShape,
+            onItemTapped: (String shapeName) {
+              setState(() {
+                _borderShape = shapeName;
+              });
+            },
+          ),
+          ColorPicker(
+            selectedValue: _color,
+            onItemTapped: (Color color) {
+              setState(() {
+                _color = color;
+              });
+            },
+          ),
+        ],
+      ),
+      codePreview: codePreview,
     );
   }
 }

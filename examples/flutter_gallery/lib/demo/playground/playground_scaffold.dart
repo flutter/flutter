@@ -4,17 +4,17 @@
 
 import 'package:flutter/material.dart';
 
-import 'playground_demo.dart';
-
 class PlaygroundScaffold extends StatelessWidget {
   const PlaygroundScaffold({
     Key key,
     @required this.title,
     @required this.demos,
-  });
+  })  : assert(title != null),
+        assert(demos != null),
+        super(key: key);
 
   final String title;
-  final List<PlaygroundDemo> demos;
+  final Map<String, Widget> demos;
 
   @override
   Widget build(BuildContext context) {
@@ -32,14 +32,12 @@ class PlaygroundScaffold extends StatelessWidget {
           ),
           bottom: TabBar(
             isScrollable: true,
-            tabs: demos.map<Widget>(
-              (PlaygroundDemo demo) {
-                return Tab(text: demo.tabName());
-              },
-            ).toList(),
+            tabs: demos.keys
+                .map<Tab>((String title) => Tab(text: title))
+                .toList(),
           ),
         ),
-        body: TabBarView(children: demos),
+        body: TabBarView(children: demos.values.toList()),
       ),
     );
   }

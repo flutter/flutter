@@ -10,12 +10,15 @@ class SliderPicker extends StatelessWidget {
   const SliderPicker({
     Key key,
     @required this.label,
+    @required this.divisions,
     this.value = 0.0,
     this.minValue = 0.0,
     this.maxValue = 1.0,
-    this.divisions,
     this.onValueChanged,
-  }) : assert(label != null), super(key: key);
+  })  : assert(label != null),
+        assert(value != null),
+        assert(divisions != null),
+        super(key: key);
 
   final String label;
   final double value;

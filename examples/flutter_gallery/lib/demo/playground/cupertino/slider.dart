@@ -11,17 +11,21 @@ import '../configuration/helpers.dart';
 import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
-const String _demoWidgetName = 'CupertinoSlider';
+class CupertinoSliderDemo extends StatefulWidget {
+  @override
+  _CupertinoSliderDemoState createState() => _CupertinoSliderDemoState();
+}
 
-class CupertinoSliderDemo extends PlaygroundDemo {
+class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
+  static final List<Color> _colors = kColorChoices
+      .map((ColorChoice c) => c.color)
+      .where((Color c) => c != Colors.white)
+      .toList();
+
   Color _activeColor = Colors.blue;
   double _value = 5.0;
 
-  @override
-  String tabName() => _demoWidgetName.toUpperCase();
-
-  @override
-  String codePreview() => '''
+  String get codePreview => '''
 CupertinoSlider(
   value: $_value,
   activeColor: ${codeSnippetForColor(_activeColor)},
@@ -32,10 +36,16 @@ CupertinoSlider(
 )
 ''';
 
-  final List<Color> _colors = kColorChoices
-      .map((ColorChoice c) => c.color)
-      .where((Color c) => c != Colors.white)
-      .toList();
+  Widget build(BuildContext context) {
+    return PlaygroundDemo(
+      codePreview: codePreview,
+      previewWidget: previewWidget(context),
+      configWidget: configWidget(context),
+    );
+  }
+
+
+  
 
   @override
   Widget configWidget(BuildContext context) {
@@ -48,7 +58,7 @@ CupertinoSlider(
           selectedValue: _activeColor,
           colors: _colors,
           onItemTapped: (Color color) {
-            updateConfiguration(() {
+            setState(() {
               _activeColor = color;
             });
           },
@@ -68,7 +78,7 @@ CupertinoSlider(
         max: 10.0,
         divisions: 10,
         onChanged: (double value) {
-          updateConfiguration(() {
+          setState(() {
             _value = value;
           });
         },

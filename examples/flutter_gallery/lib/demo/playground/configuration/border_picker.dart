@@ -10,13 +10,17 @@ import 'helpers.dart';
 import 'property_column.dart';
 
 class BorderPicker extends StatelessWidget {
-  const BorderPicker ({
+  const BorderPicker({
+    Key key,
+    @required this.selectedValue,
     this.label = 'Shape',
     this.pickerHeight = kPickerRowHeight,
-    this.selectedValue,
     this.borderOptions,
     this.onItemTapped,
-  });
+  })  : assert(label != null),
+        assert(pickerHeight != null && pickerHeight > 0.0),
+        assert(selectedValue != null),
+        super(key: key);
 
   final String label;
   final double pickerHeight;
@@ -25,14 +29,12 @@ class BorderPicker extends StatelessWidget {
   final ValueChanged<String> onItemTapped;
 
   List<Widget> _buildChoices() {
-    final List<String> options =
-      borderOptions ?? kBorderChoices.map((BorderChoice c) => c.type).toList();
+    final List<String> options = borderOptions ?? kBorderChoices.map((BorderChoice c) => c.type).toList();
     final List<Widget> choices = <Widget>[];
 
     for (int i = 0; i < options.length; i++) {
       final String shapeName = options[i];
-
-      Widget button = BorderChoiceButton(
+      Widget button = _BorderChoiceButton(
         shape: shapeName,
         isSelected: selectedValue == shapeName,
         onTapped: () {
@@ -41,14 +43,12 @@ class BorderPicker extends StatelessWidget {
           }
         },
       );
-
       if (i < options.length - 1) {
         button = Padding(
           padding: const EdgeInsets.only(right: 10.0),
           child: button,
         );
       }
-
       choices.add(button);
     }
     return choices;
@@ -72,13 +72,15 @@ class BorderPicker extends StatelessWidget {
   }
 }
 
-class BorderChoiceButton extends StatelessWidget {
-  const BorderChoiceButton({
+class _BorderChoiceButton extends StatelessWidget {
+  const _BorderChoiceButton({
     Key key,
     @required this.shape,
     this.isSelected = false,
     this.onTapped,
-  }) : assert(shape != null), super(key: key);
+  })  : assert(shape != null),
+        assert(isSelected != null),
+        super(key: key);
 
   final String shape;
   final bool isSelected;

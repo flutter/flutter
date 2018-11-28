@@ -8,18 +8,20 @@ import '../configuration/helpers.dart';
 import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
-const String _demoWidgetName = 'RaisedButton';
+class RaisedButtonDemo extends StatefulWidget {
+  @override
+  _RaisedButtonDemoState createState() => _RaisedButtonDemoState();
+}
 
-class RaisedButtonDemo extends PlaygroundDemo {
+class _RaisedButtonDemoState extends State<RaisedButtonDemo> {
   double _elevation = 8.0;
   String _borderShape = 'rounded';
   Color _color = Colors.blue;
 
-  @override
-  String tabName() => _demoWidgetName.toUpperCase();
+  // TODO
+  static String title = 'RaisedButton'.toUpperCase();
 
-  @override
-  String codePreview() => '''
+  String get codePreview => '''
 RaisedButton(
   color: ${codeSnippetForColor(_color)},
   child: Text(
@@ -34,66 +36,63 @@ RaisedButton(
 )
 ''';
 
-  Widget _elevationPicker() => SliderPicker(
-        label: 'Elevation',
-        value: _elevation,
-        minValue: 0.0,
-        maxValue: 24.0,
-        divisions: 6,
-        onValueChanged: (double value) {
-          updateConfiguration(() {
-            _elevation = value;
-          });
-        },
-      );
-
   @override
-  Widget configWidget(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        _elevationPicker(),
-        BorderPicker(
-          selectedValue: _borderShape,
-          onItemTapped: (String borderShape) {
-            updateConfiguration(() {
-              _borderShape = borderShape;
-            });
-          },
-        ),
-        ColorPicker(
-          selectedValue: _color,
-          onItemTapped: (Color color) {
-            updateConfiguration(() {
-              _color = color;
-            });
-          },
-        ),
-      ],
-    );
-  }
-
-  @override
-  Widget previewWidget(BuildContext context) {
-    return Center(
-      child: ButtonTheme(
-        minWidth: 160.0,
-        height: 50.0,
-        child: RaisedButton(
-          color: _color,
-          child: Text(
-            'BUTTON',
-            style: TextStyle(
-              fontSize: 16.0,
-              color: _color == Colors.white ? Colors.grey[900] : Colors.white,
+  Widget build(BuildContext context) {
+    return PlaygroundDemo(
+      previewWidget: Center(
+        child: ButtonTheme(
+          minWidth: 160.0,
+          height: 50.0,
+          child: RaisedButton(
+            color: _color,
+            child: Text(
+              'BUTTON',
+              style: TextStyle(
+                fontSize: 16.0,
+                color: _color == Colors.white ? Colors.grey[900] : Colors.white,
+              ),
             ),
+            shape: borderShapeFromString(_borderShape, false),
+            elevation: _elevation,
+            onPressed: () {},
           ),
-          shape: borderShapeFromString(_borderShape, false),
-          elevation: _elevation,
-          onPressed: () {},
         ),
       ),
+      configWidget: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          SliderPicker(
+            label: 'Elevation',
+            value: _elevation,
+            minValue: 0.0,
+            maxValue: 24.0,
+            divisions: 6,
+            onValueChanged: (double value) {
+              setState(() {
+                _elevation = value;
+              });
+            },
+          ),
+          BorderPicker(
+            selectedValue: _borderShape,
+            onItemTapped: (String borderShape) {
+              setState(() {
+                _borderShape = borderShape;
+              });
+            },
+          ),
+          ColorPicker(
+            selectedValue: _color,
+            onItemTapped: (Color color) {
+              setState(() {
+                _color = color;
+              });
+            },
+          ),
+        ],
+      ),
+      codePreview: codePreview,
     );
   }
 }

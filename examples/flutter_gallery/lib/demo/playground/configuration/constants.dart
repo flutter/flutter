@@ -9,7 +9,7 @@ import 'choices.dart';
 typedef IndexedValueCallback<T> = Function(int index, T value);
 
 const double kPickerSelectedElevation = 3.0;
-const double kPickerRowHeight = 46.0;
+const double kPickerRowHeight = 44.0;
 
 const List<BorderChoice> kBorderChoices = <BorderChoice>[
   BorderChoice(type: 'square', code: '''

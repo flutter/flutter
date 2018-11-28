@@ -4,16 +4,19 @@
 
 import 'package:flutter/material.dart';
 
-const double _kLabelFontSize = 16.0;
-const Color _kLabelColor = Colors.blue;
-
 class PropertyColumn extends StatelessWidget {
   const PropertyColumn({
+    Key key,
     @required this.label,
     @required this.widget,
-    this.labelFontSize = _kLabelFontSize,
-    this.labelColor = _kLabelColor,
-  });
+    this.labelFontSize = 16.0,
+    this.labelColor = Colors.blue,
+  }) : assert(label != null),
+       assert(widget != null),
+       assert(labelFontSize != null),
+       assert(labelColor != null),
+       super(key: key);
+
   final String label;
   final double labelFontSize;
   final Color labelColor;

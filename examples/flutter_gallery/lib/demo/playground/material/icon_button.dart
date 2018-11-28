@@ -6,20 +6,18 @@ import 'package:flutter/material.dart';
 
 import '../configuration/helpers.dart';
 import '../configuration/pickers.dart';
-import '../configuration/property_column.dart';
 import '../playground_demo.dart';
 
-const String _demoWidgetName = 'IconButton';
+class IconButtonDemo extends StatefulWidget {
+  @override
+  _IconButtonDemoState createState() => _IconButtonDemoState();
+}
 
-class IconButtonDemo extends PlaygroundDemo {
+class _IconButtonDemoState extends State<IconButtonDemo> {
   Color _color = Colors.blue;
   IconData _icon = Icons.thumb_up;
 
-  @override
-  String tabName() => _demoWidgetName.toUpperCase();
-
-  @override
-  String codePreview() => '''
+  String get codePreview => '''
 IconButton(
   iconSize: 50.0,
   icon: Icon(${codeSnippetForIcon(_icon)}),
@@ -30,43 +28,41 @@ IconButton(
 ''';
 
   @override
-  Widget configWidget(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        IconPicker(
-          activeColor: _color,
-          selectedValue: _icon,
-          onItemTapped: (IconData icon) {
-            updateConfiguration(() {
-              _icon = icon;
-            });
-          }),
-        ColorPicker(
-          selectedValue: _color,
-          onItemTapped: (Color color) {
-            updateConfiguration(() {
-              _color = color;
-            });
-          }),
-      ],
-    );
-  }
-
-  @override
-  Widget previewWidget(BuildContext context) {
-
-    print(Colors.lightBlue[300]);
-
-    return Center(
-      child: IconButton(
-        iconSize: 50.0,
-        icon: Icon(_icon),
-        onPressed: () {},
-        color: _color,
-        splashColor: _color.withOpacity(0.2),
+  Widget build(BuildContext context) {
+    return PlaygroundDemo(
+      previewWidget: Center(
+        child: IconButton(
+          iconSize: 50.0,
+          icon: Icon(_icon),
+          onPressed: () {},
+          color: _color,
+          splashColor: _color.withOpacity(0.2),
+        ),
       ),
+      configWidget: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          IconPicker(
+            activeColor: _color,
+            selectedValue: _icon,
+            onItemTapped: (IconData icon) {
+              setState(() {
+                _icon = icon;
+              });
+            },
+          ),
+          ColorPicker(
+            selectedValue: _color,
+            onItemTapped: (Color color) {
+              setState(() {
+                _color = color;
+              });
+            },
+          ),
+        ],
+      ),
+      codePreview: codePreview,
     );
   }
 }

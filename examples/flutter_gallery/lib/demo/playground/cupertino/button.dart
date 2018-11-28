@@ -9,16 +9,15 @@ import '../configuration/helpers.dart';
 import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
-const String _demoWidgetName = 'CupertinoButton';
+class CupertinoButtonDemo extends StatefulWidget {
+  @override
+  _CupertinoButtonDemoState createState() => _CupertinoButtonDemoState();
+}
 
-class CupertinoButtonDemo extends PlaygroundDemo {
+class _CupertinoButtonDemoState extends State<CupertinoButtonDemo> {
   Color _color = Colors.blue;
 
-  @override
-  String tabName() => _demoWidgetName.toUpperCase();
-
-  @override
-  String codePreview() => '''
+  String get codePreview => '''
 CupertinoButton(
   child: const Text('BUTTON'),
   color: ${codeSnippetForColor(_color)},
@@ -27,31 +26,30 @@ CupertinoButton(
 ''';
 
   @override
-  Widget configWidget(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        ColorPicker(
-          selectedValue: _color,
-          onItemTapped: (Color color) {
-            updateConfiguration(() {
-              _color = color;
-            });
-          },
+  Widget build(BuildContext context) {
+    return PlaygroundDemo(
+      previewWidget: Center(
+        child: CupertinoButton(
+          child: const Text('BUTTON'),
+          color: _color,
+          onPressed: () {},
         ),
-      ],
-    );
-  }
-
-  @override
-  Widget previewWidget(BuildContext context) {
-    return Center(
-      child: CupertinoButton(
-        child: const Text('BUTTON'),
-        color: _color,
-        onPressed: () {},
       ),
+      configWidget: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          ColorPicker(
+            selectedValue: _color,
+            onItemTapped: (Color color) {
+              setState(() {
+                _color = color;
+              });
+            },
+          ),
+        ],
+      ),
+      codePreview: codePreview,
     );
   }
 }

@@ -11,17 +11,21 @@ import '../configuration/helpers.dart';
 import '../configuration/pickers.dart';
 import '../playground_demo.dart';
 
-const String _demoWidgetName = 'CupertinoSwitch';
+class CupertinoSwitchDemo extends StatefulWidget {
+  @override
+  _CupertinoSwitchDemoState createState() => _CupertinoSwitchDemoState();
+}
 
-class CupertinoSwitchDemo extends PlaygroundDemo {
+class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
+  static final List<Color> _colors = kColorChoices
+      .map((ColorChoice c) => c.color)
+      .where((Color c) => c != Colors.white)
+      .toList();
+
   Color _activeColor = Colors.blue;
   bool _value = true;
 
-  @override
-  String tabName() => _demoWidgetName.toUpperCase();
-
-  @override
-  String codePreview() => '''
+  String get codePreview => '''
 CupertinoSwitch(
   value: $_value,
   activeColor: ${codeSnippetForColor(_activeColor)},
@@ -29,43 +33,37 @@ CupertinoSwitch(
 )
 ''';
 
-  final List<Color> _colors = kColorChoices
-      .map((ColorChoice c) => c.color)
-      .where((Color c) => c != Colors.white)
-      .toList();
-
   @override
-  Widget configWidget(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        ColorPicker(
-          label: 'Active Color',
-          selectedValue: _activeColor,
-          colors: _colors,
-          onItemTapped: (Color color) {
-            updateConfiguration(() {
-              _activeColor = color;
+  Widget build(BuildContext context) {
+    return PlaygroundDemo(
+      previewWidget: Center(
+        child: CupertinoSwitch(
+          value: _value,
+          activeColor: _activeColor,
+          onChanged: (bool value) {
+            setState(() {
+              _value = value;
             });
           },
         ),
-      ],
-    );
-  }
-
-  @override
-  Widget previewWidget(BuildContext context) {
-    return Center(
-      child: CupertinoSwitch(
-        value: _value,
-        activeColor: _activeColor,
-        onChanged: (bool value) {
-          updateConfiguration(() {
-            _value = value;
-          });
-        },
       ),
+      configWidget: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          ColorPicker(
+            label: 'Active Color',
+            selectedValue: _activeColor,
+            colors: _colors,
+            onItemTapped: (Color color) {
+              setState(() {
+                _activeColor = color;
+              });
+            },
+          ),
+        ],
+      ),
+      codePreview: codePreview,
     );
   }
 }

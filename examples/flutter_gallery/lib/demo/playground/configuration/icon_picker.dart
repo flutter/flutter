@@ -10,13 +10,17 @@ import 'property_column.dart';
 
 class IconPicker extends StatelessWidget {
   const IconPicker({
+    Key key,
+    @required this.selectedValue,
     this.label = 'Icon',
     this.isSelected = false,
     this.icons,
-    this.selectedValue,
     this.activeColor,
     this.onItemTapped,
-  });
+  })  : assert(label != null),
+        assert(selectedValue != null),
+        assert(isSelected != null),
+        super(key: key);
 
   final String label;
   final bool isSelected;
@@ -26,13 +30,12 @@ class IconPicker extends StatelessWidget {
   final ValueChanged<IconData> onItemTapped;
 
   List<Widget> _buildChoices() {
-    final List<IconData> options = icons ?? kIconChoices.map((IconChoice c) => c.icon).toList();
+    final List<IconData> options =
+        icons ?? kIconChoices.map((IconChoice c) => c.icon).toList();
     final List<Widget> choices = <Widget>[];
-
     for (int i = 0; i < options.length; i++) {
       final IconData icon = options[i];
-
-      Widget button = IconChoiceButton(
+      Widget button = _IconChoiceButton(
         icon: icon,
         isSelected: selectedValue == icon,
         activeColor: activeColor,
@@ -42,14 +45,12 @@ class IconPicker extends StatelessWidget {
           }
         },
       );
-
       if (i < options.length - 1) {
         button = Padding(
           padding: const EdgeInsets.only(right: 10.0),
           child: button,
         );
       }
-
       choices.add(button);
     }
     return choices;
@@ -73,14 +74,16 @@ class IconPicker extends StatelessWidget {
   }
 }
 
-class IconChoiceButton extends StatelessWidget {
-  const IconChoiceButton({
+class _IconChoiceButton extends StatelessWidget {
+  const _IconChoiceButton({
     Key key,
     @required this.icon,
     this.activeColor,
     this.isSelected,
     this.onTapped,
-  }) : assert(icon != null), super(key: key);
+  })  : assert(icon != null),
+        assert(isSelected != null),
+        super(key: key);
 
   final IconData icon;
   final Color activeColor;
@@ -97,6 +100,4 @@ class IconChoiceButton extends StatelessWidget {
       splashColor: activeColor.withOpacity(0.2),
     );
   }
-
-
 }

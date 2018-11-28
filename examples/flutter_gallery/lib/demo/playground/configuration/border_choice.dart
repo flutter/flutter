@@ -5,7 +5,10 @@
 import 'package:flutter/material.dart';
 
 class BorderChoice {
-  const BorderChoice({@required this.type, @required this.code});
+  const BorderChoice({
+    @required this.type, 
+    @required this.code
+  }) : assert(type != null), assert(code != null);
 
   final String type;
   final String code;

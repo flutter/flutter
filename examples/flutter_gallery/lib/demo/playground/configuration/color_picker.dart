@@ -10,13 +10,18 @@ import 'property_column.dart';
 
 class ColorPicker extends StatelessWidget {
   const ColorPicker({
+    Key key,
+    @required this.selectedValue,
     this.label = 'Color',
     this.inverse = false,
     this.pickerHeight = kPickerRowHeight,
-    this.selectedValue,
     this.colors,
     this.onItemTapped,
-  });
+  })  : assert(selectedValue != null),
+        assert(pickerHeight != null && pickerHeight >= 0.0),
+        assert(inverse != null),
+        assert(label != null),
+        super(key: key);
 
   final String label;
   final double pickerHeight;
@@ -31,8 +36,7 @@ class ColorPicker extends StatelessWidget {
 
     for (int i = 0; i < options.length; i++) {
       final Color color = options[i];
-
-      Widget button = ColorChoiceButton(
+      Widget button = _ColorChoiceButton(
         color: color,
         inverse: inverse,
         isSelected: selectedValue == color,
@@ -42,14 +46,12 @@ class ColorPicker extends StatelessWidget {
           }
         },
       );
-
       if (i < options.length - 1) {
         button = Padding(
           padding: const EdgeInsets.only(right: 10.0),
           child: button,
         );
       }
-
       choices.add(button);
     }
     return choices;
@@ -73,32 +75,35 @@ class ColorPicker extends StatelessWidget {
   }
 }
 
-class ColorChoiceButton extends StatelessWidget {
-  const ColorChoiceButton({
+class _ColorChoiceButton extends StatelessWidget {
+  const _ColorChoiceButton({
     Key key,
     @required this.color,
-    this.isSelected,
+    this.isSelected = false,
     this.inverse = false,
-    this.size = const Size(kPickerRowHeight, kPickerRowHeight),
     this.onTapped,
-  }) : assert(color != null), super(key: key);
+  }) : assert(color != null),
+       assert(inverse != null),
+       assert(isSelected != null),
+       super(key: key);
 
   final Color color;
   final bool isSelected;
   final bool inverse;
-  final Size size;
   final VoidCallback onTapped;
 
   @override
   Widget build(BuildContext context) {
     return ButtonTheme(
-      minWidth: size.width,
-      height: size.height,
+      minWidth: kPickerRowHeight,
+      height: kPickerRowHeight,
       child: RaisedButton(
         shape: StadiumBorder(
           side: BorderSide(
-            color: inverse ? color : (isSelected ? Colors.white : Colors.grey[350]),
             width: 2.0,
+            color: inverse
+                ? color
+                : (isSelected ? Colors.white : Colors.grey[350]),
           ),
         ),
         color: inverse ? Colors.white : color,

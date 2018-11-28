@@ -5,7 +5,9 @@
 import 'package:flutter/material.dart';
 
 class ColorChoice {
-  const ColorChoice({@required this.color, @required this.code});
+  const ColorChoice({@required this.color, @required this.code})
+      : assert(color != null),
+        assert(code != null);
 
   final Color color;
   final String code;

@@ -5,33 +5,33 @@
 import 'package:share/share.dart';
 import 'package:flutter/material.dart';
 
-const int _animationInterval = 100;
-
-abstract class PlaygroundDemo extends StatefulWidget {
-  _PlaygroundWidgetState _state;
+class PlaygroundDemo extends StatefulWidget {
+  const PlaygroundDemo({
+    Key key,
+    @required this.previewWidget,
+    @required this.configWidget,
+    @required this.codePreview,
+  })  : assert(previewWidget != null),
+        assert(configWidget != null),
+        assert(codePreview != null),
+        super(key: key);
 
   @override
-  _PlaygroundWidgetState createState() {
-    _state = _PlaygroundWidgetState();
-    return _state;
-  }
+  _PlaygroundDemoState createState() => _PlaygroundDemoState();
 
-  String tabName();
-  Widget previewWidget(BuildContext context);
-  Widget configWidget(BuildContext context);
-  String codePreview();
-
-  void updateConfiguration(VoidCallback updates) => _state.updateState(updates);
+  final Widget previewWidget;
+  final Widget configWidget;
+  final String codePreview;
 }
 
-class _PlaygroundWidgetState extends State<PlaygroundDemo>
+class _PlaygroundDemoState extends State<PlaygroundDemo>
     with SingleTickerProviderStateMixin {
-  final double _headerHeight = 60.0;
-  final double _codePadding = 15.0;
+  static const double _headerHeight = 60.0;
+  static const double _codePadding = 15.0;
+
   final Color _codeTextColor = Colors.grey[800];
 
   bool _isCodeOpen = false;
-
   AnimationController _backdropAnimationController;
 
   @override
@@ -39,15 +39,15 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo>
     super.initState();
     _backdropAnimationController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: _animationInterval),
+      duration: Duration(milliseconds: 100),
       value: 1.0,
     );
   }
 
   @override
   void dispose() {
-    super.dispose();
     _backdropAnimationController.dispose();
+    super.dispose();
   }
 
   void _toggleCode() {
@@ -58,7 +58,7 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo>
   Animation<RelativeRect> _getLayerAnimation(BoxConstraints constraints) {
     final double maxHeight = constraints.biggest.height;
     final double backPanelHeight = maxHeight - _headerHeight;
-    final double frontPanelHeight = -_headerHeight;
+    const double frontPanelHeight = -_headerHeight;
     const double offsetTop = 130.0;
 
     return RelativeRectTween(
@@ -68,27 +68,6 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo>
       parent: _backdropAnimationController,
       curve: Curves.linear,
     ));
-  }
-
-  Widget _widgetPreviewConfigurationLayer() {
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Container(
-          height: 160.0,
-          child: widget.previewWidget(context),
-        ),
-        const Divider(
-          height: 1.0,
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            child: widget.configWidget(context),
-          ),
-        ),
-      ],
-    );
   }
 
   Widget _codePreviewLayer(BoxConstraints constraints) {
@@ -104,7 +83,7 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo>
               height: _headerHeight,
               child: FlatButton(
                 color: Colors.white,
-                padding: EdgeInsets.fromLTRB(_codePadding, 2.0, 0.0, 0.0),
+                padding: const EdgeInsets.fromLTRB(_codePadding, 2.0, 0.0, 0.0),
                 child: Container(
                   width: MediaQuery.of(context).size.width,
                   child: Stack(
@@ -159,14 +138,14 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo>
                   return SingleChildScrollView(
                     child: Container(
                       height: constraints.maxHeight,
-                      padding: EdgeInsets.all(_codePadding).copyWith(top: 12.0),
+                      padding: const EdgeInsets.all(_codePadding).copyWith(top: 12.0),
                       color: Colors.white,
                       child: Text(
-                        widget.codePreview(),
+                        widget.codePreview,
                         style: TextStyle(
                           color: _codeTextColor,
                           fontSize: 14.0,
-                          height: 1.6,
+                          height: 1.4,
                           fontFamily: 'Courier',
                         ),
                       ),
@@ -181,51 +160,46 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo>
     );
   }
 
-  Widget _modalContainer() {
-    return GestureDetector(
-      onTap: () {
-        _toggleCode();
-      },
-      child: Container(
-        color: Colors.blue[700].withOpacity(0.6),
-      ),
-    );
-  }
-
-  Widget _shareButton() {
-    return Positioned(
-      bottom: 15.0,
-      right: 20.0,
-      child: RaisedButton(
-        splashColor: Colors.white,
-        child: const Text(
-          'SHARE',
-          style: TextStyle(
-            fontSize: 14.0,
-          ),
-        ),
-        onPressed: () {
-          Share.share(widget.codePreview());
-        },
-      ),
-    );
-  }
-
   List<Widget> _layersStack(BoxConstraints constraints) {
     final List<Widget> stack = <Widget>[
-      _widgetPreviewConfigurationLayer(),
+      _WidgetPreviewConfigurationLayer(
+        previewWidget: widget.previewWidget,
+        configWidget: widget.configWidget,
+      ),
     ];
 
     // If code layer is open, add modal
     if (_isCodeOpen) {
-      stack.add(_modalContainer());
+      stack.add(GestureDetector(
+        onTap: () {
+          _toggleCode();
+        },
+        child: Container(
+          color: Colors.blue[700].withOpacity(0.6),
+        ),
+      ));
     }
 
     stack.add(_codePreviewLayer(constraints));
 
     // If code layer is open, add share button
     if (_isCodeOpen) {
-      stack.add(_shareButton());
+      stack.add(Positioned(
+        bottom: 15.0,
+        right: 20.0,
+        child: RaisedButton(
+          splashColor: Colors.white,
+          child: const Text(
+            'SHARE',
+            style: TextStyle(
+              fontSize: 14.0,
+            ),
+          ),
+          onPressed: () {
+            Share.share(widget.codePreview);
+          },
+        ),
+      ));
     }
     return stack;
   }
@@ -241,6 +215,40 @@ class _PlaygroundWidgetState extends State<PlaygroundDemo>
       );
     });
   }
+}
 
-  void updateState(VoidCallback stateCallback) => setState(stateCallback);
+// Just a column: [preview, divider, config].
+class _WidgetPreviewConfigurationLayer extends StatelessWidget {
+  const _WidgetPreviewConfigurationLayer({
+    Key key,
+    @required this.previewWidget,
+    @required this.configWidget,
+  })  : assert(previewWidget != null),
+        assert(configWidget != null),
+        super(key: key);
+
+  final Widget previewWidget;
+  final Widget configWidget;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        SizedBox(
+          height: 160.0,
+          child: previewWidget,
+        ),
+        const Divider(
+          height: 1.0,
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            child: configWidget,
+          ),
+        ),
+      ],
+    );
+  }
 }

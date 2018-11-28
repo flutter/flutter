@@ -5,7 +5,9 @@
 import 'package:flutter/material.dart';
 
 class IconChoice {
-  const IconChoice({@required this.icon, @required this.code});
+  const IconChoice({@required this.icon, @required this.code})
+      : assert(icon != null),
+        assert(code != null);
 
   final IconData icon;
   final String code;
