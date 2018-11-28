@@ -6,8 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_gallery/demo/customized/home.dart';
-import 'package:flutter_gallery/welcome/home.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
@@ -27,6 +25,14 @@ int toStringErrors = 0;
 //
 // If you change navigation behavior in the Gallery or in the framework, make
 // sure all 3 are covered.
+
+// These demos don't conform to the standard template for gallery demos so should be skipped
+// when testing to see if navigation succeeded.
+const List<String> _kSkippedDemoTitles = <String>[
+  'Customized Design',
+  'Welcome Screen',
+];
+
 
 void reportToStringError(String name, String route, int lineNumber, List<String> lines, String message) {
   // If you're on line 12, then it has index 11.
@@ -164,11 +170,7 @@ Future<void> smokeGallery(WidgetTester tester) async {
     await tester.tap(find.text(category.name));
     await tester.pumpAndSettle();
     for (GalleryDemo demo in kGalleryCategoryToDemos[category]) {
-      // the following demos don't conform to the standard gallery template as
-      // they have fully customized designs so we should exclude them from the
-      // smoke test.
-      // TODO - the following items need specific smoke tests
-      if (demo.routeName == CustomizedDesign.routeName || demo.routeName == Welcome.routeName) {
+      if (_kSkippedDemoTitles.contains(demo.title)) {
         continue;
       }
       await Scrollable.ensureVisible(tester.element(find.text(demo.title)), alignment: 0.0);
