@@ -96,7 +96,7 @@ Future<GradleProject> _gradleProject({BuildInfo buildInfo}) async {
 Future<GradleProject> _readGradleProject(BuildInfo buildInfo) async {
   final FlutterProject flutterProject = await FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
-  updateLocalProperties(project: flutterProject,buildInfo: buildInfo);
+  updateLocalProperties(project: flutterProject, buildInfo: buildInfo);
   final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
   GradleProject project;
   try {
@@ -338,7 +338,7 @@ Future<void> _buildGradleProjectV2(
     BuildInfo buildInfo,
     String target,
     bool isBuildingBundle) async {
-  final GradleProject project = await _gradleProject(buildInfo:buildInfo);
+  final GradleProject project = await _gradleProject(buildInfo: buildInfo);
 
   String assembleTask;
 
