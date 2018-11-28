@@ -1758,7 +1758,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('can override TabBar onTap behavior', (WidgetTester tester) async {
+  testWidgets('can be notified of TabBar onTap behavior', (WidgetTester tester) async {
     Widget buildFrame({
       TabController controller,
       List<String> tabs,
