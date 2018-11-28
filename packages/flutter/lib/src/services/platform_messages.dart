@@ -88,6 +88,11 @@ class BinaryMessages {
     return _sendPlatformMessage(channel, message);
   }
 
+  // TODO Justin clean up. Directly send message, disregarding _mockHandlers
+  static Future<ByteData> testSend(String channel, ByteData message) {
+    return _sendPlatformMessage(channel, message);
+  }
+
   /// Set a callback for receiving messages from the platform plugins on the
   /// given channel, without decoding them.
   ///

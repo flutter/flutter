@@ -534,6 +534,11 @@ class FlutterDriver {
     return GetTextResult.fromJson(await _sendCommand(GetText(finder, timeout: timeout))).text;
   }
 
+  /// Returns the text in the `TextField` widget located by [finder].
+  Future<String> getTextFieldText(SerializableFinder finder, { Duration timeout }) async {
+    return GetTextFieldTextResult.fromJson(await _sendCommand(GetTextFieldText(finder, timeout: timeout))).text;
+  }
+
   /// Enters `text` into the currently focused text input, such as the
   /// [EditableText] widget.
   ///
@@ -568,6 +573,16 @@ class FlutterDriver {
   /// ```
   Future<void> enterText(String text, { Duration timeout }) async {
     await _sendCommand(EnterText(text, timeout: timeout));
+  }
+
+  /// TODO document and say never use this unless you really need it!
+  Future<void> setEditingState(String textEditingValue, { Duration timeout }) async {
+    await _sendCommand(SetEditingState(textEditingValue, timeout: timeout));
+  }
+
+  /// TODO document and say never use this unless you really need it!
+  Future<void> setMarkedText(String markedTextValue, { Duration timeout }) async {
+    await _sendCommand(SetMarkedText(markedTextValue, timeout: timeout));
   }
 
   /// Configures text entry emulation.

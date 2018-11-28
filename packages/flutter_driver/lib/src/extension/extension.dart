@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert' show jsonDecode;
 
+import 'package:integration_ui/keys.dart' as keys;
 import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
 
@@ -100,7 +102,10 @@ class FlutterDriverExtension {
       'get_health': _getHealth,
       'get_render_tree': _getRenderTree,
       'enter_text': _enterText,
+      'set_editing_state': _setEditingState,
+      'set_marked_text': _setMarkedText,
       'get_text': _getText,
+      'get_text_field_text': _getTextFieldText,
       'request_data': _requestData,
       'scroll': _scroll,
       'scrollIntoView': _scrollIntoView,
@@ -118,7 +123,10 @@ class FlutterDriverExtension {
       'get_health': (Map<String, String> params) => GetHealth.deserialize(params),
       'get_render_tree': (Map<String, String> params) => GetRenderTree.deserialize(params),
       'enter_text': (Map<String, String> params) => EnterText.deserialize(params),
+      'set_editing_state': (Map<String, String> params) => SetEditingState.deserialize(params),
+      'set_marked_text': (Map<String, String> params) => SetMarkedText.deserialize(params),
       'get_text': (Map<String, String> params) => GetText.deserialize(params),
+      'get_text_field_text': (Map<String, String> params) => GetTextFieldText.deserialize(params),
       'request_data': (Map<String, String> params) => RequestData.deserialize(params),
       'scroll': (Map<String, String> params) => Scroll.deserialize(params),
       'scrollIntoView': (Map<String, String> params) => ScrollIntoView.deserialize(params),
@@ -377,6 +385,13 @@ class FlutterDriverExtension {
     return GetTextResult(text.data);
   }
 
+  Future<GetTextFieldTextResult> _getTextFieldText(Command command) async {
+    final GetTextFieldText getTextFieldTextCommand = command;
+    final Finder target = await _waitForElement(_createFinder(getTextFieldTextCommand.finder));
+    final TextField textField = target.evaluate().single.widget;
+    return GetTextFieldTextResult(textField.controller.text);
+  }
+
   Future<SetTextEntryEmulationResult> _setTextEntryEmulation(Command command) async {
     final SetTextEntryEmulation setTextEntryEmulationCommand = command;
     if (setTextEntryEmulationCommand.enabled) {
@@ -395,6 +410,36 @@ class FlutterDriverExtension {
     final EnterText enterTextCommand = command;
     _testTextInput.enterText(enterTextCommand.text);
     return EnterTextResult();
+  }
+
+  Future<SetEditingStateResult> _setEditingState(Command command) async {
+    final SetEditingState setEditingStateCommand = command;
+    // TODO pass finder with command rather than using hard coded key
+    BinaryMessages.testSend(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInput.setEditingState',
+          jsonDecode(setEditingStateCommand.textEditingValue),
+        ),
+      ),
+    );
+    return SetEditingStateResult();
+  }
+
+  Future<SetMarkedTextResult> _setMarkedText(Command command) async {
+    final SetMarkedText setMarkedTextCommand = command;
+    // TODO pass finder with command rather than using hard coded key
+    BinaryMessages.testSend(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInput.setMarkedText',
+          jsonDecode(setMarkedTextCommand.markedTextValue),
+        ),
+      ),
+    );
+    return SetMarkedTextResult();
   }
 
   Future<RequestDataResult> _requestData(Command command) async {
