@@ -417,11 +417,11 @@ class TextPainter {
     final int prevCodeUnit = _text.codeUnitAt(offset - 1);
     if (prevCodeUnit == null)
       return null;
-    bool isSurrogate = _isUtf16Surrogate(prevCodeUnit);
+    final bool isSurrogate = _isUtf16Surrogate(prevCodeUnit);
     // Hard cap cluster length to 16 to maximize performance.
     final int maxGraphemeClusterLength = isSurrogate ? 16 : 1;
     int graphemeClusterLength = isSurrogate ? 2 : 1;
-    List<TextBox> boxes = List();
+    List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && graphemeClusterLength <= maxGraphemeClusterLength) {
       final int prevRuneOffset = offset - graphemeClusterLength;
       boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
@@ -445,11 +445,11 @@ class TextPainter {
     final int nextCodeUnit = _text.codeUnitAt(offset - 1);
     if (nextCodeUnit == null)
       return null;
-    bool isSurrogate = _isUtf16Surrogate(nextCodeUnit);
+    final bool isSurrogate = _isUtf16Surrogate(nextCodeUnit);
     // Hard cap cluster length to 16 to maximize performance.
     final int maxGraphemeClusterLength = isSurrogate ? 16 : 1;
     int graphemeClusterLength = isSurrogate ? 2 : 1;
-    List<TextBox> boxes = List();
+    List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && graphemeClusterLength <= maxGraphemeClusterLength) {
       final int nextRuneOffset = offset + graphemeClusterLength;
       boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
