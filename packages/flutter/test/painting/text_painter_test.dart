@@ -34,6 +34,7 @@ void main() {
       ..textDirection = TextDirection.ltr;
 
     String text = '👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸';
+    // Format: '👩‍<zwj>👩‍<zwj>👦👩‍<zwj>👩‍<zwj>👧‍<zwj>👧🇺🇸'
     painter.text = TextSpan(text: text);
     painter.layout();
 
