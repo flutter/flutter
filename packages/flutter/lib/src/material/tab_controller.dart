@@ -304,12 +304,19 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Ticker
   void didUpdateWidget(covariant DefaultTabController oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.length != oldWidget.length) {
+      final TabController oldController = _controller;
       final int oldIndex = _controller._index;
       _controller = TabController(
         vsync: this,
         length: widget.length,
         initialIndex: math.min(oldIndex, widget.length - 1),
       );
+      // This has to be done in a microtask since child widgets will attempt
+      // to remove their listeners in the didUpdateWidget method. This will fail
+      // if the controller has already been disposed.
+      scheduleMicrotask(() {
+        oldController.dispose();
+      });
     }
   }
 
