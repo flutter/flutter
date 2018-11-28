@@ -121,10 +121,10 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// simultaneously.
   ///
   /// This callback will be invoked for every pointer event after the invocation
-  /// of [onStart] and before the invocation of [onEnd], no matter what the
-  /// pressure is during this time period. The position and pressure of the
-  /// pointer is provided in the callback's `details` argument, which is a
-  /// [ForcePressUpdateDetails] object.
+  /// of [onStart] and/or [onPeak] and before the invocation of [onEnd], no
+  /// matter what the pressure is during this time period. The position and
+  /// pressure of the pointer is provided in the callback's `details` argument,
+  /// which is a [ForcePressUpdateDetails] object.
   GestureForcePressUpdateCallback onUpdate;
 
   /// A pointer is in contact with the screen and has just pressed with a force

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,12 +26,19 @@ void main() {
     int updated = 0;
     int ended = 0;
 
+    Offset startGlobalPosition;
+
+    void onStart(ForcePressDetails details) {
+      startGlobalPosition = details.globalPosition;
+      started += 1;
+    }
+
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(startPressure: startPressure, peakPressure: peakPressure);
 
-    force.onStart = (_) => started += 1;
-    force.onPeak = (_) => peaked += 1;
-    force.onUpdate = (_) => updated += 1;
-    force.onEnd = (_) => ended += 1;
+    force.onStart = onStart;
+    force.onPeak = (ForcePressDetails details) => peaked += 1;
+    force.onUpdate = (ForcePressDetails details) => updated += 1;
+    force.onEnd = (ForcePressDetails details) => ended += 1;
 
     const int pointerValue = 1;
     final TestPointer pointer = TestPointer(pointerValue);
@@ -72,6 +79,7 @@ void main() {
     expect(updated, 5);
     expect(peaked, 0);
     expect(ended, 0);
+    expect(startGlobalPosition, const Offset(10.0, 10.0));
 
     tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 6.0, pressureMin: pressureMin, pressureMax: pressureMax));
 
@@ -234,6 +242,10 @@ void main() {
     const double startPressure = 0.4; // = Device pressure of 2.66.
     const double peakPressure = 0.85; // = Device pressure of 5.66.
 
+    // Device specific constants that represent those from the iPhone X
+    const double pressureMin = 0;
+    const double pressureMax = 6.66;
+
     int started = 0;
     int peaked = 0;
     int updated = 0;
@@ -251,7 +263,7 @@ void main() {
 
     const int pointerValue = 1;
     final TestPointer pointer = TestPointer(pointerValue);
-    const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 1.0);
+    const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 1.0, pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
     force.addPointer(down);
     drag.addPointer(down);
@@ -279,6 +291,10 @@ void main() {
     const double startPressure = 0.4; // = Device pressure of 2.66.
     const double peakPressure = 0.85; // = Device pressure of 5.66.
 
+    // Device specific constants that represent those from the iPhone X
+    const double pressureMin = 0;
+    const double pressureMax = 6.66;
+
     int started = 0;
     int peaked = 0;
     int updated = 0;
@@ -296,7 +312,7 @@ void main() {
 
     const int pointerValue = 1;
     final TestPointer pointer = TestPointer(pointerValue);
-    const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 1.0);
+    const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 1.0, pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
     force.addPointer(down);
     drag.addPointer(down);
@@ -309,7 +325,7 @@ void main() {
     expect(didStartPan, 0);
 
     // Pressure fed into the test environment simulates the values received directly from the device.
-    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 3.0));
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 3.0, pressureMin: pressureMin, pressureMax: pressureMax));
 
     // We have not hit the start pressure, so no events should be true.
     expect(started, 1);
