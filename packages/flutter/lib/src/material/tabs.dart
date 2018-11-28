@@ -1131,17 +1131,25 @@ class _TabBarViewState extends State<TabBarView> {
       return _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
 
     assert((_currentIndex - previousIndex).abs() > 1);
-    int initialPage;
+    final int initialPage = _currentIndex > previousIndex
+                            ? _currentIndex - 1
+                            : _currentIndex + 1;
     setState(() {
       _warpUnderwayCount += 1;
       _children = List<Widget>.from(widget.children, growable: false);
-      if (_currentIndex > previousIndex) {
-        _children[_currentIndex - 1] = _children[previousIndex];
-        initialPage = _currentIndex - 1;
-      } else {
-        _children[_currentIndex + 1] = _children[previousIndex];
-        initialPage = _currentIndex + 1;
-      }
+
+      // Temporarily put the page currently in view to the position
+      // immediately to the left or right of the new target page.
+      // This gives the illusion of a warp directly from one page to the other,
+      // without the intervening pages being shown.
+      final Widget temp = _children[initialPage];
+      _children[initialPage] = _children[previousIndex];
+
+      // This is a hack: when the page currently in view has a GlobalKey,
+      // perform a full swap of this for the one that was in the left-or-right
+      // page position. This keeps only one GlobalKey in play.
+      if (_children[initialPage].key is GlobalKey)
+        _children[previousIndex] = temp;
     });
 
     _pageController.jumpToPage(initialPage);

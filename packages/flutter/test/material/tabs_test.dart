@@ -65,6 +65,36 @@ class AlwaysKeepAliveState extends State<AlwaysKeepAliveWidget>
   }
 }
 
+
+class AlwaysKeepAliveWidget2 extends StatefulWidget {
+  const AlwaysKeepAliveWidget2(this.text);
+
+  final String text;
+
+  @override
+  AlwaysKeepAliveState2 createState() => AlwaysKeepAliveState2();
+}
+
+class AlwaysKeepAliveState2 extends State<AlwaysKeepAliveWidget2>
+    with AutomaticKeepAliveClientMixin {
+
+  String text;
+
+  @override
+  void initState() {
+    super.initState();
+    text = widget.text;
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(text);
+  }
+}
+
 Widget buildFrame({
     Key tabBarKey,
     List<String> tabs,
@@ -1843,6 +1873,54 @@ void main() {
 
   });
 
+  testWidgets('Skipping tabs with a GlobalKey child works', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/24660
+    final List<String> tabs = <String>[
+      'Tab1',
+      'Tab2',
+      'Tab3',
+    ];
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 300.0,
+            height: 200.0,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text('tabs'),
+                bottom: TabBar(
+                  controller: controller,
+                  tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+                ),
+              ),
+              body: TabBarView(
+                controller: controller,
+                children: <Widget>[
+                  Text('1', key: GlobalKey()),
+                  const Text('2'),
+                  const Text('3'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('3'), findsNothing);
+    await tester.tap(find.text('Tab3'));
+    await tester.pumpAndSettle();
+    await tester.pump();
+    expect(controller.index, 2);
+    expect(find.text('3'), findsOneWidget);
+  });
+
   testWidgets('Skipping tabs with a KeepAlive child works', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/11895
     final List<String> tabs = <String>[
@@ -1892,7 +1970,79 @@ void main() {
     await tester.pumpAndSettle();
     await tester.pump();
     expect(controller.index, 3);
+
     expect(find.text(AlwaysKeepAliveWidget.text, skipOffstage: false), findsOneWidget);
     expect(find.text('4'), findsOneWidget);
+  });
+
+  testWidgets('Skipping tabs with a KeepAlive child does not work', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/11895
+    final List<String> tabs = <String>[
+      'Tab1',
+      'Tab2',
+      'Tab3',
+      'Tab4',
+      'Tab5',
+    ];
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 300.0,
+            height: 200.0,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text('tabs'),
+                bottom: TabBar(
+                  controller: controller,
+                  tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+                ),
+              ),
+              body: TabBarView(
+                controller: controller,
+                children: const <Widget>[
+                  AlwaysKeepAliveWidget2('1'),
+                  AlwaysKeepAliveWidget2('2'),
+                  AlwaysKeepAliveWidget2('3'),
+                  AlwaysKeepAliveWidget2('4'),
+                  AlwaysKeepAliveWidget2('5'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
+
+    await tester.tap(find.text('Tab3'));
+    await tester.pumpAndSettle();
+    await tester.pump();
+    expect(controller.index, 2);
+    expect(find.text('1'), findsNothing);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsOneWidget);
+
+    await tester.tap(find.text('Tab2'));
+    await tester.pumpAndSettle();
+    await tester.pump();
+    expect(controller.index, 1);
+
+    // If things are working correctly, this is the expected result:
+    // expect(find.text('1'), findsNothing);
+    // expect(find.text('2'), findsOneWidget);
+    // expect(find.text('3'), findsNothing);
+
+    // What we actually find is that State '1' is now in the second position.
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
   });
 }
