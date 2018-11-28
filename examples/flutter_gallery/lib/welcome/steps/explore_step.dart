@@ -157,6 +157,14 @@ class _ExploreWelcomeStepState extends WelcomeStepState<ExploreWelcomeStep> with
       ),
     ),
   ];
+
+  @override
+  void dispose() {
+    for (AnimationController controller in _popupAnimationControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
 }
 
 class _PopupPosition {

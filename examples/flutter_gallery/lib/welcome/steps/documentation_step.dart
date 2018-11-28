@@ -120,4 +120,11 @@ class _DocumentationWelcomeStepState extends WelcomeStepState<DocumentationWelco
     );
     _iconOpacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(_quickAnimationController);
   }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _quickAnimationController.dispose();
+    super.dispose();
+  }
 }

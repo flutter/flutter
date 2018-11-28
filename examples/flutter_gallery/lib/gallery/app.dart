@@ -125,7 +125,7 @@ class _GalleryAppState extends State<GalleryApp>
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: _options.theme.data.copyWith(platform: _options.platform),
-      title: 'Flutter Gallery',
+      title: 'Flutter Design Lab',
       color: Colors.grey,
       showPerformanceOverlay: _options.showPerformanceOverlay,
       checkerboardOffscreenLayers: _options.showOffscreenLayersCheckerboard,

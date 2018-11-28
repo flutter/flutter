@@ -12,7 +12,7 @@ import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 
 // This title is visible on the home and demo category pages. It's
 // not visible when the demos are running.
-const String kGalleryTitle = 'Flutter gallery';
+const String kGalleryTitle = 'Flutter Design Lab';
 
 // All of the classes printed by debugDump etc, must have toString()
 // values approved by verityToStringOutput().
@@ -176,9 +176,9 @@ Future<void> smokeGallery(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('Flutter Gallery app smoke test', smokeGallery);
+  testWidgets('Flutter Design Lab app smoke test', smokeGallery);
 
-  testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
+  testWidgets('Flutter Design Lab app smoke test with semantics', (WidgetTester tester) async {
     RendererBinding.instance.setSemanticsEnabled(true);
     await smokeGallery(tester);
     RendererBinding.instance.setSemanticsEnabled(false);
