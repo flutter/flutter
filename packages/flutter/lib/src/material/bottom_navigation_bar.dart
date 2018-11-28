@@ -148,6 +148,7 @@ class BottomNavigationBar extends StatefulWidget {
     BottomNavigationBarType type,
     this.fixedColor,
     this.iconSize = 24.0,
+    this.elevation = 8.0,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
@@ -190,6 +191,9 @@ class BottomNavigationBar extends StatefulWidget {
   ///
   /// See [BottomNavigationBarItem.icon] for more information.
   final double iconSize;
+
+  /// The elevation of the [Material] widget used to create the [BottomNavigationBar]
+  final double elevation;
 
   @override
   _BottomNavigationBarState createState() => _BottomNavigationBarState();
@@ -573,7 +577,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         children: <Widget>[
           Positioned.fill(
             child: Material( // Casts shadow.
-              elevation: 8.0,
+              elevation: widget.elevation,
               color: backgroundColor,
             ),
           ),
