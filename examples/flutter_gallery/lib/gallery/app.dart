@@ -72,7 +72,7 @@ class _GalleryAppState extends State<GalleryApp>
       timeDilation: timeDilation,
       platform: defaultTargetPlatform,
     );
-    _checkWelcomeFuture = _checkWelcomeState();
+    _checkWelcomeFuture = _getWelcomePrefsValue();
     _welcomeContentAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 250),
@@ -151,7 +151,7 @@ class _GalleryAppState extends State<GalleryApp>
     );
   }
 
-  Future<bool> _checkWelcomeState() async {
+  Future<bool> _getWelcomePrefsValue() async {
     _prefs = await SharedPreferences.getInstance();
     final bool hasSeenWelcome = _prefs.getBool(_kPrefsHasSeenWelcome) ?? false;
     return !hasSeenWelcome;

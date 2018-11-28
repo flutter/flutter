@@ -7,6 +7,9 @@ import 'animation_helpers.dart';
 
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 const int _kAnimationDuration = 1200;
+// add a (positioned) negative bottom offset to the hero image so that the
+// image is a bit better positioned on the screen on larger screens
+const double _kHeroImageBottomOffset = -50.0;
 
 class InitialWelcome extends StatefulWidget {
   const InitialWelcome({ Key key }) : super(key: key);
@@ -16,7 +19,6 @@ class InitialWelcome extends StatefulWidget {
 }
 
 class InitialWelcomeState extends State<InitialWelcome> with TickerProviderStateMixin {
-
   AnimationController _animationController;
   Animation<double> _heroFadeInAnimation;
   Animation<double> _textFadeInAnimation;
@@ -32,18 +34,14 @@ class InitialWelcomeState extends State<InitialWelcome> with TickerProviderState
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        FadeTransition(
-          opacity: _heroFadeInAnimation,
-          child: OverflowBox(
-            alignment: FractionalOffset.topLeft,
-            maxHeight: 1000.0,
+        Positioned.fill(
+          bottom: _kHeroImageBottomOffset,
+          child: FadeTransition(
+            opacity: _heroFadeInAnimation,
             child: Image(
               height: MediaQuery.of(context).size.height,
               fit: BoxFit.cover,
-              image: const AssetImage(
-                'customized/fg_hero.png',
-                package: _kGalleryAssetsPackage,
-              ),
+              image: const AssetImage('customized/fg_hero.png', package: _kGalleryAssetsPackage),
             ),
           ),
         ),
@@ -141,5 +139,4 @@ class InitialWelcomeState extends State<InitialWelcome> with TickerProviderState
     _animationController.dispose();
     super.dispose();
   }
-
 }

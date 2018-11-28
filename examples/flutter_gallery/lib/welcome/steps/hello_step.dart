@@ -13,11 +13,12 @@ const String _kSubtitle = 'Flutter allows you to build beautiful native apps on 
 
 class FlutterWelcomeStep extends StatefulWidget {
   const FlutterWelcomeStep({Key key}) : super(key: key);
+
   @override
-  FlutterWelcomeStepState createState() => FlutterWelcomeStepState();
+  _FlutterWelcomeStepState createState() => _FlutterWelcomeStepState();
 }
 
-class FlutterWelcomeStepState extends WelcomeStepState<FlutterWelcomeStep> {
+class _FlutterWelcomeStepState extends WelcomeStepState<FlutterWelcomeStep> {
   @override
   Widget build(BuildContext context) {
     return StepContainer(

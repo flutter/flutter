@@ -22,12 +22,9 @@ class CustomizedDesign extends StatefulWidget {
 class _CustomizedDesignState extends State<CustomizedDesign> with TickerProviderStateMixin {
 
   ThemeData _themeData;
-  bool _animatedStats = false;
-  Widget _mainContentWidget;
+  bool _showingStatsContent = false;
   final GlobalKey<RunStatsContentState> _statsContentKey = GlobalKey<RunStatsContentState>();
-  Widget _statsContentWidget;
   final GlobalKey<InitialWelcomeState> _initialWelcomeKey = GlobalKey<InitialWelcomeState>();
-  Widget _initialContentWidget;
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -37,36 +34,22 @@ class _CustomizedDesignState extends State<CustomizedDesign> with TickerProvider
   }
 
   @override
-  void initState() {
-    super.initState();
-    _initialContentWidget ??= InitialWelcome(key: _initialWelcomeKey);
-    _statsContentWidget ??= RunStatsContent(
-      key: _statsContentKey,
-      peekAmount: _kStatsSectionPeekAmount,
-      onHeaderTapped: tappedStatsDetailBar,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    _mainContentWidget ??= _contentWidget();
+    final Widget mainContentWidget = _contentWidget();
     return WillPopScope(
       onWillPop: () {
-        if (_animatedStats) {
+        if (_showingStatsContent) {
           _scrollController.animateTo(
             0.0,
             curve: Curves.easeOut,
             duration: const Duration(milliseconds: 300),
           );
         }
-        return Future<bool>.value(!_animatedStats);
+        return Future<bool>.value(!_showingStatsContent);
       },
       child: Theme(
         data: _themeData,
-        child: Material(
-          color: const Color(0x00FFFFFF),
-          child: _mainContentWidget,
-        ),
+        child: mainContentWidget,
       ),
     );
   }
@@ -81,8 +64,14 @@ class _CustomizedDesignState extends State<CustomizedDesign> with TickerProvider
   }
 
   Widget _contentWidget() {
+    final Widget welcomeWidget = InitialWelcome(key: _initialWelcomeKey);
+    final Widget statsContentWidget = RunStatsContent(
+      key: _statsContentKey,
+      peekAmount: _kStatsSectionPeekAmount,
+      onHeaderTapped: tappedStatsDetailBar,
+    );
     final double screenHeight = MediaQuery.of(context).size.height;
-    final String backTitle = Platform.isAndroid ? 'TrackFit' : '';
+    final String title = Platform.isAndroid ? 'TrackFit' : '';
     return Scaffold(
       backgroundColor: const Color(0xFF212024),
       body: GlowingOverscrollIndicator(
@@ -99,18 +88,18 @@ class _CustomizedDesignState extends State<CustomizedDesign> with TickerProvider
             slivers: <Widget>[
               SliverAppBar(
                 pinned: false,
-                title: Text(backTitle),
+                title: Text(title),
                 expandedHeight: screenHeight - _kStatsSectionPeekAmount - MediaQuery.of(context).padding.top,
                 leading: const BackButton(
                   color: Colors.white,
                 ),
                 backgroundColor: const Color(0xFF212024),
                 flexibleSpace: FlexibleSpaceBar(
-                  background: _initialContentWidget,
+                  background: welcomeWidget,
                 ),
               ),
               SliverToBoxAdapter(
-                child: _statsContentWidget,
+                child: statsContentWidget,
               ),
             ],
           ),
@@ -121,22 +110,23 @@ class _CustomizedDesignState extends State<CustomizedDesign> with TickerProvider
 
   bool _handleScrollNotification(ScrollNotification notification) {
     final double scrollPosition = notification.metrics.pixels;
-    final double screenHeight = MediaQuery.of(context).size.height -
+    final double statsContentScrollAmount = MediaQuery.of(context).size.height -
         _kStatsSectionPeekAmount - MediaQuery.of(context).padding.top;
-    final double screenOffset = scrollPosition / screenHeight;
-    if (screenOffset >= 0.75 && !_animatedStats) {
-      _animatedStats = true;
+    final double screenOffset = scrollPosition / statsContentScrollAmount;
+    if (screenOffset >= 0.75 && !_showingStatsContent) {
+      _showingStatsContent = true;
       _initialWelcomeKey.currentState.reverse();
       _statsContentKey.currentState.animate();
     } else if (screenOffset < 0.2) {
-      _animatedStats = false;
+      _showingStatsContent = false;
       _statsContentKey.currentState.reverse();
       _initialWelcomeKey.currentState.animate();
     }
     return true;
   }
 
-  /// display the 'stats' content when the 'view my stats' bar is tapped
+  /// This method is called when the details bar is tapped. It will scroll the
+  /// run details section in to place.
   void tappedStatsDetailBar() {
     double scrollToOffset = 0.0;
     if (_scrollController.offset == 0.0) {

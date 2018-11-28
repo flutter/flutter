@@ -12,26 +12,29 @@ const String _kSubtitle = 'Start being highly productive and do more with less c
 
 class ExploreWelcomeStep extends StatefulWidget {
   const ExploreWelcomeStep({Key key}) : super(key: key);
+
   @override
-  ExploreWelcomeStepState createState() => ExploreWelcomeStepState();
+  _ExploreWelcomeStepState createState() => _ExploreWelcomeStepState();
 }
 
-class ExploreWelcomeStepState extends WelcomeStepState<ExploreWelcomeStep> with TickerProviderStateMixin {
+class _ExploreWelcomeStepState extends WelcomeStepState<ExploreWelcomeStep> with TickerProviderStateMixin {
 
-  Widget _imageWidget;
+  @override
+  void initState() {
+    super.initState();
+    _setupAnimations();
+  }
 
   @override
   Widget build(BuildContext context) {
-    _imageWidget ??= imageWidget();
     return StepContainer(
       title: _kTitle,
       subtitle: _kSubtitle,
-      imageContentBuilder: () => _imageWidget,
+      imageContentBuilder: () => buildImageWidget(),
     );
   }
 
-  Widget imageWidget() {
-    _setupAnimations();
+  Widget buildImageWidget() {
     final List<Widget> stackChildren = <Widget>[
       Positioned.fill(
         child: Image.asset(
@@ -41,13 +44,13 @@ class ExploreWelcomeStepState extends WelcomeStepState<ExploreWelcomeStep> with 
       ),
     ];
 
-    if (_popAnimationWidgets.isEmpty) {
+    if (_popupAnimationWidgets.isEmpty) {
       for (int i = 0; i < _popWidgets.length; i++) {
-        _popAnimationWidgets.add(
-            _addAnimationWidget(_popWidgets[i], _popAnimationControllers[i]));
+        _popupAnimationWidgets.add(
+            _addAnimationWidget(_popWidgets[i], _popupAnimationControllers[i]));
       }
     }
-    stackChildren.addAll(_popAnimationWidgets);
+    stackChildren.addAll(_popupAnimationWidgets);
     return Center(
       child: Container(
         width: 300.0,
@@ -61,28 +64,27 @@ class ExploreWelcomeStepState extends WelcomeStepState<ExploreWelcomeStep> with 
   @override
   void animate({bool restart = false}) {
     if (restart) {
-      for (AnimationController animationController in _popAnimationControllers) {
+      for (AnimationController animationController in _popupAnimationControllers) {
         animationController.reset();
       }
     }
     Future<void>.delayed(Duration(milliseconds: 500), () {
-      for (AnimationController animationController in _popAnimationControllers) {
+      for (AnimationController animationController in _popupAnimationControllers) {
         animationController.forward();
       }
     });
   }
 
-  // pop animations
-  List<AnimationController> _popAnimationControllers = <AnimationController>[];
-  final List<Animation<double>> _popScaleAnimations = <Animation<double>>[];
-  final List<Animation<double>> _popOpacityAnimations = <Animation<double>>[];
-  final List<Widget> _popAnimationWidgets = <Widget>[];
+  List<AnimationController> _popupAnimationControllers = <AnimationController>[];
+  final List<Animation<double>> _popupScaleAnimations = <Animation<double>>[];
+  final List<Animation<double>> _popupOpacityAnimations = <Animation<double>>[];
+  final List<Widget> _popupAnimationWidgets = <Widget>[];
 
   void _setupAnimations() {
-    if (_popAnimationControllers.isNotEmpty) {
+    if (_popupAnimationControllers.isNotEmpty) {
       return;
     }
-    _popAnimationControllers = <AnimationController>[
+    _popupAnimationControllers = <AnimationController>[
       AnimationController(vsync: this, duration: Duration(milliseconds: 60)),
       AnimationController(vsync: this, duration: Duration(milliseconds: 280)),
       AnimationController(vsync: this, duration: Duration(milliseconds: 170)),
@@ -91,7 +93,7 @@ class ExploreWelcomeStepState extends WelcomeStepState<ExploreWelcomeStep> with 
   }
 
   Widget _addAnimationWidget(
-      _PopPosition popPosition, AnimationController animationController) {
+      _PopupPosition popPosition, AnimationController animationController) {
     final Animation<double> scaleAnimation =
     Tween<double>(begin: 0.6, end: 1.0).animate(
       CurvedAnimation(parent: animationController, curve: Curves.easeInOut),
@@ -100,8 +102,8 @@ class ExploreWelcomeStepState extends WelcomeStepState<ExploreWelcomeStep> with 
     Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: animationController, curve: Curves.easeInOut),
     );
-    _popScaleAnimations.add(scaleAnimation);
-    _popOpacityAnimations.add(opacityAnimation);
+    _popupScaleAnimations.add(scaleAnimation);
+    _popupOpacityAnimations.add(opacityAnimation);
     return Positioned(
       top: popPosition.top,
       right: popPosition.right,
@@ -117,9 +119,8 @@ class ExploreWelcomeStepState extends WelcomeStepState<ExploreWelcomeStep> with 
     );
   }
 
-  // pop widgets
-  final List<_PopPosition> _popWidgets = <_PopPosition>[
-    _PopPosition(
+  final List<_PopupPosition> _popWidgets = <_PopupPosition>[
+    _PopupPosition(
       top: 0.0,
       right: 30.0,
       child: Image.asset(
@@ -128,7 +129,7 @@ class ExploreWelcomeStepState extends WelcomeStepState<ExploreWelcomeStep> with 
         width: 80.0,
       ),
     ),
-    _PopPosition(
+    _PopupPosition(
       top: 60.0,
       left: 20.0,
       child: Image.asset(
@@ -137,7 +138,7 @@ class ExploreWelcomeStepState extends WelcomeStepState<ExploreWelcomeStep> with 
         width: 54.0,
       ),
     ),
-    _PopPosition(
+    _PopupPosition(
       bottom: 70.0,
       right: 40.0,
       child: Image.asset(
@@ -146,7 +147,7 @@ class ExploreWelcomeStepState extends WelcomeStepState<ExploreWelcomeStep> with 
         width: 40.0,
       ),
     ),
-    _PopPosition(
+    _PopupPosition(
       bottom: 8.0,
       left: 30.0,
       child: Image.asset(
@@ -158,8 +159,8 @@ class ExploreWelcomeStepState extends WelcomeStepState<ExploreWelcomeStep> with 
   ];
 }
 
-class _PopPosition {
-  _PopPosition({ this.top, this.right, this.bottom, this.left, @required this.child });
+class _PopupPosition {
+  _PopupPosition({ this.top, this.right, this.bottom, this.left, @required this.child });
   final double top;
   final double right;
   final double bottom;

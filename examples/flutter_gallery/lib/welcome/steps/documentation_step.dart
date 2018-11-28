@@ -12,13 +12,13 @@ const String _kSubtitle = 'View full API documentation, when you need it, with a
 
 class DocumentationWelcomeStep extends StatefulWidget {
   const DocumentationWelcomeStep({Key key}) : super(key: key);
+
   @override
-  DocumentationWelcomeStepState createState() => DocumentationWelcomeStepState();
+  _DocumentationWelcomeStepState createState() => _DocumentationWelcomeStepState();
 }
 
-class DocumentationWelcomeStepState extends WelcomeStepState<DocumentationWelcomeStep> with TickerProviderStateMixin {
+class _DocumentationWelcomeStepState extends WelcomeStepState<DocumentationWelcomeStep> with TickerProviderStateMixin {
 
-  Widget _imageWidget;
   AnimationController _animationController;
   AnimationController _quickAnimationController;
   Animation<double> _barScaleAnimation;
@@ -35,15 +35,14 @@ class DocumentationWelcomeStepState extends WelcomeStepState<DocumentationWelcom
 
   @override
   Widget build(BuildContext context) {
-    _imageWidget ??= imageWidget();
     return StepContainer(
       title: _kTitle,
       subtitle: _kSubtitle,
-      imageContentBuilder: () => _imageWidget
+      imageContentBuilder: () => buildImageWidget()
     );
   }
 
-  Widget imageWidget() {
+  Widget buildImageWidget() {
     final Image barImage = Image.asset('welcome/welcome_documentation.png', package: kWelcomeGalleryAssetsPackage);
     return Stack(
       children: <Widget>[

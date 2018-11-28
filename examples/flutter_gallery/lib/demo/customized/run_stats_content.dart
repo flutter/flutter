@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'animation_helpers.dart';
 import 'stats/full_stats.dart';
 import 'stats/my_stats_bar.dart';
 import 'stats/run_summary.dart';
@@ -26,29 +25,11 @@ class RunStatsContent extends StatefulWidget {
 class RunStatsContentState extends State<RunStatsContent> {
 
   final GlobalKey<MyStatsBarState> _myStatsBarKey = GlobalKey<MyStatsBarState>();
-  Widget _myStatsBar;
   final GlobalKey<RunSummaryState> _runSummaryKey = GlobalKey<RunSummaryState>();
-  Widget _runSummary;
   final GlobalKey<FullStatsState> _fullDetailsKey = GlobalKey<FullStatsState>();
-  Widget _fullDetails;
-
-  AnimationController _animationController;
-
-  Animation<double> _rotationAnimation;
-  Animation<double> _runnerFadeAnimation;
-  Animation<double> _pathFadeAnimation;
-  Animation<double> _statsSummaryAnimation;
-  Animation<double> _numberCounterAnimation;
 
   @override
   Widget build(BuildContext context) {
-    _myStatsBar ??= MyStatsBar(
-      key: _myStatsBarKey,
-      onTapped: widget.onHeaderTapped,
-      height: widget.peekAmount,
-    );
-    _runSummary ??= RunSummary(key: _runSummaryKey);
-    _fullDetails ??= FullStats(key: _fullDetailsKey);
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
     return Container(
       height: mediaQueryData.size.height - mediaQueryData.padding.top,
@@ -57,49 +38,24 @@ class RunStatsContentState extends State<RunStatsContent> {
         children: <Widget>[
           Positioned.fill(
             bottom: null,
-            child: _myStatsBar,
+            child: MyStatsBar(
+              key: _myStatsBarKey,
+              onTapped: widget.onHeaderTapped,
+              height: widget.peekAmount,
+            ),
           ),
           Positioned.fill(
             top: 70.0,
             bottom: MediaQuery.of(context).size.height * 0.4,
-            child: _runSummary,
+            child: RunSummary(key: _runSummaryKey),
           ),
           Positioned.fill(
             top: null,
-            child: _fullDetails,
+            child: FullStats(key: _fullDetailsKey),
           ),
         ],
       ),
     );
-  }
-
-  void _configureAnimations() {
-    _runnerFadeAnimation = initAnimation(
-        from: 0.0,
-        to: 1.0,
-        curve: Curves.easeOut,
-        controller: _animationController);
-    _numberCounterAnimation = Tween<double>(
-      begin: 0.0,
-      end: 646.3,
-    ).animate(
-      CurvedAnimation(
-        curve: Curves.fastOutSlowIn,
-        parent: _animationController,
-      ),
-    );
-    _pathFadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _animationController,
-      curve: const Interval(0.4, 1.0, curve: Curves.easeInOut),
-    ));
-    _statsSummaryAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _animationController,
-      curve: const Interval(0.4, 0.55, curve: Curves.easeInOut),
-    ));
   }
 
   void animate() {

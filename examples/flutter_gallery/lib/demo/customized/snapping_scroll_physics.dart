@@ -11,9 +11,11 @@ class SnappingScrollPhysics extends ClampingScrollPhysics {
   const SnappingScrollPhysics({
     ScrollPhysics parent,
     @required this.midScrollOffset,
-  })  : assert(midScrollOffset != null),
-        super(parent: parent);
+  }) : assert(midScrollOffset != null),
+       super(parent: parent);
 
+  /// The offset that determines whether the scroll controller will scroll
+  /// all the way to the start or to the end of the scroll boundaries.
   final double midScrollOffset;
 
   @override
@@ -23,12 +25,9 @@ class SnappingScrollPhysics extends ClampingScrollPhysics {
   }
 
   @override
-  Simulation createBallisticSimulation(
-      ScrollMetrics position, double velocity) {
-    final Simulation simulation =
-        super.createBallisticSimulation(position, velocity);
+  Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
+    final Simulation simulation = super.createBallisticSimulation(position, velocity);
     final double offset = position.pixels;
-
     if (simulation != null) {
       final double simulationEnd = simulation.x(double.infinity);
       if (simulationEnd >= midScrollOffset) {

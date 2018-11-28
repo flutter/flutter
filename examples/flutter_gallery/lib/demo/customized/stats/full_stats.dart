@@ -18,7 +18,6 @@ const TextStyle _titleStyle = TextStyle(
 );
 
 class FullStats extends StatefulWidget {
-
   const FullStats({ Key key }) : super(key: key);
 
   @override
@@ -34,7 +33,6 @@ class FullStatsState extends State<FullStats> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _configureAnimations();
-    animate();
   }
 
   @override

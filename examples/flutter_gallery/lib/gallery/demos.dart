@@ -123,7 +123,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     ),
     GalleryDemo(
       title: 'Welcome Screen',
-      subtitle: 'Watch the playground welcome again',
+      subtitle: 'Re-Watch the app introduction',
       icon: GalleryIcons.refresh,
       category: _kDemos,
       routeName: Welcome.routeName,

@@ -12,11 +12,12 @@ const String _kSubtitle = 'Explore the rich native UI widgets in real-time. See 
 
 class PlaygroundWelcomeStep extends StatefulWidget {
   const PlaygroundWelcomeStep({Key key}) : super(key: key);
+
   @override
-  PlaygroundWelcomeStepState createState() => PlaygroundWelcomeStepState();
+  _PlaygroundWelcomeStepState createState() => _PlaygroundWelcomeStepState();
 }
 
-class PlaygroundWelcomeStepState extends WelcomeStepState<PlaygroundWelcomeStep> {
+class _PlaygroundWelcomeStepState extends WelcomeStepState<PlaygroundWelcomeStep> {
 
   @override
   Widget build(BuildContext context) {

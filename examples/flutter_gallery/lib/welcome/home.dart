@@ -38,19 +38,19 @@ class _WelcomeState extends State<Welcome> with TickerProviderStateMixin {
   PageController _pageController;
   Timer _autoProgressTimer;
 
-  final GlobalKey<FlutterWelcomeStepState> _initialStepKey = GlobalKey<FlutterWelcomeStepState>();
-  final GlobalKey<PlaygroundWelcomeStepState> _playgroundStepKey = GlobalKey<PlaygroundWelcomeStepState>();
-  final GlobalKey<DocumentationWelcomeStepState> _documentationStepKey = GlobalKey<DocumentationWelcomeStepState>();
-  final GlobalKey<ExploreWelcomeStepState> _exploreStepKey = GlobalKey<ExploreWelcomeStepState>();
 
   @override
   void initState() {
     super.initState();
+    final GlobalKey<WelcomeStepState<FlutterWelcomeStep>> initialStepKey = GlobalKey<WelcomeStepState<FlutterWelcomeStep>>();
+    final GlobalKey<WelcomeStepState<PlaygroundWelcomeStep>> playgroundStepKey = GlobalKey<WelcomeStepState<PlaygroundWelcomeStep>>();
+    final GlobalKey<WelcomeStepState<DocumentationWelcomeStep>> documentationStepKey = GlobalKey<WelcomeStepState<DocumentationWelcomeStep>>();
+    final GlobalKey<WelcomeStepState<ExploreWelcomeStep>> exploreStepKey = GlobalKey<WelcomeStepState<ExploreWelcomeStep>>();
     _steps = <_WelcomeStep<StatefulWidget>>[
-      _WelcomeStep<FlutterWelcomeStep>(_initialStepKey, FlutterWelcomeStep(key: _initialStepKey)),
-      _WelcomeStep<PlaygroundWelcomeStep>(_playgroundStepKey, PlaygroundWelcomeStep(key: _playgroundStepKey)),
-      _WelcomeStep<DocumentationWelcomeStep>(_documentationStepKey, DocumentationWelcomeStep(key: _documentationStepKey)),
-      _WelcomeStep<ExploreWelcomeStep>(_exploreStepKey, ExploreWelcomeStep(key: _exploreStepKey)),
+      _WelcomeStep<FlutterWelcomeStep>(initialStepKey, FlutterWelcomeStep(key: initialStepKey)),
+      _WelcomeStep<PlaygroundWelcomeStep>(playgroundStepKey, PlaygroundWelcomeStep(key: playgroundStepKey)),
+      _WelcomeStep<DocumentationWelcomeStep>(documentationStepKey, DocumentationWelcomeStep(key: documentationStepKey)),
+      _WelcomeStep<ExploreWelcomeStep>(exploreStepKey, ExploreWelcomeStep(key: exploreStepKey)),
     ];
     _tabController = TabController(initialIndex: 0, length: _steps.length, vsync: this);
     _pageController = PageController();
@@ -60,9 +60,10 @@ class _WelcomeState extends State<Welcome> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
-    // we need to account for the bottom padding on ios so that we can draw
-    // a solid color in that space. don't use safearea or it'll avoid that
-    // space totally and not paint a color.
+    // We need to account for the bottom padding on ios so that we can draw
+    // a solid color in that space. Don't use safearea or it will avoid that
+    // space totally and not paint a color. Not needed on android as it has
+    // a fixed navigation bar.
     final double footerHeight = footerButtonHeight +
         (Platform.isIOS ? mediaQueryData.padding.bottom : 0.0);
     return WillPopScope(
