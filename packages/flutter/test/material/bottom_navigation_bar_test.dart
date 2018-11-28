@@ -834,7 +834,7 @@ void main() {
   });
 
   testWidgets('mutating the list of BottomNavigationBarItems throws a FluterError', (WidgetTester tester) async {
-    final List<BottomNavigationBarItem> items = [
+    final List<BottomNavigationBarItem> items = <BottomNavigationBarItem>[
       const BottomNavigationBarItem(
         title: Text('Red'),
         backgroundColor: Colors.red,
