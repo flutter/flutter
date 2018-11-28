@@ -3633,12 +3633,23 @@ class ErrorWidget extends LeafRenderObjectWidget {
 /// or [State.build].
 ///
 /// Used by [Builder.builder], [OverlayEntry.builder], etc.
+///
+/// See also:
+///
+///  * [IndexedWidgetBuilder], which is similar but also takes an index.
+///  * [TransitionBuilder], which is similar but also takes a child.
+///  * [ValueWidgetBuilder], which is similar but takes a value and a child.
 typedef WidgetBuilder = Widget Function(BuildContext context);
 
 /// Signature for a function that creates a widget for a given index, e.g., in a
 /// list.
 ///
 /// Used by [ListView.builder] and other APIs that use lazily-generated widgets.
+///
+/// See also:
+///
+///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
+///  * [TransitionBuilder], which is similar but also takes a child.
 typedef IndexedWidgetBuilder = Widget Function(BuildContext context, int index);
 
 /// A builder that builds a widget given a child.
@@ -3647,11 +3658,22 @@ typedef IndexedWidgetBuilder = Widget Function(BuildContext context, int index);
 ///
 /// Used by [AnimatedBuilder.builder], as well as [WidgetsApp.builder] and
 /// [MaterialApp.builder].
+///
+/// See also:
+///
+///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
+///  * [IndexedWidgetBuilder], which is similar but also takes an index.
+///  * [ValueWidgetBuilder], which is similar but takes a value and a child.
 typedef TransitionBuilder = Widget Function(BuildContext context, Widget child);
 
-/// A Signiture for a function that creates a widget given [onStepContinue] and [onStepCancel].
+/// A builder that creates a widget given the two callbacks `onStepContinue` and
+/// `onStepCancel`.
 ///
 /// Used by [Stepper.builder].
+///
+/// See also:
+///
+///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
 typedef ControlsWidgetBuilder = Widget Function(BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel});
 
 /// An [Element] that composes other [Element]s.
