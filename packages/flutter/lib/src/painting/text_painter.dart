@@ -455,7 +455,7 @@ class TextPainter {
       boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
       if (boxes.isEmpty) {
         graphemeClusterLength *= 2;
-        if (nextRuneOffset < 0)
+        if (nextRuneOffset >= _text.text.length)
           break;
         continue;
       }

@@ -29,6 +29,56 @@ void main() {
     expect(caretOffset.dx, painter.width);
   });
 
+  test('TextPainter caret emoji test', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    String text = '👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸';
+    painter.text = TextSpan(text: text);
+    painter.layout();
+
+    Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
+    expect(caretOffset.dx, painter.width);
+
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 1), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 2), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 3), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 4), ui.Rect.zero);
+    expect(caretOffset.dx, 42); // "👩‍👩‍👦"
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 5), ui.Rect.zero);
+    expect(caretOffset.dx, 42);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 6), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 7), ui.Rect.zero);
+    expect(caretOffset.dx, 42);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 8), ui.Rect.zero);
+    expect(caretOffset.dx, 42);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 9), ui.Rect.zero);
+    expect(caretOffset.dx, 98);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 10), ui.Rect.zero);
+    expect(caretOffset.dx, 98);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 11), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 12), ui.Rect.zero);
+    expect(caretOffset.dx, 98);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 13), ui.Rect.zero);
+    expect(caretOffset.dx, 98);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 14), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 15), ui.Rect.zero);
+    expect(caretOffset.dx, 98);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 16), ui.Rect.zero);
+    expect(caretOffset.dx, 98);
+
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 1000), ui.Rect.zero);
+    expect(caretOffset.dx, 98);
+  });
+
   test('TextPainter error test', () {
     final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
     expect(() { painter.paint(null, Offset.zero); }, throwsFlutterError);
