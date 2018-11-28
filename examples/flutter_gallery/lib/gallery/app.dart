@@ -18,7 +18,7 @@ import 'scales.dart';
 import 'themes.dart';
 import 'updater.dart';
 
-const _kPrefsHasSeenWelcome = 'hasSeenWelcome';
+const String _kPrefsHasSeenWelcome = 'hasSeenWelcome';
 
 class GalleryApp extends StatefulWidget {
   const GalleryApp({

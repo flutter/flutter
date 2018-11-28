@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'constants.dart';
 import 'steps/all.dart';
@@ -42,6 +43,11 @@ class _WelcomeState extends State<Welcome> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    // lock orientation to portrait
+    SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.portraitUp,
+    ]);
     final GlobalKey<WelcomeStepState<FlutterWelcomeStep>> initialStepKey = GlobalKey<WelcomeStepState<FlutterWelcomeStep>>();
     final GlobalKey<WelcomeStepState<PlaygroundWelcomeStep>> playgroundStepKey = GlobalKey<WelcomeStepState<PlaygroundWelcomeStep>>();
     final GlobalKey<WelcomeStepState<DocumentationWelcomeStep>> documentationStepKey = GlobalKey<WelcomeStepState<DocumentationWelcomeStep>>();
@@ -161,6 +167,21 @@ class _WelcomeState extends State<Welcome> with TickerProviderStateMixin {
       );
     });
   }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _pageController.dispose();
+    // reset orientations
+    SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    super.dispose();
+  }
+
 }
 
 class _WelcomeStep<T extends StatefulWidget> {

@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'initial_welcome.dart';
 import 'run_stats_content.dart';
 import 'snapping_scroll_physics.dart';
@@ -26,6 +27,16 @@ class _CustomizedDesignState extends State<CustomizedDesign> with TickerProvider
   final GlobalKey<RunStatsContentState> _statsContentKey = GlobalKey<RunStatsContentState>();
   final GlobalKey<InitialWelcomeState> _initialWelcomeKey = GlobalKey<InitialWelcomeState>();
   final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    // lock orientation to portrait
+    SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.portraitUp,
+    ]);
+  }
 
   @override
   void didChangeDependencies() {
@@ -137,5 +148,17 @@ class _CustomizedDesignState extends State<CustomizedDesign> with TickerProvider
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 300),
     );
+  }
+
+  @override
+  void dispose() {
+    // reset orientations
+    SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    super.dispose();
   }
 }
