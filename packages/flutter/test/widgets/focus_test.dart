@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart' hide group;
@@ -246,7 +247,8 @@ void main() {
     parentFocusScope.detach();
   });
 
-  testWidgets('Focus is lost/restored when window focus is lost/restored', (WidgetTester tester) async {
+  testWidgets('Focus is lost/restored when window focus is lost/restored on Fuchsia', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
     final FocusNode node = FocusNode();
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -267,5 +269,6 @@ void main() {
     await tester.pump();
     // Focus is restored.
     expect(node.hasFocus, true);
+    debugDefaultTargetPlatformOverride = null;
   });
 }

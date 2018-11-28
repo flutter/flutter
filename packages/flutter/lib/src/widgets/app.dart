@@ -733,26 +733,30 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // When the application moves to the background, any focus nodes
-    // need to lose focus. When the application is restored to the
-    // foreground state, any focused node should regain focus (including)
-    // restoring the keyboard. This is only important in cases where
-    // applications in the background are partially visible. For example,
-    // split-screen on Android or a backgrounded app on a desktop environment.
-    switch (state) {
-      case AppLifecycleState.inactive: {
-        final FocusManager focusManager = WidgetsBinding.instance.focusManager;
-        focusManager.windowDidLoseFocus();
-        break;
-      }
-      case AppLifecycleState.resumed: {
-        final FocusManager focusManager = WidgetsBinding.instance.focusManager;
-        focusManager.windowDidGainFocus();
-        break;
-      }
-      case AppLifecycleState.suspending:
-      case AppLifecycleState.paused:
-        break;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+        return;
+      case TargetPlatform.fuchsia:
+        // When the application moves to the background, any focus nodes
+        // need to lose focus. When the application is restored to the
+        // foreground state, any focused node should regain focus (including)
+        // restoring the keyboard. This is only important in cases where
+        // applications in the background are partially visible.
+        switch (state) {
+          case AppLifecycleState.paused:
+          case AppLifecycleState.suspending:
+          case AppLifecycleState.inactive: {
+            final FocusManager focusManager = WidgetsBinding.instance.focusManager;
+            focusManager.windowDidLoseFocus();
+            break;
+          }
+          case AppLifecycleState.resumed: {
+            final FocusManager focusManager = WidgetsBinding.instance.focusManager;
+            focusManager.windowDidGainFocus();
+            break;
+          }
+        }
     }
   }
 
