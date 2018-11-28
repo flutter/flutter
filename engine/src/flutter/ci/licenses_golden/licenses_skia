@@ -1,4 +1,4 @@
-Signature: fecc4729b6a44c4e9f75b3c8e1e4d201
+Signature: a546138721f08f3c9ff08d9bb92f27f8
 
 UNUSED LICENSES:
 
@@ -1312,7 +1312,6 @@ FILE: ../../../third_party/skia/gm/crbug_887103.cpp
 FILE: ../../../third_party/skia/gm/crbug_892988.cpp
 FILE: ../../../third_party/skia/gm/crbug_899512.cpp
 FILE: ../../../third_party/skia/gm/drawimageset.cpp
-FILE: ../../../third_party/skia/gm/drawquadset.cpp
 FILE: ../../../third_party/skia/gm/fwidth_squircle.cpp
 FILE: ../../../third_party/skia/gm/gradients_degenerate.cpp
 FILE: ../../../third_party/skia/gm/hugepath.cpp
@@ -1598,8 +1597,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrClearStencilClipOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDebugMarkerOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrFillRectOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrFillRectOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.h
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
