@@ -6,6 +6,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_gallery/demo/customized/home.dart';
+import 'package:flutter_gallery/welcome/home.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
@@ -162,6 +164,13 @@ Future<void> smokeGallery(WidgetTester tester) async {
     await tester.tap(find.text(category.name));
     await tester.pumpAndSettle();
     for (GalleryDemo demo in kGalleryCategoryToDemos[category]) {
+      // the following demos don't conform to the standard gallery template as
+      // they have fully customized designs so we should exclude them from the
+      // smoke test.
+      // TODO - the following items need specific smoke tests
+      if (demo.routeName == CustomizedDesign.routeName || demo.routeName == Welcome.routeName) {
+        continue;
+      }
       await Scrollable.ensureVisible(tester.element(find.text(demo.title)), alignment: 0.0);
       await smokeDemo(tester, demo);
       tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after running $demo');

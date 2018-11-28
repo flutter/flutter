@@ -137,17 +137,7 @@ class _GalleryAppState extends State<GalleryApp>
           child: _applyTextScaleFactor(child),
         );
       },
-      home: FutureBuilder<bool>(
-        future: _checkWelcomeFuture,
-        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            _showWelcome ??= snapshot.data;
-            return _buildHomeWidget(context);
-          } else {
-            return Container();
-          }
-        },
-      ),
+      home: _buildHomeWidget(context),
     );
   }
 
@@ -158,12 +148,7 @@ class _GalleryAppState extends State<GalleryApp>
   }
 
   Widget _buildHomeWidget(BuildContext context) {
-    final Widget welcome = Welcome(
-      onDismissed: () {
-        _welcomeContentAnimationController.forward();
-        _prefs.setBool(_kPrefsHasSeenWelcome, true);
-      },
-    );
+
     Widget home = GalleryHome(
       testMode: widget.testMode,
       optionsPage: GalleryOptionsPage(
@@ -180,22 +165,45 @@ class _GalleryAppState extends State<GalleryApp>
         child: home,
       );
     }
-    if (_showWelcome) {
-      _welcomeContentAnimation = Tween<Offset>(
-        begin: const Offset(0.0, 1.0),
-        end: const Offset(0.0, 0.0),
-      ).animate(_welcomeContentAnimationController);
-      return Stack(
-        children: <Widget>[
-          welcome,
-          SlideTransition(
-            position: _welcomeContentAnimation,
-            child: home,
-          )
-        ],
-      );
-    } else {
+    // We want to avoid showing the welcome flow if we're doing tests
+    // because the welcome requires an async check that will cause all of the
+    // tests to fail and the app will be stuck showing the welcome screen.
+    if (widget.testMode) {
       return home;
+    } else {
+      Widget contentWidget = home;
+      if (!widget.testMode && _showWelcome) {
+        final Widget welcome = Welcome(
+          onDismissed: () {
+            _welcomeContentAnimationController.forward();
+            _prefs.setBool(_kPrefsHasSeenWelcome, true);
+          },
+        );
+        _welcomeContentAnimation = Tween<Offset>(
+          begin: const Offset(0.0, 1.0),
+          end: const Offset(0.0, 0.0),
+        ).animate(_welcomeContentAnimationController);
+        contentWidget = Stack(
+          children: <Widget>[
+            welcome,
+            SlideTransition(
+              position: _welcomeContentAnimation,
+              child: home,
+            )
+          ],
+        );
+      }
+      return FutureBuilder<bool>(
+        future: _checkWelcomeFuture,
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            _showWelcome ??= snapshot.data;
+            return contentWidget;
+          } else {
+            return Container();
+          }
+        },
+      );
     }
   }
 }
