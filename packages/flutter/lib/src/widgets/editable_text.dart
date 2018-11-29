@@ -193,7 +193,7 @@ class EditableText extends StatefulWidget {
     this.autocorrect = true,
     @required this.style,
     @required this.cursorColor,
-    @required this.backgroundCursorColor,
+    this.backgroundCursorColor = const Color(0xFF8E8E93),
     this.textAlign = TextAlign.start,
     this.textDirection,
     this.locale,
