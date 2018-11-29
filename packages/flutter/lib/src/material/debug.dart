@@ -26,25 +26,27 @@ bool debugCheckHasMaterial(BuildContext context) {
       final StringBuffer message = StringBuffer();
       message.writeln(
         '${context.widget.runtimeType} widgets require a Material '
-        'widget ancestor, but none was found.'
+        'widget ancestor, but none was found.\n'
       );
       message.writeln(
+        'Explanation\n'
         'In material design, most widgets are conceptually "printed" on '
         'a sheet of material. In Flutter\'s material library, that '
         'material is represented by the Material widget. It is the '
         'Material widget that renders ink splashes, for instance. '
         'Because of this, many material library widgets require that '
-        'there be a Material widget in the tree above them.'
+        'there be a Material widget in the tree above them.\n'
       );
       message.writeln(
+        'Potential Fix\n'
         'To introduce a Material widget, you can either directly '
         'include one, or use a widget that contains Material itself, '
-        'such as a Card, Dialog, Drawer, or Scaffold.'
+        'such as a Card, Dialog, Drawer, or Scaffold.\n'
       );
       message.writeln(
         'The specific widget that could not find a Material ancestor was:'
       );
-      message.writeln('  ${context.widget}');
+      message.writeln('  ${context.widget}\n');
       final List<Widget> ancestors = <Widget>[];
       context.visitAncestorElements((Element element) {
         ancestors.add(element.widget);
