@@ -11,6 +11,8 @@ import 'package:flutter_gallery/welcome/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../demo/playground_demo.dart';
+
 import 'demos.dart';
 import 'home.dart';
 import 'options.dart';
@@ -56,11 +58,17 @@ class _GalleryAppState extends State<GalleryApp>
     // For a different example of how to set up an application routing table
     // using named routes, consider the example in the Navigator class documentation:
     // https://docs.flutter.io/flutter/widgets/Navigator-class.html
-    return Map<String, WidgetBuilder>.fromIterable(
+    final Map<String, WidgetBuilder> routes = Map<String, WidgetBuilder>.fromIterable(
       kAllGalleryDemos,
       key: (dynamic demo) => '${demo.routeName}',
       value: (dynamic demo) => demo.buildRoute,
     );
+
+    // Add special playground demo cases directly to router
+    routes[MaterialPlaygroundDemo.routeName] = MaterialPlaygroundDemo.buildRoute();
+    routes[CupertinoPlaygroundDemo.routeName] = CupertinoPlaygroundDemo.buildRoute();
+
+    return routes;
   }
 
   @override
@@ -168,42 +176,46 @@ class _GalleryAppState extends State<GalleryApp>
     // We want to avoid showing the welcome flow if we're doing tests
     // because the welcome requires an async check that will cause all of the
     // tests to fail and the app will be stuck showing the welcome screen.
-    if (widget.testMode) {
+    if (widget.testMode != null && widget.testMode == true) {
       return home;
     } else {
-      Widget contentWidget = home;
-      if (!widget.testMode && _showWelcome) {
-        final Widget welcome = Welcome(
-          onDismissed: () {
-            _welcomeContentAnimationController.forward();
-            _prefs.setBool(_kPrefsHasSeenWelcome, true);
-          },
-        );
-        _welcomeContentAnimation = Tween<Offset>(
-          begin: const Offset(0.0, 1.0),
-          end: const Offset(0.0, 0.0),
-        ).animate(_welcomeContentAnimationController);
-        contentWidget = Stack(
-          children: <Widget>[
-            welcome,
-            SlideTransition(
-              position: _welcomeContentAnimation,
-              child: home,
-            )
-          ],
-        );
-      }
       return FutureBuilder<bool>(
         future: _checkWelcomeFuture,
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             _showWelcome ??= snapshot.data;
-            return contentWidget;
+            return _buildContentWidget(home, _showWelcome);
           } else {
             return Container();
           }
         },
       );
     }
+  }
+
+  Widget _buildContentWidget(Widget homeWidget, bool showWelcome) {
+    Widget contentWidget = homeWidget;
+    if (showWelcome == true) {
+      final Widget welcome = Welcome(
+        onDismissed: () {
+          _welcomeContentAnimationController.forward();
+          _prefs.setBool(_kPrefsHasSeenWelcome, true);
+        },
+      );
+      _welcomeContentAnimation = Tween<Offset>(
+        begin: const Offset(0.0, 1.0),
+        end: const Offset(0.0, 0.0),
+      ).animate(_welcomeContentAnimationController);
+      contentWidget = Stack(
+        children: <Widget>[
+          welcome,
+          SlideTransition(
+            position: _welcomeContentAnimation,
+            child: homeWidget,
+          )
+        ],
+      );
+    }
+    return contentWidget;
   }
 }
