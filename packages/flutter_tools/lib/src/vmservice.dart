@@ -1241,6 +1241,14 @@ class Isolate extends ServiceObjectOwner {
             }});
   }
 
+  Future<void> queryDisplayRefreshRate(String viewId) async {
+    final Map<String, dynamic> result = await vm.invokeRpcRaw(
+        '_flutter.getDisplayRefreshRate',
+        params: <String, dynamic>{'viewId': viewId}
+    );
+    print('fps: ${result['fps']}');
+  }
+
   // Debug dump extension methods.
 
   Future<Map<String, dynamic>> flutterDebugDumpApp() {

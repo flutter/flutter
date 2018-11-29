@@ -180,6 +180,11 @@ class FlutterDevice {
     return elements;
   }
 
+  Future<void> queryDisplayRefreshRate() async {
+    for (FlutterView view in views)
+      await view.uiIsolate.queryDisplayRefreshRate(view.id);
+  }
+
   Future<void> debugDumpApp() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterDebugDumpApp();
@@ -505,6 +510,12 @@ abstract class ResidentRunner {
     await Future.wait(futures);
   }
 
+  Future<void> _queryDisplayRefreshRate() async {
+    await refreshViews();
+    for (FlutterDevice device in flutterDevices)
+      await device.queryDisplayRefreshRate();
+  }
+
   Future<void> _debugDumpApp() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
@@ -750,6 +761,11 @@ abstract class ResidentRunner {
     } else if (lower == 'd') {
       await detach();
       return true;
+    } else if (lower == 'f') {
+      if (supportsServiceProtocol) {
+        await _queryDisplayRefreshRate();
+        return true;
+      }
     }
 
     return false;
@@ -846,6 +862,7 @@ abstract class ResidentRunner {
     if (supportsServiceProtocol) {
       printStatus('You can dump the widget hierarchy of the app (debugDumpApp) by pressing "w".');
       printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
+      printStatus('To check supported display refresh rate in fps, press "f".');
       if (isRunningDebug) {
         printStatus('For layers (debugDumpLayerTree), use "L"; for accessibility (debugDumpSemantics), use "S" (for traversal order) or "U" (for inverse hit test order).');
         printStatus('To toggle the widget inspector (WidgetsApp.showWidgetInspectorOverride), press "i".');
