@@ -31,15 +31,12 @@ class SliderPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return PropertyColumn(
       label: label,
-      widget: Padding(
-        padding: const EdgeInsets.only(bottom: 5.0),
-        child: Slider(
-          value: value,
-          min: minValue,
-          max: maxValue,
-          divisions: divisions,
-          onChanged: onValueChanged,
-        ),
+      widget: Slider(
+        value: value,
+        min: minValue,
+        max: maxValue,
+        divisions: divisions,
+        onChanged: onValueChanged,
       ),
     );
   }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
+
 import 'package:share/share.dart';
 import 'package:flutter/material.dart';
 
@@ -37,6 +39,12 @@ class _PlaygroundDemoState extends State<PlaygroundDemo>
   @override
   void initState() {
     super.initState();
+
+    SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.portraitUp,
+    ]);
+
     _backdropAnimationController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 100),
@@ -46,6 +54,12 @@ class _PlaygroundDemoState extends State<PlaygroundDemo>
 
   @override
   void dispose() {
+    SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
     _backdropAnimationController.dispose();
     super.dispose();
   }
@@ -55,24 +69,26 @@ class _PlaygroundDemoState extends State<PlaygroundDemo>
     _backdropAnimationController.fling(velocity: _isCodeOpen ? -1.0 : 1.0);
   }
 
-  Animation<RelativeRect> _getLayerAnimation(BoxConstraints constraints) {
+  Animation<RelativeRect> _getLayerAnimation(BuildContext context, BoxConstraints constraints) {
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final double maxHeight = constraints.biggest.height;
-    final double backPanelHeight = maxHeight - _headerHeight;
-    const double frontPanelHeight = -_headerHeight;
-    const double offsetTop = 130.0;
+    final double openHeight = maxHeight - (_headerHeight + mediaQuery.padding.bottom);
+    const double closedHeight = -_headerHeight;
+    final double offsetTop = (maxHeight * 0.15).ceilToDouble();
 
     return RelativeRectTween(
-      begin: const RelativeRect.fromLTRB(0.0, offsetTop, 0.0, 0.0),
-      end: RelativeRect.fromLTRB(0.0, backPanelHeight, 0.0, frontPanelHeight),
+      begin: RelativeRect.fromLTRB(0.0, offsetTop, 0.0, 0.0),
+      end: RelativeRect.fromLTRB(0.0, openHeight, 0.0, closedHeight),
     ).animate(CurvedAnimation(
       parent: _backdropAnimationController,
       curve: Curves.linear,
     ));
   }
 
-  Widget _codePreviewLayer(BoxConstraints constraints) {
+  Widget _codePreviewLayer(BuildContext context, BoxConstraints constraints) {
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     return PositionedTransition(
-      rect: _getLayerAnimation(constraints),
+      rect: _getLayerAnimation(context, constraints),
       child: Container(
         color: Colors.transparent,
         child: Column(
@@ -80,10 +96,10 @@ class _PlaygroundDemoState extends State<PlaygroundDemo>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Container(
-              height: _headerHeight,
+              height: _headerHeight + mediaQuery.padding.bottom,
               child: FlatButton(
                 color: Colors.white,
-                padding: const EdgeInsets.fromLTRB(_codePadding, 2.0, 0.0, 0.0),
+                padding: EdgeInsets.fromLTRB(_codePadding, 2.0, mediaQuery.padding.right, 0.0),
                 child: Container(
                   width: MediaQuery.of(context).size.width,
                   child: Stack(
@@ -160,7 +176,8 @@ class _PlaygroundDemoState extends State<PlaygroundDemo>
     );
   }
 
-  List<Widget> _layersStack(BoxConstraints constraints) {
+  List<Widget> _buildStack(BuildContext context, BoxConstraints constraints) {
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final List<Widget> stack = <Widget>[
       _WidgetPreviewConfigurationLayer(
         previewWidget: widget.previewWidget,
@@ -180,13 +197,13 @@ class _PlaygroundDemoState extends State<PlaygroundDemo>
       ));
     }
 
-    stack.add(_codePreviewLayer(constraints));
+    stack.add(_codePreviewLayer(context, constraints));
 
     // If code layer is open, add share button
     if (_isCodeOpen) {
       stack.add(Positioned(
         bottom: 15.0,
-        right: 20.0,
+        right: 20.0 + mediaQuery.padding.right,
         child: RaisedButton(
           splashColor: Colors.white,
           child: const Text(
@@ -210,7 +227,7 @@ class _PlaygroundDemoState extends State<PlaygroundDemo>
         builder: (BuildContext context, BoxConstraints constraints) {
       return Container(
         child: Stack(
-          children: _layersStack(constraints),
+          children: _buildStack(context, constraints),
         ),
       );
     });
@@ -232,23 +249,27 @@ class _WidgetPreviewConfigurationLayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        SizedBox(
-          height: 160.0,
-          child: previewWidget,
-        ),
-        const Divider(
-          height: 1.0,
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            child: configWidget,
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    return Container(
+      padding: mediaQuery.padding,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          SizedBox(
+            height: 160.0,
+            child: previewWidget,
           ),
-        ),
-      ],
+          const Divider(
+            height: 1.0,
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: configWidget,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

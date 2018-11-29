@@ -31,7 +31,8 @@ class ColorPicker extends StatelessWidget {
   final ValueChanged<Color> onItemTapped;
 
   List<Widget> _buildChoices() {
-    final List<Color> options = colors ?? kColorChoices.map((ColorChoice c) => c.color).toList();
+    final List<Color> options =
+        colors ?? kColorChoices.map((ColorChoice c) => c.color).toList();
     final List<Widget> choices = <Widget>[];
 
     for (int i = 0; i < options.length; i++) {
@@ -48,7 +49,7 @@ class ColorPicker extends StatelessWidget {
       );
       if (i < options.length - 1) {
         button = Padding(
-          padding: const EdgeInsets.only(right: 10.0),
+          padding: const EdgeInsets.only(right: 12.0),
           child: button,
         );
       }
@@ -63,12 +64,15 @@ class ColorPicker extends StatelessWidget {
       label: label,
       widget: Container(
         padding: const EdgeInsets.symmetric(horizontal: 15.0),
-        height: pickerHeight,
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: _buildChoices(),
+        height: pickerHeight + kPickerRowPadding,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: _buildChoices(),
+          ),
         ),
       ),
     );
@@ -82,10 +86,10 @@ class _ColorChoiceButton extends StatelessWidget {
     this.isSelected = false,
     this.inverse = false,
     this.onTapped,
-  }) : assert(color != null),
-       assert(inverse != null),
-       assert(isSelected != null),
-       super(key: key);
+  })  : assert(color != null),
+        assert(inverse != null),
+        assert(isSelected != null),
+        super(key: key);
 
   final Color color;
   final bool isSelected;

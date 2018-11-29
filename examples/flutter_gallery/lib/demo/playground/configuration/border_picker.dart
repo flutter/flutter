@@ -45,7 +45,7 @@ class BorderPicker extends StatelessWidget {
       );
       if (i < options.length - 1) {
         button = Padding(
-          padding: const EdgeInsets.only(right: 10.0),
+          padding: const EdgeInsets.only(right: 15.0),
           child: button,
         );
       }
@@ -60,12 +60,15 @@ class BorderPicker extends StatelessWidget {
       label: label,
       widget: Container(
         padding: const EdgeInsets.symmetric(horizontal: 15.0),
-        height: pickerHeight,
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: _buildChoices(),
+        height: pickerHeight + kPickerRowPadding,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: _buildChoices(),
+          ),
         ),
       ),
     );

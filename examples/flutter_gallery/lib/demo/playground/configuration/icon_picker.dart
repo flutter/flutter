@@ -14,15 +14,17 @@ class IconPicker extends StatelessWidget {
     @required this.selectedValue,
     this.label = 'Icon',
     this.isSelected = false,
+    this.pickerHeight = kPickerRowHeight,
     this.icons,
     this.activeColor,
     this.onItemTapped,
   })  : assert(label != null),
-        assert(selectedValue != null),
+        assert(pickerHeight != null && pickerHeight > 0.0),
         assert(isSelected != null),
         super(key: key);
 
   final String label;
+  final double pickerHeight;
   final bool isSelected;
   final List<IconData> icons;
   final IconData selectedValue;
@@ -47,7 +49,7 @@ class IconPicker extends StatelessWidget {
       );
       if (i < options.length - 1) {
         button = Padding(
-          padding: const EdgeInsets.only(right: 10.0),
+          padding: const EdgeInsets.only(right: 9.0),
           child: button,
         );
       }
@@ -62,12 +64,15 @@ class IconPicker extends StatelessWidget {
       label: 'Icon',
       widget: Container(
         padding: const EdgeInsets.symmetric(horizontal: 15.0),
-        height: kPickerRowHeight,
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: _buildChoices(),
+        height: pickerHeight + kPickerRowPadding,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: _buildChoices(),
+          ),
         ),
       ),
     );
