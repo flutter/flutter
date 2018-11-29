@@ -36,19 +36,16 @@ CupertinoSlider(
 )
 ''';
 
+  @override
   Widget build(BuildContext context) {
     return PlaygroundDemo(
       codePreview: codePreview,
-      previewWidget: previewWidget(context),
-      configWidget: configWidget(context),
+      previewWidget: _buildPreviewWidget(context),
+      configWidget: _buildConfigWidget(context),
     );
   }
 
-
-  
-
-  @override
-  Widget configWidget(BuildContext context) {
+  Widget _buildConfigWidget(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -67,8 +64,7 @@ CupertinoSlider(
     );
   }
 
-  @override
-  Widget previewWidget(BuildContext context) {
+  Widget _buildPreviewWidget(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 25.0, right: 25.0),
       child: CupertinoSlider(

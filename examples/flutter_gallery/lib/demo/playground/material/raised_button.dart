@@ -18,7 +18,6 @@ class _RaisedButtonDemoState extends State<RaisedButtonDemo> {
   String _borderShape = 'rounded';
   Color _color = Colors.blue;
 
-  // TODO
   static String title = 'RaisedButton'.toUpperCase();
 
   String get codePreview => '''

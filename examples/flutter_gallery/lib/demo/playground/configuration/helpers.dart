@@ -28,11 +28,6 @@ ShapeBorder borderShapeFromString(String type, [bool withSide = true]) {
       : BorderSide.none;
 
   switch (type) {
-    case 'square':
-      return RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-        side: borderSide,
-      );
     case 'rounded':
       return RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
@@ -45,6 +40,12 @@ ShapeBorder borderShapeFromString(String type, [bool withSide = true]) {
       );
     case 'stadium':
       return StadiumBorder(
+        side: borderSide,
+      );
+    case 'square':
+    default:
+      return RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
         side: borderSide,
       );
   }

@@ -83,8 +83,8 @@ class _IconChoiceButton extends StatelessWidget {
   const _IconChoiceButton({
     Key key,
     @required this.icon,
+    @required this.isSelected,
     this.activeColor,
-    this.isSelected,
     this.onTapped,
   })  : assert(icon != null),
         assert(isSelected != null),
