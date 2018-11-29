@@ -18,9 +18,9 @@ void main() {
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
-    await Scrollable.ensureVisible(tester.element(find.text('Material')), alignment: 0.5);
+    await Scrollable.ensureVisible(tester.element(find.text('Material Widgets')), alignment: 0.5);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Material'));
+    await tester.tap(find.text('Material Widgets'));
     await tester.pumpAndSettle();
 
     // Launch the buttons demo and then prove that showing the example

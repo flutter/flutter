@@ -50,7 +50,7 @@ class _GalleryAppState extends State<GalleryApp>
   Timer _timeDilationTimer;
   SharedPreferences _prefs;
   Future<bool> _checkWelcomeFuture;
-  bool _showWelcome;
+  bool _showWelcome = false;
   AnimationController _welcomeContentAnimationController;
   Animation<Offset> _welcomeContentAnimation;
 
