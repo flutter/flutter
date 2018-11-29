@@ -411,15 +411,21 @@ class TextPainter {
     return _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
   }
 
-  // TODO(garyq): Use extended grapheme cluster length instead of an increasing
-  // cluster length amount to achieve deterministic performance.
+  // The maximum grapheme cluster length that will be attempted to have
+  // a box drawn around it before giving up. We cap this to ensure
+  // efficiency, however, very long grapheme clusters (they can be
+  // arbitrarily long) may be overlooked.
+  static const int _maxGraphemeClusterLength = 1 << 4;
+
+  // TODO(garyq): Use actual extended grapheme cluster length instead of
+  // an increasing cluster length amount to achieve deterministic performance.
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
     final int prevCodeUnit = _text.codeUnitAt(offset - 1);
     if (prevCodeUnit == null)
       return null;
     final bool isSurrogate = _isUtf16Surrogate(prevCodeUnit);
-    // Hard cap cluster length to 16 to maximize performance.
-    final int maxGraphemeClusterLength = isSurrogate ? 16 : 1;
+    // Hard cap cluster length to maximize performance.
+    final int maxGraphemeClusterLength = isSurrogate ? _maxGraphemeClusterLength : 1;
     int graphemeClusterLength = isSurrogate ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && graphemeClusterLength <= maxGraphemeClusterLength) {
@@ -439,15 +445,15 @@ class TextPainter {
     return null;
   }
 
-  // TODO(garyq): Use extended grapheme cluster length instead of an increasing
-  // cluster length amount to achieve deterministic performance.
+  // TODO(garyq): Use actual extended grapheme cluster length instead of
+  // an increasing cluster length amount to achieve deterministic performance.
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
     final int nextCodeUnit = _text.codeUnitAt(offset - 1);
     if (nextCodeUnit == null)
       return null;
     final bool isSurrogate = _isUtf16Surrogate(nextCodeUnit);
     // Hard cap cluster length to 16 to maximize performance.
-    final int maxGraphemeClusterLength = isSurrogate ? 16 : 1;
+    final int maxGraphemeClusterLength = isSurrogate ? _maxGraphemeClusterLength : 1;
     int graphemeClusterLength = isSurrogate ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && graphemeClusterLength <= maxGraphemeClusterLength) {
