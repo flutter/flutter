@@ -176,42 +176,46 @@ class _GalleryAppState extends State<GalleryApp>
     // We want to avoid showing the welcome flow if we're doing tests
     // because the welcome requires an async check that will cause all of the
     // tests to fail and the app will be stuck showing the welcome screen.
-    if (widget.testMode) {
+    if (widget.testMode != null && widget.testMode == true) {
       return home;
     } else {
-      Widget contentWidget = home;
-      if (!widget.testMode && _showWelcome) {
-        final Widget welcome = Welcome(
-          onDismissed: () {
-            _welcomeContentAnimationController.forward();
-            _prefs.setBool(_kPrefsHasSeenWelcome, true);
-          },
-        );
-        _welcomeContentAnimation = Tween<Offset>(
-          begin: const Offset(0.0, 1.0),
-          end: const Offset(0.0, 0.0),
-        ).animate(_welcomeContentAnimationController);
-        contentWidget = Stack(
-          children: <Widget>[
-            welcome,
-            SlideTransition(
-              position: _welcomeContentAnimation,
-              child: home,
-            )
-          ],
-        );
-      }
       return FutureBuilder<bool>(
         future: _checkWelcomeFuture,
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             _showWelcome ??= snapshot.data;
-            return contentWidget;
+            return _buildContentWidget(home, _showWelcome);
           } else {
             return Container();
           }
         },
       );
     }
+  }
+
+  Widget _buildContentWidget(Widget homeWidget, bool showWelcome) {
+    Widget contentWidget = homeWidget;
+    if (showWelcome == true) {
+      final Widget welcome = Welcome(
+        onDismissed: () {
+          _welcomeContentAnimationController.forward();
+          _prefs.setBool(_kPrefsHasSeenWelcome, true);
+        },
+      );
+      _welcomeContentAnimation = Tween<Offset>(
+        begin: const Offset(0.0, 1.0),
+        end: const Offset(0.0, 0.0),
+      ).animate(_welcomeContentAnimationController);
+      contentWidget = Stack(
+        children: <Widget>[
+          welcome,
+          SlideTransition(
+            position: _welcomeContentAnimation,
+            child: homeWidget,
+          )
+        ],
+      );
+    }
+    return contentWidget;
   }
 }
