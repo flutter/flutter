@@ -182,9 +182,9 @@ class EditableText extends StatefulWidget {
   /// [TextInputType.text] unless [maxLines] is greater than one, when it will
   /// default to [TextInputType.multiline].
   ///
-  /// The [controller], [focusNode], [style], [cursorColor], [textAlign],
-  /// [rendererIgnoresPointer], and [enableInteractiveSelection] arguments must
-  /// not be null.
+  /// The [controller], [focusNode], [style], [cursorColor], [backgroundCursorColor],
+  /// [textAlign], [rendererIgnoresPointer], and [enableInteractiveSelection]
+  /// arguments must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -193,6 +193,7 @@ class EditableText extends StatefulWidget {
     this.autocorrect = true,
     @required this.style,
     @required this.cursorColor,
+    @required this.backgroundCursorColor,
     this.textAlign = TextAlign.start,
     this.textDirection,
     this.locale,
@@ -323,6 +324,12 @@ class EditableText extends StatefulWidget {
   ///
   /// Cannot be null.
   final Color cursorColor;
+
+  /// The color to use when painting the background cursor while rendering
+  /// the floating cursor.
+  ///
+  /// Cannot be null.
+  final Color backgroundCursorColor;
 
   /// {@template flutter.widgets.editableText.maxLines}
   /// The maximum number of lines for the text to span, wrapping if necessary.
@@ -602,18 +609,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // Because the center of the cursor is preferredLineHeight / 2 below the touch
   // origin, but the touch origin is used to determine which line the cursor is
   // on, we need this offset to correctly render and move the cursor.
-  Offset get _floatingCursorOffset { return Offset(0, renderEditable.preferredLineHeight / 2); }
+  Offset get _floatingCursorOffset => Offset(0, renderEditable.preferredLineHeight / 2);
 
   @override
-  void updateFloatingCursor(TextEditingPoint point) {
+  void updateFloatingCursor(FloatingCursorEditingPoint point) {
     switch(point.state){
-      case TextCursorState.Start:
+      case FloatingCursorDragState.Start:
         final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);
         _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
         _pointOffsetOrigin = null;
         renderEditable.setFloatingCursor(point.state, _startCaretRect.center - _floatingCursorOffset, currentTextPosition);
         break;
-      case TextCursorState.Update:
+      case FloatingCursorDragState.Update:
         // We want to send in points that are centered around a (0,0) origin, so we cache
         // position on the first update call.
         if (_pointOffsetOrigin != null) {
@@ -626,7 +633,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           _pointOffsetOrigin = point.point;
         }
         break;
-      case TextCursorState.End:
+      case FloatingCursorDragState.End:
         if (_lastTextPosition.offset != renderEditable.selection.baseOffset)
           _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable, SelectionChangedCause.tap);
         renderEditable.setFloatingCursor(point.state, null, null);
@@ -1009,6 +1016,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textSpan: buildTextSpan(),
               value: _value,
               cursorColor: widget.cursorColor,
+              backgroundCursorColor: widget.backgroundCursorColor,
               showCursor: EditableText.debugDeterministicCursor ? ValueNotifier<bool>(true) : _showCursor,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
@@ -1074,6 +1082,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.textSpan,
     this.value,
     this.cursorColor,
+    this.backgroundCursorColor,
     this.showCursor,
     this.hasFocus,
     this.maxLines,
@@ -1100,6 +1109,7 @@ class _Editable extends LeafRenderObjectWidget {
   final TextSpan textSpan;
   final TextEditingValue value;
   final Color cursorColor;
+  final Color backgroundCursorColor;
   final ValueNotifier<bool> showCursor;
   final bool hasFocus;
   final int maxLines;
@@ -1124,6 +1134,7 @@ class _Editable extends LeafRenderObjectWidget {
     return RenderEditable(
       text: textSpan,
       cursorColor: cursorColor,
+      backgroundCursorColor: backgroundCursorColor,
       showCursor: showCursor,
       hasFocus: hasFocus,
       maxLines: maxLines,

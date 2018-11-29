@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/cupertino.dart' show CupertinoColors;
 
 import 'box.dart';
 import 'object.dart';
@@ -19,8 +18,13 @@ import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
-const Offset _kFloatingCaretSizeOffset = Offset(0.5, 2.0); // pixels
-const double _kFloatingCaretRadius = 1.0; // pixels
+
+// The additional size on the x and y axis with which to expand the prototype
+// cursor to render the floating cursor in pixels.
+const Offset _kFloatingCaretSizeOffset = Offset(0.5, 2.0);
+
+// The corner radius of the floating cursor in pixels.
+const double _kFloatingCaretRadius = 1.0;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -132,6 +136,7 @@ class RenderEditable extends RenderBox {
     @required TextDirection textDirection,
     TextAlign textAlign = TextAlign.start,
     Color cursorColor,
+    Color backgroundCursorColor,
     ValueNotifier<bool> showCursor,
     bool hasFocus,
     int maxLines = 1,
@@ -166,6 +171,7 @@ class RenderEditable extends RenderBox {
          locale: locale,
        ),
        _cursorColor = cursorColor,
+       _backgroundCursorColor = backgroundCursorColor,
        _showCursor = showCursor ?? ValueNotifier<bool>(false),
        _hasFocus = hasFocus ?? false,
        _maxLines = maxLines,
@@ -568,6 +574,19 @@ class RenderEditable extends RenderBox {
     if (_cursorColor == value)
       return;
     _cursorColor = value;
+    markNeedsPaint();
+  }
+
+  /// The color to use when painting the cursor aligned to the text while
+  /// rendering the floating cursor.
+  ///
+  /// The default is light grey.
+  Color get backgroundCursorColor => _backgroundCursorColor;
+  Color _backgroundCursorColor;
+  set backgroundCursorColor(Color value) {
+    if (backgroundCursorColor == value)
+      return;
+    _backgroundCursorColor = value;
     markNeedsPaint();
   }
 
@@ -1230,8 +1249,10 @@ class RenderEditable extends RenderBox {
   void _paintCaret(Canvas canvas, Offset effectiveOffset, TextPosition textPosition) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(textPosition, _caretPrototype);
+    // As only iOS supports floating cursors, we want the color of the cursor to be
+    // the inactive grey color from CupertinoColors.
     final Paint paint = Paint()
-      ..color = _floatingCursorOn ? CupertinoColors.inactiveGray : _cursorColor;
+      ..color = _floatingCursorOn ? backgroundCursorColor : _cursorColor;
 
     final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset);
 
@@ -1251,8 +1272,11 @@ class RenderEditable extends RenderBox {
 
   /// Sets the screen position of the floating cursor and the text position
   /// closest to the cursor.
-  void setFloatingCursor(TextCursorState state, Offset boundedOffset, TextPosition lastTextPosition) {
-    if (state == TextCursorState.Start) {
+  void setFloatingCursor(FloatingCursorDragState state, Offset boundedOffset, TextPosition lastTextPosition) {
+    assert(lastTextPosition != null);
+    assert(boundedOffset != null);
+    assert(state != null);
+    if (state == FloatingCursorDragState.Start) {
       _relativeOrigin = const Offset(0, 0);
       _previousOffset = null;
       _resetOriginOnBottom = false;
@@ -1260,7 +1284,7 @@ class RenderEditable extends RenderBox {
       _resetOriginOnRight = false;
       _resetOriginOnBottom = false;
     }
-    _floatingCursorOn = state != TextCursorState.End;
+    _floatingCursorOn = state != FloatingCursorDragState.End;
     if(_floatingCursorOn) {
       markNeedsPaint();
       _floatingCursorOffset = boundedOffset;
@@ -1283,6 +1307,9 @@ class RenderEditable extends RenderBox {
     canvas.drawRRect(caretRRect, paint);
   }
 
+  // The relative origin in relation to the distance the user has theoretically
+  // dragged the floating cursor offscreen. This value is used to account for the
+  // difference in the rendering position and the raw offset value.
   Offset _relativeOrigin = const Offset(0, 0);
   Offset _previousOffset;
   bool _resetOriginOnLeft = false;
