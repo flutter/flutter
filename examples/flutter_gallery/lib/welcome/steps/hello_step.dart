@@ -9,7 +9,7 @@ import '../welcome_step_state.dart';
 import 'step_container.dart';
 
 const String _kTitle = 'Welcome to Flutter!';
-const String _kSubtitle = 'Flutter allows you to build beautiful native apps on iOS and Android from a single codebase.';
+const String _kSubtitle = 'Flutter allows you to build beautiful native mobile apps from a single codebase.';
 
 class FlutterWelcomeStep extends StatefulWidget {
   const FlutterWelcomeStep({Key key}) : super(key: key);
