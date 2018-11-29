@@ -3136,12 +3136,12 @@ abstract class _SemanticsFragment {
   Iterable<_InterestingSemanticsFragment> get interestingFragments;
 
   /// Whether this fragment wants to abort the semantics walk because the
-  /// information in the tree aer not sufficient to calculate semantics.
+  /// information in the tree are not sufficient to calculate semantics.
   ///
   /// This happens for subtrees that are currently kept alive by a viewport but
   /// not laid out.
   ///
-  /// See alo:
+  /// See also:
   ///
   ///  * [_AbortingSemanticsFragment], which sets this to true.
   bool get abortsWalk => false;
@@ -3430,10 +3430,10 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
 
 
 /// [_SemanticsFragment] used to indicate that the current information in this
-/// subtree are not sufficient to update semantics.
+/// subtree is not sufficient to update semantics.
 ///
 /// Anybody processing this [_SemanticsFragment] should abort the walk of the
-/// current subtree without updating any [SemanticsNode]s as there are no semantic
+/// current subtree without updating any [SemanticsNode]s as there is no semantic
 /// information to compute. As a result, this fragment also doesn't carry any
 /// semantics information either.
 class _AbortingSemanticsFragment extends _InterestingSemanticsFragment {
