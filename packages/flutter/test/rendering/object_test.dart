@@ -15,6 +15,7 @@ void main() {
     });
     owner.ensureSemantics();
     renderObject.attach(owner);
+    renderObject.layout(const BoxConstraints.tightForFinite());  // semantics are only calculated if layout information are upto date.
     owner.flushSemantics();
 
     expect(onNeedVisualUpdateCallCount, 1);
