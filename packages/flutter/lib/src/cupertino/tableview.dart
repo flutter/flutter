@@ -16,14 +16,22 @@ const double kDefaultCellInset = 16.0;
 @visibleForTesting
 const double kDefaultDividerHeight = 1.0;
 
+/// An iOS-styled list.
+///
 /// WARNING: CupertinoTableView and its associated classes are EXPERIMENTAL. IF
 /// YOU USE THESE APIS, WE WILL BREAK YOU!
 ///
-/// An iOS-styled table view.
+/// [CupertinoTableView] displays a list of cells with dividers between them.
+/// Cells can be any widget, but consider using [CupertinoTableViewCell]s for
+/// iOS styling of each cell.
 ///
-/// Table views are used in iOS to render lists of cells. They are the iOS
-/// equivalent of Android's `ListView` and `RecyclerView`. [CupertinoTableView]
-/// is Flutter's iOS-styled alternative to [ListView].
+/// Table views are the iOS equivalent of Android's `ListView` and `RecyclerView`.
+/// [CupertinoTableView] is Flutter's iOS-styled alternative to Flutter's [ListView].
+/// [CupertinoTableView] renders dividers differently than [ListView] by adding
+/// a gap to the left/start of the divider. [CupertinoTableView] also offers
+/// optional rendering of cells grouped into sections, optional display of
+/// section headers, and optional addition of an index to quickly jump to a
+/// desired section, none of which are available with [ListView].
 ///
 /// # Cells
 ///
@@ -87,7 +95,7 @@ class CupertinoTableView extends StatefulWidget {
     @required this.plainChildrenBuilder,
   }) : plainChildren = null;
 
-  /// ScrollController that controls the scroll position of this [CupertinoTableView].
+  /// {@macro ScrollView#controller}
   final ScrollController scrollController;
 
   /// The table's background color beneath its cells.
@@ -166,19 +174,20 @@ class _CupertinoTableViewState extends State<CupertinoTableView> {
   }
 
   Widget _buildPlainChildFromBuilder(BuildContext context, int index) {
-    // If this cell has already been built since the last time `build()` was
-    // called, return that cached cell widget.
+    Widget undecoratedCell;
+
     if (_cellWidgetCache[index] != null) {
-      return _cellWidgetCache[index];
+      // The desired cell has already been built and cached. Retrieve it.
+      undecoratedCell = _cellWidgetCache[index];
+    } else {
+      // We do not have a cached version of this cell. Build the cell's widget
+      // and cache it.
+      undecoratedCell = widget.plainChildrenBuilder(context, index);
+      _cellWidgetCache[index] = undecoratedCell;
     }
 
-    // We do not have a cached version of this cell. Build the cell's widget
-    // and cache it.
-    final Widget cell = widget.plainChildrenBuilder(context, index);
-    _cellWidgetCache[index] = cell;
-
     // If the cell doesn't exist, return null.
-    if (cell == null) {
+    if (undecoratedCell == null) {
       return null;
     }
 
@@ -194,13 +203,13 @@ class _CupertinoTableViewState extends State<CupertinoTableView> {
       //
       // First, try to find the next cell in the cell widget cache. If it's not
       // there then create the next cell and cache it.
-      final Widget nextCell = _cellWidgetCache[index + 1] ?? widget.plainChildrenBuilder(context, index + 1);
-      _cellWidgetCache[index + 1] = nextCell;
+      final Widget nextUndecoratedCell = _cellWidgetCache[index + 1] ?? widget.plainChildrenBuilder(context, index + 1);
+      _cellWidgetCache[index + 1] = nextUndecoratedCell;
 
-      isLastCell = nextCell == null;
+      isLastCell = nextUndecoratedCell == null;
     }
 
-    return _decorateCell(cell, isLastCell);
+    return _decorateCell(undecoratedCell, isLastCell);
   }
 
   // Decorates an individual cell with a divider beneath it. If this cell
@@ -329,7 +338,7 @@ class _CupertinoDividerDecorationPainter extends BoxPainter {
 /// The gap between extra dividers is equal to the height of the last cell in
 /// the [CupertinoTableView], as per iOS behavior.
 @visibleForTesting
-class CupertinoTableViewExtraDividers extends RenderObjectWidget {
+class CupertinoTableViewExtraDividers extends SingleChildRenderObjectWidget {
   CupertinoTableViewExtraDividers({
     @required this.cellHeightController,
   });
@@ -337,8 +346,8 @@ class CupertinoTableViewExtraDividers extends RenderObjectWidget {
   final _CellHeightController cellHeightController;
 
   @override
-  RenderObjectElement createElement() {
-    return CupertinoTableViewExtraDividersElement(this);
+  SingleChildRenderObjectElement createElement() {
+    return SingleChildRenderObjectElement(this);
   }
 
   @override
@@ -361,24 +370,6 @@ class _CellHeightController with ChangeNotifier {
     _cellHeight = newHeight;
     notifyListeners();
   }
-}
-
-@visibleForTesting
-class CupertinoTableViewExtraDividersElement extends RenderObjectElement {
-  CupertinoTableViewExtraDividersElement(Widget widget) : super(widget);
-
-  @override
-  void forgetChild(Element child) {}
-
-  @override
-  void insertChildRenderObject(RenderObject child, dynamic slot) {}
-
-  @override
-  void moveChildRenderObject(RenderObject child, dynamic slot) {}
-
-  @override
-  void removeChildRenderObject(RenderObject child) {}
-
 }
 
 @visibleForTesting

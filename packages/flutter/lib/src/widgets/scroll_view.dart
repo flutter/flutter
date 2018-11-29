@@ -89,6 +89,7 @@ abstract class ScrollView extends StatelessWidget {
   /// Defaults to false.
   final bool reverse;
 
+  /// {@template ScrollView#controller}
   /// An object that can be used to control the position to which this scroll
   /// view is scrolled.
   ///
@@ -101,6 +102,7 @@ abstract class ScrollView extends StatelessWidget {
   /// [ScrollController.keepScrollOffset]). It can be used to read the current
   /// scroll position (see [ScrollController.offset]), or change it (see
   /// [ScrollController.animateTo]).
+  /// {@endtemplate}
   final ScrollController controller;
 
   /// Whether this is the primary scroll view associated with the parent
