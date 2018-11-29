@@ -685,11 +685,11 @@ TextInputAction _toTextInputAction(String action) {
 
 FloatingCursorDragState _toTextCursorAction(String state) {
   switch (state) {
-    case 'TextCursorState.start':
+    case 'FloatingCursorDragState.start':
       return FloatingCursorDragState.Start;
-    case 'TextCursorState.update':
+    case 'FloatingCursorDragState.update':
       return FloatingCursorDragState.Update;
-    case 'TextCursorState.end':
+    case 'FloatingCursorDragState.end':
       return FloatingCursorDragState.End;
   }
   throw FlutterError('Unknown text cursor action: $state');
