@@ -178,7 +178,7 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
 }
 
 void main([List<String> args = const <String>[]]) {
-  group('flutter gallery transitions', () {
+  group('flutter Design Lab transitions', () {
     FlutterDriver driver;
     setUpAll(() async {
       driver = await FlutterDriver.connect();

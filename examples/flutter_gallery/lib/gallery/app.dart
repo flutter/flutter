@@ -9,8 +9,9 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
+import 'package:flutter_gallery/welcome/home.dart';
 import 'package:scoped_model/scoped_model.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'demos.dart';
@@ -19,6 +20,8 @@ import 'options.dart';
 import 'scales.dart';
 import 'themes.dart';
 import 'updater.dart';
+
+const String _kPrefsHasSeenWelcome = 'hasSeenWelcome';
 
 class GalleryApp extends StatefulWidget {
   const GalleryApp({
@@ -42,10 +45,16 @@ class GalleryApp extends StatefulWidget {
   _GalleryAppState createState() => _GalleryAppState();
 }
 
-class _GalleryAppState extends State<GalleryApp> {
+class _GalleryAppState extends State<GalleryApp>
+    with SingleTickerProviderStateMixin {
   GalleryOptions _options;
   Timer _timeDilationTimer;
   AppStateModel model;
+  SharedPreferences _prefs;
+  Future<bool> _checkWelcomeFuture;
+  bool _showWelcome;
+  AnimationController _welcomeContentAnimationController;
+  Animation<Offset> _welcomeContentAnimation;
 
   Map<String, WidgetBuilder> _buildRoutes() {
     // For a different example of how to set up an application routing table
@@ -68,12 +77,19 @@ class _GalleryAppState extends State<GalleryApp> {
       platform: defaultTargetPlatform,
     );
     model = AppStateModel()..loadProducts();
+    _checkWelcomeFuture = _getWelcomePrefsValue();
+    _welcomeContentAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
   }
 
   @override
   void dispose() {
     _timeDilationTimer?.cancel();
     _timeDilationTimer = null;
+    _checkWelcomeFuture = null;
+    _welcomeContentAnimationController.dispose();
     super.dispose();
   }
 
@@ -93,7 +109,6 @@ class _GalleryAppState extends State<GalleryApp> {
           timeDilation = newOptions.timeDilation;
         }
       }
-
       _options = newOptions;
     });
   }
@@ -113,29 +128,11 @@ class _GalleryAppState extends State<GalleryApp> {
 
   @override
   Widget build(BuildContext context) {
-    Widget home = GalleryHome(
-      testMode: widget.testMode,
-      optionsPage: GalleryOptionsPage(
-        options: _options,
-        onOptionsChanged: _handleOptionsChanged,
-        onSendFeedback: widget.onSendFeedback ?? () {
-          launch('https://github.com/flutter/flutter/issues/new/choose', forceSafariVC: false);
-        },
-      ),
-    );
-
-    if (widget.updateUrlFetcher != null) {
-      home = Updater(
-        updateUrlFetcher: widget.updateUrlFetcher,
-        child: home,
-      );
-    }
-
     return ScopedModel<AppStateModel>(
       model: model,
       child: MaterialApp(
         theme: _options.theme.data.copyWith(platform: _options.platform),
-        title: 'Flutter Gallery',
+        title: 'Flutter Design Lab',
         color: Colors.grey,
         showPerformanceOverlay: _options.showPerformanceOverlay,
         checkerboardOffscreenLayers: _options.showOffscreenLayersCheckerboard,
@@ -147,8 +144,74 @@ class _GalleryAppState extends State<GalleryApp> {
             child: _applyTextScaleFactor(child),
           );
         },
-        home: home,
+        home: _buildHomeWidget(context),
       ),
     );
+  }
+
+  Future<bool> _getWelcomePrefsValue() async {
+    _prefs = await SharedPreferences.getInstance();
+    final bool hasSeenWelcome = _prefs.getBool(_kPrefsHasSeenWelcome) ?? false;
+    return !hasSeenWelcome;
+  }
+
+  Widget _buildHomeWidget(BuildContext context) {
+
+    Widget home = GalleryHome(
+      testMode: widget.testMode,
+      optionsPage: GalleryOptionsPage(
+        options: _options,
+        onOptionsChanged: _handleOptionsChanged,
+        onSendFeedback: widget.onSendFeedback ?? () {
+          launch('https://github.com/flutter/flutter/issues/new/choose', forceSafariVC: false);
+        },
+      ),
+    );
+    if (widget.updateUrlFetcher != null) {
+      home = Updater(
+        updateUrlFetcher: widget.updateUrlFetcher,
+        child: home,
+      );
+    }
+    // We want to avoid showing the welcome flow if we're doing tests
+    // because the welcome requires an async check that will cause all of the
+    // tests to fail and the app will be stuck showing the welcome screen.
+    if (widget.testMode) {
+      return home;
+    } else {
+      Widget contentWidget = home;
+      if (!widget.testMode && _showWelcome) {
+        final Widget welcome = Welcome(
+          onDismissed: () {
+            _welcomeContentAnimationController.forward();
+            _prefs.setBool(_kPrefsHasSeenWelcome, true);
+          },
+        );
+        _welcomeContentAnimation = Tween<Offset>(
+          begin: const Offset(0.0, 1.0),
+          end: const Offset(0.0, 0.0),
+        ).animate(_welcomeContentAnimationController);
+        contentWidget = Stack(
+          children: <Widget>[
+            welcome,
+            SlideTransition(
+              position: _welcomeContentAnimation,
+              child: home,
+            )
+          ],
+        );
+      }
+      return FutureBuilder<bool>(
+        future: _checkWelcomeFuture,
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            _showWelcome ??= snapshot.data;
+            return contentWidget;
+          } else {
+            return Container();
+          }
+        },
+      );
+    }
   }
 }

@@ -47,4 +47,6 @@ class GalleryIcons {
   static const IconData bottom_app_bar = IconData(0xe925, fontFamily: 'GalleryIcons');
   static const IconData bottom_sheet_persistent = IconData(0xe926, fontFamily: 'GalleryIcons');
   static const IconData lists_leave_behind = IconData(0xe927, fontFamily: 'GalleryIcons');
+  static const IconData running = IconData(0xe928, fontFamily: 'GalleryIcons');
+  static const IconData playground = IconData(0xe929, fontFamily: 'GalleryIcons');
 }

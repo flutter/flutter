@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gallery/demo/customized/home.dart';
+import 'package:flutter_gallery/welcome/home.dart';
 
 import '../demo/all.dart';
 import 'icons.dart';
@@ -33,7 +35,7 @@ class GalleryDemoCategory {
 
 const GalleryDemoCategory _kDemos = GalleryDemoCategory._(
   name: 'Studies',
-  icon: GalleryIcons.animation,
+  icon: GalleryIcons.playground,
 );
 
 const GalleryDemoCategory _kStyle = GalleryDemoCategory._(
@@ -110,6 +112,24 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kDemos,
       routeName: AnimationDemo.routeName,
       buildRoute: (BuildContext context) => const AnimationDemo(),
+    ),
+    GalleryDemo(
+      title: 'Customized Design',
+      subtitle: 'Activity Tracker',
+      icon: GalleryIcons.running,
+      category: _kDemos,
+      routeName: CustomizedDesign.routeName,
+      buildRoute: (BuildContext context) => CustomizedDesign(),
+    ),
+    GalleryDemo(
+      title: 'Welcome Screen',
+      subtitle: 'Re-Watch the app introduction',
+      icon: GalleryIcons.refresh,
+      category: _kDemos,
+      routeName: Welcome.routeName,
+      buildRoute: (BuildContext context) {
+        return Welcome(onDismissed: () => Navigator.of(context).pop());
+      },
     ),
 
     // Style

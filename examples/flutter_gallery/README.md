@@ -1,4 +1,4 @@
-# Flutter gallery
+# Flutter design lab
 
 A demo app for Flutter's material design and cupertino widgets, as
 well as many other features of the Flutter SDK.

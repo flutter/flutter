@@ -10,7 +10,7 @@ import 'package:flutter_gallery/gallery/example_code_parser.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('Flutter gallery example code parser test', () async {
+  test('Flutter Design Lab example code parser test', () async {
     final TestAssetBundle bundle = TestAssetBundle();
 
     final String codeSnippet0 = await getExampleCode('test_0', bundle);

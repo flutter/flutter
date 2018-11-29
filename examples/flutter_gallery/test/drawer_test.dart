@@ -12,7 +12,7 @@ void main() {
   if (binding is LiveTestWidgetsFlutterBinding)
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
-  testWidgets('Flutter Gallery drawer item test', (WidgetTester tester) async {
+  testWidgets('Flutter Design Lab drawer item test', (WidgetTester tester) async {
     bool hasFeedback = false;
 
     await tester.pumpWidget(

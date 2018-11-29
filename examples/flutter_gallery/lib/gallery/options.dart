@@ -460,8 +460,8 @@ class GalleryOptionsPage extends StatelessWidget {
         )..addAll(
           <Widget>[
             const Divider(),
-            const _Heading('Flutter gallery'),
-            _ActionItem('About Flutter Gallery', () {
+            const _Heading('Flutter Design Lab'),
+            _ActionItem('About Flutter Design Lab', () {
               showGalleryAboutDialog(context);
             }),
             _ActionItem('Send feedback', onSendFeedback),

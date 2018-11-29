@@ -51,7 +51,7 @@ class UpdaterState extends State<Updater> {
     final TextStyle dialogTextStyle =
         theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
     return AlertDialog(
-      title: const Text('Update Flutter Gallery?'),
+      title: const Text('Update Flutter Design Lab?'),
       content: Text('A newer version is available.', style: dialogTextStyle),
       actions: <Widget>[
         FlatButton(

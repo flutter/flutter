@@ -37,6 +37,8 @@ const List<String> _kSkippedDemoTitles = <String>[
   'Progress indicators',
   'Activity Indicator',
   'Video',
+  'Customized Design',
+  'Welcome Screen',
 ];
 
 // There are 3 places where the Gallery demos are traversed.
