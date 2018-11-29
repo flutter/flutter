@@ -288,7 +288,7 @@ class FlutterError extends AssertionError {
         String message = details.exceptionAsString();
         if (message.startsWith(prefix))
           message = message.substring(prefix.length);
-        debugPrint('The following $errorName was $verb:\n$message', wrapWidth: wrapWidth);
+        debugPrint('\nThe following $errorName was $verb:\n\n$message', wrapWidth: wrapWidth);
       }
       Iterable<String> stackLines = (details.stack != null) ? details.stack.toString().trimRight().split('\n') : null;
       if ((details.exception is AssertionError) && (details.exception is! FlutterError)) {
