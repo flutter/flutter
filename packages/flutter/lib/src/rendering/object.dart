@@ -2389,7 +2389,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(_semanticsConfiguration.isSemanticBoundary || parent is! RenderObject);
     if (_needsLayout) {
       // There's not enough information in this subtree to compute semantics.
-      // The subtree is probably currently offstage.
+      // The subtree is probably being kept alive by a viewport but not laid out.
       return;
     }
     final _SemanticsFragment fragment = _getSemanticsForParent(
@@ -2423,7 +2423,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     // When set to true there's currently not enough information in this subtree
     // to compute semantics. In this case the walk needs to be aborted and no
     // SemanticsNodes in the subtree should be updated.
-    // This will be true for subtrees that are currently offstage.
+    // This will be true for subtrees that are currently kept alive by a
+    // viewport but not laid out.
     bool abortWalk = false;
 
     visitChildrenForSemantics((RenderObject renderChild) {
@@ -3137,8 +3138,8 @@ abstract class _SemanticsFragment {
   /// Whether this fragment wants to abort the semantics walk because the
   /// information in the tree aer not sufficient to calculate semantics.
   ///
-  /// This happens for subtrees that are offstage and don't have updated layout
-  /// information.
+  /// This happens for subtrees that are currently kept alive by a viewport but
+  /// not laid out.
   ///
   /// See alo:
   ///
@@ -3433,10 +3434,9 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
 ///
 /// Anybody processing this [_SemanticsFragment] should abort the walk of the
 /// current subtree without updating any [SemanticsNode]s as there are no semantic
-/// information to compute. As a result, this fragment also doesn't cary any
+/// information to compute. As a result, this fragment also doesn't carry any
 /// semantics information either.
 class _AbortingSemanticsFragment extends _InterestingSemanticsFragment {
-
   _AbortingSemanticsFragment({@required RenderObject owner}) : super(owner: owner, dropsSemanticsOfPreviousSiblings: false);
 
   @override
