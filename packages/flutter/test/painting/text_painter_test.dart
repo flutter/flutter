@@ -33,8 +33,8 @@ void main() {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
-    final String text = '👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸';
     // Format: '👩‍<zwj>👩‍<zwj>👦👩‍<zwj>👩‍<zwj>👧‍<zwj>👧🇺🇸'
+    const String text = '👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸';
     painter.text = TextSpan(text: text);
     painter.layout();
 
