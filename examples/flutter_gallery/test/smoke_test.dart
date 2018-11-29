@@ -12,7 +12,7 @@ import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 
 // This title is visible on the home and demo category pages. It's
 // not visible when the demos are running.
-const String kGalleryTitle = 'Flutter gallery';
+const String kGalleryTitle = 'Flutter Design Lab';
 
 // All of the classes printed by debugDump etc, must have toString()
 // values approved by verityToStringOutput().
@@ -25,6 +25,14 @@ int toStringErrors = 0;
 //
 // If you change navigation behavior in the Gallery or in the framework, make
 // sure all 3 are covered.
+
+// These demos don't conform to the standard template for gallery demos so should be skipped
+// when testing to see if navigation succeeded.
+const List<String> _kSkippedDemoTitles = <String>[
+  'Customized Design',
+  'Welcome Screen',
+];
+
 
 void reportToStringError(String name, String route, int lineNumber, List<String> lines, String message) {
   // If you're on line 12, then it has index 11.
@@ -162,6 +170,9 @@ Future<void> smokeGallery(WidgetTester tester) async {
     await tester.tap(find.text(category.name));
     await tester.pumpAndSettle();
     for (GalleryDemo demo in kGalleryCategoryToDemos[category]) {
+      if (_kSkippedDemoTitles.contains(demo.title)) {
+        continue;
+      }
       await Scrollable.ensureVisible(tester.element(find.text(demo.title)), alignment: 0.0);
       await smokeDemo(tester, demo);
       tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after running $demo');
@@ -176,9 +187,9 @@ Future<void> smokeGallery(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('Flutter Gallery app smoke test', smokeGallery);
+  testWidgets('Flutter Design Lab app smoke test', smokeGallery);
 
-  testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
+  testWidgets('Flutter Design Lab app smoke test with semantics', (WidgetTester tester) async {
     RendererBinding.instance.setSemanticsEnabled(true);
     await smokeGallery(tester);
     RendererBinding.instance.setSemanticsEnabled(false);
