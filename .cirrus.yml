@@ -114,8 +114,6 @@ task:
     - name: build_tests-windows
       env:
         SHARD: build_tests
-      test_script:
-        - dart ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 12G
