@@ -1,4 +1,4 @@
-Signature: a9df2c124a7d660486ff477a2e8c79c8
+Signature: 1e6ce7516f8e25f068a45521f2dece16
 
 UNUSED LICENSES:
 
@@ -2006,6 +2006,7 @@ FILE: ../../../third_party/skia/docs/SkColor_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkDynamicMemoryWStream_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkFILEStream_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkFILEWStream_Reference.bmh
+FILE: ../../../third_party/skia/docs/SkFont_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkIPoint_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkIRect_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkImageInfo_Reference.bmh
