@@ -19,10 +19,10 @@ import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 final ArgParser parser = ArgParser()
-  ..addOption('build_dir', help: 'The fuchsia build directory')
-  ..addOption('dart_sdk', help: 'The prebuilt dart SDK')
+  ..addOption('build-dir', help: 'The fuchsia build directory')
+  ..addOption('dart-sdk', help: 'The prebuilt dart SDK')
   ..addOption('target', help: 'The GN target to attach to')
-  ..addFlag('verbose');
+  ..addFlag('verbose', negatable: true);
 
 // Track the original working directory so that the tool can find the
 // flutter repo in third_party.
@@ -35,8 +35,8 @@ Future<void> main(List<String> args) async {
   final List<String> targetParts = _extractPathAndName(target);
   final String path = targetParts[0];
   final String name = targetParts[1];
-  final File dartSdk = fs.file(argResults['dart_sdk']);
-  final String buildDirectory = argResults['build_dir'];
+  final File dartSdk = fs.file(argResults['dart-sdk']);
+  final String buildDirectory = argResults['build-dir'];
   final File frontendServer = fs.file('$buildDirectory/host_x64/gen/third_party/flutter/frontend_server/frontend_server_tool.snapshot');
   final File sshConfig = fs.file('$buildDirectory/ssh-keys/ssh_config');
   final File platformKernelDill = fs.file('$buildDirectory/flutter_runner_patched_sdk/platform_strong.dill');
