@@ -18,6 +18,7 @@ import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
+const double _kIOSCursorRadius = 1.0; // pixels
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -179,6 +180,12 @@ class RenderEditable extends RenderBox {
       ..onTap = _handleTap;
     _longPress = LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
+    // If the user has not specified a custom cursor, we will render a native
+    // iOS style cursor on iOS platforms.
+    if (cursorRadius == null &&
+        defaultTargetPlatform == TargetPlatform.iOS) {
+      _cursorRadius = const Radius.circular(_kIOSCursorRadius);
+    }
   }
 
   /// Character used to obscure text if [obscureText] is true.

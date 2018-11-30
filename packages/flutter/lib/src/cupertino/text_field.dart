@@ -174,7 +174,7 @@ class CupertinoTextField extends StatefulWidget {
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
-    this.cursorRadius = const Radius.circular(1.0),
+    this.cursorRadius,
     this.cursorColor = CupertinoColors.activeBlue,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),

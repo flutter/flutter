@@ -841,6 +841,33 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
+  testWidgets('Cursor radius is 1.0 on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FocusNode focusNode = FocusNode();
+
+    final Widget widget =
+      MaterialApp(
+        home: EditableText(
+          key: editableTextKey,
+          controller: TextEditingController(),
+          focusNode: focusNode,
+          style: Typography(platform: TargetPlatform.android).black.subhead,
+          cursorColor: Colors.blue,
+          maxLines: 1,
+        ),
+      );
+    await tester.pumpWidget(widget);
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorRadius, const Radius.circular(1.0));
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
 testWidgets(
       'When "newline" action is called on a Editable text with maxLines != 1, onEditingComplete and onSubmitted callbacks are not invoked.',
       (WidgetTester tester) async {

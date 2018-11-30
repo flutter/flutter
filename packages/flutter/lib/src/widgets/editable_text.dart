@@ -509,7 +509,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool _didAutoFocus = false;
 
   static const Duration _fadeDuration = Duration(milliseconds: 250);
-  final bool _platformisIOS = defaultTargetPlatform == TargetPlatform.iOS;
+  final bool _platformIsIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
@@ -526,6 +526,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
     _cursorController = AnimationController(vsync: this);
     _cursorColorTicker = Ticker(_onCursorColorTick);
+    if (_platformIsIOS) {
+
+    }
   }
 
   @override
@@ -859,7 +862,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void _cursorTick(Timer timer) {
     _showCursor.value = !_showCursor.value;
 
-    if (_platformisIOS) {
+    if (_platformIsIOS) {
       final double toValue = _showCursor.value ? 1.0 : 0.0;
       _cursorController.animateTo(toValue, duration: _fadeDuration, curve: Curves.easeOut);
     } else
@@ -877,7 +880,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _startCursorTimer() {
     _showCursor.value = true;
-    if (_platformisIOS) {
+    if (_platformIsIOS) {
       _cursorColorTicker.start();
       _cursorController.value = 1.0;
       _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
@@ -890,7 +893,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorTimer = null;
     _showCursor.value = false;
     _obscureShowCharTicksPending = 0;
-    if (_platformisIOS) {
+    if (_platformIsIOS) {
       _cursorController.stop();
       _cursorColorTicker.stop();
       _cursorController.value = 0.0;
