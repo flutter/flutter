@@ -49,9 +49,10 @@ Future<void> main(List<String> args) async {
   originalWorkingDirectory = fs.currentDirectory.path;
   fs.currentDirectory = path;
 
-  // Check for a package with no lib directory.
+  // Check for a package with a lib directory.
   String targetFile = 'lib/main.dart';
   if (!fs.file(targetFile).existsSync()) {
+    // Otherwise assume the package is flat.
     targetFile = 'main.dart';
   }
   final List<String> command = <String>[
@@ -77,7 +78,7 @@ Future<void> main(List<String> args) async {
     command,
     <FlutterCommand>[
       _FuchsiaAttachCommand(),
-      _FuchsiaDoctorCommand(),
+      _FuchsiaDoctorCommand(), // If attach fails the tool will attempt to run doctor.
     ],
     verbose: verbose,
     muteCommandLogging: false,
