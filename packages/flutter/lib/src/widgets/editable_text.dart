@@ -876,21 +876,25 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _startCursorTimer() {
-    _cursorColorTicker.start();
-    _cursorController.value = 1.0;
     _showCursor.value = true;
-    _cursorTimer = _platformisIOS ? Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart) :
-                                    Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
+    if (_platformisIOS) {
+      _cursorColorTicker.start();
+      _cursorController.value = 1.0;
+      _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
+    } else
+      _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
   }
 
   void _stopCursorTimer() {
-    _cursorColorTicker.stop();
-    _cursorController.value = 0.0;
     _cursorTimer?.cancel();
     _cursorTimer = null;
     _showCursor.value = false;
     _obscureShowCharTicksPending = 0;
-    _cursorController.stop();
+    if (_platformisIOS) {
+      _cursorController.stop();
+      _cursorColorTicker.stop();
+      _cursorController.value = 0.0;
+    }
   }
 
   void _startOrStopCursorTimerIfNeeded() {

@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/animation.dart';
 
 import 'box.dart';
 import 'object.dart';
@@ -699,16 +698,6 @@ class RenderEditable extends RenderBox {
     if (_cursorRadius == value)
       return;
     _cursorRadius = value;
-    markNeedsPaint();
-  }
-
-  ///
-  AnimationController get cursorController => _cursorController;
-  AnimationController _cursorController;
-  set cursorController(AnimationController value) {
-    if (_cursorController == value)
-      return;
-    _cursorController = value;
     markNeedsPaint();
   }
 

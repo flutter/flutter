@@ -789,31 +789,57 @@ void main() {
     // The expectations we care about are up above in the onEditingComplete
     // and onSubmission callbacks.
   });
-//
-//  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
-//    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-//
-//    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-//    final FocusNode focusNode = FocusNode();
-//
-//    final Widget widget = MaterialApp(
-//      home: EditableText(
-//        key: editableTextKey,
-//        controller: TextEditingController(),
-//        focusNode: focusNode,
-//        style: Typography(platform: TargetPlatform.android).black.subhead,
-//        cursorColor: Colors.blue,
-//        maxLines: 1,
-//      ),
-//    );
-//    await tester.pumpWidget(widget);
-//
-//    // Select EditableText to give it focus.
-//    print(tester.widgetList(find.byType(AnimationController)).length);
-//    debugDefaultTargetPlatformOverride = null;
-////    AnimationController controller = tester.widgetList(find.byType(AnimationController));
-//
-//  });
+
+  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FocusNode focusNode = FocusNode();
+
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        key: editableTextKey,
+        controller: TextEditingController(),
+        focusNode: focusNode,
+        style: Typography(platform: TargetPlatform.android).black.subhead,
+        cursorColor: Colors.blue,
+        maxLines: 1,
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 110);
+
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 0);
+
+    debugDefaultTargetPlatformOverride = null;
+  });
 
 testWidgets(
       'When "newline" action is called on a Editable text with maxLines != 1, onEditingComplete and onSubmitted callbacks are not invoked.',
