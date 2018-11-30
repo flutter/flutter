@@ -1771,11 +1771,11 @@ void main() {
           child: TabBar(
             controller: controller,
             tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-              onTap: (int index) {
-                if (controller.index != index) {
-                  controller.animateTo(index);
-                }
+            onTap: (int index) {
+              if (controller.index != index) {
+                controller.animateTo(index);
               }
+            },
           ),
         ),
       );
