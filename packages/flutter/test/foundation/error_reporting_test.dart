@@ -64,7 +64,7 @@ Future<void> main() async {
     ));
     expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
-      'The following assertion was thrown testing the error handling logic:\n'
+      'The following assertion was thrown testing the error handling logic:\n\n'
       'Message goes here\\.\n'
       '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\': Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
       '\n'
@@ -101,7 +101,7 @@ Future<void> main() async {
     ));
     expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
-      'The following assertion was thrown:\n'
+      'The following assertion was thrown:\n\n'
       'word word word word word word word word word word word word word word word word word word word word '
       'word word word word word word word word word word word word word word word word word word word word '
       'word word word word word word word word word word word word word word word word word word word word '
@@ -146,7 +146,7 @@ Future<void> main() async {
     ));
     expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
-      'The following assertion was thrown testing the error handling logic:\n'
+      'The following assertion was thrown testing the error handling logic:\n\n'
       '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\': Failed assertion: line [0-9]+ pos [0-9]+: \'false\': is not true\\.\n'
       '\n'
       'Either the assertion indicates an error in the framework itself, or we should provide substantially '
@@ -183,7 +183,7 @@ Future<void> main() async {
     ));
     expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
-      'The following NoSuchMethodError was thrown:\n'
+      'The following NoSuchMethodError was thrown:\n\n'
       'Receiver: 5\n'
       'Tried calling: foo = 2, 4\n'
       '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
@@ -204,7 +204,7 @@ Future<void> main() async {
     ));
     expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
-      'The following message was thrown:\n'
+      'The following message was thrown:\n\n'
       'hello\n'
       '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
     ));
