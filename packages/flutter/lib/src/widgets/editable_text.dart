@@ -526,9 +526,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
     _cursorController = AnimationController(vsync: this);
     _cursorColorTicker = Ticker(_onCursorColorTick);
-    if (_platformIsIOS) {
-
-    }
   }
 
   @override
@@ -861,7 +858,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _cursorTick(Timer timer) {
     _showCursor.value = !_showCursor.value;
-
     if (_platformIsIOS) {
       final double toValue = _showCursor.value ? 1.0 : 0.0;
       _cursorController.animateTo(toValue, duration: _fadeDuration, curve: Curves.easeOut);
