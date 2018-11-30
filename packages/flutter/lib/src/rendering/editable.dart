@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/animation.dart';
 
 import 'box.dart';
 import 'object.dart';
@@ -701,6 +702,16 @@ class RenderEditable extends RenderBox {
     markNeedsPaint();
   }
 
+  ///
+  AnimationController get cursorController => _cursorController;
+  AnimationController _cursorController;
+  set cursorController(AnimationController value) {
+    if (_cursorController == value)
+      return;
+    _cursorController = value;
+    markNeedsPaint();
+  }
+
   /// If false, [describeSemanticsConfiguration] will not set the
   /// configuration's cursor motion or set selection callbacks.
   ///
@@ -1240,7 +1251,7 @@ class RenderEditable extends RenderBox {
     final Offset effectiveOffset = offset + _paintOffset;
 
     if (_selection != null) {
-      if (_selection.isCollapsed && _showCursor.value && cursorColor != null) {
+      if (_selection.isCollapsed && cursorColor != null && _hasFocus) {
         _paintCaret(context.canvas, effectiveOffset);
       } else if (!_selection.isCollapsed && _selectionColor != null) {
         _selectionRects ??= _textPainter.getBoxesForSelection(_selection);

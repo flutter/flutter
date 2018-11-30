@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:mockito/mockito.dart';
+import 'package:flutter/foundation.dart';
 
 import 'semantics_tester.dart';
 
@@ -788,6 +789,31 @@ void main() {
     // The expectations we care about are up above in the onEditingComplete
     // and onSubmission callbacks.
   });
+//
+//  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
+//    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+//
+//    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+//    final FocusNode focusNode = FocusNode();
+//
+//    final Widget widget = MaterialApp(
+//      home: EditableText(
+//        key: editableTextKey,
+//        controller: TextEditingController(),
+//        focusNode: focusNode,
+//        style: Typography(platform: TargetPlatform.android).black.subhead,
+//        cursorColor: Colors.blue,
+//        maxLines: 1,
+//      ),
+//    );
+//    await tester.pumpWidget(widget);
+//
+//    // Select EditableText to give it focus.
+//    print(tester.widgetList(find.byType(AnimationController)).length);
+//    debugDefaultTargetPlatformOverride = null;
+////    AnimationController controller = tester.widgetList(find.byType(AnimationController));
+//
+//  });
 
 testWidgets(
       'When "newline" action is called on a Editable text with maxLines != 1, onEditingComplete and onSubmitted callbacks are not invoked.',

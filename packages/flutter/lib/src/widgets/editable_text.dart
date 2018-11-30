@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -17,10 +18,11 @@ import 'focus_scope.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
-import 'scroll_controller.dart';.
+import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'text_selection.dart';
+import 'ticker_provider.dart';
 
 export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType;
 export 'package:flutter/rendering.dart' show SelectionChangedCause;
@@ -30,6 +32,7 @@ export 'package:flutter/rendering.dart' show SelectionChangedCause;
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause cause);
 
 const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
+const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 
 // Number of cursor ticks during which the most recently entered character
 // is shown in an obscured text field.
@@ -491,7 +494,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver implements TextInputClient, TextSelectionDelegate {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, SingleTickerProviderStateMixin<EditableText> implements TextInputClient, TextSelectionDelegate {
   Timer _cursorTimer;
   final ValueNotifier<bool> _showCursor = ValueNotifier<bool>(false);
   final GlobalKey _editableKey = GlobalKey();
@@ -500,11 +503,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextSelectionOverlay _selectionOverlay;
 
   final ScrollController _scrollController = ScrollController();
+  AnimationController _cursorController;
+
   final LayerLink _layerLink = LayerLink();
   bool _didAutoFocus = false;
 
+  static const Duration _fadeDuration = Duration(milliseconds: 250);
+  final bool _platformisIOS = defaultTargetPlatform == TargetPlatform.iOS;
+
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
+
+  Ticker _cursorColorTicker;
 
   // State lifecycle:
 
@@ -514,6 +524,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
+    _cursorController = AnimationController(vsync: this);
+    _cursorColorTicker = Ticker(_onCursorColorTick);
   }
 
   @override
@@ -822,6 +834,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       widget.onChanged(value.text);
   }
 
+  void _onCursorColorTick(Duration frameDuration) {
+    renderEditable.cursorColor = widget.cursorColor.withOpacity(_cursorController.value);
+  }
+
   /// Whether the blinking cursor is actually visible at this precise moment
   /// (it's hidden half the time, since it blinks).
   @visibleForTesting
@@ -842,21 +858,39 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _cursorTick(Timer timer) {
     _showCursor.value = !_showCursor.value;
+
+    if (_platformisIOS) {
+      final double toValue = _showCursor.value ? 1.0 : 0.0;
+      _cursorController.animateTo(toValue, duration: _fadeDuration, curve: Curves.easeOut);
+    } else
+      _cursorController.value = _showCursor.value ? 1.0 : 0.0;
+
     if (_obscureShowCharTicksPending > 0) {
       setState(() { _obscureShowCharTicksPending--; });
     }
   }
 
-  void _startCursorTimer() {
-    _showCursor.value = true;
+  void _cursorWaitForStart(Timer timer) {
+    _cursorTimer?.cancel();
     _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
   }
 
+  void _startCursorTimer() {
+    _cursorColorTicker.start();
+    _cursorController.value = 1.0;
+    _showCursor.value = true;
+    _cursorTimer = _platformisIOS ? Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart) :
+                                    Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
+  }
+
   void _stopCursorTimer() {
+    _cursorColorTicker.stop();
+    _cursorController.value = 0.0;
     _cursorTimer?.cancel();
     _cursorTimer = null;
     _showCursor.value = false;
     _obscureShowCharTicksPending = 0;
+    _cursorController.stop();
   }
 
   void _startOrStopCursorTimerIfNeeded() {
