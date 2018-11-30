@@ -33,7 +33,8 @@ void main() {
 
     expect(log[0], contains('EXAMPLE LIBRARY'));
     expect(log[1], contains('Example context'));
-    expect(log[2], contains('Example exception'));
+    expect(log[2], contains(''));
+    expect(log[3], contains('Example exception'));
 
     final String joined = log.join('\n');
 
