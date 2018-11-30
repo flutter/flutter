@@ -8,7 +8,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart' show TickerProviderStateMixin;
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -22,6 +21,7 @@ import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'text_selection.dart';
+import 'ticker_provider.dart';
 
 export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType;
 export 'package:flutter/rendering.dart' show SelectionChangedCause;
