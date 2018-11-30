@@ -1799,7 +1799,7 @@ void main() {
     await tester.tap(find.text('B'));
     await tester.pump();
     expect(controller.indexIsChanging, true);
-    await tester.pump(const Duration(seconds: 1)); // finish the animation
+    await tester.pumpAndSettle();
     expect(controller.index, 1);
     expect(controller.previousIndex, 2);
     expect(controller.indexIsChanging, false);
@@ -1810,7 +1810,7 @@ void main() {
     await tester.pumpWidget(buildFrame(tabs: tabs, controller: controller));
     await tester.tap(find.text('C'));
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
     expect(controller.index, 2);
     expect(controller.previousIndex, 1);
     expect(tabIndex, controller.index);
@@ -1820,7 +1820,7 @@ void main() {
     await tester.pumpWidget(buildFrame(tabs: tabs, controller: controller));
     await tester.tap(find.text('A'));
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
     expect(controller.index, 0);
     expect(controller.previousIndex, 2);
     expect(tabIndex, controller.index);
@@ -1834,7 +1834,7 @@ void main() {
     await tester.pumpWidget(buildFrame(tabs: tabs, controller: controller));
     await tester.tap(find.text('A'));
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
     expect(controller.index, currentControllerIndex); // controller has not changed
     expect(tabIndex, 0);
   });
