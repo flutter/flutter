@@ -182,7 +182,7 @@ class FlutterDevice {
 
   Future<void> queryDisplayRefreshRate() async {
     for (FlutterView view in views)
-      await view.uiIsolate.queryDisplayRefreshRate(view.id);
+      await view.uiIsolate.queryDisplayRefreshRate();
   }
 
   Future<void> debugDumpApp() async {

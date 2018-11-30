@@ -1051,6 +1051,9 @@ class Isolate extends ServiceObjectOwner {
   @override
   Isolate get isolate => this;
 
+  // The corresponding [FlutterView.id] if this is a root isolate; null otherwise.
+  String viewId;
+
   DateTime startTime;
 
   /// The last pause event delivered to the isolate. If the isolate is running,
@@ -1241,7 +1244,12 @@ class Isolate extends ServiceObjectOwner {
             }});
   }
 
-  Future<void> queryDisplayRefreshRate(String viewId) async {
+  Future<void> queryDisplayRefreshRate() async {
+    if (viewId == null) {
+      print('Display refresh rate can only be queried by a root isolate with '
+            'a corresponding FlutterView.');
+      return;
+    }
     final Map<String, dynamic> result = await vm.invokeRpcRaw(
         '_flutter.getDisplayRefreshRate',
         params: <String, dynamic>{'viewId': viewId}
@@ -1418,6 +1426,7 @@ class FlutterView extends ServiceObject {
     _loaded = !mapIsRef;
     _upgradeCollection(map, owner);
     _uiIsolate = map['isolate'];
+    _uiIsolate.viewId = id;
   }
 
   // TODO(johnmccutchan): Report errors when running failed.
