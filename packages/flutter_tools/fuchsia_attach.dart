@@ -66,9 +66,12 @@ Future<void> main(List<String> args) async {
     'flutter', // TODO(jonahwilliams): change to flutter_runner when dart SDK rolls
     '--output-dill',
     outputDill,
-   '--packages',
-   packages,
+    '--packages',
+    packages,
   ];
+  if (verbose) {
+    command.add('--verbose'); 
+  }
   Cache.disableLocking(); // ignore: invalid_use_of_visible_for_testing_member
   await runner.run(
     command,
