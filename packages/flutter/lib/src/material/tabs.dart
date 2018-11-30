@@ -665,10 +665,10 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The callback is applied to the index of the tab where the tap occurred.
   ///
-  /// This callback has no effect on the default handling of taps. It's for 
+  /// This callback has no effect on the default handling of taps. It's for
   /// applications that want to do a little extra work when a tab is tapped,
   ///  even if the tap doesn't change the TabController's index. TabBar [onTap]
-  ///  callbacks should not make changes to the TabController since that would 
+  ///  callbacks should not make changes to the TabController since that would
   /// interfere with the default tap handler.
   final ValueChanged<int> onTap;
 
