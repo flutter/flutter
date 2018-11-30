@@ -1760,7 +1760,6 @@ void main() {
 
   testWidgets('can be notified of TabBar onTap behavior', (WidgetTester tester) async {
     int tabIndex = -1;
-    bool hasBeenTapped = false;
 
     Widget buildFrame({
       TabController controller,
@@ -1773,7 +1772,6 @@ void main() {
             tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
             onTap: (int index) {
               tabIndex = index;
-              hasBeenTapped = true;
             },
           ),
         ),
@@ -1793,7 +1791,6 @@ void main() {
     expect(find.text('C'), findsOneWidget);
     expect(controller, isNotNull);
     expect(controller.index, 2);
-    expect(hasBeenTapped, false);
     expect(tabIndex, -1); // no tap so far so tabIndex should reflect that
 
     // Verify whether the [onTap] notification works when the [TabBar] animates.
@@ -1806,10 +1803,8 @@ void main() {
     expect(controller.index, 1);
     expect(controller.previousIndex, 2);
     expect(controller.indexIsChanging, false);
-    expect(hasBeenTapped, true);
     expect(tabIndex, controller.index);
 
-    hasBeenTapped = false;
     tabIndex = -1;
 
     await tester.pumpWidget(buildFrame(tabs: tabs, controller: controller));
@@ -1818,10 +1813,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(controller.index, 2);
     expect(controller.previousIndex, 1);
-    expect(hasBeenTapped, true);
     expect(tabIndex, controller.index);
 
-    hasBeenTapped = false;
     tabIndex = -1;
 
     await tester.pumpWidget(buildFrame(tabs: tabs, controller: controller));
@@ -1830,10 +1823,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(controller.index, 0);
     expect(controller.previousIndex, 2);
-    expect(hasBeenTapped, true);
     expect(tabIndex, controller.index);
 
-    hasBeenTapped = false;
     tabIndex = -1;
 
     // Verify whether [onTap] is called even when the [TabController] does
@@ -1845,8 +1836,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(controller.index, currentControllerIndex); // controller has not changed
-    expect(hasBeenTapped, true);
-    expect(tabIndex, controller.index);
+    expect(tabIndex, 0);
   });
 
   test('illegal constructor combinations', () {
