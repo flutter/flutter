@@ -1,4 +1,4 @@
-Signature: af30ede4fce812b0ba58aa8ec0a00f27
+Signature: b5b1c97b11920a2cf87fffdd7336775d
 
 UNUSED LICENSES:
 
@@ -2817,7 +2817,6 @@ FILE: ../../../third_party/skia/samplecode/SampleEmboss.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFillType.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFilter2.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFontCache.cpp
-FILE: ../../../third_party/skia/samplecode/SampleFontScalerTest.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFuzz.cpp
 FILE: ../../../third_party/skia/samplecode/SampleGradients.cpp
 FILE: ../../../third_party/skia/samplecode/SampleHairCurves.cpp
