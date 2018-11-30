@@ -70,7 +70,7 @@ Future<void> main(List<String> args) async {
     packages,
   ];
   if (verbose) {
-    command.add('--verbose'); 
+    command.add('--verbose');
   }
   Cache.disableLocking(); // ignore: invalid_use_of_visible_for_testing_member
   await runner.run(
