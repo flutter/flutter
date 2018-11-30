@@ -5,7 +5,7 @@
 //ignore: Remove this once Google catches up with dev.4 Dart.
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui show TextBox;
+import 'dart:ui' as ui show TextBox, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -1272,10 +1272,10 @@ class RenderEditable extends RenderBox {
 
   /// Sets the screen position of the floating cursor and the text position
   /// closest to the cursor.
-  void setFloatingCursor(FloatingCursorDragState state, Offset boundedOffset, TextPosition lastTextPosition) {
-    assert(lastTextPosition != null);
-    assert(boundedOffset != null);
+  void setFloatingCursor(FloatingCursorDragState state, Offset boundedOffset, TextPosition lastTextPosition, { double resetLerpValue }) {
     assert(state != null);
+    assert(boundedOffset != null);
+    assert(lastTextPosition != null);
     if (state == FloatingCursorDragState.Start) {
       _relativeOrigin = const Offset(0, 0);
       _previousOffset = null;
@@ -1285,11 +1285,12 @@ class RenderEditable extends RenderBox {
       _resetOriginOnBottom = false;
     }
     _floatingCursorOn = state != FloatingCursorDragState.End;
+    _resetLerpValue = resetLerpValue;
     if(_floatingCursorOn) {
-      markNeedsPaint();
       _floatingCursorOffset = boundedOffset;
       _floatingCursorTextPosition = lastTextPosition;
     }
+    markNeedsPaint();
   }
 
   void _paintFloatingCaret(Canvas canvas, Offset effectiveOffset) {
@@ -1297,10 +1298,18 @@ class RenderEditable extends RenderBox {
     final Paint paint = Paint()
       ..color = _cursorColor;
 
-    final Rect caretPrototype = Rect.fromLTRB(_caretPrototype.left - _kFloatingCaretSizeOffset.dx,
-                                              _caretPrototype.top - _kFloatingCaretSizeOffset.dy,
-                                              _caretPrototype.right + _kFloatingCaretSizeOffset.dx,
-                                              _caretPrototype.bottom + _kFloatingCaretSizeOffset.dy);
+    double sizeAdjustmentX = _kFloatingCaretSizeOffset.dx;
+    double sizeAdjustmentY = _kFloatingCaretSizeOffset.dy;
+
+    if(_resetLerpValue != null) {
+      sizeAdjustmentX = ui.lerpDouble(sizeAdjustmentX, 0, _resetLerpValue);
+      sizeAdjustmentY = ui.lerpDouble(sizeAdjustmentY, 0, _resetLerpValue);
+    }
+
+    final Rect caretPrototype = Rect.fromLTRB(_caretPrototype.left - sizeAdjustmentX,
+                                              _caretPrototype.top - sizeAdjustmentY,
+                                              _caretPrototype.right + sizeAdjustmentX,
+                                              _caretPrototype.bottom + sizeAdjustmentY);
     final Rect caretRect = caretPrototype.shift(effectiveOffset);
     const Radius floatingCursorRadius = Radius.circular(_kFloatingCaretRadius);
     final RRect caretRRect = RRect.fromRectAndRadius(caretRect, floatingCursorRadius);
@@ -1316,6 +1325,7 @@ class RenderEditable extends RenderBox {
   bool _resetOriginOnRight = false;
   bool _resetOriginOnTop = false;
   bool _resetOriginOnBottom = false;
+  double _resetLerpValue;
 
   /// Returns the position within the text field closest to the raw cursor offset.
   Offset calculateBoundedCursorOffset(Offset rawCursorOffset) {
@@ -1386,7 +1396,8 @@ class RenderEditable extends RenderBox {
     }
     _textPainter.paint(context.canvas, effectiveOffset);
     if (_floatingCursorOn) {
-      _paintCaret(context.canvas, effectiveOffset, _floatingCursorTextPosition);
+      if (_resetLerpValue == null)
+        _paintCaret(context.canvas, effectiveOffset, _floatingCursorTextPosition);
       _paintFloatingCaret(context.canvas, _floatingCursorOffset);
     }
   }

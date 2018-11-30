@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -498,7 +499,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver implements TextInputClient, TextSelectionDelegate {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText> implements TextInputClient, TextSelectionDelegate {
   Timer _cursorTimer;
   final ValueNotifier<bool> _showCursor = ValueNotifier<bool>(false);
   final GlobalKey _editableKey = GlobalKey();
@@ -509,6 +510,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final ScrollController _scrollController = ScrollController();
   final LayerLink _layerLink = LayerLink();
   bool _didAutoFocus = false;
+
+  static const Duration _floatingCursorResetTime = Duration(milliseconds: 125);
 
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
@@ -521,6 +524,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
+    _floatingCursorController = AnimationController(vsync: this);
+    _floatingCursorTicker = Ticker(_onFloatingCursorRestTick);
   }
 
   @override
@@ -605,6 +610,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Rect _startCaretRect;
   TextPosition _lastTextPosition;
   Offset _pointOffsetOrigin;
+  Offset _lastBoundedOffset;
+  AnimationController _floatingCursorController;
+  Ticker _floatingCursorTicker;
+  bool _hasRenderedFinalFrame = false;
 
   // Because the center of the cursor is preferredLineHeight / 2 below the touch
   // origin, but the touch origin is used to determine which line the cursor is
@@ -621,24 +630,44 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         renderEditable.setFloatingCursor(point.state, _startCaretRect.center - _floatingCursorOffset, currentTextPosition);
         break;
       case FloatingCursorDragState.Update:
-        // We want to send in points that are centered around a (0,0) origin, so we cache
+        // We want to send in points that are centered around a (0,0) origin, so we cache the
         // position on the first update call.
         if (_pointOffsetOrigin != null) {
           final Offset centeredPoint = point.point - _pointOffsetOrigin;
           final Offset rawCursorOffset = _startCaretRect.center + centeredPoint - _floatingCursorOffset;
-          final Offset boundedOffset = renderEditable.calculateBoundedCursorOffset(rawCursorOffset);
-          _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(boundedOffset + _floatingCursorOffset));
-          renderEditable.setFloatingCursor(point.state, boundedOffset, _lastTextPosition);
+          _lastBoundedOffset = renderEditable.calculateBoundedCursorOffset(rawCursorOffset);
+          _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset + _floatingCursorOffset));
+          renderEditable.setFloatingCursor(point.state, _lastBoundedOffset, _lastTextPosition);
         } else {
           _pointOffsetOrigin = point.point;
         }
         break;
       case FloatingCursorDragState.End:
+        _floatingCursorTicker.start();
+        _floatingCursorController.value = 0.0;
+        _floatingCursorController.animateTo(1.0, duration: _floatingCursorResetTime, curve: Curves.decelerate);
+      break;
+    }
+  }
+
+  void _onFloatingCursorRestTick(Duration elapsed) {
+    final Offset finalPosition = renderEditable.getLocalRectForCaret(_lastTextPosition).center - _floatingCursorOffset;
+    if (_floatingCursorController.isCompleted) {
+      if (!_hasRenderedFinalFrame) {
+        renderEditable.setFloatingCursor(FloatingCursorDragState.Update, finalPosition, _lastTextPosition, resetLerpValue: 1.0);
+        _hasRenderedFinalFrame = true;
+      } else {
+        renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition);
         if (_lastTextPosition.offset != renderEditable.selection.baseOffset)
           _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable, SelectionChangedCause.tap);
-        renderEditable.setFloatingCursor(point.state, null, null);
-        renderEditable.markNeedsPaint();
-        break;
+        _floatingCursorTicker.stop();
+      }
+    } else {
+      final double lerpValue = _floatingCursorController.value;
+      final double lerpX = ui.lerpDouble(_lastBoundedOffset.dx, finalPosition.dx, lerpValue);
+      final double lerpY = ui.lerpDouble(_lastBoundedOffset.dy, finalPosition.dy, lerpValue);
+
+      renderEditable.setFloatingCursor(FloatingCursorDragState.Update, Offset(lerpX, lerpY), _lastTextPosition, resetLerpValue: lerpValue);
     }
   }
 

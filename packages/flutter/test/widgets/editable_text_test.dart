@@ -1821,6 +1821,7 @@ testWidgets(
 
     editableTextState.updateFloatingCursor(const FloatingCursorEditingPoint(state: FloatingCursorDragState.End));
 
+    await tester.pumpAndSettle();
     // The cursor has been set.
     expect(controller.selection.baseOffset, 10);
   });
@@ -1877,6 +1878,7 @@ testWidgets(
 
     editableTextState.updateFloatingCursor(const FloatingCursorEditingPoint(state: FloatingCursorDragState.End));
 
+    await tester.pumpAndSettle();
     // The cursor has been set.
     expect(controller.selection.baseOffset, 8);
 
@@ -1898,6 +1900,8 @@ testWidgets(
         point: Offset(-4850, 20)));
 
     editableTextState.updateFloatingCursor(const FloatingCursorEditingPoint(state: FloatingCursorDragState.End));
+
+    await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 11);
   });
