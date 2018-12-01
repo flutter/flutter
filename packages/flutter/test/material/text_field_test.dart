@@ -2918,8 +2918,8 @@ void main() {
     await tester.pumpWidget(textField);
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    expect(exception.toString(), startsWith('No Material widget found.'));
-    expect(exception.toString(), endsWith(':\n  $textField\nThe ancestors of this widget were:\n  [root]'));
+    expect(exception.toString(), matches('^.*\\swidgets require a Material widget ancestor, but none was found.'));
+    expect(exception.toString(), endsWith(':\n  $textField\n\nThe ancestors of this widget were:\n  [root]'));
   });
 
   testWidgets('TextField loses focus when disabled', (WidgetTester tester) async {
