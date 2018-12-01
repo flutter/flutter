@@ -1168,9 +1168,10 @@ class _TabBarViewState extends State<TabBarView> {
     if (notification is ScrollUpdateNotification && !_controller.indexIsChanging) {
       if ((_pageController.page - _controller.index).abs() > 1.0) {
         _controller.index = _pageController.page.floor();
-        _currentIndex=_controller.index;
+        _currentIndex = _controller.index;
       }
-      _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0);
+      if (_controller.length > 1)
+        _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0);
     } else if (notification is ScrollEndNotification) {
       _controller.index = _pageController.page.round();
       _currentIndex = _controller.index;
