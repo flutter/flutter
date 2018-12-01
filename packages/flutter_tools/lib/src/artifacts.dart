@@ -311,11 +311,15 @@ class OverrideArtifacts implements Artifacts {
     @required this.parent,
     this.frontendServer,
     this.engineDartBinary,
+    this.platformKernelDill,
+    this.flutterPatchedSdk,
   }) : assert(parent != null);
 
   final Artifacts parent;
   final File frontendServer;
   final File engineDartBinary;
+  final File platformKernelDill;
+  final File flutterPatchedSdk;
 
   @override
   String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
@@ -324,6 +328,12 @@ class OverrideArtifacts implements Artifacts {
     }
     if (artifact == Artifact.engineDartBinary && engineDartBinary != null) {
       return engineDartBinary.path;
+    }
+    if (artifact == Artifact.platformKernelDill && platformKernelDill != null) {
+      return platformKernelDill.path;
+    }
+    if (artifact == Artifact.flutterPatchedSdkPath && flutterPatchedSdk != null) {
+      return flutterPatchedSdk.path;
     }
     return parent.getArtifactPath(artifact, platform, mode);
   }
