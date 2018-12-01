@@ -581,6 +581,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     _lastKnownRemoteTextEditingValue = value;
     _formatAndSetValue(value);
+
+    // To keep the cursor from blinking while typing, we want to restart the
+    // cursor timer every time a new character is typed.
+    _stopCursorTimer();
+    _startCursorTimer();
   }
 
   @override

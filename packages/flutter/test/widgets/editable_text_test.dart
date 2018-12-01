@@ -841,7 +841,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  testWidgets('Cursor radius is 1.0 on iOS', (WidgetTester tester) async {
+  testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
@@ -863,7 +863,7 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    expect(renderEditable.cursorRadius, const Radius.circular(1.0));
+    expect(renderEditable.cursorRadius, const Radius.circular(2.0));
 
     debugDefaultTargetPlatformOverride = null;
   });

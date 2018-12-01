@@ -18,7 +18,7 @@ import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
-const double _kIOSCursorRadius = 1.0; // pixels
+const double _kIOSCursorRadius = 2.0; // pixels
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -180,12 +180,6 @@ class RenderEditable extends RenderBox {
       ..onTap = _handleTap;
     _longPress = LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
-    // If the user has not specified a custom cursor, we will render a native
-    // iOS style cursor on iOS platforms.
-    if (cursorRadius == null &&
-        defaultTargetPlatform == TargetPlatform.iOS) {
-      _cursorRadius = const Radius.circular(_kIOSCursorRadius);
-    }
   }
 
   /// Character used to obscure text if [obscureText] is true.
@@ -195,6 +189,8 @@ class RenderEditable extends RenderBox {
   SelectionChangedHandler onSelectionChanged;
 
   double _textLayoutLastWidth;
+
+  final bool _platformIsIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
   /// Called during the paint phase when the caret location changes.
   CaretChangedHandler onCaretChanged;
@@ -1191,11 +1187,20 @@ class RenderEditable extends RenderBox {
     _textLayoutLastWidth = constraintWidth;
   }
 
+  Rect get _getCaretPrototype {
+    switch(defaultTargetPlatform){
+      case TargetPlatform.iOS:
+        return Rect.fromLTWH(0.0, -_kCaretHeightOffset, cursorWidth, preferredLineHeight + 3.0);
+      default:
+        return Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
+    }
+  }
   @override
   void performLayout() {
     _layoutText(constraints.maxWidth);
-    _caretPrototype = Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
+    _caretPrototype = _getCaretPrototype;//Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, _getCaretHeight);
     _selectionRects = null;
+    cursorRadius ??= _platformIsIOS ? const Radius.circular(_kIOSCursorRadius) : null;
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
     // _textPainter's layout because the intrinsic size calculations are
@@ -1212,13 +1217,15 @@ class RenderEditable extends RenderBox {
     offset.applyContentDimensions(0.0, _maxScrollExtent);
   }
 
+  Offset get _getIOSCursorAdjustment => _platformIsIOS ? Offset(-cursorWidth * 0.5, 0.0) : Offset.zero;
+
   void _paintCaret(Canvas canvas, Offset effectiveOffset) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(_selection.extent, _caretPrototype);
     final Paint paint = Paint()
       ..color = _cursorColor;
 
-    final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset);
+    final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset + _getIOSCursorAdjustment);
 
     if (cursorRadius == null) {
       canvas.drawRect(caretRect, paint);
@@ -1246,6 +1253,11 @@ class RenderEditable extends RenderBox {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset effectiveOffset = offset + _paintOffset;
 
+    // On iOS, the cursor is painted over the text, on android, it's painted
+    // under it.
+    if (_platformIsIOS)
+      _textPainter.paint(context.canvas, effectiveOffset);
+
     if (_selection != null) {
       if (_selection.isCollapsed && cursorColor != null && _hasFocus) {
         _paintCaret(context.canvas, effectiveOffset);
@@ -1255,7 +1267,8 @@ class RenderEditable extends RenderBox {
       }
     }
 
-    _textPainter.paint(context.canvas, effectiveOffset);
+    if (!_platformIsIOS)
+      _textPainter.paint(context.canvas, effectiveOffset);
   }
 
   @override
