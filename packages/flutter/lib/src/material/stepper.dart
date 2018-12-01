@@ -141,7 +141,6 @@ class Stepper extends StatefulWidget {
     this.onStepContinue,
     this.onStepCancel,
     this.controlsBuilder,
-    this.useControl = true,
   }) : assert(steps != null),
        assert(type != null),
        assert(currentStep != null),
@@ -222,11 +221,6 @@ class Stepper extends StatefulWidget {
   /// )
   /// ```
   final ControlsWidgetBuilder controlsBuilder;
-
-  /// The configuration to define whether Stepper has the default 'continue' and 'cancel' control.
-  ///
-  /// If true, the 'continue' and 'cancel' button will be build.
-  final bool useControl;
 
   @override
   _StepperState createState() => _StepperState();
@@ -380,6 +374,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     }
   }
 
+  List<Widget> _buildStepContent(Widget stepContent) {
+    final Widget verticalControls = _buildVerticalControls();
+    return verticalControls == null 
+      ? <Widget>[Row(children: <Widget>[stepContent])]
+      : <Widget>[stepContent, verticalControls];
+  }
+  
   Widget _buildVerticalControls() {
     if (widget.controlsBuilder != null)
       return widget.controlsBuilder(context, onStepContinue: widget.onStepContinue, onStepCancel: widget.onStepCancel);
@@ -553,7 +554,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               bottom: 24.0,
             ),
             child: Column(
-              children: _buildVerticalControlsBody(index),
+              children: _buildStepContent(widget.steps[index].content),
             ),
           ),
           firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
@@ -564,12 +565,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         ),
       ],
     );
-  }
-
-  List<Widget> _buildVerticalControlsBody(int index) {
-    return widget.useControl
-        ? <Widget>[widget.steps[index].content, _buildVerticalControls()]
-        : <Widget>[Row(children: <Widget>[Container(child: widget.steps[index].content)])];
   }
 
   Widget _buildVertical() {
@@ -661,28 +656,16 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         Expanded(
           child: ListView(
             padding: const EdgeInsets.all(24.0),
-            children: _buildHorizontalBody(),
+            children: _buildStepContent(AnimatedSize(
+                curve: Curves.fastOutSlowIn,
+                duration: kThemeAnimationDuration,
+                vsync: this,
+                child: widget.steps[widget.currentStep].content,
+              )),
           ),
         ),
       ],
     );
-  }
-
-  List<Widget> _buildHorizontalBody() {
-    final List<Widget> horizontalBody = <Widget>[
-      AnimatedSize(
-        curve: Curves.fastOutSlowIn,
-        duration: kThemeAnimationDuration,
-        vsync: this,
-        child: widget.steps[widget.currentStep].content,
-      )
-    ];
-
-    if (widget.useControl) {
-      horizontalBody.add(_buildVerticalControls());
-    }
-
-    return horizontalBody;
   }
 
   @override
