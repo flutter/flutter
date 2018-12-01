@@ -10,7 +10,7 @@ void main() {
     await tester.pumpWidget(const ListTile());
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    expect(exception.toString(), startsWith('No Material widget found.'));
-    expect(exception.toString(), endsWith(':\n  ListTile\nThe ancestors of this widget were:\n  [root]'));
+    expect(exception.toString(), matches('^.*\\swidgets require a Material widget ancestor, but none was found.'));
+    expect(exception.toString(), endsWith(':\n  ListTile\n\nThe ancestors of this widget were:\n  [root]'));
   });
 }
