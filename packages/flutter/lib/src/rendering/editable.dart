@@ -1219,6 +1219,7 @@ class RenderEditable extends RenderBox {
     _textLayoutLastWidth = constraintWidth;
   }
 
+  // TODO(@jslavitz): Move the check for target platform into other classes once cursor offset pr has landed. https://github.com
   Rect get _getCaretPrototype {
     switch(defaultTargetPlatform){
       case TargetPlatform.iOS:
@@ -1230,7 +1231,7 @@ class RenderEditable extends RenderBox {
   @override
   void performLayout() {
     _layoutText(constraints.maxWidth);
-    _caretPrototype = _getCaretPrototype;//Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, _getCaretHeight);
+    _caretPrototype = _getCaretPrototype;
     _selectionRects = null;
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change

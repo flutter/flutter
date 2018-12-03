@@ -901,8 +901,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_platformIsIOS) {
       _cursorController.value = 1.0;
       _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
-    } else
+    } else {
       _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
+    }
   }
 
   void _stopCursorTimer() {

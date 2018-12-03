@@ -472,8 +472,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       Feedback.forLongPress(context);
   }
 
-
-
   InteractiveInkFeature _createInkFeature(TapDownDetails details) {
     final MaterialInkController inkController = Material.of(context);
     final BuildContext editableContext = _editableTextKey.currentContext;
