@@ -37,8 +37,8 @@ enum _SwitchType { material, adaptive }
 ///
 /// If the [onChanged] callback is null, then the switch will be disabled (it
 /// will not respond to input). A disabled switch's thumb and track are rendered
-/// in shades of grey by default. The appearance of a disabled switch can be
-/// overridden with [inactiveThumbColor] and [inactiveTrackColor].
+/// in shades of grey by default. The default appearance of a disabled switch
+/// can be overridden with [inactiveThumbColor] and [inactiveTrackColor].
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
