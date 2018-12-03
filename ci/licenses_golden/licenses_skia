@@ -1,4 +1,4 @@
-Signature: b274a011958a6dc124c4113c1fd2e460
+Signature: 1572d489b7d57f1de9d3c3d9977f7a1a
 
 UNUSED LICENSES:
 
@@ -2938,7 +2938,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrAAHairLinePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrAAHairLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDefaultPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDefaultPathRenderer.h
-FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts_none.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFConvertType1FontStream.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFDevice.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFDevice.h
@@ -5435,9 +5434,6 @@ FILE: ../../../third_party/skia/src/core/SkFontLCDConfig.cpp
 FILE: ../../../third_party/skia/src/core/SkQuadClipper.cpp
 FILE: ../../../third_party/skia/src/core/SkQuadClipper.h
 FILE: ../../../third_party/skia/src/images/SkImageEncoder.cpp
-FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts_SSE2.cpp
-FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts_SSE2.h
-FILE: ../../../third_party/skia/src/opts/opts_check_x86.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2009 The Android Open Source Project
 
