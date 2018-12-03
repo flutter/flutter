@@ -51,7 +51,7 @@ static void FontSkia_SetSkiaPaint(sk_sp<SkTypeface> typeface,
                                   SkPaint* skPaint,
                                   const minikin::MinikinPaint& paint) {
   skPaint->setTypeface(std::move(typeface));
-  skPaint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+  skPaint->setTextEncoding(kGlyphID_SkTextEncoding);
   // TODO: set more paint parameters from Minikin
   skPaint->setTextSize(paint.size);
 }

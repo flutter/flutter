@@ -426,15 +426,14 @@ BENCHMARK(BM_ParagraphMinikinAddStyleRun)
     ->Complexity(benchmark::oN);
 
 static void BM_ParagraphSkTextBlobAlloc(benchmark::State& state) {
-  SkPaint paint;
-  paint.setAntiAlias(true);
-  paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-  paint.setTextSize(14);
-  paint.setFakeBoldText(false);
+  SkFont font;
+  font.setEdging(SkFont::Edging::kAntiAlias);
+  font.setSize(14);
+  font.setEmbolden(false);
 
   while (state.KeepRunning()) {
     SkTextBlobBuilder builder;
-    builder.allocRunPos(paint, state.range(0));
+    builder.allocRunPos(font, state.range(0));
   }
   state.SetComplexityN(state.range(0));
 }
