@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:mockito/mockito.dart';
+import 'package:flutter/foundation.dart';
 
 import 'semantics_tester.dart';
 
@@ -787,6 +788,84 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.newline);
     // The expectations we care about are up above in the onEditingComplete
     // and onSubmission callbacks.
+  });
+
+  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FocusNode focusNode = FocusNode();
+
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        key: editableTextKey,
+        controller: TextEditingController(),
+        focusNode: focusNode,
+        style: Typography(platform: TargetPlatform.android).black.subhead,
+        cursorColor: Colors.blue,
+        maxLines: 1,
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 110);
+
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 0);
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FocusNode focusNode = FocusNode();
+
+    final Widget widget =
+      MaterialApp(
+        home: EditableText(
+          key: editableTextKey,
+          controller: TextEditingController(),
+          focusNode: focusNode,
+          style: Typography(platform: TargetPlatform.android).black.subhead,
+          cursorColor: Colors.blue,
+          maxLines: 1,
+        ),
+      );
+    await tester.pumpWidget(widget);
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorRadius, const Radius.circular(2.0));
+
+    debugDefaultTargetPlatformOverride = null;
   });
 
 testWidgets(

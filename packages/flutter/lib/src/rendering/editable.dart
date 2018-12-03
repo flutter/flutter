@@ -143,6 +143,8 @@ class RenderEditable extends RenderBox {
     Locale locale,
     double cursorWidth = 1.0,
     Radius cursorRadius,
+    bool paintCursorOnTop,
+    Offset cursorOffset,
     bool enableInteractiveSelection = true,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
@@ -170,6 +172,8 @@ class RenderEditable extends RenderBox {
        _offset = offset,
        _cursorWidth = cursorWidth,
        _cursorRadius = cursorRadius,
+       _paintCursorOnTop = paintCursorOnTop,
+       _cursorOffset = cursorOffset,
        _enableInteractiveSelection = enableInteractiveSelection,
        _obscureText = obscureText {
     assert(_showCursor != null);
@@ -188,6 +192,8 @@ class RenderEditable extends RenderBox {
   SelectionChangedHandler onSelectionChanged;
 
   double _textLayoutLastWidth;
+
+  final bool _platformIsIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
   /// Called during the paint phase when the caret location changes.
   CaretChangedHandler onCaretChanged;
@@ -691,6 +697,35 @@ class RenderEditable extends RenderBox {
     markNeedsLayout();
   }
 
+  /// If the cursor should be painted on top of the text or underneath it.
+  ///
+  /// By default, the cursor will be painted on top for iOS platforms and
+  /// underneath for Android platforms.
+  bool get paintCursorOnTop => _paintCursorOnTop;
+  bool _paintCursorOnTop;
+  set paintCursorOnTop(bool value) {
+    if (_paintCursorOnTop == value)
+      return;
+    _paintCursorOnTop = value;
+    markNeedsLayout();
+  }
+
+  /// {@template flutter.rendering.editable.cursorOffset}
+  /// The offset that is used, in pixels, when painting the cursor on screen.
+  ///
+  /// By default, the cursor will be painted on with an offset of
+  /// (-[cursorWidth] * 0.5, 0.0) on iOS platforms and (0, 0) on Android
+  /// platforms.
+  /// {@end template}
+  Offset get cursorOffset => _cursorOffset;
+  Offset _cursorOffset;
+  set cursorOffset(Offset value) {
+    if (_cursorOffset == value)
+      return;
+    _cursorOffset = value;
+    markNeedsLayout();
+  }
+
   /// How rounded the corners of the cursor should be.
   Radius get cursorRadius => _cursorRadius;
   Radius _cursorRadius;
@@ -1184,10 +1219,19 @@ class RenderEditable extends RenderBox {
     _textLayoutLastWidth = constraintWidth;
   }
 
+  // TODO(@jslavitz): Move the check for target platform into other classes once cursor offset pr has landed. https://github.com
+  Rect get _getCaretPrototype {
+    switch(defaultTargetPlatform){
+      case TargetPlatform.iOS:
+        return Rect.fromLTWH(0.0, -_kCaretHeightOffset, cursorWidth, preferredLineHeight + 3.0);
+      default:
+        return Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
+    }
+  }
   @override
   void performLayout() {
     _layoutText(constraints.maxWidth);
-    _caretPrototype = Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
+    _caretPrototype = _getCaretPrototype;
     _selectionRects = null;
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
@@ -1211,7 +1255,7 @@ class RenderEditable extends RenderBox {
     final Paint paint = Paint()
       ..color = _cursorColor;
 
-    final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset);
+    final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset + _cursorOffset ?? const Offset(0, 0));
 
     if (cursorRadius == null) {
       canvas.drawRect(caretRect, paint);
@@ -1239,8 +1283,13 @@ class RenderEditable extends RenderBox {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset effectiveOffset = offset + _paintOffset;
 
+    // On iOS, the cursor is painted over the text, on android, it's painted
+    // under it.
+    if (paintCursorOnTop)
+      _textPainter.paint(context.canvas, effectiveOffset);
+
     if (_selection != null) {
-      if (_selection.isCollapsed && _showCursor.value && cursorColor != null) {
+      if (_selection.isCollapsed && cursorColor != null && _hasFocus) {
         _paintCaret(context.canvas, effectiveOffset);
       } else if (!_selection.isCollapsed && _selectionColor != null) {
         _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
@@ -1248,7 +1297,8 @@ class RenderEditable extends RenderBox {
       }
     }
 
-    _textPainter.paint(context.canvas, effectiveOffset);
+    if (!paintCursorOnTop)
+      _textPainter.paint(context.canvas, effectiveOffset);
   }
 
   @override
