@@ -647,30 +647,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     return result;
   }
 
-  /// DEPRECATED: use [getSemantics] instead.
-  @Deprecated('use getSemantics instead')
-  SemanticsData getSemanticsData(Finder finder) {
-    if (binding.pipelineOwner.semanticsOwner == null)
-      throw StateError('Semantics are not enabled.');
-    final Iterable<Element> candidates = finder.evaluate();
-    if (candidates.isEmpty) {
-      throw StateError('Finder returned no matching elements.');
-    }
-    if (candidates.length > 1) {
-      throw StateError('Finder returned more than one element.');
-    }
-    final Element element = candidates.single;
-    RenderObject renderObject = element.findRenderObject();
-    SemanticsNode result = renderObject.debugSemantics;
-    while (renderObject != null && result == null) {
-      renderObject = renderObject?.parent;
-      result = renderObject?.debugSemantics;
-    }
-    if (result == null)
-      throw StateError('No Semantics data found.');
-    return result.getSemanticsData();
-  }
-
   /// Enable semantics in a test by creating a [SemanticsHandle].
   ///
   /// The handle must be disposed at the end of the test.

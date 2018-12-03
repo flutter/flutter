@@ -35,6 +35,7 @@ const Map<String, _HardwareType> _knownHardware = <String, _HardwareType>{
   'qcom': _HardwareType.physical,
   'ranchu': _HardwareType.emulator,
   'samsungexynos7420': _HardwareType.physical,
+  'samsungexynos7580': _HardwareType.physical,
   'samsungexynos7870': _HardwareType.physical,
   'samsungexynos8890': _HardwareType.physical,
   'samsungexynos8895': _HardwareType.physical,
@@ -469,7 +470,10 @@ class AndroidDevice extends Device {
   }
 
   @override
-  bool get supportsHotMode => true;
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => true;
 
   @override
   Future<bool> stopApp(ApplicationPackage app) {

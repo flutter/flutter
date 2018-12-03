@@ -5,15 +5,14 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
-import 'package:quiver/time.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-
 void main() {
 
   group('Flutter Command', () {
@@ -67,7 +66,7 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Clock: () => clock,
+      SystemClock: () => clock,
       Usage: () => usage,
     });
 
@@ -84,7 +83,7 @@ void main() {
                    label: anyNamed('label')));
     },
     overrides: <Type, Generator>{
-      Clock: () => clock,
+      SystemClock: () => clock,
       Usage: () => usage,
     });
 
@@ -117,7 +116,7 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Clock: () => clock,
+      SystemClock: () => clock,
       Usage: () => usage,
     });
 
@@ -153,7 +152,7 @@ void main() {
       }
     },
     overrides: <Type, Generator>{
-      Clock: () => clock,
+      SystemClock: () => clock,
       Usage: () => usage,
     });
 

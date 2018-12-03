@@ -105,6 +105,12 @@ class IMobileDevice {
   Future<bool> get isWorking async {
     if (!isInstalled)
       return false;
+    // If usage info is printed in a hyphenated id, we need to update.
+    const String fakeIphoneId = '00008020-001C2D903C42002E';
+    final ProcessResult ideviceResult = (await runAsync(<String>['ideviceinfo', '-u', fakeIphoneId])).processResult;
+    if (ideviceResult.stdout.contains('Usage: ideviceinfo')) {
+      return false;
+    }
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
     final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
@@ -297,7 +303,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (!_checkXcodeVersion())
     return XcodeBuildResult(success: false);
 
-  // TODO(cbracken) remove when https://github.com/flutter/flutter/issues/20685 is fixed.
+  // TODO(cbracken): remove when https://github.com/flutter/flutter/issues/20685 is fixed.
   await setXcodeWorkspaceBuildSystem(
     workspaceDirectory: app.project.xcodeWorkspace,
     workspaceSettings: app.project.xcodeWorkspaceSharedSettings,
@@ -443,18 +449,23 @@ Future<XcodeBuildResult> buildXcodeProject({
   Status initialBuildStatus;
   Directory tempDir;
 
+  File scriptOutputPipeFile;
   if (logger.hasTerminal) {
     tempDir = fs.systemTempDirectory.createTempSync('flutter_build_log_pipe.');
-    final File scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
+    scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
     os.makePipe(scriptOutputPipeFile.path);
 
     Future<void> listenToScriptOutputLine() async {
       final List<String> lines = await scriptOutputPipeFile.readAsLines();
       for (String line in lines) {
-        if (line == 'done') {
+        if (line == 'done' || line == 'all done') {
           buildSubStatus?.stop();
           buildSubStatus = null;
-          return null;
+          if (line == 'all done') {
+            // Free pipe file.
+            tempDir?.deleteSync(recursive: true);
+            return;
+          }
         } else {
           initialBuildStatus.cancel();
           buildSubStatus = logger.startProgress(
@@ -464,7 +475,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           );
         }
       }
-      return listenToScriptOutputLine();
+      await listenToScriptOutputLine();
     }
 
     // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
@@ -480,11 +491,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     workingDirectory: app.project.hostAppRoot.path,
     allowReentrantFlutter: true
   );
+  // Notifies listener that no more output is coming.
+  scriptOutputPipeFile?.writeAsStringSync('all done');
   buildSubStatus?.stop();
   initialBuildStatus?.cancel();
   buildStopwatch.stop();
-  // Free pipe file.
-  tempDir?.deleteSync(recursive: true);
   printStatus(
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
         + '${getElapsedAsSeconds(buildStopwatch.elapsed).padLeft(5)}',

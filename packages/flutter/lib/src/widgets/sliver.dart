@@ -392,7 +392,12 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     assert(builder != null);
     if (index < 0 || (childCount != null && index >= childCount))
       return null;
-    Widget child = builder(context, index);
+    Widget child;
+    try {
+      child = builder(context, index);
+    } catch (exception, stackTrace) {
+      child = _createErrorWidget(exception, stackTrace);
+    }
     if (child == null)
       return null;
     if (addRepaintBoundaries)
@@ -565,10 +570,21 @@ class SliverChildListDelegate extends SliverChildDelegate {
   }
 }
 
+/// A base class for sliver that have [KeepAlive] children.
+abstract class SliverWithKeepAliveWidget extends RenderObjectWidget {
+  /// Initializes fields for subclasses.
+  const SliverWithKeepAliveWidget({
+    Key key,
+  }) : super(key : key);
+
+  @override
+  RenderSliverWithKeepAliveMixin createRenderObject(BuildContext context);
+}
+
 /// A base class for sliver that have multiple box children.
 ///
 /// Helps subclasses build their children lazily using a [SliverChildDelegate].
-abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
+abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   /// Initializes fields for subclasses.
   const SliverMultiBoxAdaptorWidget({
     Key key,
@@ -1208,7 +1224,7 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
 /// Mark a child as needing to stay alive even when it's in a lazy list that
 /// would otherwise remove it.
 ///
-/// This widget is for use in [SliverMultiBoxAdaptorWidget]s, such as
+/// This widget is for use in [SliverWithKeepAliveWidget]s, such as
 /// [SliverGrid] or [SliverList].
 ///
 /// This widget is rarely used directly. The [SliverChildBuilderDelegate] and
@@ -1225,7 +1241,7 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
 /// In practice, the simplest way to deal with these notifications is to mix
 /// [AutomaticKeepAliveClientMixin] into one's [State]. See the documentation
 /// for that mixin class for details.
-class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
+class KeepAlive extends ParentDataWidget<SliverWithKeepAliveWidget> {
   /// Marks a child as needing to remain alive.
   ///
   /// The [child] and [keepAlive] arguments must not be null.
@@ -1244,8 +1260,8 @@ class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    assert(renderObject.parentData is SliverMultiBoxAdaptorParentData);
-    final SliverMultiBoxAdaptorParentData parentData = renderObject.parentData;
+    assert(renderObject.parentData is KeepAliveParentDataMixin);
+    final KeepAliveParentDataMixin parentData = renderObject.parentData;
     if (parentData.keepAlive != keepAlive) {
       parentData.keepAlive = keepAlive;
       final AbstractNode targetParent = renderObject.parent;
@@ -1266,4 +1282,17 @@ class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('keepAlive', keepAlive));
   }
+}
+
+// Return an ErrorWidget for the given Exception
+ErrorWidget _createErrorWidget(dynamic exception, StackTrace stackTrace) {
+  final FlutterErrorDetails details = FlutterErrorDetails(
+    exception: exception,
+    stack: stackTrace,
+    library: 'widgets library',
+    context: 'building',
+    informationCollector: null,
+  );
+  FlutterError.reportError(details);
+  return ErrorWidget.builder(details);
 }

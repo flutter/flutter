@@ -2,7 +2,7 @@ container:
   image: gcr.io/flutter-cirrus/build-flutter-image:latest
 
 task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
   env:
     # Name the SDK directory to include a space so that we constantly
     # test path names with spaces in them.
@@ -38,6 +38,7 @@ task:
         - analyze
         - tests-linux
         - tool_tests-linux
+        - build_tests-linux
       env:
         SHARD: deploy_gallery
         GOOGLE_DEVELOPER_SERVICE_ACCOUNT_ACTOR_FASTLANE: ENCRYPTED[d9ac1462c3c556fc2f8165c9d5566a16497d8ebc38a50357f7f3abf136b7f83e1d1d76dde36fee356cb0f9ebf7a89346]
@@ -53,7 +54,7 @@ task:
         - dart ./dev/bots/test.dart
       container:
         cpu: 4
-        memory: 8G
+        memory: 12G
     - name: tool_tests-linux
       env:
         SHARD: tool_tests
@@ -61,15 +62,15 @@ task:
         - dart ./dev/bots/test.dart
       container:
         cpu: 4
-        memory: 8G
-    - name: aot_build_tests-linux
+        memory: 12G
+    - name: build_tests-linux
       env:
-        SHARD: aot_build_tests
+        SHARD: build_tests
       test_script:
         - dart ./dev/bots/test.dart
       container:
         cpu: 4
-        memory: 8G
+        memory: 12G
     - name: codelabs-build-test
       env:
         SHARD: codelabs-build-test
@@ -77,7 +78,7 @@ task:
 
 
 task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
   windows_container:
     image: cirrusci/windowsservercore:2016
     os_version: 2016
@@ -110,9 +111,15 @@ task:
     - name: tool_tests-windows
       env:
         SHARD: tool_tests
+    - name: build_tests-windows
+      env:
+        SHARD: build_tests
+      container:
+        cpu: 4
+        memory: 12G
 
 task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
   name: deploy_gallery-macos
   only_if: $CIRRUS_BRANCH == 'dev'
   pub_cache:
@@ -121,6 +128,7 @@ task:
     - analyze
     - tests-macos
     - tool_tests-macos
+    - build_tests-macos
   env:
     # Name the SDK directory to include a space so that we constantly
     # test path names with spaces in them.
@@ -146,13 +154,15 @@ task:
     - ./dev/bots/deploy_gallery.sh
 
 task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
   osx_instance:
     image: high-sierra-xcode-9.4.1
   depends_on:
     - analyze
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
+  install_cocoapods_script:
+    - sudo gem install cocoapods
   git_fetch_script:
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
@@ -178,6 +188,14 @@ task:
     - name: tool_tests-macos
       env:
         SHARD: tool_tests
+    - name: build_tests-macos
+      env:
+        SHARD: build_tests
+        COCOAPODS_DISABLE_STATS: true
+        FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/bin/cache/artifacts/engine/ios/"
+      container:
+        cpu: 4
+        memory: 12G
 
 
 docker_builder:
@@ -190,6 +208,7 @@ docker_builder:
     - analyze
     - tests-linux
     - tool_tests-linux
+    - build_tests-linux
   build_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
   login_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
   push_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"

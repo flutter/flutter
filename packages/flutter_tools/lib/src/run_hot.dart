@@ -48,7 +48,7 @@ class DeviceReloadReport {
   List<Map<String, dynamic>> reports; // List has one report per Flutter view.
 }
 
-// TODO(flutter/flutter#23031): Test this.
+// TODO(mklim): Test this, flutter/flutter#23031.
 class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {
@@ -163,7 +163,10 @@ class HotRunner extends ResidentRunner {
   }) async {
     _didAttach = true;
     try {
-      await connectToServiceProtocol(reloadSources: _reloadSourcesService, compileExpression: _compileExpressionService);
+      await connectToServiceProtocol(
+        reloadSources: _reloadSourcesService,
+        compileExpression: _compileExpressionService,
+      );
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
       return 2;
@@ -189,8 +192,10 @@ class HotRunner extends ResidentRunner {
     }
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final bool devfsResult = await _updateDevFS(fullRestart: true);
-    _addBenchmarkData('hotReloadInitialDevFSSyncMilliseconds',
-        initialUpdateDevFSsTimer.elapsed.inMilliseconds);
+    _addBenchmarkData(
+      'hotReloadInitialDevFSSyncMilliseconds',
+      initialUpdateDevFSsTimer.elapsed.inMilliseconds,
+    );
     if (!devfsResult)
       return 3;
 
@@ -276,7 +281,7 @@ class HotRunner extends ResidentRunner {
 
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
-      appStartedCompleter: appStartedCompleter
+      appStartedCompleter: appStartedCompleter,
     );
   }
 
@@ -284,7 +289,16 @@ class HotRunner extends ResidentRunner {
   Future<void> handleTerminalCommand(String code) async {
     final String lower = code.toLowerCase();
     if (lower == 'r') {
-      final OperationResult result = await restart(fullRestart: code == 'R');
+      OperationResult result;
+      if (code == 'R') {
+        // If hot restart is not supported for all devices, ignore the command.
+        if (!canHotRestart) {
+          return;
+        }
+        result = await restart(fullRestart: true);
+      } else {
+        result = await restart(fullRestart: false);
+      }
       if (!result.isOk) {
         // TODO(johnmccutchan): Attempt to determine the number of errors that
         // occurred and tighten this message.
@@ -536,6 +550,9 @@ class HotRunner extends ResidentRunner {
   Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) async {
     final Stopwatch timer = Stopwatch()..start();
     if (fullRestart) {
+      if (!canHotRestart) {
+        return OperationResult(1, 'hotRestart not supported');
+      }
       final Status status = logger.startProgress(
         'Performing hot restart...',
         progressId: 'hot.restart',
@@ -775,9 +792,12 @@ class HotRunner extends ResidentRunner {
   @override
   void printHelp({ @required bool details }) {
     const String fire = '🔥';
+    String rawMessage = '  To hot reload changes while running, press "r". ';
+    if (canHotRestart) {
+      rawMessage += 'To hot restart (and rebuild state), press "R".';
+    }
     final String message = terminal.color(
-      fire + terminal.bolden('  To hot reload changes while running, press "r". '
-          'To hot restart (and rebuild state), press "R".'),
+      fire + terminal.bolden(rawMessage),
       TerminalColor.red,
     );
     printStatus(message);

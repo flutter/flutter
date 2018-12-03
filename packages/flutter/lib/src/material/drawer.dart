@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -390,6 +392,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   Widget _buildDrawer(BuildContext context) {
+    final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
+    final EdgeInsets padding = MediaQuery.of(context).padding;
+    double dragAreaWidth = drawerIsStart ? padding.left : padding.right;
+
+    if (Directionality.of(context) == TextDirection.rtl)
+      dragAreaWidth = drawerIsStart ? padding.right : padding.left;
+
+    dragAreaWidth = max(dragAreaWidth, _kEdgeDragWidth);
     if (_controller.status == AnimationStatus.dismissed) {
       return Align(
         alignment: _drawerOuterAlignment,
@@ -399,8 +409,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           onHorizontalDragEnd: _settle,
           behavior: HitTestBehavior.translucent,
           excludeFromSemantics: true,
-          child: Container(width: _kEdgeDragWidth),
           dragStartBehavior: widget.dragStartBehavior,
+          child: Container(width: dragAreaWidth),
         ),
       );
     } else {
@@ -437,7 +447,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                     child: FocusScope(
                       key: _drawerKey,
                       node: _focusScopeNode,
-                      child: widget.child
+                      child: widget.child,
                     ),
                   ),
                 ),

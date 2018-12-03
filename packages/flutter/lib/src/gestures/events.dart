@@ -136,61 +136,80 @@ abstract class PointerEvent {
   final Offset position;
 
   /// Distance in logical pixels that the pointer moved since the last
-  /// PointerMoveEvent. Always 0.0 for down, up, and cancel events.
+  /// [PointerMoveEvent].
+  ///
+  /// This value is always 0.0 for down, up, and cancel events.
   final Offset delta;
 
-  /// Bit field using the *Button constants (primaryMouseButton,
-  /// secondaryStylusButton, etc). For example, if this has the value 6 and the
+  /// Bit field using the *Button constants such as [kPrimaryMouseButton],
+  /// [kSecondaryStylusButton], etc.
+  ///
+  /// For example, if this has the value 6 and the
   /// [kind] is [PointerDeviceKind.invertedStylus], then this indicates an
   /// upside-down stylus with both its primary and secondary buttons pressed.
   final int buttons;
 
-  /// Set if the pointer is currently down. For touch and stylus pointers, this
-  /// means the object (finger, pen) is in contact with the input surface. For
-  /// mice, it means a button is pressed.
+  /// Set if the pointer is currently down.
+  ///
+  /// For touch and stylus pointers, this means the object (finger, pen) is in
+  /// contact with the input surface. For mice, it means a button is pressed.
   final bool down;
 
   /// Set if an application from a different security domain is in any way
-  /// obscuring this application's window. (Aspirational; not currently
-  /// implemented.)
+  /// obscuring this application's window.
+  ///
+  /// This is not currently implemented.
   final bool obscured;
 
-  /// The pressure of the touch as a number ranging from 0.0, indicating a touch
-  /// with no discernible pressure, to 1.0, indicating a touch with "normal"
-  /// pressure, and possibly beyond, indicating a stronger touch. For devices
-  /// that do not detect pressure (e.g. mice), returns 1.0.
+  /// The pressure of the touch.
+  ///
+  /// This value is a number ranging from 0.0, indicating a touch with no
+  /// discernible pressure, to 1.0, indicating a touch with "normal" pressure,
+  /// and possibly beyond, indicating a stronger touch. For devices that do not
+  /// detect pressure (e.g. mice), returns 1.0.
   final double pressure;
 
-  /// The minimum value that [pressure] can return for this pointer. For devices
-  /// that do not detect pressure (e.g. mice), returns 1.0. This will always be
-  /// a number less than or equal to 1.0.
+  /// The minimum value that [pressure] can return for this pointer.
+  ///
+  /// For devices that do not detect pressure (e.g. mice), returns 1.0.
+  /// This will always be a number less than or equal to 1.0.
   final double pressureMin;
 
-  /// The maximum value that [pressure] can return for this pointer. For devices
-  /// that do not detect pressure (e.g. mice), returns 1.0. This will always be
-  /// a greater than or equal to 1.0.
+  /// The maximum value that [pressure] can return for this pointer.
+  ///
+  /// For devices that do not detect pressure (e.g. mice), returns 1.0.
+  /// This will always be a greater than or equal to 1.0.
   final double pressureMax;
 
-  /// The distance of the detected object from the input surface (e.g. the
-  /// distance of a stylus or finger from a touch screen), in arbitrary units on
-  /// an arbitrary (not necessarily linear) scale. If the pointer is down, this
-  /// is 0.0 by definition.
+  /// The distance of the detected object from the input surface.
+  ///
+  /// For instance, this value could be the distance of a stylus or finger
+  /// from a touch screen, in arbitrary units on an arbitrary (not necessarily
+  /// linear) scale. If the pointer is down, this is 0.0 by definition.
   final double distance;
 
-  /// The minimum value that a distance can return for this pointer (always 0.0).
+  /// The minimum value that [distance] can return for this pointer.
+  ///
+  /// This value is always 0.0.
   double get distanceMin => 0.0;
 
-  /// The maximum value that a distance can return for this pointer. If this
-  /// input device cannot detect "hover touch" input events, then this will be
-  /// 0.0.
+  /// The maximum value that [distance] can return for this pointer.
+  ///
+  /// If this input device cannot detect "hover touch" input events,
+  /// then this will be 0.0.
   final double distanceMax;
 
-  /// The area of the screen being pressed, scaled to a value between 0 and 1.
-  /// The value of size can be used to determine fat touch events. This value
-  /// is only set on Android, and is a device specific approximation within
-  /// the range of detectable values. So, for example, the value of 0.1 could
-  /// mean a touch with the tip of the finger, 0.2 a touch with full finger,
-  /// and 0.3 the full palm.
+  /// The area of the screen being pressed.
+  ///
+  /// This value is scaled to a range between 0 and 1. It can be used to
+  /// determine fat touch events. This value is only set on Android and is
+  /// a device specific approximation within the range of detectable values.
+  /// So, for example, the value of 0.1 could mean a touch with the tip of
+  /// the finger, 0.2 a touch with full finger, and 0.3 the full palm.
+  ///
+  /// Because this value uses device-specific range and is uncalibrated,
+  /// it is of limited use and is primarily retained in order to be able
+  /// to reconstruct original pointer events for [AndroidView].
   final double size;
 
   /// The radius of the contact ellipse along the major axis, in logical pixels.
@@ -199,17 +218,19 @@ abstract class PointerEvent {
   /// The radius of the contact ellipse along the minor axis, in logical pixels.
   final double radiusMinor;
 
-  /// The minimum value that could be reported for radiusMajor and radiusMinor
+  /// The minimum value that could be reported for [radiusMajor] and [radiusMinor]
   /// for this pointer, in logical pixels.
   final double radiusMin;
 
-  /// The minimum value that could be reported for radiusMajor and radiusMinor
+  /// The minimum value that could be reported for [radiusMajor] and [radiusMinor]
   /// for this pointer, in logical pixels.
   final double radiusMax;
 
-  /// For PointerDeviceKind.touch events:
+  /// The orientation angle of the detected object, in radians.
   ///
-  /// The angle of the contact ellipse, in radius in the range:
+  /// For [PointerDeviceKind.touch] events:
+  ///
+  /// The angle of the contact ellipse, in radians in the range:
   ///
   ///    -pi/2 < orientation <= pi/2
   ///
@@ -219,7 +240,7 @@ abstract class PointerEvent {
   /// top-right / bottom-left diagonal, and zero indicating an orientation
   /// parallel with the y-axis).
   ///
-  /// For PointerDeviceKind.stylus and PointerDeviceKind.invertedStylus events:
+  /// For [PointerDeviceKind.stylus] and [PointerDeviceKind.invertedStylus] events:
   ///
   /// The angle of the stylus, in radians in the range:
   ///
@@ -234,7 +255,9 @@ abstract class PointerEvent {
   /// indicate that the stylus goes to the left, etc).
   final double orientation;
 
-  /// For PointerDeviceKind.stylus and PointerDeviceKind.invertedStylus events:
+  /// The tilt angle of the detected object, in radians.
+  ///
+  /// For [PointerDeviceKind.stylus] and [PointerDeviceKind.invertedStylus] events:
   ///
   /// The angle of the stylus, in radians in the range:
   ///
@@ -249,6 +272,8 @@ abstract class PointerEvent {
   /// Opaque platform-specific data associated with the event.
   final int platformData;
 
+  /// Set if the event was synthesized by Flutter.
+  ///
   /// We occasionally synthesize PointerEvents that aren't exact translations
   /// of [ui.PointerData] from the engine to cover small cross-OS discrepancies
   /// in pointer behaviors.

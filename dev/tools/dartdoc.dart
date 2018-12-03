@@ -9,9 +9,11 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 
 const String kDocsRoot = 'dev/docs';
 const String kPublishRoot = '$kDocsRoot/doc';
+const String kSnippetsRoot = 'dev/snippets';
 
 /// This script expects to run with the cwd as the root of the flutter repo. It
 /// will generate documentation for the packages in `//packages/` and write the
@@ -84,22 +86,21 @@ Future<void> main(List<String> arguments) async {
   final String pubExecutable = '$flutterRoot/bin/cache/dart-sdk/bin/pub';
 
   // Run pub.
-  Process process = await Process.start(
+  ProcessWrapper process = ProcessWrapper(await Process.start(
     pubExecutable,
     <String>['get'],
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
-  );
+  ));
   printStream(process.stdout, prefix: 'pub:stdout: ');
   printStream(process.stderr, prefix: 'pub:stderr: ');
-  final int code = await process.exitCode;
+  final int code = await process.done;
   if (code != 0)
     exit(code);
 
   createFooter('$kDocsRoot/lib/footer.html');
   copyAssets();
   cleanOutSnippets();
-  precompileSnippetsTool();
 
   final List<String> dartdocBaseArgs = <String>['global', 'run'];
   if (args['checked']) {
@@ -142,6 +143,7 @@ Future<void> main(List<String> arguments) async {
       'cli_util',
       'csslib',
       'flutter_goldens',
+      'flutter_goldens_client',
       'front_end',
       'fuchsia_remote_debug_protocol',
       'glob',
@@ -176,19 +178,19 @@ Future<void> main(List<String> arguments) async {
       'package:web_socket_channel/html.dart',
     ].join(','),
     '--favicon=favicon.ico',
-    '--package-order', 'flutter,Dart,flutter_test,flutter_driver',
+    '--package-order', 'flutter,Dart,platform_integration,flutter_test,flutter_driver',
     '--auto-include-dependencies',
   ]);
 
   String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
   print('Executing: (cd $kDocsRoot ; $pubExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
 
-  process = await Process.start(
+  process = ProcessWrapper(await Process.start(
     pubExecutable,
     dartdocArgs,
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
-  );
+  ));
   printStream(process.stdout, prefix: args['json'] ? '' : 'dartdoc:stdout: ',
     filter: args['verbose'] ? const <Pattern>[] : <Pattern>[
       RegExp(r'^generating docs for library '), // unnecessary verbosity
@@ -200,7 +202,7 @@ Future<void> main(List<String> arguments) async {
       RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
     ],
   );
-  final int exitCode = await process.exitCode;
+  final int exitCode = await process.done;
 
   if (exitCode != 0)
     exit(exitCode);
@@ -298,34 +300,6 @@ void cleanOutSnippets() {
       ..deleteSync(recursive: true)
       ..createSync(recursive: true);
   }
-}
-
-File precompileSnippetsTool() {
-  final File snapshotPath = File(path.join('bin', 'cache', 'snippets.snapshot'));
-  print('Precompiling snippets tool into ${snapshotPath.absolute.path}');
-  if (snapshotPath.existsSync()) {
-    snapshotPath.deleteSync();
-  }
-  // In order to be able to optimize properly, we need to provide a training set
-  // of arguments, and an input file to process.
-  final Directory tempDir = Directory.systemTemp.createTempSync('dartdoc_snippet_');
-  final File trainingFile = File(path.join(tempDir.path, 'snippet_training'));
-  trainingFile.writeAsStringSync('```dart\nvoid foo(){}\n```');
-  Process.runSync(Platform.resolvedExecutable, <String>[
-    '--snapshot=${snapshotPath.absolute.path}',
-    '--snapshot_kind=app-jit',
-    path.join(
-      'dev',
-      'snippets',
-      'lib',
-      'main.dart',
-    ),
-    '--type=sample',
-    '--input=${trainingFile.absolute.path}',
-    '--output=${path.join(tempDir.absolute.path, 'training_output.txt')}',
-  ]);
-  tempDir.deleteSync(recursive: true);
-  return snapshotPath;
 }
 
 void sanityCheckDocs() {

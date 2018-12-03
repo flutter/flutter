@@ -254,5 +254,10 @@
   "@remainingTextFieldCharacterCount": {
     "description": "The label for the TextField's character counter. remainingCharacters is a integer representing how many more characters the user can type into the text field before using up a given budget. All values are greater than or equal to zero.",
     "plural": "remainingCount"
+  },
+
+  "refreshIndicatorSemanticLabel": "Refresh",
+  "@refreshIndicatorSemanticLabel": {
+    "description": "The verb which describes what happens when a RefreshIndicator is displayed on screen.  This is used by TalkBack on Android to announce that a refresh is happening."
   }
 }

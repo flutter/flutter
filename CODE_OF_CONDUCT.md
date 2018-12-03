@@ -38,9 +38,9 @@ shave](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#lazy
 
 ## Questions
 
-It's always ok to ask questions. Our systems are large, nobody will be
+It's always ok to ask questions. Our systems are large, and nobody will be
 an expert in all the systems. Once you find the answer, document it in
 the first place you looked. That way, the next person will be brought
 up to speed even quicker.
 
-[!["I try not to make fun of people for admitting they don't know things, because for each thing 'everyone knows' by the time they're adults, every day there are, on average, 10,000 people in the US hearing about it for the first time. If I make fun of people, I train them not to tell me when they have those moments. And I miss out on the fun." "Diet coke and mentos thing? What's that?" "Oh man! We're going to the grocery store." "Why?" "You're one of today's lucky 10,000." (xkcd, May 2012)](https://imgs.xkcd.com/comics/ten_thousand.png)](https://xkcd.com/1053/https://xkcd.com/1053/)
+[!["I try not to make fun of people for admitting they don't know things, because for each thing 'everyone knows' by the time they're adults, every day there are, on average, 10,000 people in the US hearing about it for the first time. If I make fun of people, I train them not to tell me when they have those moments. And I miss out on the fun." "Diet coke and mentos thing? What's that?" "Oh man! We're going to the grocery store." "Why?" "You're one of today's lucky 10,000." (xkcd, May 2012)](https://imgs.xkcd.com/comics/ten_thousand.png)](https://xkcd.com/1053/)
