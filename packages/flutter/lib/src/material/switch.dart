@@ -35,6 +35,10 @@ enum _SwitchType { material, adaptive }
 /// that use a switch will listen for the [onChanged] callback and rebuild the
 /// switch with a new [value] to update the visual appearance of the switch.
 ///
+/// If the [onChanged] callback is null then the switch will be disabled and
+/// both the thumb and track will be rendered in shades of grey. The appearance
+/// of the thumb and track can be overridden with [
+///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
@@ -546,6 +550,7 @@ class _RenderSwitch extends RenderToggleable {
       BoxPainter thumbPainter;
       final Color thumbColor = isActive ? Color.lerp(inactiveColor, activeColor, currentValue) : inactiveColor;
       final ImageProvider thumbImage = isActive ? (currentValue < 0.5 ? inactiveThumbImage : activeThumbImage) : inactiveThumbImage;
+      print("PAINT value=$value thumbColor=$thumbColor isActive=$isActive thumbImage=$thumbImage");
       if (_cachedThumbPainter == null || thumbColor != _cachedThumbColor || thumbImage != _cachedThumbImage) {
         _cachedThumbColor = thumbColor;
         _cachedThumbImage = thumbImage;
