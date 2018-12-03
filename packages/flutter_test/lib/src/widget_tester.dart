@@ -12,6 +12,16 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 import 'package:test_api/test_api.dart' as test_package;
+import 'package:test_api/src/backend/declarer.dart'; // ignore: implementation_imports
+import 'package:test_api/src/frontend/timeout.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/group.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/group_entry.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/test.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/suite.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/live_test.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/message.dart'; // ignore: implementation_imports
 
 import 'all_elements.dart';
 import 'binding.dart';
@@ -25,12 +35,100 @@ import 'test_text_input.dart';
 export 'package:flutter/rendering.dart' show SemanticsHandle;
 
 export 'package:test_api/test_api.dart' hide
+  test,
+  group,
+  setUpAll,
+  tearDownAll,
+  setUp,
+  tearDown,
   expect, // we have our own wrapper below
   TypeMatcher, // matcher's TypeMatcher conflicts with the one in the Flutter framework
   isInstanceOf; // we have our own wrapper in matchers.dart
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
+
+Declarer get _declarer => Zone.current[#test.declarer] ?? _localDeclarer;
+Declarer _localDeclarer;
+
+void _setUpEnvironment() {
+  if (_declarer == null) {
+    _localDeclarer = Declarer();
+    Future<void>.value(null).then((void _) async {
+      final Group group = _declarer.build();
+      final Suite suite = Suite(group, SuitePlatform(Runtime.vm));
+      void onMessage(Message message) {
+        print(message.text);
+      }
+      Future<void> runTest(List<GroupEntry> tests, Group parent) async {
+        for (GroupEntry entry in tests) {
+          if (entry is Test) {
+            final LiveTest liveTest = entry.load(suite);
+            liveTest.onMessage.listen(onMessage);
+            await liveTest.run();
+          } else if (entry is Group) {
+            if (entry.setUpAll != null) {
+              final LiveTest liveTest = entry.setUpAll.load(suite);
+              liveTest.onMessage.listen(onMessage);
+              await liveTest.run();
+            }
+            await runTest(entry.entries, entry);
+            if (entry.tearDownAll != null) {
+              final LiveTest liveTest = entry.tearDownAll.load(suite);
+              liveTest.onMessage.listen(onMessage);
+              await liveTest.run();
+            }
+          }
+        }
+      }
+      await runTest(suite.group.entries, suite.group);
+    });
+  }
+}
+void test(dynamic description, Function body, {
+  String testOn,
+  Timeout timeout,
+  dynamic skip,
+  dynamic tags,
+  Map<String, dynamic> onPlatform,
+  int retry,
+  }) {
+  _setUpEnvironment();
+  _declarer.test(
+    description.toString(), body,
+    testOn: testOn,
+    timeout: timeout,
+    skip: skip,
+    onPlatform: onPlatform,
+    tags: tags,
+    retry: retry,
+  );
+}
+
+void group(dynamic description, Function body) {
+  _setUpEnvironment();
+  _declarer.group(description.toString(), body);
+}
+
+void setUp(Function body) {
+  _setUpEnvironment();
+  _declarer.setUp(body);
+}
+
+void tearDown(Function body) {
+  _setUpEnvironment();
+  _declarer.tearDown(body);
+}
+
+void setUpAll(Function body) {
+  _setUpEnvironment();
+  _declarer.setUpAll(body);
+}
+
+void tearDownAll(Function body) {
+  _setUpEnvironment();
+  _declarer.tearDownAll(body);
+}
 
 /// Runs the [callback] inside the Flutter test environment.
 ///
@@ -63,7 +161,7 @@ void testWidgets(String description, WidgetTesterCallback callback, {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
-  test_package.test(
+  test(
     description,
     () {
       tester._recordNumberOfSemanticsHandles();
