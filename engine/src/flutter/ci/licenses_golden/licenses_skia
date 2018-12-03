@@ -1,4 +1,4 @@
-Signature: eba985e0fa4e3eac8fe0727372293d3a
+Signature: 49de449a87219b10aa7a9b585cff3e59
 
 UNUSED LICENSES:
 
@@ -1311,6 +1311,7 @@ FILE: ../../../third_party/skia/gm/crbug_884166.cpp
 FILE: ../../../third_party/skia/gm/crbug_887103.cpp
 FILE: ../../../third_party/skia/gm/crbug_892988.cpp
 FILE: ../../../third_party/skia/gm/crbug_899512.cpp
+FILE: ../../../third_party/skia/gm/crbug_905548.cpp
 FILE: ../../../third_party/skia/gm/drawimageset.cpp
 FILE: ../../../third_party/skia/gm/drawquadset.cpp
 FILE: ../../../third_party/skia/gm/fwidth_squircle.cpp
@@ -1611,6 +1612,8 @@ FILE: ../../../third_party/skia/src/gpu/vk/GrVkAMDMemoryAllocator.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkImageLayout.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkPipelineLayout.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkPipelineLayout.h
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkSamplerYcbcrConversion.cpp
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkSamplerYcbcrConversion.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTypesPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkVulkan.h
 FILE: ../../../third_party/skia/src/image/SkImage_GpuBase.cpp
@@ -2036,6 +2039,7 @@ FILE: ../../../third_party/skia/docs/usingBookmaker.bmh
 FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/example.html
 FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/node.example.js
 FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/package.json
+FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/test.png
 FILE: ../../../third_party/skia/experimental/canvaskit/cpu.js
 FILE: ../../../third_party/skia/experimental/canvaskit/debug.js
 FILE: ../../../third_party/skia/experimental/canvaskit/externs.js
