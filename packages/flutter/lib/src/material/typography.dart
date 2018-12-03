@@ -94,13 +94,14 @@ class Typography extends Diagnosticable {
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2014], [dense2014], and [tall2014].
   factory Typography({
-    TargetPlatform platform,
+    TargetPlatform platform = TargetPlatform.android,
     TextTheme black,
     TextTheme white,
     TextTheme englishLike,
     TextTheme dense,
     TextTheme tall,
   }) {
+    assert(platform != null);
     switch (platform) {
       case TargetPlatform.iOS:
         black ??= blackCupertino;
