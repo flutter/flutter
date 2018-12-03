@@ -54,6 +54,7 @@ Declarer get _declarer {
   if (declarer != null) {
     return declarer;
   }
+  // If no declarer is defined, this test is being run via `flutter run -t test_file.dart`.
   if (_localDeclarer == null) {
     _localDeclarer = Declarer();
     Future<void>(() async {
@@ -65,6 +66,7 @@ Declarer get _declarer {
           if (entry is Test) {
             final LiveTest liveTest = entry.load(suite);
             liveTest.onMessage.listen(onMessage);
+            print('${parent?.name ?? ''}${entry.name}');
             await liveTest.run();
           } else if (entry is Group) {
             if (entry.setUpAll != null) {
