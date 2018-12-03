@@ -87,9 +87,10 @@ enum ScriptCategory {
 class Typography extends Diagnosticable {
   /// Creates a typography instance.
   ///
-  /// If [platform] is specified, the default values for [black] and [white]
-  /// are [blackCupertino] and [whiteCupertino] respectively. Otherwise
-  /// they are [blackMountainView] and [whiteMoutainView].
+  /// If [platform] is [TargetPlatform.iOS], the default values for [black] and
+  /// [white] are [blackCupertino] and [whiteCupertino] respectively. Otherwise
+  /// they are [blackMountainView] and [whiteMoutainView]. If [platform] is
+  /// null then both [black] and [white] must be specified.
   ///
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2014], [dense2014], and [tall2014].
@@ -101,7 +102,7 @@ class Typography extends Diagnosticable {
     TextTheme dense,
     TextTheme tall,
   }) {
-    assert(platform != null);
+    assert(platform != null || (black != null && white != null));
     switch (platform) {
       case TargetPlatform.iOS:
         black ??= blackCupertino;
