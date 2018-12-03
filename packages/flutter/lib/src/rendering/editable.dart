@@ -18,7 +18,6 @@ import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
-const double _kIOSCursorRadius = 2.0; // pixels
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -144,6 +143,8 @@ class RenderEditable extends RenderBox {
     Locale locale,
     double cursorWidth = 1.0,
     Radius cursorRadius,
+    bool paintCursorOnTop,
+    Offset cursorOffset,
     bool enableInteractiveSelection = true,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
@@ -171,6 +172,8 @@ class RenderEditable extends RenderBox {
        _offset = offset,
        _cursorWidth = cursorWidth,
        _cursorRadius = cursorRadius,
+       _paintCursorOnTop = paintCursorOnTop,
+       _cursorOffset = cursorOffset,
        _enableInteractiveSelection = enableInteractiveSelection,
        _obscureText = obscureText {
     assert(_showCursor != null);
@@ -694,6 +697,35 @@ class RenderEditable extends RenderBox {
     markNeedsLayout();
   }
 
+  /// If the cursor should be painted on top of the text or underneath it.
+  ///
+  /// By default, the cursor will be painted on top for iOS platforms and
+  /// underneath for Android platforms.
+  bool get paintCursorOnTop => _paintCursorOnTop;
+  bool _paintCursorOnTop;
+  set paintCursorOnTop(bool value) {
+    if (_paintCursorOnTop == value)
+      return;
+    _paintCursorOnTop = value;
+    markNeedsLayout();
+  }
+
+  /// {@template flutter.rendering.editable.cursorOffset}
+  /// The offset that is used, in pixels, when painting the cursor on screen.
+  ///
+  /// By default, the cursor will be painted on with an offset of
+  /// (-[cursorWidth] * 0.5, 0.0) on iOS platforms and (0, 0) on Android
+  /// platforms.
+  /// {@end template}
+  Offset get cursorOffset => _cursorOffset;
+  Offset _cursorOffset;
+  set cursorOffset(Offset value) {
+    if (_cursorOffset == value)
+      return;
+    _cursorOffset = value;
+    markNeedsLayout();
+  }
+
   /// How rounded the corners of the cursor should be.
   Radius get cursorRadius => _cursorRadius;
   Radius _cursorRadius;
@@ -1200,7 +1232,6 @@ class RenderEditable extends RenderBox {
     _layoutText(constraints.maxWidth);
     _caretPrototype = _getCaretPrototype;//Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, _getCaretHeight);
     _selectionRects = null;
-    cursorRadius ??= _platformIsIOS ? const Radius.circular(_kIOSCursorRadius) : null;
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
     // _textPainter's layout because the intrinsic size calculations are
@@ -1217,15 +1248,13 @@ class RenderEditable extends RenderBox {
     offset.applyContentDimensions(0.0, _maxScrollExtent);
   }
 
-  Offset get _getIOSCursorAdjustment => _platformIsIOS ? Offset(-cursorWidth * 0.5, 0.0) : Offset.zero;
-
   void _paintCaret(Canvas canvas, Offset effectiveOffset) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(_selection.extent, _caretPrototype);
     final Paint paint = Paint()
       ..color = _cursorColor;
 
-    final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset + _getIOSCursorAdjustment);
+    final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset + _cursorOffset ?? const Offset(0, 0));
 
     if (cursorRadius == null) {
       canvas.drawRect(caretRect, paint);
@@ -1255,7 +1284,7 @@ class RenderEditable extends RenderBox {
 
     // On iOS, the cursor is painted over the text, on android, it's painted
     // under it.
-    if (_platformIsIOS)
+    if (paintCursorOnTop)
       _textPainter.paint(context.canvas, effectiveOffset);
 
     if (_selection != null) {
@@ -1267,7 +1296,7 @@ class RenderEditable extends RenderBox {
       }
     }
 
-    if (!_platformIsIOS)
+    if (!paintCursorOnTop)
       _textPainter.paint(context.canvas, effectiveOffset);
   }
 

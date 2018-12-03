@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 
 import 'debug.dart';
 import 'feedback.dart';
@@ -392,6 +393,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration != null
     && widget.decoration.counterText == null;
 
+  Radius get _cursorRadius {
+    return widget.cursorRadius ?? defaultTargetPlatform == TargetPlatform.iOS ?
+                                  const Radius.circular(2.0) : null;
+  }
+
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
@@ -465,6 +471,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (cause == SelectionChangedCause.longPress)
       Feedback.forLongPress(context);
   }
+
+
 
   InteractiveInkFeature _createInkFeature(TapDownDetails details) {
     final MaterialInkController inkController = Material.of(context);
@@ -547,6 +555,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   @override
   bool get wantKeepAlive => _splashes != null && _splashes.isNotEmpty;
 
+  bool get cursorOpacityAnimates => defaultTargetPlatform == TargetPlatform.iOS ? true : false;
+
   @override
   void deactivate() {
     if (_splashes != null) {
@@ -604,8 +614,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,
-        cursorRadius: widget.cursorRadius,
+        cursorRadius: _cursorRadius,
         cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
+        cursorOpacityAnimates: cursorOpacityAnimates,
+        cursorOffset: const Offset(0, 0),
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: widget.enableInteractiveSelection,

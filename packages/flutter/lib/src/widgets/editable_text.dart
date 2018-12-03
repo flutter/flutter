@@ -22,7 +22,6 @@ import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'text_selection.dart';
-import 'ticker_provider.dart';
 
 export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType;
 export 'package:flutter/rendering.dart' show SelectionChangedCause;
@@ -32,6 +31,9 @@ export 'package:flutter/rendering.dart' show SelectionChangedCause;
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause cause);
 
 const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
+
+// The time the cursor is static in opacity before animating to become
+// transparent.
 const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 
 // Number of cursor ticks during which the most recently entered character
@@ -215,6 +217,8 @@ class EditableText extends StatefulWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
     this.cursorRadius,
+    this.cursorOpacityAnimates = false,
+    this.cursorOffset,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
     this.enableInteractiveSelection = true,
@@ -224,6 +228,7 @@ class EditableText extends StatefulWidget {
        assert(autocorrect != null),
        assert(style != null),
        assert(cursorColor != null),
+       assert(cursorOpacityAnimates != null),
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
        assert(autofocus != null),
@@ -436,6 +441,16 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final Radius cursorRadius;
 
+  /// Whether the cursor will animate from fully transparent to fully opaque
+  /// during each cursor blink.
+  ///
+  /// By default, the cursor opacity will animate on iOS platforms and will not
+  /// animate on Android platforms.
+  final bool cursorOpacityAnimates;
+
+  ///{@template flutter.rendering.editable.cursorOffset}
+  final Offset cursorOffset;
+
   /// The appearance of the keyboard.
   ///
   /// This setting is only honored on iOS devices.
@@ -494,7 +509,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, SingleTickerProviderStateMixin<EditableText> implements TextInputClient, TextSelectionDelegate {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver implements TextInputClient, TextSelectionDelegate {
   Timer _cursorTimer;
   final ValueNotifier<bool> _showCursor = ValueNotifier<bool>(false);
   final GlobalKey _editableKey = GlobalKey();
@@ -514,8 +529,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
-  Ticker _cursorColorTicker;
-
   // State lifecycle:
 
   @override
@@ -524,8 +537,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
-    _cursorController = AnimationController(vsync: this);
-    _cursorColorTicker = Ticker(_onCursorColorTick);
+    _cursorController.addListener(_onCursorColorTick);
   }
 
   @override
@@ -839,7 +851,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       widget.onChanged(value.text);
   }
 
-  void _onCursorColorTick(Duration frameDuration) {
+  void _onCursorColorTick() {
     renderEditable.cursorColor = widget.cursorColor.withOpacity(_cursorController.value);
   }
 
@@ -863,11 +875,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _cursorTick(Timer timer) {
     _showCursor.value = !_showCursor.value;
-    if (_platformIsIOS) {
+    if (widget.cursorOpacityAnimates) {
+      // If we want to show the cursor, we will animate the opacity to the value
+      // of 1.0, and likewise if we want to make it disappear, to 0.0. An easing
+      // curve is used for the animation to mimic the aesthetics of the native
+      // iOS cursor.
       final double toValue = _showCursor.value ? 1.0 : 0.0;
       _cursorController.animateTo(toValue, duration: _fadeDuration, curve: Curves.easeOut);
-    } else
+    } else {
       _cursorController.value = _showCursor.value ? 1.0 : 0.0;
+    }
 
     if (_obscureShowCharTicksPending > 0) {
       setState(() { _obscureShowCharTicksPending--; });
@@ -882,7 +899,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void _startCursorTimer() {
     _showCursor.value = true;
     if (_platformIsIOS) {
-      _cursorColorTicker.start();
       _cursorController.value = 1.0;
       _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
     } else
@@ -894,9 +910,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorTimer = null;
     _showCursor.value = false;
     _obscureShowCharTicksPending = 0;
-    if (_platformIsIOS) {
+    if (widget.cursorOpacityAnimates) {
       _cursorController.stop();
-      _cursorColorTicker.stop();
       _cursorController.value = 0.0;
     }
   }
@@ -1027,6 +1042,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               rendererIgnoresPointer: widget.rendererIgnoresPointer,
               cursorWidth: widget.cursorWidth,
               cursorRadius: widget.cursorRadius,
+              cursorOffset: widget.cursorOffset,
               enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
             ),
@@ -1092,6 +1108,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth,
     this.cursorRadius,
+    this.cursorOffset,
     this.enableInteractiveSelection = true,
     this.textSelectionDelegate,
   }) : assert(textDirection != null),
@@ -1118,6 +1135,7 @@ class _Editable extends LeafRenderObjectWidget {
   final bool rendererIgnoresPointer;
   final double cursorWidth;
   final Radius cursorRadius;
+  final Offset cursorOffset;
   final bool enableInteractiveSelection;
   final TextSelectionDelegate textSelectionDelegate;
 
@@ -1142,6 +1160,7 @@ class _Editable extends LeafRenderObjectWidget {
       obscureText: obscureText,
       cursorWidth: cursorWidth,
       cursorRadius: cursorRadius,
+      cursorOffset: cursorOffset,
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
     );
@@ -1168,6 +1187,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..obscureText = obscureText
       ..cursorWidth = cursorWidth
       ..cursorRadius = cursorRadius
+      ..cursorOffset = cursorOffset
       ..textSelectionDelegate = textSelectionDelegate;
   }
 }
