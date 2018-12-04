@@ -171,8 +171,8 @@ class _TabStyle extends AnimatedWidget {
     final double fontSize = selected
         ? lerpDouble(defaultStyle.fontSize, defaultUnselectedStyle.fontSize, animation.value)
         : lerpDouble(defaultUnselectedStyle.fontSize, defaultStyle.fontSize, animation.value);
-    final beginPercent = textStyle.fontSize / (selected ? defaultStyle.fontSize : defaultUnselectedStyle.fontSize);
-    final endPercent = (selected ? defaultUnselectedStyle.fontSize : defaultStyle.fontSize) / textStyle.fontSize;
+    final double beginPercent = textStyle.fontSize / (selected ? defaultStyle.fontSize : defaultUnselectedStyle.fontSize);
+    final double endPercent = (selected ? defaultUnselectedStyle.fontSize : defaultStyle.fontSize) / textStyle.fontSize;
 
     return IconTheme.merge(
       data: IconThemeData(
@@ -715,22 +715,21 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _initTextPainterList() {
-    bool isOnlyTabText = widget.tabs.map((Widget tab) => tab is Tab && tab.icon == null && tab.child == null).toList().reduce((value, element) => value && element);
+    final bool isOnlyTabText = widget.tabs.map<bool>((Widget tab) => tab is Tab && tab.icon == null && tab.child == null).toList().reduce((value, element) => value && element);
     if (isOnlyTabText) {
-      TextStyle defalutLabelStyle = widget.labelStyle ?? Theme.of(context).primaryTextTheme.body2;
-      TextStyle defalutUnselectedLabelStyle = widget.unselectedLabelStyle ?? Theme.of(context).primaryTextTheme.body2;
-      TextStyle defalutStyle = defalutLabelStyle.fontSize >= defalutUnselectedLabelStyle.fontSize
-          ? defalutLabelStyle
-          : defalutUnselectedLabelStyle;
+       final TextStyle defalutLabelStyle = widget.labelStyle ?? Theme.of(context).primaryTextTheme.body2;
+       final TextStyle defalutUnselectedLabelStyle = widget.unselectedLabelStyle ?? Theme.of(context).primaryTextTheme.body2;
+       final TextStyle defalutStyle = defalutLabelStyle.fontSize >= defalutUnselectedLabelStyle.fontSize ? defalutLabelStyle : defalutUnselectedLabelStyle;
 
-      _textPainters = widget.tabs.map((Tab tab) =>
-          TextPainter(
+      _textPainters = widget.tabs.map<TextPainter>((Widget tab) {
+          return TextPainter(
             textDirection: TextDirection.ltr,
             text: TextSpan(
-              text: tab.text ?? '',
+              text: (tab as Tab).text ?? '',
               style: defalutStyle,
             ),
-          )).toList();
+          );
+      }).toList();
     } else
       _textPainters = null;
   }
