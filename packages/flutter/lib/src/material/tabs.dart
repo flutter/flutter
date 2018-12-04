@@ -715,7 +715,7 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _initTextPainterList() {
-    final bool isOnlyTabText = widget.tabs.map<bool>((Widget tab) => tab is Tab && tab.icon == null && tab.child == null).toList().reduce((value, element) => value && element);
+    final bool isOnlyTabText = widget.tabs.map<bool>((Widget tab) => tab is Tab && tab.icon == null && tab.child == null).toList().reduce((bool value,bool element) => value && element);
     if (isOnlyTabText) {
        final TextStyle defalutLabelStyle = widget.labelStyle ?? Theme.of(context).primaryTextTheme.body2;
        final TextStyle defalutUnselectedLabelStyle = widget.unselectedLabelStyle ?? Theme.of(context).primaryTextTheme.body2;
@@ -725,7 +725,7 @@ class _TabBarState extends State<TabBar> {
           return TextPainter(
             textDirection: TextDirection.ltr,
             text: TextSpan(
-              text: (tab as Tab).text ?? '',
+              text: (tab is Tab).text ?? '',
               style: defalutStyle,
             ),
           );
@@ -1174,35 +1174,35 @@ class _TabBarViewState extends State<TabBarView> {
       return Future<void>.value();
 
     if (_pageController.page == _currentIndex.toDouble())
-    return Future<void>.value();
+      return Future<void>.value();
 
     final int previousIndex = _controller.previousIndex;
     if ((_currentIndex - previousIndex).abs() == 1)
-    return _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
+      return _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
 
     assert((_currentIndex - previousIndex).abs() > 1);
     int initialPage;
     setState(() {
-    _warpUnderwayCount += 1;
-    _children = List<Widget>.from(widget.children, growable: false);
-    if (_currentIndex > previousIndex) {
-    _children[_currentIndex - 1] = _children[previousIndex];
-    initialPage = _currentIndex - 1;
-    } else {
-    _children[_currentIndex + 1] = _children[previousIndex];
-    initialPage = _currentIndex + 1;
-    }
+      _warpUnderwayCount += 1;
+      _children = List<Widget>.from(widget.children, growable: false);
+      if (_currentIndex > previousIndex) {
+        _children[_currentIndex - 1] = _children[previousIndex];
+        initialPage = _currentIndex - 1;
+      } else {
+        _children[_currentIndex + 1] = _children[previousIndex];
+        initialPage = _currentIndex + 1;
+      }
     });
 
     _pageController.jumpToPage(initialPage);
 
     await _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
     if (!mounted)
-    return Future<void>.value();
+      return Future<void>.value();
 
     setState(() {
-    _warpUnderwayCount -= 1;
-    _children = widget.children;
+      _warpUnderwayCount -= 1;
+      _children = widget.children;
     });
   }
 
@@ -1365,10 +1365,10 @@ class TabPageSelector extends StatelessWidget {
       if (tabController == null) {
         throw FlutterError(
             'No TabController for $runtimeType.\n'
-                'When creating a $runtimeType, you must either provide an explicit TabController '
-                'using the "controller" property, or you must ensure that there is a '
-                'DefaultTabController above the $runtimeType.\n'
-                'In this case, there was neither an explicit controller nor a default controller.'
+            'When creating a $runtimeType, you must either provide an explicit TabController '
+            'using the "controller" property, or you must ensure that there is a '
+            'DefaultTabController above the $runtimeType.\n'
+            'In this case, there was neither an explicit controller nor a default controller.'
         );
       }
       return true;
