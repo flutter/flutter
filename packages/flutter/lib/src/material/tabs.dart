@@ -725,7 +725,7 @@ class _TabBarState extends State<TabBar> {
           return TextPainter(
             textDirection: TextDirection.ltr,
             text: TextSpan(
-              text: (tab is Tab).text ?? '',
+              text: tab is Tab ? tab.text ?? '' : '',
               style: defalutStyle,
             ),
           );
