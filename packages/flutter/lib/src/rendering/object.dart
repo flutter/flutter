@@ -1855,7 +1855,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
     assert(() {
       final AbstractNode parent = this.parent;
-      if (parent is RenderObject)
+      if (!isRepaintBoundary && parent is RenderObject)
         return parent._needsCompositing;
       return true;
     }());

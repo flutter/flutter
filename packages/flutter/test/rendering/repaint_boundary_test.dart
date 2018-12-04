@@ -34,4 +34,23 @@ void main() {
     c.opacity = 0.7;
     pumpFrame(phase: EnginePhase.flushSemantics);
   });
+
+  test('Repaint boundary can get a new parent after a hot reload without crashing', () {
+    // Regression test for https://github.com/flutter/flutter/issues/24029.
+
+    final RenderBox repaintBoundary = RenderRepaintBoundary();
+    layout(repaintBoundary, phase: EnginePhase.flushSemantics);
+
+    // Simulate hot reload.
+    renderer.renderView.reassemble();
+
+    // Give the repaint boundary a new parent.
+    renderer.renderView.dropChild(repaintBoundary);
+    final RenderBox padding = RenderPadding(
+      padding: const EdgeInsets.all(50),
+    );
+    renderer.renderView.adoptChild(padding);
+    padding.adoptChild(repaintBoundary);
+    pumpFrame(phase: EnginePhase.flushSemantics);
+  });
 }
