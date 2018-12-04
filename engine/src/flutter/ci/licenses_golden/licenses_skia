@@ -1,4 +1,4 @@
-Signature: 048ec4dc7b2fa8a8cc50ef754a2090eb
+Signature: 286e9dafd24e0951ca4799176796f14f
 
 UNUSED LICENSES:
 
@@ -3588,7 +3588,6 @@ FILE: ../../../third_party/skia/include/ports/SkFontMgr_android.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_directory.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_empty.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_fontconfig.h
-FILE: ../../../third_party/skia/include/private/SkAtomics.h
 FILE: ../../../third_party/skia/include/private/SkMutex.h
 FILE: ../../../third_party/skia/include/private/SkNx.h
 FILE: ../../../third_party/skia/include/private/SkNx_neon.h
