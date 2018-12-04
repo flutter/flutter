@@ -26,12 +26,17 @@ class DeviceManager {
   /// of their methods are called.
   DeviceManager() {
     // Register the known discoverers.
-    _deviceDiscoverers.add(AndroidDevices());
-    _deviceDiscoverers.add(IOSDevices());
-    _deviceDiscoverers.add(IOSSimulators());
-    _deviceDiscoverers.add(FuchsiaDevices());
-    _deviceDiscoverers.add(FlutterTesterDevices());
+    supportedDevices.forEach(_deviceDiscoverers.add);
   }
+
+  /// The support device discovery instances.
+  Iterable<DeviceDiscovery> get supportedDevices => <DeviceDiscovery>[
+    AndroidDevices(),
+    IOSDevices(),
+    IOSSimulators(),
+    FuchsiaDevices(),
+    FlutterTesterDevices()
+  ];
 
   final List<DeviceDiscovery> _deviceDiscoverers = <DeviceDiscovery>[];
 
