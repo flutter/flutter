@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 import 'android/android_device.dart';
 import 'application_package.dart';
 import 'base/context.dart';
@@ -30,6 +32,7 @@ class DeviceManager {
   }
 
   /// The support device discovery instances.
+  @protected
   Iterable<DeviceDiscovery> get supportedDevices => <DeviceDiscovery>[
     AndroidDevices(),
     IOSDevices(),
