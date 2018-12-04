@@ -65,13 +65,13 @@ Future<void> main(List<String> args) async {
      muteCommandLogging: help,
      verboseHelp: verboseHelp,
      overrides: <Type, Generator>{
-       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
-       Artifacts: () => OverrideArtifacts(
-         parent: CachedArtifacts(),
-         frontendServer: frontendServer,
-         engineDartBinary: dartSdk,
-       ),
-       HotRunnerConfig: () => HotRunnerConfig()
-         ..computeDartDependencies = false,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      Artifacts: () => OverrideArtifacts(
+        parent: CachedArtifacts(),
+        frontendServer: frontendServer,
+        engineDartBinary: dartSdk,
+      ),
+      HotRunnerConfig: () => HotRunnerConfig()
+        ..computeDartDependencies = false,
      });
 }
