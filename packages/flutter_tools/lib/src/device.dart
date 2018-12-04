@@ -31,7 +31,7 @@ class DeviceManager {
     supportedDevices.forEach(_deviceDiscoverers.add);
   }
 
-  /// The support device discovery instances.
+  /// The supported device discovery instances.
   @protected
   Iterable<DeviceDiscovery> get supportedDevices => <DeviceDiscovery>[
     AndroidDevices(),
