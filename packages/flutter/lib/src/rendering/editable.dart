@@ -1258,7 +1258,9 @@ class RenderEditable extends RenderBox {
     final Paint paint = Paint()
       ..color = _cursorColor;
 
-    final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset + _cursorOffset ?? const Offset(0, 0));
+    final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset);
+    if (_cursorOffset != null)
+      caretRect.shift(_cursorOffset);
 
     if (cursorRadius == null) {
       canvas.drawRect(caretRect, paint);

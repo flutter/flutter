@@ -394,8 +394,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration.counterText == null;
 
   Radius get _cursorRadius {
-    return widget.cursorRadius ?? defaultTargetPlatform == TargetPlatform.iOS ?
-                                  const Radius.circular(2.0) : null;
+    if (widget.cursorRadius != null)
+      return widget.cursorRadius;
+    if (defaultTargetPlatform == TargetPlatform.iOS)
+      return const Radius.circular(2.0);
+    return null;
   }
 
   InputDecoration _getEffectiveDecoration() {

@@ -535,6 +535,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
+  Color get _cursorColor => widget.cursorColor.withOpacity(_cursorController.value);
+
   // State lifecycle:
 
   @override
@@ -603,7 +605,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     // To keep the cursor from blinking while typing, we want to restart the
     // cursor timer every time a new character is typed.
-    _stopCursorTimer();
+    _stopCursorTimer(resetCharTicks: false);
     _startCursorTimer();
   }
 
@@ -894,7 +896,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     if (_obscureShowCharTicksPending > 0) {
-      setState(() { _obscureShowCharTicksPending--; });
+      setState(() {
+        _obscureShowCharTicksPending--;
+      });
     }
   }
 
@@ -913,13 +917,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _stopCursorTimer() {
+  void _stopCursorTimer({ bool resetCharTicks = true }) {
     _cursorTimer?.cancel();
     _cursorTimer = null;
     _showCursor.value = false;
-    _obscureShowCharTicksPending = 0;
+    if (resetCharTicks)
+      _obscureShowCharTicksPending = 0;
     if (widget.cursorOpacityAnimates) {
       _cursorController.stop();
+      _cursorController.removeListener(_onCursorColorTick);
       _cursorController.value = 0.0;
     }
   }
@@ -1033,7 +1039,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               key: _editableKey,
               textSpan: buildTextSpan(),
               value: _value,
-              cursorColor: widget.cursorColor,
+              cursorColor: _cursorColor,
               showCursor: EditableText.debugDeterministicCursor ? ValueNotifier<bool>(true) : _showCursor,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
