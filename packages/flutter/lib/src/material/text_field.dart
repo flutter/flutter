@@ -616,6 +616,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
         cursorOpacityAnimates: cursorOpacityAnimates,
         cursorOffset: const Offset(0, 0),
+        paintCursorOnTop: false,
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: widget.enableInteractiveSelection,

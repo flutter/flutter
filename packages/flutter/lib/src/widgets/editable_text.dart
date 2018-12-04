@@ -220,6 +220,7 @@ class EditableText extends StatefulWidget {
     this.cursorRadius,
     this.cursorOpacityAnimates = false,
     this.cursorOffset,
+    this.paintCursorOnTop = false,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
     this.enableInteractiveSelection = true,
@@ -229,7 +230,8 @@ class EditableText extends StatefulWidget {
        assert(autocorrect != null),
        assert(style != null),
        assert(cursorColor != null),
-//       assert(cursorOpacityAnimates != null),
+       assert(cursorOpacityAnimates != null),
+       assert(paintCursorOnTop != null),
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
        assert(autofocus != null),
@@ -243,9 +245,7 @@ class EditableText extends StatefulWidget {
                  ..addAll(inputFormatters ?? const Iterable<TextInputFormatter>.empty())
              )
            : inputFormatters,
-       super(key: key) {
-    print(cursorOpacityAnimates);
-  }
+       super(key: key);
 
   /// Controls the text being edited.
   final TextEditingController controller;
@@ -451,8 +451,11 @@ class EditableText extends StatefulWidget {
   /// animate on Android platforms.
   final bool cursorOpacityAnimates;
 
-  ///{@template flutter.rendering.editable.cursorOffset}
+  ///{@macro flutter.rendering.editable.cursorOffset}
   final Offset cursorOffset;
+
+  ///{@macro flutter.rendering.editable.paintCursorOnTop}
+  final bool paintCursorOnTop;
 
   /// The appearance of the keyboard.
   ///
@@ -1048,6 +1051,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               cursorWidth: widget.cursorWidth,
               cursorRadius: widget.cursorRadius,
               cursorOffset: widget.cursorOffset,
+              paintCursorOnTop: widget.paintCursorOnTop,
               enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
             ),
@@ -1114,6 +1118,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.cursorWidth,
     this.cursorRadius,
     this.cursorOffset,
+    this.paintCursorOnTop,
     this.enableInteractiveSelection = true,
     this.textSelectionDelegate,
   }) : assert(textDirection != null),
@@ -1141,6 +1146,7 @@ class _Editable extends LeafRenderObjectWidget {
   final double cursorWidth;
   final Radius cursorRadius;
   final Offset cursorOffset;
+  final bool paintCursorOnTop;
   final bool enableInteractiveSelection;
   final TextSelectionDelegate textSelectionDelegate;
 

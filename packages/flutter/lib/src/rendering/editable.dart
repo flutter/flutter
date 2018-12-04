@@ -143,7 +143,7 @@ class RenderEditable extends RenderBox {
     Locale locale,
     double cursorWidth = 1.0,
     Radius cursorRadius,
-    bool paintCursorOnTop,
+    bool paintCursorOnTop = false,
     Offset cursorOffset,
     bool enableInteractiveSelection = true,
     @required this.textSelectionDelegate,
@@ -153,6 +153,7 @@ class RenderEditable extends RenderBox {
        assert(textScaleFactor != null),
        assert(offset != null),
        assert(ignorePointer != null),
+       assert(paintCursorOnTop != null),
        assert(obscureText != null),
        assert(enableInteractiveSelection != null),
        assert(textSelectionDelegate != null),
@@ -697,10 +698,12 @@ class RenderEditable extends RenderBox {
     markNeedsLayout();
   }
 
+  ///{@template flutter.rendering.editable.paintCursorOnTop}
   /// If the cursor should be painted on top of the text or underneath it.
   ///
   /// By default, the cursor will be painted on top for iOS platforms and
   /// underneath for Android platforms.
+  /// {@end template}
   bool get paintCursorOnTop => _paintCursorOnTop;
   bool _paintCursorOnTop;
   set paintCursorOnTop(bool value) {
