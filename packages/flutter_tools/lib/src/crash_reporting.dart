@@ -326,7 +326,7 @@ class EngineCrash {
   }
 
   String parseSignature() {
-    final String signature = 'Fatal ';
+    const String signature = 'Fatal ';
     final String line = _backtrace[lineContaining('backtrace') - 5];
     return signature + line;
   }
