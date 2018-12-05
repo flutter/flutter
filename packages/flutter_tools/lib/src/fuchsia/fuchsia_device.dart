@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
@@ -214,6 +215,17 @@ class FuchsiaDevice extends Device {
   @override
   bool get supportsScreenshot => false;
 
+  bool get ipv6 {
+    // Workaround for https://github.com/dart-lang/sdk/issues/29456
+    final String fragment = id.split('%').first;
+    try {
+      Uri.parseIPv6Address(fragment);
+      return true;
+    } on FormatException {
+      return false;
+    }
+  }
+
   /// List the ports currently running a dart observatory.
   Future<List<int>> servicePorts() async {
     final String lsOutput = await shell('ls /tmp/dart.services');
@@ -267,6 +279,71 @@ class FuchsiaDevice extends Device {
     }
     throwToolExit('No ports found running $isolateName');
     return null;
+  }
+
+  FuchsiaIsolateDiscoveryProtocol  getIsolateDiscoveryProtocol(String isolateName) => FuchsiaIsolateDiscoveryProtocol(this, isolateName);
+}
+
+class FuchsiaIsolateDiscoveryProtocol {
+  FuchsiaIsolateDiscoveryProtocol(this._device, this._isolateName);
+
+  static const Duration _pollDuration = Duration(seconds: 1);
+  final Map<int, VMService> _ports = <int, VMService>{};
+  final FuchsiaDevice _device;
+  final String _isolateName;
+  final Completer<Uri> _foundUri = Completer<Uri>();
+  Timer _pollingTimer;
+  Status _status;
+
+  Future<Uri> get uri {
+    _status ??= logger.startProgress(
+      'Waiting for a connection from Flutter on ${_device.name}...',
+      expectSlowOperation: true,
+    );
+    _pollingTimer ??= Timer.periodic(_pollDuration, _findIsolate);
+    return _foundUri.future;
+  }
+
+  void dispose() {
+    if (!_foundUri.isCompleted) {
+      _status.cancel();
+      _foundUri.completeError(Exception('Did not complete'));
+    }
+  }
+
+  Future<void> _findIsolate(Timer timer) async {
+    final List<int> ports = await _device.servicePorts();
+    for (int port in ports) {
+      VMService service;
+      if (_ports.containsKey(port)) {
+        service = _ports[port];
+      } else {
+        final int localPort = await _device.portForwarder.forward(port);
+        try {
+          final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$localPort');
+          service = await VMService.connect(uri);
+          _ports[port] = service;
+        } on SocketException catch (err) {
+          printTrace('Failed to connect to $localPort: $err');
+        }
+      }
+      await service.getVM();
+      await service.refreshViews();
+      for (FlutterView flutterView in service.vm.views) {
+        if (flutterView.uiIsolate == null) {
+          continue;
+        }
+        final Uri address = flutterView.owner.vmService.httpAddress;
+        if (flutterView.uiIsolate.name.contains(_isolateName)) {
+          _foundUri.complete(_device.ipv6
+            ? Uri.parse('http://[$_ipv6Loopback]:${address.port}/')
+            : Uri.parse('http://$_ipv4Loopback:${address.port}/'));
+          timer.cancel();
+          _status.stop();
+          return;
+        }
+      }
+    }
   }
 }
 
