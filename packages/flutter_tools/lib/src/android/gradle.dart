@@ -462,7 +462,7 @@ class GradleProject {
     for (String s in tasks.split('\n')) {
       final Match match = _assembleTaskPattern.matchAsPrefix(s);
       if (match != null) {
-        final String variant = match.group(1).toLowerCase();
+        final String variant = match.group(1);
         if (!variant.endsWith('test'))
           variants.add(variant);
       }
@@ -495,7 +495,7 @@ class GradleProject {
 
   String _buildTypeFor(BuildInfo buildInfo) {
     final String modeName = camelCase(buildInfo.modeName);
-    if (buildTypes.contains(modeName.toLowerCase()))
+    if (buildTypes.contains(modeName))
       return modeName;
     return null;
   }
