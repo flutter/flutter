@@ -237,9 +237,9 @@ class TextField extends StatefulWidget {
   ///
   /// If set, a character counter will be displayed below the
   /// field showing how many characters have been entered. If set to a number
-  /// greather than 0, it will also display the maximum number allowed. If set 
+  /// greather than 0, it will also display the maximum number allowed. If set
   /// to -1 then only the current character count is displayed.
-  /// 
+  ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
   /// enforces the length with a [LengthLimitingTextInputFormatter], which is
@@ -415,7 +415,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       counterText += '/${widget.maxLength}';
       final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength);
       semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
-    
+  
       // Handle length exceeds maxLength
       if (_effectiveController.value.text.runes.length > widget.maxLength) {
         final ThemeData themeData = Theme.of(context);
