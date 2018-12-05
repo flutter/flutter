@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/animation.dart' show Curves;
 
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
@@ -596,9 +597,11 @@ class _CupertinoBackGestureController<T> {
     if (velocity.abs() >= _kMinFlingVelocity) {
       controller.fling(velocity: -velocity);
     } else if (controller.value <= 0.5) {
-      controller.fling(velocity: -1.0);
+//      controller.fling(velocity: -10.0);
+      controller.animateTo(-0.01, duration: const Duration(milliseconds: 140), curve: Curves.decelerate);
     } else {
-      controller.fling(velocity: 1.0);
+//      controller.fling(velocity: 14.0);
+      controller.animateTo(1.01, duration: const Duration(milliseconds: 140), curve: Curves.decelerate);
     }
     assert(controller.isAnimating);
     assert(controller.status != AnimationStatus.completed);
@@ -613,8 +616,12 @@ class _CupertinoBackGestureController<T> {
     assert(_animating);
     controller.removeStatusListener(_handleStatusChanged);
     _animating = false;
-    if (status == AnimationStatus.dismissed)
+    print(controller.status);
+    if (controller.value <= controller.lowerBound) {
       navigator.pop<T>(); // this will cause the route to get disposed, which will dispose us
+    }
+    print(controller.status);
+
     onEnded(); // this will call dispose if popping the route failed to do so
   }
 
