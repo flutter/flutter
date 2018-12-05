@@ -247,7 +247,7 @@ class TextField extends StatefulWidget {
   ///
   /// This value must be either null, greater than 0, or -1 (negative one). If set to null
   /// (the default), there is no limit to the number of characters allowed. If set to -1,
-  /// then no limit will be enforce, but the display of how many characters have been
+  /// then no limit will be enforced, but the display of how many characters have been
   /// entered is still displayed.
   ///
   /// Whitespace characters (e.g. newline, space, tab) are included in the
