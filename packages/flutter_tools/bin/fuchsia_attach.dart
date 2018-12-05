@@ -14,8 +14,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
-import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -91,7 +89,6 @@ Future<void> main(List<String> args) async {
     muteCommandLogging: false,
     verboseHelp: false,
     overrides: <Type, Generator>{
-      DeviceManager: () => _FuchsiaDeviceManager(),
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       Artifacts: () => OverrideArtifacts(
         parent: CachedArtifacts(),
@@ -134,11 +131,4 @@ class _FuchsiaAttachCommand extends AttachCommand {
     Cache.flutterRoot = '$originalWorkingDirectory/third_party/dart-pkg/git/flutter';
     return super.runCommand();
   }
-}
-
-class _FuchsiaDeviceManager extends DeviceManager {
-  @override
-  Iterable<DeviceDiscovery> get supportedDevices => <DeviceDiscovery>[
-    FuchsiaDevices(),
-  ];
 }

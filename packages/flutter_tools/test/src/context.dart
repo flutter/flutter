@@ -179,9 +179,6 @@ class MockDeviceManager implements DeviceManager {
 
   @override
   Future<List<String>> getDeviceDiagnostics() async => <String>[];
-
-  @override
-  Iterable<DeviceDiscovery> get supportedDevices => const <DeviceDiscovery>[];
 }
 
 class MockAndroidLicenseValidator extends AndroidLicenseValidator {

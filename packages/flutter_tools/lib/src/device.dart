@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
-
 import 'android/android_device.dart';
 import 'application_package.dart';
 import 'base/context.dart';
@@ -28,18 +26,12 @@ class DeviceManager {
   /// of their methods are called.
   DeviceManager() {
     // Register the known discoverers.
-    supportedDevices.forEach(_deviceDiscoverers.add);
+    _deviceDiscoverers.add(AndroidDevices());
+    _deviceDiscoverers.add(IOSDevices());
+    _deviceDiscoverers.add(IOSSimulators());
+    _deviceDiscoverers.add(FuchsiaDevices());
+    _deviceDiscoverers.add(FlutterTesterDevices());
   }
-
-  /// The support device discovery instances.
-  @protected
-  Iterable<DeviceDiscovery> get supportedDevices => <DeviceDiscovery>[
-    AndroidDevices(),
-    IOSDevices(),
-    IOSSimulators(),
-    FuchsiaDevices(),
-    FlutterTesterDevices()
-  ];
 
   final List<DeviceDiscovery> _deviceDiscoverers = <DeviceDiscovery>[];
 
