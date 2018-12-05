@@ -1810,13 +1810,13 @@ void main() {
   });
 
   testWidgets(
-      'setting maxLength to TextField.noMaxLength shows only entered length',
+      'setting maxLength to -1 shows only entered length',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
             child: TextField(
-              maxLength: TextField.noMaxLength,
+              maxLength: -1,
             ),
           ),
         ),
