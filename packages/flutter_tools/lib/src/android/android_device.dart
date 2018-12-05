@@ -21,6 +21,7 @@ import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../crash_reporting.dart';
 import '../protocol_discovery.dart';
 
 import 'adb.dart';
@@ -718,8 +719,11 @@ class _AdbLogReader extends DeviceLogReader {
 
   // Whether a fatal crash is happening or not.
   // During a fatal crash only lines from the crash are accepted, the rest are
-  // dropped.
+  // dropped. They are also cached into engineCrash, which is used later to
+  // submit a crash report.
   bool _fatalCrash = false;
+
+  EngineCrash _engineCrash;
 
   // The format of the line is controlled by the '-v' parameter passed to
   // adb logcat. We are currently passing 'time', which has the format:
@@ -749,13 +753,13 @@ class _AdbLogReader extends DeviceLogReader {
       if (_fatalCrash) {
         // While a fatal crash is going on, only accept lines from the crash
         // Otherwise the crash log in the console may get interrupted
-
         final Match fatalMatch = _tombstoneLine.firstMatch(line);
 
         if (fatalMatch != null) {
           acceptLine = true;
 
           line = fatalMatch[1];
+          _engineCrash.addTraceLine(line);
 
           if (_tombstoneTerminator.hasMatch(fatalMatch[1])) {
             // Hit crash terminator, stop logging the crash info
@@ -768,6 +772,10 @@ class _AdbLogReader extends DeviceLogReader {
         if (_fatalLog.hasMatch(line)) {
           // Hit fatal signal, app is now crashing
           _fatalCrash = true;
+          _engineCrash = EngineCrash();
+          CrashReportSender.engineCrash = _engineCrash;
+          _engineCrash.error = line;
+          _engineCrash.addTraceLine(line);
         }
       } else {
         // Filter on approved names and levels.

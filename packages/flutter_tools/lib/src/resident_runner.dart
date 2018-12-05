@@ -17,6 +17,7 @@ import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'compile.dart';
+import 'crash_reporting.dart';
 import 'dart/dependencies.dart';
 import 'dart/package_map.dart';
 import 'dependency_checker.dart';
@@ -26,6 +27,7 @@ import 'globals.dart';
 import 'project.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
+import 'version.dart';
 import 'vmservice.dart';
 
 class FlutterDevice {
@@ -775,14 +777,19 @@ abstract class ResidentRunner {
     }
   }
 
-  void _serviceDisconnected() {
+  void _serviceDisconnected() async {
     if (_stopped) {
       // User requested the application exit.
       return;
     }
     if (_finished.isCompleted)
       return;
+
     printStatus('Lost connection to device.');
+    String getVersion() => FlutterVersion.instance.getVersionString();
+    await CrashReportSender.instance.checkAndSendEngineReport(
+      getFlutterVersion: getVersion,
+    );
     _resetTerminal();
     _finished.complete(0);
   }

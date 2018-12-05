@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+// import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
@@ -11,14 +12,19 @@ import 'package:stack_trace/stack_trace.dart';
 import 'base/io.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/terminal.dart';
 import 'globals.dart';
 import 'usage.dart';
 
 /// Tells crash backend that the error is from the Flutter CLI.
-const String _kProductId = 'Flutter_Tools';
+const String _kProductToolsId = 'Flutter_Tools';
+/// Tells crash backend that the error is from the Flutter CLI.
+const String _kProductEngineId = 'Flutter_Engine';
 
 /// Tells crash backend that this is a Dart error as opposed to, say, Java.
 const String _kDartTypeId = 'DartError';
+/// Tells crash backend that this is a C++ error as opposed to, say, Java.
+const String _kEngineTypeId = 'EngineCrash';
 
 /// Crash backend host.
 const String _kCrashServerHost = 'clients2.google.com';
@@ -29,6 +35,13 @@ const String _kCrashEndpointPath = '/cr/report';
 /// The field corresponding to the multipart/form-data file attachment where
 /// crash backend expects to find the Dart stack trace.
 const String _kStackTraceFileField = 'DartError';
+
+/// The field corresponding to the multipart/form-data file attachment where
+/// crash backend expects to find the Engine stack trace, registers, and general
+/// error information.
+const String _kEngineStackTraceFileField = 'EngineStackTrace';
+const String _kEngineRegistersFileField = 'EngineRegisters';
+const String _kEngineErrorFileField = 'EngineError';
 
 /// The name of the file attached as [_kStackTraceFileField].
 ///
@@ -53,6 +66,11 @@ class CrashReportSender {
   static CrashReportSender _instance;
 
   static CrashReportSender get instance => _instance ?? CrashReportSender._(http.Client());
+
+  // Holds the crash data and stack trace for engine crashes. Since engine crashes
+  // end the flutter tool, we can only crash once per run, so this is a static
+  // variable.
+  static EngineCrash engineCrash;
 
   /// Overrides the default [http.Client] with [client] for testing purposes.
   @visibleForTesting
@@ -94,14 +112,14 @@ class CrashReportSender {
       final String flutterVersion = getFlutterVersion();
       final Uri uri = _baseUrl.replace(
         queryParameters: <String, String>{
-          'product': _kProductId,
+          'product': _kProductToolsId,
           'version': flutterVersion,
         },
       );
 
       final http.MultipartRequest req = http.MultipartRequest('POST', uri);
       req.fields['uuid'] = _usage.clientId;
-      req.fields['product'] = _kProductId;
+      req.fields['product'] = _kProductToolsId;
       req.fields['version'] = flutterVersion;
       req.fields['osName'] = platform.operatingSystem;
       req.fields['osVersion'] = os.name; // this actually includes version
@@ -132,5 +150,186 @@ class CrashReportSender {
         printError('Crash report sender itself crashed: $sendError\n$sendStackTrace');
       }
     }
+  }
+
+  /// Checks if there is an engine crash report available and asks user if
+  /// they want to send the report to Google.
+  ///
+  /// The report is populated from parsed data in engineCrash, which is in
+  /// turn parsed from adb logcat.
+  Future<void> checkAndSendEngineReport({
+    @required String getFlutterVersion(),
+  }) async {
+    engineCrash = CrashReportSender.engineCrash;
+    if (engineCrash == null || engineCrash.reportStatus != null) {
+      return null;
+    }
+    Completer completer = Completer();
+    engineCrash.reportStatus = completer.future;
+
+    printError('Flutter Engine has crashed!', emphasis: true);
+    printStatus('The following error report has been generated:', emphasis: true);
+    printStatus('');
+    printStatus('====================================================================');
+    printStatus(engineCrash.squashBacktrace());
+
+    printStatus('ClientID: ' + _usage.clientId);
+    printStatus('Flutter Version: ' + getFlutterVersion());
+    printStatus('OS: ' + platform.operatingSystem);
+    printStatus('OS version: ' + os.name); // this actually includes version
+    printStatus('====================================================================');
+    printStatus('');
+
+    bool always = config.getValue('engine-crash-reporting'); // Read this value from disk in flutter settings.
+    if (!always) {
+      printStatus('Reporting this crash will help improve Flutter.', emphasis: true);
+      final String input = (await terminal.promptForCharInput(
+        <String>['y', 'n', 'a', 'Y', 'N', 'A'],
+        prompt: 'Would you like to send this Engine crash report to Google?\n([y]es|[N]o|[a]lways)',
+        defaultChoiceIndex: 1,
+        displayAcceptedCharacters: false)).toLowerCase().trim();
+      if (input == 'a' || input == 'always') {
+        // Set flag in settings
+        config.setValueBool('engine-crash-reporting', true);
+        always = true;
+      } else if (input == 'y' || input == 'yes') {
+        // Nothing to do.
+      } else if (input == 'n' || input == 'no' || input == '') {
+        // "No" or no recognized response. Default to not sending report.
+        printStatus("Skipped sending engine crash report.");
+        completer.complete();
+        return null;
+      }
+    }
+    try {
+      printStatus('Sending crash report to Google.');
+      if (always) {
+        printStatus('===========================================================================');
+        printStatus('If you would like to stop automatically sending engine crash reports, use: ');
+        printStatus('  flutter config --no-engine-crash-reporting');
+        printStatus('===========================================================================');
+      }
+
+      final String flutterVersion = getFlutterVersion();
+      final Uri uri = _baseUrl.replace(
+        queryParameters: <String, String>{
+          'product': _kProductEngineId,
+          'version': flutterVersion,
+        },
+      );
+
+      final http.MultipartRequest req = http.MultipartRequest('POST', uri);
+      req.fields['uuid'] = _usage.clientId;
+      req.fields['product'] = _kProductEngineId;
+      req.fields['version'] = flutterVersion;
+      req.fields['osName'] = platform.operatingSystem;
+      req.fields['osVersion'] = os.name; // this actually includes version
+      req.fields['type'] = _kEngineTypeId;
+      req.fields['signature'] = engineCrash.parseSignature();
+      req.fields['error_runtime_type'] = _kEngineTypeId;
+
+      if (engineCrash.lineContaining('backtrace') != -1) {
+        req.files.add(http.MultipartFile.fromString(
+          _kEngineStackTraceFileField,
+          engineCrash.squashBacktrace(
+            startLine: engineCrash.lineContaining('backtrace') + 1,
+          ),
+          filename: _kEngineStackTraceFileField,
+        ));
+
+        req.files.add(http.MultipartFile.fromString(
+          _kEngineRegistersFileField,
+          engineCrash.squashBacktrace(
+            startLine: engineCrash.lineContaining('backtrace') - 5,
+            endLine: engineCrash.lineContaining('backtrace')
+          ),
+          filename: _kEngineRegistersFileField,
+        ));
+
+        req.files.add(http.MultipartFile.fromString(
+          _kEngineErrorFileField,
+          engineCrash.squashBacktrace(
+            endLine: engineCrash.lineContaining('backtrace: ') - 4,
+          ),
+          filename: _kEngineErrorFileField,
+        ));
+      } else {
+        // Malformed error with no backtrace. Report entire error.
+        req.files.add(http.MultipartFile.fromString(
+          _kEngineErrorFileField,
+          engineCrash.squashBacktrace(),
+          filename: _kEngineErrorFileField,
+        ));
+      }
+
+      final http.StreamedResponse resp = await _client.send(req);
+
+      if (resp.statusCode == 200) {
+        final String reportId = await http.ByteStream(resp.stream)
+            .bytesToString();
+        printStatus('Crash report sent (report ID: $reportId)');
+      } else {
+        printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
+      }
+    } catch (sendError, sendStackTrace) {
+      if (sendError is SocketException) {
+        printError('Failed to send crash report due to a network error: $sendError');
+      } else {
+        // If the sender itself crashes, just print. We did our best.
+        printError('Crash report sender itself crashed: $sendError\n$sendStackTrace');
+      }
+    }
+    completer.complete();
+  }
+}
+
+// Holds the parsed data (from logs) of an engine crash.
+class EngineCrash {
+
+  EngineCrash() {
+    error = '';
+    _backtrace = <String>[];
+  }
+
+  String error;
+
+  // Lines that make up the backtrace.
+  List<String> _backtrace;
+
+  // Completes when the report is fully submitted or skipped. Is null when
+  // no report attempt has been made.
+  Future reportStatus;
+
+  void addTraceLine(String line) {
+    _backtrace.add(line);
+  }
+
+  String squashBacktrace({int startLine = 0, int endLine = -1}) {
+    if (endLine < 0) {
+      endLine = _backtrace.length;
+    }
+    String out = '';
+    for (; startLine < endLine; startLine++) {
+      out += _backtrace[startLine] + '\n';
+    }
+    return out;
+  }
+
+  int lineContaining(String str) {
+    for (int i = 0; i < _backtrace.length; i++) {
+      String line = _backtrace[i];
+      if (line.contains(str)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  static final RegExp _fatalLog = RegExp(r'^F\/libc\s*\(\s*\d+\):\sFatal signal (\d+)');
+
+  String parseSignature() {
+    String signature = "Fatal ";
+    String line = _backtrace[lineContaining('backtrace') - 5];
+    return signature + line;
   }
 }

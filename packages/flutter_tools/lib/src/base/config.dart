@@ -28,7 +28,12 @@ class Config {
 
   dynamic getValue(String key) => _values[key];
 
-  void setValue(String key, String value) {
+  void setValue(String key, dynamic value) {
+    _values[key] = value;
+    _flushValues();
+  }
+
+  void setValueBool(String key, bool value) {
     _values[key] = value;
     _flushValues();
   }

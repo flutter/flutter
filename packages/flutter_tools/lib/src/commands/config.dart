@@ -15,7 +15,10 @@ class ConfigCommand extends FlutterCommand {
   ConfigCommand({ bool verboseHelp = false }) {
     argParser.addFlag('analytics',
       negatable: true,
-      help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
+      help: 'Enable or disable reporting of anonymous tool usage statistics and crash reports.');
+    argParser.addFlag('engine-crash-reporting',
+      negatable: true,
+      help: 'Enable or disable reporting of anonymous engine crash reports.');
     argParser.addFlag('clear-ios-signing-cert',
       negatable: false,
       help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
@@ -73,18 +76,20 @@ class ConfigCommand extends FlutterCommand {
       flutterUsage.enabled = value;
       printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
+    if (argResults.wasParsed('engine-crash-reporting'))
+      _updateConfigBool('engine-crash-reporting', argResults['engine-crash-reporting']);
 
     if (argResults.wasParsed('gradle-dir'))
-      _updateConfig('gradle-dir', argResults['gradle-dir']);
+      _updateConfigString('gradle-dir', argResults['gradle-dir']);
 
     if (argResults.wasParsed('android-sdk'))
-      _updateConfig('android-sdk', argResults['android-sdk']);
+      _updateConfigString('android-sdk', argResults['android-sdk']);
 
     if (argResults.wasParsed('android-studio-dir'))
-      _updateConfig('android-studio-dir', argResults['android-studio-dir']);
+      _updateConfigString('android-studio-dir', argResults['android-studio-dir']);
 
     if (argResults.wasParsed('clear-ios-signing-cert'))
-      _updateConfig('ios-signing-cert', '');
+      _updateConfigString('ios-signing-cert', '');
 
     if (argResults.arguments.isEmpty)
       printStatus(usage);
@@ -110,7 +115,7 @@ class ConfigCommand extends FlutterCommand {
     printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
-  void _updateConfig(String keyName, String keyValue) {
+  void _updateConfigString(String keyName, String keyValue) {
     if (keyValue.isEmpty) {
       config.removeValue(keyName);
       printStatus('Removing "$keyName" value.');
@@ -118,5 +123,10 @@ class ConfigCommand extends FlutterCommand {
       config.setValue(keyName, keyValue);
       printStatus('Setting "$keyName" value to "$keyValue".');
     }
+  }
+
+  void _updateConfigBool(String keyName, bool keyValue) {
+    config.setValueBool(keyName, keyValue);
+    printStatus('Setting "$keyName" value to "$keyValue".');
   }
 }

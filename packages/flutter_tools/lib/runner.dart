@@ -75,6 +75,15 @@ Future<int> _handleToolError(
     bool reportCrashes,
     String getFlutterVersion(),
     ) async {
+  // Wait for any existing engine crash reports to finish.
+  if (CrashReportSender.engineCrash != null && CrashReportSender.engineCrash.reportStatus != null) {
+    // Other functions may exit the program before this Future can complete.
+    await CrashReportSender.engineCrash.reportStatus;
+  }
+  await CrashReportSender.instance.checkAndSendEngineReport(
+    getFlutterVersion: getFlutterVersion,
+  );
+
   if (error is UsageException) {
     printError('${error.message}\n');
     printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
