@@ -40,8 +40,6 @@ const String _kStackTraceFileField = 'DartError';
 /// The field corresponding to the multipart/form-data file attachment where
 /// crash backend expects to find the Engine stack trace, registers, and general
 /// error information.
-const String _kEngineStackTraceFileField = 'EngineStackTrace';
-const String _kEngineRegistersFileField = 'EngineRegisters';
 const String _kEngineErrorFileField = 'EngineError';
 const String _kEngineDevicesFileField = 'Devices';
 
@@ -168,7 +166,7 @@ class CrashReportSender {
     }
     engineCrash.beginReport();
 
-    List<Device> devices = await deviceManager.getDevices().toList();
+    final List<Device> devices = await deviceManager.getDevices().toList();
 
     printError('Flutter Engine has crashed!', emphasis: true);
     printStatus('The following error report has been generated:', emphasis: true);
