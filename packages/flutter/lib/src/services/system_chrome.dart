@@ -333,6 +333,63 @@ class SystemChrome {
   ///   return /* ... */;
   /// }
   /// ```
+  ///
+  /// For more complex control of the system overlay styles, consider using
+  /// an [AnnotatedRegion] widget instead of calling [setSystemUiOverlayStyle]
+  /// directly. This widget places a value directly into the layer tree where
+  /// it can be hit-tested by the framework. On every frame, the framework will
+  /// select the first annotated region it finds under the status and
+  /// navigation bar and synthesize them into a single style. This process can
+  /// be short-circuted by passing `sized: false` to a single annotated region
+  /// widget.
+  ///
+  /// ## Sample Code
+  /// The following example creates a widget that changes the status bar color
+  /// to a random value on Android.
+  ///
+  /// ```dart
+  ///  class MyHomePage extends StatefulWidget {
+  ///    @override
+  ///    State createState() => MyHomePageState();
+  ///  }
+  ///
+  ///  class MyHomePageState extends State<MyHomePage> {
+  ///    final _random = math.Random();
+  ///    SystemUiOverlayStyle _currentStyle = SystemUiOverlayStyle.light;
+  ///
+  ///    void _changeColor() {
+  ///      final color = Color.fromRGBO(
+  ///        _random.nextInt(255),
+  ///        _random.nextInt(255),
+  ///        _random.nextInt(255),
+  ///        1.0,
+  ///      );
+  ///      setState(() {
+  ///        _currentStyle = SystemUiOverlayStyle.dark.copyWith(
+  ///          statusBarColor: color,
+  ///        );
+  ///      });
+  ///    }
+  ///
+  ///    @override
+  ///    Widget build(BuildContext context) {
+  ///      return Scaffold(
+  ///        body: AnnotatedRegion(
+  ///          sized: false,
+  ///          value: _currentStyle,
+  ///           child: Center(
+  ///             child: RaisedButton(
+  ///               child: const Text('Change Color'),
+  ///               onPressed: _changeColor,
+  ///             ),
+  ///           ),
+  ///         ),
+  ///       );
+  ///     }
+  ///   }
+  ///
+  /// See also:
+  ///   * [AnnotatedRegion], the widget used to place data into the layer tree.
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
     assert(style != null);
     if (_pendingStyle != null) {
