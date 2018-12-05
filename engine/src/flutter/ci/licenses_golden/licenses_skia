@@ -1,4 +1,4 @@
-Signature: da4f8ed217de7ed216e99b4f80ead657
+Signature: cc5a89d06ace82130b58c98bc71c119b
 
 UNUSED LICENSES:
 
@@ -3833,7 +3833,6 @@ FILE: ../../../third_party/skia/src/opts/Sk4px_SSE2.h
 FILE: ../../../third_party/skia/src/opts/Sk4px_none.h
 FILE: ../../../third_party/skia/src/opts/SkBlitMask_opts.h
 FILE: ../../../third_party/skia/src/opts/SkBlitRow_opts.h
-FILE: ../../../third_party/skia/src/opts/SkColor_opts_neon.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_sse41.cpp
 FILE: ../../../third_party/skia/src/opts/SkOpts_ssse3.cpp
 FILE: ../../../third_party/skia/src/opts/SkXfermode_opts.h
@@ -5690,7 +5689,6 @@ ORIGIN: ../../../third_party/skia/src/core/SkMatrixImageFilter.cpp + ../../../th
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/src/core/SkMatrixImageFilter.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixImageFilter.h
-FILE: ../../../third_party/skia/src/opts/SkColor_opts_SSE2.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2014 The Android Open Source Project
 
