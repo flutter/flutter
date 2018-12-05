@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
@@ -70,6 +71,37 @@ void main() {
       );
     },
   );
+
+  testWidgets('Shows toolbar after two taps in the same place only on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    Widget widget = CupertinoApp(
+      home: CupertinoTextField(
+        controller: TextEditingController(),
+        focusNode: FocusNode(),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    EditableTextState state = tester.firstState(find.byType(EditableText));
+
+    expect(state.selectionOverlay, null);
+    Finder textFinder = find.byType(EditableText);
+    await tester.tap(textFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(textFinder);
+
+    // The text selection controls should appear.
+    expect(state.selectionOverlay.toolbarIsVisible, true);
+
+    await tester.tap(textFinder);
+    await tester.pumpAndSettle();
+
+    // After another tap it should be invisible.
+    expect(state.selectionOverlay.toolbarIsVisible, false);
+
+    debugDefaultTargetPlatformOverride = null;
+  });
 
   testWidgets(
     'default text field has a border',
@@ -746,9 +778,6 @@ void main() {
         controller.selection,
         const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
-
-      // No toolbar.
-      expect(find.byType(CupertinoButton), findsNothing);
     },
   );
 
@@ -878,9 +907,6 @@ void main() {
         controller.selection,
         const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
-
-      // No toolbar.
-      expect(find.byType(CupertinoButton), findsNothing);
     },
   );
 
@@ -938,7 +964,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
 
       await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // We ended up moving the cursor to the edge of the same word and dismissed
       // the toolbar.
@@ -946,9 +972,6 @@ void main() {
         controller.selection,
         const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
-
-      // Collapsed toolbar shows 2 buttons.
-      expect(find.byType(CupertinoButton), findsNothing);
     },
   );
 
@@ -981,16 +1004,13 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
 
       await tester.longPressAt(textfieldStart + const Offset(100.0, 5.0));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Plain collapsed selection at the exact tap position.
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 6, affinity: TextAffinity.upstream),
       );
-
-      // Long press toolbar.
-      expect(find.byType(CupertinoButton), findsNWidgets(2));
     },
   );
 
@@ -1023,7 +1043,7 @@ void main() {
         const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Double tap selection.
       expect(
@@ -1075,7 +1095,7 @@ void main() {
         const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(textfieldStart + const Offset(100.0, 5.0));
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pumpAndSettle();
       expect(
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
@@ -1090,7 +1110,7 @@ void main() {
         const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pumpAndSettle();
       expect(
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),

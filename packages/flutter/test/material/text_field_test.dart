@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -285,6 +286,62 @@ void main() {
     final TextField textField = tester.firstWidget(find.byType(TextField));
     expect(textField.cursorWidth, 2.0);
     expect(textField.cursorRadius, null);
+  });
+
+  testWidgets('Shows toolbar after two taps in the same place only on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    Widget widget = MaterialApp(
+      home: Material(
+        child: TextField(
+          controller: TextEditingController(),
+          focusNode: FocusNode(),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    EditableTextState state = tester.firstState(find.byType(EditableText));
+
+    expect(state.selectionOverlay, null);
+    Finder textFinder = find.byType(EditableText);
+    await tester.tap(textFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(textFinder);
+
+    // The text selection controls should appear.
+    expect(state.selectionOverlay.toolbarIsVisible, true);
+
+    await tester.tap(textFinder);
+    await tester.pumpAndSettle();
+
+    // After another tap it should be invisible.
+    expect(state.selectionOverlay.toolbarIsVisible, false);
+
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    widget = MaterialApp(
+      home: Material(
+        child: TextField(
+          controller: TextEditingController(),
+          focusNode: FocusNode(),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    state = tester.firstState(find.byType(EditableText));
+
+    expect(state.selectionOverlay.toolbarIsVisible, false);
+
+    textFinder = find.byType(EditableText);
+    await tester.tap(textFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(textFinder);
+
+    // The text selection controls should not appear.
+    expect(state.selectionOverlay.toolbarIsVisible, false);
+
+    debugDefaultTargetPlatformOverride = null;
   });
 
   testWidgets('cursor has expected radius value', (WidgetTester tester) async {

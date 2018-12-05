@@ -235,6 +235,7 @@ class TextSelectionOverlay {
       _value = value {
     final OverlayState overlay = Overlay.of(context);
     assert(overlay != null);
+    print('created controller');
     _handleController = AnimationController(duration: _fadeDuration, vsync: overlay);
     _toolbarController = AnimationController(duration: _fadeDuration, vsync: overlay);
   }
@@ -299,6 +300,7 @@ class TextSelectionOverlay {
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   void showToolbar() {
     assert(_toolbar == null);
+    print(_toolbar);
     _toolbar = OverlayEntry(builder: _buildToolbar);
     Overlay.of(context, debugRequiredFor: debugRequiredFor).insert(_toolbar);
     _toolbarController.forward(from: 0.0);
@@ -347,13 +349,13 @@ class TextSelectionOverlay {
   bool get toolbarIsVisible => _toolbar != null;
 
   /// Hides the overlay.
-  void hide() {
+  void hide({ bool instant = false }) {
     if (_handles != null) {
       _handles[0].remove();
       _handles[1].remove();
       _handles = null;
     }
-    if (toolbarIsVisible && fadeOutSelectionControls)
+    if (!instant && toolbarIsVisible && fadeOutSelectionControls)
       _toolbarController.reverse(from: _toolbarController.upperBound).whenCompleteOrCancel ((){_hideToolbar();});
     else {
       _hideToolbar();
@@ -369,9 +371,10 @@ class TextSelectionOverlay {
 
   /// Final cleanup.
   void dispose() {
-    hide();
+    hide(instant: true);
     _handleController.dispose();
     _toolbarController.dispose();
+    print('disposed');
   }
 
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {

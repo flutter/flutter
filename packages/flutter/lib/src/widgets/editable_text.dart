@@ -762,11 +762,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final bool longPress = cause == SelectionChangedCause.longPress;
       if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
         _selectionOverlay.showHandles();
-      if (longPress || cause == SelectionChangedCause.doubleTap)
+      if ((longPress || cause == SelectionChangedCause.doubleTap) && !toolbarVisible)
         _selectionOverlay.showToolbar();
       if (widget.showToolbarOnDoubleSlowTap && renderObject.selection.isCollapsed &&
-          renderObject.selection.baseOffset == selection.baseOffset && cause == SelectionChangedCause.tap && !toolbarVisible)
+          renderObject.selection.baseOffset == selection.baseOffset && cause == SelectionChangedCause.tap && !toolbarVisible) {
         _selectionOverlay.showToolbar();
+      }
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);
     }
