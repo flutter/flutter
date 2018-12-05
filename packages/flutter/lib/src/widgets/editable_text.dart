@@ -213,6 +213,7 @@ class EditableText extends StatefulWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
     this.cursorRadius,
+    this.fadeOutSelectionControls,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
     this.enableInteractiveSelection = true,
@@ -433,6 +434,14 @@ class EditableText extends StatefulWidget {
   /// By default, the cursor has no radius.
   /// {@endtemplate}
   final Radius cursorRadius;
+
+  /// {@template Flutter.widgets.EditableText.fadeOutSelectionControls}
+  /// Whether or not the selection controls should fade out when dismissed.
+  ///
+  /// By default, this value is set to true on iOS platforms and false on
+  /// Android platforms.
+  /// {@end-template}
+  final bool fadeOutSelectionControls;
 
   /// The appearance of the keyboard.
   ///
@@ -738,6 +747,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         renderObject: renderObject,
         selectionControls: widget.selectionControls,
         selectionDelegate: this,
+        fadeOutSelectionControls: widget.fadeOutSelectionControls,
       );
       final bool longPress = cause == SelectionChangedCause.longPress;
       if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))

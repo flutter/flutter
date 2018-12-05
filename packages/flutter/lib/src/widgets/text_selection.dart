@@ -229,6 +229,7 @@ class TextSelectionOverlay {
     @required this.renderObject,
     this.selectionControls,
     this.selectionDelegate,
+    this.fadeOutSelectionControls,
   }): assert(value != null),
       assert(context != null),
       _value = value {
@@ -262,6 +263,9 @@ class TextSelectionOverlay {
   /// The delegate for manipulating the current selection in the owning
   /// text field.
   final TextSelectionDelegate selectionDelegate;
+
+  /// {@macro flutter.widgets.EditableText.fadeOutSelectionControls}
+  final bool fadeOutSelectionControls;
 
   /// Controls the fade-in animations.
   static const Duration _fadeDuration = Duration(milliseconds: 150);
@@ -349,7 +353,7 @@ class TextSelectionOverlay {
       _handles[1].remove();
       _handles = null;
     }
-    if (toolbarIsVisible && defaultTargetPlatform == TargetPlatform.iOS)
+    if (toolbarIsVisible && fadeOutSelectionControls)
       _toolbarController.reverse(from: _toolbarController.upperBound).whenCompleteOrCancel ((){_hideToolbar();});
     else {
       _hideToolbar();
