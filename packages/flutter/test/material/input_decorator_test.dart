@@ -248,6 +248,22 @@ void main() {
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderColor(tester), Colors.transparent);
+
+    // labelAlignment: top positions the label at the text baseline.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        isFocused: false,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          labelAlignment: TextFieldLabelAlignment.top,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopLeft(find.text('label')).dy, 28.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 44.0);
   });
 
   // Overall height for this InputDecorator is 40.0dps
