@@ -1223,8 +1223,7 @@ class RenderEditable extends RenderBox {
     _textPainter.layout(minWidth: availableWidth, maxWidth: maxWidth);
     _textLayoutLastWidth = constraintWidth;
   }
-
-  // TODO(@jslavitz): Move the check for target platform into other classes once cursor offset pr has landed. https://github.com
+  
   Rect get _getCaretPrototype {
     switch(defaultTargetPlatform){
       case TargetPlatform.iOS:
