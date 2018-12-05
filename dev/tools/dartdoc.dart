@@ -101,7 +101,6 @@ Future<void> main(List<String> arguments) async {
   createFooter('$kDocsRoot/lib/footer.html');
   copyAssets();
   cleanOutSnippets();
-  await precompileSnippetsTool(pubExecutable, pubEnvironment);
 
   final List<String> dartdocBaseArgs = <String>['global', 'run'];
   if (args['checked']) {
@@ -301,57 +300,6 @@ void cleanOutSnippets() {
       ..deleteSync(recursive: true)
       ..createSync(recursive: true);
   }
-}
-
-Future<File> precompileSnippetsTool(
-  String pubExecutable,
-  Map<String, String> pubEnvironment,
-) async {
-  final File snapshotPath = File(path.join('bin', 'cache', 'snippets.snapshot'));
-  print('Precompiling snippets tool into ${snapshotPath.absolute.path}');
-  if (snapshotPath.existsSync()) {
-    snapshotPath.deleteSync();
-  }
-
-  final ProcessWrapper process = ProcessWrapper(await Process.start(
-    pubExecutable,
-    <String>['get'],
-    workingDirectory: kSnippetsRoot,
-    environment: pubEnvironment,
-  ));
-  printStream(process.stdout, prefix: 'pub:stdout: ');
-  printStream(process.stderr, prefix: 'pub:stderr: ');
-  final int code = await process.done;
-  if (code != 0)
-    exit(code);
-
-  // In order to be able to optimize properly, we need to provide a training set
-  // of arguments, and an input file to process.
-  final Directory tempDir = Directory.systemTemp.createTempSync('dartdoc_snippet_');
-  final File trainingFile = File(path.join(tempDir.path, 'snippet_training'));
-  trainingFile.writeAsStringSync('```dart\nvoid foo(){}\n```');
-  try {
-    final ProcessResult result = Process.runSync(Platform.resolvedExecutable, <String>[
-      '--snapshot=${snapshotPath.absolute.path}',
-      '--snapshot_kind=app-jit',
-      path.join(
-        'lib',
-        'main.dart',
-      ),
-      '--type=sample',
-      '--input=${trainingFile.absolute.path}',
-      '--output=${path.join(tempDir.absolute.path, 'training_output.txt')}',
-    ], workingDirectory: path.absolute(kSnippetsRoot));
-    if (result.exitCode != 0) {
-      stdout.writeln(result.stdout);
-      stderr.writeln(result.stderr);
-      throw Exception('Could not generate snippets snapshot: process exited with code ${result.exitCode}');
-    }
-  } on ProcessException catch (error) {
-    throw Exception('Could not generate snippets snapshot:\n$error');
-  }
-  tempDir.deleteSync(recursive: true);
-  return snapshotPath;
 }
 
 void sanityCheckDocs() {
