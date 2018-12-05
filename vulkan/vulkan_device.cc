@@ -58,7 +58,9 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
   };
 
   const char* extensions[] = {
+#if OS_ANDROID
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+#endif
 #if OS_FUCHSIA
     VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
     VK_KHR_EXTERNAL_MEMORY_FUCHSIA_EXTENSION_NAME,
@@ -177,6 +179,7 @@ uint32_t VulkanDevice::GetGraphicsQueueIndex() const {
 bool VulkanDevice::GetSurfaceCapabilities(
     const VulkanSurface& surface,
     VkSurfaceCapabilitiesKHR* capabilities) const {
+#if OS_ANDROID
   if (!surface.IsValid() || capabilities == nullptr) {
     return false;
   }
@@ -206,6 +209,9 @@ bool VulkanDevice::GetSurfaceCapabilities(
   capabilities->currentExtent.width = size.width();
   capabilities->currentExtent.height = size.height();
   return true;
+#else
+  return false;
+#endif
 }
 
 bool VulkanDevice::GetPhysicalDeviceFeatures(
@@ -262,6 +268,7 @@ std::vector<VkQueueFamilyProperties> VulkanDevice::GetQueueFamilyProperties()
 int VulkanDevice::ChooseSurfaceFormat(const VulkanSurface& surface,
                                       std::vector<VkFormat> desired_formats,
                                       VkSurfaceFormatKHR* format) const {
+#if OS_ANDROID
   if (!surface.IsValid() || format == nullptr) {
     return -1;
   }
@@ -297,7 +304,7 @@ int VulkanDevice::ChooseSurfaceFormat(const VulkanSurface& surface,
       return static_cast<int>(i);
     }
   }
-
+#endif
   return -1;
 }
 
