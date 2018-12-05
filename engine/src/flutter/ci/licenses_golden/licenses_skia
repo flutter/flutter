@@ -1,4 +1,4 @@
-Signature: cd09ddee00f49a39664d19254160b5b2
+Signature: a997b669f57504c0d8ee1a51e3bd1bca
 
 UNUSED LICENSES:
 
@@ -4149,6 +4149,7 @@ FILE: ../../../third_party/skia/bench/ColorSpaceXformBench.cpp
 FILE: ../../../third_party/skia/bench/CubicKLMBench.cpp
 FILE: ../../../third_party/skia/bench/PathTextBench.cpp
 FILE: ../../../third_party/skia/bench/ShadowBench.cpp
+FILE: ../../../third_party/skia/bin/gerrit-number
 FILE: ../../../third_party/skia/dm/DMGpuTestProcs.cpp
 FILE: ../../../third_party/skia/example/HelloWorld.cpp
 FILE: ../../../third_party/skia/example/HelloWorld.h
@@ -4160,7 +4161,6 @@ FILE: ../../../third_party/skia/experimental/svg/model/SkSVGRadialGradient.cpp
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGRadialGradient.h
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGUse.cpp
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGUse.h
-FILE: ../../../third_party/skia/experimental/tools/gerrit-change-id-to-number
 FILE: ../../../third_party/skia/fuzz/FuzzCanvas.cpp
 FILE: ../../../third_party/skia/gm/alpha_image.cpp
 FILE: ../../../third_party/skia/gm/atlastext.cpp
