@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-// import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
@@ -13,8 +12,10 @@ import 'base/io.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/terminal.dart';
+import 'device.dart';
 import 'globals.dart';
 import 'usage.dart';
+import 'version.dart';
 
 /// Tells crash backend that the error is from the Flutter CLI.
 const String _kProductToolsId = 'Flutter_Tools';
@@ -42,6 +43,7 @@ const String _kStackTraceFileField = 'DartError';
 const String _kEngineStackTraceFileField = 'EngineStackTrace';
 const String _kEngineRegistersFileField = 'EngineRegisters';
 const String _kEngineErrorFileField = 'EngineError';
+const String _kEngineDevicesFileField = 'Devices';
 
 /// The name of the file attached as [_kStackTraceFileField].
 ///
@@ -166,18 +168,22 @@ class CrashReportSender {
     }
     engineCrash.beginReport();
 
+    List<Device> devices = await deviceManager.getDevices().toList();
+
     printError('Flutter Engine has crashed!', emphasis: true);
     printStatus('The following error report has been generated:', emphasis: true);
-    printStatus('');
-    printStatus('====================================================================');
-    printStatus(engineCrash.squashBacktrace());
+    printStatus('''
 
-    printStatus('ClientID: ' + _usage.clientId);
-    printStatus('Flutter Version: ' + getFlutterVersion());
-    printStatus('OS: ' + platform.operatingSystem);
-    printStatus('OS version: ' + os.name); // this actually includes version
-    printStatus('====================================================================');
-    printStatus('');
+====================================================================
+${engineCrash.squashBacktrace()}
+ClientID: ${_usage.clientId}
+Flutter Framework Version: ${getFlutterVersion()}
+Flutter Engine Version: ${FlutterVersion.instance.engineRevision}
+OS: ${platform.operatingSystem}
+OS version: ${os.name}
+Devices: $devices
+====================================================================
+''');
 
     bool always = config.getValue('engine-crash-reporting'); // Read this value from disk in flutter settings.
     if (!always) {
@@ -203,10 +209,11 @@ class CrashReportSender {
     try {
       printStatus('Sending crash report to Google.');
       if (always) {
-        printStatus('===========================================================================');
-        printStatus('If you would like to stop automatically sending engine crash reports, use: ');
-        printStatus('  flutter config --no-engine-crash-reporting');
-        printStatus('===========================================================================');
+        printStatus('''
+===========================================================================
+If you would like to stop automatically sending engine crash reports, use:
+  flutter config --no-engine-crash-reporting
+===========================================================================''');
       }
 
       final String flutterVersion = getFlutterVersion();
@@ -220,46 +227,26 @@ class CrashReportSender {
       final http.MultipartRequest req = http.MultipartRequest('POST', uri);
       req.fields['uuid'] = _usage.clientId;
       req.fields['product'] = _kProductEngineId;
-      req.fields['version'] = flutterVersion;
+      req.fields['version'] = flutterVersion + ', ' + FlutterVersion.instance.engineRevision;
       req.fields['osName'] = platform.operatingSystem;
       req.fields['osVersion'] = os.name; // this actually includes version
       req.fields['type'] = _kEngineTypeId;
       req.fields['signature'] = engineCrash.parseSignature();
       req.fields['error_runtime_type'] = _kEngineTypeId;
 
-      if (engineCrash.lineContaining('backtrace') != -1) {
-        req.files.add(http.MultipartFile.fromString(
-          _kEngineStackTraceFileField,
-          engineCrash.squashBacktrace(
-            startLine: engineCrash.lineContaining('backtrace') + 1,
-          ),
-          filename: _kEngineStackTraceFileField,
-        ));
-
-        req.files.add(http.MultipartFile.fromString(
-          _kEngineRegistersFileField,
-          engineCrash.squashBacktrace(
-            startLine: engineCrash.lineContaining('backtrace') - 5,
-            endLine: engineCrash.lineContaining('backtrace')
-          ),
-          filename: _kEngineRegistersFileField,
-        ));
-
-        req.files.add(http.MultipartFile.fromString(
-          _kEngineErrorFileField,
-          engineCrash.squashBacktrace(
-            endLine: engineCrash.lineContaining('backtrace: ') - 4,
-          ),
-          filename: _kEngineErrorFileField,
-        ));
-      } else {
-        // Malformed error with no backtrace. Report entire error.
-        req.files.add(http.MultipartFile.fromString(
-          _kEngineErrorFileField,
-          engineCrash.squashBacktrace(),
-          filename: _kEngineErrorFileField,
-        ));
-      }
+      // Report entire error.
+      req.files.add(http.MultipartFile.fromString(
+        _kEngineErrorFileField,
+        engineCrash.squashBacktrace(),
+        filename: _kEngineErrorFileField,
+      ));
+      // TODO(garyq): Determine the exact devide that crashed.
+      // Report list of all connected devices.
+      req.files.add(http.MultipartFile.fromString(
+        _kEngineDevicesFileField,
+        devices.toString(),
+        filename: _kEngineDevicesFileField,
+      ));
 
       final http.StreamedResponse resp = await _client.send(req);
 
@@ -286,11 +273,8 @@ class CrashReportSender {
 class EngineCrash {
 
   EngineCrash() {
-    error = '';
     _backtrace = <String>[];
   }
-
-  String error;
 
   // Lines that make up the backtrace.
   List<String> _backtrace;
@@ -316,6 +300,7 @@ class EngineCrash {
     _completer.complete();
   }
 
+  // Converts the bactrace from a list to a single string.
   String squashBacktrace({int startLine = 0, int endLine = -1}) {
     if (endLine < 0) {
       endLine = _backtrace.length;
@@ -327,19 +312,23 @@ class EngineCrash {
     return out;
   }
 
+  // Finds the index of the first line that contains [str].
   int lineContaining(String str) {
     for (int i = 0; i < _backtrace.length; i++) {
-      final String line = _backtrace[i];
-      if (line.contains(str)) {
+      if (_backtrace[i].contains(str)) {
         return i;
       }
     }
     return -1;
   }
 
+  // Attempts to produce a representative signature for deduping.
   String parseSignature() {
-    const String signature = 'Fatal ';
-    final String line = _backtrace[lineContaining('backtrace') - 5];
-    return signature + line;
+    final int line = lineContaining('backtrace');
+    if (line >= 0) {
+      return 'Fatal ' + _backtrace[line - 5];
+    }
+    // backtrace should always have at least one line.
+    return _backtrace[0];
   }
 }

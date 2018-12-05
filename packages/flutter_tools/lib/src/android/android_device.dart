@@ -774,7 +774,6 @@ class _AdbLogReader extends DeviceLogReader {
           _fatalCrash = true;
           _engineCrash = EngineCrash();
           CrashReportSender.engineCrash = _engineCrash;
-          _engineCrash.error = line;
           _engineCrash.addTraceLine(line);
         }
       } else {
