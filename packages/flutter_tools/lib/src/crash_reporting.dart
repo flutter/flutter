@@ -164,8 +164,7 @@ class CrashReportSender {
     if (engineCrash == null || engineCrash.reportStatus != null) {
       return;
     }
-    final Completer<void> completer = Completer<void>();
-    engineCrash.reportStatus = completer.future;
+    engineCrash.beginReport();
 
     printError('Flutter Engine has crashed!', emphasis: true);
     printStatus('The following error report has been generated:', emphasis: true);
@@ -197,7 +196,7 @@ class CrashReportSender {
       } else if (input == 'n' || input == 'no' || input == '') {
         // "No" or no recognized response. Default to not sending report.
         printStatus('Skipped sending engine crash report.');
-        completer.complete();
+        engineCrash.endReport();
         return;
       }
     }
@@ -279,7 +278,7 @@ class CrashReportSender {
         printError('Crash report sender itself crashed: $sendError\n$sendStackTrace');
       }
     }
-    completer.complete();
+    engineCrash.endReport();
   }
 }
 
@@ -299,9 +298,22 @@ class EngineCrash {
   // Completes when the report is fully submitted or skipped. Is null when
   // no report attempt has been made.
   Future<void> reportStatus;
+  Completer<void> _completer;
 
   void addTraceLine(String line) {
     _backtrace.add(line);
+  }
+
+  // 'Locks' the report so that the program will not end while waiting for
+  // input/server response.
+  void beginReport() {
+    _completer = Completer<void>();
+    reportStatus = _completer.future;
+  }
+
+  // 'Unlocks' the report and allows the program execution to continue.
+  void endReport() {
+    _completer.complete();
   }
 
   String squashBacktrace({int startLine = 0, int endLine = -1}) {
