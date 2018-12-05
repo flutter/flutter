@@ -530,7 +530,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool _didAutoFocus = false;
 
   static const Duration _fadeDuration = Duration(milliseconds: 250);
-  final bool _platformIsIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
@@ -546,7 +545,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
     _cursorController = AnimationController(vsync: this);
-    _cursorController.addListener(_onCursorColorTick);
   }
 
   @override
@@ -909,8 +907,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _startCursorTimer() {
     _showCursor.value = true;
-    if (_platformIsIOS) {
+    if (widget.cursorOpacityAnimates) {
       _cursorController.value = 1.0;
+      _cursorController.addListener(_onCursorColorTick);
       _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
     } else {
       _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
@@ -1178,8 +1177,10 @@ class _Editable extends LeafRenderObjectWidget {
       cursorWidth: cursorWidth,
       cursorRadius: cursorRadius,
       cursorOffset: cursorOffset,
+      paintCursorOnTop: paintCursorOnTop,
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
+      devicePixelRatio: MediaQuery.of(context).devicePixelRatio,
     );
   }
 

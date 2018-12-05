@@ -146,6 +146,7 @@ class RenderEditable extends RenderBox {
     bool paintCursorOnTop = false,
     Offset cursorOffset,
     bool enableInteractiveSelection = true,
+    double devicePixelRatio = 1.0,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
@@ -176,6 +177,7 @@ class RenderEditable extends RenderBox {
        _paintCursorOnTop = paintCursorOnTop,
        _cursorOffset = cursorOffset,
        _enableInteractiveSelection = enableInteractiveSelection,
+       _devicePixelRatio = devicePixelRatio,
        _obscureText = obscureText {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
@@ -194,8 +196,6 @@ class RenderEditable extends RenderBox {
 
   double _textLayoutLastWidth;
 
-  final bool _platformIsIOS = defaultTargetPlatform == TargetPlatform.iOS;
-
   /// Called during the paint phase when the caret location changes.
   CaretChangedHandler onCaretChanged;
 
@@ -205,6 +205,8 @@ class RenderEditable extends RenderBox {
   ///
   /// The default value of this property is false.
   bool ignorePointer;
+
+  double _devicePixelRatio;
 
   /// Whether to hide the text being edited (e.g., for passwords).
   bool get obscureText => _obscureText;
@@ -1258,9 +1260,17 @@ class RenderEditable extends RenderBox {
     final Paint paint = Paint()
       ..color = _cursorColor;
 
-    final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset);
+    Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset);
     if (_cursorOffset != null)
-      caretRect.shift(_cursorOffset);
+      caretRect = caretRect.shift(_cursorOffset);
+
+    final Offset caretPosition = localToGlobal(caretRect.topLeft);
+    final double pixelMultiple = 1.0 / _devicePixelRatio;
+    final int quotientX = (caretPosition.dx / pixelMultiple).round();
+    final int quotientY = (caretPosition.dy / pixelMultiple).round();
+    final double pixelPerfectOffsetX = quotientX * pixelMultiple - caretPosition.dx;
+    final double pixelPerfectOffsetY = quotientY * pixelMultiple - caretPosition.dy;
+    caretRect = caretRect.shift(Offset(pixelPerfectOffsetX, pixelPerfectOffsetY));
 
     if (cursorRadius == null) {
       canvas.drawRect(caretRect, paint);

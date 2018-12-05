@@ -45,6 +45,7 @@ const TextStyle _kDefaultTextStyle = TextStyle(
 const Color _kSelectionHighlightColor = Color(0x667FAACF);
 const Color _kInactiveTextColor = Color(0xFFC2C2C2);
 const Color _kDisabledBackground = Color(0xFFFAFAFA);
+const int _iOSHorizontalCursorOffsetPixels = -2;
 
 /// Visibility of text field overlays based on the state of the current text entry.
 ///
@@ -642,6 +643,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     final bool enabled = widget.enabled ?? true;
+    final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
     if (widget.maxLength != null && widget.maxLengthEnforced) {
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
     }
@@ -673,7 +675,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           cursorRadius: widget.cursorRadius,
           cursorColor: widget.cursorColor,
           cursorOpacityAnimates: true,
-          cursorOffset: Offset(-widget.cursorWidth * 0.5, 0.0),
+          cursorOffset: cursorOffset,
           paintCursorOnTop: true,
           scrollPadding: widget.scrollPadding,
           keyboardAppearance: keyboardAppearance,
