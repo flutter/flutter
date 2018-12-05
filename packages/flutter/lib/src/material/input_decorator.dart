@@ -16,6 +16,11 @@ import 'theme.dart';
 const Duration _kTransitionDuration = Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
+/// Alignment before focus, relevant to multiline inupts
+enum TextFieldLabelAlignment {
+  top, center,
+}
+
 // Defines the gap in the InputDecorator's outline border where the
 // floating label will appear.
 class _InputBorderGap extends ChangeNotifier {
@@ -449,6 +454,7 @@ class _Decoration {
     this.helperError,
     this.counter,
     this.container,
+    this.labelAlignment,
   }) : assert(contentPadding != null),
        assert(isCollapsed != null),
        assert(floatingLabelHeight != null),
@@ -460,6 +466,7 @@ class _Decoration {
   final double floatingLabelProgress;
   final InputBorder border;
   final _InputBorderGap borderGap;
+  final TextFieldLabelAlignment labelAlignment;
   final Widget icon;
   final Widget input;
   final Widget label;
@@ -494,7 +501,8 @@ class _Decoration {
         && typedOther.suffixIcon == suffixIcon
         && typedOther.helperError == helperError
         && typedOther.counter == counter
-        && typedOther.container == container;
+        && typedOther.container == container
+        && typedOther.labelAlignment == labelAlignment;
   }
 
   @override
@@ -516,6 +524,7 @@ class _Decoration {
       helperError,
       counter,
       container,
+      labelAlignment,
     );
   }
 }
@@ -1152,8 +1161,10 @@ class _RenderDecoration extends RenderBox {
           break;
       }
       final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t);
+      final double yOffset = decoration.labelAlignment == TextFieldLabelAlignment.top
+        ? 0 : labelOffset.dy;
       _labelTransform = Matrix4.identity()
-        ..translate(dx, labelOffset.dy + dy)
+        ..translate(dx, yOffset + dy)
         ..scale(scale);
       context.pushTransform(needsCompositing, offset, _labelTransform, _paintLabel);
     }
@@ -1890,6 +1901,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         icon: icon,
         input: widget.child,
         label: label,
+        labelAlignment: decoration.labelAlignment,
         hint: hint,
         prefix: prefix,
         suffix: suffix,
@@ -1970,6 +1982,7 @@ class InputDecoration {
     this.border,
     this.enabled = true,
     this.semanticCounterText,
+    this.labelAlignment = TextFieldLabelAlignment.center,
   }) : assert(enabled != null),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not allowed'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not allowed'),
@@ -2015,7 +2028,8 @@ class InputDecoration {
        focusedErrorBorder = null,
        disabledBorder = null,
        enabledBorder = null,
-       semanticCounterText = null;
+       semanticCounterText = null,
+       labelAlignment = null;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -2437,6 +2451,12 @@ class InputDecoration {
   /// If provided, this replaces the semantic label of the [counterText].
   final String semanticCounterText;
 
+  /// When the input is multiline (maxLines > 1) and before it is focused, the
+  /// label can be vertically aligned in the center of the input or at the top.
+  ///
+  /// Defaults to centered.
+  final TextFieldLabelAlignment labelAlignment;
+
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
   ///
@@ -2475,6 +2495,7 @@ class InputDecoration {
     InputBorder border,
     bool enabled,
     String semanticCounterText,
+    TextFieldLabelAlignment labelAlignment,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
@@ -2510,6 +2531,7 @@ class InputDecoration {
       border: border ?? this.border,
       enabled: enabled ?? this.enabled,
       semanticCounterText: semanticCounterText ?? this.semanticCounterText,
+      labelAlignment: labelAlignment ?? this.labelAlignment,
     );
   }
 
@@ -2582,7 +2604,8 @@ class InputDecoration {
         && typedOther.enabledBorder == enabledBorder
         && typedOther.border == border
         && typedOther.enabled == enabled
-        && typedOther.semanticCounterText == semanticCounterText;
+        && typedOther.semanticCounterText == semanticCounterText
+        && typedOther.labelAlignment == labelAlignment;
   }
 
   @override
@@ -2631,6 +2654,7 @@ class InputDecoration {
         border,
         enabled,
         semanticCounterText,
+        labelAlignment,
       ),
     );
   }
@@ -2700,6 +2724,8 @@ class InputDecoration {
       description.add('enabled: false');
     if (semanticCounterText != null)
       description.add('semanticCounterText: $semanticCounterText');
+    if (labelAlignment != null)
+      description.add('labelAlignment: $labelAlignment');
     return 'InputDecoration(${description.join(', ')})';
   }
 }
