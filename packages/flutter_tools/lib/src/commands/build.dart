@@ -10,6 +10,7 @@ import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 import 'build_aot.dart';
 import 'build_apk.dart';
 import 'build_bundle.dart';
@@ -43,6 +44,8 @@ abstract class BuildSubCommand extends FlutterCommand {
   @override
   @mustCallSuper
   Future<FlutterCommandResult> runCommand() async {
+    if (FlutterVersion.instance.getBranchName() == 'master')
+      printStatus('Warning: Building app on master channel. Releasing apps built on master channel is not recommended.');
     if (isRunningOnBot) {
       final File dotPackages = fs.file('.packages');
       printStatus('Contents of .packages:');
