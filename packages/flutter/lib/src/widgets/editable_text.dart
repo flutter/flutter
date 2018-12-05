@@ -214,6 +214,7 @@ class EditableText extends StatefulWidget {
     this.cursorWidth = 2.0,
     this.cursorRadius,
     this.fadeOutSelectionControls,
+    this.showToolbarOnDoubleSlowTap,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
     this.enableInteractiveSelection = true,
@@ -436,12 +437,21 @@ class EditableText extends StatefulWidget {
   final Radius cursorRadius;
 
   /// {@template Flutter.widgets.EditableText.fadeOutSelectionControls}
-  /// Whether or not the selection controls should fade out when dismissed.
+  /// Whether the selection controls should fade out when dismissed.
   ///
-  /// By default, this value is set to true on iOS platforms and false on
-  /// Android platforms.
+  /// By default, this value is true on iOS platforms and false on Android
+  /// platforms.
   /// {@end-template}
   final bool fadeOutSelectionControls;
+
+  /// {@template Flutter.widgets.EditableText.showToolbarOnDoubleSlowTap}
+  /// Whether the copy paste toolbar should appear after two slow taps on the
+  /// text field when the cursor also doesn't change position.
+  ///
+  /// By default, this value is true on iOS platforms and false on Android
+  /// platforms.
+  /// {@end-template}
+  final bool showToolbarOnDoubleSlowTap;
 
   /// The appearance of the keyboard.
   ///
@@ -754,7 +764,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _selectionOverlay.showHandles();
       if (longPress || cause == SelectionChangedCause.doubleTap)
         _selectionOverlay.showToolbar();
-      if (defaultTargetPlatform == TargetPlatform.iOS && renderObject.selection.isCollapsed &&
+      if (widget.showToolbarOnDoubleSlowTap && renderObject.selection.isCollapsed &&
           renderObject.selection.baseOffset == selection.baseOffset && cause == SelectionChangedCause.tap && !toolbarVisible)
         _selectionOverlay.showToolbar();
       if (widget.onSelectionChanged != null)

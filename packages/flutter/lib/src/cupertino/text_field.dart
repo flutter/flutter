@@ -673,6 +673,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           cursorRadius: widget.cursorRadius,
           cursorColor: widget.cursorColor,
           scrollPadding: widget.scrollPadding,
+          fadeOutSelectionControls: true,
+          showToolbarOnDoubleSlowTap: true,
           keyboardAppearance: keyboardAppearance,
         ),
       ),

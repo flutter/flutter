@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 
 import 'debug.dart';
 import 'feedback.dart';
@@ -547,6 +548,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   @override
   bool get wantKeepAlive => _splashes != null && _splashes.isNotEmpty;
 
+  bool get platformIsIOS => defaultTargetPlatform == TargetPlatform.iOS ?
+                                         true : false;
+
   @override
   void deactivate() {
     if (_splashes != null) {
@@ -607,6 +611,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cursorRadius: widget.cursorRadius,
         cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
         scrollPadding: widget.scrollPadding,
+        showToolbarOnDoubleSlowTap: platformIsIOS,
+        fadeOutSelectionControls: platformIsIOS,
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: widget.enableInteractiveSelection,
       ),
