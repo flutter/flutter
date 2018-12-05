@@ -1006,7 +1006,7 @@ class RenderEditable extends RenderBox {
   @override
   double computeMaxIntrinsicWidth(double height) {
     _layoutText(double.infinity);
-    return _textPainter.maxIntrinsicWidth;
+    return _textPainter.maxIntrinsicWidth + cursorWidth;
   }
 
   /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].

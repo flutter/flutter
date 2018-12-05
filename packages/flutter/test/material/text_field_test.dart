@@ -3382,4 +3382,44 @@ void main() {
     await tester.tap(find.byType(TextField));
     expect(tapCount, 0);
   });
+
+  testWidgets('Includes cursor for TextField', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/24612
+
+    const double stepWidth = 80.0;
+
+    Widget buildFrame(double cursorWidth) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                IntrinsicWidth(
+                  stepWidth: stepWidth,
+                  child: TextField(
+                    cursorWidth: cursorWidth,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // A cursor of default size doesn't cause the TextField to increase its
+    // width.
+    await tester.pumpWidget(buildFrame(2.0));
+    await tester.enterText(find.byType(TextField), '1234');
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(TextField)).width, stepWidth);
+
+    // A wide cursor is counted in the width of the text and causes the
+    // TextField to increase to twice the stepWidth.
+    await tester.pumpWidget(buildFrame(18.0));
+    await tester.enterText(find.byType(TextField), '1234');
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(TextField)).width, 2 * stepWidth);
+  });
 }
