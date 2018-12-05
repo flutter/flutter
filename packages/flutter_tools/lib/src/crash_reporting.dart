@@ -162,9 +162,9 @@ class CrashReportSender {
   }) async {
     engineCrash = CrashReportSender.engineCrash;
     if (engineCrash == null || engineCrash.reportStatus != null) {
-      return null;
+      return;
     }
-    Completer completer = Completer();
+    final Completer<void> completer = Completer<void>();
     engineCrash.reportStatus = completer.future;
 
     printError('Flutter Engine has crashed!', emphasis: true);
@@ -196,9 +196,9 @@ class CrashReportSender {
         // Nothing to do.
       } else if (input == 'n' || input == 'no' || input == '') {
         // "No" or no recognized response. Default to not sending report.
-        printStatus("Skipped sending engine crash report.");
+        printStatus('Skipped sending engine crash report.');
         completer.complete();
-        return null;
+        return;
       }
     }
     try {
@@ -298,7 +298,7 @@ class EngineCrash {
 
   // Completes when the report is fully submitted or skipped. Is null when
   // no report attempt has been made.
-  Future reportStatus;
+  Future<void> reportStatus;
 
   void addTraceLine(String line) {
     _backtrace.add(line);
@@ -317,7 +317,7 @@ class EngineCrash {
 
   int lineContaining(String str) {
     for (int i = 0; i < _backtrace.length; i++) {
-      String line = _backtrace[i];
+      final String line = _backtrace[i];
       if (line.contains(str)) {
         return i;
       }
@@ -325,11 +325,9 @@ class EngineCrash {
     return -1;
   }
 
-  static final RegExp _fatalLog = RegExp(r'^F\/libc\s*\(\s*\d+\):\sFatal signal (\d+)');
-
   String parseSignature() {
-    String signature = "Fatal ";
-    String line = _backtrace[lineContaining('backtrace') - 5];
+    final String signature = 'Fatal ';
+    final String line = _backtrace[lineContaining('backtrace') - 5];
     return signature + line;
   }
 }

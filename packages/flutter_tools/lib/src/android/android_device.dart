@@ -18,10 +18,10 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../crash_reporting.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../crash_reporting.dart';
 import '../protocol_discovery.dart';
 
 import 'adb.dart';

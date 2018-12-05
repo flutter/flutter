@@ -777,7 +777,7 @@ abstract class ResidentRunner {
     }
   }
 
-  void _serviceDisconnected() async {
+  Future<void> _serviceDisconnected() async {
     if (_stopped) {
       // User requested the application exit.
       return;
@@ -786,6 +786,7 @@ abstract class ResidentRunner {
       return;
 
     printStatus('Lost connection to device.');
+    // Check for potential engine crashes to report.
     String getVersion() => FlutterVersion.instance.getVersionString();
     await CrashReportSender.instance.checkAndSendEngineReport(
       getFlutterVersion: getVersion,
