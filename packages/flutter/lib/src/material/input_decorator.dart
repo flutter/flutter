@@ -18,7 +18,10 @@ const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
 /// Alignment before focus, relevant to multiline inupts
 enum TextFieldLabelAlignment {
-  top, center,
+  /// Align vertically to the top of the [TextField]
+  top,
+  /// Align vertically to the center of the [TextField]
+  center,
 }
 
 // Defines the gap in the InputDecorator's outline border where the
@@ -849,7 +852,7 @@ class _RenderDecoration extends RenderBox {
 
     boxConstraints = boxConstraints.copyWith(maxWidth: inputWidth);
     if (label != null) // The label is not baseline aligned.
-      label.layout(boxConstraints, parentUsesSize: true);
+      layoutLineBox(label);
 
     boxConstraints = boxConstraints.copyWith(minWidth: inputWidth);
     layoutLineBox(hint);
@@ -1046,8 +1049,13 @@ class _RenderDecoration extends RenderBox {
           start += contentPadding.left;
           start -= centerLayout(prefixIcon, start - prefixIcon.size.width);
         }
-        if (label != null)
-          centerLayout(label, start - label.size.width);
+        if (label != null) {
+          if (decoration.labelAlignment == TextFieldLabelAlignment.top) {
+            baselineLayout(label, start - label.size.width);
+          } else {
+            centerLayout(label, start - label.size.width);
+          }
+        }
         if (prefix != null)
           start -= baselineLayout(prefix, start - prefix.size.width);
         if (input != null)
@@ -1070,7 +1078,11 @@ class _RenderDecoration extends RenderBox {
           start += centerLayout(prefixIcon, start);
         }
         if (label != null)
-          centerLayout(label, start);
+          if (decoration.labelAlignment == TextFieldLabelAlignment.top) {
+            baselineLayout(label, start);
+          } else {
+            centerLayout(label, start);
+          }
         if (prefix != null)
           start += baselineLayout(prefix, start);
         if (input != null)
@@ -1161,10 +1173,8 @@ class _RenderDecoration extends RenderBox {
           break;
       }
       final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t);
-      final double yOffset = decoration.labelAlignment == TextFieldLabelAlignment.top
-        ? 0 : labelOffset.dy;
       _labelTransform = Matrix4.identity()
-        ..translate(dx, yOffset + dy)
+        ..translate(dx, labelOffset.dy + dy)
         ..scale(scale);
       context.pushTransform(needsCompositing, offset, _labelTransform, _paintLabel);
     }
