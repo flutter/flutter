@@ -100,24 +100,22 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(GetInstanceProcAddr);
   DEFINE_PROC(GetPhysicalDeviceFeatures);
   DEFINE_PROC(GetPhysicalDeviceQueueFamilyProperties);
-  DEFINE_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR);
-  DEFINE_PROC(GetPhysicalDeviceSurfaceFormatsKHR);
-  DEFINE_PROC(GetPhysicalDeviceSurfacePresentModesKHR);
-  DEFINE_PROC(GetPhysicalDeviceSurfaceSupportKHR);
-  DEFINE_PROC(GetSwapchainImagesKHR);
-  DEFINE_PROC(QueuePresentKHR);
   DEFINE_PROC(QueueSubmit);
   DEFINE_PROC(QueueWaitIdle);
   DEFINE_PROC(ResetCommandBuffer);
   DEFINE_PROC(ResetFences);
   DEFINE_PROC(WaitForFences);
 #if OS_ANDROID
+  DEFINE_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR);
+  DEFINE_PROC(GetPhysicalDeviceSurfaceFormatsKHR);
+  DEFINE_PROC(GetPhysicalDeviceSurfacePresentModesKHR);
+  DEFINE_PROC(GetPhysicalDeviceSurfaceSupportKHR);
+  DEFINE_PROC(GetSwapchainImagesKHR);
+  DEFINE_PROC(QueuePresentKHR);
   DEFINE_PROC(CreateAndroidSurfaceKHR);
 #endif  // OS_ANDROID
 #if OS_FUCHSIA
-  DEFINE_PROC(CreateMagmaSurfaceKHR);
   DEFINE_PROC(GetMemoryFuchsiaHandleKHR);
-  DEFINE_PROC(GetPhysicalDeviceMagmaPresentationSupportKHR);
   DEFINE_PROC(ImportSemaphoreFuchsiaHandleKHR);
 #endif  // OS_FUCHSIA
 

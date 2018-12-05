@@ -594,8 +594,6 @@ FILE: ../../../flutter/vulkan/vulkan_native_surface.cc
 FILE: ../../../flutter/vulkan/vulkan_native_surface.h
 FILE: ../../../flutter/vulkan/vulkan_native_surface_android.cc
 FILE: ../../../flutter/vulkan/vulkan_native_surface_android.h
-FILE: ../../../flutter/vulkan/vulkan_native_surface_magma.cc
-FILE: ../../../flutter/vulkan/vulkan_native_surface_magma.h
 FILE: ../../../flutter/vulkan/vulkan_proc_table.cc
 FILE: ../../../flutter/vulkan/vulkan_proc_table.h
 FILE: ../../../flutter/vulkan/vulkan_provider.cc
