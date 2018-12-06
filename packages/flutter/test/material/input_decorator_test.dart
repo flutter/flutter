@@ -266,7 +266,6 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
     expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
     expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
-
   });
 
   testWidgets('InputDecorator alignLabelWithHint for multiline TextField', (WidgetTester tester) async {
@@ -2072,5 +2071,52 @@ void main() {
     const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue));
     expect(underlineInputBorder.hashCode, const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)).hashCode);
     expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder().hashCode));
+  });
+
+  testWidgets('InputDecorationTheme implements debugFillDescription', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    InputDecorationTheme(
+      labelStyle: TextStyle(),
+      helperStyle: TextStyle(),
+      hintStyle: TextStyle(),
+      errorMaxLines: 5,
+      hasFloatingPlaceholder: false,
+      contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+      prefixStyle: TextStyle(),
+      suffixStyle: TextStyle(),
+      counterStyle: TextStyle(),
+      filled: true,
+      fillColor: Colors.red,
+      errorBorder: UnderlineInputBorder(),
+      focusedBorder: UnderlineInputBorder(),
+      focusedErrorBorder: UnderlineInputBorder(),
+      disabledBorder: UnderlineInputBorder(),
+      enabledBorder: UnderlineInputBorder(),
+      border: UnderlineInputBorder(),
+      alignLabelWithHint: true,
+    ).debugFillProperties(builder);
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode n) => n.toString()).toList();
+    expect(description, <String>[
+      'labelStyle: TextStyle(<all styles inherited>)',
+      'helperStyle: TextStyle(<all styles inherited>)',
+      'hintStyle: TextStyle(<all styles inherited>)',
+      'errorMaxLines: 5',
+      'hasFloatingPlaceholder: false',
+      'contentPadding: EdgeInsetsDirectional(40.0, 12.0, 0.0, 12.0)',
+      'prefixStyle: TextStyle(<all styles inherited>)',
+      'suffixStyle: TextStyle(<all styles inherited>)',
+      'counterStyle: TextStyle(<all styles inherited>)',
+      'filled: true',
+      'fillColor: MaterialColor(primary value: Color(0xfff44336))',
+      'errorBorder: UnderlineInputBorder()',
+      'focusedBorder: UnderlineInputBorder()',
+      'focusedErrorBorder: UnderlineInputBorder()',
+      'disabledBorder: UnderlineInputBorder()',
+      'enabledBorder: UnderlineInputBorder()',
+      'border: UnderlineInputBorder()',
+      'alignLabelWithHint: true',
+    ]);
   });
 }
