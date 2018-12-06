@@ -167,6 +167,7 @@ class VsCode {
   }
 
   // Linux:
+  //   /opt/visual-studio-code/bin/code
   //   /usr/share/code/bin/code
   //   /usr/share/code-insiders/bin/code-insiders
   // Linux Extensions:
@@ -174,6 +175,7 @@ class VsCode {
   //   $HOME/.vscode-insiders/extensions
   static List<VsCode> _installedLinux() {
     return _findInstalled(<_VsCodeInstallLocation>[
+      const _VsCodeInstallLocation('/opt/visual-studio-code', '.vscode'),
       const _VsCodeInstallLocation('/usr/share/code', '.vscode'),
       const _VsCodeInstallLocation('/usr/share/code-insiders', '.vscode-insiders', isInsiders: true),
     ]);
