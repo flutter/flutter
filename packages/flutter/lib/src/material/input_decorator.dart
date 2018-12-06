@@ -1989,7 +1989,7 @@ class InputDecoration {
     this.border,
     this.enabled = true,
     this.semanticCounterText,
-    this.alignLabelWithHint = false,
+    this.alignLabelWithHint,
   }) : assert(enabled != null),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not allowed'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not allowed'),
@@ -2569,6 +2569,7 @@ class InputDecoration {
       disabledBorder: disabledBorder ?? theme.disabledBorder,
       enabledBorder: enabledBorder ?? theme.enabledBorder,
       border: border ?? theme.border,
+      alignLabelWithHint: alignLabelWithHint ?? theme.alignLabelWithHint,
     );
   }
 
@@ -2775,6 +2776,7 @@ class InputDecorationTheme extends Diagnosticable {
     this.disabledBorder,
     this.enabledBorder,
     this.border,
+    this.alignLabelWithHint = false,
   }) : assert(isDense != null),
        assert(isCollapsed != null),
       assert(filled != null);
@@ -3036,6 +3038,11 @@ class InputDecorationTheme extends Diagnosticable {
   ///    rounded rectangle around the input decorator's container.
   final InputBorder border;
 
+  /// Typically set to true when the [InputDecorator] contains a multiline
+  /// [TextField] ([TextField.maxLines] is null or > 1) to override the default
+  /// behavior of aligning the label in the center of the [TextField].
+  final bool alignLabelWithHint;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -3060,5 +3067,6 @@ class InputDecorationTheme extends Diagnosticable {
     properties.add(DiagnosticsProperty<InputBorder>('disabledBorder', disabledBorder, defaultValue: defaultTheme.disabledBorder));
     properties.add(DiagnosticsProperty<InputBorder>('enabledBorder', enabledBorder, defaultValue: defaultTheme.enabledBorder));
     properties.add(DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
+    properties.add(DiagnosticsProperty<bool>('alignLabelWithHint', alignLabelWithHint, defaultValue: defaultTheme.alignLabelWithHint));
   }
 }

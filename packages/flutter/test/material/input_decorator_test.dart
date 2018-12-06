@@ -1520,7 +1520,7 @@ void main() {
     );
     expect(
       child.toString(),
-      "InputDecorator-[<'key'>](decoration: InputDecoration(alignLabelWithHint: false), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
+      "InputDecorator-[<'key'>](decoration: InputDecoration(), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
     );
   });
 
@@ -1603,6 +1603,7 @@ void main() {
         filled: true,
         fillColor: Colors.red,
         border: InputBorder.none,
+        alignLabelWithHint: true,
       )
     );
 
@@ -1618,6 +1619,7 @@ void main() {
     expect(decoration.filled, true);
     expect(decoration.fillColor, Colors.red);
     expect(decoration.border, InputBorder.none);
+    expect(decoration.alignLabelWithHint, true);
 
     // InputDecoration (baseDecoration) defines InputDecoration properties
     decoration = const InputDecoration(
@@ -1633,6 +1635,7 @@ void main() {
       filled: false,
       fillColor: Colors.blue,
       border: OutlineInputBorder(),
+      alignLabelWithHint: false,
     ).applyDefaults(
       const InputDecorationTheme(
         labelStyle: themeStyle,
@@ -1648,6 +1651,7 @@ void main() {
         filled: true,
         fillColor: Colors.red,
         border: InputBorder.none,
+        alignLabelWithHint: true,
       ),
     );
 
@@ -1664,6 +1668,7 @@ void main() {
     expect(decoration.filled, false);
     expect(decoration.fillColor, Colors.blue);
     expect(decoration.border, const OutlineInputBorder());
+    expect(decoration.alignLabelWithHint, false);
   });
 
   testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
