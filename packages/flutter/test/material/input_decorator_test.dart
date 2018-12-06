@@ -2075,7 +2075,7 @@ void main() {
 
   testWidgets('InputDecorationTheme implements debugFillDescription', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    InputDecorationTheme(
+    const InputDecorationTheme(
       labelStyle: TextStyle(),
       helperStyle: TextStyle(),
       hintStyle: TextStyle(),
