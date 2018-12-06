@@ -39,6 +39,7 @@ class CupertinoScrollbar extends StatefulWidget {
   const CupertinoScrollbar({
     Key key,
     @required this.child,
+    this.padding,
   }) : super(key: key);
 
   /// The subtree to place inside the [CupertinoScrollbar].
@@ -46,6 +47,9 @@ class CupertinoScrollbar extends StatefulWidget {
   /// This should include a source of [ScrollNotification] notifications,
   /// typically a [Scrollable] widget.
   final Widget child;
+
+  ///
+  final EdgeInsets padding;
 
   @override
   _CupertinoScrollbarState createState() => _CupertinoScrollbarState();
@@ -91,6 +95,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       radius: _kScrollbarRadius,
       minLength: _kScrollbarMinLength,
       minOverscrollLength: _kScrollbarMinOverscrollLength,
+      padding: widget.padding,
     );
   }
 

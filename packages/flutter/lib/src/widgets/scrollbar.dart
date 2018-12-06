@@ -48,6 +48,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     this.radius,
     this.minLength = _kMinThumbExtent,
     this.minOverscrollLength = _kMinThumbExtent,
+    this.padding,
   }) : assert(color != null),
        assert(textDirection != null),
        assert(thickness != null),
@@ -94,6 +95,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// The smallest size the scrollbar can shrink to when viewport is
   /// overscrolled. Mustn't be null.
   final double minOverscrollLength;
+
+  /// Padding applied to the scrollbar from all edges of the screen.
+  ///
+  /// Primarily used to account for the possibility of tab bars and navigation
+  /// bars lying on top of scroll views.
+  final EdgeInsets padding;
 
   ScrollMetrics _lastMetrics;
   AxisDirection _lastAxisDirection;
@@ -158,6 +165,22 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ) {
     // Establish the minimum size possible.
     double thumbExtent = math.min(viewport, minOverscrollLength);
+
+//    double _mainAxisMargin = mainAxisMargin;
+//    switch(_lastAxisDirection) {
+//      case AxisDirection.up:
+//        _mainAxisMargin = padding?.top;
+//        break;
+//      case AxisDirection.down:
+//        _mainAxisMargin = padding?.bottom;
+//        break;
+//      case AxisDirection.left:
+//        _mainAxisMargin = padding?.left;
+//        break;
+//      case AxisDirection.right:
+//        _mainAxisMargin = padding?.right;
+//        break;
+//    }
 
     if (before + inside + after > 0.0) {
       // Thumb extent reflects fraction of content visible, as long as this
@@ -243,6 +266,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         || mainAxisMargin != old.mainAxisMargin
         || crossAxisMargin != old.crossAxisMargin
         || radius != old.radius
+        || padding != old.padding
         || minLength != old.minLength;
   }
 
