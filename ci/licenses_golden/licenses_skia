@@ -1,4 +1,4 @@
-Signature: 45fc64b737b7268066347c855c147c2f
+Signature: ce48dabee21e76b51a85b00cab6819ae
 
 UNUSED LICENSES:
 
@@ -4150,6 +4150,7 @@ FILE: ../../../third_party/skia/bench/CubicKLMBench.cpp
 FILE: ../../../third_party/skia/bench/PathTextBench.cpp
 FILE: ../../../third_party/skia/bench/ShadowBench.cpp
 FILE: ../../../third_party/skia/bin/gerrit-number
+FILE: ../../../third_party/skia/bin/sysopen
 FILE: ../../../third_party/skia/dm/DMGpuTestProcs.cpp
 FILE: ../../../third_party/skia/example/HelloWorld.cpp
 FILE: ../../../third_party/skia/example/HelloWorld.h
