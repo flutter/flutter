@@ -375,10 +375,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   List<Widget> _buildStepContent(Widget stepContent) {
-    final Widget verticalControls = _buildVerticalControls();
-    return verticalControls == null 
+    final Widget verticalControl = _buildVerticalControls();
+    return verticalControl == null 
       ? <Widget>[Row(children: <Widget>[stepContent])]
-      : <Widget>[stepContent, verticalControls];
+      : <Widget>[stepContent, verticalControl];
   }
   
   Widget _buildVerticalControls() {
