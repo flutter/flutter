@@ -537,6 +537,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     Key key,
     @required this.tabs,
     this.controller,
+    this.elevation = 0.0,
     this.isScrollable = false,
     this.indicatorColor,
     this.indicatorWeight = 2.0,
@@ -549,6 +550,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
   }) : assert(tabs != null),
+       assert(elevation != null),
        assert(isScrollable != null),
        assert(indicator != null || (indicatorWeight != null && indicatorWeight > 0.0)),
        assert(indicator != null || (indicatorPadding != null)),
@@ -564,6 +566,12 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If [TabController] is not provided, then the value of [DefaultTabController.of]
   /// will be used.
   final TabController controller;
+
+  /// The z-coordinate at which to place this tab bar when it is above other
+  /// content. This controls the size of the shadow below the tab bar.
+  ///
+  /// Defaults to 0, the appropriate elevation for tab bars.
+  final double elevation;
 
   /// Whether this tab bar can be scrolled horizontally.
   ///
@@ -1001,7 +1009,15 @@ class _TabBarState extends State<TabBar> {
       );
     }
 
-    return tabBar;
+    // Wrap in Material if the tabBar has an elevation
+    if (widget.elevation > 0) {
+      return Material(
+        elevation: widget.elevation,
+        child: tabBar,
+      );
+    } else {
+      return tabBar;
+    }
   }
 }
 
