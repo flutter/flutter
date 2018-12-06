@@ -16,14 +16,6 @@ import 'theme.dart';
 const Duration _kTransitionDuration = Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
-/// Alignment before focus, relevant to multiline inupts
-enum TextFieldLabelAlignment {
-  /// Align vertically to the top of the [TextField]
-  top,
-  /// Align vertically to the center of the [TextField]
-  center,
-}
-
 // Defines the gap in the InputDecorator's outline border where the
 // floating label will appear.
 class _InputBorderGap extends ChangeNotifier {
@@ -457,7 +449,7 @@ class _Decoration {
     this.helperError,
     this.counter,
     this.container,
-    this.labelAlignment,
+    this.alignLabelWithHint,
   }) : assert(contentPadding != null),
        assert(isCollapsed != null),
        assert(floatingLabelHeight != null),
@@ -469,7 +461,7 @@ class _Decoration {
   final double floatingLabelProgress;
   final InputBorder border;
   final _InputBorderGap borderGap;
-  final TextFieldLabelAlignment labelAlignment;
+  final bool alignLabelWithHint;
   final Widget icon;
   final Widget input;
   final Widget label;
@@ -505,7 +497,7 @@ class _Decoration {
         && typedOther.helperError == helperError
         && typedOther.counter == counter
         && typedOther.container == container
-        && typedOther.labelAlignment == labelAlignment;
+        && typedOther.alignLabelWithHint == alignLabelWithHint;
   }
 
   @override
@@ -527,7 +519,7 @@ class _Decoration {
       helperError,
       counter,
       container,
-      labelAlignment,
+      alignLabelWithHint,
     );
   }
 }
@@ -851,8 +843,13 @@ class _RenderDecoration extends RenderBox {
       + contentPadding.right));
 
     boxConstraints = boxConstraints.copyWith(maxWidth: inputWidth);
-    if (label != null) // The label is not baseline aligned.
-      layoutLineBox(label);
+    if (label != null) {
+      if (decoration.alignLabelWithHint) {
+        layoutLineBox(label);
+      } else {
+        label.layout(boxConstraints, parentUsesSize: true);
+      }
+    }
 
     boxConstraints = boxConstraints.copyWith(minWidth: inputWidth);
     layoutLineBox(hint);
@@ -1050,7 +1047,7 @@ class _RenderDecoration extends RenderBox {
           start -= centerLayout(prefixIcon, start - prefixIcon.size.width);
         }
         if (label != null) {
-          if (decoration.labelAlignment == TextFieldLabelAlignment.top) {
+          if (decoration.alignLabelWithHint) {
             baselineLayout(label, start - label.size.width);
           } else {
             centerLayout(label, start - label.size.width);
@@ -1078,7 +1075,7 @@ class _RenderDecoration extends RenderBox {
           start += centerLayout(prefixIcon, start);
         }
         if (label != null)
-          if (decoration.labelAlignment == TextFieldLabelAlignment.top) {
+          if (decoration.alignLabelWithHint) {
             baselineLayout(label, start);
           } else {
             centerLayout(label, start);
@@ -1911,7 +1908,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         icon: icon,
         input: widget.child,
         label: label,
-        labelAlignment: decoration.labelAlignment,
+        alignLabelWithHint: decoration.alignLabelWithHint,
         hint: hint,
         prefix: prefix,
         suffix: suffix,
@@ -1992,7 +1989,7 @@ class InputDecoration {
     this.border,
     this.enabled = true,
     this.semanticCounterText,
-    this.labelAlignment = TextFieldLabelAlignment.center,
+    this.alignLabelWithHint = false,
   }) : assert(enabled != null),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not allowed'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not allowed'),
@@ -2039,7 +2036,7 @@ class InputDecoration {
        disabledBorder = null,
        enabledBorder = null,
        semanticCounterText = null,
-       labelAlignment = null;
+       alignLabelWithHint = false;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -2461,11 +2458,12 @@ class InputDecoration {
   /// If provided, this replaces the semantic label of the [counterText].
   final String semanticCounterText;
 
-  /// When the input is multiline (maxLines > 1) and before it is focused, the
-  /// label can be vertically aligned in the center of the input or at the top.
+  /// Typically set to true when the [InputDecorator] contains a multiline
+  /// [TextField] ([TextField.maxLines] is null or > 1) to override the default
+  /// behavior of aligning the label in the center of the [TextField].
   ///
-  /// Defaults to centered.
-  final TextFieldLabelAlignment labelAlignment;
+  /// Defaults to false.
+  final bool alignLabelWithHint;
 
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
@@ -2505,7 +2503,7 @@ class InputDecoration {
     InputBorder border,
     bool enabled,
     String semanticCounterText,
-    TextFieldLabelAlignment labelAlignment,
+    bool alignLabelWithHint,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
@@ -2541,7 +2539,7 @@ class InputDecoration {
       border: border ?? this.border,
       enabled: enabled ?? this.enabled,
       semanticCounterText: semanticCounterText ?? this.semanticCounterText,
-      labelAlignment: labelAlignment ?? this.labelAlignment,
+      alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
     );
   }
 
@@ -2615,7 +2613,7 @@ class InputDecoration {
         && typedOther.border == border
         && typedOther.enabled == enabled
         && typedOther.semanticCounterText == semanticCounterText
-        && typedOther.labelAlignment == labelAlignment;
+        && typedOther.alignLabelWithHint == alignLabelWithHint;
   }
 
   @override
@@ -2664,7 +2662,7 @@ class InputDecoration {
         border,
         enabled,
         semanticCounterText,
-        labelAlignment,
+        alignLabelWithHint,
       ),
     );
   }
@@ -2734,8 +2732,8 @@ class InputDecoration {
       description.add('enabled: false');
     if (semanticCounterText != null)
       description.add('semanticCounterText: $semanticCounterText');
-    if (labelAlignment != null)
-      description.add('labelAlignment: $labelAlignment');
+    if (alignLabelWithHint != null)
+      description.add('alignLabelWithHint: $alignLabelWithHint');
     return 'InputDecoration(${description.join(', ')})';
   }
 }

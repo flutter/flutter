@@ -249,14 +249,14 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderColor(tester), Colors.transparent);
 
-    // labelAlignment: top positions the label at the text baseline.
+    // alignLabelWithHint: true positions the label at the text baseline.
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
         isFocused: false,
         decoration: const InputDecoration(
           labelText: 'label',
-          labelAlignment: TextFieldLabelAlignment.top,
+          alignLabelWithHint: true,
         ),
       ),
     );
@@ -1485,7 +1485,7 @@ void main() {
     );
     expect(
       child.toString(),
-      "InputDecorator-[<'key'>](decoration: InputDecoration(labelAlignment: TextFieldLabelAlignment.center), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
+      "InputDecorator-[<'key'>](decoration: InputDecoration(alignLabelWithHint: false), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
     );
   });
 
