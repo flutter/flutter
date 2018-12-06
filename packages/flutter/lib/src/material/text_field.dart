@@ -80,7 +80,7 @@ class TextField extends StatefulWidget {
   /// field showing how many characters have been entered. If the value is
   /// set to a positive integer it will also display the maximum allowed
   /// number of characters to be entered.  If the value is set to -1 then
-  /// only the current length is displatyed.
+  /// only the current length is displayed.
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
@@ -245,7 +245,7 @@ class TextField extends StatefulWidget {
   /// enforces the length with a [LengthLimitingTextInputFormatter], which is
   /// evaluated after the supplied [inputFormatters], if any.
   ///
-  /// This value must be either null, greater than 0, or -1 (negative one). If set to null
+  /// This value must be either null, -1, or greater than 0. If set to null
   /// (the default), there is no limit to the number of characters allowed. If set to -1,
   /// then no limit will be enforced, but the display of how many characters have been
   /// entered is still displayed.
