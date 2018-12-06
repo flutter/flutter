@@ -42,7 +42,7 @@ Future<void> main() async {
     final GlobalKey key = GlobalKey();
     final Completer<void> completer = Completer<void>();
     await tester.pumpWidget(
-      KeyedSubtree(
+       KeyedSubtree(
         key: key,
         child: DecoratedBox(
           decoration: BoxDecoration(
