@@ -845,8 +845,10 @@ class _RenderDecoration extends RenderBox {
     boxConstraints = boxConstraints.copyWith(maxWidth: inputWidth);
     if (label != null) {
       if (decoration.alignLabelWithHint) {
+        // The label is aligned with the hint, at the baseline
         layoutLineBox(label);
       } else {
+        // The label is centered, not baseline aligned
         label.layout(boxConstraints, parentUsesSize: true);
       }
     }
@@ -2460,7 +2462,7 @@ class InputDecoration {
 
   /// Typically set to true when the [InputDecorator] contains a multiline
   /// [TextField] ([TextField.maxLines] is null or > 1) to override the default
-  /// behavior of aligning the label in the center of the [TextField].
+  /// behavior of aligning the label with the center of the [TextField].
   ///
   /// Defaults to false.
   final bool alignLabelWithHint;
@@ -2779,7 +2781,8 @@ class InputDecorationTheme extends Diagnosticable {
     this.alignLabelWithHint = false,
   }) : assert(isDense != null),
        assert(isCollapsed != null),
-      assert(filled != null);
+       assert(filled != null),
+       assert(alignLabelWithHint != null);
 
   /// The style to use for [InputDecoration.labelText] when the label is
   /// above (i.e., vertically adjacent to) the input field.
@@ -3040,7 +3043,7 @@ class InputDecorationTheme extends Diagnosticable {
 
   /// Typically set to true when the [InputDecorator] contains a multiline
   /// [TextField] ([TextField.maxLines] is null or > 1) to override the default
-  /// behavior of aligning the label in the center of the [TextField].
+  /// behavior of aligning the label with the center of the [TextField].
   final bool alignLabelWithHint;
 
   @override
