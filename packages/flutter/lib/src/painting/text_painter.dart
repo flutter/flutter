@@ -395,9 +395,11 @@ class TextPainter {
   // and search for non-whitespace text to obtain a box for lines ending
   // with whitespace.
   bool _isWhiteSpace(int value) {
-    // This does not include characters such as Line Feed, as newlines are
-    // handled separately.
-    return value == 0x0020 || value == 0x3000 || value == 0x0009 || value == 0x000B || value == 0x00A0 || (value >= 0x2000 && value <= 0x200A) || value == 0x202F || value == 0x205F;
+    // This does not include characters such as '\n', as newlines are
+    // handled separately. Otherwise, it is equivalent to Unicode
+    // [[:General_Category=Space_Separator:]-[:Line_Break=Glue:]] as used
+    // in Minikin/LibTxt.
+    return value == 0x0020 || value == 0x3000 || (value >= 0x2000 && value <= 0x200A && value != 0x2007) || value == 0x205F;
   }
 
   /// Returns the closest offset after `offset` at which the input cursor can be
