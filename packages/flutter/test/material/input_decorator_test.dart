@@ -610,6 +610,67 @@ void main() {
     expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 56.0));
   });
 
+  testWidgets('InputDecorator counter text, widget, and null', (WidgetTester tester) async {
+    const int maxLength = 10;
+
+    Widget buildFrame({
+      String counterText,
+      Widget counter,
+    }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                TextFormField(
+                  maxLength: maxLength,
+                  decoration: InputDecoration(
+                    counterText: counterText,
+                    counter: counter,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // When both counter and counterText are null, defaults to showing the
+    // built-in counter
+    await tester.pumpWidget(buildFrame());
+    Finder counterFinder = find.byType(Text);
+    expect(counterFinder, findsOneWidget);
+    Text counterWidget = tester.widget(counterFinder);
+    expect(counterWidget.data, '0/${maxLength.toString()}');
+
+    // When counterText is set and counter is null, shows the counterText string
+    const String counterText = 'I show instead of count';
+    await tester.pumpWidget(buildFrame(counterText: counterText));
+    counterFinder = find.byType(Text);
+    expect(counterFinder, findsOneWidget);
+    counterWidget = tester.widget(counterFinder);
+    expect(counterWidget.data, counterText);
+
+    // When counter is set and counterText is null, shows the counter widget
+    final Key key = UniqueKey();
+    final Widget counter = Text('hello', key: key);
+    await tester.pumpWidget(buildFrame(counter: counter));
+    counterFinder = find.byKey(key);
+    expect(counterFinder, findsOneWidget);
+
+    // When both counter and counterText are set, shows the counter widget
+    await tester.pumpWidget(buildFrame(counterText: counterText, counter: counter));
+    counterFinder = find.byKey(key);
+    expect(counterFinder, findsOneWidget);
+    expect(find.text(counterText), findsNothing);
+
+    // When counterText is empty string and counter is null, shows nothing
+    await tester.pumpWidget(buildFrame(counterText: ''));
+    expect(find.byType(Text), findsNothing);
+  });
+
   testWidgets('InputDecoration errorMaxLines', (WidgetTester tester) async {
     const String kError1 = 'e0';
     const String kError2 = 'e0\ne1';
