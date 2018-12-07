@@ -1835,17 +1835,25 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       errorMaxLines: decoration.errorMaxLines,
     );
 
-    final Widget counter = decoration.counterText == null ? null :
-      Semantics(
-        container: true,
-        liveRegion: isFocused,
-        child: Text(
-          decoration.counterText,
-          style: _getHelperStyle(themeData).merge(decoration.counterStyle),
-          overflow: TextOverflow.ellipsis,
-          semanticsLabel: decoration.semanticCounterText,
-        ),
-      );
+    // TODO Justin the counter widget is created here
+    Widget counter;
+    if (decoration.counterText == '' && decoration.counter == null) {
+      counter = null;
+    } else if (decoration.counter != null) {
+      counter = decoration.counter;
+    } else {
+      counter = decoration.counterText == null ? null :
+        Semantics(
+          container: true,
+          liveRegion: isFocused,
+          child: Text(
+            decoration.counterText,
+            style: _getHelperStyle(themeData).merge(decoration.counterStyle),
+            overflow: TextOverflow.ellipsis,
+            semanticsLabel: decoration.semanticCounterText,
+          ),
+        );
+    }
 
     // The _Decoration widget and _RenderDecoration assume that contentPadding
     // has been resolved to EdgeInsets.
@@ -1958,6 +1966,7 @@ class InputDecoration {
     this.suffix,
     this.suffixText,
     this.suffixStyle,
+    this.counter,
     this.counterText,
     this.counterStyle,
     this.filled,
@@ -2008,6 +2017,7 @@ class InputDecoration {
        suffixIcon = null,
        suffixText = null,
        suffixStyle = null,
+       counter = null,
        counterText = null,
        counterStyle = null,
        errorBorder = null,
@@ -2234,6 +2244,9 @@ class InputDecoration {
   ///
   /// If null, defaults to the [hintStyle].
   final TextStyle suffixStyle;
+
+  /// TODO Justin document
+  final Widget counter;
 
   /// Optional text to place below the line as a character count.
   ///
@@ -2463,6 +2476,7 @@ class InputDecoration {
     Widget suffix,
     String suffixText,
     TextStyle suffixStyle,
+    Widget counter,
     String counterText,
     TextStyle counterStyle,
     bool filled,
@@ -2498,6 +2512,7 @@ class InputDecoration {
       suffix: suffix ?? this.suffix,
       suffixText: suffixText ?? this.suffixText,
       suffixStyle: suffixStyle ?? this.suffixStyle,
+      counter: counter ?? this.counter,
       counterText: counterText ?? this.counterText,
       counterStyle: counterStyle ?? this.counterStyle,
       filled: filled ?? this.filled,
@@ -2571,6 +2586,7 @@ class InputDecoration {
         && typedOther.suffix == suffix
         && typedOther.suffixText == suffixText
         && typedOther.suffixStyle == suffixStyle
+        && typedOther.counter == counter
         && typedOther.counterText == counterText
         && typedOther.counterStyle == counterStyle
         && typedOther.filled == filled
@@ -2619,6 +2635,7 @@ class InputDecoration {
       ),
       hashValues(
         suffixStyle,
+        counter,
         counterText,
         counterStyle,
         filled,
@@ -2676,6 +2693,8 @@ class InputDecoration {
       description.add('suffixText: $suffixText');
     if (suffixStyle != null)
       description.add('suffixStyle: $suffixStyle');
+    if (counter != null)
+      description.add('counter: $counter');
     if (counterText != null)
       description.add('counterText: $counterText');
     if (counterStyle != null)
