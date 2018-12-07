@@ -390,6 +390,12 @@ class TextPainter {
   bool _isUtf16Surrogate(int value) {
     return value & 0xF800 == 0xD800;
   }
+  // LibTxt does not draw space for end-of-line whitespace. We need to
+  // detect this and search for non-whitespace text to obtain a box for
+  // lines ending with whitespace.
+  bool _isWhiteSpace(int value) {
+    return value == 0x0020 || value == 0x0009 || value == 0x000A || value == 0x000B || value == 0x000C || value == 0x000D || value == 0x3000 || value == 0x00A0;
+  }
 
   /// Returns the closest offset after `offset` at which the input cursor can be
   /// positioned.
@@ -423,10 +429,11 @@ class TextPainter {
     final int prevCodeUnit = _text.codeUnitAt(offset - 1);
     if (prevCodeUnit == null)
       return null;
-    final bool isSurrogate = _isUtf16Surrogate(prevCodeUnit);
+    // Check for multi-code-unit glyphs such as emojis as well as end-of-line whitespace
+    final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _isWhiteSpace(prevCodeUnit);
     // Hard cap cluster length to maximize performance.
-    final int maxGraphemeClusterLength = isSurrogate ? _maxGraphemeClusterLength : 1;
-    int graphemeClusterLength = isSurrogate ? 2 : 1;
+    final int maxGraphemeClusterLength = needsSearch ? _maxGraphemeClusterLength : 1;
+    int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && graphemeClusterLength <= maxGraphemeClusterLength) {
       final int prevRuneOffset = offset - graphemeClusterLength;
@@ -451,10 +458,10 @@ class TextPainter {
     final int nextCodeUnit = _text.codeUnitAt(offset - 1);
     if (nextCodeUnit == null)
       return null;
-    final bool isSurrogate = _isUtf16Surrogate(nextCodeUnit);
+    final bool needsSearch = _isUtf16Surrogate(nextCodeUnit) || _isWhiteSpace(nextCodeUnit);
     // Hard cap cluster length to 16 to maximize performance.
-    final int maxGraphemeClusterLength = isSurrogate ? _maxGraphemeClusterLength : 1;
-    int graphemeClusterLength = isSurrogate ? 2 : 1;
+    final int maxGraphemeClusterLength = needsSearch ? _maxGraphemeClusterLength : 1;
+    int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && graphemeClusterLength <= maxGraphemeClusterLength) {
       final int nextRuneOffset = offset + graphemeClusterLength;
