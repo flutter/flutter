@@ -390,11 +390,13 @@ class TextPainter {
   bool _isUtf16Surrogate(int value) {
     return value & 0xF800 == 0xD800;
   }
-  // LibTxt does not draw space for end-of-line whitespace. We need to
-  // detect this and search for non-whitespace text to obtain a box for
-  // lines ending with whitespace.
+  // LibTxt does not draw space for end-of-line whitespace that normally
+  // takes up space. We need to detect this and search for non-whitespace
+  // text to obtain a box for lines ending with whitespace.
   bool _isWhiteSpace(int value) {
-    return value == 0x0020 || value == 0x0009 || value == 0x000A || value == 0x000B || value == 0x000C || value == 0x000D || value == 0x3000 || value == 0x00A0;
+    // This does not include characters such as Line Feed, as newlines are
+    // handled separately.
+    return value == 0x0020 || value == 0x3000 || value == 0x0009 || value == 0x000B || value == 0x00A0 || (value >= 0x2000 && value <= 0x200A) || value == 0x202F || value == 0x205F;
   }
 
   /// Returns the closest offset after `offset` at which the input cursor can be

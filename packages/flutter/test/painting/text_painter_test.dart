@@ -77,6 +77,27 @@ void main() {
     expect(caretOffset.dx, 98);
   });
 
+  test('TextPainter caret center space test', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    // Format: '👩‍<zwj>👩‍<zwj>👦👩‍<zwj>👩‍<zwj>👧‍<zwj>👧🇺🇸'
+    const String text = 'test text with space at end   ';
+    painter.text = const TextSpan(text: text);
+    painter.textAlign = TextAlign.center;
+    painter.layout();
+
+    Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
+    expect(caretOffset.dx, painter.width / 2);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: text.length), ui.Rect.zero);
+    expect(caretOffset.dx, 399);
+
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+    expect(caretOffset.dx, 35);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
+    expect(caretOffset.dx, 49);
+  });
+
   test('TextPainter error test', () {
     final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
     expect(() { painter.paint(null, Offset.zero); }, throwsFlutterError);
