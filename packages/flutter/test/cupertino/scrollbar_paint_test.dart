@@ -11,11 +11,14 @@ void main() {
   testWidgets('Paints iOS spec', (WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
-      child: CupertinoScrollbar(
-        child: SingleChildScrollView(
-          child: SizedBox(width: 4000.0, height: 4000.0),
+      child: MediaQuery(
+        data: MediaQueryData(padding: EdgeInsets.fromLTRB(0, 0, 0, 0)),
+        child: CupertinoScrollbar(
+          child: SingleChildScrollView(
+            child: SizedBox(width: 4000.0, height: 4000.0),
+          ),
         ),
-      ),
+      )
     ));
     expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));

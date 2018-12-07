@@ -39,7 +39,8 @@ class CupertinoScrollbar extends StatefulWidget {
   const CupertinoScrollbar({
     Key key,
     @required this.child,
-    this.padding,
+    this.dynamicNavBarPersistentHeight,
+    this.dynamicNavBarHeightExtension,
   }) : super(key: key);
 
   /// The subtree to place inside the [CupertinoScrollbar].
@@ -48,8 +49,16 @@ class CupertinoScrollbar extends StatefulWidget {
   /// typically a [Scrollable] widget.
   final Widget child;
 
+  /// In the case of a dynamic nav bar, the height of the persistent component
+  /// of the nav bar.
   ///
-  final EdgeInsets padding;
+  /// Should be left to null for static nav bars.
+  final double dynamicNavBarPersistentHeight;
+
+  /// In the case of a dynamic nav bar, the height extension of the nav bar.
+  ///
+  /// Should be left to null for static nav bars.
+  final double dynamicNavBarHeightExtension;
 
   @override
   _CupertinoScrollbarState createState() => _CupertinoScrollbarState();
@@ -74,6 +83,8 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       parent: _fadeoutAnimationController,
       curve: Curves.fastOutSlowIn
     );
+    if (widget.dynamicNavBarHeightExtension != null)
+      assert (widget.dynamicNavBarHeightExtension > 0);
   }
 
   @override
@@ -85,6 +96,8 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
   /// Returns a [ScrollbarPainter] visually styled like the iOS scrollbar.
   ScrollbarPainter _buildCupertinoScrollbarPainter() {
+    final double topPadding = MediaQuery.of(context).padding.top;
+    final double dynamicNavBarPersistentHeight = widget.dynamicNavBarPersistentHeight ?? 0;
     return ScrollbarPainter(
       color: _kScrollbarColor,
       textDirection: _textDirection,
@@ -95,7 +108,9 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       radius: _kScrollbarRadius,
       minLength: _kScrollbarMinLength,
       minOverscrollLength: _kScrollbarMinOverscrollLength,
-      padding: widget.padding,
+      navBarMinExtent: dynamicNavBarPersistentHeight + topPadding,
+      navBarHeightExtension: widget.dynamicNavBarHeightExtension,
+      bottomExtent: MediaQuery.of(context).padding.bottom,
     );
   }
 
@@ -106,7 +121,6 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       if (_fadeoutAnimationController.status != AnimationStatus.forward) {
         _fadeoutAnimationController.forward();
       }
-
       _fadeoutTimer?.cancel();
       _painter.update(notification.metrics, notification.metrics.axisDirection);
     } else if (notification is ScrollEndNotification) {

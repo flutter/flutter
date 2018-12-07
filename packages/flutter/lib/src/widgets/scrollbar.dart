@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -48,7 +49,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     this.radius,
     this.minLength = _kMinThumbExtent,
     this.minOverscrollLength = _kMinThumbExtent,
-    this.padding,
+    this.navBarMinExtent,
+    this.navBarHeightExtension,
+    this.bottomExtent,
   }) : assert(color != null),
        assert(textDirection != null),
        assert(thickness != null),
@@ -96,11 +99,23 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// overscrolled. Mustn't be null.
   final double minOverscrollLength;
 
-  /// Padding applied to the scrollbar from all edges of the screen.
+  /// The minimum height of the navigation bar, including the device padding.
   ///
-  /// Primarily used to account for the possibility of tab bars and navigation
-  /// bars lying on top of scroll views.
-  final EdgeInsets padding;
+  /// Typically this is the device's top padding. However, in the case of a
+  /// dynamic nav bar the bar's persistent height must also be taken into
+  /// account.
+  final double navBarMinExtent;
+
+  /// The height extension of a dynamic nav bar.
+  ///
+  /// This value should be null for static nav bars.
+  final double navBarHeightExtension;
+
+  /// The height from the bottom of screen where the scroll bar should not be
+  /// rendered.
+  ///
+  /// Typically this is the device's bottom padding.
+  final double bottomExtent;
 
   ScrollMetrics _lastMetrics;
   AxisDirection _lastAxisDirection;
@@ -166,21 +181,17 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     // Establish the minimum size possible.
     double thumbExtent = math.min(viewport, minOverscrollLength);
 
-//    double _mainAxisMargin = mainAxisMargin;
-//    switch(_lastAxisDirection) {
-//      case AxisDirection.up:
-//        _mainAxisMargin = padding?.top;
-//        break;
-//      case AxisDirection.down:
-//        _mainAxisMargin = padding?.bottom;
-//        break;
-//      case AxisDirection.left:
-//        _mainAxisMargin = padding?.left;
-//        break;
-//      case AxisDirection.right:
-//        _mainAxisMargin = padding?.right;
-//        break;
-//    }
+    double mainAxisPadding = mainAxisMargin;
+    final bool dynamicNavBar = navBarHeightExtension != null;
+
+    if (_lastMetrics.axis == Axis.vertical) {
+      if(dynamicNavBar && before <= navBarHeightExtension)
+          mainAxisPadding += navBarMinExtent + (navBarHeightExtension - before);
+      else if ((!dynamicNavBar || before > navBarHeightExtension) && after > bottomExtent)
+        mainAxisPadding += navBarMinExtent;
+      else
+        mainAxisPadding += bottomExtent;
+    }
 
     if (before + inside + after > 0.0) {
       // Thumb extent reflects fraction of content visible, as long as this
@@ -215,11 +226,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         );
       }
     }
-
     final double fractionPast = before / (before + after);
     final double thumbOffset = (before + after > 0.0)
-        ? fractionPast * (viewport - thumbExtent - 2 * mainAxisMargin) + mainAxisMargin
-        : mainAxisMargin;
+        ? fractionPast * (viewport - thumbExtent - 2 * mainAxisPadding) + mainAxisPadding
+        : mainAxisPadding;
 
     painter(canvas, size, thumbOffset, thumbExtent);
   }
@@ -266,7 +276,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         || mainAxisMargin != old.mainAxisMargin
         || crossAxisMargin != old.crossAxisMargin
         || radius != old.radius
-        || padding != old.padding
         || minLength != old.minLength;
   }
 

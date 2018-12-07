@@ -104,6 +104,8 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
         textDirection: _textDirection,
         thickness: _kScrollbarThickness,
         fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
+        navBarMinExtent: 0,
+        bottomExtent: 0,
       );
   }
 

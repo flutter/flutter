@@ -598,6 +598,12 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor.alpha == 0xFF;
 
+  /// The height of the persistent component of the nav bar.
+  static const double navBarPersistentHeight = _kNavBarPersistentHeight;
+
+  /// The dynamic height extension of the nav bar.
+  static const double navBarHeightExtension = _kNavBarLargeTitleHeightExtension;
+
   @override
   _CupertinoSliverNavigationBarState createState() => _CupertinoSliverNavigationBarState();
 }

@@ -109,13 +109,16 @@ void main() {
     Widget viewWithScroll(TargetPlatform platform) {
       return Directionality(
         textDirection: TextDirection.ltr,
-        child: Theme(
-          data: ThemeData(
-            platform: platform
-          ),
-          child: const Scrollbar(
-            child: SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0),
+        child: MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.fromLTRB(0, 0, 0, 0)),
+          child: Theme(
+            data: ThemeData(
+              platform: platform
+            ),
+            child: const Scrollbar(
+              child: SingleChildScrollView(
+                child: SizedBox(width: 4000.0, height: 4000.0),
+              ),
             ),
           ),
         ),
