@@ -769,7 +769,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// App bar with [floating]: false, [pinned]: true, [snap]: false:
 /// {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_pinned.mp4}
 ///
-/// The property [snap] can only be set to true of [floating] is also true.
+/// The property [snap] can only be set to true if [floating] is also true.
 ///
 /// See also:
 ///
