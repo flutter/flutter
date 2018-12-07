@@ -79,8 +79,8 @@ class TextField extends StatefulWidget {
   /// [maxLength] is set a character counter will be displayed below the
   /// field showing how many characters have been entered. If the value is
   /// set to a positive integer it will also display the maximum allowed
-  /// number of characters to be entered.  If the value is set to -1 then
-  /// only the current length is displayed.
+  /// number of characters to be entered.  If the value is set to
+  /// [TextField.noMaxLength] then only the current length is displayed.
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
@@ -136,7 +136,7 @@ class TextField extends StatefulWidget {
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
-       assert(maxLength == null || maxLength == -1 || maxLength > 0),
+       assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        assert(enableInteractiveSelection != null),
        super(key: key);
@@ -232,22 +232,26 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.maxLines}
   final int maxLines;
 
+  /// If [maxLength] is set to this value, only the "current input length"
+  /// part of the character counter is shown.
+  static const int noMaxLength = -1;
+
   /// The maximum number of characters (Unicode scalar values) to allow in the
   /// text field.
   ///
   /// If set, a character counter will be displayed below the
   /// field showing how many characters have been entered. If set to a number
   /// greather than 0, it will also display the maximum number allowed. If set
-  /// to -1 then only the current character count is displayed.
+  /// to [TextField.noMaxLength] then only the current character count is displayed.
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
   /// enforces the length with a [LengthLimitingTextInputFormatter], which is
   /// evaluated after the supplied [inputFormatters], if any.
   ///
-  /// This value must be either null, -1, or greater than 0. If set to null
+  /// This value must be either null, [TextField.noMaxLength], or greater than 0. If set to null
   /// (the default), there is no limit to the number of characters allowed.
-  /// If set to -1, then no limit will be enforced, but the number of
+  /// If set to [TextField.noMaxLength], then no limit will be enforced, but the number of
   /// characters entered will still be displayed.
   ///
   /// Whitespace characters (e.g. newline, space, tab) are included in the
