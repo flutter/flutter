@@ -746,6 +746,31 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// ```
 /// {@end-tool}
 ///
+/// ## Examples of App Bars
+///
+/// The following animations show how app bars with different configurations
+/// behave when a user scrolls up and then down again.
+///
+/// App bar with [floating]: false, [pinned]: false, [snap]: false:
+/// {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar.mp4}
+///
+/// App bar with [floating]: true, [pinned]: false, [snap]: false:
+/// {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_floating.mp4}
+///
+/// App bar with [floating]: true, [pinned]: false, [snap]: true:
+/// {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_floating_snap.mp4}
+///
+/// App bar with [floating]: true, [pinned]: true, [snap]: false:
+/// {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_pinned_floating.mp4}
+///
+/// App bar with [floating]: true, [pinned]: true, [snap]: true:
+/// {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_pinned_floating_snap.mp4}
+///
+/// App bar with [floating]: false, [pinned]: true, [snap]: false:
+/// {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_pinned.mp4}
+///
+/// The property [snap] can only be set to true of [floating] is also true.
+///
 /// See also:
 ///
 ///  * [CustomScrollView], which integrates the [SliverAppBar] into its
@@ -949,12 +974,22 @@ class SliverAppBar extends StatefulWidget {
   /// If [snap] is true then a scroll that exposes the app bar will trigger an
   /// animation that slides the entire app bar into view. Similarly if a scroll
   /// dismisses the app bar, the animation will slide it completely out of view.
+  ///
+  /// See also:
+  ///
+  /// * [SliverAppBar] for animated examples of how this property changes the
+  ///   behavior of the app bar.
   final bool floating;
 
   /// Whether the app bar should remain visible at the start of the scroll view.
   ///
   /// The app bar can still expand and contract as the user scrolls, but it will
   /// remain visible rather than being scrolled out of view.
+  ///
+  /// See also:
+  ///
+  /// * [SliverAppBar] for animated examples of how this property changes the
+  ///   behavior of the app bar.
   final bool pinned;
 
   /// If [snap] and [floating] are true then the floating app bar will "snap"
@@ -967,6 +1002,11 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// Snapping only applies when the app bar is floating, not when the appbar
   /// appears at the top of its scroll view.
+  ///
+  /// See also:
+  ///
+  /// * [SliverAppBar] for animated examples of how this property changes the
+  ///   behavior of the app bar.
   final bool snap;
 
   @override
