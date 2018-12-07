@@ -1,4 +1,4 @@
-Signature: d3be528f962040734a772923d8e0772c
+Signature: b9fcb938f7d25e2daba6500285ff555c
 
 UNUSED LICENSES:
 
@@ -1348,6 +1348,7 @@ FILE: ../../../third_party/skia/include/effects/SkTrimPathEffect.h
 FILE: ../../../third_party/skia/include/gpu/GrBackendDrawableInfo.h
 FILE: ../../../third_party/skia/include/gpu/GrDriverBugWorkarounds.h
 FILE: ../../../third_party/skia/include/gpu/vk/GrVkMemoryAllocator.h
+FILE: ../../../third_party/skia/include/ports/SkFontMgr_fuchsia.h
 FILE: ../../../third_party/skia/include/private/GrCCClipPath.h
 FILE: ../../../third_party/skia/include/private/GrCCPerOpListPaths.h
 FILE: ../../../third_party/skia/include/private/GrProxyRef.h
@@ -1630,6 +1631,7 @@ FILE: ../../../third_party/skia/src/pdf/SkClusterator.cpp
 FILE: ../../../third_party/skia/src/pdf/SkClusterator.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFTag.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFTag.h
+FILE: ../../../third_party/skia/src/ports/SkFontMgr_fuchsia.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.h
 FILE: ../../../third_party/skia/src/sksl/SkSLInterpreter.cpp
