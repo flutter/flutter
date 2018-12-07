@@ -81,7 +81,6 @@ void main() {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
-    // Format: '👩‍<zwj>👩‍<zwj>👦👩‍<zwj>👩‍<zwj>👧‍<zwj>👧🇺🇸'
     const String text = 'test text with space at end   ';
     painter.text = const TextSpan(text: text);
     painter.textAlign = TextAlign.center;
