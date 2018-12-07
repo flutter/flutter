@@ -107,14 +107,16 @@ class _ManifestAssetBundle implements AssetBundle {
     if (flutterManifest == null)
       return 1;
 
+    // If the last build time isn't set before this early return, empty pubspecs will
+    // hang on hot reload, as the incremental dill files will never be copied to the
+    // device.
+    _lastBuildTimestamp = DateTime.now();
     if (flutterManifest.isEmpty) {
       entries[_assetManifestJson] = DevFSStringContent('{}');
       return 0;
     }
 
     final String assetBasePath = fs.path.dirname(fs.path.absolute(manifestPath));
-
-    _lastBuildTimestamp = DateTime.now();
 
     final PackageMap packageMap = PackageMap(packagesPath);
 
