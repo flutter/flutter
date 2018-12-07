@@ -1835,7 +1835,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       errorMaxLines: decoration.errorMaxLines,
     );
 
-    // TODO Justin the counter widget is created here
     Widget counter;
     if (decoration.counterText == '' && decoration.counter == null) {
       counter = null;
@@ -2245,16 +2244,20 @@ class InputDecoration {
   /// If null, defaults to the [hintStyle].
   final TextStyle suffixStyle;
 
-  /// TODO Justin document
-  final Widget counter;
-
   /// Optional text to place below the line as a character count.
   ///
   /// Rendered using [counterStyle]. Uses [helperStyle] if [counterStyle] is
   /// null.
   ///
   /// The semantic label can be replaced by providing a [semanticCounterText].
+  ///
+  /// If set to empty string and [counter] isn't specified, will display nothing
+  /// in the place of the counter.
   final String counterText;
+
+  /// Optional custom widget to place below the line instead of the default
+  /// widget built by passing [counterText].
+  final Widget counter;
 
   /// The style to use for the [counterText].
   ///
