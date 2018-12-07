@@ -751,23 +751,23 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// The following animations show how app bars with different configurations
 /// behave when a user scrolls up and then down again.
 ///
-/// App bar with [floating]: false, [pinned]: false, [snap]: false:
-/// {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar.mp4}
+/// * App bar with [floating]: false, [pinned]: false, [snap]: false:
+///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar.mp4}
 ///
-/// App bar with [floating]: true, [pinned]: false, [snap]: false:
-/// {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_floating.mp4}
+/// * App bar with [floating]: true, [pinned]: false, [snap]: false:
+///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_floating.mp4}
 ///
-/// App bar with [floating]: true, [pinned]: false, [snap]: true:
-/// {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_floating_snap.mp4}
+/// * App bar with [floating]: true, [pinned]: false, [snap]: true:
+///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_floating_snap.mp4}
 ///
-/// App bar with [floating]: true, [pinned]: true, [snap]: false:
-/// {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_pinned_floating.mp4}
+/// * App bar with [floating]: true, [pinned]: true, [snap]: false:
+///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_pinned_floating.mp4}
 ///
-/// App bar with [floating]: true, [pinned]: true, [snap]: true:
-/// {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_pinned_floating_snap.mp4}
+/// * App bar with [floating]: true, [pinned]: true, [snap]: true:
+///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_pinned_floating_snap.mp4}
 ///
-/// App bar with [floating]: false, [pinned]: true, [snap]: false:
-/// {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_pinned.mp4}
+/// * App bar with [floating]: false, [pinned]: true, [snap]: false:
+///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_pinned.mp4}
 ///
 /// The property [snap] can only be set to true if [floating] is also true.
 ///
