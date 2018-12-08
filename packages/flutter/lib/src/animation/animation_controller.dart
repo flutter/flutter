@@ -550,7 +550,7 @@ class AnimationController extends Animation<double>
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
-  TickerFuture repeat({ double min, double max, Duration period }) {
+  TickerFuture repeat({ double min, double max, bool reverse = false, Duration period }) {
     min ??= lowerBound;
     max ??= upperBound;
     period ??= duration;
@@ -565,7 +565,7 @@ class AnimationController extends Animation<double>
       }
       return true;
     }());
-    return animateWith(_RepeatingSimulation(min, max, period));
+    return animateWith(_RepeatingSimulation(min, max, reverse, period));
   }
 
   /// Drives the animation with a critically damped spring (within [lowerBound]
@@ -742,21 +742,35 @@ class _InterpolationSimulation extends Simulation {
 }
 
 class _RepeatingSimulation extends Simulation {
-  _RepeatingSimulation(this.min, this.max, Duration period)
-    : _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond {
+  _RepeatingSimulation(this.min, this.max, this.reverse, Duration period)
+      : _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond {
     assert(_periodInSeconds > 0.0);
   }
 
   final double min;
   final double max;
+  final bool reverse;
 
   final double _periodInSeconds;
+
+  double _previousT = 0.0;
+  bool _isPlayingReverse = false;
 
   @override
   double x(double timeInSeconds) {
     assert(timeInSeconds >= 0.0);
     final double t = (timeInSeconds / _periodInSeconds) % 1.0;
-    return ui.lerpDouble(min, max, t);
+
+    if(_previousT > t) {
+      _isPlayingReverse = !_isPlayingReverse;
+    }
+    _previousT = t;
+
+    if(reverse && _isPlayingReverse) {
+      return ui.lerpDouble(max, min, t);
+    } else {
+      return ui.lerpDouble(min, max, t);
+    }
   }
 
   @override
