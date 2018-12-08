@@ -52,5 +52,5 @@
     "remainingTextFieldCharacterCountZero": "Hapana herufi zilizo baki",
     "remainingTextFieldCharacterCountOne": "Herufi 1 imebaki",
     "remainingTextFieldCharacterCountOther": "herufi $remainingCount zimebaki",
-    "refreshIndicatorSemanticLabel": "Refresh",
+    "refreshIndicatorSemanticLabel": "Refresh"
 }
