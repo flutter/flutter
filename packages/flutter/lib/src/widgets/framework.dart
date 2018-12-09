@@ -3924,7 +3924,7 @@ class StatefulElement extends ComponentElement {
           'the inherited widget is in a constructor or an initState() method, '
           'then the rebuilt dependent widget will not reflect the changes in the '
           'inherited widget.\n'
-          'Typically references to to inherited widgets should occur in widget build() methods. Alternatively, '
+          'Typically references to inherited widgets should occur in widget build() methods. Alternatively, '
           'initialization based on inherited widgets can be placed in the didChangeDependencies method, which '
           'is called after initState and whenever the dependencies change thereafter.'
         );
