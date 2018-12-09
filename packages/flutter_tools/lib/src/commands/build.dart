@@ -43,7 +43,7 @@ abstract class BuildSubCommand extends FlutterCommand {
   @override
   @mustCallSuper
   Future<FlutterCommandResult> runCommand() async {
-    if (isRunningOnBot) {
+    if (isRunningOnBot && logger.isVerbose) {
       final File dotPackages = fs.file('.packages');
       printStatus('Contents of .packages:');
       if (dotPackages.existsSync())
