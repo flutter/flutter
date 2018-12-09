@@ -580,6 +580,28 @@ void main() {
     statusLog.clear();
   });
 
+  test('calling repeat with reverse set to true makes the animation alternate '
+      'between lowerBound and upperBound values on each repeat', () {
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      value: 0.0,
+      lowerBound: 0.0,
+      upperBound: 1.0,
+      vsync: const TestVSync(),
+    );
+
+    expect(controller.value, 0.0);
+
+    controller.repeat(reverse: true);
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 25));
+    expect(controller.value, 0.25);
+
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 125));
+    expect(controller.value, 0.75);
+  });
+
   group('AnimationBehavior', () {
     test('Default values for constructor', () {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
