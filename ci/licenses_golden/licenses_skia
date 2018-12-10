@@ -1,4 +1,4 @@
-Signature: a3ad2ebe6291c1be0c19990c8f4479d4
+Signature: c47d511e771d36f091f50e0c0b6e1ceb
 
 UNUSED LICENSES:
 
@@ -2861,7 +2861,6 @@ FILE: ../../../third_party/skia/src/core/SkAAClip.cpp
 FILE: ../../../third_party/skia/src/core/SkAAClip.h
 FILE: ../../../third_party/skia/src/core/SkAdvancedTypefaceMetrics.h
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState.cpp
-FILE: ../../../third_party/skia/src/core/SkBitmapProcState_matrix.h
 FILE: ../../../third_party/skia/src/core/SkBlitRow.h
 FILE: ../../../third_party/skia/src/core/SkBlitRow_D32.cpp
 FILE: ../../../third_party/skia/src/core/SkClipStack.cpp
