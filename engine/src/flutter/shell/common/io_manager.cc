@@ -24,6 +24,7 @@ sk_sp<GrContext> IOManager::CreateCompatibleResourceLoadingContext(
   // thread. The necessary work isn't being flushed or synchronized with the
   // other threads correctly, so the textures end up blank.  For now, suppress
   // that feature, which will cause texture uploads to do CPU YUV conversion.
+  // A similar work-around is also used in shell/gpu/gpu_surface_gl.cc.
   options.fDisableGpuYUVConversion = true;
 
   // To get video playback on the widest range of devices, we limit Skia to

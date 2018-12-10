@@ -66,30 +66,10 @@ std::string VulkanResultToString(VkResult result) {
       return "VK_ERROR_INVALID_EXTERNAL_HANDLE";
     case VK_ERROR_OUT_OF_POOL_MEMORY:
       return "VK_ERROR_OUT_OF_POOL_MEMORY";
-
-#if VK_HEADER_VERSION >= 63
-    case VK_ERROR_NOT_PERMITTED_EXT:
-      return "VK_ERROR_NOT_PERMITTED_EXT";
-#endif
-
-#if VK_HEADER_VERSION >= 72
-    case VK_ERROR_FRAGMENTATION_EXT:
-      return "VK_ERROR_FRAGMENTATION_EXT";
-#endif
-
-#if OS_FUCHSIA
-#if VK_KHR_external_memory
-    case VK_ERROR_INVALID_EXTERNAL_HANDLE_KHR:
-      return "VK_ERROR_INVALID_EXTERNAL_HANDLE_KHR";
-#elif VK_KHX_external_memory
-    case VK_ERROR_INVALID_EXTERNAL_HANDLE_KHX:
-      return "VK_ERROR_INVALID_EXTERNAL_HANDLE_KHX";
-#endif
-    case VK_ERROR_OUT_OF_POOL_MEMORY_KHR:
-      return "VK_ERROR_OUT_OF_POOL_MEMORY_KHR";
-#endif
+    default:
+      return "Unknown Error";
   }
-  return "Unknown Error";
+  return "";
 }
 
 }  // namespace vulkan

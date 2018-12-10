@@ -9,6 +9,7 @@ package io.flutter.view;
  * the first time.
  */
 public class FlutterRunArguments {
+  public String[] bundlePaths;
   public String bundlePath;
   public String entrypoint;
   public String libraryPath;
