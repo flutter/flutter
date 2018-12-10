@@ -1313,6 +1313,7 @@ class RenderEditable extends RenderBox {
     final Rect caretRect = caretPrototype.shift(effectiveOffset);
     const Radius floatingCursorRadius = Radius.circular(_kFloatingCaretRadius);
     final RRect caretRRect = RRect.fromRectAndRadius(caretRect, floatingCursorRadius);
+    print(caretRRect.left.toString() + ' and ' + caretRRect.top.toString() + ' and ' + caretRRect.right.toString() + ' and ' + caretRRect.bottom.toString() + ' and ' + caretRRect.brRadius.toString());
     canvas.drawRRect(caretRRect, paint);
   }
 

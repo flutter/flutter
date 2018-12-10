@@ -137,7 +137,6 @@ void main() {
     final RenderEditable editable = findRenderEditable(tester);
     editable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
 
-
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     editableTextState.updateFloatingCursor(const FloatingCursorEditingPoint(state: FloatingCursorDragState.Start));
     editableTextState.updateFloatingCursor(const FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
