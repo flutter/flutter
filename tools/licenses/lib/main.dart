@@ -809,8 +809,7 @@ class _RepositoryMultiLicenseNoticesForFilesFile extends _RepositoryLicenseFile 
   Iterable<License> get licenses => _licenses.values;
 }
 
-// TODO(goderbauer): use this in https://github.com/flutter/engine/pull/6886.
-class _RepositoryCxxStlDualLicenseFile extends _RepositoryLicenseFile { // ignore: unused_element
+class _RepositoryCxxStlDualLicenseFile extends _RepositoryLicenseFile {
   _RepositoryCxxStlDualLicenseFile(_RepositoryDirectory parent, fs.TextFile io)
     : _licenses = _parseLicenses(io), super(parent, io);
 
@@ -1488,6 +1487,62 @@ class _RepositoryJSR305SrcDirectory extends _RepositoryDirectory {
   }
 }
 
+class _RepositoryLibcxxDirectory extends _RepositoryDirectory {
+  _RepositoryLibcxxDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'utils'
+        && super.shouldRecurse(entry);
+  }
+
+  @override
+  _RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'src')
+      return new _RepositoryLibcxxSrcDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+
+  @override
+  _RepositoryFile createFile(fs.IoNode entry) {
+    if (entry.name == 'LICENSE.TXT')
+      return new _RepositoryCxxStlDualLicenseFile(this, entry);
+    return super.createFile(entry);
+  }
+}
+
+class _RepositoryLibcxxSrcDirectory extends _RepositoryDirectory {
+  _RepositoryLibcxxSrcDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  _RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'support')
+      return new _RepositoryLibcxxSrcSupportDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class _RepositoryLibcxxSrcSupportDirectory extends _RepositoryDirectory {
+  _RepositoryLibcxxSrcSupportDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'solaris'
+        && super.shouldRecurse(entry);
+  }
+}
+
+class _RepositoryLibcxxabiDirectory extends _RepositoryDirectory {
+  _RepositoryLibcxxabiDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  _RepositoryFile createFile(fs.IoNode entry) {
+    if (entry.name == 'LICENSE.TXT')
+      return new _RepositoryCxxStlDualLicenseFile(this, entry);
+    return super.createFile(entry);
+  }
+}
+
 class _RepositoryLibJpegDirectory extends _RepositoryDirectory {
   _RepositoryLibJpegDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -1699,6 +1754,10 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
       return new _RepositoryIcuDirectory(this, entry);
     if (entry.name == 'jsr-305')
       return new _RepositoryJSR305Directory(this, entry);
+    if (entry.name == 'libcxx')
+      return new _RepositoryLibcxxDirectory(this, entry);
+    if (entry.name == 'libcxxabi')
+      return new _RepositoryLibcxxabiDirectory(this, entry);
     if (entry.name == 'libjpeg')
       return new _RepositoryLibJpegDirectory(this, entry);
     if (entry.name == 'libjpeg_turbo' || entry.name == 'libjpeg-turbo')
