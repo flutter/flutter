@@ -3,6 +3,10 @@ author: Flutter Authors <flutter-dev@googlegroups.com>
 description: Flutter continuous integration performance and correctness tests.
 homepage: https://github.com/flutter/flutter
 
+environment:
+  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
+  sdk: ">=2.1.0-dev.5.0 <3.0.0"
+
 dependencies:
   args: 1.5.1
   file: 5.0.6
