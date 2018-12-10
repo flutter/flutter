@@ -35,7 +35,7 @@ std::string Settings::ToString() const {
   stream << "trace_startup: " << trace_startup << std::endl;
   stream << "endless_trace_buffer: " << endless_trace_buffer << std::endl;
   stream << "enable_dart_profiling: " << enable_dart_profiling << std::endl;
-  stream << "dart_non_checked_mode: " << dart_non_checked_mode << std::endl;
+  stream << "disable_dart_asserts: " << disable_dart_asserts << std::endl;
   stream << "enable_observatory: " << enable_observatory << std::endl;
   stream << "observatory_port: " << observatory_port << std::endl;
   stream << "ipv6: " << ipv6 << std::endl;
