@@ -761,10 +761,13 @@ void Paragraph::Layout(double width, bool force) {
       // TODO(garyq): Multipling in the style.height on the first line is
       // probably wrong. Figure out how paragraph and line heights are supposed
       // to work and fix it.
-      double line_spacing =
-          (line_number == 0)
-              ? -metrics.fAscent * style.height
-              : (-metrics.fAscent + metrics.fLeading) * style.height;
+      double leading =
+          style.use_custom_leading
+              ? (metrics.fDescent - metrics.fAscent) * style.leading
+              : metrics.fLeading;
+      double line_spacing = (line_number == 0)
+                                ? -metrics.fAscent * style.height
+                                : (-metrics.fAscent + leading) * style.height;
       if (line_spacing > max_line_spacing) {
         max_line_spacing = line_spacing;
         if (line_number == 0) {
