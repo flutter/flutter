@@ -1898,10 +1898,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         helperError: helperError,
         counter: counter,
         container: container,
-    ),
-    textDirection: textDirection,
-    textBaseline: textBaseline,
-    isFocused: isFocused,
+      ),
+      textDirection: textDirection,
+      textBaseline: textBaseline,
+      isFocused: isFocused,
     );
   }
 }

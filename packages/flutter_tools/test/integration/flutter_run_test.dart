@@ -16,15 +16,16 @@ void main() {
   group('flutter_run', () {
     Directory tempDir;
     final BasicProject _project = BasicProject();
-    FlutterTestDriver _flutter;
+    FlutterRunTestDriver _flutter;
 
     setUp(() async {
       tempDir = createResolvedTempDirectorySync();
       await _project.setUpIn(tempDir);
-      _flutter = FlutterTestDriver(tempDir);
+      _flutter = FlutterRunTestDriver(tempDir);
     });
 
     tearDown(() async {
+      await _flutter.stop();
       tryToDelete(tempDir);
     });
 
@@ -52,11 +53,7 @@ void main() {
     test('writes pid-file', () async {
       final File pidFile = tempDir.childFile('test.pid');
       await _flutter.run(pidFile: pidFile);
-      try {
-        expect(pidFile.existsSync(), isTrue);
-      } finally {
-        await _flutter.stop();
-      }
+      expect(pidFile.existsSync(), isTrue);
     });
   }, timeout: const Timeout.factor(6));
 }

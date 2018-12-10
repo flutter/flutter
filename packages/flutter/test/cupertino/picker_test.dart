@@ -132,6 +132,49 @@ void main() {
       expect(boxDecoration.gradient, isNull);
       expect(boxDecoration.color, isNotNull);
     });
+
+    testWidgets('gradient displays correctly with null background color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 300.0,
+              width: 300.0,
+              child: CupertinoPicker(
+                backgroundColor: null,
+                itemExtent: 15.0,
+                children: const <Widget>[
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                ],
+                onSelectedItemChanged: (int i) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      // If the background color is null, the gradient color should be white.
+      const Color backgroundColor = Color(0xFFFFFFFF);
+      final Container container = tester.firstWidget(find.byType(Container));
+      final BoxDecoration boxDecoration = container.decoration;
+      expect(boxDecoration.gradient.colors, <Color>[
+        backgroundColor,
+        backgroundColor.withAlpha(0xF2),
+        backgroundColor.withAlpha(0xDD),
+        backgroundColor.withAlpha(0x00),
+        backgroundColor.withAlpha(0x00),
+        backgroundColor.withAlpha(0xDD),
+        backgroundColor.withAlpha(0xF2),
+        backgroundColor,
+      ]);
+    });
   });
 
   group('scroll', () {

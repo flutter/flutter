@@ -139,10 +139,10 @@ has this value labeled as `"x-flutter-type": "icuShortTimePattern"`.
 
 The value of `scriptCategory` is based on the
 [Language categories reference](https://material.io/design/typography/language-support.html#language-categories-reference)
-section in the Material spec. The `scriptCategory` value is used when looking up
-the `TextTheme`, see the
-[MaterialTextGeometry](https://docs.flutter.io/flutter/material/MaterialTextGeometry/localizedFor.html)
-method.
+section in the Material spec. The Material theme uses the
+`scriptCategory` value to lookup a localized version of the default
+`TextTheme`, see
+[Typography.geometryThemeFor](https://docs.flutter.io/flutter/material/Typography/geometryThemeFor.html).
 
 
 ### Generated file localizations.dart: all of the localizations as a Map

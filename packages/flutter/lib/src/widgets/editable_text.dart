@@ -740,7 +740,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final bool longPress = cause == SelectionChangedCause.longPress;
       if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
         _selectionOverlay.showHandles();
-      if (longPress)
+      if (longPress || cause == SelectionChangedCause.doubleTap)
         _selectionOverlay.showToolbar();
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);

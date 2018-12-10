@@ -1414,4 +1414,41 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('en_CA'), findsOneWidget);
   });
+
+  testWidgets('WidgetsApp invalid preferredLocales', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildFrame(
+        supportedLocales: const <Locale>[
+          Locale('zh', 'CN'),
+          Locale('en', 'CA'),
+          Locale('en', 'US'),
+          Locale('en', 'AU'),
+          Locale('de', 'DE'),
+        ],
+        localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) {
+          if (locale == null)
+            return const Locale('und', 'US');
+          return const Locale('en', 'US');
+        },
+        buildContent: (BuildContext context) {
+          final Locale locale = Localizations.localeOf(context);
+          return Text('$locale');
+        }
+      )
+    );
+
+    await tester.binding.setLocales(const <Locale>[
+      Locale.fromSubtags(languageCode: 'en', countryCode: 'US'),]
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('en_US'), findsOneWidget);
+
+    await tester.binding.setLocales(null);
+    await tester.pumpAndSettle();
+    expect(find.text('und_US'), findsOneWidget);
+
+    await tester.binding.setLocales(const <Locale>[]);
+    await tester.pumpAndSettle();
+    expect(find.text('und_US'), findsOneWidget);
+  });
 }

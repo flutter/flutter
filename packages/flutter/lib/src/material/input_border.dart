@@ -195,6 +195,7 @@ class UnderlineInputBorder extends InputBorder {
     if (a is UnderlineInputBorder) {
       return UnderlineInputBorder(
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
+        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
       );
     }
     return super.lerpFrom(a, t);
@@ -205,6 +206,7 @@ class UnderlineInputBorder extends InputBorder {
     if (b is UnderlineInputBorder) {
       return UnderlineInputBorder(
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
+        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
       );
     }
     return super.lerpTo(b, t);

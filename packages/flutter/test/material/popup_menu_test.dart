@@ -509,6 +509,9 @@ void main() {
                 textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasImplicitScrolling,
+                    ],
                     children: <TestSemantics>[
                       TestSemantics(
                         actions: <SemanticsAction>[SemanticsAction.tap],
