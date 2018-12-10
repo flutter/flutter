@@ -461,10 +461,14 @@ class IosDevice implements Device {
 
 /// Path to the `adb` executable.
 String get adbPath {
-  final String androidHome = Platform.environment['ANDROID_HOME'];
+  
+  final String androidHome =
+      Platform.environment['ANDROID_HOME'] != null
+          ? Platform.environment['ANDROID_HOME']
+          : Platform.environment['ANDROID_SDK_ROOT'];
 
   if (androidHome == null)
-    throw 'ANDROID_HOME environment variable missing. This variable must '
+    throw 'ANDROID_SDK_ROOT environment variable missing. This variable must '
         'point to the Android SDK directory containing platform-tools.';
 
   final String adbPath = path.join(androidHome, 'platform-tools/adb');
