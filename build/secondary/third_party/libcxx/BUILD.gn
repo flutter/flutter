@@ -44,8 +44,8 @@ source_set("libcxx") {
     "//third_party/libcxxabi",
   ]
 
-  # TODO(goderbauer): remove when all sources build with LTO for android_arm64.
-  if (is_android && current_cpu == "arm64") {
+  # TODO(goderbauer): remove when all sources build with LTO for android_arm64 and android_x64.
+  if (is_android && (current_cpu == "arm64" || current_cpu == "x64")) {
     sources -= [ "src/new.cpp" ]
     deps += [ ":libcxx_nolto" ]
   }
