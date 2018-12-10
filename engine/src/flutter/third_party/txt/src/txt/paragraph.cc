@@ -479,10 +479,6 @@ void Paragraph::Layout(double width, bool force) {
       }
     }
 
-    // TODO(garyq): Make GetRectsForRange return a zero-width box for the
-    // excluded whitespace such that the caret placement is correct regardless
-    // of the index being whitespace or not.
-
     // Exclude trailing whitespace from right and center-justified lines so the
     // last visible character in the line will be flush with the right margin.
     size_t line_end_index =
@@ -739,6 +735,23 @@ void Paragraph::Layout(double width, bool force) {
                               next_line_start - line_range.start);
     code_unit_runs_.insert(code_unit_runs_.end(), line_code_unit_runs.begin(),
                            line_code_unit_runs.end());
+
+    // Add extra empty metrics for skipped whitespace at line end. This allows
+    // GetRectsForRange to properly draw empty rects at the ends of lines with
+    // truncated whitespace.
+    if (line_end_index < line_range.end) {
+      std::vector<GlyphPosition> empty_glyph_positions;
+      double end_x = line_code_unit_runs.back().positions.back().x_pos.end;
+      for (size_t index = line_end_index; index < line_range.end; ++index) {
+        empty_glyph_positions.emplace_back(end_x, 0, index, 1);
+      }
+      code_unit_runs_.emplace_back(
+          std::move(empty_glyph_positions),
+          Range<size_t>(line_end_index, line_range.end),
+          Range<double>(end_x, end_x), line_code_unit_runs.back().line_number,
+          line_code_unit_runs.back().font_metrics,
+          line_code_unit_runs.back().direction);
+    }
 
     double max_line_spacing = 0;
     double max_descent = 0;
