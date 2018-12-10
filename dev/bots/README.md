@@ -15,7 +15,8 @@ the Flutter team if you need to do that.
 The [Cirrus](https://cirrus-ci.org)-based bots run the
 [`test.dart`](test.dart) script for each PR and submission. This does
 testing for the tools, for the framework, and (for submitted changes
-only) rebuilds and updates the master branch API docs staging site.
+only) rebuilds and updates the master branch API docs
+[staging site](https://master-docs-flutter-io.firebaseapp.com).
 For tagged dev and beta builds, it also builds and deploys the gallery
 app to the app stores. It is configured by the
 [.cirrus.yml](/.cirrus.yml).
@@ -38,7 +39,7 @@ their infrastructure.
 
 To work on this infrastructure you will need:
 
-- [install depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools)
+- [depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools)
 - Python package installer: `sudo apt-get install python-pip`
 - Python coverage package (only needed for `training_simulation`): `sudo pip install coverage`
 

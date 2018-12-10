@@ -21,7 +21,7 @@ final List<String> flutterTestArgs = <String>[];
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'tool_tests': _runToolTests,
-  'aot_build_tests': _runAotBuildTests,
+  'build_tests': _runBuildTests,
   'coverage': _runCoverage,
 };
 
@@ -150,25 +150,76 @@ Future<void> _runToolTests() async {
   print('${bold}DONE: All tests successful.$reset');
 }
 
-/// Verifies that AOT builds of some examples apps finish
-/// without crashing. It does not actually launch the AOT-built
-/// apps. That happens later in the devicelab. This is just
-/// a smoke-test.
-Future<void> _runAotBuildTests() async {
-  await _flutterBuildAot(path.join('examples', 'hello_world'));
-  await _flutterBuildAot(path.join('examples', 'flutter_gallery'));
-  await _flutterBuildAot(path.join('examples', 'flutter_view'));
+/// Verifies that AOT, APK, and IPA (if on macOS) builds of some
+/// examples apps finish without crashing. It does not actually
+/// launch the apps. That happens later in the devicelab. This is
+/// just a smoke-test. In particular, this will verify we can build
+/// when there are spaces in the path name for the Flutter SDK and
+/// target app.
+Future<void> _runBuildTests() async {
+  final List<String> paths = <String>[
+    path.join('examples', 'hello_world'),
+    path.join('examples', 'flutter_gallery'),
+    path.join('examples', 'flutter_view'),
+  ];
+  for (String path in paths) {
+    await _flutterBuildAot(path);
+    await _flutterBuildApk(path);
+    await _flutterBuildIpa(path);
+  }
 
-  print('${bold}DONE: All AOT build tests successful.$reset');
+  print('${bold}DONE: All build tests successful.$reset');
 }
 
-Future<void> _flutterBuildAot(String relativePathToApplication) {
-  return runCommand(flutter,
-    <String>['build', 'aot'],
+Future<void> _flutterBuildAot(String relativePathToApplication) async {
+  print('Running AOT build tests...');
+  await runCommand(flutter,
+    <String>['build', 'aot', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
     expectNonZeroExit: false,
     timeout: _kShortTimeout,
   );
+  print('Done.');
+}
+
+Future<void> _flutterBuildApk(String relativePathToApplication) async {
+  // TODO(dnfield): See if we can get Android SDK on all Cirrus platforms.
+  if (Platform.environment['ANDROID_HOME']?.isEmpty ?? true) {
+    return;
+  }
+  print('Running APK build tests...');
+  await runCommand(flutter,
+    <String>['build', 'apk', '--debug', '-v'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+  print('Done.');
+}
+
+Future<void> _flutterBuildIpa(String relativePathToApplication) async {
+  if (!Platform.isMacOS) {
+    return;
+  }
+  print('Running IPA build tests...');
+  // Install Cocoapods.  We don't have these checked in for the examples,
+  // and build ios doesn't take care of it automatically.
+  final File podfile = File(path.join(flutterRoot, relativePathToApplication, 'ios', 'Podfile'));
+  if (podfile.existsSync()) {
+    await runCommand('pod',
+      <String>['install'],
+      workingDirectory: podfile.parent.path,
+      expectNonZeroExit: false,
+      timeout: _kShortTimeout,
+    );
+  }
+  await runCommand(flutter,
+    <String>['build', 'ios', '--no-codesign', '--debug', '-v'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+  print('Done.');
 }
 
 Future<void> _runTests() async {
