@@ -25,8 +25,6 @@ std::string Settings::ToString() const {
          << std::endl;
   stream << "application_library_path: " << application_library_path
          << std::endl;
-  stream << "main_dart_file_path: " << main_dart_file_path << std::endl;
-  stream << "packages_file_path: " << packages_file_path << std::endl;
   stream << "temp_directory_path: " << temp_directory_path << std::endl;
   stream << "dart_flags:" << std::endl;
   for (const auto& dart_flag : dart_flags) {

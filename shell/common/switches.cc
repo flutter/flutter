@@ -170,12 +170,6 @@ blink::Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   command_line.GetOptionValue(FlagForSwitch(Switch::FlutterAssetsDir),
                               &settings.assets_path);
 
-  command_line.GetOptionValue(FlagForSwitch(Switch::MainDartFile),
-                              &settings.main_dart_file_path);
-
-  command_line.GetOptionValue(FlagForSwitch(Switch::Packages),
-                              &settings.packages_file_path);
-
   std::string aot_shared_library_path;
   command_line.GetOptionValue(FlagForSwitch(Switch::AotSharedLibraryPath),
                               &aot_shared_library_path);
