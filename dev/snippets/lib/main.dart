@@ -12,12 +12,13 @@ import 'configuration.dart';
 import 'snippets.dart';
 
 const String _kElementOption = 'element';
+const String _kHelpOption = 'help';
 const String _kInputOption = 'input';
 const String _kLibraryOption = 'library';
+const String _kOutputOption = 'output';
 const String _kPackageOption = 'package';
 const String _kTemplateOption = 'template';
 const String _kTypeOption = 'type';
-const String _kOutputOption = 'output';
 
 /// Generates snippet dartdoc output for a given input, and creates any sample
 /// applications needed by the snippet.
@@ -73,8 +74,19 @@ void main(List<String> argList) {
     defaultsTo: environment['ELEMENT_NAME'],
     help: 'The name of the element that this snippet belongs to.',
   );
+  parser.addFlag(
+    _kHelpOption,
+    defaultsTo: false,
+    negatable: false,
+    help: 'Prints help documentation for this command',
+  );
 
   final ArgResults args = parser.parse(argList);
+
+  if (args[_kHelpOption]) {
+    stderr.writeln(parser.usage);
+    exit(0);
+  }
 
   final SnippetType snippetType = SnippetType.values
       .firstWhere((SnippetType type) => getEnumName(type) == args[_kTypeOption], orElse: () => null);

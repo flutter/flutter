@@ -9,9 +9,11 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 
 const String kDocsRoot = 'dev/docs';
 const String kPublishRoot = '$kDocsRoot/doc';
+const String kSnippetsRoot = 'dev/snippets';
 
 /// This script expects to run with the cwd as the root of the flutter repo. It
 /// will generate documentation for the packages in `//packages/` and write the
@@ -84,15 +86,15 @@ Future<void> main(List<String> arguments) async {
   final String pubExecutable = '$flutterRoot/bin/cache/dart-sdk/bin/pub';
 
   // Run pub.
-  Process process = await Process.start(
+  ProcessWrapper process = ProcessWrapper(await Process.start(
     pubExecutable,
     <String>['get'],
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
-  );
+  ));
   printStream(process.stdout, prefix: 'pub:stdout: ');
   printStream(process.stderr, prefix: 'pub:stderr: ');
-  final int code = await process.exitCode;
+  final int code = await process.done;
   if (code != 0)
     exit(code);
 
@@ -141,6 +143,7 @@ Future<void> main(List<String> arguments) async {
       'cli_util',
       'csslib',
       'flutter_goldens',
+      'flutter_goldens_client',
       'front_end',
       'fuchsia_remote_debug_protocol',
       'glob',
@@ -175,19 +178,19 @@ Future<void> main(List<String> arguments) async {
       'package:web_socket_channel/html.dart',
     ].join(','),
     '--favicon=favicon.ico',
-    '--package-order', 'flutter,Dart,flutter_test,flutter_driver',
+    '--package-order', 'flutter,Dart,platform_integration,flutter_test,flutter_driver',
     '--auto-include-dependencies',
   ]);
 
   String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
   print('Executing: (cd $kDocsRoot ; $pubExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
 
-  process = await Process.start(
+  process = ProcessWrapper(await Process.start(
     pubExecutable,
     dartdocArgs,
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
-  );
+  ));
   printStream(process.stdout, prefix: args['json'] ? '' : 'dartdoc:stdout: ',
     filter: args['verbose'] ? const <Pattern>[] : <Pattern>[
       RegExp(r'^generating docs for library '), // unnecessary verbosity
@@ -199,7 +202,7 @@ Future<void> main(List<String> arguments) async {
       RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
     ],
   );
-  final int exitCode = await process.exitCode;
+  final int exitCode = await process.done;
 
   if (exitCode != 0)
     exit(exitCode);

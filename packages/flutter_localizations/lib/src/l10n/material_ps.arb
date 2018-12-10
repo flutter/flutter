@@ -49,5 +49,6 @@
   "collapsedIconTapHint": "TBD",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "TBD",
-  "remainingTextFieldCharacterCountOther": "TBD"
+  "remainingTextFieldCharacterCountOther": "TBD",
+  "refreshIndicatorSemanticLabel": "TBD"
 }

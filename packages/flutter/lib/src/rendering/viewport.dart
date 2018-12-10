@@ -984,11 +984,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
     assert(targetOffset != null);
 
-    if (duration == Duration.zero) {
-      offset.jumpTo(targetOffset.offset);
-    } else {
-      offset.animateTo(targetOffset.offset, duration: duration, curve: curve);
-    }
+    offset.moveTo(targetOffset.offset, duration: duration, curve: curve);
     return targetOffset.rect;
   }
 }

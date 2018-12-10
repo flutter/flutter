@@ -11,6 +11,7 @@ import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
+import '../compile.dart';
 import '../device.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
@@ -48,6 +49,7 @@ class AttachCommand extends FlutterCommand {
     usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
+    usesFuchsiaOptions(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
@@ -60,12 +62,6 @@ class AttachCommand extends FlutterCommand {
         'project-root',
         hide: !verboseHelp,
         help: 'Normally used only in run target',
-      )..addOption(
-        'module',
-        abbr: 'm',
-        hide: !verboseHelp,
-        help: 'The name of the module (required if attaching to a fuchsia device)',
-        valueHelp: 'module-name',
       )..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
@@ -141,15 +137,23 @@ class AttachCommand extends FlutterCommand {
           'Waiting for a connection from Flutter on ${device.name}...',
           expectSlowOperation: true,
         );
-        final int localPort = await device.findIsolatePort(module, localPorts);
-        if (localPort == null) {
+        try {
+          final int localPort = await device.findIsolatePort(module, localPorts);
+          if (localPort == null) {
+            throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
+          }
+          observatoryUri = ipv6
+            ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
+            : Uri.parse('http://$ipv4Loopback:$localPort/');
+          status.stop();
+        } catch (_) {
+          final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
+          for (ForwardedPort port in ports) {
+            await device.portForwarder.unforward(port);
+          }
           status.cancel();
-          throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
+          rethrow;
         }
-        status.stop();
-        observatoryUri = ipv6
-          ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
-          : Uri.parse('http://$ipv4Loopback:$localPort/');
       } else {
         ProtocolDiscovery observatoryDiscovery;
         try {
@@ -176,6 +180,7 @@ class AttachCommand extends FlutterCommand {
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
+        targetModel: TargetModel(argResults['target-model']),
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = hotRunnerFactory.build(
@@ -208,7 +213,9 @@ class AttachCommand extends FlutterCommand {
       }
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
-      ports.forEach(device.portForwarder.unforward);
+      for (ForwardedPort port in ports) {
+        await device.portForwarder.unforward(port);
+      }
     }
     return null;
   }

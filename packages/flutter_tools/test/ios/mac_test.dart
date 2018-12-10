@@ -127,6 +127,14 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
+    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when ideviceinfo returns specific error code and message', () async {
+      when(mockProcessManager.run(<String>['ideviceinfo', '-u', 'foo', '-k', 'bar', '--simple']))
+          .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 255, 'No device found with udid foo, is it plugged in?', '')));
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotFoundError>()));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
     group('screenshot', () {
       final String outputPath = fs.path.join('some', 'test', 'path', 'image.png');
       MockProcessManager mockProcessManager;

@@ -38,7 +38,7 @@ enum CrossFadeState {
 /// top child and the bottom child should be keyed using the provided
 /// `topChildKey` and `bottomChildKey` keys respectively.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// Widget defaultLayoutBuilder(Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey) {
@@ -60,6 +60,7 @@ enum CrossFadeState {
 ///   );
 /// }
 /// ```
+/// {@end-tool}
 typedef AnimatedCrossFadeBuilder = Widget Function(Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey);
 
 /// A widget that cross-fades between two given children and animates itself
@@ -81,7 +82,7 @@ typedef AnimatedCrossFadeBuilder = Widget Function(Widget topChild, Key topChild
 /// [AnimatedCrossFade] is rebuilt with a different value for the
 /// [crossFadeState] property.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This code fades between two representations of the Flutter logo. It depends
 /// on a boolean field `_first`; when `_first` is true, the first logo is shown,
@@ -97,6 +98,7 @@ typedef AnimatedCrossFadeBuilder = Widget Function(Widget topChild, Key topChild
 ///   crossFadeState: _first ? CrossFadeState.showFirst : CrossFadeState.showSecond,
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

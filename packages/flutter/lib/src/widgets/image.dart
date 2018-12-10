@@ -298,7 +298,7 @@ class Image extends StatefulWidget {
   /// which corresponds to bilinear interpolation, rather than the default
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Suppose that the project's `pubspec.yaml` file contains the following:
   ///
@@ -309,6 +309,7 @@ class Image extends StatefulWidget {
   ///     - images/2x/cat.png
   ///     - images/3.5x/cat.png
   /// ```
+  /// {@end-tool}
   ///
   /// On a screen with a device pixel ratio of 2.0, the following widget would
   /// render the `images/2x/cat.png` file:
@@ -336,11 +337,13 @@ class Image extends StatefulWidget {
   /// must be provided. For instance, suppose a package called `my_icons` has
   /// `icons/heart.png` .
   ///
+  /// {@tool sample}
   /// Then to display the image, use:
   ///
   /// ```dart
   /// Image.asset('icons/heart.png', package: 'my_icons')
   /// ```
+  /// {@end-tool}
   ///
   /// Assets used by the package itself should also be displayed using the
   /// [package] argument as above.

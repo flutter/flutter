@@ -128,7 +128,7 @@ class Typography extends Diagnosticable {
   ///
   /// This [TextTheme] should provide color but not geometry (font size,
   /// weight, etc). A text theme's geometry depends on the locale. To look
-  /// up a localized [TextTheme], use the the overall [Theme], for example:
+  /// up a localized [TextTheme], use the overall [Theme], for example:
   /// `Theme.of(context).textTheme`.
   ///
   /// The [englishLike], [dense], and [tall] text theme's provide locale-specific

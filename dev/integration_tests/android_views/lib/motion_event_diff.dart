@@ -95,23 +95,6 @@ void diffPointerCoordsList(StringBuffer diffBuffer,
     return;
   }
 
-  if (isSinglePointerAction(originalEvent['action'])) {
-    final int idx = getPointerIdx(originalEvent['action']);
-    final Map<String, dynamic> expected =
-        expectedList[idx].cast<String, dynamic>();
-    final Map<String, dynamic> actual = actualList[idx].cast<String, dynamic>();
-    diffPointerCoords(expected, actual, idx, diffBuffer);
-    // For POINTER_UP and POINTER_DOWN events the engine drops the data for all pointers
-    // but for the pointer that was taken up/down.
-    // See: https://github.com/flutter/flutter/issues/19882
-    //
-    // Until that issue is resolved, we only compare the pointer for which the action
-    // applies to here.
-    //
-    // TODO(amirh): Compare all pointers once the issue mentioned above is resolved.
-    return;
-  }
-
   for (int i = 0; i < expectedList.length; i++) {
     final Map<String, dynamic> expected =
         expectedList[i].cast<String, dynamic>();
@@ -149,12 +132,6 @@ void diffMaps(
           '$messagePrefix$key (expected: ${expected[key]} actual: ${actual[key]}) ');
     }
   }
-}
-
-bool isSinglePointerAction(int action) {
-  final int actionMasked = getActionMasked(action);
-  return actionMasked == 5 || // POINTER_DOWN
-      actionMasked == 6; // POINTER_UP
 }
 
 int getActionMasked(int action) => action & 0xff;

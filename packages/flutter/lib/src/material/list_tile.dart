@@ -170,7 +170,7 @@ enum ListTileControlAffinity {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// Here is a simple tile with an icon and some text.
 ///
@@ -180,6 +180,8 @@ enum ListTileControlAffinity {
 ///   title: const Text('The seat for the narrator'),
 /// )
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// Tiles can be much more elaborate. Here is a tile which can be tapped, but
 /// which is disabled when the `_act` variable is not 2. When the tile is
@@ -196,6 +198,7 @@ enum ListTileControlAffinity {
 ///   onTap: () { /* react to the tile being tapped */ }
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

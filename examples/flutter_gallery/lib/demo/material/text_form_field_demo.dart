@@ -72,7 +72,10 @@ class _PasswordFieldState extends State<PasswordField> {
               _obscureText = !_obscureText;
             });
           },
-          child: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
+          child: Icon(
+            _obscureText ? Icons.visibility : Icons.visibility_off,
+            semanticLabel: _obscureText ? 'show password' : 'hide password',
+          ),
         ),
       ),
     );

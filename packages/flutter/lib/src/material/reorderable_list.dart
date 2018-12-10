@@ -25,9 +25,7 @@ import 'material_localizations.dart';
 /// [ReorderableListView] will need to account for this when inserting before
 /// [newIndex].
 ///
-/// ## Sample code
-///
-/// Example implementation:
+/// {@tool sample}
 ///
 /// ```dart
 /// final List<MyDataObject> backingList = <MyDataObject>[/* ... */];
@@ -41,6 +39,7 @@ import 'material_localizations.dart';
 ///   backingList.insert(newIndex, element);
 /// }
 /// ```
+/// {@end-tool}
 typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 
 /// A list whose items the user can interactively reorder by dragging.
