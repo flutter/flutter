@@ -120,8 +120,8 @@ int RunTester(const blink::Settings& settings, bool run_forever) {
     return EXIT_FAILURE;
   }
 
-  if (settings.main_dart_file_path.empty()) {
-    FML_LOG(ERROR) << "Main dart file not specified.";
+  if (settings.application_kernel_asset.empty()) {
+    FML_LOG(ERROR) << "Dart kernel file not specified.";
     return EXIT_FAILURE;
   }
 
@@ -142,8 +142,8 @@ int RunTester(const blink::Settings& settings, bool run_forever) {
       fml::FileMapping::Protection::kRead};
   auto main_dart_file_mapping = std::make_unique<fml::FileMapping>(
       fml::OpenFile(
-          fml::paths::AbsolutePath(settings.main_dart_file_path).c_str(), false,
-          fml::FilePermission::kRead),
+          fml::paths::AbsolutePath(settings.application_kernel_asset).c_str(),
+          false, fml::FilePermission::kRead),
       protection);
 
   auto isolate_configuration =
@@ -243,11 +243,11 @@ int main(int argc, char* argv[]) {
   if (command_line.positional_args().size() > 0) {
     // The tester may not use the switch for the main dart file path. Specifying
     // it as a positional argument instead.
-    settings.main_dart_file_path = command_line.positional_args()[0];
+    settings.application_kernel_asset = command_line.positional_args()[0];
   }
 
-  if (settings.main_dart_file_path.size() == 0) {
-    FML_LOG(ERROR) << "Main dart file path not specified.";
+  if (settings.application_kernel_asset.size() == 0) {
+    FML_LOG(ERROR) << "Dart kernel file not specified.";
     return EXIT_FAILURE;
   }
 

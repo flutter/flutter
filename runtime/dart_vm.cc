@@ -325,18 +325,18 @@ DartVM::DartVM(const Settings& settings,
                 arraysize(kDartPrecompilationArgs));
   }
 
-  // Enable checked mode if we are not running precompiled code. We run non-
+  // Enable Dart assertions if we are not running precompiled code. We run non-
   // precompiled code only in the debug product mode.
-  bool use_checked_mode = !settings.dart_non_checked_mode;
+  bool enable_asserts = !settings.disable_dart_asserts;
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DYNAMIC_PROFILE || \
     FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DYNAMIC_RELEASE
-  use_checked_mode = false;
+  enable_asserts = false;
 #endif
 
 #if !OS_FUCHSIA
   if (IsRunningPrecompiledCode()) {
-    use_checked_mode = false;
+    enable_asserts = false;
   }
 #endif  // !OS_FUCHSIA
 
@@ -347,7 +347,7 @@ DartVM::DartVM(const Settings& settings,
               arraysize(kDartWriteProtectCodeArgs));
 #endif
 
-  if (use_checked_mode) {
+  if (enable_asserts) {
     PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
   }
 
