@@ -120,13 +120,13 @@ DEF_SWITCH(RunForever,
            "run-forever",
            "In non-interactive mode, keep the shell running after the Dart "
            "script has completed.")
-DEF_SWITCH(DartNonCheckedMode,
-           "dart-non-checked-mode",
-           "Dart code runs in checked mode when the runtime mode is debug. In "
-           "profile and release product modes, the application code is "
-           "precompiled and checked mode is unsupported. However, this flag "
-           "may be specified if the user wishes to run in the debug product "
-           "mode (i.e. with JIT or DBC) with checked mode off.")
+DEF_SWITCH(DisableDartAsserts,
+           "disable-dart-asserts",
+           "Dart code runs with assertions enabled when the runtime mode is "
+           "debug. In profile and release product modes, assertions are "
+           "disabled. This flag may be specified if the user wishes to run "
+           "with assertions disabled in the debug product mode (i.e. with JIT "
+           "or DBC).")
 DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);
