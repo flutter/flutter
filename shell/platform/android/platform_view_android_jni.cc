@@ -236,15 +236,17 @@ std::unique_ptr<IsolateConfiguration> CreateIsolateConfiguration(
 static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
                                             jobject jcaller,
                                             jlong shell_holder,
-                                            jstring jbundlepath,
-                                            jstring jdefaultPath,
+                                            jobjectArray jbundlepaths,
                                             jstring jEntrypoint,
                                             jstring jLibraryUrl,
                                             jobject jAssetManager) {
   auto asset_manager = std::make_shared<blink::AssetManager>();
+  for (const auto& bundlepath :
+       fml::jni::StringArrayToVector(env, jbundlepaths)) {
+    if (bundlepath.empty()) {
+      continue;
+    }
 
-  const auto bundlepath = fml::jni::JavaStringToString(env, jbundlepath);
-  if (bundlepath.size() > 0) {
     // If we got a bundle path, attempt to use that as a directory asset
     // bundle or a zip asset bundle.
     const auto file_ext_index = bundlepath.rfind(".");
@@ -255,28 +257,21 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
       asset_manager->PushBack(
           std::make_unique<blink::DirectoryAssetBundle>(fml::OpenDirectory(
               bundlepath.c_str(), false, fml::FilePermission::kRead)));
+
+      // Use the last path component of the bundle path to determine the
+      // directory in the APK assets.
+      const auto last_slash_index = bundlepath.rfind("/", bundlepath.size());
+      if (last_slash_index != std::string::npos) {
+        auto apk_asset_dir = bundlepath.substr(
+            last_slash_index + 1, bundlepath.size() - last_slash_index);
+
+        asset_manager->PushBack(std::make_unique<blink::APKAssetProvider>(
+            env,                       // jni environment
+            jAssetManager,             // asset manager
+            std::move(apk_asset_dir))  // apk asset dir
+        );
+      }
     }
-
-    // Use the last path component of the bundle path to determine the
-    // directory in the APK assets.
-    const auto last_slash_index = bundlepath.rfind("/", bundlepath.size());
-    if (last_slash_index != std::string::npos) {
-      auto apk_asset_dir = bundlepath.substr(
-          last_slash_index + 1, bundlepath.size() - last_slash_index);
-
-      asset_manager->PushBack(std::make_unique<blink::APKAssetProvider>(
-          env,                       // jni environment
-          jAssetManager,             // asset manager
-          std::move(apk_asset_dir))  // apk asset dir
-      );
-    }
-  }
-
-  const auto defaultpath = fml::jni::JavaStringToString(env, jdefaultPath);
-  if (defaultpath.size() > 0) {
-    asset_manager->PushBack(
-        std::make_unique<blink::DirectoryAssetBundle>(fml::OpenDirectory(
-            defaultpath.c_str(), false, fml::FilePermission::kRead)));
   }
 
   auto isolate_configuration = CreateIsolateConfiguration(*asset_manager);
@@ -591,9 +586,8 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
       },
       {
           .name = "nativeRunBundleAndSnapshotFromLibrary",
-          .signature =
-              "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;"
-              "Ljava/lang/String;Landroid/content/res/AssetManager;)V",
+          .signature = "(J[Ljava/lang/String;Ljava/lang/String;"
+                       "Ljava/lang/String;Landroid/content/res/AssetManager;)V",
           .fnPtr =
               reinterpret_cast<void*>(&shell::RunBundleAndSnapshotFromLibrary),
       },
