@@ -1,0 +1,95 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("libcxx_config") {
+  include_dirs = [ "include" ]
+}
+
+source_set("libcxx") {
+  sources = [
+    "src/algorithm.cpp",
+    "src/any.cpp",
+    "src/bind.cpp",
+    "src/chrono.cpp",
+    "src/condition_variable.cpp",
+    "src/debug.cpp",
+    "src/exception.cpp",
+    "src/functional.cpp",
+    "src/future.cpp",
+    "src/hash.cpp",
+    "src/ios.cpp",
+    "src/iostream.cpp",
+    "src/locale.cpp",
+    "src/memory.cpp",
+    "src/mutex.cpp",
+    "src/new.cpp",
+    "src/optional.cpp",
+    "src/random.cpp",
+    "src/regex.cpp",
+    "src/shared_mutex.cpp",
+    "src/stdexcept.cpp",
+    "src/string.cpp",
+    "src/strstream.cpp",
+    "src/system_error.cpp",
+    "src/thread.cpp",
+    "src/typeinfo.cpp",
+    "src/utility.cpp",
+    "src/valarray.cpp",
+    "src/variant.cpp",
+    "src/vector.cpp",
+  ]
+
+  deps = [
+    "//third_party/libcxxabi",
+  ]
+
+  # TODO(goderbauer): remove when all sources build with LTO for android_arm64.
+  if (is_android && current_cpu == "arm64") {
+    sources -= [ "src/new.cpp" ]
+    deps += [ ":libcxx_nolto" ]
+  }
+
+  public_configs = [
+    ":libcxx_config",
+    "//third_party/libcxxabi:libcxxabi_config",
+  ]
+
+  defines = [
+    "_LIBCPP_NO_EXCEPTIONS",
+    "_LIBCPP_NO_RTTI",
+    "_LIBCPP_BUILDING_LIBRARY",
+    "LIBCXX_BUILDING_LIBCXXABI",
+  ]
+
+  if (is_clang) {
+    # shared_mutex.cpp and debug.cpp are purposefully in violation.
+    cflags_cc = [ "-Wno-thread-safety-analysis" ]
+  }
+}
+
+source_set("libcxx_nolto") {
+  visibility = [ ":*" ]
+
+  sources = [
+    "src/new.cpp",
+  ]
+
+  cflags_cc = [ "-fno-lto" ]
+
+  deps = [
+    "//third_party/libcxxabi",
+  ]
+
+  public_configs = [
+    ":libcxx_config",
+    "//third_party/libcxxabi:libcxxabi_config",
+  ]
+
+  defines = [
+    "_LIBCPP_NO_EXCEPTIONS",
+    "_LIBCPP_NO_RTTI",
+    "_LIBCPP_BUILDING_LIBRARY",
+    "LIBCXX_BUILDING_LIBCXXABI",
+  ]
+}
