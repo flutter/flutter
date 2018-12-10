@@ -525,7 +525,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
     _floatingCursorController = AnimationController(vsync: this);
-    _floatingCursorTicker = Ticker(_onFloatingCursorRestTick);
+    _floatingCursorController.addListener(_onFloatingCursorResetTick);
   }
 
   @override
@@ -612,7 +612,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Offset _pointOffsetOrigin;
   Offset _lastBoundedOffset;
   AnimationController _floatingCursorController;
-  Ticker _floatingCursorTicker;
   bool _hasRenderedFinalFrame = false;
 
   // Because the center of the cursor is preferredLineHeight / 2 below the touch
@@ -643,25 +642,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
         break;
       case FloatingCursorDragState.End:
-        _floatingCursorTicker.start();
         _floatingCursorController.value = 0.0;
         _floatingCursorController.animateTo(1.0, duration: _floatingCursorResetTime, curve: Curves.decelerate);
       break;
     }
   }
 
-  void _onFloatingCursorRestTick(Duration elapsed) {
+  void _onFloatingCursorResetTick() {
     final Offset finalPosition = renderEditable.getLocalRectForCaret(_lastTextPosition).center - _floatingCursorOffset;
     if (_floatingCursorController.isCompleted) {
-      if (!_hasRenderedFinalFrame) {
-        renderEditable.setFloatingCursor(FloatingCursorDragState.Update, finalPosition, _lastTextPosition, resetLerpValue: 1.0);
-        _hasRenderedFinalFrame = true;
-      } else {
-        renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition);
-        if (_lastTextPosition.offset != renderEditable.selection.baseOffset)
-          _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable, SelectionChangedCause.tap);
-        _floatingCursorTicker.stop();
-      }
+      renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition);
+      if (_lastTextPosition.offset != renderEditable.selection.baseOffset)
+        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable, SelectionChangedCause.tap);
     } else {
       final double lerpValue = _floatingCursorController.value;
       final double lerpX = ui.lerpDouble(_lastBoundedOffset.dx, finalPosition.dx, lerpValue);
