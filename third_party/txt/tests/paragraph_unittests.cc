@@ -821,11 +821,15 @@ TEST_F(ParagraphTest, ChineseParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-// TODO(garyq): Support RTL languages.
-TEST_F(ParagraphTest, DISABLED_ArabicParagraph) {
+TEST_F(ParagraphTest, ArabicParagraph) {
   const char* text =
       "من أسر وإعلان الخاصّة وهولندا،, عل قائمة الضغوط بالمطالبة تلك. الصفحة "
-      "بمباركة التقليدية قام عن. تصفح";
+      "بمباركة التقليدية قام عن. تصفحبمباركة التقل. يدية فح قام عن. "
+      "تصفحبمباركة التقليدية قام عن. تصفحبمباركة التقليدية تصفحب قام عن. فح "
+      "تصفحبمقباركة التقلفحيدية قام عن. تصفحبمباركة التقليدية ققام عن. "
+      "تصفحبمباركة التقليدية قام عن. تصفحبمباركة التقليدية قام عن. تص  تصفحب "
+      "فحبمباركة التقققليدية قام عن. تصفحبمباركة التقليدية قام عن. تصفحبمباركة "
+      "التقليدية قام عن. تصفحبمباركة التقليدية قام عن. تصفح";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
                           icu_text.getBuffer() + icu_text.length());
@@ -838,12 +842,9 @@ TEST_F(ParagraphTest, DISABLED_ArabicParagraph) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
-  text_style.font_size = 35;
+  text_style.font_size = 45;
   text_style.letter_spacing = 2;
   text_style.font_family = "Katibeh";
-  text_style.decoration = TextDecoration::kUnderline |
-                          TextDecoration::kOverline |
-                          TextDecoration::kLineThrough;
   text_style.decoration_style = txt::TextDecorationStyle::kSolid;
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
@@ -856,21 +857,190 @@ TEST_F(ParagraphTest, DISABLED_ArabicParagraph) {
   paragraph->Layout(GetTestCanvasWidth() - 100);
 
   paragraph->Paint(GetCanvas(), 0, 0);
+  ASSERT_TRUE(Snapshot());
 
-  ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
+  ASSERT_EQ(paragraph->text_.size(), 458ull);  // Arabic script uses ligatures
 
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
   ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
   ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
-  ASSERT_EQ(paragraph->records_.size(), 2ull);
+  ASSERT_EQ(paragraph->records_.size(),
+            8ull);  // 8 lines, breaks into 8 records.
   ASSERT_EQ(paragraph->paragraph_style_.text_direction, TextDirection::rtl);
 
-  for (size_t i = 0; i < u16_text.length(); i++) {
-    ASSERT_EQ(paragraph->text_[i], u16_text[u16_text.length() - i]);
-  }
+  ASSERT_EQ(paragraph->line_heights_[0], 45);
+  ASSERT_EQ(paragraph->line_heights_[1], 99);
+  ASSERT_EQ(paragraph->line_heights_[2], 153);
+  ASSERT_EQ(paragraph->line_heights_[3], 207);
+}
 
+TEST_F(ParagraphTest, ArabicLeadingOverrideParagraph) {
+  const char* text =
+      "من أسر وإعلان الخاصّة وهولندا،, عل قائمة الضغوط بالمطالبة تلك. الصفحة "
+      "بمباركة التقليدية قام عن. تصفحبمباركة التقل. يدية فح قام عن. "
+      "تصفحبمباركة التقليدية قام عن. تصفحبمباركة التقليدية تصفحب قام عن. فح "
+      "تصفحبمقباركة التقلفحيدية قام عن. تصفحبمباركة التقليدية ققام عن. "
+      "تصفحبمباركة التقليدية قام عن. تصفحبمباركة التقليدية قام عن. تص  تصفحب "
+      "فحبمباركة التقققليدية قام عن. تصفحبمباركة التقليدية قام عن. تصفحبمباركة "
+      "التقليدية قام عن. تصفحبمباركة التقليدية قام عن. تصفح";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 14;
+  paragraph_style.text_align = TextAlign::right;
+  paragraph_style.text_direction = TextDirection::rtl;
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  text_style.font_size = 45;
+  text_style.letter_spacing = 2;
+  text_style.font_family = "Katibeh";
+  text_style.decoration_style = txt::TextDecorationStyle::kSolid;
+  text_style.decoration_color = SK_ColorBLACK;
+  text_style.use_custom_leading = true;
+  text_style.leading = 0;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth() - 100);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
   ASSERT_TRUE(Snapshot());
+
+  ASSERT_EQ(paragraph->text_.size(), 458ull);  // Arabic script uses ligatures
+
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
+  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
+  ASSERT_EQ(paragraph->records_.size(),
+            8ull);  // 8 lines, breaks into 8 records.
+  ASSERT_EQ(paragraph->paragraph_style_.text_direction, TextDirection::rtl);
+
+  ASSERT_EQ(paragraph->line_heights_[0], 45);
+  ASSERT_EQ(paragraph->line_heights_[1], 90);
+  ASSERT_EQ(paragraph->line_heights_[2], 135);
+  ASSERT_EQ(paragraph->line_heights_[3], 180);
+}
+
+TEST_F(ParagraphTest, ArabicLeadingOverrideTallParagraph) {
+  const char* text =
+      "من أسر وإعلان الخاصّة وهولندا،, عل قائمة الضغوط بالمطالبة تلك. الصفحة "
+      "بمباركة التقليدية قام عن. تصفحبمباركة التقل. يدية فح قام عن. "
+      "تصفحبمباركة التقليدية قام عن. تصفحبمباركة التقليدية تصفحب قام عن. فح "
+      "تصفحبمقباركة التقلفحيدية قام عن. تصفحبمباركة التقليدية ققام عن. "
+      "تصفحبمباركة التقليدية قام عن. تصفحبمباركة التقليدية قام عن. تص  تصفحب "
+      "فحبمباركة التقققليدية قام عن. تصفحبمباركة التقليدية قام عن. تصفحبمباركة "
+      "التقليدية قام عن. تصفحبمباركة التقليدية قام عن. تصفح";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 14;
+  paragraph_style.text_align = TextAlign::right;
+  paragraph_style.text_direction = TextDirection::rtl;
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  text_style.font_size = 45;
+  text_style.letter_spacing = 2;
+  text_style.font_family = "Katibeh";
+  text_style.decoration_style = txt::TextDecorationStyle::kSolid;
+  text_style.decoration_color = SK_ColorBLACK;
+  text_style.use_custom_leading = true;
+  text_style.leading = 0.65;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth() - 100);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+  ASSERT_TRUE(Snapshot());
+
+  ASSERT_EQ(paragraph->text_.size(), 458ull);  // Arabic script uses ligatures
+
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
+  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
+  ASSERT_EQ(paragraph->records_.size(),
+            8ull);  // 8 lines, breaks into 8 records.
+  ASSERT_EQ(paragraph->paragraph_style_.text_direction, TextDirection::rtl);
+
+  ASSERT_EQ(paragraph->line_heights_[0], 45);
+  ASSERT_EQ(paragraph->line_heights_[1], 119);
+  ASSERT_EQ(paragraph->line_heights_[2], 193);
+  ASSERT_EQ(paragraph->line_heights_[3], 267);
+}
+
+TEST_F(ParagraphTest, ArabicLeadingOverrideNegativeParagraph) {
+  const char* text =
+      "من أسر وإعلان الخاصّة وهولندا،, عل قائمة الضغوط بالمطالبة تلك. الصفحة "
+      "بمباركة التقليدية قام عن. تصفحبمباركة التقل. يدية فح قام عن. "
+      "تصفحبمباركة التقليدية قام عن. تصفحبمباركة التقليدية تصفحب قام عن. فح "
+      "تصفحبمقباركة التقلفحيدية قام عن. تصفحبمباركة التقليدية ققام عن. "
+      "تصفحبمباركة التقليدية قام عن. تصفحبمباركة التقليدية قام عن. تص  تصفحب "
+      "فحبمباركة التقققليدية قام عن. تصفحبمباركة التقليدية قام عن. تصفحبمباركة "
+      "التقليدية قام عن. تصفحبمباركة التقليدية قام عن. تصفح";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 14;
+  paragraph_style.text_align = TextAlign::right;
+  paragraph_style.text_direction = TextDirection::rtl;
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  text_style.font_size = 45;
+  text_style.letter_spacing = 2;
+  text_style.font_family = "Katibeh";
+  text_style.decoration_style = txt::TextDecorationStyle::kSolid;
+  text_style.decoration_color = SK_ColorBLACK;
+  text_style.use_custom_leading = true;
+  text_style.leading = -0.2;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth() - 100);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+  ASSERT_TRUE(Snapshot());
+
+  ASSERT_EQ(paragraph->text_.size(), 458ull);  // Arabic script uses ligatures
+
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
+  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
+  ASSERT_EQ(paragraph->records_.size(),
+            8ull);  // 8 lines, breaks into 8 records.
+  ASSERT_EQ(paragraph->paragraph_style_.text_direction, TextDirection::rtl);
+
+  ASSERT_EQ(paragraph->line_heights_[0], 45);
+  ASSERT_EQ(paragraph->line_heights_[1], 81);
+  ASSERT_EQ(paragraph->line_heights_[2], 117);
+  ASSERT_EQ(paragraph->line_heights_[3], 153);
 }
 
 TEST_F(ParagraphTest, GetGlyphPositionAtCoordinateParagraph) {
@@ -1162,9 +1332,6 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeTight)) {
 
 TEST_F(ParagraphTest,
        DISABLE_ON_WINDOWS(GetRectsForRangeIncludeLineSpacingMiddle)) {
-  // const char* text =
-  //     "12345,  \"67890\" 12345 67890 12345 67890 12345 67890 12345 67890
-  //     12345 " "67890 12345";
   const char* text =
       "(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)("
       "　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)("

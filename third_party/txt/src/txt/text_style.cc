@@ -47,6 +47,10 @@ bool TextStyle::equals(const TextStyle& other) const {
     return false;
   if (height != other.height)
     return false;
+  if (use_custom_leading != other.use_custom_leading)
+    return false;
+  if (use_custom_leading && leading != other.leading)
+    return false;
   if (locale != other.locale)
     return false;
   if (foreground != other.foreground)
