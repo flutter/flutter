@@ -8,7 +8,7 @@ environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
 
 dependencies:
-  file: 5.0.6
+  file: 5.0.7
   json_rpc_2: 2.0.9
   meta: 1.1.6
   path: 1.6.2
@@ -45,4 +45,4 @@ dev_dependencies:
   mockito: 4.0.0
   quiver: 2.0.1
 
-# PUBSPEC CHECKSUM: 79d1
+# PUBSPEC CHECKSUM: 1bd2
