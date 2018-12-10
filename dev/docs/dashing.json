@@ -6,7 +6,7 @@
     "link": "https://flutter.io"
   },
   "index": "index.html",
-  "icon32x32": "flutter.docset/flutter/static-assets/favicon.png",
+  "icon32x32": "flutter/static-assets/favicon.png",
   "allowJS": true,
   "ExternalURL": "https://docs.flutter.io",
   "selectors": {
