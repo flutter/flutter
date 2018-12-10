@@ -612,7 +612,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Offset _pointOffsetOrigin;
   Offset _lastBoundedOffset;
   AnimationController _floatingCursorController;
-  bool _hasRenderedFinalFrame = false;
 
   // Because the center of the cursor is preferredLineHeight / 2 below the touch
   // origin, but the touch origin is used to determine which line the cursor is

@@ -28,9 +28,7 @@ class FakeEditableTextState extends TextSelectionDelegate {
 void main() {
 
   final TextEditingController controller = TextEditingController();
-  final FocusScopeNode focusScopeNode = FocusScopeNode();
   const TextStyle textStyle = TextStyle();
-
 
   test('editable intrinsics', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -147,7 +145,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(EditableText), paints..rrect(
-        rrect: RRect.fromRectAndRadius(Rect.fromLTRB(406.5, 0.0, 409.5, 14.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
+      rrect: RRect.fromRectAndRadius(Rect.fromLTRB(406.5, 0.0, 409.5, 14.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
     );
 
     // Moves the cursor right a few characters.
@@ -155,7 +153,7 @@ void main() {
       point: Offset(-250, 20)));
 
     expect(find.byType(EditableText), paints..rrect(
-        rrect: RRect.fromRectAndRadius(Rect.fromLTRB(136.5, 0.0, 139.5, 14.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
+      rrect: RRect.fromRectAndRadius(Rect.fromLTRB(136.5, 0.0, 139.5, 14.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
     );
 
     editableTextState.updateFloatingCursor(const FloatingCursorEditingPoint(state: FloatingCursorDragState.End));
