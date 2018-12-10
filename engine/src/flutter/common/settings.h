@@ -38,9 +38,6 @@ struct Settings {
   std::string application_kernel_asset;
   std::string application_kernel_list_asset;
 
-  std::string main_dart_file_path;
-  std::string packages_file_path;
-
   std::string temp_directory_path;
   std::vector<std::string> dart_flags;
 

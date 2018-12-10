@@ -157,15 +157,6 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
 
   if (self) {
     _settings = DefaultSettingsForProcess();
-
-    if (dartMainURL != nil && [[NSFileManager defaultManager] fileExistsAtPath:dartMainURL.path]) {
-      _settings.main_dart_file_path = dartMainURL.path.UTF8String;
-    }
-
-    if (dartPackages.path != nil &&
-        [[NSFileManager defaultManager] fileExistsAtPath:dartPackages.path]) {
-      _settings.packages_file_path = dartPackages.path.UTF8String;
-    }
   }
 
   return self;
