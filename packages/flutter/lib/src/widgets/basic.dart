@@ -170,7 +170,7 @@ class Directionality extends InheritedWidget {
 ///
 /// ```dart
 /// Image.network(
-///   'https://github.com/flutter/flutter_gallery_assets/raw/master/lib/products/backpack.png',
+///   'https://raw.githubusercontent.com/flutter/assets-for-api-docs/master/packages/diagrams/assets/blend_mode_destination.jpeg',
 ///   color: Color.fromRGBO(255, 255, 255, 0.5),
 ///   colorBlendMode: BlendMode.modulate
 /// )
