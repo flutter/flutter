@@ -318,6 +318,12 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     _keepAliveBucket.values.forEach(visitor);
   }
 
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    super.visitChildren(visitor);
+    // Do not visit children in [_keepAliveBucket].
+  }
+
   /// Called during layout to create and add the child with the given index and
   /// scroll offset.
   ///
