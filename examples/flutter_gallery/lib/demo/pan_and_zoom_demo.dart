@@ -1,7 +1,7 @@
 import 'dart:math';
-import 'dart:ui' show Gradient;
 import 'package:flutter/material.dart' hide Gradient;
 import 'package:vector_math/vector_math.dart' show Vector2;
+import 'pan_and_zoom_demo_board.dart';
 
 class PanAndZoomDemo extends StatelessWidget {
   const PanAndZoomDemo({Key key}) : super(key: key);
@@ -13,9 +13,18 @@ class PanAndZoomDemo extends StatelessWidget {
 }
 
 class PanAndZoom extends StatelessWidget {
+  static const int HEXAGON_RADIUS = 32;
+  static const int BOARD_RADIUS = 8;
+
   @override
   Widget build (BuildContext context) {
-    final MapPainter painter = MapPainter();
+    final Board board = Board(
+      boardRadius: BOARD_RADIUS,
+      hexagonRadius: HEXAGON_RADIUS,
+    );
+    final BoardPainter painter = BoardPainter(
+      board: board,
+    );
     final Size screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -158,26 +167,25 @@ class _MapInteractionState extends State<MapInteraction> {
   }
 }
 
-class MapPainter extends CustomPainter {
-  static const double SIZE = 256.0;
+class BoardPainter extends CustomPainter {
+  BoardPainter({
+    this.board,
+  });
+
+  Board board;
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawRect(
-      Rect.fromPoints(const Offset(-SIZE, -SIZE), const Offset(SIZE, SIZE)),
-      Paint()
-        ..style = PaintingStyle.fill
-        ..shader = Gradient.linear(
-          const Offset(0, 0),
-          const Offset(100, 100),
-          <Color>[Colors.lightBlue[700], Colors.lightBlue[100], Colors.lightBlue[700]],
-          <double>[0.0, 0.5, 1.0],
-          TileMode.repeated,
-        )
-        ..strokeWidth = 2.0,
-    );
+    final Paint hexagonFillPaint = Paint()
+      ..color = Colors.grey[200]
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2.0;
+
+    board.forEach((BoardPoint boardPoint) {
+      canvas.drawPath(board.getPathForBoardPoint(boardPoint), hexagonFillPaint);
+    });
   }
 
   @override
-  bool shouldRepaint(MapPainter oldDelegate) => false;
+  bool shouldRepaint(BoardPainter oldDelegate) => false;
 }
