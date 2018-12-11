@@ -31,7 +31,7 @@ class SnippetGenerator {
   SnippetGenerator({Configuration configuration})
       : configuration = configuration ??
             // Flutter's root is four directories up from this script.
-            Configuration(flutterRoot: Directory(Platform.environment['FLUTTER_ROOT'] ?? path.canonicalize(path.join(path.dirname(Platform.script.path), '..', '..', '..')))) {
+            Configuration(flutterRoot: Directory(Platform.environment['FLUTTER_ROOT'] ?? path.canonicalize(path.join(path.dirname(path.fromUri(Platform.script)), '..', '..', '..')))) {
     this.configuration.createOutputDirectory();
   }
 

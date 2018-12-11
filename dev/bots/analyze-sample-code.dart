@@ -124,7 +124,7 @@ class SampleChecker {
 
   /// Finds the location of the snippets script.
   String get _snippetsExecutable {
-    final String platformScriptPath = path.dirname(Platform.script.toFilePath());
+    final String platformScriptPath = path.dirname(path.fromUri(Platform.script));
     return path.canonicalize(path.join(platformScriptPath, '..', 'snippets', 'lib', 'main.dart'));
   }
 
