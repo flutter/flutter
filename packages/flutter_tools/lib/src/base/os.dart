@@ -88,11 +88,21 @@ class _PosixUtils extends OperatingSystemUtils {
     if (all)
       command.add('-a');
     command.add(execName);
-    final ProcessResult result = processManager.runSync(command);
+    final ProcessResult result = processManager.runSync(
+      command,
+      environment: _environmentOverrides,
+    );
     if (result.exitCode != 0)
       return const <File>[];
     final String stdout = result.stdout;
     return stdout.trim().split('\n').map<File>((String path) => fs.file(path.trim())).toList();
+  }
+
+  Map<String, String> get _environmentOverrides {
+    final String path = platform.environment['PATH'];
+    return path == null || path.isEmpty
+        ? const <String, String>{'PATH': '/bin:/sbin:/usr/bin:/usr/local/bin'}
+        : const <String, String>{};
   }
 
   @override
