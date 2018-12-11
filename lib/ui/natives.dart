@@ -45,6 +45,13 @@ void saveCompilationTrace(String filePath) {
   file.writeAsBytesSync(result);
 }
 
+List<int> dumpCompilationTrace() {
+  final dynamic result = _saveCompilationTrace();
+  if (result is Error)
+    throw result;
+  return result;
+}
+
 dynamic _saveCompilationTrace() native 'SaveCompilationTrace';
 
 void _scheduleMicrotask(void callback()) native 'ScheduleMicrotask';
