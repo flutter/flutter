@@ -25,15 +25,7 @@ abstract class OperatingSystemUtils {
   OperatingSystemUtils._private();
 
   /// Make the given file executable. This may be a no-op on some platforms.
-  void makeExecutable(File file);
-
-  /// Updates the specified file system [entity] to have the file mode
-  /// bits set to the value defined by [mode], which can be specified in octal
-  /// (e.g. `644`) or symbolically (e.g. `u+x`).
-  ///
-  /// On operating systems that do not support file mode bits, this will be a
-  /// no-op.
-  void chmod(FileSystemEntity entity, String mode);
+  ProcessResult makeExecutable(File file);
 
   /// Return the path (with symlinks resolved) to the given executable, or null
   /// if `which` was not able to locate the binary.
@@ -86,13 +78,8 @@ class _PosixUtils extends OperatingSystemUtils {
   _PosixUtils() : super._private();
 
   @override
-  void makeExecutable(File file) {
-    chmod(file, 'a+x');
-  }
-
-  @override
-  void chmod(FileSystemEntity entity, String mode) {
-    processManager.runSync(<String>['chmod', mode, entity.path]);
+  ProcessResult makeExecutable(File file) {
+    return processManager.runSync(<String>['chmod', 'a+x', file.path]);
   }
 
   @override
@@ -165,11 +152,11 @@ class _PosixUtils extends OperatingSystemUtils {
 class _WindowsUtils extends OperatingSystemUtils {
   _WindowsUtils() : super._private();
 
+  // This is a no-op.
   @override
-  void makeExecutable(File file) {}
-
-  @override
-  void chmod(FileSystemEntity entity, String mode) {}
+  ProcessResult makeExecutable(File file) {
+    return ProcessResult(0, 0, null, null);
+  }
 
   @override
   List<File> _which(String execName, {bool all = false}) {
