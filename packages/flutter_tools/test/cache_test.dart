@@ -98,7 +98,7 @@ void main() {
         verifyNever(artifact2.update());
         expect(
           testLogger.errorText,
-          contains('https://github.com/flutter/flutter/wiki/Using-Flutter-in-China'),
+          contains('https://flutter.io/community/china'),
         );
       }
     });
