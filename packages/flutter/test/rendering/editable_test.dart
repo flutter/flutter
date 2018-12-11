@@ -63,6 +63,7 @@ void main() {
         '   ║   family: Ahem\n'
         '   ║   size: 10.0\n'
         '   ║   height: 1.0x\n'
+        '   ║   leading: 1.0x\n'
         '   ║   "12345"\n'
         '   ╚═══════════\n'
       ),

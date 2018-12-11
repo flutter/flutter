@@ -453,6 +453,7 @@ class _TextStyleProxy implements TextStyle {
   @override FontStyle get fontStyle => _delegate.fontStyle;
   @override FontWeight get fontWeight => _delegate.fontWeight;
   @override double get height => _delegate.height;
+  @override double get leading => _delegate.leading;
   @override Locale get locale => _delegate.locale;
   @override ui.Paint get foreground => _delegate.foreground;
   @override ui.Paint get background => _delegate.background;
@@ -477,7 +478,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle apply({Color color, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String fontFamily, double fontSizeFactor = 1.0, double fontSizeDelta = 0.0, int fontWeightDelta = 0, double letterSpacingFactor = 1.0, double letterSpacingDelta = 0.0, double wordSpacingFactor = 1.0, double wordSpacingDelta = 0.0, double heightFactor = 1.0, double heightDelta = 0.0}) {
+  TextStyle apply({Color color, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String fontFamily, double fontSizeFactor = 1.0, double fontSizeDelta = 0.0, int fontWeightDelta = 0, double letterSpacingFactor = 1.0, double letterSpacingDelta = 0.0, double wordSpacingFactor = 1.0, double wordSpacingDelta = 0.0, double heightFactor = 1.0, double heightDelta = 0.0, double leadingFactor = 1.0, double leadingDelta = 0.0}) {
     throw UnimplementedError();
   }
 
@@ -487,7 +488,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, Locale locale, ui.Paint foreground, ui.Paint background, List<Shadow> shadows, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
+  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, double leading, Locale locale, ui.Paint foreground, ui.Paint background, List<Shadow> shadows, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
     throw UnimplementedError();
   }
 
