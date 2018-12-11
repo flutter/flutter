@@ -1,4 +1,4 @@
-Signature: 5165520309f921e87d1d8d4435891814
+Signature: 13fc10881fe243f710665ac16224bbb5
 
 UNUSED LICENSES:
 
@@ -1985,6 +1985,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: skia
 ORIGIN: ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/.clang-tidy
 FILE: ../../../third_party/skia/CQ_COMMITTERS
 FILE: ../../../third_party/skia/DEPS
 FILE: ../../../third_party/skia/Doxyfile
