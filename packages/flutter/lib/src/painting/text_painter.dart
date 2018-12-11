@@ -411,11 +411,12 @@ class TextPainter {
     return _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
   }
 
-  // The maximum grapheme cluster length that will be attempted to have
+  // The maximum grapheme cluster length that wi be attempted to have
   // a box drawn around it before giving up. We cap this to ensure
   // efficiency, however, very long grapheme clusters (they can be
-  // arbitrarily long) may be overlooked.
-  static const int _maxGraphemeClusterLength = 1 << 4;
+  // arbitrarily long) may be overlooked. the getBoxesForRange call is
+  // roughly O(text.size) which can cause slowdowns on very long strings.
+  static const int _maxGraphemeClusterLength = 1 << 7;
 
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
@@ -429,7 +430,7 @@ class TextPainter {
     final int maxGraphemeClusterLength = needsSearch ? _maxGraphemeClusterLength : 1;
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
-    while (boxes.isEmpty && graphemeClusterLength <= maxGraphemeClusterLength) {
+    while (boxes.isEmpty && graphemeClusterLength <= maxGraphemeClusterLength && graphemeClusterLength <= offset << 1) {
       final int prevRuneOffset = offset - graphemeClusterLength;
       boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
       if (boxes.isEmpty) {
@@ -458,7 +459,7 @@ class TextPainter {
     final int maxGraphemeClusterLength = needsSearch ? _maxGraphemeClusterLength : 1;
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
-    while (boxes.isEmpty && graphemeClusterLength <= maxGraphemeClusterLength) {
+    while (boxes.isEmpty && graphemeClusterLength <= maxGraphemeClusterLength && graphemeClusterLength <= (_text.text.length - offset) << 1) {
       final int nextRuneOffset = offset + graphemeClusterLength;
       boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
       if (boxes.isEmpty) {
