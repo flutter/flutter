@@ -206,7 +206,7 @@ class SampleChecker {
     if (_snippetsSnapshotPath == null) {
       _snippetsSnapshotPath = '$_snippetsExecutable.snapshot';
       return Process.runSync(
-        path.absolute(Platform.executable),
+        Platform.executable,
         <String>[
           '--snapshot=$_snippetsSnapshotPath',
           '--snapshot-kind=app-jit',
@@ -216,7 +216,7 @@ class SampleChecker {
       );
     } else {
       return Process.runSync(
-        path.absolute(Platform.executable),
+        Platform.executable,
         <String>[path.absolute(_snippetsSnapshotPath)]..addAll(args),
         workingDirectory: workingDirectory,
       );
