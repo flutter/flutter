@@ -256,7 +256,6 @@ Int32List _encodeTextStyle(
   double letterSpacing,
   double wordSpacing,
   double height,
-  double leading,
   Locale locale,
   Paint background,
   Paint foreground,
@@ -311,24 +310,20 @@ Int32List _encodeTextStyle(
     result[0] |= 1 << 12;
     // Passed separately to native.
   }
-  if (leading != null) {
+  if (locale != null) {
     result[0] |= 1 << 13;
     // Passed separately to native.
   }
-  if (locale != null) {
+  if (background != null) {
     result[0] |= 1 << 14;
     // Passed separately to native.
   }
-  if (background != null) {
+  if (foreground != null) {
     result[0] |= 1 << 15;
     // Passed separately to native.
   }
-  if (foreground != null) {
-    result[0] |= 1 << 16;
-    // Passed separately to native.
-  }
   if (shadows != null) {
-    result[0] |= 1 << 17;
+    result[0] |= 1 << 16;
     // Passed separately to native.
   }
   return result;
@@ -349,8 +344,7 @@ class TextStyle {
   /// * `letterSpacing`: The amount of space (in logical pixels) to add between each letter.
   /// * `wordSpacing`: The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
   /// * `textBaseline`: The common baseline that should be aligned between this text span and its parent text span, or, for the root text spans, with the line box.
-  /// * `height`: The height of this text span, as a multiple of the sum of font size and leading.
-  /// * `leading`: Custom leading to use instead of the font-provided leading as a multiple of font size. When null, default font leading will be used. Leading is the additional spacing between lines.
+  /// * `height`: The height of this text span, as a multiple of the font size.
   /// * `locale`: The locale used to select region-specific glyphs.
   /// * `background`: The paint drawn as a background for the text.
   /// * `foreground`: The paint used to draw the text. If this is specified, `color` must be null.
@@ -367,7 +361,6 @@ class TextStyle {
     double letterSpacing,
     double wordSpacing,
     double height,
-    double leading,
     Locale locale,
     Paint background,
     Paint foreground,
@@ -389,7 +382,6 @@ class TextStyle {
          letterSpacing,
          wordSpacing,
          height,
-         leading,
          locale,
          background,
          foreground,
@@ -400,7 +392,6 @@ class TextStyle {
        _letterSpacing = letterSpacing,
        _wordSpacing = wordSpacing,
        _height = height,
-       _leading = leading,
        _locale = locale,
        _background = background,
        _foreground = foreground,
@@ -412,7 +403,6 @@ class TextStyle {
   final double _letterSpacing;
   final double _wordSpacing;
   final double _height;
-  final double _leading;
   final Locale _locale;
   final Paint _background;
   final Paint _foreground;
@@ -430,7 +420,6 @@ class TextStyle {
         _letterSpacing != typedOther._letterSpacing ||
         _wordSpacing != typedOther._wordSpacing ||
         _height != typedOther._height ||
-        _leading != typedOther._leading ||
         _locale != typedOther._locale ||
         _background != typedOther._background ||
         _foreground != typedOther._foreground)
@@ -445,7 +434,7 @@ class TextStyle {
   }
 
   @override
-  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _letterSpacing, _wordSpacing, _height, _leading, _locale, _background, _foreground);
+  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _letterSpacing, _wordSpacing, _height, _locale, _background, _foreground);
 
   @override
   String toString() {
@@ -462,11 +451,10 @@ class TextStyle {
              'letterSpacing: ${  _encoded[0] & 0x00400 == 0x00400 ? "${_letterSpacing}x"                    : "unspecified"}, '
              'wordSpacing: ${    _encoded[0] & 0x00800 == 0x00800 ? "${_wordSpacing}x"                      : "unspecified"}, '
              'height: ${         _encoded[0] & 0x01000 == 0x01000 ? "${_height}x"                           : "unspecified"}, '
-             'leading: ${        _encoded[0] & 0x02000 == 0x02000 ? "${_leading}x"                           : "unspecified"}, '
-             'locale: ${         _encoded[0] & 0x04000 == 0x04000 ? _locale                                 : "unspecified"}, '
-             'background: ${     _encoded[0] & 0x08000 == 0x08000 ? _background                             : "unspecified"}, '
-             'foreground: ${     _encoded[0] & 0x10000 == 0x10000 ? _foreground                             : "unspecified"}, '
-             'shadows: ${        _encoded[0] & 0x20000 == 0x20000 ? _shadows                                : "unspecified"}'
+             'locale: ${         _encoded[0] & 0x02000 == 0x02000 ? _locale                                 : "unspecified"}, '
+             'background: ${     _encoded[0] & 0x04000 == 0x04000 ? _background                             : "unspecified"}, '
+             'foreground: ${     _encoded[0] & 0x08000 == 0x08000 ? _foreground                             : "unspecified"}, '
+             'shadows: ${        _encoded[0] & 0x10000 == 0x10000 ? _shadows                                : "unspecified"}'
            ')';
   }
 }
@@ -1147,8 +1135,8 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   /// Applies the given style to the added text until [pop] is called.
   ///
   /// See [pop] for details.
-  void pushStyle(TextStyle style) => _pushStyle(style._encoded, style._fontFamily, style._fontSize, style._letterSpacing, style._wordSpacing, style._height, style._leading, _encodeLocale(style._locale), style._background?._objects, style._background?._data, style._foreground?._objects, style._foreground?._data, Shadow._encodeShadows(style._shadows));
-  void _pushStyle(Int32List encoded, String fontFamily, double fontSize, double letterSpacing, double wordSpacing, double height, double leading, String locale, List<dynamic> backgroundObjects, ByteData backgroundData, List<dynamic> foregroundObjects, ByteData foregroundData, ByteData shadowsData) native 'ParagraphBuilder_pushStyle';
+  void pushStyle(TextStyle style) => _pushStyle(style._encoded, style._fontFamily, style._fontSize, style._letterSpacing, style._wordSpacing, style._height, _encodeLocale(style._locale), style._background?._objects, style._background?._data, style._foreground?._objects, style._foreground?._data, Shadow._encodeShadows(style._shadows));
+  void _pushStyle(Int32List encoded, String fontFamily, double fontSize, double letterSpacing, double wordSpacing, double height, String locale, List<dynamic> backgroundObjects, ByteData backgroundData, List<dynamic> foregroundObjects, ByteData foregroundData, ByteData shadowsData) native 'ParagraphBuilder_pushStyle';
 
   static String _encodeLocale(Locale locale) => locale?.toString() ?? '';
 

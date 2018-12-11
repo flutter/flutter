@@ -41,11 +41,10 @@ const int tsFontSizeIndex = 9;
 const int tsLetterSpacingIndex = 10;
 const int tsWordSpacingIndex = 11;
 const int tsHeightIndex = 12;
-const int tsLeadingIndex = 13;
-const int tsLocaleIndex = 14;
-const int tsBackgroundIndex = 15;
-const int tsForegroundIndex = 16;
-const int tsTextShadowsIndex = 17;
+const int tsLocaleIndex = 13;
+const int tsBackgroundIndex = 14;
+const int tsForegroundIndex = 15;
+const int tsTextShadowsIndex = 16;
 
 const int tsColorMask = 1 << tsColorIndex;
 const int tsTextDecorationMask = 1 << tsTextDecorationIndex;
@@ -59,7 +58,6 @@ const int tsFontSizeMask = 1 << tsFontSizeIndex;
 const int tsLetterSpacingMask = 1 << tsLetterSpacingIndex;
 const int tsWordSpacingMask = 1 << tsWordSpacingIndex;
 const int tsHeightMask = 1 << tsHeightIndex;
-const int tsLeadingMask = 1 << tsLeadingIndex;
 const int tsLocaleMask = 1 << tsLocaleIndex;
 const int tsBackgroundMask = 1 << tsBackgroundIndex;
 const int tsForegroundMask = 1 << tsForegroundIndex;
@@ -209,7 +207,6 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
                                  double letterSpacing,
                                  double wordSpacing,
                                  double height,
-                                 double leading,
                                  const std::string& locale,
                                  Dart_Handle background_objects,
                                  Dart_Handle background_data,
@@ -270,11 +267,6 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
 
   if (mask & tsHeightMask) {
     style.height = height;
-  }
-
-  if (mask & tsLeadingMask) {
-    style.use_custom_leading = true;
-    style.leading = leading;
   }
 
   if (mask & tsLocaleMask) {
