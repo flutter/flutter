@@ -36,9 +36,7 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeD
 }
 
 Material _getMaterialFromDialog(WidgetTester tester) {
-  final StatefulElement widget = tester.element(
-      find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
-  return widget.state.widget;
+  return tester.widget<Material>(find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
 }
 
 const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
@@ -86,7 +84,7 @@ void main() {
     expect(materialWidget.color, customColor);
   });
 
-  testWidgets('Dialog background color', (WidgetTester tester) async {
+  testWidgets('Dialog Defaults', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
       content: Text('Y'),
@@ -100,6 +98,7 @@ void main() {
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.color, Colors.grey[800]);
     expect(materialWidget.shape, _defaultDialogShape);
+    expect(materialWidget.elevation, 24.0);
   });
 
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {

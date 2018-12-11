@@ -54,17 +54,16 @@ class Dialog extends StatelessWidget {
   ///
   /// This sets the [Material.color] on this [Dialog]'s [Material].
   ///
-  /// If `null`, [ThemeData.cardColor] is used (this is the default for
-  /// [MaterialType.card]).
+  /// If `null`, [ThemeData.cardColor] is used.
   /// {@endtemplate}
   final Color backgroundColor;
 
+  /// {@template flutter.material.dialog.elevation}
   /// The z-coordinate of this [Dialog].
   ///
-  /// If this is `null`, [DialogTheme.elevation] will be used, if
-  /// [DialogTheme.elevation] is not set, the default value [_defaultElevation]
-  /// is used.
-  ///
+  /// If null then [DialogTheme.elevation] is used, and if that's null then the
+  /// dialog's elevation is 24.0.
+  /// {@endtemplate}
   /// {@macro flutter.material.material.elevation}
   final double elevation;
 
@@ -94,10 +93,6 @@ class Dialog extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  Color _getColor(BuildContext context, DialogTheme dialogTheme) {
-    return backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor;
-  }
-
   // TODO(johnsonmh): Update default dialog border radius to 4.0 to match material spec.
   static const RoundedRectangleBorder _defaultDialogShape =
     RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
@@ -120,7 +115,7 @@ class Dialog extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 280.0),
             child: Material(
-              color: _getColor(context, dialogTheme),
+              color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
               elevation: elevation ?? dialogTheme.elevation ?? _defaultElevation,
               shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
               type: MaterialType.card,
@@ -269,13 +264,7 @@ class AlertDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.backgroundColor}
   final Color backgroundColor;
 
-  /// The z-coordinate of this [Dialog].
-  ///
-  /// If this is `null`, [DialogTheme.elevation] will be used, if
-  /// [DialogTheme.elevation] is not set, the default value
-  /// [Dialog._defaultElevation] is used.
-  ///
-  ///
+  /// {@macro flutter.material.dialog.elevation}
   /// {@macro flutter.material.material.elevation}
   final double elevation;
 
@@ -554,12 +543,7 @@ class SimpleDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.backgroundColor}
   final Color backgroundColor;
 
-  /// The z-coordinate of this [Dialog].
-  ///
-  /// If this is `null`, [DialogTheme.elevation] will be used, if
-  /// [DialogTheme.elevation] is not set, the default value
-  /// [Dialog._defaultElevation] is used.
-  ///
+  /// {@macro flutter.material.dialog.elevation}
   /// {@macro flutter.material.material.elevation}
   final double elevation;
 

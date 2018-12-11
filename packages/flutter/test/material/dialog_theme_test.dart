@@ -35,9 +35,7 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeD
 final Key _painterKey = UniqueKey();
 
 Material _getMaterialFromDialog(WidgetTester tester) {
-  final StatefulElement widget = tester.element(
-      find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
-  return widget.state.widget;
+  return tester.widget<Material>(find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
 }
 
 void main() {
