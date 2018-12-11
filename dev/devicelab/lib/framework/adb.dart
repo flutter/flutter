@@ -461,7 +461,6 @@ class IosDevice implements Device {
 
 /// Path to the `adb` executable.
 String get adbPath {
-  
   final String androidHome =
       Platform.environment['ANDROID_HOME'] != null
           ? Platform.environment['ANDROID_HOME']
