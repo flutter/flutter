@@ -47,6 +47,7 @@ function create_docset() {
   echo "Building Flutter docset."
   rm -rf flutter.docset
   (dashing build --source ./doc --config ./dashing.json > /tmp/dashing.log 2>&1 || (tail -100 /tmp/dashing.log; false)) && \
+  cp ./doc/flutter/static-assets/favicon.png ./flutter.docset/icon.png && \
   tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset
 }
 
@@ -62,7 +63,7 @@ function move_offline_into_place() {
   if [[ "$CIRRUS_BRANCH" == "stable" ]]; then
     echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://docs.flutter.io/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
   else
-    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://master-docs-flutter-io.firebaseapp.com/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
+    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://master-docs.flutter.io/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
   fi
   mv flutter.docset.tar.gz doc/offline/flutter.docset.tar.gz
   du -sh doc/offline/flutter.docset.tar.gz
@@ -123,7 +124,7 @@ cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/
 if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
   echo "This is not a pull request; considering whether to upload docs... (branch=$CIRRUS_BRANCH)"
   if [[ "$CIRRUS_BRANCH" == "master" ]]; then
-    echo "Updating $CIRRUS_BRANCH docs: https://master-docs-flutter-io.firebaseapp.com/"
+    echo "Updating $CIRRUS_BRANCH docs: https://master-docs.flutter.io/"
     # Disable search indexing on the master staging site so searches get only
     # the stable site.
     echo -e "User-agent: *\nDisallow: /" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
