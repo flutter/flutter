@@ -38,7 +38,7 @@ void main() {
         await _flutter.stepOverOrOverAsyncSuspension();
         final SourcePosition location = await _flutter.getSourceLocation();
         final int actualLine = location.line;
-        
+
         // Get the line we're expected to stop at by searching for the comment
         // within the source code.
         final int expectedLine = _project.lineForStep(i);
