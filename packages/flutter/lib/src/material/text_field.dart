@@ -170,7 +170,7 @@ class TextField extends StatefulWidget {
   ///
   /// ## Keyboard
   ///
-  /// Requesting the focus will typically cause the the keyboard to be shown
+  /// Requesting the focus will typically cause the keyboard to be shown
   /// if it's not showing already.
   ///
   /// On Android, the user can hide the keyboard - withouth changing the focus -
