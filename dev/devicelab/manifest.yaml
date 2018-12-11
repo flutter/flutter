@@ -283,6 +283,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  flutter_run_test:
+    description: >
+      Tests the `flutter run -t` command with a testfile.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   named_isolates_test:
     description: >
       Tests naming and attaching to specific isolates.

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:test_api/src/backend/declarer.dart'; // ignore: implementation_imports
 import 'package:test_api/src/frontend/timeout.dart'; // ignore: implementation_imports
@@ -31,7 +30,7 @@ Declarer get _declarer {
     _localDeclarer = Declarer();
     Future<void>(() {
       Invoker.guard<Future<void>>(() async {
-        final _Reporter reporter = _Reporter(color: !Platform.isWindows);
+        final _Reporter reporter = _Reporter(color: false); // disable color when run directly.
         final Group group = _declarer.build();
         final Suite suite = Suite(group, SuitePlatform(Runtime.vm));
         await _runGroup(suite, group, <Group>[], reporter);
