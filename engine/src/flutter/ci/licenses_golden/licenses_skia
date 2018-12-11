@@ -1,4 +1,4 @@
-Signature: 163054540871aed5a7142da193dd2c33
+Signature: 881b0a7a89e9e0978fe75c655f5a77ac
 
 UNUSED LICENSES:
 
@@ -2799,7 +2799,6 @@ FILE: ../../../third_party/skia/include/core/SkMatrix44.h
 FILE: ../../../third_party/skia/include/core/SkSize.h
 FILE: ../../../third_party/skia/include/core/SkTLazy.h
 FILE: ../../../third_party/skia/include/effects/SkLayerDrawLooper.h
-FILE: ../../../third_party/skia/include/gpu/GrRenderTarget.h
 FILE: ../../../third_party/skia/include/gpu/GrTexture.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLConfig.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLConfig_chrome.h
@@ -2918,6 +2917,7 @@ FILE: ../../../third_party/skia/src/gpu/GrPathRendererChain.h
 FILE: ../../../third_party/skia/src/gpu/GrPathUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrPathUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrRenderTarget.cpp
+FILE: ../../../third_party/skia/src/gpu/GrRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/GrStencilAttachment.cpp
 FILE: ../../../third_party/skia/src/gpu/GrStencilAttachment.h
 FILE: ../../../third_party/skia/src/gpu/GrStencilSettings.cpp
@@ -3098,11 +3098,11 @@ FILE: ../../../third_party/skia/include/core/SkMultiPictureDraw.h
 FILE: ../../../third_party/skia/include/core/SkPictureRecorder.h
 FILE: ../../../third_party/skia/include/core/SkSurfaceProps.h
 FILE: ../../../third_party/skia/include/core/SkTextBlob.h
-FILE: ../../../third_party/skia/include/gpu/GrGpuResource.h
-FILE: ../../../third_party/skia/include/gpu/GrResourceKey.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleInterface.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_indirect.h
 FILE: ../../../third_party/skia/include/ports/SkRemotableFontMgr.h
+FILE: ../../../third_party/skia/include/private/GrGpuResource.h
+FILE: ../../../third_party/skia/include/private/GrResourceKey.h
 FILE: ../../../third_party/skia/include/private/SkHalf.h
 FILE: ../../../third_party/skia/samplecode/SampleHT.cpp
 FILE: ../../../third_party/skia/samplecode/SampleIdentityScale.cpp
@@ -3312,9 +3312,9 @@ FILE: ../../../third_party/skia/include/core/SkImage.h
 FILE: ../../../third_party/skia/include/core/SkRRect.h
 FILE: ../../../third_party/skia/include/core/SkStrokeRec.h
 FILE: ../../../third_party/skia/include/core/SkSurface.h
-FILE: ../../../third_party/skia/include/gpu/GrSurface.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLFunctions.h
 FILE: ../../../third_party/skia/include/pathops/SkPathOps.h
+FILE: ../../../third_party/skia/include/private/GrSurface.h
 FILE: ../../../third_party/skia/include/private/SkChecksum.h
 FILE: ../../../third_party/skia/include/private/SkPathRef.h
 FILE: ../../../third_party/skia/include/private/SkTInternalLList.h
@@ -3594,12 +3594,12 @@ FILE: ../../../third_party/skia/include/core/SkTraceMemoryDump.h
 FILE: ../../../third_party/skia/include/effects/SkImageSource.h
 FILE: ../../../third_party/skia/include/effects/SkTableColorFilter.h
 FILE: ../../../third_party/skia/include/gpu/GrContextOptions.h
-FILE: ../../../third_party/skia/include/gpu/GrSamplerState.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLTypes.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_android.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_directory.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_empty.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_fontconfig.h
+FILE: ../../../third_party/skia/include/private/GrSamplerState.h
 FILE: ../../../third_party/skia/include/private/SkMutex.h
 FILE: ../../../third_party/skia/include/private/SkNx.h
 FILE: ../../../third_party/skia/include/private/SkNx_neon.h
