@@ -4,12 +4,11 @@
 
 import 'dart:convert';
 
-import 'package:flutter_tools/src/doctor.dart';
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/version.dart';
+import '../doctor.dart';
 
 // Include VS Code insiders (useful for debugging).
 const bool _includeInsiders = false;
