@@ -38,7 +38,9 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// [StatefulWidget]s.
 ///
 /// The callback can be asynchronous (using `async`/`await` or
-/// using explicit [Future]s).
+/// using explicit [Future]s). The default timeout is defined at
+/// [TestWidgetsFlutterBinding.defaultTestTimeout]. To increase
+/// timeout, use [WidgetTester.addTime].
 ///
 /// This function uses the [test] function in the test package to
 /// register the given callback as a test. The callback, when run,
@@ -50,6 +52,7 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 ///
 /// ```dart
 ///     testWidgets('MyWidget', (WidgetTester tester) async {
+///       tester.addTime(const Duration(seconds: 3));
 ///       await tester.pumpWidget(new MyWidget());
 ///       await tester.tap(find.text('Save'));
 ///       expect(find.text('Success'), findsOneWidget);
@@ -226,6 +229,20 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       binding.scheduleFrame();
       return binding.pump(duration, phase);
     });
+  }
+
+  /// See [AutomatedTestWidgetsFlutterBinding.addTime]
+  ///
+  /// This is the shorthand for
+  /// ```dart
+  ///     final AutomatedTestWidgetsFlutterBinding binding = tester.binding;
+  ///     binding.addTime(const Duration(seconds: ));
+  /// ```
+  void addTime(Duration duration) {
+    final TestWidgetsFlutterBinding binding = this.binding;
+    if (binding is AutomatedTestWidgetsFlutterBinding) {
+        binding.addTime(duration);
+    }
   }
 
   /// Triggers a frame after `duration` amount of time.
