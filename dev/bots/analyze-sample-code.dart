@@ -206,18 +206,18 @@ class SampleChecker {
     if (_snippetsSnapshotPath == null) {
       _snippetsSnapshotPath = '$_snippetsExecutable.snapshot';
       return Process.runSync(
-        Platform.executable,
+        path.canonicalize(Platform.executable),
         <String>[
           '--snapshot=$_snippetsSnapshotPath',
           '--snapshot-kind=app-jit',
-          path.absolute(_snippetsExecutable),
+          path.canonicalize(_snippetsExecutable),
         ]..addAll(args),
         workingDirectory: workingDirectory,
       );
     } else {
       return Process.runSync(
-        Platform.executable,
-        <String>[path.absolute(_snippetsSnapshotPath)]..addAll(args),
+        path.canonicalize(Platform.executable),
+        <String>[path.canonicalize(_snippetsSnapshotPath)]..addAll(args),
         workingDirectory: workingDirectory,
       );
     }
