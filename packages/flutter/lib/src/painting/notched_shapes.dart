@@ -5,7 +5,7 @@ import 'basic_types.dart';
 /// A shape with a notch in its outline.
 ///
 /// Typically used as the outline of a 'host' widget to make a notch that
-/// accomodates a 'guest' widget. e.g the [BottomAppBar] may have a notch to
+/// accommodates a 'guest' widget. e.g the [BottomAppBar] may have a notch to
 /// accomodate the [FloatingActionBar].
 
 /// See also: [ShapeBorder], which defines a shaped border without a dynamic
