@@ -167,6 +167,7 @@ public class TextInputPlugin implements MethodCallHandler {
     }
 
     private void showTextInput(FlutterView view) {
+        view.requestFocus();
         mImm.showSoftInput(view, 0);
     }
 
