@@ -16,7 +16,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
 
   //BoardPoint _selectedBoardPoint;
   int boardRadius; // Number of hexagons from center to edge
-  int hexagonRadius; // Pixel radius of a hexagon (center to vertex)
+  double hexagonRadius; // Pixel radius of a hexagon (center to vertex)
 
   // Return a pixel point for a q,r point
   Point<double> boardPointToPoint(BoardPoint boardPoint) {
@@ -29,19 +29,22 @@ class Board extends Object with IterableMixin<BoardPoint> {
   Path getPathForBoardPoint(BoardPoint boardPoint) {
     final Point<double> centerOfHexZeroCenter = boardPointToPoint(boardPoint);
 
-    // Start point of hexagon (top vertex)
+    // Start point of hexagon (top vertex).
+    // Give one pixel of padding between hexagons.
     final Point<double> hexStart = Point<double>(
-      centerOfHexZeroCenter.x,
-      centerOfHexZeroCenter.y - hexagonRadius,
+      centerOfHexZeroCenter.x + 1,
+      centerOfHexZeroCenter.y - hexagonRadius + 1,
     );
+
+    final double hexagonRadiusPadded = hexagonRadius - 1;
 
     final Path hexagon = Path();
     hexagon.moveTo(hexStart.x, hexStart.y);
-    hexagon.lineTo(hexStart.x + sqrt(3) / 2 * hexagonRadius, hexStart.y + 0.5 * hexagonRadius);
-    hexagon.lineTo(hexStart.x + sqrt(3) / 2 * hexagonRadius, hexStart.y + 1.5 * hexagonRadius);
-    hexagon.lineTo(hexStart.x, hexStart.y + 2 * hexagonRadius);
-    hexagon.lineTo(hexStart.x - sqrt(3) / 2 * hexagonRadius, hexStart.y + 1.5 * hexagonRadius);
-    hexagon.lineTo(hexStart.x - sqrt(3) / 2 * hexagonRadius, hexStart.y + 0.5 * hexagonRadius);
+    hexagon.lineTo(hexStart.x + sqrt(3) / 2 * hexagonRadiusPadded, hexStart.y + 0.5 * hexagonRadiusPadded);
+    hexagon.lineTo(hexStart.x + sqrt(3) / 2 * hexagonRadiusPadded, hexStart.y + 1.5 * hexagonRadiusPadded);
+    hexagon.lineTo(hexStart.x, hexStart.y + 2 * hexagonRadiusPadded);
+    hexagon.lineTo(hexStart.x - sqrt(3) / 2 * hexagonRadiusPadded, hexStart.y + 1.5 * hexagonRadiusPadded);
+    hexagon.lineTo(hexStart.x - sqrt(3) / 2 * hexagonRadiusPadded, hexStart.y + 0.5 * hexagonRadiusPadded);
     hexagon.close();
     return hexagon;
   }

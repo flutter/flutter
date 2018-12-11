@@ -13,7 +13,7 @@ class PanAndZoomDemo extends StatelessWidget {
 }
 
 class PanAndZoom extends StatelessWidget {
-  static const int HEXAGON_RADIUS = 32;
+  static const double HEXAGON_RADIUS = 32.0;
   static const int BOARD_RADIUS = 8;
 
   @override
@@ -177,7 +177,7 @@ class BoardPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint hexagonFillPaint = Paint()
-      ..color = Colors.grey[200]
+      ..color = Colors.grey[600]
       ..style = PaintingStyle.fill
       ..strokeWidth = 2.0;
 
