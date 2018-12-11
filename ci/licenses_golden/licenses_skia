@@ -1,4 +1,4 @@
-Signature: b51f26d7fee9cae6f975e8205cac752d
+Signature: 3e939872206350b5a913ba0c685f400b
 
 UNUSED LICENSES:
 
@@ -2049,7 +2049,17 @@ FILE: ../../../third_party/skia/experimental/canvaskit/externs.js
 FILE: ../../../third_party/skia/experimental/canvaskit/gpu.js
 FILE: ../../../third_party/skia/experimental/canvaskit/helper.js
 FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/_namedcolors.js
-FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/canvas2d.js
+FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/canvas2dcontext.js
+FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/color.js
+FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/font.js
+FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/htmlcanvas.js
+FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/imagedata.js
+FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/lineargradient.js
+FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/pattern.js
+FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/postamble.js
+FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/preamble.js
+FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/radialgradient.js
+FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/util.js
 FILE: ../../../third_party/skia/experimental/canvaskit/interface.js
 FILE: ../../../third_party/skia/experimental/canvaskit/karma.bench.conf.js
 FILE: ../../../third_party/skia/experimental/canvaskit/karma.conf.js
