@@ -22,7 +22,7 @@ const Pattern finishedMessageMatch = '+1 ~1 -1: Some tests failed.';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
-  await createFlutterRunTask();
+  await task(createFlutterRunTask());
 }
 
 // verifies that the messages above are printed as a test script is executed.
