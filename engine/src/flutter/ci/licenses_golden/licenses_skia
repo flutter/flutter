@@ -1,4 +1,4 @@
-Signature: 1a777fb66f7d5bdeaa2efde25e4391a0
+Signature: ade717176ffbea37d14ec8f3185a0809
 
 UNUSED LICENSES:
 
@@ -1605,6 +1605,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrFillRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrFillRectOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.h
+FILE: ../../../third_party/skia/src/gpu/ops/GrStrokeRectOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrStrokeRectOp.h
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.cpp
@@ -3764,10 +3766,8 @@ FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLVarying.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLXferProcessor.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrAAConvexTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrAAConvexTessellator.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrAAFillRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrAALinearizingConvexPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrAALinearizingConvexPathRenderer.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrAAStrokeRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasTextOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasTextOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearOp.h
@@ -3786,7 +3786,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrLatticeOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrLatticeOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrNonAAStrokeRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrStencilPathOp.h
@@ -4477,8 +4476,6 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUtil.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUtil.mm
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDebugMarkerOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrNonAAFillRectOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrRectOpFactory.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSemaphoreOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSemaphoreOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelper.cpp
