@@ -63,14 +63,15 @@ task:
       container:
         cpu: 4
         memory: 12G
-    - name: build_tests-linux
-      env:
-        SHARD: build_tests
-      test_script:
-        - dart ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
+    # TODO(jonahwilliams): re-enable when issue is diagnosed.
+    # - name: build_tests-linux
+    #   env:
+    #     SHARD: build_tests
+    #   test_script:
+    #     - dart ./dev/bots/test.dart
+    #   container:
+    #     cpu: 4
+    #     memory: 12G
     - name: codelabs-build-test
       env:
         SHARD: codelabs-build-test
