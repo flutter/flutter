@@ -13,7 +13,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 
 final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'examples/hello_world'));
 final File runTestSource = File(path.join(
-  flutterDirectory.path, 'dev', 'manual_tests', 'test', 'flutter_run_test.dart',
+  flutterDirectory.path, 'dev', 'automated_tests', 'flutter_run_test', 'flutter_run_test.dart',
 ));
 const Pattern passedMessageMatch = '+0: example passed';
 const Pattern failedMessageMatch = '+1: example failed [E]';
