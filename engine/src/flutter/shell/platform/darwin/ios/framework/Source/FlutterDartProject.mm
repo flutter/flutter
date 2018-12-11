@@ -134,7 +134,7 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
 #pragma mark - Override base class designated initializers
 
 - (instancetype)init {
-  return [self initWithFlutterAssets:nil dartMain:nil packages:nil];
+  return [self initWithPrecompiledDartBundle:nil];
 }
 
 #pragma mark - Designated initializers
@@ -145,33 +145,6 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
   if (self) {
     _precompiledDartBundle.reset([bundle retain]);
     _settings = DefaultSettingsForProcess(bundle);
-  }
-
-  return self;
-}
-
-- (instancetype)initWithFlutterAssets:(NSURL*)flutterAssetsURL
-                             dartMain:(NSURL*)dartMainURL
-                             packages:(NSURL*)dartPackages {
-  self = [super init];
-
-  if (self) {
-    _settings = DefaultSettingsForProcess();
-  }
-
-  return self;
-}
-
-- (instancetype)initWithFlutterAssetsWithScriptSnapshot:(NSURL*)flutterAssetsURL {
-  self = [super init];
-
-  if (self) {
-    _settings = DefaultSettingsForProcess();
-
-    if (flutterAssetsURL != nil &&
-        [[NSFileManager defaultManager] fileExistsAtPath:flutterAssetsURL.path]) {
-      _settings.assets_path = flutterAssetsURL.path.UTF8String;
-    }
   }
 
   return self;
