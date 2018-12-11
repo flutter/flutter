@@ -73,10 +73,7 @@ class StyledRuns {
   FRIEND_TEST(ParagraphTest, DecorationsParagraph);
   FRIEND_TEST(ParagraphTest, ItalicsParagraph);
   FRIEND_TEST(ParagraphTest, ChineseParagraph);
-  FRIEND_TEST(ParagraphTest, ArabicParagraph);
-  FRIEND_TEST(ParagraphTest, ArabicLeadingOverrideParagraph);
-  FRIEND_TEST(ParagraphTest, ArabicLeadingOverrideTallParagraph);
-  FRIEND_TEST(ParagraphTest, ArabicLeadingOverrideNegativeParagraph);
+  FRIEND_TEST(ParagraphTest, DISABLED_ArabicParagraph);
   FRIEND_TEST(ParagraphTest, LongWordParagraph);
   FRIEND_TEST(ParagraphTest, KernParagraph);
   FRIEND_TEST(ParagraphTest, HyphenBreakParagraph);
