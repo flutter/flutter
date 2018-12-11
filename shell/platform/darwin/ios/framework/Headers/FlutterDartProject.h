@@ -16,23 +16,9 @@ FLUTTER_EXPORT
 @interface FlutterDartProject : NSObject
 
 /**
- * Initializes with a specific
+ * Initializes a Flutter Dart project from a bundle.
  */
 - (instancetype)initWithPrecompiledDartBundle:(NSBundle*)bundle NS_DESIGNATED_INITIALIZER;
-
-/**
- * Initializes with a specific set of Flutter Assets, with a specified location of
- * main() and Dart packages.
- */
-- (instancetype)initWithFlutterAssets:(NSURL*)flutterAssetsURL
-                             dartMain:(NSURL*)dartMainURL
-                             packages:(NSURL*)dartPackages NS_DESIGNATED_INITIALIZER;
-
-/**
- * Initializes from a specific set of Flutter Assets.
- */
-- (instancetype)initWithFlutterAssetsWithScriptSnapshot:(NSURL*)flutterAssetsURL
-    NS_DESIGNATED_INITIALIZER;
 
 /**
  * Unavailable - use `init` instead.
