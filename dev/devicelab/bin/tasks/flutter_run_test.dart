@@ -22,47 +22,46 @@ const Pattern finishedMessageMatch = '+1 ~1 -1: Some tests failed.';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
-  await task(createFlutterRunTask());
+  await createFlutterRunTask();
 }
 
-TaskFunction createFlutterRunTask() {
-  return () async {
-    bool passedTest = false;
-    bool failedTest = false;
-    bool skippedTest = false;
-    bool finishedMessage = false;
-    final Device device = await devices.workingDevice;
-    await device.unlock();
-    final List<String> options = <String>[
-      '-t', runTestSource.absolute.path, '-d', device.deviceId,
-    ];
-    setLocalEngineOptionIfNecessary(options);
-    await inDirectory<void>(flutterGalleryDir, () async {
-      startProcess(
-        path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['run']..addAll(options),
-        environment: null
-      );
-      final Completer<void> finished = Completer<void>();
-      final StreamSubscription<void> subscription = device.logcat.listen((String line) {
-        // tests execute in order.
-        if (line.contains(passedMessageMatch)) {
-          passedTest = true;
-        } else if (line.contains(failedMessageMatch)) {
-          failedTest = true;
-        } else if (line.contains(skippedMessageMatch)) {
-          skippedTest = true;
-        } else if (line.contains(finishedMessageMatch)) {
-          finishedMessage = true;
-          finished.complete();
-        }
-      });
-      await finished.future.timeout(const Duration(minutes: 1));
-      subscription.cancel();
+// verifies that the messages above are printed as a test script is executed.
+Future<TaskResult> createFlutterRunTask() async {
+  bool passedTest = false;
+  bool failedTest = false;
+  bool skippedTest = false;
+  bool finishedMessage = false;
+  final Device device = await devices.workingDevice;
+  await device.unlock();
+  final List<String> options = <String>[
+    '-t', runTestSource.absolute.path, '-d', device.deviceId,
+  ];
+  setLocalEngineOptionIfNecessary(options);
+  await inDirectory<void>(flutterGalleryDir, () async {
+    startProcess(
+      path.join(flutterDirectory.path, 'bin', 'flutter'),
+      <String>['run']..addAll(options),
+      environment: null
+    );
+    final Completer<void> finished = Completer<void>();
+    final StreamSubscription<void> subscription = device.logcat.listen((String line) {
+      // tests execute in order.
+      if (line.contains(passedMessageMatch)) {
+        passedTest = true;
+      } else if (line.contains(failedMessageMatch)) {
+        failedTest = true;
+      } else if (line.contains(skippedMessageMatch)) {
+        skippedTest = true;
+      } else if (line.contains(finishedMessageMatch)) {
+        finishedMessage = true;
+        finished.complete();
+      }
     });
-    return passedTest && failedTest && skippedTest && finishedMessage
-      ? TaskResult.success(<String, dynamic>{})
-      : TaskResult.failure('Test did not execute as expected.');
-  };
+    await finished.future.timeout(const Duration(minutes: 1));
+    subscription.cancel();
+  });
+  return passedTest && failedTest && skippedTest && finishedMessage
+    ? TaskResult.success(<String, dynamic>{})
+    : TaskResult.failure('Test did not execute as expected.');
 }
 
