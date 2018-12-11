@@ -42,7 +42,12 @@ void _updateWindowMetrics(double devicePixelRatio,
 
 typedef _LocaleClosure = String Function();
 
-String _localeClosure() => window.locale.toString();
+String _localeClosure() {
+  if (window.locale == null) {
+    return null;
+  }
+  return window.locale.toString();
+}
 
 @pragma('vm:entry-point')
 _LocaleClosure _getLocaleClosure() => _localeClosure;
