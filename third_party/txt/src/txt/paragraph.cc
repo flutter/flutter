@@ -739,7 +739,7 @@ void Paragraph::Layout(double width, bool force) {
     // Add extra empty metrics for skipped whitespace at line end. This allows
     // GetRectsForRange to properly draw empty rects at the ends of lines with
     // truncated whitespace.
-    if (line_end_index < line_range.end) {
+    if (line_end_index < line_range.end && !line_code_unit_runs.empty()) {
       std::vector<GlyphPosition> empty_glyph_positions;
       double end_x = line_code_unit_runs.back().positions.back().x_pos.end;
       for (size_t index = line_end_index; index < line_range.end; ++index) {
