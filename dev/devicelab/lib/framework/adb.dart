@@ -467,7 +467,7 @@ String get adbPath {
           : Platform.environment['ANDROID_SDK_ROOT'];
 
   if (androidHome == null)
-    throw 'ANDROID_SDK_ROOT environment variable missing. This variable must '
+    throw 'The ANDROID_SDK_ROOT and ANDROID_HOME environment variables are missing. At least one of these variables must '
         'point to the Android SDK directory containing platform-tools.';
 
   final String adbPath = path.join(androidHome, 'platform-tools/adb');
