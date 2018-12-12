@@ -570,7 +570,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
   }
 }
 
-/// A gesture detector to detect concurrent gesture events for a text field.
+/// A gesture detector to detect non-exclusive event chains for a text field.
 ///
 /// Unlike a plain [GestureDetector] where a single gesture wins the gesture
 /// arena, text fields supports chains of concurrent events.
@@ -586,27 +586,32 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Multiple callbacks can be called from the same sequence of gesture.
   /// The [child] parameter must not be null.
   const TextSelectionGestureDetector({
+    Key key,
     this.onTapDown,
     this.onSingleTapUp,
     this.onSingleTapCancel,
     this.onSingleLongTapDown,
     this.onDoubleTapDown,
     @required this.child,
-  }) : assert(child != null);
+  }) : assert(child != null),
+       super(key: key);
 
-  /// Called each distinct time a tap was held momentarily or on a short tap.
+  /// Called for every tap down including every tap down that's part of a
+  /// double click or a long press, but except touches that are quickly
+  /// recognized as not tap (e.g. a very quick fling) under [kPressTimeout].
   final GestureTapDownCallback onTapDown;
 
   /// Called for each distinct short tap. Also called on the first tap of a
   /// double tap but not on the second tap.
   final GestureTapUpCallback onSingleTapUp;
 
-  /// Called for each tap down that does not become a short tap such as a long
-  /// tap or drag.
+  /// Called for each touch that becomes recognized as a gesture that is not a
+  /// short tap, such as a long tap or drag. It is called at the moment when
+  /// another gesture from the touch is recognized.
   final GestureTapCancelCallback onSingleTapCancel;
 
   /// Called for a single long tap that's sustained but not necessarily lifted.
-  /// Not called for a double-tap-hold.
+  /// Not called for a double-tap-hold, which calls [onDoubleTapDown] instead.
   final GestureLongPressCallback onSingleLongTapDown;
 
   /// Called after a momentary hold or a short tap that is close in space and
