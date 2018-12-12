@@ -112,4 +112,40 @@ void main() {
     expect(render.geometry.paintExtent, availableHeight);
     expect(render.geometry.layoutExtent, 0.0);
   });
+
+  testWidgets('Text does not dissapear when scrolled up', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/25000.
+
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            const SliverAppBar(
+              pinned: true,
+              floating: true,
+              expandedHeight: 120.0,
+              title: Text('Hallo Welt!!1'),
+            ),
+            SliverList(
+              delegate: SliverChildListDelegate(List<Widget>.generate(20, (int i) {
+                return Container(
+                  child: Text('Tile $i'),
+                  height: 100.0,
+                );
+              })),
+            )
+          ],
+        ),
+      ),
+    );
+
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
+    expect(render.text.style.color.opacity, 1.0);
+
+    controller.jumpTo(200.0);
+    await tester.pumpAndSettle();
+    expect(render.text.style.color.opacity, 1.0);
+  });
 }
