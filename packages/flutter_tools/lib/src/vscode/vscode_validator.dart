@@ -26,8 +26,12 @@ class VsCodeValidator extends DoctorValidator {
         ? null
         : 'version ${_vsCode.version}';
 
+    final ValidationType validationType = _vsCode.isValid
+        ? ValidationType.installed
+        : ValidationType.partial;
+
     return ValidationResult(
-      ValidationType.installed,
+      validationType,
       _vsCode.validationMessages,
       statusInfo: vsCodeVersionText,
     );

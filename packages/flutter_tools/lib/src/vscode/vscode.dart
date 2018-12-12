@@ -49,6 +49,7 @@ class VsCode {
     if (extensionDirs.isNotEmpty) {
       final FileSystemEntity extensionDir = extensionDirs.first;
 
+      _isValid = true;
       _extensionVersion = Version.parse(
           extensionDir.basename.substring('$extensionIdentifier-'.length));
       _validationMessages.add(ValidationMessage('Flutter extension version $_extensionVersion'));
@@ -73,9 +74,11 @@ class VsCode {
   final Version version;
   final String edition;
 
+  bool _isValid = false;
   Version _extensionVersion;
   final List<ValidationMessage> _validationMessages = <ValidationMessage>[];
 
+  bool get isValid => _isValid;
   String get productName => 'VS Code' + (edition != null ? ', $edition' : '');
 
   Iterable<ValidationMessage> get validationMessages => _validationMessages;
