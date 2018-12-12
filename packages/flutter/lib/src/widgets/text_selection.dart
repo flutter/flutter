@@ -572,8 +572,9 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
 
 /// A gesture detector to detect non-exclusive event chains for a text field.
 ///
-/// Unlike a plain [GestureDetector] where a single gesture wins the gesture
-/// arena, text fields supports chains of concurrent events.
+/// This widget is unlike a plain [GestureDetector] which only recognizes one
+/// tap or double tap in a chain of events and supports more complex
+/// sequences for text fields.
 ///
 /// See also:
 ///
