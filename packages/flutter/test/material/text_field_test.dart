@@ -3456,8 +3456,11 @@ void main() {
 
     expect(tapCount, 0);
     await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 300));
     expect(tapCount, 3);
   });
 
