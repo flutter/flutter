@@ -411,6 +411,8 @@ class TextPainter {
     return _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
   }
 
+  // Get the Offset of the cursor (in pixels) based off the near edge of the
+  // character upstream from the given string offset.
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
     final int prevCodeUnit = _text.codeUnitAt(offset - 1);
     if (prevCodeUnit == null)
@@ -421,10 +423,19 @@ class TextPainter {
       return null;
     final TextBox box = boxes[0];
     final double caretEnd = box.end;
+
+    // If the upstream character is a newline, cursor is at start of next line
+    const int NEWLINE_CODE_UNIT = 10;
+    if (prevCodeUnit == NEWLINE_CODE_UNIT) {
+      return Offset(_emptyOffset.dx, box.bottom);
+    }
+
     final double dx = box.direction == TextDirection.rtl ? caretEnd - caretPrototype.width : caretEnd;
     return Offset(dx, box.top);
   }
 
+  // Get the Offset of the cursor (in pixels) based off the near edge of the
+  // character downstream from the given string offset.
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
     final int nextCodeUnit = _text.codeUnitAt(offset);
     if (nextCodeUnit == null)
