@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
-import 'package:test/test.dart' as test_package;
+import 'package:test_api/test_api.dart' as test_package;
 
 import 'all_elements.dart';
 import 'binding.dart';
@@ -24,7 +24,7 @@ import 'test_text_input.dart';
 /// Keep users from needing multiple imports to test semantics.
 export 'package:flutter/rendering.dart' show SemanticsHandle;
 
-export 'package:test/test.dart' hide
+export 'package:test_api/test_api.dart' hide
   expect, // we have our own wrapper below
   TypeMatcher, // matcher's TypeMatcher conflicts with the one in the Flutter framework
   isInstanceOf; // we have our own wrapper in matchers.dart
@@ -645,30 +645,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     if (result == null)
       throw StateError('No Semantics data found.');
     return result;
-  }
-
-  /// DEPRECATED: use [getSemantics] instead.
-  @Deprecated('use getSemantics instead')
-  SemanticsData getSemanticsData(Finder finder) {
-    if (binding.pipelineOwner.semanticsOwner == null)
-      throw StateError('Semantics are not enabled.');
-    final Iterable<Element> candidates = finder.evaluate();
-    if (candidates.isEmpty) {
-      throw StateError('Finder returned no matching elements.');
-    }
-    if (candidates.length > 1) {
-      throw StateError('Finder returned more than one element.');
-    }
-    final Element element = candidates.single;
-    RenderObject renderObject = element.findRenderObject();
-    SemanticsNode result = renderObject.debugSemantics;
-    while (renderObject != null && result == null) {
-      renderObject = renderObject?.parent;
-      result = renderObject?.debugSemantics;
-    }
-    if (result == null)
-      throw StateError('No Semantics data found.');
-    return result.getSemanticsData();
   }
 
   /// Enable semantics in a test by creating a [SemanticsHandle].

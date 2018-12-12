@@ -135,12 +135,14 @@ class MethodChannel {
   /// * a [MissingPluginException], if the method has not been implemented by a
   ///   platform plugin.
   ///
-  /// ## Sample code
-  ///
   /// The following code snippets demonstrate how to invoke platform methods
   /// in Dart using a MethodChannel and how to implement those methods in Java
-  /// (for Android) and Objective-C (for iOS). The code might be packaged up as
-  /// a musical plugin, see <https://flutter.io/developing-packages/>:
+  /// (for Android) and Objective-C (for iOS).
+  ///
+  /// {@tool sample}
+  ///
+  /// The code might be packaged up as a musical plugin, see
+  /// <https://flutter.io/developing-packages/>:
   ///
   /// ```dart
   /// class Music {
@@ -188,6 +190,11 @@ class MethodChannel {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
+  ///
+  /// {@tool sample}
+  ///
+  /// Java (for Android):
   ///
   /// ```java
   /// // Assumes existence of an Android MusicApi.
@@ -223,8 +230,13 @@ class MethodChannel {
   ///   // Other methods elided.
   /// }
   /// ```
+  /// {@end-tool}
   ///
-  /// ```objective-c
+  /// {@tool sample}
+  ///
+  /// Objective-C (for iOS):
+  ///
+  /// ```objectivec
   /// @interface MusicPlugin : NSObject<FlutterPlugin>
   /// @end
   ///
@@ -259,6 +271,7 @@ class MethodChannel {
   /// // Other methods elided.
   /// @end
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///

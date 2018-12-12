@@ -5,7 +5,6 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/src/material/dialog_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeData theme}) {

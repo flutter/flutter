@@ -34,6 +34,12 @@ void main() {
           strokeWidth: 0.0,
         )
     );
+
+    const RoundedRectangleBorder directional = RoundedRectangleBorder(
+      borderRadius: BorderRadiusDirectional.only(topStart: Radius.circular(20)),
+    );
+    expect(ShapeBorder.lerp(directional, c10, 1.0),
+           ShapeBorder.lerp(c10, directional, 0.0));
   });
 
   test('RoundedRectangleBorder and CircleBorder', () {

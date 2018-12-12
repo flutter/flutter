@@ -22,7 +22,7 @@ import 'bottom_tab_bar.dart';
 /// Use [CupertinoTabView] as the content of each tab to support tabs with parallel
 /// navigation state and history.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// A sample code implementing a typical iOS information architecture with tabs.
 ///
@@ -70,6 +70,7 @@ import 'bottom_tab_bar.dart';
 ///   },
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// To push a route above all tabs instead of inside the currently selected one
 /// (such as when showing a dialog on top of this scaffold), use

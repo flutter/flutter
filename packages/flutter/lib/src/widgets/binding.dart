@@ -32,7 +32,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// handlers must be implemented (and the analyzer will list those that have
 /// been omitted).
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This [StatefulWidget] implements the parts of the [State] and
 /// [WidgetsBindingObserver] protocols necessary to react to application
@@ -72,6 +72,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// To respond to other notifications, replace the [didChangeAppLifecycleState]
 /// method above with other methods from this class.
@@ -109,7 +110,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from [Window.onMetricsChanged].
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// This [StatefulWidget] implements the parts of the [State] and
   /// [WidgetsBindingObserver] protocols necessary to react when the device is
@@ -149,6 +150,7 @@ abstract class WidgetsBindingObserver {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// In general, this is unnecessary as the layout system takes care of
   /// automatically recomputing the application geometry when the application
@@ -168,7 +170,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from [Window.onTextScaleFactorChanged].
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// class TextScaleFactorReactor extends StatefulWidget {
@@ -204,6 +206,7 @@ abstract class WidgetsBindingObserver {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -216,7 +219,7 @@ abstract class WidgetsBindingObserver {
   /// settings.
   ///
   /// This method exposes notifications from [Window.onLocaleChanged].
-  void didChangeLocale(Locale locale) { }
+  void didChangeLocales(List<Locale> locale) { }
 
   /// Called when the system puts the app in the background or returns
   /// the app to the foreground.
@@ -410,20 +413,20 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   @protected
   @mustCallSuper
   void handleLocaleChanged() {
-    dispatchLocaleChanged(ui.window.locale);
+    dispatchLocalesChanged(ui.window.locales);
   }
 
   /// Notify all the observers that the locale has changed (using
-  /// [WidgetsBindingObserver.didChangeLocale]), giving them the
-  /// `locale` argument.
+  /// [WidgetsBindingObserver.didChangeLocales]), giving them the
+  /// `locales` argument.
   ///
   /// This is called by [handleLocaleChanged] when the [Window.onLocaleChanged]
   /// notification is received.
   @protected
   @mustCallSuper
-  void dispatchLocaleChanged(Locale locale) {
+  void dispatchLocalesChanged(List<Locale> locales) {
     for (WidgetsBindingObserver observer in _observers)
-      observer.didChangeLocale(locale);
+      observer.didChangeLocales(locales);
   }
 
   /// Notify all the observers that the active set of [AccessibilityFeatures]

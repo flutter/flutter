@@ -12,6 +12,7 @@ import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -25,25 +26,72 @@ final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 
 /// Read the log for a particular device.
 class _FuchsiaLogReader extends DeviceLogReader {
-  _FuchsiaLogReader(this._device);
+  _FuchsiaLogReader(this._device, [this._app]);
 
-  // TODO(jonahwilliams): handle filtering log output from different modules.
-  static final Pattern flutterLogOutput = RegExp(r'\[\d+\.\d+\]\[\d+\]\[\d+\]\[klog\] INFO: \w+\(flutter\): ');
+  static final RegExp _flutterLogOutput = RegExp(r'INFO: \w+\(flutter\): ');
 
   FuchsiaDevice _device;
+  ApplicationPackage _app;
 
   @override String get name => _device.name;
 
   Stream<String> _logLines;
   @override
   Stream<String> get logLines {
-    _logLines ??= fuchsiaSdk.syslogs()
-      .where((String line) => flutterLogOutput.matchAsPrefix(line) != null);
+    _logLines ??= _processLogs(fuchsiaSdk.syslogs());
     return _logLines;
+  }
+
+  Stream<String> _processLogs(Stream<String> lines) {
+    // Get the starting time of the log processor to filter logs from before
+    // the process attached.
+    final DateTime startTime = systemClock.now();
+    // Determine if line comes from flutter, and optionally whether it matches
+    // the correct fuchsia module.
+    final RegExp matchRegExp = _app == null
+      ? _flutterLogOutput
+      : RegExp('INFO: ${_app.name}\\(flutter\\): ');
+    return Stream<String>.eventTransformed(
+      lines,
+      (Sink<String> outout) => _FuchsiaLogSink(outout, matchRegExp, startTime),
+    );
   }
 
   @override
   String toString() => name;
+}
+
+class _FuchsiaLogSink implements EventSink<String> {
+  _FuchsiaLogSink(this._outputSink, this._matchRegExp, this._startTime);
+
+  static final RegExp _utcDateOutput = RegExp(r'\d+\-\d+\-\d+ \d+:\d+:\d+');
+  final EventSink<String> _outputSink;
+  final RegExp _matchRegExp;
+  final DateTime _startTime;
+
+  @override
+  void add(String line) {
+    if (!_matchRegExp.hasMatch(line)) {
+      return;
+    }
+    final String rawDate = _utcDateOutput.firstMatch(line)?.group(0);
+    if (rawDate == null) {
+      return;
+    }
+    final DateTime logTime = DateTime.parse(rawDate);
+    if (logTime.millisecondsSinceEpoch < _startTime.millisecondsSinceEpoch) {
+      return;
+    }
+    _outputSink.add('[${logTime.toLocal()}] Flutter: ${line.split(_matchRegExp).last}');
+  }
+
+  @override
+  void addError(Object error, [StackTrace stackTrace]) {
+    _outputSink.addError(error, stackTrace);
+  }
+
+  @override
+  void close() { _outputSink.close(); }
 }
 
 class FuchsiaDevices extends PollingDeviceDiscovery {
@@ -97,7 +145,10 @@ class FuchsiaDevice extends Device {
   FuchsiaDevice(String id, { this.name }) : super(id);
 
   @override
-  bool get supportsHotMode => true;
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => false;
 
   @override
   final String name;
@@ -149,7 +200,7 @@ class FuchsiaDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'Fuchsia';
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader ??= _FuchsiaLogReader(this);
+  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader ??= _FuchsiaLogReader(this, app);
   _FuchsiaLogReader _logReader;
 
   @override
@@ -172,8 +223,11 @@ class FuchsiaDevice extends Device {
   /// Run `command` on the Fuchsia device shell.
   Future<String> shell(String command) async {
     final RunResult result = await runAsync(<String>[
-      'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, id, command]);
+      'ssh', '-F', fuchsiaArtifacts.sshConfig.absolute.path, id, command]);
     if (result.exitCode != 0) {
+      if (result.stderr.contains('/tmp/dart.services: No such file or directory')) {
+        throwToolExit('No Dart Observatories found. Are you running a debug build?');
+      }
       throwToolExit('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
       return null;
     }
@@ -228,7 +282,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     // Note: the provided command works around a bug in -N, see US-515
     // for more explanation.
     final List<String> command = <String>[
-      'ssh', '-6', '-F', fuchsiaSdk.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
+      'ssh', '-6', '-F', fuchsiaArtifacts.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
       '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true'
     ];
     final Process process = await processManager.start(command);
@@ -252,7 +306,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     final Process process = _processes.remove(forwardedPort.hostPort);
     process?.kill();
     final List<String> command = <String>[
-        'ssh', '-F', fuchsiaSdk.sshConfig.absolute.path, '-O', 'cancel', '-vvv',
+        'ssh', '-F', fuchsiaArtifacts.sshConfig.absolute.path, '-O', 'cancel', '-vvv',
         '-L', '${forwardedPort.hostPort}:$_ipv4Loopback:${forwardedPort.devicePort}', device.id];
     final ProcessResult result = await processManager.run(command);
     if (result.exitCode != 0) {
@@ -274,6 +328,13 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       await serverSocket.close();
     return port;
   }
+}
+
+class FuchsiaModulePackage extends ApplicationPackage {
+  FuchsiaModulePackage({@required this.name}) : super(id: name);
+
+  @override
+  final String name;
 }
 
 /// Parses output from `dart.services` output on a fuchsia device.

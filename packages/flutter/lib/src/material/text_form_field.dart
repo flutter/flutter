@@ -39,7 +39,7 @@ import 'theme.dart';
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// Creates a [TextFormField] with an [InputDecoration] and validator function.
 ///
@@ -59,6 +59,7 @@ import 'theme.dart';
 ///   },
 /// )
 /// ```
+/// {@end-tool}
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
   ///
@@ -94,6 +95,9 @@ class TextFormField extends FormField<String> {
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
     bool enabled = true,
+    double cursorWidth = 2.0,
+    Radius cursorRadius,
+    Color cursorColor,
     Brightness keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     bool enableInteractiveSelection = true,
@@ -140,6 +144,9 @@ class TextFormField extends FormField<String> {
         onSubmitted: onFieldSubmitted,
         inputFormatters: inputFormatters,
         enabled: enabled,
+        cursorWidth: cursorWidth,
+        cursorRadius: cursorRadius,
+        cursorColor: cursorColor,
         scrollPadding: scrollPadding,
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: enableInteractiveSelection,

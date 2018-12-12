@@ -62,7 +62,7 @@ typedef SemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size si
 /// class is provided, to check if the new instance contains different
 /// information that affects the semantics tree.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample extends the same code shown for [RadialGradient] to create a
 /// custom painter that paints a sky.
@@ -117,6 +117,7 @@ typedef SemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size si
 ///   bool shouldRebuildSemantics(Sky oldDelegate) => false;
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

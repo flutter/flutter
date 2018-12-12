@@ -217,7 +217,7 @@ class AssetImage extends AssetBundleImageProvider {
 
   static Future<Map<String, List<String>>> _manifestParser(String jsonData) {
     if (jsonData == null)
-      return null;
+      return SynchronousFuture<Map<String, List<String>>>(null);
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
     final Map<String, dynamic> parsedJson = json.decode(jsonData);
     final Iterable<String> keys = parsedJson.keys;

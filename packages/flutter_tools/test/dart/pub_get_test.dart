@@ -213,7 +213,7 @@ class MockStreamSubscription<T> implements StreamSubscription<T> {
   Future<E> asFuture<E>([E futureValue]) => Future<E>.value();
 
   @override
-  Future<void> cancel() => null;
+  Future<void> cancel() async { }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;

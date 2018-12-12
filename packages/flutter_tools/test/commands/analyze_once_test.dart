@@ -18,6 +18,11 @@ import '../src/context.dart';
 /// Test case timeout for tests involving project analysis.
 const Timeout allowForSlowAnalyzeTests = Timeout.factor(5.0);
 
+final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
+  Platform: _kNoColorTerminalPlatform,
+};
+
 void main() {
   final String analyzerSeparator = platform.isWindows ? '-' : '•';
 
@@ -99,7 +104,7 @@ void main() {
         exitMessageContains: '2 issues found.',
         toolExit: true,
       );
-    }, timeout: allowForSlowAnalyzeTests);
+    }, timeout: allowForSlowAnalyzeTests, overrides: noColorTerminalOverride);
 
     // Analyze in the current directory - no arguments
     testUsingContext('working directory with local options', () async {
@@ -126,7 +131,7 @@ void main() {
         exitMessageContains: '3 issues found.',
         toolExit: true,
       );
-    }, timeout: allowForSlowAnalyzeTests);
+    }, timeout: allowForSlowAnalyzeTests, overrides: noColorTerminalOverride);
 
     testUsingContext('no duplicate issues', () async {
       final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
@@ -160,7 +165,7 @@ void bar() {
       } finally {
         tryToDelete(tempDir);
       }
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('returns no issues when source is error-free', () async {
       const String contents = '''
@@ -177,7 +182,7 @@ StringBuffer bar = StringBuffer('baz');
       } finally {
         tryToDelete(tempDir);
       }
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('returns no issues for todo comments', () async {
       const String contents = '''
@@ -195,7 +200,7 @@ StringBuffer bar = StringBuffer('baz');
       } finally {
         tryToDelete(tempDir);
       }
-    });
+    }, overrides: noColorTerminalOverride);
   });
 }
 

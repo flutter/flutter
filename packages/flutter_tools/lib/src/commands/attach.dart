@@ -11,6 +11,7 @@ import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
+import '../compile.dart';
 import '../device.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
@@ -48,9 +49,13 @@ class AttachCommand extends FlutterCommand {
     usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
+    usesFuchsiaOptions(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
+        help: 'Device port where the observatory is listening.',
+      )..addOption(
+        'observatory-port',
         help: 'Local port where the observatory is listening.',
       )..addOption('pid-file',
         help: 'Specify a file to write the process id to. '
@@ -60,17 +65,17 @@ class AttachCommand extends FlutterCommand {
         'project-root',
         hide: !verboseHelp,
         help: 'Normally used only in run target',
-      )..addOption(
-        'module',
-        abbr: 'm',
-        hide: !verboseHelp,
-        help: 'The name of the module (required if attaching to a fuchsia device)',
-        valueHelp: 'module-name',
       )..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
         help: 'Handle machine structured JSON command input and provide output '
               'and progress in machine friendly format.',
+      )..addFlag('ipv6',
+        hide: true,
+        negatable: false,
+        help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool '
+              'forwards the host port to a device port. Not used when the '
+              '--debug-port flag is not set.',
       );
     hotRunnerFactory ??= HotRunnerFactory();
   }
@@ -83,6 +88,14 @@ class AttachCommand extends FlutterCommand {
   @override
   final String description = 'Attach to a running application.';
 
+  // TODO(djshuckerow): this is now a confusing name. An explanation:
+  // The --observatory-port flag passed to `flutter run` is used to
+  // set up the port on the development macine that the Dart observatory
+  // listens to. This flag serves the same purpose in this command.
+  //
+  // The --debug-port flag passed only to `flutter attach` is used to
+  // set up the port on the device running a Flutter app to connect back
+  // to the host development machine.
   int get observatoryPort {
     if (argResults['debug-port'] == null)
       return null;
@@ -100,6 +113,12 @@ class AttachCommand extends FlutterCommand {
     if (await findTargetDevice() == null)
       throwToolExit(null);
     observatoryPort;
+    if (observatoryPort == null && argResults.wasParsed('ipv6')) {
+      throwToolExit(
+        'When the --debug-port is unknown, this command determines '
+        'the value of --ipv6 on its own.',
+      );
+    }
   }
 
   @override
@@ -141,15 +160,23 @@ class AttachCommand extends FlutterCommand {
           'Waiting for a connection from Flutter on ${device.name}...',
           expectSlowOperation: true,
         );
-        final int localPort = await device.findIsolatePort(module, localPorts);
-        if (localPort == null) {
+        try {
+          final int localPort = await device.findIsolatePort(module, localPorts);
+          if (localPort == null) {
+            throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
+          }
+          observatoryUri = ipv6
+            ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
+            : Uri.parse('http://$ipv4Loopback:$localPort/');
+          status.stop();
+        } catch (_) {
+          final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
+          for (ForwardedPort port in ports) {
+            await device.portForwarder.unforward(port);
+          }
           status.cancel();
-          throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
+          rethrow;
         }
-        status.stop();
-        observatoryUri = ipv6
-          ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
-          : Uri.parse('http://$ipv4Loopback:$localPort/');
       } else {
         ProtocolDiscovery observatoryDiscovery;
         try {
@@ -159,14 +186,24 @@ class AttachCommand extends FlutterCommand {
           );
           printStatus('Waiting for a connection from Flutter on ${device.name}...');
           observatoryUri = await observatoryDiscovery.uri;
+          // Determine ipv6 status from the scanned logs.
+          ipv6 = observatoryDiscovery.ipv6;
           printStatus('Done.');
         } finally {
           await observatoryDiscovery?.cancel();
         }
       }
     } else {
-      final int localPort = await device.portForwarder.forward(devicePort);
-      observatoryUri = Uri.parse('http://$ipv4Loopback:$localPort/');
+      ipv6 = argResults['ipv6'];
+      // int.tryParse will throw if it is passed null, so we need to do this.
+      final int argObservatoryPort = argResults['observatory-port'] == null
+        ? null
+        : int.tryParse(argResults['observatory-port']);
+      final int localPort = argObservatoryPort
+        ?? await device.portForwarder.forward(devicePort);
+      observatoryUri = ipv6
+        ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
+        : Uri.parse('http://$ipv4Loopback:$localPort/');
     }
     try {
       final FlutterDevice flutterDevice = FlutterDevice(
@@ -176,6 +213,7 @@ class AttachCommand extends FlutterCommand {
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
+        targetModel: TargetModel(argResults['target-model']),
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = hotRunnerFactory.build(
@@ -208,7 +246,9 @@ class AttachCommand extends FlutterCommand {
       }
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
-      ports.forEach(device.portForwarder.unforward);
+      for (ForwardedPort port in ports) {
+        await device.portForwarder.unforward(port);
+      }
     }
     return null;
   }
