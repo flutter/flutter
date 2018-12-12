@@ -5,6 +5,7 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeData theme}) {
@@ -39,6 +40,22 @@ Material _getMaterialFromDialog(WidgetTester tester) {
 }
 
 void main() {
+  testWidgets('Dialog Theme implements debugFillDescription', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const DialogTheme(
+      backgroundColor: Color(0xff123456),
+      elevation: 8.0,
+      shape: null,
+    ).debugFillProperties(builder);
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode n) => n.toString()).toList();
+    expect(description, <String>[
+      'backgroundColor: Color(0xff123456)',
+      'elevation: 8.0'
+    ]);
+  });
+
   testWidgets('Dialog background color', (WidgetTester tester) async {
     const Color customColor = Colors.pink;
     const AlertDialog dialog = AlertDialog(

@@ -42,25 +42,6 @@ Material _getMaterialFromDialog(WidgetTester tester) {
 const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
 
 void main() {
-  testWidgets('Dialog implements debugFillDescription', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    AlertDialog(
-      title: Text('Title'),
-      content: Text('Y'),
-      actions: <Widget>[ ],
-    ).debugFillProperties(builder);
-    final List<String> description = builder.properties
-        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode n) => n.toString()).toList();
-    expect(description, <String>[
-      'textColor: Color(0xff00ff00)',
-      'disabledTextColor: Color(0xffff0000)',
-      'color: Color(0xff000000)',
-      'highlightColor: Color(0xff1565c0)',
-      'splashColor: Color(0xff9e9e9e)',
-    ]);
-  });
-
   testWidgets('Dialog is scrollable', (WidgetTester tester) async {
     bool didPressOk = false;
     final AlertDialog dialog = AlertDialog(
