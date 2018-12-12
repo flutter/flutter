@@ -186,6 +186,7 @@ FileType identifyFile(String name, Reader reader) {
     case '.ttf': return FileType.binary; // TrueType Font
     case '.ttcf': // (mac)
     case '.ttc': return FileType.binary; // TrueType Collection (windows)
+    case '.woff': return FileType.binary; // Web Open Font Format
     case '.otf': return FileType.binary; // OpenType Font
     // Graphics formats
     case '.gif': return FileType.binary; // GIF
