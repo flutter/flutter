@@ -1520,7 +1520,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///   final Color color;
 ///
 ///   static FrogColor of(BuildContext context) {
-///     return context.inheritFromWidgetOfExactType(FrogColor);
+///     return context.inheritFromWidgetOfExactType(FrogColor) as FrogColor;
 ///   }
 ///
 ///   @override
@@ -1531,8 +1531,8 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///
 /// The convention is to provide a static method `of` on the [InheritedWidget]
 /// which does the call to [BuildContext.inheritFromWidgetOfExactType]. This
-/// allows the class to define its own fallback logic in the case of there not
-/// being a widget in scope. In the example above, the value returned will be
+/// allows the class to define its own fallback logic in case there isn't
+/// a widget in scope. In the example above, the value returned will be
 /// null in that case, but it could also have defaulted to a value.
 ///
 /// Sometimes, the `of` method returns the data rather than the inherited

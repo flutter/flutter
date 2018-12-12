@@ -237,18 +237,14 @@ dart_tool("fuchsia_tester") {
   ]
 }
 
-dart_tool("fuchsia_tools") {
-  package_name = "fuchsia_tools"
-  main_dart = "bin/fuchsia_tools.dart"
+dart_tool("fuchsia_attach") {
+  package_name = "fuchsia_attach"
+  main_dart = "bin/fuchsia_attach.dart"
 
   # Can be left empty as analysis is disabled.
   sources = []
 
   disable_analysis = true
-
-  non_dart_deps = [
-    "//third_party/flutter/frontend_server:frontend_server_tool",
-  ]
 
   deps = [
     ":flutter_tools",
