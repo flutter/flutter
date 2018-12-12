@@ -2086,11 +2086,11 @@ class InputDecoration {
 
   /// The maximum number of lines the [hintText] can occupy.
   ///
-  /// Defaults to null, which means that the [hintText] will be limited
-  /// to a single line with [TextOverflow.ellipsis].
+  /// Defaults to the value of [TextField.maxLines] attribute. 
   ///
   /// This value is passed along to the [Text.maxLines] attribute
-  /// of the [Text] widget used to display the error.
+  /// of the [Text] widget used to display the hint text. [TextOverflow.ellipsis] is 
+  /// used to handle the overflow when it is limited to single line.
   final int hintMaxLines;
 
   /// Text that appears below the input [child] and the border.
