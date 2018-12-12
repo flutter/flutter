@@ -113,9 +113,11 @@ class _GalleryAppState extends State<GalleryApp> {
       optionsPage: GalleryOptionsPage(
         options: _options,
         onOptionsChanged: _handleOptionsChanged,
-        onSendFeedback: widget.onSendFeedback ?? () {
-          launch('https://github.com/flutter/flutter/issues/new/choose', forceSafariVC: false);
-        },
+        onSendFeedback: widget.onSendFeedback ??
+            () {
+              launch('https://github.com/flutter/flutter/issues/new/choose',
+                  forceSafariVC: false);
+            },
       ),
     );
 

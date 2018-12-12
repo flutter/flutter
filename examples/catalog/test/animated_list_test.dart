@@ -7,7 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sample_catalog/animated_list.dart' as animated_list_sample;
 
 void main() {
-  testWidgets('animated_list sample app smoke test', (WidgetTester tester) async {
+  testWidgets('animated_list sample app smoke test',
+      (WidgetTester tester) async {
     animated_list_sample.main();
     await tester.pump();
 

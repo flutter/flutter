@@ -13,7 +13,9 @@ import 'package:flutter/material.dart';
 Future<String> _handleMessages(String message) async {
   assert(message == 'demoNames');
   return const JsonEncoder.withIndent('  ').convert(
-    kAllGalleryDemos.map((GalleryDemo demo) => '${demo.title}@${demo.category.name}').toList(),
+    kAllGalleryDemos
+        .map((GalleryDemo demo) => '${demo.title}@${demo.category.name}')
+        .toList(),
   );
 }
 

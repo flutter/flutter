@@ -148,8 +148,7 @@ class VideoPlayPause extends StatefulWidget {
 class _VideoPlayPauseState extends State<VideoPlayPause> {
   _VideoPlayPauseState() {
     listener = () {
-      if (mounted)
-        setState(() {});
+      if (mounted) setState(() {});
     };
   }
 
@@ -352,11 +351,10 @@ Future<bool> isIOSSimulator() async {
 
 class _VideoDemoState extends State<VideoDemo>
     with SingleTickerProviderStateMixin {
-  final VideoPlayerController butterflyController =
-      VideoPlayerController.asset(
-        'videos/butterfly.mp4',
-        package: 'flutter_gallery_assets',
-      );
+  final VideoPlayerController butterflyController = VideoPlayerController.asset(
+    'videos/butterfly.mp4',
+    package: 'flutter_gallery_assets',
+  );
   final VideoPlayerController beeController = VideoPlayerController.network(
     beeUri,
   );
@@ -375,8 +373,7 @@ class _VideoDemoState extends State<VideoDemo>
       controller.play();
       await connectedCompleter.future;
       await controller.initialize();
-      if (mounted)
-        setState(() {});
+      if (mounted) setState(() {});
     }
 
     initController(butterflyController);

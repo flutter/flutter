@@ -16,10 +16,10 @@ class _ProductItem extends StatelessWidget {
     @required this.product,
     @required this.quantity,
     @required this.onChanged,
-  }) : assert(product != null),
-       assert(quantity != null),
-       assert(onChanged != null),
-       super(key: key);
+  })  : assert(product != null),
+        assert(quantity != null),
+        assert(onChanged != null),
+        super(key: key);
 
   final Product product;
   final int quantity;
@@ -46,12 +46,20 @@ class _ProductItem extends StatelessWidget {
                 ),
               ),
               child: DropdownButton<int>(
-                items: <int>[0, 1, 2, 3, 4, 5].map<DropdownMenuItem<int>>((int value) {
+                items: <int>[
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5
+                ].map<DropdownMenuItem<int>>((int value) {
                   return DropdownMenuItem<int>(
                     value: value,
                     child: Padding(
                       padding: const EdgeInsets.only(left: 8.0),
-                      child: Text('Quantity $value', style: theme.quantityMenuStyle),
+                      child: Text('Quantity $value',
+                          style: theme.quantityMenuStyle),
                     ),
                   );
                 }).toList(),
@@ -68,9 +76,9 @@ class _ProductItem extends StatelessWidget {
 
 // Vendor name and description
 class _VendorItem extends StatelessWidget {
-  const _VendorItem({ Key key, @required this.vendor })
-    : assert(vendor != null),
-      super(key: key);
+  const _VendorItem({Key key, @required this.vendor})
+      : assert(vendor != null),
+        super(key: key);
 
   final Vendor vendor;
 
@@ -109,21 +117,26 @@ class _HeadingLayout extends MultiChildLayoutDelegate {
   void performLayout(Size size) {
     const double margin = 56.0;
     final bool landscape = size.width > size.height;
-    final double imageWidth = (landscape ? size.width / 2.0 : size.width) - margin * 2.0;
-    final BoxConstraints imageConstraints = BoxConstraints(maxHeight: 224.0, maxWidth: imageWidth);
+    final double imageWidth =
+        (landscape ? size.width / 2.0 : size.width) - margin * 2.0;
+    final BoxConstraints imageConstraints =
+        BoxConstraints(maxHeight: 224.0, maxWidth: imageWidth);
     final Size imageSize = layoutChild(image, imageConstraints);
     const double imageY = 0.0;
     positionChild(image, const Offset(margin, imageY));
 
-    final double productWidth = landscape ? size.width / 2.0 : size.width - margin;
-    final BoxConstraints productConstraints = BoxConstraints(maxWidth: productWidth);
+    final double productWidth =
+        landscape ? size.width / 2.0 : size.width - margin;
+    final BoxConstraints productConstraints =
+        BoxConstraints(maxWidth: productWidth);
     final Size productSize = layoutChild(product, productConstraints);
     final double productX = landscape ? size.width / 2.0 : margin;
     final double productY = landscape ? 0.0 : imageY + imageSize.height + 16.0;
     positionChild(product, Offset(productX, productY));
 
     final Size iconSize = layoutChild(icon, BoxConstraints.loose(size));
-    positionChild(icon, Offset(productX - iconSize.width - 16.0, productY + 8.0));
+    positionChild(
+        icon, Offset(productX - iconSize.width - 16.0, productY + 8.0));
 
     final double vendorWidth = landscape ? size.width - margin : productWidth;
     layoutChild(vendor, BoxConstraints(maxWidth: vendorWidth));
@@ -144,9 +157,9 @@ class _Heading extends StatelessWidget {
     @required this.product,
     @required this.quantity,
     this.quantityChanged,
-  }) : assert(product != null),
-       assert(quantity != null && quantity >= 0 && quantity <= 5),
-       super(key: key);
+  })  : assert(product != null),
+        assert(quantity != null && quantity >= 0 && quantity <= 5),
+        super(key: key);
 
   final Product product;
   final int quantity;
@@ -161,7 +174,8 @@ class _Heading extends StatelessWidget {
         type: MaterialType.card,
         elevation: 0.0,
         child: Padding(
-          padding: const EdgeInsets.only(left: 16.0, top: 18.0, right: 16.0, bottom: 24.0),
+          padding: const EdgeInsets.only(
+              left: 16.0, top: 18.0, right: 16.0, bottom: 24.0),
           child: CustomMultiChildLayout(
             delegate: _HeadingLayout(),
             children: <Widget>[
@@ -211,10 +225,10 @@ class OrderPage extends StatefulWidget {
     @required this.order,
     @required this.products,
     @required this.shoppingCart,
-  }) : assert(order != null),
-       assert(products != null && products.isNotEmpty),
-       assert(shoppingCart != null),
-       super(key: key);
+  })  : assert(order != null),
+        assert(products != null && products.isNotEmpty),
+        assert(shoppingCart != null),
+        super(key: key);
 
   final Order order;
   final List<Product> products;
@@ -233,7 +247,8 @@ class _OrderPageState extends State<OrderPage> {
   @override
   void initState() {
     super.initState();
-    scaffoldKey = GlobalKey<ScaffoldState>(debugLabel: 'Shrine Order ${widget.order}');
+    scaffoldKey =
+        GlobalKey<ScaffoldState>(debugLabel: 'Shrine Order ${widget.order}');
   }
 
   Order get currentOrder => ShrineOrderRoute.of(context).order;
@@ -242,8 +257,9 @@ class _OrderPageState extends State<OrderPage> {
     ShrineOrderRoute.of(context).order = value;
   }
 
-  void updateOrder({ int quantity, bool inCart }) {
-    final Order newOrder = currentOrder.copyWith(quantity: quantity, inCart: inCart);
+  void updateOrder({int quantity, bool inCart}) {
+    final Order newOrder =
+        currentOrder.copyWith(quantity: quantity, inCart: inCart);
     if (currentOrder != newOrder) {
       setState(() {
         widget.shoppingCart[newOrder.product] = newOrder;
@@ -268,8 +284,7 @@ class _OrderPageState extends State<OrderPage> {
           final int n = currentOrder.quantity;
           final String item = currentOrder.product.name;
           showSnackBarMessage(
-            'There ${ n == 1 ? "is one $item item" : "are $n $item items" } in the shopping cart.'
-          );
+              'There ${n == 1 ? "is one $item item" : "are $n $item items"} in the shopping cart.');
         },
         backgroundColor: const Color(0xFF16F0F0),
         tooltip: 'Add to cart',
@@ -284,7 +299,9 @@ class _OrderPageState extends State<OrderPage> {
             child: _Heading(
               product: widget.order.product,
               quantity: currentOrder.quantity,
-              quantityChanged: (int value) { updateOrder(quantity: value); },
+              quantityChanged: (int value) {
+                updateOrder(quantity: value);
+              },
             ),
           ),
           SliverSafeArea(
@@ -298,17 +315,17 @@ class _OrderPageState extends State<OrderPage> {
               ),
               delegate: SliverChildListDelegate(
                 widget.products
-                  .where((Product product) => product != widget.order.product)
-                  .map((Product product) {
-                    return Card(
-                      elevation: 1.0,
-                      child: Image.asset(
-                        product.imageAsset,
-                        package: product.imageAssetPackage,
-                        fit: BoxFit.contain,
-                      ),
-                    );
-                  }).toList(),
+                    .where((Product product) => product != widget.order.product)
+                    .map((Product product) {
+                  return Card(
+                    elevation: 1.0,
+                    child: Image.asset(
+                      product.imageAsset,
+                      package: product.imageAssetPackage,
+                      fit: BoxFit.contain,
+                    ),
+                  );
+                }).toList(),
               ),
             ),
           ),
@@ -328,13 +345,14 @@ class ShrineOrderRoute extends ShrinePageRoute<Order> {
     @required this.order,
     WidgetBuilder builder,
     RouteSettings settings,
-  }) : assert(order != null),
-       super(builder: builder, settings: settings);
+  })  : assert(order != null),
+        super(builder: builder, settings: settings);
 
   Order order;
 
   @override
   Order get currentResult => order;
 
-  static ShrineOrderRoute of(BuildContext context) => ModalRoute.of<Order>(context);
+  static ShrineOrderRoute of(BuildContext context) =>
+      ModalRoute.of<Order>(context);
 }

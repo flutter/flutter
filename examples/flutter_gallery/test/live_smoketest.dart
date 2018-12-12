@@ -21,7 +21,8 @@ import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 
 // Reports success or failure to the native code.
-const MethodChannel _kTestChannel = MethodChannel('io.flutter.demo.gallery/TestLifecycleListener');
+const MethodChannel _kTestChannel =
+    MethodChannel('io.flutter.demo.gallery/TestLifecycleListener');
 
 // We don't want to wait for animations to complete before tapping the
 // back button in the demos with these titles.
@@ -51,15 +52,20 @@ Future<void> main() async {
   try {
     // Verify that _kUnsynchronizedDemos and _kSkippedDemos identify
     // demos that actually exist.
-    final List<String> allDemoTitles = kAllGalleryDemos.map((GalleryDemo demo) => demo.title).toList();
-    if (!Set<String>.from(allDemoTitles).containsAll(_kUnsynchronizedDemoTitles))
-      fail('Unrecognized demo titles in _kUnsynchronizedDemosTitles: $_kUnsynchronizedDemoTitles');
+    final List<String> allDemoTitles =
+        kAllGalleryDemos.map((GalleryDemo demo) => demo.title).toList();
+    if (!Set<String>.from(allDemoTitles)
+        .containsAll(_kUnsynchronizedDemoTitles))
+      fail(
+          'Unrecognized demo titles in _kUnsynchronizedDemosTitles: $_kUnsynchronizedDemoTitles');
     if (!Set<String>.from(allDemoTitles).containsAll(_kSkippedDemoTitles))
-      fail('Unrecognized demo names in _kSkippedDemoTitles: $_kSkippedDemoTitles');
+      fail(
+          'Unrecognized demo names in _kSkippedDemoTitles: $_kSkippedDemoTitles');
 
     print('Starting app...');
     runApp(const GalleryApp(testMode: true));
-    final _LiveWidgetController controller = _LiveWidgetController(WidgetsBinding.instance);
+    final _LiveWidgetController controller =
+        _LiveWidgetController(WidgetsBinding.instance);
     for (GalleryDemoCategory category in kAllGalleryDemoCategories) {
       print('Tapping "${category.name}" section...');
       await controller.tap(find.text(category.name));
@@ -67,12 +73,12 @@ Future<void> main() async {
         final Finder demoItem = find.text(demo.title);
         print('Scrolling to "${demo.title}"...');
         await controller.scrollIntoView(demoItem, alignment: 0.5);
-        if (_kSkippedDemoTitles.contains(demo.title))
-          continue;
+        if (_kSkippedDemoTitles.contains(demo.title)) continue;
         for (int i = 0; i < 2; i += 1) {
           print('Tapping "${demo.title}"...');
           await controller.tap(demoItem); // Launch the demo
-          controller.frameSync = !_kUnsynchronizedDemoTitles.contains(demo.title);
+          controller.frameSync =
+              !_kUnsynchronizedDemoTitles.contains(demo.title);
           print('Going back to demo list...');
           await controller.tap(backFinder);
           controller.frameSync = true;
@@ -92,10 +98,8 @@ Future<void> main() async {
 final Finder backFinder = find.byElementPredicate(
   (Element element) {
     final Widget widget = element.widget;
-    if (widget is Tooltip)
-      return widget.message == 'Back';
-    if (widget is CupertinoNavigationBarBackButton)
-      return true;
+    if (widget is Tooltip) return widget.message == 'Back';
+    if (widget is CupertinoNavigationBarBackButton) return true;
     return false;
   },
   description: 'Material or Cupertino back button',
@@ -132,12 +136,13 @@ class _LiveWidgetController extends LiveWidgetController {
   }
 
   @override
-  Future<void> tap(Finder finder, { int pointer }) async {
+  Future<void> tap(Finder finder, {int pointer}) async {
     await super.tap(await _waitForElement(finder), pointer: pointer);
   }
 
   Future<void> scrollIntoView(Finder finder, {double alignment}) async {
     final Finder target = await _waitForElement(finder);
-    await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: alignment);
+    await Scrollable.ensureVisible(target.evaluate().single,
+        duration: const Duration(milliseconds: 100), alignment: alignment);
   }
 }

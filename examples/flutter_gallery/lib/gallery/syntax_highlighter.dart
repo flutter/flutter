@@ -6,41 +6,38 @@ import 'package:flutter/material.dart';
 import 'package:string_scanner/string_scanner.dart';
 
 class SyntaxHighlighterStyle {
-  SyntaxHighlighterStyle({
-    this.baseStyle,
-    this.numberStyle,
-    this.commentStyle,
-    this.keywordStyle,
-    this.stringStyle,
-    this.punctuationStyle,
-    this.classStyle,
-    this.constantStyle
-  });
+  SyntaxHighlighterStyle(
+      {this.baseStyle,
+      this.numberStyle,
+      this.commentStyle,
+      this.keywordStyle,
+      this.stringStyle,
+      this.punctuationStyle,
+      this.classStyle,
+      this.constantStyle});
 
   static SyntaxHighlighterStyle lightThemeStyle() {
     return SyntaxHighlighterStyle(
-      baseStyle: const TextStyle(color: Color(0xFF000000)),
-      numberStyle: const TextStyle(color: Color(0xFF1565C0)),
-      commentStyle: const TextStyle(color: Color(0xFF9E9E9E)),
-      keywordStyle: const TextStyle(color: Color(0xFF9C27B0)),
-      stringStyle: const TextStyle(color: Color(0xFF43A047)),
-      punctuationStyle: const TextStyle(color: Color(0xFF000000)),
-      classStyle: const TextStyle(color: Color(0xFF512DA8)),
-      constantStyle: const TextStyle(color: Color(0xFF795548))
-    );
+        baseStyle: const TextStyle(color: Color(0xFF000000)),
+        numberStyle: const TextStyle(color: Color(0xFF1565C0)),
+        commentStyle: const TextStyle(color: Color(0xFF9E9E9E)),
+        keywordStyle: const TextStyle(color: Color(0xFF9C27B0)),
+        stringStyle: const TextStyle(color: Color(0xFF43A047)),
+        punctuationStyle: const TextStyle(color: Color(0xFF000000)),
+        classStyle: const TextStyle(color: Color(0xFF512DA8)),
+        constantStyle: const TextStyle(color: Color(0xFF795548)));
   }
 
   static SyntaxHighlighterStyle darkThemeStyle() {
     return SyntaxHighlighterStyle(
-      baseStyle: const TextStyle(color: Color(0xFFFFFFFF)),
-      numberStyle: const TextStyle(color: Color(0xFF1565C0)),
-      commentStyle: const TextStyle(color: Color(0xFF9E9E9E)),
-      keywordStyle: const TextStyle(color: Color(0xFF80CBC4)),
-      stringStyle: const TextStyle(color: Color(0xFF009688)),
-      punctuationStyle: const TextStyle(color: Color(0xFFFFFFFF)),
-      classStyle: const TextStyle(color: Color(0xFF009688)),
-      constantStyle: const TextStyle(color: Color(0xFF795548))
-    );
+        baseStyle: const TextStyle(color: Color(0xFFFFFFFF)),
+        numberStyle: const TextStyle(color: Color(0xFF1565C0)),
+        commentStyle: const TextStyle(color: Color(0xFF9E9E9E)),
+        keywordStyle: const TextStyle(color: Color(0xFF80CBC4)),
+        stringStyle: const TextStyle(color: Color(0xFF009688)),
+        punctuationStyle: const TextStyle(color: Color(0xFFFFFFFF)),
+        classStyle: const TextStyle(color: Color(0xFF009688)),
+        constantStyle: const TextStyle(color: Color(0xFF795548)));
   }
 
   final TextStyle baseStyle;
@@ -53,7 +50,8 @@ class SyntaxHighlighterStyle {
   final TextStyle constantStyle;
 }
 
-abstract class SyntaxHighlighter { // ignore: one_member_abstracts
+abstract class SyntaxHighlighter {
+  // ignore: one_member_abstracts
   TextSpan format(String src);
 }
 
@@ -66,17 +64,66 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
   SyntaxHighlighterStyle _style;
 
   static const List<String> _keywords = <String>[
-    'abstract', 'as', 'assert', 'async', 'await', 'break', 'case', 'catch',
-    'class', 'const', 'continue', 'default', 'deferred', 'do', 'dynamic', 'else',
-    'enum', 'export', 'external', 'extends', 'factory', 'false', 'final',
-    'finally', 'for', 'get', 'if', 'implements', 'import', 'in', 'is', 'library',
-    'new', 'null', 'operator', 'part', 'rethrow', 'return', 'set', 'static',
-    'super', 'switch', 'sync', 'this', 'throw', 'true', 'try', 'typedef', 'var',
-    'void', 'while', 'with', 'yield'
+    'abstract',
+    'as',
+    'assert',
+    'async',
+    'await',
+    'break',
+    'case',
+    'catch',
+    'class',
+    'const',
+    'continue',
+    'default',
+    'deferred',
+    'do',
+    'dynamic',
+    'else',
+    'enum',
+    'export',
+    'external',
+    'extends',
+    'factory',
+    'false',
+    'final',
+    'finally',
+    'for',
+    'get',
+    'if',
+    'implements',
+    'import',
+    'in',
+    'is',
+    'library',
+    'new',
+    'null',
+    'operator',
+    'part',
+    'rethrow',
+    'return',
+    'set',
+    'static',
+    'super',
+    'switch',
+    'sync',
+    'this',
+    'throw',
+    'true',
+    'try',
+    'typedef',
+    'var',
+    'void',
+    'while',
+    'with',
+    'yield'
   ];
 
   static const List<String> _builtInTypes = <String>[
-    'int', 'double', 'num', 'bool'
+    'int',
+    'double',
+    'num',
+    'bool'
   ];
 
   String _src;
@@ -96,15 +143,18 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
 
       for (_HighlightSpan span in _spans) {
         if (currentPosition != span.start)
-          formattedText.add(TextSpan(text: _src.substring(currentPosition, span.start)));
+          formattedText
+              .add(TextSpan(text: _src.substring(currentPosition, span.start)));
 
-        formattedText.add(TextSpan(style: span.textStyle(_style), text: span.textForSpan(_src)));
+        formattedText.add(TextSpan(
+            style: span.textStyle(_style), text: span.textForSpan(_src)));
 
         currentPosition = span.end;
       }
 
       if (currentPosition != _src.length)
-        formattedText.add(TextSpan(text: _src.substring(currentPosition, _src.length)));
+        formattedText
+            .add(TextSpan(text: _src.substring(currentPosition, _src.length)));
 
       return TextSpan(style: _style.baseStyle, children: formattedText);
     } else {
@@ -122,11 +172,8 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
 
       // Block comments
       if (_scanner.scan(RegExp(r'/\*(.|\n)*\*/'))) {
-        _spans.add(_HighlightSpan(
-          _HighlightType.comment,
-          _scanner.lastMatch.start,
-          _scanner.lastMatch.end
-        ));
+        _spans.add(_HighlightSpan(_HighlightType.comment,
+            _scanner.lastMatch.start, _scanner.lastMatch.end));
         continue;
       }
 
@@ -143,115 +190,81 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
           endComment = _src.length;
         }
 
-        _spans.add(_HighlightSpan(
-          _HighlightType.comment,
-          startComment,
-          endComment
-        ));
+        _spans.add(
+            _HighlightSpan(_HighlightType.comment, startComment, endComment));
 
-        if (eof)
-          break;
+        if (eof) break;
 
         continue;
       }
 
       // Raw r"String"
       if (_scanner.scan(RegExp(r'r".*"'))) {
-        _spans.add(_HighlightSpan(
-          _HighlightType.string,
-          _scanner.lastMatch.start,
-          _scanner.lastMatch.end
-        ));
+        _spans.add(_HighlightSpan(_HighlightType.string,
+            _scanner.lastMatch.start, _scanner.lastMatch.end));
         continue;
       }
 
       // Raw r'String'
       if (_scanner.scan(RegExp(r"r'.*'"))) {
-        _spans.add(_HighlightSpan(
-          _HighlightType.string,
-          _scanner.lastMatch.start,
-          _scanner.lastMatch.end
-        ));
+        _spans.add(_HighlightSpan(_HighlightType.string,
+            _scanner.lastMatch.start, _scanner.lastMatch.end));
         continue;
       }
 
       // Multiline """String"""
       if (_scanner.scan(RegExp(r'"""(?:[^"\\]|\\(.|\n))*"""'))) {
-        _spans.add(_HighlightSpan(
-          _HighlightType.string,
-          _scanner.lastMatch.start,
-          _scanner.lastMatch.end
-        ));
+        _spans.add(_HighlightSpan(_HighlightType.string,
+            _scanner.lastMatch.start, _scanner.lastMatch.end));
         continue;
       }
 
       // Multiline '''String'''
       if (_scanner.scan(RegExp(r"'''(?:[^'\\]|\\(.|\n))*'''"))) {
-        _spans.add(_HighlightSpan(
-          _HighlightType.string,
-          _scanner.lastMatch.start,
-          _scanner.lastMatch.end
-        ));
+        _spans.add(_HighlightSpan(_HighlightType.string,
+            _scanner.lastMatch.start, _scanner.lastMatch.end));
         continue;
       }
 
       // "String"
       if (_scanner.scan(RegExp(r'"(?:[^"\\]|\\.)*"'))) {
-        _spans.add(_HighlightSpan(
-          _HighlightType.string,
-          _scanner.lastMatch.start,
-          _scanner.lastMatch.end
-        ));
+        _spans.add(_HighlightSpan(_HighlightType.string,
+            _scanner.lastMatch.start, _scanner.lastMatch.end));
         continue;
       }
 
       // 'String'
       if (_scanner.scan(RegExp(r"'(?:[^'\\]|\\.)*'"))) {
-        _spans.add(_HighlightSpan(
-          _HighlightType.string,
-          _scanner.lastMatch.start,
-          _scanner.lastMatch.end
-        ));
+        _spans.add(_HighlightSpan(_HighlightType.string,
+            _scanner.lastMatch.start, _scanner.lastMatch.end));
         continue;
       }
 
       // Double
       if (_scanner.scan(RegExp(r'\d+\.\d+'))) {
-        _spans.add(_HighlightSpan(
-          _HighlightType.number,
-          _scanner.lastMatch.start,
-          _scanner.lastMatch.end
-        ));
+        _spans.add(_HighlightSpan(_HighlightType.number,
+            _scanner.lastMatch.start, _scanner.lastMatch.end));
         continue;
       }
 
       // Integer
       if (_scanner.scan(RegExp(r'\d+'))) {
-        _spans.add(_HighlightSpan(
-          _HighlightType.number,
-          _scanner.lastMatch.start,
-          _scanner.lastMatch.end)
-        );
+        _spans.add(_HighlightSpan(_HighlightType.number,
+            _scanner.lastMatch.start, _scanner.lastMatch.end));
         continue;
       }
 
       // Punctuation
       if (_scanner.scan(RegExp(r'[\[\]{}().!=<>&\|\?\+\-\*/%\^~;:,]'))) {
-        _spans.add(_HighlightSpan(
-          _HighlightType.punctuation,
-          _scanner.lastMatch.start,
-          _scanner.lastMatch.end
-        ));
+        _spans.add(_HighlightSpan(_HighlightType.punctuation,
+            _scanner.lastMatch.start, _scanner.lastMatch.end));
         continue;
       }
 
       // Meta data
       if (_scanner.scan(RegExp(r'@\w+'))) {
-        _spans.add(_HighlightSpan(
-          _HighlightType.keyword,
-          _scanner.lastMatch.start,
-          _scanner.lastMatch.end
-        ));
+        _spans.add(_HighlightSpan(_HighlightType.keyword,
+            _scanner.lastMatch.start, _scanner.lastMatch.end));
         continue;
       }
 
@@ -260,8 +273,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         _HighlightType type;
 
         String word = _scanner.lastMatch[0];
-        if (word.startsWith('_'))
-          word = word.substring(1);
+        if (word.startsWith('_')) word = word.substring(1);
 
         if (_keywords.contains(word))
           type = _HighlightType.keyword;
@@ -269,15 +281,14 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
           type = _HighlightType.keyword;
         else if (_firstLetterIsUpperCase(word))
           type = _HighlightType.klass;
-        else if (word.length >= 2 && word.startsWith('k') && _firstLetterIsUpperCase(word.substring(1)))
+        else if (word.length >= 2 &&
+            word.startsWith('k') &&
+            _firstLetterIsUpperCase(word.substring(1)))
           type = _HighlightType.constant;
 
         if (type != null) {
           _spans.add(_HighlightSpan(
-            type,
-            _scanner.lastMatch.start,
-            _scanner.lastMatch.end
-          ));
+              type, _scanner.lastMatch.start, _scanner.lastMatch.end));
         }
       }
 
@@ -295,12 +306,10 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
 
   void _simplify() {
     for (int i = _spans.length - 2; i >= 0; i -= 1) {
-      if (_spans[i].type == _spans[i + 1].type && _spans[i].end == _spans[i + 1].start) {
-        _spans[i] = _HighlightSpan(
-          _spans[i].type,
-          _spans[i].start,
-          _spans[i + 1].end
-        );
+      if (_spans[i].type == _spans[i + 1].type &&
+          _spans[i].end == _spans[i + 1].start) {
+        _spans[i] =
+            _HighlightSpan(_spans[i].type, _spans[i].start, _spans[i + 1].end);
         _spans.removeAt(i + 1);
       }
     }

@@ -11,7 +11,7 @@ import '../../gallery/demo.dart';
 enum IndicatorType { overscroll, refresh }
 
 class OverscrollDemo extends StatefulWidget {
-  const OverscrollDemo({ Key key }) : super(key: key);
+  const OverscrollDemo({Key key}) : super(key: key);
 
   static const String routeName = '/material/overscroll';
 
@@ -21,24 +21,38 @@ class OverscrollDemo extends StatefulWidget {
 
 class OverscrollDemoState extends State<OverscrollDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
   static final List<String> _items = <String>[
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'H',
+    'I',
+    'J',
+    'K',
+    'L',
+    'M',
+    'N'
   ];
 
   Future<void> _handleRefresh() {
     final Completer<void> completer = Completer<void>();
-    Timer(const Duration(seconds: 3), () { completer.complete(); });
+    Timer(const Duration(seconds: 3), () {
+      completer.complete();
+    });
     return completer.future.then<void>((_) {
-       _scaffoldKey.currentState?.showSnackBar(SnackBar(
-         content: const Text('Refresh complete'),
-         action: SnackBarAction(
-           label: 'RETRY',
-           onPressed: () {
-             _refreshIndicatorKey.currentState.show();
-           }
-         )
-       ));
+      _scaffoldKey.currentState?.showSnackBar(SnackBar(
+          content: const Text('Refresh complete'),
+          action: SnackBarAction(
+              label: 'RETRY',
+              onPressed: () {
+                _refreshIndicatorKey.currentState.show();
+              })));
     });
   }
 
@@ -46,19 +60,15 @@ class OverscrollDemoState extends State<OverscrollDemo> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        title: const Text('Pull to refresh'),
-        actions: <Widget>[
-          MaterialDemoDocumentationButton(OverscrollDemo.routeName),
-          IconButton(
+      appBar: AppBar(title: const Text('Pull to refresh'), actions: <Widget>[
+        MaterialDemoDocumentationButton(OverscrollDemo.routeName),
+        IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh',
             onPressed: () {
               _refreshIndicatorKey.currentState.show();
-            }
-          ),
-        ]
-      ),
+            }),
+      ]),
       body: RefreshIndicator(
         key: _refreshIndicatorKey,
         onRefresh: _handleRefresh,
@@ -71,7 +81,8 @@ class OverscrollDemoState extends State<OverscrollDemo> {
               isThreeLine: true,
               leading: CircleAvatar(child: Text(item)),
               title: Text('This item represents $item.'),
-              subtitle: const Text('Even more additional list item information appears on line three.'),
+              subtitle: const Text(
+                  'Even more additional list item information appears on line three.'),
             );
           },
         ),

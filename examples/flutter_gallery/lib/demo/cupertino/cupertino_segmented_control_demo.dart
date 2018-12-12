@@ -15,10 +15,12 @@ class CupertinoSegmentedControlDemo extends StatefulWidget {
   static const String routeName = 'cupertino/segmented_control';
 
   @override
-  _CupertinoSegmentedControlDemoState createState() => _CupertinoSegmentedControlDemoState();
+  _CupertinoSegmentedControlDemoState createState() =>
+      _CupertinoSegmentedControlDemoState();
 }
 
-class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedControlDemo> {
+class _CupertinoSegmentedControlDemoState
+    extends State<CupertinoSegmentedControlDemo> {
   final Map<int, Widget> children = const <int, Widget>{
     0: Text('Midnight'),
     1: Text('Viridian'),
@@ -53,7 +55,10 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
     return Scaffold(
       appBar: AppBar(
         title: const Text('Segmented Control'),
-        actions: <Widget>[MaterialDemoDocumentationButton(CupertinoSegmentedControlDemo.routeName)],
+        actions: <Widget>[
+          MaterialDemoDocumentationButton(
+              CupertinoSegmentedControlDemo.routeName)
+        ],
       ),
       body: Column(
         children: <Widget>[

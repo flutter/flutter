@@ -7,12 +7,13 @@ library stocks;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show
-  debugPaintSizeEnabled,
-  debugPaintBaselinesEnabled,
-  debugPaintLayerBordersEnabled,
-  debugPaintPointersEnabled,
-  debugRepaintRainbowEnabled;
+import 'package:flutter/rendering.dart'
+    show
+        debugPaintSizeEnabled,
+        debugPaintBaselinesEnabled,
+        debugPaintLayerBordersEnabled,
+        debugPaintPointersEnabled,
+        debugRepaintRainbowEnabled;
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'stock_data.dart';
@@ -27,7 +28,8 @@ class _StocksLocalizationsDelegate extends LocalizationsDelegate<StockStrings> {
   Future<StockStrings> load(Locale locale) => StockStrings.load(locale);
 
   @override
-  bool isSupported(Locale locale) => locale.languageCode == 'es' || locale.languageCode == 'en';
+  bool isSupported(Locale locale) =>
+      locale.languageCode == 'es' || locale.languageCode == 'en';
 
   @override
   bool shouldReload(_StocksLocalizationsDelegate old) => false;
@@ -42,17 +44,16 @@ class StocksAppState extends State<StocksApp> {
   StockData stocks;
 
   StockConfiguration _configuration = StockConfiguration(
-    stockMode: StockMode.optimistic,
-    backupMode: BackupMode.enabled,
-    debugShowGrid: false,
-    debugShowSizes: false,
-    debugShowBaselines: false,
-    debugShowLayers: false,
-    debugShowPointers: false,
-    debugShowRainbow: false,
-    showPerformanceOverlay: false,
-    showSemanticsDebugger: false
-  );
+      stockMode: StockMode.optimistic,
+      backupMode: BackupMode.enabled,
+      debugShowGrid: false,
+      debugShowSizes: false,
+      debugShowBaselines: false,
+      debugShowLayers: false,
+      debugShowPointers: false,
+      debugShowRainbow: false,
+      showPerformanceOverlay: false,
+      showSemanticsDebugger: false);
 
   @override
   void initState() {
@@ -70,14 +71,10 @@ class StocksAppState extends State<StocksApp> {
     switch (_configuration.stockMode) {
       case StockMode.optimistic:
         return ThemeData(
-          brightness: Brightness.light,
-          primarySwatch: Colors.purple
-        );
+            brightness: Brightness.light, primarySwatch: Colors.purple);
       case StockMode.pessimistic:
         return ThemeData(
-          brightness: Brightness.dark,
-          accentColor: Colors.redAccent
-        );
+            brightness: Brightness.dark, accentColor: Colors.redAccent);
     }
     assert(_configuration.stockMode != null);
     return null;
@@ -88,21 +85,20 @@ class StocksAppState extends State<StocksApp> {
     final List<String> path = settings.name.split('/');
     // We only support paths that start with a slash, so bail if
     // the first component is not empty:
-    if (path[0] != '')
-      return null;
+    if (path[0] != '') return null;
     // If the path is "/stock:..." then show a stock page for the
     // specified stock symbol.
     if (path[1].startsWith('stock:')) {
       // We don't yet support subpages of a stock, so bail if there's
       // any more path components.
-      if (path.length != 2)
-        return null;
+      if (path.length != 2) return null;
       // Extract the symbol part of "stock:..." and return a route
       // for that symbol.
       final String symbol = path[1].substring(6);
       return MaterialPageRoute<void>(
         settings: settings,
-        builder: (BuildContext context) => StockSymbolPage(symbol: symbol, stocks: stocks),
+        builder: (BuildContext context) =>
+            StockSymbolPage(symbol: symbol, stocks: stocks),
       );
     }
     // The other paths we support are in the routes table.
@@ -135,8 +131,10 @@ class StocksAppState extends State<StocksApp> {
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
       showSemanticsDebugger: _configuration.showSemanticsDebugger,
       routes: <String, WidgetBuilder>{
-         '/':         (BuildContext context) => StockHome(stocks, _configuration, configurationUpdater),
-         '/settings': (BuildContext context) => StockSettings(_configuration, configurationUpdater)
+        '/': (BuildContext context) =>
+            StockHome(stocks, _configuration, configurationUpdater),
+        '/settings': (BuildContext context) =>
+            StockSettings(_configuration, configurationUpdater)
       },
       onGenerateRoute: _getRoute,
     );

@@ -18,10 +18,9 @@ class StockStrings {
   final String _localeName;
 
   static Future<StockStrings> load(Locale locale) {
-    return initializeMessages(locale.toString())
-      .then<StockStrings>((Object _) {
-        return StockStrings(locale);
-      });
+    return initializeMessages(locale.toString()).then<StockStrings>((Object _) {
+      return StockStrings(locale);
+    });
   }
 
   static StockStrings of(BuildContext context) {
@@ -38,16 +37,16 @@ class StockStrings {
   }
 
   String market() => Intl.message(
-    'MARKET',
-    name: 'market',
-    desc: 'Label for the Market tab',
-    locale: _localeName,
-  );
+        'MARKET',
+        name: 'market',
+        desc: 'Label for the Market tab',
+        locale: _localeName,
+      );
 
   String portfolio() => Intl.message(
-    'PORTFOLIO',
-    name: 'portfolio',
-    desc: 'Label for the Portfolio tab',
-    locale: _localeName,
-  );
+        'PORTFOLIO',
+        name: 'portfolio',
+        desc: 'Label for the Portfolio tab',
+        locale: _localeName,
+      );
 }

@@ -9,18 +9,16 @@ import 'package:flutter/semantics.dart';
 
 import '../../gallery/demo.dart';
 
-enum LeaveBehindDemoAction {
-  reset,
-  horizontalSwipe,
-  leftSwipe,
-  rightSwipe
-}
+enum LeaveBehindDemoAction { reset, horizontalSwipe, leftSwipe, rightSwipe }
 
 class LeaveBehindItem implements Comparable<LeaveBehindItem> {
-  LeaveBehindItem({ this.index, this.name, this.subject, this.body });
+  LeaveBehindItem({this.index, this.name, this.subject, this.body});
 
   LeaveBehindItem.from(LeaveBehindItem item)
-    : index = item.index, name = item.name, subject = item.subject, body = item.body;
+      : index = item.index,
+        name = item.name,
+        subject = item.subject,
+        body = item.body;
 
   final int index;
   final String name;
@@ -32,7 +30,7 @@ class LeaveBehindItem implements Comparable<LeaveBehindItem> {
 }
 
 class LeaveBehindDemo extends StatefulWidget {
-  const LeaveBehindDemo({ Key key }) : super(key: key);
+  const LeaveBehindDemo({Key key}) : super(key: key);
 
   static const String routeName = '/material/leave-behind';
 
@@ -41,18 +39,18 @@ class LeaveBehindDemo extends StatefulWidget {
 }
 
 class LeaveBehindDemoState extends State<LeaveBehindDemo> {
-  static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> _scaffoldKey =
+      GlobalKey<ScaffoldState>();
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   List<LeaveBehindItem> leaveBehindItems;
 
   void initListItems() {
     leaveBehindItems = List<LeaveBehindItem>.generate(16, (int index) {
       return LeaveBehindItem(
-        index: index,
-        name: 'Item $index Sender',
-        subject: 'Subject: $index',
-        body: "[$index] first line of the message's body..."
-      );
+          index: index,
+          name: 'Item $index Sender',
+          subject: 'Subject: $index',
+          body: "[$index] first line of the message's body...");
     });
   }
 
@@ -93,12 +91,12 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       leaveBehindItems.remove(item);
     });
     _scaffoldKey.currentState.showSnackBar(SnackBar(
-      content: Text('You archived item ${item.index}'),
-      action: SnackBarAction(
-        label: 'UNDO',
-        onPressed: () { handleUndo(item); }
-      )
-    ));
+        content: Text('You archived item ${item.index}'),
+        action: SnackBarAction(
+            label: 'UNDO',
+            onPressed: () {
+              handleUndo(item);
+            })));
   }
 
   void _handleDelete(LeaveBehindItem item) {
@@ -106,12 +104,12 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       leaveBehindItems.remove(item);
     });
     _scaffoldKey.currentState.showSnackBar(SnackBar(
-      content: Text('You deleted item ${item.index}'),
-      action: SnackBarAction(
-        label: 'UNDO',
-        onPressed: () { handleUndo(item); }
-      )
-    ));
+        content: Text('You deleted item ${item.index}'),
+        action: SnackBarAction(
+            label: 'UNDO',
+            onPressed: () {
+              handleUndo(item);
+            })));
   }
 
   @override
@@ -126,50 +124,42 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       );
     } else {
       body = ListView(
-        children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
-          return _LeaveBehindListItem(
-            item: item,
-            onArchive: _handleArchive,
-            onDelete: _handleDelete,
-            dismissDirection: _dismissDirection,
-          );
-        }).toList()
-      );
+          children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
+        return _LeaveBehindListItem(
+          item: item,
+          onArchive: _handleArchive,
+          onDelete: _handleDelete,
+          dismissDirection: _dismissDirection,
+        );
+      }).toList());
     }
 
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        title: const Text('Swipe to dismiss'),
-        actions: <Widget>[
-          MaterialDemoDocumentationButton(LeaveBehindDemo.routeName),
-          PopupMenuButton<LeaveBehindDemoAction>(
+      appBar: AppBar(title: const Text('Swipe to dismiss'), actions: <Widget>[
+        MaterialDemoDocumentationButton(LeaveBehindDemo.routeName),
+        PopupMenuButton<LeaveBehindDemoAction>(
             onSelected: handleDemoAction,
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<LeaveBehindDemoAction>>[
-              const PopupMenuItem<LeaveBehindDemoAction>(
-                value: LeaveBehindDemoAction.reset,
-                child: Text('Reset the list')
-              ),
-              const PopupMenuDivider(),
-              CheckedPopupMenuItem<LeaveBehindDemoAction>(
-                value: LeaveBehindDemoAction.horizontalSwipe,
-                checked: _dismissDirection == DismissDirection.horizontal,
-                child: const Text('Horizontal swipe')
-              ),
-              CheckedPopupMenuItem<LeaveBehindDemoAction>(
-                value: LeaveBehindDemoAction.leftSwipe,
-                checked: _dismissDirection == DismissDirection.endToStart,
-                child: const Text('Only swipe left')
-              ),
-              CheckedPopupMenuItem<LeaveBehindDemoAction>(
-                value: LeaveBehindDemoAction.rightSwipe,
-                checked: _dismissDirection == DismissDirection.startToEnd,
-                child: const Text('Only swipe right')
-              )
-            ]
-          )
-        ]
-      ),
+            itemBuilder: (BuildContext context) =>
+                <PopupMenuEntry<LeaveBehindDemoAction>>[
+                  const PopupMenuItem<LeaveBehindDemoAction>(
+                      value: LeaveBehindDemoAction.reset,
+                      child: Text('Reset the list')),
+                  const PopupMenuDivider(),
+                  CheckedPopupMenuItem<LeaveBehindDemoAction>(
+                      value: LeaveBehindDemoAction.horizontalSwipe,
+                      checked: _dismissDirection == DismissDirection.horizontal,
+                      child: const Text('Horizontal swipe')),
+                  CheckedPopupMenuItem<LeaveBehindDemoAction>(
+                      value: LeaveBehindDemoAction.leftSwipe,
+                      checked: _dismissDirection == DismissDirection.endToStart,
+                      child: const Text('Only swipe left')),
+                  CheckedPopupMenuItem<LeaveBehindDemoAction>(
+                      value: LeaveBehindDemoAction.rightSwipe,
+                      checked: _dismissDirection == DismissDirection.startToEnd,
+                      child: const Text('Only swipe right'))
+                ])
+      ]),
       body: body,
     );
   }
@@ -215,27 +205,22 @@ class _LeaveBehindListItem extends StatelessWidget {
             _handleDelete();
         },
         background: Container(
-          color: theme.primaryColor,
-          child: const ListTile(
-            leading: Icon(Icons.delete, color: Colors.white, size: 36.0)
-          )
-        ),
+            color: theme.primaryColor,
+            child: const ListTile(
+                leading: Icon(Icons.delete, color: Colors.white, size: 36.0))),
         secondaryBackground: Container(
-          color: theme.primaryColor,
-          child: const ListTile(
-            trailing: Icon(Icons.archive, color: Colors.white, size: 36.0)
-          )
-        ),
+            color: theme.primaryColor,
+            child: const ListTile(
+                trailing:
+                    Icon(Icons.archive, color: Colors.white, size: 36.0))),
         child: Container(
           decoration: BoxDecoration(
-            color: theme.canvasColor,
-            border: Border(bottom: BorderSide(color: theme.dividerColor))
-          ),
+              color: theme.canvasColor,
+              border: Border(bottom: BorderSide(color: theme.dividerColor))),
           child: ListTile(
-            title: Text(item.name),
-            subtitle: Text('${item.subject}\n${item.body}'),
-            isThreeLine: true
-          ),
+              title: Text(item.name),
+              subtitle: Text('${item.subject}\n${item.body}'),
+              isThreeLine: true),
         ),
       ),
     );

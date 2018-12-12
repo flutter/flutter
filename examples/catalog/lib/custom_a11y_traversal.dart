@@ -98,7 +98,8 @@ class SpinnerButton extends StatelessWidget {
       this.rowOrder,
       this.columnOrder,
       this.field,
-      this.increment}) : super(key: key);
+      this.increment})
+      : super(key: key);
 
   final VoidCallback onPressed;
   final IconData icon;
@@ -109,7 +110,8 @@ class SpinnerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String label = '${increment ? 'Increment' : 'Decrement'} ${_fieldToName(field)}';
+    final String label =
+        '${increment ? 'Increment' : 'Decrement'} ${_fieldToName(field)}';
 
     return RowColumnTraversal(
       rowOrder: rowOrder,
@@ -197,7 +199,11 @@ class CustomTraversalExample extends StatefulWidget {
 class CustomTraversalExampleState extends State<CustomTraversalExample> {
   /// The fields that we are manipulating. List indices correspond to
   /// the entries in the [Field] enum.
-  List<int> fields = <int>[0, 0, 0];
+  List<int> fields = <int>[
+    0,
+    0,
+    0
+  ];
 
   void _addToField(Field field, int delta) {
     setState(() {
@@ -213,7 +219,8 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
     );
   }
 
-  Widget _makeSpinnerButton(int rowOrder, int columnOrder, Field field, {bool increment = true}) {
+  Widget _makeSpinnerButton(int rowOrder, int columnOrder, Field field,
+      {bool increment = true}) {
     return SpinnerButton(
       rowOrder: rowOrder,
       columnOrder: columnOrder,
@@ -245,7 +252,8 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
         body: Builder(
           builder: (BuildContext context) {
             return DefaultTextStyle(
-              style: DefaultTextStyle.of(context).style.copyWith(fontSize: 21.0),
+              style:
+                  DefaultTextStyle.of(context).style.copyWith(fontSize: 21.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -308,7 +316,11 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
                       textColor: Colors.blue,
                       onPressed: () {
                         setState(() {
-                          fields = <int>[0, 0, 0];
+                          fields = <int>[
+                            0,
+                            0,
+                            0
+                          ];
                         });
                       },
                     ),

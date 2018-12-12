@@ -4,14 +4,18 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sample_catalog/custom_semantics.dart' as custom_semantics show main;
+import 'package:sample_catalog/custom_semantics.dart' as custom_semantics
+    show main;
 import 'package:sample_catalog/custom_semantics.dart';
 
 void main() {
-  testWidgets('custom_semantics sample smoke test', (WidgetTester tester) async {
+  testWidgets('custom_semantics sample smoke test',
+      (WidgetTester tester) async {
     // Turn on Semantics
-    final SemanticsHandle semanticsHandler = tester.binding.pipelineOwner.ensureSemantics();
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final SemanticsHandle semanticsHandler =
+        tester.binding.pipelineOwner.ensureSemantics();
+    final SemanticsOwner semanticsOwner =
+        tester.binding.pipelineOwner.semanticsOwner;
 
     // Build the sample app
     custom_semantics.main();
@@ -23,7 +27,8 @@ void main() {
         .renderObject(find.byType(AdjustableDropdownListTile))
         .debugSemantics;
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       label: 'Timeout',
@@ -36,7 +41,8 @@ void main() {
     semanticsOwner.performAction(semantics.id, SemanticsAction.increase);
     await tester.pump();
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       label: 'Timeout',
@@ -49,7 +55,8 @@ void main() {
     semanticsOwner.performAction(semantics.id, SemanticsAction.increase);
     await tester.pump();
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: false,
       hasDecreaseAction: true,
       label: 'Timeout',
@@ -61,7 +68,8 @@ void main() {
     semanticsOwner.performAction(semantics.id, SemanticsAction.decrease);
     await tester.pump();
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       label: 'Timeout',
@@ -78,7 +86,8 @@ void main() {
     semanticsOwner.performAction(semantics.id, SemanticsAction.decrease);
     await tester.pump();
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: true,
       hasDecreaseAction: false,
       label: 'Timeout',
@@ -91,7 +100,8 @@ void main() {
   });
 }
 
-void expectAdjustable(SemanticsNode node, {
+void expectAdjustable(
+  SemanticsNode node, {
   bool hasIncreaseAction = true,
   bool hasDecreaseAction = true,
   String label = '',
@@ -102,10 +112,8 @@ void expectAdjustable(SemanticsNode node, {
   final SemanticsData semanticsData = node.getSemanticsData();
 
   int actions = 0;
-  if (hasIncreaseAction)
-    actions |= SemanticsAction.increase.index;
-  if (hasDecreaseAction)
-    actions |= SemanticsAction.decrease.index;
+  if (hasIncreaseAction) actions |= SemanticsAction.increase.index;
+  if (hasDecreaseAction) actions |= SemanticsAction.decrease.index;
 
   expect(semanticsData.actions, actions);
   expect(semanticsData.label, label);

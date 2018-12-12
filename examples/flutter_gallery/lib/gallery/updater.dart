@@ -11,9 +11,9 @@ import 'package:url_launcher/url_launcher.dart';
 typedef UpdateUrlFetcher = Future<String> Function();
 
 class Updater extends StatefulWidget {
-  const Updater({ @required this.updateUrlFetcher, this.child, Key key })
-    : assert(updateUrlFetcher != null),
-      super(key: key);
+  const Updater({@required this.updateUrlFetcher, this.child, Key key})
+      : assert(updateUrlFetcher != null),
+        super(key: key);
 
   final UpdateUrlFetcher updateUrlFetcher;
   final Widget child;
@@ -40,9 +40,9 @@ class UpdaterState extends State<Updater> {
 
     final String updateUrl = await widget.updateUrlFetcher();
     if (updateUrl != null) {
-      final bool wantsUpdate = await showDialog<bool>(context: context, builder: _buildDialog);
-      if (wantsUpdate != null && wantsUpdate)
-        launch(updateUrl);
+      final bool wantsUpdate =
+          await showDialog<bool>(context: context, builder: _buildDialog);
+      if (wantsUpdate != null && wantsUpdate) launch(updateUrl);
     }
   }
 

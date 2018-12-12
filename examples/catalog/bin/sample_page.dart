@@ -22,22 +22,29 @@ class SampleError extends Error {
 // beginning of lines within the comment. A keyword's value is all of
 // the following text up to the next keyword or the end of the comment,
 // sans leading and trailing whitespace.
-const String sampleCatalogKeywords = r'^Title:|^Summary:|^Description:|^Classes:|^Sample:|^See also:';
+const String sampleCatalogKeywords =
+    r'^Title:|^Summary:|^Description:|^Classes:|^Sample:|^See also:';
 
 Directory outputDirectory;
 Directory sampleDirectory;
 Directory testDirectory;
 Directory driverDirectory;
 
-void logMessage(String s) { print(s); }
-void logError(String s) { print(s); }
+void logMessage(String s) {
+  print(s);
+}
+
+void logError(String s) {
+  print(s);
+}
 
 File inputFile(String dir, String name) {
   return File(dir + Platform.pathSeparator + name);
 }
 
 File outputFile(String name, [Directory directory]) {
-  return File((directory ?? outputDirectory).path + Platform.pathSeparator + name);
+  return File(
+      (directory ?? outputDirectory).path + Platform.pathSeparator + name);
 }
 
 void initialize() {
@@ -61,7 +68,8 @@ String expandTemplate(String template, Map<String, String> values) {
   });
 }
 
-void writeExpandedTemplate(File output, String template, Map<String, String> values) {
+void writeExpandedTemplate(
+    File output, String template, Map<String, String> values) {
   output.writeAsStringSync(expandTemplate(template, values));
   logMessage('wrote $output');
 }
@@ -87,9 +95,11 @@ class SampleInfo {
   // The value of the 'Classes:' comment as a list of class names.
   Iterable<String> get highlightedClasses {
     final String classNames = commentValues['classes'];
-    if (classNames == null)
-      return const <String>[];
-    return classNames.split(',').map<String>((String s) => s.trim()).where((String s) => s.isNotEmpty);
+    if (classNames == null) return const <String>[];
+    return classNames
+        .split(',')
+        .map<String>((String s) => s.trim())
+        .where((String s) => s.isNotEmpty);
   }
 
   // The relative import path for this sample, like '../lib/foo.dart'.
@@ -105,27 +115,29 @@ class SampleInfo {
     final RegExp startRE = RegExp(r'^/\*\s+^Sample\s+Catalog', multiLine: true);
     final RegExp endRE = RegExp(r'^\*/', multiLine: true);
     final Match startMatch = startRE.firstMatch(contents);
-    if (startMatch == null)
-      return false;
+    if (startMatch == null) return false;
 
     final int startIndex = startMatch.end;
     final Match endMatch = endRE.firstMatch(contents.substring(startIndex));
-    if (endMatch == null)
-      return false;
+    if (endMatch == null) return false;
 
-    final String comment = contents.substring(startIndex, startIndex + endMatch.start);
-    sourceCode = contents.substring(0, startMatch.start) + contents.substring(startIndex + endMatch.end);
+    final String comment =
+        contents.substring(startIndex, startIndex + endMatch.start);
+    sourceCode = contents.substring(0, startMatch.start) +
+        contents.substring(startIndex + endMatch.end);
     if (sourceCode.trim().isEmpty)
       throw SampleError('did not find any source code in $sourceFile');
 
     final RegExp keywordsRE = RegExp(sampleCatalogKeywords, multiLine: true);
     final List<Match> keywordMatches = keywordsRE.allMatches(comment).toList();
     if (keywordMatches.isEmpty)
-      throw SampleError('did not find any keywords in the Sample Catalog comment in $sourceFile');
+      throw SampleError(
+          'did not find any keywords in the Sample Catalog comment in $sourceFile');
 
     commentValues = <String, String>{};
     for (int i = 0; i < keywordMatches.length; i += 1) {
-      final String keyword = comment.substring(keywordMatches[i].start, keywordMatches[i].end - 1);
+      final String keyword =
+          comment.substring(keywordMatches[i].start, keywordMatches[i].end - 1);
       final String value = comment.substring(
         keywordMatches[i].end,
         i == keywordMatches.length - 1 ? null : keywordMatches[i + 1].start,
@@ -136,7 +148,8 @@ class SampleInfo {
     commentValues['path'] = 'examples/catalog/${sourceFile.path}';
     commentValues['source'] = sourceCode.trim();
     commentValues['link'] = link;
-    commentValues['android screenshot'] = 'https://storage.googleapis.com/flutter-catalog/$commit/${sourceName}_small.png';
+    commentValues['android screenshot'] =
+        'https://storage.googleapis.com/flutter-catalog/$commit/${sourceName}_small.png';
 
     return true;
   }
@@ -149,7 +162,8 @@ void generate(String commit) {
   for (FileSystemEntity entity in sampleDirectory.listSync()) {
     if (entity is File && entity.path.endsWith('.dart')) {
       final SampleInfo sample = SampleInfo(entity, commit);
-      if (sample.initialize()) // skip files that lack the Sample Catalog comment
+      if (sample
+          .initialize()) // skip files that lack the Sample Catalog comment
         samples.add(sample);
     }
   }
@@ -160,7 +174,8 @@ void generate(String commit) {
     return a.sourceName.compareTo(b.sourceName);
   });
 
-  final String entryTemplate = inputFile('bin', 'entry.md.template').readAsStringSync();
+  final String entryTemplate =
+      inputFile('bin', 'entry.md.template').readAsStringSync();
 
   // Write the sample catalog's home page: index.md
   final Iterable<String> entries = samples.map<String>((SampleInfo sample) {
@@ -187,7 +202,8 @@ void generate(String commit) {
   // a file that's structurally the same as index.md but only contains samples
   // that feature one class. For example AnimatedList_index.md would only
   // include samples that had AnimatedList in their "Classes:" list.
-  final Map<String, List<SampleInfo>> classToSamples = <String, List<SampleInfo>>{};
+  final Map<String, List<SampleInfo>> classToSamples =
+      <String, List<SampleInfo>>{};
   for (SampleInfo sample in samples) {
     for (String className in sample.highlightedClasses) {
       classToSamples[className] ??= <SampleInfo>[];
@@ -195,7 +211,8 @@ void generate(String commit) {
     }
   }
   for (String className in classToSamples.keys) {
-    final Iterable<String> entries = classToSamples[className].map<String>((SampleInfo sample) {
+    final Iterable<String> entries =
+        classToSamples[className].map<String>((SampleInfo sample) {
       return expandTemplate(entryTemplate, sample.commentValues);
     });
     writeExpandedTemplate(
@@ -215,12 +232,18 @@ void generate(String commit) {
     outputFile('screenshot.dart', driverDirectory),
     inputFile('bin', 'screenshot.dart.template').readAsStringSync(),
     <String, String>{
-      'imports': samples.map<String>((SampleInfo page) {
-        return "import '${page.importPath}' show ${page.sampleClass};\n";
-      }).toList().join(),
-      'widgets': samples.map<String>((SampleInfo sample) {
-        return 'new ${sample.sampleClass}(),\n';
-      }).toList().join(),
+      'imports': samples
+          .map<String>((SampleInfo page) {
+            return "import '${page.importPath}' show ${page.sampleClass};\n";
+          })
+          .toList()
+          .join(),
+      'widgets': samples
+          .map<String>((SampleInfo sample) {
+            return 'new ${sample.sampleClass}(),\n';
+          })
+          .toList()
+          .join(),
     },
   );
 
@@ -230,9 +253,12 @@ void generate(String commit) {
     outputFile('screenshot_test.dart', driverDirectory),
     inputFile('bin', 'screenshot_test.dart.template').readAsStringSync(),
     <String, String>{
-      'paths': samples.map<String>((SampleInfo sample) {
-        return "'${outputFile(sample.sourceName + '.png').path}'";
-      }).toList().join(',\n'),
+      'paths': samples
+          .map<String>((SampleInfo sample) {
+            return "'${outputFile(sample.sourceName + '.png').path}'";
+          })
+          .toList()
+          .join(',\n'),
     },
   );
 
@@ -244,20 +270,16 @@ void generate(String commit) {
 
 void main(List<String> args) {
   if (args.length != 1) {
-    logError(
-      'Usage (cd examples/catalog/; dart bin/sample_page.dart commit)\n'
-      'The flutter commit hash locates screenshots on storage.googleapis.com/flutter-catalog/'
-    );
+    logError('Usage (cd examples/catalog/; dart bin/sample_page.dart commit)\n'
+        'The flutter commit hash locates screenshots on storage.googleapis.com/flutter-catalog/');
     exit(255);
   }
   try {
     generate(args[0]);
   } catch (error) {
-    logError(
-      'Error: sample_page.dart failed: $error\n'
-      'This sample_page.dart app expects to be run from the examples/catalog directory. '
-      'More information can be found in examples/catalog/README.md.'
-    );
+    logError('Error: sample_page.dart failed: $error\n'
+        'This sample_page.dart app expects to be run from the examples/catalog directory. '
+        'More information can be found in examples/catalog/README.md.');
     exit(255);
   }
   exit(0);

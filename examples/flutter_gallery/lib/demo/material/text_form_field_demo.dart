@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import '../../gallery/demo.dart';
 
 class TextFormFieldDemo extends StatefulWidget {
-  const TextFormFieldDemo({ Key key }) : super(key: key);
+  const TextFormFieldDemo({Key key}) : super(key: key);
 
   static const String routeName = '/material/text-form-field';
 
@@ -88,17 +88,17 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
   PersonData person = PersonData();
 
   void showInSnackBar(String value) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
-      content: Text(value)
-    ));
+    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(value)));
   }
 
   bool _autovalidate = false;
   bool _formWasEdited = false;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<FormFieldState<String>> _passwordFieldKey = GlobalKey<FormFieldState<String>>();
-  final _UsNumberTextInputFormatter _phoneNumberFormatter = _UsNumberTextInputFormatter();
+  final GlobalKey<FormFieldState<String>> _passwordFieldKey =
+      GlobalKey<FormFieldState<String>>();
+  final _UsNumberTextInputFormatter _phoneNumberFormatter =
+      _UsNumberTextInputFormatter();
   void _handleSubmitted() {
     final FormState form = _formKey.currentState;
     if (!form.validate()) {
@@ -112,8 +112,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
 
   String _validateName(String value) {
     _formWasEdited = true;
-    if (value.isEmpty)
-      return 'Name is required.';
+    if (value.isEmpty) return 'Name is required.';
     final RegExp nameExp = RegExp(r'^[A-Za-z ]+$');
     if (!nameExp.hasMatch(value))
       return 'Please enter only alphabetical characters.';
@@ -133,35 +132,38 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     final FormFieldState<String> passwordField = _passwordFieldKey.currentState;
     if (passwordField.value == null || passwordField.value.isEmpty)
       return 'Please enter a password.';
-    if (passwordField.value != value)
-      return 'The passwords don\'t match';
+    if (passwordField.value != value) return 'The passwords don\'t match';
     return null;
   }
 
   Future<bool> _warnUserAboutInvalidData() async {
     final FormState form = _formKey.currentState;
-    if (form == null || !_formWasEdited || form.validate())
-      return true;
+    if (form == null || !_formWasEdited || form.validate()) return true;
 
     return await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('This form has errors'),
-          content: const Text('Really leave this form?'),
-          actions: <Widget> [
-            FlatButton(
-              child: const Text('YES'),
-              onPressed: () { Navigator.of(context).pop(true); },
-            ),
-            FlatButton(
-              child: const Text('NO'),
-              onPressed: () { Navigator.of(context).pop(false); },
-            ),
-          ],
-        );
-      },
-    ) ?? false;
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('This form has errors'),
+              content: const Text('Really leave this form?'),
+              actions: <Widget>[
+                FlatButton(
+                  child: const Text('YES'),
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                ),
+                FlatButton(
+                  child: const Text('NO'),
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 
   @override
@@ -170,7 +172,9 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Text fields'),
-        actions: <Widget>[MaterialDemoDocumentationButton(TextFormFieldDemo.routeName)],
+        actions: <Widget>[
+          MaterialDemoDocumentationButton(TextFormFieldDemo.routeName)
+        ],
       ),
       body: SafeArea(
         top: false,
@@ -194,7 +198,9 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     hintText: 'What do people call you?',
                     labelText: 'Name *',
                   ),
-                  onSaved: (String value) { person.name = value; },
+                  onSaved: (String value) {
+                    person.name = value;
+                  },
                   validator: _validateName,
                 ),
                 const SizedBox(height: 24.0),
@@ -208,10 +214,12 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     prefixText: '+1',
                   ),
                   keyboardType: TextInputType.phone,
-                  onSaved: (String value) { person.phoneNumber = value; },
+                  onSaved: (String value) {
+                    person.phoneNumber = value;
+                  },
                   validator: _validatePhoneNumber,
                   // TextInputFormatters are applied in sequence.
-                  inputFormatters: <TextInputFormatter> [
+                  inputFormatters: <TextInputFormatter>[
                     WhitelistingTextInputFormatter.digitsOnly,
                     // Fit the validating format.
                     _phoneNumberFormatter,
@@ -227,7 +235,9 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     labelText: 'E-mail',
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  onSaved: (String value) { person.email = value; },
+                  onSaved: (String value) {
+                    person.email = value;
+                  },
                 ),
                 const SizedBox(height: 24.0),
                 TextFormField(
@@ -243,12 +253,11 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 TextFormField(
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Salary',
-                    prefixText: '\$',
-                    suffixText: 'USD',
-                    suffixStyle: TextStyle(color: Colors.green)
-                  ),
+                      border: OutlineInputBorder(),
+                      labelText: 'Salary',
+                      prefixText: '\$',
+                      suffixText: 'USD',
+                      suffixStyle: TextStyle(color: Colors.green)),
                   maxLines: 1,
                 ),
                 const SizedBox(height: 24.0),
@@ -264,7 +273,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 ),
                 const SizedBox(height: 24.0),
                 TextFormField(
-                  enabled: person.password != null && person.password.isNotEmpty,
+                  enabled:
+                      person.password != null && person.password.isNotEmpty,
                   decoration: const InputDecoration(
                     border: UnderlineInputBorder(),
                     filled: true,
@@ -282,10 +292,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   ),
                 ),
                 const SizedBox(height: 24.0),
-                Text(
-                  '* indicates required field',
-                  style: Theme.of(context).textTheme.caption
-                ),
+                Text('* indicates required field',
+                    style: Theme.of(context).textTheme.caption),
                 const SizedBox(height: 24.0),
               ],
             ),
@@ -300,32 +308,26 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
 class _UsNumberTextInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue
-  ) {
+      TextEditingValue oldValue, TextEditingValue newValue) {
     final int newTextLength = newValue.text.length;
     int selectionIndex = newValue.selection.end;
     int usedSubstringIndex = 0;
     final StringBuffer newText = StringBuffer();
     if (newTextLength >= 1) {
       newText.write('(');
-      if (newValue.selection.end >= 1)
-        selectionIndex++;
+      if (newValue.selection.end >= 1) selectionIndex++;
     }
     if (newTextLength >= 4) {
       newText.write(newValue.text.substring(0, usedSubstringIndex = 3) + ') ');
-      if (newValue.selection.end >= 3)
-        selectionIndex += 2;
+      if (newValue.selection.end >= 3) selectionIndex += 2;
     }
     if (newTextLength >= 7) {
       newText.write(newValue.text.substring(3, usedSubstringIndex = 6) + '-');
-      if (newValue.selection.end >= 6)
-        selectionIndex++;
+      if (newValue.selection.end >= 6) selectionIndex++;
     }
     if (newTextLength >= 11) {
       newText.write(newValue.text.substring(6, usedSubstringIndex = 10) + ' ');
-      if (newValue.selection.end >= 10)
-        selectionIndex++;
+      if (newValue.selection.end >= 10) selectionIndex++;
     }
     // Dump the rest.
     if (newTextLength >= usedSubstringIndex)

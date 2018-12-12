@@ -15,7 +15,6 @@ class CupertinoSwitchDemo extends StatefulWidget {
 }
 
 class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
-
   bool _switchValue = false;
 
   @override
@@ -23,7 +22,9 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cupertino Switch'),
-        actions: <Widget>[MaterialDemoDocumentationButton(CupertinoSwitchDemo.routeName)],
+        actions: <Widget>[
+          MaterialDemoDocumentationButton(CupertinoSwitchDemo.routeName)
+        ],
       ),
       body: Center(
         child: Column(
@@ -41,9 +42,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
                       });
                     },
                   ),
-                  const Text(
-                    'Active'
-                  ),
+                  const Text('Active'),
                 ],
               ),
             ),
@@ -55,9 +54,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
                     value: true,
                     onChanged: null,
                   ),
-                  Text(
-                    'Disabled'
-                  ),
+                  Text('Disabled'),
                 ],
               ),
             ),
@@ -69,9 +66,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
                     value: false,
                     onChanged: null,
                   ),
-                  Text(
-                    'Disabled'
-                  ),
+                  Text('Disabled'),
                 ],
               ),
             ),

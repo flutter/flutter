@@ -63,7 +63,8 @@ List<String> _allDemos = <String>[];
 
 /// Extracts event data from [events] recorded by timeline, validates it, turns
 /// it into a histogram, and saves to a JSON file.
-Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
+Future<void> saveDurationsHistogram(
+    List<Map<String, dynamic>> events, String outputPath) async {
   final Map<String, List<int>> durations = <String, List<int>>{};
   Map<String, dynamic> startEvent;
 
@@ -92,7 +93,8 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
   });
 
   if (unexpectedValueCounts.isNotEmpty) {
-    final StringBuffer error = StringBuffer('Some routes recorded wrong number of values (expected 2 values/route):\n\n');
+    final StringBuffer error = StringBuffer(
+        'Some routes recorded wrong number of values (expected 2 values/route):\n\n');
     unexpectedValueCounts.forEach((String routeName, int count) {
       error.writeln(' - $routeName recorded $count values.');
     });
@@ -103,12 +105,14 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
     while (eventIter.moveNext()) {
       final String eventName = eventIter.current['name'];
 
-      if (!<String>['Start Transition', 'Frame'].contains(eventName))
-        continue;
+      if (!<String>[
+        'Start Transition',
+        'Frame'
+      ].contains(eventName)) continue;
 
       final String routeName = eventName == 'Start Transition'
-        ? eventIter.current['args']['to']
-        : '';
+          ? eventIter.current['args']['to']
+          : '';
 
       if (eventName == lastEventName && routeName == lastRouteName) {
         error.write('.');
@@ -124,7 +128,8 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
 
   // Save the durations Map to a file.
   final File file = await _fs.file(outputPath).create(recursive: true);
-  await file.writeAsString(const JsonEncoder.withIndent('  ').convert(durations));
+  await file
+      .writeAsString(const JsonEncoder.withIndent('  ').convert(durations));
 }
 
 /// Scrolls each demo menu item into view, launches it, then returns to the
@@ -134,8 +139,7 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   String currentDemoCategory;
 
   for (String demo in demos) {
-    if (kSkippedDemos.contains(demo))
-      continue;
+    if (kSkippedDemos.contains(demo)) continue;
 
     final String demoName = demo.substring(0, demo.indexOf('@'));
     final String demoCategory = demo.substring(demo.indexOf('@') + 1);
@@ -147,12 +151,15 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
       await driver.tap(find.byTooltip('Back'));
       await driver.tap(find.text(demoCategory));
       // Scroll back to the top
-      await driver.scroll(demoList, 0.0, 10000.0, const Duration(milliseconds: 100));
+      await driver.scroll(
+          demoList, 0.0, 10000.0, const Duration(milliseconds: 100));
     }
     currentDemoCategory = demoCategory;
 
     final SerializableFinder demoItem = find.text(demoName);
-    await driver.scrollUntilVisible(demoList, demoItem,
+    await driver.scrollUntilVisible(
+      demoList,
+      demoItem,
       dyScroll: -48.0,
       alignment: 0.5,
       timeout: const Duration(seconds: 30),
@@ -189,18 +196,16 @@ void main([List<String> args = const <String>[]]) {
       }
 
       // See _handleMessages() in transitions_perf.dart.
-      _allDemos = List<String>.from(const JsonDecoder().convert(await driver.requestData('demoNames')));
-      if (_allDemos.isEmpty)
-        throw 'no demo names found';
+      _allDemos = List<String>.from(
+          const JsonDecoder().convert(await driver.requestData('demoNames')));
+      if (_allDemos.isEmpty) throw 'no demo names found';
     });
 
     tearDownAll(() async {
-      if (driver != null)
-        await driver.close();
+      if (driver != null) await driver.close();
     });
 
     test('all demos', () async {
-
       // Collect timeline data for just a limited set of demos to avoid OOMs.
       final Timeline timeline = await driver.traceAction(
         () async {
@@ -217,15 +222,16 @@ void main([List<String> args = const <String>[]]) {
       // 'Start Transition' event when a demo is launched (see GalleryItem).
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeSummaryToFile('transitions', pretty: true);
-      final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
+      final String histogramPath =
+          path.join(testOutputsDirectory, 'transition_durations.timeline.json');
       await saveDurationsHistogram(
           List<Map<String, dynamic>>.from(timeline.json['traceEvents']),
           histogramPath);
 
       // Execute the remaining tests.
-      final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
+      final Set<String> unprofiledDemos = Set<String>.from(_allDemos)
+        ..removeAll(kProfiledDemos);
       await runDemos(unprofiledDemos.toList(), driver);
-
     }, timeout: const Timeout(Duration(minutes: 5)));
   });
 }

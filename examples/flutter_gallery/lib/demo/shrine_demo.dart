@@ -12,13 +12,12 @@ import 'shrine/shrine_theme.dart' show ShrineTheme;
 // isn't a standalone app with its own main() and MaterialApp.
 Widget buildShrine(BuildContext context, Widget child) {
   return Theme(
-    data: ThemeData(
-      primarySwatch: Colors.grey,
-      iconTheme: const IconThemeData(color: Color(0xFF707070)),
-      platform: Theme.of(context).platform,
-    ),
-    child: ShrineTheme(child: child)
-  );
+      data: ThemeData(
+        primarySwatch: Colors.grey,
+        iconTheme: const IconThemeData(color: Color(0xFF707070)),
+        platform: Theme.of(context).platform,
+      ),
+      child: ShrineTheme(child: child));
 }
 
 // In a standalone version of this app, MaterialPageRoute<T> could be used directly.
@@ -29,8 +28,10 @@ class ShrinePageRoute<T> extends MaterialPageRoute<T> {
   }) : super(builder: builder, settings: settings);
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return buildShrine(context, super.buildPage(context, animation, secondaryAnimation));
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
+    return buildShrine(
+        context, super.buildPage(context, animation, secondaryAnimation));
   }
 }
 

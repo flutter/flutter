@@ -16,7 +16,8 @@ void main() {
     final Finder nameField = find.widgetWithText(TextFormField, 'Name *');
     expect(nameField, findsOneWidget);
 
-    final Finder passwordField = find.widgetWithText(TextFormField, 'Password *');
+    final Finder passwordField =
+        find.widgetWithText(TextFormField, 'Password *');
     expect(passwordField, findsOneWidget);
 
     await tester.enterText(nameField, '');
@@ -33,7 +34,8 @@ void main() {
     await tester.drag(passwordField, const Offset(0.0, 1200.0));
     await tester.pumpAndSettle();
     expect(find.text('Name is required.'), findsOneWidget);
-    expect(find.text('Please enter only alphabetical characters.'), findsNothing);
+    expect(
+        find.text('Please enter only alphabetical characters.'), findsNothing);
     await tester.enterText(nameField, '#');
     await tester.pumpAndSettle();
 
@@ -43,12 +45,14 @@ void main() {
     await tester.tap(submitButton);
     await tester.pumpAndSettle();
     expect(find.text('Name is required.'), findsNothing);
-    expect(find.text('Please enter only alphabetical characters.'), findsOneWidget);
+    expect(find.text('Please enter only alphabetical characters.'),
+        findsOneWidget);
 
     await tester.enterText(nameField, 'Jane Doe');
     await tester.tap(submitButton);
     await tester.pumpAndSettle();
     expect(find.text('Name is required.'), findsNothing);
-    expect(find.text('Please enter only alphabetical characters.'), findsNothing);
+    expect(
+        find.text('Please enter only alphabetical characters.'), findsNothing);
   });
 }

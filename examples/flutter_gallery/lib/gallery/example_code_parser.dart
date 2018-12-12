@@ -12,14 +12,14 @@ const String _kEndTag = '// END';
 Map<String, String> _exampleCode;
 
 Future<String> getExampleCode(String tag, AssetBundle bundle) async {
-  if (_exampleCode == null)
-    await _parseExampleCode(bundle);
+  if (_exampleCode == null) await _parseExampleCode(bundle);
   return _exampleCode[tag];
 }
 
 Future<void> _parseExampleCode(AssetBundle bundle) async {
-  final String code = await bundle.loadString('lib/gallery/example_code.dart') ??
-    '// lib/gallery/example_code.dart not found\n';
+  final String code =
+      await bundle.loadString('lib/gallery/example_code.dart') ??
+          '// lib/gallery/example_code.dart not found\n';
   _exampleCode = <String, String>{};
 
   final List<String> lines = code.split('\n');

@@ -20,9 +20,7 @@ class Vendor {
   final String avatarAssetPackage;
 
   bool isValid() {
-    return name != null &&
-      description != null &&
-      avatarAsset != null;
+    return name != null && description != null && avatarAsset != null;
   }
 
   @override
@@ -30,17 +28,16 @@ class Vendor {
 }
 
 class Product {
-  const Product({
-    this.name,
-    this.description,
-    this.featureTitle,
-    this.featureDescription,
-    this.imageAsset,
-    this.imageAssetPackage,
-    this.categories,
-    this.price,
-    this.vendor
-  });
+  const Product(
+      {this.name,
+      this.description,
+      this.featureTitle,
+      this.featureDescription,
+      this.imageAsset,
+      this.imageAssetPackage,
+      this.categories,
+      this.price,
+      this.vendor});
 
   final String name;
   final String description;
@@ -57,12 +54,12 @@ class Product {
 
   bool isValid() {
     return name != null &&
-      description != null &&
-      imageAsset != null &&
-      categories != null &&
-      categories.isNotEmpty &&
-      price != null &&
-      vendor.isValid();
+        description != null &&
+        imageAsset != null &&
+        categories != null &&
+        categories.isNotEmpty &&
+        price != null &&
+        vendor.isValid();
   }
 
   @override
@@ -70,33 +67,30 @@ class Product {
 }
 
 class Order {
-  Order({ @required this.product, this.quantity = 1, this.inCart = false })
-    : assert(product != null),
-      assert(quantity != null && quantity >= 0),
-      assert(inCart != null);
+  Order({@required this.product, this.quantity = 1, this.inCart = false})
+      : assert(product != null),
+        assert(quantity != null && quantity >= 0),
+        assert(inCart != null);
 
   final Product product;
   final int quantity;
   final bool inCart;
 
-  Order copyWith({ Product product, int quantity, bool inCart }) {
+  Order copyWith({Product product, int quantity, bool inCart}) {
     return Order(
-      product: product ?? this.product,
-      quantity: quantity ?? this.quantity,
-      inCart: inCart ?? this.inCart
-    );
+        product: product ?? this.product,
+        quantity: quantity ?? this.quantity,
+        inCart: inCart ?? this.inCart);
   }
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
     final Order typedOther = other;
     return product == typedOther.product &&
-           quantity == typedOther.quantity &&
-           inCart == typedOther.inCart;
+        quantity == typedOther.quantity &&
+        inCart == typedOther.inCart;
   }
 
   @override

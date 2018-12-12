@@ -20,11 +20,12 @@ ui.Picture paint(ui.Rect paintBounds) {
 
   canvas.translate(logicalSize.width / 2.0, logicalSize.height / 2.0);
   canvas.drawRect(ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
-                  ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
+      ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
 
   // The paint method of Paragraph draws the contents of the paragraph onto the
   // given canvas.
-  canvas.drawParagraph(paragraph, ui.Offset(-paragraph.width / 2.0, (paragraph.width / 2.0) - 125.0));
+  canvas.drawParagraph(paragraph,
+      ui.Offset(-paragraph.width / 2.0, (paragraph.width / 2.0) - 125.0));
 
   return recorder.endRecording();
 }
@@ -44,7 +45,8 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
 }
 
 void beginFrame(Duration timeStamp) {
-  final ui.Rect paintBounds = ui.Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio);
+  final ui.Rect paintBounds =
+      ui.Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio);
   final ui.Picture picture = paint(paintBounds);
   final ui.Scene scene = composite(picture, paintBounds);
   ui.window.render(scene);

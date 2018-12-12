@@ -19,18 +19,20 @@ void beginFrame(Duration timeStamp) {
 
   // PAINT
 
-  final ui.Rect paintBounds = ui.Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio);
+  final ui.Rect paintBounds =
+      ui.Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio);
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder, paintBounds);
   canvas.translate(paintBounds.width / 2.0, paintBounds.height / 2.0);
 
   // Here we determine the rotation according to the timeStamp given to us by
   // the engine.
-  final double t = timeStamp.inMicroseconds / Duration.microsecondsPerMillisecond / 1800.0;
+  final double t =
+      timeStamp.inMicroseconds / Duration.microsecondsPerMillisecond / 1800.0;
   canvas.rotate(math.pi * (t % 1.0));
 
   canvas.drawRect(ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
-                  ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
+      ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
   final ui.Picture picture = recorder.endRecording();
 
   // COMPOSITE

@@ -11,8 +11,10 @@ class GalleryTheme {
   final ThemeData data;
 }
 
-final GalleryTheme kDarkGalleryTheme = GalleryTheme._('Dark', _buildDarkTheme());
-final GalleryTheme kLightGalleryTheme = GalleryTheme._('Light', _buildLightTheme());
+final GalleryTheme kDarkGalleryTheme =
+    GalleryTheme._('Dark', _buildDarkTheme());
+final GalleryTheme kLightGalleryTheme =
+    GalleryTheme._('Light', _buildLightTheme());
 
 TextTheme _buildTextTheme(TextTheme base) {
   return base.copyWith(

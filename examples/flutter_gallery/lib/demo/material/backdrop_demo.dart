@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 // (CategoryView) on top of the backdrop.
 
 class Category {
-  const Category({ this.title, this.assets });
+  const Category({this.title, this.assets});
   final String title;
   final List<String> assets;
   @override
@@ -95,7 +95,7 @@ const List<Category> allCategories = <Category>[
 ];
 
 class CategoryView extends StatelessWidget {
-  const CategoryView({ Key key, this.category }) : super(key: key);
+  const CategoryView({Key key, this.category}) : super(key: key);
 
   final Category category;
 
@@ -243,7 +243,8 @@ class BackdropDemo extends StatefulWidget {
   _BackdropDemoState createState() => _BackdropDemoState();
 }
 
-class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderStateMixin {
+class _BackdropDemoState extends State<BackdropDemo>
+    with SingleTickerProviderStateMixin {
   final GlobalKey _backdropKey = GlobalKey(debugLabel: 'Backdrop');
   AnimationController _controller;
   Category _category = allCategories[0];
@@ -273,7 +274,8 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
 
   bool get _backdropPanelVisible {
     final AnimationStatus status = _controller.status;
-    return status == AnimationStatus.completed || status == AnimationStatus.forward;
+    return status == AnimationStatus.completed ||
+        status == AnimationStatus.forward;
   }
 
   void _toggleBackdropPanelVisibility() {
@@ -289,17 +291,19 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   // the user must either tap its heading or the backdrop's menu icon.
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    if (_controller.isAnimating || _controller.status == AnimationStatus.completed)
-      return;
+    if (_controller.isAnimating ||
+        _controller.status == AnimationStatus.completed) return;
 
-    _controller.value -= details.primaryDelta / (_backdropHeight ?? details.primaryDelta);
+    _controller.value -=
+        details.primaryDelta / (_backdropHeight ?? details.primaryDelta);
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (_controller.isAnimating || _controller.status == AnimationStatus.completed)
-      return;
+    if (_controller.isAnimating ||
+        _controller.status == AnimationStatus.completed) return;
 
-    final double flingVelocity = details.velocity.pixelsPerSecond.dy / _backdropHeight;
+    final double flingVelocity =
+        details.velocity.pixelsPerSecond.dy / _backdropHeight;
     if (flingVelocity < 0.0)
       _controller.fling(velocity: math.max(2.0, -flingVelocity));
     else if (flingVelocity > 0.0)
@@ -331,15 +335,14 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     );
 
     final ThemeData theme = Theme.of(context);
-    final List<Widget> backdropItems = allCategories.map<Widget>((Category category) {
+    final List<Widget> backdropItems =
+        allCategories.map<Widget>((Category category) {
       final bool selected = category == _category;
       return Material(
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(4.0)),
         ),
-        color: selected
-          ? Colors.white.withOpacity(0.25)
-          : Colors.transparent,
+        color: selected ? Colors.white.withOpacity(0.25) : Colors.transparent,
         child: ListTile(
           title: Text(category.title),
           selected: selected,
