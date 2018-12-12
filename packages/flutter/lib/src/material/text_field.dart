@@ -398,6 +398,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       .applyDefaults(Theme.of(context).inputDecorationTheme)
       .copyWith(
         enabled: widget.enabled,
+        hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines
       );
 
     if (!needsCounter)
