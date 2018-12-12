@@ -1796,7 +1796,7 @@ void main() {
     ).toString();
 
     // Spot check
-    expect(debugString, contains('labelStyle: TextStyle(inherit: true, height: 1.0x)'));
+    expect(debugString, contains('labelStyle: TextStyle(inherit: true, height: 1.0x, leading: 1.0x)'));
     expect(debugString, contains('isDense: true'));
     expect(debugString, contains('fillColor: Color(0x0000000a)'));
     expect(debugString, contains('errorBorder: UnderlineInputBorder()'));
