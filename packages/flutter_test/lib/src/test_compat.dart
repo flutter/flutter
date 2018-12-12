@@ -79,9 +79,9 @@ Future<void> _runLiveTest(Suite suiteConfig, LiveTest liveTest, _Reporter report
   // Schedule a microtask to ensure that [onTestStarted] fires before the
   // first [LiveTest.onStateChange] event.
   await Future<void>.microtask(liveTest.run);
-  // Once the test finishes, use [new Future] to do a coarse-grained event
+  // Once the test finishes, use await null to do a coarse-grained event
   // loop pump to avoid starving non-microtask events.
-  await Future<void>(() {});
+  await null;
   final bool isSuccess = liveTest.state.result.isPassing;
   if (isSuccess) {
     reporter.passed.add(liveTest);
