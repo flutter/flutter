@@ -19,6 +19,8 @@ const BoxDecoration kBoxDecorationC = BoxDecoration(
 );
 
 class TestBuildCounter extends StatelessWidget {
+  const TestBuildCounter();
+
   static int buildCount = 0;
 
   @override

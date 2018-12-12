@@ -598,6 +598,18 @@ abstract class StatelessWidget extends Widget {
   ///  * The discussion on performance considerations at [StatelessWidget].
   @protected
   Widget build(BuildContext context);
+
+  /// Called whenever the widget configuration is updated.
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return true, otherwise it should
+  /// return false.
+  ///
+  /// If the method returns false, then the widget will not get rebuilt.
+  ///
+  /// The `oldWidget` argument will never be null.
+  @protected
+  bool shouldRebuild(covariant StatelessWidget oldWidget) => true;
 }
 
 /// A widget that has mutable state.
@@ -3775,10 +3787,13 @@ class StatelessElement extends ComponentElement {
 
   @override
   void update(StatelessWidget newWidget) {
+    final StatelessWidget oldWidget = widget;
     super.update(newWidget);
     assert(widget == newWidget);
-    _dirty = true;
-    rebuild();
+    if(widget.shouldRebuild(oldWidget)){
+      _dirty = true;
+      rebuild();
+    }
   }
 }
 

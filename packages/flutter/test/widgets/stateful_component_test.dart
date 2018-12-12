@@ -56,11 +56,12 @@ void main() {
   });
 
   testWidgets('Don\'t rebuild subwidgets', (WidgetTester tester) async {
+    TestBuildCounter.buildCount = 0;
     await tester.pumpWidget(
-      FlipWidget(
-        key: const Key('rebuild test'),
+      const FlipWidget(
+        key: Key('rebuild test'),
         left: TestBuildCounter(),
-        right: const DecoratedBox(decoration: kBoxDecorationB)
+        right: DecoratedBox(decoration: kBoxDecorationB)
       )
     );
 
