@@ -69,6 +69,10 @@ Engine::Engine(Delegate& delegate,
 
 Engine::~Engine() = default;
 
+float Engine::GetDisplayRefreshRate() const {
+  return animator_->GetDisplayRefreshRate();
+}
+
 fml::WeakPtr<Engine> Engine::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
 }

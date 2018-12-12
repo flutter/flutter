@@ -39,6 +39,10 @@ Animator::Animator(Delegate& delegate,
 
 Animator::~Animator() = default;
 
+float Animator::GetDisplayRefreshRate() const {
+  return waiter_->GetDisplayRefreshRate();
+}
+
 void Animator::Stop() {
   paused_ = true;
 }

@@ -36,6 +36,8 @@ class Animator final {
 
   ~Animator();
 
+  float GetDisplayRefreshRate() const;
+
   void RequestFrame(bool regenerate_layer_tree = true);
 
   void Render(std::unique_ptr<flow::LayerTree> layer_tree);
