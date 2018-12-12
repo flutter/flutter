@@ -459,7 +459,7 @@ class TextPainter {
     final int maxGraphemeClusterLength = needsSearch ? _maxGraphemeClusterLength : 1;
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
-    while (boxes.isEmpty && graphemeClusterLength <= maxGraphemeClusterLength && (_text.text == null || graphemeClusterLength <= (_text.text.length - offset) << 1)) {
+    while (boxes.isEmpty && graphemeClusterLength <= maxGraphemeClusterLength && _text.text != null && graphemeClusterLength + offset <= _text.text.length << 1) {
       final int nextRuneOffset = offset + graphemeClusterLength;
       boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
       if (boxes.isEmpty) {

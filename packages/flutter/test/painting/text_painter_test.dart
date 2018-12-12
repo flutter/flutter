@@ -44,9 +44,9 @@ void main() {
     expect(caretOffset.dx, painter.width);
 
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
-    expect(caretOffset.dx, 0);
+    expect(caretOffset.dx, 42);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
-    expect(caretOffset.dx, 0);
+    expect(caretOffset.dx, 42);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 3), ui.Rect.zero);
     expect(caretOffset.dx, 0);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 4), ui.Rect.zero);
