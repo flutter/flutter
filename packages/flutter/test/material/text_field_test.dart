@@ -722,6 +722,43 @@ void main() {
     expect(inputBox.size, greaterThan(fourLineInputSize));
   });
 
+
+  testWidgets('Multiline hint text will wrap up to maxLines', (WidgetTester tester) async {
+    final Key textFieldKey = UniqueKey();
+
+    Widget builder(int maxLines, final String hintMsg) {
+      return boilerplate(
+        child: TextField(
+          key: textFieldKey,
+          style: const TextStyle(color: Colors.black, fontSize: 34.0),
+          maxLines: maxLines,
+          decoration: InputDecoration(
+            hintText: hintMsg,
+          ),
+        ),
+      );
+    }
+
+    const String hintPlaceholder = 'Placeholder';
+    const String multipleLineText = 'Here\'s a text, which is more than one line, to demostrate the multiple line hint text';
+    await tester.pumpWidget(builder(null, hintPlaceholder));
+
+    RenderBox findHintText(String hint) => tester.renderObject(find.text(hint));
+
+    final RenderBox hintTextBox = findHintText(hintPlaceholder);
+    final Size oneLineHintSize = hintTextBox.size;
+
+    await tester.pumpWidget(builder(null, hintPlaceholder));
+    expect(findHintText(hintPlaceholder), equals(hintTextBox));
+    expect(hintTextBox.size, equals(oneLineHintSize));
+
+    const int maxLines = 3;
+    await tester.pumpWidget(builder(maxLines, multipleLineText));
+    final Text hintTextWidget = tester.widget(find.text(multipleLineText));
+    expect(hintTextWidget.maxLines, equals(maxLines));
+    expect(findHintText(multipleLineText).size, greaterThan(oneLineHintSize));
+  });
+
   testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -3381,5 +3418,36 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.tap(find.byType(TextField));
     expect(tapCount, 0);
+  });
+
+  testWidgets('style enforces required fields', (WidgetTester tester) async {
+    Widget buildFrame(TextStyle style) {
+      return MaterialApp(
+        home: Material(
+          child: TextField(
+            style: style,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(const TextStyle(
+      inherit: false,
+      fontSize: 12.0,
+      textBaseline: TextBaseline.alphabetic,
+    )));
+    expect(tester.takeException(), isNull);
+
+    // With inherit not set to false, will pickup required fields from theme
+    await tester.pumpWidget(buildFrame(const TextStyle(
+      fontSize: 12.0,
+    )));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildFrame(const TextStyle(
+      inherit: false,
+      fontSize: 12.0,
+    )));
+    expect(tester.takeException(), isNotNull);
   });
 }
