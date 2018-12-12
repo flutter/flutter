@@ -379,7 +379,7 @@ class _LicensePageState extends State<LicensePage> {
   final List<Widget> _licenses = <Widget>[];
   bool _loaded = false;
 
-  Future<Null> _initLicenses() async {
+  Future<void> _initLicenses() async {
     final Flow flow = Flow.begin();
     Timeline.timeSync('_initLicenses()', () { }, flow: flow);
     await for (LicenseEntry license in LicenseRegistry.licenses) {

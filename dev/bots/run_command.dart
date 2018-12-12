@@ -44,7 +44,7 @@ Future<void> runCommand(String executable, List<String> arguments, {
   final String relativeWorkingDir = path.relative(workingDirectory);
   if (skip) {
     printProgress('SKIPPING', relativeWorkingDir, commandDescription);
-    return null;
+    return;
   }
   printProgress('RUNNING', relativeWorkingDir, commandDescription);
 

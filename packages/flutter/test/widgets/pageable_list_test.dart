@@ -45,7 +45,7 @@ Widget buildFrame({
   );
 }
 
-Future<Null> page(WidgetTester tester, Offset offset) {
+Future<void> page(WidgetTester tester, Offset offset) {
   return TestAsyncUtils.guard(() async {
     final String itemText = currentPage != null ? currentPage.toString() : '0';
     await tester.drag(find.text(itemText), offset);
@@ -53,11 +53,11 @@ Future<Null> page(WidgetTester tester, Offset offset) {
   });
 }
 
-Future<Null> pageLeft(WidgetTester tester) {
+Future<void> pageLeft(WidgetTester tester) {
   return page(tester, Offset(-pageSize.width, 0.0));
 }
 
-Future<Null> pageRight(WidgetTester tester) {
+Future<void> pageRight(WidgetTester tester) {
   return page(tester, Offset(pageSize.width, 0.0));
 }
 

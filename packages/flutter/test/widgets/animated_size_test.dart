@@ -138,7 +138,7 @@ void main() {
     });
 
     testWidgets('tracks unstable child, then resumes animation when child stabilizes', (WidgetTester tester) async {
-      Future<Null> pumpMillis(int millis) async {
+      Future<void> pumpMillis(int millis) async {
         await tester.pump(Duration(milliseconds: millis));
       }
 

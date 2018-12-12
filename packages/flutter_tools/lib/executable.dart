@@ -18,7 +18,6 @@ import 'src/commands/doctor.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
 import 'src/commands/format.dart';
-import 'src/commands/fuchsia_reload.dart';
 import 'src/commands/ide_config.dart';
 import 'src/commands/inject_plugins.dart';
 import 'src/commands/install.dart';
@@ -56,14 +55,13 @@ Future<void> main(List<String> args) async {
     ChannelCommand(verboseHelp: verboseHelp),
     CleanCommand(),
     ConfigCommand(verboseHelp: verboseHelp),
-    CreateCommand(verboseHelp: verboseHelp),
+    CreateCommand(),
     DaemonCommand(hidden: !verboseHelp),
     DevicesCommand(),
     DoctorCommand(verbose: verbose),
     DriveCommand(),
     EmulatorsCommand(),
     FormatCommand(),
-    FuchsiaReloadCommand(),
     IdeConfigCommand(hidden: !verboseHelp),
     InjectPluginsCommand(hidden: !verboseHelp),
     InstallCommand(),

@@ -277,7 +277,7 @@ void main() {
     StateSetter contentsSetState; // call this to rebuild the route's SampleForm contents
     bool contentsEmpty = false; // when true, don't include the SampleForm in the route
 
-    final TestPageRoute<Null> route = TestPageRoute<Null>(
+    final TestPageRoute<void> route = TestPageRoute<void>(
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {

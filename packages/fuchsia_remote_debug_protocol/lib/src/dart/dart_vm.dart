@@ -18,9 +18,12 @@ const Duration _kRpcTimeout = Duration(seconds: 5);
 
 final Logger _log = Logger('DartVm');
 
-/// Signature of an asynchronous function for astablishing a JSON RPC-2
+/// Signature of an asynchronous function for establishing a JSON RPC-2
 /// connection to a [Uri].
-typedef RpcPeerConnectionFunction = Future<json_rpc.Peer> Function(Uri uri);
+typedef RpcPeerConnectionFunction = Future<json_rpc.Peer> Function(
+  Uri uri, {
+  Duration timeout,
+});
 
 /// [DartVm] uses this function to connect to the Dart VM on Fuchsia.
 ///
@@ -30,16 +33,18 @@ RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 
 /// Attempts to connect to a Dart VM service.
 ///
-/// Gives up after `_kConnectTimeout` has elapsed.
-Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
+/// Gives up after `timeout` has elapsed.
+Future<json_rpc.Peer> _waitAndConnect(
+  Uri uri, {
+  Duration timeout = _kConnectTimeout,
+}) async {
   final Stopwatch timer = Stopwatch()..start();
 
   Future<json_rpc.Peer> attemptConnection(Uri uri) async {
     WebSocket socket;
     json_rpc.Peer peer;
     try {
-      socket =
-          await WebSocket.connect(uri.toString()).timeout(_kConnectTimeout);
+      socket = await WebSocket.connect(uri.toString()).timeout(timeout);
       peer = json_rpc.Peer(IOWebSocketChannel(socket).cast())..listen();
       return peer;
     } on HttpException catch (e) {
@@ -53,7 +58,7 @@ Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
       // Other unknown errors will be handled with reconnects.
       await peer?.close();
       await socket?.close();
-      if (timer.elapsed < _kConnectTimeout) {
+      if (timer.elapsed < timeout) {
         _log.info('Attempting to reconnect');
         await Future<void>.delayed(_kReconnectAttemptInterval);
         return attemptConnection(uri);
@@ -105,11 +110,15 @@ class DartVm {
   /// Attempts to connect to the given [Uri].
   ///
   /// Throws an error if unable to connect.
-  static Future<DartVm> connect(Uri uri) async {
+  static Future<DartVm> connect(
+    Uri uri, {
+    Duration timeout = _kConnectTimeout,
+  }) async {
     if (uri.scheme == 'http') {
       uri = uri.replace(scheme: 'ws', path: '/ws');
     }
-    final json_rpc.Peer peer = await fuchsiaVmServiceConnectionFunction(uri);
+    final json_rpc.Peer peer =
+        await fuchsiaVmServiceConnectionFunction(uri, timeout: timeout);
     if (peer == null) {
       return null;
     }

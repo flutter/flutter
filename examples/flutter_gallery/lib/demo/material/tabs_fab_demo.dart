@@ -69,7 +69,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   }
 
   void _showExplanatoryText() {
-    _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
+    _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
       return Container(
         decoration: BoxDecoration(
           border: Border(top: BorderSide(color: Theme.of(context).dividerColor))
@@ -141,7 +141,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
         actions: <Widget>[
           MaterialDemoDocumentationButton(TabsFabDemo.routeName),
           IconButton(
-            icon: const Icon(Icons.sentiment_very_satisfied),
+            icon: const Icon(Icons.sentiment_very_satisfied, semanticLabel: 'Toggle extended buttons'),
             onPressed: () {
               setState(() {
                 _extendedButtons = !_extendedButtons;

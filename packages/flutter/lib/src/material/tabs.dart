@@ -150,7 +150,7 @@ class _TabStyle extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final TabBarTheme tabBarTheme = themeData.tabBarTheme;
+    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
 
     final TextStyle defaultStyle = labelStyle ?? themeData.primaryTextTheme.body2;
     final TextStyle defaultUnselectedStyle = unselectedLabelStyle ?? labelStyle ?? themeData.primaryTextTheme.body2;
@@ -513,7 +513,7 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// Uses values from [ThemeData.tabBarTheme] if it is set in the current context.
+/// Uses values from [TabBarTheme] if it is set in the current context.
 ///
 /// See also:
 ///
@@ -698,11 +698,11 @@ class _TabBarState extends State<TabBar> {
   Decoration get _indicator {
     if (widget.indicator != null)
       return widget.indicator;
-    final ThemeData themeData = Theme.of(context);
-    if (themeData.tabBarTheme.indicator != null)
-      return themeData.tabBarTheme.indicator;
+    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    if (tabBarTheme.indicator != null)
+      return tabBarTheme.indicator;
 
-    Color color = widget.indicatorColor ?? themeData.indicatorColor;
+    Color color = widget.indicatorColor ?? Theme.of(context).indicatorColor;
     // ThemeData tries to avoid this by having indicatorColor avoid being the
     // primaryColor. However, it's possible that the tab bar is on a
     // Material that isn't the primaryColor. In that case, if the indicator
@@ -755,7 +755,7 @@ class _TabBarState extends State<TabBar> {
     _indicatorPainter = _controller == null ? null : _IndicatorPainter(
       controller: _controller,
       indicator: _indicator,
-      indicatorSize: widget.indicatorSize ?? Theme.of(context).tabBarTheme.indicatorSize,
+      indicatorSize: widget.indicatorSize ?? TabBarTheme.of(context).indicatorSize,
       tabKeys: _tabKeys,
       old: _indicatorPainter,
     );
@@ -899,6 +899,7 @@ class _TabBarState extends State<TabBar> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller.length == 0) {
       return Container(
@@ -1118,12 +1119,12 @@ class _TabBarViewState extends State<TabBarView> {
     }
   }
 
-  Future<Null> _warpToCurrentIndex() async {
+  Future<void> _warpToCurrentIndex() async {
     if (!mounted)
-      return Future<Null>.value();
+      return Future<void>.value();
 
     if (_pageController.page == _currentIndex.toDouble())
-      return Future<Null>.value();
+      return Future<void>.value();
 
     final int previousIndex = _controller.previousIndex;
     if ((_currentIndex - previousIndex).abs() == 1)
@@ -1147,7 +1148,7 @@ class _TabBarViewState extends State<TabBarView> {
 
     await _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
     if (!mounted)
-      return Future<Null>.value();
+      return Future<void>.value();
 
     setState(() {
       _warpUnderwayCount -= 1;
@@ -1167,9 +1168,10 @@ class _TabBarViewState extends State<TabBarView> {
     if (notification is ScrollUpdateNotification && !_controller.indexIsChanging) {
       if ((_pageController.page - _controller.index).abs() > 1.0) {
         _controller.index = _pageController.page.floor();
-        _currentIndex=_controller.index;
+        _currentIndex = _controller.index;
       }
-      _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0);
+      if (_controller.length > 1)
+        _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0);
     } else if (notification is ScrollEndNotification) {
       _controller.index = _pageController.page.round();
       _currentIndex = _controller.index;

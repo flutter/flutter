@@ -87,7 +87,7 @@ class CrashReportSender {
   }) async {
     try {
       if (_usage.suppressAnalytics)
-        return null;
+        return;
 
       printStatus('Sending crash report to Google.');
 
@@ -107,6 +107,7 @@ class CrashReportSender {
       req.fields['osVersion'] = os.name; // this actually includes version
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
+      req.fields['error_message'] = '$error';
 
       final String stackTraceWithRelativePaths = Chain.parse(stackTrace.toString()).terse.toString();
       req.files.add(http.MultipartFile.fromString(

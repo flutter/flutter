@@ -13,8 +13,6 @@ class VsCodeValidator extends DoctorValidator {
 
   final VsCode _vsCode;
 
-  static const String extensionMarketplaceUrl =
-    'https://marketplace.visualstudio.com/items?itemName=${VsCode.extensionIdentifier}';
 
   static Iterable<DoctorValidator> get installedValidators {
     return VsCode
@@ -24,24 +22,18 @@ class VsCodeValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
-    ValidationType type = ValidationType.missing;
     final String vsCodeVersionText = _vsCode.version == Version.unknown
         ? null
         : 'version ${_vsCode.version}';
-    messages.add(ValidationMessage('VS Code at ${_vsCode.directory}'));
-    if (_vsCode.isValid) {
-      type = ValidationType.installed;
-      messages.addAll(_vsCode.validationMessages
-          .map<ValidationMessage>((String m) => ValidationMessage(m)));
-    } else {
-      type = ValidationType.partial;
-      messages.addAll(_vsCode.validationMessages
-          .map<ValidationMessage>((String m) => ValidationMessage.error(m)));
-      messages.add(ValidationMessage(
-          'Flutter extension not installed; install from\n$extensionMarketplaceUrl'));
-    }
 
-    return ValidationResult(type, messages, statusInfo: vsCodeVersionText);
+    final ValidationType validationType = _vsCode.isValid
+        ? ValidationType.installed
+        : ValidationType.partial;
+
+    return ValidationResult(
+      validationType,
+      _vsCode.validationMessages,
+      statusInfo: vsCodeVersionText,
+    );
   }
 }

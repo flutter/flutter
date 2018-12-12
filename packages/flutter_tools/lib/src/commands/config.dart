@@ -35,7 +35,7 @@ class ConfigCommand extends FlutterCommand {
   final String description =
     'Configure Flutter settings.\n\n'
     'To remove a setting, configure it to an empty string.\n\n'
-    'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve\n'
+    'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve '
     'Flutter tools over time. See Google\'s privacy policy: https://www.google.com/intl/en/policies/privacy/';
 
   @override
@@ -59,7 +59,7 @@ class ConfigCommand extends FlutterCommand {
 
   /// Return null to disable analytics recording of the `config` command.
   @override
-  Future<String> get usagePath => null;
+  Future<String> get usagePath async => null;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

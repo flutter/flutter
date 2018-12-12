@@ -10,47 +10,52 @@ import 'package:matcher/matcher.dart';
 
 import '../widgets/semantics_tester.dart';
 
+MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeData theme}) {
+  return MaterialApp(
+      theme: theme,
+      home: Material(
+        child: Builder(
+          builder: (BuildContext context) {
+            return Center(
+              child: RaisedButton(
+                child: const Text('X'),
+                onPressed: () {
+                  showDialog<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                        return dialog;
+                    },
+                  );
+                }
+              )
+            );
+          }
+        )
+      ),
+  );
+}
+
+const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
+
 void main() {
   testWidgets('Dialog is scrollable', (WidgetTester tester) async {
     bool didPressOk = false;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Builder(
-            builder: (BuildContext context) {
-              return Center(
-                child: RaisedButton(
-                  child: const Text('X'),
-                  onPressed: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          content: Container(
-                            height: 5000.0,
-                            width: 300.0,
-                            color: Colors.green[500],
-                          ),
-                          actions: <Widget>[
-                            FlatButton(
-                              onPressed: () {
-                                didPressOk = true;
-                              },
-                              child: const Text('OK')
-                            )
-                          ],
-                        );
-                      },
-                    );
-                  }
-                )
-              );
-            }
-          )
+    final AlertDialog dialog = AlertDialog(
+      content: Container(
+        height: 5000.0,
+        width: 300.0,
+        color: Colors.green[500],
+      ),
+      actions: <Widget>[
+        FlatButton(
+            onPressed: () {
+              didPressOk = true;
+            },
+            child: const Text('OK')
         )
-      )
+      ],
     );
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
 
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
@@ -62,46 +67,76 @@ void main() {
   });
 
   testWidgets('Dialog background color', (WidgetTester tester) async {
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(brightness: Brightness.dark),
-        home: Material(
-          child: Builder(
-            builder: (BuildContext context) {
-              return Center(
-                child: RaisedButton(
-                  child: const Text('X'),
-                  onPressed: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return const AlertDialog(
-                          title: Text('Title'),
-                          content: Text('Y'),
-                          actions: <Widget>[ ],
-                        );
-                      },
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-      ),
+    const AlertDialog dialog = AlertDialog(
+      title: Text('Title'),
+      content: Text('Y'),
+      actions: <Widget>[ ],
     );
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: ThemeData(brightness: Brightness.dark)));
 
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1));
 
-    final StatefulElement widget = tester.element(find.byType(Material).last);
+    final StatefulElement widget = tester.element(
+        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
     final Material materialWidget = widget.state.widget;
-    //first and second expect check that the material is the dialog's one
-    expect(materialWidget.type, MaterialType.card);
-    expect(materialWidget.elevation, 24);
     expect(materialWidget.color, Colors.grey[800]);
+    expect(materialWidget.shape, _defaultDialogShape);
+  });
+
+  testWidgets('Custom dialog shape', (WidgetTester tester) async {
+    const RoundedRectangleBorder customBorder =
+      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
+    const AlertDialog dialog = AlertDialog(
+      actions: <Widget>[ ],
+      shape: customBorder,
+    );
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1));
+
+    final StatefulElement widget = tester.element(
+        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
+    final Material materialWidget = widget.state.widget;
+    expect(materialWidget.shape, customBorder);
+  });
+
+  testWidgets('Null dialog shape', (WidgetTester tester) async {
+    const AlertDialog dialog = AlertDialog(
+      actions: <Widget>[ ],
+      shape: null,
+    );
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1));
+
+    final StatefulElement widget = tester.element(
+        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
+    final Material materialWidget = widget.state.widget;
+    expect(materialWidget.shape, _defaultDialogShape);
+  });
+
+  testWidgets('Rectangular dialog shape', (WidgetTester tester) async {
+    const ShapeBorder customBorder = Border();
+    const AlertDialog dialog = AlertDialog(
+      actions: <Widget>[ ],
+      shape: customBorder,
+    );
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1));
+
+    final StatefulElement widget = tester.element(
+        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
+    final Material materialWidget = widget.state.widget;
+    expect(materialWidget.shape, customBorder);
   });
 
   testWidgets('Simple dialog control test', (WidgetTester tester) async {

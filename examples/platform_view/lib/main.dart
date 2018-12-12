@@ -45,7 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<Null> _launchPlatformCount() async {
+  Future<void> _launchPlatformCount() async {
     final int platformCounter =
         await _methodChannel.invokeMethod('switchView', _counter);
     setState(() {

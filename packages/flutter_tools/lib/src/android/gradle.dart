@@ -23,7 +23,7 @@ import '../project.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
-const String gradleVersion = '4.4';
+const String gradleVersion = '4.10.2';
 final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
 
 GradleProject _cachedGradleProject;
@@ -365,8 +365,8 @@ Future<void> _buildGradleProjectV2(
   if (target != null) {
     command.add('-Ptarget=$target');
   }
-  if (buildInfo.trackWidgetCreation)
-    command.add('-Ptrack-widget-creation=true');
+  assert(buildInfo.trackWidgetCreation != null);
+  command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
   if (buildInfo.compilationTraceFilePath != null)
     command.add('-Pprecompile=${buildInfo.compilationTraceFilePath}');
   if (buildInfo.buildHotUpdate)
@@ -503,8 +503,8 @@ class GradleProject {
   String _productFlavorFor(BuildInfo buildInfo) {
     if (buildInfo.flavor == null)
       return productFlavors.isEmpty ? '' : null;
-    else if (productFlavors.contains(buildInfo.flavor.toLowerCase()))
-      return buildInfo.flavor.toLowerCase();
+    else if (productFlavors.contains(buildInfo.flavor))
+      return buildInfo.flavor;
     else
       return null;
   }

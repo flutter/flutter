@@ -74,4 +74,7 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
 
   @override
   bool shouldReload(_WidgetsLocalizationsDelegate old) => false;
+
+  @override
+  String toString() => 'GlobalWidgetsLocalizations.delegate(all locales)';
 }

@@ -22,7 +22,7 @@ void _tests() {
     debugResetSemanticsIdCounter();
   });
 
-  Future<Null> pumpTestWidget(WidgetTester tester) async {
+  Future<void> pumpTestWidget(WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: ListView(
         children: <Widget>[

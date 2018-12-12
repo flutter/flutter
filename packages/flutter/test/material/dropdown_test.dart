@@ -13,6 +13,7 @@ import 'package:flutter/rendering.dart';
 import '../widgets/semantics_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
+final ValueChanged<String> onChanged = (_) {};
 
 final Type dropdownButtonType = DropdownButton<String>(
   onChanged: (_) { },
@@ -26,6 +27,7 @@ Widget buildFrame({
   bool isDense = false,
   bool isExpanded = false,
   Widget hint,
+  Widget disabledHint,
   List<String> items = menuItems,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
@@ -40,10 +42,11 @@ Widget buildFrame({
             key: buttonKey,
             value: value,
             hint: hint,
+            disabledHint: disabledHint,
             onChanged: onChanged,
             isDense: isDense,
             isExpanded: isExpanded,
-            items: items.map<DropdownMenuItem<String>>((String item) {
+            items: items == null ? null : items.map<DropdownMenuItem<String>>((String item) {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
                 value: item,
@@ -115,7 +118,7 @@ bool sameGeometry(RenderBox box1, RenderBox box2) {
 void main() {
   testWidgets('Default dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
-    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two');
+    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', onChanged: onChanged);
     await tester.pumpWidget(build());
     final Finder buttonFinder = find.byKey(buttonKey);
     assert(tester.renderObject(buttonFinder).attached);
@@ -128,7 +131,7 @@ void main() {
 
   testWidgets('Expanded dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
-    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', isExpanded: true);
+    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', isExpanded: true, onChanged: onChanged);
     await tester.pumpWidget(build());
     final Finder buttonFinder = find.byKey(buttonKey);
     assert(tester.renderObject(buttonFinder).attached);
@@ -234,6 +237,48 @@ void main() {
     expect(value, equals('two'));
   });
 
+  testWidgets('Dropdown form field', (WidgetTester tester) async {
+    String value = 'one';
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            home: Material(
+              child: DropdownButtonFormField<String>(
+                value: value,
+                hint: const Text('Select Value'),
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.fastfood)
+                ),
+                items: menuItems.map((String val) {
+                  return DropdownMenuItem<String>(
+                    value: val,
+                    child: Text(val)
+                  );
+                }).toList(),
+                onChanged: (String v) {
+                  setState(() {
+                    value = v;
+                  });
+                },
+                validator: (String v) => v == null ? 'Must select value' : null,
+              ),
+            ),
+          );
+        }
+      )
+    );
+
+    expect(value, equals('one'));
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('three').last);
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, equals('three'));
+  });
+
   testWidgets('Dropdown in ListView', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12053
     // Positions a DropdownButton at the left and right edges of the screen,
@@ -326,7 +371,7 @@ void main() {
       final Key buttonKey = UniqueKey();
       const String value = 'two';
 
-      Widget build() => buildFrame(buttonKey: buttonKey, value: value, textDirection: textDirection);
+      Widget build() => buildFrame(buttonKey: buttonKey, value: value, textDirection: textDirection, onChanged: onChanged);
 
       await tester.pumpWidget(build());
       final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
@@ -371,7 +416,7 @@ void main() {
   testWidgets('Arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', isExpanded: true);
+    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', isExpanded: true, onChanged: onChanged);
 
     await tester.pumpWidget(build());
     final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
@@ -389,7 +434,7 @@ void main() {
     final Key buttonKey = UniqueKey();
     const String value = 'two';
 
-    Widget build() => buildFrame(buttonKey: buttonKey, value: value, isDense: true);
+    Widget build() => buildFrame(buttonKey: buttonKey, value: value, isDense: true, onChanged: onChanged);
 
     await tester.pumpWidget(build());
     final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
@@ -428,7 +473,8 @@ void main() {
     await tester.pumpWidget(buildFrame(
       buttonKey: buttonKey,
       value: null, // nothing selected
-      items: List<String>.generate(/*length=*/ 100, (int index) => index.toString())
+      items: List<String>.generate(/*length=*/ 100, (int index) => index.toString()),
+      onChanged: onChanged,
     ));
     await tester.tap(find.byKey(buttonKey));
     await tester.pump();
@@ -455,7 +501,8 @@ void main() {
     await tester.pumpWidget(buildFrame(
       buttonKey: buttonKey,
       value: '50',
-      items: List<String>.generate(/*length=*/ 100, (int index) => index.toString())
+      items: List<String>.generate(/*length=*/ 100, (int index) => index.toString()),
+      onChanged: onChanged,
     ));
     final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
     await tester.tap(find.byKey(buttonKey));
@@ -477,7 +524,7 @@ void main() {
     final Key buttonKey = UniqueKey();
     String value;
 
-    Widget build() => buildFrame(buttonKey: buttonKey, value: value);
+    Widget build() => buildFrame(buttonKey: buttonKey, value: value, onChanged: onChanged);
 
     await tester.pumpWidget(build());
     final RenderBox buttonBoxNullValue = tester.renderObject(find.byKey(buttonKey));
@@ -580,7 +627,7 @@ void main() {
     Rect buttonRect;
     Rect menuRect;
 
-    Future<Null> popUpAndDown(Widget frame) async {
+    Future<void> popUpAndDown(Widget frame) async {
       await tester.pumpWidget(frame);
       await tester.tap(find.byType(dropdownButtonType));
       await tester.pumpAndSettle();
@@ -594,19 +641,19 @@ void main() {
     // so that it fits within the frame.
 
     await popUpAndDown(
-      buildFrame(alignment: Alignment.topLeft, value: menuItems.last)
+      buildFrame(alignment: Alignment.topLeft, value: menuItems.last, onChanged: onChanged)
     );
     expect(menuRect.topLeft, Offset.zero);
     expect(menuRect.topRight, Offset(menuRect.width, 0.0));
 
     await popUpAndDown(
-      buildFrame(alignment: Alignment.topCenter, value: menuItems.last)
+      buildFrame(alignment: Alignment.topCenter, value: menuItems.last, onChanged: onChanged)
     );
     expect(menuRect.topLeft, Offset(buttonRect.left, 0.0));
     expect(menuRect.topRight, Offset(buttonRect.right, 0.0));
 
     await popUpAndDown(
-      buildFrame(alignment: Alignment.topRight, value: menuItems.last)
+      buildFrame(alignment: Alignment.topRight, value: menuItems.last, onChanged: onChanged)
     );
     expect(menuRect.topLeft, Offset(800.0 - menuRect.width, 0.0));
     expect(menuRect.topRight, const Offset(800.0, 0.0));
@@ -616,19 +663,19 @@ void main() {
     // is selected) and shifted horizontally so that it fits within the frame.
 
     await popUpAndDown(
-      buildFrame(alignment: Alignment.centerLeft, value: menuItems.first)
+      buildFrame(alignment: Alignment.centerLeft, value: menuItems.first, onChanged: onChanged)
     );
     expect(menuRect.topLeft, Offset(0.0, buttonRect.top));
     expect(menuRect.topRight, Offset(menuRect.width, buttonRect.top));
 
     await popUpAndDown(
-      buildFrame(alignment: Alignment.center, value: menuItems.first)
+      buildFrame(alignment: Alignment.center, value: menuItems.first, onChanged: onChanged)
     );
     expect(menuRect.topLeft, buttonRect.topLeft);
     expect(menuRect.topRight, buttonRect.topRight);
 
     await popUpAndDown(
-      buildFrame(alignment: Alignment.centerRight, value: menuItems.first)
+      buildFrame(alignment: Alignment.centerRight, value: menuItems.first, onChanged: onChanged)
     );
     expect(menuRect.topLeft, Offset(800.0 - menuRect.width, buttonRect.top));
     expect(menuRect.topRight, Offset(800.0, buttonRect.top));
@@ -638,26 +685,26 @@ void main() {
     // so that it fits within the frame.
 
     await popUpAndDown(
-      buildFrame(alignment: Alignment.bottomLeft, value: menuItems.first)
+      buildFrame(alignment: Alignment.bottomLeft, value: menuItems.first, onChanged: onChanged)
     );
     expect(menuRect.bottomLeft, const Offset(0.0, 600.0));
     expect(menuRect.bottomRight, Offset(menuRect.width, 600.0));
 
     await popUpAndDown(
-      buildFrame(alignment: Alignment.bottomCenter, value: menuItems.first)
+      buildFrame(alignment: Alignment.bottomCenter, value: menuItems.first, onChanged: onChanged)
     );
     expect(menuRect.bottomLeft, Offset(buttonRect.left, 600.0));
     expect(menuRect.bottomRight, Offset(buttonRect.right, 600.0));
 
     await popUpAndDown(
-      buildFrame(alignment: Alignment.bottomRight, value: menuItems.first)
+      buildFrame(alignment: Alignment.bottomRight, value: menuItems.first, onChanged: onChanged)
     );
     expect(menuRect.bottomLeft, Offset(800.0 - menuRect.width, 600.0));
     expect(menuRect.bottomRight, const Offset(800.0, 600.0));
   });
 
   testWidgets('Dropdown menus are dismissed on screen orientation changes', (WidgetTester tester) async {
-    await tester.pumpWidget(buildFrame());
+    await tester.pumpWidget(buildFrame(onChanged: onChanged));
     await tester.tap(find.byType(dropdownButtonType));
     await tester.pumpAndSettle();
     expect(find.byType(ListView), findsOneWidget);
@@ -670,7 +717,7 @@ void main() {
 
   testWidgets('Semantics Tree contains only selected element', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(buildFrame(items: menuItems));
+    await tester.pumpWidget(buildFrame(items: menuItems, onChanged: onChanged));
 
     expect(semantics, isNot(includesNodeWith(label: menuItems[0])));
     expect(semantics, includesNodeWith(label: menuItems[1]));
@@ -702,7 +749,7 @@ void main() {
       buttonKey: key,
       value: 'three',
       items: menuItems,
-      onChanged: null,
+      onChanged: onChanged,
       hint: const Text('test'),
     ));
 
@@ -722,6 +769,7 @@ void main() {
       buttonKey: key,
       value: null,
       items: menuItems,
+      onChanged: onChanged,
     ));
     await tester.tap(find.byKey(key));
     await tester.pumpAndSettle();
@@ -740,6 +788,9 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.hasImplicitScrolling,
+                      ],
                       children: <TestSemantics>[
                         TestSemantics(
                           label: 'one',
@@ -776,6 +827,42 @@ void main() {
       ],
     ), ignoreId: true, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
+  });
+
+  testWidgets('disabledHint displays on empty items or onChanged', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    Widget build({List<String> items, ValueChanged<String> onChanged}) => buildFrame(
+      items: items,
+      onChanged: onChanged,
+      buttonKey: buttonKey, value: null,
+      hint: const Text('enabled'),
+      disabledHint: const Text('disabled'));
+
+    // [disabledHint] should display when [items] is null
+    await tester.pumpWidget(build(items: null, onChanged: onChanged));
+    expect(find.text('enabled'), findsNothing);
+    expect(find.text('disabled'), findsOneWidget);
+
+    // [disabledHint] should display when [items] is an empty list.
+    await tester.pumpWidget(build(items: <String>[], onChanged: onChanged));
+    expect(find.text('enabled'), findsNothing);
+    expect(find.text('disabled'), findsOneWidget);
+
+    // [disabledHint] should display when [onChanged] is null
+    await tester.pumpWidget(build(items: menuItems, onChanged: null));
+    expect(find.text('enabled'), findsNothing);
+    expect(find.text('disabled'), findsOneWidget);
+    final RenderBox disabledHintBox = tester.renderObject(find.byKey(buttonKey));
+
+    // A Dropdown button with a disabled hint should be the same size as a
+    // one with a regular enabled hint.
+    await tester.pumpWidget(build(items: menuItems, onChanged: onChanged));
+    expect(find.text('disabled'), findsNothing);
+    expect(find.text('enabled'), findsOneWidget);
+    final RenderBox enabledHintBox = tester.renderObject(find.byKey(buttonKey));
+    expect(enabledHintBox.localToGlobal(Offset.zero), equals(disabledHintBox.localToGlobal(Offset.zero)));
+    expect(enabledHintBox.size, equals(disabledHintBox.size));
   });
 
   testWidgets('Dropdown in middle showing middle item', (WidgetTester tester) async {

@@ -78,7 +78,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
               Builder(
                 builder: (BuildContext context) {
                   return IconButton(
-                    icon: const Icon(Icons.library_books),
+                    icon: const Icon(Icons.library_books, semanticLabel: 'Show documentation'),
                     onPressed: () => _showApiDocumentation(context),
                   );
                 },
@@ -138,7 +138,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
 
   @override
   void didChangeDependencies() {
-    getExampleCode(widget.exampleCodeTag, DefaultAssetBundle.of(context)).then<Null>((String code) {
+    getExampleCode(widget.exampleCodeTag, DefaultAssetBundle.of(context)).then<void>((String code) {
       if (mounted) {
         setState(() {
           _exampleCode = code ?? 'Example code not found';

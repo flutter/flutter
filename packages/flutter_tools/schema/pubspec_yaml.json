@@ -43,7 +43,7 @@
                         }
                     }
                 },
-                "application": {
+                "module": {
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {

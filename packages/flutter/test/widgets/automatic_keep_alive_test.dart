@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -543,6 +544,17 @@ void main() {
     expect(find.text('FooBar 3'), findsNothing);
     expect(find.text('FooBar 73'), findsOneWidget);
   });
+
+  testWidgets('AutomaticKeepAlive with SliverKeepAliveWidget', (WidgetTester tester) async {
+    // We're just doing a basic test here to make sure that the functionality of
+    // RenderSliverWithKeepAliveMixin doesn't get regressed or deleted. As testing
+    // the full functionality would be cumbersome.
+    final RenderSliverMultiBoxAdaptorAlt alternate = RenderSliverMultiBoxAdaptorAlt();
+    final RenderBox child = RenderBoxKeepAlive();
+    alternate.insert(child);
+
+    expect(alternate.children.length, 1);
+  });
 }
 
 class _AlwaysKeepAlive extends StatefulWidget {
@@ -564,4 +576,58 @@ class _AlwaysKeepAliveState extends State<_AlwaysKeepAlive> with AutomaticKeepAl
       child: const Text('keep me alive'),
     );
   }
+}
+
+class RenderBoxKeepAlive extends RenderBox {
+  State<StatefulWidget> createState() => AlwaysKeepAliveRenderBoxState();
+}
+
+class AlwaysKeepAliveRenderBoxState extends State<_AlwaysKeepAlive> with AutomaticKeepAliveClientMixin<_AlwaysKeepAlive> {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Container(
+      height: 48.0,
+      child: const Text('keep me alive'),
+    );
+  }
+}
+
+abstract class KeepAliveParentDataMixinAlt implements KeepAliveParentDataMixin {
+  @override
+  bool keptAlive = false;
+
+  @override
+  bool keepAlive = false;
+}
+
+class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
+    KeepAliveParentDataMixinAlt,
+    RenderSliverHelpers,
+    RenderSliverWithKeepAliveMixin {
+
+  RenderSliverMultiBoxAdaptorAlt({
+    RenderSliverBoxChildManager childManager
+  }) : _childManager = childManager;
+
+  @protected
+  RenderSliverBoxChildManager get childManager => _childManager;
+  final RenderSliverBoxChildManager _childManager;
+
+  final List<RenderBox> children = <RenderBox>[];
+
+  void insert(RenderBox child, { RenderBox after }) {
+    children.add(child);
+  }
+
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    children.forEach(visitor);
+  }
+
+  @override
+  void performLayout() {}
 }

@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
+import 'package:path/path.dart' as path;
 import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/ios.dart';
@@ -57,6 +59,22 @@ TaskFunction createAndroidSemanticsIntegrationTest() {
     '${flutterDirectory.path}/dev/integration_tests/android_semantics_testing',
     'lib/main.dart',
   );
+}
+
+TaskFunction createFlutterCreateOfflineTest() {
+  return () async {
+    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_create_test.');
+    String output;
+    await inDirectory(tempDir, () async {
+      output = await eval(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>['create', '--offline', 'flutter_create_test']);
+    });
+    if (output.contains(RegExp('building flutter tool', caseSensitive: false))) {
+      return TaskResult.failure('`flutter create --offline` should not rebuild flutter tool');
+    } else if (!output.contains('All done!')) {
+      return TaskResult.failure('`flutter create` failed');
+    }
+    return TaskResult.success(null);
+  };
 }
 
 class DriverTest {

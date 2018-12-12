@@ -6,6 +6,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 
+import '../rendering/mock_canvas.dart';
+import '../rendering/recording_canvas.dart';
+
 class FakeEditableTextState extends TextSelectionDelegate {
   @override
   TextEditingValue get textEditingValue { return const TextEditingValue(); }
@@ -63,6 +66,29 @@ void main() {
         '   ║   "12345"\n'
         '   ╚═══════════\n'
       ),
+    );
+  });
+
+  // Test that clipping will be used even when the text fits within the visible
+  // region if the start position of the text is offset (e.g. during scrolling
+  // animation).
+  test('correct clipping', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      text: const TextSpan(
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        text: 'A',
+      ),
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
+      locale: const Locale('en', 'US'),
+      offset: ViewportOffset.fixed(10.0),
+      textSelectionDelegate: delegate,
+    );
+    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    expect(
+      (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+      paints..clipRect(rect: Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0))
     );
   });
 }

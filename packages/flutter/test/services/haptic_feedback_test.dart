@@ -27,7 +27,7 @@ void main() {
         log.add(methodCall);
       });
 
-      await Function.apply(hapticFunction, null);
+      await hapticFunction();
       expect(log, hasLength(1));
       expect(
         log.last,

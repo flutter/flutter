@@ -26,7 +26,7 @@ enum BorderStyle {
 /// A [Border] consists of four [BorderSide] objects: [Border.top],
 /// [Border.left], [Border.right], and [Border.bottom].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample shows how [BorderSide] objects can be used in a [Container], via
 /// a [BoxDecoration] and a [Border], to decorate some [Text]. In this example,
@@ -45,6 +45,7 @@ enum BorderStyle {
 ///   child: Text('Flutter in the sky', textAlign: TextAlign.center),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -198,7 +199,7 @@ class BorderSide {
   ///
   /// The arguments must not be null.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static BorderSide lerp(BorderSide a, BorderSide b, double t) {
     assert(a != null);
     assert(b != null);
@@ -404,7 +405,7 @@ abstract class ShapeBorder {
   /// function instead. If both return null, it returns `a` before `t=0.5`
   /// and `b` after `t=0.5`.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static ShapeBorder lerp(ShapeBorder a, ShapeBorder b, double t) {
     assert(t != null);
     ShapeBorder result;

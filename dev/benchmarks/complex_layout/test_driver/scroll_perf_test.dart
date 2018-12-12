@@ -26,6 +26,9 @@ void main() {
       // benchmark has greater noise.
       // See: https://github.com/flutter/flutter/issues/19434
       await Future<void>.delayed(const Duration(milliseconds: 250));
+
+      await driver.forceGC();
+
       final Timeline timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
         final SerializableFinder list = find.byValueKey(listKey);

@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:test/src/executable.dart' as test; // ignore: implementation_imports
+import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
 
 import '../artifacts.dart';
 import '../base/common.dart';

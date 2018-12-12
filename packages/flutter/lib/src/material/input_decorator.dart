@@ -1488,7 +1488,9 @@ class InputDecorator extends StatefulWidget {
   /// Typically an [EditableText], [DropdownButton], or [InkWell].
   final Widget child;
 
-  bool get _labelIsFloating => !isEmpty || isFocused;
+  /// Whether the label needs to get out of the way of the input, either by
+  /// floating or disappearing.
+  bool get _labelShouldWithdraw => !isEmpty || isFocused;
 
   @override
   _InputDecoratorState createState() => _InputDecoratorState();
@@ -1526,7 +1528,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     _floatingLabelController = AnimationController(
       duration: _kTransitionDuration,
       vsync: this,
-      value: widget._labelIsFloating ? 1.0 : 0.0,
+      value: (widget.decoration.hasFloatingPlaceholder && widget._labelShouldWithdraw) ? 1.0 : 0.0,
     );
     _floatingLabelController.addListener(_handleChange);
 
@@ -1573,9 +1575,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (widget.decoration != old.decoration)
       _effectiveDecoration = null;
 
-    if (widget._labelIsFloating != old._labelIsFloating) {
-      if (widget._labelIsFloating)
+    if (widget._labelShouldWithdraw != old._labelShouldWithdraw && widget.decoration.hasFloatingPlaceholder) {
+      if (widget._labelShouldWithdraw) {
         _floatingLabelController.forward();
+      }
       else
         _floatingLabelController.reverse();
     }
@@ -1641,7 +1644,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // True if the label will be shown and the hint will not.
   // If we're not focused, there's no value, and labelText was provided,
   // then the label appears where the hint would.
-  bool get _hasInlineLabel => !isFocused && isEmpty && decoration.labelText != null;
+  bool get _hasInlineLabel => !widget._labelShouldWithdraw && decoration.labelText != null;
+
+  // If the label is a floating placeholder, it's always shown.
+  bool get _shouldShowLabel => _hasInlineLabel || decoration.hasFloatingPlaceholder;
+
 
   // The base style for the inline label or hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
@@ -1671,6 +1678,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   InputBorder _getDefaultBorder(ThemeData themeData) {
+    if (decoration.border?.borderSide == BorderSide.none) {
+      return decoration.border;
+    }
+
     Color borderColor;
     if (decoration.enabled) {
       borderColor = decoration.errorText == null
@@ -1708,6 +1719,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         style: hintStyle,
         overflow: TextOverflow.ellipsis,
         textAlign: textAlign,
+        maxLines: decoration.hintMaxLines,
       ),
     );
 
@@ -1731,23 +1743,28 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle inlineLabelStyle = inlineStyle.merge(decoration.labelStyle);
     final Widget label = decoration.labelText == null ? null : _Shaker(
       animation: _shakingLabelController.view,
-      child: AnimatedDefaultTextStyle(
+      child: AnimatedOpacity(
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
-        style: widget._labelIsFloating
-          ? _getFloatingLabelStyle(themeData)
-          : inlineLabelStyle,
-        child: Text(
-          decoration.labelText,
-          overflow: TextOverflow.ellipsis,
-          textAlign: textAlign,
+        opacity: _shouldShowLabel ? 1.0 : 0.0,
+        child: AnimatedDefaultTextStyle(
+          duration:_kTransitionDuration,
+          curve: _kTransitionCurve,
+          style: widget._labelShouldWithdraw
+            ? _getFloatingLabelStyle(themeData)
+            : inlineLabelStyle,
+          child: Text(
+            decoration.labelText,
+            overflow: TextOverflow.ellipsis,
+            textAlign: textAlign,
+          ),
         ),
       ),
     );
 
     final Widget prefix = decoration.prefix == null && decoration.prefixText == null ? null :
       _AffixText(
-        labelIsFloating: widget._labelIsFloating,
+        labelIsFloating: widget._labelShouldWithdraw,
         text: decoration.prefixText,
         style: decoration.prefixStyle ?? hintStyle,
         child: decoration.prefix,
@@ -1755,7 +1772,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final Widget suffix = decoration.suffix == null && decoration.suffixText == null ? null :
       _AffixText(
-        labelIsFloating: widget._labelIsFloating,
+        labelIsFloating: widget._labelShouldWithdraw,
         text: decoration.suffixText,
         style: decoration.suffixStyle ?? hintStyle,
         child: decoration.suffix,
@@ -1882,10 +1899,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         helperError: helperError,
         counter: counter,
         container: container,
-    ),
-    textDirection: textDirection,
-    textBaseline: textBaseline,
-    isFocused: isFocused,
+      ),
+      textDirection: textDirection,
+      textBaseline: textBaseline,
+      isFocused: isFocused,
     );
   }
 }
@@ -1928,9 +1945,11 @@ class InputDecoration {
     this.helperStyle,
     this.hintText,
     this.hintStyle,
+    this.hintMaxLines,
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
+    this.hasFloatingPlaceholder = true,
     this.isDense,
     this.contentPadding,
     this.prefixIcon,
@@ -1965,6 +1984,7 @@ class InputDecoration {
   /// Sets the [isCollapsed] property to true.
   const InputDecoration.collapsed({
     @required this.hintText,
+    this.hasFloatingPlaceholder = true,
     this.hintStyle,
     this.filled = false,
     this.fillColor,
@@ -1976,6 +1996,7 @@ class InputDecoration {
        labelStyle = null,
        helperText = null,
        helperStyle = null,
+       hintMaxLines = null,
        errorText = null,
        errorStyle = null,
        errorMaxLines = null,
@@ -2063,6 +2084,15 @@ class InputDecoration {
   /// input field and the current [Theme].
   final TextStyle hintStyle;
 
+  /// The maximum number of lines the [hintText] can occupy.
+  ///
+  /// Defaults to the value of [TextField.maxLines] attribute.
+  ///
+  /// This value is passed along to the [Text.maxLines] attribute
+  /// of the [Text] widget used to display the hint text. [TextOverflow.ellipsis] is
+  /// used to handle the overflow when it is limited to single line.
+  final int hintMaxLines;
+
   /// Text that appears below the input [child] and the border.
   ///
   /// If non-null, the border's color animates to red and the [helperText] is
@@ -2087,6 +2117,16 @@ class InputDecoration {
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
   final int errorMaxLines;
+
+  /// Whether the label floats on focus.
+  ///
+  /// If this is false, the placeholder disappears when the input has focus or
+  /// inputted text.
+  /// If this is true, the placeholder will rise to the top of the input when
+  /// the input has focus or inputted text.
+  ///
+  /// Defaults to true.
+  final bool hasFloatingPlaceholder;
 
   /// Whether the input [child] is part of a dense form (i.e., uses less vertical
   /// space).
@@ -2421,9 +2461,11 @@ class InputDecoration {
     TextStyle helperStyle,
     String hintText,
     TextStyle hintStyle,
+    int hintMaxLines,
     String errorText,
     TextStyle errorStyle,
     int errorMaxLines,
+    bool hasFloatingPlaceholder,
     bool isDense,
     EdgeInsetsGeometry contentPadding,
     Widget prefixIcon,
@@ -2455,9 +2497,11 @@ class InputDecoration {
       helperStyle: helperStyle ?? this.helperStyle,
       hintText: hintText ?? this.hintText,
       hintStyle: hintStyle ?? this.hintStyle,
+      hintMaxLines: hintMaxLines ?? this.hintMaxLines,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
+      hasFloatingPlaceholder: hasFloatingPlaceholder ?? this.hasFloatingPlaceholder,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
       prefixIcon: prefixIcon ?? this.prefixIcon,
@@ -2495,6 +2539,7 @@ class InputDecoration {
       hintStyle: hintStyle ?? theme.hintStyle,
       errorStyle: errorStyle ?? theme.errorStyle,
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
+      hasFloatingPlaceholder: hasFloatingPlaceholder ?? theme.hasFloatingPlaceholder,
       isDense: isDense ?? theme.isDense,
       contentPadding: contentPadding ?? theme.contentPadding,
       prefixStyle: prefixStyle ?? theme.prefixStyle,
@@ -2525,9 +2570,11 @@ class InputDecoration {
         && typedOther.helperStyle == helperStyle
         && typedOther.hintText == hintText
         && typedOther.hintStyle == hintStyle
+        && typedOther.hintMaxLines == hintMaxLines
         && typedOther.errorText == errorText
         && typedOther.errorStyle == errorStyle
         && typedOther.errorMaxLines == errorMaxLines
+        && typedOther.hasFloatingPlaceholder == hasFloatingPlaceholder
         && typedOther.isDense == isDense
         && typedOther.contentPadding == contentPadding
         && typedOther.isCollapsed == isCollapsed
@@ -2565,9 +2612,11 @@ class InputDecoration {
       helperStyle,
       hintText,
       hintStyle,
+      hintMaxLines,
       errorText,
       errorStyle,
       errorMaxLines,
+      hasFloatingPlaceholder,
       isDense,
       hashValues(
         contentPadding,
@@ -2613,12 +2662,16 @@ class InputDecoration {
       description.add('helperText: "$helperText"');
     if (hintText != null)
       description.add('hintText: "$hintText"');
+    if (hintMaxLines != null)
+      description.add('hintMaxLines: "$hintMaxLines"');
     if (errorText != null)
       description.add('errorText: "$errorText"');
     if (errorStyle != null)
       description.add('errorStyle: "$errorStyle"');
     if (errorMaxLines != null)
       description.add('errorMaxLines: "$errorMaxLines"');
+    if (hasFloatingPlaceholder == false)
+      description.add('hasFloatingPlaceholder: false');
     if (isDense ?? false)
       description.add('isDense: $isDense');
     if (contentPadding != null)
@@ -2691,6 +2744,7 @@ class InputDecorationTheme extends Diagnosticable {
     this.hintStyle,
     this.errorStyle,
     this.errorMaxLines,
+    this.hasFloatingPlaceholder = true,
     this.isDense = false,
     this.contentPadding,
     this.isCollapsed = false,
@@ -2746,6 +2800,16 @@ class InputDecorationTheme extends Diagnosticable {
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
   final int errorMaxLines;
+
+  /// Whether the placeholder text floats to become a label on focus.
+  ///
+  /// If this is false, the placeholder disappears when the input has focus or
+  /// inputted text.
+  /// If this is true, the placeholder will rise to the top of the input when
+  /// the input has focus or inputted text.
+  ///
+  /// Defaults to true.
+  final bool hasFloatingPlaceholder;
 
   /// Whether the input decorator's child is part of a dense form (i.e., uses
   /// less vertical space).
@@ -2965,6 +3029,7 @@ class InputDecorationTheme extends Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
     properties.add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
     properties.add(DiagnosticsProperty<int>('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
+    properties.add(DiagnosticsProperty<bool>('hasFloatingPlaceholder', hasFloatingPlaceholder, defaultValue: defaultTheme.hasFloatingPlaceholder));
     properties.add(DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
     properties.add(DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));

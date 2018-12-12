@@ -12,6 +12,7 @@ import 'button_bar.dart';
 import 'button_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'dialog_theme.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -19,6 +20,7 @@ import 'theme.dart';
 
 // Examples can assume:
 // enum Department { treasury, state }
+// BuildContext context;
 
 /// A material design dialog.
 ///
@@ -42,6 +44,7 @@ class Dialog extends StatelessWidget {
     this.child,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
+    this.shape,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -61,12 +64,26 @@ class Dialog extends StatelessWidget {
   /// Defaults to [Curves.fastOutSlowIn].
   final Curve insetAnimationCurve;
 
+  /// {@template flutter.material.dialog.shape}
+  /// The shape of this dialog's border.
+  ///
+  /// Defines the dialog's [Material.shape].
+  ///
+  /// The default shape is a [RoundedRectangleBorder] with a radius of 2.0.
+  /// {@endtemplate}
+  final ShapeBorder shape;
+
   Color _getColor(BuildContext context) {
     return Theme.of(context).dialogBackgroundColor;
   }
 
+  // TODO(johnsonmh): Update default dialog border radius to 4.0 to match material spec.
+  static const RoundedRectangleBorder _defaultDialogShape =
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
+
   @override
   Widget build(BuildContext context) {
+    final DialogTheme dialogTheme = DialogTheme.of(context);
     return AnimatedPadding(
       padding: MediaQuery.of(context).viewInsets + const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
       duration: insetAnimationDuration,
@@ -85,6 +102,7 @@ class Dialog extends StatelessWidget {
               color: _getColor(context),
               type: MaterialType.card,
               child: child,
+              shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
             ),
           ),
         ),
@@ -115,14 +133,14 @@ class Dialog extends StatelessWidget {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This snippet shows a method in a [State] which, when called, displays a dialog box
 /// and returns a [Future] that completes when the dialog is dismissed.
 ///
 /// ```dart
-/// Future<Null> _neverSatisfied() async {
-///   return showDialog<Null>(
+/// Future<void> _neverSatisfied() async {
+///   return showDialog<void>(
 ///     context: context,
 ///     barrierDismissible: false, // user must tap button!
 ///     builder: (BuildContext context) {
@@ -149,6 +167,7 @@ class Dialog extends StatelessWidget {
 ///   );
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -172,6 +191,7 @@ class AlertDialog extends StatelessWidget {
     this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
     this.actions,
     this.semanticLabel,
+    this.shape,
   }) : assert(contentPadding != null),
        super(key: key);
 
@@ -235,6 +255,9 @@ class AlertDialog extends StatelessWidget {
   ///    value is used.
   final String semanticLabel;
 
+  /// {@macro flutter.material.dialog.shape}
+  final ShapeBorder shape;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -274,7 +297,6 @@ class AlertDialog extends StatelessWidget {
 
     if (actions != null) {
       children.add(ButtonTheme.bar(
-        colorScheme: Theme.of(context).colorScheme,
         child: ButtonBar(
           children: actions,
         ),
@@ -296,7 +318,7 @@ class AlertDialog extends StatelessWidget {
         child: dialogChild
       );
 
-    return Dialog(child: dialogChild);
+    return Dialog(child: dialogChild, shape: shape);
   }
 }
 
@@ -313,7 +335,7 @@ class AlertDialog extends StatelessWidget {
 /// title and the first option, and 24 pixels of spacing between the last option
 /// and the bottom of the dialog.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// SimpleDialogOption(
@@ -321,6 +343,7 @@ class AlertDialog extends StatelessWidget {
 ///   child: const Text('Treasury department'),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -377,7 +400,7 @@ class SimpleDialogOption extends StatelessWidget {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// In this example, the user is asked to select between two options. These
 /// options are represented as an enum. The [showDialog] method here returns
@@ -391,7 +414,7 @@ class SimpleDialogOption extends StatelessWidget {
 /// that doesn't mention every value in the enum.
 ///
 /// ```dart
-/// Future<Null> _askedToLead() async {
+/// Future<void> _askedToLead() async {
 ///   switch (await showDialog<Department>(
 ///     context: context,
 ///     builder: (BuildContext context) {
@@ -420,6 +443,7 @@ class SimpleDialogOption extends StatelessWidget {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -441,6 +465,7 @@ class SimpleDialog extends StatelessWidget {
     this.children,
     this.contentPadding = const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
     this.semanticLabel,
+    this.shape,
   }) : assert(titlePadding != null),
        assert(contentPadding != null),
        super(key: key);
@@ -495,6 +520,9 @@ class SimpleDialog extends StatelessWidget {
   ///    value is used.
   final String semanticLabel;
 
+  /// {@macro flutter.material.dialog.shape}
+  final ShapeBorder shape;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -547,7 +575,7 @@ class SimpleDialog extends StatelessWidget {
         label: label,
         child: dialogChild,
       );
-    return Dialog(child: dialogChild);
+    return Dialog(child: dialogChild, shape: shape);
   }
 }
 

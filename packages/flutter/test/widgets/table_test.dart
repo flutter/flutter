@@ -28,7 +28,7 @@ void main() {
     );
   });
   testWidgets('Table widget - control test', (WidgetTester tester) async {
-    Future<Null> run(TextDirection textDirection) async {
+    Future<void> run(TextDirection textDirection) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: textDirection,
@@ -208,7 +208,7 @@ void main() {
   });
 
   testWidgets('Table border - smoke test', (WidgetTester tester) async {
-    Future<Null> run(TextDirection textDirection) async {
+    Future<void> run(TextDirection textDirection) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: textDirection,

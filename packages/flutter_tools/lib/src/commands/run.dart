@@ -6,7 +6,7 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
+import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -19,6 +19,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import 'daemon.dart';
 
+// TODO(mklim): Test this, flutter/flutter#23031.
 abstract class RunCommandBase extends FlutterCommand {
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
@@ -32,7 +33,7 @@ abstract class RunCommandBase extends FlutterCommand {
       ..addFlag('ipv6',
         hide: true,
         negatable: false,
-        help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool\n'
+        help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool '
               'forwards the host port to a device port.',
       )
       ..addOption('route',
@@ -46,6 +47,7 @@ abstract class RunCommandBase extends FlutterCommand {
     usesTargetOption();
     usesPortOptions();
     usesPubOption();
+    usesIsolateFilterOption(hide: !verboseHelp);
   }
 
   bool get traceStartup => argResults['trace-startup'];
@@ -83,27 +85,27 @@ class RunCommand extends RunCommandBase {
       )
       ..addFlag('enable-software-rendering',
         negatable: false,
-        help: 'Enable rendering using the Skia software backend. This is useful\n'
-              'when testing Flutter on emulators. By default, Flutter will\n'
-              'attempt to either use OpenGL or Vulkan and fall back to software\n'
-              'when neither is available.',
+        help: 'Enable rendering using the Skia software backend. '
+              'This is useful when testing Flutter on emulators. By default, '
+              'Flutter will attempt to either use OpenGL or Vulkan and fall back '
+              'to software when neither is available.',
       )
       ..addFlag('skia-deterministic-rendering',
         negatable: false,
-        help: 'When combined with --enable-software-rendering, provides 100%\n'
+        help: 'When combined with --enable-software-rendering, provides 100% '
               'deterministic Skia rendering.',
       )
       ..addFlag('trace-skia',
         negatable: false,
-        help: 'Enable tracing of Skia code. This is useful when debugging\n'
+        help: 'Enable tracing of Skia code. This is useful when debugging '
               'the GPU thread. By default, Flutter will not log skia code.',
       )
       ..addFlag('use-test-fonts',
         negatable: true,
-        help: 'Enable (and default to) the "Ahem" font. This is a special font\n'
-              'used in tests to remove any dependencies on the font metrics. It\n'
-              'is enabled when you use "flutter test". Set this flag when running\n'
-              'a test using "flutter run" for debugging purposes. This flag is\n'
+        help: 'Enable (and default to) the "Ahem" font. This is a special font '
+              'used in tests to remove any dependencies on the font metrics. It '
+              'is enabled when you use "flutter test". Set this flag when running '
+              'a test using "flutter run" for debugging purposes. This flag is '
               'only available when running in debug mode.',
       )
       ..addFlag('build',
@@ -116,19 +118,19 @@ class RunCommand extends RunCommandBase {
       )
       ..addOption('precompile',
         hide: !verboseHelp,
-        help: 'Precompile functions specified in input file. This flag is only\n'
-              'allowed when using --dynamic. It takes a Dart compilation trace\n'
-              'file produced by the training run of the application. With this\n'
-              'flag, instead of using default Dart VM snapshot provided by the\n'
-              'engine, the application will use its own snapshot that includes\n'
+        help: 'Precompile functions specified in input file. This flag is only '
+              'allowed when using --dynamic. It takes a Dart compilation trace '
+              'file produced by the training run of the application. With this '
+              'flag, instead of using default Dart VM snapshot provided by the '
+              'engine, the application will use its own snapshot that includes '
               'additional functions.'
       )
       ..addFlag('hotupdate',
         hide: !verboseHelp,
-        help: 'Build differential snapshot based on the last state of the build\n'
-              'tree and any changes to the application source code since then.\n'
-              'This flag is only allowed when using --dynamic. With this flag,\n'
-              'a partial VM snapshot is generated that is loaded on top of the\n'
+        help: 'Build differential snapshot based on the last state of the build '
+              'tree and any changes to the application source code since then. '
+              'This flag is only allowed when using --dynamic. With this flag, '
+              'a partial VM snapshot is generated that is loaded on top of the '
               'original VM snapshot that contains precompiled code.'
       )
       ..addFlag('track-widget-creation',
@@ -142,7 +144,7 @@ class RunCommand extends RunCommandBase {
       ..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
-        help: 'Handle machine structured JSON command input and provide output\n'
+        help: 'Handle machine structured JSON command input and provide output '
               'and progress in machine friendly format.',
       )
       ..addFlag('hot',
@@ -151,8 +153,8 @@ class RunCommand extends RunCommandBase {
         help: 'Run with support for hot reloading.',
       )
       ..addOption('pid-file',
-        help: 'Specify a file to write the process id to.\n'
-              'You can send SIGUSR1 to trigger a hot reload\n'
+        help: 'Specify a file to write the process id to. '
+              'You can send SIGUSR1 to trigger a hot reload '
               'and SIGUSR2 to trigger a hot restart.',
       )
       ..addFlag('resident',
@@ -164,9 +166,9 @@ class RunCommand extends RunCommandBase {
       ..addFlag('benchmark',
         negatable: false,
         hide: !verboseHelp,
-        help: 'Enable a benchmarking mode. This will run the given application,\n'
-              'measure the startup time and the app restart time, write the\n'
-              'results out to "refresh_benchmark.json", and exit. This flag is\n'
+        help: 'Enable a benchmarking mode. This will run the given application, '
+              'measure the startup time and the app restart time, write the '
+              'results out to "refresh_benchmark.json", and exit. This flag is '
               'intended for use in generating automated flutter benchmarks.',
       )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
@@ -274,6 +276,8 @@ class RunCommand extends RunCommandBase {
     // debug mode.
     final bool hotMode = shouldUseHotMode();
 
+    writePidFile(argResults['pid-file']);
+
     if (argResults['machine']) {
       if (devices.length > 1)
         throwToolExit('--machine does not support -d all.');
@@ -297,7 +301,7 @@ class RunCommand extends RunCommandBase {
       } catch (error) {
         throwToolExit(error.toString());
       }
-      final DateTime appStartedTime = clock.now();
+      final DateTime appStartedTime = systemClock.now();
       final int result = await app.runner.waitForAppToFinish();
       if (result != 0)
         throwToolExit(null, exitCode: result);
@@ -333,15 +337,9 @@ class RunCommand extends RunCommandBase {
 
     if (hotMode) {
       for (Device device in devices) {
-        if (!device.supportsHotMode)
-          throwToolExit('Hot mode is not supported by ${device.name}. Run with --no-hot.');
+        if (!device.supportsHotReload)
+          throwToolExit('Hot reload is not supported by ${device.name}. Run with --no-hot.');
       }
-    }
-
-    final String pidFile = argResults['pid-file'];
-    if (pidFile != null) {
-      // Write our pid to the file.
-      fs.file(pidFile).writeAsStringSync(pid.toString());
     }
 
     final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {
@@ -351,6 +349,7 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
+        viewFilter: argResults['isolate-filter'],
       );
     }).toList();
 
@@ -393,7 +392,7 @@ class RunCommand extends RunCommandBase {
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
     appStartedTimeRecorder.future.then<void>( // ignore: unawaited_futures
-      (_) { appStartedTime = clock.now(); }
+      (_) { appStartedTime = systemClock.now(); }
     );
 
     final int result = await runner.run(

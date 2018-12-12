@@ -4,7 +4,6 @@ REM Use of this source code is governed by a BSD-style license that can be
 REM found in the LICENSE file.
 
 TITLE Flutter Console
-COLOR 3f
 
 echo.
 echo          ######## ##       ##     ## ######## ######## ######## ########

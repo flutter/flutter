@@ -111,7 +111,7 @@ class PageController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   ///
   /// The `duration` and `curve` arguments must not be null.
-  Future<Null> animateToPage(int page, {
+  Future<void> animateToPage(int page, {
     @required Duration duration,
     @required Curve curve,
   }) {
@@ -138,7 +138,7 @@ class PageController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   ///
   /// The `duration` and `curve` arguments must not be null.
-  Future<Null> nextPage({ @required Duration duration, @required Curve curve }) {
+  Future<void> nextPage({ @required Duration duration, @required Curve curve }) {
     return animateToPage(page.round() + 1, duration: duration, curve: curve);
   }
 
@@ -148,7 +148,7 @@ class PageController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   ///
   /// The `duration` and `curve` arguments must not be null.
-  Future<Null> previousPage({ @required Duration duration, @required Curve curve }) {
+  Future<void> previousPage({ @required Duration duration, @required Curve curve }) {
     return animateToPage(page.round() - 1, duration: duration, curve: curve);
   }
 

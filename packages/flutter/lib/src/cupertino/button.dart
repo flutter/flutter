@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -188,10 +186,10 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     if (_animationController.isAnimating)
       return;
     final bool wasHeldDown = _buttonHeldDown;
-    final Future<Null> ticker = _buttonHeldDown
+    final TickerFuture ticker = _buttonHeldDown
         ? _animationController.animateTo(1.0, duration: kFadeOutDuration)
         : _animationController.animateTo(0.0, duration: kFadeInDuration);
-    ticker.then<void>((Null value) {
+    ticker.then<void>((void value) {
       if (mounted && wasHeldDown != _buttonHeldDown)
         _animate();
     });

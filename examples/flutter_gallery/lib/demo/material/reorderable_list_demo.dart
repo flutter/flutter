@@ -39,7 +39,7 @@ class _ListItem {
 class _ListDemoState extends State<ReorderableListDemo> {
   static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  PersistentBottomSheetController<Null> _bottomSheet;
+  PersistentBottomSheetController<void> _bottomSheet;
   _ReorderableListType _itemType = _ReorderableListType.threeLine;
   bool _reverseSort = false;
   final List<_ListItem> _items = <String>[
@@ -58,7 +58,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
 
   void _showConfigurationSheet() {
     setState(() {
-      _bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
+      _bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((BuildContext bottomSheetContext) {
         return DecoratedBox(
           decoration: const BoxDecoration(
             border: Border(top: BorderSide(color: Colors.black26)),

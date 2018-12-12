@@ -9,11 +9,11 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Viewport basic test (LTR)', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: Scrollbar(
         child: SingleChildScrollView(
-          child: const SizedBox(width: 4000.0, height: 4000.0),
+          child: SizedBox(width: 4000.0, height: 4000.0),
         ),
       ),
     ));
@@ -23,11 +23,11 @@ void main() {
   });
 
   testWidgets('Viewport basic test (RTL)', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: Scrollbar(
         child: SingleChildScrollView(
-          child: const SizedBox(width: 4000.0, height: 4000.0),
+          child: SizedBox(width: 4000.0, height: 4000.0),
         ),
       ),
     ));

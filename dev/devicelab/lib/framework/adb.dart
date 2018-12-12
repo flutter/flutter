@@ -407,7 +407,6 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<void> performPreflightTasks() async {
     // Currently we do not have preflight tasks for iOS.
-    return null;
   }
 }
 

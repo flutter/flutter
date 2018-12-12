@@ -493,7 +493,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     return timestamp - _shownTimestamp >= _frameDuration;
   }
 
-  Future<Null> _decodeNextFrameAndSchedule() async {
+  Future<void> _decodeNextFrameAndSchedule() async {
     try {
       _nextFrame = await _codec.getNextFrame();
     } catch (exception, stack) {

@@ -1,0 +1,30 @@
+{@inject-html}
+<div class="snippet-buttons">
+  <button id="shortSnippetButton" onclick="showSnippet(shortSnippet);" selected>Sample</button>
+  <button id="longSnippetButton" onclick="showSnippet(longSnippet);">Sample in an App</button>
+</div>
+<div class="snippet-container">
+  <div class="snippet" id="shortSnippet">
+    {{description}}
+    <div class="copyable-container">
+      <button class="copy-button-overlay copy-button" title="Copy to clipboard"
+              onclick="copyTextToClipboard();">
+        <i class="material-icons copy-image">assignment</i>
+      </button>
+      <pre class="language-{{language}}"><code class="language-{{language}}">{{code}}</code></pre>
+    </div>
+  </div>
+  <div class="snippet" id="longSnippet" hidden>
+    <div class="snippet-description">To create a sample project with this code snippet, run:<br/>
+      <span class="snippet-create-command">flutter create --sample={{id}} mysample</span>
+    </div>
+    <div class="copyable-container">
+      <button class="copy-button-overlay copy-button" title="Copy to clipboard"
+              onclick="copyTextToClipboard();">
+        <i class="material-icons copy-image">assignment</i>
+      </button>
+      <pre class="language-{{language}}"><code class="language-{{language}}">{{app}}</code></pre>
+    </div>
+  </div>
+</div>
+{@end-inject-html}

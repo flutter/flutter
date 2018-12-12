@@ -296,10 +296,10 @@ class TestSemantics {
       return true;
     bool result = true;
     final Iterator<TestSemantics> it = children.iterator;
-    for (final SemanticsNode node in node.debugListChildrenInOrder(childOrder)) {
+    for (final SemanticsNode child in node.debugListChildrenInOrder(childOrder)) {
       it.moveNext();
       final bool childMatches = it.current._matches(
-        node,
+        child,
         matchState,
         ignoreRect: ignoreRect,
         ignoreTransform: ignoreTransform,

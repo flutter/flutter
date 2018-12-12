@@ -9,6 +9,9 @@ import 'border_radius.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 /// The shape to use when rendering a [Border] or [BoxDecoration].
 ///
 /// Consider using [ShapeBorder] subclasses directly (with [ShapeDecoration]),
@@ -98,7 +101,7 @@ abstract class BoxBorder extends ShapeBorder {
   /// For a more flexible approach, consider [ShapeBorder.lerp], which would
   /// instead [add] the two sets of sides and interpolate them simultaneously.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static BoxBorder lerp(BoxBorder a, BoxBorder b, double t) {
     assert(t != null);
     if ((a is Border || a == null) && (b is Border || b == null))
@@ -236,19 +239,23 @@ abstract class BoxBorder extends ShapeBorder {
 ///
 /// The sides are represented by [BorderSide] objects.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// All four borders the same, two-pixel wide solid white:
 ///
 /// ```dart
 /// Border.all(width: 2.0, color: const Color(0xFFFFFFFF))
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// The border for a material design divider:
 ///
 /// ```dart
 /// Border(bottom: BorderSide(color: Theme.of(context).dividerColor))
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// A 1990s-era "OK" button:
 ///
@@ -281,6 +288,7 @@ abstract class BoxBorder extends ShapeBorder {
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -421,7 +429,7 @@ class Border extends BoxBorder {
   /// If a border is null, it is treated as having four [BorderSide.none]
   /// borders.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static Border lerp(Border a, Border b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -711,7 +719,7 @@ class BorderDirectional extends BoxBorder {
   /// If a border is null, it is treated as having four [BorderSide.none]
   /// borders.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static BorderDirectional lerp(BorderDirectional a, BorderDirectional b, double t) {
     assert(t != null);
     if (a == null && b == null)

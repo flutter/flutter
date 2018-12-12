@@ -257,7 +257,7 @@ typedef TweenVisitor<T> = Tween<T> Function(Tween<T> tween, T targetValue, Tween
 /// Subclasses must implement the [forEachTween] method to allow
 /// [ImplicitlyAnimatedWidgetState] to iterate through the subclasses' widget's
 /// fields and animate them.
-abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin {
+abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin<T> {
   /// The animation controller driving this widget's implicit animations.
   @protected
   AnimationController get controller => _controller;
@@ -1018,7 +1018,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_opacity.mp4}
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// class LogoFade extends StatefulWidget {
@@ -1052,6 +1052,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

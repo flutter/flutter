@@ -12,6 +12,7 @@ import 'globals.dart';
 import 'resident_runner.dart';
 import 'tracing.dart';
 
+// TODO(mklim): Test this, flutter/flutter#23031.
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     List<FlutterDevice> devices, {
@@ -109,7 +110,7 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  Future<void> handleTerminalCommand(String code) async => null;
+  Future<void> handleTerminalCommand(String code) async { }
 
   @override
   Future<void> cleanupAfterSignal() async {

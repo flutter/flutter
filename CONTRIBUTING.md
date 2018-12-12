@@ -3,288 +3,73 @@ Contributing to Flutter
 
 [![Build Status](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.org/flutter/flutter)
 
-_See also: [Flutter's code of conduct](https://flutter.io/design-principles/#code-of-conduct)_
+_See also: [Flutter's code of conduct](CODE_OF_CONDUCT.md)_
 
 Welcome
 -------
 
-We gladly accept contributions via GitHub pull requests.
-
-Please become familiar with our
-[style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo) and
-[design philosophy](https://flutter.io/design-principles/). These guidelines are intended to
-keep the code consistent and avoid common pitfalls, and being familiar with them will
-make everything much easier for you. If you have questions about our processes or are looking
-for random tips and tricks, you may be interested in the [engine wiki](https://github.com/flutter/engine/wiki) and [framework wiki](https://github.com/flutter/flutter/wiki).
-
-This document will introduce you to the basic steps for developing for the Flutter framework (Dart).
-If you're interested in developing for the Flutter engine (C++, Java, Objective C), please
-switch to [the engine repo's `CONTRIBUTING.md` document](https://github.com/flutter/engine/blob/master/CONTRIBUTING.md).
-
-If you have an itch, work on that. If you are just looking for something good to start with, consider
-[the issues marked "easy fix"](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22easy+fix%22+sort%3Areactions-%2B1-desc) in our issues list.
-
-Things you will need
---------------------
-
- * Linux, Mac OS X, or Windows
- * git (used for source version control).
- * An IDE. We recommend [Android Studio with the Flutter plugin](https://flutter.io/using-ide/).
- * An ssh client (used to authenticate with GitHub).
- * Python (used by some of our tools).
- * The Android platform tools (see [Issue #55](https://github.com/flutter/flutter/issues/55)
-   about downloading the Android platform tools automatically).
-   _If you're also working on the Flutter engine, you can use the
-   copy of the Android platform tools in
-   `.../engine/src/third_party/android_tools/sdk/platform-tools`._
-   - Mac: `brew cask install android-platform-tools`
-   - Linux: `sudo apt-get install android-tools-adb`
-
-Getting the code and configuring your environment
--------------------------------------------------
-
- * Ensure all the dependencies described in the previous section, in particular
-   git, ssh, and python are installed. Ensure that `adb`
-   (from the Android platform tools) is in your path (e.g.,
-   that `which adb` prints sensible output).
- * Fork `https://github.com/flutter/flutter` into your own GitHub account. If
-   you already have a fork, and are now installing a development environment on
-   a new machine, make sure you've updated your fork so that you don't use stale
-   configuration options from long ago.
- * If you haven't configured your machine with an SSH key that's known to github then
-   follow the directions here: https://help.github.com/articles/generating-ssh-keys/.
- * `git clone git@github.com:<your_name_here>/flutter.git`
- * `cd flutter`
- * `git remote add upstream git@github.com:flutter/flutter.git` (So that you
-   fetch from the master repository, not your clone, when running `git fetch`
-   et al.)
- * Add this repository's `bin` directory to your path. That will let you use the
-   `flutter` command in this directory more easily.
- * Run `flutter update-packages` This will fetch all the Dart packages that
-   Flutter depends on. You can replicate what this script does by running
-   `pub get` in each directory that contains a `pubspec.yaml` file.
- * If you plan on using IntelliJ as your IDE, then also run
-   `flutter ide-config --overwrite` to create all of the IntelliJ configuration
-   files so you can open the main flutter directory as a project and run examples
-   from within the IDE.
-
-Running the examples
---------------------
-
-To run an example, switch to that example's directory, and use `flutter run`.
-Make sure you have an emulator running, or a device connected over USB and
-debugging enabled on that device.
-
- * `cd examples/hello_world`
- * `flutter run`
-
-You can also specify a particular Dart file to run if you want to run an example
-that doesn't have a `lib/main.dart` file using the `-t` command-line option. For
-example, to run the `widgets/spinning_square.dart` example in the [examples/layers](examples/layers)
-directory on a connected Android device, from that directory you would run:
-`flutter run -t widgets/spinning_square.dart`
-
-When running code from the examples directory, any changes you make to the
-example code, as well as any changes to Dart code in the
-[packages/flutter](packages/flutter) directory and subdirectories, will
-automatically be picked when you relaunch the app.  You can do the same for your
-own code by mimicking the `pubspec.yaml` files in the `examples` subdirectories.
-
-Running the analyzer
---------------------
-
-When editing Flutter code, it's important to check the code with the
-analyzer. There are two main ways to run it. In either case you will
-want to run `flutter update-packages` first, or you will get bogus
-error messages about core classes like Offset from `dart:ui`.
-
-For a one-off, use `flutter analyze --flutter-repo`. This uses the `analysis_options.yaml` file
-at the root of the repository for its configuration.
-
-For continuous analysis, use `flutter analyze --flutter-repo --watch`. This uses normal
-`analysis_options.yaml` files, and they can differ from package to package.
-
-If you want to see how many members are missing dartdocs, you should use the first option,
-providing the additional command `--dartdocs`.
-
-If you omit the `--flutter-repo` option you may end up in a confusing state because that will
-assume you want to check a single package and the flutter repository has several packages.
-
-
-Running the tests
------------------
-
-To automatically find all files named `_test.dart` inside a package's `test/` subdirectory, and
-run them inside the flutter shell as a test, use the `flutter test` command, e.g:
-
- * `cd examples/stocks`
- * `flutter test`
-
-Individual tests can also be run directly, e.g. `flutter test lib/my_app_test.dart`
-
-Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree/master/packages/flutter_test)
-which provides flutter-specific extensions on top of [package:test](https://pub.dartlang.org/packages/test).
-
-`flutter test` runs tests inside the flutter shell. To debug tests in Observatory, use the `--start-paused`
-option to start the test in a paused state and wait for connection from a debugger. This option lets you
-set breakpoints before the test runs.
-
-To run analysis and all the tests for the entire Flutter repository, the same way that Cirrus runs them, run `dart dev/bots/test.dart` and `dart dev/bots/analyze.dart`.
-
-If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you
-can pass `--local-engine` to change what flutter shell `flutter test` uses. For example,
-if you built an engine in the `out/host_debug_unopt` directory, you can pass
-`--local-engine=host_debug_unopt` to run the tests in that engine.
-
-Flutter tests are headless, you won't see any UI. You can use
-`print` to generate console output or you can interact with the DartVM
-via observatory at [http://localhost:8181/](http://localhost:8181/).
-
-Adding a test
--------------
-
-To add a test to the Flutter package, create a file whose name
-ends with `_test.dart` in the `packages/flutter/test` directory. The
-test should have a `main` function and use the `flutter_test` package.
-
-Working with flutter tools
---------------------------
-
-The flutter tool itself is built when you run `flutter` for the first time and each time
-you run `flutter upgrade`. If you want to alter and re-test the tool's behavior itself,
-locally commit your tool changes in git and the tool will be rebuilt from Dart sources
-in `packages/flutter_tools` the next time you run `flutter`.
-
-Alternatively, delete the `bin/cache/flutter_tools.snapshot` file. Doing so will
-force a rebuild of the tool from your local sources the next time you run `flutter`.
-
-flutter_tools' tests run inside the Dart command line VM rather than in the
-flutter shell. To run the tests, ensure that no devices are connected,
-then navigate to `flutter_tools` and execute:
-
-```shell
-../../bin/cache/dart-sdk/bin/pub run test -j1
-```
-
-The pre-built flutter tool runs in release mode with the observatory off by default.
-To enable debugging mode and the observatory on the `flutter` tool, uncomment the
-`FLUTTER_TOOL_ARGS` line in the `bin/flutter` shell script.
-
-Using git
----------
-
-To start working on a patch:
-
- * `git fetch upstream`
- * `git checkout upstream/master -b name_of_your_branch`
- * Hack away.
- * `git commit -a -m "<your informative commit message>"`
- * `git push origin name_of_your_branch`
-
-To send us a pull request:
-
-* `git pull-request` (if you are using [Hub](http://github.com/github/hub/)) or
-  go to `https://github.com/flutter/flutter` and click the
-  "Compare & pull request" button
-
-Please make sure all your checkins have detailed commit messages explaining the patch.
-
-Once you've gotten an LGTM from a project maintainer and once your PR has received
-the green light from all our automated testing (running on Cirrus, etc), and once
-the tree is green (see the [design principles](https://flutter.io/design-principles/)
-document for more details), submit your changes to the `master` branch using one of
-the following methods:
-
-* Wait for one of the project maintainers to submit it for you.
-* Click the green "Merge pull request" button on the GitHub UI of your pull
-  request (requires commit access)
-
-You must complete the
-[Contributor License Agreement](https://cla.developers.google.com/clas).
-You can do this online, and it only takes a minute.
-If you've never submitted code before, you must add your (or your
-organization's) name and contact info to the [AUTHORS](AUTHORS) file.
-
-We grant commit access to people who have gained our trust and demonstrated
-a commitment to Flutter.
-
-Tools for tracking and improving test coverage
-----------------------------------------------
-
-We strive for a high degree of test coverage for the Flutter framework. We use
-Coveralls to [track our test coverage](https://coveralls.io/github/flutter/flutter?branch=master).
-You can download our current coverage data from cloud storage and visualize it
-in Atom as follows:
-
- * Install [Atom](https://atom.io/).
- * Install the [lcov-info](https://atom.io/packages/lcov-info) package for Atom.
- * Open the `packages/flutter` folder in Atom.
- * Open a Dart file in the `lib` directory an type `Ctrl+Alt+C` to bring up the
-   coverage data.
-
-If you don't see any coverage data, check that you have an `lcov.info` file in
-the `packages/flutter/coverage` directory. It should have been downloaded by the
-`flutter update-packages` command you ran previously.
-
-If you want to iterate quickly on improving test coverage, consider using this
-workflow:
-
- * Open a file and observe that some line is untested.
- * Write a test that exercises that line.
- * Run `flutter test --merge-coverage path/to/your/test_test.dart`.
- * After the test passes, observe that the line is now tested.
-
-This workflow merges the coverage data from this test run with the base coverage
-data downloaded by `flutter update-packages`.
-
-See [issue 4719](https://github.com/flutter/flutter/issues/4719) for ideas about
-how to improve this workflow.
-
-Working on the engine and the framework at the same time
---------------------------------------------------------
-
-You can work both with this repository (flutter.git) and the Flutter
-[engine repository](https://github.com/flutter/engine) at the same time using
-the following steps.
-
-1. Follow the instructions above for creating a working copy of this repository.
-
-2. Follow the [contributing instructions](https://github.com/flutter/engine/blob/master/CONTRIBUTING.md)
-   in the engine repository to create a working copy of the engine. The instructions
-   also explain how to use a locally-built engine instead of the one bundled with
-   your installation of the Flutter framework.
-
-Making a breaking change to the engine
---------------------------------------
-
-If you make a breaking change to the engine, you'll need to land your change in a
-few steps:
-
-1. Land your change in the engine repository.
-
-2. Publish a new version of the engine that contains your change. See the
-   engine's [release process](https://github.com/flutter/engine/wiki/Release-process)
-   for instructions about how to publish a new version of the engine. Publishing
-   a new version is important in order to not break folks using prebuilt
-   binaries in their workflow (e.g., our customers).
-
-API docs for master branch
---------------------------
-
-To view the API docs for the `master` branch,
-visit https://master-docs-flutter-io.firebaseapp.com/.
-
-Those docs should be updated after a successful CI build
-of Flutter's `master` branch.
-
-(Looking for the API docs for our releases?
-Please visit https://docs.flutter.io.)
-
-Build infrastructure
---------------------
-
-We build and test Flutter on:
-
-- [Cirrus](https://cirrus-ci.com/) ([details](.cirrus.yml))
-- Chromebots (a.k.a. "recipes", [details](dev/bots/README.md))
-- Devicelab (a.k.a. "cocoon", [details](dev/devicelab/README.md))
+We invite you to join our team! Everyone is welcome to contribute code
+via pull requests, to file issues on GitHub, to help people asking for
+help on our mailing lists or on Stack Overflow, to help triage,
+reproduce, or fix bugs that people have filed, to add to our
+documentation, or to help out in any other way.
+
+We grant commit access (which includes full rights to the issue
+database, such as being able to edit labels) to people who have gained
+our trust and demonstrated a commitment to Flutter.
+
+This document focuses on what is needed to contribute by writing code
+and submitting pull requests for the Flutter framework. For
+information on contributing in other ways, see [the community page
+on flutter.io](https://flutter.io/community).
+
+Developing for Flutter
+----------------------
+
+To develop for Flutter, you will eventually need to become familiar
+with our processes and conventions. This section lists the documents
+that describe these methodologies. The following list is ordered: you
+are strongly recommended to go through these documents in the order
+presented.
+
+1. [Our code of conduct](CODE_OF_CONDUCT.md), which stipulates explicitly
+   that everyone must be gracious, respectful, and professional. This
+   also documents our conflict resolution policy and encourages people
+   to ask questions.
+
+2. [Values](https://github.com/flutter/flutter/wiki/Values),
+   which talks about what we care most about.
+
+3. [Setting up your engine development environment](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment),
+   which describes the steps you need to configure your computer to
+   work on Flutter's engine. If you only want to write code for the
+   Flutter framework, you can skip this step. Flutter's engine uses
+   mainly C++, Java, and ObjectiveC.
+
+4. [Setting up your framework development environment](https://github.com/flutter/flutter/wiki/Setting-up-the-Framework-development-environment),
+   which describes the steps you need to configure your computer to
+   work on Flutter's framework. Flutter's framework uses mainly Dart.
+
+4. [Tree hygiene](https://github.com/flutter/flutter/wiki/Tree-hygiene),
+   which covers how to land a PR, how to do code review, how to
+   handle breaking changes, how to handle regressions, and how to
+   handle post-commit test failures.
+
+3. [Issue hygiene](https://github.com/flutter/flutter/wiki/Issue-hygiene),
+   which covers our processes around triaging bugs, escalating high
+   priority bugs, assigning bugs, and our GitHub labels and
+   milestones.
+
+5. [Our style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo),
+   which includes advice for designing APIs for Flutter, and how to
+   format code in the framework.
+
+In addition to the above, there are many pages on [our
+Wiki](https://github.com/flutter/flutter/wiki/) that may be of
+interest. For a curated list of pages see the sidebar on the wiki's
+home page. They are more or less listed in order of importance.
+
+If you would like to chat to other people who work on Flutter, consider joining the
+https://gitter.im/flutter/contributors chat channel. We also have a [general chat
+channel](https://gitter.im/flutter/flutter) for people who aren't working on Flutter
+but who use Flutter.

@@ -369,7 +369,7 @@ class _BounceInOutCurve extends Curve {
   double transform(double t) {
     assert(t >= 0.0 && t <= 1.0);
     if (t < 0.5)
-      return (1.0 - _bounce(1.0 - t)) * 0.5;
+      return (1.0 - _bounce(1.0 - t * 2.0)) * 0.5;
     else
       return _bounce(t * 2.0 - 1.0) * 0.5 + 0.5;
   }

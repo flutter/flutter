@@ -21,7 +21,7 @@ class CupertinoPickerDemo extends StatefulWidget {
 class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   int _selectedColorIndex = 0;
 
-  Duration timer = Duration();
+  Duration timer = const Duration();
 
   // Value that is shown in the date picker in date mode.
   DateTime date = DateTime.now();

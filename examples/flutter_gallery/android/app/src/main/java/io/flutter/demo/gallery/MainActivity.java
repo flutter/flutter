@@ -4,6 +4,7 @@
 
 package io.flutter.demo.gallery;
 
+import android.os.Build;
 import android.os.Bundle;
 
 import io.flutter.app.FlutterActivity;
@@ -28,7 +29,9 @@ public class MainActivity extends FlutterActivity {
             @Override
             public void onFirstFrame() {
                 // Report fully drawn time for Play Store Console.
-                MainActivity.this.reportFullyDrawn();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    MainActivity.this.reportFullyDrawn();
+                }
                 MainActivity.this.getFlutterView().removeFirstFrameListener(this);
             }
           });

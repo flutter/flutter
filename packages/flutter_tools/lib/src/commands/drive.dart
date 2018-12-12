@@ -45,23 +45,24 @@ class DriveCommand extends RunCommandBase {
       ..addFlag('keep-app-running',
         defaultsTo: null,
         help: 'Will keep the Flutter application running when done testing.\n'
-              'By default, "flutter drive" stops the application after tests are finished,\n'
-              'and --keep-app-running overrides this. On the other hand, if --use-existing-app\n'
-              'is specified, then "flutter drive" instead defaults to leaving the application\n'
+              'By default, "flutter drive" stops the application after tests are finished, '
+              'and --keep-app-running overrides this. On the other hand, if --use-existing-app '
+              'is specified, then "flutter drive" instead defaults to leaving the application '
               'running, and --no-keep-app-running overrides it.',
       )
       ..addOption('use-existing-app',
-        help: 'Connect to an already running instance via the given observatory URL.\n'
-              'If this option is given, the application will not be automatically started,\n'
+        help: 'Connect to an already running instance via the given observatory URL. '
+              'If this option is given, the application will not be automatically started, '
               'and it will only be stopped if --no-keep-app-running is explicitly set.',
         valueHelp: 'url',
       )
       ..addOption('driver',
-        help: 'The test file to run on the host (as opposed to the target file to run on\n'
-              'the device). By default, this file has the same base name as the target\n'
-              'file, but in the "test_driver/" directory instead, and with "_test" inserted\n'
-              'just before the extension, so e.g. if the target is "lib/main.dart", the\n'
-              'driver will be "test_driver/main_test.dart".',
+        help: 'The test file to run on the host (as opposed to the target file to run on '
+              'the device).\n'
+              'By default, this file has the same base name as the target file, but in the '
+              '"test_driver/" directory instead, and with "_test" inserted just before the '
+              'extension, so e.g. if the target is "lib/main.dart", the driver will be '
+              '"test_driver/main_test.dart".',
         valueHelp: 'path',
       );
   }

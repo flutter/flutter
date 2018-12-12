@@ -176,7 +176,7 @@ abstract class TextSelectionControls {
   /// asynchronous. Race conditions may exist with this API as currently
   /// implemented.
   // TODO(ianh): https://github.com/flutter/flutter/issues/11427
-  Future<Null> handlePaste(TextSelectionDelegate delegate) async {
+  Future<void> handlePaste(TextSelectionDelegate delegate) async {
     final TextEditingValue value = delegate.textEditingValue; // Snapshot the input before using `await`.
     final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
     if (data != null) {
@@ -531,6 +531,9 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
         onPanUpdate: _handleDragUpdate,
         onTap: _handleTap,
         child: Stack(
+          // Always let the selection handles draw outside of the conceptual
+          // box where (0,0) is the top left corner of the RenderEditable.
+          overflow: Overflow.visible,
           children: <Widget>[
             Positioned(
               left: point.dx,

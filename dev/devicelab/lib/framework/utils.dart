@@ -169,7 +169,7 @@ Future<String> getDartVersion() async {
 
 Future<String> getCurrentFlutterRepoCommit() {
   if (!dir('${flutterDirectory.path}/.git').existsSync()) {
-    return null;
+    return Future<String>.value(null);
   }
 
   return inDirectory<String>(flutterDirectory, () {

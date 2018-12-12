@@ -452,4 +452,22 @@ void main() {
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
   });
+
+  testWidgets('throws when builder returns null', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Text('Home'),
+    ));
+    // No exceptions yet.
+    expect(tester.takeException(), isNull);
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(MaterialPageRoute<void>(
+          settings: const RouteSettings(name: 'broken'),
+          builder: (BuildContext context) => null,
+        ));
+    await tester.pumpAndSettle();
+    // An exception should've been thrown because the `builder` returned null.
+    expect(tester.takeException(), isInstanceOf<FlutterError>());
+  });
 }

@@ -299,3 +299,45 @@ class LocalEngineArtifacts extends Artifacts {
     throw Exception('Unsupported platform $platform.');
   }
 }
+
+/// An implementation of [Artifacts] that provides individual overrides.
+///
+/// If an artifact is not provided, the lookup delegates to the parent.
+class OverrideArtifacts implements Artifacts {
+  /// Creates a new [OverrideArtifacts].
+  ///
+  /// [parent] must be provided.
+  OverrideArtifacts({
+    @required this.parent,
+    this.frontendServer,
+    this.engineDartBinary,
+    this.platformKernelDill,
+    this.flutterPatchedSdk,
+  }) : assert(parent != null);
+
+  final Artifacts parent;
+  final File frontendServer;
+  final File engineDartBinary;
+  final File platformKernelDill;
+  final File flutterPatchedSdk;
+
+  @override
+  String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
+    if (artifact == Artifact.frontendServerSnapshotForEngineDartSdk && frontendServer != null) {
+      return frontendServer.path;
+    }
+    if (artifact == Artifact.engineDartBinary && engineDartBinary != null) {
+      return engineDartBinary.path;
+    }
+    if (artifact == Artifact.platformKernelDill && platformKernelDill != null) {
+      return platformKernelDill.path;
+    }
+    if (artifact == Artifact.flutterPatchedSdkPath && flutterPatchedSdk != null) {
+      return flutterPatchedSdk.path;
+    }
+    return parent.getArtifactPath(artifact, platform, mode);
+  }
+
+  @override
+  String getEngineType(TargetPlatform platform, [BuildMode mode]) => parent.getEngineType(platform, mode);
+}

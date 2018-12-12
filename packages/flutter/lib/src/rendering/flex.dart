@@ -707,7 +707,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             '  https://flutter.io/debugging/#rendering-layer\n'
             '  http://docs.flutter.io/flutter/rendering/debugDumpRenderTree.html\n'
             'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
-            '  https://github.com/flutter/flutter/issues/new'
+            '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
           );
         }());
         totalFlex += childParentData.flex;

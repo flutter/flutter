@@ -124,18 +124,17 @@ class Theme extends StatelessWidget {
   /// }
   /// ```
   static ThemeData of(BuildContext context, { bool shadowThemeOnly = false }) {
-    final _InheritedTheme inheritedTheme =
-        context.inheritFromWidgetOfExactType(_InheritedTheme);
+    final _InheritedTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedTheme);
     if (shadowThemeOnly) {
       if (inheritedTheme == null || inheritedTheme.theme.isMaterialAppTheme)
         return null;
       return inheritedTheme.theme.data;
     }
 
-    final ThemeData colorTheme = (inheritedTheme != null) ? inheritedTheme.theme.data : _kFallbackTheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final TextTheme geometryTheme = localizations?.localTextGeometry ?? MaterialTextGeometry.englishLike;
-    return ThemeData.localize(colorTheme, geometryTheme);
+    final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
+    final ThemeData theme = inheritedTheme?.theme?.data ?? _kFallbackTheme;
+    return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
 
   @override

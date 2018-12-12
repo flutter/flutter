@@ -30,7 +30,7 @@ void main() {
   // More technically, when an EditableText is given a particular [action], Flutter
   // requests [serializedActionName] when attaching to the platform's input
   // system.
-  Future<Null> _desiredKeyboardActionIsRequested({
+  Future<void> _desiredKeyboardActionIsRequested({
     WidgetTester tester,
     TextInputAction action,
     String serializedActionName,
@@ -745,6 +745,94 @@ void main() {
     // and onSubmission callbacks.
   });
 
+  testWidgets(
+      'When "newline" action is called on a Editable text with maxLines == 1 callbacks are invoked: onEditingComplete > onSubmitted',
+      (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey =
+        GlobalKey<EditableTextState>();
+    final FocusNode focusNode = FocusNode();
+
+    bool onEditingCompleteCalled = false;
+    bool onSubmittedCalled = false;
+
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        key: editableTextKey,
+        controller: TextEditingController(),
+        focusNode: focusNode,
+        style: Typography(platform: TargetPlatform.android).black.subhead,
+        cursorColor: Colors.blue,
+        maxLines: 1,
+        onEditingComplete: () {
+          onEditingCompleteCalled = true;
+          assert(!onSubmittedCalled);
+        },
+        onSubmitted: (String value) {
+          onSubmittedCalled = true;
+          assert(onEditingCompleteCalled);
+        },
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Select EditableText to give it focus.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    assert(focusNode.hasFocus);
+
+    // The execution path starting with receiveAction() will trigger the
+    // onEditingComplete and onSubmission callbacks.
+    await tester.testTextInput.receiveAction(TextInputAction.newline);
+    // The expectations we care about are up above in the onEditingComplete
+    // and onSubmission callbacks.
+  });
+
+testWidgets(
+      'When "newline" action is called on a Editable text with maxLines != 1, onEditingComplete and onSubmitted callbacks are not invoked.',
+      (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey =
+        GlobalKey<EditableTextState>();
+    final FocusNode focusNode = FocusNode();
+
+    bool onEditingCompleteCalled = false;
+    bool onSubmittedCalled = false;
+
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        key: editableTextKey,
+        controller: TextEditingController(),
+        focusNode: focusNode,
+        style: Typography(platform: TargetPlatform.android).black.subhead,
+        cursorColor: Colors.blue,
+        maxLines: 3,
+        onEditingComplete: () {
+          onEditingCompleteCalled = true;
+        },
+        onSubmitted: (String value) {
+          onSubmittedCalled = true;
+        },
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Select EditableText to give it focus.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    assert(focusNode.hasFocus);
+
+    // The execution path starting with receiveAction() will trigger the
+    // onEditingComplete and onSubmission callbacks.
+    await tester.testTextInput.receiveAction(TextInputAction.newline);
+
+    // These callbacks shouldn't have been triggered.
+    assert(!onSubmittedCalled);
+    assert(!onEditingCompleteCalled);
+  });
+
   testWidgets('Changing controller updates EditableText',
       (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
@@ -1444,7 +1532,7 @@ void main() {
   });
 
   group('a11y copy/cut/paste', () {
-    Future<Null> _buildApp(
+    Future<void> _buildApp(
         MockTextSelectionControls controls, WidgetTester tester) {
       return tester.pumpWidget(MaterialApp(
         home: EditableText(

@@ -227,7 +227,7 @@ void main() {
   group('ListView', () {
     testWidgets('ListView ensureVisible Axis.vertical', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -263,7 +263,7 @@ void main() {
 
     testWidgets('ListView ensureVisible Axis.horizontal', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -299,7 +299,7 @@ void main() {
 
     testWidgets('ListView ensureVisible Axis.vertical reverse', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -335,7 +335,7 @@ void main() {
 
     testWidgets('ListView ensureVisible Axis.horizontal reverse', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -372,7 +372,7 @@ void main() {
     // TODO(abarth): Unskip this test. See https://github.com/flutter/flutter/issues/7919
     testWidgets('ListView ensureVisible negative child', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -430,7 +430,7 @@ void main() {
 
     testWidgets('ListView ensureVisible rotated child', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -483,7 +483,7 @@ void main() {
   group('ListView shrinkWrap', () {
     testWidgets('ListView ensureVisible Axis.vertical', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -519,7 +519,7 @@ void main() {
 
     testWidgets('ListView ensureVisible Axis.horizontal', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -555,7 +555,7 @@ void main() {
 
     testWidgets('ListView ensureVisible Axis.vertical reverse', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -591,7 +591,7 @@ void main() {
 
     testWidgets('ListView ensureVisible Axis.horizontal reverse', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -629,7 +629,7 @@ void main() {
   group('Scrollable with center', () {
     testWidgets('ensureVisible', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }

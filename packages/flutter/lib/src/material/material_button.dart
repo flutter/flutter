@@ -258,7 +258,10 @@ class MaterialButton extends StatelessWidget {
       elevation: buttonTheme.getElevation(this),
       highlightElevation: buttonTheme.getHighlightElevation(this),
       padding: buttonTheme.getPadding(this),
-      constraints: buttonTheme.constraints,
+      constraints: buttonTheme.getConstraints(this).copyWith(
+        minWidth: minWidth,
+        minHeight: height,
+      ),
       shape: buttonTheme.shape,
       clipBehavior: clipBehavior ?? Clip.none,
       animationDuration: buttonTheme.getAnimationDuration(this),
@@ -279,6 +282,4 @@ class MaterialButton extends StatelessWidget {
 ///
 /// This mixin only exists to give the "label and icon" button widgets a distinct
 /// type for the sake of [ButtonTheme].
-abstract class MaterialButtonWithIconMixin {
-  MaterialButtonWithIconMixin._();
-}
+mixin MaterialButtonWithIconMixin { }

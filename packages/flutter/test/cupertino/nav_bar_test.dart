@@ -602,10 +602,10 @@ void main() {
       'Border is displayed by default in sliver nav bar',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
+      const CupertinoApp(
         home: CupertinoPageScaffold(
           child: CustomScrollView(
-            slivers: const <Widget>[
+            slivers: <Widget>[
               CupertinoSliverNavigationBar(
                 largeTitle: Text('Large Title'),
               ),
@@ -632,10 +632,10 @@ void main() {
       'Border is not displayed when null in sliver nav bar',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
+      const CupertinoApp(
         home: CupertinoPageScaffold(
           child: CustomScrollView(
-            slivers: const <Widget>[
+            slivers: <Widget>[
               CupertinoSliverNavigationBar(
                 largeTitle: Text('Large Title'),
                 border: null,
@@ -659,10 +659,10 @@ void main() {
   testWidgets('CupertinoSliverNavigationBar has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(CupertinoApp(
+    await tester.pumpWidget(const CupertinoApp(
       home: CupertinoPageScaffold(
         child: CustomScrollView(
-          slivers: const <Widget>[
+          slivers: <Widget>[
             CupertinoSliverNavigationBar(
               largeTitle: Text('Large Title'),
               border: null,
@@ -706,10 +706,10 @@ void main() {
       'Border can be overridden in sliver nav bar',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
+      const CupertinoApp(
         home: CupertinoPageScaffold(
           child: CustomScrollView(
-            slivers: const <Widget>[
+            slivers: <Widget>[
               CupertinoSliverNavigationBar(
                 largeTitle: Text('Large Title'),
                 border: Border(

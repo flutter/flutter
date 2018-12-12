@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:linter/src/rules/pub/package_names.dart' as package_names; // ignore: implementation_imports
 import 'package:linter/src/utils.dart' as linter_utils; // ignore: implementation_imports
@@ -13,6 +14,7 @@ import '../android/android_sdk.dart' as android_sdk;
 import '../android/gradle.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/net.dart';
 import '../base/os.dart';
 import '../base/utils.dart';
 import '../cache.dart';
@@ -25,15 +27,13 @@ import '../template.dart';
 import '../version.dart';
 
 enum _ProjectType {
-  /// This is the legacy "app" module type that was created before the default
-  /// was "application". It is kept around to allow users to recreate files that
-  /// have been removed in old projects.
+  /// This is the default project with the user-managed host code.
+  /// It is different than the "module" template in that it exposes and doesn't
+  /// manage the platform code.
   app,
-  /// The is the default type of project created. It is an application with
+  /// The is a project that has managed platform host code. It is an application with
   /// ephemeral .ios and .android directories that can be updated automatically.
-  application,
-  /// This is the old name for the [application] style project.
-  module, // TODO(gspencer): deprecated -- should be removed once IntelliJ no longer uses it.
+  module,
   /// This is a Flutter Dart package project. It doesn't have any native
   /// components, only Dart.
   package,
@@ -43,11 +43,6 @@ enum _ProjectType {
 
 _ProjectType _stringToProjectType(String value) {
   _ProjectType result;
-  // TODO(gspencer): remove module when it is no longer used by IntelliJ plugin.
-  // Module is just an alias for application.
-  if (value == 'module') {
-    value = 'application';
-  }
   for (_ProjectType type in _ProjectType.values) {
     if (value == getEnumName(type)) {
       result = type;
@@ -58,7 +53,7 @@ _ProjectType _stringToProjectType(String value) {
 }
 
 class CreateCommand extends FlutterCommand {
-  CreateCommand({bool verboseHelp = false }) {
+  CreateCommand() {
     argParser.addFlag('pub',
       defaultsTo: true,
       help: 'Whether to run "flutter packages get" after the project has been created.'
@@ -82,24 +77,28 @@ class CreateCommand extends FlutterCommand {
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
       allowedHelp: <String, String>{
-        getEnumName(_ProjectType.application): '(default) Generate a Flutter application.',
+        getEnumName(_ProjectType.app): '(default) Generate a Flutter application.',
         getEnumName(_ProjectType.package): 'Generate a shareable Flutter project containing modular '
             'Dart code.',
         getEnumName(_ProjectType.plugin): 'Generate a shareable Flutter project containing an API '
             'in Dart code with a platform-specific implementation for Android, for iOS code, or '
             'for both.',
-      }..addAll(verboseHelp
-          ? <String, String>{
-        getEnumName(_ProjectType.app): 'Generate the legacy form of an application project. Use '
-            '"application" instead, unless you are working with an existing legacy app project. '
-            'This is not just an alias for the "application" template, it produces different '
-            'output.',
-        getEnumName(_ProjectType.module): 'Legacy, deprecated form of an application project. Use '
-            '"application" instead. This is just an alias for the "application" template, it '
-            'produces the same output. It will be removed in a future release.',
-            }
-          : <String, String>{}),
+      },
       defaultsTo: null,
+    );
+    argParser.addOption(
+      'sample',
+      abbr: 's',
+      help: 'Specifies the Flutter code sample to use as the main.dart for an application. Implies '
+        '--template=app.',
+      defaultsTo: null,
+      valueHelp: 'the sample ID of the desired sample from the API documentation website (http://docs.flutter.io)'
+    );
+    argParser.addFlag(
+      'overwrite',
+      negatable: true,
+      defaultsTo: false,
+      help: 'When performing operations, overwrite existing files.',
     );
     argParser.addOption(
       'description',
@@ -109,8 +108,13 @@ class CreateCommand extends FlutterCommand {
     argParser.addOption(
       'org',
       defaultsTo: 'com.example',
-      help: 'The organization responsible for your new Flutter project, in reverse domain name notation.\n'
+      help: 'The organization responsible for your new Flutter project, in reverse domain name notation. '
             'This string is used in Java package names and as prefix in the iOS bundle identifier.'
+    );
+    argParser.addOption(
+      'project-name',
+      defaultsTo: null,
+      help: 'The project name for this new Flutter project. This must be a valid dart package name.'
     );
     argParser.addOption(
       'ios-language',
@@ -174,6 +178,19 @@ class CreateCommand extends FlutterCommand {
     return null;
   }
 
+  Future<String> _fetchSampleFromServer(String sampleId) async {
+    // Sanity check the sampleId
+    if (sampleId.contains(RegExp(r'[^-\w\.]'))) {
+      throwToolExit('Sample ID "$sampleId" contains invalid characters. Check the ID in the '
+        'documentation and try again.');
+    }
+
+    final String host = FlutterVersion.instance.channel == 'stable'
+        ? 'docs.flutter.io'
+        : 'master-docs-flutter-io.firebaseapp.com';
+    return utf8.decode(await fetchUrl(Uri.https(host, 'snippets/$sampleId.dart')));
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (argResults.rest.isEmpty)
@@ -191,7 +208,7 @@ class CreateCommand extends FlutterCommand {
     }
 
     if (Cache.flutterRoot == null)
-      throwToolExit('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment\n'
+      throwToolExit('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment '
         'variable was specified. Unable to find package:flutter.', exitCode: 2);
 
     await Cache.instance.updateAll();
@@ -210,6 +227,17 @@ class CreateCommand extends FlutterCommand {
     final Directory projectDir = fs.directory(argResults.rest.first);
     final String projectDirPath = fs.path.normalize(projectDir.absolute.path);
 
+    String sampleCode;
+    if (argResults['sample'] != null) {
+      if (argResults['template'] != null &&
+        _stringToProjectType(argResults['template'] ?? 'app') != _ProjectType.app) {
+        throwToolExit('Cannot specify --sample with a project type other than '
+          '"${getEnumName(_ProjectType.app)}"');
+      }
+      // Fetch the sample from the server.
+      sampleCode = await _fetchSampleFromServer(argResults['sample']);
+    }
+
     _ProjectType template;
     _ProjectType detectedProjectType;
     final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
@@ -227,7 +255,7 @@ class CreateCommand extends FlutterCommand {
         }
       }
     }
-    template ??= detectedProjectType ?? _ProjectType.application;
+    template ??= detectedProjectType ?? _ProjectType.app;
     if (detectedProjectType != null && template != detectedProjectType && metadataExists) {
       // We can only be definitive that this is the wrong type if the .metadata file
       // exists and contains a type that doesn't match.
@@ -235,7 +263,7 @@ class CreateCommand extends FlutterCommand {
           "existing template type of '${getEnumName(detectedProjectType)}'.");
     }
 
-    final bool generateApplication = template == _ProjectType.application;
+    final bool generateModule = template == _ProjectType.module;
     final bool generatePlugin = template == _ProjectType.plugin;
     final bool generatePackage = template == _ProjectType.package;
 
@@ -247,17 +275,17 @@ class CreateCommand extends FlutterCommand {
         organization = existingOrganizations.first;
       } else if (1 < existingOrganizations.length) {
         throwToolExit(
-          'Ambiguous organization in existing files: $existingOrganizations.\n'
+          'Ambiguous organization in existing files: $existingOrganizations. '
           'The --org command line argument must be specified to recreate project.'
         );
       }
     }
-    final String projectName = fs.path.basename(projectDirPath);
 
-    String error = _validateProjectDir(projectDirPath, flutterRoot: flutterRoot);
+    String error = _validateProjectDir(projectDirPath, flutterRoot: flutterRoot, overwrite: argResults['overwrite']);
     if (error != null)
       throwToolExit(error);
 
+    final String projectName = argResults['project-name'] ?? fs.path.basename(projectDirPath);
     error = _validateProjectName(projectName);
     if (error != null)
       throwToolExit(error);
@@ -274,30 +302,38 @@ class CreateCommand extends FlutterCommand {
     );
 
     final String relativeDirPath = fs.path.relative(projectDirPath);
-    if (!projectDir.existsSync()) {
+    if (!projectDir.existsSync() || projectDir.listSync().isEmpty) {
       printStatus('Creating project $relativeDirPath...');
     } else {
+      if (sampleCode != null && !argResults['overwrite']) {
+        throwToolExit('Will not overwrite existing project in $relativeDirPath: '
+          'must specify --overwrite for samples to overwrite.');
+      }
       printStatus('Recreating project $relativeDirPath...');
     }
+
     final Directory relativeDir = fs.directory(projectDirPath);
     int generatedFileCount = 0;
     switch (template) {
       case _ProjectType.app:
-        generatedFileCount += await _generateLegacyApp(relativeDir, templateContext);
+        generatedFileCount += await _generateApp(relativeDir, templateContext, overwrite: argResults['overwrite']);
         break;
       case _ProjectType.module:
-      case _ProjectType.application:
-        generatedFileCount += await _generateApplication(relativeDir, templateContext);
+        generatedFileCount += await _generateModule(relativeDir, templateContext, overwrite: argResults['overwrite']);
         break;
       case _ProjectType.package:
-        generatedFileCount += await _generatePackage(relativeDir, templateContext);
+        generatedFileCount += await _generatePackage(relativeDir, templateContext, overwrite: argResults['overwrite']);
         break;
       case _ProjectType.plugin:
-        generatedFileCount += await _generatePlugin(relativeDir, templateContext);
+        generatedFileCount += await _generatePlugin(relativeDir, templateContext, overwrite: argResults['overwrite']);
         break;
+    }
+    if (sampleCode != null) {
+      generatedFileCount += await _applySample(relativeDir, sampleCode);
     }
     printStatus('Wrote $generatedFileCount files.');
     printStatus('\nAll done!');
+    final String application = sampleCode != null ? 'sample application' : 'application';
     if (generatePackage) {
       final String relativeMainPath = fs.path.normalize(fs.path.join(
         relativeDirPath,
@@ -305,13 +341,13 @@ class CreateCommand extends FlutterCommand {
         '${templateContext['projectName']}.dart',
       ));
       printStatus('Your package code is in $relativeMainPath');
-    } else if (generateApplication) {
+    } else if (generateModule) {
       final String relativeMainPath = fs.path.normalize(fs.path.join(
           relativeDirPath,
           'lib',
           'main.dart',
       ));
-      printStatus('Your application code is in $relativeMainPath.');
+      printStatus('Your module code is in $relativeMainPath.');
     } else {
       // Run doctor; tell the user the next steps.
       final FlutterProject project = await FlutterProject.fromPath(projectDirPath);
@@ -325,12 +361,12 @@ class CreateCommand extends FlutterCommand {
         await doctor.summary();
 
         printStatus('''
-In order to run your application, type:
+In order to run your $application, type:
 
   \$ cd $relativeAppPath
   \$ flutter run
 
-Your application code is in $relativeAppMain.
+Your $application code is in $relativeAppMain.
 ''');
         if (generatePlugin) {
           printStatus('''
@@ -352,20 +388,20 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
             're-validate your setup.');
         printStatus("When complete, type 'flutter run' from the '$relativeAppPath' "
             'directory in order to launch your app.');
-        printStatus('Your application code is in $relativeAppMain');
+        printStatus('Your $application code is in $relativeAppMain');
       }
     }
 
     return null;
   }
 
-  Future<int> _generateApplication(Directory directory, Map<String, dynamic> templateContext) async {
+  Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
-        : 'A new flutter application project.';
+        : 'A new flutter module project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate(fs.path.join('application', 'common'), directory, templateContext);
+    generatedCount += _renderTemplate(fs.path.join('module', 'common'), directory, templateContext, overwrite: overwrite);
     if (argResults['pub']) {
       await pubGet(
         context: PubContext.create,
@@ -378,13 +414,13 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return generatedCount;
   }
 
-  Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext) async {
+  Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
-        : 'A new flutter package project.';
+        : 'A new Flutter package project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate('package', directory, templateContext);
+    generatedCount += _renderTemplate('package', directory, templateContext, overwrite: overwrite);
     if (argResults['pub']) {
       await pubGet(
         context: PubContext.createPackage,
@@ -395,13 +431,13 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return generatedCount;
   }
 
-  Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext) async {
+  Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
         : 'A new flutter plugin project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate('plugin', directory, templateContext);
+    generatedCount += _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
     if (argResults['pub']) {
       await pubGet(
         context: PubContext.createPlugin,
@@ -423,19 +459,19 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     templateContext['pluginProjectName'] = projectName;
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
 
-    generatedCount += await _generateLegacyApp(project.example.directory, templateContext);
+    generatedCount += await _generateApp(project.example.directory, templateContext, overwrite: overwrite);
     return generatedCount;
   }
 
-  Future<int> _generateLegacyApp(Directory directory, Map<String, dynamic> templateContext) async {
+  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
     int generatedCount = 0;
-    generatedCount += _renderTemplate('app', directory, templateContext);
+    generatedCount += _renderTemplate('app', directory, templateContext, overwrite: overwrite);
     final FlutterProject project = await FlutterProject.fromDirectory(directory);
     generatedCount += _injectGradleWrapper(project);
 
     if (argResults['with-driver-test']) {
       final Directory testDirectory = directory.childDirectory('test_driver');
-      generatedCount += _renderTemplate('driver', testDirectory, templateContext);
+      generatedCount += _renderTemplate('driver', testDirectory, templateContext, overwrite: overwrite);
     }
 
     if (argResults['pub']) {
@@ -446,6 +482,20 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
 
     return generatedCount;
+  }
+
+  // Takes an application template and replaces the main.dart with one from the
+  // documentation website in sampleCode.  Returns the difference in the number
+  // of files after applying the sample, since it also deletes the application's
+  // test directory (since the template's test doesn't apply to the sample).
+  Future<int> _applySample(Directory directory, String sampleCode) async {
+    final File mainDartFile = directory.childDirectory('lib').childFile('main.dart');
+    await mainDartFile.create(recursive: true);
+    await mainDartFile.writeAsString(sampleCode);
+    final Directory testDir = directory.childDirectory('test');
+    final List<FileSystemEntity> files = testDir.listSync(recursive: true);
+    await testDir.delete(recursive: true);
+    return -files.length;
   }
 
   Map<String, dynamic> _templateContext({
@@ -486,9 +536,9 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     };
   }
 
-  int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context) {
+  int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, {bool overwrite = false}) {
     final Template template = Template.fromName(templateName);
-    return template.render(directory, context, overwriteExisting: false);
+    return template.render(directory, context, overwriteExisting: overwrite);
   }
 
   int _injectGradleWrapper(FlutterProject project) {
@@ -570,11 +620,21 @@ String _validateProjectName(String projectName) {
 
 /// Return null if the project directory is legal. Return a validation message
 /// if we should disallow the directory name.
-String _validateProjectDir(String dirPath, { String flutterRoot }) {
+String _validateProjectDir(String dirPath, { String flutterRoot, bool overwrite = false }) {
   if (fs.path.isWithin(flutterRoot, dirPath)) {
-    return 'Cannot create a project within the Flutter SDK.\n'
+    return 'Cannot create a project within the Flutter SDK. '
       "Target directory '$dirPath' is within the Flutter SDK at '$flutterRoot'.";
   }
+
+  // If the destination directory is actually a file, then we refuse to
+  // overwrite, on the theory that the user probably didn't expect it to exist.
+  if (fs.isFileSync(dirPath)) {
+    return "Invalid project name: '$dirPath' - refers to an existing file."
+        '${overwrite ? ' Refusing to overwrite a file with a directory.' : ''}';
+  }
+
+  if (overwrite)
+    return null;
 
   final FileSystemEntityType type = fs.typeSync(dirPath);
 

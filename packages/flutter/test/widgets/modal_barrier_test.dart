@@ -85,6 +85,86 @@ void main() {
       reason: 'The route should have been dismissed by tapping the barrier.');
   });
 
+  testWidgets('ModalBarrier does not pop the Navigator with a WillPopScope that returns false', (WidgetTester tester) async {
+    bool willPopCalled = false;
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => FirstWidget(),
+      '/modal': (BuildContext context) => Stack(
+        children: <Widget>[
+          SecondWidget(),
+          WillPopScope(
+            child: const SizedBox(),
+            onWillPop: () async {
+              willPopCalled = true;
+              return false;
+            },
+          ),
+      ],),
+    };
+
+    await tester.pumpWidget(MaterialApp(routes: routes));
+
+    // Initially the barrier is not visible
+    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
+
+    // Tapping on X routes to the barrier
+    await tester.tap(find.text('X'));
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
+
+    expect(willPopCalled, isFalse);
+
+    // Tap on the barrier to attempt to dismiss it
+    await tester.tap(find.byKey(const ValueKey<String>('barrier')));
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
+
+    expect(find.byKey(const ValueKey<String>('barrier')), findsOneWidget,
+      reason: 'The route should still be present if the pop is vetoed.');
+
+    expect(willPopCalled, isTrue);
+  });
+
+  testWidgets('ModalBarrier pops the Navigator with a WillPopScope that returns true', (WidgetTester tester) async {
+    bool willPopCalled = false;
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => FirstWidget(),
+      '/modal': (BuildContext context) => Stack(
+        children: <Widget>[
+          SecondWidget(),
+          WillPopScope(
+            child: const SizedBox(),
+            onWillPop: () async {
+              willPopCalled = true;
+              return true;
+            },
+          ),
+        ],),
+    };
+
+    await tester.pumpWidget(MaterialApp(routes: routes));
+
+    // Initially the barrier is not visible
+    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
+
+    // Tapping on X routes to the barrier
+    await tester.tap(find.text('X'));
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
+
+    expect(willPopCalled, isFalse);
+
+    // Tap on the barrier to attempt to dismiss it
+    await tester.tap(find.byKey(const ValueKey<String>('barrier')));
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
+
+    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
+      reason: 'The route should not be present if the pop is permitted.');
+
+    expect(willPopCalled, isTrue);
+  });
+
   testWidgets('Undismissible ModalBarrier hidden in semantic tree', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(const ModalBarrier(dismissible: false));

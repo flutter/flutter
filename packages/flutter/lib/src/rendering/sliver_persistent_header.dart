@@ -515,14 +515,16 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
   @override
   double updateGeometry() {
     final double minExtent = this.minExtent;
+    final double minAllowedExtent = constraints.remainingPaintExtent > minExtent ? minExtent : constraints.remainingPaintExtent;
     final double maxExtent = this.maxExtent;
     final double paintExtent = maxExtent - _effectiveScrollOffset;
+    final double clampedPaintExtent = paintExtent.clamp(minAllowedExtent, constraints.remainingPaintExtent);
     final double layoutExtent = maxExtent - constraints.scrollOffset;
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: math.min(constraints.overlap, 0.0),
-      paintExtent: paintExtent.clamp(minExtent, constraints.remainingPaintExtent),
-      layoutExtent: layoutExtent.clamp(0.0, constraints.remainingPaintExtent - minExtent),
+      paintExtent: clampedPaintExtent,
+      layoutExtent: layoutExtent.clamp(0.0, clampedPaintExtent),
       maxPaintExtent: maxExtent,
       maxScrollObstructionExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
