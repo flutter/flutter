@@ -422,6 +422,7 @@ class PageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
+    this.cacheExtent,
     List<Widget> children = const <Widget>[],
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildListDelegate(children),
@@ -447,6 +448,7 @@ class PageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
+    this.cacheExtent,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
   }) : controller = controller ?? _defaultPageController,
@@ -463,6 +465,7 @@ class PageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
+    this.cacheExtent,
     @required this.childrenDelegate,
   }) : assert(childrenDelegate != null),
        controller = controller ?? _defaultPageController,
@@ -507,6 +510,9 @@ class PageView extends StatefulWidget {
 
   /// Called whenever the page in the center of the viewport changes.
   final ValueChanged<int> onPageChanged;
+
+  /// {@macro flutter.rendering.viewport.cacheExtent}
+  final double cacheExtent;
 
   /// A delegate that provides the children for the [PageView].
   ///
@@ -567,7 +573,7 @@ class _PageViewState extends State<PageView> {
         physics: physics,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return Viewport(
-            cacheExtent: 0.0,
+            cacheExtent: widget.cacheExtent ?? 0.0,
             axisDirection: axisDirection,
             offset: position,
             slivers: <Widget>[
