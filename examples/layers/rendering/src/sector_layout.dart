@@ -15,16 +15,16 @@ class SectorConstraints extends Constraints {
     this.maxDeltaRadius = double.infinity,
     this.minDeltaTheta = 0.0,
     this.maxDeltaTheta = kTwoPi,
-  })  : assert(maxDeltaRadius >= minDeltaRadius),
-        assert(maxDeltaTheta >= minDeltaTheta);
+  }) : assert(maxDeltaRadius >= minDeltaRadius),
+       assert(maxDeltaTheta >= minDeltaTheta);
 
   const SectorConstraints.tight({
     double deltaRadius = 0.0,
     double deltaTheta = 0.0,
-  })  : minDeltaRadius = deltaRadius,
-        maxDeltaRadius = deltaRadius,
-        minDeltaTheta = deltaTheta,
-        maxDeltaTheta = deltaTheta;
+  }) : minDeltaRadius = deltaRadius,
+       maxDeltaRadius = deltaRadius,
+       minDeltaTheta = deltaTheta,
+       maxDeltaTheta = deltaTheta;
 
   final double minDeltaRadius;
   final double maxDeltaRadius;
@@ -225,10 +225,10 @@ class RenderSectorRing extends RenderSectorWithChildren {
     BoxDecoration decoration,
     double deltaRadius = double.infinity,
     double padding = 0.0,
-  })  : _padding = padding,
-        assert(deltaRadius >= 0.0),
-        _desiredDeltaRadius = deltaRadius,
-        super(decoration);
+  }) : _padding = padding,
+       assert(deltaRadius >= 0.0),
+       _desiredDeltaRadius = deltaRadius,
+       super(decoration);
 
   double _desiredDeltaRadius;
   double get desiredDeltaRadius => _desiredDeltaRadius;
@@ -342,9 +342,9 @@ class RenderSectorSlice extends RenderSectorWithChildren {
     BoxDecoration decoration,
     double deltaTheta = kTwoPi,
     double padding = 0.0,
-  })  : _padding = padding,
-        _desiredDeltaTheta = deltaTheta,
-        super(decoration);
+  }) : _padding = padding,
+       _desiredDeltaTheta = deltaTheta,
+       super(decoration);
 
   double _desiredDeltaTheta;
   double get desiredDeltaTheta => _desiredDeltaTheta;

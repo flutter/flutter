@@ -69,10 +69,10 @@ class GalleryDemo {
     @required this.routeName,
     this.documentationUrl,
     @required this.buildRoute,
-  })  : assert(title != null),
-        assert(category != null),
-        assert(routeName != null),
-        assert(buildRoute != null);
+  }) : assert(title != null),
+       assert(category != null),
+       assert(routeName != null),
+       assert(buildRoute != null);
 
   final String title;
   final IconData icon;

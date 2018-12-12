@@ -130,9 +130,9 @@ class _BackAppBar extends StatelessWidget {
     this.leading = const SizedBox(width: 56.0),
     @required this.title,
     this.trailing,
-  })  : assert(leading != null),
-        assert(title != null),
-        super(key: key);
+  }) : assert(leading != null),
+       assert(title != null),
+       super(key: key);
 
   final Widget leading;
   final Widget title;

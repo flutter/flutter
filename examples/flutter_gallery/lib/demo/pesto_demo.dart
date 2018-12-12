@@ -50,15 +50,15 @@ class PestoStyle extends TextStyle {
     double letterSpacing,
     double height,
   }) : super(
-          inherit: false,
-          color: color,
-          fontFamily: 'Raleway',
-          fontSize: fontSize,
-          fontWeight: fontWeight,
-          textBaseline: TextBaseline.alphabetic,
-          letterSpacing: letterSpacing,
-          height: height,
-        );
+         inherit: false,
+         color: color,
+         fontFamily: 'Raleway',
+         fontSize: fontSize,
+         fontWeight: fontWeight,
+         textBaseline: TextBaseline.alphabetic,
+         letterSpacing: letterSpacing,
+         height: height,
+       );
 }
 
 // Displays a grid of recipe cards.

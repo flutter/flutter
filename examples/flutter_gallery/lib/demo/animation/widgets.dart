@@ -52,10 +52,10 @@ class SectionTitle extends StatelessWidget {
     @required this.section,
     @required this.scale,
     @required this.opacity,
-  })  : assert(section != null),
-        assert(scale != null),
-        assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-        super(key: key);
+  }) : assert(section != null),
+       assert(scale != null),
+       assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+       super(key: key);
 
   final Section section;
   final double scale;

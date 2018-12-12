@@ -13,19 +13,19 @@ class NavigationIconView {
     String title,
     Color color,
     TickerProvider vsync,
-  })  : _icon = icon,
-        _color = color,
-        _title = title,
-        item = BottomNavigationBarItem(
-          icon: icon,
-          activeIcon: activeIcon,
-          title: Text(title),
-          backgroundColor: color,
-        ),
-        controller = AnimationController(
-          duration: kThemeAnimationDuration,
-          vsync: vsync,
-        ) {
+  }) : _icon = icon,
+       _color = color,
+       _title = title,
+       item = BottomNavigationBarItem(
+         icon: icon,
+         activeIcon: activeIcon,
+         title: Text(title),
+         backgroundColor: color,
+       ),
+       controller = AnimationController(
+         duration: kThemeAnimationDuration,
+         vsync: vsync,
+       ) {
     _animation = controller.drive(CurveTween(
       curve: const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
     ));
