@@ -27,6 +27,7 @@ class ServiceProtocol {
   static const fml::StringView kRunInViewExtensionName;
   static const fml::StringView kFlushUIThreadTasksExtensionName;
   static const fml::StringView kSetAssetBundlePathExtensionName;
+  static const fml::StringView kGetDisplayRefreshRateExtensionName;
 
   class Handler {
    public:

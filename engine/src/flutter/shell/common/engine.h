@@ -66,6 +66,8 @@ class Engine final : public blink::RuntimeDelegate {
 
   ~Engine() override;
 
+  float GetDisplayRefreshRate() const;
+
   fml::WeakPtr<Engine> GetWeakPtr() const;
 
   FML_WARN_UNUSED_RESULT

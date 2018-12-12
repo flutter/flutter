@@ -806,6 +806,7 @@ public class FlutterView extends SurfaceView
         WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
         float fps = wm.getDefaultDisplay().getRefreshRate();
         VsyncWaiter.refreshPeriodNanos = (long) (1000000000.0 / fps);
+        VsyncWaiter.refreshRateFPS = fps;
     }
 
     // Called by native to update the semantics/accessibility tree.

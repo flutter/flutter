@@ -21,6 +21,8 @@ class VsyncWaiterAndroid final : public VsyncWaiter {
 
   ~VsyncWaiterAndroid() override;
 
+  float GetDisplayRefreshRate() const override;
+
  private:
   // |shell::VsyncWaiter|
   void AwaitVSync() override;

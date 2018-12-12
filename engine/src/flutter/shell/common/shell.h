@@ -225,6 +225,11 @@ class Shell final : public PlatformView::Delegate,
       const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document& response);
 
+  // Service protocol handler
+  bool OnServiceProtocolGetDisplayRefreshRate(
+      const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
+      rapidjson::Document& response);
+
   FML_DISALLOW_COPY_AND_ASSIGN(Shell);
 };
 
