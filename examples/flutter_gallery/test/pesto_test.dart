@@ -8,8 +8,9 @@ import 'package:flutter_gallery/gallery/app.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  if (binding is LiveTestWidgetsFlutterBinding)
+  if (binding is LiveTestWidgetsFlutterBinding) {
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+  }
 
   // Regression test for https://github.com/flutter/flutter/pull/5168
   testWidgets('Pesto appbar heroics', (WidgetTester tester) async {
@@ -19,9 +20,9 @@ void main() {
         child: SizedBox(
           width: 450.0,
           height: 800.0,
-          child: GalleryApp(testMode: true)
-        )
-      )
+          child: GalleryApp(testMode: true),
+        ),
+      ),
     );
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame

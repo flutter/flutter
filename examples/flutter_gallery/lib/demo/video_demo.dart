@@ -10,12 +10,10 @@ import 'package:video_player/video_player.dart';
 import 'package:device_info/device_info.dart';
 
 // TODO(sigurdm): This should not be stored here.
-const String beeUri =
-    'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
+const String beeUri = 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
 
 class VideoCard extends StatelessWidget {
-  const VideoCard({Key key, this.controller, this.title, this.subtitle})
-      : super(key: key);
+  const VideoCard({Key key, this.controller, this.title, this.subtitle}) : super(key: key);
 
   final VideoPlayerController controller;
   final String title;
@@ -55,8 +53,8 @@ class VideoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget fullScreenRoutePageBuilder(BuildContext context,
-        Animation<double> animation, Animation<double> secondaryAnimation) {
+    Widget fullScreenRoutePageBuilder(
+        BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
       return _buildFullScreenVideo();
     }
 
@@ -148,8 +146,9 @@ class VideoPlayPause extends StatefulWidget {
 class _VideoPlayPauseState extends State<VideoPlayPause> {
   _VideoPlayPauseState() {
     listener = () {
-      if (mounted)
+      if (mounted) {
         setState(() {});
+      }
     };
   }
 
@@ -214,8 +213,7 @@ class FadeAnimation extends StatefulWidget {
   _FadeAnimationState createState() => _FadeAnimationState();
 }
 
-class _FadeAnimationState extends State<FadeAnimation>
-    with SingleTickerProviderStateMixin {
+class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProviderStateMixin {
   AnimationController animationController;
 
   @override
@@ -297,8 +295,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
     final Connectivity connectivity = Connectivity();
     ConnectivityResult previousResult = await connectivity.checkConnectivity();
     yield previousResult;
-    await for (ConnectivityResult result
-        in connectivity.onConnectivityChanged) {
+    await for (ConnectivityResult result in connectivity.onConnectivityChanged) {
       if (result != previousResult) {
         yield result;
         previousResult = result;
@@ -350,13 +347,11 @@ Future<bool> isIOSSimulator() async {
   return Platform.isIOS && !(await deviceInfoPlugin.iosInfo).isPhysicalDevice;
 }
 
-class _VideoDemoState extends State<VideoDemo>
-    with SingleTickerProviderStateMixin {
-  final VideoPlayerController butterflyController =
-      VideoPlayerController.asset(
-        'videos/butterfly.mp4',
-        package: 'flutter_gallery_assets',
-      );
+class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMixin {
+  final VideoPlayerController butterflyController = VideoPlayerController.asset(
+    'videos/butterfly.mp4',
+    package: 'flutter_gallery_assets',
+  );
   final VideoPlayerController beeController = VideoPlayerController.network(
     beeUri,
   );
@@ -375,8 +370,9 @@ class _VideoDemoState extends State<VideoDemo>
       controller.play();
       await connectedCompleter.future;
       await controller.initialize();
-      if (mounted)
+      if (mounted) {
         setState(() {});
+      }
     }
 
     initController(butterflyController);

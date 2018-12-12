@@ -6,10 +6,21 @@ import 'package:flutter/material.dart';
 
 class ShrineStyle extends TextStyle {
   const ShrineStyle.roboto(double size, FontWeight weight, Color color)
-    : super(inherit: false, color: color, fontSize: size, fontWeight: weight, textBaseline: TextBaseline.alphabetic);
+      : super(
+           inherit: false,
+           color: color,
+           fontSize: size,
+           fontWeight: weight,
+           textBaseline: TextBaseline.alphabetic);
 
   const ShrineStyle.abrilFatface(double size, FontWeight weight, Color color)
-    : super(inherit: false, color: color, fontFamily: 'AbrilFatface', fontSize: size, fontWeight: weight, textBaseline: TextBaseline.alphabetic);
+      : super(
+           inherit: false,
+           color: color,
+           fontFamily: 'AbrilFatface',
+           fontSize: size,
+           fontWeight: weight,
+           textBaseline: TextBaseline.alphabetic);
 }
 
 TextStyle robotoRegular12(Color color) => ShrineStyle.roboto(12.0, FontWeight.w500, color);
@@ -26,9 +37,9 @@ TextStyle abrilFatfaceRegular34(Color color) => ShrineStyle.abrilFatface(34.0, F
 /// InheritedWidget is shared by all of the routes and widgets created for
 /// the Shrine app.
 class ShrineTheme extends InheritedWidget {
-  ShrineTheme({ Key key, @required Widget child })
-    : assert(child != null),
-      super(key: key, child: child);
+  ShrineTheme({Key key, @required Widget child})
+      : assert(child != null),
+       super(key: key, child: child);
 
   final Color cardBackgroundColor = Colors.white;
   final Color appBarBackgroundColor = Colors.white;

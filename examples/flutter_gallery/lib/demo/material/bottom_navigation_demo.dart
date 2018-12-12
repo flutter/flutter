@@ -13,19 +13,19 @@ class NavigationIconView {
     String title,
     Color color,
     TickerProvider vsync,
-  }) : _icon = icon,
-       _color = color,
-       _title = title,
-       item = BottomNavigationBarItem(
-         icon: icon,
-         activeIcon: activeIcon,
-         title: Text(title),
-         backgroundColor: color,
-       ),
-       controller = AnimationController(
-         duration: kThemeAnimationDuration,
-         vsync: vsync,
-       ) {
+  })  : _icon = icon,
+        _color = color,
+        _title = title,
+        item = BottomNavigationBarItem(
+          icon: icon,
+          activeIcon: activeIcon,
+          title: Text(title),
+          backgroundColor: color,
+        ),
+        controller = AnimationController(
+          duration: kThemeAnimationDuration,
+          vsync: vsync,
+        ) {
     _animation = controller.drive(CurveTween(
       curve: const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
     ));
@@ -44,9 +44,7 @@ class NavigationIconView {
       iconColor = _color;
     } else {
       final ThemeData themeData = Theme.of(context);
-      iconColor = themeData.brightness == Brightness.light
-          ? themeData.primaryColor
-          : themeData.accentColor;
+      iconColor = themeData.brightness == Brightness.light ? themeData.primaryColor : themeData.accentColor;
     }
 
     return FadeTransition(
@@ -96,7 +94,7 @@ class CustomInactiveIcon extends StatelessWidget {
       height: iconTheme.size - 8.0,
       decoration: BoxDecoration(
         border: Border.all(color: iconTheme.color, width: 2.0),
-      )
+      ),
     );
   }
 }
@@ -108,8 +106,7 @@ class BottomNavigationDemo extends StatefulWidget {
   _BottomNavigationDemoState createState() => _BottomNavigationDemoState();
 }
 
-class _BottomNavigationDemoState extends State<BottomNavigationDemo>
-    with TickerProviderStateMixin {
+class _BottomNavigationDemoState extends State<BottomNavigationDemo> with TickerProviderStateMixin {
   int _currentIndex = 0;
   BottomNavigationBarType _type = BottomNavigationBarType.shifting;
   List<NavigationIconView> _navigationViews;
@@ -158,16 +155,14 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
 
   @override
   void dispose() {
-    for (NavigationIconView view in _navigationViews)
-      view.controller.dispose();
+    for (NavigationIconView view in _navigationViews) view.controller.dispose();
     super.dispose();
   }
 
   Widget _buildTransitionsStack() {
     final List<FadeTransition> transitions = <FadeTransition>[];
 
-    for (NavigationIconView view in _navigationViews)
-      transitions.add(view.transition(_type, context));
+    for (NavigationIconView view in _navigationViews) transitions.add(view.transition(_type, context));
 
     // We want to have the newly animating (fading in) views on top.
     transitions.sort((FadeTransition a, FadeTransition b) {
@@ -185,8 +180,8 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   Widget build(BuildContext context) {
     final BottomNavigationBar botNavBar = BottomNavigationBar(
       items: _navigationViews
-          .map<BottomNavigationBarItem>((NavigationIconView navigationView) => navigationView.item)
-          .toList(),
+        .map<BottomNavigationBarItem>((NavigationIconView navigationView) => navigationView.item)
+        .toList(),
       currentIndex: _currentIndex,
       type: _type,
       onTap: (int index) {
@@ -210,20 +205,20 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
               });
             },
             itemBuilder: (BuildContext context) => <PopupMenuItem<BottomNavigationBarType>>[
-              const PopupMenuItem<BottomNavigationBarType>(
-                value: BottomNavigationBarType.fixed,
-                child: Text('Fixed'),
-              ),
-              const PopupMenuItem<BottomNavigationBarType>(
-                value: BottomNavigationBarType.shifting,
-                child: Text('Shifting'),
-              )
-            ],
+                  const PopupMenuItem<BottomNavigationBarType>(
+                    value: BottomNavigationBarType.fixed,
+                    child: Text('Fixed'),
+                  ),
+                  const PopupMenuItem<BottomNavigationBarType>(
+                    value: BottomNavigationBarType.shifting,
+                    child: Text('Shifting'),
+                  )
+                ],
           )
         ],
       ),
       body: Center(
-        child: _buildTransitionsStack()
+        child: _buildTransitionsStack(),
       ),
       bottomNavigationBar: botNavBar,
     );

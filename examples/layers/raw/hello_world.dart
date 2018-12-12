@@ -13,8 +13,7 @@ void beginFrame(Duration timeStamp) {
 
   final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(
     ui.ParagraphStyle(textDirection: ui.TextDirection.ltr),
-  )
-    ..addText('Hello, world.');
+  )..addText('Hello, world.');
   final ui.Paragraph paragraph = paragraphBuilder.build()
     ..layout(ui.ParagraphConstraints(width: logicalSize.width));
 
@@ -22,10 +21,12 @@ void beginFrame(Duration timeStamp) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder, physicalBounds);
   canvas.scale(devicePixelRatio, devicePixelRatio);
-  canvas.drawParagraph(paragraph, ui.Offset(
-    (logicalSize.width - paragraph.maxIntrinsicWidth) / 2.0,
-    (logicalSize.height - paragraph.height) / 2.0
-  ));
+  canvas.drawParagraph(
+    paragraph,
+    ui.Offset(
+      (logicalSize.width - paragraph.maxIntrinsicWidth) / 2.0,
+      (logicalSize.height - paragraph.height) / 2.0,
+    ));
   final ui.Picture picture = recorder.endRecording();
 
   final ui.SceneBuilder sceneBuilder = ui.SceneBuilder()

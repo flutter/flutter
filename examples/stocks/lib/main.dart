@@ -7,12 +7,13 @@ library stocks;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show
-  debugPaintSizeEnabled,
-  debugPaintBaselinesEnabled,
-  debugPaintLayerBordersEnabled,
-  debugPaintPointersEnabled,
-  debugRepaintRainbowEnabled;
+import 'package:flutter/rendering.dart'
+    show
+        debugPaintSizeEnabled,
+        debugPaintBaselinesEnabled,
+        debugPaintLayerBordersEnabled,
+        debugPaintPointersEnabled,
+        debugRepaintRainbowEnabled;
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'stock_data.dart';
@@ -51,7 +52,7 @@ class StocksAppState extends State<StocksApp> {
     debugShowPointers: false,
     debugShowRainbow: false,
     showPerformanceOverlay: false,
-    showSemanticsDebugger: false
+    showSemanticsDebugger: false,
   );
 
   @override
@@ -71,12 +72,12 @@ class StocksAppState extends State<StocksApp> {
       case StockMode.optimistic:
         return ThemeData(
           brightness: Brightness.light,
-          primarySwatch: Colors.purple
+          primarySwatch: Colors.purple,
         );
       case StockMode.pessimistic:
         return ThemeData(
           brightness: Brightness.dark,
-          accentColor: Colors.redAccent
+          accentColor: Colors.redAccent,
         );
     }
     assert(_configuration.stockMode != null);
@@ -88,15 +89,17 @@ class StocksAppState extends State<StocksApp> {
     final List<String> path = settings.name.split('/');
     // We only support paths that start with a slash, so bail if
     // the first component is not empty:
-    if (path[0] != '')
+    if (path[0] != '') {
       return null;
+    }
     // If the path is "/stock:..." then show a stock page for the
     // specified stock symbol.
     if (path[1].startsWith('stock:')) {
       // We don't yet support subpages of a stock, so bail if there's
       // any more path components.
-      if (path.length != 2)
+      if (path.length != 2) {
         return null;
+      }
       // Extract the symbol part of "stock:..." and return a route
       // for that symbol.
       final String symbol = path[1].substring(6);
@@ -135,8 +138,8 @@ class StocksAppState extends State<StocksApp> {
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
       showSemanticsDebugger: _configuration.showSemanticsDebugger,
       routes: <String, WidgetBuilder>{
-         '/':         (BuildContext context) => StockHome(stocks, _configuration, configurationUpdater),
-         '/settings': (BuildContext context) => StockSettings(_configuration, configurationUpdater)
+        '/': (BuildContext context) => StockHome(stocks, _configuration, configurationUpdater),
+        '/settings': (BuildContext context) => StockSettings(_configuration, configurationUpdater)
       },
       onGenerateRoute: _getRoute,
     );

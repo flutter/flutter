@@ -49,9 +49,9 @@ final List<TravelDestination> destinations = <TravelDestination>[
 ];
 
 class TravelDestinationItem extends StatelessWidget {
-  TravelDestinationItem({ Key key, @required this.destination, this.shape })
-    : assert(destination != null && destination.isValid),
-      super(key: key);
+  TravelDestinationItem({Key key, @required this.destination, this.shape})
+      : assert(destination != null && destination.isValid),
+       super(key: key);
 
   static const double height = 366.0;
   final TravelDestination destination;
@@ -93,7 +93,8 @@ class TravelDestinationItem extends StatelessWidget {
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
-                        child: Text(destination.title,
+                        child: Text(
+                          destination.title,
                           style: titleStyle,
                         ),
                       ),
@@ -135,12 +136,12 @@ class TravelDestinationItem extends StatelessWidget {
                     FlatButton(
                       child: Text('SHARE', semanticsLabel: 'Share ${destination.title}'),
                       textColor: Colors.amber.shade500,
-                      onPressed: () { /* do nothing */ },
+                      onPressed: () {/* do nothing */},
                     ),
                     FlatButton(
                       child: Text('EXPLORE', semanticsLabel: 'Explore ${destination.title}'),
                       textColor: Colors.amber.shade500,
-                      onPressed: () { /* do nothing */ },
+                      onPressed: () {/* do nothing */},
                     ),
                   ],
                 ),
@@ -152,7 +153,6 @@ class TravelDestinationItem extends StatelessWidget {
     );
   }
 }
-
 
 class CardsDemo extends StatefulWidget {
   static const String routeName = '/material/cards';
@@ -178,14 +178,16 @@ class _CardsDemoState extends State<CardsDemo> {
             ),
             onPressed: () {
               setState(() {
-                _shape = _shape != null ? null : const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16.0),
-                    topRight: Radius.circular(16.0),
-                    bottomLeft: Radius.circular(2.0),
-                    bottomRight: Radius.circular(2.0),
-                  ),
-                );
+                _shape = _shape != null
+                    ? null
+                    : const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16.0),
+                          topRight: Radius.circular(16.0),
+                          bottomLeft: Radius.circular(2.0),
+                          bottomRight: Radius.circular(2.0),
+                        ),
+                      );
               });
             },
           ),
@@ -202,8 +204,8 @@ class _CardsDemoState extends State<CardsDemo> {
               shape: _shape,
             ),
           );
-        }).toList()
-      )
+        }).toList(),
+      ),
     );
   }
 }

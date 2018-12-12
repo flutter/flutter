@@ -6,13 +6,11 @@ import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
-const String _introText =
-  'Tooltips are short identifying messages that briefly appear in response to '
-  'a long press. Tooltip messages are also used by services that make Flutter '
-  'apps accessible, like screen readers.';
+const String _introText = 'Tooltips are short identifying messages that briefly appear in response to '
+    'a long press. Tooltip messages are also used by services that make Flutter '
+    'apps accessible, like screen readers.';
 
 class TooltipDemo extends StatelessWidget {
-
   static const String routeName = '/material/tooltips';
 
   @override
@@ -39,11 +37,11 @@ class TooltipDemo extends StatelessWidget {
                       child: Icon(
                         Icons.call,
                         size: 18.0,
-                        color: theme.iconTheme.color
-                      )
+                        color: theme.iconTheme.color,
+                      ),
                     ),
                     Text(' icon.', style: theme.textTheme.subhead)
-                  ]
+                  ],
                 ),
                 Center(
                   child: IconButton(
@@ -53,23 +51,21 @@ class TooltipDemo extends StatelessWidget {
                     tooltip: 'Place a phone call',
                     onPressed: () {
                       Scaffold.of(context).showSnackBar(const SnackBar(
-                         content: Text('That was an ordinary tap.')
+                        content: Text('That was an ordinary tap.'),
                       ));
-                    }
-                  )
+                    },
+                  ),
                 )
-              ]
-              .map<Widget>((Widget widget) {
+              ].map<Widget>((Widget widget) {
                 return Padding(
                   padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
-                  child: widget
+                  child: widget,
                 );
-              })
-              .toList()
+              }).toList(),
             ),
           );
-        }
-      )
+        },
+      ),
     );
   }
 }

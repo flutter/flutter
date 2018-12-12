@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 const String _explanatoryText =
-  "When the Scaffold's floating action button changes, the new button fades and "
-  'turns into view. In this demo, changing tabs can cause the app to be rebuilt '
-  'with a FloatingActionButton that the Scaffold distinguishes from the others '
-  'by its key.';
+    "When the Scaffold's floating action button changes, the new button fades and "
+    'turns into view. In this demo, changing tabs can cause the app to be rebuilt '
+    'with a FloatingActionButton that the Scaffold distinguishes from the others '
+    'by its key.';
 
 class _Page {
-  _Page({ this.label, this.colors, this.icon });
+  _Page({this.label, this.colors, this.icon});
 
   final String label;
   final MaterialColor colors;
@@ -72,12 +72,12 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
     _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
       return Container(
         decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Theme.of(context).dividerColor))
+          border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(32.0),
-          child: Text(_explanatoryText, style: Theme.of(context).textTheme.subhead)
-        )
+          child: Text(_explanatoryText, style: Theme.of(context).textTheme.subhead),
+        ),
       );
     });
   }
@@ -90,23 +90,25 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
           padding: const EdgeInsets.fromLTRB(48.0, 48.0, 48.0, 96.0),
           child: Card(
             child: Center(
-              child: Text(page.label,
+              child: Text(
+                page.label,
                 style: TextStyle(
                   color: page.labelColor,
-                  fontSize: 32.0
+                  fontSize: 32.0,
                 ),
-                textAlign: TextAlign.center
-              )
-            )
-          )
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
         );
-      }
+      },
     );
   }
 
   Widget buildFloatingActionButton(_Page page) {
-    if (!page.fabDefined)
+    if (!page.fabDefined) {
       return null;
+    }
 
     if (_extendedButtons) {
       return FloatingActionButton.extended(
@@ -115,7 +117,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
         backgroundColor: page.fabColor,
         icon: page.fabIcon,
         label: Text(page.label.toUpperCase()),
-        onPressed: _showExplanatoryText
+        onPressed: _showExplanatoryText,
       );
     }
 
@@ -124,7 +126,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
       tooltip: 'Show explanation',
       backgroundColor: page.fabColor,
       child: page.fabIcon,
-      onPressed: _showExplanatoryText
+      onPressed: _showExplanatoryText,
     );
   }
 
@@ -153,7 +155,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
       floatingActionButton: buildFloatingActionButton(_selectedPage),
       body: TabBarView(
         controller: _controller,
-        children: _allPages.map<Widget>(buildTabView).toList()
+        children: _allPages.map<Widget>(buildTabView).toList(),
       ),
     );
   }

@@ -92,13 +92,8 @@ class RowColumnTraversal extends StatelessWidget {
 /// set its traversal order.
 class SpinnerButton extends StatelessWidget {
   const SpinnerButton(
-      {Key key,
-      this.onPressed,
-      this.icon,
-      this.rowOrder,
-      this.columnOrder,
-      this.field,
-      this.increment}) : super(key: key);
+      {Key key, this.onPressed, this.icon, this.rowOrder, this.columnOrder, this.field, this.increment})
+      : super(key: key);
 
   final VoidCallback onPressed;
   final IconData icon;
@@ -213,7 +208,12 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
     );
   }
 
-  Widget _makeSpinnerButton(int rowOrder, int columnOrder, Field field, {bool increment = true}) {
+  Widget _makeSpinnerButton(
+    int rowOrder,
+    int columnOrder,
+    Field field, {
+    bool increment = true,
+  }) {
     return SpinnerButton(
       rowOrder: rowOrder,
       columnOrder: columnOrder,

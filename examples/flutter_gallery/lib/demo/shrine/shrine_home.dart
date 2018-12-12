@@ -34,7 +34,8 @@ int _maxIndexInRow(int rowIndex) {
 
 int _rowAtIndex(int index) {
   final int blockCount = index ~/ _childrenPerBlock;
-  return const <int>[0, 0, 1, 1, 2, 2, 3, 4][index - blockCount * _childrenPerBlock] + blockCount * _rowsPerBlock;
+  return const <int>[0, 0, 1, 1, 2, 2, 3, 4][index - blockCount * _childrenPerBlock] +
+      blockCount * _rowsPerBlock;
 }
 
 int _columnAtIndex(int index) {
@@ -85,8 +86,9 @@ class _ShrineGridLayout extends SliverGridLayout {
 
   @override
   double computeMaxScrollOffset(int childCount) {
-    if (childCount == 0)
+    if (childCount == 0) {
       return 0.0;
+    }
     final int rowCount = _rowAtIndex(childCount - 1) + 1;
     final double rowSpacing = rowStride - tileHeight;
     return rowStride * rowCount - rowSpacing;
@@ -114,9 +116,9 @@ class _ShrineGridDelegate extends SliverGridDelegate {
 
 // Displays the Vendor's name and avatar.
 class _VendorItem extends StatelessWidget {
-  const _VendorItem({ Key key, @required this.vendor })
-    : assert(vendor != null),
-      super(key: key);
+  const _VendorItem({Key key, @required this.vendor})
+      : assert(vendor != null),
+       super(key: key);
 
   final Vendor vendor;
 
@@ -150,16 +152,17 @@ class _VendorItem extends StatelessWidget {
 // Displays the product's price. If the product is in the shopping cart then the
 // background is highlighted.
 abstract class _PriceItem extends StatelessWidget {
-  const _PriceItem({ Key key, @required this.product })
+  const _PriceItem({Key key, @required this.product})
       : assert(product != null),
-        super(key: key);
+       super(key: key);
 
   final Product product;
 
   Widget buildItem(BuildContext context, TextStyle style, EdgeInsets padding) {
     BoxDecoration decoration;
-    if (_shoppingCart[product] != null)
+    if (_shoppingCart[product] != null) {
       decoration = BoxDecoration(color: ShrineTheme.of(context).priceHighlightColor);
+    }
 
     return Container(
       padding: padding,
@@ -170,7 +173,7 @@ abstract class _PriceItem extends StatelessWidget {
 }
 
 class _ProductPriceItem extends _PriceItem {
-  const _ProductPriceItem({ Key key, Product product }) : super(key: key, product: product);
+  const _ProductPriceItem({Key key, Product product}) : super(key: key, product: product);
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +186,7 @@ class _ProductPriceItem extends _PriceItem {
 }
 
 class _FeaturePriceItem extends _PriceItem {
-  const _FeaturePriceItem({ Key key, Product product }) : super(key: key, product: product);
+  const _FeaturePriceItem({Key key, Product product}) : super(key: key, product: product);
 
   @override
   Widget build(BuildContext context) {
@@ -216,8 +219,8 @@ class _HeadingLayout extends MultiChildLayoutDelegate {
 
     final Size imageSize = layoutChild(image, BoxConstraints.loose(size));
     final double imageX = imageSize.width < halfWidth - halfUnit
-      ? halfWidth / 2.0 - imageSize.width / 2.0 - halfUnit
-      : halfWidth - imageSize.width;
+        ? halfWidth / 2.0 - imageSize.width / 2.0 - halfUnit
+        : halfWidth - imageSize.width;
     positionChild(image, Offset(imageX, halfHeight - imageSize.height / 2.0));
 
     final double maxTitleWidth = halfWidth + unitSize - margin;
@@ -242,11 +245,11 @@ class _HeadingLayout extends MultiChildLayoutDelegate {
 
 // A card that highlights the "featured" catalog item.
 class _Heading extends StatelessWidget {
-  _Heading({ Key key, @required this.product })
-    : assert(product != null),
-      assert(product.featureTitle != null),
-      assert(product.featureDescription != null),
-      super(key: key);
+  _Heading({Key key, @required this.product})
+      : assert(product != null),
+       assert(product.featureTitle != null),
+       assert(product.featureDescription != null),
+       super(key: key);
 
   final Product product;
 
@@ -257,8 +260,8 @@ class _Heading extends StatelessWidget {
     return MergeSemantics(
       child: SizedBox(
         height: screenSize.width > screenSize.height
-          ? (screenSize.height - kToolbarHeight) * 0.85
-          : (screenSize.height - kToolbarHeight) * 0.70,
+            ? (screenSize.height - kToolbarHeight) * 0.85
+            : (screenSize.height - kToolbarHeight) * 0.70,
         child: Container(
           decoration: BoxDecoration(
             color: theme.cardBackgroundColor,
@@ -302,9 +305,9 @@ class _Heading extends StatelessWidget {
 // A card that displays a product's image, price, and vendor. The _ProductItem
 // cards appear in a grid below the heading.
 class _ProductItem extends StatelessWidget {
-  const _ProductItem({ Key key, @required this.product, this.onPressed })
-    : assert(product != null),
-      super(key: key);
+  const _ProductItem({Key key, @required this.product, this.onPressed})
+      : assert(product != null),
+       super(key: key);
 
   final Product product;
   final VoidCallback onPressed;
@@ -326,14 +329,14 @@ class _ProductItem extends StatelessWidget {
                   height: 144.0,
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Hero(
-                      tag: product.tag,
-                      child: Image.asset(
-                        product.imageAsset,
-                        package: product.imageAssetPackage,
-                        fit: BoxFit.contain,
-                      ),
+                    tag: product.tag,
+                    child: Image.asset(
+                      product.imageAsset,
+                      package: product.imageAssetPackage,
+                      fit: BoxFit.contain,
                     ),
                   ),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: _VendorItem(vendor: product.vendor),
@@ -364,19 +367,22 @@ class _ShrineHomeState extends State<ShrineHome> {
 
   Future<void> _showOrderPage(Product product) async {
     final Order order = _shoppingCart[product] ?? Order(product: product);
-    final Order completedOrder = await Navigator.push(context, ShrineOrderRoute(
-      order: order,
-      builder: (BuildContext context) {
-        return OrderPage(
-          order: order,
-          products: _products,
-          shoppingCart: _shoppingCart,
-        );
-      }
-    ));
+    final Order completedOrder = await Navigator.push(
+      context,
+      ShrineOrderRoute(
+        order: order,
+        builder: (BuildContext context) {
+          return OrderPage(
+            order: order,
+            products: _products,
+            shoppingCart: _shoppingCart,
+          );
+        },
+      ));
     assert(completedOrder.product != null);
-    if (completedOrder.quantity == 0)
+    if (completedOrder.quantity == 0) {
       _shoppingCart.remove(completedOrder.product);
+    }
   }
 
   @override
@@ -398,7 +404,9 @@ class _ShrineHomeState extends State<ShrineHome> {
                 _products.map<Widget>((Product product) {
                   return _ProductItem(
                     product: product,
-                    onPressed: () { _showOrderPage(product); },
+                    onPressed: () {
+                      _showOrderPage(product);
+                    },
                   );
                 }).toList(),
               ),

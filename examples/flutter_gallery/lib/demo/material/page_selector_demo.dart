@@ -7,14 +7,15 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class _PageSelector extends StatelessWidget {
-  const _PageSelector({ this.icons });
+  const _PageSelector({this.icons});
 
   final List<Icon> icons;
 
   void _handleArrowButtonPress(BuildContext context, int delta) {
     final TabController controller = DefaultTabController.of(context);
-    if (!controller.indexIsChanging)
+    if (!controller.indexIsChanging) {
       controller.animateTo((controller.index + delta).clamp(0, icons.length - 1));
+    }
   }
 
   @override
@@ -33,19 +34,23 @@ class _PageSelector extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.chevron_left),
                   color: color,
-                  onPressed: () { _handleArrowButtonPress(context, -1); },
-                  tooltip: 'Page back'
+                  onPressed: () {
+                    _handleArrowButtonPress(context, -1);
+                  },
+                  tooltip: 'Page back',
                 ),
                 TabPageSelector(controller: controller),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
                   color: color,
-                  onPressed: () { _handleArrowButtonPress(context, 1); },
-                  tooltip: 'Page forward'
+                  onPressed: () {
+                    _handleArrowButtonPress(context, 1);
+                  },
+                  tooltip: 'Page forward',
                 )
               ],
-              mainAxisAlignment: MainAxisAlignment.spaceBetween
-            )
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ),
           ),
           Expanded(
             child: IconTheme(
@@ -63,7 +68,7 @@ class _PageSelector extends StatelessWidget {
                       ),
                     ),
                   );
-                }).toList()
+                }).toList(),
               ),
             ),
           ),

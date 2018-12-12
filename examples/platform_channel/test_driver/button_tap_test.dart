@@ -14,13 +14,13 @@ void main() {
     });
 
     tearDownAll(() async {
-      if (driver != null)
+      if (driver != null) {
         driver.close();
+      }
     });
 
     test('tap on the button, verify result', () async {
-      final SerializableFinder batteryLevelLabel =
-          find.byValueKey('Battery level label');
+      final SerializableFinder batteryLevelLabel = find.byValueKey('Battery level label');
       expect(batteryLevelLabel, isNotNull);
 
       final SerializableFinder button = find.text('Refresh');

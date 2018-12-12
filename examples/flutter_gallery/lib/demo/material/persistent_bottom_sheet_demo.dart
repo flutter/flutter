@@ -25,34 +25,39 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
   }
 
   void _showBottomSheet() {
-    setState(() { // disable the button
+    setState(() {
+      // disable the button
       _showBottomSheetCallback = null;
     });
-    _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
-      final ThemeData themeData = Theme.of(context);
-      return Container(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: themeData.disabledColor))
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Text('This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: themeData.accentColor,
-              fontSize: 24.0
-            )
-          )
-        )
-      );
-    })
-    .closed.whenComplete(() {
-      if (mounted) {
-        setState(() { // re-enable the button
-          _showBottomSheetCallback = _showBottomSheet;
-        });
-      }
-    });
+    _scaffoldKey.currentState
+      .showBottomSheet<void>((BuildContext context) {
+        final ThemeData themeData = Theme.of(context);
+        return Container(
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: themeData.disabledColor)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Text(
+              'This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: themeData.accentColor,
+                fontSize: 24.0,
+              ),
+            ),
+          ),
+        );
+      })
+      .closed
+      .whenComplete(() {
+        if (mounted) {
+          setState(() {
+            // re-enable the button
+            _showBottomSheetCallback = _showBottomSheet;
+          });
+        }
+      });
   }
 
   void _showMessage() {
@@ -66,7 +71,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('OK')
+              child: const Text('OK'),
             )
           ],
         );
@@ -95,9 +100,9 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
       body: Center(
         child: RaisedButton(
           onPressed: _showBottomSheetCallback,
-          child: const Text('SHOW BOTTOM SHEET')
-        )
-      )
+          child: const Text('SHOW BOTTOM SHEET'),
+        ),
+      ),
     );
   }
 }

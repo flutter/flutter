@@ -110,19 +110,21 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
       thumbCenter + slideUpOffset,
       invert: true,
     );
-    final Color paintColor = enableColor.evaluate(enableAnimation).withAlpha((255.0 * activationAnimation.value).round());
+    final Color paintColor =
+        enableColor.evaluate(enableAnimation).withAlpha((255.0 * activationAnimation.value).round());
     canvas.drawPath(
       thumbPath,
       Paint()..color = paintColor,
     );
     canvas.drawLine(
-        thumbCenter,
-        thumbCenter + slideUpOffset,
-        Paint()
-          ..color = paintColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0);
-    labelPainter.paint(canvas, thumbCenter + slideUpOffset + Offset(-labelPainter.width / 2.0, -labelPainter.height - 4.0));
+      thumbCenter,
+      thumbCenter + slideUpOffset,
+      Paint()
+        ..color = paintColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0);
+    labelPainter.paint(
+      canvas, thumbCenter + slideUpOffset + Offset(-labelPainter.width / 2.0, -labelPainter.height - 4.0));
   }
 }
 

@@ -29,8 +29,13 @@ Directory sampleDirectory;
 Directory testDirectory;
 Directory driverDirectory;
 
-void logMessage(String s) { print(s); }
-void logError(String s) { print(s); }
+void logMessage(String s) {
+  print(s);
+}
+
+void logError(String s) {
+  print(s);
+}
 
 File inputFile(String dir, String name) {
   return File(dir + Platform.pathSeparator + name);
@@ -54,8 +59,9 @@ String expandTemplate(String template, Map<String, String> values) {
   // Matches @(foo), match[1] == 'foo'
   final RegExp tokenRE = RegExp(r'@\(([\w ]+)\)', multiLine: true);
   return template.replaceAllMapped(tokenRE, (Match match) {
-    if (match.groupCount != 1)
+    if (match.groupCount != 1) {
       throw SampleError('bad template keyword $match[0]');
+    }
     final String keyword = match[1];
     return values[keyword] ?? '';
   });
@@ -87,8 +93,9 @@ class SampleInfo {
   // The value of the 'Classes:' comment as a list of class names.
   Iterable<String> get highlightedClasses {
     final String classNames = commentValues['classes'];
-    if (classNames == null)
+    if (classNames == null) {
       return const <String>[];
+    }
     return classNames.split(',').map<String>((String s) => s.trim()).where((String s) => s.isNotEmpty);
   }
 
@@ -105,23 +112,27 @@ class SampleInfo {
     final RegExp startRE = RegExp(r'^/\*\s+^Sample\s+Catalog', multiLine: true);
     final RegExp endRE = RegExp(r'^\*/', multiLine: true);
     final Match startMatch = startRE.firstMatch(contents);
-    if (startMatch == null)
+    if (startMatch == null) {
       return false;
+    }
 
     final int startIndex = startMatch.end;
     final Match endMatch = endRE.firstMatch(contents.substring(startIndex));
-    if (endMatch == null)
+    if (endMatch == null) {
       return false;
+    }
 
     final String comment = contents.substring(startIndex, startIndex + endMatch.start);
     sourceCode = contents.substring(0, startMatch.start) + contents.substring(startIndex + endMatch.end);
-    if (sourceCode.trim().isEmpty)
+    if (sourceCode.trim().isEmpty) {
       throw SampleError('did not find any source code in $sourceFile');
+    }
 
     final RegExp keywordsRE = RegExp(sampleCatalogKeywords, multiLine: true);
     final List<Match> keywordMatches = keywordsRE.allMatches(comment).toList();
-    if (keywordMatches.isEmpty)
+    if (keywordMatches.isEmpty) {
       throw SampleError('did not find any keywords in the Sample Catalog comment in $sourceFile');
+    }
 
     commentValues = <String, String>{};
     for (int i = 0; i < keywordMatches.length; i += 1) {
@@ -136,7 +147,8 @@ class SampleInfo {
     commentValues['path'] = 'examples/catalog/${sourceFile.path}';
     commentValues['source'] = sourceCode.trim();
     commentValues['link'] = link;
-    commentValues['android screenshot'] = 'https://storage.googleapis.com/flutter-catalog/$commit/${sourceName}_small.png';
+    commentValues['android screenshot'] =
+        'https://storage.googleapis.com/flutter-catalog/$commit/${sourceName}_small.png';
 
     return true;
   }
@@ -149,8 +161,10 @@ void generate(String commit) {
   for (FileSystemEntity entity in sampleDirectory.listSync()) {
     if (entity is File && entity.path.endsWith('.dart')) {
       final SampleInfo sample = SampleInfo(entity, commit);
-      if (sample.initialize()) // skip files that lack the Sample Catalog comment
+      if (sample.initialize()) {
+        // skip files that lack the Sample Catalog comment
         samples.add(sample);
+      }
     }
   }
 
@@ -215,12 +229,18 @@ void generate(String commit) {
     outputFile('screenshot.dart', driverDirectory),
     inputFile('bin', 'screenshot.dart.template').readAsStringSync(),
     <String, String>{
-      'imports': samples.map<String>((SampleInfo page) {
-        return "import '${page.importPath}' show ${page.sampleClass};\n";
-      }).toList().join(),
-      'widgets': samples.map<String>((SampleInfo sample) {
-        return 'new ${sample.sampleClass}(),\n';
-      }).toList().join(),
+      'imports': samples
+        .map<String>((SampleInfo page) {
+          return "import '${page.importPath}' show ${page.sampleClass};\n";
+        })
+        .toList()
+        .join(),
+      'widgets': samples
+        .map<String>((SampleInfo sample) {
+          return 'new ${sample.sampleClass}(),\n';
+        })
+        .toList()
+        .join(),
     },
   );
 
@@ -230,23 +250,25 @@ void generate(String commit) {
     outputFile('screenshot_test.dart', driverDirectory),
     inputFile('bin', 'screenshot_test.dart.template').readAsStringSync(),
     <String, String>{
-      'paths': samples.map<String>((SampleInfo sample) {
-        return "'${outputFile(sample.sourceName + '.png').path}'";
-      }).toList().join(',\n'),
+      'paths': samples
+        .map<String>((SampleInfo sample) {
+          return "'${outputFile(sample.sourceName + '.png').path}'";
+        })
+        .toList()
+        .join(',\n'),
     },
   );
 
   // For now, the website's index.json file must be updated by hand.
   logMessage('The following entries must appear in _data/catalog/widgets.json');
-  for (String className in classToSamples.keys)
-    logMessage('"sample": "${className}_index"');
+  for (String className in classToSamples.keys) logMessage('"sample": "${className}_index"');
 }
 
 void main(List<String> args) {
   if (args.length != 1) {
     logError(
       'Usage (cd examples/catalog/; dart bin/sample_page.dart commit)\n'
-      'The flutter commit hash locates screenshots on storage.googleapis.com/flutter-catalog/'
+          'The flutter commit hash locates screenshots on storage.googleapis.com/flutter-catalog/',
     );
     exit(255);
   }
@@ -255,8 +277,8 @@ void main(List<String> args) {
   } catch (error) {
     logError(
       'Error: sample_page.dart failed: $error\n'
-      'This sample_page.dart app expects to be run from the examples/catalog directory. '
-      'More information can be found in examples/catalog/README.md.'
+          'This sample_page.dart app expects to be run from the examples/catalog directory. '
+          'More information can be found in examples/catalog/README.md.',
     );
     exit(255);
   }

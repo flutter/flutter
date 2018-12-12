@@ -11,7 +11,6 @@ void main() {
 }
 
 class FlutterView extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -33,8 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static const String _channel = 'increment';
   static const String _pong = 'pong';
   static const String _emptyMessage = '';
-  static const BasicMessageChannel<String> platform =
-      BasicMessageChannel<String>(_channel, StringCodec());
+  static const BasicMessageChannel<String> platform = BasicMessageChannel<String>(_channel, StringCodec());
 
   int _counter = 0;
 
@@ -63,9 +61,8 @@ class _MyHomePageState extends State<MyHomePage> {
         children: <Widget>[
           Expanded(
             child: Center(
-              child: Text(
-                'Platform button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
-                style: const TextStyle(fontSize: 17.0))
+              child: Text('Platform button tapped $_counter time${_counter == 1 ? '' : 's'}.',
+                style: const TextStyle(fontSize: 17.0)),
             ),
           ),
           Container(

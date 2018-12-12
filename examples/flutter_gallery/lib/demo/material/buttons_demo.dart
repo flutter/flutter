@@ -6,8 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
-const String _raisedText =
-    'Raised buttons add dimension to mostly flat layouts. They emphasize '
+const String _raisedText = 'Raised buttons add dimension to mostly flat layouts. They emphasize '
     'functions on busy or wide spaces.';
 
 const String _raisedCode = 'buttons_raised';
@@ -18,27 +17,23 @@ const String _flatText = 'A flat button displays an ink splash on press '
 
 const String _flatCode = 'buttons_flat';
 
-const String _outlineText =
-    'Outline buttons become opaque and elevate when pressed. They are often '
+const String _outlineText = 'Outline buttons become opaque and elevate when pressed. They are often '
     'paired with raised buttons to indicate an alternative, secondary action.';
 
 const String _outlineCode = 'buttons_outline';
 
-const String _dropdownText =
-    'A dropdown button displays a menu that\'s used to select a value from a '
+const String _dropdownText = 'A dropdown button displays a menu that\'s used to select a value from a '
     'small set of values. The button displays the current value and a down '
     'arrow.';
 
 const String _dropdownCode = 'buttons_dropdown';
 
-const String _iconText =
-    'IconButtons are appropriate for toggle buttons that allow a single choice '
+const String _iconText = 'IconButtons are appropriate for toggle buttons that allow a single choice '
     'to be selected or deselected, such as adding or removing an item\'s star.';
 
 const String _iconCode = 'buttons_icon';
 
-const String _actionText =
-    'Floating action buttons are used for a promoted action. They are '
+const String _actionText = 'Floating action buttons are used for a promoted action. They are '
     'distinguished by a circled icon floating above the UI and can have motion '
     'behaviors that include morphing, launching, and a transferring anchor '
     'point.';
@@ -58,7 +53,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
   @override
   Widget build(BuildContext context) {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context).copyWith(
-      shape: _buttonShape
+      shape: _buttonShape,
     );
 
     final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
@@ -190,7 +185,10 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 },
               ),
               const FlatButton(
-                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 3',),
+                child: Text(
+                  'DISABLED',
+                  semanticsLabel: 'DISABLED BUTTON 3',
+                ),
                 onPressed: null,
               ),
             ],
@@ -322,17 +320,30 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 });
               },
               items: <String>[
-                  'One', 'Two', 'Free', 'Four', 'Can', 'I', 'Have', 'A', 'Little',
-                  'Bit', 'More', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'
-                 ]
-                .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                })
-                .toList(),
-             ),
+                'One',
+                'Two',
+                'Free',
+                'Four',
+                'Can',
+                'I',
+                'Have',
+                'A',
+                'Little',
+                'Bit',
+                'More',
+                'Five',
+                'Six',
+                'Seven',
+                'Eight',
+                'Nine',
+                'Ten'
+              ].map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
           ),
         ],
       ),
@@ -364,9 +375,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             ),
             onPressed: null,
           )
-        ]
-        .map<Widget>((Widget button) => SizedBox(width: 64.0, height: 64.0, child: button))
-        .toList(),
+        ].map<Widget>((Widget button) => SizedBox(width: 64.0, height: 64.0, child: button)).toList(),
       ),
     );
   }

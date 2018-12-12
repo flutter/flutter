@@ -12,8 +12,9 @@ class GalleryTextScaleValue {
 
   @override
   bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+    if (runtimeType != other.runtimeType) {
       return false;
+    }
     final GalleryTextScaleValue typedOther = other;
     return scale == typedOther.scale && label == typedOther.label;
   }
@@ -25,7 +26,6 @@ class GalleryTextScaleValue {
   String toString() {
     return '$runtimeType($label)';
   }
-
 }
 
 const List<GalleryTextScaleValue> kAllGalleryTextScaleValues = <GalleryTextScaleValue>[

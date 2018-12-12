@@ -16,10 +16,10 @@ class _ProductItem extends StatelessWidget {
     @required this.product,
     @required this.quantity,
     @required this.onChanged,
-  }) : assert(product != null),
-       assert(quantity != null),
-       assert(onChanged != null),
-       super(key: key);
+  })  : assert(product != null),
+        assert(quantity != null),
+        assert(onChanged != null),
+        super(key: key);
 
   final Product product;
   final int quantity;
@@ -68,9 +68,9 @@ class _ProductItem extends StatelessWidget {
 
 // Vendor name and description
 class _VendorItem extends StatelessWidget {
-  const _VendorItem({ Key key, @required this.vendor })
-    : assert(vendor != null),
-      super(key: key);
+  const _VendorItem({Key key, @required this.vendor})
+      : assert(vendor != null),
+       super(key: key);
 
   final Vendor vendor;
 
@@ -144,9 +144,9 @@ class _Heading extends StatelessWidget {
     @required this.product,
     @required this.quantity,
     this.quantityChanged,
-  }) : assert(product != null),
-       assert(quantity != null && quantity >= 0 && quantity <= 5),
-       super(key: key);
+  })  : assert(product != null),
+        assert(quantity != null && quantity >= 0 && quantity <= 5),
+        super(key: key);
 
   final Product product;
   final int quantity;
@@ -211,10 +211,10 @@ class OrderPage extends StatefulWidget {
     @required this.order,
     @required this.products,
     @required this.shoppingCart,
-  }) : assert(order != null),
-       assert(products != null && products.isNotEmpty),
-       assert(shoppingCart != null),
-       super(key: key);
+  })  : assert(order != null),
+        assert(products != null && products.isNotEmpty),
+        assert(shoppingCart != null),
+        super(key: key);
 
   final Order order;
   final List<Product> products;
@@ -242,7 +242,7 @@ class _OrderPageState extends State<OrderPage> {
     ShrineOrderRoute.of(context).order = value;
   }
 
-  void updateOrder({ int quantity, bool inCart }) {
+  void updateOrder({int quantity, bool inCart}) {
     final Order newOrder = currentOrder.copyWith(quantity: quantity, inCart: inCart);
     if (currentOrder != newOrder) {
       setState(() {
@@ -268,7 +268,7 @@ class _OrderPageState extends State<OrderPage> {
           final int n = currentOrder.quantity;
           final String item = currentOrder.product.name;
           showSnackBarMessage(
-            'There ${ n == 1 ? "is one $item item" : "are $n $item items" } in the shopping cart.'
+            'There ${n == 1 ? "is one $item item" : "are $n $item items"} in the shopping cart.',
           );
         },
         backgroundColor: const Color(0xFF16F0F0),
@@ -284,7 +284,9 @@ class _OrderPageState extends State<OrderPage> {
             child: _Heading(
               product: widget.order.product,
               quantity: currentOrder.quantity,
-              quantityChanged: (int value) { updateOrder(quantity: value); },
+              quantityChanged: (int value) {
+                updateOrder(quantity: value);
+              },
             ),
           ),
           SliverSafeArea(
@@ -300,15 +302,15 @@ class _OrderPageState extends State<OrderPage> {
                 widget.products
                   .where((Product product) => product != widget.order.product)
                   .map((Product product) {
-                    return Card(
-                      elevation: 1.0,
-                      child: Image.asset(
-                        product.imageAsset,
-                        package: product.imageAssetPackage,
-                        fit: BoxFit.contain,
-                      ),
-                    );
-                  }).toList(),
+                  return Card(
+                    elevation: 1.0,
+                    child: Image.asset(
+                      product.imageAsset,
+                      package: product.imageAssetPackage,
+                      fit: BoxFit.contain,
+                    ),
+                  );
+                }).toList(),
               ),
             ),
           ),
@@ -328,8 +330,8 @@ class ShrineOrderRoute extends ShrinePageRoute<Order> {
     @required this.order,
     WidgetBuilder builder,
     RouteSettings settings,
-  }) : assert(order != null),
-       super(builder: builder, settings: settings);
+  })  : assert(order != null),
+        super(builder: builder, settings: settings);
 
   Order order;
 

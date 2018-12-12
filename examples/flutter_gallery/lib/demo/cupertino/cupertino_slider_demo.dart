@@ -31,7 +31,7 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
           children: <Widget>[
             Column(
               mainAxisSize: MainAxisSize.min,
-              children: <Widget> [
+              children: <Widget>[
                 CupertinoSlider(
                   value: _value,
                   min: 0.0,
@@ -40,14 +40,14 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
                     setState(() {
                       _value = value;
                     });
-                  }
+                  },
                 ),
                 Text('Cupertino Continuous: ${_value.toStringAsFixed(1)}'),
-              ]
+              ],
             ),
             Column(
               mainAxisSize: MainAxisSize.min,
-              children: <Widget> [
+              children: <Widget>[
                 CupertinoSlider(
                   value: _discreteValue,
                   min: 0.0,
@@ -57,10 +57,10 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
                     setState(() {
                       _discreteValue = value;
                     });
-                  }
+                  },
                 ),
                 Text('Cupertino Discrete: $_discreteValue'),
-              ]
+              ],
             ),
           ],
         ),

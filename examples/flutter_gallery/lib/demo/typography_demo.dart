@@ -10,10 +10,10 @@ class TextStyleItem extends StatelessWidget {
     @required this.name,
     @required this.style,
     @required this.text,
-  }) : assert(name != null),
-       assert(style != null),
-       assert(text != null),
-       super(key: key);
+  })  : assert(name != null),
+        assert(style != null),
+        assert(text != null),
+        super(key: key);
 
   final String name;
   final TextStyle style;
@@ -30,13 +30,13 @@ class TextStyleItem extends StatelessWidget {
         children: <Widget>[
           SizedBox(
             width: 72.0,
-            child: Text(name, style: nameStyle)
+            child: Text(name, style: nameStyle),
           ),
           Expanded(
-            child: Text(text, style: style.copyWith(height: 1.0))
+            child: Text(text, style: style.copyWith(height: 1.0)),
           )
-        ]
-      )
+        ],
+      ),
     );
   }
 }
@@ -61,11 +61,13 @@ class TypographyDemo extends StatelessWidget {
     ];
 
     if (MediaQuery.of(context).size.width > 500.0) {
-      styleItems.insert(0, TextStyleItem(
-        name: 'Display 4',
-        style: textTheme.display4,
-        text: 'Light 112sp'
-      ));
+      styleItems.insert(
+        0,
+        TextStyleItem(
+          name: 'Display 4',
+          style: textTheme.display4,
+          text: 'Light 112sp',
+        ));
     }
 
     return Scaffold(

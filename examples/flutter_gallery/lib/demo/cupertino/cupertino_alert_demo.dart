@@ -129,8 +129,8 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                 child: const CupertinoDessertDialog(
                   title: Text('Select Favorite Dessert'),
                   content: Text('Please select your favorite type of dessert from the '
-                      'list below. Your selection will be used to customize the suggested '
-                      'list of eateries in your area.'),
+                    'list below. Your selection will be used to customize the suggested '
+                    'list of eateries in your area.'),
                 ),
               );
             },
@@ -184,7 +184,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                     onPressed: () {
                       Navigator.pop(context, 'Cancel');
                     },
-                  )
+                  ),
                 ),
               );
             },

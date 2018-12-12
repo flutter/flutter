@@ -38,7 +38,7 @@ class _SpinningSquareState extends State<SpinningSquare> with SingleTickerProvid
         width: 200.0,
         height: 200.0,
         color: const Color(0xFF00FF00),
-      )
+      ),
     );
   }
 }

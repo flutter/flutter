@@ -6,11 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
-enum GridDemoTileStyle {
-  imageOnly,
-  oneLine,
-  twoLine
-}
+enum GridDemoTileStyle { imageOnly, oneLine, twoLine }
 
 typedef BannerTapCallback = void Function(Photo photo);
 
@@ -38,7 +34,7 @@ class Photo {
 }
 
 class GridPhotoViewer extends StatefulWidget {
-  const GridPhotoViewer({ Key key, this.photo }) : super(key: key);
+  const GridPhotoViewer({Key key, this.photo}) : super(key: key);
 
   final Photo photo;
 
@@ -72,8 +68,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this)
-      ..addListener(_handleFlingAnimation);
+    _controller = AnimationController(vsync: this)..addListener(_handleFlingAnimation);
   }
 
   @override
@@ -115,13 +110,14 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
 
   void _handleOnScaleEnd(ScaleEndDetails details) {
     final double magnitude = details.velocity.pixelsPerSecond.distance;
-    if (magnitude < _kMinFlingVelocity)
+    if (magnitude < _kMinFlingVelocity) {
       return;
+    }
     final Offset direction = details.velocity.pixelsPerSecond / magnitude;
     final double distance = (Offset.zero & context.size).shortestSide;
     _flingAnimation = _controller.drive(Tween<Offset>(
       begin: _offset,
-      end: _clampOffset(_offset + direction * distance)
+      end: _clampOffset(_offset + direction * distance),
     ));
     _controller
       ..value = 0.0
@@ -155,11 +151,11 @@ class GridDemoPhotoItem extends StatelessWidget {
     Key key,
     @required this.photo,
     @required this.tileStyle,
-    @required this.onBannerTap
-  }) : assert(photo != null && photo.isValid),
-       assert(tileStyle != null),
-       assert(onBannerTap != null),
-       super(key: key);
+    @required this.onBannerTap,
+  })  : assert(photo != null && photo.isValid),
+        assert(tileStyle != null),
+        assert(onBannerTap != null),
+        super(key: key);
 
   final Photo photo;
   final GridDemoTileStyle tileStyle;
@@ -170,7 +166,7 @@ class GridDemoPhotoItem extends StatelessWidget {
       builder: (BuildContext context) {
         return Scaffold(
           appBar: AppBar(
-            title: Text(photo.title)
+            title: Text(photo.title),
           ),
           body: SizedBox.expand(
             child: Hero(
@@ -179,14 +175,16 @@ class GridDemoPhotoItem extends StatelessWidget {
             ),
           ),
         );
-      }
+      },
     ));
   }
 
   @override
   Widget build(BuildContext context) {
     final Widget image = GestureDetector(
-      onTap: () { showPhoto(context); },
+      onTap: () {
+        showPhoto(context);
+      },
       child: Hero(
         key: Key(photo.assetName),
         tag: photo.tag,
@@ -194,8 +192,8 @@ class GridDemoPhotoItem extends StatelessWidget {
           photo.assetName,
           package: photo.assetPackage,
           fit: BoxFit.cover,
-        )
-      )
+        ),
+      ),
     );
 
     final IconData icon = photo.isFavorite ? Icons.star : Icons.star_border;
@@ -207,7 +205,9 @@ class GridDemoPhotoItem extends StatelessWidget {
       case GridDemoTileStyle.oneLine:
         return GridTile(
           header: GestureDetector(
-            onTap: () { onBannerTap(photo); },
+            onTap: () {
+              onBannerTap(photo);
+            },
             child: GridTileBar(
               title: _GridTitleText(photo.title),
               backgroundColor: Colors.black45,
@@ -223,7 +223,9 @@ class GridDemoPhotoItem extends StatelessWidget {
       case GridDemoTileStyle.twoLine:
         return GridTile(
           footer: GestureDetector(
-            onTap: () { onBannerTap(photo); },
+            onTap: () {
+              onBannerTap(photo);
+            },
             child: GridTileBar(
               backgroundColor: Colors.black45,
               title: _GridTitleText(photo.title),
@@ -243,7 +245,7 @@ class GridDemoPhotoItem extends StatelessWidget {
 }
 
 class GridListDemo extends StatefulWidget {
-  const GridListDemo({ Key key }) : super(key: key);
+  const GridListDemo({Key key}) : super(key: key);
 
   static const String routeName = '/material/grid-list';
 
@@ -346,19 +348,19 @@ class GridListDemoState extends State<GridListDemo> {
           PopupMenuButton<GridDemoTileStyle>(
             onSelected: changeTileStyle,
             itemBuilder: (BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[
-              const PopupMenuItem<GridDemoTileStyle>(
-                value: GridDemoTileStyle.imageOnly,
-                child: Text('Image only'),
-              ),
-              const PopupMenuItem<GridDemoTileStyle>(
-                value: GridDemoTileStyle.oneLine,
-                child: Text('One line'),
-              ),
-              const PopupMenuItem<GridDemoTileStyle>(
-                value: GridDemoTileStyle.twoLine,
-                child: Text('Two line'),
-              ),
-            ],
+                  const PopupMenuItem<GridDemoTileStyle>(
+                    value: GridDemoTileStyle.imageOnly,
+                    child: Text('Image only'),
+                  ),
+                  const PopupMenuItem<GridDemoTileStyle>(
+                    value: GridDemoTileStyle.oneLine,
+                    child: Text('One line'),
+                  ),
+                  const PopupMenuItem<GridDemoTileStyle>(
+                    value: GridDemoTileStyle.twoLine,
+                    child: Text('Two line'),
+                  ),
+                ],
           ),
         ],
       ),
@@ -382,7 +384,7 @@ class GridListDemoState extends State<GridListDemo> {
                       setState(() {
                         photo.isFavorite = !photo.isFavorite;
                       });
-                    }
+                    },
                   );
                 }).toList(),
               ),

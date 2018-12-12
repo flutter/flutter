@@ -83,20 +83,19 @@ class _IconsDemoCard extends StatelessWidget {
       icon: Icon(icon),
       iconSize: iconSize,
       tooltip: "${enabled ? 'Enabled' : 'Disabled'} icon button",
-      onPressed: enabled ? handleIconButtonPress : null
+      onPressed: enabled ? handleIconButtonPress : null,
     );
   }
 
-  Widget _centeredText(String label) =>
-    Padding(
-      // Match the default padding of IconButton.
-      padding: const EdgeInsets.all(8.0),
-      child: Text(label, textAlign: TextAlign.center),
-    );
+  Widget _centeredText(String label) => Padding(
+        // Match the default padding of IconButton.
+        padding: const EdgeInsets.all(8.0),
+        child: Text(label, textAlign: TextAlign.center),
+      );
 
   TableRow _buildIconRow(double size) {
     return TableRow(
-      children: <Widget> [
+      children: <Widget>[
         _centeredText(size.floor().toString()),
         _buildIconButton(size, icon, true),
         _buildIconButton(size, icon, false),
@@ -115,13 +114,13 @@ class _IconsDemoCard extends StatelessWidget {
           explicitChildNodes: true,
           child: Table(
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            children: <TableRow> [
+            children: <TableRow>[
               TableRow(
-                children: <Widget> [
+                children: <Widget>[
                   _centeredText('Size'),
                   _centeredText('Enabled'),
                   _centeredText('Disabled'),
-                ]
+                ],
               ),
               _buildIconRow(18.0),
               _buildIconRow(24.0),

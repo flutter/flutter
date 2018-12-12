@@ -24,6 +24,6 @@ void main() {
         // particular text direction.
         textDirection: TextDirection.ltr,
       ),
-    )
+    ),
   );
 }

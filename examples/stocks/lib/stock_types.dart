@@ -18,17 +18,17 @@ class StockConfiguration {
     @required this.debugShowPointers,
     @required this.debugShowRainbow,
     @required this.showPerformanceOverlay,
-    @required this.showSemanticsDebugger
-  }) : assert(stockMode != null),
-       assert(backupMode != null),
-       assert(debugShowGrid != null),
-       assert(debugShowSizes != null),
-       assert(debugShowBaselines != null),
-       assert(debugShowLayers != null),
-       assert(debugShowPointers != null),
-       assert(debugShowRainbow != null),
-       assert(showPerformanceOverlay != null),
-       assert(showSemanticsDebugger != null);
+    @required this.showSemanticsDebugger,
+  })  : assert(stockMode != null),
+        assert(backupMode != null),
+        assert(debugShowGrid != null),
+        assert(debugShowSizes != null),
+        assert(debugShowBaselines != null),
+        assert(debugShowLayers != null),
+        assert(debugShowPointers != null),
+        assert(debugShowRainbow != null),
+        assert(showPerformanceOverlay != null),
+        assert(showSemanticsDebugger != null);
 
   final StockMode stockMode;
   final BackupMode backupMode;
@@ -51,7 +51,7 @@ class StockConfiguration {
     bool debugShowPointers,
     bool debugShowRainbow,
     bool showPerformanceOverlay,
-    bool showSemanticsDebugger
+    bool showSemanticsDebugger,
   }) {
     return StockConfiguration(
       stockMode: stockMode ?? this.stockMode,
@@ -63,7 +63,7 @@ class StockConfiguration {
       debugShowPointers: debugShowPointers ?? this.debugShowPointers,
       debugShowRainbow: debugShowRainbow ?? this.debugShowRainbow,
       showPerformanceOverlay: showPerformanceOverlay ?? this.showPerformanceOverlay,
-      showSemanticsDebugger: showSemanticsDebugger ?? this.showSemanticsDebugger
+      showSemanticsDebugger: showSemanticsDebugger ?? this.showSemanticsDebugger,
     );
   }
 }

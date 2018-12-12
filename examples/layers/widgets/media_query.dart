@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class AdaptedListItem extends StatelessWidget {
-  const AdaptedListItem({ Key key, this.name }) : super(key: key);
+  const AdaptedListItem({Key key, this.name}) : super(key: key);
 
   final String name;
 
@@ -20,13 +20,13 @@ class AdaptedListItem extends StatelessWidget {
           color: Colors.lightBlueAccent.shade100,
         ),
         Text(name)
-      ]
+      ],
     );
   }
 }
 
 class AdaptedGridItem extends StatelessWidget {
-  const AdaptedGridItem({ Key key, this.name }) : super(key: key);
+  const AdaptedGridItem({Key key, this.name}) : super(key: key);
 
   final String name;
 
@@ -38,24 +38,24 @@ class AdaptedGridItem extends StatelessWidget {
           Expanded(
             child: Container(
               color: Colors.lightBlueAccent.shade100,
-            )
+            ),
           ),
           Container(
             margin: const EdgeInsets.only(left: 8.0),
             child: Row(
               children: <Widget>[
                 Expanded(
-                  child: Text(name)
+                  child: Text(name),
                 ),
                 const IconButton(
                   icon: Icon(Icons.more_vert),
-                  onPressed: null
+                  onPressed: null,
                 )
-              ]
-            )
+              ],
+            ),
           )
-        ]
-      )
+        ],
+      ),
     );
   }
 }
@@ -65,7 +65,7 @@ const double _kMaxTileWidth = 150.0;
 const double _kGridViewBreakpoint = 450.0;
 
 class AdaptiveContainer extends StatelessWidget {
-  const AdaptiveContainer({ Key key, this.names }) : super(key: key);
+  const AdaptiveContainer({Key key, this.names}) : super(key: key);
 
   final List<String> names;
 
@@ -87,8 +87,7 @@ class AdaptiveContainer extends StatelessWidget {
 
 List<String> _initNames() {
   final List<String> names = <String>[];
-  for (int i = 0; i < 30; i++)
-    names.add('Item $i');
+  for (int i = 0; i < 30; i++) names.add('Item $i');
   return names;
 }
 
@@ -99,9 +98,9 @@ void main() {
     title: 'Media Query Example',
     home: Scaffold(
       appBar: AppBar(
-        title: const Text('Media Query Example')
+        title: const Text('Media Query Example'),
       ),
-      body: Material(child: AdaptiveContainer(names: _kNames))
-    )
+      body: Material(child: AdaptiveContainer(names: _kNames)),
+    ),
   ));
 }

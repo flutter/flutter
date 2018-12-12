@@ -116,7 +116,7 @@ class _CalculatorState extends State<Calculator> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).canvasColor,
-        elevation: 0.0
+        elevation: 0.0,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -124,21 +124,21 @@ class _CalculatorState extends State<Calculator> {
           // Give the key-pad 3/5 of the vertical space and the display 2/5.
           Expanded(
             flex: 2,
-            child: CalcDisplay(content: _expression.toString())
+            child: CalcDisplay(content: _expression.toString()),
           ),
           const Divider(height: 1.0),
           Expanded(
             flex: 3,
-            child: KeyPad(calcState: this)
+            child: KeyPad(calcState: this),
           )
-        ]
-      )
+        ],
+      ),
     );
   }
 }
 
 class CalcDisplay extends StatelessWidget {
-  const CalcDisplay({ this.content });
+  const CalcDisplay({this.content});
 
   final String content;
 
@@ -147,14 +147,14 @@ class CalcDisplay extends StatelessWidget {
     return Center(
       child: Text(
         content,
-        style: const TextStyle(fontSize: 24.0)
-      )
+        style: const TextStyle(fontSize: 24.0),
+      ),
     );
   }
 }
 
 class KeyPad extends StatelessWidget {
-  const KeyPad({ this.calcState });
+  const KeyPad({this.calcState});
 
   final _CalculatorState calcState;
 
@@ -177,28 +177,16 @@ class KeyPad extends StatelessWidget {
               flex: 3,
               child: Column(
                 children: <Widget>[
-                  KeyRow(<Widget>[
-                    NumberKey(7, calcState),
-                    NumberKey(8, calcState),
-                    NumberKey(9, calcState)
-                  ]),
-                  KeyRow(<Widget>[
-                    NumberKey(4, calcState),
-                    NumberKey(5, calcState),
-                    NumberKey(6, calcState)
-                  ]),
-                  KeyRow(<Widget>[
-                    NumberKey(1, calcState),
-                    NumberKey(2, calcState),
-                    NumberKey(3, calcState)
-                  ]),
+                  KeyRow(<Widget>[NumberKey(7, calcState), NumberKey(8, calcState), NumberKey(9, calcState)]),
+                  KeyRow(<Widget>[NumberKey(4, calcState), NumberKey(5, calcState), NumberKey(6, calcState)]),
+                  KeyRow(<Widget>[NumberKey(1, calcState), NumberKey(2, calcState), NumberKey(3, calcState)]),
                   KeyRow(<Widget>[
                     CalcKey('.', calcState.handlePointTap),
                     NumberKey(0, calcState),
                     CalcKey('=', calcState.handleEqualsTap),
                   ])
-                ]
-              )
+                ],
+              ),
             ),
             Expanded(
               child: Material(
@@ -210,13 +198,13 @@ class KeyPad extends StatelessWidget {
                     CalcKey('\u00D7', calcState.handleMultTap),
                     CalcKey('-', calcState.handleMinusTap),
                     CalcKey('+', calcState.handlePlusTap)
-                  ]
-                )
-              )
+                  ],
+                ),
+              ),
             ),
-          ]
-        )
-      )
+          ],
+        ),
+      ),
     );
   }
 }
@@ -231,8 +219,8 @@ class KeyRow extends StatelessWidget {
     return Expanded(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: keys
-      )
+        children: keys,
+      ),
     );
   }
 }
@@ -253,18 +241,18 @@ class CalcKey extends StatelessWidget {
           child: Text(
             text,
             style: TextStyle(
-              fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0
-            )
-          )
-        )
-      )
+              fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
 
 class NumberKey extends CalcKey {
   NumberKey(int value, _CalculatorState calcState)
-    : super('$value', () {
-        calcState.handleNumberTap(value);
-      });
+      : super('$value', () {
+         calcState.handleNumberTap(value);
+       });
 }

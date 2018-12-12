@@ -20,7 +20,7 @@ enum _ReorderableListType {
 }
 
 class ReorderableListDemo extends StatefulWidget {
-  const ReorderableListDemo({ Key key }) : super(key: key);
+  const ReorderableListDemo({Key key}) : super(key: key);
 
   static const String routeName = '/material/reorderable-list';
 
@@ -43,7 +43,20 @@ class _ListDemoState extends State<ReorderableListDemo> {
   _ReorderableListType _itemType = _ReorderableListType.threeLine;
   bool _reverseSort = false;
   final List<_ListItem> _items = <String>[
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'H',
+    'I',
+    'J',
+    'K',
+    'L',
+    'M',
+    'N',
   ].map<_ListItem>((String item) => _ListItem(item, false)).toList();
 
   void changeItemType(_ReorderableListType type) {
@@ -51,7 +64,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
       _itemType = type;
     });
     // Rebuild the bottom sheet to reflect the selected list view.
-    _bottomSheet?.setState(() { });
+    _bottomSheet?.setState(() {});
     // Close the bottom sheet to give the user a clear view of the list.
     _bottomSheet?.close();
   }
@@ -131,7 +144,8 @@ class _ListDemoState extends State<ReorderableListDemo> {
           key: Key(item.value),
           height: 100.0,
           width: 100.0,
-          child: CircleAvatar(child: Text(item.value),
+          child: CircleAvatar(
+            child: Text(item.value),
             backgroundColor: Colors.green,
           ),
         );
@@ -151,7 +165,6 @@ class _ListDemoState extends State<ReorderableListDemo> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -166,15 +179,14 @@ class _ListDemoState extends State<ReorderableListDemo> {
             onPressed: () {
               setState(() {
                 _reverseSort = !_reverseSort;
-                _items.sort((_ListItem a, _ListItem b) => _reverseSort ? b.value.compareTo(a.value) : a.value.compareTo(b.value));
+                _items.sort((_ListItem a, _ListItem b) =>
+                    _reverseSort ? b.value.compareTo(a.value) : a.value.compareTo(b.value));
               });
             },
           ),
           IconButton(
             icon: Icon(
-              Theme.of(context).platform == TargetPlatform.iOS
-                  ? Icons.more_horiz
-                  : Icons.more_vert,
+              Theme.of(context).platform == TargetPlatform.iOS ? Icons.more_horiz : Icons.more_vert,
             ),
             tooltip: 'Show menu',
             onPressed: _bottomSheet == null ? _showConfigurationSheet : null,
@@ -185,11 +197,12 @@ class _ListDemoState extends State<ReorderableListDemo> {
         child: ReorderableListView(
           header: _itemType != _ReorderableListType.threeLine
               ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text('Header of the list', style: Theme.of(context).textTheme.headline))
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Header of the list', style: Theme.of(context).textTheme.headline))
               : null,
           onReorder: _onReorder,
-          scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
+          scrollDirection:
+              _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           children: _items.map<Widget>(buildListTile).toList(),
         ),

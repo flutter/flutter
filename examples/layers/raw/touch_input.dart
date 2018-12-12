@@ -28,7 +28,7 @@ ui.Picture paint(ui.Rect paintBounds) {
   canvas.drawCircle(
     size.center(ui.Offset.zero),
     size.shortestSide * 0.45,
-    ui.Paint()..color = color
+    ui.Paint()..color = color,
   );
 
   // When we're done issuing painting commands, we end the recording an receive

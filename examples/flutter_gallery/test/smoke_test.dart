@@ -33,21 +33,24 @@ void reportToStringError(String name, String route, int lineNumber, List<String>
   const int margin = 5;
   final int firstLine = math.max(0, lineNumber - margin);
   final int lastLine = math.min(lines.length, lineNumber + margin);
-  print('$name : $route : line $lineNumber of ${lines.length} : $message; nearby lines were:\n  ${lines.sublist(firstLine, lastLine).join("\n  ")}');
+  print(
+    '$name : $route : line $lineNumber of ${lines.length} : $message; nearby lines were:\n  ${lines.sublist(firstLine, lastLine).join("\n  ")}');
   toStringErrors += 1;
 }
 
 void verifyToStringOutput(String name, String route, String testString) {
   int lineNumber = 0;
   final List<String> lines = testString.split('\n');
-  if (!testString.endsWith('\n'))
+  if (!testString.endsWith('\n')) {
     reportToStringError(name, route, lines.length, lines, 'does not end with a line feed');
+  }
   for (String line in lines) {
     lineNumber += 1;
     if (line == '' && lineNumber != lines.length) {
       reportToStringError(name, route, lineNumber, lines, 'found empty line');
     } else if (line.contains('Instance of ')) {
-      reportToStringError(name, route, lineNumber, lines, 'found a class that does not have its own toString');
+      reportToStringError(
+        name, route, lineNumber, lines, 'found a class that does not have its own toString');
     } else if (line.endsWith(' ')) {
       reportToStringError(name, route, lineNumber, lines, 'found a line with trailing whitespace');
     }
@@ -78,8 +81,10 @@ Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
   // Verify that the dumps are pretty.
   final String routeName = demo.routeName;
   verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance.renderViewElement.toStringDeep());
-  verifyToStringOutput('debugDumpRenderTree', routeName, RendererBinding.instance?.renderView?.toStringDeep());
-  verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance?.renderView?.debugLayer?.toStringDeep());
+  verifyToStringOutput(
+    'debugDumpRenderTree', routeName, RendererBinding.instance?.renderView?.toStringDeep());
+  verifyToStringOutput(
+    'debugDumpLayerTree', routeName, RendererBinding.instance?.renderView?.debugLayer?.toStringDeep());
 
   // Scroll the demo around a bit more.
   await tester.flingFrom(const Offset(400.0, 300.0), const Offset(-200.0, 0.0), 500.0);
@@ -164,7 +169,8 @@ Future<void> smokeGallery(WidgetTester tester) async {
     for (GalleryDemo demo in kGalleryCategoryToDemos[category]) {
       await Scrollable.ensureVisible(tester.element(find.text(demo.title)), alignment: 0.0);
       await smokeDemo(tester, demo);
-      tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after running $demo');
+      tester.binding
+        .debugAssertNoTransientCallbacks('A transient callback was still active after running $demo');
     }
     await tester.pageBack();
     await tester.pumpAndSettle();

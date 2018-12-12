@@ -10,13 +10,8 @@ import 'package:intl/intl.dart';
 import '../../gallery/demo.dart';
 
 class _InputDropdown extends StatelessWidget {
-  const _InputDropdown({
-    Key key,
-    this.child,
-    this.labelText,
-    this.valueText,
-    this.valueStyle,
-    this.onPressed }) : super(key: key);
+  const _InputDropdown({Key key, this.child, this.labelText, this.valueText, this.valueStyle, this.onPressed})
+      : super(key: key);
 
   final String labelText;
   final String valueText;
@@ -38,8 +33,9 @@ class _InputDropdown extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(valueText, style: valueStyle),
-            Icon(Icons.arrow_drop_down,
-              color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70
+            Icon(
+              Icons.arrow_drop_down,
+              color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70,
             ),
           ],
         ),
@@ -55,7 +51,7 @@ class _DateTimePicker extends StatelessWidget {
     this.selectedDate,
     this.selectedTime,
     this.selectDate,
-    this.selectTime
+    this.selectTime,
   }) : super(key: key);
 
   final String labelText;
@@ -69,19 +65,21 @@ class _DateTimePicker extends StatelessWidget {
       context: context,
       initialDate: selectedDate,
       firstDate: DateTime(2015, 8),
-      lastDate: DateTime(2101)
+      lastDate: DateTime(2101),
     );
-    if (picked != null && picked != selectedDate)
+    if (picked != null && picked != selectedDate) {
       selectDate(picked);
+    }
   }
 
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay picked = await showTimePicker(
       context: context,
-      initialTime: selectedTime
+      initialTime: selectedTime,
     );
-    if (picked != null && picked != selectedTime)
+    if (picked != null && picked != selectedTime) {
       selectTime(picked);
+    }
   }
 
   @override
@@ -96,7 +94,9 @@ class _DateTimePicker extends StatelessWidget {
             labelText: labelText,
             valueText: DateFormat.yMMMd().format(selectedDate),
             valueStyle: valueStyle,
-            onPressed: () { _selectDate(context); },
+            onPressed: () {
+              _selectDate(context);
+            },
           ),
         ),
         const SizedBox(width: 12.0),
@@ -105,7 +105,9 @@ class _DateTimePicker extends StatelessWidget {
           child: _InputDropdown(
             valueText: selectedTime.format(context),
             valueStyle: valueStyle,
-            onPressed: () { _selectTime(context); },
+            onPressed: () {
+              _selectTime(context);
+            },
           ),
         ),
       ],

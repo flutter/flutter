@@ -82,8 +82,9 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
   }
 
   // Verify that the durations data is valid.
-  if (durations.keys.isEmpty)
+  if (durations.keys.isEmpty) {
     throw 'no "Start Transition" timeline events found';
+  }
   final Map<String, int> unexpectedValueCounts = <String, int>{};
   durations.forEach((String routeName, List<int> values) {
     if (values.length != 2) {
@@ -92,7 +93,8 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
   });
 
   if (unexpectedValueCounts.isNotEmpty) {
-    final StringBuffer error = StringBuffer('Some routes recorded wrong number of values (expected 2 values/route):\n\n');
+    final StringBuffer error =
+        StringBuffer('Some routes recorded wrong number of values (expected 2 values/route):\n\n');
     unexpectedValueCounts.forEach((String routeName, int count) {
       error.writeln(' - $routeName recorded $count values.');
     });
@@ -103,12 +105,11 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
     while (eventIter.moveNext()) {
       final String eventName = eventIter.current['name'];
 
-      if (!<String>['Start Transition', 'Frame'].contains(eventName))
+      if (!<String>['Start Transition', 'Frame'].contains(eventName)) {
         continue;
+      }
 
-      final String routeName = eventName == 'Start Transition'
-        ? eventIter.current['args']['to']
-        : '';
+      final String routeName = eventName == 'Start Transition' ? eventIter.current['args']['to'] : '';
 
       if (eventName == lastEventName && routeName == lastRouteName) {
         error.write('.');
@@ -134,8 +135,9 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   String currentDemoCategory;
 
   for (String demo in demos) {
-    if (kSkippedDemos.contains(demo))
+    if (kSkippedDemos.contains(demo)) {
       continue;
+    }
 
     final String demoName = demo.substring(0, demo.indexOf('@'));
     final String demoCategory = demo.substring(demo.indexOf('@') + 1);
@@ -152,7 +154,9 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
     currentDemoCategory = demoCategory;
 
     final SerializableFinder demoItem = find.text(demoName);
-    await driver.scrollUntilVisible(demoList, demoItem,
+    await driver.scrollUntilVisible(
+      demoList,
+      demoItem,
       dyScroll: -48.0,
       alignment: 0.5,
       timeout: const Duration(seconds: 30),
@@ -190,17 +194,18 @@ void main([List<String> args = const <String>[]]) {
 
       // See _handleMessages() in transitions_perf.dart.
       _allDemos = List<String>.from(const JsonDecoder().convert(await driver.requestData('demoNames')));
-      if (_allDemos.isEmpty)
+      if (_allDemos.isEmpty) {
         throw 'no demo names found';
+      }
     });
 
     tearDownAll(() async {
-      if (driver != null)
+      if (driver != null) {
         await driver.close();
+      }
     });
 
     test('all demos', () async {
-
       // Collect timeline data for just a limited set of demos to avoid OOMs.
       final Timeline timeline = await driver.traceAction(
         () async {
@@ -219,13 +224,11 @@ void main([List<String> args = const <String>[]]) {
       await summary.writeSummaryToFile('transitions', pretty: true);
       final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
       await saveDurationsHistogram(
-          List<Map<String, dynamic>>.from(timeline.json['traceEvents']),
-          histogramPath);
+        List<Map<String, dynamic>>.from(timeline.json['traceEvents']), histogramPath);
 
       // Execute the remaining tests.
       final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
       await runDemos(unprofiledDemos.toList(), driver);
-
     }, timeout: const Timeout(Duration(minutes: 5)));
   });
 }

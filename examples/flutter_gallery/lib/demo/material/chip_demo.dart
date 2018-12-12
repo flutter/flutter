@@ -100,16 +100,15 @@ class _ChipsTile extends StatelessWidget {
       }).toList()));
     } else {
       final TextStyle textStyle = Theme.of(context).textTheme.caption.copyWith(fontStyle: FontStyle.italic);
-      cardChildren.add(
-        Semantics(
-          container: true,
-          child: Container(
-            alignment: Alignment.center,
-            constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
-            padding: const EdgeInsets.all(8.0),
-            child: Text('None', style: textStyle),
-          ),
-        ));
+      cardChildren.add(Semantics(
+        container: true,
+        child: Container(
+          alignment: Alignment.center,
+          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          padding: const EdgeInsets.all(8.0),
+          child: Text('None', style: textStyle),
+        ),
+      ));
     }
 
     return Card(
@@ -117,7 +116,7 @@ class _ChipsTile extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: cardChildren,
-      )
+      ),
     );
   }
 }
@@ -217,16 +216,16 @@ class _ChipDemoState extends State<ChipDemo> {
 
     final List<Widget> inputChips = _tools.map<Widget>((String name) {
       return InputChip(
-          key: ValueKey<String>(name),
-          avatar: CircleAvatar(
-            backgroundImage: _nameToAvatar(name),
-          ),
-          label: Text(_capitalize(name)),
-          onDeleted: () {
-            setState(() {
-              _removeTool(name);
-            });
+        key: ValueKey<String>(name),
+        avatar: CircleAvatar(
+          backgroundImage: _nameToAvatar(name),
+        ),
+        label: Text(_capitalize(name)),
+        onDeleted: () {
+          setState(() {
+            _removeTool(name);
           });
+        });
     }).toList();
 
     final List<Widget> choiceChips = _materials.map<Widget>((String name) {
@@ -319,7 +318,7 @@ class _ChipDemoState extends State<ChipDemo> {
       body: ChipTheme(
         data: _showShapeBorder
             ? theme.chipTheme.copyWith(
-                shape: BeveledRectangleBorder(
+              shape: BeveledRectangleBorder(
                 side: const BorderSide(width: 0.66, style: BorderStyle.solid, color: Colors.grey),
                 borderRadius: BorderRadius.circular(10.0),
               ))

@@ -12,10 +12,12 @@ import 'package:stocks/stock_data.dart' as stock_data;
 
 Element findElementOfExactWidgetTypeGoingDown(Element node, Type targetType) {
   void walker(Element child) {
-    if (child.widget.runtimeType == targetType)
+    if (child.widget.runtimeType == targetType) {
       throw child;
+    }
     child.visitChildElements(walker);
   }
+
   try {
     walker(node);
   } on Element catch (result) {
@@ -27,10 +29,12 @@ Element findElementOfExactWidgetTypeGoingDown(Element node, Type targetType) {
 Element findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
   Element result;
   bool walker(Element ancestor) {
-    if (ancestor.widget.runtimeType == targetType)
+    if (ancestor.widget.runtimeType == targetType) {
       result = ancestor;
+    }
     return result == null;
   }
+
   node.visitAncestorElements(walker);
   return result;
 }

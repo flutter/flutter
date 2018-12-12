@@ -117,9 +117,9 @@ class ListModel<E> {
     @required this.listKey,
     @required this.removedItemBuilder,
     Iterable<E> initialItems,
-  }) : assert(listKey != null),
-       assert(removedItemBuilder != null),
-       _items = List<E>.from(initialItems ?? <E>[]);
+  })  : assert(listKey != null),
+        assert(removedItemBuilder != null),
+        _items = List<E>.from(initialItems ?? <E>[]);
 
   final GlobalKey<AnimatedListState> listKey;
   final dynamic removedItemBuilder;
@@ -157,11 +157,11 @@ class CardItem extends StatelessWidget {
     @required this.animation,
     this.onTap,
     @required this.item,
-    this.selected = false
-  }) : assert(animation != null),
-       assert(item != null && item >= 0),
-       assert(selected != null),
-       super(key: key);
+    this.selected = false,
+  })  : assert(animation != null),
+        assert(item != null && item >= 0),
+        assert(selected != null),
+        super(key: key);
 
   final Animation<double> animation;
   final VoidCallback onTap;
@@ -171,8 +171,9 @@ class CardItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TextStyle textStyle = Theme.of(context).textTheme.display1;
-    if (selected)
+    if (selected) {
       textStyle = textStyle.copyWith(color: Colors.lightGreenAccent[400]);
+    }
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: SizeTransition(

@@ -51,12 +51,12 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
           ),
           padding: const EdgeInsets.all(2.0),
           borderRadius: BorderRadius.circular(15.0),
-          onPressed: ()=> setState(()=> _chatTextController.clear()),
+          onPressed: () => setState(() => _chatTextController.clear()),
         ),
       ),
       autofocus: true,
       suffixMode: OverlayVisibilityMode.editing,
-      onSubmitted: (String text)=> setState(()=> _chatTextController.clear()),
+      onSubmitted: (String text) => setState(() => _chatTextController.clear()),
     );
   }
 

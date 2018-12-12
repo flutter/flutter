@@ -103,8 +103,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                   setState(() => _selectedColorIndex = index);
                 },
                 children: List<Widget>.generate(coolColorNames.length, (int index) {
-                  return Center(child:
-                  Text(coolColorNames[index]),
+                  return Center(
+                    child: Text(coolColorNames[index]),
                   );
                 }),
               ),
@@ -118,7 +118,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           Text(
             coolColorNames[_selectedColorIndex],
             style: const TextStyle(
-                color: CupertinoColors.inactiveGray
+              color: CupertinoColors.inactiveGray,
             ),
           ),
         ],
@@ -148,8 +148,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           const Text('Countdown Timer'),
           Text(
             '${timer.inHours}:'
-                '${(timer.inMinutes % 60).toString().padLeft(2,'0')}:'
-                '${(timer.inSeconds % 60).toString().padLeft(2,'0')}',
+                '${(timer.inMinutes % 60).toString().padLeft(2, '0')}:'
+                '${(timer.inSeconds % 60).toString().padLeft(2, '0')}',
             style: const TextStyle(color: CupertinoColors.inactiveGray),
           ),
         ],
@@ -182,7 +182,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
             DateFormat.yMMMMd().format(date),
             style: const TextStyle(color: CupertinoColors.inactiveGray),
           ),
-        ]
+        ],
       ),
     );
   }

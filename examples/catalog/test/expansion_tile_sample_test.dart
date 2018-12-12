@@ -17,8 +17,7 @@ void main() {
       expect(find.text(chapter.title), findsOneWidget);
       for (Entry section in chapter.children) {
         expect(find.text(section.title), findsNothing);
-        for (Entry item in section.children)
-          expect(find.text(item.title), findsNothing);
+        for (Entry item in section.children) expect(find.text(item.title), findsNothing);
       }
     }
 
@@ -34,16 +33,14 @@ void main() {
 
     // Expand the chapters. Now the chapter and sections, but not the
     // items, should be present.
-    for (Entry chapter in expansion_tile_sample.data.reversed)
-      await tapEntry(chapter.title);
+    for (Entry chapter in expansion_tile_sample.data.reversed) await tapEntry(chapter.title);
 
     for (Entry chapter in expansion_tile_sample.data) {
       expect(find.text(chapter.title), findsOneWidget);
       for (Entry section in chapter.children) {
         expect(find.text(section.title), findsOneWidget);
         await scrollUpOneEntry();
-        for (Entry item in section.children)
-          expect(find.text(item.title), findsNothing);
+        for (Entry item in section.children) expect(find.text(item.title), findsNothing);
       }
       await scrollUpOneEntry();
     }
@@ -69,8 +66,7 @@ void main() {
       expect(find.text(chapter.title), findsOneWidget);
       for (Entry section in chapter.children.reversed) {
         expect(find.text(section.title), findsOneWidget);
-        for (Entry item in section.children.reversed)
-          expect(find.text(item.title), findsOneWidget);
+        for (Entry item in section.children.reversed) expect(find.text(item.title), findsOneWidget);
         await tapEntry(section.title); // close the section
       }
       await tapEntry(chapter.title); // close the chapter
@@ -81,10 +77,8 @@ void main() {
       expect(find.text(chapter.title), findsOneWidget);
       for (Entry section in chapter.children) {
         expect(find.text(section.title), findsNothing);
-        for (Entry item in section.children)
-          expect(find.text(item.title), findsNothing);
+        for (Entry item in section.children) expect(find.text(item.title), findsNothing);
       }
     }
-
   });
 }

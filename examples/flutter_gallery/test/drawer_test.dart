@@ -9,8 +9,9 @@ import 'package:flutter_gallery/gallery/app.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  if (binding is LiveTestWidgetsFlutterBinding)
+  if (binding is LiveTestWidgetsFlutterBinding) {
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+  }
 
   testWidgets('Flutter Gallery drawer item test', (WidgetTester tester) async {
     bool hasFeedback = false;

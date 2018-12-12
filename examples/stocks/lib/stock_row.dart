@@ -14,7 +14,7 @@ class StockRow extends StatelessWidget {
     this.stock,
     this.onPressed,
     this.onDoubleTap,
-    this.onLongPressed
+    this.onLongPressed,
   }) : super(key: ObjectKey(stock));
 
   final Stock stock;
@@ -32,8 +32,9 @@ class StockRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
     String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
-    if (stock.percentChange > 0)
+    if (stock.percentChange > 0) {
       changeInPrice = '+' + changeInPrice;
+    }
     return InkWell(
       onTap: _getHandler(onPressed),
       onDoubleTap: _getHandler(onDoubleTap),
@@ -42,8 +43,8 @@ class StockRow extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 20.0),
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: Theme.of(context).dividerColor)
-          )
+            bottom: BorderSide(color: Theme.of(context).dividerColor),
+          ),
         ),
         child: Row(
           children: <Widget>[
@@ -51,8 +52,8 @@ class StockRow extends StatelessWidget {
               margin: const EdgeInsets.only(right: 5.0),
               child: Hero(
                 tag: stock,
-                child: StockArrow(percentChange: stock.percentChange)
-              )
+                child: StockArrow(percentChange: stock.percentChange),
+              ),
             ),
             Expanded(
               child: Row(
@@ -60,29 +61,29 @@ class StockRow extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      stock.symbol
-                    )
+                      stock.symbol,
+                    ),
                   ),
                   Expanded(
                     child: Text(
                       lastSale,
-                      textAlign: TextAlign.right
-                    )
+                      textAlign: TextAlign.right,
+                    ),
                   ),
                   Expanded(
                     child: Text(
                       changeInPrice,
-                      textAlign: TextAlign.right
-                    )
+                      textAlign: TextAlign.right,
+                    ),
                   ),
                 ],
                 crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: DefaultTextStyle.of(context).style.textBaseline
-              )
+                textBaseline: DefaultTextStyle.of(context).style.textBaseline,
+              ),
             ),
-          ]
-        )
-      )
+          ],
+        ),
+      ),
     );
   }
 }

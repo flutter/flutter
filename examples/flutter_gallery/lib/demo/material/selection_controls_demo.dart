@@ -6,24 +6,21 @@ import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
-const String _checkboxText =
-  'Checkboxes allow the user to select multiple options from a set. '
-  'A normal checkbox\'s value is true or false and a tristate checkbox\'s '
-  'value can also be null.';
+const String _checkboxText = 'Checkboxes allow the user to select multiple options from a set. '
+    'A normal checkbox\'s value is true or false and a tristate checkbox\'s '
+    'value can also be null.';
 
 const String _checkboxCode = 'selectioncontrols_checkbox';
 
-const String _radioText =
-  'Radio buttons allow the user to select one option from a set. Use radio '
-  'buttons for exclusive selection if you think that the user needs to see '
-  'all available options side-by-side.';
+const String _radioText = 'Radio buttons allow the user to select one option from a set. Use radio '
+    'buttons for exclusive selection if you think that the user needs to see '
+    'all available options side-by-side.';
 
 const String _radioCode = 'selectioncontrols_radio';
 
-const String _switchText =
-  'On/off switches toggle the state of a single settings option. The option '
-  'that the switch controls, as well as the state it’s in, should be made '
-  'clear from the corresponding inline label.';
+const String _switchText = 'On/off switches toggle the state of a single settings option. The option '
+    'that the switch controls, as well as the state it’s in, should be made '
+    'clear from the corresponding inline label.';
 
 const String _switchCode = 'selectioncontrols_switch';
 
@@ -63,7 +60,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
 
     return TabbedComponentDemoScaffold(
       title: 'Selection controls',
-      demos: demos
+      demos: demos,
     );
   }
 
@@ -122,10 +119,10 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
               Checkbox(value: true, onChanged: null),
               Checkbox(value: false, onChanged: null),
               Checkbox(value: null, tristate: true, onChanged: null),
-            ]
+            ],
           )
-        ]
-      )
+        ],
+      ),
     );
   }
 
@@ -141,19 +138,19 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
               Radio<int>(
                 value: 0,
                 groupValue: radioValue,
-                onChanged: handleRadioValueChanged
+                onChanged: handleRadioValueChanged,
               ),
               Radio<int>(
                 value: 1,
                 groupValue: radioValue,
-                onChanged: handleRadioValueChanged
+                onChanged: handleRadioValueChanged,
               ),
               Radio<int>(
                 value: 2,
                 groupValue: radioValue,
-                onChanged: handleRadioValueChanged
+                onChanged: handleRadioValueChanged,
               )
-            ]
+            ],
           ),
           // Disabled radio buttons
           Row(
@@ -162,22 +159,22 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
               Radio<int>(
                 value: 0,
                 groupValue: 0,
-                onChanged: null
+                onChanged: null,
               ),
               Radio<int>(
                 value: 1,
                 groupValue: 0,
-                onChanged: null
+                onChanged: null,
               ),
               Radio<int>(
                 value: 2,
                 groupValue: 0,
-                onChanged: null
+                onChanged: null,
               )
-            ]
+            ],
           )
-        ]
-      )
+        ],
+      ),
     );
   }
 
@@ -193,7 +190,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
               setState(() {
                 switchValue = value;
               });
-            }
+            },
           ),
           // Disabled switches
           const Switch.adaptive(value: true, onChanged: null),

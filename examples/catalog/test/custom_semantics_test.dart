@@ -19,11 +19,11 @@ void main() {
 
     // Verify it correctly exposes its semantics.
     // TODO(goderbauer): Use `SemanticsTester` after https://github.com/flutter/flutter/issues/12286.
-    final SemanticsNode semantics = tester
-        .renderObject(find.byType(AdjustableDropdownListTile))
-        .debugSemantics;
+    final SemanticsNode semantics =
+        tester.renderObject(find.byType(AdjustableDropdownListTile)).debugSemantics;
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       label: 'Timeout',
@@ -36,7 +36,8 @@ void main() {
     semanticsOwner.performAction(semantics.id, SemanticsAction.increase);
     await tester.pump();
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       label: 'Timeout',
@@ -49,7 +50,8 @@ void main() {
     semanticsOwner.performAction(semantics.id, SemanticsAction.increase);
     await tester.pump();
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: false,
       hasDecreaseAction: true,
       label: 'Timeout',
@@ -61,7 +63,8 @@ void main() {
     semanticsOwner.performAction(semantics.id, SemanticsAction.decrease);
     await tester.pump();
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       label: 'Timeout',
@@ -78,7 +81,8 @@ void main() {
     semanticsOwner.performAction(semantics.id, SemanticsAction.decrease);
     await tester.pump();
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: true,
       hasDecreaseAction: false,
       label: 'Timeout',
@@ -91,7 +95,8 @@ void main() {
   });
 }
 
-void expectAdjustable(SemanticsNode node, {
+void expectAdjustable(
+  SemanticsNode node, {
   bool hasIncreaseAction = true,
   bool hasDecreaseAction = true,
   String label = '',
@@ -102,10 +107,12 @@ void expectAdjustable(SemanticsNode node, {
   final SemanticsData semanticsData = node.getSemanticsData();
 
   int actions = 0;
-  if (hasIncreaseAction)
+  if (hasIncreaseAction) {
     actions |= SemanticsAction.increase.index;
-  if (hasDecreaseAction)
+  }
+  if (hasDecreaseAction) {
     actions |= SemanticsAction.decrease.index;
+  }
 
   expect(semanticsData.actions, actions);
   expect(semanticsData.label, label);

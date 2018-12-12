@@ -18,7 +18,7 @@ const double _kDemoItemHeight = 64.0;
 const Duration _kFrontLayerSwitchDuration = Duration(milliseconds: 300);
 
 class _FlutterLogo extends StatelessWidget {
-  const _FlutterLogo({ Key key }) : super(key: key);
+  const _FlutterLogo({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,7 @@ class _CategoryItem extends StatelessWidget {
     Key key,
     this.category,
     this.onTap,
-  }) : super (key: key);
+  }) : super(key: key);
 
   final GalleryDemoCategory category;
   final VoidCallback onTap;
@@ -132,8 +132,8 @@ class _CategoriesPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: List<Widget>.generate(rowCount, (int rowIndex) {
                   final int columnCountForRow = rowIndex == rowCount - 1
-                    ? categories.length - columnCount * math.max(0, rowCount - 1)
-                    : columnCount;
+                      ? categories.length - columnCount * math.max(0, rowCount - 1)
+                      : columnCount;
 
                   return Row(
                     children: List<Widget>.generate(columnCountForRow, (int columnIndex) {
@@ -163,7 +163,7 @@ class _CategoriesPage extends StatelessWidget {
 }
 
 class _DemoItem extends StatelessWidget {
-  const _DemoItem({ Key key, this.demo }) : super(key: key);
+  const _DemoItem({Key key, this.demo}) : super(key: key);
 
   final GalleryDemo demo;
 
@@ -196,7 +196,7 @@ class _DemoItem extends StatelessWidget {
         Text(
           demo.subtitle,
           style: theme.textTheme.body1.copyWith(
-            color: isDark ? Colors.white : const Color(0xFF60646B)
+            color: isDark ? Colors.white : const Color(0xFF60646B),
           ),
         ),
       );
@@ -292,8 +292,9 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
 
   static Widget _topHomeLayout(Widget currentChild, List<Widget> previousChildren) {
     List<Widget> children = previousChildren;
-    if (currentChild != null)
+    if (currentChild != null) {
       children = children.toList()..add(currentChild);
+    }
     return Stack(
       children: children,
       alignment: Alignment.topCenter,
@@ -350,18 +351,16 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
               switchOutCurve: switchOutCurve,
               switchInCurve: switchInCurve,
               child: _category == null
-                ? const _FlutterLogo()
-                : IconButton(
-                  icon: const BackButtonIcon(),
-                  tooltip: 'Back',
-                  onPressed: () => setState(() => _category = null),
-                ),
+                  ? const _FlutterLogo()
+                  : IconButton(
+                      icon: const BackButtonIcon(),
+                      tooltip: 'Back',
+                      onPressed: () => setState(() => _category = null),
+                    ),
             ),
             frontTitle: AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
-              child: _category == null
-                ? const Text('Flutter gallery')
-                : Text(_category.name),
+              child: _category == null ? const Text('Flutter gallery') : Text(_category.name),
             ),
             frontHeading: widget.testMode ? null : Container(height: 24.0),
             frontLayer: AnimatedSwitcher(
@@ -370,13 +369,13 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
               switchInCurve: switchInCurve,
               layoutBuilder: centerHome ? _centerHomeLayout : _topHomeLayout,
               child: _category != null
-                ? _DemosPage(_category)
-                : _CategoriesPage(
-                  categories: kAllGalleryDemoCategories,
-                  onCategoryTap: (GalleryDemoCategory category) {
-                    setState(() => _category = category);
-                  },
-                ),
+                  ? _DemosPage(_category)
+                  : _CategoriesPage(
+                      categories: kAllGalleryDemoCategories,
+                      onCategoryTap: (GalleryDemoCategory category) {
+                        setState(() => _category = category);
+                      },
+                    ),
             ),
           ),
         ),
@@ -398,14 +397,14 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
             child: const Banner(
               message: 'PREVIEW',
               location: BannerLocation.topEnd,
-            )
+            ),
           ),
-        ]
+        ],
       );
     }
     home = AnnotatedRegion<SystemUiOverlayStyle>(
       child: home,
-      value: SystemUiOverlayStyle.light
+      value: SystemUiOverlayStyle.light,
     );
 
     return home;

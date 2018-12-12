@@ -17,7 +17,7 @@ Widget buildShrine(BuildContext context, Widget child) {
       iconTheme: const IconThemeData(color: Color(0xFF707070)),
       platform: Theme.of(context).platform,
     ),
-    child: ShrineTheme(child: child)
+    child: ShrineTheme(child: child),
   );
 }
 
