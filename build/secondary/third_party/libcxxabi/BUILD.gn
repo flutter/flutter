@@ -32,8 +32,8 @@ source_set("libcxxabi") {
   # TODO(goderbauer): Remove this and add cxa_demangle.cpp to the regular source
   # list above when https://dart-review.googlesource.com/c/sdk/+/84831 has been
   # rolled into the engine.
-  if (!is_android || flutter_runtime_mode != "release" ||
-      flutter_runtime_mode != "dynamic_release") {
+  if (!is_android || (flutter_runtime_mode != "release" &&
+                      flutter_runtime_mode != "dynamic_release")) {
     sources += [ "src/cxa_demangle.cpp" ]
   }
 
