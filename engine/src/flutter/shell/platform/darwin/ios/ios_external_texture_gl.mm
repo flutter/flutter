@@ -11,8 +11,6 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
-#include "third_party/skia/include/gpu/GrTexture.h"
-#include "third_party/skia/include/gpu/GrTypes.h"
 
 namespace shell {
 
