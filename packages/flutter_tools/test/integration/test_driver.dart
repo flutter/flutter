@@ -163,8 +163,17 @@ abstract class FlutterTestDriver {
         message: 'Isolate did not pause');
   }
 
+  Future<bool> isAtAsyncSuspension() async {
+    final Isolate isolate = await _getFlutterIsolate();
+    return isolate.pauseEvent.atAsyncSuspension == true;
+  }
+
   Future<Isolate> resume({bool wait = true}) => _resume(wait: wait);
   Future<Isolate> stepOver({bool wait = true}) => _resume(step: StepOption.kOver, wait: wait);
+  Future<Isolate> stepOverAsync({ bool wait = true }) => _resume(step: StepOption.kOverAsyncSuspension, wait: wait);
+  Future<Isolate> stepOverOrOverAsyncSuspension({ bool wait = true }) async {
+    return (await isAtAsyncSuspension()) ? stepOverAsync(wait: wait) : stepOver(wait: wait);
+  }
   Future<Isolate> stepInto({bool wait = true}) => _resume(step: StepOption.kInto, wait: wait);
   Future<Isolate> stepOut({bool wait = true}) => _resume(step: StepOption.kOut, wait: wait);
 
@@ -365,6 +374,14 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         _vmService.streamListen('Isolate'),
         _vmService.streamListen('Debug'),
       ]);
+
+      // On hot restarts, the isolate ID we have for the Flutter thread will
+      // exit so we need to invalidate our cached ID.
+      _vmService.onIsolateEvent.listen((Event event) {
+        if (event.kind == EventKind.kIsolateExit && event.isolate.id == _flutterIsolateId) {
+          _flutterIsolateId = null;
+        }
+      });
 
       // Because we start paused, resume so the app is in a "running" state as
       // expected by tests. Tests will reload/restart as required if they need
