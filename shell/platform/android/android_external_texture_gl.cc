@@ -7,7 +7,7 @@
 #include <GLES/glext.h>
 
 #include "flutter/shell/platform/android/platform_view_android_jni.h"
-#include "third_party/skia/include/gpu/GrTexture.h"
+#include "third_party/skia/include/gpu/GrBackendSurface.h"
 
 namespace shell {
 
