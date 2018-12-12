@@ -646,7 +646,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
-    final double toolbarOpacity = pinned && !floating ? 1.0
+    final double toolbarOpacity = pinned ? 1.0
       : ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0);
     final Widget appBar = FlexibleSpaceBar.createSettings(
       minExtent: minExtent,
