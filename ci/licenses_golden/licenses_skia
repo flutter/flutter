@@ -1,4 +1,4 @@
-Signature: 13fc10881fe243f710665ac16224bbb5
+Signature: 904762efaee11ecdcf1b3308f5d174b4
 
 UNUSED LICENSES:
 
@@ -1312,6 +1312,7 @@ FILE: ../../../third_party/skia/gm/crbug_887103.cpp
 FILE: ../../../third_party/skia/gm/crbug_892988.cpp
 FILE: ../../../third_party/skia/gm/crbug_899512.cpp
 FILE: ../../../third_party/skia/gm/crbug_905548.cpp
+FILE: ../../../third_party/skia/gm/daa.cpp
 FILE: ../../../third_party/skia/gm/drawimageset.cpp
 FILE: ../../../third_party/skia/gm/drawquadset.cpp
 FILE: ../../../third_party/skia/gm/fwidth_squircle.cpp
@@ -1398,6 +1399,7 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGPlane.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGRoundEffect.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGScene.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGText.cpp
+FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper.cpp
 FILE: ../../../third_party/skia/samplecode/SampleAnimatedImage.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCusp.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFlutterAnimate.cpp
@@ -1691,7 +1693,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skcms
-ORIGIN: ../../../third_party/skia/third_party/skcms/LICENSE
+ORIGIN: ../../../third_party/skia/include/third_party/vulkan/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/third_party/skcms/version.sha1
 ----------------------------------------------------------------------------------------------------
@@ -1729,19 +1731,19 @@ LIBRARY: skia
 LIBRARY: vulkan
 ORIGIN: ../../../flutter/third_party/txt/LICENSE
 TYPE: LicenseType.apache
+FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vk_platform.h
+FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan.h
+FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_android.h
+FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_core.h
+FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_ios.h
+FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_macos.h
+FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_win32.h
+FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_xcb.h
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/example.html
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/package.json
 FILE: ../../../third_party/skia/modules/pathkit/npm-wasm/example.html
 FILE: ../../../third_party/skia/modules/pathkit/npm-wasm/package.json
 FILE: ../../../third_party/skia/src/images/SkWebpEncoder.cpp
-FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vk_platform.h
-FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan.h
-FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan_android.h
-FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan_core.h
-FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan_ios.h
-FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan_macos.h
-FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan_win32.h
-FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan_xcb.h
 ----------------------------------------------------------------------------------------------------
 Apache License
 Version 2.0, January 2004
@@ -2042,6 +2044,8 @@ FILE: ../../../third_party/skia/docs/overview.bmh
 FILE: ../../../third_party/skia/docs/status.json
 FILE: ../../../third_party/skia/docs/undocumented.bmh
 FILE: ../../../third_party/skia/docs/usingBookmaker.bmh
+FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/Roboto-Regular.ttf
+FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/Roboto-Regular.woff
 FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/example.html
 FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/node.example.js
 FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/package.json
@@ -2049,6 +2053,7 @@ FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/test.png
 FILE: ../../../third_party/skia/experimental/canvaskit/cpu.js
 FILE: ../../../third_party/skia/experimental/canvaskit/debug.js
 FILE: ../../../third_party/skia/experimental/canvaskit/externs.js
+FILE: ../../../third_party/skia/experimental/canvaskit/fonts/NotoMono-Regular.ttf
 FILE: ../../../third_party/skia/experimental/canvaskit/gpu.js
 FILE: ../../../third_party/skia/experimental/canvaskit/helper.js
 FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/_namedcolors.js
@@ -2140,6 +2145,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Debug-OpenCL.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Debug-SK_CPU_LIMIT_SSE41.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Debug-SafeStack.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Debug-Tidy.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Release-ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Release-Fast.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Release-NoDEPS.json
@@ -2330,7 +2336,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_get_hash
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_pull.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_push.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/internal_bot_2.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/internal_bot_5.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_canvaskit.expected/Test-Debian9-EMCC-GCE-GPU-WEBGL1-wasm-Debug-All-CanvasKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_canvaskit.expected/canvaskit_trybot.json
@@ -2802,6 +2807,7 @@ FILE: ../../../third_party/skia/include/core/SkMatrix44.h
 FILE: ../../../third_party/skia/include/core/SkSize.h
 FILE: ../../../third_party/skia/include/core/SkTLazy.h
 FILE: ../../../third_party/skia/include/effects/SkLayerDrawLooper.h
+FILE: ../../../third_party/skia/include/gpu/GrRenderTarget.h
 FILE: ../../../third_party/skia/include/gpu/GrTexture.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLConfig.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLConfig_chrome.h
@@ -2920,7 +2926,6 @@ FILE: ../../../third_party/skia/src/gpu/GrPathRendererChain.h
 FILE: ../../../third_party/skia/src/gpu/GrPathUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrPathUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrRenderTarget.cpp
-FILE: ../../../third_party/skia/src/gpu/GrRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/GrStencilAttachment.cpp
 FILE: ../../../third_party/skia/src/gpu/GrStencilAttachment.h
 FILE: ../../../third_party/skia/src/gpu/GrStencilSettings.cpp
@@ -3101,11 +3106,11 @@ FILE: ../../../third_party/skia/include/core/SkMultiPictureDraw.h
 FILE: ../../../third_party/skia/include/core/SkPictureRecorder.h
 FILE: ../../../third_party/skia/include/core/SkSurfaceProps.h
 FILE: ../../../third_party/skia/include/core/SkTextBlob.h
+FILE: ../../../third_party/skia/include/gpu/GrGpuResource.h
+FILE: ../../../third_party/skia/include/gpu/GrResourceKey.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleInterface.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_indirect.h
 FILE: ../../../third_party/skia/include/ports/SkRemotableFontMgr.h
-FILE: ../../../third_party/skia/include/private/GrGpuResource.h
-FILE: ../../../third_party/skia/include/private/GrResourceKey.h
 FILE: ../../../third_party/skia/include/private/SkHalf.h
 FILE: ../../../third_party/skia/samplecode/SampleHT.cpp
 FILE: ../../../third_party/skia/samplecode/SampleIdentityScale.cpp
@@ -3315,9 +3320,9 @@ FILE: ../../../third_party/skia/include/core/SkImage.h
 FILE: ../../../third_party/skia/include/core/SkRRect.h
 FILE: ../../../third_party/skia/include/core/SkStrokeRec.h
 FILE: ../../../third_party/skia/include/core/SkSurface.h
+FILE: ../../../third_party/skia/include/gpu/GrSurface.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLFunctions.h
 FILE: ../../../third_party/skia/include/pathops/SkPathOps.h
-FILE: ../../../third_party/skia/include/private/GrSurface.h
 FILE: ../../../third_party/skia/include/private/SkChecksum.h
 FILE: ../../../third_party/skia/include/private/SkPathRef.h
 FILE: ../../../third_party/skia/include/private/SkTInternalLList.h
@@ -3597,12 +3602,12 @@ FILE: ../../../third_party/skia/include/core/SkTraceMemoryDump.h
 FILE: ../../../third_party/skia/include/effects/SkImageSource.h
 FILE: ../../../third_party/skia/include/effects/SkTableColorFilter.h
 FILE: ../../../third_party/skia/include/gpu/GrContextOptions.h
+FILE: ../../../third_party/skia/include/gpu/GrSamplerState.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLTypes.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_android.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_directory.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_empty.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_fontconfig.h
-FILE: ../../../third_party/skia/include/private/GrSamplerState.h
 FILE: ../../../third_party/skia/include/private/SkMutex.h
 FILE: ../../../third_party/skia/include/private/SkNx.h
 FILE: ../../../third_party/skia/include/private/SkNx_neon.h
