@@ -44,7 +44,7 @@ class AndroidStudioValidator extends DoctorValidator {
     plugins.validatePackage(messages, <String>['Dart'], 'Dart');
 
     if (_studio.isValid) {
-      type = ValidationType.installed;
+      type = _hasIssues(messages) ? ValidationType.partial : ValidationType.installed;
       messages.addAll(_studio.validationMessages
           .map<ValidationMessage>((String m) => ValidationMessage(m)));
     } else {
@@ -60,6 +60,10 @@ class AndroidStudioValidator extends DoctorValidator {
     }
 
     return ValidationResult(type, messages, statusInfo: studioVersionText);
+  }
+
+  bool _hasIssues(List<ValidationMessage> messages) {
+    return messages.any((ValidationMessage message) => message.isError);
   }
 }
 
