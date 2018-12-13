@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle;
-import 'dart:math' show min;
+import 'dart:math' show min, max;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -413,12 +413,12 @@ class TextPainter {
   }
 
   // Unicode value for a zero width joiner character.
-  const int _zwjUtf16 = 0x200d;
+  static const int _zwjUtf16 = 0x200d;
 
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
-    final int prevCodeUnit = _text.codeUnitAt(offset - 1);
+    final int prevCodeUnit = _text.codeUnitAt(max(0, offset - 1));
     if (prevCodeUnit == null)
       return null;
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
