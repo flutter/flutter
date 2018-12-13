@@ -92,8 +92,8 @@ class TextField extends StatefulWidget {
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
   /// The [textAlign], [autofocus], [obscureText], [autocorrect],
-  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
-  /// and [enableInteractiveSelection] arguments must not be null.
+  /// [maxLengthEnforced], [scrollPadding], [maxLines], and [maxLength]
+  /// arguments must not be null.
   ///
   /// See also:
   ///
@@ -126,7 +126,7 @@ class TextField extends StatefulWidget {
     this.cursorColor,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
-    this.enableInteractiveSelection = true,
+    this.enableInteractiveSelection,
     this.onTap,
   }) : assert(textAlign != null),
        assert(autofocus != null),
@@ -137,7 +137,6 @@ class TextField extends StatefulWidget {
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       assert(enableInteractiveSelection != null),
        super(key: key);
 
   /// Controls the text being edited.
@@ -334,6 +333,11 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
 
+  /// {@macro flutter.rendering.editable.selectionEnabled}
+  bool get selectionEnabled {
+    return enableInteractiveSelection ?? !obscureText;
+  }
+
   /// Called when the user taps on this textfield.
   ///
   /// The textfield builds a [GestureDetector] to handle input events like tap,
@@ -508,7 +512,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleTap() {
-    if (widget.enableInteractiveSelection)
+    if (widget.selectionEnabled)
       _renderEditable.handleTap();
     _requestKeyboard();
     _confirmCurrentSplash();
@@ -521,7 +525,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleLongPress() {
-    if (widget.enableInteractiveSelection)
+    if (widget.selectionEnabled)
       _renderEditable.handleLongPress();
     _confirmCurrentSplash();
   }
@@ -599,7 +603,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
         selectionColor: themeData.textSelectionColor,
-        selectionControls: widget.enableInteractiveSelection
+        selectionControls: widget.selectionEnabled
           ? (themeData.platform == TargetPlatform.iOS
              ? cupertinoTextSelectionControls
              : materialTextSelectionControls)

@@ -183,8 +183,7 @@ class EditableText extends StatefulWidget {
   /// default to [TextInputType.multiline].
   ///
   /// The [controller], [focusNode], [style], [cursorColor], [textAlign],
-  /// [rendererIgnoresPointer], and [enableInteractiveSelection] arguments must
-  /// not be null.
+  /// [rendererIgnoresPointer] arguments must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -214,7 +213,7 @@ class EditableText extends StatefulWidget {
     this.cursorRadius,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
-    this.enableInteractiveSelection = true,
+    this.enableInteractiveSelection,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -226,7 +225,6 @@ class EditableText extends StatefulWidget {
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
-       assert(enableInteractiveSelection != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
            ? (
@@ -468,6 +466,11 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to false, resulting in a typical blinking cursor.
   static bool debugDeterministicCursor = false;
+
+  /// {@macro flutter.rendering.editable.selectionEnabled}
+  bool get selectionEnabled {
+    return enableInteractiveSelection ?? !obscureText;
+  }
 
   @override
   EditableTextState createState() => EditableTextState();
@@ -929,19 +932,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {
-    return widget.enableInteractiveSelection && _hasFocus && controls?.canCopy(this) == true
+    return widget.selectionEnabled && _hasFocus && controls?.canCopy(this) == true
       ? () => controls.handleCopy(this)
       : null;
   }
 
   VoidCallback _semanticsOnCut(TextSelectionControls controls) {
-    return widget.enableInteractiveSelection && _hasFocus && controls?.canCut(this) == true
+    return widget.selectionEnabled && _hasFocus && controls?.canCut(this) == true
       ? () => controls.handleCut(this)
       : null;
   }
 
   VoidCallback _semanticsOnPaste(TextSelectionControls controls) {
-    return widget.enableInteractiveSelection &&_hasFocus && controls?.canPaste(this) == true
+    return widget.selectionEnabled &&_hasFocus && controls?.canPaste(this) == true
       ? () => controls.handlePaste(this)
       : null;
   }
@@ -1050,11 +1053,10 @@ class _Editable extends LeafRenderObjectWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth,
     this.cursorRadius,
-    this.enableInteractiveSelection = true,
+    this.enableInteractiveSelection,
     this.textSelectionDelegate,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
-       assert(enableInteractiveSelection != null),
        super(key: key);
 
   final TextSpan textSpan;
