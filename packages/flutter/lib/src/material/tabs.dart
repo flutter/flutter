@@ -548,6 +548,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.labelPadding,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
+    this.onTap,
   }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(indicator != null || (indicatorWeight != null && indicatorWeight > 0.0)),
@@ -659,6 +660,17 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this property is null then the [labelStyle] value is used. If [labelStyle]
   /// is null then the text style of the theme's body2 definition is used.
   final TextStyle unselectedLabelStyle;
+
+  /// An optional callback that's called when the [TabBar] is tapped.
+  ///
+  /// The callback is applied to the index of the tab where the tap occurred.
+  ///
+  /// This callback has no effect on the default handling of taps. It's for
+  /// applications that want to do a little extra work when a tab is tapped,
+  /// even if the tap doesn't change the TabController's index. TabBar [onTap]
+  /// callbacks should not make changes to the TabController since that would
+  /// interfere with the default tap handler.
+  final ValueChanged<int> onTap;
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
@@ -883,6 +895,9 @@ class _TabBarState extends State<TabBar> {
   void _handleTap(int index) {
     assert(index >= 0 && index < widget.tabs.length);
     _controller.animateTo(index);
+    if (widget.onTap != null) {
+      widget.onTap(index);
+    }
   }
 
   Widget _buildStyledTab(Widget child, bool selected, Animation<double> animation) {
