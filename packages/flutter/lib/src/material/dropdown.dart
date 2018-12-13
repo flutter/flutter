@@ -508,7 +508,11 @@ class DropdownButton<T> extends StatefulWidget {
     @required this.onChanged,
     this.elevation = 8,
     this.style,
+    this.iconType = Icons.arrow_drop_down,
     this.iconSize = 24.0,
+    this.iconEnabledColor,
+    this.iconDisabledColor,
+    this.iconEdgeInsets = EdgeInsets.zero,
     this.isDense = false,
     this.isExpanded = false,
   }) : assert(items == null || value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
@@ -547,10 +551,32 @@ class DropdownButton<T> extends StatefulWidget {
   /// [ThemeData.textTheme] of the current [Theme].
   final TextStyle style;
 
-  /// The size to use for the drop-down button's down arrow icon button.
+  /// The icon type to use for the drop-down button's icon button.
+  ///
+  /// Defaults to Icons.arrow_drop_down.
+  final IconData iconType;
+
+  /// The size to use for the drop-down button's icon button.
   ///
   /// Defaults to 24.0.
   final double iconSize;
+
+  /// The color to use for the drop-down button's icon button
+  /// when the dropdown is enabled.
+  ///
+  /// Defaults to Colors.grey.shade700 when app theme brightness is light,
+  /// else defaults to Colors.white70.
+  final Color iconEnabledColor;
+
+  /// The color to use for the drop-down button's icon button
+  /// when the dropdown is disabled.
+  ///
+  /// Defaults to Colors.grey.shade400 when app theme brightness is light,
+  /// else defaults to Colors.white10.
+  final Color iconDisabledColor;
+
+  /// The edge insets to use for the drop-down button's icon button.
+  final EdgeInsets iconEdgeInsets;
 
   /// Reduce the button's height.
   ///
@@ -663,15 +689,18 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 
   Color get _downArrowColor {
-    // These colors are not defined in the Material Design spec.
     if (_enabled) {
-      if (Theme.of(context).brightness == Brightness.light) {
+      if (widget.iconEnabledColor != null) {
+        return widget.iconEnabledColor;
+      } else if (Theme.of(context).brightness == Brightness.light) {
         return Colors.grey.shade700;
       } else {
         return Colors.white70;
       }
     } else {
-      if (Theme.of(context).brightness == Brightness.light) {
+      if (widget.iconDisabledColor != null) {
+        return widget.iconDisabledColor;
+      } else if (Theme.of(context).brightness == Brightness.light) {
         return Colors.grey.shade400;
       } else {
         return Colors.white10;
@@ -725,9 +754,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             widget.isExpanded ? Expanded(child: innerItemsWidget) : innerItemsWidget,
-            Icon(Icons.arrow_drop_down,
-              size: widget.iconSize,
-              color: _downArrowColor,
+            Padding(
+              padding: widget.iconEdgeInsets,
+              child: Icon(widget.iconType,
+                size: widget.iconSize,
+                color: _downArrowColor,
+              ),
             ),
           ],
         ),
