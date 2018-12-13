@@ -118,8 +118,8 @@ Future<void> getBatteryLevel() async {
 }
 ```
 
-Learn how to use <a href="https://flutter.io/using-packages/">packages</a>, or
-write <a href="https://flutter.io/platform-channels/">platform channels</a>,
+Learn how to use <a href="https://flutter.io/using-packages/">packages</a> or
+write <a href="https://flutter.io/platform-channels/">platform channels</a>
 to access native code, APIs, and SDKs.
 
 ## Unified app development

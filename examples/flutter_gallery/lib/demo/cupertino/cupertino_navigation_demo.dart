@@ -34,10 +34,10 @@ const int _kChildCount = 50;
 
 class CupertinoNavigationDemo extends StatelessWidget {
   CupertinoNavigationDemo()
-      : colorItems = List<Color>.generate(50, (int index) {
+      : colorItems = List<Color>.generate(_kChildCount, (int index) {
           return coolColors[math.Random().nextInt(coolColors.length)];
         }) ,
-        colorNameItems = List<String>.generate(50, (int index) {
+        colorNameItems = List<String>.generate(_kChildCount, (int index) {
           return coolColorNames[math.Random().nextInt(coolColorNames.length)];
         });
 

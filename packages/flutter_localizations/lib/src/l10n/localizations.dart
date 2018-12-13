@@ -10653,6 +10653,210 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'VISA LICENSER';
 }
 
+/// The translations for Tamil (`ta`).
+class MaterialLocalizationTa extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Tamil.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationTa({
+    String localeName = 'ta',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName-ஐ பற்றி';
+
+  @override
+  String get alertDialogLabel => r'எச்சரிக்கை';
+
+  @override
+  String get anteMeridiemAbbreviation => r'காலை';
+
+  @override
+  String get backButtonTooltip => r'பின் செல்க';
+
+  @override
+  String get cancelButtonLabel => r'ரத்து';
+
+  @override
+  String get closeButtonLabel => r'மூடு';
+
+  @override
+  String get closeButtonTooltip => r'மூடு';
+
+  @override
+  String get collapsedIconTapHint => r'விரி';
+
+  @override
+  String get continueButtonLabel => r'தொடர்க';
+
+  @override
+  String get copyButtonLabel => r'நகல்';
+
+  @override
+  String get cutButtonLabel => r'வெட்டு';
+
+  @override
+  String get deleteButtonTooltip => r'நீக்குக';
+
+  @override
+  String get dialogLabel => r'உரையாடல்';
+
+  @override
+  String get drawerLabel => r'வழிசெலுத்தல் பட்டி';
+
+  @override
+  String get expandedIconTapHint => r'சுருக்கு';
+
+  @override
+  String get hideAccountsLabel => r'கணக்குகளை மறைக்கவும்';
+
+  @override
+  String get licensesPageTitle => r'உரிமங்கள்';
+
+  @override
+  String get modalBarrierDismissLabel => r'நிராகரி';
+
+  @override
+  String get nextMonthTooltip => r'அடுத்த மாதம்';
+
+  @override
+  String get nextPageTooltip => r'அடுத்த பக்கம்';
+
+  @override
+  String get okButtonLabel => r'சரி';
+
+  @override
+  String get openAppDrawerTooltip => r'வழிசெலுத்தல் பட்டி திறக்க';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$rowCount-யில் $firstRow–$lastRow';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'கிட்டத்தட்ட $rowCount-யில் $firstRow–$lastRow';
+
+  @override
+  String get pasteButtonLabel => r'ஒட்டு';
+
+  @override
+  String get popupMenuLabel => r'பாப்-அப் பட்டி';
+
+  @override
+  String get postMeridiemAbbreviation => r'மாலை';
+
+  @override
+  String get previousMonthTooltip => r'முந்திய மாதம்';
+
+  @override
+  String get previousPageTooltip => r'முன் பக்கம்';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'புதுப்பிக்கவும்';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'ஒரு எழுத்து உள்ளது';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount எழுத்துக்கள் உள்ளன';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'எழுத்துக்கள் எதுவும் இல்லை';
+
+  @override
+  String get reorderItemDown => r'கீழே செல்';
+
+  @override
+  String get reorderItemLeft => r'இடைப்பக்கம் செல்';
+
+  @override
+  String get reorderItemRight => r'வலப்பக்கம் செல்';
+
+  @override
+  String get reorderItemToEnd => r'முடிவிற்கு செல்';
+
+  @override
+  String get reorderItemToStart => r'ஆரம்பத்திற்கு செல்';
+
+  @override
+  String get reorderItemUp => r'மேலே செல்';
+
+  @override
+  String get rowsPerPageTitle => r'பக்கத்திற்கு வரிசைகள்:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.dense;
+
+  @override
+  String get searchFieldLabel => r'தேடுக';
+
+  @override
+  String get selectAllButtonLabel => r'அனைத்தையும் தேர்ந்தெடு';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 வரிசை தேர்ந்தெடுக்கப்பட்டது';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount வரிசைகள் தேர்ந்தெடுக்கப்பட்டன';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => r'எந்த வரிசையும் தேர்ந்தெடுக்கவில்லை';
+
+  @override
+  String get showAccountsLabel => r'கணக்குகளை காமிக்கவும்';
+
+  @override
+  String get showMenuTooltip => r'பட்டியை காண்பி';
+
+  @override
+  String get signedInLabel => r'உள்நுழைந்துள்ளீர்கள்';
+
+  @override
+  String get tabLabelRaw => r'$tabCount தாவலில் $tabIndex';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'மணி நேரம் தேர்ந்தெடுக்கவும்';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'நிமிடங்கள் தேர்ந்தெடுக்கவும்';
+
+  @override
+  String get viewLicensesButtonLabel => r'உரிமங்களை பார்க்கவும்';
+}
+
 /// The translations for Thai (`th`).
 class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Thai.
@@ -12365,6 +12569,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
   'sl', // Slovenian
   'sr', // Serbian
   'sv', // Swedish
+  'ta', // Tamil
   'th', // Thai
   'tl', // Tagalog
   'tr', // Turkish
@@ -12425,6 +12630,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `sl` - Slovenian
 ///  * `sr` - Serbian (plus 2 scripts)
 ///  * `sv` - Swedish
+///  * `ta` - Tamil
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
 ///  * `tr` - Turkish
@@ -12612,6 +12818,8 @@ GlobalMaterialLocalizations getTranslation(
     }
     case 'sv':
       return MaterialLocalizationSv(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'ta':
+      return MaterialLocalizationTa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'th':
       return MaterialLocalizationTh(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'tl':
