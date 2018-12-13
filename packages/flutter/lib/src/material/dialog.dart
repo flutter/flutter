@@ -236,7 +236,7 @@ class AlertDialog extends StatelessWidget {
 
   /// Style for the text in the title of this [AlertDialog].
   ///
-  /// This parameter is optional.
+  /// If null, defaults to [ThemeData.textTheme.title].
   final TextStyle titleTextStyle;
 
   /// The (optional) content of the dialog is displayed in the center of the
@@ -257,7 +257,7 @@ class AlertDialog extends StatelessWidget {
 
   /// Style for the text in the content section of this [AlertDialog].
   ///
-  /// This parameter is optional.
+  /// If null, defaults to [ThemeData.textTheme.subhead].
   final TextStyle contentTextStyle;
 
   /// The (optional) set of actions that are displayed at the bottom of the
