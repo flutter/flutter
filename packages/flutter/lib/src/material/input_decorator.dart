@@ -1739,6 +1739,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         style: hintStyle,
         overflow: TextOverflow.ellipsis,
         textAlign: textAlign,
+        maxLines: decoration.hintMaxLines,
       ),
     );
 
@@ -1965,6 +1966,7 @@ class InputDecoration {
     this.helperStyle,
     this.hintText,
     this.hintStyle,
+    this.hintMaxLines,
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
@@ -2016,6 +2018,7 @@ class InputDecoration {
        labelStyle = null,
        helperText = null,
        helperStyle = null,
+       hintMaxLines = null,
        errorText = null,
        errorStyle = null,
        errorMaxLines = null,
@@ -2103,6 +2106,15 @@ class InputDecoration {
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   final TextStyle hintStyle;
+
+  /// The maximum number of lines the [hintText] can occupy.
+  ///
+  /// Defaults to the value of [TextField.maxLines] attribute.
+  ///
+  /// This value is passed along to the [Text.maxLines] attribute
+  /// of the [Text] widget used to display the hint text. [TextOverflow.ellipsis] is
+  /// used to handle the overflow when it is limited to single line.
+  final int hintMaxLines;
 
   /// Text that appears below the input [child] and the border.
   ///
@@ -2479,6 +2491,7 @@ class InputDecoration {
     TextStyle helperStyle,
     String hintText,
     TextStyle hintStyle,
+    int hintMaxLines,
     String errorText,
     TextStyle errorStyle,
     int errorMaxLines,
@@ -2515,6 +2528,7 @@ class InputDecoration {
       helperStyle: helperStyle ?? this.helperStyle,
       hintText: hintText ?? this.hintText,
       hintStyle: hintStyle ?? this.hintStyle,
+      hintMaxLines: hintMaxLines ?? this.hintMaxLines,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
@@ -2589,6 +2603,7 @@ class InputDecoration {
         && typedOther.helperStyle == helperStyle
         && typedOther.hintText == hintText
         && typedOther.hintStyle == hintStyle
+        && typedOther.hintMaxLines == hintMaxLines
         && typedOther.errorText == errorText
         && typedOther.errorStyle == errorStyle
         && typedOther.errorMaxLines == errorMaxLines
@@ -2631,6 +2646,7 @@ class InputDecoration {
       helperStyle,
       hintText,
       hintStyle,
+      hintMaxLines,
       errorText,
       errorStyle,
       errorMaxLines,
@@ -2681,6 +2697,8 @@ class InputDecoration {
       description.add('helperText: "$helperText"');
     if (hintText != null)
       description.add('hintText: "$hintText"');
+    if (hintMaxLines != null)
+      description.add('hintMaxLines: "$hintMaxLines"');
     if (errorText != null)
       description.add('errorText: "$errorText"');
     if (errorStyle != null)

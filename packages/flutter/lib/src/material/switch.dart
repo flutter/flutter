@@ -35,6 +35,11 @@ enum _SwitchType { material, adaptive }
 /// that use a switch will listen for the [onChanged] callback and rebuild the
 /// switch with a new [value] to update the visual appearance of the switch.
 ///
+/// If the [onChanged] callback is null, then the switch will be disabled (it
+/// will not respond to input). A disabled switch's thumb and track are rendered
+/// in shades of grey by default. The default appearance of a disabled switch
+/// can be overridden with [inactiveThumbColor] and [inactiveTrackColor].
+///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
@@ -505,8 +510,7 @@ class _RenderSwitch extends RenderToggleable {
   @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
-
-    final bool isActive = onChanged != null;
+    final bool isEnabled = onChanged != null;
     final double currentValue = position.value;
 
     double visualPosition;
@@ -519,7 +523,17 @@ class _RenderSwitch extends RenderToggleable {
         break;
     }
 
-    final Color trackColor = isActive ? Color.lerp(inactiveTrackColor, activeTrackColor, currentValue) : inactiveTrackColor;
+    final Color trackColor = isEnabled
+      ? Color.lerp(inactiveTrackColor, activeTrackColor, currentValue)
+      : inactiveTrackColor;
+
+    final Color thumbColor = isEnabled
+      ? Color.lerp(inactiveColor, activeColor, currentValue)
+      : inactiveColor;
+
+    final ImageProvider thumbImage = isEnabled
+      ? (currentValue < 0.5 ? inactiveThumbImage : activeThumbImage)
+      : inactiveThumbImage;
 
     // Paint the track
     final Paint paint = Paint()
@@ -544,8 +558,6 @@ class _RenderSwitch extends RenderToggleable {
     try {
       _isPainting = true;
       BoxPainter thumbPainter;
-      final Color thumbColor = isActive ? Color.lerp(inactiveColor, activeColor, currentValue) : inactiveColor;
-      final ImageProvider thumbImage = isActive ? (currentValue < 0.5 ? inactiveThumbImage : activeThumbImage) : inactiveThumbImage;
       if (_cachedThumbPainter == null || thumbColor != _cachedThumbColor || thumbImage != _cachedThumbImage) {
         _cachedThumbColor = thumbColor;
         _cachedThumbImage = thumbImage;
