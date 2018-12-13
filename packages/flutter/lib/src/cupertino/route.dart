@@ -594,14 +594,21 @@ class _CupertinoBackGestureController<T> {
     // Fling in the appropriate direction.
     // AnimationController.fling is guaranteed to
     // take at least one frame.
+    final Animation<double> animation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.decelerate,
+    );
     if (velocity.abs() >= _kMinFlingVelocity) {
       controller.fling(velocity: -velocity);
     } else if (controller.value <= 0.5) {
-//      controller.fling(velocity: -10.0);
-      controller.animateTo(-0.01, duration: const Duration(milliseconds: 140), curve: Curves.decelerate);
+      controller.reverse();
+
+//      animation.;
+//      controller.animateTo(-0.01, duration: const Duration(milliseconds: 140), curve: Curves.decelerate);
     } else {
+      controller.forward();
 //      controller.fling(velocity: 14.0);
-      controller.animateTo(1.01, duration: const Duration(milliseconds: 140), curve: Curves.decelerate);
+//      controller.animateTo(1.01, duration: const Duration(milliseconds: 140), curve: Curves.decelerate);
     }
     assert(controller.isAnimating);
     assert(controller.status != AnimationStatus.completed);
@@ -609,7 +616,7 @@ class _CupertinoBackGestureController<T> {
 
     // Don't end the gesture until the transition completes.
     _animating = true;
-    controller.addStatusListener(_handleStatusChanged);
+    animation.addStatusListener(_handleStatusChanged);
   }
 
   void _handleStatusChanged(AnimationStatus status) {

@@ -482,8 +482,8 @@ class AnimationController extends Animation<double>
   /// regardless of whether `target` > [value] or not. At the end of the
   /// animation, when `target` is reached, [status] is reported as
   /// [AnimationStatus.completed].
-  TickerFuture animateTo(double target, { Duration duration, Curve curve = Curves.linear, bool animatesForward = true }) {
-    _direction = animatesForward ? _AnimationDirection.forward : _AnimationDirection.reverse;
+  TickerFuture animateTo(double target, { Duration duration, Curve curve = Curves.linear }) {
+    _direction = _AnimationDirection.forward;
     return _animateToInternal(target, duration: duration, curve: curve);
   }
 
