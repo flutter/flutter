@@ -77,6 +77,7 @@ public class FlutterMain {
     private static String sFlutterAssetsDir = DEFAULT_FLUTTER_ASSETS_DIR;
 
     private static boolean sInitialized = false;
+    private static ResourceUpdater sResourceUpdater;
     private static ResourceExtractor sResourceExtractor;
     private static boolean sIsPrecompiledAsBlobs;
     private static boolean sIsPrecompiledAsSharedLibrary;
@@ -254,6 +255,21 @@ public class FlutterMain {
         Context context = applicationContext;
         new ResourceCleaner(context).start();
 
+        Bundle metaData = null;
+        try {
+            metaData = context.getPackageManager().getApplicationInfo(
+                    context.getPackageName(), PackageManager.GET_META_DATA).metaData;
+
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Unable to read application info", e);
+        }
+
+        if (metaData != null && metaData.getBoolean("DynamicUpdates")) {
+            sResourceUpdater = new ResourceUpdater(context);
+            sResourceUpdater.startUpdateDownloadOnce();
+            sResourceUpdater.waitForDownloadCompletion();
+        }
+
         sResourceExtractor = new ResourceExtractor(context);
 
         String icuAssetPath = SHARED_ASSET_DIR + File.separator + SHARED_ASSET_ICU_DATA;
@@ -319,6 +335,10 @@ public class FlutterMain {
         String dataDirectory = PathUtils.getDataDirectory(applicationContext);
         File appBundle = new File(dataDirectory, sFlutterAssetsDir);
         return appBundle.exists() ? appBundle.getPath() : null;
+    }
+
+    public static String getUpdateInstallationPath() {
+        return sResourceUpdater == null ? null : sResourceUpdater.getUpdateInstallationPath();
     }
 
     /**
