@@ -194,7 +194,7 @@ class EditableText extends StatefulWidget {
     this.autocorrect = true,
     @required this.style,
     @required this.cursorColor,
-    this.backgroundCursorColor = const Color(0xFF8E8E93),
+    @required this.backgroundCursorColor,
     this.textAlign = TextAlign.start,
     this.textDirection,
     this.locale,
@@ -223,6 +223,7 @@ class EditableText extends StatefulWidget {
        assert(autocorrect != null),
        assert(style != null),
        assert(cursorColor != null),
+       assert(backgroundCursorColor != null),
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
        assert(autofocus != null),
@@ -326,10 +327,11 @@ class EditableText extends StatefulWidget {
   /// Cannot be null.
   final Color cursorColor;
 
-  /// The color to use when painting the background cursor while rendering
-  /// the floating cursor.
+  /// The color to use when painting the background cursor aligned with the text
+  /// while rendering the floating cursor.
   ///
-  /// Cannot be null.
+  /// Cannot be null. By default it is the disabled grey color from
+  /// CupertinoColors.
   final Color backgroundCursorColor;
 
   /// {@template flutter.widgets.editableText.maxLines}
@@ -511,7 +513,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final LayerLink _layerLink = LayerLink();
   bool _didAutoFocus = false;
 
+  // The time it takes for the floating cursor to snap to the text aligned
+  // cursor position after the user has finished placing it.
   static const Duration _floatingCursorResetTime = Duration(milliseconds: 125);
+
+  AnimationController _floatingCursorResetController;
 
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
@@ -524,8 +530,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
-    _floatingCursorController = AnimationController(vsync: this);
-    _floatingCursorController.addListener(_onFloatingCursorResetTick);
+    _floatingCursorResetController = AnimationController(vsync: this);
+    _floatingCursorResetController.addListener(_onFloatingCursorResetTick);
   }
 
   @override
@@ -607,11 +613,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  // The original position of the caret on FloatingCursorDragState.start.
   Rect _startCaretRect;
+
+  // The most recent text position as determined by the location of the floating
+  // cursor.
   TextPosition _lastTextPosition;
+
+  // The offset of the floating cursor as determined from the first update call.
   Offset _pointOffsetOrigin;
+
+  // The most recent position of the floating cursor.
   Offset _lastBoundedOffset;
-  AnimationController _floatingCursorController;
 
   // Because the center of the cursor is preferredLineHeight / 2 below the touch
   // origin, but the touch origin is used to determine which line the cursor is
@@ -624,37 +637,41 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       case FloatingCursorDragState.Start:
         final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);
         _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-        _pointOffsetOrigin = null;
         renderEditable.setFloatingCursor(point.state, _startCaretRect.center - _floatingCursorOffset, currentTextPosition);
         break;
       case FloatingCursorDragState.Update:
         // We want to send in points that are centered around a (0,0) origin, so we cache the
         // position on the first update call.
         if (_pointOffsetOrigin != null) {
-          final Offset centeredPoint = point.point - _pointOffsetOrigin;
+          final Offset centeredPoint = point.offset - _pointOffsetOrigin;
           final Offset rawCursorOffset = _startCaretRect.center + centeredPoint - _floatingCursorOffset;
-          _lastBoundedOffset = renderEditable.calculateBoundedCursorOffset(rawCursorOffset);
+          _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
           _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset + _floatingCursorOffset));
           renderEditable.setFloatingCursor(point.state, _lastBoundedOffset, _lastTextPosition);
         } else {
-          _pointOffsetOrigin = point.point;
+          _pointOffsetOrigin = point.offset;
         }
         break;
       case FloatingCursorDragState.End:
-        _floatingCursorController.value = 0.0;
-        _floatingCursorController.animateTo(1.0, duration: _floatingCursorResetTime, curve: Curves.decelerate);
+        _floatingCursorResetController.value = 0.0;
+        _floatingCursorResetController.animateTo(1.0, duration: _floatingCursorResetTime, curve: Curves.decelerate);
       break;
     }
   }
 
   void _onFloatingCursorResetTick() {
     final Offset finalPosition = renderEditable.getLocalRectForCaret(_lastTextPosition).center - _floatingCursorOffset;
-    if (_floatingCursorController.isCompleted) {
+    if (_floatingCursorResetController.isCompleted) {
       renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition);
       if (_lastTextPosition.offset != renderEditable.selection.baseOffset)
+        // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
         _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable, SelectionChangedCause.tap);
+      _startCaretRect = null;
+      _lastTextPosition = null;
+      _pointOffsetOrigin = null;
+      _lastBoundedOffset = null;
     } else {
-      final double lerpValue = _floatingCursorController.value;
+      final double lerpValue = _floatingCursorResetController.value;
       final double lerpX = ui.lerpDouble(_lastBoundedOffset.dx, finalPosition.dx, lerpValue);
       final double lerpY = ui.lerpDouble(_lastBoundedOffset.dy, finalPosition.dy, lerpValue);
 

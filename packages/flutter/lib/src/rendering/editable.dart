@@ -21,7 +21,7 @@ const double _kCaretHeightOffset = 2.0; // pixels
 
 // The additional size on the x and y axis with which to expand the prototype
 // cursor to render the floating cursor in pixels.
-const Offset _kFloatingCaretSizeOffset = Offset(0.5, 2.0);
+const Offset _kFloatingCaretSizeIncrease = Offset(0.5, 2.0);
 
 // The corner radius of the floating cursor in pixels.
 const double _kFloatingCaretRadius = 1.0;
@@ -151,7 +151,7 @@ class RenderEditable extends RenderBox {
     Locale locale,
     double cursorWidth = 1.0,
     Radius cursorRadius,
-    EdgeInsets cursorPadding = const EdgeInsets.fromLTRB(3, 6, 3, 6),
+    EdgeInsets floatingCursorAddedMargin = const EdgeInsets.fromLTRB(3, 6, 3, 6),
     bool enableInteractiveSelection = true,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
@@ -180,7 +180,7 @@ class RenderEditable extends RenderBox {
        _offset = offset,
        _cursorWidth = cursorWidth,
        _cursorRadius = cursorRadius,
-       _cursorPadding = cursorPadding,
+       _floatingCursorAddedMargin = floatingCursorAddedMargin,
        _enableInteractiveSelection = enableInteractiveSelection,
        _obscureText = obscureText {
     assert(_showCursor != null);
@@ -729,12 +729,12 @@ class RenderEditable extends RenderBox {
   /// moving the floating cursor.
   ///
   /// Defaults to a padding with left, right set to 3 and top, bottom to 6.
-  EdgeInsets get cursorPadding => _cursorPadding;
-  EdgeInsets _cursorPadding;
-  set cursorPadding(EdgeInsets value) {
-    if (_cursorPadding == value)
+  EdgeInsets get floatingCursorAddedMargin => _floatingCursorAddedMargin;
+  EdgeInsets _floatingCursorAddedMargin;
+  set floatingCursorAddedMargin(EdgeInsets value) {
+    if (_floatingCursorAddedMargin == value)
       return;
-    _cursorPadding = value;
+    _floatingCursorAddedMargin = value;
     markNeedsPaint();
   }
 
@@ -1249,8 +1249,8 @@ class RenderEditable extends RenderBox {
   void _paintCaret(Canvas canvas, Offset effectiveOffset, TextPosition textPosition) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(textPosition, _caretPrototype);
-    // As only iOS supports floating cursors, we want the color of the cursor to be
-    // the inactive grey color from CupertinoColors.
+    // If the floating cursor is enabled, the text cursor's color is [backgroundCursorColor] while
+    // the floating cursor's color is _cursorColor;
     final Paint paint = Paint()
       ..color = _floatingCursorOn ? backgroundCursorColor : _cursorColor;
 
@@ -1285,7 +1285,7 @@ class RenderEditable extends RenderBox {
       _resetOriginOnBottom = false;
     }
     _floatingCursorOn = state != FloatingCursorDragState.End;
-    _resetLerpValue = resetLerpValue;
+    _resetFloatingCursorAnimationValue = resetLerpValue;
     if(_floatingCursorOn) {
       _floatingCursorOffset = boundedOffset;
       _floatingCursorTextPosition = lastTextPosition;
@@ -1295,25 +1295,25 @@ class RenderEditable extends RenderBox {
 
   void _paintFloatingCaret(Canvas canvas, Offset effectiveOffset) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
-    final Paint paint = Paint()
-      ..color = _cursorColor;
+    assert(_floatingCursorOn);
 
-    double sizeAdjustmentX = _kFloatingCaretSizeOffset.dx;
-    double sizeAdjustmentY = _kFloatingCaretSizeOffset.dy;
+    final Paint paint = Paint()..color = _cursorColor;
 
-    if(_resetLerpValue != null) {
-      sizeAdjustmentX = ui.lerpDouble(sizeAdjustmentX, 0, _resetLerpValue);
-      sizeAdjustmentY = ui.lerpDouble(sizeAdjustmentY, 0, _resetLerpValue);
+    double sizeAdjustmentX = _kFloatingCaretSizeIncrease.dx;
+    double sizeAdjustmentY = _kFloatingCaretSizeIncrease.dy;
+
+    if(_resetFloatingCursorAnimationValue != null) {
+      sizeAdjustmentX = ui.lerpDouble(sizeAdjustmentX, 0, _resetFloatingCursorAnimationValue);
+      sizeAdjustmentY = ui.lerpDouble(sizeAdjustmentY, 0, _resetFloatingCursorAnimationValue);
     }
 
-    final Rect caretPrototype = Rect.fromLTRB(_caretPrototype.left - sizeAdjustmentX,
+    final Rect floatingCaretPrototype = Rect.fromLTRB(_caretPrototype.left - sizeAdjustmentX,
                                               _caretPrototype.top - sizeAdjustmentY,
                                               _caretPrototype.right + sizeAdjustmentX,
                                               _caretPrototype.bottom + sizeAdjustmentY);
-    final Rect caretRect = caretPrototype.shift(effectiveOffset);
+    final Rect caretRect = floatingCaretPrototype.shift(effectiveOffset);
     const Radius floatingCursorRadius = Radius.circular(_kFloatingCaretRadius);
     final RRect caretRRect = RRect.fromRectAndRadius(caretRect, floatingCursorRadius);
-    print(caretRRect.left.toString() + ' and ' + caretRRect.top.toString() + ' and ' + caretRRect.right.toString() + ' and ' + caretRRect.bottom.toString() + ' and ' + caretRRect.brRadius.toString());
     canvas.drawRRect(caretRRect, paint);
   }
 
@@ -1326,15 +1326,15 @@ class RenderEditable extends RenderBox {
   bool _resetOriginOnRight = false;
   bool _resetOriginOnTop = false;
   bool _resetOriginOnBottom = false;
-  double _resetLerpValue;
+  double _resetFloatingCursorAnimationValue;
 
   /// Returns the position within the text field closest to the raw cursor offset.
-  Offset calculateBoundedCursorOffset(Offset rawCursorOffset) {
+  Offset calculateBoundedFloatingCursorOffset(Offset rawCursorOffset) {
     Offset deltaPosition = const Offset(0, 0);
-    final double topBound = -cursorPadding.top;
-    final double bottomBound = _textPainter.height - preferredLineHeight + cursorPadding.bottom;
-    final double leftBound = -cursorPadding.left;
-    final double rightBound = _textPainter.width + cursorPadding.right;
+    final double topBound = -floatingCursorAddedMargin.top;
+    final double bottomBound = _textPainter.height - preferredLineHeight + floatingCursorAddedMargin.bottom;
+    final double leftBound = -floatingCursorAddedMargin.left;
+    final double rightBound = _textPainter.width + floatingCursorAddedMargin.right;
 
     if (_previousOffset != null)
       deltaPosition = rawCursorOffset - _previousOffset;
@@ -1397,7 +1397,7 @@ class RenderEditable extends RenderBox {
     }
     _textPainter.paint(context.canvas, effectiveOffset);
     if (_floatingCursorOn) {
-      if (_resetLerpValue == null)
+      if (_resetFloatingCursorAnimationValue == null)
         _paintCaret(context.canvas, effectiveOffset, _floatingCursorTextPosition);
       _paintFloatingCaret(context.canvas, _floatingCursorOffset);
     }

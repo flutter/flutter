@@ -458,14 +458,16 @@ class FloatingCursorEditingPoint {
   /// Creates information for setting the position and state of a floating
   /// cursor.
   ///
-  /// [state] must not be null.
-  const FloatingCursorEditingPoint({
-    this.point = const Offset(0, 0),
+  /// [state] must not be null and [offset] must not be null if the state is
+  /// [FloatingCursorDragState.Update].
+  FloatingCursorEditingPoint({
+    this.offset,
     @required this.state,
-  }) : assert(state != null);
+  }) : assert(state != null),
+       assert(state == FloatingCursorDragState.Update ? offset != null : true);
 
   /// The raw position of the floating cursor as determined by the iOS sdk.
-  final Offset point;
+  final Offset offset;
 
   /// The state of the floating cursor.
   final FloatingCursorDragState state;
