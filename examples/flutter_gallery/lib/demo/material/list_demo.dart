@@ -64,8 +64,8 @@ class _ListDemoState extends State<ListDemo> {
   }
 
   void _showConfigurationSheet() {
-    final PersistentBottomSheetController<void> bottomSheet =
-        scaffoldKey.currentState.showBottomSheet<void>((BuildContext bottomSheetContext) {
+    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState
+      .showBottomSheet<void>((BuildContext bottomSheetContext) {
       return Container(
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: Colors.black26)),

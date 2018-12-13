@@ -110,8 +110,9 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
       thumbCenter + slideUpOffset,
       invert: true,
     );
-    final Color paintColor =
-        enableColor.evaluate(enableAnimation).withAlpha((255.0 * activationAnimation.value).round());
+    final Color paintColor = enableColor
+      .evaluate(enableAnimation)
+      .withAlpha((255.0 * activationAnimation.value).round());
     canvas.drawPath(
       thumbPath,
       Paint()..color = paintColor,

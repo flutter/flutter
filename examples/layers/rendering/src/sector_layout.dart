@@ -512,8 +512,8 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
       return Size.zero;
     }
     final double maxChildDeltaRadius = math.max(0.0, math.min(width, height) / 2.0 - innerRadius);
-    final SectorDimensions childDimensions =
-        child.getIntrinsicDimensions(SectorConstraints(maxDeltaRadius: maxChildDeltaRadius), innerRadius);
+    final SectorDimensions childDimensions = child
+      .getIntrinsicDimensions(SectorConstraints(maxDeltaRadius: maxChildDeltaRadius), innerRadius);
     final double dimension = (innerRadius + childDimensions.deltaRadius) * 2.0;
     return Size.square(dimension);
   }
