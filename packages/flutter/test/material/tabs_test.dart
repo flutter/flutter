@@ -1895,4 +1895,55 @@ void main() {
     expect(find.text(AlwaysKeepAliveWidget.text, skipOffstage: false), findsOneWidget);
     expect(find.text('4'), findsOneWidget);
   });
+
+  testWidgets('Removing the last tab', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/24424
+
+    final List<Tab> tabs = <Tab>[const Tab(text: 'LEFT'), const Tab(text: 'RIGHT')];
+
+    Widget buildFrame(TabController controller) {
+      return boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: Column(
+            children: <Widget>[
+              TabBar(controller: controller, tabs: tabs),
+              Expanded(child: TabBarView(controller: controller, children: tabs)),
+            ]
+          ),
+        ),
+      );
+    }
+
+    final TabController controller1 = TabController(
+      vsync: const TestVSync(),
+      length: 2,
+      initialIndex: 0,
+    );
+
+    await tester.pumpWidget(buildFrame(controller1));
+    expect(controller1.index, 0);
+
+    await tester.tap(find.text('RIGHT'));
+    expect(controller1.index, 1);
+    expect(controller1.indexIsChanging, true);
+
+    // At this point the change selected tab animation hasn't completed.
+    // When the controller is replaced the TabBarView will see one last
+    // scroll notification. Since there's only one tab left, it can be
+    // ignored.
+
+    final TabController controller2 = TabController(
+      vsync: const TestVSync(),
+      length: 1,
+      initialIndex: 0,
+    );
+
+    tabs.removeAt(1);
+    await tester.pumpWidget(buildFrame(controller2));
+    await tester.pumpAndSettle();
+    expect(controller1.indexIsChanging, false);
+    expect(controller2.index, 0);
+
+  });
 }

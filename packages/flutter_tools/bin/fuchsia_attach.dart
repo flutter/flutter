@@ -22,6 +22,8 @@ final ArgParser parser = ArgParser()
   ..addOption('build-dir', help: 'The fuchsia build directory')
   ..addOption('dart-sdk', help: 'The prebuilt dart SDK')
   ..addOption('target', help: 'The GN target to attach to')
+  ..addOption('entrypoint', defaultsTo: 'main.dart', help: 'The filename of the main method. Defaults to main.dart')
+  ..addOption('device', help: 'The device id to attach to')
   ..addFlag('verbose', negatable: true);
 
 // Track the original working directory so that the tool can find the
@@ -50,10 +52,11 @@ Future<void> main(List<String> args) async {
   fs.currentDirectory = path;
 
   // Check for a package with a lib directory.
-  String targetFile = 'lib/main.dart';
+  final String entrypoint = argResults['entrypoint'];
+  String targetFile = 'lib/$entrypoint';
   if (!fs.file(targetFile).existsSync()) {
     // Otherwise assume the package is flat.
-    targetFile = 'main.dart';
+    targetFile = entrypoint;
   }
   final List<String> command = <String>[
     'attach',
@@ -70,6 +73,10 @@ Future<void> main(List<String> args) async {
     '--packages',
     packages,
   ];
+  final String deviceName = argResults['device'];
+  if (deviceName != null && deviceName.isNotEmpty) {
+    command.addAll(<String>['-d', deviceName]);
+  }
   if (verbose) {
     command.add('--verbose');
   }
