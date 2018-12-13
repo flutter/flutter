@@ -539,7 +539,7 @@ void main() {
 
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 23 + widgetInspectorExtensionCount);
+    expect(binding.extensions.length, 24 + widgetInspectorExtensionCount);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
