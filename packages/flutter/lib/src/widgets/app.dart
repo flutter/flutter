@@ -734,8 +734,8 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
-      case TargetPlatform.android:
         return;
+      case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         // When the application moves to the background, any focus nodes
         // need to lose focus. When the application is restored to the
