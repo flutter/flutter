@@ -448,7 +448,7 @@ class TextPainter {
   // an increasing cluster length amount to achieve deterministic performance.
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
     // We cap the offset at the final index of the _text.
-    final int nextCodeUnit = _text.codeUnitAt(min(offset, _text.text.length - 1));
+    final int nextCodeUnit = _text.codeUnitAt(min(offset, _text.text == null ? 0 : _text.text.length - 1));
     if (nextCodeUnit == null)
       return null;
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
