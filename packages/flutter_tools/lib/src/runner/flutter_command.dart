@@ -162,7 +162,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Gets the observatory port provided to in the 'observatory-port' option.
-  /// 
+  ///
   /// If no port is set, returns null.
   int get observatoryPort {
     if (!_usesPortOption || argResults['observatory-port'] == null) {
