@@ -133,8 +133,7 @@ void main() {
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
 
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     final RenderParagraph title = _getTextRenderObjectFromDialog(tester, titleText);
     expect(title.text.style, titleTextStyle);
@@ -151,8 +150,7 @@ void main() {
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
 
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
     expect(content.text.style, contentTextStyle);

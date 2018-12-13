@@ -19,7 +19,7 @@ import 'theme.dart';
 /// a border radius of 2.0 on all corners.
 ///
 /// [titleTextStyle] and [contentTextStyle] are only used in [AlertDialogs].
-/// If null, they default to `ThemeData.textTheme.title` and `ThemeData.textTheme.subhead`,
+/// If null, they default to [ThemeData.textTheme.title] and [ThemeData.textTheme.subhead],
 /// respectively.
 ///
 /// See also:
@@ -54,11 +54,15 @@ class DialogTheme extends Diagnosticable {
   /// Default value for [AlertDialog.titleTextStyle].
   ///
   /// Only used in [AlertDialog]s.
+  ///
+  /// If null, defaults to [ThemeData.textTheme.title].
   final TextStyle titleTextStyle;
 
   /// Default value for [AlertDialog.contentTextStyle].
   ///
   /// Only used in [AlertDialog]s.
+  ///
+  /// If null, defaults to [ThemeData.textTheme.subhead].
   final TextStyle contentTextStyle;
 
   /// Creates a copy of this object but with the given fields replaced with the
