@@ -167,6 +167,21 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
       },);
+
+      testUsingContext('exits when observatory-port is specified and debug-port is not', () async {
+        testDeviceManager.addDevice(device);
+
+        final AttachCommand command = AttachCommand();
+        await expectLater(
+          createTestCommandRunner(command).run(<String>['attach', '--observatory-port', '100']),
+          throwsToolExit(
+            message: 'When the --debug-port is unknown, this command does not use '
+                     'the value of --observatory-port.',
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+      },);
     });
 
 

@@ -98,10 +98,16 @@ class AttachCommand extends FlutterCommand {
     if (await findTargetDevice() == null)
       throwToolExit(null);
     debugPort;
-    if (debugPort == null && argResults.wasParsed('ipv6')) {
+    if (debugPort == null && ipv6 != null) {
       throwToolExit(
         'When the --debug-port is unknown, this command determines '
         'the value of --ipv6 on its own.',
+      );
+    }
+    if (debugPort == null && observatoryPort != null) {
+      throwToolExit(
+        'When the --debug-port is unknown, this command does not use '
+        'the value of --observatory-port.',
       );
     }
   }
@@ -123,7 +129,7 @@ class AttachCommand extends FlutterCommand {
       : null;
 
     Uri observatoryUri;
-    bool ipv6 = false;
+    bool usesIpv6 = false;
     bool attachLogger = false;
     if (devicePort == null) {
       if (device is FuchsiaDevice) {
@@ -132,7 +138,7 @@ class AttachCommand extends FlutterCommand {
         if (module == null) {
           throwToolExit('\'--module\' is requried for attaching to a Fuchsia device');
         }
-        ipv6 = _isIpv6(device.id);
+        usesIpv6 = _isIpv6(device.id);
         final List<int> ports = await device.servicePorts();
         if (ports.isEmpty) {
           throwToolExit('No active service ports on ${device.name}');
@@ -150,7 +156,7 @@ class AttachCommand extends FlutterCommand {
           if (localPort == null) {
             throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
           }
-          observatoryUri = ipv6
+          observatoryUri = usesIpv6
             ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
             : Uri.parse('http://$ipv4Loopback:$localPort/');
           status.stop();
@@ -172,17 +178,17 @@ class AttachCommand extends FlutterCommand {
           printStatus('Waiting for a connection from Flutter on ${device.name}...');
           observatoryUri = await observatoryDiscovery.uri;
           // Determine ipv6 status from the scanned logs.
-          ipv6 = observatoryDiscovery.ipv6;
+          usesIpv6 = observatoryDiscovery.ipv6;
           printStatus('Done.');
         } finally {
           await observatoryDiscovery?.cancel();
         }
       }
     } else {
-      ipv6 = argResults['ipv6'];
+      usesIpv6 = ipv6;
       final int localPort = observatoryPort
         ?? await device.portForwarder.forward(devicePort);
-      observatoryUri = ipv6
+      observatoryUri = usesIpv6
         ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
         : Uri.parse('http://$ipv4Loopback:$localPort/');
     }
@@ -205,7 +211,7 @@ class AttachCommand extends FlutterCommand {
         usesTerminalUI: daemon == null,
         projectRootPath: argResults['project-root'],
         dillOutputPath: argResults['output-dill'],
-        ipv6: ipv6,
+        ipv6: usesIpv6,
       );
       if (attachLogger) {
         flutterDevice.startEchoingDeviceLog();
