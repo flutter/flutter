@@ -117,24 +117,6 @@ void main() {
     expect(materialWidget.elevation, customElevation);
   });
 
-  testWidgets('Custom dialog elevation', (WidgetTester tester) async {
-    const double customElevation = 12.0;
-    const AlertDialog dialog = AlertDialog(
-      actions: <Widget>[ ],
-      elevation: customElevation,
-    );
-    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
-
-    await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
-
-    final StatefulElement widget = tester.element(
-        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
-    final Material materialWidget = widget.state.widget;
-    expect(materialWidget.elevation, customElevation);
-  });
-
   testWidgets('Custom Title Text Style', (WidgetTester tester) async {
     const String titleText = 'Title';
     const TextStyle titleTextStyle = TextStyle(color: Colors.pink);
