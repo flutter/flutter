@@ -49,7 +49,7 @@ class AttachCommand extends FlutterCommand {
     usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
     usesPortOptions();
-    usesIpv6Option();
+    usesIpv6Flag();
     usesFilesystemOptions(hide: !verboseHelp);
     usesFuchsiaOptions(hide: !verboseHelp);
     argParser
@@ -98,13 +98,13 @@ class AttachCommand extends FlutterCommand {
     if (await findTargetDevice() == null)
       throwToolExit(null);
     debugPort;
-    if (debugPort == null && ipv6 != null) {
+    if (debugPort == null && argResults.wasParsed(FlutterCommand.ipv6Flag)) {
       throwToolExit(
         'When the --debug-port is unknown, this command determines '
         'the value of --ipv6 on its own.',
       );
     }
-    if (debugPort == null && observatoryPort != null) {
+    if (debugPort == null && argResults.wasParsed(FlutterCommand.observatoryPortOption)) {
       throwToolExit(
         'When the --debug-port is unknown, this command does not use '
         'the value of --observatory-port.',

@@ -40,7 +40,7 @@ abstract class RunCommandBase extends FlutterCommand {
               'Android device.\nIgnored on iOS.');
     usesTargetOption();
     usesPortOptions();
-    usesIpv6Option();
+    usesIpv6Flag();
     usesPubOption();
     usesIsolateFilterOption(hide: !verboseHelp);
   }
