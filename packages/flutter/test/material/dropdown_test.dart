@@ -28,6 +28,11 @@ Widget buildFrame({
   bool isExpanded = false,
   Widget hint,
   Widget disabledHint,
+  IconData iconType = Icons.arrow_drop_down,
+  double iconSize = 24.0,
+  Color iconEnabledColor,
+  Color iconDisabledColor,
+  EdgeInsets iconEdgeInsets = EdgeInsets.zero,
   List<String> items = menuItems,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
@@ -46,6 +51,11 @@ Widget buildFrame({
             onChanged: onChanged,
             isDense: isDense,
             isExpanded: isExpanded,
+            iconType: iconType,
+            iconSize: iconSize,
+            iconEnabledColor: iconEnabledColor,
+            iconDisabledColor: iconDisabledColor,
+            iconEdgeInsets: iconEdgeInsets,
             items: items == null ? null : items.map<DropdownMenuItem<String>>((String item) {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
@@ -519,6 +529,61 @@ void main() {
     );
   });
 
+  testWidgets('Icon type of DropdownButton', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    await tester.pumpWidget(
+        buildFrame(buttonKey: buttonKey, value: 'two', onChanged: onChanged)
+    );
+    expect(find.byIcon(Icons.arrow_drop_down), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_downward), findsNothing);
+
+    await tester.pumpWidget(
+        buildFrame(buttonKey: buttonKey, value: 'two', iconType: Icons.arrow_downward, onChanged: onChanged)
+    );
+    expect(find.byIcon(Icons.arrow_drop_down), findsNothing);
+    expect(find.byIcon(Icons.arrow_downward), findsOneWidget);
+  });
+
+  testWidgets('Size of DropdownButton with icon size', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    double iconSize;
+
+    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', iconSize: iconSize, onChanged: onChanged);
+
+    await tester.pumpWidget(build());
+    final RenderBox buttonBoxDefaultIconSize = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBoxDefaultIconSize.attached);
+
+    iconSize = 42.0;
+    await tester.pumpWidget(build());
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBox.attached);
+
+    // A Dropdown button should be the same size regardless of the icon size.
+    expect(buttonBox.localToGlobal(Offset.zero), equals(buttonBoxDefaultIconSize.localToGlobal(Offset.zero)));
+    expect(buttonBox.size, equals(buttonBoxDefaultIconSize.size));
+  });
+
+  testWidgets('Size of DropdownButton with icon padding', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    EdgeInsets iconEdgeInsets = EdgeInsets.zero;
+
+    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', iconEdgeInsets: iconEdgeInsets, onChanged: onChanged);
+
+    await tester.pumpWidget(build());
+    final RenderBox buttonBoxDefaultPadding = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBoxDefaultPadding.attached);
+
+    iconEdgeInsets = const EdgeInsets.only(top: 8.0, left: 16.0, right: 24.0);
+    await tester.pumpWidget(build());
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBox.attached);
+
+    // A Dropdown button should be the same size regardless of the icon padding.
+    expect(buttonBox.localToGlobal(Offset.zero), equals(buttonBoxDefaultPadding.localToGlobal(Offset.zero)));
+    expect(buttonBox.size, equals(buttonBoxDefaultPadding.size));
+  });
 
   testWidgets('Size of DropdownButton with null value', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
