@@ -93,6 +93,9 @@ class RuntimeController final : public WindowClient {
     std::string variant_code;
   };
 
+  // Stores data about the window to be used at startup
+  // as well as on hot restarts. Data kept here will persist
+  // after hot restart.
   struct WindowData {
     WindowData();
 
