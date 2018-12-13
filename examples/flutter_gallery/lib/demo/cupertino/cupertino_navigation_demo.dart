@@ -218,10 +218,10 @@ class Tab1RowItem extends StatelessWidget {
         Navigator.of(context).push(CupertinoPageRoute<void>(
           title: colorName,
           builder: (BuildContext context) => Tab1ItemPage(
-                color: color,
-                colorName: colorName,
-                index: index,
-              ),
+            color: color,
+            colorName: colorName,
+            index: index,
+          ),
         ));
       },
       child: SafeArea(

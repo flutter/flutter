@@ -138,23 +138,23 @@ class ContactsDemoState extends State<ContactsDemo> {
                     });
                   },
                   itemBuilder: (BuildContext context) => <PopupMenuItem<AppBarBehavior>>[
-                        const PopupMenuItem<AppBarBehavior>(
-                          value: AppBarBehavior.normal,
-                          child: Text('App bar scrolls away'),
-                        ),
-                        const PopupMenuItem<AppBarBehavior>(
-                          value: AppBarBehavior.pinned,
-                          child: Text('App bar stays put'),
-                        ),
-                        const PopupMenuItem<AppBarBehavior>(
-                          value: AppBarBehavior.floating,
-                          child: Text('App bar floats'),
-                        ),
-                        const PopupMenuItem<AppBarBehavior>(
-                          value: AppBarBehavior.snapping,
-                          child: Text('App bar snaps'),
-                        ),
-                      ],
+                    const PopupMenuItem<AppBarBehavior>(
+                      value: AppBarBehavior.normal,
+                      child: Text('App bar scrolls away'),
+                    ),
+                    const PopupMenuItem<AppBarBehavior>(
+                      value: AppBarBehavior.pinned,
+                      child: Text('App bar stays put'),
+                    ),
+                    const PopupMenuItem<AppBarBehavior>(
+                      value: AppBarBehavior.floating,
+                      child: Text('App bar floats'),
+                    ),
+                    const PopupMenuItem<AppBarBehavior>(
+                      value: AppBarBehavior.snapping,
+                      child: Text('App bar snaps'),
+                    ),
+                  ],
                 ),
               ],
               flexibleSpace: FlexibleSpaceBar(

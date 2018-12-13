@@ -148,27 +148,27 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
           PopupMenuButton<LeaveBehindDemoAction>(
             onSelected: handleDemoAction,
             itemBuilder: (BuildContext context) => <PopupMenuEntry<LeaveBehindDemoAction>>[
-                  const PopupMenuItem<LeaveBehindDemoAction>(
-                    value: LeaveBehindDemoAction.reset,
-                    child: Text('Reset the list'),
-                  ),
-                  const PopupMenuDivider(),
-                  CheckedPopupMenuItem<LeaveBehindDemoAction>(
-                    value: LeaveBehindDemoAction.horizontalSwipe,
-                    checked: _dismissDirection == DismissDirection.horizontal,
-                    child: const Text('Horizontal swipe'),
-                  ),
-                  CheckedPopupMenuItem<LeaveBehindDemoAction>(
-                    value: LeaveBehindDemoAction.leftSwipe,
-                    checked: _dismissDirection == DismissDirection.endToStart,
-                    child: const Text('Only swipe left'),
-                  ),
-                  CheckedPopupMenuItem<LeaveBehindDemoAction>(
-                    value: LeaveBehindDemoAction.rightSwipe,
-                    checked: _dismissDirection == DismissDirection.startToEnd,
-                    child: const Text('Only swipe right'),
-                  )
-                ],
+              const PopupMenuItem<LeaveBehindDemoAction>(
+                value: LeaveBehindDemoAction.reset,
+                child: Text('Reset the list'),
+              ),
+              const PopupMenuDivider(),
+              CheckedPopupMenuItem<LeaveBehindDemoAction>(
+                value: LeaveBehindDemoAction.horizontalSwipe,
+                checked: _dismissDirection == DismissDirection.horizontal,
+                child: const Text('Horizontal swipe'),
+              ),
+              CheckedPopupMenuItem<LeaveBehindDemoAction>(
+                value: LeaveBehindDemoAction.leftSwipe,
+                checked: _dismissDirection == DismissDirection.endToStart,
+                child: const Text('Only swipe left'),
+              ),
+              CheckedPopupMenuItem<LeaveBehindDemoAction>(
+                value: LeaveBehindDemoAction.rightSwipe,
+                checked: _dismissDirection == DismissDirection.startToEnd,
+                child: const Text('Only swipe right'),
+              )
+            ],
           )
         ],
       ),

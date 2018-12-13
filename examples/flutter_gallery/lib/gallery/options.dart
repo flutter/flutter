@@ -70,15 +70,15 @@ class GalleryOptions {
 
   @override
   int get hashCode => hashValues(
-        theme,
-        textScaleFactor,
-        textDirection,
-        timeDilation,
-        platform,
-        showPerformanceOverlay,
-        showRasterCacheImagesCheckerboard,
-        showOffscreenLayersCheckerboard,
-      );
+    theme,
+    textScaleFactor,
+    textDirection,
+    timeDilation,
+    platform,
+    showPerformanceOverlay,
+    showRasterCacheImagesCheckerboard,
+    showOffscreenLayersCheckerboard,
+  );
 
   @override
   String toString() {

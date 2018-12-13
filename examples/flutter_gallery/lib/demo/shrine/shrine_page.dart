@@ -108,19 +108,19 @@ class ShrinePageState extends State<ShrinePage> {
           ),
           PopupMenuButton<ShrineAction>(
             itemBuilder: (BuildContext context) => <PopupMenuItem<ShrineAction>>[
-                  const PopupMenuItem<ShrineAction>(
-                    value: ShrineAction.sortByPrice,
-                    child: Text('Sort by price'),
-                  ),
-                  const PopupMenuItem<ShrineAction>(
-                    value: ShrineAction.sortByProduct,
-                    child: Text('Sort by product'),
-                  ),
-                  const PopupMenuItem<ShrineAction>(
-                    value: ShrineAction.emptyCart,
-                    child: Text('Empty shopping cart'),
-                  )
-                ],
+              const PopupMenuItem<ShrineAction>(
+                value: ShrineAction.sortByPrice,
+                child: Text('Sort by price'),
+              ),
+              const PopupMenuItem<ShrineAction>(
+                value: ShrineAction.sortByProduct,
+                child: Text('Sort by product'),
+              ),
+              const PopupMenuItem<ShrineAction>(
+                value: ShrineAction.emptyCart,
+                child: Text('Empty shopping cart'),
+              )
+            ],
             onSelected: (ShrineAction action) {
               switch (action) {
                 case ShrineAction.sortByPrice:

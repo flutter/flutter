@@ -205,15 +205,15 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> with Ticker
               });
             },
             itemBuilder: (BuildContext context) => <PopupMenuItem<BottomNavigationBarType>>[
-                  const PopupMenuItem<BottomNavigationBarType>(
-                    value: BottomNavigationBarType.fixed,
-                    child: Text('Fixed'),
-                  ),
-                  const PopupMenuItem<BottomNavigationBarType>(
-                    value: BottomNavigationBarType.shifting,
-                    child: Text('Shifting'),
-                  )
-                ],
+              const PopupMenuItem<BottomNavigationBarType>(
+                value: BottomNavigationBarType.fixed,
+                child: Text('Fixed'),
+              ),
+              const PopupMenuItem<BottomNavigationBarType>(
+                value: BottomNavigationBarType.shifting,
+                child: Text('Shifting'),
+              )
+            ],
           )
         ],
       ),

@@ -19,8 +19,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function>{
-        "market": MessageLookupByLibrary.simpleMessage("MERCADO"),
-        "portfolio": MessageLookupByLibrary.simpleMessage("CARTERA"),
-        "title": MessageLookupByLibrary.simpleMessage("Acciones")
-      };
+    "market": MessageLookupByLibrary.simpleMessage("MERCADO"),
+    "portfolio": MessageLookupByLibrary.simpleMessage("CARTERA"),
+    "title": MessageLookupByLibrary.simpleMessage("Acciones")
+  };
 }

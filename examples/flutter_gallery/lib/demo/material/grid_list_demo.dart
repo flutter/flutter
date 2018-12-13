@@ -348,19 +348,19 @@ class GridListDemoState extends State<GridListDemo> {
           PopupMenuButton<GridDemoTileStyle>(
             onSelected: changeTileStyle,
             itemBuilder: (BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[
-                  const PopupMenuItem<GridDemoTileStyle>(
-                    value: GridDemoTileStyle.imageOnly,
-                    child: Text('Image only'),
-                  ),
-                  const PopupMenuItem<GridDemoTileStyle>(
-                    value: GridDemoTileStyle.oneLine,
-                    child: Text('One line'),
-                  ),
-                  const PopupMenuItem<GridDemoTileStyle>(
-                    value: GridDemoTileStyle.twoLine,
-                    child: Text('Two line'),
-                  ),
-                ],
+              const PopupMenuItem<GridDemoTileStyle>(
+                value: GridDemoTileStyle.imageOnly,
+                child: Text('Image only'),
+              ),
+              const PopupMenuItem<GridDemoTileStyle>(
+                value: GridDemoTileStyle.oneLine,
+                child: Text('One line'),
+              ),
+              const PopupMenuItem<GridDemoTileStyle>(
+                value: GridDemoTileStyle.twoLine,
+                child: Text('Two line'),
+              ),
+            ],
           ),
         ],
       ),

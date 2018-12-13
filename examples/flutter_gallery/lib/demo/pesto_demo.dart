@@ -371,11 +371,11 @@ class _RecipePageState extends State<RecipePage> {
                   PopupMenuButton<String>(
                     onSelected: (String item) {},
                     itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-                          _buildMenuItem(Icons.share, 'Tweet recipe'),
-                          _buildMenuItem(Icons.email, 'Email recipe'),
-                          _buildMenuItem(Icons.message, 'Message recipe'),
-                          _buildMenuItem(Icons.people, 'Share on Facebook'),
-                        ],
+                      _buildMenuItem(Icons.share, 'Tweet recipe'),
+                      _buildMenuItem(Icons.email, 'Email recipe'),
+                      _buildMenuItem(Icons.message, 'Message recipe'),
+                      _buildMenuItem(Icons.people, 'Share on Facebook'),
+                    ],
                   ),
                 ],
                 flexibleSpace: const FlexibleSpaceBar(
