@@ -10,7 +10,8 @@ import 'package:intl/intl.dart';
 import '../../gallery/demo.dart';
 
 class _InputDropdown extends StatelessWidget {
-  const _InputDropdown({Key key, this.child, this.labelText, this.valueText, this.valueStyle, this.onPressed})
+  const _InputDropdown(
+      { Key key, this.child, this.labelText, this.valueText, this.valueStyle, this.onPressed })
       : super(key: key);
 
   final String labelText;

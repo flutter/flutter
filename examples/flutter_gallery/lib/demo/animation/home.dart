@@ -420,7 +420,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
 }
 
 class AnimationDemoHome extends StatefulWidget {
-  const AnimationDemoHome({Key key}) : super(key: key);
+  const AnimationDemoHome({ Key key }) : super(key: key);
 
   static const String routeName = '/animation';
 

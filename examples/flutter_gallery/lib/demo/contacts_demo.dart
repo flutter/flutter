@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class _ContactCategory extends StatelessWidget {
-  const _ContactCategory({Key key, this.icon, this.children}) : super(key: key);
+  const _ContactCategory({ Key key, this.icon, this.children }) : super(key: key);
 
   final IconData icon;
   final List<Widget> children;
@@ -42,7 +42,7 @@ class _ContactCategory extends StatelessWidget {
 }
 
 class _ContactItem extends StatelessWidget {
-  _ContactItem({Key key, this.icon, this.lines, this.tooltip, this.onPressed})
+  _ContactItem({ Key key, this.icon, this.lines, this.tooltip, this.onPressed })
       : assert(lines.length > 1),
        super(key: key);
 

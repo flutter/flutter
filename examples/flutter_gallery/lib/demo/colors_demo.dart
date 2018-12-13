@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 const double kColorItemHeight = 48.0;
 
 class Palette {
-  Palette({this.name, this.primary, this.accent, this.threshold = 900});
+  Palette({ this.name, this.primary, this.accent, this.threshold = 900 });
 
   final String name;
   final MaterialColor primary;

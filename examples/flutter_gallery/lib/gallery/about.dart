@@ -22,7 +22,7 @@ class _LinkTextSpan extends TextSpan {
   // manage the recognizer from outside the TextSpan, e.g. in the State of a
   // stateful widget that then hands the recognizer to the TextSpan.
 
-  _LinkTextSpan({TextStyle style, String url, String text})
+  _LinkTextSpan({ TextStyle style, String url, String text })
       : super(
          style: style,
          text: text ?? url,

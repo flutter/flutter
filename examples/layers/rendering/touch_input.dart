@@ -20,7 +20,7 @@ List<Color> _kColors = <Color>[
 
 /// A simple model object for a dot that reacts to pointer pressure.
 class Dot {
-  Dot({Color color}) : _paint = Paint()..color = color;
+  Dot({ Color color }) : _paint = Paint()..color = color;
 
   final Paint _paint;
   Offset position = Offset.zero;

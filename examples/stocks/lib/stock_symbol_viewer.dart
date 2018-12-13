@@ -8,7 +8,7 @@ import 'stock_arrow.dart';
 import 'stock_data.dart';
 
 class _StockSymbolView extends StatelessWidget {
-  const _StockSymbolView({this.stock, this.arrow});
+  const _StockSymbolView({ this.stock, this.arrow });
 
   final Stock stock;
   final Widget arrow;
@@ -65,7 +65,7 @@ class _StockSymbolView extends StatelessWidget {
 }
 
 class StockSymbolPage extends StatelessWidget {
-  const StockSymbolPage({this.symbol, this.stocks});
+  const StockSymbolPage({ this.symbol, this.stocks });
 
   final String symbol;
   final StockData stocks;
@@ -115,7 +115,7 @@ class StockSymbolPage extends StatelessWidget {
 }
 
 class StockSymbolBottomSheet extends StatelessWidget {
-  const StockSymbolBottomSheet({this.stock});
+  const StockSymbolBottomSheet({ this.stock });
 
   final Stock stock;
 

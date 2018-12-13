@@ -5,7 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 class LifecycleWatcher extends StatefulWidget {
-  const LifecycleWatcher({Key key}) : super(key: key);
+  const LifecycleWatcher({ Key key }) : super(key: key);
 
   @override
   _LifecycleWatcherState createState() => _LifecycleWatcherState();

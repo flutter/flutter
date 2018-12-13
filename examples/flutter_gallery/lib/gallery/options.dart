@@ -90,7 +90,7 @@ const double _kItemHeight = 48.0;
 const EdgeInsetsDirectional _kItemPadding = EdgeInsetsDirectional.only(start: 56.0);
 
 class _OptionsItem extends StatelessWidget {
-  const _OptionsItem({Key key, this.child}) : super(key: key);
+  const _OptionsItem({ Key key, this.child }) : super(key: key);
 
   final Widget child;
 
@@ -118,7 +118,7 @@ class _OptionsItem extends StatelessWidget {
 }
 
 class _BooleanItem extends StatelessWidget {
-  const _BooleanItem(this.title, this.value, this.onChanged, {this.switchKey});
+  const _BooleanItem(this.title, this.value, this.onChanged, { this.switchKey });
 
   final String title;
   final bool value;
@@ -164,7 +164,7 @@ class _ActionItem extends StatelessWidget {
 }
 
 class _FlatButton extends StatelessWidget {
-  const _FlatButton({Key key, this.onPressed, this.child}) : super(key: key);
+  const _FlatButton({ Key key, this.onPressed, this.child }) : super(key: key);
 
   final VoidCallback onPressed;
   final Widget child;

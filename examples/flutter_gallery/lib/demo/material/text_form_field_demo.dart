@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import '../../gallery/demo.dart';
 
 class TextFormFieldDemo extends StatefulWidget {
-  const TextFormFieldDemo({Key key}) : super(key: key);
+  const TextFormFieldDemo({ Key key }) : super(key: key);
 
   static const String routeName = '/material/text-form-field';
 

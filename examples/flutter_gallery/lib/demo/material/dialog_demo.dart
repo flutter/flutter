@@ -72,7 +72,7 @@ class DialogDemoState extends State<DialogDemo> {
     _selectedTime = TimeOfDay(hour: now.hour, minute: now.minute);
   }
 
-  void showDemoDialog<T>({BuildContext context, Widget child}) {
+  void showDemoDialog<T>({ BuildContext context, Widget child }) {
     showDialog<T>(
       context: context,
       builder: (BuildContext context) => child,

@@ -68,7 +68,7 @@ class _ProductItem extends StatelessWidget {
 
 // Vendor name and description
 class _VendorItem extends StatelessWidget {
-  const _VendorItem({Key key, @required this.vendor})
+  const _VendorItem({ Key key, @required this.vendor })
       : assert(vendor != null),
        super(key: key);
 
@@ -242,7 +242,7 @@ class _OrderPageState extends State<OrderPage> {
     ShrineOrderRoute.of(context).order = value;
   }
 
-  void updateOrder({int quantity, bool inCart}) {
+  void updateOrder({ int quantity, bool inCart }) {
     final Order newOrder = currentOrder.copyWith(quantity: quantity, inCart: inCart);
     if (currentOrder != newOrder) {
       setState(() {

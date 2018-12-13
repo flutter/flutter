@@ -48,7 +48,7 @@ import 'package:flutter/semantics.dart';
 ///  * [SemanticSortKey] for the base class of all semantic sort keys.
 ///  * [OrdinalSortKey] for a concrete sort key that sorts based on the given ordinal.
 class RowColumnTraversal extends StatelessWidget {
-  const RowColumnTraversal({this.rowOrder, this.columnOrder, this.child});
+  const RowColumnTraversal({ this.rowOrder, this.columnOrder, this.child });
 
   final int rowOrder;
   final int columnOrder;
@@ -92,7 +92,7 @@ class RowColumnTraversal extends StatelessWidget {
 /// set its traversal order.
 class SpinnerButton extends StatelessWidget {
   const SpinnerButton(
-      {Key key, this.onPressed, this.icon, this.rowOrder, this.columnOrder, this.field, this.increment})
+      { Key key, this.onPressed, this.icon, this.rowOrder, this.columnOrder, this.field, this.increment })
       : super(key: key);
 
   final VoidCallback onPressed;

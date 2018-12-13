@@ -56,10 +56,10 @@ class SectorConstraints extends Constraints {
 }
 
 class SectorDimensions {
-  const SectorDimensions({this.deltaRadius = 0.0, this.deltaTheta = 0.0});
+  const SectorDimensions({ this.deltaRadius = 0.0, this.deltaTheta = 0.0 });
 
   factory SectorDimensions.withConstraints(SectorConstraints constraints,
-      {double deltaRadius = 0.0, double deltaTheta = 0.0}) {
+      { double deltaRadius = 0.0, double deltaTheta = 0.0 }) {
     return SectorDimensions(
       deltaRadius: constraints.constrainDeltaRadius(deltaRadius),
       deltaTheta: constraints.constrainDeltaTheta(deltaTheta),
@@ -129,7 +129,7 @@ abstract class RenderSector extends RenderObject {
   @override
   Rect get semanticBounds => Rect.fromLTWH(-deltaRadius, -deltaRadius, 2.0 * deltaRadius, 2.0 * deltaRadius);
 
-  bool hitTest(HitTestResult result, {double radius, double theta}) {
+  bool hitTest(HitTestResult result, { double radius, double theta }) {
     if (radius < parentData.radius ||
         radius >= parentData.radius + deltaRadius ||
         theta < parentData.theta ||
@@ -141,7 +141,7 @@ abstract class RenderSector extends RenderObject {
     return true;
   }
 
-  void hitTestChildren(HitTestResult result, {double radius, double theta}) {}
+  void hitTestChildren(HitTestResult result, { double radius, double theta }) {}
 
   double deltaRadius;
   double deltaTheta;
@@ -196,7 +196,7 @@ class RenderSectorWithChildren extends RenderDecoratedSector
   RenderSectorWithChildren(BoxDecoration decoration) : super(decoration);
 
   @override
-  void hitTestChildren(HitTestResult result, {double radius, double theta}) {
+  void hitTestChildren(HitTestResult result, { double radius, double theta }) {
     RenderSector child = lastChild;
     while (child != null) {
       if (child.hitTest(result, radius: radius, theta: theta)) {
@@ -546,7 +546,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
   }
 
   @override
-  bool hitTest(HitTestResult result, {Offset position}) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (child == null) {
       return false;
     }

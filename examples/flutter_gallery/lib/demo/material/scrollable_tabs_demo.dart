@@ -9,7 +9,7 @@ import '../../gallery/demo.dart';
 enum TabsDemoStyle { iconsAndText, iconsOnly, textOnly }
 
 class _Page {
-  const _Page({this.icon, this.text});
+  const _Page({ this.icon, this.text });
   final IconData icon;
   final String text;
 }

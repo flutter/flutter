@@ -18,7 +18,7 @@ const double _kDemoItemHeight = 64.0;
 const Duration _kFrontLayerSwitchDuration = Duration(milliseconds: 300);
 
 class _FlutterLogo extends StatelessWidget {
-  const _FlutterLogo({Key key}) : super(key: key);
+  const _FlutterLogo({ Key key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +163,7 @@ class _CategoriesPage extends StatelessWidget {
 }
 
 class _DemoItem extends StatelessWidget {
-  const _DemoItem({Key key, this.demo}) : super(key: key);
+  const _DemoItem({ Key key, this.demo }) : super(key: key);
 
   final GalleryDemo demo;
 

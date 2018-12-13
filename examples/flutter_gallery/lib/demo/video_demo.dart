@@ -13,7 +13,7 @@ import 'package:device_info/device_info.dart';
 const String beeUri = 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
 
 class VideoCard extends StatelessWidget {
-  const VideoCard({Key key, this.controller, this.title, this.subtitle}) : super(key: key);
+  const VideoCard({ Key key, this.controller, this.title, this.subtitle }) : super(key: key);
 
   final VideoPlayerController controller;
   final String title;
@@ -333,7 +333,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
 }
 
 class VideoDemo extends StatefulWidget {
-  const VideoDemo({Key key}) : super(key: key);
+  const VideoDemo({ Key key }) : super(key: key);
 
   static const String routeName = '/video';
 

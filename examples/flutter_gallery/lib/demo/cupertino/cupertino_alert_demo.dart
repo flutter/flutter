@@ -17,7 +17,7 @@ class CupertinoAlertDemo extends StatefulWidget {
 class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  void showDemoDialog<T>({BuildContext context, Widget child}) {
+  void showDemoDialog<T>({ BuildContext context, Widget child }) {
     showDialog<T>(
       context: context,
       barrierDismissible: false,
@@ -34,7 +34,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
     });
   }
 
-  void showDemoActionSheet<T>({BuildContext context, Widget child}) {
+  void showDemoActionSheet<T>({ BuildContext context, Widget child }) {
     showCupertinoModalPopup<T>(
       context: context,
       builder: (BuildContext context) => child,
@@ -196,7 +196,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
 }
 
 class CupertinoDessertDialog extends StatelessWidget {
-  const CupertinoDessertDialog({Key key, this.title, this.content}) : super(key: key);
+  const CupertinoDessertDialog({ Key key, this.title, this.content }) : super(key: key);
 
   final Widget title;
   final Widget content;

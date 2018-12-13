@@ -8,7 +8,7 @@ import '../demo/all.dart';
 import 'icons.dart';
 
 class GalleryDemoCategory {
-  const GalleryDemoCategory._({this.name, this.icon});
+  const GalleryDemoCategory._({ this.name, this.icon });
   @required
   final String name;
   @required

@@ -206,7 +206,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
 }
 
 class _ChoiceValue<T> {
-  const _ChoiceValue({this.value, this.title, this.label});
+  const _ChoiceValue({ this.value, this.title, this.label });
 
   final T value;
   final String title;
@@ -497,12 +497,12 @@ class _DiamondBorder extends ShapeBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, {TextDirection textDirection}) {
+  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
     return getOuterPath(rect, textDirection: textDirection);
   }
 
   @override
-  Path getOuterPath(Rect rect, {TextDirection textDirection}) {
+  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
     return Path()
       ..moveTo(rect.left + rect.width / 2.0, rect.top)
       ..lineTo(rect.right, rect.top + rect.height / 2.0)
@@ -512,7 +512,7 @@ class _DiamondBorder extends ShapeBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {TextDirection textDirection}) {}
+  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {}
 
   // This border doesn't support scaling.
   @override

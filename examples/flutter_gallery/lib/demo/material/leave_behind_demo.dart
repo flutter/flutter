@@ -12,7 +12,7 @@ import '../../gallery/demo.dart';
 enum LeaveBehindDemoAction { reset, horizontalSwipe, leftSwipe, rightSwipe }
 
 class LeaveBehindItem implements Comparable<LeaveBehindItem> {
-  LeaveBehindItem({this.index, this.name, this.subject, this.body});
+  LeaveBehindItem({ this.index, this.name, this.subject, this.body });
 
   LeaveBehindItem.from(LeaveBehindItem item)
       : index = item.index,
@@ -30,7 +30,7 @@ class LeaveBehindItem implements Comparable<LeaveBehindItem> {
 }
 
 class LeaveBehindDemo extends StatefulWidget {
-  const LeaveBehindDemo({Key key}) : super(key: key);
+  const LeaveBehindDemo({ Key key }) : super(key: key);
 
   static const String routeName = '/material/leave-behind';
 

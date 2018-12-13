@@ -221,7 +221,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
 }
 
 class _ResultCard extends StatelessWidget {
-  const _ResultCard({this.integer, this.title, this.searchDelegate});
+  const _ResultCard({ this.integer, this.title, this.searchDelegate });
 
   final int integer;
   final String title;
@@ -253,7 +253,7 @@ class _ResultCard extends StatelessWidget {
 }
 
 class _SuggestionList extends StatelessWidget {
-  const _SuggestionList({this.suggestions, this.query, this.onSelected});
+  const _SuggestionList({ this.suggestions, this.query, this.onSelected });
 
   final List<String> suggestions;
   final String query;

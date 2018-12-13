@@ -49,7 +49,7 @@ final List<TravelDestination> destinations = <TravelDestination>[
 ];
 
 class TravelDestinationItem extends StatelessWidget {
-  TravelDestinationItem({Key key, @required this.destination, this.shape})
+  TravelDestinationItem({ Key key, @required this.destination, this.shape })
       : assert(destination != null && destination.isValid),
        super(key: key);
 
