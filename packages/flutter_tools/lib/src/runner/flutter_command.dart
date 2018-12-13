@@ -86,6 +86,10 @@ abstract class FlutterCommand extends Command<void> {
 
   bool _usesPubOption = false;
 
+  bool _usesPortOption = false;
+
+  bool _usesIpv6Option = false;
+
   bool get shouldRunPub => _usesPubOption && argResults['pub'];
 
   bool get shouldUpdateCache => true;
@@ -147,6 +151,43 @@ abstract class FlutterCommand extends Command<void> {
             'compilation. See more details on filesystem-root option.\n',
       );
   }
+
+  /// Adds options for connecting to the Dart VM observatory port.
+  void usesPortOptions() {
+    argParser.addOption('observatory-port',
+        help: 'Listen to the given port for an observatory debugger connection.\n'
+              'Specifying port 0 (the default) will find a random free port.'
+    );
+    _usesPortOption = true;
+  }
+
+  /// Gets the observatory port provided to in the 'observatory-port' option.
+  /// 
+  /// If no port is set, returns null.
+  int get observatoryPort {
+    if (!_usesPortOption || argResults['observatory-port'] == null) {
+      return null;
+    }
+    try {
+      return int.parse(argResults['observatory-port']);
+    } catch (error) {
+      throwToolExit('Invalid port for `--observatory-port`: $error');
+    }
+    return null;
+  }
+
+  void usesIpv6Option() {
+    argParser.addFlag('ipv6',
+      hide: true,
+      negatable: false,
+      help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool '
+            'forwards the host port to a device port. Not used when the '
+            '--debug-port flag is not set.',
+    );
+    _usesIpv6Option = true;
+  }
+
+  bool get ipv6 => _usesIpv6Option ? argResults['ipv6'] : null;
 
   void usesBuildNumberOption() {
     argParser.addOption('build-number',

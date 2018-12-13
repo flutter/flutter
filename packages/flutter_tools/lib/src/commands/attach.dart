@@ -48,15 +48,14 @@ class AttachCommand extends FlutterCommand {
     addBuildModeFlags(defaultToRelease: false);
     usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
+    usesPortOptions();
+    usesIpv6Option();
     usesFilesystemOptions(hide: !verboseHelp);
     usesFuchsiaOptions(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
         help: 'Device port where the observatory is listening.',
-      )..addOption(
-        'observatory-port',
-        help: 'Local port where the observatory is listening.',
       )..addOption('pid-file',
         help: 'Specify a file to write the process id to. '
               'You can send SIGUSR1 to trigger a hot reload '
@@ -70,12 +69,6 @@ class AttachCommand extends FlutterCommand {
         negatable: false,
         help: 'Handle machine structured JSON command input and provide output '
               'and progress in machine friendly format.',
-      )..addFlag('ipv6',
-        hide: true,
-        negatable: false,
-        help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool '
-              'forwards the host port to a device port. Not used when the '
-              '--debug-port flag is not set.',
       );
     hotRunnerFactory ??= HotRunnerFactory();
   }
@@ -88,15 +81,7 @@ class AttachCommand extends FlutterCommand {
   @override
   final String description = 'Attach to a running application.';
 
-  // TODO(djshuckerow): this is now a confusing name. An explanation:
-  // The --observatory-port flag passed to `flutter run` is used to
-  // set up the port on the development macine that the Dart observatory
-  // listens to. This flag serves the same purpose in this command.
-  //
-  // The --debug-port flag passed only to `flutter attach` is used to
-  // set up the port on the device running a Flutter app to connect back
-  // to the host development machine.
-  int get observatoryPort {
+  int get debugPort {
     if (argResults['debug-port'] == null)
       return null;
     try {
@@ -112,8 +97,8 @@ class AttachCommand extends FlutterCommand {
     await super.validateCommand();
     if (await findTargetDevice() == null)
       throwToolExit(null);
-    observatoryPort;
-    if (observatoryPort == null && argResults.wasParsed('ipv6')) {
+    debugPort;
+    if (debugPort == null && argResults.wasParsed('ipv6')) {
       throwToolExit(
         'When the --debug-port is unknown, this command determines '
         'the value of --ipv6 on its own.',
@@ -130,7 +115,7 @@ class AttachCommand extends FlutterCommand {
     writePidFile(argResults['pid-file']);
 
     final Device device = await findTargetDevice();
-    final int devicePort = observatoryPort;
+    final int devicePort = debugPort;
 
     final Daemon daemon = argResults['machine']
       ? Daemon(stdinCommandStream, stdoutCommandResponse,
@@ -195,11 +180,7 @@ class AttachCommand extends FlutterCommand {
       }
     } else {
       ipv6 = argResults['ipv6'];
-      // int.tryParse will throw if it is passed null, so we need to do this.
-      final int argObservatoryPort = argResults['observatory-port'] == null
-        ? null
-        : int.tryParse(argResults['observatory-port']);
-      final int localPort = argObservatoryPort
+      final int localPort = observatoryPort
         ?? await device.portForwarder.forward(devicePort);
       observatoryUri = ipv6
         ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
