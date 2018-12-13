@@ -28,6 +28,7 @@ executable("testing") {
   if (is_fuchsia) {
     deps += [
       "//garnet/public/lib/ui/scenic:client",
+      "//zircon/public/lib/trace",
       "//zircon/public/lib/trace-provider",
     ]
   }
