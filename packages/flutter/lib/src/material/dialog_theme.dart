@@ -19,8 +19,8 @@ import 'theme.dart';
 /// a border radius of 2.0 on all corners.
 ///
 /// [titleTextStyle] and [contentTextStyle] are only used in [AlertDialogs].
-/// They default to `ThemeData.textTheme.title` and `ThemeData.textTheme.subhead`,
-/// respectively, when null in this [DialogTheme].
+/// If null, they default to `ThemeData.textTheme.title` and `ThemeData.textTheme.subhead`,
+/// respectively.
 ///
 /// See also:
 ///

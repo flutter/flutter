@@ -39,6 +39,11 @@ Material _getMaterialFromDialog(WidgetTester tester) {
   return tester.widget<Material>(find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
 }
 
+RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
+  final StatelessElement contentWidget = tester.element(find.descendant(of: find.byType(AlertDialog), matching: find.text(text)));
+  return contentWidget.renderObject;
+}
+
 void main() {
   testWidgets('Dialog Theme implements debugFillDescription', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -143,9 +148,7 @@ void main() {
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1));
 
-    final StatelessElement titleWidget = tester.element(
-        find.descendant(of: find.byType(AlertDialog), matching: find.text(titleText)));
-    final RenderParagraph title = titleWidget.renderObject;
+    final RenderParagraph title = _getTextRenderObjectFromDialog(tester, titleText);
     expect(title.text.style, titleTextStyle);
   });
 
@@ -163,9 +166,7 @@ void main() {
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1));
 
-    final StatelessElement contentWidget = tester.element(
-        find.descendant(of: find.byType(AlertDialog), matching: find.text(contentText)));
-    final RenderParagraph content = contentWidget.renderObject;
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
     expect(content.text.style, contentTextStyle);
   });
 }

@@ -40,6 +40,11 @@ Material _getMaterialFromDialog(WidgetTester tester) {
   return tester.widget<Material>(find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
 }
 
+RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
+  final StatelessElement contentWidget = tester.element(find.descendant(of: find.byType(AlertDialog), matching: find.text(text)));
+  return contentWidget.renderObject;
+}
+
 const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
 
 void main() {
@@ -131,9 +136,7 @@ void main() {
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1));
 
-    final StatelessElement titleWidget = tester.element(
-        find.descendant(of: find.byType(AlertDialog), matching: find.text(titleText)));
-    final RenderParagraph title = titleWidget.renderObject;
+    final RenderParagraph title = _getTextRenderObjectFromDialog(tester, titleText);
     expect(title.text.style, titleTextStyle);
   });
 
@@ -151,67 +154,7 @@ void main() {
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1));
 
-    final StatelessElement contentWidget = tester.element(
-        find.descendant(of: find.byType(AlertDialog), matching: find.text(contentText)));
-    final RenderParagraph content = contentWidget.renderObject;
-    expect(content.text.style, contentTextStyle);
-  });
-
-  testWidgets('Custom dialog elevation', (WidgetTester tester) async {
-    const double customElevation = 12.0;
-    const AlertDialog dialog = AlertDialog(
-      actions: <Widget>[ ],
-      elevation: customElevation,
-    );
-    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
-
-    await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
-
-    final StatefulElement widget = tester.element(
-        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
-    final Material materialWidget = widget.state.widget;
-    expect(materialWidget.elevation, customElevation);
-  });
-
-  testWidgets('Custom Title Text Style', (WidgetTester tester) async {
-    const String titleText = 'Title';
-    const TextStyle titleTextStyle = TextStyle(color: Colors.pink);
-    const AlertDialog dialog = AlertDialog(
-      title: Text(titleText),
-      titleTextStyle: titleTextStyle,
-      actions: <Widget>[ ],
-    );
-    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
-
-    await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
-
-    final StatelessElement titleWidget = tester.element(
-        find.descendant(of: find.byType(AlertDialog), matching: find.text(titleText)));
-    final RenderParagraph title = titleWidget.renderObject;
-    expect(title.text.style, titleTextStyle);
-  });
-
-  testWidgets('Custom Content Text Style', (WidgetTester tester) async {
-    const String contentText = 'Content';
-    const TextStyle contentTextStyle = TextStyle(color: Colors.pink);
-    const AlertDialog dialog = AlertDialog(
-      content: Text(contentText),
-      contentTextStyle: contentTextStyle,
-      actions: <Widget>[ ],
-    );
-    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
-
-    await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
-
-    final StatelessElement contentWidget = tester.element(
-        find.descendant(of: find.byType(AlertDialog), matching: find.text(contentText)));
-    final RenderParagraph content = contentWidget.renderObject;
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
     expect(content.text.style, contentTextStyle);
   });
 
