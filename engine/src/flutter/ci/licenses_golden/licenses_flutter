@@ -454,6 +454,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/ResourceCleaner.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/ResourcePaths.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/view/ResourceUpdater.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/TextureRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/VsyncWaiter.java
 FILE: ../../../flutter/shell/platform/android/library_loader.cc

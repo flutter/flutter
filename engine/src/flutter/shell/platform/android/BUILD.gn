@@ -140,6 +140,7 @@ java_library("flutter_shell_java") {
     "io/flutter/view/ResourceCleaner.java",
     "io/flutter/view/ResourceExtractor.java",
     "io/flutter/view/ResourcePaths.java",
+    "io/flutter/view/ResourceUpdater.java",
     "io/flutter/view/TextureRegistry.java",
     "io/flutter/view/VsyncWaiter.java",
   ]
