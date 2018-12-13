@@ -615,7 +615,6 @@ class DeviceDomain extends Domain {
   Future<List<Device>> getDevices([Map<String, dynamic> args]) async {
     final List<Device> devices = <Device>[];
     for (PollingDeviceDiscovery discoverer in _discoverers) {
-      print(await discoverer.devices);
       devices.addAll(await discoverer.devices);
     }
     return devices;
