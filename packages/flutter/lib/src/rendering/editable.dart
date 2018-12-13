@@ -122,6 +122,8 @@ class RenderEditable extends RenderBox {
   ///
   /// The [offset] is required and must not be null. You can use [new
   /// ViewportOffset.zero] if you have no need for scrolling.
+  ///
+  /// The [enableInteractiveSelection] argument must not be null.
   RenderEditable({
     TextSpan text,
     @required TextDirection textDirection,
@@ -141,7 +143,7 @@ class RenderEditable extends RenderBox {
     Locale locale,
     double cursorWidth = 1.0,
     Radius cursorRadius,
-    bool enableInteractiveSelection,
+    bool enableInteractiveSelection = true,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
@@ -150,6 +152,7 @@ class RenderEditable extends RenderBox {
        assert(offset != null),
        assert(ignorePointer != null),
        assert(obscureText != null),
+       assert(enableInteractiveSelection != null),
        assert(textSelectionDelegate != null),
        _textPainter = TextPainter(
          text: text,
@@ -712,22 +715,6 @@ class RenderEditable extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// {@template flutter.rendering.editable.selectionEnabled}
-  /// True if interactive selection is enabled based on the values of
-  /// [enableInteractiveSelection] and [obscureText].
-  ///
-  /// By default [enableInteractiveSelection] is null, obscureText is false,
-  /// and this method returns true.
-  /// If [enableInteractiveSelection] is null and obscureText is true, then this
-  /// method returns false. This is the common case for password fields.
-  /// If [enableInteractiveSelection] is non-null then its value is returned. An
-  /// app might set it to true to enable interactive selection for a password
-  /// field, or to false to unconditionally disable interactive selection.
-  /// {@endtemplate}
-  bool get selectionEnabled {
-    return enableInteractiveSelection ?? !obscureText;
-  }
-
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -741,10 +728,10 @@ class RenderEditable extends RenderBox {
       ..isFocused = hasFocus
       ..isTextField = true;
 
-    if (hasFocus && selectionEnabled)
+    if (hasFocus && enableInteractiveSelection)
       config.onSetSelection = _handleSetSelection;
 
-    if (selectionEnabled && _selection?.isValid == true) {
+    if (enableInteractiveSelection && _selection?.isValid == true) {
       config.textSelection = _selection;
       if (_textPainter.getOffsetBefore(_selection.extentOffset) != null) {
         config
