@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../emulator.dart';
+import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -567,6 +568,7 @@ class DeviceDomain extends Domain {
     registerHandler('forward', forward);
     registerHandler('unforward', unforward);
 
+    addDeviceDiscoverer(FuchsiaDevices());
     addDeviceDiscoverer(AndroidDevices());
     addDeviceDiscoverer(IOSDevices());
     addDeviceDiscoverer(IOSSimulators());
@@ -613,6 +615,7 @@ class DeviceDomain extends Domain {
   Future<List<Device>> getDevices([Map<String, dynamic> args]) async {
     final List<Device> devices = <Device>[];
     for (PollingDeviceDiscovery discoverer in _discoverers) {
+      print(await discoverer.devices);
       devices.addAll(await discoverer.devices);
     }
     return devices;
