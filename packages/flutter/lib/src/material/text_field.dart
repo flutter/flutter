@@ -249,10 +249,10 @@ class TextField extends StatefulWidget {
   /// enforces the length with a [LengthLimitingTextInputFormatter], which is
   /// evaluated after the supplied [inputFormatters], if any.
   ///
-  /// This value must be either null, [TextField.noMaxLength], or greater than 0. If set to null
-  /// (the default), there is no limit to the number of characters allowed.
-  /// If set to [TextField.noMaxLength], then no limit will be enforced, but the number of
-  /// characters entered will still be displayed.
+  /// This value must be either null, [TextField.noMaxLength], or greater than 0.
+  /// If null (the default) then there is no limit to the number of characters
+  /// that can be entered. If set to [TextField.noMaxLength], then no limit will 
+  /// be enforced, but the number of characters entered will still be displayed.
   ///
   /// Whitespace characters (e.g. newline, space, tab) are included in the
   /// character count.
