@@ -1024,49 +1024,16 @@ class _RectPaintPredicate extends _OneParameterPaintPredicate<Rect> {
   );
 }
 
-class _RRectPaintPredicate extends _DrawCommandPaintPredicate {
-  _RRectPaintPredicate({ this.rrect, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
+class _RRectPaintPredicate extends _OneParameterPaintPredicate<RRect> {
+  _RRectPaintPredicate({ RRect rrect, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawRRect,
     'a rounded rectangle',
-    2,
-    1,
+    expected: rrect,
     color: color,
     strokeWidth: strokeWidth,
     hasMaskFilter: hasMaskFilter,
-    style: style
+    style: style,
   );
-
-  final RRect rrect;
-
-  @override
-  void verifyArguments(List<dynamic> arguments) {
-    super.verifyArguments(arguments);
-    const double eps = .0001;
-    final RRect actual = arguments[0];
-    if (rrect != null &&
-       ((actual.left - rrect.left).abs() > eps ||
-        (actual.right - rrect.right).abs() > eps ||
-        (actual.top - rrect.top).abs() > eps ||
-        (actual.bottom - rrect.bottom).abs() > eps ||
-        (actual.blRadiusX - rrect.blRadiusX).abs() > eps ||
-        (actual.blRadiusY - rrect.blRadiusY).abs() > eps ||
-        (actual.brRadiusX - rrect.brRadiusX).abs() > eps ||
-        (actual.brRadiusY - rrect.brRadiusY).abs() > eps ||
-        (actual.tlRadiusX - rrect.tlRadiusX).abs() > eps ||
-        (actual.tlRadiusY - rrect.tlRadiusY).abs() > eps ||
-        (actual.trRadiusX - rrect.trRadiusX).abs() > eps ||
-        (actual.trRadiusY - rrect.trRadiusY).abs() > eps)) {
-      throw 'It called $methodName with RRect, $actual, which was not exactly the expected RRect ($rrect).';
-    }
-  }
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (rrect != null) {
-      description.add('RRect: $rrect');
-    }
-  }
 }
 
 class _DRRectPaintPredicate extends _TwoParameterPaintPredicate<RRect, RRect> {
