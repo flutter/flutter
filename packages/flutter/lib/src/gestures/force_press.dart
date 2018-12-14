@@ -19,8 +19,9 @@ enum _ForceState {
   possible,
 
   // A pointer is down and a force press gesture has been detected. However, if
-  // ForcePressGestureRecognizer the only recognizer in the arena, the gesture
-  // will not yet have started.
+  // the ForcePressGestureRecognizer is the only recognizer in the arena, thus
+  // accepted as soon as the gesture state is possible, the gesture will not
+  // yet have started.
   accepted,
 
   // A pointer is down and the gesture has started, ie. the pressure of the pointer
@@ -78,6 +79,11 @@ typedef GestureForcePressUpdateCallback = void Function(ForcePressDetails detail
 /// with the screen.
 typedef GestureForcePressEndCallback = void Function(ForcePressDetails details);
 
+/// Signature used by [ForcePressGestureRecognizer] for interpolating the raw
+/// device pressure to a value in the range [0, 1] given the device's pressure
+/// min and pressure max.
+typedef GestureForceInterpolation = double Function(double pressureMin, double pressureMax, double pressure);
+
 /// Recognizes a force press on devices that have force sensors.
 ///
 /// Only the force from a single pointer is used to invoke events. A tap
@@ -88,8 +94,9 @@ typedef GestureForcePressEndCallback = void Function(ForcePressDetails details);
 /// pointer's pressure was never greater than
 /// [ForcePressGestureRecognizer.startPressure] in that duration.
 ///
-/// As of November, 2018 only iPhone 6S devices and higher numbered devices have force
-/// touch, with the exception of the iPhone XR.
+/// As of November, 2018 iPhone devices of generation 6S and higher have
+/// force touch functionality, with the exception of the iPhone XR. In addition,
+/// a small handful of Android devices have this functionality as well.
 ///
 /// Reported pressure will always be in the range [0.0, 1.0], where 1.0 is
 /// maximum pressure and 0.0 is minimum pressure.
@@ -98,12 +105,18 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// The [startPressure] defaults to 0.4, and [peakPressure] defaults to 0.85
   /// where a value of 0.0 is no pressure and a value of 1.0 is maximum pressure.
+  ///
+  /// [startPressure], [peakPressure] and [interpolation] must not be null.
+  /// [peakPressure] must be greater than [startPressure]. [interpolation] must
+  /// always return a value in the range [0.0, 1.0] for
   ForcePressGestureRecognizer({
     this.startPressure = 0.4,
     this.peakPressure = 0.85,
+    this.interpolation = _gestureForceInterpolation,
     Object debugOwner,
   }) : assert(startPressure != null),
        assert(peakPressure != null),
+       assert(interpolation != null),
        assert(peakPressure > startPressure),
        super(debugOwner: debugOwner);
 
@@ -153,6 +166,26 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// must be greater than [startPressure].
   final double peakPressure;
 
+  /// The function used to convert the raw device pressure values into a value
+  /// in the range [0, 1].
+  ///
+  /// The function takes in the device's min, max and raw touch
+  /// pressure and returns a value in the range [0.0, 1.0] denoting the
+  /// interpolated touch pressure.
+  ///
+  /// This function must always return values in the range [0, 1] when
+  /// pressureMin <= pressure < pressureMax.
+  ///
+  /// By default, the the function is a simple linear interpolation, however,
+  /// changing the function could be useful to accommodate variations in the way
+  /// different devices respond to pressure, change how animations from pressure
+  /// feedback are rendered or for other custom functionality.
+  final GestureForceInterpolation interpolation;
+
+  static double _gestureForceInterpolation(double pressureMin, double pressureMax, double pressure) {
+    return _inverseLerp(pressureMin, pressureMax, pressure);
+  }
+
   Offset _lastPosition;
   double _lastPressure;
   _ForceState _state = _ForceState.ready;
@@ -171,7 +204,8 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(_state != _ForceState.ready);
     // A static pointer with changes in pressure creates PointerMoveEvent events.
     if (event is PointerMoveEvent || event is PointerDownEvent) {
-      final double pressure = _inverseLerp(event.pressureMin, event.pressureMax, event.pressure);
+      final double pressure = interpolation(event.pressureMin, event.pressureMax, event.pressure);
+      assert(pressure <= 1.0 && pressure >= 0.0);
       _lastPosition = event.position;
       _lastPressure = pressure;
 
@@ -179,8 +213,9 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
         if (pressure > startPressure) {
           _state = _ForceState.started;
           resolve(GestureDisposition.accepted);
-        } else if (event.delta.distanceSquared > kTouchSlop)
+        } else if (event.delta.distanceSquared > kTouchSlop) {
           resolve(GestureDisposition.rejected);
+        }
       }
       // In case this is the only gesture detector we still don't want to start
       // the gesture until the pressure is greater than the startPressure.
@@ -253,10 +288,10 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     didStopTrackingLastPointer(pointer);
   }
 
-  double _inverseLerp(double min, double max, double t) {
+  static double _inverseLerp(double min, double max, double t) {
     return (t - min) / (max - min);
   }
 
   @override
-  String get debugDescription => 'forcepress';
+  String get debugDescription => 'force press';
 }
