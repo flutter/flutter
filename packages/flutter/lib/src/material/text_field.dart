@@ -613,6 +613,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cursorWidth: widget.cursorWidth,
         cursorRadius: widget.cursorRadius,
         cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
+        backgroundCursorColor: CupertinoColors.inactiveGray,
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: widget.enableInteractiveSelection,
