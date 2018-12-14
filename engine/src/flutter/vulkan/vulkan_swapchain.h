@@ -61,6 +61,7 @@ class VulkanSwapchain {
 
   SkISize GetSize() const;
 
+#if OS_ANDROID
  private:
   const VulkanProcTable& vk;
   const VulkanDevice& device_;
@@ -88,6 +89,7 @@ class VulkanSwapchain {
                                      sk_sp<SkColorSpace> color_space) const;
 
   VulkanBackbuffer* GetNextBackbuffer();
+#endif  // OS_ANDROID
 
   FML_DISALLOW_COPY_AND_ASSIGN(VulkanSwapchain);
 };
