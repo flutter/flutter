@@ -21,7 +21,6 @@ import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'text_selection.dart';
-import 'ticker_provider.dart';
 
 export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType;
 export 'package:flutter/rendering.dart' show SelectionChangedCause;
@@ -183,9 +182,9 @@ class EditableText extends StatefulWidget {
   /// [TextInputType.text] unless [maxLines] is greater than one, when it will
   /// default to [TextInputType.multiline].
   ///
-  /// The [controller], [focusNode], [style], [cursorColor], [backgroundCursorColor],
-  /// [textAlign], [rendererIgnoresPointer], and [enableInteractiveSelection]
-  /// arguments must not be null.
+  /// The [controller], [focusNode], [style], [cursorColor], [textAlign],
+  /// [rendererIgnoresPointer], and [enableInteractiveSelection] arguments must
+  /// not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -194,7 +193,6 @@ class EditableText extends StatefulWidget {
     this.autocorrect = true,
     @required this.style,
     @required this.cursorColor,
-    @required this.backgroundCursorColor,
     this.textAlign = TextAlign.start,
     this.textDirection,
     this.locale,
@@ -223,7 +221,6 @@ class EditableText extends StatefulWidget {
        assert(autocorrect != null),
        assert(style != null),
        assert(cursorColor != null),
-       assert(backgroundCursorColor != null),
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
        assert(autofocus != null),
@@ -326,13 +323,6 @@ class EditableText extends StatefulWidget {
   ///
   /// Cannot be null.
   final Color cursorColor;
-
-  /// The color to use when painting the background cursor aligned with the text
-  /// while rendering the floating cursor.
-  ///
-  /// Cannot be null. By default it is the disabled grey color from
-  /// CupertinoColors.
-  final Color backgroundCursorColor;
 
   /// {@template flutter.widgets.editableText.maxLines}
   /// The maximum number of lines for the text to span, wrapping if necessary.
@@ -501,7 +491,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText> implements TextInputClient, TextSelectionDelegate {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver implements TextInputClient, TextSelectionDelegate {
   Timer _cursorTimer;
   final ValueNotifier<bool> _showCursor = ValueNotifier<bool>(false);
   final GlobalKey _editableKey = GlobalKey();
@@ -512,12 +502,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final ScrollController _scrollController = ScrollController();
   final LayerLink _layerLink = LayerLink();
   bool _didAutoFocus = false;
-
-  // The time it takes for the floating cursor to snap to the text aligned
-  // cursor position after the user has finished placing it.
-  static const Duration _floatingCursorResetTime = Duration(milliseconds: 125);
-
-  AnimationController _floatingCursorResetController;
 
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
@@ -530,8 +514,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
-    _floatingCursorResetController = AnimationController(vsync: this);
-    _floatingCursorResetController.addListener(_onFloatingCursorResetTick);
   }
 
   @override
@@ -610,72 +592,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         //  action does not imply the user is done inputting information.
         _finalizeEditing(false);
         break;
-    }
-  }
-
-  // The original position of the caret on FloatingCursorDragState.start.
-  Rect _startCaretRect;
-
-  // The most recent text position as determined by the location of the floating
-  // cursor.
-  TextPosition _lastTextPosition;
-
-  // The offset of the floating cursor as determined from the first update call.
-  Offset _pointOffsetOrigin;
-
-  // The most recent position of the floating cursor.
-  Offset _lastBoundedOffset;
-
-  // Because the center of the cursor is preferredLineHeight / 2 below the touch
-  // origin, but the touch origin is used to determine which line the cursor is
-  // on, we need this offset to correctly render and move the cursor.
-  Offset get _floatingCursorOffset => Offset(0, renderEditable.preferredLineHeight / 2);
-
-  @override
-  void updateFloatingCursor(RawFloatingCursorPoint point) {
-    switch(point.state){
-      case FloatingCursorDragState.Start:
-        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);
-        _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-        renderEditable.setFloatingCursor(point.state, _startCaretRect.center - _floatingCursorOffset, currentTextPosition);
-        break;
-      case FloatingCursorDragState.Update:
-        // We want to send in points that are centered around a (0,0) origin, so we cache the
-        // position on the first update call.
-        if (_pointOffsetOrigin != null) {
-          final Offset centeredPoint = point.offset - _pointOffsetOrigin;
-          final Offset rawCursorOffset = _startCaretRect.center + centeredPoint - _floatingCursorOffset;
-          _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
-          _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset + _floatingCursorOffset));
-          renderEditable.setFloatingCursor(point.state, _lastBoundedOffset, _lastTextPosition);
-        } else {
-          _pointOffsetOrigin = point.offset;
-        }
-        break;
-      case FloatingCursorDragState.End:
-        _floatingCursorResetController.value = 0.0;
-        _floatingCursorResetController.animateTo(1.0, duration: _floatingCursorResetTime, curve: Curves.decelerate);
-      break;
-    }
-  }
-
-  void _onFloatingCursorResetTick() {
-    final Offset finalPosition = renderEditable.getLocalRectForCaret(_lastTextPosition).center - _floatingCursorOffset;
-    if (_floatingCursorResetController.isCompleted) {
-      renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition);
-      if (_lastTextPosition.offset != renderEditable.selection.baseOffset)
-        // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
-        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable, SelectionChangedCause.tap);
-      _startCaretRect = null;
-      _lastTextPosition = null;
-      _pointOffsetOrigin = null;
-      _lastBoundedOffset = null;
-    } else {
-      final double lerpValue = _floatingCursorResetController.value;
-      final double lerpX = ui.lerpDouble(_lastBoundedOffset.dx, finalPosition.dx, lerpValue);
-      final double lerpY = ui.lerpDouble(_lastBoundedOffset.dy, finalPosition.dy, lerpValue);
-
-      renderEditable.setFloatingCursor(FloatingCursorDragState.Update, Offset(lerpX, lerpY), _lastTextPosition, resetLerpValue: lerpValue);
     }
   }
 
@@ -1053,7 +969,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textSpan: buildTextSpan(),
               value: _value,
               cursorColor: widget.cursorColor,
-              backgroundCursorColor: widget.backgroundCursorColor,
               showCursor: EditableText.debugDeterministicCursor ? ValueNotifier<bool>(true) : _showCursor,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
@@ -1119,7 +1034,6 @@ class _Editable extends LeafRenderObjectWidget {
     this.textSpan,
     this.value,
     this.cursorColor,
-    this.backgroundCursorColor,
     this.showCursor,
     this.hasFocus,
     this.maxLines,
@@ -1146,7 +1060,6 @@ class _Editable extends LeafRenderObjectWidget {
   final TextSpan textSpan;
   final TextEditingValue value;
   final Color cursorColor;
-  final Color backgroundCursorColor;
   final ValueNotifier<bool> showCursor;
   final bool hasFocus;
   final int maxLines;
@@ -1171,7 +1084,6 @@ class _Editable extends LeafRenderObjectWidget {
     return RenderEditable(
       text: textSpan,
       cursorColor: cursorColor,
-      backgroundCursorColor: backgroundCursorColor,
       showCursor: showCursor,
       hasFocus: hasFocus,
       maxLines: maxLines,
