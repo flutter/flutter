@@ -47,7 +47,7 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
       .transform<String>(const LineSplitter())
       .listen((String line) {
     print('run:stderr: $line');
-    stderr.add(line);
+    stdout.add(line);
   });
 
   process.exitCode.then<void>((int processExitCode) { exitCode = processExitCode; });
