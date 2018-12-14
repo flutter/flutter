@@ -598,6 +598,8 @@ class _CupertinoBackGestureController<T> {
       parent: controller,
       curve: Curves.decelerate,
     );
+//    Duration duration = controller.duration;
+    controller.duration = const Duration(milliseconds: 140);
     if (velocity.abs() >= _kMinFlingVelocity) {
       controller.fling(velocity: -velocity);
     } else if (controller.value <= 0.5) {
