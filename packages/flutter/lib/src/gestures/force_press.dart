@@ -112,7 +112,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   ForcePressGestureRecognizer({
     this.startPressure = 0.4,
     this.peakPressure = 0.85,
-    this.interpolation = _gestureForceInterpolation,
+    this.interpolation = _inverseLerp,
     Object debugOwner,
   }) : assert(startPressure != null),
        assert(peakPressure != null),
@@ -181,10 +181,6 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// different devices respond to pressure, change how animations from pressure
   /// feedback are rendered or for other custom functionality.
   final GestureForceInterpolation interpolation;
-
-  static double _gestureForceInterpolation(double pressureMin, double pressureMax, double pressure) {
-    return _inverseLerp(pressureMin, pressureMax, pressure);
-  }
 
   Offset _lastPosition;
   double _lastPressure;
