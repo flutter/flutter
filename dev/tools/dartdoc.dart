@@ -100,8 +100,8 @@ Future<void> main(List<String> arguments) async {
 
   createFooter('$kDocsRoot/lib/footer.html');
   copyAssets();
+  createSearchMetadata('$kDocsRoot/lib/opensearch.xml', '$kDocsRoot/doc/opensearch.xml');
   cleanOutSnippets();
-  await precompileSnippetsTool(pubExecutable, pubEnvironment);
 
   final List<String> dartdocBaseArgs = <String>['global', 'run'];
   if (args['checked']) {
@@ -135,6 +135,7 @@ Future<void> main(List<String> arguments) async {
     '--header', 'analytics.html',
     '--header', 'survey.html',
     '--header', 'snippets.html',
+    '--header', 'opensearch.html',
     '--footer-text', 'lib/footer.html',
     '--exclude-packages',
     <String>[
@@ -232,20 +233,25 @@ ArgParser _createArgsParser() {
 
 final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
 
+String getBranchName() {
+  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
+  if (gitResult.exitCode != 0)
+    throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
+  final Match gitBranchMatch = gitBranchRegexp.firstMatch(
+      gitResult.stdout.trim().split('\n').first);
+  return gitBranchMatch == null ? '' : gitBranchMatch.group(1).split('...').first;
+}
+
 void createFooter(String footerPath) {
   const int kGitRevisionLength = 10;
 
-  ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
+  final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
   if (gitResult.exitCode != 0)
     throw 'git rev-parse exit with non-zero exit code: ${gitResult.exitCode}';
   String gitRevision = gitResult.stdout.trim();
 
-  gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
-   if (gitResult.exitCode != 0)
-    throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
-  final Match gitBranchMatch = gitBranchRegexp.firstMatch(
-      gitResult.stdout.trim().split('\n').first);
-  final String gitBranchOut = gitBranchMatch == null ? '' : '• </span class="no-break">${gitBranchMatch.group(1).split('...').first}</span>';
+  final String gitBranch = getBranchName();
+  final String gitBranchOut = gitBranch.isEmpty ? '' : '• </span class="no-break">$gitBranch</span>';
 
   gitRevision = gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
 
@@ -255,6 +261,21 @@ void createFooter(String footerPath) {
     '• </span class="no-break">$timestamp<span>',
     '• </span class="no-break">$gitRevision</span>',
     gitBranchOut].join(' '));
+}
+
+/// Generates an OpenSearch XML description that can be used to add a custom
+/// search for Flutter API docs to the browser. Unfortunately, it has to know
+/// the URL to which site to search, so we customize it here based upon the
+/// branch name.
+void createSearchMetadata(String templatePath, String metadataPath) {
+  final String template = File(templatePath).readAsStringSync();
+  final String branch = getBranchName();
+  final String metadata = template.replaceAll(
+    '{SITE_URL}',
+    branch == 'stable' ? 'https://docs.flutter.io/' : 'https://master-docs.flutter.io/',
+  );
+  Directory(path.dirname(metadataPath)).create(recursive: true);
+  File(metadataPath).writeAsStringSync(metadata);
 }
 
 /// Recursively copies `srcDir` to `destDir`, invoking [onFileCopied], if
@@ -293,7 +314,8 @@ void copyAssets() {
           (File src, File dest) => print('Copied ${src.path} to ${dest.path}'));
 }
 
-
+/// Clean out any existing snippets so that we don't publish old files from
+/// previous runs accidentally.
 void cleanOutSnippets() {
   final Directory snippetsDir = Directory(path.join(kPublishRoot, 'snippets'));
   if (snippetsDir.existsSync()) {
@@ -301,57 +323,6 @@ void cleanOutSnippets() {
       ..deleteSync(recursive: true)
       ..createSync(recursive: true);
   }
-}
-
-Future<File> precompileSnippetsTool(
-  String pubExecutable,
-  Map<String, String> pubEnvironment,
-) async {
-  final File snapshotPath = File(path.join('bin', 'cache', 'snippets.snapshot'));
-  print('Precompiling snippets tool into ${snapshotPath.absolute.path}');
-  if (snapshotPath.existsSync()) {
-    snapshotPath.deleteSync();
-  }
-
-  final ProcessWrapper process = ProcessWrapper(await Process.start(
-    pubExecutable,
-    <String>['get'],
-    workingDirectory: kSnippetsRoot,
-    environment: pubEnvironment,
-  ));
-  printStream(process.stdout, prefix: 'pub:stdout: ');
-  printStream(process.stderr, prefix: 'pub:stderr: ');
-  final int code = await process.done;
-  if (code != 0)
-    exit(code);
-
-  // In order to be able to optimize properly, we need to provide a training set
-  // of arguments, and an input file to process.
-  final Directory tempDir = Directory.systemTemp.createTempSync('dartdoc_snippet_');
-  final File trainingFile = File(path.join(tempDir.path, 'snippet_training'));
-  trainingFile.writeAsStringSync('```dart\nvoid foo(){}\n```');
-  try {
-    final ProcessResult result = Process.runSync(Platform.resolvedExecutable, <String>[
-      '--snapshot=${snapshotPath.absolute.path}',
-      '--snapshot_kind=app-jit',
-      path.join(
-        'lib',
-        'main.dart',
-      ),
-      '--type=sample',
-      '--input=${trainingFile.absolute.path}',
-      '--output=${path.join(tempDir.absolute.path, 'training_output.txt')}',
-    ], workingDirectory: path.absolute(kSnippetsRoot));
-    if (result.exitCode != 0) {
-      stdout.writeln(result.stdout);
-      stderr.writeln(result.stderr);
-      throw Exception('Could not generate snippets snapshot: process exited with code ${result.exitCode}');
-    }
-  } on ProcessException catch (error) {
-    throw Exception('Could not generate snippets snapshot:\n$error');
-  }
-  tempDir.deleteSync(recursive: true);
-  return snapshotPath;
 }
 
 void sanityCheckDocs() {
