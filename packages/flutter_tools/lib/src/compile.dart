@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:meta/meta.dart';
 import 'package:usage/uuid/uuid.dart';
 
@@ -18,6 +17,7 @@ import 'base/io.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
 import 'base/terminal.dart';
+import 'build_info.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
 
