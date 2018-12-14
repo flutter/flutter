@@ -38,7 +38,7 @@ class GenSnapshot {
   const GenSnapshot();
 
   static String getSnapshotterPath(SnapshotType snapshotType) {
-    return artifacts.getArtifactPath(
+    return artifacts.getTargetArtifactPath(
         Artifact.genSnapshot, snapshotType.platform, snapshotType.mode);
   }
 
@@ -302,7 +302,7 @@ class AOTSnapshotter {
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
-      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, targetPlatform),
+      sdkRoot: artifacts.getHostArtifactPath(Artifact.flutterPatchedSdkPath, targetPlatform),
       mainPath: mainPath,
       packagesPath: packagesPath,
       outputFilePath: getKernelPathForTransformerOptions(
@@ -319,7 +319,7 @@ class AOTSnapshotter {
     );
 
     // Write path to frontend_server, since things need to be re-generated when that changes.
-    final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk, targetPlatform);
+    final String frontendPath = artifacts.getHostArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk, targetPlatform);
     await fs.directory(outputPath).childFile('frontend_server.d').writeAsString('frontend_server.d: $frontendPath\n');
 
     return compilerOutput?.outputFilename;
@@ -362,8 +362,8 @@ class JITSnapshotter {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
-    final String engineVmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, targetPlatform);
-    final String engineIsolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, targetPlatform);
+    final String engineVmSnapshotData = artifacts.getHostArtifactPath(Artifact.vmSnapshotData, targetPlatform);
+    final String engineIsolateSnapshotData = artifacts.getHostArtifactPath(Artifact.isolateSnapshotData, targetPlatform);
     final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
     final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
 

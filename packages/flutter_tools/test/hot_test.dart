@@ -119,7 +119,7 @@ void main() {
 
     setUp(() {
       mockArtifacts = MockLocalEngineArtifacts();
-      when(mockArtifacts.getArtifactPath(Artifact.flutterPatchedSdkPath)).thenReturn('some/path');
+      when(mockArtifacts.getHostArtifactPath(Artifact.flutterPatchedSdkPath, any)).thenReturn('some/path');
     });
 
     testUsingContext('no setup', () async {

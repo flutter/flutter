@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/build_info.dart';
+
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
@@ -17,7 +19,6 @@ import 'base/process_manager.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
-import 'build_info.dart';
 import 'cache.dart';
 import 'device.dart';
 import 'fuchsia/fuchsia_workflow.dart';
@@ -441,7 +442,7 @@ class _FlutterValidator extends DoctorValidator {
     messages.add(ValidationMessage('Engine revision ${version.engineRevisionShort}'));
     messages.add(ValidationMessage('Dart version ${version.dartSdkVersion}'));
     final String genSnapshotPath =
-      artifacts.getArtifactPath(Artifact.genSnapshot, TargetPlatform.tester);
+      artifacts.getHostArtifactPath(Artifact.genSnapshot, TargetPlatform.tester);
 
     // Check that the binaries we downloaded for this platform actually run on it.
     if (!_genSnapshotRuns(genSnapshotPath)) {

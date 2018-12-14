@@ -261,7 +261,7 @@ class _Compiler {
 
     ResidentCompiler createCompiler() {
       return ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, targetPlatform),
+        artifacts.getHostArtifactPath(Artifact.flutterPatchedSdkPath, targetPlatform),
         packagesPath: PackageMap.globalPackagesPath,
         trackWidgetCreation: trackWidgetCreation,
         compilerMessageConsumer: reportCompilerMessage,

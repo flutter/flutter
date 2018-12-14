@@ -40,7 +40,7 @@ class FlutterDevice {
     ResidentCompiler generator,
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
-         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, targetPlatform),
+         artifacts.getHostArtifactPath(Artifact.flutterPatchedSdkPath, targetPlatform),
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots,
          fileSystemScheme: fileSystemScheme,

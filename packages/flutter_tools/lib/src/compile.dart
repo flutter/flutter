@@ -167,7 +167,7 @@ class KernelCompiler {
     String fileSystemScheme,
     bool targetProductVm = false,
   }) async {
-    final String frontendServer = artifacts.getArtifactPath(
+    final String frontendServer = artifacts.getHostArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk,
       targetPlatform,
     );
@@ -198,7 +198,7 @@ class KernelCompiler {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/'))
       sdkRoot = '$sdkRoot/';
-    final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary, targetPlatform);
+    final String engineDartPath = artifacts.getHostArtifactPath(Artifact.engineDartBinary, targetPlatform);
     if (!processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
@@ -438,12 +438,12 @@ class ResidentCompiler {
 
   Future<CompilerOutput> _compile(String scriptUri, String outputPath,
       String packagesFilePath) async {
-    final String frontendServer = artifacts.getArtifactPath(
+    final String frontendServer = artifacts.getHostArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk,
       _targetPlatform,
     );
     final List<String> command = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary, _targetPlatform),
+      artifacts.getHostArtifactPath(Artifact.engineDartBinary, _targetPlatform),
       frontendServer,
       '--sdk-root',
       _sdkRoot,

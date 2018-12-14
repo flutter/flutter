@@ -113,7 +113,7 @@ void main() {
       mockArtifacts = MockArtifacts();
       mockXcode = MockXcode();
       for (BuildMode mode in BuildMode.values) {
-        when(mockArtifacts.getArtifactPath(Artifact.snapshotDart, any, mode)).thenReturn(kSnapshotDart);
+        when(mockArtifacts.getHostArtifactPath(Artifact.snapshotDart, any, mode)).thenReturn(kSnapshotDart);
       }
     });
 
@@ -526,8 +526,8 @@ void main() {
       snapshotter = JITSnapshotter();
       mockAndroidSdk = MockAndroidSdk();
       mockArtifacts = MockArtifacts();
-      when(mockArtifacts.getArtifactPath(Artifact.vmSnapshotData, any)).thenReturn(kEngineVmSnapshotData);
-      when(mockArtifacts.getArtifactPath(Artifact.isolateSnapshotData, any)).thenReturn(kEngineIsolateSnapshotData);
+      when(mockArtifacts.getHostArtifactPath(Artifact.vmSnapshotData, any)).thenReturn(kEngineVmSnapshotData);
+      when(mockArtifacts.getHostArtifactPath(Artifact.isolateSnapshotData, any)).thenReturn(kEngineIsolateSnapshotData);
     });
 
     final Map<Type, Generator> contextOverrides = <Type, Generator>{

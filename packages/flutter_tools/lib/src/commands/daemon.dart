@@ -353,7 +353,7 @@ class AppDomain extends Domain {
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
       viewFilter: isolateFilter,
-      targetPlatform: TargetPlatform.tester,
+      targetPlatform: await device.targetPlatform,
     );
 
     ResidentRunner runner;

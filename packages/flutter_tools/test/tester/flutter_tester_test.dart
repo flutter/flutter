@@ -132,7 +132,7 @@ void main() {
         mockArtifacts = MockArtifacts();
         final String artifactPath = fs.path.join(flutterRoot, 'artifact');
         fs.file(artifactPath).createSync(recursive: true);
-        when(mockArtifacts.getArtifactPath(any, any)).thenReturn(artifactPath);
+        when(mockArtifacts.getHostArtifactPath(any, any)).thenReturn(artifactPath);
 
         mockKernelCompiler = MockKernelCompiler();
       });

@@ -107,7 +107,7 @@ class FlutterTesterDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester, TargetPlatform.tester);
+    final String shellPath = artifacts.getHostArtifactPath(Artifact.flutterTester, TargetPlatform.tester);
     if (!fs.isFileSync(shellPath))
       throwToolExit('Cannot find Flutter shell at $shellPath');
 

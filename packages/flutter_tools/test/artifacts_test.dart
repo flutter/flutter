@@ -28,11 +28,11 @@ void main() {
 
     testUsingContext('getArtifactPath', () {
       expect(
-          artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),
+          artifacts.getTargetArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),
           fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'ios-release', 'Flutter.framework')
       );
       expect(
-          artifacts.getArtifactPath(Artifact.flutterTester, TargetPlatform.tester),
+          artifacts.getHostArtifactPath(Artifact.flutterTester, TargetPlatform.tester),
           fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester')
       );
     }, overrides: <Type, Generator> {
@@ -78,15 +78,15 @@ void main() {
 
     testUsingContext('getArtifactPath', () {
       expect(
-          artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),
+          artifacts.getTargetArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),
           fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'Flutter.framework')
       );
       expect(
-          artifacts.getArtifactPath(Artifact.flutterTester),
+          artifacts.getHostArtifactPath(Artifact.flutterTester, TargetPlatform.android_arm),
           fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'flutter_tester')
       );
       expect(
-        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        artifacts.getHostArtifactPath(Artifact.engineDartSdkPath, TargetPlatform.android_arm),
         fs.path.join(tempDir.path, 'out', 'host_debug_unopt', 'dart-sdk')
       );
     }, overrides: <Type, Generator> {

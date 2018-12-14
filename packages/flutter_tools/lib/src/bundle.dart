@@ -78,7 +78,7 @@ Future<void> build({
       printTrace('Extra front-end options: $extraFrontEndOptions');
     ensureDirectoryExists(applicationKernelFilePath);
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
-      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, targetPlatform),
+      sdkRoot: artifacts.getHostArtifactPath(Artifact.flutterPatchedSdkPath, targetPlatform),
       incrementalCompilerByteStorePath: compilationTraceFilePath != null ? null :
           fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
       mainPath: fs.file(mainPath).absolute.path,
@@ -98,7 +98,7 @@ Future<void> build({
     kernelContent = DevFSFileContent(fs.file(compilerOutput.outputFilename));
 
     await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
-        .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk, targetPlatform)}\n');
+        .writeAsString('frontend_server.d: ${artifacts.getHostArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk, targetPlatform)}\n');
 
     if (compilationTraceFilePath != null) {
       final JITSnapshotter snapshotter = JITSnapshotter();
@@ -178,15 +178,15 @@ Future<void> assemble({
   final Map<String, DevFSContent> assetEntries = Map<String, DevFSContent>.from(assetBundle.entries);
   if (kernelContent != null) {
     if (compilationTraceFilePath != null) {
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, targetPlatform);
+      final String vmSnapshotData = artifacts.getHostArtifactPath(Artifact.vmSnapshotData, targetPlatform);
       final String isolateSnapshotData = fs.path.join(getBuildDirectory(), _kIsolateSnapshotData);
       final String isolateSnapshotInstr = fs.path.join(getBuildDirectory(), _kIsolateSnapshotInstr);
       assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
       assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
       assetEntries[_kIsolateSnapshotInstr] = DevFSFileContent(fs.file(isolateSnapshotInstr));
     } else {
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, null, buildMode);
-      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, null, buildMode);
+      final String vmSnapshotData = artifacts.getHostArtifactPath(Artifact.vmSnapshotData, null, buildMode);
+      final String isolateSnapshotData = artifacts.getHostArtifactPath(Artifact.isolateSnapshotData, null, buildMode);
       assetEntries[_kKernelKey] = kernelContent;
       assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
       assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));

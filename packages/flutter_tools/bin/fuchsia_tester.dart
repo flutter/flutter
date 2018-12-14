@@ -100,13 +100,13 @@ Future<void> run(List<String> args) async {
     // Put the tester shell where runTests expects it.
     // TODO(garymm): Switch to a Fuchsia-specific Artifacts impl.
     final Link testerDestLink =
-        fs.link(artifacts.getArtifactPath(Artifact.flutterTester, TargetPlatform.fuchsia));
+        fs.link(artifacts.getHostArtifactPath(Artifact.flutterTester, TargetPlatform.fuchsia));
     testerDestLink.parent.createSync(recursive: true);
     testerDestLink.createSync(shellPath);
     final Link icudtlLink = testerDestLink.parent.childLink('icudtl.dat');
     icudtlLink.createSync(argResults[_kOptionIcudtl]);
     final Directory sdkRootDest =
-        fs.directory(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, TargetPlatform.fuchsia));
+        fs.directory(artifacts.getHostArtifactPath(Artifact.flutterPatchedSdkPath, TargetPlatform.fuchsia));
     sdkRootDest.createSync(recursive: true);
     for (FileSystemEntity artifact in sdkRootSrc.listSync()) {
       fs.link(sdkRootDest.childFile(artifact.basename).path).createSync(artifact.path);
