@@ -748,6 +748,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   /// The [color] is required; physical things have a color.
   ///
   /// The [shape], [elevation], [color], and [shadowColor] must not be null.
+  /// Additionally, the [elevation] must be non-negative.
   const PhysicalModel({
     Key key,
     this.shape = BoxShape.rectangle,
@@ -758,7 +759,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
     this.shadowColor = const Color(0xFF000000),
     Widget child,
   }) : assert(shape != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        super(key: key, child: child);
@@ -777,7 +778,10 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   /// This is ignored if the [shape] is not [BoxShape.rectangle].
   final BorderRadius borderRadius;
 
-  /// The z-coordinate at which to place this physical object.
+  /// The z-coordinate relative to the parent at which to place this physical
+  /// object.
+  ///
+  /// The value is non-negative.
   final double elevation;
 
   /// The background color.
@@ -836,6 +840,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   /// The [color] is required; physical things have a color.
   ///
   /// The [clipper], [elevation], [color], and [shadowColor] must not be null.
+  /// Additionally, the [elevation] must be non-negative.
   const PhysicalShape({
     Key key,
     @required this.clipper,
@@ -846,7 +851,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
     Widget child,
   }) : assert(clipper != null),
        assert(clipBehavior != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        super(key: key, child: child);
@@ -861,7 +866,10 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   /// {@macro flutter.widgets.Clip}
   final Clip clipBehavior;
 
-  /// The z-coordinate at which to place this physical object.
+  /// The z-coordinate relative to the parent at which to place this physical
+  /// object.
+  ///
+  /// The value is non-negative.
   final double elevation;
 
   /// The background color.
