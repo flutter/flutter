@@ -342,18 +342,20 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {
-      return FlutterDevice(
-        device,
-        trackWidgetCreation: argResults['track-widget-creation'],
-        dillOutputPath: argResults['output-dill'],
-        fileSystemRoots: argResults['filesystem-root'],
-        fileSystemScheme: argResults['filesystem-scheme'],
-        viewFilter: argResults['isolate-filter'],
-        targetPlatform: TargetPlatform.tester,
+    final List<FlutterDevice> flutterDevices = <FlutterDevice>[];
+    for (Device device in devices) {
+      flutterDevices.add(
+        FlutterDevice(
+          device,
+          trackWidgetCreation: argResults['track-widget-creation'],
+          dillOutputPath: argResults['output-dill'],
+          fileSystemRoots: argResults['filesystem-root'],
+          fileSystemScheme: argResults['filesystem-scheme'],
+          viewFilter: argResults['isolate-filter'],
+          targetPlatform: await device.targetPlatform,
+        )
       );
-    }).toList();
-
+    }
     ResidentRunner runner;
     final String applicationBinaryPath = argResults['use-application-binary'];
     if (hotMode) {
