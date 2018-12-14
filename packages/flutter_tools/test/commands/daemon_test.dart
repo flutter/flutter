@@ -307,7 +307,7 @@ bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
 bool _isConnectedEvent(Map<String, dynamic> map) => map['event'] == 'daemon.connected';
 
 class MockFuchsiaWorkflow extends FuchsiaWorkflow {
-  MockFuchsiaWorkflow({ this.canListDevices = true });  
+  MockFuchsiaWorkflow({ this.canListDevices = true });
 
   @override
   final bool canListDevices;
