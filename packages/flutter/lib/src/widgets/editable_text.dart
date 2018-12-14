@@ -632,7 +632,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Offset get _floatingCursorOffset => Offset(0, renderEditable.preferredLineHeight / 2);
 
   @override
-  void updateFloatingCursor(FloatingCursorEditingPoint point) {
+  void updateFloatingCursor(RawFloatingCursorPoint point) {
     switch(point.state){
       case FloatingCursorDragState.Start:
         final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);

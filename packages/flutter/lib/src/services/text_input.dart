@@ -454,13 +454,13 @@ enum FloatingCursorDragState {
 }
 
 /// The current state and position of the floating cursor.
-class FloatingCursorEditingPoint {
+class RawFloatingCursorPoint {
   /// Creates information for setting the position and state of a floating
   /// cursor.
   ///
   /// [state] must not be null and [offset] must not be null if the state is
   /// [FloatingCursorDragState.Update].
-  FloatingCursorEditingPoint({
+  RawFloatingCursorPoint({
     this.offset,
     @required this.state,
   }) : assert(state != null),
@@ -602,7 +602,7 @@ abstract class TextInputClient {
   void performAction(TextInputAction action);
 
   /// Updates the floating cursor position and state.
-  void updateFloatingCursor(FloatingCursorEditingPoint point);
+  void updateFloatingCursor(RawFloatingCursorPoint point);
 }
 
 /// An interface for interacting with a text input control.
@@ -697,12 +697,12 @@ FloatingCursorDragState _toTextCursorAction(String state) {
   throw FlutterError('Unknown text cursor action: $state');
 }
 
-FloatingCursorEditingPoint _toTextPoint(FloatingCursorDragState state, Map<String, dynamic> encoded) {
+RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, dynamic> encoded) {
   assert(state != null, 'You must provide a state to set a new editing point.');
   assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
   final Offset offset = state == FloatingCursorDragState.Update ? Offset(encoded['X'], encoded['Y']) : const Offset(0, 0);
-  return FloatingCursorEditingPoint(offset: offset, state: state);
+  return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
 class _TextInputClientHandler {

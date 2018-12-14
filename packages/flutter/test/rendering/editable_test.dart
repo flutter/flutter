@@ -138,8 +138,8 @@ void main() {
     editable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Start));
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
       offset: const Offset(20, 20)));
     await tester.pump();
 
@@ -148,14 +148,14 @@ void main() {
     );
 
     // Moves the cursor right a few characters.
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
       offset: const Offset(-250, 20)));
 
     expect(find.byType(EditableText), paints..rrect(
       rrect: RRect.fromRectAndRadius(Rect.fromLTRB(136.5, 0, 139.5, 14.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
     );
 
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.End));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
 
     await tester.pumpAndSettle();
 

@@ -1834,24 +1834,24 @@ testWidgets(
     expect(controller.selection.baseOffset, 29);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Start));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
 
     expect(controller.selection.baseOffset, 29);
 
     // Sets the origin.
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
       offset: const Offset(20, 20)));
 
     expect(controller.selection.baseOffset, 29);
 
     // Moves the cursor right a few characters.
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
       offset: const Offset(-250, 20)));
 
     // But we have not yet set the offset because the user is not done placing the cursor.
     expect(controller.selection.baseOffset, 29);
 
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.End));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
 
     await tester.pumpAndSettle();
     // The cursor has been set.
@@ -1887,52 +1887,52 @@ testWidgets(
     expect(controller.selection.baseOffset, 29);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Start));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
 
     expect(controller.selection.baseOffset, 29);
 
     // Sets the origin.
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
         offset: const Offset(20, 20)));
 
     expect(controller.selection.baseOffset, 29);
 
     // Moves the cursor super far right
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
         offset: const Offset(2090, 20)));
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
         offset: const Offset(2100, 20)));
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
         offset: const Offset(2090, 20)));
 
     // After peaking the cursor, we move in the opposite direction.
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
         offset: const Offset(1400, 20)));
 
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.End));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
 
     await tester.pumpAndSettle();
     // The cursor has been set.
     expect(controller.selection.baseOffset, 8);
 
     // Go in the other direction.
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Start));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
     // Sets the origin.
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
         offset: const Offset(20, 20)));
 
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
         offset: const Offset(-5000, 20)));
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
         offset: const Offset(-5010, 20)));
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
         offset: const Offset(-5000, 20)));
 
     // Move back in the opposite direction only a few hundred.
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.Update,
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
         offset: const Offset(-4850, 20)));
 
-    editableTextState.updateFloatingCursor(FloatingCursorEditingPoint(state: FloatingCursorDragState.End));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
 
     await tester.pumpAndSettle();
 
