@@ -1,4 +1,4 @@
-Signature: 92e718d7f08ffefbf617736c0ced1c48
+Signature: 5b4273a3a37602c42b9d47c2476229fe
 
 UNUSED LICENSES:
 
@@ -1577,6 +1577,7 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyManager.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyManager.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyPipelineState.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyPipelineState.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCppUtil.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlGpuCommandBuffer.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlGpuCommandBuffer.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineState.h
