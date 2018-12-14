@@ -76,10 +76,11 @@ class TextField extends StatefulWidget {
   ///
   /// The [maxLength] property is set to null by default, which means the
   /// number of characters allowed in the text field is not restricted. If
-  /// [maxLength] is set, a character counter will be displayed below the
-  /// field, showing how many characters have been entered and how many are
-  /// allowed unless the value is set to [noMaxLength] in which case only the
-  /// current length is displayed.
+  /// [maxLength] is set a character counter will be displayed below the
+  /// field showing how many characters have been entered. If the value is
+  /// set to a positive integer it will also display the maximum allowed
+  /// number of characters to be entered.  If the value is set to
+  /// [TextField.noMaxLength] then only the current length is displayed.
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
@@ -135,7 +136,7 @@ class TextField extends StatefulWidget {
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
-       assert(maxLength == null || maxLength > 0),
+       assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        assert(enableInteractiveSelection != null),
        super(key: key);
@@ -233,20 +234,25 @@ class TextField extends StatefulWidget {
 
   /// If [maxLength] is set to this value, only the "current input length"
   /// part of the character counter is shown.
-  static const int noMaxLength = 9007199254740992; // math.pow(2, 53);
+  static const int noMaxLength = -1;
 
   /// The maximum number of characters (Unicode scalar values) to allow in the
   /// text field.
   ///
   /// If set, a character counter will be displayed below the
-  /// field, showing how many characters have been entered and how many are
-  /// allowed. After [maxLength] characters have been input, additional input
+  /// field showing how many characters have been entered. If set to a number
+  /// greather than 0, it will also display the maximum number allowed. If set
+  /// to [TextField.noMaxLength] then only the current character count is displayed.
+  ///
+  /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
   /// enforces the length with a [LengthLimitingTextInputFormatter], which is
   /// evaluated after the supplied [inputFormatters], if any.
   ///
-  /// This value must be either null or greater than zero. If set to null
-  /// (the default), there is no limit to the number of characters allowed.
+  /// This value must be either null, [TextField.noMaxLength], or greater than 0.
+  /// If null (the default) then there is no limit to the number of characters
+  /// that can be entered. If set to [TextField.noMaxLength], then no limit will
+  /// be enforced, but the number of characters entered will still be displayed.
   ///
   /// Whitespace characters (e.g. newline, space, tab) are included in the
   /// character count.
@@ -408,23 +414,26 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     String counterText = '$currentLength';
     String semanticCounterText = '';
 
-    if (widget.maxLength != TextField.noMaxLength) {
+    // Handle a real maxLength (positive number)
+    if (widget.maxLength > 0) {
+      // Show the maxLength in the counter
       counterText += '/${widget.maxLength}';
       final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength);
       semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
+
+      // Handle length exceeds maxLength
+      if (_effectiveController.value.text.runes.length > widget.maxLength) {
+        final ThemeData themeData = Theme.of(context);
+        return effectiveDecoration.copyWith(
+          errorText: effectiveDecoration.errorText ?? '',
+          counterStyle: effectiveDecoration.errorStyle
+            ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
+          counterText: counterText,
+          semanticCounterText: semanticCounterText,
+        );
+      }
     }
 
-    // Handle length exceeds maxLength
-    if (_effectiveController.value.text.runes.length > widget.maxLength) {
-      final ThemeData themeData = Theme.of(context);
-      return effectiveDecoration.copyWith(
-        errorText: effectiveDecoration.errorText ?? '',
-        counterStyle: effectiveDecoration.errorStyle
-          ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
-        counterText: counterText,
-        semanticCounterText: semanticCounterText,
-      );
-    }
     return effectiveDecoration.copyWith(
       counterText: counterText,
       semanticCounterText: semanticCounterText,
