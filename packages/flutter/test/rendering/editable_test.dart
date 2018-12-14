@@ -144,7 +144,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(EditableText), paints..rrect(
-      rrect: RRect.fromRectAndRadius(Rect.fromLTRB(406.5, 0, 409.5, 14.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
+      rrect: RRect.fromRectAndRadius(Rect.fromLTRB(464.5, 0, 467.5, 16.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
     );
 
     // Moves the cursor right a few characters.
@@ -152,7 +152,7 @@ void main() {
       offset: const Offset(-250, 20)));
 
     expect(find.byType(EditableText), paints..rrect(
-      rrect: RRect.fromRectAndRadius(Rect.fromLTRB(136.5, 0, 139.5, 14.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
+      rrect: RRect.fromRectAndRadius(Rect.fromLTRB(194.5, 0, 197.5, 16.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
     );
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
