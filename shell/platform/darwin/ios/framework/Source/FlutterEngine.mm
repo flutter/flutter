@@ -373,6 +373,25 @@
                               arguments:@[ @(client), state ]];
 }
 
+- (void)updateFloatingCursor:(FlutterFloatingCursorDragState)state
+                  withClient:(int)client
+                withPosition:(NSDictionary*)position {
+  NSString* stateString;
+  switch (state) {
+    case FlutterFloatingCursorDragStateStart:
+      stateString = @"FloatingCursorDragState.start";
+      break;
+    case FlutterFloatingCursorDragStateUpdate:
+      stateString = @"FloatingCursorDragState.update";
+      break;
+    case FlutterFloatingCursorDragStateEnd:
+      stateString = @"FloatingCursorDragState.end";
+      break;
+  }
+  [_textInputChannel.get() invokeMethod:@"TextInputClient.updateFloatingCursor"
+                              arguments:@[ @(client), stateString, position ]];
+}
+
 - (void)performAction:(FlutterTextInputAction)action withClient:(int)client {
   NSString* actionString;
   switch (action) {

@@ -566,6 +566,24 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
   return [FlutterTextRange rangeWithNSRange:[self rangeForCharacterAtIndex:currentIndex]];
 }
 
+- (void)beginFloatingCursorAtPoint:(CGPoint)point {
+  [_textInputDelegate updateFloatingCursor:FlutterFloatingCursorDragStateStart
+                                withClient:_textInputClient
+                              withPosition:@{@"X" : @(point.x), @"Y" : @(point.y)}];
+}
+
+- (void)updateFloatingCursorAtPoint:(CGPoint)point {
+  [_textInputDelegate updateFloatingCursor:FlutterFloatingCursorDragStateUpdate
+                                withClient:_textInputClient
+                              withPosition:@{@"X" : @(point.x), @"Y" : @(point.y)}];
+}
+
+- (void)endFloatingCursor {
+  [_textInputDelegate updateFloatingCursor:FlutterFloatingCursorDragStateEnd
+                                withClient:_textInputClient
+                              withPosition:@{@"X" : @(0), @"Y" : @(0)}];
+}
+
 #pragma mark - UIKeyInput Overrides
 
 - (void)updateEditingState {
