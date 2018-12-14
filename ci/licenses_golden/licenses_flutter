@@ -603,6 +603,7 @@ FILE: ../../../flutter/vulkan/vulkan_surface.cc
 FILE: ../../../flutter/vulkan/vulkan_surface.h
 FILE: ../../../flutter/vulkan/vulkan_swapchain.cc
 FILE: ../../../flutter/vulkan/vulkan_swapchain.h
+FILE: ../../../flutter/vulkan/vulkan_swapchain_stub.cc
 FILE: ../../../flutter/vulkan/vulkan_utilities.cc
 FILE: ../../../flutter/vulkan/vulkan_utilities.h
 FILE: ../../../flutter/vulkan/vulkan_window.cc
