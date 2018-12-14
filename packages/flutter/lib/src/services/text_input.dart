@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:io' show Platform;
-import 'dart:ui' show TextAffinity, hashValues;
+import 'dart:ui' show TextAffinity, hashValues, Offset;
 
 import 'package:flutter/foundation.dart';
 
@@ -439,6 +439,40 @@ TextAffinity _toTextAffinity(String affinity) {
   return null;
 }
 
+/// A floating cursor state the user has induced by force pressing an iOS
+/// keyboard.
+enum FloatingCursorDragState {
+  /// A user has just activated a floating cursor.
+  Start,
+
+  /// A user is dragging a floating cursor.
+  Update,
+
+  /// A user has lifted their finger off the screen after using a floating
+  /// cursor.
+  End,
+}
+
+/// The current state and position of the floating cursor.
+class RawFloatingCursorPoint {
+  /// Creates information for setting the position and state of a floating
+  /// cursor.
+  ///
+  /// [state] must not be null and [offset] must not be null if the state is
+  /// [FloatingCursorDragState.Update].
+  RawFloatingCursorPoint({
+    this.offset,
+    @required this.state,
+  }) : assert(state != null),
+       assert(state == FloatingCursorDragState.Update ? offset != null : true);
+
+  /// The raw position of the floating cursor as determined by the iOS sdk.
+  final Offset offset;
+
+  /// The state of the floating cursor.
+  final FloatingCursorDragState state;
+}
+
 /// The current text, selection, and composing state for editing a run of text.
 @immutable
 class TextEditingValue {
@@ -566,6 +600,9 @@ abstract class TextInputClient {
 
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
+
+  /// Updates the floating cursor position and state.
+  void updateFloatingCursor(RawFloatingCursorPoint point);
 }
 
 /// An interface for interacting with a text input control.
@@ -648,6 +685,26 @@ TextInputAction _toTextInputAction(String action) {
   throw FlutterError('Unknown text input action: $action');
 }
 
+FloatingCursorDragState _toTextCursorAction(String state) {
+  switch (state) {
+    case 'FloatingCursorDragState.start':
+      return FloatingCursorDragState.Start;
+    case 'FloatingCursorDragState.update':
+      return FloatingCursorDragState.Update;
+    case 'FloatingCursorDragState.end':
+      return FloatingCursorDragState.End;
+  }
+  throw FlutterError('Unknown text cursor action: $state');
+}
+
+RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, dynamic> encoded) {
+  assert(state != null, 'You must provide a state to set a new editing point.');
+  assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
+  assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
+  final Offset offset = state == FloatingCursorDragState.Update ? Offset(encoded['X'], encoded['Y']) : const Offset(0, 0);
+  return RawFloatingCursorPoint(offset: offset, state: state);
+}
+
 class _TextInputClientHandler {
   _TextInputClientHandler() {
     SystemChannels.textInput.setMethodCallHandler(_handleTextInputInvocation);
@@ -670,6 +727,9 @@ class _TextInputClientHandler {
         break;
       case 'TextInputClient.performAction':
         _currentConnection._client.performAction(_toTextInputAction(args[1]));
+        break;
+      case 'TextInputClient.updateFloatingCursor':
+        _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
         break;
       default:
         throw MissingPluginException();
