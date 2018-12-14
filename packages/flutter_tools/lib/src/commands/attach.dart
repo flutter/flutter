@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/build_info.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -117,9 +119,11 @@ class AttachCommand extends FlutterCommand {
     Uri observatoryUri;
     bool ipv6 = false;
     bool attachLogger = false;
+    TargetPlatform platform;
     if (devicePort == null) {
       if (device is FuchsiaDevice) {
         attachLogger = true;
+        platform = TargetPlatform.fuchsia;
         final String module = argResults['module'];
         if (module == null) {
           throwToolExit('\'--module\' is requried for attaching to a Fuchsia device');
@@ -155,6 +159,7 @@ class AttachCommand extends FlutterCommand {
           rethrow;
         }
       } else {
+        platform = TargetPlatform.tester;
         ProtocolDiscovery observatoryDiscovery;
         try {
           observatoryDiscovery = ProtocolDiscovery.observatory(
@@ -181,6 +186,7 @@ class AttachCommand extends FlutterCommand {
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
         targetModel: TargetModel(argResults['target-model']),
+        targetPlatform: platform,
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = hotRunnerFactory.build(

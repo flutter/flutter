@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
@@ -99,13 +100,13 @@ Future<void> run(List<String> args) async {
     // Put the tester shell where runTests expects it.
     // TODO(garymm): Switch to a Fuchsia-specific Artifacts impl.
     final Link testerDestLink =
-        fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
+        fs.link(artifacts.getArtifactPath(Artifact.flutterTester, TargetPlatform.fuchsia));
     testerDestLink.parent.createSync(recursive: true);
     testerDestLink.createSync(shellPath);
     final Link icudtlLink = testerDestLink.parent.childLink('icudtl.dat');
     icudtlLink.createSync(argResults[_kOptionIcudtl]);
     final Directory sdkRootDest =
-        fs.directory(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
+        fs.directory(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, TargetPlatform.fuchsia));
     sdkRootDest.createSync(recursive: true);
     for (FileSystemEntity artifact in sdkRootSrc.listSync()) {
       fs.link(sdkRootDest.childFile(artifact.basename).path).createSync(artifact.path);

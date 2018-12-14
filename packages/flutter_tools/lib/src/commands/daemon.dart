@@ -353,6 +353,7 @@ class AppDomain extends Domain {
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
       viewFilter: isolateFilter,
+      targetPlatform: TargetPlatform.tester,
     );
 
     ResidentRunner runner;

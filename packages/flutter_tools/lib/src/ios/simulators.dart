@@ -402,6 +402,7 @@ class IOSSimulator extends Device {
       mainPath: mainPath,
       precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
+      targetPlatform: buildInfo.targetPlatform,
     );
   }
 

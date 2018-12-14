@@ -107,7 +107,7 @@ class FlutterTesterDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
+    final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester, TargetPlatform.tester);
     if (!fs.isFileSync(shellPath))
       throwToolExit('Cannot find Flutter shell at $shellPath');
 
@@ -137,6 +137,7 @@ class FlutterTesterDevice extends Device {
       applicationKernelFilePath: applicationKernelFilePath,
       precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
+      targetPlatform: TargetPlatform.tester,
     );
     command.add('--flutter-assets-dir=$assetDirPath');
 

@@ -32,7 +32,7 @@ void main() {
           fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'ios-release', 'Flutter.framework')
       );
       expect(
-          artifacts.getArtifactPath(Artifact.flutterTester),
+          artifacts.getArtifactPath(Artifact.flutterTester, TargetPlatform.tester),
           fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester')
       );
     }, overrides: <Type, Generator> {

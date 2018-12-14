@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -53,6 +54,7 @@ void main() {
       final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
         trackWidgetCreation: false,
+        targetPlatform: TargetPlatform.tester,
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
@@ -77,6 +79,7 @@ void main() {
       final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
         trackWidgetCreation: false,
+        targetPlatform: TargetPlatform.tester,
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
@@ -104,6 +107,7 @@ void main() {
         sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
         trackWidgetCreation: false,
+        targetPlatform: TargetPlatform.tester,
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
@@ -125,7 +129,7 @@ void main() {
     StreamController<String> stdErrStreamController;
 
     setUp(() {
-      generator = ResidentCompiler('sdkroot');
+      generator = ResidentCompiler('sdkroot', targetPlatform: TargetPlatform.tester);
       mockProcessManager = MockProcessManager();
       mockFrontendServer = MockProcess();
       mockFrontendServerStdIn = MockStdIn();
@@ -264,7 +268,7 @@ void main() {
     StreamController<String> stdErrStreamController;
 
     setUp(() {
-      generator = ResidentCompiler('sdkroot');
+      generator = ResidentCompiler('sdkroot', targetPlatform: TargetPlatform.tester);
       mockProcessManager = MockProcessManager();
       mockFrontendServer = MockProcess();
       mockFrontendServerStdIn = MockStdIn();

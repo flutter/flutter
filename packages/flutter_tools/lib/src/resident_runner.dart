@@ -31,6 +31,7 @@ import 'vmservice.dart';
 class FlutterDevice {
   FlutterDevice(this.device, {
     @required this.trackWidgetCreation,
+    @required TargetPlatform targetPlatform,
     this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
@@ -39,11 +40,12 @@ class FlutterDevice {
     ResidentCompiler generator,
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
-         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, targetPlatform),
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots,
          fileSystemScheme: fileSystemScheme,
          targetModel: targetModel,
+         targetPlatform: targetPlatform,
        );
 
   final Device device;

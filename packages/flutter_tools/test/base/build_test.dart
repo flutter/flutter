@@ -526,8 +526,8 @@ void main() {
       snapshotter = JITSnapshotter();
       mockAndroidSdk = MockAndroidSdk();
       mockArtifacts = MockArtifacts();
-      when(mockArtifacts.getArtifactPath(Artifact.vmSnapshotData)).thenReturn(kEngineVmSnapshotData);
-      when(mockArtifacts.getArtifactPath(Artifact.isolateSnapshotData)).thenReturn(kEngineIsolateSnapshotData);
+      when(mockArtifacts.getArtifactPath(Artifact.vmSnapshotData, any)).thenReturn(kEngineVmSnapshotData);
+      when(mockArtifacts.getArtifactPath(Artifact.isolateSnapshotData, any)).thenReturn(kEngineIsolateSnapshotData);
     });
 
     final Map<Type, Generator> contextOverrides = <Type, Generator>{

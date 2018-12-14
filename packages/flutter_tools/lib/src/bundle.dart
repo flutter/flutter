@@ -65,6 +65,7 @@ Future<void> build({
   List<String> extraGenSnapshotOptions = const <String>[],
   List<String> fileSystemRoots,
   String fileSystemScheme,
+  @required TargetPlatform targetPlatform,
 }) async {
   depfilePath ??= defaultDepfilePath;
   assetDirPath ??= getAssetBuildDirectory();
@@ -77,7 +78,7 @@ Future<void> build({
       printTrace('Extra front-end options: $extraFrontEndOptions');
     ensureDirectoryExists(applicationKernelFilePath);
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
-      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, targetPlatform),
       incrementalCompilerByteStorePath: compilationTraceFilePath != null ? null :
           fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
       mainPath: fs.file(mainPath).absolute.path,
@@ -89,6 +90,7 @@ Future<void> build({
       fileSystemScheme: fileSystemScheme,
       packagesPath: packagesPath,
       linkPlatformKernelIn: compilationTraceFilePath != null,
+      targetPlatform: targetPlatform,
     );
     if (compilerOutput?.outputFilename == null) {
       throwToolExit('Compiler failed on $mainPath');
@@ -96,7 +98,7 @@ Future<void> build({
     kernelContent = DevFSFileContent(fs.file(compilerOutput.outputFilename));
 
     await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
-        .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
+        .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk, targetPlatform)}\n');
 
     if (compilationTraceFilePath != null) {
       final JITSnapshotter snapshotter = JITSnapshotter();
@@ -132,6 +134,7 @@ Future<void> build({
     privateKeyPath: privateKeyPath,
     assetDirPath: assetDirPath,
     compilationTraceFilePath: compilationTraceFilePath,
+    targetPlatform: targetPlatform,
   );
 }
 
@@ -167,6 +170,7 @@ Future<void> assemble({
   String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
   String compilationTraceFilePath,
+  @required TargetPlatform targetPlatform,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   printTrace('Building bundle');
@@ -174,7 +178,7 @@ Future<void> assemble({
   final Map<String, DevFSContent> assetEntries = Map<String, DevFSContent>.from(assetBundle.entries);
   if (kernelContent != null) {
     if (compilationTraceFilePath != null) {
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
+      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, targetPlatform);
       final String isolateSnapshotData = fs.path.join(getBuildDirectory(), _kIsolateSnapshotData);
       final String isolateSnapshotInstr = fs.path.join(getBuildDirectory(), _kIsolateSnapshotInstr);
       assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));

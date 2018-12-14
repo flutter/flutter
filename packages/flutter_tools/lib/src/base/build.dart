@@ -289,6 +289,7 @@ class AOTSnapshotter {
     @required String packagesPath,
     @required String outputPath,
     @required bool trackWidgetCreation,
+    @required TargetPlatform targetPlatform,
     List<String> extraFrontEndOptions = const <String>[],
   }) async {
     final Directory outputDir = fs.directory(outputPath);
@@ -301,7 +302,7 @@ class AOTSnapshotter {
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
-      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, targetPlatform),
       mainPath: mainPath,
       packagesPath: packagesPath,
       outputFilePath: getKernelPathForTransformerOptions(
@@ -314,10 +315,11 @@ class AOTSnapshotter {
       aot: true,
       trackWidgetCreation: trackWidgetCreation,
       targetProductVm: buildMode == BuildMode.release,
+      targetPlatform: targetPlatform,
     );
 
     // Write path to frontend_server, since things need to be re-generated when that changes.
-    final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
+    final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk, targetPlatform);
     await fs.directory(outputPath).childFile('frontend_server.d').writeAsString('frontend_server.d: $frontendPath\n');
 
     return compilerOutput?.outputFilename;
@@ -350,6 +352,7 @@ class JITSnapshotter {
     @required String compilationTraceFilePath,
     @required bool buildHotUpdate,
     List<String> extraGenSnapshotOptions = const <String>[],
+    TargetPlatform targetPlatform,
   }) async {
     if (!_isValidJitPlatform(platform)) {
       printError('${getNameForTargetPlatform(platform)} does not support JIT snapshotting.');
@@ -359,8 +362,8 @@ class JITSnapshotter {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
-    final String engineVmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
-    final String engineIsolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
+    final String engineVmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, targetPlatform);
+    final String engineIsolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, targetPlatform);
     final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
     final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
 

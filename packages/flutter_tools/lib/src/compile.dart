@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:meta/meta.dart';
 import 'package:usage/uuid/uuid.dart';
 
@@ -155,6 +156,7 @@ class KernelCompiler {
     String outputFilePath,
     String depFilePath,
     TargetModel targetModel = TargetModel.flutter,
+    @required TargetPlatform targetPlatform,
     bool linkPlatformKernelIn = false,
     bool aot = false,
     @required bool trackWidgetCreation,
@@ -166,7 +168,8 @@ class KernelCompiler {
     bool targetProductVm = false,
   }) async {
     final String frontendServer = artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk
+      Artifact.frontendServerSnapshotForEngineDartSdk,
+      targetPlatform,
     );
 
     // TODO(cbracken): eliminate pathFilter.
@@ -195,7 +198,7 @@ class KernelCompiler {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/'))
       sdkRoot = '$sdkRoot/';
-    final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary, targetPlatform);
     if (!processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
@@ -332,6 +335,7 @@ class ResidentCompiler {
     CompilerMessageConsumer compilerMessageConsumer = printError,
     String initializeFromDill,
     TargetModel targetModel = TargetModel.flutter,
+    @required TargetPlatform targetPlatform,
     bool unsafePackageSerialization
   }) : assert(_sdkRoot != null),
        _trackWidgetCreation = trackWidgetCreation,
@@ -339,6 +343,7 @@ class ResidentCompiler {
        _fileSystemRoots = fileSystemRoots,
        _fileSystemScheme = fileSystemScheme,
        _targetModel = targetModel,
+       _targetPlatform = targetPlatform,
        _stdoutHandler = _StdoutHandler(consumer: compilerMessageConsumer),
        _controller = StreamController<_CompilationRequest>(),
        _initializeFromDill = initializeFromDill,
@@ -351,6 +356,7 @@ class ResidentCompiler {
   final bool _trackWidgetCreation;
   final String _packagesPath;
   final TargetModel _targetModel;
+  final TargetPlatform _targetPlatform;
   final List<String> _fileSystemRoots;
   final String _fileSystemScheme;
   String _sdkRoot;
@@ -433,10 +439,11 @@ class ResidentCompiler {
   Future<CompilerOutput> _compile(String scriptUri, String outputPath,
       String packagesFilePath) async {
     final String frontendServer = artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk
+      Artifact.frontendServerSnapshotForEngineDartSdk,
+      _targetPlatform,
     );
     final List<String> command = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      artifacts.getArtifactPath(Artifact.engineDartBinary, _targetPlatform),
       frontendServer,
       '--sdk-root',
       _sdkRoot,

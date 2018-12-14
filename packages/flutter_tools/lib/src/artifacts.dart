@@ -93,7 +93,7 @@ abstract class Artifacts {
   }
 
   // Returns the requested [artifact] for the [platform] and [mode] combination.
-  String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]);
+  String getArtifactPath(Artifact artifact, TargetPlatform platform, [BuildMode mode]);
 
   // Returns which set of engine artifacts is currently used for the [platform]
   // and [mode] combination.
@@ -104,7 +104,7 @@ abstract class Artifacts {
 class CachedArtifacts extends Artifacts {
 
   @override
-  String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
+  String getArtifactPath(Artifact artifact, TargetPlatform platform, [BuildMode mode]) {
     platform ??= _currentHostPlatform;
     switch (platform) {
       case TargetPlatform.android_arm:

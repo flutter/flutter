@@ -88,6 +88,7 @@ class BuildAotCommand extends BuildSubCommand {
         trackWidgetCreation: false,
         outputPath: outputPath,
         extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
+        targetPlatform: platform,
       );
       if (mainPath == null) {
         throwToolExit('Compiler terminated unexpectedly.');

@@ -226,7 +226,7 @@ class _CompilationRequest {
 // This class is a wrapper around compiler that allows multiple isolates to
 // enqueue compilation requests, but ensures only one compilation at a time.
 class _Compiler {
-  _Compiler(bool trackWidgetCreation, Uri projectRootDirectory) {
+  _Compiler(bool trackWidgetCreation, Uri projectRootDirectory, TargetPlatform targetPlatform) {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -261,12 +261,13 @@ class _Compiler {
 
     ResidentCompiler createCompiler() {
       return ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, targetPlatform),
         packagesPath: PackageMap.globalPackagesPath,
         trackWidgetCreation: trackWidgetCreation,
         compilerMessageConsumer: reportCompilerMessage,
         initializeFromDill: testFilePath,
         unsafePackageSerialization: false,
+        targetPlatform: targetPlatform,
       );
     }
 
@@ -543,7 +544,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= _Compiler(trackWidgetCreation, projectRootDirectory);
+        compiler ??= _Compiler(trackWidgetCreation, projectRootDirectory, TargetPlatform.tester);
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {

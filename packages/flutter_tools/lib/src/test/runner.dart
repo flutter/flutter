@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:meta/meta.dart';
 import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
 
@@ -61,7 +62,7 @@ Future<int> runTests(
   testArgs.addAll(testFiles);
 
   // Configure package:test to use the Flutter engine for child processes.
-  final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
+  final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester, TargetPlatform.tester);
   if (!processManager.canRun(shellPath))
     throwToolExit('Cannot find Flutter shell at $shellPath');
 

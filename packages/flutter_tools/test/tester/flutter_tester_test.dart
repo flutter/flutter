@@ -132,7 +132,7 @@ void main() {
         mockArtifacts = MockArtifacts();
         final String artifactPath = fs.path.join(flutterRoot, 'artifact');
         fs.file(artifactPath).createSync(recursive: true);
-        when(mockArtifacts.getArtifactPath(any)).thenReturn(artifactPath);
+        when(mockArtifacts.getArtifactPath(any, any)).thenReturn(artifactPath);
 
         mockKernelCompiler = MockKernelCompiler();
       });
@@ -175,6 +175,7 @@ Hello!
           fileSystemRoots: anyNamed('fileSystemRoots'),
           fileSystemScheme: anyNamed('fileSystemScheme'),
           packagesPath: anyNamed('packagesPath'),
+          targetPlatform: anyNamed('targetPlatform'),
         )).thenAnswer((_) async {
           fs.file('$mainPath.dill').createSync(recursive: true);
           return CompilerOutput('$mainPath.dill', 0);
