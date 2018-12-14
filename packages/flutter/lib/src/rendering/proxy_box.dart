@@ -1517,7 +1517,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   double get elevation => _elevation;
   double _elevation;
   set elevation(double value) {
-    assert(value != null);
+    assert(value != null && value >= 0.0);
     if (elevation == value)
       return;
     final bool didNeedCompositing = alwaysNeedsCompositing;
