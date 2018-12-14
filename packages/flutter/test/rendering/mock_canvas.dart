@@ -1049,13 +1049,13 @@ class _RRectPaintPredicate extends _DrawCommandPaintPredicate {
         (actual.top - rrect.top).abs() > eps ||
         (actual.bottom - rrect.bottom).abs() > eps ||
         (actual.blRadiusX - rrect.blRadiusX).abs() > eps ||
-        (actual.blRadiusY - rrect.blRadiusX).abs() > eps ||
-        (actual.brRadiusX - rrect.blRadiusX).abs() > eps ||
-        (actual.brRadiusY - rrect.blRadiusX).abs() > eps ||
-        (actual.tlRadiusX - rrect.blRadiusX).abs() > eps ||
-        (actual.tlRadiusY - rrect.blRadiusX).abs() > eps ||
-        (actual.trRadiusX - rrect.blRadiusX).abs() > eps ||
-        (actual.trRadiusY - rrect.blRadiusX).abs() > eps)) {
+        (actual.blRadiusY - rrect.blRadiusY).abs() > eps ||
+        (actual.brRadiusX - rrect.brRadiusX).abs() > eps ||
+        (actual.brRadiusY - rrect.brRadiusY).abs() > eps ||
+        (actual.tlRadiusX - rrect.tlRadiusX).abs() > eps ||
+        (actual.tlRadiusY - rrect.tlRadiusY).abs() > eps ||
+        (actual.trRadiusX - rrect.trRadiusX).abs() > eps ||
+        (actual.trRadiusY - rrect.trRadiusY).abs() > eps)) {
       throw 'It called $methodName with RRect, $actual, which was not exactly the expected RRect ($rrect).';
     }
   }
