@@ -598,19 +598,22 @@ class _CupertinoBackGestureController<T> {
       parent: controller,
       curve: Curves.decelerate,
     );
+//    print(controller.duration.inMilliseconds);
 //    Duration duration = controller.duration;
     controller.duration = const Duration(milliseconds: 140);
     if (velocity.abs() >= _kMinFlingVelocity) {
       controller.fling(velocity: -velocity);
     } else if (controller.value <= 0.5) {
+      print('reversing');
       controller.reverse();
 
 //      animation.;
 //      controller.animateTo(-0.01, duration: const Duration(milliseconds: 140), curve: Curves.decelerate);
     } else {
-      controller.forward();
+//      print('forward');
+//      controller.forward();
 //      controller.fling(velocity: 14.0);
-//      controller.animateTo(1.01, duration: const Duration(milliseconds: 140), curve: Curves.decelerate);
+      controller.animateTo(1.01, duration: const Duration(milliseconds: 140), curve: Curves.decelerate);
     }
     assert(controller.isAnimating);
     assert(controller.status != AnimationStatus.completed);
@@ -625,12 +628,9 @@ class _CupertinoBackGestureController<T> {
     assert(_animating);
     controller.removeStatusListener(_handleStatusChanged);
     _animating = false;
-    print(controller.status);
     if (controller.value <= controller.lowerBound) {
       navigator.pop<T>(); // this will cause the route to get disposed, which will dispose us
     }
-    print(controller.status);
-
     onEnded(); // this will call dispose if popping the route failed to do so
   }
 

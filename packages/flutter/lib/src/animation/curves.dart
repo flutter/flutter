@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
@@ -316,7 +317,6 @@ class _DecelerateCurve extends Curve {
   }
 }
 
-
 // BOUNCE CURVES
 
 double _bounce(double t) {
@@ -511,6 +511,8 @@ class Curves {
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_decelerate.mp4}
   static const Curve decelerate = _DecelerateCurve._();
+
+  static const Curve lerp = _lerpCurve._(0.5);
 
   /// A cubic animation curve that speeds up quickly and ends slowly.
   ///
