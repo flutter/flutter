@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../emulator.dart';
+import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -567,6 +568,7 @@ class DeviceDomain extends Domain {
     registerHandler('forward', forward);
     registerHandler('unforward', unforward);
 
+    addDeviceDiscoverer(FuchsiaDevices());
     addDeviceDiscoverer(AndroidDevices());
     addDeviceDiscoverer(IOSDevices());
     addDeviceDiscoverer(IOSSimulators());
