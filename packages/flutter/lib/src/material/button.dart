@@ -28,8 +28,10 @@ import 'theme_data.dart';
 class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
   ///
-  /// The [shape], [elevation], [padding], [constraints], and [clipBehavior]
-  /// arguments must not be null.
+  /// The [shape], [elevation], [highlightElevation], [disabledElevation],
+  /// [padding], [constraints], and [clipBehavior] arguments must not be null.
+  /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
+  /// must be non-negative.
   const RawMaterialButton({
     Key key,
     @required this.onPressed,
@@ -50,9 +52,9 @@ class RawMaterialButton extends StatefulWidget {
     this.child,
   }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
        assert(shape != null),
-       assert(elevation != null),
-       assert(highlightElevation != null),
-       assert(disabledElevation != null),
+       assert(elevation != null && elevation >= 0.0),
+       assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(disabledElevation != null && disabledElevation >= 0.0),
        assert(padding != null),
        assert(constraints != null),
        assert(animationDuration != null),
@@ -84,7 +86,7 @@ class RawMaterialButton extends StatefulWidget {
   /// The elevation for the button's [Material] when the button
   /// is [enabled] but not pressed.
   ///
-  /// Defaults to 2.0.
+  /// Defaults to 2.0. The value is always non-negative.
   ///
   /// See also:
   ///
@@ -95,7 +97,7 @@ class RawMaterialButton extends StatefulWidget {
   /// The elevation for the button's [Material] when the button
   /// is [enabled] and pressed.
   ///
-  /// Defaults to 8.0.
+  /// Defaults to 8.0. The value is always non-negative.
   ///
   /// See also:
   ///
@@ -106,7 +108,7 @@ class RawMaterialButton extends StatefulWidget {
   /// The elevation for the button's [Material] when the button
   /// is not [enabled].
   ///
-  /// Defaults to 0.0.
+  /// Defaults to 0.0. The value is always non-negative.
   ///
   ///  * [elevation], the default elevation.
   ///  * [highlightElevation], the elevation when the button is pressed.

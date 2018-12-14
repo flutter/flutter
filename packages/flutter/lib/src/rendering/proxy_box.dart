@@ -1586,7 +1586,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
     Color shadowColor = const Color(0xFF000000),
   }) : assert(shape != null),
        assert(clipBehavior != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        _shape = shape,

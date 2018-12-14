@@ -42,7 +42,9 @@ class MaterialButton extends StatelessWidget {
   /// [FlatButton] or [RaisedButton]. To create a custom Material button
   /// consider using [RawMaterialButton].
   ///
-  /// The [clipBehavior] argument must not be null.
+  /// The [clipBehavior], [elevation], [highlightElevation], and
+  /// [disabledElevation] argument must not be null. Additionally, [elevation],
+  /// [highlightElevation], and [disabledElevation] must be non-negative.
   const MaterialButton({
     Key key,
     @required this.onPressed,
@@ -66,7 +68,10 @@ class MaterialButton extends StatelessWidget {
     this.minWidth,
     this.height,
     this.child,
-  }) : super(key: key);
+  }) : assert(elevation != null && elevation >= 0.0),
+       assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(disabledElevation != null && disabledElevation >= 0.0),
+       super(key: key);
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
@@ -150,10 +155,12 @@ class MaterialButton extends StatelessWidget {
   /// the current theme's highlight color, [ThemeData.highlightColor].
   final Color highlightColor;
 
-  /// The z-coordinate at which to place this button. This controls the size of
-  /// the shadow below the raised button.
+  /// The z-coordinate at which to place this button relative to its parent.
   ///
-  /// Defaults to 2, the appropriate elevation for raised buttons.
+  /// This controls the size of the shadow below the raised button.
+  ///
+  /// Defaults to 2, the appropriate elevation for raised buttons. The value
+  /// is always non-negative.
   ///
   /// See also:
   ///
@@ -162,14 +169,14 @@ class MaterialButton extends StatelessWidget {
   ///  * [highlightElevation], the elevation when the button is pressed.
   final double elevation;
 
-  /// The elevation for the button's [Material] when the button
-  /// is [enabled] and pressed.
+  /// The elevation for the button's [Material] relative to its parent when the
+  /// button is [enabled] and pressed.
   ///
   /// This controls the size of the shadow below the button. When a tap
   /// down gesture occurs within the button, its [InkWell] displays a
   /// [highlightColor] "highlight".
   ///
-  /// Defaults to 8.0.
+  /// Defaults to 8.0. The value is always non-negative.
   ///
   /// See also:
   ///
@@ -177,10 +184,10 @@ class MaterialButton extends StatelessWidget {
   ///  * [disabledElevation], the elevation when the button is disabled.
   final double highlightElevation;
 
-  /// The elevation for the button's [Material] when the button
-  /// is not [enabled].
+  /// The elevation for the button's [Material] relative to its parent when the
+  /// button is not [enabled].
   ///
-  /// Defaults to 0.0.
+  /// Defaults to 0.0. The value is always non-negative.
   ///
   /// See also:
   ///
