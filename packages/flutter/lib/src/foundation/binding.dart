@@ -119,12 +119,12 @@ abstract class BindingBase {
         callback: _exitApplication,
       );
       registerServiceExtension(
-          name: 'dumpCompilationTrace',
-          callback: (Map<String, String> parameters) async {
-            return <String, dynamic> {
-              'value': dumpCompilationTrace(),
-            };
-          }
+        name: 'dumpCompilationTrace',
+        callback: (Map<String, String> parameters) async {
+          return <String, dynamic> {
+            'value': dumpCompilationTrace(),
+          };
+        }
       );
     }
 

@@ -620,7 +620,6 @@ abstract class ResidentRunner {
         outputFile.parent.createSync(recursive: true);
         outputFile.writeAsBytesSync(buffer);
         printStatus('Compilation trace written to ${fs.path.relative(outputFile.path)}.');
-        return;
       }
     }
   }
