@@ -41,10 +41,6 @@ class MaterialButton extends StatelessWidget {
   /// Rather than creating a material button directly, consider using
   /// [FlatButton] or [RaisedButton]. To create a custom Material button
   /// consider using [RawMaterialButton].
-  ///
-  /// The [clipBehavior], [elevation], [highlightElevation], and
-  /// [disabledElevation] argument must not be null. Additionally, [elevation],
-  /// [highlightElevation], and [disabledElevation] must be non-negative.
   const MaterialButton({
     Key key,
     @required this.onPressed,
@@ -68,10 +64,7 @@ class MaterialButton extends StatelessWidget {
     this.minWidth,
     this.height,
     this.child,
-  }) : assert(elevation != null && elevation >= 0.0),
-       assert(highlightElevation != null && highlightElevation >= 0.0),
-       assert(disabledElevation != null && disabledElevation >= 0.0),
-       super(key: key);
+  }) : super(key: key);
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
