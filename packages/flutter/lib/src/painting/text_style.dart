@@ -250,6 +250,7 @@ class TextStyle extends Diagnosticable {
     this.decorationStyle,
     this.debugLabel,
     String fontFamily,
+    this.fontFamilyFallback,
     String package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        assert(inherit != null),
@@ -280,6 +281,8 @@ class TextStyle extends Diagnosticable {
   /// prefixing is done by the constructor when the `package` argument is
   /// provided.
   final String fontFamily;
+
+  final List<String> fontFamilyFallback;
 
   /// The size of glyphs (in logical pixels) to use when painting the text.
   ///
@@ -392,6 +395,7 @@ class TextStyle extends Diagnosticable {
   TextStyle copyWith({
     Color color,
     String fontFamily,
+    List<String> fontFamilyFallback,
     double fontSize,
     FontWeight fontWeight,
     FontStyle fontStyle,
@@ -419,6 +423,7 @@ class TextStyle extends Diagnosticable {
       inherit: inherit,
       color: this.foreground == null && foreground == null ? color ?? this.color : null,
       fontFamily: fontFamily ?? this.fontFamily,
+      fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontSize: fontSize ?? this.fontSize,
       fontWeight: fontWeight ?? this.fontWeight,
       fontStyle: fontStyle ?? this.fontStyle,
@@ -469,6 +474,7 @@ class TextStyle extends Diagnosticable {
     Color decorationColor,
     TextDecorationStyle decorationStyle,
     String fontFamily,
+    String fontFamilyFallback,
     double fontSizeFactor = 1.0,
     double fontSizeDelta = 0.0,
     int fontWeightDelta = 0,
@@ -505,6 +511,7 @@ class TextStyle extends Diagnosticable {
       inherit: inherit,
       color: foreground == null ? color ?? this.color : null,
       fontFamily: fontFamily ?? this.fontFamily,
+      fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize * fontSizeFactor + fontSizeDelta,
       fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)],
       fontStyle: fontStyle,
@@ -556,6 +563,7 @@ class TextStyle extends Diagnosticable {
     return copyWith(
       color: other.color,
       fontFamily: other.fontFamily,
+      fontFamilyFallback: other.fontFamilyFallback,
       fontSize: other.fontSize,
       fontWeight: other.fontWeight,
       fontStyle: other.fontStyle,
@@ -601,6 +609,7 @@ class TextStyle extends Diagnosticable {
         inherit: b.inherit,
         color: Color.lerp(null, b.color, t),
         fontFamily: t < 0.5 ? null : b.fontFamily,
+        fontFamilyFallback: t < 0.5 ? null : b.fontFamilyFallback,
         fontSize: t < 0.5 ? null : b.fontSize,
         fontWeight: FontWeight.lerp(null, b.fontWeight, t),
         fontStyle: t < 0.5 ? null : b.fontStyle,
@@ -624,6 +633,7 @@ class TextStyle extends Diagnosticable {
         inherit: a.inherit,
         color: Color.lerp(a.color, null, t),
         fontFamily: t < 0.5 ? a.fontFamily : null,
+        fontFamilyFallback: t < 0.5 ? a.fontFamilyFallback : null,
         fontSize: t < 0.5 ? a.fontSize : null,
         fontWeight: FontWeight.lerp(a.fontWeight, null, t),
         fontStyle: t < 0.5 ? a.fontStyle : null,
@@ -646,6 +656,7 @@ class TextStyle extends Diagnosticable {
       inherit: b.inherit,
       color: a.foreground == null && b.foreground == null ? Color.lerp(a.color, b.color, t) : null,
       fontFamily: t < 0.5 ? a.fontFamily : b.fontFamily,
+      fontFamilyFallback: t < 0.5 ? a.fontFamilyFallback : b.fontFamilyFallback,
       fontSize: ui.lerpDouble(a.fontSize ?? b.fontSize, b.fontSize ?? a.fontSize, t),
       fontWeight: FontWeight.lerp(a.fontWeight, b.fontWeight, t),
       fontStyle: t < 0.5 ? a.fontStyle : b.fontStyle,
@@ -679,6 +690,7 @@ class TextStyle extends Diagnosticable {
       fontStyle: fontStyle,
       textBaseline: textBaseline,
       fontFamily: fontFamily,
+      fontFamilyFallback: fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize * textScaleFactor,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
@@ -714,6 +726,7 @@ class TextStyle extends Diagnosticable {
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       fontFamily: fontFamily,
+      fontFamilyFallback: fontFamilyFallback,
       fontSize: (fontSize ?? _defaultFontSize) * textScaleFactor,
       lineHeight: height,
       maxLines: maxLines,
@@ -743,7 +756,8 @@ class TextStyle extends Diagnosticable {
         locale != other.locale ||
         foreground != other.foreground ||
         background != other.background ||
-        !listEquals(shadows, other.shadows))
+        !listEquals(shadows, other.shadows) ||
+        !listEquals(fontFamilyFallback, other.fontFamilyFallback))
       return RenderComparison.layout;
     if (color != other.color ||
         decoration != other.decoration ||
@@ -776,7 +790,8 @@ class TextStyle extends Diagnosticable {
            decoration == typedOther.decoration &&
            decorationColor == typedOther.decorationColor &&
            decorationStyle == typedOther.decorationStyle &&
-           listEquals(shadows, typedOther.shadows);
+           listEquals(shadows, typedOther.shadows) &&
+           listEquals(fontFamilyFallback, typedOther.fontFamilyFallback);
   }
 
   @override
@@ -785,6 +800,7 @@ class TextStyle extends Diagnosticable {
       inherit,
       color,
       fontFamily,
+      fontFamilyFallback,
       fontSize,
       fontWeight,
       fontStyle,
@@ -814,6 +830,7 @@ class TextStyle extends Diagnosticable {
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
     styles.add(DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
     styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
+    styles.add(StringProperty('${prefix}familyFallback', fontFamilyFallback, defaultValue: null, quoted: false));
     styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
     String weightDescription;
     if (fontWeight != null) {
