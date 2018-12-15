@@ -121,6 +121,15 @@ class Offset extends OffsetBase {
   /// and the second sets [dy], the vertical component.
   const Offset(double dx, double dy) : super(dx, dy);
 
+  /// Creates an offset from its [direction] and [distance].
+  ///
+  /// The direction is in radians clockwise from the positive x-axis.
+  ///
+  /// The distance can be omitted, to create a unit vector (distance = 1.0).
+  factory Offset.fromDirection(double direction, [ double distance = 1.0 ]) {
+    return new Offset(distance * math.cos(direction), distance * math.sin(direction));
+  }
+
   /// The x component of the offset.
   ///
   /// The y component is given by [dy].
@@ -135,12 +144,12 @@ class Offset extends OffsetBase {
   ///
   /// If you need this value to compare it to another [Offset]'s distance,
   /// consider using [distanceSquared] instead, since it is cheaper to compute.
-  double get distance => math.sqrt(_dx * _dx + _dy * _dy);
+  double get distance => math.sqrt(dx * dx + dy * dy);
 
   /// The square of the magnitude of the offset.
   ///
   /// This is cheaper than computing the [distance] itself.
-  double get distanceSquared => _dx * _dx + _dy * _dy;
+  double get distanceSquared => dx * dx + dy * dy;
 
   /// The angle of this offset as radians clockwise from the positive x-axis, in
   /// the range -[pi] to [pi], assuming positive values of the x-axis go to the
@@ -321,12 +330,12 @@ class Offset extends OffsetBase {
     if (other is! Offset)
       return false;
     final Offset typedOther = other;
-    return _dx == typedOther._dx &&
-           _dy == typedOther._dy;
+    return dx == typedOther.dx &&
+           dy == typedOther.dy;
   }
 
   @override
-  int get hashCode => hashValues(_dx, _dy);
+  int get hashCode => hashValues(dx, dy);
 
   @override
   String toString() => 'Offset(${dx?.toStringAsFixed(1)}, ${dy?.toStringAsFixed(1)})';
@@ -372,6 +381,30 @@ class Size extends OffsetBase {
 
   /// The vertical extent of this size.
   double get height => _dy;
+
+  /// The aspect ratio of this size.
+  ///
+  /// This returns the [width] divided by the [height].
+  ///
+  /// If the [width] is zero, the result will be zero. If the [height] is zero
+  /// (and the [width] is not), the result will be [double.infinity] or
+  /// [double.negativeInfinity] as determined by the sign of [width].
+  ///
+  /// See also:
+  ///
+  ///  * [AspectRatio], a widget for giving a child widget a specific aspect
+  ///    ratio.
+  ///  * [FittedBox], a widget that (in most modes) attempts to maintain a
+  ///    child widget's aspect ratio while changing its size.
+  double get aspectRatio {
+    if (height != 0.0)
+      return width / height;
+    if (width > 0.0)
+      return double.infinity;
+    if (width < 0.0)
+      return double.negativeInfinity;
+    return 0.0;
+  }
 
   /// An empty size, one with a zero width and a zero height.
   static const Size zero = const Size(0.0, 0.0);
