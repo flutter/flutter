@@ -22,14 +22,17 @@ TEST(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
     return false;
   };
 
+  std::string main =
+      std::string(testing::GetFixturesPath()) + "/simple_main.dart";
+
   FlutterRendererConfig config = {};
   config.type = FlutterRendererType::kSoftware;
   config.software = renderer;
 
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
-  args.assets_path = testing::GetFixturesPath();
-  args.main_path = "";
+  args.assets_path = "";
+  args.main_path = main.c_str();
   args.packages_path = "";
 
   FlutterEngine engine = nullptr;
