@@ -428,6 +428,7 @@ abstract class ResidentRunner {
     this.usesTerminalUI = true,
     String projectRootPath,
     String packagesFilePath,
+    this.saveCompilationTrace,
     this.stayResident,
     this.ipv6,
   }) {
@@ -442,6 +443,7 @@ abstract class ResidentRunner {
   final String target;
   final DebuggingOptions debuggingOptions;
   final bool usesTerminalUI;
+  final bool saveCompilationTrace;
   final bool stayResident;
   final bool ipv6;
   final Completer<int> _finished = Completer<int>();
@@ -489,6 +491,8 @@ abstract class ResidentRunner {
 
   Future<void> stop() async {
     _stopped = true;
+    if (saveCompilationTrace)
+      await _saveCompilationTrace();
     await stopEchoingDeviceLog();
     await preStop();
     return stopApp();
@@ -590,6 +594,35 @@ abstract class ResidentRunner {
     } catch (error) {
       status.cancel();
       printError('Error taking screenshot: $error');
+    }
+  }
+
+  Future<void> _saveCompilationTrace() async {
+    if (!supportsServiceProtocol)
+      return;
+
+    for (FlutterDevice device in flutterDevices) {
+      for (FlutterView view in device.views) {
+        final int index = device.views.indexOf(view);
+        printStatus('Saving compilation trace for '
+            '${device.device.name}${index == 0 ? '' :'/Isolate$index'}...');
+
+        List<int> buffer;
+        try {
+          buffer = await view.uiIsolate.flutterDumpCompilationTrace();
+          assert(buffer != null);
+        } catch (error) {
+          printError('Error communicating with Flutter on the device: $error');
+          continue;
+        }
+
+        final File outputFile = fs.currentDirectory
+          .childFile('compilation${index == 0 ? '' : index}.txt');
+
+        outputFile.parent.createSync(recursive: true);
+        outputFile.writeAsBytesSync(buffer);
+        printStatus('Compilation trace written to ${fs.path.relative(outputFile.path)}.');
+      }
     }
   }
 

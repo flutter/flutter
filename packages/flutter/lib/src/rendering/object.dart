@@ -1138,10 +1138,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(_debugCanPerformMutations);
     assert(child != null);
     setupParentData(child);
+    super.adoptChild(child);
     markNeedsLayout();
     markNeedsCompositingBitsUpdate();
     markNeedsSemanticsUpdate();
-    super.adoptChild(child);
   }
 
   /// Called by subclasses when they decide a render object is no longer a child.
@@ -1830,9 +1830,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   bool _needsCompositingBitsUpdate = false; // set to true when a child is added
   /// Mark the compositing state for this render object as dirty.
   ///
-  /// This is called to indicate that the value for [needsCompositing] needs to
-  /// be recomputed during the next [flushCompositingBits] engine phase.
-  ///
   /// When the subtree is mutated, we need to recompute our
   /// [needsCompositing] bit, and some of our ancestors need to do the
   /// same (in case ours changed in a way that will change theirs). To
@@ -1869,9 +1866,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   bool _needsCompositing; // initialised in the constructor
   /// Whether we or one of our descendants has a compositing layer.
-  ///
-  /// If this node needs compositing as indicated by this bit, then all ancestor
-  /// nodes will also need compositing.
   ///
   /// Only legal to call after [PipelineOwner.flushLayout] and
   /// [PipelineOwner.flushCompositingBits] have been called.

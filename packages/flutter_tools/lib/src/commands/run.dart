@@ -30,14 +30,20 @@ abstract class RunCommandBase extends FlutterCommand {
         negatable: false,
         help: 'Start tracing during startup.',
       )
-      ..addFlag('ipv6',
-        hide: true,
-        negatable: false,
-        help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool '
-              'forwards the host port to a device port.',
-      )
       ..addOption('route',
         help: 'Which route to load when running the app.',
+      )
+      ..addFlag('save-compilation-trace',
+        hide: !verboseHelp,
+        negatable: false,
+        help: 'Save runtime compilation trace to a file.\n'
+              'Compilation trace will be saved to compilation.txt when \'flutter run\' exits. '
+              'This file contains a list of Dart symbols that were compiled by the runtime JIT '
+              'compiler up to that point. This file can be used in later --dynamic builds to '
+              'precompile some code by the offline compiler, thus reducing application startup '
+              'latency at the cost of larger application package.\n'
+              'This flag is only allowed when running --dynamic --profile (recommended) or '
+              '--debug mode.\n'
       )
       ..addOption('target-platform',
         defaultsTo: 'default',
@@ -46,31 +52,13 @@ abstract class RunCommandBase extends FlutterCommand {
               'Android device.\nIgnored on iOS.');
     usesTargetOption();
     usesPortOptions();
+    usesIpv6Flag();
     usesPubOption();
     usesIsolateFilterOption(hide: !verboseHelp);
   }
 
   bool get traceStartup => argResults['trace-startup'];
-  bool get ipv6 => argResults['ipv6'];
   String get route => argResults['route'];
-
-  void usesPortOptions() {
-    argParser.addOption('observatory-port',
-        help: 'Listen to the given port for an observatory debugger connection.\n'
-              'Specifying port 0 (the default) will find a random free port.'
-    );
-  }
-
-  int get observatoryPort {
-    if (argResults['observatory-port'] != null) {
-      try {
-        return int.parse(argResults['observatory-port']);
-      } catch (error) {
-        throwToolExit('Invalid port for `--observatory-port`: $error');
-      }
-    }
-    return null;
-  }
 }
 
 class RunCommand extends RunCommandBase {
@@ -341,6 +329,12 @@ class RunCommand extends RunCommandBase {
           throwToolExit('Hot reload is not supported by ${device.name}. Run with --no-hot.');
       }
     }
+    
+    if (argResults['save-compilation-trace'] &&
+        getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile) {
+      throwToolExit('Error: --save-compilation-trace is only allowed when running '
+          '--dynamic --profile (recommended) or --debug mode.');
+    }
 
     final List<FlutterDevice> flutterDevices = <FlutterDevice>[];
     for (Device device in devices) {
@@ -370,6 +364,7 @@ class RunCommand extends RunCommandBase {
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
         dillOutputPath: argResults['output-dill'],
+        saveCompilationTrace: argResults['save-compilation-trace'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -382,6 +377,7 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
+        saveCompilationTrace: argResults['save-compilation-trace'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
