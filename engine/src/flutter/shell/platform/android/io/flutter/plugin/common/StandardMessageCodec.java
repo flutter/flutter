@@ -30,6 +30,7 @@ import android.util.Log;
  *     <li>null</li>
  *     <li>Booleans</li>
  *     <li>Bytes, Shorts, Integers, Longs</li>
+ *     <li>BigIntegers (see below)</li>
  *     <li>Floats, Doubles</li>
  *     <li>Strings</li>
  *     <li>byte[], int[], long[], double[]</li>
@@ -53,11 +54,8 @@ import android.util.Log;
  *     <li>Map: Map</li>
  * </ul>
  *
- * <p>Direct support for BigIntegers has been deprecated on 2018-01-09 to be made
- * unavailable four weeks after this change is available on the Flutter alpha
- * branch. BigIntegers were needed because the Dart 1.0 int type had no size
- * limit. With Dart 2.0, the int type is a fixed-size, 64-bit signed integer.
- * If you need to communicate larger integers, use String encoding instead.</p>
+ * <p>BigIntegers are represented in Dart as strings with the
+ * hexadecimal representation of the integer's value.</p>
  *
  * <p>To extend the codec, overwrite the writeValue and readValueOfType methods.</p>
  */
@@ -96,7 +94,6 @@ public class StandardMessageCodec implements MessageCodec<Object> {
     private static final byte FALSE = 2;
     private static final byte INT = 3;
     private static final byte LONG = 4;
-    @Deprecated
     private static final byte BIGINT = 5;
     private static final byte DOUBLE = 6;
     private static final byte STRING = 7;
@@ -237,7 +234,6 @@ public class StandardMessageCodec implements MessageCodec<Object> {
                 writeAlignment(stream, 8);
                 writeDouble(stream, ((Number) value).doubleValue());
             } else if (value instanceof BigInteger) {
-                Log.w("Flutter", "Support for BigIntegers has been deprecated. Use String encoding instead.");
                 stream.write(BIGINT);
                 writeBytes(stream,
                     ((BigInteger) value).toString(16).getBytes(UTF8));
@@ -367,7 +363,6 @@ public class StandardMessageCodec implements MessageCodec<Object> {
                 result = buffer.getLong();
                 break;
             case BIGINT: {
-                Log.w("Flutter", "Support for BigIntegers has been deprecated. Use String encoding instead.");
                 final byte[] hex = readBytes(buffer);
                 result = new BigInteger(new String(hex, UTF8), 16);
                 break;
