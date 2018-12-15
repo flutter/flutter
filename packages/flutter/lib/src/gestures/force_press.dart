@@ -201,7 +201,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     // A static pointer with changes in pressure creates PointerMoveEvent events.
     if (event is PointerMoveEvent || event is PointerDownEvent) {
       final double pressure = interpolation(event.pressureMin, event.pressureMax, event.pressure);
-      assert(pressure <= 1.0 && pressure >= 0.0);
+      assert(pressure.isNaN ? true : (pressure <= 1.0 && pressure >= 0.0));
       _lastPosition = event.position;
       _lastPressure = pressure;
 
