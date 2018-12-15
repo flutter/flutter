@@ -329,7 +329,7 @@ class RunCommand extends RunCommandBase {
           throwToolExit('Hot reload is not supported by ${device.name}. Run with --no-hot.');
       }
     }
-    
+
     if (argResults['save-compilation-trace'] &&
         getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile) {
       throwToolExit('Error: --save-compilation-trace is only allowed when running '
