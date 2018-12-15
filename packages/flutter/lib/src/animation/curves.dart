@@ -304,16 +304,19 @@ class FlippedCurve extends Curve {
 ///
 /// See [Curves.decelerate] for an instance of this class.
 class _DecelerateCurve extends Curve {
-  const _DecelerateCurve._();
+  const _DecelerateCurve._(this.exponent);
+
+  final double exponent;
 
   @override
   double transform(double t) {
+//    print(t);
     assert(t >= 0.0 && t <= 1.0);
     // Intended to match the behavior of:
     // https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/view/animation/DecelerateInterpolator.java
     // ...as of December 2016.
     t = 1.0 - t;
-    return 1.0 - t * t;
+    return 1.0 - math.pow(t, exponent);
   }
 }
 
@@ -510,9 +513,14 @@ class Curves {
   /// factor (the default factor).
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_decelerate.mp4}
-  static const Curve decelerate = _DecelerateCurve._();
+  static const Curve decelerate = _DecelerateCurve._(2);
 
-  static const Curve lerp = _lerpCurve._(0.5);
+  /// A curve where the rate of change is based on an exponential function; an
+  /// upside-down `f(t) = pow(t, [exponent])` curve.
+  ///
+  /// For exponents greater than 1, the larger the exponent, the quicker the
+  /// animation starts and the slower it ends.
+  static Curve curveWithPower(double exponent) => _DecelerateCurve._(exponent);
 
   /// A cubic animation curve that speeds up quickly and ends slowly.
   ///

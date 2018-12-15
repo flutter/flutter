@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -13,6 +14,8 @@ import 'package:flutter/animation.dart' show Curves;
 
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
+const int _kMaxPageForwardAnimationTime = 800; // Milliseconds.
+const int _kMaxPageBackAnimationTime = 300; // Milliseconds.
 
 // Barrier color for a Cupertino modal barrier.
 const Color _kModalBarrierColor = Color(0x6604040F);
@@ -594,41 +597,37 @@ class _CupertinoBackGestureController<T> {
     // Fling in the appropriate direction.
     // AnimationController.fling is guaranteed to
     // take at least one frame.
-    final Animation<double> animation = CurvedAnimation(
-      parent: controller,
-      curve: Curves.decelerate,
-    );
-//    print(controller.duration.inMilliseconds);
-//    Duration duration = controller.duration;
-    controller.duration = const Duration(milliseconds: 140);
-    if (velocity.abs() >= _kMinFlingVelocity) {
-      controller.fling(velocity: -velocity);
-    } else if (controller.value <= 0.5) {
-      print('reversing');
-      controller.reverse();
+    final Curve animationCurve = Curves.curveWithPower(8);
+    bool animateForward;
+    if (velocity.abs() >= _kMinFlingVelocity)
+      animateForward = velocity > 0 ? false : true;
+    else
+      animateForward = controller.value > 0.5 ? true : false;
 
-//      animation.;
-//      controller.animateTo(-0.01, duration: const Duration(milliseconds: 140), curve: Curves.decelerate);
+    if (animateForward) {
+      // The closer the panel is to dismissing, the shorter the animation is.
+      final int milliseconds = min(lerpDouble(_kMaxPageForwardAnimationTime, 0, controller.value).floor(),
+                                   _kMaxPageBackAnimationTime);
+      controller.animateTo(1.01, duration: Duration(milliseconds: milliseconds), curve: animationCurve);
     } else {
-//      print('forward');
-//      controller.forward();
-//      controller.fling(velocity: 14.0);
-      controller.animateTo(1.01, duration: const Duration(milliseconds: 140), curve: Curves.decelerate);
+      final int milliseconds = lerpDouble(0, _kMaxPageForwardAnimationTime, controller.value).floor();
+      controller.animateBack(-0.01, duration: Duration(milliseconds: milliseconds), curve: animationCurve);
     }
+
     assert(controller.isAnimating);
     assert(controller.status != AnimationStatus.completed);
     assert(controller.status != AnimationStatus.dismissed);
 
     // Don't end the gesture until the transition completes.
     _animating = true;
-    animation.addStatusListener(_handleStatusChanged);
+    controller.addStatusListener(_handleStatusChanged);
   }
 
   void _handleStatusChanged(AnimationStatus status) {
     assert(_animating);
     controller.removeStatusListener(_handleStatusChanged);
     _animating = false;
-    if (controller.value <= controller.lowerBound) {
+    if (status == AnimationStatus.dismissed) {
       navigator.pop<T>(); // this will cause the route to get disposed, which will dispose us
     }
     onEnded(); // this will call dispose if popping the route failed to do so
