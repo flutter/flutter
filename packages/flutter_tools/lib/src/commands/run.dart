@@ -33,6 +33,18 @@ abstract class RunCommandBase extends FlutterCommand {
       ..addOption('route',
         help: 'Which route to load when running the app.',
       )
+      ..addFlag('save-compilation-trace',
+        hide: !verboseHelp,
+        negatable: false,
+        help: 'Save runtime compilation trace to a file.\n'
+              'Compilation trace will be saved to compilation.txt when \'flutter run\' exits. '
+              'This file contains a list of Dart symbols that were compiled by the runtime JIT '
+              'compiler up to that point. This file can be used in later --dynamic builds to '
+              'precompile some code by the offline compiler, thus reducing application startup '
+              'latency at the cost of larger application package.\n'
+              'This flag is only allowed when running --dynamic --profile (recommended) or '
+              '--debug mode.\n'
+      )
       ..addOption('target-platform',
         defaultsTo: 'default',
         allowed: <String>['default', 'android-arm', 'android-arm64'],
@@ -318,6 +330,11 @@ class RunCommand extends RunCommandBase {
       }
     }
 
+    if (argResults['save-compilation-trace'] &&
+        getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile)
+      throwToolExit('Error: --save-compilation-trace is only allowed when running '
+          '--dynamic --profile (recommended) or --debug mode.');
+
     final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {
       return FlutterDevice(
         device,
@@ -343,6 +360,7 @@ class RunCommand extends RunCommandBase {
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
         dillOutputPath: argResults['output-dill'],
+        saveCompilationTrace: argResults['save-compilation-trace'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -355,6 +373,7 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
+        saveCompilationTrace: argResults['save-compilation-trace'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
