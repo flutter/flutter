@@ -1,4 +1,4 @@
-Signature: d1d0c6f4959debcac01d71e193990a02
+Signature: cd2e519d1448fb84a51765e78da86fcf
 
 UNUSED LICENSES:
 
@@ -1305,6 +1305,7 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionSetPath.cpp
 FILE: ../../../third_party/skia/gm/3dgm.cpp
 FILE: ../../../third_party/skia/gm/analytic_gradients.cpp
 FILE: ../../../third_party/skia/gm/androidblendmodes.cpp
+FILE: ../../../third_party/skia/gm/b_119394958.cpp
 FILE: ../../../third_party/skia/gm/clockwise.cpp
 FILE: ../../../third_party/skia/gm/crbug_847759.cpp
 FILE: ../../../third_party/skia/gm/crbug_884166.cpp
