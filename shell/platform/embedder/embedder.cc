@@ -384,6 +384,9 @@ FlutterResult FlutterEngineRun(size_t version,
   run_configuration.AddAssetResolver(
       std::make_unique<blink::DirectoryAssetBundle>(fml::OpenDirectory(
           settings.assets_path.c_str(), false, fml::FilePermission::kRead)));
+  if (!run_configuration.IsValid()) {
+    return kInvalidArguments;
+  }
 
   if (!embedder_engine->Run(std::move(run_configuration))) {
     return kInvalidArguments;
