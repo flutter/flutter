@@ -1153,7 +1153,7 @@ class AccessibilityBridge
                     } else if (action.overrideId == Action.LONG_PRESS.value) {
                         onLongPressOverride = action;
                     } else {
-                        // If we recieve a different overrideId it means that we were passed
+                        // If we receive a different overrideId it means that we were passed
                         // a standard action to override that we don't yet support.
                         assert action.overrideId == -1;
                         customAccessibilityActions.add(action);
