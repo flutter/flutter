@@ -47,7 +47,7 @@ bool EmbedderEngine::NotifyDestroyed() {
 }
 
 bool EmbedderEngine::Run(RunConfiguration run_configuration) {
-  if (!IsValid()) {
+  if (!IsValid() || !run_configuration.IsValid()) {
     return false;
   }
 
