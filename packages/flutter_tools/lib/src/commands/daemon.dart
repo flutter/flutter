@@ -579,21 +579,6 @@ class DeviceDomain extends Domain {
     if (!discoverer.supportsPlatform)
       return;
 
-    if (!discoverer.canListAnything) {
-      // This event will affect the client UI. Coordinate changes here
-      // with the Flutter IntelliJ team.
-      sendEvent(
-        'daemon.showMessage',
-        <String, String>{
-          'level': 'warning',
-          'title': 'Unable to list devices',
-          'message':
-              'Unable to discover ${discoverer.name}. Please run '
-              '"flutter doctor" to diagnose potential issues',
-        },
-      );
-    }
-
     _discoverers.add(discoverer);
 
     discoverer.onAdded.listen(_onDeviceEvent('device.added'));
