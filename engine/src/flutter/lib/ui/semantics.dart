@@ -404,7 +404,7 @@ class SemanticsFlag {
   /// that the node's semantic label can be used to announce an edge triggered
   /// semantics update.
   ///
-  /// Semantic nodes annotated with this flag will still recieve a11y focus.
+  /// Semantic nodes annotated with this flag will still receive a11y focus.
   ///
   /// Updating this label within the same active route subtree will not cause
   /// additional announcements.
