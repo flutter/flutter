@@ -2,18 +2,21 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//third_party/dart/build/dart/dart_action.gni")
+
+# Builds test fixtures for a unit test.
+#
+# Generates a directory structure containing an assets directory and the Dart
+# code to execute compiled to kernel, emitted to assets/kernel_blob.bin.
 template("test_fixtures") {
   testonly = true
 
   assert(defined(invoker.fixtures), "Test fixtures must be specified.")
 
+  fixtures_location = "$target_gen_dir/$target_name/assets"
+  fixtures_location_file = "$target_gen_dir/$target_name/test_fixtures_location.cc"
+
   fixtures_name_target_name = target_name + "_gen_fixtures_name"
-  fixtures_source_set_target_name = target_name + "_gen_fixtures_source_set"
-  fixtures_copy_target_name = target_name + "_copy_fixtures"
-
-  fixtures_location = "$target_gen_dir/fixtures"
-  fixtures_location_file = "$target_gen_dir/test_fixtures_location.cc"
-
   action(fixtures_name_target_name) {
     script = "$flutter_root/testing/build/gen_fixtures_location_symbol.py"
 
@@ -29,7 +32,9 @@ template("test_fixtures") {
     ]
   }
 
+  fixtures_source_set_target_name = target_name + "_gen_fixtures_source_set"
   source_set(fixtures_source_set_target_name) {
+    testonly = true
     sources = [
       fixtures_location_file,
     ]
@@ -39,16 +44,32 @@ template("test_fixtures") {
     ]
   }
 
-  copy(fixtures_copy_target_name) {
-    sources = invoker.fixtures
-    outputs = [
-      "$fixtures_location/{{source_file_part}}",
+  fixtures_kernel_target_name = target_name + "_kernel"
+  dart_action(fixtures_kernel_target_name) {
+    testonly = true
+    script = "$root_out_dir/frontend_server.dart.snapshot"
+
+    fixture_paths = []
+    foreach(fixture, invoker.fixtures) {
+      fixture_paths += [ rebase_path(fixture) ]
+    }
+    inputs = fixture_paths
+    outputs = ["$fixtures_location/kernel_blob.bin"]
+
+    args = [
+      "--sdk-root", rebase_path("$root_out_dir/flutter_patched_sdk"),
+      "--target", "flutter",
+      "--output-dill", rebase_path("$fixtures_location/kernel_blob.bin"),
+    ] + fixture_paths
+    deps = [
+      "//third_party/dart/utils/kernel-service:frontend_server"
     ]
   }
 
   group(target_name) {
+    testonly = true
     deps = [
-      ":$fixtures_copy_target_name",
+      ":$fixtures_kernel_target_name",
       ":$fixtures_source_set_target_name",
     ]
   }
