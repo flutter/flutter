@@ -658,6 +658,66 @@ void main() {
     // End the test here to ensure the animation is properly disposed of.
   });
 
+  testWidgets('An obscured TextField is not selectable by default', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/24100
+
+    final TextEditingController controller = TextEditingController();
+    Widget buildFrame(bool obscureText, bool enableInteractiveSelection) {
+      return overlay(
+        child: TextField(
+          controller: controller,
+          obscureText: obscureText,
+          enableInteractiveSelection: enableInteractiveSelection,
+        ),
+      );
+    }
+
+    // Obscure text and don't enable or disable selection
+    await tester.pumpWidget(buildFrame(true, null));
+    await tester.enterText(find.byType(TextField), 'abcdefghi');
+    await skipPastScrollingAnimation(tester);
+    expect(controller.selection.isCollapsed, true);
+
+    // Long press doesn't select anything
+    final Offset ePos = textOffsetToPosition(tester, 1);
+    final TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
+    expect(controller.selection.isCollapsed, true);
+  });
+
+  testWidgets('An obscured TextField is selectable when enabled', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/24100
+
+    final TextEditingController controller = TextEditingController();
+    Widget buildFrame(bool obscureText, bool enableInteractiveSelection) {
+      return overlay(
+        child: TextField(
+          controller: controller,
+          obscureText: obscureText,
+          enableInteractiveSelection: enableInteractiveSelection,
+        ),
+      );
+    }
+
+    // Explicitly allow selection on obscured text
+    await tester.pumpWidget(buildFrame(true, true));
+    await tester.enterText(find.byType(TextField), 'abcdefghi');
+    await skipPastScrollingAnimation(tester);
+    expect(controller.selection.isCollapsed, true);
+
+    // Long press does select text
+    final Offset ePos2 = textOffsetToPosition(tester, 1);
+    final TestGesture gesture2 = await tester.startGesture(ePos2, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture2.up();
+    await tester.pump();
+    expect(controller.selection.isCollapsed, false);
+  });
+
   testWidgets('Multiline text will wrap up to maxLines', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
 
