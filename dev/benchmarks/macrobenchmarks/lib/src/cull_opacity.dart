@@ -15,7 +15,7 @@ class _CullOpacityPageState extends State<CullOpacityPage> with SingleTickerProv
 
     _controller = AnimationController(vsync: this, duration: Duration(seconds: 2));
     _offsetY = Tween<double>(begin: 0, end: -1000.0).animate(_controller)..addListener((){
-      setState((){});
+      setState(() {});
     });
     _controller.repeat();
   }
@@ -29,7 +29,7 @@ class _CullOpacityPageState extends State<CullOpacityPage> with SingleTickerProv
         opacity: 0.5,
         child: RepaintBoundary(
           child: Container(
-            // slightly change width to invalidate raster cache
+            // Slightly change width to invalidate raster cache.
             width: 1000 - (_offsetY.value / 100),
             height: 100, color: Colors.red,
           ),
