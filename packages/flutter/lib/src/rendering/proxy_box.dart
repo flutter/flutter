@@ -541,16 +541,26 @@ class RenderAspectRatio extends RenderProxyBox {
 /// depth of the tree.
 class RenderIntrinsicWidth extends RenderProxyBox {
   /// Creates a render object that sizes itself to its child's intrinsic width.
+  ///
+  /// If [stepWidth] is non-null it must be > 0.0. Similarly If [stepHeight] is
+  /// non-null it must be > 0.0.
   RenderIntrinsicWidth({
     double stepWidth,
     double stepHeight,
     RenderBox child
-  }) : _stepWidth = stepWidth, _stepHeight = stepHeight, super(child);
+  }) : assert(stepWidth == null || stepWidth > 0.0),
+       assert(stepHeight == null || stepHeight > 0.0),
+       _stepWidth = stepWidth,
+       _stepHeight = stepHeight,
+       super(child);
 
   /// If non-null, force the child's width to be a multiple of this value.
+  ///
+  /// This value must be null or > 0.0.
   double get stepWidth => _stepWidth;
   double _stepWidth;
   set stepWidth(double value) {
+    assert(value == null || value > 0.0);
     if (value == _stepWidth)
       return;
     _stepWidth = value;
@@ -558,9 +568,12 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   }
 
   /// If non-null, force the child's height to be a multiple of this value.
+  ///
+  /// This value must be null or > 0.0.
   double get stepHeight => _stepHeight;
   double _stepHeight;
   set stepHeight(double value) {
+    assert(value == null || value > 0.0);
     if (value == _stepHeight)
       return;
     _stepHeight = value;

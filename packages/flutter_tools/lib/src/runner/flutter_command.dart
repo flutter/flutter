@@ -72,6 +72,12 @@ abstract class FlutterCommand extends Command<void> {
   /// Will be `null` until the top-most command has begun execution.
   static FlutterCommand get current => context[FlutterCommand];
 
+  /// The option name for a custom observatory port.
+  static const String observatoryPortOption = 'observatory-port';
+
+  /// The flag name for whether or not to use ipv6.
+  static const String ipv6Flag = 'ipv6';
+
   @override
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(allowTrailingOptions: false);
@@ -85,6 +91,10 @@ abstract class FlutterCommand extends Command<void> {
   bool _usesTargetOption = false;
 
   bool _usesPubOption = false;
+
+  bool _usesPortOption = false;
+
+  bool _usesIpv6Flag = false;
 
   bool get shouldRunPub => _usesPubOption && argResults['pub'];
 
@@ -147,6 +157,43 @@ abstract class FlutterCommand extends Command<void> {
             'compilation. See more details on filesystem-root option.\n',
       );
   }
+
+  /// Adds options for connecting to the Dart VM observatory port.
+  void usesPortOptions() {
+    argParser.addOption(observatoryPortOption,
+        help: 'Listen to the given port for an observatory debugger connection.\n'
+              'Specifying port 0 (the default) will find a random free port.'
+    );
+    _usesPortOption = true;
+  }
+
+  /// Gets the observatory port provided to in the 'observatory-port' option.
+  ///
+  /// If no port is set, returns null.
+  int get observatoryPort {
+    if (!_usesPortOption || argResults['observatory-port'] == null) {
+      return null;
+    }
+    try {
+      return int.parse(argResults['observatory-port']);
+    } catch (error) {
+      throwToolExit('Invalid port for `--observatory-port`: $error');
+    }
+    return null;
+  }
+
+  void usesIpv6Flag() {
+    argParser.addFlag(ipv6Flag,
+      hide: true,
+      negatable: false,
+      help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool '
+            'forwards the host port to a device port. Not used when the '
+            '--debug-port flag is not set.',
+    );
+    _usesIpv6Flag = true;
+  }
+
+  bool get ipv6 => _usesIpv6Flag ? argResults['ipv6'] : null;
 
   void usesBuildNumberOption() {
     argParser.addOption('build-number',
