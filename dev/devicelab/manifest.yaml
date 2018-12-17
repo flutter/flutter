@@ -481,6 +481,7 @@ tasks:
       Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true # https://github.com/flutter/flutter/issues/25481
 
   flutter_gallery__transition_perf_with_semantics:
     description: >
@@ -488,6 +489,7 @@ tasks:
       with semantics enabled.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true # https://github.com/flutter/flutter/issues/25481
 
   flutter_gallery__memory_nav:
     description: >
