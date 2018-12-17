@@ -217,6 +217,27 @@ void main() {
       await commands.close();
     });
 
+    testUsingContext('device.getDevices reports avaiable devices', () async {
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
+      daemon = Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+      );
+      final MockPollingDeviceDiscovery discoverer = MockPollingDeviceDiscovery();
+      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      discoverer.addDevice(MockAndroidDevice());
+      commands.add(<String, dynamic>{'id': 0, 'method': 'device.getDevices'});
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
+      expect(response['id'], 0);
+      final dynamic result = response['result'];
+      expect(result, isList);
+      expect(result, isNotEmpty);
+      await responses.close();
+      await commands.close();
+    });
+
     testUsingContext('should send device.added event when device is discovered', () async {
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
