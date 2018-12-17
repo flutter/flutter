@@ -187,26 +187,16 @@ void main() {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
-    String text = 'aaa';
     const double SIZE_OF_A = 14.0; // square size of "a" character
+    String text = 'aaa';
     painter.text = TextSpan(text: text);
     painter.layout();
-
-    int offset = 0;
-    Offset caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, closeTo(0.0, 0.0001));
-    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
-    expect(caretOffset.dx, painter.width);
-    expect(caretOffset.dy, closeTo(0.0, 0.0001));
 
     // getOffsetForCaret in a plain one-line string is the same for either affinity.
-    text = 'aaa';
+    int offset = 0;
     painter.text = TextSpan(text: text);
     painter.layout();
-    caretOffset = painter.getOffsetForCaret(
+    Offset caretOffset = painter.getOffsetForCaret(
       ui.TextPosition(offset: offset),
       ui.Rect.zero,
     );
@@ -232,6 +222,19 @@ void main() {
     expect(caretOffset.dx, closeTo(SIZE_OF_A * offset, 0.0001));
     expect(caretOffset.dy, closeTo(0.0, 0.0001));
     offset = 2;
+    caretOffset = painter.getOffsetForCaret(
+      ui.TextPosition(offset: offset),
+      ui.Rect.zero,
+    );
+    expect(caretOffset.dx, closeTo(SIZE_OF_A * offset, 0.0001));
+    expect(caretOffset.dy, closeTo(0.0, 0.0001));
+    caretOffset = painter.getOffsetForCaret(
+      ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
+      ui.Rect.zero,
+    );
+    expect(caretOffset.dx, closeTo(SIZE_OF_A * offset, 0.0001));
+    expect(caretOffset.dy, closeTo(0.0, 0.0001));
+    offset = 3;
     caretOffset = painter.getOffsetForCaret(
       ui.TextPosition(offset: offset),
       ui.Rect.zero,
@@ -326,7 +329,7 @@ void main() {
     // end of one line and start of next using affinity.
     text = 'aaaaaaaa'; // Just enough to wrap one character down to second line
     painter.text = TextSpan(text: text);
-    painter.layout(maxWidth: 100);
+    painter.layout(maxWidth: 100); // SIZE_OF_A * text.length > 100, so it wraps
     caretOffset = painter.getOffsetForCaret(
       ui.TextPosition(offset: text.length - 1),
       ui.Rect.zero,
@@ -361,8 +364,9 @@ void main() {
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
     expect(caretOffset.dy, closeTo(SIZE_OF_A, 0.0001));
 
-    // Check that getOffsetForCaret handles being at the end when affinity is
-    // downstream and align is right.
+    // Given a one-line right aligned string, positioning the cursor at offset 0
+    // means that it appears at the "end" of the string, after the character
+    // that was typed first, at x=0.
     painter.textAlign = TextAlign.right;
     text = 'aaa';
     painter.text = TextSpan(text: text);
@@ -396,9 +400,24 @@ void main() {
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
     expect(caretOffset.dy, closeTo(SIZE_OF_A, 0.0001));
 
-    // Correctly handles multiple trailing newlines with the same offset
-    // regardless of affinity.
+    // When given a string with multiple trailing newlines, places the caret
+    // in the position given by offset regardless of affinity.
     text = 'aaa\n\n\n';
+    offset = 3;
+    caretOffset = painter.getOffsetForCaret(
+      ui.TextPosition(offset: offset),
+      ui.Rect.zero,
+    );
+    expect(caretOffset.dx, closeTo(SIZE_OF_A * 3, 0.0001));
+    expect(caretOffset.dy, closeTo(0.0, 0.0001));
+    caretOffset = painter.getOffsetForCaret(
+      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
+      ui.Rect.zero,
+    );
+    expect(caretOffset.dx, closeTo(SIZE_OF_A * 3, 0.0001));
+    expect(caretOffset.dy, closeTo(0.0, 0.0001));
+
+    offset = 4;
     painter.text = TextSpan(text: text);
     painter.layout();
     caretOffset = painter.getOffsetForCaret(
@@ -407,6 +426,12 @@ void main() {
     );
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
     expect(caretOffset.dy, closeTo(SIZE_OF_A, 0.001));
+    caretOffset = painter.getOffsetForCaret(
+      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
+      ui.Rect.zero,
+    );
+    expect(caretOffset.dx, closeTo(0.0, 0.0001));
+    expect(caretOffset.dy, closeTo(SIZE_OF_A, 0.0001));
 
     offset = 5;
     caretOffset = painter.getOffsetForCaret(
@@ -415,6 +440,12 @@ void main() {
     );
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
     expect(caretOffset.dy, closeTo(SIZE_OF_A * 2, 0.001));
+    caretOffset = painter.getOffsetForCaret(
+      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
+      ui.Rect.zero,
+    );
+    expect(caretOffset.dx, closeTo(0.0, 0.0001));
+    expect(caretOffset.dy, closeTo(SIZE_OF_A * 2, 0.0001));
 
     offset = 6;
     caretOffset = painter.getOffsetForCaret(
@@ -431,38 +462,20 @@ void main() {
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
     expect(caretOffset.dy, closeTo(SIZE_OF_A * 3, 0.0001));
 
-    offset = 5;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, closeTo(0.0, 0.0001));
-    expect(caretOffset.dy, closeTo(SIZE_OF_A * 2, 0.0001));
-
-    offset = 4;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, closeTo(0.0, 0.0001));
-    expect(caretOffset.dy, closeTo(SIZE_OF_A, 0.0001));
-
-    offset = 3;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, closeTo(SIZE_OF_A * 3, 0.0001));
-    expect(caretOffset.dy, closeTo(0.0, 0.0001));
-
-    // Correctly handles multiple leading newlines with the same offset
-    // regardless of affinity.
+    // When given a string with multiple leading newlines, places the caret in
+    // the position given by offset regardless of affinity.
     text = '\n\n\naaa';
+    offset = 3;
     painter.text = TextSpan(text: text);
     painter.layout();
-
     caretOffset = painter.getOffsetForCaret(
       ui.TextPosition(offset: offset),
+      ui.Rect.zero,
+    );
+    expect(caretOffset.dx, closeTo(0.0, 0.0001));
+    expect(caretOffset.dy, closeTo(SIZE_OF_A * 3, 0.0001));
+    caretOffset = painter.getOffsetForCaret(
+      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
       ui.Rect.zero,
     );
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
@@ -471,6 +484,12 @@ void main() {
     offset = 2;
     caretOffset = painter.getOffsetForCaret(
       ui.TextPosition(offset: offset),
+      ui.Rect.zero,
+    );
+    expect(caretOffset.dx, closeTo(0.0, 0.0001));
+    expect(caretOffset.dy, closeTo(SIZE_OF_A * 2, 0.0001));
+    caretOffset = painter.getOffsetForCaret(
+      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
       ui.Rect.zero,
     );
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
@@ -483,6 +502,12 @@ void main() {
     );
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
     expect(caretOffset.dy,closeTo(SIZE_OF_A, 0.0001));
+    caretOffset = painter.getOffsetForCaret(
+      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
+      ui.Rect.zero,
+    );
+    expect(caretOffset.dx, closeTo(0.0, 0.0001));
+    expect(caretOffset.dy, closeTo(SIZE_OF_A, 0.0001));
 
     offset = 0;
     caretOffset = painter.getOffsetForCaret(
@@ -491,36 +516,11 @@ void main() {
     );
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
     expect(caretOffset.dy, closeTo(0.0, 0.0001));
-
     caretOffset = painter.getOffsetForCaret(
       ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
       ui.Rect.zero,
     );
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
     expect(caretOffset.dy, closeTo(0.0, 0.0001));
-
-    offset = 1;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, closeTo(0.0, 0.0001));
-    expect(caretOffset.dy, closeTo(SIZE_OF_A, 0.0001));
-
-    offset = 2;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, closeTo(0.0, 0.0001));
-    expect(caretOffset.dy, closeTo(SIZE_OF_A * 2, 0.0001));
-
-    offset = 3;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, closeTo(0.0, 0.0001));
-    expect(caretOffset.dy, closeTo(SIZE_OF_A * 3, 0.0001));
   });
 }
