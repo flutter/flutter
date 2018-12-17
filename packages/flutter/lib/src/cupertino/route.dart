@@ -156,7 +156,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   final bool maintainState;
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 350);
+  Duration get transitionDuration => const Duration(milliseconds: 400);
 
   @override
   Color get barrierColor => null;
@@ -352,18 +352,18 @@ class CupertinoPageTransition extends StatelessWidget {
        _primaryPositionAnimation = (linearTransition ? primaryRouteAnimation :
          CurvedAnimation(
            parent: primaryRouteAnimation,
-           curve: Curves.easeOut,
-           reverseCurve: Curves.easeIn,
+           curve: Curves.linearToEaseOut,
+           reverseCurve: Curves.easeInToLinear,
          )
        ).drive(_kRightMiddleTween),
        _secondaryPositionAnimation = CurvedAnimation(
          parent: secondaryRouteAnimation,
-         curve: Curves.easeOut,
-         reverseCurve: Curves.easeIn,
+         curve: Curves.linearToEaseOut,
+         reverseCurve: Curves.easeInToLinear,
        ).drive(_kMiddleLeftTween),
        _primaryShadowAnimation = CurvedAnimation(
          parent: primaryRouteAnimation,
-         curve: Curves.easeOut,
+         curve: Curves.linearToEaseOut,
        ).drive(_kGradientShadowTween),
        super(key: key);
 

@@ -72,7 +72,8 @@ class PageRouteBuilder<T> extends PageRoute<T> {
        assert(barrierDismissible != null),
        assert(maintainState != null),
        assert(opaque != null),
-       super(settings: settings);
+       super(settings: settings) {
+  }
 
   /// Used build the route's primary contents.
   ///
