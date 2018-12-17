@@ -216,8 +216,28 @@ class FuchsiaDevice extends Device {
 
   /// List the ports currently running a dart observatory.
   Future<List<int>> servicePorts() async {
-    final String lsOutput = await shell('ls /tmp/dart.services');
-    return parseFuchsiaDartPortOutput(lsOutput);
+    final String findOutput = await shell('find /hub -name vmservice-port');
+    if (findOutput.trim() == '') {
+      throwToolExit('No Dart Observatories found. Are you running a debug build?');
+      return null;
+    }
+    final List<int> ports = <int>[];
+    for (String path in findOutput.split('\n')) {
+      if (path == '') {
+        continue;
+      }
+      final String lsOutput = await shell('ls $path');
+      for (String line in lsOutput.split('\n')) {
+        if (line == '') {
+          continue;
+        }
+        final int port = int.tryParse(line);
+        if (port != null) {
+          ports.add(port);
+        }
+      }
+    }
+    return ports;
   }
 
   /// Run `command` on the Fuchsia device shell.
@@ -225,9 +245,6 @@ class FuchsiaDevice extends Device {
     final RunResult result = await runAsync(<String>[
       'ssh', '-F', fuchsiaArtifacts.sshConfig.absolute.path, id, command]);
     if (result.exitCode != 0) {
-      if (result.stderr.contains('/tmp/dart.services: No such file or directory')) {
-        throwToolExit('No Dart Observatories found. Are you running a debug build?');
-      }
       throwToolExit('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
       return null;
     }
@@ -335,29 +352,4 @@ class FuchsiaModulePackage extends ApplicationPackage {
 
   @override
   final String name;
-}
-
-/// Parses output from `dart.services` output on a fuchsia device.
-///
-/// Example output:
-///     $ ls /tmp/dart.services
-///     > d  2          0 .
-///     > -  1          0 36780
-@visibleForTesting
-List<int> parseFuchsiaDartPortOutput(String text) {
-  final List<int> ports = <int>[];
-  if (text == null)
-    return ports;
-  for (String line in text.split('\n')) {
-    final String trimmed = line.trim();
-    final int lastSpace = trimmed.lastIndexOf(' ');
-    final String lastWord = trimmed.substring(lastSpace + 1);
-    if ((lastWord != '.') && (lastWord != '..')) {
-      final int value = int.tryParse(lastWord);
-      if (value != null) {
-        ports.add(value);
-      }
-    }
-  }
-  return ports;
 }
