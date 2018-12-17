@@ -102,9 +102,9 @@ reproduce a CI test failure locally.
 
 ## Prerequisites
 
-You must set the `ANDROID_HOME` environment variable to run tests on Android. If
-you have a local build of the Flutter engine, then you have a copy of the
-Android SDK at `.../engine/src/third_party/android_tools/sdk`.
+You must set the `ANDROID_HOME` or `ANDROID_SDK_ROOT` environment variable to run
+tests on Android. If you have a local build of the Flutter engine, then you have
+a copy of the Android SDK at `.../engine/src/third_party/android_tools/sdk`.
 
 You can find where your Android SDK is using `flutter doctor`.
 
