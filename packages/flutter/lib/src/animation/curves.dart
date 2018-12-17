@@ -310,11 +310,10 @@ class _DecelerateCurve extends Curve {
 
   @override
   double transform(double t) {
-//    print(t);
     assert(t >= 0.0 && t <= 1.0);
     // Intended to match the behavior of:
     // https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/view/animation/DecelerateInterpolator.java
-    // ...as of December 2016.
+    // (for an exponent of 2)...as of December 2016.
     t = 1.0 - t;
     return 1.0 - math.pow(t, exponent);
   }

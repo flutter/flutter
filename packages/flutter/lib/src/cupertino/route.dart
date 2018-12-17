@@ -627,9 +627,9 @@ class _CupertinoBackGestureController<T> {
     assert(_animating);
     controller.removeStatusListener(_handleStatusChanged);
     _animating = false;
-    if (status == AnimationStatus.dismissed) {
+    if (status == AnimationStatus.dismissed)
       navigator.pop<T>(); // this will cause the route to get disposed, which will dispose us
-    }
+
     onEnded(); // this will call dispose if popping the route failed to do so
   }
 
