@@ -167,11 +167,10 @@ someOtherTask
     }
 
     String propertyFor(String key, File file) {
-      return file
-          .readAsLinesSync()
+      final Iterable<String> result = file.readAsLinesSync()
           .where((String line) => line.startsWith('$key='))
-          .map((String line) => line.split('=')[1])
-          .first;
+          .map((String line) => line.split('=')[1]);
+      return result.isEmpty ? null : result.first;
     }
 
     Future<void> checkBuildVersion({
@@ -190,18 +189,15 @@ someOtherTask
       // write schemaData otherwise pubspec.yaml file can't be loaded
       writeEmptySchemaFile(fs);
 
-      try {
-        updateLocalProperties(
-          project: await FlutterProject.fromPath('path/to/project'),
-          buildInfo: buildInfo,
-        );
+      updateLocalProperties(
+        project: await FlutterProject.fromPath('path/to/project'),
+        buildInfo: buildInfo,
+        requireAndroidSdk: false,
+      );
 
-        final File localPropertiesFile = fs.file('path/to/project/android/local.properties');
-        expect(propertyFor('flutter.versionName', localPropertiesFile), expectedBuildName);
-        expect(propertyFor('flutter.versionCode', localPropertiesFile), expectedBuildNumber);
-      } on Exception {
-        // Android SDK not found, skip test
-      }
+      final File localPropertiesFile = fs.file('path/to/project/android/local.properties');
+      expect(propertyFor('flutter.versionName', localPropertiesFile), expectedBuildName);
+      expect(propertyFor('flutter.versionCode', localPropertiesFile), expectedBuildNumber);
     }
 
     testUsingAndroidContext('extract build name and number from pubspec.yaml', () async {
