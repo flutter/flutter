@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -197,6 +198,7 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidWorkflow: () => MockAndroidWorkflow(canListDevices: false),
       IOSWorkflow: () => MockIOSWorkflow(),
+      FuchsiaWorkflow: () => MockFuchsiaWorkflow(),
     });
 
     testUsingContext('device.getDevices should respond with list', () async {
@@ -241,6 +243,7 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidWorkflow: () => MockAndroidWorkflow(),
       IOSWorkflow: () => MockIOSWorkflow(),
+      FuchsiaWorkflow: () => MockFuchsiaWorkflow(),
     });
 
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
@@ -302,6 +305,13 @@ void main() {
 bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
 
 bool _isConnectedEvent(Map<String, dynamic> map) => map['event'] == 'daemon.connected';
+
+class MockFuchsiaWorkflow extends FuchsiaWorkflow {
+  MockFuchsiaWorkflow({ this.canListDevices = true });
+
+  @override
+  final bool canListDevices;
+}
 
 class MockAndroidWorkflow extends AndroidWorkflow {
   MockAndroidWorkflow({ this.canListDevices = true });
