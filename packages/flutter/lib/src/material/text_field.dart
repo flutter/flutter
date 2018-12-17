@@ -406,11 +406,16 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     final int currentLength = _effectiveController.value.text.runes.length;
     String counterText = '$currentLength';
     String semanticCounterText = '';
+    Function counter;
 
     if (widget.maxLength != TextField.noMaxLength) {
       counterText += '/${widget.maxLength}';
       final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength);
       semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
+
+      if (effectiveDecoration.counter != null) {
+        counter = () => effectiveDecoration.counter(currentLength, widget.maxLength);
+      }
     }
 
     // Handle length exceeds maxLength
@@ -425,6 +430,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       );
     }
     return effectiveDecoration.copyWith(
+      counter: counter,
       counterText: counterText,
       semanticCounterText: semanticCounterText,
     );

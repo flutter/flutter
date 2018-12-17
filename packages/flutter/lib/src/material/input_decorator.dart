@@ -1839,7 +1839,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration.counterText == '' && decoration.counter == null) {
       counter = null;
     } else if (decoration.counter != null) {
-      counter = decoration.counter;
+      counter = decoration.counter();
     } else {
       counter = decoration.counterText == null ? null :
         Semantics(
@@ -2255,9 +2255,19 @@ class InputDecoration {
   /// in the place of the counter.
   final String counterText;
 
-  /// Optional custom widget to place below the line instead of the default
-  /// widget built by passing [counterText].
-  final Widget counter;
+  /// Optional function to generate a custom counter widget, called with
+  /// positional arguments [int currentLength] and [int maxLength].  Will be
+  /// placed below the line instead of the default widget built when passing
+  /// [counterText].
+  ///
+  /// {@tool sample}
+  /// ```dart
+  /// counter: (int currentLength, int maxLength) {
+  ///   return Text('You have entered $currentLength of $maxLength characters');
+  /// }
+  /// ```
+  /// {@end-tool}
+  final Function counter;
 
   /// The style to use for the [counterText].
   ///
@@ -2479,7 +2489,7 @@ class InputDecoration {
     Widget suffix,
     String suffixText,
     TextStyle suffixStyle,
-    Widget counter,
+    Function counter,
     String counterText,
     TextStyle counterStyle,
     bool filled,
