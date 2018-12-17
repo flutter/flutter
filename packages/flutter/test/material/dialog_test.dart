@@ -125,7 +125,7 @@ void main() {
   testWidgets('Custom Title Text Style', (WidgetTester tester) async {
     const String titleText = 'Title';
     const TextStyle titleTextStyle = TextStyle(color: Colors.pink);
-    final AlertDialog dialog = AlertDialog(
+    const AlertDialog dialog = AlertDialog(
       title: Text(titleText),
       titleTextStyle: titleTextStyle,
       actions: <Widget>[ ],
@@ -142,7 +142,7 @@ void main() {
   testWidgets('Custom Content Text Style', (WidgetTester tester) async {
     const String contentText = 'Content';
     const TextStyle contentTextStyle = TextStyle(color: Colors.pink);
-    final AlertDialog dialog = AlertDialog(
+    const AlertDialog dialog = AlertDialog(
       content: Text(contentText),
       contentTextStyle: contentTextStyle,
       actions: <Widget>[ ],

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui';
+import 'dart:ui' hide TextStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
