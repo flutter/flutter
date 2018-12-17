@@ -71,11 +71,13 @@ class FlutterDevice {
     if (vmServices != null)
       return;
     final List<VMService> localVmServices = List<VMService>(observatoryUris.length);
-    for (int i = 0; i < observatoryUris.length; i++) {
+    for (int i = 0; i < observatoryUris.length; i += 1) {
       printTrace('Connecting to service protocol: ${observatoryUris[i]}');
-      localVmServices[i] = await VMService.connect(observatoryUris[i],
-          reloadSources: reloadSources,
-          compileExpression: compileExpression);
+      localVmServices[i] = await VMService.connect(
+        observatoryUris[i],
+        reloadSources: reloadSources,
+        compileExpression: compileExpression,
+      );
       printTrace('Successfully connected to service protocol: ${observatoryUris[i]}');
     }
     vmServices = localVmServices;
@@ -860,6 +862,7 @@ abstract class ResidentRunner {
 
   Future<int> waitForAppToFinish() async {
     final int exitCode = await _finished.future;
+    assert(exitCode != null);
     await cleanupAtFinish();
     return exitCode;
   }

@@ -242,10 +242,11 @@ class HotRunner extends ResidentRunner {
       return 0;
     }
 
+    int result = 0;
     if (stayResident)
-      return waitForAppToFinish();
+      result = await waitForAppToFinish();
     await cleanupAtFinish();
-    return 0;
+    return result;
   }
 
   @override
