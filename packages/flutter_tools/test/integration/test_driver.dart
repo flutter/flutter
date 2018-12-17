@@ -82,8 +82,8 @@ abstract class FlutterTestDriver {
       _debugPrint('Process exited ($code)');
       _hasExited = true;
     });
-    _transformToLines(_proc.stdout).listen((String line) => _stdout.add(line));
-    _transformToLines(_proc.stderr).listen((String line) => _stderr.add(line));
+    transformToLines(_proc.stdout).listen((String line) => _stdout.add(line));
+    transformToLines(_proc.stderr).listen((String line) => _stderr.add(line));
 
     // Capture stderr to a buffer so we can show it all if any requests fail.
     _stderr.stream.listen(_errorBuffer.writeln);
@@ -236,7 +236,8 @@ abstract class FlutterTestDriver {
     final Completer<Map<String, dynamic>> response = Completer<Map<String, dynamic>>();
     StreamSubscription<String> sub;
     sub = _stdout.stream.listen((String line) async {
-      final dynamic json = _parseFlutterResponse(line);
+      final dynamic json = parseFlutterResponse(line);
+      _lastResponse = line;
       if (json == null) {
         return;
       } else if (
@@ -284,20 +285,6 @@ abstract class FlutterTestDriver {
     }).catchError((dynamic error) {
       throw '$error\nReceived:\n${messages.toString()}';
     }).whenComplete(() => sub.cancel());
-  }
-
-  Map<String, dynamic> _parseFlutterResponse(String line) {
-    if (line.startsWith('[') && line.endsWith(']')) {
-      try {
-        final Map<String, dynamic> resp = json.decode(line)[0];
-        _lastResponse = line;
-        return resp;
-      } catch (e) {
-        // Not valid JSON, so likely some other output that was surrounded by [brackets]
-        return null;
-      }
-    }
-    return null;
   }
 }
 
@@ -509,8 +496,21 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   }
 }
 
-Stream<String> _transformToLines(Stream<List<int>> byteStream) {
+Stream<String> transformToLines(Stream<List<int>> byteStream) {
   return byteStream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
+}
+
+Map<String, dynamic> parseFlutterResponse(String line) {
+  if (line.startsWith('[') && line.endsWith(']')) {
+    try {
+      final Map<String, dynamic> resp = json.decode(line)[0];
+      return resp;
+    } catch (e) {
+      // Not valid JSON, so likely some other output that was surrounded by [brackets]
+      return null;
+    }
+  }
+  return null;
 }
 
 class SourcePosition {
