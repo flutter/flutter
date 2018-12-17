@@ -30,7 +30,7 @@ Future<void> buildApk({
 
   // Validate that we can find an android sdk.
   if (androidSdk == null)
-    throwToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
+    throwToolExit('No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.');
 
   final List<String> validationResult = androidSdk.validateSdkWellFormed();
   if (validationResult.isNotEmpty) {
