@@ -13,6 +13,7 @@ import 'build.dart';
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({bool verboseHelp = false}) {
     usesTargetOption();
+    usesFlavorOption();
     usesFilesystemOptions(hide: !verboseHelp);
     addBuildModeFlags();
     argParser
@@ -85,10 +86,12 @@ class BuildBundleCommand extends BuildSubCommand {
       throwToolExit('Unknown platform: $targetPlatform');
 
     final BuildMode buildMode = getBuildMode();
+    final String flavor = getBuildFlavor();
 
     await build(
       platform: platform,
       buildMode: buildMode,
+      flavor: flavor,
       mainPath: targetFile,
       manifestPath: argResults['manifest'],
       depfilePath: argResults['depfile'],

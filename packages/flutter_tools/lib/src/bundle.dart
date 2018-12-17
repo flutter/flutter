@@ -49,6 +49,7 @@ const String _kIsolateSnapshotInstr = 'isolate_snapshot_instr';
 Future<void> build({
   TargetPlatform platform,
   BuildMode buildMode,
+  String flavor,
   String mainPath = defaultMainPath,
   String manifestPath = defaultManifestPath,
   String applicationKernelFilePath,
@@ -117,6 +118,7 @@ Future<void> build({
   }
 
   final AssetBundle assets = await buildAssets(
+    flavor: flavor,
     manifestPath: manifestPath,
     assetDirPath: assetDirPath,
     packagesPath: packagesPath,
@@ -136,6 +138,7 @@ Future<void> build({
 }
 
 Future<AssetBundle> buildAssets({
+  String flavor,
   String manifestPath,
   String assetDirPath,
   String packagesPath,
@@ -148,6 +151,7 @@ Future<AssetBundle> buildAssets({
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(
+    flavor: flavor,
     manifestPath: manifestPath,
     assetDirPath: assetDirPath,
     packagesPath: packagesPath,
