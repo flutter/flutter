@@ -265,36 +265,37 @@ using namespace shell;
   if (value == nil || value == [NSNull null]) {
     [self writeByte:FlutterStandardFieldNil];
   } else if ([value isKindOfClass:[NSNumber class]]) {
-    NSNumber* number = value;
-    const char* type = [number objCType];
-    if ([self isBool:number type:type]) {
-      BOOL b = number.boolValue;
+    CFNumberRef number = (CFNumberRef)value;
+    BOOL success = NO;
+    if (CFGetTypeID(number) == CFBooleanGetTypeID()) {
+      BOOL b = CFBooleanGetValue((CFBooleanRef)number);
       [self writeByte:(b ? FlutterStandardFieldTrue : FlutterStandardFieldFalse)];
-    } else if (strcmp(type, @encode(signed int)) == 0 || strcmp(type, @encode(signed short)) == 0 ||
-               strcmp(type, @encode(unsigned short)) == 0 ||
-               strcmp(type, @encode(signed char)) == 0 ||
-               strcmp(type, @encode(unsigned char)) == 0) {
-      SInt32 n = number.intValue;
-      [self writeByte:FlutterStandardFieldInt32];
-      [self writeBytes:(UInt8*)&n length:4];
-    } else if (strcmp(type, @encode(signed long)) == 0 ||
-               strcmp(type, @encode(unsigned int)) == 0) {
-      SInt64 n = number.longValue;
-      [self writeByte:FlutterStandardFieldInt64];
-      [self writeBytes:(UInt8*)&n length:8];
-    } else if (strcmp(type, @encode(double)) == 0 || strcmp(type, @encode(float)) == 0) {
-      Float64 f = number.doubleValue;
-      [self writeByte:FlutterStandardFieldFloat64];
-      [self writeAlignment:8];
-      [self writeBytes:(UInt8*)&f length:8];
-    } else if (strcmp(type, @encode(unsigned long)) == 0 ||
-               strcmp(type, @encode(signed long long)) == 0 ||
-               strcmp(type, @encode(unsigned long long)) == 0) {
-      NSString* hex = [NSString stringWithFormat:@"%llx", number.unsignedLongLongValue];
-      [self writeByte:FlutterStandardFieldIntHex];
-      [self writeUTF8:hex];
-    } else {
-      NSLog(@"Unsupported value: %@ of type %s", value, type);
+      success = YES;
+    } else if (CFNumberIsFloatType(number)) {
+      Float64 f;
+      success = CFNumberGetValue(number, kCFNumberFloat64Type, &f);
+      if (success) {
+        [self writeByte:FlutterStandardFieldFloat64];
+        [self writeAlignment:8];
+        [self writeBytes:(UInt8*)&f length:8];
+      }
+    } else if (CFNumberGetByteSize(number) <= 4) {
+      SInt32 n;
+      success = CFNumberGetValue(number, kCFNumberSInt32Type, &n);
+      if (success) {
+        [self writeByte:FlutterStandardFieldInt32];
+        [self writeBytes:(UInt8*)&n length:4];
+      }
+    } else if (CFNumberGetByteSize(number) <= 8) {
+      SInt64 n;
+      success = CFNumberGetValue(number, kCFNumberSInt64Type, &n);
+      if (success) {
+        [self writeByte:FlutterStandardFieldInt64];
+        [self writeBytes:(UInt8*)&n length:8];
+      }
+    }
+    if (!success) {
+      NSLog(@"Unsupported value: %@ of number type %ld", value, CFNumberGetType(number));
       NSAssert(NO, @"Unsupported value for standard codec");
     }
   } else if ([value isKindOfClass:[NSString class]]) {
@@ -328,11 +329,6 @@ using namespace shell;
     NSLog(@"Unsupported value: %@ of type %@", value, [value class]);
     NSAssert(NO, @"Unsupported value for standard codec");
   }
-}
-
-- (BOOL)isBool:(NSNumber*)number type:(const char*)type {
-  return strcmp(type, @encode(signed char)) == 0 &&
-         [NSStringFromClass([number class]) isEqual:@"__NSCFBoolean"];
 }
 @end
 
@@ -428,12 +424,12 @@ using namespace shell;
     case FlutterStandardFieldInt32: {
       SInt32 value;
       [self readBytes:&value length:4];
-      return [NSNumber numberWithInt:value];
+      return @(value);
     }
     case FlutterStandardFieldInt64: {
       SInt64 value;
       [self readBytes:&value length:8];
-      return [NSNumber numberWithLong:value];
+      return @(value);
     }
     case FlutterStandardFieldFloat64: {
       Float64 value;
