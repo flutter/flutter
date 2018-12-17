@@ -431,6 +431,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   @override
   double get value {
     final Curve activeCurve = _useForwardCurve ? curve : reverseCurve;
+
     final double t = parent.value;
     if (activeCurve == null)
       return t;
