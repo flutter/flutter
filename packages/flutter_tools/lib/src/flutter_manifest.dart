@@ -257,9 +257,9 @@ class FlutterManifest {
 
 class Font {
   Font(this.familyName, this.fontAssets)
-     : assert(familyName != null),
-       assert(fontAssets != null),
-       assert(fontAssets.isNotEmpty);
+    : assert(familyName != null),
+      assert(fontAssets != null),
+      assert(fontAssets.isNotEmpty);
 
   final String familyName;
   final List<FontAsset> fontAssets;
@@ -277,7 +277,7 @@ class Font {
 
 class FontAsset {
   FontAsset(this.assetUri, {this.weight, this.style})
-     : assert(assetUri != null);
+    : assert(assetUri != null);
 
   final Uri assetUri;
   final int weight;
