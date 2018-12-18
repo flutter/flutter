@@ -693,7 +693,7 @@ class Rect {
   /// A rectangle with left, top, right, and bottom edges all at zero.
   static final Rect zero = new Rect._();
 
-  static const double _giantScalar = 1.0E+9; // matches kGiantRect from default_layer_builder.cc
+  static const double _giantScalar = 1.0E+9; // matches kGiantRect from layer.h
 
   /// A rectangle that covers the entire coordinate space.
   ///
