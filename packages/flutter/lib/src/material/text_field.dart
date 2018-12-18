@@ -20,6 +20,14 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
 
+typedef InputCounterWidgetBuilder = Widget Function(
+  BuildContext context,
+  {
+    @required int currentLength,
+    @required int maxLength,
+  }
+);
+
 /// A material design text field.
 ///
 /// A text field lets the user enter text, either with hardware keyboard or with
@@ -129,6 +137,7 @@ class TextField extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.enableInteractiveSelection,
     this.onTap,
+    this.buildCounter,
   }) : assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
@@ -371,6 +380,19 @@ class TextField extends StatefulWidget {
   /// textfield's internal gesture detector, use a [Listener].
   final GestureTapCallback onTap;
 
+  /// Function to generate a custom counter widget, called with positional
+  /// arguments [int currentLength] and [int maxLength].  Will be placed below
+  /// the line instead of the default widget built when passing [counterText].
+  ///
+  /// {@tool sample}
+  /// ```dart
+  /// Widget counter(int currentLength, int maxLength) {
+  ///   return Text('You have entered $currentLength of $maxLength characters');
+  /// }
+  /// ```
+  /// {@end-tool}
+  final InputCounterWidgetBuilder buildCounter;
+
   @override
   _TextFieldState createState() => _TextFieldState();
 
@@ -418,10 +440,14 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines
       );
 
-    Function counter;
+    Widget counter;
     final int currentLength = _effectiveController.value.text.runes.length;
-    if (effectiveDecoration.counter != null) {
-      counter = () => effectiveDecoration.counter(currentLength, widget.maxLength);
+    if (widget.buildCounter != null) {
+      counter = widget.buildCounter(
+        context,
+        currentLength: currentLength,
+        maxLength: widget.maxLength,
+      );
       return effectiveDecoration.copyWith(counter: counter);
     }
 

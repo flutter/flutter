@@ -1837,22 +1837,19 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     );
 
     Widget counter;
-    if (decoration.counterText == '' && decoration.counter == null) {
-      counter = null;
-    } else if (decoration.counter != null) {
-      counter = decoration.counter();
-    } else {
-      counter = decoration.counterText == null ? null :
-        Semantics(
-          container: true,
-          liveRegion: isFocused,
-          child: Text(
-            decoration.counterText,
-            style: _getHelperStyle(themeData).merge(decoration.counterStyle),
-            overflow: TextOverflow.ellipsis,
-            semanticsLabel: decoration.semanticCounterText,
-          ),
-        );
+    if (decoration.counter != null) {
+      counter = decoration.counter;
+    } else if (decoration.counterText != null) {
+      counter = Semantics(
+        container: true,
+        liveRegion: isFocused,
+        child: Text(
+          decoration.counterText,
+          style: _getHelperStyle(themeData).merge(decoration.counterStyle),
+          overflow: TextOverflow.ellipsis,
+          semanticsLabel: decoration.semanticCounterText,
+        ),
+      );
     }
 
     // The _Decoration widget and _RenderDecoration assume that contentPadding
@@ -2267,19 +2264,9 @@ class InputDecoration {
   /// in the place of the counter.
   final String counterText;
 
-  /// Optional function to generate a custom counter widget, called with
-  /// positional arguments [int currentLength] and [int maxLength].  Will be
-  /// placed below the line instead of the default widget built when passing
+  /// Optional custom counter widget to go in the place otherwise occupied by
   /// [counterText].
-  ///
-  /// {@tool sample}
-  /// ```dart
-  /// Widget counter(int currentLength, int maxLength) {
-  ///   return Text('You have entered $currentLength of $maxLength characters');
-  /// }
-  /// ```
-  /// {@end-tool}
-  final Function counter;
+  final Widget counter;
 
   /// The style to use for the [counterText].
   ///
@@ -2502,7 +2489,7 @@ class InputDecoration {
     Widget suffix,
     String suffixText,
     TextStyle suffixStyle,
-    Function counter,
+    Widget counter,
     String counterText,
     TextStyle counterStyle,
     bool filled,
