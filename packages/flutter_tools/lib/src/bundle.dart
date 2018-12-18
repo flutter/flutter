@@ -153,6 +153,7 @@ Future<AssetBundle> buildAssets({
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(
+    platform: platform,
     flavor: flavor,
     manifestPath: manifestPath,
     assetDirPath: assetDirPath,

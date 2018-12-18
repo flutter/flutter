@@ -40,6 +40,7 @@ abstract class AssetBundle {
 
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
+    TargetPlatform platform,
     String flavor,
     String manifestPath = _ManifestAssetBundle.defaultManifestPath,
     String assetDirPath,
@@ -89,6 +90,7 @@ class _ManifestAssetBundle implements AssetBundle {
 
   @override
   Future<int> build({
+    TargetPlatform platform,
     String flavor,
     String manifestPath = defaultManifestPath,
     String assetDirPath,
