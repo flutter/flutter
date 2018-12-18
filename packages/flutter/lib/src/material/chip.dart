@@ -287,10 +287,12 @@ abstract class SelectableChipAttributes {
   /// {@end-tool}
   ValueChanged<bool> get onSelected;
 
-  /// Elevation to be applied on the chip during the press motion.
+  /// Elevation to be applied on the chip relative to its parent during the
+  /// press motion.
+  ///
   /// This controls the size of the shadow below the chip.
   ///
-  /// Defaults to 8.
+  /// Defaults to 8. The value is always non-negative.
   double get pressElevation;
 
   /// Color to be used for the chip's background, indicating that it is
@@ -397,10 +399,12 @@ abstract class TappableChipAttributes {
   /// {@end-tool}
   VoidCallback get onPressed;
 
-  /// Elevation to be applied on the chip during the press motion.
+  /// Elevation to be applied on the chip relative to its parent during the
+  /// press motion.
+  ///
   /// This controls the size of the shadow below the chip.
   ///
-  /// Defaults to 8.
+  /// Defaults to 8. The value is always non-negative.
   double get pressElevation;
 
   /// Tooltip string to be used for the body area (where the label and avatar
@@ -1159,7 +1163,8 @@ class RawChip extends StatefulWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], and [clipBehavior] arguments must not be null.
+  /// The [label], [pressElevation], [isEnabled], and [clipBehavior] arguments
+  /// must not be null. Additionally, [pressElevation] must be non-negative.
   const RawChip({
     Key key,
     this.avatar,
@@ -1188,6 +1193,7 @@ class RawChip extends StatefulWidget
   })  : assert(label != null),
         assert(isEnabled != null),
         assert(clipBehavior != null),
+        assert(pressElevation != null && pressElevation >= 0.0),
         deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
         super(key: key);
 

@@ -156,7 +156,7 @@ class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
   /// The [type], [elevation], [shadowColor], and [animationDuration] arguments
-  /// must not be null.
+  /// must not be null. Additionally, [elevation] must be non-negative.
   ///
   /// If a [shape] is specified, then the [borderRadius] property must be
   /// null and the [type] property must not be [MaterialType.circle]. If the
@@ -176,7 +176,7 @@ class Material extends StatefulWidget {
     this.animationDuration = kThemeChangeDuration,
     this.child,
   }) : assert(type != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(shadowColor != null),
        assert(!(shape != null && borderRadius != null)),
        assert(animationDuration != null),
@@ -195,14 +195,17 @@ class Material extends StatefulWidget {
   final MaterialType type;
 
   /// {@template flutter.material.material.elevation}
-  /// The z-coordinate at which to place this material. This controls the size
-  /// of the shadow below the material.
+  /// The z-coordinate at which to place this material relative to its parent.
+  ///
+  /// This controls the size of the shadow below the material.
   ///
   /// If this is non-zero, the contents of the material are clipped, because the
   /// widget conceptually defines an independent printed piece of material.
   ///
   /// Defaults to 0. Changing this value will cause the shadow to animate over
   /// [animationDuration].
+  ///
+  /// The value is non-negative.
   /// {@endtemplate}
   final double elevation;
 
@@ -609,7 +612,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   }) : assert(child != null),
        assert(shape != null),
        assert(clipBehavior != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        super(key: key, curve: curve, duration: duration);
@@ -628,7 +631,10 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   /// {@macro flutter.widgets.Clip}
   final Clip clipBehavior;
 
-  /// The target z-coordinate at which to place this physical object.
+  /// The target z-coordinate at which to place this physical object relative
+  /// to its parent.
+  ///
+  /// The value is non-negative.
   final double elevation;
 
   /// The target background color.

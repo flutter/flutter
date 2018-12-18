@@ -1240,7 +1240,8 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the properties of a [PhysicalModel].
   ///
   /// The [child], [shape], [borderRadius], [elevation], [color], [shadowColor], [curve], and
-  /// [duration] arguments must not be null.
+  /// [duration] arguments must not be null. Additionally, [elevation] must be
+  /// non-negative.
   ///
   /// Animating [color] is optional and is controlled by the [animateColor] flag.
   ///
@@ -1262,7 +1263,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
        assert(shape != null),
        assert(clipBehavior != null),
        assert(borderRadius != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        assert(animateColor != null),
@@ -1285,7 +1286,10 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// The target border radius of the rounded corners for a rectangle shape.
   final BorderRadius borderRadius;
 
-  /// The target z-coordinate at which to place this physical object.
+  /// The target z-coordinate relative to the parent at which to place this
+  /// physical object.
+  ///
+  /// The value will always be non-negative.
   final double elevation;
 
   /// The target background color.
