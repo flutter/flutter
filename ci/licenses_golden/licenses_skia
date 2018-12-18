@@ -1,4 +1,4 @@
-Signature: 47c6b0c813ad1f45e10f70405474e782
+Signature: 1e99025f61268dfb2c44ceadf9bb17d1
 
 UNUSED LICENSES:
 
@@ -1316,6 +1316,7 @@ FILE: ../../../third_party/skia/gm/crbug_905548.cpp
 FILE: ../../../third_party/skia/gm/daa.cpp
 FILE: ../../../third_party/skia/gm/drawimageset.cpp
 FILE: ../../../third_party/skia/gm/drawquadset.cpp
+FILE: ../../../third_party/skia/gm/fontregen.cpp
 FILE: ../../../third_party/skia/gm/fwidth_squircle.cpp
 FILE: ../../../third_party/skia/gm/gradients_degenerate.cpp
 FILE: ../../../third_party/skia/gm/hugepath.cpp
@@ -1743,10 +1744,6 @@ FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_ios.h
 FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_macos.h
 FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_win32.h
 FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_xcb.h
-FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/example.html
-FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/package.json
-FILE: ../../../third_party/skia/modules/pathkit/npm-wasm/example.html
-FILE: ../../../third_party/skia/modules/pathkit/npm-wasm/package.json
 FILE: ../../../third_party/skia/src/images/SkWebpEncoder.cpp
 ----------------------------------------------------------------------------------------------------
 Apache License
@@ -2067,6 +2064,7 @@ FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/font.js
 FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/htmlcanvas.js
 FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/imagedata.js
 FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/lineargradient.js
+FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/path2d.js
 FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/pattern.js
 FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/postamble.js
 FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/preamble.js
@@ -2391,6 +2389,10 @@ FILE: ../../../third_party/skia/modules/pathkit/externs.js
 FILE: ../../../third_party/skia/modules/pathkit/helper.js
 FILE: ../../../third_party/skia/modules/pathkit/karma.bench.conf.js
 FILE: ../../../third_party/skia/modules/pathkit/karma.conf.js
+FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/example.html
+FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/package.json
+FILE: ../../../third_party/skia/modules/pathkit/npm-wasm/example.html
+FILE: ../../../third_party/skia/modules/pathkit/npm-wasm/package.json
 FILE: ../../../third_party/skia/modules/pathkit/package.json
 FILE: ../../../third_party/skia/modules/pathkit/perf/effects.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/path.bench.js
@@ -2453,14 +2455,6 @@ FILE: ../../../third_party/skia/site/user/api/METADATA
 FILE: ../../../third_party/skia/site/user/api/catalog.htm
 FILE: ../../../third_party/skia/site/user/modules/METADATA
 FILE: ../../../third_party/skia/site/user/modules/PathKit_effects.png
-FILE: ../../../third_party/skia/site/user/sample/architecture.png
-FILE: ../../../third_party/skia/site/user/sample/detail_correct.png
-FILE: ../../../third_party/skia/site/user/sample/detail_wrong.png
-FILE: ../../../third_party/skia/site/user/sample/gamut_correct.png
-FILE: ../../../third_party/skia/site/user/sample/gamut_wrong.png
-FILE: ../../../third_party/skia/site/user/sample/gradient_correct.png
-FILE: ../../../third_party/skia/site/user/sample/gradient_wrong.png
-FILE: ../../../third_party/skia/site/user/sample/transfer_fn.png
 FILE: ../../../third_party/skia/src/compute/hs/cl/intel/gen8/u32/hs_kernels.bin
 FILE: ../../../third_party/skia/src/compute/hs/cl/intel/gen8/u32/hs_kernels.bin.len.xxd
 FILE: ../../../third_party/skia/src/compute/hs/cl/intel/gen8/u32/hs_kernels.bin.xxd
@@ -3125,7 +3119,6 @@ FILE: ../../../third_party/skia/src/c/sk_surface.cpp
 FILE: ../../../third_party/skia/src/core/SkBBHFactory.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapCache.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapCache.h
-FILE: ../../../third_party/skia/src/core/SkBitmapProcState_matrix_neon.h
 FILE: ../../../third_party/skia/src/core/SkCachedData.cpp
 FILE: ../../../third_party/skia/src/core/SkCachedData.h
 FILE: ../../../third_party/skia/src/core/SkCanvasPriv.h
@@ -4377,7 +4370,6 @@ FILE: ../../../third_party/skia/src/compute/skc/weakref.c
 FILE: ../../../third_party/skia/src/compute/skc/weakref.h
 FILE: ../../../third_party/skia/src/core/SkArenaAllocList.h
 FILE: ../../../third_party/skia/src/core/SkAutoBlitterChoose.h
-FILE: ../../../third_party/skia/src/core/SkBitmapProcState_utils.h
 FILE: ../../../third_party/skia/src/core/SkBlendMode.cpp
 FILE: ../../../third_party/skia/src/core/SkBlitter_RGB565.cpp
 FILE: ../../../third_party/skia/src/core/SkClipStackDevice.cpp
