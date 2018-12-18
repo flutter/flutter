@@ -323,6 +323,10 @@ void cleanOutSnippets() {
       ..deleteSync(recursive: true)
       ..createSync(recursive: true);
   }
+  final File snippetsIndex = File(path.join(kPublishRoot, 'snippets.txt'));
+  if (snippetsIndex.existsSync()) {
+    snippetsIndex.deleteSync();
+  }
 }
 
 void sanityCheckDocs() {
@@ -353,6 +357,7 @@ void createIndexAndCleanup() {
   addHtmlBaseToIndex();
   changePackageToSdkInTitlebar();
   putRedirectInOldIndexLocation();
+  writeSnippetsIndexFile();
   print('\nDocs ready to go!');
 }
 
@@ -405,6 +410,20 @@ void addHtmlBaseToIndex() {
 void putRedirectInOldIndexLocation() {
   const String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
   File('$kPublishRoot/flutter/index.html').writeAsStringSync(metaTag);
+}
+
+
+void writeSnippetsIndexFile() {
+  final Directory snippetsDir = Directory(path.join(kPublishRoot, 'snippets'));
+  if (snippetsDir.existsSync()) {
+    final Iterable<String> files = snippetsDir
+        .listSync()
+        .whereType<File>()
+        .map((File file) => path.basename(file.path))
+        .where((String name) => path.extension(name) == '.dart')
+        .map((String name) => name.substring(0, name.length - '.dart'.length));
+    File('$kPublishRoot/snippets.txt').writeAsStringSync(files.join('\n'));
+  }
 }
 
 List<String> findPackageNames() {
