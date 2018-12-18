@@ -170,7 +170,7 @@ class Directionality extends InheritedWidget {
 ///
 /// ```dart
 /// Image.network(
-///   'https://github.com/flutter/flutter_gallery_assets/raw/master/lib/products/backpack.png',
+///   'https://raw.githubusercontent.com/flutter/assets-for-api-docs/master/packages/diagrams/assets/blend_mode_destination.jpeg',
 ///   color: Color.fromRGBO(255, 255, 255, 0.5),
 ///   colorBlendMode: BlendMode.modulate
 /// )
@@ -2477,24 +2477,43 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
   ///
   /// This class is relatively expensive. Avoid using it where possible.
   const IntrinsicWidth({ Key key, this.stepWidth, this.stepHeight, Widget child })
-    : super(key: key, child: child);
+    : assert(stepWidth == null || stepWidth >= 0.0),
+      assert(stepHeight == null || stepHeight >= 0.0),
+      super(key: key, child: child);
 
   /// If non-null, force the child's width to be a multiple of this value.
+  ///
+  /// If null or 0.0 the child's width will be the same as its maximum
+  /// intrinsic width.
+  ///
+  /// This value must not be negative.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderBox.getMaxIntrinsicWidth], which defines a widget's max
+  /// intrinsic width  in general.
   final double stepWidth;
 
   /// If non-null, force the child's height to be a multiple of this value.
+  ///
+  /// If null or 0.0 the child's height will not be constrained.
+  ///
+  /// This value must not be negative.
   final double stepHeight;
+
+  double get _stepWidth => stepWidth == 0.0 ? null : stepWidth;
+  double get _stepHeight => stepHeight == 0.0 ? null : stepHeight;
 
   @override
   RenderIntrinsicWidth createRenderObject(BuildContext context) {
-    return RenderIntrinsicWidth(stepWidth: stepWidth, stepHeight: stepHeight);
+    return RenderIntrinsicWidth(stepWidth: _stepWidth, stepHeight: _stepHeight);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderIntrinsicWidth renderObject) {
     renderObject
-      ..stepWidth = stepWidth
-      ..stepHeight = stepHeight;
+      ..stepWidth = _stepWidth
+      ..stepHeight = _stepHeight;
   }
 }
 

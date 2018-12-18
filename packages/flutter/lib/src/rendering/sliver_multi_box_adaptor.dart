@@ -318,6 +318,12 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     _keepAliveBucket.values.forEach(visitor);
   }
 
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    super.visitChildren(visitor);
+    // Do not visit children in [_keepAliveBucket].
+  }
+
   /// Called during layout to create and add the child with the given index and
   /// scroll offset.
   ///
@@ -596,7 +602,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       final List<int> indices = _keepAliveBucket.keys.toList()..sort();
       for (int index in indices) {
         children.add(_keepAliveBucket[index].toDiagnosticsNode(
-          name: 'child with index $index (kept alive offstage)',
+          name: 'child with index $index (kept alive but not laid out)',
           style: DiagnosticsTreeStyle.offstage,
         ));
       }

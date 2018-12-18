@@ -10,6 +10,7 @@ syntax inside of the dartdoc comment for a Flutter class/variable/enum/etc.:
 /// above" or "see the code below", since the location of the description may
 /// change in the future. You can use dartdoc [Linking] in the description, and
 /// __Markdown__ too.
+/// 
 /// ```dart preamble
 /// class Foo extends StatelessWidget {
 ///   const Foo({this.value = ''});
@@ -48,9 +49,17 @@ additional burden, since all code will also be compiled to be sure it compiles).
 The templates available for using as an argument to the snippets tool are as
 follows:
 
-- __`stateful_widget`__ : Takes a `preamble` in addition to the default code
+- [`stateful_widget`](stateful_widget.tmpl) :
+  The default code block will be placed as the body of the `State` object of a
+  StatefulWidget subclass. Because the default code block is placed as the body
+  of a stateful widget, you will need to implement the `build()` function, and any
+  state variables. It also has a `preamble` in addition to the default code
   block, which will be placed at the top level of the Dart file, so bare
-  function calls are not allowed in the preamble.  The default code block is
-  placed as the body of a stateful widget, so you will need to implement the
-  build() function, and any state variables.
-  
+  function calls are not allowed in the preamble.  It also has an `imports`
+  section to import additional packages. Please only import things that are part
+  of flutter or part of default dependencies for a `flutter create` project.
+
+- [`stateless_widget`](stateless_widget.tmpl) :
+  Identical to the `stateful_widget` template, except that the default code
+  block is inserted as the return value for a pre-existing `build` function in a
+  StatelessWidget, instead of being at the class level.

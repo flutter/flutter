@@ -474,7 +474,7 @@ final TextTreeConfiguration transitionTextConfiguration = TextTreeConfiguration(
 ///   <name>: <description>:
 ///     <properties>
 ///     <children>
-///```
+/// ```
 ///
 /// See also:
 ///

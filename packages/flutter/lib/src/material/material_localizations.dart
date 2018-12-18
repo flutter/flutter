@@ -38,7 +38,7 @@ import 'typography.dart';
 //
 // 6. If you're adding a String for the sake of Flutter, not for an app-specific
 //    version of this interface, you are making a breaking API change. See
-//    https://flutter.io/design-principles/#handling-breaking-changes.
+//    https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes.
 
 /// Defines the localized resource values used by the Material widgets.
 ///
