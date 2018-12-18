@@ -370,9 +370,10 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
       controller.play();
       await connectedCompleter.future;
       await controller.initialize();
-      if (mounted)
+      if (mounted) {
         print('< VideoDemo initController "$name" done ${isDisposed ? "DISPOSED" : ""}');
         setState(() {});
+      }
     }
 
     initController(butterflyController, 'butterfly');
