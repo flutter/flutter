@@ -154,24 +154,30 @@ class FlutterDriver {
   ///
   /// Resumes the application if it is currently paused (e.g. at a breakpoint).
   ///
-  /// [dartVmServiceUrl] is the URL to Dart observatory (a.k.a. VM service). If
+  /// `dartVmServiceUrl` is the URL to Dart observatory (a.k.a. VM service). If
   /// not specified, the URL specified by the `VM_SERVICE_URL` environment
   /// variable is used. One or the other must be specified.
   ///
-  /// [printCommunication] determines whether the command communication between
+  /// `printCommunication` determines whether the command communication between
   /// the test and the app should be printed to stdout.
   ///
-  /// [logCommunicationToFile] determines whether the command communication
+  /// `logCommunicationToFile` determines whether the command communication
   /// between the test and the app should be logged to `flutter_driver_commands.log`.
   ///
-  /// [isolateNumber] (optional) determines the specific isolate to connect to.
+  /// `isolateNumber` determines the specific isolate to connect to.
   /// If this is left as `null`, will connect to the first isolate found
-  /// running on [dartVmServiceUrl].
+  /// running on `dartVmServiceUrl`.
   ///
-  /// [fuchsiaModuleTarget] (optional) If running on a Fuchsia Device, either
-  /// this or the environment variable `FUCHSIA_MODULE_TARGET` must be set. This
-  /// field will be ignored if [isolateNumber] is set, as this is already
-  /// enough information to connect to an Isolate.
+  /// `fuchsiaModuleTarget` specifies the pattern for determining which mod to
+  /// control. When running on a Fuchsia device, either this or the environment
+  /// variable `FUCHSIA_MODULE_TARGET` must be set (the environment variable is
+  /// treated as a substring pattern). This field will be ignored if
+  /// `isolateNumber` is set, as this is already enough information to connect
+  /// to an isolate.
+  ///
+  /// The return value is a future. This method never times out, though it may
+  /// fail (completing with an error). A timeout can be applied by the caller
+  /// using [Future.timeout] if necessary.
   static Future<FlutterDriver> connect({
     String dartVmServiceUrl,
     bool printCommunication = false,
@@ -179,7 +185,7 @@ class FlutterDriver {
     int isolateNumber,
     Pattern fuchsiaModuleTarget,
   }) async {
-    // If running on a Fuchsia device, connect to the first Isolate whose name
+    // If running on a Fuchsia device, connect to the first isolate whose name
     // matches FUCHSIA_MODULE_TARGET.
     //
     // If the user has already supplied an isolate number/URL to the Dart VM
@@ -620,8 +626,10 @@ class FlutterDriver {
     return result.id;
   }
 
-  /// Take a screenshot.  The image will be returned as a PNG.
-  Future<List<int>> screenshot({ Duration timeout }) async {
+  /// Take a screenshot.
+  ///
+  /// The image will be returned as a PNG.
+  Future<List<int>> screenshot() async {
     // HACK: this artificial delay here is to deal with a race between the
     //       driver script and the GPU thread. The issue is that driver API
     //       synchronizes with the framework based on transient callbacks, which
@@ -670,14 +678,14 @@ class FlutterDriver {
     //       and a source of flakes.
     await Future<void>.delayed(const Duration(seconds: 2));
 
-    final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot').timeout(timeout);
+    final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot');
     return base64.decode(result['screenshot']);
   }
 
   /// Returns the Flags set in the Dart VM as JSON.
   ///
-  /// See the complete documentation for `getFlagList` Dart VM service method
-  /// [here][getFlagList].
+  /// See the complete documentation for [the `getFlagList` Dart VM service
+  /// method][getFlagList].
   ///
   /// Example return value:
   ///
@@ -693,17 +701,22 @@ class FlutterDriver {
   ///     ]
   ///
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
-  Future<List<Map<String, dynamic>>> getVmFlags({ Duration timeout }) async {
-    final Map<String, dynamic> result = await _peer.sendRequest('getFlagList').timeout(timeout);
+  Future<List<Map<String, dynamic>>> getVmFlags() async {
+    final Map<String, dynamic> result = await _peer.sendRequest('getFlagList');
     return result['flags'];
   }
 
   /// Starts recording performance traces.
+  ///
+  /// The `timeout` argument causes a warning to be displayed to the user if the
+  /// operation exceeds the specified timeout; it does not actually cancel the
+  /// operation.
   Future<void> startTracing({
     List<TimelineStream> streams = _defaultStreams,
     Duration timeout = _kUnusuallyLongTimeout,
   }) async {
     assert(streams != null && streams.isNotEmpty);
+    assert(timeout != null);
     try {
       await _warnIfSlow<void>(
         future: _peer.sendRequest(_setVMTimelineFlagsMethodName, <String, String>{
@@ -722,9 +735,14 @@ class FlutterDriver {
   }
 
   /// Stops recording performance traces and downloads the timeline.
+  ///
+  /// The `timeout` argument causes a warning to be displayed to the user if the
+  /// operation exceeds the specified timeout; it does not actually cancel the
+  /// operation.
   Future<Timeline> stopTracingAndDownloadTimeline({
     Duration timeout = _kUnusuallyLongTimeout,
   }) async {
+    assert(timeout != null);
     try {
       await _warnIfSlow<void>(
         future: _peer.sendRequest(_setVMTimelineFlagsMethodName, <String, String>{'recordedStreams': '[]'}),
@@ -769,9 +787,14 @@ class FlutterDriver {
   }
 
   /// Clears all timeline events recorded up until now.
+  ///
+  /// The `timeout` argument causes a warning to be displayed to the user if the
+  /// operation exceeds the specified timeout; it does not actually cancel the
+  /// operation.
   Future<void> clearTimeline({
     Duration timeout = _kUnusuallyLongTimeout
   }) async {
+    assert(timeout != null);
     try {
       await _warnIfSlow<void>(
         future: _peer.sendRequest(_clearVMTimelineMethodName, <String, String>{}),

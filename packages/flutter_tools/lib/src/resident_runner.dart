@@ -386,7 +386,7 @@ class FlutterDevice {
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
-      timeout: fastOperation,
+      timeout: kFastOperation,
     );
     int bytes = 0;
     try {
@@ -565,7 +565,7 @@ abstract class ResidentRunner {
   }
 
   Future<void> _screenshot(FlutterDevice device) async {
-    final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...', timeout: fastOperation);
+    final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...', timeout: kFastOperation);
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
       if (supportsServiceProtocol && isRunningDebug) {

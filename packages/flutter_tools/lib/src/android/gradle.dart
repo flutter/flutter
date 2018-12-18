@@ -97,7 +97,7 @@ Future<GradleProject> _readGradleProject() async {
   final FlutterProject flutterProject = await FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
   updateLocalProperties(project: flutterProject);
-  final Status status = logger.startProgress('Resolving dependencies...', timeout: slowOperation);
+  final Status status = logger.startProgress('Resolving dependencies...', timeout: kSlowOperation);
   GradleProject project;
   try {
     final RunResult propertiesRunResult = await runCheckedAsync(
@@ -174,7 +174,7 @@ Future<String> _ensureGradle(FlutterProject project) async {
 // of validating the Gradle executable. This may take several seconds.
 Future<String> _initializeGradle(FlutterProject project) async {
   final Directory android = project.android.hostAppGradleRoot;
-  final Status status = logger.startProgress('Initializing gradle...', timeout: slowOperation);
+  final Status status = logger.startProgress('Initializing gradle...', timeout: kSlowOperation);
   String gradle = _locateGradlewExecutable(android);
   if (gradle == null) {
     injectGradleWrapper(android);
@@ -313,7 +313,7 @@ Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async 
   // Run 'gradlew build'.
   final Status status = logger.startProgress(
     'Running \'gradlew build\'...',
-    timeout: slowOperation,
+    timeout: kSlowOperation,
     multilineOutput: true,
   );
   final int exitCode = await runCommandAndStreamOutput(
@@ -355,7 +355,7 @@ Future<void> _buildGradleProjectV2(
   }
   final Status status = logger.startProgress(
     'Running Gradle task \'$assembleTask\'...',
-    timeout: slowOperation,
+    timeout: kSlowOperation,
     multilineOutput: true,
   );
   final String gradlePath = fs.file(gradle).absolute.path;

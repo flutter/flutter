@@ -50,32 +50,41 @@ class AndroidWorkflow implements Workflow {
 class AndroidValidator extends DoctorValidator {
   AndroidValidator(): super('Android toolchain - develop for Android devices',);
 
+  @override
+  String get slowWarning => '${_task ?? 'This'} is taking a long time...';
+  String _task;
+
   /// Returns false if we cannot determine the Java version or if the version
   /// is not compatible.
   Future<bool> _checkJavaVersion(String javaBinary, List<ValidationMessage> messages) async {
-    if (!processManager.canRun(javaBinary)) {
-      messages.add(ValidationMessage.error(userMessages.androidCantRunJavaBinary(javaBinary)));
-      return false;
-    }
-    String javaVersion;
+    _task = 'Checking Java status';
     try {
-      printTrace('java -version');
-      final ProcessResult result = await processManager.run(<String>[javaBinary, '-version']);
-      if (result.exitCode == 0) {
-        final List<String> versionLines = result.stderr.split('\n');
-        javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+      if (!processManager.canRun(javaBinary)) {
+        messages.add(ValidationMessage.error(userMessages.androidCantRunJavaBinary(javaBinary)));
+        return false;
       }
-    } catch (error) {
-      printTrace(error.toString());
+      String javaVersion;
+      try {
+        printTrace('java -version');
+        final ProcessResult result = await processManager.run(<String>[javaBinary, '-version']);
+        if (result.exitCode == 0) {
+          final List<String> versionLines = result.stderr.split('\n');
+          javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+        }
+      } catch (error) {
+        printTrace(error.toString());
+      }
+      if (javaVersion == null) {
+        // Could not determine the java version.
+        messages.add(ValidationMessage.error(userMessages.androidUnknownJavaVersion));
+        return false;
+      }
+      messages.add(ValidationMessage(userMessages.androidJavaVersion(javaVersion)));
+      // TODO(johnmccutchan): Validate version.
+      return true;
+    } finally {
+      _task = null;
     }
-    if (javaVersion == null) {
-      // Could not determine the java version.
-      messages.add(ValidationMessage.error(userMessages.androidUnknownJavaVersion));
-      return false;
-    }
-    messages.add(ValidationMessage(userMessages.androidJavaVersion(javaVersion)));
-    // TODO(johnmccutchan): Validate version.
-    return true;
   }
 
   @override
@@ -148,6 +157,9 @@ class AndroidValidator extends DoctorValidator {
 
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator(): super('Android license subvalidator',);
+
+  @override
+  String get slowWarning => 'Checking Android licenses is taking an unexpectedly long time...';
 
   @override
   Future<ValidationResult> validate() async {

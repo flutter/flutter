@@ -12,8 +12,8 @@ import 'terminal.dart';
 import 'utils.dart';
 
 const int kDefaultStatusPadding = 59;
-const Duration fastOperation = Duration(seconds: 2);
-const Duration slowOperation = Duration(minutes: 2);
+const Duration kFastOperation = Duration(seconds: 2);
+const Duration kSlowOperation = Duration(minutes: 2);
 
 typedef VoidCallback = void Function();
 
@@ -26,24 +26,30 @@ abstract class Logger {
 
   bool get hasTerminal => stdio.hasTerminal;
 
-  /// Display an error [message] to the user. Commands should use this if they
+  /// Display an error `message` to the user. Commands should use this if they
   /// fail in some way.
   ///
-  /// The [message] argument is printed to the stderr in red by default.
-  /// The [stackTrace] argument is the stack trace that will be printed if
+  /// The `message` argument is printed to the stderr in red by default.
+  ///
+  /// The `stackTrace` argument is the stack trace that will be printed if
   /// supplied.
-  /// The [emphasis] argument will cause the output message be printed in bold text.
-  /// The [color] argument will print the message in the supplied color instead
+  ///
+  /// The `emphasis` argument will cause the output message be printed in bold text.
+  ///
+  /// The `color` argument will print the message in the supplied color instead
   /// of the default of red. Colors will not be printed if the output terminal
   /// doesn't support them.
-  /// The [indent] argument specifies the number of spaces to indent the overall
+  ///
+  /// The `indent` argument specifies the number of spaces to indent the overall
   /// message. If wrapping is enabled in [outputPreferences], then the wrapped
   /// lines will be indented as well.
-  /// If [hangingIndent] is specified, then any wrapped lines will be indented
+  ///
+  /// If `hangingIndent` is specified, then any wrapped lines will be indented
   /// by this much more than the first line, if wrapping is enabled in
   /// [outputPreferences].
-  /// If [wrap] is specified, then it overrides the
-  /// [outputPreferences.wrapText] setting.
+  ///
+  /// If `wrap` is specified, then it overrides the
+  /// `outputPreferences.wrapText` setting.
   void printError(
     String message, {
     StackTrace stackTrace,
@@ -57,24 +63,31 @@ abstract class Logger {
   /// Display normal output of the command. This should be used for things like
   /// progress messages, success messages, or just normal command output.
   ///
-  /// The [message] argument is printed to the stderr in red by default.
-  /// The [stackTrace] argument is the stack trace that will be printed if
+  /// The `message` argument is printed to the stderr in red by default.
+  ///
+  /// The `stackTrace` argument is the stack trace that will be printed if
   /// supplied.
-  /// If the [emphasis] argument is true, it will cause the output message be
+  ///
+  /// If the `emphasis` argument is true, it will cause the output message be
   /// printed in bold text. Defaults to false.
-  /// The [color] argument will print the message in the supplied color instead
+  ///
+  /// The `color` argument will print the message in the supplied color instead
   /// of the default of red. Colors will not be printed if the output terminal
   /// doesn't support them.
-  /// If [newline] is true, then a newline will be added after printing the
+  ///
+  /// If `newline` is true, then a newline will be added after printing the
   /// status. Defaults to true.
-  /// The [indent] argument specifies the number of spaces to indent the overall
+  ///
+  /// The `indent` argument specifies the number of spaces to indent the overall
   /// message. If wrapping is enabled in [outputPreferences], then the wrapped
   /// lines will be indented as well.
-  /// If [hangingIndent] is specified, then any wrapped lines will be indented
+  ///
+  /// If `hangingIndent` is specified, then any wrapped lines will be indented
   /// by this much more than the first line, if wrapping is enabled in
   /// [outputPreferences].
-  /// If [wrap] is specified, then it overrides the
-  /// [outputPreferences.wrapText] setting.
+  ///
+  /// If `wrap` is specified, then it overrides the
+  /// `outputPreferences.wrapText` setting.
   void printStatus(
     String message, {
     bool emphasis,
@@ -91,13 +104,17 @@ abstract class Logger {
 
   /// Start an indeterminate progress display.
   ///
-  /// The [message] argument is the message to display to the user.
+  /// The `message` argument is the message to display to the user.
   ///
-  /// The [progressId] argument provides an ID which can be used to identify
+  /// The `timeout` argument sets a duration after which an additional message
+  /// may be shown saying that the operation is taking a long time. (Not all
+  /// [Status] subclasses show such a message.)
+  ///
+  /// The `progressId` argument provides an ID that can be used to identify
   /// this type of progress (e.g. `hot.reload`, `hot.restart`).
   ///
-  /// The [progressIndicatorPadding] can optionally be used to specify spacing
-  /// between the [message] and the progress indicator, if any.
+  /// The `progressIndicatorPadding` can optionally be used to specify spacing
+  /// between the `message` and the progress indicator, if any.
   Status startProgress(
     String message, {
     @required Duration timeout,
@@ -188,6 +205,7 @@ class StdoutLogger extends Logger {
       _status = AnsiStatus(
         message: message,
         timeout: timeout,
+        multilineOutput: multilineOutput,
         padding: progressIndicatorPadding,
         onFinish: _clearStatus,
       )..start();
@@ -358,7 +376,7 @@ class VerboseLogger extends Logger {
       timeout: timeout,
       onFinish: () {
         String time;
-        if (timeout > fastOperation) {
+        if (timeout > kFastOperation) {
           time = getElapsedAsSeconds(timer.elapsed);
         } else {
           time = getElapsedAsMilliseconds(timer.elapsed);
@@ -407,6 +425,8 @@ class VerboseLogger extends Logger {
 
 enum _LogType { error, status, trace }
 
+typedef SlowWarningCallback = String Function();
+
 /// A [Status] class begins when start is called, and may produce progress
 /// information asynchronously.
 ///
@@ -432,17 +452,19 @@ abstract class Status {
 
   /// A [SilentStatus] or an [AnsiSpinner] (depending on whether the
   /// terminal is fancy enough), already started.
-  factory Status.withSpinner({ @required Duration timeout, VoidCallback onFinish }) {
+  factory Status.withSpinner({
+    @required Duration timeout,
+    VoidCallback onFinish,
+    SlowWarningCallback slowWarningCallback,
+  }) {
     assert(timeout != null);
     if (terminal.supportsColor)
-      return AnsiSpinner(timeout: timeout, onFinish: onFinish)..start();
+      return AnsiSpinner(timeout: timeout, onFinish: onFinish, slowWarningCallback: slowWarningCallback)..start();
     return SilentStatus(timeout: timeout, onFinish: onFinish)..start();
   }
 
   final Duration timeout;
   final VoidCallback onFinish;
-
-  bool _isStarted = false;
 
   @protected
   final Stopwatch stopwatch = Stopwatch();
@@ -452,17 +474,15 @@ abstract class Status {
 
   @protected
   String get elapsedTime {
-    if (timeout > fastOperation)
+    if (timeout > kFastOperation)
       return getElapsedAsSeconds(stopwatch.elapsed);
     return getElapsedAsMilliseconds(stopwatch.elapsed);
   }
 
   /// Call to start spinning.
   void start() {
-    assert(!_isStarted);
     assert(!stopwatch.isRunning);
     stopwatch.start();
-    _isStarted = true;
   }
 
   /// Call to stop spinning after success.
@@ -477,10 +497,8 @@ abstract class Status {
 
   @protected
   void finish() {
-    assert(_isStarted);
     assert(stopwatch.isRunning);
     stopwatch.stop();
-    _isStarted = false;
     if (onFinish != null)
       onFinish();
   }
@@ -496,26 +514,31 @@ class SilentStatus extends Status {
 
 /// An [AnsiSpinner] is a simple animation that does nothing but implement a
 /// terminal spinner. When stopped or canceled, the animation erases itself.
+///
+/// If the timeout expires, a customizable warning is shown (but the spinner
+/// continues otherwise unabated).
 class AnsiSpinner extends Status {
   AnsiSpinner({
     @required Duration timeout,
     VoidCallback onFinish,
+    this.slowWarningCallback,
   }) : super(timeout: timeout, onFinish: onFinish);
 
   int ticks = 0;
   Timer timer;
-
-  bool _showingSlowWarning = false;
 
   // Windows console font has a limited set of Unicode characters.
   List<String> get _animation => platform.isWindows
       ? <String>[r'-', r'\', r'|', r'/']
       : <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 
-  static const String _slowWarning = ' (This is taking an unexpectedly long time.)';
+  static const String _defaultSlowWarning = '(This is taking an unexpectedly long time.)';
+  final SlowWarningCallback slowWarningCallback;
+
+  String _slowWarning = '';
 
   String get _currentAnimationFrame => _animation[ticks % _animation.length];
-  int get _currentLength => _currentAnimationFrame.length + (_showingSlowWarning ? _slowWarning.length : 0);
+  int get _currentLength => _currentAnimationFrame.length + _slowWarning.length;
   String get _backspace => '\b' * _currentLength;
   String get _clear => ' ' *  _currentLength;
 
@@ -541,14 +564,21 @@ class AnsiSpinner extends Status {
     ticks += 1;
     stdout.write('$_currentAnimationFrame');
     if (seemsSlow) {
+      if (slowWarningCallback != null) {
+        _slowWarning = ' ' + slowWarningCallback();
+      } else {
+        _slowWarning = ' ' + _defaultSlowWarning;
+      }
       stdout.write(_slowWarning);
-      _showingSlowWarning = true;
     }
   }
 }
 
-/// Constructor writes [message] to [stdout] with padding, then starts as an
-/// [AnsiSpinner]. On [cancel] or [stop], will call [onFinish]. On [stop], will
+/// Constructor writes [message] to [stdout] with padding, then starts an
+/// indeterminate progress indicator animation (it's a subclass of
+/// [AnsiSpinner]).
+///
+/// On [cancel] or [stop], will call [onFinish]. On [stop], will
 /// additionally print out summary information.
 class AnsiStatus extends AnsiSpinner {
   AnsiStatus({
@@ -638,7 +668,7 @@ class SummaryStatus extends Status {
 
   /// Prints a (minimum) 8 character padded time.
   ///
-  /// If [timeout] is less than or equal to [fastOperation], the time is in
+  /// If [timeout] is less than or equal to [kFastOperation], the time is in
   /// seconds; otherwise, milliseconds. If the time is longer than [timeout],
   /// appends "(!)" to the time.
   ///
