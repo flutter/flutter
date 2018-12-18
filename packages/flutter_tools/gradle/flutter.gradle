@@ -26,6 +26,13 @@ buildscript {
     }
 }
 
+android {
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+}
+
 apply plugin: FlutterPlugin
 
 class FlutterPlugin implements Plugin<Project> {

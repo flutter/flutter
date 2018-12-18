@@ -26,6 +26,7 @@ const double _kTextAndIconTabHeight = 72.0;
 /// Defines how the bounds of the selected tab indicator are computed.
 ///
 /// See also:
+///
 ///  * [TabBar], which displays a row of tabs.
 ///  * [TabBarView], which displays a widget for the currently selected tab.
 ///  * [TabBar.indicator], which defines the appearance of the selected tab
@@ -1183,10 +1184,9 @@ class _TabBarViewState extends State<TabBarView> {
     if (notification is ScrollUpdateNotification && !_controller.indexIsChanging) {
       if ((_pageController.page - _controller.index).abs() > 1.0) {
         _controller.index = _pageController.page.floor();
-        _currentIndex = _controller.index;
+        _currentIndex =_controller.index;
       }
-      if (_controller.length > 1)
-        _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0);
+      _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0);
     } else if (notification is ScrollEndNotification) {
       _controller.index = _pageController.page.round();
       _currentIndex = _controller.index;

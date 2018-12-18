@@ -71,7 +71,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 ///
 /// See also:
 ///
-///   * [ImageCache], which holds images that may be reused.
+///  * [ImageCache], which holds images that may be reused.
 Future<void> precacheImage(
   ImageProvider provider,
   BuildContext context, {
