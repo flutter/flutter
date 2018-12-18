@@ -99,7 +99,11 @@ typedef GestureForceInterpolation = double Function(double pressureMin, double p
 /// a small handful of Android devices have this functionality as well.
 ///
 /// Reported pressure will always be in the range [0.0, 1.0], where 1.0 is
-/// maximum pressure and 0.0 is minimum pressure.
+/// maximum pressure and 0.0 is minimum pressure. If using a non-linear
+/// interpolation equation, the pressure reported will correspond with the
+/// custom curve. (ie. if the interpolation maps t(0.5) -> 0.1, a value of 0.1
+/// will be reported at a device pressure value of 0.5).
+///
 class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Creates a force press gesture recognizer.
   ///
@@ -108,7 +112,8 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// [startPressure], [peakPressure] and [interpolation] must not be null.
   /// [peakPressure] must be greater than [startPressure]. [interpolation] must
-  /// always return a value in the range [0.0, 1.0] for
+  /// always return a value in the range [0.0, 1.0] where
+  /// pressureMin <= pressure <= pressureMax.
   ForcePressGestureRecognizer({
     this.startPressure = 0.4,
     this.peakPressure = 0.85,
@@ -174,12 +179,22 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// interpolated touch pressure.
   ///
   /// This function must always return values in the range [0, 1] when
-  /// pressureMin <= pressure < pressureMax.
+  /// pressureMin <= pressure <= pressureMax.
   ///
   /// By default, the the function is a simple linear interpolation, however,
   /// changing the function could be useful to accommodate variations in the way
   /// different devices respond to pressure, change how animations from pressure
   /// feedback are rendered or for other custom functionality.
+  ///
+  /// For example, an ease in curve can be used to determine the interpolated
+  /// value:
+  ///
+  /// ```dart
+  /// static double interpolateWithEasing(double min, double max, double t) {
+  ///    double lerp = (t - min) / (max - min);
+  ///    return Curve.easeIn.transform(lerp);
+  /// }
+  /// ```
   final GestureForceInterpolation interpolation;
 
   Offset _lastPosition;
