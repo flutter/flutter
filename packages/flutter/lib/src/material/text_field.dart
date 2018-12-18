@@ -297,6 +297,13 @@ class TextField extends StatefulWidget {
   final bool maxLengthEnforced;
 
   /// {@macro flutter.widgets.editableText.onChanged}
+  ///
+  /// See also:
+  ///
+  ///  * [inputFormatters], which are called before [onChanged]
+  ///    runs and can validate and change ("format") the input value.
+  ///  * [onEditingComplete], [onSubmitted], [onSelectionChanged]:
+  ///    which are more specialized input change notifications.
   final ValueChanged<String> onChanged;
 
   /// {@macro flutter.widgets.editableText.onEditingComplete}
