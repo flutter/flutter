@@ -39,6 +39,8 @@ class SnippetGenerator {
   /// snippet.
   final Configuration configuration;
 
+  static const JsonEncoder jsonEncoder = JsonEncoder.withIndent('    ');
+
   /// A Dart formatted used to format the snippet code and finished application
   /// code.
   static DartFormatter formatter = DartFormatter(pageWidth: 80, fixes: StyleFix.all);
@@ -226,6 +228,13 @@ class SnippetGenerator {
         final File outputFile = output ?? getOutputFile(id);
         stderr.writeln('Writing to ${outputFile.absolute.path}');
         outputFile.writeAsStringSync(app);
+
+        final File metadataFile = File('${outputFile.path}.json');
+        stderr.writeln('Writing metadata to ${metadataFile.absolute.path}');
+        final Map<String, Object> metadata = <String, Object>{
+          'file': path.basename(outputFile.path),
+        };
+        metadataFile.writeAsStringSync(jsonEncoder.convert(metadata));
         break;
       case SnippetType.sample:
         break;

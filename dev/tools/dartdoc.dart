@@ -323,10 +323,6 @@ void cleanOutSnippets() {
       ..deleteSync(recursive: true)
       ..createSync(recursive: true);
   }
-  final File snippetsIndex = File(path.join(kPublishRoot, 'snippets.txt'));
-  if (snippetsIndex.existsSync()) {
-    snippetsIndex.deleteSync();
-  }
 }
 
 void sanityCheckDocs() {
@@ -416,13 +412,14 @@ void putRedirectInOldIndexLocation() {
 void writeSnippetsIndexFile() {
   final Directory snippetsDir = Directory(path.join(kPublishRoot, 'snippets'));
   if (snippetsDir.existsSync()) {
-    final Iterable<String> files = snippetsDir
+    final Iterable<File> files = snippetsDir
         .listSync()
         .whereType<File>()
-        .map((File file) => path.basename(file.path))
-        .where((String name) => path.extension(name) == '.dart')
-        .map((String name) => name.substring(0, name.length - '.dart'.length));
-    File('$kPublishRoot/snippets.txt').writeAsStringSync(files.join('\n'));
+        .where((File file) => path.extension(file.path) == '.json');
+        // Combine all the metadata into a single JSON array.
+        final Iterable<String> fileContents = files.map((File file) => file.readAsStringSync());
+      final String jsonArray = '[\n${fileContents.join(',\n')}\n]';
+    File('$kPublishRoot/snippets/index.json').writeAsStringSync(jsonArray);
   }
 }
 
