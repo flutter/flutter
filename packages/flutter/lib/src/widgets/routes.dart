@@ -1028,11 +1028,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
-  /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
-  /// * [addScopedWillPopCallback], which adds a callback to the list this
-  ///   method checks.
-  /// * [removeScopedWillPopCallback], which removes a callback from the list
-  ///   this method checks.
+  ///  * [Form], which provides an `onWillPop` callback that uses this mechanism.
+  ///  * [addScopedWillPopCallback], which adds a callback to the list this
+  ///    method checks.
+  ///  * [removeScopedWillPopCallback], which removes a callback from the list
+  ///    this method checks.
   @override
   Future<RoutePopDisposition> willPop() async {
     final _ModalScopeState<T> scope = _scopeKey.currentState;
@@ -1507,6 +1507,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// dialog rather than just `Navigator.pop(context, result)`.
 ///
 /// See also:
+///
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 Future<T> showGeneralDialog<T>({

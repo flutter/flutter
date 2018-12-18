@@ -20,7 +20,8 @@ final PlatformViewsRegistry platformViewsRegistry = PlatformViewsRegistry._insta
 /// through the [platformViewsRegistry] getter.
 ///
 /// See also:
-///   * [PlatformView], a widget that shows a platform view.
+///
+///  * [PlatformView], a widget that shows a platform view.
 class PlatformViewsRegistry {
   PlatformViewsRegistry._instance();
 

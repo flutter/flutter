@@ -987,8 +987,8 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * [SliverAppBar] for more animated examples of how this property changes the
-  ///   behavior of the app bar in combination with [pinned] and [snap].
+  ///  * [SliverAppBar] for more animated examples of how this property changes the
+  ///    behavior of the app bar in combination with [pinned] and [snap].
   final bool floating;
 
   /// Whether the app bar should remain visible at the start of the scroll view.
@@ -1008,8 +1008,8 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * [SliverAppBar] for more animated examples of how this property changes the
-  ///   behavior of the app bar in combination with [floating].
+  ///  * [SliverAppBar] for more animated examples of how this property changes the
+  ///    behavior of the app bar in combination with [floating].
   final bool pinned;
 
   /// If [snap] and [floating] are true then the floating app bar will "snap"
@@ -1035,8 +1035,8 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * [SliverAppBar] for more animated examples of how this property changes the
-  ///   behavior of the app bar in combination with [pinned] and [floating].
+  ///  * [SliverAppBar] for more animated examples of how this property changes the
+  ///    behavior of the app bar in combination with [pinned] and [floating].
   final bool snap;
 
   @override

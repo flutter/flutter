@@ -2287,6 +2287,7 @@ class InputDecoration {
   /// is showing an error.
   ///
   /// See also:
+  ///
   ///  * [InputDecorator.isFocused], which is true if the [InputDecorator]'s child
   ///    has the focus.
   ///  * [InputDecoration.errorText], the error shown by the [InputDecorator], if non-null.
@@ -2877,6 +2878,7 @@ class InputDecorationTheme extends Diagnosticable {
   /// is showing an error.
   ///
   /// See also:
+  ///
   ///  * [InputDecorator.isFocused], which is true if the [InputDecorator]'s child
   ///    has the focus.
   ///  * [InputDecoration.errorText], the error shown by the [InputDecorator], if non-null.

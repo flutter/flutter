@@ -57,9 +57,9 @@ export 'package:flutter/services.dart' show TextInputType, TextInputAction, Text
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
 ///  * [EditableText], which is the raw text editing control at the heart of a
-///    [TextField]. (The [EditableText] widget is rarely used directly unless
+///    [TextField]. The [EditableText] widget is rarely used directly unless
 ///    you are implementing an entirely different design language, such as
-///    Cupertino.)
+///    Cupertino.
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///

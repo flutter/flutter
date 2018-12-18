@@ -502,7 +502,7 @@ final TextTreeConfiguration whitespaceTextConfiguration = TextTreeConfiguration(
 ///
 /// See also:
 ///
-///   * [DiagnosticsTreeStyle.singleLine]
+///  * [DiagnosticsTreeStyle.singleLine]
 final TextTreeConfiguration singleLineTextConfiguration = TextTreeConfiguration(
   propertySeparator: ', ',
   beforeProperties: '(',
@@ -1527,7 +1527,7 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
 /// See also:
 ///
 ///  * [DiagnosticsProperty] which documents named parameters common to all
-///    [DiagnosticsProperty]
+///    [DiagnosticsProperty].
 class EnumProperty<T> extends DiagnosticsProperty<T> {
   /// Create a diagnostics property that displays an enum.
   ///
@@ -2455,12 +2455,12 @@ abstract class DiagnosticableTree extends Diagnosticable {
   /// [DiagnosticsProperty<Object>] as possible [DiagnosticsNode] objects to
   /// provide.
   ///
+  /// Used by [toStringDeep], [toDiagnosticsNode] and [toStringShallow].
+  ///
   /// See also:
   ///
   ///  * [RenderTable.debugDescribeChildren], which provides high quality custom
   ///    descriptions for its child nodes.
-  ///
-  /// Used by [toStringDeep], [toDiagnosticsNode] and [toStringShallow].
   @protected
   List<DiagnosticsNode> debugDescribeChildren() => const <DiagnosticsNode>[];
 }

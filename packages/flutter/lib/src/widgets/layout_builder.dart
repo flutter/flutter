@@ -25,9 +25,9 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 ///
 /// See also:
 ///
-/// * [Builder], which calls a `builder` function at build time.
-/// * [StatefulBuilder], which passes its `builder` function a `setState` callback.
-/// * [CustomSingleChildLayout], which positions its child during layout.
+///  * [Builder], which calls a `builder` function at build time.
+///  * [StatefulBuilder], which passes its `builder` function a `setState` callback.
+///  * [CustomSingleChildLayout], which positions its child during layout.
 class LayoutBuilder extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   ///

@@ -1735,8 +1735,8 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 ///
 /// See also:
 ///
-/// * [RenderPhysicalModel], which is optimized for rounded rectangles and
-///   circles.
+///  * [RenderPhysicalModel], which is optimized for rounded rectangles and
+///    circles.
 class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   /// Creates an arbitrary shape clip.
   ///
@@ -3980,8 +3980,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// See also:
   ///
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
-  ///    focus is removed from the node
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  ///    focus is removed from the node.
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   VoidCallback get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
   VoidCallback _onDidGainAccessibilityFocus;
   set onDidGainAccessibilityFocus(VoidCallback handler) {
@@ -4008,8 +4008,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// See also:
   ///
   ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
-  ///    accessibility focus
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  ///    accessibility focus.
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   VoidCallback get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
   VoidCallback _onDidLoseAccessibilityFocus;
   set onDidLoseAccessibilityFocus(VoidCallback handler) {
@@ -4029,7 +4029,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// See also:
   ///
-  ///   * [CustomSemanticsAction], for an explaination of custom actions.
+  ///  * [CustomSemanticsAction], for an explaination of custom actions.
   Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
   Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions;
   set customSemanticsActions(Map<CustomSemanticsAction, VoidCallback> value) {
@@ -4589,8 +4589,8 @@ class RenderFollowerLayer extends RenderProxyBox {
 ///
 /// See also:
 ///
-///   * [Layer.find], for an example of how this value is retrieved.
-///   * [AnnotatedRegionLayer], the layer this render object creates.
+///  * [Layer.find], for an example of how this value is retrieved.
+///  * [AnnotatedRegionLayer], the layer this render object creates.
 class RenderAnnotatedRegion<T> extends RenderProxyBox {
 
   /// Creates a new [RenderAnnotatedRegion] to insert [value] into the
