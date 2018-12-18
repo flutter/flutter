@@ -34,7 +34,7 @@ void main() {
       ..textDirection = TextDirection.ltr;
 
     // Format: '👩‍<zwj>👩‍<zwj>👦👩‍<zwj>👩‍<zwj>👧‍<zwj>👧🇺🇸'
-    // One four-person family, one three person family, one US flag.
+    // One three-person family, one four person family, one US flag.
     const String text = '👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸';
     painter.text = const TextSpan(text: text);
     painter.layout();

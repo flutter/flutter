@@ -388,6 +388,8 @@ class TextPainter {
     canvas.drawParagraph(_paragraph, offset);
   }
 
+  // Complex glyphs can be represented by two or more UTF16 codepoints. This
+  // checks if the value represents a UTF16 glyph by itself or is a 'surrogate'.
   bool _isUtf16Surrogate(int value) {
     return value & 0xF800 == 0xD800;
   }
@@ -428,11 +430,18 @@ class TextPainter {
     while (boxes.isEmpty && _text.text != null) {
       final int prevRuneOffset = offset - graphemeClusterLength;
       boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
+      // When the range does not include a full cluster, no boxes will be returned.
       if (boxes.isEmpty) {
+        // When we are at the beginning of the line, a non-surrogate position will
+        // return empty boxes. We break and try from downstream instead.
         if (!needsSearch)
-          break; // only perform one iteration if no search is required.
+          break; // Only perform one iteration if no search is required.
         if (prevRuneOffset < -_text.text.length)
-          break; // stop iterating when beyond the max length of the text.
+          break; // Stop iterating when beyond the max length of the text.
+        // Multiply by two to log(n) time cover the entire text span. This allows
+        // faster discovery of very long clusters and reduces the possibility
+        // of certain large clusters taking much longer than others, which can
+        // cause jank.
         graphemeClusterLength *= 2;
         continue;
       }
@@ -458,11 +467,18 @@ class TextPainter {
     while (boxes.isEmpty && _text.text != null) {
       final int nextRuneOffset = offset + graphemeClusterLength;
       boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
+      // When the range does not include a full cluster, no boxes will be returned.
       if (boxes.isEmpty) {
+        // When we are at the end of the line, a non-surrogate position will
+        // return empty boxes. We break and try from upstream instead.
         if (!needsSearch)
-          break; // only perform one iteration if no search is required.
+          break; // Only perform one iteration if no search is required.
         if (nextRuneOffset >= _text.text.length << 1)
-          break; // stop iterating when beyond the max length of the text.
+          break; // Stop iterating when beyond the max length of the text.
+        // Multiply by two to log(n) time cover the entire text span. This allows
+        // faster discovery of very long clusters and reduces the possibility
+        // of certain large clusters taking much longer than others, which can
+        // cause jank.
         graphemeClusterLength *= 2;
         continue;
       }
