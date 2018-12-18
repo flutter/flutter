@@ -187,7 +187,7 @@ class CreateCommand extends FlutterCommand {
 
     final String host = FlutterVersion.instance.channel == 'stable'
         ? 'docs.flutter.io'
-        : 'master-docs-flutter-io.firebaseapp.com';
+        : 'master-docs.flutter.io';
     return utf8.decode(await fetchUrl(Uri.https(host, 'snippets/$sampleId.dart')));
   }
 
