@@ -726,7 +726,6 @@ class TextStyle extends Diagnosticable {
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       fontFamily: fontFamily,
-      fontFamilyFallback: fontFamilyFallback,
       fontSize: (fontSize ?? _defaultFontSize) * textScaleFactor,
       lineHeight: height,
       maxLines: maxLines,
@@ -830,7 +829,7 @@ class TextStyle extends Diagnosticable {
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
     styles.add(DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
     styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
-    styles.add(StringProperty('${prefix}familyFallback', fontFamilyFallback, defaultValue: null, quoted: false));
+    // styles.add(StringProperty('${prefix}familyFallback', fontFamilyFallback, defaultValue: null, quoted: false));
     styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
     String weightDescription;
     if (fontWeight != null) {
