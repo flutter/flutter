@@ -87,20 +87,19 @@ class ResourceExtractor {
                         output.getParentFile().mkdirs();
                     }
 
-                    try (InputStream is = manager.open(asset)) {
-                        try (OutputStream os = new FileOutputStream(output)) {
-                            if (buffer == null) {
-                                buffer = new byte[BUFFER_SIZE];
-                            }
-
-                            int count = 0;
-                            while ((count = is.read(buffer, 0, BUFFER_SIZE)) != -1) {
-                                os.write(buffer, 0, count);
-                            }
-
-                            os.flush();
-                            Log.i(TAG, "Extracted baseline resource " + asset);
+                    try (InputStream is = manager.open(asset);
+                         OutputStream os = new FileOutputStream(output)) {
+                        if (buffer == null) {
+                            buffer = new byte[BUFFER_SIZE];
                         }
+
+                        int count = 0;
+                        while ((count = is.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                            os.write(buffer, 0, count);
+                        }
+
+                        os.flush();
+                        Log.i(TAG, "Extracted baseline resource " + asset);
                     }
 
                 } catch (FileNotFoundException fnfe) {
@@ -158,20 +157,19 @@ class ResourceExtractor {
                     output.getParentFile().mkdirs();
                 }
 
-                try (InputStream is = zipFile.getInputStream(entry)) {
-                    try (OutputStream os = new FileOutputStream(output)) {
-                        if (buffer == null) {
-                            buffer = new byte[BUFFER_SIZE];
-                        }
-
-                        int count = 0;
-                        while ((count = is.read(buffer, 0, BUFFER_SIZE)) != -1) {
-                            os.write(buffer, 0, count);
-                        }
-
-                        os.flush();
-                        Log.i(TAG, "Extracted override resource " + asset);
+                try (InputStream is = zipFile.getInputStream(entry);
+                     OutputStream os = new FileOutputStream(output)) {
+                    if (buffer == null) {
+                        buffer = new byte[BUFFER_SIZE];
                     }
+
+                    int count = 0;
+                    while ((count = is.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                        os.write(buffer, 0, count);
+                    }
+
+                    os.flush();
+                    Log.i(TAG, "Extracted override resource " + asset);
 
                 } catch (FileNotFoundException fnfe) {
                     continue;
