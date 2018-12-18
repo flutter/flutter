@@ -15,9 +15,7 @@ void main() {
 
     await tester.pumpWidget(_withTheme(theme));
 
-    final PhysicalShape widget = tester.widget(
-        find.descendant(of: find.byType(BottomAppBar),
-            matching: find.byType(PhysicalShape)).first);
+    final PhysicalShape widget = _getBabRenderObject(tester);
     expect(widget.color, themedColor);
   });
 
@@ -31,10 +29,7 @@ void main() {
       home: const Scaffold(body: BottomAppBar()),
     ));
 
-    final PhysicalShape widget = tester.widget(find
-        .descendant(
-            of: find.byType(BottomAppBar), matching: find.byType(PhysicalShape))
-        .first);
+    final PhysicalShape widget = _getBabRenderObject(tester);
     expect(widget.color, babThemeColor);
   });
 
@@ -55,6 +50,15 @@ void main() {
   });
 }
 
+PhysicalShape _getBabRenderObject(WidgetTester tester) {
+  return tester.widget<PhysicalShape>(
+      find.descendant(
+          of: find.byType(BottomAppBar),
+          matching: find.byType(PhysicalShape),
+      ),
+  );
+}
+
 final Key _painterKey = UniqueKey();
 
 Widget _withTheme(BottomAppBarTheme theme) {
@@ -66,11 +70,12 @@ Widget _withTheme(BottomAppBarTheme theme) {
         bottomNavigationBar: RepaintBoundary(
           key: _painterKey,
           child: BottomAppBar(
-            child: Row(children: const <Widget>[
-              Icon(Icons.add),
-              Expanded(child: SizedBox()),
-              Icon(Icons.add),
-            ]
+            child: Row(
+              children: const <Widget>[
+                Icon(Icons.add),
+                Expanded(child: SizedBox()),
+                Icon(Icons.add),
+              ],
             ),
           ),
         )
