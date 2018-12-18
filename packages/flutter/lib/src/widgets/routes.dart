@@ -270,6 +270,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// the [nextRoute] is popped off of this route, the
   /// `secondaryAnimation` will run from 1.0 - 0.0.
   ///
+  /// If false, this route's [buildTransitions] `secondaryAnimation` parameter
+  /// value will be [kAlwaysDismissedAnimation]. In other words, this route
+  /// will not animate when when [nextRoute] is pushed on top of it or when
+  /// [nextRoute] is popped off of it.
+  ///
   /// Returns true by default.
   ///
   /// See also:
@@ -289,6 +294,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// run from 0.0 - 1.0 when this route is pushed on top of
   /// it. Similarly, if this route is popped off of [previousRoute]
   /// the previous route's `secondaryAnimation` will run from 1.0 - 0.0.
+  ///
+  /// If false, then the previous route's [buildTransitions]
+  /// `secondaryAnimation` value will be kAlwaysDismissedAnimation. In
+  /// other words [previousRoute] will not animate when this route is
+  /// pushed on top of it or when then this route is popped off of it.
   ///
   /// Returns true by default.
   ///
