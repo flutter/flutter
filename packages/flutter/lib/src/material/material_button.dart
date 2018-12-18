@@ -90,8 +90,9 @@ class MaterialButton extends StatelessWidget {
   /// [ButtonThemeData.textTheme].
   ///
   /// See also:
-  ///   * [disabledTextColor], the text color to use when the button has been
-  ///     disabled.
+  ///
+  ///  * [disabledTextColor], the text color to use when the button has been
+  ///    disabled.
   final Color textColor;
 
   /// The color to use for this button's text when the button is disabled.
@@ -103,6 +104,7 @@ class MaterialButton extends StatelessWidget {
   /// [ThemeData.disabledColor].
   ///
   /// See also:
+  ///
   ///  * [textColor] - The color to use for this button's text when the button is [enabled].
   final Color disabledTextColor;
 
@@ -112,7 +114,8 @@ class MaterialButton extends StatelessWidget {
   /// The default fill color is the theme's button color, [ThemeData.buttonColor].
   ///
   /// See also:
-  ///   * [disabledColor] - the fill color of the button when the button is disabled.
+  ///
+  ///  * [disabledColor] - the fill color of the button when the button is disabled.
   final Color color;
 
   /// The fill color of the button when the button is disabled.
@@ -121,7 +124,8 @@ class MaterialButton extends StatelessWidget {
   /// [ThemeData.disabledColor].
   ///
   /// See also:
-  ///   * [color] - the fill color of the button when the button is [enabled].
+  ///
+  ///  * [color] - the fill color of the button when the button is [enabled].
   final Color disabledColor;
 
   /// The splash color of the button's [InkWell].
@@ -231,7 +235,7 @@ class MaterialButton extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
   /// The smallest horizontal extent that the button will occupy.

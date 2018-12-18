@@ -90,7 +90,7 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * <https://developer.apple.com/ios/human-interface-guidelines/visual-design/adaptivity-and-layout/>
+  ///  * <https://developer.apple.com/ios/human-interface-guidelines/visual-design/adaptivity-and-layout/>
   final double minSize;
 
   /// The opacity that the button will fade to when it is pressed.

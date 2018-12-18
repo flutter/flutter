@@ -630,7 +630,6 @@ class ClipRRect extends SingleChildRenderObjectWidget {
 /// By default, inscribes an axis-aligned oval into its layout dimensions and
 /// prevents its child from painting outside that oval, but the size and
 /// location of the clip oval can be customized using a custom [clipper].
-/// See also:
 ///
 /// See also:
 ///
@@ -1699,13 +1698,13 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
 ///
 /// See also:
 ///
-/// * [MultiChildLayoutDelegate], for details about how to control the layout of
-///   the children.
-/// * [CustomSingleChildLayout], which uses a delegate to control the layout of
-///   a single child.
-/// * [Stack], which arranges children relative to the edges of the container.
-/// * [Flow], which provides paint-time control of its children using transform
-///   matrices.
+///  * [MultiChildLayoutDelegate], for details about how to control the layout of
+///    the children.
+///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
+///    a single child.
+///  * [Stack], which arranges children relative to the edges of the container.
+///  * [Flow], which provides paint-time control of its children using transform
+///    matrices.
 class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   /// Creates a custom multi-child layout.
   ///
@@ -2479,7 +2478,7 @@ class AspectRatio extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * [The catalog of layout widgets](https://flutter.io/widgets/layout/).
 class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic width.
   ///
@@ -2499,7 +2498,7 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// See also:
   ///
   ///  * [RenderBox.getMaxIntrinsicWidth], which defines a widget's max
-  /// intrinsic width  in general.
+  ///    intrinsic width  in general.
   final double stepWidth;
 
   /// If non-null, force the child's height to be a multiple of this value.
@@ -2538,7 +2537,7 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * [The catalog of layout widgets](https://flutter.io/widgets/layout/).
 class IntrinsicHeight extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic height.
   ///
@@ -3393,7 +3392,7 @@ class PositionedDirectional extends StatelessWidget {
 ///  * [Row], for a version of this widget that is always horizontal.
 ///  * [Column], for a version of this widget that is always vertical.
 ///  * [Expanded], to indicate children that should take all the remaining room.
-///  * [Flexible], to indicate children that should share the remaining room but
+///  * [Flexible], to indicate children that should share the remaining room.
 ///  * [Spacer], a widget that takes up space proportional to it's flex value.
 ///    that may be sized smaller (leaving some remaining room unused).
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
@@ -4697,7 +4696,7 @@ class RawImage extends LeafRenderObjectWidget {
   ///
   /// See also:
   ///
-  ///   * [Paint.invertColors], for the dart:ui implementation.
+  ///  * [Paint.invertColors], for the dart:ui implementation.
   final bool invertColors;
 
   @override
@@ -5226,18 +5225,18 @@ class MetaData extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-/// * [MergeSemantics], which marks a subtree as being a single node for
-///   accessibility purposes.
-/// * [ExcludeSemantics], which excludes a subtree from the semantics tree
-///   (which might be useful if it is, e.g., totally decorative and not
-///   important to the user).
-/// * [RenderObject.semanticsAnnotator], the rendering library API through which
-///   the [Semantics] widget is actually implemented.
-/// * [SemanticsNode], the object used by the rendering library to represent
-///   semantics in the semantics tree.
-/// * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can
-///   be enabled using [WidgetsApp.showSemanticsDebugger] or
-///   [MaterialApp.showSemanticsDebugger].
+///  * [MergeSemantics], which marks a subtree as being a single node for
+///    accessibility purposes.
+///  * [ExcludeSemantics], which excludes a subtree from the semantics tree
+///    (which might be useful if it is, e.g., totally decorative and not
+///    important to the user).
+///  * [RenderObject.semanticsAnnotator], the rendering library API through which
+///    the [Semantics] widget is actually implemented.
+///  * [SemanticsNode], the object used by the rendering library to represent
+///    semantics in the semantics tree.
+///  * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can
+///    be enabled using [WidgetsApp.showSemanticsDebugger] or
+///    [MaterialApp.showSemanticsDebugger].
 @immutable
 class Semantics extends SingleChildRenderObjectWidget {
   /// Creates a semantic annotation.
@@ -5568,7 +5567,7 @@ class MergeSemantics extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-/// * [ExcludeSemantics] which drops all semantics of its descendants.
+///  * [ExcludeSemantics] which drops all semantics of its descendants.
 class BlockSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that excludes the semantics of all widgets painted before
   /// it in the same semantic container.
@@ -5605,7 +5604,7 @@ class BlockSemantics extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-/// * [BlockSemantics] which drops semantics of widgets earlier in the tree.
+///  * [BlockSemantics] which drops semantics of widgets earlier in the tree.
 class ExcludeSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that drops all the semantics of its descendants.
   const ExcludeSemantics({
@@ -5663,7 +5662,8 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 /// {@end-tool}
 ///
 /// See also:
-///   * [CustomScrollView], for an explaination of index semantics.
+///
+///  * [CustomScrollView], for an explaination of index semantics.
 class IndexedSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that annotated the first child semantics node with an index.
   ///

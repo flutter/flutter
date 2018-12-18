@@ -595,7 +595,7 @@ abstract class StatelessWidget extends Widget {
   ///
   /// See also:
   ///
-  ///  * The discussion on performance considerations at [StatelessWidget].
+  ///  * [StatelessWidget], which contains the discussion on performance considerations.
   @protected
   Widget build(BuildContext context);
 }
@@ -1047,8 +1047,8 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   ///
   /// See also:
   ///
-  /// * [BindingBase.reassembleApplication].
-  /// * [Image], which uses this to reload images.
+  ///  * [BindingBase.reassembleApplication].
+  ///  * [Image], which uses this to reload images.
   @protected
   @mustCallSuper
   void reassemble() { }
@@ -1299,7 +1299,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * The discussion on performance considerations at [StatefulWidget].
+  ///  * [StatefulWidget], which contains the discussion on performance considerations.
   @protected
   Widget build(BuildContext context);
 
@@ -2662,11 +2662,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// See also:
   ///
-  /// - [Offstage] widget that hides its children.
-  /// - [Finder] that skips offstage widgets by default.
-  /// - [RenderObject.visitChildrenForSemantics], in contrast to this method,
-  ///   designed specifically for excluding parts of the UI from the semantics
-  ///   tree.
+  ///  * [Offstage] widget that hides its children.
+  ///  * [Finder] that skips offstage widgets by default.
+  ///  * [RenderObject.visitChildrenForSemantics], in contrast to this method,
+  ///    designed specifically for excluding parts of the UI from the semantics
+  ///    tree.
   void debugVisitOnstageChildren(ElementVisitor visitor) => visitChildren(visitor);
 
   /// Wrapper around [visitChildren] for [BuildContext].

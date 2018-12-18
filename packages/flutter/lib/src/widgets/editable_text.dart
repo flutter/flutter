@@ -298,7 +298,7 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  ///  * [TextCapitalization], for a description of each capitalization behavior.
   /// {@endtemplate}
   final TextCapitalization textCapitalization;
 

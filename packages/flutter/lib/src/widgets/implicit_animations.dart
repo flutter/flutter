@@ -44,12 +44,12 @@ class BoxConstraintsTween extends Tween<BoxConstraints> {
 ///
 /// See also:
 ///
-///   * [Tween] for a discussion on how to use interpolation objects.
-///   * [ShapeDecoration], [RoundedRectangleBorder], [CircleBorder], and
-///     [StadiumBorder] for examples of shape borders that can be smoothly
-///     interpolated.
-///   * [BoxBorder] for a border that can only be smoothly interpolated between other
-///     [BoxBorder]s.
+///  * [Tween] for a discussion on how to use interpolation objects.
+///  * [ShapeDecoration], [RoundedRectangleBorder], [CircleBorder], and
+///    [StadiumBorder] for examples of shape borders that can be smoothly
+///    interpolated.
+///  * [BoxBorder] for a border that can only be smoothly interpolated between other
+///    [BoxBorder]s.
 class DecorationTween extends Tween<Decoration> {
   /// Creates a decoration tween.
   ///
