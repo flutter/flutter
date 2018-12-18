@@ -16,13 +16,8 @@ if (is_android) {
 
   if (!defined(default_android_sdk_root)) {
     default_android_sdk_root = "//third_party/android_tools/sdk"
-    default_android_sdk_version = "22"
-    default_android_sdk_build_tools_version = "22.0.1"
-  }
-
-  if (!defined(google_play_services_library)) {
-    google_play_services_library =
-        "//third_party/android_tools:google_play_services_default_java"
+    default_android_sdk_version = "28"
+    default_android_sdk_build_tools_version = "28.0.3"
   }
 
   declare_args() {

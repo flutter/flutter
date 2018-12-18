@@ -4,11 +4,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import distutils.spawn
 import fnmatch
 import optparse
 import os
 import shutil
 import re
+import subprocess
 import sys
 import textwrap
 
@@ -90,11 +92,25 @@ def DoJavac(
       '-classpath', ':'.join(classpath),
       '-d', classes_dir]
 
+  def GetJavaHome():
+    # Android's boot jar doesn't contain all java 8 classes.
+    # See: https://github.com/evant/gradle-retrolambda/issues/23.
+    # Get the path of the jdk folder by searching for the 'jar' executable. We
+    # cannot search for the 'javac' executable because goma provides a custom
+    # version of 'javac'.
+    # Can't use jar path for macOS though.
+    if sys.platform == 'darwin':
+      return subprocess.check_output(['/usr/libexec/java_home', '-v', '1.8']).strip()
+    jar_path = os.path.realpath(distutils.spawn.find_executable('jar'))
+    return os.path.dirname(os.path.dirname(jar_path))
+
   if bootclasspath:
+    rt_jar = os.path.join(GetJavaHome(), 'jre', 'lib', 'rt.jar')
+    bootclasspath.append(rt_jar)
     javac_args.extend([
         '-bootclasspath', ':'.join(bootclasspath),
-        '-source', '1.7',
-        '-target', '1.7',
+        '-source', '1.8',
+        '-target', '1.8',
         ])
 
   if chromium_code:

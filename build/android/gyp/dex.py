@@ -11,14 +11,9 @@ import sys
 from util import build_utils
 from util import md5_check
 
-
 def DoDex(options, paths):
-  dx_binary = os.path.join(options.android_sdk_tools, 'dx')
-  # See http://crbug.com/272064 for context on --force-jumbo.
-  dex_cmd = [dx_binary, '--dex', '--force-jumbo', '--output', options.dex_path]
-  if options.no_locals != '0':
-    dex_cmd.append('--no-locals')
-
+  d8_binary = os.path.join(options.android_sdk_tools, 'd8')
+  dex_cmd = [d8_binary, '--output', options.dex_path]
   dex_cmd += paths
 
   record_path = '%s.md5.stamp' % options.dex_path
@@ -52,8 +47,6 @@ def main():
   parser.add_option('--proguard-enabled-input-path',
                     help=('Path to dex in Release mode when proguard '
                           'is enabled.'))
-  parser.add_option('--no-locals',
-                    help='Exclude locals list from the dex file.')
   parser.add_option('--inputs', help='A list of additional input paths.')
   parser.add_option('--excluded-paths',
                     help='A list of paths to exclude from the dex file.')
