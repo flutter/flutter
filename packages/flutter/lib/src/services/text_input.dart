@@ -405,7 +405,7 @@ class TextInputConfiguration {
   ///
   /// See also:
   ///
-  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  ///  * [TextCapitalization], for a description of each capitalization behavior.
   final TextCapitalization textCapitalization;
 
   /// The appearance of the keyboard.

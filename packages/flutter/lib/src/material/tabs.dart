@@ -26,6 +26,7 @@ const double _kTextAndIconTabHeight = 72.0;
 /// Defines how the bounds of the selected tab indicator are computed.
 ///
 /// See also:
+///
 ///  * [TabBar], which displays a row of tabs.
 ///  * [TabBarView], which displays a widget for the currently selected tab.
 ///  * [TabBar.indicator], which defines the appearance of the selected tab
