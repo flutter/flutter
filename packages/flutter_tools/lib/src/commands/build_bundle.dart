@@ -13,9 +13,9 @@ import 'build.dart';
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({bool verboseHelp = false}) {
     usesTargetOption();
-    usesFlavorOption();
     usesFilesystemOptions(hide: !verboseHelp);
     addBuildModeFlags();
+    usesFlavorOption();
     argParser
       ..addFlag('precompiled', negatable: false)
       // This option is still referenced by the iOS build scripts. We should
