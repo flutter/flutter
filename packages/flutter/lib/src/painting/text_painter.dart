@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' show min, max;
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle;
 
 import 'package:flutter/foundation.dart';
@@ -387,6 +388,8 @@ class TextPainter {
     canvas.drawParagraph(_paragraph, offset);
   }
 
+  // Complex glyphs can be represented by two or more UTF16 codepoints. This
+  // checks if the value represents a UTF16 glyph by itself or is a 'surrogate'.
   bool _isUtf16Surrogate(int value) {
     return value & 0xF800 == 0xD800;
   }
@@ -411,32 +414,80 @@ class TextPainter {
     return _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
   }
 
+  // Unicode value for a zero width joiner character.
+  static const int _zwjUtf16 = 0x200d;
+
+  // TODO(garyq): Use actual extended grapheme cluster length instead of
+  // an increasing cluster length amount to achieve deterministic performance.
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
-    final int prevCodeUnit = _text.codeUnitAt(offset - 1);
+    final int prevCodeUnit = _text.codeUnitAt(max(0, offset - 1));
     if (prevCodeUnit == null)
       return null;
-    final int prevRuneOffset = _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
-    final List<TextBox> boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
-    if (boxes.isEmpty)
-      return null;
-    final TextBox box = boxes[0];
-    final double caretEnd = box.end;
-    final double dx = box.direction == TextDirection.rtl ? caretEnd - caretPrototype.width : caretEnd;
-    return Offset(dx, box.top);
+    // Check for multi-code-unit glyphs such as emojis or zero width joiner
+    final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _text.codeUnitAt(offset) == _zwjUtf16;
+    int graphemeClusterLength = needsSearch ? 2 : 1;
+    List<TextBox> boxes = <TextBox>[];
+    while (boxes.isEmpty && _text.text != null) {
+      final int prevRuneOffset = offset - graphemeClusterLength;
+      boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
+      // When the range does not include a full cluster, no boxes will be returned.
+      if (boxes.isEmpty) {
+        // When we are at the beginning of the line, a non-surrogate position will
+        // return empty boxes. We break and try from downstream instead.
+        if (!needsSearch)
+          break; // Only perform one iteration if no search is required.
+        if (prevRuneOffset < -_text.text.length)
+          break; // Stop iterating when beyond the max length of the text.
+        // Multiply by two to log(n) time cover the entire text span. This allows
+        // faster discovery of very long clusters and reduces the possibility
+        // of certain large clusters taking much longer than others, which can
+        // cause jank.
+        graphemeClusterLength *= 2;
+        continue;
+      }
+      final TextBox box = boxes[0];
+      final double caretEnd = box.end;
+      final double dx = box.direction == TextDirection.rtl ? caretEnd - caretPrototype.width : caretEnd;
+      return Offset(dx, box.top);
+    }
+    return null;
   }
 
+  // TODO(garyq): Use actual extended grapheme cluster length instead of
+  // an increasing cluster length amount to achieve deterministic performance.
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
-    final int nextCodeUnit = _text.codeUnitAt(offset - 1);
+    // We cap the offset at the final index of the _text.
+    final int nextCodeUnit = _text.codeUnitAt(min(offset, _text.text == null ? 0 : _text.text.length - 1));
     if (nextCodeUnit == null)
       return null;
-    final int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
-    final List<TextBox> boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
-    if (boxes.isEmpty)
-      return null;
-    final TextBox box = boxes[0];
-    final double caretStart = box.start;
-    final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
-    return Offset(dx, box.top);
+    // Check for multi-code-unit glyphs such as emojis or zero width joiner
+    final bool needsSearch = _isUtf16Surrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16;
+    int graphemeClusterLength = needsSearch ? 2 : 1;
+    List<TextBox> boxes = <TextBox>[];
+    while (boxes.isEmpty && _text.text != null) {
+      final int nextRuneOffset = offset + graphemeClusterLength;
+      boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
+      // When the range does not include a full cluster, no boxes will be returned.
+      if (boxes.isEmpty) {
+        // When we are at the end of the line, a non-surrogate position will
+        // return empty boxes. We break and try from upstream instead.
+        if (!needsSearch)
+          break; // Only perform one iteration if no search is required.
+        if (nextRuneOffset >= _text.text.length << 1)
+          break; // Stop iterating when beyond the max length of the text.
+        // Multiply by two to log(n) time cover the entire text span. This allows
+        // faster discovery of very long clusters and reduces the possibility
+        // of certain large clusters taking much longer than others, which can
+        // cause jank.
+        graphemeClusterLength *= 2;
+        continue;
+      }
+      final TextBox box = boxes[0];
+      final double caretStart = box.start;
+      final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
+      return Offset(dx, box.top);
+    }
+    return null;
   }
 
   Offset get _emptyOffset {
