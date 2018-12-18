@@ -118,6 +118,7 @@ Future<void> build({
   }
 
   final AssetBundle assets = await buildAssets(
+    platform: platform,
     flavor: flavor,
     manifestPath: manifestPath,
     assetDirPath: assetDirPath,
@@ -138,6 +139,7 @@ Future<void> build({
 }
 
 Future<AssetBundle> buildAssets({
+  TargetPlatform platform,
   String flavor,
   String manifestPath,
   String assetDirPath,
