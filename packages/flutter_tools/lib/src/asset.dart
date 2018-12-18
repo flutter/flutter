@@ -98,12 +98,13 @@ class _ManifestAssetBundle implements AssetBundle {
     bool includeDefaultFonts = true,
     bool reportLicensedPackages = false
   }) async {
+    final String platformName = platform != null ? getNameForTargetPlatform(platform) : null;
     assetDirPath ??= getAssetBuildDirectory();
     packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
     FlutterManifest flutterManifest;
     try {
       flutterManifest = await FlutterManifest.createFromPath(manifestPath,
-          platform: getNameForTargetPlatform(platform), flavor: flavor);
+          platform: platformName, flavor: flavor);
     } catch (e) {
       printStatus('Error detected in pubspec.yaml:', emphasis: true);
       printError('$e');
@@ -150,7 +151,7 @@ class _ManifestAssetBundle implements AssetBundle {
       final Uri package = packageMap.map[packageName];
       if (package != null && package.scheme == 'file') {
         final String packageManifestPath = fs.path.fromUri(package.resolve('../pubspec.yaml'));
-        final FlutterManifest packageFlutterManifest = await FlutterManifest.createFromPath(packageManifestPath, platform: getNameForTargetPlatform(platform));
+        final FlutterManifest packageFlutterManifest = await FlutterManifest.createFromPath(packageManifestPath, platform: platformName);
         if (packageFlutterManifest == null)
           continue;
         // Skip the app itself
