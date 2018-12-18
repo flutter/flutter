@@ -145,10 +145,8 @@ class Cache {
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
   Directory getCacheDir(String name) {
     final Directory dir = fs.directory(fs.path.join(getRoot().path, name));
-    if (!dir.existsSync()) {
+    if (!dir.existsSync())
       dir.createSync(recursive: true);
-      os.chmod(dir, '755');
-    }
     return dir;
   }
 
@@ -196,10 +194,8 @@ class Cache {
     final Directory thirdPartyDir = getArtifactDirectory('third_party');
 
     final Directory serviceDir = fs.directory(fs.path.join(thirdPartyDir.path, serviceName));
-    if (!serviceDir.existsSync()) {
+    if (!serviceDir.existsSync())
       serviceDir.createSync(recursive: true);
-      os.chmod(serviceDir, '755');
-    }
 
     final File cachedFile = fs.file(fs.path.join(serviceDir.path, url.pathSegments.last));
     if (!cachedFile.existsSync()) {
@@ -556,16 +552,13 @@ class FlutterEngine extends CachedArtifact {
     return result;
   }
 
+
   void _makeFilesExecutable(Directory dir) {
-    os.chmod(dir, 'a+r,a+x');
-    for (FileSystemEntity entity in dir.listSync(recursive: true)) {
+    for (FileSystemEntity entity in dir.listSync()) {
       if (entity is File) {
-        final FileStat stat = entity.statSync();
-        final bool isUserExecutable = ((stat.mode >> 6) & 0x1) == 1;
-        if (entity.basename == 'flutter_tester' || isUserExecutable) {
-          // Make the file readable and executable by all users.
-          os.chmod(entity, 'a+r,a+x');
-        }
+        final String name = fs.path.basename(entity.path);
+        if (name == 'flutter_tester')
+          os.makeExecutable(entity);
       }
     }
   }

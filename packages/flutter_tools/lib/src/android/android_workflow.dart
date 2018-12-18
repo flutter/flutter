@@ -125,6 +125,10 @@ class AndroidValidator extends DoctorValidator {
       final String androidHomeDir = platform.environment[kAndroidHome];
       messages.add(ValidationMessage('$kAndroidHome = $androidHomeDir'));
     }
+    if (platform.environment.containsKey(kAndroidSdkRoot)) {
+      final String androidSdkRoot = platform.environment[kAndroidSdkRoot];
+      messages.add(ValidationMessage('$kAndroidSdkRoot = $androidSdkRoot'));
+    }
 
     final List<String> validationResult = androidSdk.validateSdkWellFormed();
 

@@ -21,6 +21,7 @@ import 'android_studio.dart' as android_studio;
 AndroidSdk get androidSdk => context[AndroidSdk];
 
 const String kAndroidHome = 'ANDROID_HOME';
+const String kAndroidSdkRoot = 'ANDROID_SDK_ROOT';
 
 // Android SDK layout:
 
@@ -243,6 +244,8 @@ class AndroidSdk {
         androidHomeDir = config.getValue('android-sdk');
       } else if (platform.environment.containsKey(kAndroidHome)) {
         androidHomeDir = platform.environment[kAndroidHome];
+      } else if (platform.environment.containsKey(kAndroidSdkRoot)) {
+        androidHomeDir = platform.environment[kAndroidSdkRoot];
       } else if (platform.isLinux) {
         if (homeDirPath != null)
           androidHomeDir = fs.path.join(homeDirPath, 'Android', 'Sdk');

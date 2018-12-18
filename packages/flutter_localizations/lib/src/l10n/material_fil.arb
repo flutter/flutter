@@ -51,5 +51,5 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 character ang natitira",
   "remainingTextFieldCharacterCountOther": "$remainingCount na character ang natitira",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "Nagre-refresh"
 }

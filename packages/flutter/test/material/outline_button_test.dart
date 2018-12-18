@@ -271,20 +271,22 @@ void main() {
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
   });
 
-  testWidgets('OutlineButton implements debugFillDescription', (WidgetTester tester) async {
+  testWidgets('OutlineButton implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     OutlineButton(
-        onPressed: () {},
-        textColor: const Color(0xFF00FF00),
-        disabledTextColor: const Color(0xFFFF0000),
-        color: const Color(0xFF000000),
-        highlightColor: const Color(0xFF1565C0),
-        splashColor: const Color(0xFF9E9E9E),
-        child: const Text('Hello'),
+      onPressed: () {},
+      textColor: const Color(0xFF00FF00),
+      disabledTextColor: const Color(0xFFFF0000),
+      color: const Color(0xFF000000),
+      highlightColor: const Color(0xFF1565C0),
+      splashColor: const Color(0xFF9E9E9E),
+      child: const Text('Hello'),
     ).debugFillProperties(builder);
+
     final List<String> description = builder.properties
-        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode n) => n.toString()).toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString()).toList();
+
     expect(description, <String>[
       'textColor: Color(0xff00ff00)',
       'disabledTextColor: Color(0xffff0000)',
