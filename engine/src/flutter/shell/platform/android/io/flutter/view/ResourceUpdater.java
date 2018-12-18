@@ -9,10 +9,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.widget.Toast;
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -22,7 +19,6 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Date;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -30,7 +26,7 @@ import java.util.concurrent.ExecutionException;
 public final class ResourceUpdater {
     private static final String TAG = "ResourceUpdater";
 
-    private class DownloadTask extends AsyncTask<String, String, Void> {
+    private static class DownloadTask extends AsyncTask<String, String, Void> {
         @Override
         protected Void doInBackground(String... args) {
             try {
@@ -72,7 +68,7 @@ public final class ResourceUpdater {
                     Log.i(TAG, "Downloading update " + unresolvedURL);
                     try (OutputStream output = new FileOutputStream(localFile)) {
                         int count;
-                        byte data[] = new byte[1024];
+                        byte[] data = new byte[1024];
                         while ((count = input.read(data)) != -1) {
                             output.write(data, 0, count);
                         }
