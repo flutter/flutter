@@ -330,7 +330,7 @@ class ResourceExtractor {
 
     ResourceExtractor(Context context) {
         mContext = context;
-        mResources = new HashSet<String>();
+        mResources = new HashSet<>();
     }
 
     ResourceExtractor addResource(String resource) {

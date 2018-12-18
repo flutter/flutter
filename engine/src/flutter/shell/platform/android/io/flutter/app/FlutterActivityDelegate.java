@@ -171,7 +171,7 @@ public final class FlutterActivityDelegate
           String appBundlePath = FlutterMain.findAppBundlePath(activity.getApplicationContext());
           if (appBundlePath != null) {
             FlutterRunArguments arguments = new FlutterRunArguments();
-            ArrayList<String> bundlePaths = new ArrayList<String>();
+            ArrayList<String> bundlePaths = new ArrayList<>();
             if (FlutterMain.getUpdateInstallationPath() != null) {
                 bundlePaths.add(FlutterMain.getUpdateInstallationPath());
             }
@@ -296,7 +296,7 @@ public final class FlutterActivityDelegate
         // Before adding more entries to this list, consider that arbitrary
         // Android applications can generate intents with extra data and that
         // there are many security-sensitive args in the binary.
-        ArrayList<String> args = new ArrayList<String>();
+        ArrayList<String> args = new ArrayList<>();
         if (intent.getBooleanExtra("trace-startup", false)) {
             args.add("--trace-startup");
         }
@@ -343,7 +343,7 @@ public final class FlutterActivityDelegate
             }
             if (!flutterView.getFlutterNativeView().isApplicationRunning()) {
               FlutterRunArguments args = new FlutterRunArguments();
-              ArrayList<String> bundlePaths = new ArrayList<String>();
+              ArrayList<String> bundlePaths = new ArrayList<>();
               if (FlutterMain.getUpdateInstallationPath() != null) {
                   bundlePaths.add(FlutterMain.getUpdateInstallationPath());
               }

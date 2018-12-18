@@ -51,7 +51,7 @@ class InputConnectionAdaptor extends BaseInputConnection {
                              selectionStart, selectionEnd,
                              composingStart, composingEnd);
 
-        HashMap<Object, Object> state = new HashMap<Object, Object>();
+        HashMap<Object, Object> state = new HashMap<>();
         state.put("text", mEditable.toString());
         state.put("selectionBase", selectionStart);
         state.put("selectionExtent", selectionEnd);

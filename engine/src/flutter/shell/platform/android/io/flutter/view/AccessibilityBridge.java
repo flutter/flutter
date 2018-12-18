@@ -108,8 +108,8 @@ class AccessibilityBridge
     AccessibilityBridge(FlutterView owner) {
         assert owner != null;
         mOwner = owner;
-        mObjects = new HashMap<Integer, SemanticsObject>();
-        mCustomAccessibilityActions = new HashMap<Integer, CustomAccessibilityAction>();
+        mObjects = new HashMap<>();
+        mCustomAccessibilityActions = new HashMap<>();
         previousRoutes = new ArrayList<>();
         mFlutterAccessibilityChannel = new BasicMessageChannel<>(
                 owner, "flutter/accessibility", StandardMessageCodec.INSTANCE);
@@ -443,7 +443,7 @@ class AccessibilityBridge
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_SET_SELECTION: {
-                final Map<String, Integer> selection = new HashMap<String, Integer>();
+                final Map<String, Integer> selection = new HashMap<>();
                 final boolean hasSelection = arguments != null
                         && arguments.containsKey(
                                    AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT)
@@ -611,7 +611,7 @@ class AccessibilityBridge
     }
 
     void updateSemantics(ByteBuffer buffer, String[] strings) {
-        ArrayList<SemanticsObject> updated = new ArrayList<SemanticsObject>();
+        ArrayList<SemanticsObject> updated = new ArrayList<>();
         while (buffer.hasRemaining()) {
             int id = buffer.getInt();
             SemanticsObject object = getOrCreateObject(id);
@@ -627,7 +627,7 @@ class AccessibilityBridge
             }
         }
 
-        Set<SemanticsObject> visitedObjects = new HashSet<SemanticsObject>();
+        Set<SemanticsObject> visitedObjects = new HashSet<>();
         SemanticsObject rootObject = getRootObject();
         List<SemanticsObject> newRoutes = new ArrayList<>();
         if (rootObject != null) {
@@ -1115,7 +1115,7 @@ class AccessibilityBridge
                 childrenInHitTestOrder = null;
             } else {
                 if (childrenInTraversalOrder == null)
-                    childrenInTraversalOrder = new ArrayList<SemanticsObject>(childCount);
+                    childrenInTraversalOrder = new ArrayList<>(childCount);
                 else
                     childrenInTraversalOrder.clear();
 
@@ -1126,7 +1126,7 @@ class AccessibilityBridge
                 }
 
                 if (childrenInHitTestOrder == null)
-                    childrenInHitTestOrder = new ArrayList<SemanticsObject>(childCount);
+                    childrenInHitTestOrder = new ArrayList<>(childCount);
                 else
                     childrenInHitTestOrder.clear();
 
@@ -1141,8 +1141,7 @@ class AccessibilityBridge
                 customAccessibilityActions = null;
             } else {
                 if (customAccessibilityActions == null)
-                    customAccessibilityActions =
-                            new ArrayList<CustomAccessibilityAction>(actionCount);
+                    customAccessibilityActions = new ArrayList<>(actionCount);
                 else
                     customAccessibilityActions.clear();
 
