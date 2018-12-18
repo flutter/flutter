@@ -86,7 +86,7 @@ class BuildBundleCommand extends BuildSubCommand {
       throwToolExit('Unknown platform: $targetPlatform');
 
     final BuildMode buildMode = getBuildMode();
-    final String flavor = getBuildFlavor();
+    final String flavor = getFlavor();
 
     await build(
       platform: platform,
