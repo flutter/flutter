@@ -37,6 +37,8 @@
 
 namespace flow {
 
+static constexpr SkRect kGiantRect = SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
+
 // This should be an exact copy of the Clip enum in painting.dart.
 enum Clip { none, hardEdge, antiAlias, antiAliasWithSaveLayer };
 
@@ -47,7 +49,7 @@ struct PrerollContext {
   GrContext* gr_context;
   ExternalViewEmbedder* view_embedder;
   SkColorSpace* dst_color_space;
-  SkRect child_paint_bounds;
+  SkRect cull_rect;
 
   // The following allows us to paint in the end of subtree preroll
   const Stopwatch& frame_time;

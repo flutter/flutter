@@ -31,7 +31,7 @@ void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
       frame.gr_context(),
       frame.view_embedder(),
       color_space,
-      SkRect::MakeEmpty(),
+      kGiantRect,
       frame.context().frame_time(),
       frame.context().engine_time(),
       frame.context().texture_registry(),
@@ -113,7 +113,7 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
       nullptr,                  // gr_context  (used for the raster cache)
       nullptr,                  // external view embedder
       nullptr,                  // SkColorSpace* dst_color_space
-      SkRect::MakeEmpty(),      // SkRect child_paint_bounds
+      kGiantRect,               // SkRect cull_rect
       unused_stopwatch,         // frame time (dont care)
       unused_stopwatch,         // engine time (dont care)
       unused_texture_registry,  // texture registry (not supported)
