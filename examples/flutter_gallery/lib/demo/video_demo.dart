@@ -357,20 +357,21 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final Completer<void> connectedCompleter = Completer<void>();
   bool isSupported = true;
+  bool isDisposed = false;
 
   @override
   void initState() {
     super.initState();
 
     Future<void> initController(VideoPlayerController controller, String name) async {
-      print('> VideoDemo initController "$name"');
+      print('> VideoDemo initController "$name" ${isDisposed ? "DISPOSED" : ""');
       controller.setLooping(true);
       controller.setVolume(0.0);
       controller.play();
       await connectedCompleter.future;
       await controller.initialize();
       if (mounted)
-        print('< VideoDemo initController "$name" done');
+        print('< VideoDemo initController "$name" done ${isDisposed ? "DISPOSED" : ""}');
         setState(() {});
     }
 
@@ -384,6 +385,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
   @override
   void dispose() {
     print('> VideoDemo dispose');
+    isDisposed  = true;
     butterflyController.dispose();
     beeController.dispose();
     print('< VideoDemo dispose');
