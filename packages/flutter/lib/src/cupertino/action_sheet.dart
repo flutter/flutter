@@ -258,7 +258,7 @@ class CupertinoActionSheet extends StatelessWidget {
 ///  * [CupertinoActionSheet], an alert that presents the user with a set of two or
 ///    more choices related to the current context.
 class CupertinoActionSheetAction extends StatelessWidget {
-  ///Creates an action for an iOS-style action sheet.
+  /// Creates an action for an iOS-style action sheet.
   ///
   /// The [child] and [onPressed] arguments must not be null.
   const CupertinoActionSheetAction({
