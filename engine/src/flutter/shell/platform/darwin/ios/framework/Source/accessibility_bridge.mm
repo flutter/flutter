@@ -110,7 +110,7 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   if (self) {
     _bridge = bridge;
     _uid = uid;
-    self.children = [[[NSMutableArray alloc] init] autorelease];
+    _children = [[NSMutableArray alloc] init];
   }
 
   return self;
@@ -121,7 +121,7 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
     child.parent = nil;
   }
   [_children removeAllObjects];
-  [_children dealloc];
+  [_children release];
   _parent = nil;
   [_container release];
   _container = nil;
