@@ -29,11 +29,11 @@ class FlutterManifest {
   }
 
   /// Returns null on invalid manifest. Returns empty manifest on missing file.
-  static Future<FlutterManifest> createFromPath(String path) async {
+  static Future<FlutterManifest> createFromPath(String path,
+      {String platform, String flavor}) async {
     if (path == null || !fs.isFileSync(path))
       return _createFromYaml(null);
-    final String manifest = await fs.file(path).readAsString();
-    return createFromString(manifest);
+    return _createFromPathWithAssets(path, platform, flavor);
   }
 
   /// Returns null on missing or invalid manifest
@@ -62,6 +62,47 @@ class FlutterManifest {
     }
 
     return pubspec;
+  }
+
+  static Future<FlutterManifest> _createFromPath(String path) async {
+    if (path == null || !fs.isFileSync(path))
+      return null;
+    final String manifest = await fs.file(path).readAsString();
+    return createFromString(manifest);
+  }
+
+  static Future<FlutterManifest> _createFromPathWithAssets(
+      String path, String platform, String flavor) async {
+    final FlutterManifest flutterManifest = await _createFromPath(path);
+    if (flutterManifest == null)
+      return null;
+
+    for (String assetPath in buildAssetFilePaths(path, platform, flavor)) {
+      if (!fs.isFileSync(assetPath))
+        continue;
+
+      final FlutterManifest manifest = await _createFromPath(assetPath);
+      if (manifest == null)
+        return null;
+
+      if (manifest._flutterDescriptor['uses-material-design'] != null) {
+        flutterManifest._flutterDescriptor['uses-material-design'] =
+          manifest._flutterDescriptor['uses-material-design'];
+      }
+
+      if (manifest._flutterDescriptor['assets'] != null) {
+        flutterManifest._flutterDescriptor['assets'] =
+          manifest._flutterDescriptor['assets'];
+      }
+
+      if (manifest._flutterDescriptor['fonts'] != null) {
+        flutterManifest._fonts = null;
+        flutterManifest._flutterDescriptor['fonts'] =
+          manifest._flutterDescriptor['fonts'];
+      }
+    }
+
+    return flutterManifest;
   }
 
   /// A map representation of the entire `pubspec.yaml` file.
@@ -218,9 +259,9 @@ class FlutterManifest {
 
 class Font {
   Font(this.familyName, this.fontAssets)
-    : assert(familyName != null),
-      assert(fontAssets != null),
-      assert(fontAssets.isNotEmpty);
+      : assert(familyName != null),
+        assert(fontAssets != null),
+        assert(fontAssets.isNotEmpty);
 
   final String familyName;
   final List<FontAsset> fontAssets;
@@ -238,7 +279,7 @@ class Font {
 
 class FontAsset {
   FontAsset(this.assetUri, {this.weight, this.style})
-    : assert(assetUri != null);
+      : assert(assetUri != null);
 
   final Uri assetUri;
   final int weight;
@@ -289,4 +330,29 @@ Future<bool> _validate(dynamic manifest) async {
     printError(validator.errors.join('\n'));
     return false;
   }
+}
+
+const String _assetsFilesPrefix = 'assets';
+const String _assetsFilesDelimiter = '-';
+
+String _buildAssetFilePath(String dirname, {String platform, String flavor}) {
+  final List<String> segments = <String>[_assetsFilesPrefix];
+  if (platform != null) {
+    segments.add(platform.split('-').first);
+  }
+  if (flavor != null) {
+    segments.add(flavor);
+  }
+  return fs.path.join(dirname, '${segments.join(_assetsFilesDelimiter)}.yaml');
+}
+
+@visibleForTesting
+List<String> buildAssetFilePaths(String path, String platform, String flavor) {
+  final String dirname = fs.path.dirname(path);
+  final Set<String> paths = Set<String>()
+    ..add(_buildAssetFilePath(dirname))
+    ..add(_buildAssetFilePath(dirname, platform: platform))
+    ..add(_buildAssetFilePath(dirname, flavor: flavor))
+    ..add(_buildAssetFilePath(dirname, platform: platform, flavor: flavor));
+  return paths.toList(growable: false);
 }

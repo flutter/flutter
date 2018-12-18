@@ -102,7 +102,8 @@ class _ManifestAssetBundle implements AssetBundle {
     packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
     FlutterManifest flutterManifest;
     try {
-      flutterManifest = await FlutterManifest.createFromPath(manifestPath);
+      flutterManifest = await FlutterManifest.createFromPath(manifestPath,
+          platform: getNameForTargetPlatform(platform), flavor: flavor);
     } catch (e) {
       printStatus('Error detected in pubspec.yaml:', emphasis: true);
       printError('$e');
@@ -149,7 +150,7 @@ class _ManifestAssetBundle implements AssetBundle {
       final Uri package = packageMap.map[packageName];
       if (package != null && package.scheme == 'file') {
         final String packageManifestPath = fs.path.fromUri(package.resolve('../pubspec.yaml'));
-        final FlutterManifest packageFlutterManifest = await FlutterManifest.createFromPath(packageManifestPath);
+        final FlutterManifest packageFlutterManifest = await FlutterManifest.createFromPath(packageManifestPath, platform: getNameForTargetPlatform(platform));
         if (packageFlutterManifest == null)
           continue;
         // Skip the app itself
