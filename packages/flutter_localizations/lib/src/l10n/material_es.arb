@@ -35,7 +35,7 @@
   "signedInLabel": "Sesión iniciada",
   "hideAccountsLabel": "Ocultar cuentas",
   "showAccountsLabel": "Mostrar cuentas",
-  "modalBarrierDismissLabel": "Ignorar",
+  "modalBarrierDismissLabel": "Cerrar",
   "drawerLabel": "Menú de navegación",
   "popupMenuLabel": "Menú emergente",
   "dialogLabel": "Cuadro de diálogo",
@@ -52,5 +52,5 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Queda 1 carácter.",
   "remainingTextFieldCharacterCountOther": "Quedan $remainingCount caracteres",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "Actualizar"
 }

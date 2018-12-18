@@ -30,8 +30,8 @@ class _ComponentTuple {
 class SnippetGenerator {
   SnippetGenerator({Configuration configuration})
       : configuration = configuration ??
-           // This script must be run from dev/docs, so the root is up two levels.
-            Configuration(flutterRoot: Directory(path.canonicalize(path.join('..', '..')))) {
+            // Flutter's root is four directories up from this script.
+            Configuration(flutterRoot: Directory(Platform.environment['FLUTTER_ROOT'] ?? path.canonicalize(path.join(path.dirname(path.fromUri(Platform.script)), '..', '..', '..')))) {
     this.configuration.createOutputDirectory();
   }
 

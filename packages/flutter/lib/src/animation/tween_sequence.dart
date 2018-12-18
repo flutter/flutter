@@ -34,7 +34,7 @@ import 'tween.dart';
 ///     ),
 ///   ],
 /// ).animate(myAnimationController);
-///```
+/// ```
 class TweenSequence<T> extends Animatable<T> {
   /// Construct a TweenSequence.
   ///

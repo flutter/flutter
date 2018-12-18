@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
+import 'dart:ui' show dumpCompilationTrace;
 
 import 'package:meta/meta.dart';
 
@@ -116,6 +117,14 @@ abstract class BindingBase {
       registerSignalServiceExtension(
         name: 'exit',
         callback: _exitApplication,
+      );
+      registerServiceExtension(
+        name: 'dumpCompilationTrace',
+        callback: (Map<String, String> parameters) async {
+          return <String, dynamic> {
+            'value': dumpCompilationTrace(),
+          };
+        }
       );
     }
 
