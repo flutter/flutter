@@ -3635,7 +3635,7 @@ void main() {
   );
 
   testWidgets(
-    'slow double tap does not trigger double tap (iOS)',
+    'two slow tap does not trigger a word selection (iOS)',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',

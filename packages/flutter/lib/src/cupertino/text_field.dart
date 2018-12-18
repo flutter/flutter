@@ -652,6 +652,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
               onSingleTapUp: _handleSingleTapUp,
               onSingleLongTapDown: _handleSingleLongTapDown,
               onDoubleTapDown: _handleDoubleTapDown,
+              behavior: HitTestBehavior.translucent,
               child: _addTextDependentAttachments(paddedEditable),
             ),
           ),

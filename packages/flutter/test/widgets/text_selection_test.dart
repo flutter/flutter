@@ -12,11 +12,11 @@ void main() {
   int singleLongTapDownCount;
   int doubleTapDownCount;
 
-  void _handleTapDown(TapDownDetails details) => tapCount++;
-  void _handleSingleTapUp(TapUpDetails details) => singleTapUpCount++;
-  void _handleSingleTapCancel() => singleTapCancelCount++;
-  void _handleSingleLongTapDown() => singleLongTapDownCount++;
-  void _handleDoubleTapDown(TapDownDetails details) => doubleTapDownCount++;
+  void _handleTapDown(TapDownDetails details) { tapCount++; }
+  void _handleSingleTapUp(TapUpDetails details) { singleTapUpCount++; }
+  void _handleSingleTapCancel() { singleTapCancelCount++; }
+  void _handleSingleLongTapDown() { singleLongTapDownCount++; }
+  void _handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
 
   setUp(() {
     tapCount = 0;

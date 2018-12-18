@@ -572,9 +572,10 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
 
 /// A gesture detector to detect non-exclusive event chains for a text field.
 ///
-/// This widget is unlike a plain [GestureDetector] which only recognizes one
-/// tap or double tap in a chain of events and supports more complex
-/// sequences for text fields.
+/// An ordinary [GestureDetector] configured to handle events like tap and
+/// double tap will only recognize one or the other. This widget detects both:
+/// first the tap and then, if another tap down occurs within a time limit, the
+/// double tap.
 ///
 /// See also:
 ///
@@ -584,7 +585,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
 class TextSelectionGestureDetector extends StatefulWidget {
   /// Create a [TextSelectionGestureDetector].
   ///
-  /// Multiple callbacks can be called from the same sequence of gesture.
+  /// Multiple callbacks can be called for one sequence of input gesture.
   /// The [child] parameter must not be null.
   const TextSelectionGestureDetector({
     Key key,
@@ -593,17 +594,20 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onSingleTapCancel,
     this.onSingleLongTapDown,
     this.onDoubleTapDown,
+    this.behavior,
     @required this.child,
   }) : assert(child != null),
        super(key: key);
 
   /// Called for every tap down including every tap down that's part of a
-  /// double click or a long press, but except touches that are quickly
-  /// recognized as not tap (e.g. a very quick fling) under [kPressTimeout].
+  /// double click or a long press, except touches that include enough movement
+  /// to not qualify as taps (e.g. pans and flings).
   final GestureTapDownCallback onTapDown;
 
-  /// Called for each distinct short tap. Also called on the first tap of a
-  /// double tap but not on the second tap.
+  /// Called for each distinct tap except for every second tap of a double tap.
+  /// For example, if the detector was configured [onSingleTapDown] and
+  /// [onDoubleTapDown], three quick taps would be recognized as a single tap
+  /// down, followed by a double tap down, followed by a single tap down.
   final GestureTapUpCallback onSingleTapUp;
 
   /// Called for each touch that becomes recognized as a gesture that is not a
@@ -611,13 +615,20 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// another gesture from the touch is recognized.
   final GestureTapCancelCallback onSingleTapCancel;
 
-  /// Called for a single long tap that's sustained but not necessarily lifted.
-  /// Not called for a double-tap-hold, which calls [onDoubleTapDown] instead.
+  /// Called for a single long tap that's sustained for longer than
+  /// [kLongPressTimeout] but not necessarily lifted. Not called for a
+  /// double-tap-hold, which calls [onDoubleTapDown] instead.
   final GestureLongPressCallback onSingleLongTapDown;
 
   /// Called after a momentary hold or a short tap that is close in space and
-  /// time to a previous short tap.
+  /// time (within [kDoubleTapTimeout]) to a previous short tap.
   final GestureTapDownCallback onDoubleTapDown;
+
+  /// How this gesture detector should behave during hit testing.
+  ///
+  /// This defaults to [HitTestBehavior.deferToChild] if [child] is not null and
+  /// [HitTestBehavior.translucent] if child is null.
+  final HitTestBehavior behavior;
 
   /// Child below this widget.
   final Widget child;
@@ -627,10 +638,10 @@ class TextSelectionGestureDetector extends StatefulWidget {
 }
 
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
-  // Is shortly after a previous single tap when not null.
+  // Counts down for a short duration after a previous tap. Null otherwise.
   Timer _doubleTapTimer;
   Offset _lastTapOffset;
-  // True if second tap down of a double tap is detected. Used to discard
+  // True if a second tap down of a double tap is detected. Used to discard
   // subsequent tap up / tap hold of the same tap.
   bool _isDoubleTap = false;
 
@@ -705,12 +716,12 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      behavior: HitTestBehavior.translucent,
       onTapDown: _handleTapDown,
       onTapUp: _handleTapUp,
       onTapCancel: _handleTapCancel,
       onLongPress: _handleLongPress,
       excludeFromSemantics: true,
+      behavior: widget.behavior,
       child: widget.child,
     );
   }

@@ -694,6 +694,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           onSingleTapCancel: _handleSingleTapCancel,
           onSingleLongTapDown: _handleSingleLongTapDown,
           onDoubleTapDown: _handleDoubleTapDown,
+          behavior: HitTestBehavior.translucent,
           child: child,
         ),
       ),
