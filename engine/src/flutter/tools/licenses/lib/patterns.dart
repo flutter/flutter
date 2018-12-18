@@ -1209,7 +1209,7 @@ final List<RegExp> csLicenses = <RegExp>[
     r'^\1\2OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF *\n'
     r'^\1\2SUCH DAMAGE\. *\n'
     r'^(?:(?:\1\2?g? *)? *\n)*'
-    r'^\1\2The licence and distribution terms for any publicly available version or *\n'
+    r'^\1\2The licence and distribution terms for any publically available version or *\n'
     r'^\1\2derivative of this code cannot be changed\. +i\.e\. +this code cannot simply be *\n'
     r'^\1\2copied and put under another distribution licence *\n'
     r'^\1\2\[including the GNU Public Licence\.\]',
