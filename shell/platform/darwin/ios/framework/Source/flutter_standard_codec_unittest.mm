@@ -66,12 +66,12 @@ TEST(FlutterStandardCodec, CanEncodeAndDecodeUInt32) {
   checkEncodeDecode(@(value), [NSData dataWithBytes:bytes length:9]);
 }
 
-TEST(FlutterStandardCodec, CanEncodeAndDecodeUInt64AsHexString) {
+TEST(FlutterStandardCodec, CanEncodeUInt64) {
   FlutterStandardMessageCodec* codec = [FlutterStandardMessageCodec sharedInstance];
   UInt64 u64 = 0xfffffffffffffffa;
+  uint8_t bytes[9] = {0x04, 0xfa, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
   NSData* encoded = [codec encode:@(u64)];
-  NSString* decoded = [codec decode:encoded];
-  ASSERT_TRUE([decoded isEqual:@"fffffffffffffffa"]);
+  ASSERT_TRUE([encoded isEqual:[NSData dataWithBytes:bytes length:9]]);
 }
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeSInt8) {
