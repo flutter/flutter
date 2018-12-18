@@ -542,6 +542,8 @@ class Curves {
   static const Cubic easeOut = Cubic(0.0, 0.0, 0.58, 1.0);
 
   /// A cubic animation curve that starts linearly and ends slowly.
+  ///
+  /// A symmetric animation to [easeInToLinear].
   static const Cubic linearToEaseOut = Cubic(0.45, 1.0, 0.58, 1.0);
 
   /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly.
