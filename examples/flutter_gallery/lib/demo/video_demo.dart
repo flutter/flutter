@@ -364,7 +364,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
     super.initState();
 
     Future<void> initController(VideoPlayerController controller, String name) async {
-      print('> VideoDemo initController "$name" ${isDisposed ? "DISPOSED" : ""');
+      print('> VideoDemo initController "$name" ${isDisposed ? "DISPOSED" : ""}');
       controller.setLooping(true);
       controller.setVolume(0.0);
       controller.play();
