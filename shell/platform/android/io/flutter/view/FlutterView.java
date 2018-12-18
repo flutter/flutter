@@ -319,7 +319,7 @@ public class FlutterView extends SurfaceView
                 Method localeListGet = localeList.getClass().getDeclaredMethod("get", int.class);
                 Method localeListSize = localeList.getClass().getDeclaredMethod("size");
                 int localeCount = (int)localeListSize.invoke(localeList);
-                List<String> data = new ArrayList<String>();
+                List<String> data = new ArrayList<>();
                 for (int index = 0; index < localeCount; ++index) {
                     Locale locale = (Locale)localeListGet.invoke(localeList, index);
                     data.add(locale.getLanguage());
