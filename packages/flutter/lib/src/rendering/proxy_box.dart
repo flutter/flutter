@@ -1504,6 +1504,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
 /// determine the actual shape of the physical model.
 abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   /// The [shape], [elevation], [color], and [shadowColor] must not be null.
+  /// Additionally, the [elevation] must be non-negative.
   _RenderPhysicalModelBase({
     @required RenderBox child,
     @required double elevation,
@@ -1511,7 +1512,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     @required Color shadowColor,
     Clip clipBehavior = Clip.none,
     CustomClipper<T> clipper,
-  }) : assert(elevation != null),
+  }) : assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        assert(clipBehavior != null),
@@ -1520,14 +1521,16 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
        _shadowColor = shadowColor,
        super(child: child, clipBehavior: clipBehavior, clipper: clipper);
 
-  /// The z-coordinate at which to place this material.
+  /// The z-coordinate relative to the parent at which to place this material.
+  ///
+  /// The value is non-negative.
   ///
   /// If [debugDisableShadows] is set, this value is ignored and no shadow is
   /// drawn (an outline is rendered instead).
   double get elevation => _elevation;
   double _elevation;
   set elevation(double value) {
-    assert(value != null);
+    assert(value != null && value >= 0.0);
     if (elevation == value)
       return;
     final bool didNeedCompositing = alwaysNeedsCompositing;
@@ -1585,6 +1588,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   /// The [color] is required.
   ///
   /// The [shape], [elevation], [color], and [shadowColor] must not be null.
+  /// Additionally, the [elevation] must be non-negative.
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,
@@ -1595,7 +1599,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
     Color shadowColor = const Color(0xFF000000),
   }) : assert(shape != null),
        assert(clipBehavior != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        _shape = shape,
@@ -1742,8 +1746,8 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   ///
   /// The [color] and [shape] parameters are required.
   ///
-  /// The [clipper], [elevation], [color] and [shadowColor] must
-  /// not be null.
+  /// The [clipper], [elevation], [color] and [shadowColor] must not be null.
+  /// Additionally, the [elevation] must be non-negative.
   RenderPhysicalShape({
     RenderBox child,
     @required CustomClipper<Path> clipper,
@@ -1752,7 +1756,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
     @required Color color,
     Color shadowColor = const Color(0xFF000000),
   }) : assert(clipper != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        super(
