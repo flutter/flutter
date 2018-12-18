@@ -2274,7 +2274,7 @@ class InputDecoration {
   ///
   /// {@tool sample}
   /// ```dart
-  /// counter: (int currentLength, int maxLength) {
+  /// Widget counter(int currentLength, int maxLength) {
   ///   return Text('You have entered $currentLength of $maxLength characters');
   /// }
   /// ```
