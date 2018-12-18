@@ -53,7 +53,7 @@ gcc_toolchain("clang_x86") {
 
 gcc_toolchain("x86") {
   cc = "${compiler_prefix}gcc"
-  cxx = "$compiler_prefix}g++"
+  cxx = "${compiler_prefix}g++"
 
   readelf = "readelf"
   nm = "nm"
