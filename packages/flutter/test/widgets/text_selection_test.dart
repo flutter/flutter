@@ -29,6 +29,7 @@ void main() {
   Future<void> pumpGestureDetector(WidgetTester tester) async {
     await tester.pumpWidget(
       TextSelectionGestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTapDown: _handleTapDown,
         onSingleTapUp: _handleSingleTapUp,
         onSingleTapCancel: _handleSingleTapCancel,
