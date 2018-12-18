@@ -615,7 +615,7 @@ void main() {
 
     Widget buildFrame({
       String counterText,
-      Widget counter,
+      Function counter,
     }) {
       return MaterialApp(
         home: Scaffold(
@@ -655,7 +655,9 @@ void main() {
 
     // When counter is set and counterText is null, shows the counter widget
     final Key key = UniqueKey();
-    final Widget counter = Text('hello', key: key);
+    final Function counter = (int currentLength, int max) {
+      return Text('${currentLength.toString()} of ${max.toString()}', key: key);
+    };
     await tester.pumpWidget(buildFrame(counter: counter));
     counterFinder = find.byKey(key);
     expect(counterFinder, findsOneWidget);
