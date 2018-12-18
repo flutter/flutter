@@ -67,7 +67,7 @@ class TestPointer {
   /// By default, the time stamp on the event is [Duration.zero]. You
   /// can give a specific time stamp by passing the `timeStamp`
   /// argument.
-  PointerDownEvent down(Offset newLocation, { Duration timeStamp = Duration.zero, }) {
+  PointerDownEvent down(Offset newLocation, { Duration timeStamp = Duration.zero }) {
     assert(!isDown);
     _isDown = true;
     _location = newLocation;
