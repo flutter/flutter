@@ -61,7 +61,6 @@ class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
  private:
   fml::RefPtr<AndroidContextGL> onscreen_context_;
   fml::RefPtr<AndroidContextGL> offscreen_context_;
-  sk_sp<GrContext> gr_context_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceGL);
 };
