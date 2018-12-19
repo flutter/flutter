@@ -205,22 +205,22 @@ class ResourceExtractor {
                     TIMESTAMP_PREFIX + packageInfo.versionCode + "-" + packageInfo.lastUpdateTime;
 
             if (updateManifest != null) {
-                String baselineVersion = updateManifest.optString("baselineVersion", null);
-                if (baselineVersion == null) {
-                    Log.w(TAG, "Invalid update manifest: baselineVersion");
+                String buildNumber = updateManifest.optString("buildNumber", null);
+                if (buildNumber == null) {
+                    Log.w(TAG, "Invalid update manifest: buildNumber");
                 }
 
-                String updateVersion = updateManifest.optString("updateVersion", null);
-                if (updateVersion == null) {
-                    Log.w(TAG, "Invalid update manifest: updateVersion");
+                String patchNumber = updateManifest.optString("patchNumber", null);
+                if (patchNumber == null) {
+                    Log.w(TAG, "Invalid update manifest: patchNumber");
                 }
 
-                if (baselineVersion != null && updateVersion != null) {
-                    if (!baselineVersion.equals(Integer.toString(packageInfo.versionCode))) {
+                if (buildNumber != null && patchNumber != null) {
+                    if (!buildNumber.equals(Integer.toString(packageInfo.versionCode))) {
                         Log.w(TAG, "Outdated update file for " + packageInfo.versionCode);
                     } else {
                         final File updateFile = new File(FlutterMain.getUpdateInstallationPath());
-                        expectedTimestamp += "-" + updateVersion + "-" + updateFile.lastModified();
+                        expectedTimestamp += "-" + patchNumber + "-" + updateFile.lastModified();
                     }
                 }
             }
