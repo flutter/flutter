@@ -384,10 +384,18 @@ class TextField extends StatefulWidget {
   /// arguments [int currentLength] and [int maxLength].  Will be placed below
   /// the line instead of the default widget built when passing [counterText].
   ///
+  /// Accessibility will be up to you if you use this instead of [counterText].
+  ///
   /// {@tool sample}
   /// ```dart
-  /// Widget counter(int currentLength, int maxLength) {
-  ///   return Text('$currentLength of $maxLength characters');
+  /// Widget counter(BuildContext context, { int currentLength, int maxLength }) {
+  ///   return Semantics(
+  ///     container: true,
+  ///     child: Text(
+  ///       '$currentLength of $maxLength characters',
+  ///       semanticsLabel: 'character count',
+  ///     ),
+  ///   );
   /// }
   /// ```
   /// {@end-tool}
