@@ -25,6 +25,7 @@ typedef InputCounterWidgetBuilder = Widget Function(
   {
     @required int currentLength,
     @required int maxLength,
+    @required bool isFocused,
   }
 );
 
@@ -380,17 +381,28 @@ class TextField extends StatefulWidget {
   /// textfield's internal gesture detector, use a [Listener].
   final GestureTapCallback onTap;
 
-  /// Function to generate a custom counter widget, called with positional
-  /// arguments [int currentLength] and [int maxLength].  Will be placed below
-  /// the line instead of the default widget built when passing [counterText].
+  /// Function to generate a custom counter widget. Passed the build context,
+  /// current and max lengths of the input, and [isFocused]. Will be placed
+  /// below the line in place of the default widget built when passing
+  /// [counterText].
   ///
   /// Accessibility will be up to you if you use this instead of [counterText].
+  /// Be sure to wrap your widget in a [Semantics] widget and use the given
+  /// [isFocused] value.
   ///
   /// {@tool sample}
   /// ```dart
-  /// Widget counter(BuildContext context, { int currentLength, int maxLength }) {
+  /// Widget counter(
+  ///   BuildContext context,
+  ///   {
+  ///     int currentLength,
+  ///     int maxLength,
+  ///     bool isFocused,
+  ///   },
+  /// ) {
   ///   return Semantics(
   ///     container: true,
+  ///     isFocused: isFocused,
   ///     child: Text(
   ///       '$currentLength of $maxLength characters',
   ///       semanticsLabel: 'character count',
@@ -457,6 +469,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         context,
         currentLength: currentLength,
         maxLength: widget.maxLength,
+        isFocused: _effectiveFocusNode.hasFocus,
       );
       return effectiveDecoration.copyWith(counter: counter);
     }

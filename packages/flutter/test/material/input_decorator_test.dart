@@ -654,7 +654,7 @@ void main() {
     const String counterText = 'I show instead of count';
     final Widget counter = Text('hello', key: counterKey);
     final InputCounterWidgetBuilder buildCounter =
-      (BuildContext context, { int currentLength, int maxLength }) {
+      (BuildContext context, { int currentLength, int maxLength, bool isFocused }) {
         return Text(
           '${currentLength.toString()} of ${maxLength.toString()}',
           key: buildCounterKey,
