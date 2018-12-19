@@ -398,11 +398,11 @@ class TextField extends StatefulWidget {
   ///     int currentLength,
   ///     int maxLength,
   ///     bool isFocused,
-  ///   },
+  ///   }
   /// ) {
   ///   return Semantics(
   ///     container: true,
-  ///     isFocused: isFocused,
+  ///     liveRegion: isFocused,
   ///     child: Text(
   ///       '$currentLength of $maxLength characters',
   ///       semanticsLabel: 'character count',

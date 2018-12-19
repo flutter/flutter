@@ -644,7 +644,7 @@ void main() {
     await tester.pumpWidget(buildFrame());
     Finder counterFinder = find.byType(Text);
     expect(counterFinder, findsOneWidget);
-    Text counterWidget = tester.widget(counterFinder);
+    final Text counterWidget = tester.widget(counterFinder);
     expect(counterWidget.data, '0/${maxLength.toString()}');
 
     // When counter, counterText, and buildCounter are set, shows the counter
