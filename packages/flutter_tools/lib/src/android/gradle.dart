@@ -384,6 +384,8 @@ Future<void> _buildGradleProjectV2(
   }
   if (buildInfo.targetPlatform != null)
     command.add('-Ptarget-platform=${getNameForTargetPlatform(buildInfo.targetPlatform)}');
+  if (buildInfo.flavor != null)
+    command.add('-Pflavor=${buildInfo.flavor}');
 
   command.add(assembleTask);
   final int exitCode = await runCommandAndStreamOutput(
