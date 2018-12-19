@@ -443,7 +443,7 @@ class _MaterialAppState extends State<MaterialApp> {
             mini: true,
           );
         },
-      )
+      ),
     );
 
     assert(() {

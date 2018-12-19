@@ -182,7 +182,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     // Proof by contradiction:
     //
     // If we introduce a loop, this retained layer must be appended to one of
-    // its descendent layers, say A. That means the child structure of A has
+    // its descendant layers, say A. That means the child structure of A has
     // changed so A's _needsAddToScene is true. This contradicts
     // _subtreeNeedsAddToScene being false.
     if (!_subtreeNeedsAddToScene && _engineLayer != null) {
