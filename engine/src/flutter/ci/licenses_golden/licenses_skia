@@ -1,4 +1,4 @@
-Signature: 46cc1581cee7c269169bb5a2a74e4d74
+Signature: 7ef78e46c81808cb45314dbb00832732
 
 UNUSED LICENSES:
 
@@ -2265,6 +2265,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Debian9-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Debian9-Clang-GCE-CPU-AVX2-x86_64-Release-All-BonusConfigs.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Debian9-Clang-NUC5PPYH-GPU-IntelHD405-x86_64-Debug-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Debian9-Clang-NUC7i5BNK-GPU-IntelIris640-x86_64-Release-All.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Mac-Clang-MacBook10.1-GPU-IntelHD615-x86_64-Release-All-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Mac-Clang-MacBookPro11.5-GPU-RadeonHD8870M-x86_64-Release-All-MoltenVK_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Mac-Clang-MacMini7.1-GPU-IntelIris5100-x86_64-Release-All-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Ubuntu17-GCC-Golo-GPU-QuadroP400-x86_64-Release-All-Valgrind_AbandonGpuContext_SK_CPU_LIMIT_SSE41.json
