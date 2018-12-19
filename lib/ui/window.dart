@@ -778,7 +778,7 @@ class Window {
 
   /// Change the retained semantics data about this window.
   ///
-  /// If [semanticsEnabled] is true, the user has requested that this funciton
+  /// If [semanticsEnabled] is true, the user has requested that this function
   /// be called whenever the semantic content of this window changes.
   ///
   /// In either case, this function disposes the given update, which means the
