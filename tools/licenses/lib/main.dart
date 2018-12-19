@@ -2156,6 +2156,65 @@ class _Progress {
   }
 }
 
+Future<void> _collectLicensesForComponent(_RepositoryDirectory componentRoot, {
+  String inputGolden,
+  String outputGolden,
+  bool force,
+}) async {
+  String signature;
+  if (force) {
+    signature = null;
+  } else {
+    signature = await componentRoot.signature;
+  }
+
+  // Check whether the golden file matches the signature of the current contents
+  // of this directory.
+  try {
+    system.File goldenFile = new system.File(inputGolden);
+    String goldenSignature = await goldenFile.openRead()
+        .transform(utf8.decoder).transform(new LineSplitter()).first;
+    final RegExp signaturePattern = new RegExp(r'Signature: (\w+)');
+    Match goldenMatch = signaturePattern.matchAsPrefix(goldenSignature);
+    if (goldenMatch != null && goldenMatch.group(1) == signature) {
+      system.stderr.writeln('    Skipping this component - no change in signature');
+      return;
+    }
+  } on system.FileSystemException {
+    system.stderr.writeln('    Failed to read signature file, scanning directory.');
+  }
+
+  _Progress progress = new _Progress(componentRoot.fileCount);
+
+  system.File outFile = new system.File(outputGolden);
+  system.IOSink sink = outFile.openWrite();
+  if (signature != null)
+    sink.writeln('Signature: $signature\n');
+
+  List<License> licenses = new Set<License>.from(componentRoot.getLicenses(progress).toList()).toList();
+
+  sink.writeln('UNUSED LICENSES:\n');
+  List<String> unusedLicenses = licenses
+    .where((License license) => !license.isUsed)
+    .map((License license) => license.toString())
+    .toList();
+  unusedLicenses.sort();
+  sink.writeln(unusedLicenses.join('\n\n'));
+  sink.writeln('~' * 80);
+
+  sink.writeln('USED LICENSES:\n');
+  List<License> usedLicenses = licenses.where((License license) => license.isUsed).toList();
+  List<String> output = usedLicenses.map((License license) => license.toString()).toList();
+  output.sort();
+  sink.writeln(output.join('\n\n'));
+  sink.writeln('Total license count: ${licenses.length}');
+
+  await sink.close();
+  progress.label = 'Done.';
+  progress.flush();
+  system.stderr.writeln('');
+}
+
 
 // MAIN
 
@@ -2213,86 +2272,38 @@ Future<Null> main(List<String> arguments) async {
       progress.flush();
       system.stderr.writeln('');
     } else {
-      RegExp signaturePattern = new RegExp(r'Signature: (\w+)');
 
       final List<String> usedGoldens = <String>[];
       bool isFirstComponent = true;
       for (_RepositoryDirectory component in root.subdirectories) {
         system.stderr.writeln('Collecting licenses for ${component.io.name}');
 
-        String signature;
-        if (component.io.name == 'flutter') {
-          // Always run the full license check on the flutter tree.  This tree is
-          // relatively small but changes frequently in ways that do not affect
-          // the license output, and we don't want to require updates to the golden
-          // signature for those changes.
-          signature = null;
-        } else {
-          signature = await component.signature;
-        }
-
-        // Check whether the golden file matches the signature of the current contents
-        // of this directory.
-        try {
-          final String goldenFileName = 'licenses_${component.io.name}';
-          system.File goldenFile = new system.File(path.join(argResults['golden'], goldenFileName));
-          String goldenSignature = await goldenFile.openRead()
-              .transform(utf8.decoder).transform(new LineSplitter()).first;
-          usedGoldens.add(goldenFileName);
-          Match goldenMatch = signaturePattern.matchAsPrefix(goldenSignature);
-          if (goldenMatch != null && goldenMatch.group(1) == signature) {
-            system.stderr.writeln('    Skipping this component - no change in signature');
-            continue;
-          }
-        } on system.FileSystemException {
-            system.stderr.writeln('    Failed to read signature file, scanning directory.');
-        }
-
-        _Progress progress = new _Progress(component.fileCount);
-
-        system.File outFile = new system.File(
-            path.join(argResults['out'], 'licenses_${component.name}'));
-        system.IOSink sink = outFile.openWrite();
-        if (signature != null)
-          sink.writeln('Signature: $signature\n');
-
         _RepositoryDirectory componentRoot;
         if (isFirstComponent) {
-          // For the first component, we can use the results of the initial
-          // repository crawl.
+          // For the first component, we can use the results of the initial repository crawl.
           isFirstComponent = false;
           componentRoot = component;
         } else {
           // For other components, we need a clean repository that does not
           // contain any state left over from previous components.
           clearLicenseRegistry();
-          componentRoot = new _RepositoryRoot(rootDirectory).subdirectories.firstWhere(
-            (_RepositoryDirectory dir) => dir.name == component.name
-          );
+          componentRoot = new _RepositoryRoot(rootDirectory).subdirectories
+              .firstWhere((_RepositoryDirectory dir) => dir.name == component.name);
         }
-        List<License> licenses = new Set<License>.from(
-            componentRoot.getLicenses(progress).toList()).toList();
 
-        sink.writeln('UNUSED LICENSES:\n');
-        List<String> unusedLicenses = licenses
-          .where((License license) => !license.isUsed)
-          .map((License license) => license.toString())
-          .toList();
-        unusedLicenses.sort();
-        sink.writeln(unusedLicenses.join('\n\n'));
-        sink.writeln('~' * 80);
-
-        sink.writeln('USED LICENSES:\n');
-        List<License> usedLicenses = licenses.where((License license) => license.isUsed).toList();
-        List<String> output = usedLicenses.map((License license) => license.toString()).toList();
-        output.sort();
-        sink.writeln(output.join('\n\n'));
-        sink.writeln('Total license count: ${licenses.length}');
-
-        await sink.close();
-        progress.label = 'Done.';
-        progress.flush();
-        system.stderr.writeln('');
+        // Always run the full license check on the flutter tree.  This tree is
+        // relatively small but changes frequently in ways that do not affect
+        // the license output, and we don't want to require updates to the golden
+        // signature for those changes.
+        final bool force = component.io.name == 'flutter';
+        final String goldenFileName = 'licenses_${component.io.name}';
+        await _collectLicensesForComponent(
+            componentRoot,
+            inputGolden: path.join(argResults['golden'], goldenFileName),
+            outputGolden: path.join(argResults['out'], goldenFileName),
+            force: force,
+        );
+        usedGoldens.add(goldenFileName);
       }
 
       final Set<String> unusedGoldens = system.Directory(argResults['golden']).listSync().map((system.FileSystemEntity file) => path.basename(file.path)).toSet()
