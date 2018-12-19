@@ -59,7 +59,7 @@ Future<void> main() async {
   final Finder demoList = find.byKey(const Key('GalleryDemoList'));
   final Finder demoItem = find.text('Text fields');
   do {
-    await controller.drag(demoList, const Offset(0.0, -300.0));
+    await controller.drag(demoList, const Offset(0, -300));
     await Future<void>.delayed(const Duration(milliseconds: 20));
   } while (!demoItem.precache());
 
@@ -68,7 +68,7 @@ Future<void> main() async {
   final Rect demoItemBounds = boundsFor(controller, demoItem);
   final Rect demoListBounds = boundsFor(controller, demoList);
   if (!demoListBounds.contains(demoItemBounds.center)) {
-    await controller.drag(demoList, Offset(0.0, demoListBounds.center.dy - demoItemBounds.center.dy));
+    await controller.drag(demoList, Offset(0, demoListBounds.center.dy - demoItemBounds.center.dy));
     await endOfAnimation();
   }
 

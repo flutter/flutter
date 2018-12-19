@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'sections.dart';
 
-const double kSectionIndicatorWidth = 32.0;
+const double kSectionIndicatorWidth = 32;
 
 // The card for a single section. Displays the section's gradient and background image.
 class SectionCard extends StatelessWidget {
@@ -64,7 +64,7 @@ class SectionTitle extends StatelessWidget {
   static const TextStyle sectionTitleStyle = TextStyle(
     fontFamily: 'Raleway',
     inherit: false,
-    fontSize: 24.0,
+    fontSize: 24,
     fontWeight: FontWeight.w500,
     color: Colors.white,
     textBaseline: TextBaseline.alphabetic,
@@ -85,7 +85,7 @@ class SectionTitle extends StatelessWidget {
           child: Stack(
             children: <Widget>[
               Positioned(
-                top: 4.0,
+                top: 4,
                 child: Text(section.title, style: sectionTitleShadowStyle),
               ),
               Text(section.title, style: sectionTitleStyle),
@@ -108,7 +108,7 @@ class SectionIndicator extends StatelessWidget {
     return IgnorePointer(
       child: Container(
         width: kSectionIndicatorWidth,
-        height: 3.0,
+        height: 3,
         color: Colors.white.withOpacity(opacity),
       ),
     );
@@ -128,7 +128,7 @@ class SectionDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget image = DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6.0),
+        borderRadius: BorderRadius.circular(6),
         image: DecorationImage(
           image: AssetImage(
             detail.imageAsset,
@@ -143,8 +143,8 @@ class SectionDetailView extends StatelessWidget {
     Widget item;
     if (detail.title == null && detail.subtitle == null) {
       item = Container(
-        height: 240.0,
-        padding: const EdgeInsets.all(16.0),
+        height: 240,
+        padding: const EdgeInsets.all(16),
         child: SafeArea(
           top: false,
           bottom: false,
@@ -155,7 +155,7 @@ class SectionDetailView extends StatelessWidget {
       item = ListTile(
         title: Text(detail.title),
         subtitle: Text(detail.subtitle),
-        leading: SizedBox(width: 32.0, height: 32.0, child: image),
+        leading: SizedBox(width: 32, height: 32, child: image),
       );
     }
 

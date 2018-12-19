@@ -23,12 +23,12 @@ class ModalBottomSheetDemo extends StatelessWidget {
             showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
               return Container(
                 child: Padding(
-                  padding: const EdgeInsets.all(32.0),
+                  padding: const EdgeInsets.all(32),
                   child: Text('This is the modal bottom sheet. Tap anywhere to dismiss.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Theme.of(context).accentColor,
-                      fontSize: 24.0
+                      fontSize: 24
                     )
                   )
                 )

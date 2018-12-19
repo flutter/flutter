@@ -129,7 +129,7 @@ final Widget trailingButtons = Row(
   mainAxisSize: MainAxisSize.min,
   children: <Widget>[
     CupertinoDemoDocumentationButton(CupertinoNavigationDemo.routeName),
-    const Padding(padding: EdgeInsets.only(left: 8.0)),
+    const Padding(padding: EdgeInsets.only(left: 8)),
     const ExitButton(),
   ],
 );
@@ -203,30 +203,30 @@ class Tab1RowItem extends StatelessWidget {
         top: false,
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0, right: 8.0),
+          padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8, right: 8),
           child: Row(
             children: <Widget>[
               Container(
-                height: 60.0,
-                width: 60.0,
+                height: 60,
+                width: 60,
                 decoration: BoxDecoration(
                   color: color,
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(colorName),
-                      const Padding(padding: EdgeInsets.only(top: 8.0)),
+                      const Padding(padding: EdgeInsets.only(top: 8)),
                       const Text(
                         'Buy this cool color',
                         style: TextStyle(
                           color: Color(0xFF8E8E93),
-                          fontSize: 13.0,
+                          fontSize: 13,
                           fontWeight: FontWeight.w300,
                         ),
                       ),
@@ -262,7 +262,7 @@ class Tab1RowItem extends StatelessWidget {
       children: <Widget>[
         row,
         Container(
-          height: 1.0,
+          height: 1,
           color: const Color(0xFFD9D9D9),
         ),
       ],
@@ -309,21 +309,21 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
         bottom: false,
         child: ListView(
           children: <Widget>[
-            const Padding(padding: EdgeInsets.only(top: 16.0)),
+            const Padding(padding: EdgeInsets.only(top: 16)),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   Container(
-                    height: 128.0,
-                    width: 128.0,
+                    height: 128,
+                    width: 128,
                     decoration: BoxDecoration(
                       color: widget.color,
-                      borderRadius: BorderRadius.circular(24.0),
+                      borderRadius: BorderRadius.circular(24),
                     ),
                   ),
-                  const Padding(padding: EdgeInsets.only(left: 18.0)),
+                  const Padding(padding: EdgeInsets.only(left: 18)),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,29 +331,29 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                       children: <Widget>[
                         Text(
                           widget.colorName,
-                          style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                         ),
-                        const Padding(padding: EdgeInsets.only(top: 6.0)),
+                        const Padding(padding: EdgeInsets.only(top: 6)),
                         Text(
                           'Item number ${widget.index}',
                           style: const TextStyle(
                             color: Color(0xFF8E8E93),
-                            fontSize: 16.0,
+                            fontSize: 16,
                             fontWeight: FontWeight.w100,
                           ),
                         ),
-                        const Padding(padding: EdgeInsets.only(top: 20.0)),
+                        const Padding(padding: EdgeInsets.only(top: 20)),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             CupertinoButton.filled(
-                              minSize: 30.0,
-                              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                              borderRadius: BorderRadius.circular(32.0),
+                              minSize: 30,
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              borderRadius: BorderRadius.circular(32),
                               child: const Text(
                                 'GET',
                                 style: TextStyle(
-                                  fontSize: 14.0,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: -0.28,
                                 ),
@@ -361,9 +361,9 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                               onPressed: () { },
                             ),
                             CupertinoButton.filled(
-                              minSize: 30.0,
+                              minSize: 30,
                               padding: EdgeInsets.zero,
-                              borderRadius: BorderRadius.circular(32.0),
+                              borderRadius: BorderRadius.circular(32),
                               child: const Icon(CupertinoIcons.ellipsis),
                               onPressed: () { },
                             ),
@@ -376,29 +376,29 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
               ),
             ),
             const Padding(
-              padding: EdgeInsets.only(left: 16.0, top: 28.0, bottom: 8.0),
+              padding: EdgeInsets.only(left: 16, top: 28, bottom: 8),
               child: Text(
                 'USERS ALSO LIKED',
                 style: TextStyle(
                   color: Color(0xFF646464),
                   letterSpacing: -0.60,
-                  fontSize: 15.0,
+                  fontSize: 15,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
             SizedBox(
-              height: 200.0,
+              height: 200,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: 10,
-                itemExtent: 160.0,
+                itemExtent: 160,
                 itemBuilder: (BuildContext context, int index) {
                   return Padding(
-                    padding: const EdgeInsets.only(left: 16.0),
+                    padding: const EdgeInsets.only(left: 16),
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
+                        borderRadius: BorderRadius.circular(8),
                         color: relatedColors[index],
                       ),
                       child: Center(
@@ -406,7 +406,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                           child: const Icon(
                             CupertinoIcons.plus_circled,
                             color: CupertinoColors.white,
-                            size: 36.0,
+                            size: 36,
                           ),
                           onPressed: () { },
                         ),
@@ -443,12 +443,12 @@ class Tab2Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: SafeArea(
         top: false,
         bottom: false,
         child: ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(16)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -457,7 +457,7 @@ class Tab2Header extends StatelessWidget {
                   color: Color(0xFFE5E5E5),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const <Widget>[
@@ -466,7 +466,7 @@ class Tab2Header extends StatelessWidget {
                         style: TextStyle(
                           color: Color(0xFF646464),
                           letterSpacing: -0.9,
-                          fontSize: 14.0,
+                          fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -475,7 +475,7 @@ class Tab2Header extends StatelessWidget {
                         style: TextStyle(
                           color: Color(0xFF646464),
                           letterSpacing: -0.6,
-                          fontSize: 12.0,
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -488,34 +488,34 @@ class Tab2Header extends StatelessWidget {
                   color: Color(0xFFF3F3F3),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       const Text(
                         'Product or product packaging damaged during transit',
                         style: TextStyle(
-                          fontSize: 16.0,
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.46,
                         ),
                       ),
-                      const Padding(padding: EdgeInsets.only(top: 16.0)),
+                      const Padding(padding: EdgeInsets.only(top: 16)),
                       const Text(
                         'REVIEWERS',
                         style: TextStyle(
                           color: Color(0xFF646464),
-                          fontSize: 12.0,
+                          fontSize: 12,
                           letterSpacing: -0.6,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const Padding(padding: EdgeInsets.only(top: 8.0)),
+                      const Padding(padding: EdgeInsets.only(top: 8)),
                       Row(
                         children: <Widget>[
                           Container(
-                            width: 44.0,
-                            height: 44.0,
+                            width: 44,
+                            height: 44,
                             decoration: const BoxDecoration(
                               image: DecorationImage(
                                 image: AssetImage(
@@ -526,10 +526,10 @@ class Tab2Header extends StatelessWidget {
                               shape: BoxShape.circle,
                             ),
                           ),
-                          const Padding(padding: EdgeInsets.only(left: 8.0)),
+                          const Padding(padding: EdgeInsets.only(left: 8)),
                           Container(
-                            width: 44.0,
-                            height: 44.0,
+                            width: 44,
+                            height: 44,
                             decoration: const BoxDecoration(
                               image: DecorationImage(
                                 image: AssetImage(
@@ -540,11 +540,11 @@ class Tab2Header extends StatelessWidget {
                               shape: BoxShape.circle,
                             ),
                           ),
-                          const Padding(padding: EdgeInsets.only(left: 2.0)),
+                          const Padding(padding: EdgeInsets.only(left: 2)),
                           const Icon(
                             CupertinoIcons.check_mark_circled,
                             color: Color(0xFF646464),
-                            size: 20.0,
+                            size: 20,
                           ),
                         ],
                       ),
@@ -575,13 +575,13 @@ class Tab2ConversationBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(18.0)),
+        borderRadius: const BorderRadius.all(Radius.circular(18)),
         color: color == Tab2ConversationBubbleColor.blue
             ? CupertinoColors.activeBlue
             : CupertinoColors.lightBackgroundGray,
       ),
-      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Text(
         text,
         style: TextStyle(
@@ -589,7 +589,7 @@ class Tab2ConversationBubble extends StatelessWidget {
               ? CupertinoColors.white
               : CupertinoColors.black,
           letterSpacing: -0.4,
-          fontSize: 15.0,
+          fontSize: 15,
           fontWeight: FontWeight.w400,
         ),
       ),
@@ -622,13 +622,13 @@ class Tab2ConversationAvatar extends StatelessWidget {
           ],
         ),
       ),
-      margin: const EdgeInsets.only(left: 8.0, bottom: 8.0),
-      padding: const EdgeInsets.all(12.0),
+      margin: const EdgeInsets.only(left: 8, bottom: 8),
+      padding: const EdgeInsets.all(12),
       child: Text(
         text,
         style: const TextStyle(
           color: CupertinoColors.white,
-          fontSize: 13.0,
+          fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -721,7 +721,7 @@ class CupertinoDemoTab3 extends StatelessWidget {
         ),
         child: ListView(
           children: <Widget>[
-            const Padding(padding: EdgeInsets.only(top: 32.0)),
+            const Padding(padding: EdgeInsets.only(top: 32)),
             GestureDetector(
               onTap: () {
                 Navigator.of(context, rootNavigator: true).push(
@@ -735,13 +735,13 @@ class CupertinoDemoTab3 extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: CupertinoTheme.of(context).scaffoldBackgroundColor,
                   border: const Border(
-                    top: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
-                    bottom: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
+                    top: BorderSide(color: Color(0xFFBCBBC1), width: 0),
+                    bottom: BorderSide(color: Color(0xFFBCBBC1), width: 0),
                   ),
                 ),
-                height: 44.0,
+                height: 44,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: SafeArea(
                     top: false,
                     bottom: false,
@@ -783,10 +783,10 @@ class Tab3Dialog extends StatelessWidget {
           children: <Widget>[
             const Icon(
               CupertinoIcons.profile_circled,
-              size: 160.0,
+              size: 160,
               color: Color(0xFF646464),
             ),
-            const Padding(padding: EdgeInsets.only(top: 18.0)),
+            const Padding(padding: EdgeInsets.only(top: 18)),
             CupertinoButton.filled(
               child: const Text('Sign in'),
               onPressed: () {

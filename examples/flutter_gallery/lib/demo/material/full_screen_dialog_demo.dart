@@ -37,7 +37,7 @@ class DateTimeItem extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: theme.dividerColor))
               ),
@@ -65,8 +65,8 @@ class DateTimeItem extends StatelessWidget {
             )
           ),
           Container(
-            margin: const EdgeInsets.only(left: 8.0),
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            margin: const EdgeInsets.only(left: 8),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
               border: Border(bottom: BorderSide(color: theme.dividerColor))
             ),
@@ -163,10 +163,10 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
       body: Form(
         onWillPop: _onWillPop,
         child: ListView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           children: <Widget>[
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               alignment: Alignment.bottomLeft,
               child: TextField(
                 decoration: const InputDecoration(
@@ -185,7 +185,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               )
             ),
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               alignment: Alignment.bottomLeft,
               child: TextField(
                 decoration: const InputDecoration(
@@ -253,8 +253,8 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
           ]
           .map<Widget>((Widget child) {
             return Container(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              height: 96.0,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              height: 96,
               child: child
             );
           })

@@ -23,8 +23,8 @@ const Curve _kScrollCurve = Curves.fastOutSlowIn;
 // reduced to _kAppBarMidHeight, its layout is horizontal, only one section
 // heading is visible, and the section's list of details is visible below the
 // heading. The appbar's height can be reduced to no more than _kAppBarMinHeight.
-const double _kAppBarMinHeight = 90.0;
-const double _kAppBarMidHeight = 256.0;
+const double _kAppBarMinHeight = 90;
+const double _kAppBarMidHeight = 256;
 // The AppBar's max height depends on the screen, see _AnimationDemoHomeState._buildBody()
 
 // Initially occupies the same space as the status bar and gets smaller as
@@ -189,7 +189,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
     final double columnCardHeight = size.height / cardCount;
     final double rowCardWidth = size.width;
     final Offset offset = translation.alongSize(size);
-    double columnCardY = 0.0;
+    double columnCardY = 0;
     double rowCardX = -(selectedIndex * rowCardWidth);
 
     // When tCollapsed > 0 the titles spread apart
@@ -211,7 +211,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
 
       // Layout the card for index.
       final Rect columnCardRect = Rect.fromLTWH(columnCardX, columnCardY, columnCardWidth, columnCardHeight);
-      final Rect rowCardRect = Rect.fromLTWH(rowCardX, 0.0, rowCardWidth, size.height);
+      final Rect rowCardRect = Rect.fromLTWH(rowCardX, 0, rowCardWidth, size.height);
       final Rect cardRect = _interpolateRect(columnCardRect, rowCardRect).shift(offset);
       final String cardId = 'card$index';
       if (hasChild(cardId)) {
@@ -341,7 +341,7 @@ class _AllSectionsView extends AnimatedWidget {
 
     return CustomMultiChildLayout(
       delegate: _AllSectionsLayout(
-        translation: Alignment((selectedIndex.value - sectionIndex) * 2.0 - 1.0, -1.0),
+        translation: Alignment((selectedIndex.value - sectionIndex) * 2.0 - 1.0, -1),
         tColumnToRow: tColumnToRow,
         tCollapsed: tCollapsed,
         cardCount: sections.length,
@@ -381,7 +381,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
 
   Simulation _toZeroScrollOffsetSimulation(double offset, double dragVelocity) {
     final double velocity = math.max(dragVelocity, minFlingVelocity);
-    return ScrollSpringSimulation(spring, offset, 0.0, velocity, tolerance: tolerance);
+    return ScrollSpringSimulation(spring, offset, 0, velocity, tolerance: tolerance);
   }
 
   @override
@@ -430,7 +430,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   final PageController _headingPageController = PageController();
   final PageController _detailsPageController = PageController();
   ScrollPhysics _headingScrollPhysics = const NeverScrollableScrollPhysics();
-  ValueNotifier<double> selectedIndex = ValueNotifier<double>(0.0);
+  ValueNotifier<double> selectedIndex = ValueNotifier<double>(0);
 
   @override
   Widget build(BuildContext context) {
@@ -445,7 +445,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
 
   void _handleBackButton(double midScrollOffset) {
     if (_scrollController.offset >= midScrollOffset)
-      _scrollController.animateTo(0.0, curve: _kScrollCurve, duration: _kScrollDuration);
+      _scrollController.animateTo(0, curve: _kScrollCurve, duration: _kScrollDuration);
     else
       Navigator.maybePop(context);
   }
@@ -558,7 +558,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
                 // Start out below the status bar, gradually move to the top of the screen.
                 _StatusBarPaddingSliver(
                   maxHeight: statusBarHeight,
-                  scrollFactor: 7.0,
+                  scrollFactor: 7,
                 ),
                 // Section Headings
                 SliverPersistentHeader(
@@ -581,7 +581,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
                 // Details
                 SliverToBoxAdapter(
                   child: SizedBox(
-                    height: 610.0,
+                    height: 610,
                     child: NotificationListener<ScrollNotification>(
                       onNotification: (ScrollNotification notification) {
                         return _handlePageNotification(notification, _detailsPageController, _headingPageController);
@@ -603,7 +603,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
           ),
           Positioned(
             top: statusBarHeight,
-            left: 0.0,
+            left: 0,
             child: IconTheme(
               data: const IconThemeData(color: Colors.white),
               child: SafeArea(

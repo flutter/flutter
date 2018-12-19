@@ -14,8 +14,8 @@ class CupertinoSliderDemo extends StatefulWidget {
 }
 
 class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
-  double _value = 25.0;
-  double _discreteValue = 20.0;
+  double _value = 25;
+  double _discreteValue = 20;
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +40,8 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
                   children: <Widget> [
                     CupertinoSlider(
                       value: _value,
-                      min: 0.0,
-                      max: 100.0,
+                      min: 0,
+                      max: 100,
                       onChanged: (double value) {
                         setState(() {
                           _value = value;
@@ -56,8 +56,8 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
                   children: <Widget> [
                     CupertinoSlider(
                       value: _discreteValue,
-                      min: 0.0,
-                      max: 100.0,
+                      min: 0,
+                      max: 100,
                       divisions: 5,
                       onChanged: (double value) {
                         setState(() {

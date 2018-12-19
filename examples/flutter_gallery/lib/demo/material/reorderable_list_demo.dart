@@ -129,8 +129,8 @@ class _ListDemoState extends State<ReorderableListDemo> {
       case _ReorderableListType.verticalAvatar:
         listTile = Container(
           key: Key(item.value),
-          height: 100.0,
-          width: 100.0,
+          height: 100,
+          width: 100,
           child: CircleAvatar(child: Text(item.value),
             backgroundColor: Colors.green,
           ),
@@ -185,12 +185,12 @@ class _ListDemoState extends State<ReorderableListDemo> {
         child: ReorderableListView(
           header: _itemType != _ReorderableListType.threeLine
               ? Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8),
                   child: Text('Header of the list', style: Theme.of(context).textTheme.headline))
               : null,
           onReorder: _onReorder,
           scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 8),
           children: _items.map<Widget>(buildListTile).toList(),
         ),
       ),

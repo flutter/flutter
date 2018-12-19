@@ -147,13 +147,13 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
       await driver.tap(find.byTooltip('Back'));
       await driver.tap(find.text(demoCategory));
       // Scroll back to the top
-      await driver.scroll(demoList, 0.0, 10000.0, const Duration(milliseconds: 100));
+      await driver.scroll(demoList, 0, 10000, const Duration(milliseconds: 100));
     }
     currentDemoCategory = demoCategory;
 
     final SerializableFinder demoItem = find.text(demoName);
     await driver.scrollUntilVisible(demoList, demoItem,
-      dyScroll: -48.0,
+      dyScroll: -48,
       alignment: 0.5,
       timeout: const Duration(seconds: 30),
     );

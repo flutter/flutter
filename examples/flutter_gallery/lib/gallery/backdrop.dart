@@ -7,15 +7,15 @@ import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
-const double _kFrontHeadingHeight = 32.0; // front layer beveled rectangle
-const double _kFrontClosedHeight = 92.0; // front layer height when closed
-const double _kBackAppBarHeight = 56.0; // back layer (options) appbar height
+const double _kFrontHeadingHeight = 32; // front layer beveled rectangle
+const double _kFrontClosedHeight = 92; // front layer height when closed
+const double _kBackAppBarHeight = 56; // back layer (options) appbar height
 
 // The size of the front layer heading's left and right beveled corners.
 final Animatable<BorderRadius> _kFrontHeadingBevelRadius = BorderRadiusTween(
   begin: const BorderRadius.only(
-    topLeft: Radius.circular(12.0),
-    topRight: Radius.circular(12.0),
+    topLeft: Radius.circular(12),
+    topRight: Radius.circular(12),
   ),
   end: const BorderRadius.only(
     topLeft: Radius.circular(_kFrontHeadingHeight),
@@ -91,12 +91,12 @@ class _CrossFadeTransition extends AnimatedWidget {
 
     final double opacity1 = CurvedAnimation(
       parent: ReverseAnimation(progress),
-      curve: const Interval(0.5, 1.0),
+      curve: const Interval(0.5, 1),
     ).value;
 
     final double opacity2 = CurvedAnimation(
       parent: progress,
-      curve: const Interval(0.5, 1.0),
+      curve: const Interval(0.5, 1),
     ).value;
 
     return Stack(
@@ -126,7 +126,7 @@ class _CrossFadeTransition extends AnimatedWidget {
 class _BackAppBar extends StatelessWidget {
   const _BackAppBar({
     Key key,
-    this.leading = const SizedBox(width: 56.0),
+    this.leading = const SizedBox(width: 56),
     @required this.title,
     this.trailing,
   }) : assert(leading != null), assert(title != null), super(key: key);
@@ -140,7 +140,7 @@ class _BackAppBar extends StatelessWidget {
     final List<Widget> children = <Widget>[
       Container(
         alignment: Alignment.center,
-        width: 56.0,
+        width: 56,
         child: leading,
       ),
       Expanded(
@@ -152,7 +152,7 @@ class _BackAppBar extends StatelessWidget {
       children.add(
         Container(
           alignment: Alignment.center,
-          width: 56.0,
+          width: 56,
           child: trailing,
         ),
       );
@@ -199,15 +199,15 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   AnimationController _controller;
   Animation<double> _frontOpacity;
 
-  static final Animatable<double> _frontOpacityTween = Tween<double>(begin: 0.2, end: 1.0)
-    .chain(CurveTween(curve: const Interval(0.0, 0.4, curve: Curves.easeInOut)));
+  static final Animatable<double> _frontOpacityTween = Tween<double>(begin: 0.2, end: 1)
+    .chain(CurveTween(curve: const Interval(0, 0.4, curve: Curves.easeInOut)));
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
-      value: 1.0,
+      value: 1,
       vsync: this,
     );
     _frontOpacity = _controller.drive(_frontOpacityTween);
@@ -223,7 +223,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
     // Warning: this can be safely called from the event handlers but it may
     // not be called at build time.
     final RenderBox renderBox = _backdropKey.currentContext.findRenderObject();
-    return math.max(0.0, renderBox.size.height - _kBackAppBarHeight - _kFrontClosedHeight);
+    return math.max(0, renderBox.size.height - _kBackAppBarHeight - _kFrontClosedHeight);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -236,9 +236,9 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
 
     final double flingVelocity = details.velocity.pixelsPerSecond.dy / _backdropHeight;
     if (flingVelocity < 0.0)
-      _controller.fling(velocity: math.max(2.0, -flingVelocity));
+      _controller.fling(velocity: math.max(2, -flingVelocity));
     else if (flingVelocity > 0.0)
-      _controller.fling(velocity: math.min(-2.0, -flingVelocity));
+      _controller.fling(velocity: math.min(-2, -flingVelocity));
     else
       _controller.fling(velocity: _controller.value < 0.5 ? -2.0 : 2.0);
   }
@@ -251,8 +251,8 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
     final Animation<RelativeRect> frontRelativeRect = _controller.drive(RelativeRectTween(
-      begin: RelativeRect.fromLTRB(0.0, constraints.biggest.height - _kFrontClosedHeight, 0.0, 0.0),
-      end: const RelativeRect.fromLTRB(0.0, _kBackAppBarHeight, 0.0, 0.0),
+      begin: RelativeRect.fromLTRB(0, constraints.biggest.height - _kFrontClosedHeight, 0, 0),
+      end: const RelativeRect.fromLTRB(0, _kBackAppBarHeight, 0, 0),
     ));
 
     final List<Widget> layers = <Widget>[
@@ -293,7 +293,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
           animation: _controller,
           builder: (BuildContext context, Widget child) {
             return PhysicalShape(
-              elevation: 12.0,
+              elevation: 12,
               color: Theme.of(context).canvasColor,
               clipper: ShapeBorderClipper(
                 shape: BeveledRectangleBorder(

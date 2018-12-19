@@ -155,19 +155,19 @@ class _ListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: CupertinoTheme.of(context).scaffoldBackgroundColor,
-      height: 60.0,
-      padding: const EdgeInsets.only(top: 9.0),
+      height: 60,
+      padding: const EdgeInsets.only(top: 9),
       child: Row(
         children: <Widget>[
           Container(
-            width: 38.0,
+            width: 38,
             child: called
                 ? const Align(
                     alignment: Alignment.topCenter,
                     child: Icon(
                       CupertinoIcons.phone_solid,
                       color: CupertinoColors.inactiveGray,
-                      size: 18.0,
+                      size: 18,
                     ),
                   )
                 : null,
@@ -176,10 +176,10 @@ class _ListItem extends StatelessWidget {
           child: Container(
               decoration: const BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
+                  bottom: BorderSide(color: Color(0xFFBCBBC1), width: 0),
                 ),
               ),
-              padding: const EdgeInsets.only(left: 1.0, bottom: 9.0, right: 10.0),
+              padding: const EdgeInsets.only(left: 1, bottom: 9, right: 10),
               child: Row(
                 children: <Widget>[
                   Expanded(
@@ -201,7 +201,7 @@ class _ListItem extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 15.0,
+                            fontSize: 15,
                             letterSpacing: -0.24,
                             color: CupertinoColors.inactiveGray,
                           ),
@@ -213,12 +213,12 @@ class _ListItem extends StatelessWidget {
                     date,
                     style: const TextStyle(
                       color: CupertinoColors.inactiveGray,
-                      fontSize: 15.0,
+                      fontSize: 15,
                       letterSpacing: -0.41,
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: 9.0),
+                    padding: const EdgeInsets.only(left: 9),
                     child: Icon(
                       CupertinoIcons.info,
                       color: CupertinoTheme.of(context).primaryColor,

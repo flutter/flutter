@@ -73,16 +73,16 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
       case TabsDemoStyle.iconsAndText:
         return ShapeDecoration(
           shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            borderRadius: BorderRadius.all(Radius.circular(4)),
             side: BorderSide(
               color: Colors.white24,
-              width: 2.0,
+              width: 2,
             ),
           ) + const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            borderRadius: BorderRadius.all(Radius.circular(4)),
             side: BorderSide(
               color: Colors.transparent,
-              width: 4.0,
+              width: 4,
             ),
           ),
         );
@@ -92,12 +92,12 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
           shape: const CircleBorder(
             side: BorderSide(
               color: Colors.white24,
-              width: 4.0,
+              width: 4,
             ),
           ) + const CircleBorder(
             side: BorderSide(
               color: Colors.transparent,
-              width: 4.0,
+              width: 4,
             ),
           ),
         );
@@ -107,12 +107,12 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
           shape: const StadiumBorder(
             side: BorderSide(
               color: Colors.white24,
-              width: 2.0,
+              width: 2,
             ),
           ) + const StadiumBorder(
             side: BorderSide(
               color: Colors.transparent,
-              width: 4.0,
+              width: 4,
             ),
           ),
         );
@@ -180,13 +180,13 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
             bottom: false,
             child: Container(
               key: ObjectKey(page.icon),
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(12),
               child: Card(
                 child: Center(
                   child: Icon(
                     page.icon,
                     color: iconColor,
-                    size: 128.0,
+                    size: 128,
                     semanticLabel: 'Placeholder for ${page.text} tab',
                   ),
                 ),

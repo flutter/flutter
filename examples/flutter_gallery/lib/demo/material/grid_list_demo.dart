@@ -14,7 +14,7 @@ enum GridDemoTileStyle {
 
 typedef BannerTapCallback = void Function(Photo photo);
 
-const double _kMinFlingVelocity = 800.0;
+const double _kMinFlingVelocity = 800;
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class Photo {
@@ -65,7 +65,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
   AnimationController _controller;
   Animation<Offset> _flingAnimation;
   Offset _offset = Offset.zero;
-  double _scale = 1.0;
+  double _scale = 1;
   Offset _normalizedOffset;
   double _previousScale;
 
@@ -370,9 +370,9 @@ class GridListDemoState extends State<GridListDemo> {
               bottom: false,
               child: GridView.count(
                 crossAxisCount: (orientation == Orientation.portrait) ? 2 : 3,
-                mainAxisSpacing: 4.0,
-                crossAxisSpacing: 4.0,
-                padding: const EdgeInsets.all(4.0),
+                mainAxisSpacing: 4,
+                crossAxisSpacing: 4,
+                padding: const EdgeInsets.all(4),
                 childAspectRatio: (orientation == Orientation.portrait) ? 1.0 : 1.3,
                 children: photos.map<Widget>((Photo photo) {
                   return GridDemoPhotoItem(

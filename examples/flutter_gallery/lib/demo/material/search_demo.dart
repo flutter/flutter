@@ -80,7 +80,7 @@ class _SearchDemoState extends State<SearchDemo> {
                         message: 'search',
                         child: Icon(
                           Icons.search,
-                          size: 18.0,
+                          size: 18,
                         ),
                       ),
                       Text(' icon in the AppBar'),
@@ -90,7 +90,7 @@ class _SearchDemoState extends State<SearchDemo> {
                 ],
               ),
             ),
-            const SizedBox(height: 64.0),
+            const SizedBox(height: 64),
             Text('Last selected integer: ${_lastIntegerSelected ?? 'NONE' }.')
           ],
         ),
@@ -240,13 +240,13 @@ class _ResultCard extends StatelessWidget {
       },
       child: Card(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: Column(
             children: <Widget>[
               Text(title),
               Text(
                 '$integer',
-                style: theme.textTheme.headline.copyWith(fontSize: 72.0),
+                style: theme.textTheme.headline.copyWith(fontSize: 72),
               ),
             ],
           ),

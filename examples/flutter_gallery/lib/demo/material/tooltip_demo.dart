@@ -38,7 +38,7 @@ class TooltipDemo extends StatelessWidget {
                       message: 'call icon',
                       child: Icon(
                         Icons.call,
-                        size: 18.0,
+                        size: 18,
                         color: theme.iconTheme.color
                       )
                     ),
@@ -47,7 +47,7 @@ class TooltipDemo extends StatelessWidget {
                 ),
                 Center(
                   child: IconButton(
-                    iconSize: 48.0,
+                    iconSize: 48,
                     icon: const Icon(Icons.call),
                     color: theme.iconTheme.color,
                     tooltip: 'Place a phone call',
@@ -61,7 +61,7 @@ class TooltipDemo extends StatelessWidget {
               ]
               .map<Widget>((Widget widget) {
                 return Padding(
-                  padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
+                  padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
                   child: widget
                 );
               })

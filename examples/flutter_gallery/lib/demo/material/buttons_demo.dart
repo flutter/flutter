@@ -133,7 +133,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   Widget buildRaisedButton() {
     return Align(
-      alignment: const Alignment(0.0, -0.2),
+      alignment: const Alignment(0, -0.2),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -156,14 +156,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               RaisedButton.icon(
-                icon: const Icon(Icons.add, size: 18.0),
+                icon: const Icon(Icons.add, size: 18),
                 label: const Text('RAISED BUTTON', semanticsLabel: 'RAISED BUTTON 2'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
               RaisedButton.icon(
-                icon: const Icon(Icons.add, size: 18.0),
+                icon: const Icon(Icons.add, size: 18),
                 label: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 2'),
                 onPressed: null,
               ),
@@ -176,7 +176,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   Widget buildFlatButton() {
     return Align(
-      alignment: const Alignment(0.0, -0.2),
+      alignment: const Alignment(0, -0.2),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -199,14 +199,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               FlatButton.icon(
-                icon: const Icon(Icons.add_circle_outline, size: 18.0),
+                icon: const Icon(Icons.add_circle_outline, size: 18),
                 label: const Text('FLAT BUTTON', semanticsLabel: 'FLAT BUTTON 2'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
               FlatButton.icon(
-                icon: const Icon(Icons.add_circle_outline, size: 18.0),
+                icon: const Icon(Icons.add_circle_outline, size: 18),
                 label: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 4'),
                 onPressed: null,
               ),
@@ -219,7 +219,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   Widget buildOutlineButton() {
     return Align(
-      alignment: const Alignment(0.0, -0.2),
+      alignment: const Alignment(0, -0.2),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -242,14 +242,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               OutlineButton.icon(
-                icon: const Icon(Icons.add, size: 18.0),
+                icon: const Icon(Icons.add, size: 18),
                 label: const Text('OUTLINE BUTTON', semanticsLabel: 'OUTLINE BUTTON 2'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
               OutlineButton.icon(
-                icon: const Icon(Icons.add, size: 18.0),
+                icon: const Icon(Icons.add, size: 18),
                 label: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 6'),
                 onPressed: null,
               ),
@@ -267,7 +267,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   Widget buildDropdownButton() {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
@@ -289,7 +289,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             ),
           ),
           const SizedBox(
-            height: 24.0,
+            height: 24,
           ),
           ListTile(
             title: const Text('Dropdown with a hint:'),
@@ -310,7 +310,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             ),
           ),
           const SizedBox(
-            height: 24.0,
+            height: 24,
           ),
           ListTile(
             title: const Text('Scrollable dropdown:'),
@@ -343,7 +343,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   Widget buildIconButton() {
     return Align(
-      alignment: const Alignment(0.0, -0.2),
+      alignment: const Alignment(0, -0.2),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -365,7 +365,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             onPressed: null,
           )
         ]
-        .map<Widget>((Widget button) => SizedBox(width: 64.0, height: 64.0, child: button))
+        .map<Widget>((Widget button) => SizedBox(width: 64, height: 64, child: button))
         .toList(),
       ),
     );
@@ -373,7 +373,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   Widget buildActionButton() {
     return Align(
-      alignment: const Alignment(0.0, -0.2),
+      alignment: const Alignment(0, -0.2),
       child: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {

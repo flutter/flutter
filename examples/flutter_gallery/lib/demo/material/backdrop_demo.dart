@@ -105,8 +105,8 @@ class CategoryView extends StatelessWidget {
     return ListView(
       key: PageStorageKey<Category>(category),
       padding: const EdgeInsets.symmetric(
-        vertical: 16.0,
-        horizontal: 64.0,
+        vertical: 16,
+        horizontal: 64,
       ),
       children: category.assets.map<Widget>((String asset) {
         return Column(
@@ -114,7 +114,7 @@ class CategoryView extends StatelessWidget {
           children: <Widget>[
             Card(
               child: Container(
-                width: 144.0,
+                width: 144,
                 alignment: Alignment.center,
                 child: Column(
                   children: <Widget>[
@@ -124,7 +124,7 @@ class CategoryView extends StatelessWidget {
                       fit: BoxFit.contain,
                     ),
                     Container(
-                      padding: const EdgeInsets.only(bottom: 16.0),
+                      padding: const EdgeInsets.only(bottom: 16),
                       alignment: AlignmentDirectional.center,
                       child: Text(
                         asset,
@@ -135,7 +135,7 @@ class CategoryView extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 24.0),
+            const SizedBox(height: 24),
           ],
         );
       }).toList(),
@@ -165,10 +165,10 @@ class BackdropPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Material(
-      elevation: 2.0,
+      elevation: 2,
       borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(16.0),
-        topRight: Radius.circular(16.0),
+        topLeft: Radius.circular(16),
+        topRight: Radius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -179,8 +179,8 @@ class BackdropPanel extends StatelessWidget {
             onVerticalDragEnd: onVerticalDragEnd,
             onTap: onTap,
             child: Container(
-              height: 48.0,
-              padding: const EdgeInsetsDirectional.only(start: 16.0),
+              height: 48,
+              padding: const EdgeInsetsDirectional.only(start: 16),
               alignment: AlignmentDirectional.centerStart,
               child: DefaultTextStyle(
                 style: theme.textTheme.subhead,
@@ -191,7 +191,7 @@ class BackdropPanel extends StatelessWidget {
               ),
             ),
           ),
-          const Divider(height: 1.0),
+          const Divider(height: 1),
           Expanded(child: child),
         ],
       ),
@@ -218,14 +218,14 @@ class BackdropTitle extends AnimatedWidget {
           Opacity(
             opacity: CurvedAnimation(
               parent: ReverseAnimation(animation),
-              curve: const Interval(0.5, 1.0),
+              curve: const Interval(0.5, 1),
             ).value,
             child: const Text('Select a Category'),
           ),
           Opacity(
             opacity: CurvedAnimation(
               parent: animation,
-              curve: const Interval(0.5, 1.0),
+              curve: const Interval(0.5, 1),
             ).value,
             child: const Text('Asset Viewer'),
           ),
@@ -253,7 +253,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     super.initState();
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
-      value: 1.0,
+      value: 1,
       vsync: this,
     );
   }
@@ -267,7 +267,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   void _changeCategory(Category category) {
     setState(() {
       _category = category;
-      _controller.fling(velocity: 2.0);
+      _controller.fling(velocity: 2);
     });
   }
 
@@ -301,9 +301,9 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
 
     final double flingVelocity = details.velocity.pixelsPerSecond.dy / _backdropHeight;
     if (flingVelocity < 0.0)
-      _controller.fling(velocity: math.max(2.0, -flingVelocity));
+      _controller.fling(velocity: math.max(2, -flingVelocity));
     else if (flingVelocity > 0.0)
-      _controller.fling(velocity: math.min(-2.0, -flingVelocity));
+      _controller.fling(velocity: math.min(-2, -flingVelocity));
     else
       _controller.fling(velocity: _controller.value < 0.5 ? -2.0 : 2.0);
   }
@@ -314,19 +314,19 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   // we need to know how big the BackdropPanel will be to set up its
   // animation.
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
-    const double panelTitleHeight = 48.0;
+    const double panelTitleHeight = 48;
     final Size panelSize = constraints.biggest;
     final double panelTop = panelSize.height - panelTitleHeight;
 
     final Animation<RelativeRect> panelAnimation = _controller.drive(
       RelativeRectTween(
         begin: RelativeRect.fromLTRB(
-          0.0,
+          0,
           panelTop - MediaQuery.of(context).padding.bottom,
-          0.0,
+          0,
           panelTop - panelSize.height,
         ),
-        end: const RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0),
+        end: const RelativeRect.fromLTRB(0, 0, 0, 0),
       ),
     );
 
@@ -335,7 +335,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
       final bool selected = category == _category;
       return Material(
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+          borderRadius: BorderRadius.all(Radius.circular(4)),
         ),
         color: selected
           ? Colors.white.withOpacity(0.25)
@@ -360,7 +360,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
             textColor: theme.primaryTextTheme.title.color.withOpacity(0.6),
             selectedColor: theme.primaryTextTheme.title.color,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: backdropItems,
@@ -386,7 +386,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 0.0,
+        elevation: 0,
         title: BackdropTitle(
           listenable: _controller.view,
         ),

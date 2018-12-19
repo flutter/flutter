@@ -31,26 +31,26 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       placeholder: 'Text Message',
       decoration: BoxDecoration(
         border: Border.all(
-          width: 0.0,
+          width: 0,
           color: CupertinoColors.inactiveGray,
         ),
-        borderRadius: BorderRadius.circular(15.0),
+        borderRadius: BorderRadius.circular(15),
       ),
       maxLines: null,
       keyboardType: TextInputType.multiline,
-      prefix: const Padding(padding: EdgeInsets.symmetric(horizontal: 4.0)),
+      prefix: const Padding(padding: EdgeInsets.symmetric(horizontal: 4)),
       suffix: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         child: CupertinoButton(
           color: CupertinoColors.activeGreen,
-          minSize: 0.0,
+          minSize: 0,
           child: const Icon(
             CupertinoIcons.up_arrow,
-            size: 21.0,
+            size: 21,
             color: CupertinoColors.white,
           ),
-          padding: const EdgeInsets.all(2.0),
-          borderRadius: BorderRadius.circular(15.0),
+          padding: const EdgeInsets.all(2),
+          borderRadius: BorderRadius.circular(15),
           onPressed: ()=> setState(()=> _chatTextController.clear()),
         ),
       ),
@@ -65,14 +65,14 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       prefix: Icon(
         CupertinoIcons.person_solid,
         color: CupertinoColors.lightBackgroundGray,
-        size: 28.0,
+        size: 28,
       ),
-      padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
       clearButtonMode: OverlayVisibilityMode.editing,
       textCapitalization: TextCapitalization.words,
       autocorrect: false,
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
+        border: Border(bottom: BorderSide(width: 0, color: CupertinoColors.inactiveGray)),
       ),
       placeholder: 'Name',
     );
@@ -83,14 +83,14 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       prefix: Icon(
         CupertinoIcons.mail_solid,
         color: CupertinoColors.lightBackgroundGray,
-        size: 28.0,
+        size: 28,
       ),
-      padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
       clearButtonMode: OverlayVisibilityMode.editing,
       keyboardType: TextInputType.emailAddress,
       autocorrect: false,
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
+        border: Border(bottom: BorderSide(width: 0, color: CupertinoColors.inactiveGray)),
       ),
       placeholder: 'Email',
     );
@@ -102,13 +102,13 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       prefix: const Icon(
         CupertinoIcons.location_solid,
         color: CupertinoColors.lightBackgroundGray,
-        size: 28.0,
+        size: 28,
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
       clearButtonMode: OverlayVisibilityMode.editing,
       textCapitalization: TextCapitalization.words,
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
+        border: Border(bottom: BorderSide(width: 0, color: CupertinoColors.inactiveGray)),
       ),
       placeholder: 'Location',
     );
@@ -119,15 +119,15 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       prefix: Icon(
         CupertinoIcons.padlock_solid,
         color: CupertinoColors.lightBackgroundGray,
-        size: 28.0,
+        size: 28,
       ),
-      padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
       clearButtonMode: OverlayVisibilityMode.editing,
       keyboardType: TextInputType.number,
       autocorrect: false,
       obscureText: true,
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
+        border: Border(bottom: BorderSide(width: 0, color: CupertinoColors.inactiveGray)),
       ),
       placeholder: 'Create a PIN',
     );
@@ -139,12 +139,12 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       prefix: const Icon(
         CupertinoIcons.tags_solid,
         color: CupertinoColors.lightBackgroundGray,
-        size: 28.0,
+        size: 28,
       ),
       enabled: false,
-      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
+        border: Border(bottom: BorderSide(width: 0, color: CupertinoColors.inactiveGray)),
       ),
     );
   }
@@ -155,7 +155,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       style: const TextStyle(
         fontFamily: '.SF UI Text',
         inherit: false,
-        fontSize: 17.0,
+        fontSize: 17,
         color: CupertinoColors.black,
       ),
       child: CupertinoPageScaffold(
@@ -169,7 +169,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
         child: ListView(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
               child: Column(
                 children: <Widget>[
                   _buildNameField(),
@@ -181,7 +181,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
               child: _buildChatTextField(),
             ),
           ],

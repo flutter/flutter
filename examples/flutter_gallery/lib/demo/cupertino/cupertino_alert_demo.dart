@@ -56,7 +56,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
             final List<Widget> stackChildren = <Widget>[
               ListView(
                 // Add more padding to the normal safe area.
-                padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0)
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 72)
                     + MediaQuery.of(context).padding,
                 children: <Widget>[
                   CupertinoButton.filled(
@@ -86,10 +86,10 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                       );
                     },
                   ),
-                  const Padding(padding: EdgeInsets.all(8.0)),
+                  const Padding(padding: EdgeInsets.all(8)),
                   CupertinoButton.filled(
                     child: const Text('Alert with Title'),
-                    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 36),
                     onPressed: () {
                       showDemoDialog(
                         context: context,
@@ -115,10 +115,10 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                       );
                     },
                   ),
-                  const Padding(padding: EdgeInsets.all(8.0)),
+                  const Padding(padding: EdgeInsets.all(8)),
                   CupertinoButton.filled(
                     child: const Text('Alert with Buttons'),
-                    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 36),
                     onPressed: () {
                       showDemoDialog(
                         context: context,
@@ -131,10 +131,10 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                       );
                     },
                   ),
-                  const Padding(padding: EdgeInsets.all(8.0)),
+                  const Padding(padding: EdgeInsets.all(8)),
                   CupertinoButton.filled(
                     child: const Text('Alert Buttons Only'),
-                    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 36),
                     onPressed: () {
                       showDemoDialog(
                         context: context,
@@ -142,10 +142,10 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                       );
                     },
                   ),
-                  const Padding(padding: EdgeInsets.all(8.0)),
+                  const Padding(padding: EdgeInsets.all(8)),
                   CupertinoButton.filled(
                     child: const Text('Action Sheet'),
-                    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 36),
                     onPressed: () {
                       showDemoActionSheet(
                         context: context,
@@ -190,7 +190,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
             if (lastSelectedValue != null) {
               stackChildren.add(
                 Positioned(
-                  bottom: 32.0,
+                  bottom: 32,
                   child: Text('You selected: $lastSelectedValue'),
                 ),
               );

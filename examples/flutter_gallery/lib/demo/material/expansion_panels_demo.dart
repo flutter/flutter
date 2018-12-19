@@ -33,8 +33,8 @@ class DualHeaderWithHint extends StatelessWidget {
     return AnimatedCrossFade(
       firstChild: first,
       secondChild: second,
-      firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
-      secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
+      firstCurve: const Interval(0, 0.6, curve: Curves.fastOutSlowIn),
+      secondCurve: const Interval(0.4, 1, curve: Curves.fastOutSlowIn),
       sizeCurve: Curves.fastOutSlowIn,
       crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
       duration: const Duration(milliseconds: 200),
@@ -51,13 +51,13 @@ class DualHeaderWithHint extends StatelessWidget {
         Expanded(
           flex: 2,
           child: Container(
-            margin: const EdgeInsets.only(left: 24.0),
+            margin: const EdgeInsets.only(left: 24),
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
                 name,
-                style: textTheme.body1.copyWith(fontSize: 15.0),
+                style: textTheme.body1.copyWith(fontSize: 15),
               ),
             ),
           ),
@@ -65,10 +65,10 @@ class DualHeaderWithHint extends StatelessWidget {
         Expanded(
           flex: 3,
           child: Container(
-            margin: const EdgeInsets.only(left: 24.0),
+            margin: const EdgeInsets.only(left: 24),
             child: _crossFade(
-              Text(value, style: textTheme.caption.copyWith(fontSize: 15.0)),
-              Text(hint, style: textTheme.caption.copyWith(fontSize: 15.0)),
+              Text(value, style: textTheme.caption.copyWith(fontSize: 15)),
+              Text(hint, style: textTheme.caption.copyWith(fontSize: 15)),
               showHint
             )
           )
@@ -100,36 +100,36 @@ class CollapsibleBody extends StatelessWidget {
       children: <Widget>[
         Container(
           margin: const EdgeInsets.only(
-            left: 24.0,
-            right: 24.0,
-            bottom: 24.0
+            left: 24,
+            right: 24,
+            bottom: 24
           ) - margin,
           child: Center(
             child: DefaultTextStyle(
-              style: textTheme.caption.copyWith(fontSize: 15.0),
+              style: textTheme.caption.copyWith(fontSize: 15),
               child: child
             )
           )
         ),
-        const Divider(height: 1.0),
+        const Divider(height: 1),
         Container(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          padding: const EdgeInsets.symmetric(vertical: 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               Container(
-                margin: const EdgeInsets.only(right: 8.0),
+                margin: const EdgeInsets.only(right: 8),
                 child: FlatButton(
                   onPressed: onCancel,
                   child: const Text('CANCEL', style: TextStyle(
                     color: Colors.black54,
-                    fontSize: 15.0,
+                    fontSize: 15,
                     fontWeight: FontWeight.w500
                   ))
                 )
               ),
               Container(
-                margin: const EdgeInsets.only(right: 8.0),
+                margin: const EdgeInsets.only(right: 8),
                 child: FlatButton(
                   onPressed: onSave,
                   textTheme: ButtonTextTheme.accent,
@@ -206,11 +206,11 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
             child: Builder(
               builder: (BuildContext context) {
                 return CollapsibleBody(
-                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
                   onSave: () { Form.of(context).save(); close(); },
                   onCancel: () { Form.of(context).reset(); close(); },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: TextFormField(
                       controller: item.textController,
                       decoration: InputDecoration(
@@ -281,7 +281,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
       ),
       DemoItem<double>(
         name: 'Sun',
-        value: 80.0,
+        value: 80,
         hint: 'Select sun level',
         valueToString: (double amount) => '${amount.round()}',
         builder: (DemoItem<double> item) {
@@ -302,8 +302,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                     onSaved: (double value) { item.value = value; },
                     builder: (FormFieldState<double> field) {
                       return Slider(
-                        min: 0.0,
-                        max: 100.0,
+                        min: 0,
+                        max: 100,
                         divisions: 5,
                         activeColor: Colors.orange[100 + (field.value * 5.0).round()],
                         label: '${field.value.round()}',
@@ -335,7 +335,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
           top: false,
           bottom: false,
           child: Container(
-            margin: const EdgeInsets.all(24.0),
+            margin: const EdgeInsets.all(24),
             child: ExpansionPanelList(
               expansionCallback: (int index, bool isExpanded) {
                 setState(() {

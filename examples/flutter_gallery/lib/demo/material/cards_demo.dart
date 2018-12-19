@@ -53,7 +53,7 @@ class TravelDestinationItem extends StatelessWidget {
     : assert(destination != null && destination.isValid),
       super(key: key);
 
-  static const double height = 366.0;
+  static const double height = 366;
   final TravelDestination destination;
   final ShapeBorder shape;
 
@@ -67,7 +67,7 @@ class TravelDestinationItem extends StatelessWidget {
       top: false,
       bottom: false,
       child: Container(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8),
         height: height,
         child: Card(
           shape: shape,
@@ -76,7 +76,7 @@ class TravelDestinationItem extends StatelessWidget {
             children: <Widget>[
               // photo and title
               SizedBox(
-                height: 184.0,
+                height: 184,
                 child: Stack(
                   children: <Widget>[
                     Positioned.fill(
@@ -87,9 +87,9 @@ class TravelDestinationItem extends StatelessWidget {
                       ),
                     ),
                     Positioned(
-                      bottom: 16.0,
-                      left: 16.0,
-                      right: 16.0,
+                      bottom: 16,
+                      left: 16,
+                      right: 16,
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
@@ -104,7 +104,7 @@ class TravelDestinationItem extends StatelessWidget {
               // description and share/explore buttons
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: DefaultTextStyle(
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
@@ -114,7 +114,7 @@ class TravelDestinationItem extends StatelessWidget {
                       children: <Widget>[
                         // three line description
                         Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
+                          padding: const EdgeInsets.only(bottom: 8),
                           child: Text(
                             destination.description[0],
                             style: descriptionStyle.copyWith(color: Colors.black54),
@@ -180,10 +180,10 @@ class _CardsDemoState extends State<CardsDemo> {
               setState(() {
                 _shape = _shape != null ? null : const RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16.0),
-                    topRight: Radius.circular(16.0),
-                    bottomLeft: Radius.circular(2.0),
-                    bottomRight: Radius.circular(2.0),
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                    bottomLeft: Radius.circular(2),
+                    bottomRight: Radius.circular(2),
                   ),
                 );
               });
@@ -193,10 +193,10 @@ class _CardsDemoState extends State<CardsDemo> {
       ),
       body: ListView(
         itemExtent: TravelDestinationItem.height,
-        padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+        padding: const EdgeInsets.only(top: 8, left: 8, right: 8),
         children: destinations.map<Widget>((TravelDestination destination) {
           return Container(
-            margin: const EdgeInsets.only(bottom: 8.0),
+            margin: const EdgeInsets.only(bottom: 8),
             child: TravelDestinationItem(
               destination: destination,
               shape: _shape,

@@ -17,9 +17,9 @@ class PestoDemo extends StatelessWidget {
 
 const String _kSmallLogoImage = 'logos/pesto/logo_small.png';
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
-const double _kAppBarHeight = 128.0;
-const double _kFabHalfSize = 28.0; // TODO(mpcomplete): needs to adapt to screen size
-const double _kRecipePageMaxWidth = 500.0;
+const double _kAppBarHeight = 128;
+const double _kFabHalfSize = 28; // TODO(mpcomplete): needs to adapt to screen size
+const double _kRecipePageMaxWidth = 500;
 
 final Set<Recipe> _favoriteRecipes = Set<Recipe>();
 
@@ -121,7 +121,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           final Size size = constraints.biggest;
           final double appBarHeight = size.height - statusBarHeight;
           final double t = (appBarHeight - kToolbarHeight) / (_kAppBarHeight - kToolbarHeight);
-          final double extraPadding = Tween<double>(begin: 10.0, end: 24.0).transform(t);
+          final double extraPadding = Tween<double>(begin: 10, end: 24).transform(t);
           final double logoHeight = appBarHeight - 1.5 * extraPadding;
           return Padding(
             padding: EdgeInsets.only(
@@ -140,18 +140,18 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
   Widget _buildBody(BuildContext context, double statusBarHeight) {
     final EdgeInsets mediaPadding = MediaQuery.of(context).padding;
     final EdgeInsets padding = EdgeInsets.only(
-      top: 8.0,
+      top: 8,
       left: 8.0 + mediaPadding.left,
       right: 8.0 + mediaPadding.right,
-      bottom: 8.0
+      bottom: 8
     );
     return SliverPadding(
       padding: padding,
       sliver: SliverGrid(
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: _kRecipePageMaxWidth,
-          crossAxisSpacing: 8.0,
-          mainAxisSpacing: 8.0,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
         ),
         delegate: SliverChildBuilderDelegate(
           (BuildContext context, int index) {
@@ -199,19 +199,19 @@ class PestoLogo extends StatefulWidget {
 
 class _PestoLogoState extends State<PestoLogo> {
   // Native sizes for logo and its image/text components.
-  static const double kLogoHeight = 162.0;
-  static const double kLogoWidth = 220.0;
-  static const double kImageHeight = 108.0;
-  static const double kTextHeight = 48.0;
-  final TextStyle titleStyle = const PestoStyle(fontSize: kTextHeight, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 3.0);
+  static const double kLogoHeight = 162;
+  static const double kLogoWidth = 220;
+  static const double kImageHeight = 108;
+  static const double kTextHeight = 48;
+  final TextStyle titleStyle = const PestoStyle(fontSize: kTextHeight, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 3);
   final RectTween _textRectTween = RectTween(
-    begin: Rect.fromLTWH(0.0, kLogoHeight, kLogoWidth, kTextHeight),
-    end: Rect.fromLTWH(0.0, kImageHeight, kLogoWidth, kTextHeight)
+    begin: Rect.fromLTWH(0, kLogoHeight, kLogoWidth, kTextHeight),
+    end: Rect.fromLTWH(0, kImageHeight, kLogoWidth, kTextHeight)
   );
-  final Curve _textOpacity = const Interval(0.4, 1.0, curve: Curves.easeInOut);
+  final Curve _textOpacity = const Interval(0.4, 1, curve: Curves.easeInOut);
   final RectTween _imageRectTween = RectTween(
-    begin: Rect.fromLTWH(0.0, 0.0, kLogoWidth, kLogoHeight),
-    end: Rect.fromLTWH(0.0, 0.0, kLogoWidth, kImageHeight),
+    begin: Rect.fromLTWH(0, 0, kLogoWidth, kLogoHeight),
+    end: Rect.fromLTWH(0, 0, kLogoWidth, kImageHeight),
   );
 
   @override
@@ -256,7 +256,7 @@ class RecipeCard extends StatelessWidget {
   final Recipe recipe;
   final VoidCallback onTap;
 
-  TextStyle get titleStyle => const PestoStyle(fontSize: 24.0, fontWeight: FontWeight.w600);
+  TextStyle get titleStyle => const PestoStyle(fontSize: 24, fontWeight: FontWeight.w600);
   TextStyle get authorStyle => const PestoStyle(fontWeight: FontWeight.w500, color: Colors.black54);
 
   @override
@@ -283,12 +283,12 @@ class RecipeCard extends StatelessWidget {
               child: Row(
                 children: <Widget>[
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16),
                     child: Image.asset(
                       recipe.ingredientsImagePath,
                       package: recipe.ingredientsImagePackage,
-                      width: 48.0,
-                      height: 48.0,
+                      width: 48,
+                      height: 48,
                     ),
                   ),
                   Expanded(
@@ -323,7 +323,7 @@ class RecipePage extends StatefulWidget {
 
 class _RecipePageState extends State<RecipePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final TextStyle menuItemStyle = const PestoStyle(fontSize: 15.0, color: Colors.black54, height: 24.0/15.0);
+  final TextStyle menuItemStyle = const PestoStyle(fontSize: 15, color: Colors.black54, height: 24.0/15.0);
 
   double _getAppBarHeight(BuildContext context) => MediaQuery.of(context).size.height * 0.3;
 
@@ -341,9 +341,9 @@ class _RecipePageState extends State<RecipePage> {
       body: Stack(
         children: <Widget>[
           Positioned(
-            top: 0.0,
-            left: 0.0,
-            right: 0.0,
+            top: 0,
+            left: 0,
+            right: 0,
             height: appBarHeight + _kFabHalfSize,
             child: Hero(
               tag: 'packages/$_kGalleryAssetsPackage/${widget.recipe.imagePath}',
@@ -374,8 +374,8 @@ class _RecipePageState extends State<RecipePage> {
                   background: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment(0.0, -1.0),
-                        end: Alignment(0.0, -0.2),
+                        begin: Alignment(0, -1),
+                        end: Alignment(0, -0.2),
                         colors: <Color>[Color(0x60000000), Color(0x00000000)],
                       ),
                     ),
@@ -391,7 +391,7 @@ class _RecipePageState extends State<RecipePage> {
                       child: RecipeSheet(recipe: widget.recipe),
                     ),
                     Positioned(
-                      right: 16.0,
+                      right: 16,
                       child: FloatingActionButton(
                         child: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
                         onPressed: _toggleFavorite,
@@ -412,7 +412,7 @@ class _RecipePageState extends State<RecipePage> {
       child: Row(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(right: 24.0),
+            padding: const EdgeInsets.only(right: 24),
             child: Icon(icon, color: Colors.black54)
           ),
           Text(label, style: menuItemStyle),
@@ -435,11 +435,11 @@ class _RecipePageState extends State<RecipePage> {
 class RecipeSheet extends StatelessWidget {
   RecipeSheet({ Key key, this.recipe }) : super(key: key);
 
-  final TextStyle titleStyle = const PestoStyle(fontSize: 34.0);
-  final TextStyle descriptionStyle = const PestoStyle(fontSize: 15.0, color: Colors.black54, height: 24.0/15.0);
-  final TextStyle itemStyle = const PestoStyle(fontSize: 15.0, height: 24.0/15.0);
-  final TextStyle itemAmountStyle = PestoStyle(fontSize: 15.0, color: _kTheme.primaryColor, height: 24.0/15.0);
-  final TextStyle headingStyle = const PestoStyle(fontSize: 16.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
+  final TextStyle titleStyle = const PestoStyle(fontSize: 34);
+  final TextStyle descriptionStyle = const PestoStyle(fontSize: 15, color: Colors.black54, height: 24.0/15.0);
+  final TextStyle itemStyle = const PestoStyle(fontSize: 15, height: 24.0/15.0);
+  final TextStyle itemAmountStyle = PestoStyle(fontSize: 15, color: _kTheme.primaryColor, height: 24.0/15.0);
+  final TextStyle headingStyle = const PestoStyle(fontSize: 16, fontWeight: FontWeight.bold, height: 24.0/15.0);
 
   final Recipe recipe;
 
@@ -450,10 +450,10 @@ class RecipeSheet extends StatelessWidget {
         top: false,
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
           child: Table(
             columnWidths: const <int, TableColumnWidth>{
-              0: FixedColumnWidth(64.0)
+              0: FixedColumnWidth(64)
             },
             children: <TableRow>[
               TableRow(
@@ -463,8 +463,8 @@ class RecipeSheet extends StatelessWidget {
                     child: Image.asset(
                       recipe.ingredientsImagePath,
                       package: recipe.ingredientsImagePackage,
-                      width: 32.0,
-                      height: 32.0,
+                      width: 32,
+                      height: 32,
                       alignment: Alignment.centerLeft,
                       fit: BoxFit.scaleDown
                     )
@@ -479,7 +479,7 @@ class RecipeSheet extends StatelessWidget {
                 children: <Widget>[
                   const SizedBox(),
                   Padding(
-                    padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                    padding: const EdgeInsets.only(top: 8, bottom: 4),
                     child: Text(recipe.description, style: descriptionStyle)
                   ),
                 ]
@@ -488,7 +488,7 @@ class RecipeSheet extends StatelessWidget {
                 children: <Widget>[
                   const SizedBox(),
                   Padding(
-                    padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
+                    padding: const EdgeInsets.only(top: 24, bottom: 4),
                     child: Text('Ingredients', style: headingStyle)
                   ),
                 ]
@@ -502,7 +502,7 @@ class RecipeSheet extends StatelessWidget {
                 children: <Widget>[
                   const SizedBox(),
                   Padding(
-                    padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
+                    padding: const EdgeInsets.only(top: 24, bottom: 4),
                     child: Text('Steps', style: headingStyle)
                   ),
                 ]
@@ -522,11 +522,11 @@ class RecipeSheet extends StatelessWidget {
     return TableRow(
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          padding: const EdgeInsets.symmetric(vertical: 4),
           child: Text(left, style: itemAmountStyle),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          padding: const EdgeInsets.symmetric(vertical: 4),
           child: Text(right, style: itemStyle),
         ),
       ],

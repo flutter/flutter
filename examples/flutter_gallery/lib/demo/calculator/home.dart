@@ -116,7 +116,7 @@ class _CalculatorState extends State<Calculator> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).canvasColor,
-        elevation: 0.0
+        elevation: 0
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -126,7 +126,7 @@ class _CalculatorState extends State<Calculator> {
             flex: 2,
             child: CalcDisplay(content: _expression.toString())
           ),
-          const Divider(height: 1.0),
+          const Divider(height: 1),
           Expanded(
             flex: 3,
             child: KeyPad(calcState: this)
@@ -147,7 +147,7 @@ class CalcDisplay extends StatelessWidget {
     return Center(
       child: Text(
         content,
-        style: const TextStyle(fontSize: 24.0)
+        style: const TextStyle(fontSize: 24)
       )
     );
   }

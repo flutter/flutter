@@ -41,17 +41,17 @@ void main() {
     await tester.tap(find.text('Contact profile'));
     await tester.pumpAndSettle();
 
-    await tester.drag(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
+    await tester.drag(find.text('(650) 555-1234'), const Offset(0, -50));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.drag(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
+    await tester.drag(find.text('(650) 555-1234'), const Offset(0, -50));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.drag(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
+    await tester.drag(find.text('(650) 555-1234'), const Offset(0, -50));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.drag(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
+    await tester.drag(find.text('(650) 555-1234'), const Offset(0, -50));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.drag(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
+    await tester.drag(find.text('(650) 555-1234'), const Offset(0, -50));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.drag(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
+    await tester.drag(find.text('(650) 555-1234'), const Offset(0, -50));
     await tester.pump(const Duration(milliseconds: 200));
 
     await tester.pump(const Duration(hours: 100)); // for testing

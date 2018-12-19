@@ -15,7 +15,7 @@ class _ContactCategory extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: themeData.dividerColor))
       ),
@@ -28,8 +28,8 @@ class _ContactCategory extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 24.0),
-                width: 72.0,
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                width: 72,
                 child: Icon(icon, color: themeData.primaryColor)
               ),
               Expanded(child: Column(children: children))
@@ -67,7 +67,7 @@ class _ContactItem extends StatelessWidget {
     ];
     if (icon != null) {
       rowChildren.add(SizedBox(
-        width: 72.0,
+        width: 72,
         child: IconButton(
           icon: Icon(icon),
           color: themeData.primaryColor,
@@ -77,7 +77,7 @@ class _ContactItem extends StatelessWidget {
     }
     return MergeSemantics(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: rowChildren
@@ -98,7 +98,7 @@ enum AppBarBehavior { normal, pinned, floating, snapping }
 
 class ContactsDemoState extends State<ContactsDemo> {
   static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final double _appBarHeight = 256.0;
+  final double _appBarHeight = 256;
 
   AppBarBehavior _appBarBehavior = AppBarBehavior.pinned;
 
@@ -171,8 +171,8 @@ class ContactsDemoState extends State<ContactsDemo> {
                     const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          begin: Alignment(0.0, -1.0),
-                          end: Alignment(0.0, -0.4),
+                          begin: Alignment(0, -1),
+                          end: Alignment(0, -0.4),
                           colors: <Color>[Color(0x60000000), Color(0x00000000)],
                         ),
                       ),

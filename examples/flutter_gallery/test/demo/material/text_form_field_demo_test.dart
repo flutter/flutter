@@ -23,14 +23,14 @@ void main() {
     await tester.pumpAndSettle();
     // The submit button isn't initially visible. Drag it into view so that
     // it will see the tap.
-    await tester.drag(nameField, const Offset(0.0, -1200.0));
+    await tester.drag(nameField, const Offset(0, -1200));
     await tester.pumpAndSettle();
     await tester.tap(submitButton);
     await tester.pumpAndSettle();
 
     // Now drag the password field (the submit button will be obscured by
     // the snackbar) and expose the name field again.
-    await tester.drag(passwordField, const Offset(0.0, 1200.0));
+    await tester.drag(passwordField, const Offset(0, 1200));
     await tester.pumpAndSettle();
     expect(find.text('Name is required.'), findsOneWidget);
     expect(find.text('Please enter only alphabetical characters.'), findsNothing);
@@ -39,7 +39,7 @@ void main() {
 
     // Make the submit button visible again (by dragging the name field), so
     // it will see the tap.
-    await tester.drag(nameField, const Offset(0.0, -1200.0));
+    await tester.drag(nameField, const Offset(0, -1200));
     await tester.tap(submitButton);
     await tester.pumpAndSettle();
     expect(find.text('Name is required.'), findsNothing);

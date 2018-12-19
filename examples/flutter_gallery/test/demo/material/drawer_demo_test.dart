@@ -21,7 +21,7 @@ void main() {
     final double initialTopItemSaneY = tester.getTopLeft(find.text('Drawer item A')).dy;
     expect(initialTopItemSaneY, greaterThan(0.0));
 
-    await tester.drag(find.text('Drawer item B'), const Offset(0.0, 400.0));
+    await tester.drag(find.text('Drawer item B'), const Offset(0, 400));
     await tester.pump();
 
     expect(tester.getTopLeft(find.byType(UserAccountsDrawerHeader)).dy, 0.0);

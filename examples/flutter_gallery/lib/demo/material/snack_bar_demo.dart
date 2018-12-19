@@ -35,7 +35,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
       top: false,
       bottom: false,
       child: ListView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(24),
         children: <Widget>[
           const Text(_text1),
           const Text(_text2),
@@ -62,7 +62,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
         ]
         .map<Widget>((Widget child) {
           return Container(
-            margin: const EdgeInsets.symmetric(vertical: 12.0),
+            margin: const EdgeInsets.symmetric(vertical: 12),
             child: child
           );
         })

@@ -36,9 +36,9 @@ class DialogDemoItem extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          Icon(icon, size: 36.0, color: color),
+          Icon(icon, size: 36, color: color),
           Padding(
-            padding: const EdgeInsets.only(left: 16.0),
+            padding: const EdgeInsets.only(left: 16),
             child: Text(text),
           ),
         ],
@@ -92,7 +92,7 @@ class DialogDemoState extends State<DialogDemo> {
         actions: <Widget>[MaterialDemoDocumentationButton(DialogDemo.routeName)],
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 72),
         children: <Widget>[
           RaisedButton(
             child: const Text('ALERT'),
@@ -203,7 +203,7 @@ class DialogDemoState extends State<DialogDemo> {
         // Add a little space between the buttons
         .map<Widget>((Widget button) {
           return Container(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: button
           );
         })

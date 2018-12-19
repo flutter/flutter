@@ -29,8 +29,8 @@ Path _triangle(double size, Offset thumbCenter, {bool invert = false}) {
 }
 
 class _CustomThumbShape extends SliderComponentShape {
-  static const double _thumbSize = 4.0;
-  static const double _disabledThumbSize = 3.0;
+  static const double _thumbSize = 4;
+  static const double _disabledThumbSize = 3;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
@@ -67,9 +67,9 @@ class _CustomThumbShape extends SliderComponentShape {
 }
 
 class _CustomValueIndicatorShape extends SliderComponentShape {
-  static const double _indicatorSize = 4.0;
-  static const double _disabledIndicatorSize = 3.0;
-  static const double _slideUpHeight = 40.0;
+  static const double _indicatorSize = 4;
+  static const double _disabledIndicatorSize = 3;
+  static const double _slideUpHeight = 40;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
@@ -100,11 +100,11 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
       end: sliderTheme.valueIndicatorColor,
     );
     final Tween<double> slideUpTween = Tween<double>(
-      begin: 0.0,
+      begin: 0,
       end: _slideUpHeight,
     );
     final double size = _indicatorSize * sizeTween.evaluate(enableAnimation);
-    final Offset slideUpOffset = Offset(0.0, -slideUpTween.evaluate(activationAnimation));
+    final Offset slideUpOffset = Offset(0, -slideUpTween.evaluate(activationAnimation));
     final Path thumbPath = _triangle(
       size,
       thumbCenter + slideUpOffset,
@@ -127,8 +127,8 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
 }
 
 class _SliderDemoState extends State<SliderDemo> {
-  double _value = 25.0;
-  double _discreteValue = 20.0;
+  double _value = 25;
+  double _discreteValue = 20;
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +139,7 @@ class _SliderDemoState extends State<SliderDemo> {
         actions: <Widget>[MaterialDemoDocumentationButton(SliderDemo.routeName)],
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40.0),
+        padding: const EdgeInsets.symmetric(horizontal: 40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
@@ -148,8 +148,8 @@ class _SliderDemoState extends State<SliderDemo> {
               children: <Widget>[
                 Slider(
                   value: _value,
-                  min: 0.0,
-                  max: 100.0,
+                  min: 0,
+                  max: 100,
                   onChanged: (double value) {
                     setState(() {
                       _value = value;
@@ -171,8 +171,8 @@ class _SliderDemoState extends State<SliderDemo> {
               children: <Widget>[
                 Slider(
                   value: _discreteValue,
-                  min: 0.0,
-                  max: 200.0,
+                  min: 0,
+                  max: 200,
                   divisions: 5,
                   label: '${_discreteValue.round()}',
                   onChanged: (double value) {
@@ -202,8 +202,8 @@ class _SliderDemoState extends State<SliderDemo> {
                   ),
                   child: Slider(
                     value: _discreteValue,
-                    min: 0.0,
-                    max: 200.0,
+                    min: 0,
+                    max: 200,
                     divisions: 5,
                     semanticFormatterCallback: (double value) => value.round().toString(),
                     label: '${_discreteValue.round()}',

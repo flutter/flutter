@@ -59,10 +59,10 @@ class IconsDemoState extends State<IconsDemo> {
           top: false,
           bottom: false,
           child: ListView(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(24),
             children: <Widget>[
               _IconsDemoCard(handleIconButtonPress, Icons.face), // direction-agnostic icon
-              const SizedBox(height: 24.0),
+              const SizedBox(height: 24),
               _IconsDemoCard(handleIconButtonPress, Icons.battery_unknown), // direction-aware icon
             ],
           ),
@@ -90,7 +90,7 @@ class _IconsDemoCard extends StatelessWidget {
   Widget _centeredText(String label) =>
     Padding(
       // Match the default padding of IconButton.
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8),
       child: Text(label, textAlign: TextAlign.center),
     );
 
@@ -123,10 +123,10 @@ class _IconsDemoCard extends StatelessWidget {
                   _centeredText('Disabled'),
                 ]
               ),
-              _buildIconRow(18.0),
-              _buildIconRow(24.0),
-              _buildIconRow(36.0),
-              _buildIconRow(48.0),
+              _buildIconRow(18),
+              _buildIconRow(24),
+              _buildIconRow(36),
+              _buildIconRow(48),
             ],
           ),
         ),

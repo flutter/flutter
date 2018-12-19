@@ -33,7 +33,7 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
           child: Column(
             children: <Widget>[
               const Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16),
                 child: Text(
                   'iOS themed buttons are flat. They can have borders or backgrounds but '
                   'only when necessary.'
@@ -46,9 +46,9 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                     Text(_pressedCount > 0
                         ? 'Button pressed $_pressedCount time${_pressedCount == 1 ? "" : "s"}'
                         : ' '),
-                    const Padding(padding: EdgeInsets.all(12.0)),
+                    const Padding(padding: EdgeInsets.all(12)),
                     Align(
-                      alignment: const Alignment(0.0, -0.2),
+                      alignment: const Alignment(0, -0.2),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
@@ -65,14 +65,14 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                         ],
                       ),
                     ),
-                    const Padding(padding: EdgeInsets.all(12.0)),
+                    const Padding(padding: EdgeInsets.all(12)),
                     CupertinoButton.filled(
                       child: const Text('With Background'),
                       onPressed: () {
                         setState(() { _pressedCount += 1; });
                       }
                     ),
-                    const Padding(padding: EdgeInsets.all(12.0)),
+                    const Padding(padding: EdgeInsets.all(12)),
                     const CupertinoButton.filled(
                       child: Text('Disabled'),
                       onPressed: null,

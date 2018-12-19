@@ -50,7 +50,7 @@ void main() {
 
     // Verify the font scale.
     final Size origTextSize = tester.getSize(find.text('Text size'));
-    expect(origTextSize, equals(const Size(144.0, 16.0)));
+    expect(origTextSize, equals(const Size(144, 16)));
 
     // Popup the text size menu: first menu button, choose 'Small'
     await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
@@ -58,7 +58,7 @@ void main() {
     await tester.tap(find.text('Small'));
     await tester.pumpAndSettle();
     Size textSize = tester.getSize(find.text('Text size'));
-    expect(textSize, equals(const Size(116.0, 13.0)));
+    expect(textSize, equals(const Size(116, 13)));
 
     // Set font scale back to the default.
     await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
@@ -83,7 +83,7 @@ void main() {
     expect(hasFeedback, false);
 
     // Scroll to the end
-    await tester.drag(find.text('Text size'), const Offset(0.0, -1000.0));
+    await tester.drag(find.text('Text size'), const Offset(0, -1000));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Send feedback'));
     await tester.pumpAndSettle();

@@ -7,8 +7,8 @@ import 'package:intl/intl.dart';
 import '../../gallery/demo.dart';
 import 'cupertino_navigation_demo.dart' show coolColorNames;
 
-const double _kPickerSheetHeight = 216.0;
-const double _kPickerItemHeight = 32.0;
+const double _kPickerSheetHeight = 216;
+const double _kPickerItemHeight = 32;
 
 class CupertinoPickerDemo extends StatefulWidget {
   static const String routeName = '/cupertino/picker';
@@ -36,13 +36,13 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       decoration: BoxDecoration(
         color: CupertinoTheme.of(context).scaffoldBackgroundColor,
         border: const Border(
-          top: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
-          bottom: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
+          top: BorderSide(color: Color(0xFFBCBBC1), width: 0),
+          bottom: BorderSide(color: Color(0xFFBCBBC1), width: 0),
         ),
       ),
-      height: 44.0,
+      height: 44,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: SafeArea(
           top: false,
           bottom: false,
@@ -58,12 +58,12 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   Widget _buildBottomPicker(Widget picker) {
     return Container(
       height: _kPickerSheetHeight,
-      padding: const EdgeInsets.only(top: 6.0),
+      padding: const EdgeInsets.only(top: 6),
       color: CupertinoColors.white,
       child: DefaultTextStyle(
         style: const TextStyle(
           color: CupertinoColors.black,
-          fontSize: 22.0,
+          fontSize: 22,
         ),
         child: GestureDetector(
           // Blocks taps from propagating to the modal sheet and popping.
@@ -260,7 +260,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           ),
           child: ListView(
             children: <Widget>[
-              const Padding(padding: EdgeInsets.only(top: 32.0)),
+              const Padding(padding: EdgeInsets.only(top: 32)),
               _buildColorPicker(context),
               _buildCountdownTimerPicker(context),
               _buildDatePicker(context),

@@ -26,7 +26,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   ];
 
   static final Animatable<Offset> _drawerDetailsTween = Tween<Offset>(
-    begin: const Offset(0.0, -1.0),
+    begin: const Offset(0, -1),
     end: Offset.zero,
   ).chain(CurveTween(
     curve: Curves.fastOutSlowIn,
@@ -149,7 +149,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
               removeTop: true,
               child: Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.only(top: 8.0),
+                  padding: const EdgeInsets.only(top: 8),
                   children: <Widget>[
                     Stack(
                       children: <Widget>[
@@ -213,8 +213,8 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Container(
-                  width: 100.0,
-                  height: 100.0,
+                  width: 100,
+                  height: 100,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
@@ -226,7 +226,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
+                  padding: const EdgeInsets.only(top: 8),
                   child: Text('Tap here to open the drawer',
                     style: Theme.of(context).textTheme.subhead,
                   ),

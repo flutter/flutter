@@ -96,7 +96,7 @@ final Map<_Page, List<_CardData>> _allPages = <_Page, List<_CardData>>{
 class _CardDataItem extends StatelessWidget {
   const _CardDataItem({ this.page, this.data });
 
-  static const double height = 272.0;
+  static const double height = 272;
   final _Page page;
   final _CardData data;
 
@@ -104,7 +104,7 @@ class _CardDataItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -116,8 +116,8 @@ class _CardDataItem extends StatelessWidget {
               child: CircleAvatar(child: Text('${page.id}')),
             ),
             SizedBox(
-              width: 144.0,
-              height: 144.0,
+              width: 144,
+              height: 144,
               child: Image.asset(
                 data.imageAsset,
                 package: data.imageAssetPackage,
@@ -154,7 +154,7 @@ class TabsDemo extends StatelessWidget {
                   title: const Text('Tabs and scrolling'),
                   actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
                   pinned: true,
-                  expandedHeight: 150.0,
+                  expandedHeight: 150,
                   forceElevated: innerBoxIsScrolled,
                   bottom: TabBar(
                     tabs: _allPages.keys.map<Widget>(
@@ -180,8 +180,8 @@ class TabsDemo extends StatelessWidget {
                         ),
                         SliverPadding(
                           padding: const EdgeInsets.symmetric(
-                            vertical: 8.0,
-                            horizontal: 16.0,
+                            vertical: 8,
+                            horizontal: 16,
                           ),
                           sliver: SliverFixedExtentList(
                             itemExtent: _CardDataItem.height,
@@ -190,7 +190,7 @@ class TabsDemo extends StatelessWidget {
                                 final _CardData data = _allPages[page][index];
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0,
+                                    vertical: 8,
                                   ),
                                   child: _CardDataItem(
                                     page: page,

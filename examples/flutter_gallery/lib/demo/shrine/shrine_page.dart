@@ -37,7 +37,7 @@ class ShrinePage extends StatefulWidget {
 
 /// Defines the Scaffold, AppBar, etc that the demo pages have in common.
 class ShrinePageState extends State<ShrinePage> {
-  double _appBarElevation = 0.0;
+  double _appBarElevation = 0;
 
   bool _handleScrollNotification(ScrollNotification notification) {
     final double elevation = notification.metrics.extentBefore <= 0.0 ? 0.0 : 1.0;
@@ -53,7 +53,7 @@ class ShrinePageState extends State<ShrinePage> {
     showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
       if (widget.shoppingCart.isEmpty) {
         return const Padding(
-          padding: EdgeInsets.all(24.0),
+          padding: EdgeInsets.all(24),
           child: Text('The shopping cart is empty')
         );
       }

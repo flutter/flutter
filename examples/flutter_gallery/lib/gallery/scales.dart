@@ -31,7 +31,7 @@ class GalleryTextScaleValue {
 const List<GalleryTextScaleValue> kAllGalleryTextScaleValues = <GalleryTextScaleValue>[
   GalleryTextScaleValue(null, 'System Default'),
   GalleryTextScaleValue(0.8, 'Small'),
-  GalleryTextScaleValue(1.0, 'Normal'),
+  GalleryTextScaleValue(1, 'Normal'),
   GalleryTextScaleValue(1.3, 'Large'),
-  GalleryTextScaleValue(2.0, 'Huge'),
+  GalleryTextScaleValue(2, 'Huge'),
 ];

@@ -81,7 +81,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
 
   Widget buildCheckbox() {
     return Align(
-      alignment: const Alignment(0.0, -0.2),
+      alignment: const Alignment(0, -0.2),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -131,7 +131,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
 
   Widget buildRadio() {
     return Align(
-      alignment: const Alignment(0.0, -0.2),
+      alignment: const Alignment(0, -0.2),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -183,7 +183,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
 
   Widget buildSwitch() {
     return Align(
-      alignment: const Alignment(0.0, -0.2),
+      alignment: const Alignment(0, -0.2),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[

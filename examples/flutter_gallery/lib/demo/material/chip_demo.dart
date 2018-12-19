@@ -85,7 +85,7 @@ class _ChipsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> cardChildren = <Widget>[
       Container(
-        padding: const EdgeInsets.only(top: 16.0, bottom: 4.0),
+        padding: const EdgeInsets.only(top: 16, bottom: 4),
         alignment: Alignment.center,
         child: Text(label, textAlign: TextAlign.start),
       ),
@@ -94,7 +94,7 @@ class _ChipsTile extends StatelessWidget {
       cardChildren.add(Wrap(
         children: children.map<Widget>((Widget chip) {
         return Padding(
-          padding: const EdgeInsets.all(2.0),
+          padding: const EdgeInsets.all(2),
           child: chip,
         );
       }).toList()));
@@ -105,8 +105,8 @@ class _ChipsTile extends StatelessWidget {
           container: true,
           child: Container(
             alignment: Alignment.center,
-            constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
-            padding: const EdgeInsets.all(8.0),
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            padding: const EdgeInsets.all(8),
             child: Text('None', style: textStyle),
           ),
         ));
@@ -182,7 +182,7 @@ class _ChipDemoState extends State<ChipDemo> {
     assert(name.length > 1);
     final int hash = name.hashCode & 0xffff;
     final double hue = (360.0 * hash / (1 << 15)) % 360.0;
-    return HSVColor.fromAHSV(1.0, hue, 0.4, 0.90).toColor();
+    return HSVColor.fromAHSV(1, hue, 0.4, 0.90).toColor();
   }
 
   AssetImage _nameToAvatar(String name) {
@@ -283,7 +283,7 @@ class _ChipDemoState extends State<ChipDemo> {
 
     final ThemeData theme = Theme.of(context);
     final List<Widget> tiles = <Widget>[
-      const SizedBox(height: 8.0, width: 0.0),
+      const SizedBox(height: 8, width: 0),
       _ChipsTile(label: 'Available Materials (Chip)', children: chips),
       _ChipsTile(label: 'Available Tools (InputChip)', children: inputChips),
       _ChipsTile(label: 'Choose a Material (ChoiceChip)', children: choiceChips),
@@ -291,7 +291,7 @@ class _ChipDemoState extends State<ChipDemo> {
       _ChipsTile(label: 'Perform Allowed Action (ActionChip)', children: actionChips),
       const Divider(),
       Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8),
         child: Center(
           child: Text(
             _createResult(),
@@ -321,7 +321,7 @@ class _ChipDemoState extends State<ChipDemo> {
             ? theme.chipTheme.copyWith(
                 shape: BeveledRectangleBorder(
                 side: const BorderSide(width: 0.66, style: BorderStyle.solid, color: Colors.grey),
-                borderRadius: BorderRadius.circular(10.0),
+                borderRadius: BorderRadius.circular(10),
               ))
             : theme.chipTheme,
         child: ListView(children: tiles),

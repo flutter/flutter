@@ -33,7 +33,7 @@ const RaisedButton(
 // Create a button with an icon and a
 // title.
 RaisedButton.icon(
-  icon: const Icon(Icons.add, size: 18.0),
+  icon: const Icon(Icons.add, size: 18),
   label: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
@@ -61,7 +61,7 @@ const OutlineButton(
 // Create a button with an icon and a
 // title.
 OutlineButton.icon(
-  icon: const Icon(Icons.add, size: 18.0),
+  icon: const Icon(Icons.add, size: 18),
   label: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
@@ -253,10 +253,10 @@ class GridLists {
 // loaded from the web.
 GridView.count(
   crossAxisCount: 3,
-  childAspectRatio: 1.0,
-  padding: const EdgeInsets.all(4.0),
-  mainAxisSpacing: 4.0,
-  crossAxisSpacing: 4.0,
+  childAspectRatio: 1,
+  padding: const EdgeInsets.all(4),
+  mainAxisSpacing: 4,
+  crossAxisSpacing: 4,
   children: <String>[
     'https://example.com/image-0.jpg',
     'https://example.com/image-1.jpg',

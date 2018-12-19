@@ -29,19 +29,19 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
     0: Center(
       child: FlutterLogo(
         colors: Colors.indigo,
-        size: 200.0,
+        size: 200,
       ),
     ),
     1: Center(
       child: FlutterLogo(
         colors: Colors.teal,
-        size: 200.0,
+        size: 200,
       ),
     ),
     2: Center(
       child: FlutterLogo(
         colors: Colors.cyan,
-        size: 200.0,
+        size: 200,
       ),
     ),
   };
@@ -65,10 +65,10 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
           child: Column(
             children: <Widget>[
               const Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16),
               ),
               SizedBox(
-                width: 500.0,
+                width: 500,
                 child: CupertinoSegmentedControl<int>(
                   children: children,
                   onValueChanged: (int newValue) {
@@ -82,34 +82,34 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    vertical: 32.0,
-                    horizontal: 16.0,
+                    vertical: 32,
+                    horizontal: 16,
                   ),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      vertical: 64.0,
-                      horizontal: 16.0,
+                      vertical: 64,
+                      horizontal: 16,
                     ),
                     decoration: BoxDecoration(
                       color: CupertinoTheme.of(context).scaffoldBackgroundColor,
-                      borderRadius: BorderRadius.circular(3.0),
+                      borderRadius: BorderRadius.circular(3),
                       boxShadow: const <BoxShadow>[
                         BoxShadow(
-                          offset: Offset(0.0, 3.0),
-                          blurRadius: 5.0,
-                          spreadRadius: -1.0,
+                          offset: Offset(0, 3),
+                          blurRadius: 5,
+                          spreadRadius: -1,
                           color: _kKeyUmbraOpacity,
                         ),
                         BoxShadow(
-                          offset: Offset(0.0, 6.0),
-                          blurRadius: 10.0,
-                          spreadRadius: 0.0,
+                          offset: Offset(0, 6),
+                          blurRadius: 10,
+                          spreadRadius: 0,
                           color: _kKeyPenumbraOpacity,
                         ),
                         BoxShadow(
-                          offset: Offset(0.0, 1.0),
-                          blurRadius: 18.0,
-                          spreadRadius: 0.0,
+                          offset: Offset(0, 1),
+                          blurRadius: 18,
+                          spreadRadius: 0,
                           color: _kAmbientShadowOpacity,
                         ),
                       ],

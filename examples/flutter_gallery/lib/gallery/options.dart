@@ -83,8 +83,8 @@ class GalleryOptions {
   }
 }
 
-const double _kItemHeight = 48.0;
-const EdgeInsetsDirectional _kItemPadding = EdgeInsetsDirectional.only(start: 56.0);
+const double _kItemHeight = 48;
+const EdgeInsetsDirectional _kItemPadding = EdgeInsetsDirectional.only(start: 56);
 
 class _OptionsItem extends StatelessWidget {
   const _OptionsItem({ Key key, this.child }) : super(key: key);
@@ -249,7 +249,7 @@ class _TextScaleFactorItem extends StatelessWidget {
             ),
           ),
           PopupMenuButton<GalleryTextScaleValue>(
-            padding: const EdgeInsetsDirectional.only(end: 16.0),
+            padding: const EdgeInsetsDirectional.only(end: 16),
             icon: const Icon(Icons.arrow_drop_down),
             itemBuilder: (BuildContext context) {
               return kAllGalleryTextScaleValues.map<PopupMenuItem<GalleryTextScaleValue>>((GalleryTextScaleValue scaleValue) {
@@ -354,7 +354,7 @@ class _PlatformItem extends StatelessWidget {
             ),
           ),
           PopupMenuButton<TargetPlatform>(
-            padding: const EdgeInsetsDirectional.only(end: 16.0),
+            padding: const EdgeInsetsDirectional.only(end: 16),
             icon: const Icon(Icons.arrow_drop_down),
             itemBuilder: (BuildContext context) {
               return TargetPlatform.values.map((TargetPlatform platform) {
@@ -445,7 +445,7 @@ class GalleryOptionsPage extends StatelessWidget {
     return DefaultTextStyle(
       style: theme.primaryTextTheme.subhead,
       child: ListView(
-        padding: const EdgeInsets.only(bottom: 124.0),
+        padding: const EdgeInsets.only(bottom: 124),
         children: <Widget>[
           const _Heading('Display'),
           _ThemeItem(options, onOptionsChanged),

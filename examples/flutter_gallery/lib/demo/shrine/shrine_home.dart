@@ -86,7 +86,7 @@ class _ShrineGridLayout extends SliverGridLayout {
   @override
   double computeMaxScrollOffset(int childCount) {
     if (childCount == 0)
-      return 0.0;
+      return 0;
     final int rowCount = _rowAtIndex(childCount - 1) + 1;
     final double rowSpacing = rowStride - tileHeight;
     return rowStride * rowCount - rowSpacing;
@@ -94,7 +94,7 @@ class _ShrineGridLayout extends SliverGridLayout {
 }
 
 class _ShrineGridDelegate extends SliverGridDelegate {
-  static const double _spacing = 8.0;
+  static const double _spacing = 8;
 
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
@@ -123,13 +123,13 @@ class _VendorItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 24.0,
+      height: 24,
       child: Row(
         children: <Widget>[
           SizedBox(
-            width: 24.0,
+            width: 24,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
+              borderRadius: BorderRadius.circular(12),
               child: Image.asset(
                 vendor.avatarAsset,
                 package: vendor.avatarAssetPackage,
@@ -137,7 +137,7 @@ class _VendorItem extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8.0),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(vendor.name, style: ShrineTheme.of(context).vendorItemStyle),
           ),
@@ -177,7 +177,7 @@ class _ProductPriceItem extends _PriceItem {
     return buildItem(
       context,
       ShrineTheme.of(context).priceStyle,
-      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     );
   }
 }
@@ -190,7 +190,7 @@ class _FeaturePriceItem extends _PriceItem {
     return buildItem(
       context,
       ShrineTheme.of(context).featurePriceStyle,
-      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
     );
   }
 }
@@ -207,12 +207,12 @@ class _HeadingLayout extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
     final Size priceSize = layoutChild(price, BoxConstraints.loose(size));
-    positionChild(price, Offset(size.width - priceSize.width, 0.0));
+    positionChild(price, Offset(size.width - priceSize.width, 0));
 
     final double halfWidth = size.width / 2.0;
     final double halfHeight = size.height / 2.0;
     const double halfUnit = unitSize / 2.0;
-    const double margin = 16.0;
+    const double margin = 16;
 
     final Size imageSize = layoutChild(image, BoxConstraints.loose(size));
     final double imageX = imageSize.width < halfWidth - halfUnit
@@ -322,9 +322,9 @@ class _ProductItem extends StatelessWidget {
                   child: _ProductPriceItem(product: product),
                 ),
                 Container(
-                  width: 144.0,
-                  height: 144.0,
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  width: 144,
+                  height: 144,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Hero(
                       tag: product.tag,
                       child: Image.asset(
@@ -335,7 +335,7 @@ class _ProductItem extends StatelessWidget {
                     ),
                   ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: _VendorItem(vendor: product.vendor),
                 ),
               ],
@@ -391,7 +391,7 @@ class _ShrineHomeState extends State<ShrineHome> {
           SliverToBoxAdapter(child: _Heading(product: featured)),
           SliverSafeArea(
             top: false,
-            minimum: const EdgeInsets.all(16.0),
+            minimum: const EdgeInsets.all(16),
             sliver: SliverGrid(
               gridDelegate: gridDelegate,
               delegate: SliverChildListDelegate(

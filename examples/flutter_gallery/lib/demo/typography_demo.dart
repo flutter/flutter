@@ -24,16 +24,16 @@ class TextStyleItem extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final TextStyle nameStyle = theme.textTheme.caption.copyWith(color: theme.textTheme.caption.color);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           SizedBox(
-            width: 72.0,
+            width: 72,
             child: Text(name, style: nameStyle)
           ),
           Expanded(
-            child: Text(text, style: style.copyWith(height: 1.0))
+            child: Text(text, style: style.copyWith(height: 1))
           )
         ]
       )

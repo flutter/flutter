@@ -27,7 +27,7 @@ class NavigationIconView {
          vsync: vsync,
        ) {
     _animation = controller.drive(CurveTween(
-      curve: const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
+      curve: const Interval(0.5, 1, curve: Curves.fastOutSlowIn),
     ));
   }
 
@@ -54,14 +54,14 @@ class NavigationIconView {
       child: SlideTransition(
         position: _animation.drive(
           Tween<Offset>(
-            begin: const Offset(0.0, 0.02), // Slightly down.
+            begin: const Offset(0, 0.02), // Slightly down.
             end: Offset.zero,
           ),
         ),
         child: IconTheme(
           data: IconThemeData(
             color: iconColor,
-            size: 120.0,
+            size: 120,
           ),
           child: Semantics(
             label: 'Placeholder for $_title tab',
@@ -78,7 +78,7 @@ class CustomIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
     return Container(
-      margin: const EdgeInsets.all(4.0),
+      margin: const EdgeInsets.all(4),
       width: iconTheme.size - 8.0,
       height: iconTheme.size - 8.0,
       color: iconTheme.color,
@@ -91,11 +91,11 @@ class CustomInactiveIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
     return Container(
-      margin: const EdgeInsets.all(4.0),
+      margin: const EdgeInsets.all(4),
       width: iconTheme.size - 8.0,
       height: iconTheme.size - 8.0,
       decoration: BoxDecoration(
-        border: Border.all(color: iconTheme.color, width: 2.0),
+        border: Border.all(color: iconTheme.color, width: 2),
       )
     );
   }

@@ -143,7 +143,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Bottom app bar'),
-        elevation: 0.0,
+        elevation: 0,
         actions: <Widget>[
           MaterialDemoDocumentationButton(BottomAppBarDemo.routeName),
           IconButton(
@@ -157,7 +157,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.only(bottom: 88.0),
+        padding: const EdgeInsets.only(bottom: 88),
         children: <Widget>[
           const _Heading('FAB Shape'),
 
@@ -228,8 +228,8 @@ class _RadioItem<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Container(
-      height: 56.0,
-      padding: const EdgeInsetsDirectional.only(start: 16.0),
+      height: 56,
+      padding: const EdgeInsetsDirectional.only(start: 16),
       alignment: AlignmentDirectional.centerStart,
       child: MergeSemantics(
         child: Row(
@@ -287,14 +287,14 @@ class _ColorsItem extends StatelessWidget {
             onChanged(namedColor.color);
           },
           constraints: const BoxConstraints.tightFor(
-            width: 32.0,
-            height: 32.0,
+            width: 32,
+            height: 32,
           ),
           fillColor: namedColor.color,
           shape: CircleBorder(
             side: BorderSide(
               color: namedColor.color == selectedColor ? Colors.black : const Color(0xFFD5D7DA),
-              width: 2.0,
+              width: 2,
             ),
           ),
           child: Semantics(
@@ -316,8 +316,8 @@ class _Heading extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Container(
-      height: 48.0,
-      padding: const EdgeInsetsDirectional.only(start: 56.0),
+      height: 48,
+      padding: const EdgeInsetsDirectional.only(start: 56),
       alignment: AlignmentDirectional.centerStart,
       child: Text(
         text,
@@ -438,15 +438,15 @@ class _DiamondFab extends StatelessWidget {
       child: InkWell(
         onTap: onPressed,
         child: Container(
-          width: 56.0,
-          height: 56.0,
+          width: 56,
+          height: 56,
           child: IconTheme.merge(
             data: IconThemeData(color: Theme.of(context).accentIconTheme.color),
             child: child,
           ),
         ),
       ),
-      elevation: 6.0,
+      elevation: 6,
     );
   }
 }

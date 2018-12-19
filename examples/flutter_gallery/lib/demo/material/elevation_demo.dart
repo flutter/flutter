@@ -14,25 +14,25 @@ class _ElevationDemoState extends State<ElevationDemo> {
 
   List<Widget> buildCards() {
     const List<double> elevations = <double>[
-      0.0,
-      1.0,
-      2.0,
-      3.0,
-      4.0,
-      5.0,
-      8.0,
-      16.0,
-      24.0,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      8,
+      16,
+      24,
     ];
 
     return elevations.map<Widget>((double elevation) {
       return Center(
         child: Card(
-          margin: const EdgeInsets.all(20.0),
+          margin: const EdgeInsets.all(20),
           elevation: _showElevation ? elevation : 0.0,
           child: SizedBox(
-            height: 100.0,
-            width: 100.0,
+            height: 100,
+            width: 100,
             child: Center(
               child: Text('${elevation.toStringAsFixed(0)} pt'),
             ),

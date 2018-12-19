@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-const double kColorItemHeight = 48.0;
+const double kColorItemHeight = 48;
 
 class Palette {
   Palette({ this.name, this.primary, this.accent, this.threshold = 900});
@@ -63,7 +63,7 @@ class ColorItem extends StatelessWidget {
       container: true,
       child: Container(
         height: kColorItemHeight,
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         color: color,
         child: SafeArea(
           top: false,
@@ -131,7 +131,7 @@ class ColorsDemo extends StatelessWidget {
       length: allPalettes.length,
       child: Scaffold(
         appBar: AppBar(
-          elevation: 0.0,
+          elevation: 0,
           title: const Text('Colors'),
           bottom: TabBar(
             isScrollable: true,

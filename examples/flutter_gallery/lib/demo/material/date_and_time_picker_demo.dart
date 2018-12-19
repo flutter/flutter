@@ -99,7 +99,7 @@ class _DateTimePicker extends StatelessWidget {
             onPressed: () { _selectDate(context); },
           ),
         ),
-        const SizedBox(width: 12.0),
+        const SizedBox(width: 12),
         Expanded(
           flex: 3,
           child: _InputDropdown(
@@ -140,7 +140,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
           top: false,
           bottom: false,
           child: ListView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             children: <Widget>[
               TextField(
                 enabled: true,
@@ -154,7 +154,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                 decoration: const InputDecoration(
                   labelText: 'Location',
                 ),
-                style: Theme.of(context).textTheme.display1.copyWith(fontSize: 20.0),
+                style: Theme.of(context).textTheme.display1.copyWith(fontSize: 20),
               ),
               _DateTimePicker(
                 labelText: 'From',
@@ -186,7 +186,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                   });
                 },
               ),
-              const SizedBox(height: 8.0),
+              const SizedBox(height: 8),
               InputDecorator(
                 decoration: const InputDecoration(
                   labelText: 'Activity',

@@ -107,7 +107,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16),
                     child: Text(demo.description,
                       style: Theme.of(context).textTheme.subhead
                     )
@@ -162,10 +162,10 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     } else {
       body = SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: RichText(
             text: TextSpan(
-              style: const TextStyle(fontFamily: 'monospace', fontSize: 10.0),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 10),
               children: <TextSpan>[
                 DartSyntaxHighlighter(style).format(_exampleCode)
               ]

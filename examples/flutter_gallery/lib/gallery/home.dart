@@ -14,7 +14,7 @@ import 'demos.dart';
 
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 const Color _kFlutterBlue = Color(0xFF003D75);
-const double _kDemoItemHeight = 64.0;
+const double _kDemoItemHeight = 64;
 const Duration _kFrontLayerSwitchDuration = Duration(milliseconds: 300);
 
 class _FlutterLogo extends StatelessWidget {
@@ -24,8 +24,8 @@ class _FlutterLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        width: 34.0,
-        height: 34.0,
+        width: 34,
+        height: 34,
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage(
@@ -67,16 +67,16 @@ class _CategoryItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.all(6.0),
+              padding: const EdgeInsets.all(6),
               child: Icon(
                 category.icon,
-                size: 60.0,
+                size: 60,
                 color: isDark ? Colors.white : _kFlutterBlue,
               ),
             ),
-            const SizedBox(height: 10.0),
+            const SizedBox(height: 10),
             Container(
-              height: 48.0,
+              height: 48,
               alignment: Alignment.center,
               child: Text(
                 category.name,
@@ -120,7 +120,7 @@ class _CategoriesPage extends StatelessWidget {
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             final double columnWidth = constraints.biggest.width / columnCount.toDouble();
-            final double rowHeight = math.min(225.0, columnWidth * aspectRatio);
+            final double rowHeight = math.min(225, columnWidth * aspectRatio);
             final int rowCount = (categories.length + columnCount - 1) ~/ columnCount;
 
             // This repaint boundary prevents the inner contents of the front layer
@@ -214,12 +214,12 @@ class _DemoItem extends StatelessWidget {
         child: Row(
           children: <Widget>[
             Container(
-              width: 56.0,
-              height: 56.0,
+              width: 56,
+              height: 56,
               alignment: Alignment.center,
               child: Icon(
                 demo.icon,
-                size: 24.0,
+                size: 24,
                 color: isDark ? Colors.white : _kFlutterBlue,
               ),
             ),
@@ -230,7 +230,7 @@ class _DemoItem extends StatelessWidget {
                 children: titleChildren,
               ),
             ),
-            const SizedBox(width: 44.0),
+            const SizedBox(width: 44),
           ],
         ),
       ),
@@ -257,7 +257,7 @@ class _DemosPage extends StatelessWidget {
         explicitChildNodes: true,
         child: ListView(
           key: PageStorageKey<String>(category.name),
-          padding: EdgeInsets.only(top: 8.0, bottom: windowBottomPadding),
+          padding: EdgeInsets.only(top: 8, bottom: windowBottomPadding),
           children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
             return _DemoItem(demo: demo);
           }).toList(),
@@ -325,8 +325,8 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
     final MediaQueryData media = MediaQuery.of(context);
     final bool centerHome = media.orientation == Orientation.portrait && media.size.height < 800.0;
 
-    const Curve switchOutCurve = Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
-    const Curve switchInCurve = Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
+    const Curve switchOutCurve = Interval(0.4, 1, curve: Curves.fastOutSlowIn);
+    const Curve switchInCurve = Interval(0.4, 1, curve: Curves.fastOutSlowIn);
 
     Widget home = Scaffold(
       key: _scaffoldKey,
@@ -363,7 +363,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
                 ? const Text('Flutter gallery')
                 : Text(_category.name),
             ),
-            frontHeading: widget.testMode ? null : Container(height: 24.0),
+            frontHeading: widget.testMode ? null : Container(height: 24),
             frontLayer: AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
               switchOutCurve: switchOutCurve,

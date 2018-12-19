@@ -27,7 +27,7 @@ class _PageSelector extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Container(
-            margin: const EdgeInsets.only(top: 16.0),
+            margin: const EdgeInsets.only(top: 16),
             child: Row(
               children: <Widget>[
                 IconButton(
@@ -50,13 +50,13 @@ class _PageSelector extends StatelessWidget {
           Expanded(
             child: IconTheme(
               data: IconThemeData(
-                size: 128.0,
+                size: 128,
                 color: color,
               ),
               child: TabBarView(
                 children: icons.map<Widget>((Icon icon) {
                   return Container(
-                    padding: const EdgeInsets.all(12.0),
+                    padding: const EdgeInsets.all(12),
                     child: Card(
                       child: Center(
                         child: icon,

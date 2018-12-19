@@ -44,7 +44,7 @@ void showGalleryAboutDialog(BuildContext context) {
     applicationLegalese: '© 2017 The Chromium Authors',
     children: <Widget>[
       Padding(
-        padding: const EdgeInsets.only(top: 24.0),
+        padding: const EdgeInsets.only(top: 24),
         child: RichText(
           text: TextSpan(
             children: <TextSpan>[

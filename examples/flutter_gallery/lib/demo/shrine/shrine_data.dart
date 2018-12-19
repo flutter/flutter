@@ -61,7 +61,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/belt.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['fashion', 'latest'],
-    price: 300.00,
+    price: 300,
     vendor: _sandra,
     description:
       'Isn’t it cool when things look old, but they\'re not. Looks Old But Not makes '
@@ -72,7 +72,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/sunnies.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['travel', 'fashion', 'beauty'],
-    price: 20.00,
+    price: 20,
     vendor: _trevor,
     description:
       'Be an optimist. Carry Sunglasses with you at all times. All Tints and '
@@ -85,7 +85,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/flatwear.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['furniture'],
-    price: 30.00,
+    price: 30,
     vendor: _trevor,
     description:
     'Leave the tunnel and the rain is fallin amazing things happen when you wait'
@@ -95,7 +95,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/sweater.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['fashion'],
-    price: 300.00,
+    price: 300,
     vendor: _stella,
     description:
       'Looks can be deceiving. This sweater comes in a wide variety of '
@@ -107,7 +107,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/table.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['furniture'],
-    price: 63.00,
+    price: 63,
     vendor: _stella,
     description:
       'Leave the tunnel and the rain is fallin amazing things happen when you wait'
@@ -117,7 +117,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/jacket.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['fashion'],
-    price: 36.00,
+    price: 36,
     vendor: _ali,
     description:
       'Leave the tunnel and the rain is fallin amazing things happen when you wait'
@@ -127,7 +127,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/top.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['fashion'],
-    price: 125.00,
+    price: 125,
     vendor: _peter,
     description:
       'Leave the tunnel and the rain is fallin amazing things happen when you wait'
@@ -137,7 +137,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/cup.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['travel', 'furniture'],
-    price: 75.00,
+    price: 75,
     vendor: _sandra,
     description:
       'Drinksy has been making extraordinary mugs for decades. With each '
@@ -149,7 +149,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/teaset.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['furniture', 'fashion'],
-    price: 70.00,
+    price: 70,
     vendor: _trevor,
     featureTitle: 'Beautiful glass teapot',
     featureDescription:
@@ -164,7 +164,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/napkins.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['furniture', 'fashion'],
-    price: 89.00,
+    price: 89,
     vendor: _trevor,
     description:
       'Blue linen napkins were meant to go with friends, so you may want to pick '
@@ -175,7 +175,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/earrings.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['fashion', 'beauty'],
-    price: 25.00,
+    price: 25,
     vendor: _stella,
     description:
       'WeDipIt does it again. These hand-dipped 4 inch earrings are perfect for '
@@ -187,7 +187,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/planters.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['latest', 'furniture'],
-    price: 30.00,
+    price: 30,
     vendor: _ali,
     description:
       'The Perfect Planter Co makes the best vessels for just about anything you '
@@ -199,7 +199,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/dress.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['fashion'],
-    price: 54.00,
+    price: 54,
     vendor: _sandra,
     description:
       'Trying to find the perfect outift to match your mood? Try no longer. '
@@ -211,7 +211,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/backpack.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['travel', 'fashion'],
-    price: 25.00,
+    price: 25,
     vendor: _peter,
     description:
       'This backpack by Bags ‘n’ stuff can hold just about anything: a laptop, '
@@ -223,7 +223,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/hat.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['travel', 'fashion', 'latest'],
-    price: 25.00,
+    price: 25,
     vendor: _ali,
     description:
       'This is the  helmet for those warm summer days on the road. '
@@ -235,7 +235,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/scarf.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['latest', 'fashion'],
-    price: 17.00,
+    price: 17,
     vendor: _peter,
     description:
     'Leave the tunnel and the rain is fallin amazing things happen when you wait'
@@ -245,7 +245,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/sweats.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['travel', 'fashion', 'latest'],
-    price: 25.00,
+    price: 25,
     vendor: _stella,
     description:
     'Leave the tunnel and the rain is fallin amazing things happen when you wait'
@@ -255,7 +255,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/jumper.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>['travel', 'fashion', 'beauty'],
-    price: 25.00,
+    price: 25,
     vendor: _peter,
     description:
     'Leave the tunnel and the rain is fallin amazing things happen when you wait'
@@ -265,7 +265,7 @@ const List<Product> _allProducts = <Product> [
     imageAsset: 'products/shirt.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: <String>[ 'fashion', 'latest'],
-    price: 120.00,
+    price: 120,
     vendor: _stella,
     description:
     'Leave the tunnel and the rain is fallin amazing things happen when you wait'

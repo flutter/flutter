@@ -18,7 +18,7 @@ class VideoCard extends StatelessWidget {
 
   Widget _buildInlineVideo() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
       child: Center(
         child: AspectRatio(
           aspectRatio: 3 / 2,
@@ -62,10 +62,10 @@ class VideoCard extends StatelessWidget {
       );
 
       route.completed.then((void value) {
-        controller.setVolume(0.0);
+        controller.setVolume(0);
       });
 
-      controller.setVolume(1.0);
+      controller.setVolume(1);
       Navigator.of(context).push(route);
     }
 
@@ -179,12 +179,12 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
             }
             if (controller.value.isPlaying) {
               imageFadeAnimation = const FadeAnimation(
-                child: Icon(Icons.pause, size: 100.0),
+                child: Icon(Icons.pause, size: 100),
               );
               controller.pause();
             } else {
               imageFadeAnimation = const FadeAnimation(
-                child: Icon(Icons.play_arrow, size: 100.0),
+                child: Icon(Icons.play_arrow, size: 100),
               );
               controller.play();
             }
@@ -224,7 +224,7 @@ class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProvider
         setState(() {});
       }
     });
-    animationController.forward(from: 0.0);
+    animationController.forward(from: 0);
   }
 
   @override
@@ -237,7 +237,7 @@ class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProvider
   void didUpdateWidget(FadeAnimation oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.child != widget.child) {
-      animationController.forward(from: 0.0);
+      animationController.forward(from: 0);
     }
   }
 
@@ -366,7 +366,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
     Future<void> initController(VideoPlayerController controller, String name) async {
       print('> VideoDemo initController "$name" ${isDisposed ? "DISPOSED" : ""}');
       controller.setLooping(true);
-      controller.setVolume(0.0);
+      controller.setVolume(0);
       controller.play();
       await connectedCompleter.future;
       await controller.initialize();

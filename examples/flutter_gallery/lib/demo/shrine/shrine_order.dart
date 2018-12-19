@@ -33,11 +33,11 @@ class _ProductItem extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Text(product.name, style: theme.featureTitleStyle),
-        const SizedBox(height: 24.0),
+        const SizedBox(height: 24),
         Text(product.description, style: theme.featureStyle),
-        const SizedBox(height: 16.0),
+        const SizedBox(height: 16),
         Padding(
-          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 88.0),
+          padding: const EdgeInsets.only(top: 8, bottom: 8, right: 88),
           child: DropdownButtonHideUnderline(
             child: Container(
               decoration: BoxDecoration(
@@ -50,7 +50,7 @@ class _ProductItem extends StatelessWidget {
                   return DropdownMenuItem<int>(
                     value: value,
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
+                      padding: const EdgeInsets.only(left: 8),
                       child: Text('Quantity $value', style: theme.quantityMenuStyle),
                     ),
                   );
@@ -82,13 +82,13 @@ class _VendorItem extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         SizedBox(
-          height: 24.0,
+          height: 24,
           child: Align(
             alignment: Alignment.bottomLeft,
             child: Text(vendor.name, style: theme.vendorTitleStyle),
           ),
         ),
-        const SizedBox(height: 16.0),
+        const SizedBox(height: 16),
         Text(vendor.description, style: theme.vendorStyle),
       ],
     );
@@ -107,12 +107,12 @@ class _HeadingLayout extends MultiChildLayoutDelegate {
 
   @override
   void performLayout(Size size) {
-    const double margin = 56.0;
+    const double margin = 56;
     final bool landscape = size.width > size.height;
     final double imageWidth = (landscape ? size.width / 2.0 : size.width) - margin * 2.0;
-    final BoxConstraints imageConstraints = BoxConstraints(maxHeight: 224.0, maxWidth: imageWidth);
+    final BoxConstraints imageConstraints = BoxConstraints(maxHeight: 224, maxWidth: imageWidth);
     final Size imageSize = layoutChild(image, imageConstraints);
-    const double imageY = 0.0;
+    const double imageY = 0;
     positionChild(image, const Offset(margin, imageY));
 
     final double productWidth = landscape ? size.width / 2.0 : size.width - margin;
@@ -159,9 +159,9 @@ class _Heading extends StatelessWidget {
       height: (screenSize.height - kToolbarHeight) * 1.35,
       child: Material(
         type: MaterialType.card,
-        elevation: 0.0,
+        elevation: 0,
         child: Padding(
-          padding: const EdgeInsets.only(left: 16.0, top: 18.0, right: 16.0, bottom: 24.0),
+          padding: const EdgeInsets.only(left: 16, top: 18, right: 16, bottom: 24),
           child: CustomMultiChildLayout(
             delegate: _HeadingLayout(),
             children: <Widget>[
@@ -181,7 +181,7 @@ class _Heading extends StatelessWidget {
                 id: _HeadingLayout.icon,
                 child: const Icon(
                   Icons.info_outline,
-                  size: 24.0,
+                  size: 24,
                   color: Color(0xFFFFE0E0),
                 ),
               ),
@@ -289,19 +289,19 @@ class _OrderPageState extends State<OrderPage> {
           ),
           SliverSafeArea(
             top: false,
-            minimum: const EdgeInsets.fromLTRB(8.0, 32.0, 8.0, 8.0),
+            minimum: const EdgeInsets.fromLTRB(8, 32, 8, 8),
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 248.0,
-                mainAxisSpacing: 8.0,
-                crossAxisSpacing: 8.0,
+                maxCrossAxisExtent: 248,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
               ),
               delegate: SliverChildListDelegate(
                 widget.products
                   .where((Product product) => product != widget.order.product)
                   .map((Product product) {
                     return Card(
-                      elevation: 1.0,
+                      elevation: 1,
                       child: Image.asset(
                         product.imageAsset,
                         package: product.imageAssetPackage,

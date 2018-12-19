@@ -17,8 +17,8 @@ void main() {
       // The bug only manifests itself when the screen's orientation is portrait
       const Center(
         child: SizedBox(
-          width: 450.0,
-          height: 800.0,
+          width: 450,
+          height: 800,
           child: GalleryApp(testMode: true)
         )
       )
@@ -35,7 +35,7 @@ void main() {
     await tester.tap(find.text('Roasted Chicken'));
     await tester.pumpAndSettle();
 
-    await tester.drag(find.text('Roasted Chicken'), const Offset(0.0, -300.0));
+    await tester.drag(find.text('Roasted Chicken'), const Offset(0, -300));
     await tester.pumpAndSettle();
 
     Navigator.pop(find.byType(Scaffold).evaluate().single);
@@ -53,7 +53,7 @@ void main() {
     await tester.tap(find.text('Pesto'));
     await tester.pumpAndSettle();
 
-    await tester.fling(find.text('Roasted Chicken'), const Offset(0.0, -200.0), 10000.0);
+    await tester.fling(find.text('Roasted Chicken'), const Offset(0, -200), 10000);
     await tester.pumpAndSettle(); // start and finish fling
     expect(find.text('Spanakopita'), findsOneWidget);
   });

@@ -75,7 +75,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
           border: Border(top: BorderSide(color: Theme.of(context).dividerColor))
         ),
         child: Padding(
-          padding: const EdgeInsets.all(32.0),
+          padding: const EdgeInsets.all(32),
           child: Text(_explanatoryText, style: Theme.of(context).textTheme.subhead)
         )
       );
@@ -87,13 +87,13 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
       builder: (BuildContext context) {
         return Container(
           key: ValueKey<String>(page.label),
-          padding: const EdgeInsets.fromLTRB(48.0, 48.0, 48.0, 96.0),
+          padding: const EdgeInsets.fromLTRB(48, 48, 48, 96),
           child: Card(
             child: Center(
               child: Text(page.label,
                 style: TextStyle(
                   color: page.labelColor,
-                  fontSize: 32.0
+                  fontSize: 32
                 ),
                 textAlign: TextAlign.center
               )

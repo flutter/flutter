@@ -180,11 +180,11 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           autovalidate: _autovalidate,
           onWillPop: _warnUserAboutInvalidData,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                const SizedBox(height: 24.0),
+                const SizedBox(height: 24),
                 TextFormField(
                   textCapitalization: TextCapitalization.words,
                   decoration: const InputDecoration(
@@ -197,7 +197,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   onSaved: (String value) { person.name = value; },
                   validator: _validateName,
                 ),
-                const SizedBox(height: 24.0),
+                const SizedBox(height: 24),
                 TextFormField(
                   decoration: const InputDecoration(
                     border: UnderlineInputBorder(),
@@ -217,7 +217,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     _phoneNumberFormatter,
                   ],
                 ),
-                const SizedBox(height: 24.0),
+                const SizedBox(height: 24),
                 TextFormField(
                   decoration: const InputDecoration(
                     border: UnderlineInputBorder(),
@@ -229,7 +229,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   keyboardType: TextInputType.emailAddress,
                   onSaved: (String value) { person.email = value; },
                 ),
-                const SizedBox(height: 24.0),
+                const SizedBox(height: 24),
                 TextFormField(
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
@@ -239,7 +239,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   ),
                   maxLines: 3,
                 ),
-                const SizedBox(height: 24.0),
+                const SizedBox(height: 24),
                 TextFormField(
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
@@ -251,7 +251,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   ),
                   maxLines: 1,
                 ),
-                const SizedBox(height: 24.0),
+                const SizedBox(height: 24),
                 PasswordField(
                   fieldKey: _passwordFieldKey,
                   helperText: 'No more than 8 characters.',
@@ -262,7 +262,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     });
                   },
                 ),
-                const SizedBox(height: 24.0),
+                const SizedBox(height: 24),
                 TextFormField(
                   enabled: person.password != null && person.password.isNotEmpty,
                   decoration: const InputDecoration(
@@ -274,19 +274,19 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   obscureText: true,
                   validator: _validatePassword,
                 ),
-                const SizedBox(height: 24.0),
+                const SizedBox(height: 24),
                 Center(
                   child: RaisedButton(
                     child: const Text('SUBMIT'),
                     onPressed: _handleSubmitted,
                   ),
                 ),
-                const SizedBox(height: 24.0),
+                const SizedBox(height: 24),
                 Text(
                   '* indicates required field',
                   style: Theme.of(context).textTheme.caption
                 ),
-                const SizedBox(height: 24.0),
+                const SizedBox(height: 24),
               ],
             ),
           ),

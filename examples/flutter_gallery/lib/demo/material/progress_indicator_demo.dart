@@ -28,7 +28,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
 
     _animation = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
+      curve: const Interval(0, 0.9, curve: Curves.fastOutSlowIn),
       reverseCurve: Curves.fastOutSlowIn
     )..addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.dismissed)
@@ -67,7 +67,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
   Widget _buildIndicators(BuildContext context, Widget child) {
     final List<Widget> indicators = <Widget>[
       const SizedBox(
-        width: 200.0,
+        width: 200,
         child: LinearProgressIndicator()
       ),
       const LinearProgressIndicator(),
@@ -78,13 +78,13 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
         children: <Widget>[
           const CircularProgressIndicator(),
           SizedBox(
-              width: 20.0,
-              height: 20.0,
+              width: 20,
+              height: 20,
               child: CircularProgressIndicator(value: _animation.value)
           ),
           SizedBox(
-            width: 100.0,
-            height: 20.0,
+            width: 100,
+            height: 20,
             child: Text('${(_animation.value * 100.0).toStringAsFixed(1)}%',
               textAlign: TextAlign.right
             ),
@@ -94,7 +94,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     ];
     return Column(
       children: indicators
-        .map<Widget>((Widget c) => Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)))
+        .map<Widget>((Widget c) => Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 20)))
         .toList(),
     );
   }
@@ -117,7 +117,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
                 top: false,
                 bottom: false,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                   child: AnimatedBuilder(
                     animation: _animation,
                     builder: _buildIndicators

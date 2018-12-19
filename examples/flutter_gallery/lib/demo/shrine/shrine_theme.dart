@@ -12,15 +12,15 @@ class ShrineStyle extends TextStyle {
     : super(inherit: false, color: color, fontFamily: 'AbrilFatface', fontSize: size, fontWeight: weight, textBaseline: TextBaseline.alphabetic);
 }
 
-TextStyle robotoRegular12(Color color) => ShrineStyle.roboto(12.0, FontWeight.w500, color);
-TextStyle robotoLight12(Color color) => ShrineStyle.roboto(12.0, FontWeight.w300, color);
-TextStyle robotoRegular14(Color color) => ShrineStyle.roboto(14.0, FontWeight.w500, color);
-TextStyle robotoMedium14(Color color) => ShrineStyle.roboto(14.0, FontWeight.w600, color);
-TextStyle robotoLight14(Color color) => ShrineStyle.roboto(14.0, FontWeight.w300, color);
-TextStyle robotoRegular16(Color color) => ShrineStyle.roboto(16.0, FontWeight.w500, color);
-TextStyle robotoRegular20(Color color) => ShrineStyle.roboto(20.0, FontWeight.w500, color);
-TextStyle abrilFatfaceRegular24(Color color) => ShrineStyle.abrilFatface(24.0, FontWeight.w500, color);
-TextStyle abrilFatfaceRegular34(Color color) => ShrineStyle.abrilFatface(34.0, FontWeight.w500, color);
+TextStyle robotoRegular12(Color color) => ShrineStyle.roboto(12, FontWeight.w500, color);
+TextStyle robotoLight12(Color color) => ShrineStyle.roboto(12, FontWeight.w300, color);
+TextStyle robotoRegular14(Color color) => ShrineStyle.roboto(14, FontWeight.w500, color);
+TextStyle robotoMedium14(Color color) => ShrineStyle.roboto(14, FontWeight.w600, color);
+TextStyle robotoLight14(Color color) => ShrineStyle.roboto(14, FontWeight.w300, color);
+TextStyle robotoRegular16(Color color) => ShrineStyle.roboto(16, FontWeight.w500, color);
+TextStyle robotoRegular20(Color color) => ShrineStyle.roboto(20, FontWeight.w500, color);
+TextStyle abrilFatfaceRegular24(Color color) => ShrineStyle.abrilFatface(24, FontWeight.w500, color);
+TextStyle abrilFatfaceRegular34(Color color) => ShrineStyle.abrilFatface(34, FontWeight.w500, color);
 
 /// The TextStyles and Colors used for titles, labels, and descriptions. This
 /// InheritedWidget is shared by all of the routes and widgets created for
