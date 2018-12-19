@@ -341,6 +341,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('target-platform')) {
             targetPlatformValue = project.property('target-platform')
         }
+        String flavorValue = null
+        if (project.hasProperty('flavor')) {
+            flavorValue = project.property('flavor')
+        }
 
         def addFlutterDeps = { variant ->
             String flutterBuildMode = buildModeFor(variant.buildType)
@@ -370,6 +374,7 @@ class FlutterPlugin implements Plugin<Project> {
                 buildHotUpdate buildHotUpdateValue
                 buildSharedLibrary buildSharedLibraryValue
                 targetPlatform targetPlatformValue
+                flavor flavorValue
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
                 extraFrontEndOptions extraFrontEndOptionsValue
@@ -433,6 +438,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean buildSharedLibrary
     @Optional @Input
     String targetPlatform
+    @Optional @Input
+    String flavor
     File sourceDir
     File intermediateDir
     @Optional @Input
@@ -534,6 +541,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (targetPlatform != null) {
                 args "--target-platform", "${targetPlatform}"
+            }
+            if (flavor != null) {
+                args "--flavor", "${flavor}"
             }
             if (buildMode == "release" || buildMode == "profile") {
                 args "--precompiled"
