@@ -137,16 +137,14 @@ void main(List<String> argList) {
     }
   }
 
-  final String idString = id.join('.');
   final SnippetGenerator generator = SnippetGenerator();
   stdout.write(generator.generate(
     input,
     snippetType,
     template: template,
-    id: idString,
+    id: id.join('.'),
     output: args[_kOutputOption] != null ? File(args[_kOutputOption]) : null,
     metadata: <String, Object>{
-      'id': idString,
       'package': packageName,
       'library': libraryName,
       'element': elementName,

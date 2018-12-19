@@ -236,10 +236,12 @@ class SnippetGenerator {
           (_ComponentTuple data) => data.name == 'description',
           orElse: () => null,
         );
+        metadata ??= <String, Object>{};
         metadata.addAll(<String, Object>{
+          'id': id,
           'file': path.basename(outputFile.path),
           'description': description != null
-              ? description.mergedContent.replaceAll('\n', ' ')
+              ? description.mergedContent
               : null,
         });
         metadataFile.writeAsStringSync(jsonEncoder.convert(metadata));
