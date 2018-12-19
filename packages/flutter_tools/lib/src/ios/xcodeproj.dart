@@ -49,6 +49,9 @@ Future<void> updateGeneratedXcodeProperties({
   if (targetOverride != null)
     localsBuffer.writeln('FLUTTER_TARGET=$targetOverride');
 
+  if (buildInfo.flavor != null)
+    localsBuffer.writeln('FLUTTER_FLAVOR=${buildInfo.flavor}');
+
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
   localsBuffer.writeln('FLUTTER_BUILD_DIR=${getBuildDirectory()}');
 

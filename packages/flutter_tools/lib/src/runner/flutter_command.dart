@@ -278,7 +278,7 @@ abstract class FlutterCommand extends Command<void> {
     return _defaultBuildMode;
   }
 
-  String getFlavor() => argParser.options.containsKey('flavor')
+  String getFlavor() => argParser.options.containsKey('flavor') && argResults['flavor'] != ''
         ? argResults['flavor']
         : null;
 

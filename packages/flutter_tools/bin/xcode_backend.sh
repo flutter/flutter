@@ -41,6 +41,11 @@ BuildApp() {
     project_path="${FLUTTER_APPLICATION_PATH}"
   fi
 
+  local flavor=""
+  if [[ -n "$FLUTTER_FLAVOR" ]]; then
+    flavor="${FLUTTER_FLAVOR}"
+  fi
+
   local target_path="lib/main.dart"
   if [[ -n "$FLUTTER_TARGET" ]]; then
     target_path="${FLUTTER_TARGET}"
@@ -239,6 +244,7 @@ BuildApp() {
     ${verbose_flag}                                                         \
     build bundle                                                            \
     --target-platform=ios                                                   \
+    --flavor="${flavor}"                                                    \
     --target="${target_path}"                                               \
     --${build_mode}                                                         \
     --depfile="${build_dir}/snapshot_blob.bin.d"                            \
