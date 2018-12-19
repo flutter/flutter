@@ -280,8 +280,29 @@ class TextStyle extends Diagnosticable {
   /// 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto'). The
   /// prefixing is done by the constructor when the `package` argument is
   /// provided.
+  ///
+  /// The value provided in [fontFamily] will act as the preferred/first font
+  /// family that glyphs are looked for in, followed in order by the font families
+  /// in [fontFamilyFallback]. When [fontFamily] is null or not provided, the
+  /// first value in [fontFamilyFallback] acts as the preferred/first font
+  /// family. When neither is provided, then the default platform font will
+  /// be used. 
   final String fontFamily;
 
+  /// The ordered list of font families to fall back on when a glyph cannot be
+  /// found in a higher priority font family.
+  ///
+  /// The value provided in [fontFamily] will act as the preferred/first font
+  /// family that glyphs are looked for in, followed in order by the font families
+  /// in [fontFamilyFallback]. When [fontFamily] is null or not provided, the
+  /// first value in [fontFamilyFallback] acts as the preferred/first font
+  /// family. When neither is provided, then the default platform font will
+  /// be used. Providing and empty list or null for this property is the same
+  /// as omitting it.
+  ///
+  /// For example, if a glyph is not found in [fontFamily], then each font family
+  /// in [fontFamilyFallback] will be searched in order until it is found. If it
+  /// is not found, then a box will be drawn in its place.
   final List<String> fontFamilyFallback;
 
   /// The size of glyphs (in logical pixels) to use when painting the text.
@@ -829,7 +850,7 @@ class TextStyle extends Diagnosticable {
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
     styles.add(DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
     styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
-    // styles.add(StringProperty('${prefix}familyFallback', fontFamilyFallback, defaultValue: null, quoted: false));
+    styles.add(StringProperty('${prefix}familyFallback', fontFamilyFallback, defaultValue: null, quoted: false));
     styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
     String weightDescription;
     if (fontWeight != null) {
