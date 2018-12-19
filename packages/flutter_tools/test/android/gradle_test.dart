@@ -325,6 +325,48 @@ flutter:
         expectedBuildNumber: '3',
       );
     });
+
+    testUsingAndroidContext('allow build info to unset build name and number', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: null, buildNumber: null),
+        expectedBuildName: null,
+        expectedBuildNumber: null,
+      );
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3),
+        expectedBuildName: '1.0.2',
+        expectedBuildNumber: '3',
+      );
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.3', buildNumber: 4),
+        expectedBuildName: '1.0.3',
+        expectedBuildNumber: '4',
+      );
+      // Values don't get unset.
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: null,
+        expectedBuildName: '1.0.3',
+        expectedBuildNumber: '4',
+      );
+      // Values get unset.
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: null, buildNumber: null),
+        expectedBuildName: null,
+        expectedBuildNumber: null,
+      );
+    });
   });
 }
 

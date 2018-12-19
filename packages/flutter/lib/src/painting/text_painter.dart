@@ -422,6 +422,7 @@ class TextPainter {
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
+    final String flattenedText = _text.toPlainText();
     final int prevCodeUnit = _text.codeUnitAt(max(0, offset - 1));
     if (prevCodeUnit == null)
       return null;
@@ -430,7 +431,7 @@ class TextPainter {
     final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _text.codeUnitAt(offset) == _zwjUtf16;
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
-    while (boxes.isEmpty && _text.text != null) {
+    while (boxes.isEmpty && flattenedText != null) {
       final int prevRuneOffset = offset - graphemeClusterLength;
       boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
       // When the range does not include a full cluster, no boxes will be returned.
@@ -439,7 +440,7 @@ class TextPainter {
         // return empty boxes. We break and try from downstream instead.
         if (!needsSearch)
           break; // Only perform one iteration if no search is required.
-        if (prevRuneOffset < -_text.text.length)
+        if (prevRuneOffset < -flattenedText.length)
           break; // Stop iterating when beyond the max length of the text.
         // Multiply by two to log(n) time cover the entire text span. This allows
         // faster discovery of very long clusters and reduces the possibility
@@ -448,7 +449,7 @@ class TextPainter {
         graphemeClusterLength *= 2;
         continue;
       }
-      final TextBox box = boxes[0];
+      final TextBox box = boxes.first;
 
       // If the upstream character is a newline, cursor is at start of next line
       const int NEWLINE_CODE_UNIT = 10;
@@ -468,15 +469,16 @@ class TextPainter {
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
+    final String flattenedText = _text.toPlainText();
     // We cap the offset at the final index of the _text.
-    final int nextCodeUnit = _text.codeUnitAt(min(offset, _text.text == null ? 0 : _text.text.length - 1));
+    final int nextCodeUnit = _text.codeUnitAt(min(offset, flattenedText == null ? 0 : flattenedText.length - 1));
     if (nextCodeUnit == null)
       return null;
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
     final bool needsSearch = _isUtf16Surrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16;
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
-    while (boxes.isEmpty && _text.text != null) {
+    while (boxes.isEmpty && flattenedText != null) {
       final int nextRuneOffset = offset + graphemeClusterLength;
       boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
       // When the range does not include a full cluster, no boxes will be returned.
@@ -485,7 +487,7 @@ class TextPainter {
         // return empty boxes. We break and try from upstream instead.
         if (!needsSearch)
           break; // Only perform one iteration if no search is required.
-        if (nextRuneOffset >= _text.text.length << 1)
+        if (nextRuneOffset >= flattenedText.length << 1)
           break; // Stop iterating when beyond the max length of the text.
         // Multiply by two to log(n) time cover the entire text span. This allows
         // faster discovery of very long clusters and reduces the possibility
@@ -494,7 +496,7 @@ class TextPainter {
         graphemeClusterLength *= 2;
         continue;
       }
-      final TextBox box = boxes[0];
+      final TextBox box = boxes.last;
       final double caretStart = box.start;
       final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
       return Offset(dx, box.top);

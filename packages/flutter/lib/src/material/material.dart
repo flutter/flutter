@@ -19,7 +19,7 @@ typedef RectCallback = Rect Function();
 ///
 /// See also:
 ///
-///  * [Material], in particular [Material.type]
+///  * [Material], in particular [Material.type].
 ///  * [kMaterialEdges]
 enum MaterialType {
   /// Rectangle using default theme canvas color.
@@ -149,9 +149,9 @@ abstract class MaterialInkController {
 ///
 /// See also:
 ///
-/// * [MergeableMaterial], a piece of material that can split and remerge.
-/// * [Card], a wrapper for a [Material] of [type] [MaterialType.card].
-/// * <https://material.google.com/>
+///  * [MergeableMaterial], a piece of material that can split and remerge.
+///  * [Card], a wrapper for a [Material] of [type] [MaterialType.card].
+///  * <https://material.google.com/>
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///

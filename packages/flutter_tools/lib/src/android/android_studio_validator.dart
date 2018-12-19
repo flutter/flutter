@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../doctor.dart';
 import '../globals.dart';
@@ -34,9 +35,9 @@ class AndroidStudioValidator extends DoctorValidator {
 
     final String studioVersionText = _studio.version == Version.unknown
         ? null
-        : 'version ${_studio.version}';
+        : userMessages.androidStudioVersion(_studio.version.toString());
     messages
-        .add(ValidationMessage('Android Studio at ${_studio.directory}'));
+        .add(ValidationMessage(userMessages.androidStudioLocation(_studio.directory)));
 
     final IntelliJPlugins plugins = IntelliJPlugins(_studio.pluginsPath);
     plugins.validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
@@ -51,11 +52,9 @@ class AndroidStudioValidator extends DoctorValidator {
       type = ValidationType.partial;
       messages.addAll(_studio.validationMessages
           .map<ValidationMessage>((String m) => ValidationMessage.error(m)));
-      messages.add(ValidationMessage(
-          'Try updating or re-installing Android Studio.'));
+      messages.add(ValidationMessage(userMessages.androidStudioNeedsUpdate));
       if (_studio.configured != null) {
-        messages.add(ValidationMessage(
-            'Consider removing your android-studio-dir setting by running:\nflutter config --android-studio-dir='));
+        messages.add(ValidationMessage(userMessages.androidStudioResetDir));
       }
     }
 
@@ -76,13 +75,9 @@ class NoAndroidStudioValidator extends DoctorValidator {
 
     final String cfgAndroidStudio = config.getValue('android-studio-dir');
     if (cfgAndroidStudio != null) {
-      messages.add(
-          ValidationMessage.error('android-studio-dir = $cfgAndroidStudio\n'
-              'but Android Studio not found at this location.'));
+      messages.add(ValidationMessage.error(userMessages.androidStudioMissing(cfgAndroidStudio)));
     }
-    messages.add(ValidationMessage(
-        'Android Studio not found; download from https://developer.android.com/studio/index.html\n'
-        '(or visit https://flutter.io/setup/#android-setup for detailed instructions).'));
+    messages.add(ValidationMessage(userMessages.androidStudioInstallation));
 
     return ValidationResult(ValidationType.notAvailable, messages,
         statusInfo: 'not installed');
