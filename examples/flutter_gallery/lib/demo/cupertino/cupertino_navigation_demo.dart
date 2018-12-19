@@ -714,7 +714,11 @@ class CupertinoDemoTab3 extends StatelessWidget {
         trailing: trailingButtons,
       ),
       child: DecoratedBox(
-        decoration: BoxDecoration(color: CupertinoTheme.of(context).tableBackgroundColor),
+        decoration: BoxDecoration(
+          color: CupertinoTheme.of(context).brightness == Brightness.light
+              ? CupertinoColors.extraLightBackgroundGray
+              : CupertinoColors.darkBackgroundGray,
+        ),
         child: ListView(
           children: <Widget>[
             const Padding(padding: EdgeInsets.only(top: 32.0)),

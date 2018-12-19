@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'bottom_tab_bar.dart';
+import 'theme.dart';
 
 /// Implements a tabbed iOS application's root layout and behavior structure.
 ///
@@ -219,8 +220,13 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       ));
     }
 
-    return Stack(
-      children: stacked,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: CupertinoTheme.of(context).scaffoldBackgroundColor
+      ),
+      child: Stack(
+        children: stacked,
+      ),
     );
   }
 }

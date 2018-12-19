@@ -86,7 +86,6 @@ class CupertinoThemeData extends Diagnosticable {
     CupertinoTextThemeData textTheme,
     Color barBackgroundColor,
     Color scaffoldBackgroundColor,
-    Color tableBackgroundColor,
   }) : this.raw(
         brightness,
         primaryColor,
@@ -94,7 +93,6 @@ class CupertinoThemeData extends Diagnosticable {
         textTheme,
         barBackgroundColor,
         scaffoldBackgroundColor,
-        tableBackgroundColor,
       );
 
   /// Same as the default constructor but with positional arguments to avoid
@@ -109,7 +107,6 @@ class CupertinoThemeData extends Diagnosticable {
     this._textTheme,
     this._barBackgroundColor,
     this._scaffoldBackgroundColor,
-    this._tableBackgroundColor,
   );
 
   bool get _isLight => brightness == Brightness.light;
@@ -186,16 +183,6 @@ class CupertinoThemeData extends Diagnosticable {
   }
   final Color _scaffoldBackgroundColor;
 
-  /// Background color of a table view behind cell groups.
-  ///
-  /// Defaults to a [CupertinoColors.extraLightBackgroundGray] or
-  /// [CupertinoColors.darkBackgroundGray] depending on the [brightness].
-  Color get tableBackgroundColor {
-    return _tableBackgroundColor ??
-        (_isLight ? CupertinoColors.extraLightBackgroundGray : CupertinoColors.darkBackgroundGray);
-  }
-  final Color _tableBackgroundColor;
-
   /// Return an instance of the [CupertinoThemeData] whose property getters
   /// only return the construction time specifications with no derived values.
   ///
@@ -209,7 +196,6 @@ class CupertinoThemeData extends Diagnosticable {
       _textTheme,
       _barBackgroundColor,
       _scaffoldBackgroundColor,
-      _tableBackgroundColor,
     );
   }
 
@@ -227,7 +213,6 @@ class CupertinoThemeData extends Diagnosticable {
     CupertinoTextThemeData textTheme,
     Color barBackgroundColor,
     Color scaffoldBackgroundColor,
-    Color tableBackgroundColor,
   }) {
     return CupertinoThemeData(
       brightness: brightness ?? _brightness,
@@ -236,7 +221,6 @@ class CupertinoThemeData extends Diagnosticable {
       textTheme: textTheme ?? _textTheme,
       barBackgroundColor: barBackgroundColor ?? _barBackgroundColor,
       scaffoldBackgroundColor: scaffoldBackgroundColor ?? _scaffoldBackgroundColor,
-      tableBackgroundColor: tableBackgroundColor ?? _tableBackgroundColor,
     );
   }
 
@@ -250,7 +234,6 @@ class CupertinoThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<CupertinoTextThemeData>('textTheme', textTheme, defaultValue: defaultData.textTheme));
     properties.add(DiagnosticsProperty<Color>('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
     properties.add(DiagnosticsProperty<Color>('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
-    properties.add(DiagnosticsProperty<Color>('tableBackgroundColor', tableBackgroundColor, defaultValue: defaultData.tableBackgroundColor));
   }
 }
 
@@ -262,7 +245,6 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
     this.textTheme,
     this.barBackgroundColor,
     this.scaffoldBackgroundColor,
-    this.tableBackgroundColor,
   ) : super.raw(
         brightness,
         primaryColor,
@@ -270,7 +252,6 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
         textTheme,
         barBackgroundColor,
         scaffoldBackgroundColor,
-        tableBackgroundColor,
       );
 
   @override final Brightness brightness;
@@ -279,5 +260,4 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
   @override final CupertinoTextThemeData textTheme;
   @override final Color barBackgroundColor;
   @override final Color scaffoldBackgroundColor;
-  @override final Color tableBackgroundColor;
 }

@@ -254,7 +254,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         style: CupertinoTheme.of(context).textTheme.textStyle,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: CupertinoTheme.of(context).tableBackgroundColor,
+            color: CupertinoTheme.of(context).brightness == Brightness.light
+                ? CupertinoColors.extraLightBackgroundGray
+                : CupertinoColors.darkBackgroundGray,
           ),
           child: ListView(
             children: <Widget>[

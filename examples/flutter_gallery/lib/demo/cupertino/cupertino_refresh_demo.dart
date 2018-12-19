@@ -42,7 +42,11 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
       style: CupertinoTheme.of(context).textTheme.textStyle,
       child: CupertinoPageScaffold(
         child: DecoratedBox(
-          decoration: BoxDecoration(color: CupertinoTheme.of(context).tableBackgroundColor),
+          decoration: BoxDecoration(
+            color: CupertinoTheme.of(context).brightness == Brightness.light
+                ? CupertinoColors.extraLightBackgroundGray
+                : CupertinoColors.darkBackgroundGray,
+          ),
           child: CustomScrollView(
             slivers: <Widget>[
               CupertinoSliverNavigationBar(
