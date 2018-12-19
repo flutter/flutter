@@ -232,8 +232,15 @@ class SnippetGenerator {
         final File metadataFile = File(path.join(path.dirname(outputFile.path),
             '${path.basenameWithoutExtension(outputFile.path)}.json'));
         stderr.writeln('Writing metadata to ${metadataFile.absolute.path}');
+        final _ComponentTuple description = snippetData.firstWhere(
+          (_ComponentTuple data) => data.name == 'description',
+          orElse: () => null,
+        );
         metadata.addAll(<String, Object>{
           'file': path.basename(outputFile.path),
+          'description': description != null
+              ? description.mergedContent.replaceAll('\n', ' ')
+              : null,
         });
         metadataFile.writeAsStringSync(jsonEncoder.convert(metadata));
         break;
