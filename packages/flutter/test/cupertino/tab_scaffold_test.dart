@@ -254,6 +254,64 @@ void main() {
     expect(tabsPainted, <int>[0, 1, 0]);
     expect(selectedTabs, <int>[0]);
   });
+
+  testWidgets('Tab bar respects themes', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    BoxDecoration tabDecoration = tester.widget<DecoratedBox>(find.descendant(
+      of: find.byType(CupertinoTabBar),
+      matching: find.byType(DecoratedBox),
+    )).decoration;
+
+    expect(tabDecoration.color, const Color(0xCCF8F8F8));
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pump();
+
+    // Pump again but with dark theme.
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          brightness: Brightness.dark,
+          primaryColor: CupertinoColors.destructiveRed,
+        ),
+        home: CupertinoTabScaffold(
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    tabDecoration = tester.widget<DecoratedBox>(find.descendant(
+      of: find.byType(CupertinoTabBar),
+      matching: find.byType(DecoratedBox),
+    )).decoration;
+
+    expect(tabDecoration.color, const Color(0xB7212121));
+
+    final RichText tab1 = tester.widget(find.descendant(
+      of: find.text('Tab 1'),
+      matching: find.byType(RichText),
+    ));
+    // Tab 2 should still be selected after changing theme.
+    expect(tab1.text.style.color, CupertinoColors.inactiveGray);
+    final RichText tab2 = tester.widget(find.descendant(
+      of: find.text('Tab 2'),
+      matching: find.byType(RichText),
+    ));
+    expect(tab2.text.style.color, CupertinoColors.destructiveRed);
+  });
 }
 
 CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
@@ -268,7 +326,6 @@ CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
         title: Text('Tab 2'),
       ),
     ],
-    backgroundColor: CupertinoColors.white,
     currentIndex: selectedTab,
     onTap: (int newTab) => selectedTabs.add(newTab),
   );
