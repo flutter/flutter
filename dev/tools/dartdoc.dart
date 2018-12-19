@@ -412,13 +412,15 @@ void putRedirectInOldIndexLocation() {
 void writeSnippetsIndexFile() {
   final Directory snippetsDir = Directory(path.join(kPublishRoot, 'snippets'));
   if (snippetsDir.existsSync()) {
+    const JsonEncoder jsonEncoder = JsonEncoder.withIndent('    ');
     final Iterable<File> files = snippetsDir
         .listSync()
         .whereType<File>()
         .where((File file) => path.extension(file.path) == '.json');
         // Combine all the metadata into a single JSON array.
-        final Iterable<String> fileContents = files.map((File file) => file.readAsStringSync());
-      final String jsonArray = '[\n${fileContents.join(',\n')}\n]';
+    final Iterable<String> fileContents = files.map((File file) => file.readAsStringSync());
+    final List<dynamic> metadataObjects = fileContents.map<dynamic>(json.decode).toList();
+    final String jsonArray = jsonEncoder.convert(metadataObjects);
     File('$kPublishRoot/snippets/index.json').writeAsStringSync(jsonArray);
   }
 }
