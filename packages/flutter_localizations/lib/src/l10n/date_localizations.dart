@@ -9800,8 +9800,8 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
   },
   'th': <String, dynamic>{
     'NAME': r'''th''',
-    'ERAS': <dynamic>[r'''ปีก่อน ค.ศ.''', r'''ค.ศ.'''],
-    'ERANAMES': <dynamic>[r'''ปีก่อนคริสต์ศักราช''', r'''คริสต์ศักราช'''],
+    'ERAS': <dynamic>[r'''ปีก่อน พ.ศ.''', r'''พ.ศ.'''],
+    'ERANAMES': <dynamic>[r'''ปีก่อนพุทธศักราช''', r'''พุทธศักราช'''],
     'NARROWMONTHS': <dynamic>[
       r'''ม.ค.''',
       r'''ก.พ.''',
