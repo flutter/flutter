@@ -442,7 +442,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
     Widget counter;
     final int currentLength = _effectiveController.value.text.runes.length;
-    if (widget.buildCounter != null) {
+    if (effectiveDecoration.counter == null
+        && effectiveDecoration.counterText == null
+        && widget.buildCounter != null) {
       counter = widget.buildCounter(
         context,
         currentLength: currentLength,

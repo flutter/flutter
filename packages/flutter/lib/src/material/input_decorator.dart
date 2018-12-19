@@ -1839,7 +1839,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     Widget counter;
     if (decoration.counter != null) {
       counter = decoration.counter;
-    } else if (decoration.counterText != null) {
+    } else if (decoration.counterText != null && decoration.counterText != '') {
       counter = Semantics(
         container: true,
         liveRegion: isFocused,
