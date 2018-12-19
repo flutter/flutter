@@ -159,6 +159,9 @@ class FakeIosPlatformViewsController {
   // delayed until it completes.
   Completer<void> creationDelay;
 
+  // Maps a view id to the number of gestures it accepted so fat.
+  final Map<int, int> gesturesAccepted = <int, int>{};
+
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
   }
@@ -169,9 +172,11 @@ class FakeIosPlatformViewsController {
         return _create(call);
       case 'dispose':
         return _dispose(call);
+      case 'acceptGesture':
+        return _acceptGesture(call);
     }
     return Future<dynamic>.sync(() => null);
-    }
+  }
 
   Future<dynamic> _create(MethodCall call) async {
     if (creationDelay != null)
@@ -196,6 +201,14 @@ class FakeIosPlatformViewsController {
     }
 
     _views[id] = FakeUiKitView(id, viewType, creationParams);
+    gesturesAccepted[id] = 0;
+    return Future<int>.sync(() => null);
+  }
+
+  Future<dynamic> _acceptGesture(MethodCall call) async {
+    final Map<dynamic, dynamic> args = call.arguments;
+    final int id = args['id'];
+    gesturesAccepted[id] += 1;
     return Future<int>.sync(() => null);
   }
 

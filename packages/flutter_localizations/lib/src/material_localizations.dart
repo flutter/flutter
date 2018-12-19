@@ -568,7 +568,27 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   /// data. Subsequent invocations have no effect.
   static void _loadDateIntlDataIfNotLoaded() {
     if (!_dateIntlDataInitialized) {
+      // TODO(garyq): Add support for scriptCodes. Do not strip scriptCode from string.
+
+      // Keep track of initialzed locales, or will fail on attempted double init.
+      // This can only happen if a locale with a stripped scriptCode has already
+      // been initialzed. This should be removed when scriptCode stripping is removed.
+      final Set<String> initializedLocales = Set<String>();
       date_localizations.dateSymbols.forEach((String locale, dynamic data) {
+        // Strip scriptCode from the locale, as we do not distinguish between scripts
+        // for dates.
+        final List<String> codes = locale.split('_');
+        String countryCode;
+        if (codes.length == 2) {
+          countryCode = codes[1].length < 4 ? codes[1] : null;
+        } else if (codes.length == 3) {
+          countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
+        }
+        locale = codes[0] + (countryCode != null ? '_' + countryCode : '');
+        if (initializedLocales.contains(locale))
+          return;
+        initializedLocales.add(locale);
+        // Perform initialization.
         assert(date_localizations.datePatterns.containsKey(locale));
         final intl.DateSymbols symbols = intl.DateSymbols.deserializeFromMap(data);
         date_symbol_data_custom.initializeDateFormattingCustom(

@@ -124,7 +124,10 @@ class IOSDevice extends Device {
   final String _sdkVersion;
 
   @override
-  bool get supportsHotMode => true;
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => true;
 
   @override
   final String name;

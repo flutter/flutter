@@ -8,7 +8,6 @@ import 'dart:math' show Random, max;
 
 import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
-import 'package:quiver/time.dart';
 
 import '../globals.dart';
 import 'context.dart';
@@ -204,6 +203,7 @@ class SettingsFile {
   final Map<String, String> values = <String, String>{};
 
   void writeContents(File file) {
+    file.parent.createSync(recursive: true);
     file.writeAsStringSync(values.keys.map<String>((String key) {
       return '$key=${values[key]}';
     }).join('\n'));
@@ -250,8 +250,6 @@ Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
   final Map<dynamic, dynamic> map = untyped;
   return map.cast<String, dynamic>();
 }
-
-Clock get clock => context[Clock];
 
 typedef AsyncCallback = Future<void> Function();
 

@@ -69,14 +69,14 @@ void main() {
       expect(content.isModified, isFalse);
 
       file.parent.createSync(recursive: true);
-      file.writeAsBytesSync(<int>[1, 2, 3]);
+      file.writeAsBytesSync(<int>[1, 2, 3], flush: true);
 
       final DateTime fiveSecondsAgo = DateTime.now().subtract(const Duration(seconds:5));
       expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
       expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
       expect(content.isModifiedAfter(null), isTrue);
 
-      file.writeAsBytesSync(<int>[2, 3, 4]);
+      file.writeAsBytesSync(<int>[2, 3, 4], flush: true);
       expect(content.fileDependencies, <String>[filePath]);
       expect(content.isModified, isTrue);
       expect(content.isModified, isFalse);

@@ -176,7 +176,7 @@ class TextTheme extends Diagnosticable {
   /// the typography styles in the material design specification, as a starting
   /// point.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// /// A Widget that sets the ambient theme's title text color for its
@@ -203,11 +203,12 @@ class TextTheme extends Diagnosticable {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
-  ///   * [merge] is used instead of [copyWith] when you want to merge all
-  ///     of the fields of a TextTheme instead of individual fields.
+  ///  * [merge] is used instead of [copyWith] when you want to merge all
+  ///    of the fields of a TextTheme instead of individual fields.
   TextTheme copyWith({
     TextStyle display4,
     TextStyle display3,
@@ -259,7 +260,7 @@ class TextTheme extends Diagnosticable {
   /// [TextTheme] has only some fields defined, and you want to define the rest
   /// by merging it with a default theme.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// /// A Widget that sets the ambient theme's title text color for its
@@ -284,12 +285,13 @@ class TextTheme extends Diagnosticable {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
-  ///   * [copyWith] is used instead of [merge] when you wish to override
-  ///     individual fields in the [TextTheme] instead of merging all of the
-  ///     fields of two [TextTheme]s.
+  ///  * [copyWith] is used instead of [merge] when you wish to override
+  ///    individual fields in the [TextTheme] instead of merging all of the
+  ///    fields of two [TextTheme]s.
   TextTheme merge(TextTheme other) {
     if (other == null)
       return this;

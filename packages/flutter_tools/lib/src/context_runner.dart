@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:quiver/time.dart';
-
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
@@ -19,6 +17,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
@@ -56,7 +55,6 @@ Future<T> runInContext<T>(
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
       BotDetector: () => const BotDetector(),
       Cache: () => Cache(),
-      Clock: () => const Clock(),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
       Config: () => Config(),
@@ -65,11 +63,11 @@ Future<T> runInContext<T>(
       Doctor: () => const Doctor(),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(),
-      UserMessages: () => UserMessages(),
       FuchsiaSdk: () => FuchsiaSdk(),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(),
       FuchsiaWorkflow: () => FuchsiaWorkflow(),
       Flags: () => const EmptyFlags(),
-      FlutterVersion: () => FlutterVersion(const Clock()),
+      FlutterVersion: () => FlutterVersion(const SystemClock()),
       GenSnapshot: () => const GenSnapshot(),
       HotRunnerConfig: () => HotRunnerConfig(),
       IMobileDevice: () => const IMobileDevice(),
@@ -81,8 +79,10 @@ Future<T> runInContext<T>(
       OperatingSystemUtils: () => OperatingSystemUtils(),
       PlistBuddy: () => const PlistBuddy(),
       SimControl: () => SimControl(),
+      SystemClock: () => const SystemClock(),
       Stdio: () => const Stdio(),
       Usage: () => Usage(),
+      UserMessages: () => UserMessages(),
       Xcode: () => Xcode(),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
     },

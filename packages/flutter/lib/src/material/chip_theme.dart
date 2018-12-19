@@ -60,7 +60,7 @@ class ChipTheme extends InheritedWidget {
   /// Defaults to the ambient [ThemeData.chipTheme] if there is no
   /// [ChipTheme] in the given build context.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// class Spaceship extends StatelessWidget {
@@ -76,6 +76,7 @@ class ChipTheme extends InheritedWidget {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -111,7 +112,7 @@ class ChipTheme extends InheritedWidget {
 /// you get from [ChipTheme.of], or create an entirely new one with
 /// [ChipThemeData..fromDefaults].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// class CarColor extends StatefulWidget {
@@ -139,6 +140,7 @@ class ChipTheme extends InheritedWidget {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

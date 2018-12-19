@@ -124,7 +124,7 @@ class SampleChecker {
 
   /// Finds the location of the snippets script.
   String get _snippetsExecutable {
-    final String platformScriptPath = path.dirname(Platform.script.toFilePath());
+    final String platformScriptPath = path.dirname(path.fromUri(Platform.script));
     return path.canonicalize(path.join(platformScriptPath, '..', 'snippets', 'lib', 'main.dart'));
   }
 
@@ -202,22 +202,23 @@ class SampleChecker {
   // Precompiles the snippets tool if _snippetsSnapshotPath isn't set yet, and
   // runs the precompiled version if it is set.
   ProcessResult _runSnippetsScript(List<String> args) {
+    final String workingDirectory = path.join(_flutterRoot, 'dev', 'docs');
     if (_snippetsSnapshotPath == null) {
       _snippetsSnapshotPath = '$_snippetsExecutable.snapshot';
       return Process.runSync(
-        Platform.executable,
+        path.canonicalize(Platform.executable),
         <String>[
           '--snapshot=$_snippetsSnapshotPath',
           '--snapshot-kind=app-jit',
-          _snippetsExecutable,
+          path.canonicalize(_snippetsExecutable),
         ]..addAll(args),
-        workingDirectory: _flutterRoot,
+        workingDirectory: workingDirectory,
       );
     } else {
       return Process.runSync(
-        Platform.executable,
-        <String>[_snippetsSnapshotPath]..addAll(args),
-        workingDirectory: _flutterRoot,
+        path.canonicalize(Platform.executable),
+        <String>[path.canonicalize(_snippetsSnapshotPath)]..addAll(args),
+        workingDirectory: workingDirectory,
       );
     }
   }
@@ -714,7 +715,7 @@ class Line {
   final String code;
 
   String toStringWithColumn(int column) {
-    if (column != null) {
+    if (column != null && indent != null) {
       return '$filename:$line:${column + indent}: $code';
     }
     return toString();

@@ -44,7 +44,7 @@ class AndroidWorkflow implements Workflow {
   bool get canLaunchDevices => androidSdk != null && androidSdk.validateSdkWellFormed().isEmpty;
 
   @override
-  bool get canListEmulators => getEmulatorPath(androidSdk) != null && getAvdPath() != null;
+  bool get canListEmulators => getEmulatorPath(androidSdk) != null;
 }
 
 class AndroidValidator extends DoctorValidator {
@@ -111,6 +111,10 @@ class AndroidValidator extends DoctorValidator {
     if (platform.environment.containsKey(kAndroidHome)) {
       final String androidHomeDir = platform.environment[kAndroidHome];
       messages.add(ValidationMessage('$kAndroidHome = $androidHomeDir'));
+    }
+    if (platform.environment.containsKey(kAndroidSdkRoot)) {
+      final String androidSdkRoot = platform.environment[kAndroidSdkRoot];
+      messages.add(ValidationMessage('$kAndroidSdkRoot = $androidSdkRoot'));
     }
 
     final List<String> validationResult = androidSdk.validateSdkWellFormed();

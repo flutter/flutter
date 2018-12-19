@@ -265,6 +265,98 @@ void main() {
     expect(find.text('Page 2'), isOnstage);
   });
 
+  testWidgets('test edge swipes work with media query padding (LTR)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        builder: (BuildContext context, Widget navigator) {
+          return MediaQuery(
+            data: const MediaQueryData(padding: EdgeInsets.only(left: 40)),
+            child: navigator,
+          );
+        },
+        home: const Placeholder(),
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) => const Center(child: Text('Page 1')),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) => const Center(child: Text('Page 2')),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    // Now drag from the left edge.
+    final TestGesture gesture = await tester.startGesture(const Offset(35.0, 200.0));
+    await gesture.moveBy(const Offset(300.0, 0.0));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // Page 1 is now visible.
+    expect(find.text('Page 1'), isOnstage);
+    expect(find.text('Page 2'), isOnstage);
+  });
+
+  testWidgets('test edge swipes work with media query padding (RLT)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        builder: (BuildContext context, Widget navigator) {
+          return Directionality(
+            textDirection: TextDirection.rtl,
+            child: MediaQuery(
+              data: const MediaQueryData(padding: EdgeInsets.only(right: 40)),
+              child: navigator,
+            ),
+          );
+        },
+        home: const Placeholder(),
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) => const Center(child: Text('Page 1')),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) => const Center(child: Text('Page 2')),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    // Now drag from the left edge.
+    final TestGesture gesture = await tester.startGesture(const Offset(765.0, 200.0));
+    await gesture.moveBy(const Offset(-300.0, 0.0));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // Page 1 is now visible.
+    expect(find.text('Page 1'), isOnstage);
+    expect(find.text('Page 2'), isOnstage);
+  });
+
   testWidgets('test only edge swipes work (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(

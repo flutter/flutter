@@ -13,7 +13,8 @@ void main() {
   // The "can be constructed" tests that follow are primarily to ensure that any
   // animations started by the progress indicators are stopped at dispose() time.
 
-  testWidgets('LinearProgressIndicator(value: 0.0) can be constructed', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator(value: 0.0) can be constructed and has empty semantics by default', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -25,9 +26,13 @@ void main() {
         ),
       ),
     );
+
+    expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics());
+    handle.dispose();
   });
 
-  testWidgets('LinearProgressIndicator(value: null) can be constructed', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator(value: null) can be constructed and has empty semantics by default', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.rtl,
@@ -39,6 +44,9 @@ void main() {
         ),
       ),
     );
+
+    expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics());
+    handle.dispose();
   });
 
   testWidgets('LinearProgressIndicator paint (LTR)', (WidgetTester tester) async {
@@ -166,20 +174,34 @@ void main() {
     );
   });
 
-  testWidgets('CircularProgressIndicator(value: 0.0) can be constructed', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator(value: 0.0) can be constructed and has value semantics by default', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
-      const Center(
-        child: CircularProgressIndicator(value: 0.0)
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CircularProgressIndicator(value: 0.0)
+        )
       )
     );
+
+    expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics(
+      value: '0%',
+      textDirection: TextDirection.ltr,
+    ));
+    handle.dispose();
   });
 
-  testWidgets('CircularProgressIndicator(value: null) can be constructed', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator(value: null) can be constructed and has empty semantics by default', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Center(
         child: CircularProgressIndicator(value: null)
       )
     );
+
+    expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics());
+    handle.dispose();
   });
 
   testWidgets('LinearProgressIndicator causes a repaint when it changes', (WidgetTester tester) async {
@@ -320,5 +342,148 @@ void main() {
           ..rect(rect: Rect.fromLTRB(0.0, 0.0, 25.0, 4.0))
     );
     expect(tester.binding.transientCallbackCount, 0);
+  });
+
+  testWidgets('LinearProgressIndicator can be made accessible', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey key = GlobalKey();
+    const String label = 'Label';
+    const String value = '25%';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: LinearProgressIndicator(
+          key: key,
+          value: 0.25,
+          semanticsLabel: label,
+          semanticsValue: value,
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
+      textDirection: TextDirection.ltr,
+      label: label,
+      value: value,
+    ));
+
+    handle.dispose();
+  });
+
+  testWidgets('LinearProgressIndicator that is determinate gets default a11y value', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey key = GlobalKey();
+    const String label = 'Label';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: LinearProgressIndicator(
+          key: key,
+          value: 0.25,
+          semanticsLabel: label,
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
+      textDirection: TextDirection.ltr,
+      label: label,
+      value: '25%',
+    ));
+
+    handle.dispose();
+  });
+
+  testWidgets('LinearProgressIndicator that is determinate does not default a11y value when label is null', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: LinearProgressIndicator(
+          key: key,
+          value: 0.25,
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics());
+
+    handle.dispose();
+  });
+
+  testWidgets('LinearProgressIndicator that is indeterminate does not default a11y value', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey key = GlobalKey();
+    const String label = 'Progress';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: LinearProgressIndicator(
+          key: key,
+          value: 0.25,
+          semanticsLabel: label,
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
+      textDirection: TextDirection.ltr,
+      label: label,
+    ));
+
+    handle.dispose();
+  });
+
+  testWidgets('CircularProgressIndicator can be made accessible', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey key = GlobalKey();
+    const String label = 'Label';
+    const String value = '25%';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CircularProgressIndicator(
+          key: key,
+          value: 0.25,
+          semanticsLabel: label,
+          semanticsValue: value,
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
+      textDirection: TextDirection.ltr,
+      label: label,
+      value: value,
+    ));
+
+    handle.dispose();
+  });
+
+  testWidgets('RefreshProgressIndicator can be made accessible', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey key = GlobalKey();
+    const String label = 'Label';
+    const String value = '25%';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RefreshProgressIndicator(
+          key: key,
+          semanticsLabel: label,
+          semanticsValue: value,
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
+      textDirection: TextDirection.ltr,
+      label: label,
+      value: value,
+    ));
+
+
+    handle.dispose();
   });
 }

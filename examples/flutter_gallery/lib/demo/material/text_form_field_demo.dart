@@ -72,7 +72,10 @@ class _PasswordFieldState extends State<PasswordField> {
               _obscureText = !_obscureText;
             });
           },
-          child: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
+          child: Icon(
+            _obscureText ? Icons.visibility : Icons.visibility_off,
+            semanticLabel: _obscureText ? 'show password' : 'hide password',
+          ),
         ),
       ),
     );
@@ -230,7 +233,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 TextFormField(
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: 'Tell us about yourself',
+                    hintText: 'Tell us about yourself (e.g., write down what you do or what hobbies you have)',
                     helperText: 'Keep it short, this is just a demo.',
                     labelText: 'Life story',
                   ),

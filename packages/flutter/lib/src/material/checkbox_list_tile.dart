@@ -37,10 +37,13 @@ import 'theme_data.dart';
 /// To show the [CheckboxListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This widget shows a checkbox that, when checked, slows down all animations
 /// (including the animation of the checkbox itself getting checked!).
+///
+/// This sample requires that you also import 'package:flutter/scheduler.dart',
+/// so that you can reference [timeDilation].
 ///
 /// ```dart
 /// CheckboxListTile(
@@ -52,9 +55,7 @@ import 'theme_data.dart';
 ///   secondary: const Icon(Icons.hourglass_empty),
 /// )
 /// ```
-///
-/// This sample requires that you also import 'package:flutter/scheduler.dart',
-/// so that you can reference [timeDilation].
+/// {@end-tool}
 ///
 /// See also:
 ///

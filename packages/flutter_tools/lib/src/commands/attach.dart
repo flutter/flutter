@@ -11,6 +11,7 @@ import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
+import '../compile.dart';
 import '../device.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
@@ -47,11 +48,14 @@ class AttachCommand extends FlutterCommand {
     addBuildModeFlags(defaultToRelease: false);
     usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
+    usesPortOptions();
+    usesIpv6Flag();
     usesFilesystemOptions(hide: !verboseHelp);
+    usesFuchsiaOptions(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
-        help: 'Local port where the observatory is listening.',
+        help: 'Device port where the observatory is listening.',
       )..addOption('pid-file',
         help: 'Specify a file to write the process id to. '
               'You can send SIGUSR1 to trigger a hot reload '
@@ -60,12 +64,6 @@ class AttachCommand extends FlutterCommand {
         'project-root',
         hide: !verboseHelp,
         help: 'Normally used only in run target',
-      )..addOption(
-        'module',
-        abbr: 'm',
-        hide: !verboseHelp,
-        help: 'The name of the module (required if attaching to a fuchsia device)',
-        valueHelp: 'module-name',
       )..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
@@ -83,7 +81,7 @@ class AttachCommand extends FlutterCommand {
   @override
   final String description = 'Attach to a running application.';
 
-  int get observatoryPort {
+  int get debugPort {
     if (argResults['debug-port'] == null)
       return null;
     try {
@@ -99,7 +97,19 @@ class AttachCommand extends FlutterCommand {
     await super.validateCommand();
     if (await findTargetDevice() == null)
       throwToolExit(null);
-    observatoryPort;
+    debugPort;
+    if (debugPort == null && argResults.wasParsed(FlutterCommand.ipv6Flag)) {
+      throwToolExit(
+        'When the --debug-port is unknown, this command determines '
+        'the value of --ipv6 on its own.',
+      );
+    }
+    if (debugPort == null && argResults.wasParsed(FlutterCommand.observatoryPortOption)) {
+      throwToolExit(
+        'When the --debug-port is unknown, this command does not use '
+        'the value of --observatory-port.',
+      );
+    }
   }
 
   @override
@@ -111,7 +121,7 @@ class AttachCommand extends FlutterCommand {
     writePidFile(argResults['pid-file']);
 
     final Device device = await findTargetDevice();
-    final int devicePort = observatoryPort;
+    final int devicePort = debugPort;
 
     final Daemon daemon = argResults['machine']
       ? Daemon(stdinCommandStream, stdoutCommandResponse,
@@ -119,7 +129,7 @@ class AttachCommand extends FlutterCommand {
       : null;
 
     Uri observatoryUri;
-    bool ipv6 = false;
+    bool usesIpv6 = false;
     bool attachLogger = false;
     if (devicePort == null) {
       if (device is FuchsiaDevice) {
@@ -128,7 +138,7 @@ class AttachCommand extends FlutterCommand {
         if (module == null) {
           throwToolExit('\'--module\' is requried for attaching to a Fuchsia device');
         }
-        ipv6 = _isIpv6(device.id);
+        usesIpv6 = _isIpv6(device.id);
         final List<int> ports = await device.servicePorts();
         if (ports.isEmpty) {
           throwToolExit('No active service ports on ${device.name}');
@@ -141,15 +151,23 @@ class AttachCommand extends FlutterCommand {
           'Waiting for a connection from Flutter on ${device.name}...',
           expectSlowOperation: true,
         );
-        final int localPort = await device.findIsolatePort(module, localPorts);
-        if (localPort == null) {
+        try {
+          final int localPort = await device.findIsolatePort(module, localPorts);
+          if (localPort == null) {
+            throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
+          }
+          observatoryUri = usesIpv6
+            ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
+            : Uri.parse('http://$ipv4Loopback:$localPort/');
+          status.stop();
+        } catch (_) {
+          final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
+          for (ForwardedPort port in ports) {
+            await device.portForwarder.unforward(port);
+          }
           status.cancel();
-          throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
+          rethrow;
         }
-        status.stop();
-        observatoryUri = ipv6
-          ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
-          : Uri.parse('http://$ipv4Loopback:$localPort/');
       } else {
         ProtocolDiscovery observatoryDiscovery;
         try {
@@ -159,14 +177,20 @@ class AttachCommand extends FlutterCommand {
           );
           printStatus('Waiting for a connection from Flutter on ${device.name}...');
           observatoryUri = await observatoryDiscovery.uri;
+          // Determine ipv6 status from the scanned logs.
+          usesIpv6 = observatoryDiscovery.ipv6;
           printStatus('Done.');
         } finally {
           await observatoryDiscovery?.cancel();
         }
       }
     } else {
-      final int localPort = await device.portForwarder.forward(devicePort);
-      observatoryUri = Uri.parse('http://$ipv4Loopback:$localPort/');
+      usesIpv6 = ipv6;
+      final int localPort = observatoryPort
+        ?? await device.portForwarder.forward(devicePort);
+      observatoryUri = usesIpv6
+        ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
+        : Uri.parse('http://$ipv4Loopback:$localPort/');
     }
     try {
       final FlutterDevice flutterDevice = FlutterDevice(
@@ -176,6 +200,7 @@ class AttachCommand extends FlutterCommand {
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
+        targetModel: TargetModel(argResults['target-model']),
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = hotRunnerFactory.build(
@@ -186,7 +211,7 @@ class AttachCommand extends FlutterCommand {
         usesTerminalUI: daemon == null,
         projectRootPath: argResults['project-root'],
         dillOutputPath: argResults['output-dill'],
-        ipv6: ipv6,
+        ipv6: usesIpv6,
       );
       if (attachLogger) {
         flutterDevice.startEchoingDeviceLog();
@@ -208,7 +233,9 @@ class AttachCommand extends FlutterCommand {
       }
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
-      ports.forEach(device.portForwarder.unforward);
+      for (ForwardedPort port in ports) {
+        await device.portForwarder.unforward(port);
+      }
     }
     return null;
   }

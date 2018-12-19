@@ -60,7 +60,7 @@ class BeveledRectangleBorder extends ShapeBorder {
     if (a is BeveledRectangleBorder) {
       return BeveledRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
+        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
       );
     }
     return super.lerpFrom(a, t);
@@ -72,7 +72,7 @@ class BeveledRectangleBorder extends ShapeBorder {
     if (b is BeveledRectangleBorder) {
       return BeveledRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
       );
     }
     return super.lerpTo(b, t);

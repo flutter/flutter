@@ -122,14 +122,8 @@ class AOTSnapshotter {
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
-      '--url_mapping=dart:ui,$uiPath',
-      '--url_mapping=dart:vmservice_io,$vmServicePath',
+      '--deterministic',
     ];
-    genSnapshotArgs.addAll(<String>[
-      '--reify-generic-functions',
-      '--strong',
-      '--sync-async',
-    ]);
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
       printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
@@ -365,8 +359,8 @@ class JITSnapshotter {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
-    final String engineVmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
-    final String engineIsolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
+    final String engineVmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, null, buildMode);
+    final String engineIsolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, null, buildMode);
     final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
     final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
 
@@ -379,9 +373,7 @@ class JITSnapshotter {
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
-      '--reify-generic-functions',
-      '--strong',
-      '--sync-async',
+      '--deterministic',
     ];
     if (buildMode == BuildMode.debug) {
       genSnapshotArgs.add('--enable_asserts');

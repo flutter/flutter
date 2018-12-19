@@ -20,7 +20,8 @@ final PlatformViewsRegistry platformViewsRegistry = PlatformViewsRegistry._insta
 /// through the [platformViewsRegistry] getter.
 ///
 /// See also:
-///   * [PlatformView], a widget that shows a platform view.
+///
+///  * [PlatformView], a widget that shows a platform view.
 class PlatformViewsRegistry {
   PlatformViewsRegistry._instance();
 
@@ -615,6 +616,18 @@ class UiKitViewController {
     _layoutDirection = layoutDirection;
 
     // TODO(amirh): invoke the iOS platform views channel direction method once available.
+  }
+
+  /// Accept an active gesture.
+  ///
+  /// When a touch sequence is happening on the embedded UIView all touch events are delayed.
+  /// Calling this method releases the delayed events to the embedded UIView and makes it consume
+  /// any following touch events for the pointers involved in the active gesture.
+  Future<void> acceptGesture() {
+    final Map<String, dynamic> args = <String, dynamic> {
+      'id': id,
+    };
+    return SystemChannels.platform_views.invokeMethod('acceptGesture', args);
   }
 
   /// Disposes the view.

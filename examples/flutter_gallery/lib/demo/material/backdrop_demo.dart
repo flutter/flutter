@@ -395,6 +395,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
             onPressed: _toggleBackdropPanelVisibility,
             icon: AnimatedIcon(
               icon: AnimatedIcons.close_menu,
+              semanticLabel: 'close',
               progress: _controller.view,
             ),
           ),

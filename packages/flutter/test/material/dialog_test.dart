@@ -35,6 +35,10 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeD
   );
 }
 
+Material _getMaterialFromDialog(WidgetTester tester) {
+  return tester.widget<Material>(find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
+}
+
 const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
 
 void main() {
@@ -58,15 +62,29 @@ void main() {
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
 
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     expect(didPressOk, false);
     await tester.tap(find.text('OK'));
     expect(didPressOk, true);
   });
 
-  testWidgets('Dialog background color', (WidgetTester tester) async {
+  testWidgets('Dialog background color from AlertDialog', (WidgetTester tester) async {
+    const Color customColor = Colors.pink;
+    const AlertDialog dialog = AlertDialog(
+      backgroundColor: customColor,
+      actions: <Widget>[ ],
+    );
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: ThemeData(brightness: Brightness.dark)));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.color, customColor);
+  });
+
+  testWidgets('Dialog Defaults', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
       content: Text('Y'),
@@ -75,14 +93,27 @@ void main() {
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: ThemeData(brightness: Brightness.dark)));
 
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
-    final StatefulElement widget = tester.element(
-        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
-    final Material materialWidget = widget.state.widget;
+    final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.color, Colors.grey[800]);
     expect(materialWidget.shape, _defaultDialogShape);
+    expect(materialWidget.elevation, 24.0);
+  });
+
+  testWidgets('Custom dialog elevation', (WidgetTester tester) async {
+    const double customElevation = 12.0;
+    const AlertDialog dialog = AlertDialog(
+      actions: <Widget>[ ],
+      elevation: customElevation,
+    );
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.elevation, customElevation);
   });
 
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
@@ -95,12 +126,9 @@ void main() {
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
 
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
-    final StatefulElement widget = tester.element(
-        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
-    final Material materialWidget = widget.state.widget;
+    final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.shape, customBorder);
   });
 
@@ -112,12 +140,9 @@ void main() {
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
 
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
-    final StatefulElement widget = tester.element(
-        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
-    final Material materialWidget = widget.state.widget;
+    final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.shape, _defaultDialogShape);
   });
 
@@ -130,12 +155,9 @@ void main() {
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
 
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
-    final StatefulElement widget = tester.element(
-        find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
-    final Material materialWidget = widget.state.widget;
+    final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.shape, customBorder);
   });
 
@@ -406,8 +428,7 @@ void main() {
     )));
 
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     expect(semantics, includesNodeWith(
       label: 'Title',

@@ -473,10 +473,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       }
       _controllers[oldWidget.currentIndex].reverse();
       _controllers[widget.currentIndex].forward();
+    } else {
+      if (_backgroundColor != widget.items[widget.currentIndex].backgroundColor)
+        _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
     }
-
-    if (_backgroundColor != widget.items[widget.currentIndex].backgroundColor)
-      _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
   }
 
   List<Widget> _createTiles() {

@@ -16,7 +16,7 @@ part of material_animated_icons;
 ///
 /// The available icons are specified in [AnimatedIcons].
 ///
-/// ### Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// AnimatedIcon(
@@ -25,6 +25,7 @@ part of material_animated_icons;
 ///   semanticLabel: 'Show menu',
 /// )
 /// ```
+/// {@end-tool}
 ///
 class AnimatedIcon extends StatelessWidget {
 

@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   test('Message loop flushes microtasks between iterations', () async {

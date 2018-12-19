@@ -50,7 +50,7 @@ class IOSValidator extends DoctorValidator {
 
   Future<bool> get hasIosDeploy => exitsHappyAsync(<String>['ios-deploy', '--version']);
 
-  String get iosDeployMinimumVersion => '1.9.2';
+  String get iosDeployMinimumVersion => '1.9.4';
 
   Future<String> get iosDeployVersionText async => (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '');
 
@@ -69,11 +69,14 @@ class IOSValidator extends DoctorValidator {
     }
   }
 
+  // Change this value if the number of checks for packages needed for installation changes
+  static const int totalChecks = 4;
+
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
-    ValidationType brewStatus = ValidationType.missing;
+    ValidationType packageManagerStatus = ValidationType.installed;
     String xcodeVersionInfo;
 
     if (xcode.isInstalled) {
@@ -111,41 +114,46 @@ class IOSValidator extends DoctorValidator {
       }
     }
 
-    // brew installed
-    if (hasHomebrew) {
-      brewStatus = ValidationType.installed;
+    int checksFailed = 0;
 
       if (!iMobileDevice.isInstalled) {
-        brewStatus = ValidationType.partial;
+        checksFailed += 3;
+      packageManagerStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(userMessages.iOSIMobileDeviceMissing));
       } else if (!await iMobileDevice.isWorking) {
-        brewStatus = ValidationType.partial;
+        checksFailed += 3;
+        packageManagerStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(userMessages.iOSIMobileDeviceBroken));
       } else if (!await hasIDeviceInstaller) {
-        brewStatus = ValidationType.partial;
+        checksFailed += 1;
+        packageManagerStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(userMessages.iOSDeviceInstallerMissing));
       }
 
       // Check ios-deploy is installed at meets version requirements.
-      if (await hasIosDeploy) {
+      if (iHasIosDeploy) {
         messages.add(ValidationMessage(userMessages.iOSDeployVersion(await iosDeployVersionText)));
       }
       if (!await _iosDeployIsInstalledAndMeetsVersionCheck) {
-        brewStatus = ValidationType.partial;
-        if (await hasIosDeploy) {
+        packageManagerStatus = ValidationType.partial;
+        if (iHasIosDeploy) {
           messages.add(ValidationMessage.error(userMessages.iOSDeployOutdated(iosDeployMinimumVersion)));
         } else {
+          checksFailed += 1;
           messages.add(ValidationMessage.error(userMessages.iOSDeployMissing));
         }
       }
 
-    } else {
-      brewStatus = ValidationType.missing;
+    // If one of the checks for the packages failed, we may need brew so that we can install
+    // the necessary packages. If they're all there, however, we don't even need it.
+    if (checksFailed == totalChecks)
+      packageManagerStatus = ValidationType.missing;
+    if (checksFailed > 0 && !hasHomebrew) {
       messages.add(ValidationMessage.error(userMessages.iOSBrewMissing));
     }
 
     return ValidationResult(
-        <ValidationType>[xcodeStatus, brewStatus].reduce(_mergeValidationTypes),
+        <ValidationType>[xcodeStatus, packageManagerStatus].reduce(_mergeValidationTypes),
         messages,
         statusInfo: xcodeVersionInfo
     );
