@@ -30,6 +30,8 @@ task:
         cd $ENGINE_PATH/src
         ./flutter/tools/gn --android --unoptimized
         ninja -C out/android_debug_unopt
+        mkdir javadoc_tmp
+        ./flutter/tools/gen_javadoc.py --out-dir javadoc_tmp
 
 format_and_dart_test_task:
   container:

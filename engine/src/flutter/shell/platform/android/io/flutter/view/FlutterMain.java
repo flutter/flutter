@@ -344,10 +344,10 @@ public class FlutterMain {
     /**
      * Returns the file name for the given asset.
      * The returned file name can be used to access the asset in the APK
-     * through the {@link AssetManager} API.
+     * through the {@link android.content.res.AssetManager} API.
      *
      * @param asset the name of the asset. The name can be hierarchical
-     * @return      the filename to be used with {@link AssetManager}
+     * @return      the filename to be used with {@link android.content.res.AssetManager}
      */
     public static String getLookupKeyForAsset(String asset) {
         return fromFlutterAssets(asset);
@@ -356,11 +356,11 @@ public class FlutterMain {
     /**
      * Returns the file name for the given asset which originates from the
      * specified packageName. The returned file name can be used to access
-     * the asset in the APK through the {@link AssetManager} API.
+     * the asset in the APK through the {@link android.content.res.AssetManager} API.
      *
      * @param asset       the name of the asset. The name can be hierarchical
      * @param packageName the name of the package from which the asset originates
-     * @return            the file name to be used with {@link AssetManager}
+     * @return            the file name to be used with {@link android.content.res.AssetManager}
      */
     public static String getLookupKeyForAsset(String asset, String packageName) {
         return getLookupKeyForAsset(
