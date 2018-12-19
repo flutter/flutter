@@ -233,9 +233,10 @@ class AlertDialog extends StatelessWidget {
   /// [actions].
   final EdgeInsetsGeometry titlePadding;
 
-  /// Style for the text in the title of this [AlertDialog].
+  /// Style for the text in the [title] of this [AlertDialog].
   ///
-  /// If null, defaults to [ThemeData.textTheme.title].
+  /// If null, [DialogTheme.titleTextStyle] is used, if that's null, defaults to
+  /// [ThemeData.textTheme.title].
   final TextStyle titleTextStyle;
 
   /// The (optional) content of the dialog is displayed in the center of the
@@ -254,9 +255,10 @@ class AlertDialog extends StatelessWidget {
   /// to separate the content from the other edges of the dialog.
   final EdgeInsetsGeometry contentPadding;
 
-  /// Style for the text in the content section of this [AlertDialog].
+  /// Style for the text in the [content] of this [AlertDialog].
   ///
-  /// If null, defaults to [ThemeData.textTheme.subhead].
+  /// If null, [DialogTheme.contentTextStyle] is used, if that's null, defaults
+  /// to [ThemeData.textTheme.subhead].
   final TextStyle contentTextStyle;
 
   /// The (optional) set of actions that are displayed at the bottom of the

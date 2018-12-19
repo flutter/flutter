@@ -41,8 +41,7 @@ Material _getMaterialFromDialog(WidgetTester tester) {
 }
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  final StatelessElement contentWidget = tester.element(find.descendant(of: find.byType(AlertDialog), matching: find.text(text)));
-  return contentWidget.renderObject;
+  return tester.element<StatelessElement>(find.descendant(of: find.byType(AlertDialog), matching: find.text(text))).renderObject;
 }
 
 const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));

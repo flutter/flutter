@@ -18,7 +18,7 @@ import 'theme.dart';
 /// When Shape is `null`, the dialog defaults to a [RoundedRectangleBorder] with
 /// a border radius of 2.0 on all corners.
 ///
-/// [titleTextStyle] and [contentTextStyle] are only used in [AlertDialogs].
+/// [titleTextStyle] and [contentTextStyle] are used in [AlertDialogs].
 /// If null, they default to [ThemeData.textTheme.title] and [ThemeData.textTheme.subhead],
 /// respectively.
 ///
@@ -51,16 +51,12 @@ class DialogTheme extends Diagnosticable {
   /// Default value for [Dialog.shape].
   final ShapeBorder shape;
 
-  /// Default value for [AlertDialog.titleTextStyle].
-  ///
-  /// Only used in [AlertDialog]s.
+  /// Used to configure the [DefaultTextStyle] for the [AlertDialog.title] widget.
   ///
   /// If null, defaults to [ThemeData.textTheme.title].
   final TextStyle titleTextStyle;
 
-  /// Default value for [AlertDialog.contentTextStyle].
-  ///
-  /// Only used in [AlertDialog]s.
+  /// Used to configure the [DefaultTextStyle] for the [AlertDialog.content] widget.
   ///
   /// If null, defaults to [ThemeData.textTheme.subhead].
   final TextStyle contentTextStyle;
