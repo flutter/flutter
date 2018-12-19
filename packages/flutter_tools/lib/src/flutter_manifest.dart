@@ -56,7 +56,7 @@ class FlutterManifest {
 
     final Map<dynamic, dynamic> flutterMap = pubspec._descriptor['flutter'];
     if (flutterMap != null) {
-      pubspec._flutterDescriptor = flutterMap.cast<String, dynamic>();
+      pubspec._flutterDescriptor = Map<String, dynamic>.from(flutterMap);
     } else {
       pubspec._flutterDescriptor = <String, dynamic>{};
     }
