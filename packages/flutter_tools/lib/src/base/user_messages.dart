@@ -121,7 +121,7 @@ class UserMessages {
       'Once installed, run:\n'
       '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer';
   String get iOSIMobileDeviceMissing =>
-      'libimobiledevice and ideviceinstaller are not installed. To install, run:\n'
+      'libimobiledevice and ideviceinstaller are not installed. To install with Brew, run:\n'
       '  brew update\n'
       '  brew install --HEAD usbmuxd\n'
       '  brew link usbmuxd\n'
@@ -130,7 +130,7 @@ class UserMessages {
   String get iOSIMobileDeviceBroken =>
       'Verify that all connected devices have been paired with this computer in Xcode.\n'
       'If all devices have been paired, libimobiledevice and ideviceinstaller may require updating.\n'
-      'To update, run:\n'
+      'To update with Brew, run:\n'
       '  brew update\n'
       '  brew uninstall --ignore-dependencies libimobiledevice\n'
       '  brew uninstall --ignore-dependencies usbmuxd\n'
@@ -141,20 +141,20 @@ class UserMessages {
       '  brew install ideviceinstaller';
   String get iOSDeviceInstallerMissing =>
       'ideviceinstaller is not installed; this is used to discover connected iOS devices.\n'
-      'To install, run:\n'
+      'To install with Brew, run:\n'
       '  brew install --HEAD usbmuxd\n'
       '  brew link usbmuxd\n'
       '  brew install --HEAD libimobiledevice\n'
       '  brew install ideviceinstaller';
   String iOSDeployVersion(String version) => 'ios-deploy $version';
   String iOSDeployOutdated(String minVersion) =>
-      'ios-deploy out of date ($minVersion is required). To upgrade:\n'
+      'ios-deploy out of date ($minVersion is required). To upgrade with Brew:\n'
       '  brew upgrade ios-deploy';
   String get iOSDeployMissing =>
       'ios-deploy not installed. To install:\n'
       '  brew install ios-deploy';
   String get iOSBrewMissing =>
-      'Brew not installed; use this to install tools for iOS device development.\n'
+      'Brew can be used to install tools for iOS device development.\n'
       'Download brew at https://brew.sh/.';
 
   // Messages used in CocoaPodsValidator

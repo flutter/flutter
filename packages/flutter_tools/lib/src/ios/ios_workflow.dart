@@ -116,33 +116,35 @@ class IOSValidator extends DoctorValidator {
 
     int checksFailed = 0;
 
-      if (!iMobileDevice.isInstalled) {
-        checksFailed += 3;
+    if (!iMobileDevice.isInstalled) {
+      checksFailed += 3;
+    packageManagerStatus = ValidationType.partial;
+      messages.add(ValidationMessage.error(userMessages.iOSIMobileDeviceMissing));
+    } else if (!await iMobileDevice.isWorking) {
+      checksFailed += 3;
       packageManagerStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(userMessages.iOSIMobileDeviceMissing));
-      } else if (!await iMobileDevice.isWorking) {
-        checksFailed += 3;
-        packageManagerStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(userMessages.iOSIMobileDeviceBroken));
-      } else if (!await hasIDeviceInstaller) {
-        checksFailed += 1;
-        packageManagerStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(userMessages.iOSDeviceInstallerMissing));
-      }
+      messages.add(ValidationMessage.error(userMessages.iOSIMobileDeviceBroken));
+    } else if (!await hasIDeviceInstaller) {
+      checksFailed += 1;
+      packageManagerStatus = ValidationType.partial;
+      messages.add(ValidationMessage.error(userMessages.iOSDeviceInstallerMissing));
+    }
 
-      // Check ios-deploy is installed at meets version requirements.
+    final bool iHasIosDeploy = await hasIosDeploy;
+
+    // Check ios-deploy is installed at meets version requirements.
+    if (iHasIosDeploy) {
+      messages.add(ValidationMessage(userMessages.iOSDeployVersion(await iosDeployVersionText)));
+    }
+    if (!await _iosDeployIsInstalledAndMeetsVersionCheck) {
+      packageManagerStatus = ValidationType.partial;
       if (iHasIosDeploy) {
-        messages.add(ValidationMessage(userMessages.iOSDeployVersion(await iosDeployVersionText)));
+        messages.add(ValidationMessage.error(userMessages.iOSDeployOutdated(iosDeployMinimumVersion)));
+      } else {
+        checksFailed += 1;
+        messages.add(ValidationMessage.error(userMessages.iOSDeployMissing));
       }
-      if (!await _iosDeployIsInstalledAndMeetsVersionCheck) {
-        packageManagerStatus = ValidationType.partial;
-        if (iHasIosDeploy) {
-          messages.add(ValidationMessage.error(userMessages.iOSDeployOutdated(iosDeployMinimumVersion)));
-        } else {
-          checksFailed += 1;
-          messages.add(ValidationMessage.error(userMessages.iOSDeployMissing));
-        }
-      }
+    }
 
     // If one of the checks for the packages failed, we may need brew so that we can install
     // the necessary packages. If they're all there, however, we don't even need it.
