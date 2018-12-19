@@ -146,16 +146,16 @@ java_library("flutter_shell_java") {
   ]
 
   deps = [
-    ":android_support_v4",
+    ":android_support_v13",
   ]
 
   jar_path = "$root_out_dir/flutter_java.jar"
 }
 
-java_prebuilt("android_support_v4") {
+java_prebuilt("android_support_v13") {
   supports_android = true
 
-  jar_path = "//third_party/android_tools/sdk/extras/android/support/v4/android-support-v4.jar"
+  jar_path = "//third_party/android_tools/sdk/extras/android/support/v13/android-support-v13.jar"
 }
 
 copy("flutter_shell_assets") {
