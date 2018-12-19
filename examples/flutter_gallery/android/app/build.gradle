@@ -1,8 +1,8 @@
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader('UTF-8') { reader ->
-        localProperties.load(reader)
+    localPropertiesFile.withInputStream { stream ->
+        localProperties.load(stream)
     }
 }
 
@@ -11,25 +11,14 @@ if (flutterRoot == null) {
     throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
-// The Gallery app's version is defined by the Flutter framework's version.
 def flutterVersion = file("$flutterRoot/version").text
 def flutterVersionComponents = flutterVersion.split(/[^0-9]+/)
 // Let the integer version code of xx.yy.zz-pre.nnn be xxyyzznnn.
-int flutterVersionNumber = Math.min(flutterVersionComponents[0].toInteger(), 20) * 100000000
-flutterVersionNumber += Math.min(flutterVersionComponents[1].toInteger(), 99) * 1000000
-flutterVersionNumber += Math.min(flutterVersionComponents[2].toInteger(), 999) * 1000
+int flutterVersionCode = Math.min(flutterVersionComponents[0].toInteger(), 20) * 100000000
+flutterVersionCode += Math.min(flutterVersionComponents[1].toInteger(), 99) * 1000000
+flutterVersionCode += Math.min(flutterVersionComponents[2].toInteger(), 999) * 1000
 if (flutterVersionComponents.length > 3) {
-    flutterVersionNumber += Math.min(flutterVersionComponents[3].toInteger(), 999)
-}
-
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-if (flutterVersionCode == null) {
-    flutterVersionCode = "$flutterVersionNumber"
-}
-
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
-if (flutterVersionName == null) {
-    flutterVersionName = "$flutterVersion"
+    flutterVersionCode += Math.min(flutterVersionComponents[3].toInteger(), 999)
 }
 
 apply plugin: 'com.android.application'
@@ -46,8 +35,9 @@ android {
         applicationId "io.flutter.demo.gallery"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
+        // The Gallery app's version is defined by the Flutter framework's version.
+        versionCode flutterVersionCode
+        versionName "$flutterVersion"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -75,6 +65,6 @@ flutter {
 dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:rules:1.0.1'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 }
