@@ -625,7 +625,7 @@ class ThemeData extends Diagnosticable {
   /// builder is not found, a builder whose platform is null is used.
   final PageTransitionsTheme pageTransitionsTheme;
 
-  /// A theme for customizing the shape and color of a BAB.
+  /// A theme for customizing the shape, elevation, and color of a BAB.
   final BottomAppBarTheme bottomAppBarTheme;
 
   /// A set of thirteen colors that can be used to configure the

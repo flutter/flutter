@@ -19,9 +19,24 @@ void main() {
     expect(widget.color, themedColor);
   });
 
-  testWidgets('BAB theme color supersedes theme BottomAppBarColor', (WidgetTester tester) async {
-    const Color babThemeColor = Colors.black87;
+  testWidgets('BAB color - Widget', (WidgetTester tester) async {
     const Color themeColor = Colors.white10;
+    const Color babThemeColor = Colors.black87;
+    const Color babColor = Colors.pink;
+    const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(bottomAppBarTheme: theme, bottomAppBarColor: themeColor),
+      home: const Scaffold(body: BottomAppBar(color: babColor)),
+    ));
+
+    final PhysicalShape widget = _getBabRenderObject(tester);
+    expect(widget.color, babColor);
+  });
+
+  testWidgets('BAB color - BabTheme', (WidgetTester tester) async {
+    const Color themeColor = Colors.white10;
+    const Color babThemeColor = Colors.black87;
     const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
 
     await tester.pumpWidget(MaterialApp(
@@ -31,6 +46,28 @@ void main() {
 
     final PhysicalShape widget = _getBabRenderObject(tester);
     expect(widget.color, babThemeColor);
+  });
+
+  testWidgets('BAB color - Theme', (WidgetTester tester) async {
+    const Color themeColor = Colors.white10;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(bottomAppBarColor: themeColor),
+      home: const Scaffold(body: BottomAppBar()),
+    ));
+
+    final PhysicalShape widget = _getBabRenderObject(tester);
+    expect(widget.color, themeColor);
+  });
+
+  testWidgets('BAB color - Default', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(),
+      home: const Scaffold(body: BottomAppBar()),
+    ));
+
+    final PhysicalShape widget = _getBabRenderObject(tester);
+    expect(widget.color, Colors.white);
   });
 
   testWidgets('BAB theme customizes shape and notch margin', (WidgetTester tester) async {
