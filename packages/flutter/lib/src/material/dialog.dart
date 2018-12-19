@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -204,8 +203,10 @@ class AlertDialog extends StatelessWidget {
     Key key,
     this.title,
     this.titlePadding,
+    this.titleTextStyle,
     this.content,
     this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
+    this.contentTextStyle,
     this.actions,
     this.backgroundColor,
     this.elevation,
@@ -232,6 +233,12 @@ class AlertDialog extends StatelessWidget {
   /// [actions].
   final EdgeInsetsGeometry titlePadding;
 
+  /// Style for the text in the [title] of this [AlertDialog].
+  ///
+  /// If null, [DialogTheme.titleTextStyle] is used, if that's null, defaults to
+  /// [ThemeData.textTheme.title].
+  final TextStyle titleTextStyle;
+
   /// The (optional) content of the dialog is displayed in the center of the
   /// dialog in a lighter font.
   ///
@@ -247,6 +254,12 @@ class AlertDialog extends StatelessWidget {
   /// title, and padding of 24 pixels is provided on the left, right, and bottom
   /// to separate the content from the other edges of the dialog.
   final EdgeInsetsGeometry contentPadding;
+
+  /// Style for the text in the [content] of this [AlertDialog].
+  ///
+  /// If null, [DialogTheme.contentTextStyle] is used, if that's null, defaults
+  /// to [ThemeData.textTheme.subhead].
+  final TextStyle contentTextStyle;
 
   /// The (optional) set of actions that are displayed at the bottom of the
   /// dialog.
@@ -287,6 +300,8 @@ class AlertDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
+    final ThemeData theme = Theme.of(context);
+    final DialogTheme dialogTheme = DialogTheme.of(context);
     final List<Widget> children = <Widget>[];
     String label = semanticLabel;
 
@@ -294,7 +309,7 @@ class AlertDialog extends StatelessWidget {
       children.add(Padding(
         padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.title,
+          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
           child: Semantics(child: title, namesRoute: true),
         ),
       ));
@@ -314,7 +329,7 @@ class AlertDialog extends StatelessWidget {
         child: Padding(
           padding: contentPadding,
           child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.subhead,
+            style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
             child: content,
           ),
         ),
