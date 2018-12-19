@@ -1,4 +1,4 @@
-Signature: a16cffc7457b35dbdf53d2e3b11c0522
+Signature: 46cc1581cee7c269169bb5a2a74e4d74
 
 UNUSED LICENSES:
 
@@ -5157,6 +5157,7 @@ FILE: ../../../third_party/skia/src/gpu/GrPathRendering_none.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFGlyphUse.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFSubsetFont.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFSubsetFont.h
+FILE: ../../../third_party/skia/src/pdf/SkPDFUnion.h
 FILE: ../../../third_party/skia/src/pdf/SkUUID.h
 FILE: ../../../third_party/skia/src/utils/SkUTF.cpp
 FILE: ../../../third_party/skia/src/utils/SkUTF.h
