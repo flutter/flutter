@@ -41,7 +41,6 @@ abstract class DoctorValidatorsProvider {
   List<Workflow> get workflows;
 }
 
-
 class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> _validators;
   List<Workflow> _workflows;

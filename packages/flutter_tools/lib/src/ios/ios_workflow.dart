@@ -118,10 +118,10 @@ class IOSValidator extends DoctorValidator {
 
     if (!iMobileDevice.isInstalled) {
       checksFailed += 3;
-    packageManagerStatus = ValidationType.partial;
+      packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(userMessages.iOSIMobileDeviceMissing));
     } else if (!await iMobileDevice.isWorking) {
-      checksFailed += 3;
+      checksFailed += 2;
       packageManagerStatus = ValidationType.partial;
       messages.add(ValidationMessage.error(userMessages.iOSIMobileDeviceBroken));
     } else if (!await hasIDeviceInstaller) {
