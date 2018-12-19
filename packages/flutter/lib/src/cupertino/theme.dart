@@ -83,7 +83,7 @@ class CupertinoThemeData extends Diagnosticable {
     Brightness brightness,
     Color primaryColor,
     Color primaryContrastingColor,
-    CupertinoTextTheme textTheme,
+    CupertinoTextThemeData textTheme,
     Color barBackgroundColor,
     Color scaffoldBackgroundColor,
     Color tableBackgroundColor,
@@ -159,13 +159,13 @@ class CupertinoThemeData extends Diagnosticable {
   /// Derived from [brightness] and [primaryColor] if unspecified, including
   /// [brightness] and [primaryColor] of a Material [ThemeData] if coming
   /// from a Material [Theme].
-  CupertinoTextTheme get textTheme {
-    return _textTheme ?? CupertinoTextTheme(
+  CupertinoTextThemeData get textTheme {
+    return _textTheme ?? CupertinoTextThemeData(
       brightness: brightness,
       primaryColor: primaryColor,
     );
   }
-  final CupertinoTextTheme _textTheme;
+  final CupertinoTextThemeData _textTheme;
 
   /// Background color of the top nav bar and bottom tab bar.
   ///
@@ -224,7 +224,7 @@ class CupertinoThemeData extends Diagnosticable {
     Brightness brightness,
     Color primaryColor,
     Color primaryContrastingColor,
-    CupertinoTextTheme textTheme,
+    CupertinoTextThemeData textTheme,
     Color barBackgroundColor,
     Color scaffoldBackgroundColor,
     Color tableBackgroundColor,
@@ -247,7 +247,7 @@ class CupertinoThemeData extends Diagnosticable {
     properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
     properties.add(DiagnosticsProperty<Color>('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
     properties.add(DiagnosticsProperty<Color>('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
-    properties.add(DiagnosticsProperty<CupertinoTextTheme>('textTheme', textTheme, defaultValue: defaultData.textTheme));
+    properties.add(DiagnosticsProperty<CupertinoTextThemeData>('textTheme', textTheme, defaultValue: defaultData.textTheme));
     properties.add(DiagnosticsProperty<Color>('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
     properties.add(DiagnosticsProperty<Color>('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
     properties.add(DiagnosticsProperty<Color>('tableBackgroundColor', tableBackgroundColor, defaultValue: defaultData.tableBackgroundColor));
@@ -276,7 +276,7 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
   @override final Brightness brightness;
   @override final Color primaryColor;
   @override final Color primaryContrastingColor;
-  @override final CupertinoTextTheme textTheme;
+  @override final CupertinoTextThemeData textTheme;
   @override final Color barBackgroundColor;
   @override final Color scaffoldBackgroundColor;
   @override final Color tableBackgroundColor;

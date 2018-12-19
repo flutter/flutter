@@ -53,6 +53,9 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Segmented Control'),
+        // We're specifying a back label here because the previous page is a
+        // Material page. CupertinoPageRoutes could auto-populate these back
+        // labels.
         previousPageTitle: 'Cupertino',
         trailing: CupertinoDemoDocumentationButton(CupertinoSegmentedControlDemo.routeName),
       ),

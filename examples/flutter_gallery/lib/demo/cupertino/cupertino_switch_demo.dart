@@ -22,6 +22,9 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Switch'),
+        // We're specifying a back label here because the previous page is a
+        // Material page. CupertinoPageRoutes could auto-populate these back
+        // labels.
         previousPageTitle: 'Cupertino',
         trailing: CupertinoDemoDocumentationButton(CupertinoSwitchDemo.routeName),
       ),

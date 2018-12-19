@@ -1128,7 +1128,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
     Brightness brightness,
     Color primaryColor,
     Color primaryContrastingColor,
-    CupertinoTextTheme textTheme,
+    CupertinoTextThemeData textTheme,
     Color barBackgroundColor,
     Color scaffoldBackgroundColor,
     Color tableBackgroundColor,

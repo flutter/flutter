@@ -119,6 +119,10 @@ Widget _wrapWithBackground({
   );
 }
 
+// This exists to support backward compatibility with arguments like
+// `actionsForegroundColor`. CupertinoThemes can be used to support these
+// scenarios now. To support `actionsForegroundColor`, the nav bar rewraps
+// its children with a CupertinoTheme.
 Widget _wrapActiveColor(Color color, BuildContext context, Widget child) {
   if (color == null) {
     return child;

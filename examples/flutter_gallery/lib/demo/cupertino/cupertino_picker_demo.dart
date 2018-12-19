@@ -244,6 +244,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Picker'),
+        // We're specifying a back label here because the previous page is a
+        // Material page. CupertinoPageRoutes could auto-populate these back
+        // labels.
         previousPageTitle: 'Cupertino',
         trailing: CupertinoDemoDocumentationButton(CupertinoPickerDemo.routeName),
       ),

@@ -85,8 +85,8 @@ const TextStyle _kDefaultLargeTitleDarkTextStyle = TextStyle(
 
 /// Cupertino typography theme in a [CupertinoThemeData].
 @immutable
-class CupertinoTextTheme extends Diagnosticable {
-  /// Create a [CupertinoTextTheme].
+class CupertinoTextThemeData extends Diagnosticable {
+  /// Create a [CupertinoTextThemeData].
   ///
   /// The [primaryColor] and [isLight] parameters are used to derive TextStyle
   /// defaults of other attributes such as [textStyle] and [actionTextStyle]
@@ -95,7 +95,7 @@ class CupertinoTextTheme extends Diagnosticable {
   ///
   /// Other [TextStyle] parameters default to default iOS text styles when
   /// unspecified.
-  const CupertinoTextTheme({
+  const CupertinoTextThemeData({
     Color primaryColor,
     Brightness brightness,
     TextStyle textStyle,
@@ -155,9 +155,9 @@ class CupertinoTextTheme extends Diagnosticable {
     );
   }
 
-  /// Returns a copy of the current [CupertinoTextTheme] instance with
+  /// Returns a copy of the current [CupertinoTextThemeData] instance with
   /// specified overrides.
-  CupertinoTextTheme copyWith({
+  CupertinoTextThemeData copyWith({
     Color primaryColor,
     Brightness brightness,
     TextStyle textStyle,
@@ -167,7 +167,7 @@ class CupertinoTextTheme extends Diagnosticable {
     TextStyle navLargeTitleTextStyle,
     TextStyle navActionTextStyle,
   }) {
-    return CupertinoTextTheme(
+    return CupertinoTextThemeData(
       primaryColor: primaryColor ?? _primaryColor,
       brightness: brightness ?? _brightness,
       textStyle: textStyle ?? _textStyle,

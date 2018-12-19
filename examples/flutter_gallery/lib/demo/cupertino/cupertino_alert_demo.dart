@@ -43,6 +43,9 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Alerts'),
+        // We're specifying a back label here because the previous page is a
+        // Material page. CupertinoPageRoutes could auto-populate these back
+        // labels.
         previousPageTitle: 'Cupertino',
         trailing: CupertinoDemoDocumentationButton(CupertinoAlertDemo.routeName),
       ),

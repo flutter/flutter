@@ -145,6 +145,9 @@ class Theme extends StatelessWidget {
       child: IconTheme(
         data: data.iconTheme,
         child: CupertinoTheme(
+          // We're using a MaterialBasedCupertinoThemeData here instead of a
+          // CupertinoThemeData because it defers some properties to the Material
+          // ThemeData.
           data: MaterialBasedCupertinoThemeData(
             materialTheme: data,
           ),

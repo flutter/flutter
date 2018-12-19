@@ -21,6 +21,9 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Buttons'),
+        // We're specifying a back label here because the previous page is a
+        // Material page. CupertinoPageRoutes could auto-populate these back
+        // labels.
         previousPageTitle: 'Cupertino',
         trailing: CupertinoDemoDocumentationButton(CupertinoButtonsDemo.routeName),
       ),

@@ -46,7 +46,10 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
           child: CustomScrollView(
             slivers: <Widget>[
               CupertinoSliverNavigationBar(
-                largeTitle: const Text('Cupertino Refresh'),
+                largeTitle: const Text('Refresh'),
+                // We're specifying a back label here because the previous page
+                // is a Material page. CupertinoPageRoutes could auto-populate
+                // these back labels.
                 previousPageTitle: 'Cupertino',
                 trailing: CupertinoDemoDocumentationButton(CupertinoRefreshControlDemo.routeName),
               ),
