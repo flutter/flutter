@@ -486,7 +486,7 @@ File _findBundleFile(GradleProject project, BuildInfo buildInfo) {
   if (bundleFile.existsSync())
     return bundleFile;
   if (buildInfo.flavor != null) {
-    // Android Studio Gradle plugin v3 adds the flavor to the path. For the bundle the folder name is the flavor plus the mode name.
+    // Android Studio Gradle plugin v3 adds the flavor to the path. For the bundle the folder name is the flavor + the mode name.
     bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, buildInfo.flavor + modeName, bundleFileName));
     if (bundleFile.existsSync())
       return bundleFile;
