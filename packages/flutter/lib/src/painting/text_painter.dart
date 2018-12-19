@@ -420,7 +420,7 @@ class TextPainter {
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
-    String flattenedText = _text.toPlainText();
+    final String flattenedText = _text.toPlainText();
     final int prevCodeUnit = _text.codeUnitAt(max(0, offset - 1));
     if (prevCodeUnit == null)
       return null;
@@ -457,7 +457,7 @@ class TextPainter {
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
-    String flattenedText = _text.toPlainText();
+    final String flattenedText = _text.toPlainText();
     // We cap the offset at the final index of the _text.
     final int nextCodeUnit = _text.codeUnitAt(min(offset, flattenedText == null ? 0 : flattenedText.length - 1));
     if (nextCodeUnit == null)
