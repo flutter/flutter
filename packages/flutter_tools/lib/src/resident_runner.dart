@@ -368,7 +368,7 @@ class FlutterDevice {
     return 0;
   }
 
-  Future<bool> updateDevFS({
+  Future<UpdateFSReport> updateDevFS({
     String mainPath,
     String target,
     AssetBundle bundle,
@@ -384,9 +384,9 @@ class FlutterDevice {
       'Syncing files to device ${device.name}...',
       expectSlowOperation: true,
     );
-    int bytes = 0;
+    UpdateFSReport report;
     try {
-      bytes = await devFS.update(
+      report = await devFS.update(
         mainPath: mainPath,
         target: target,
         bundle: bundle,
@@ -403,11 +403,11 @@ class FlutterDevice {
       );
     } on DevFSException {
       devFSStatus.cancel();
-      return false;
+      return UpdateFSReport(success: false);
     }
     devFSStatus.stop();
-    printTrace('Synced ${getSizeAsMB(bytes)}.');
-    return true;
+    printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
+    return report;
   }
 
   void updateReloadStatus(bool wasReloadSuccessful) {

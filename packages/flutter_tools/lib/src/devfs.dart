@@ -350,6 +350,22 @@ class _DevFSHttpWriter {
   }
 }
 
+class UpdateFSReport {
+  UpdateFSReport({this.success: false, this.invalidatedSourcesCount = 0, this.syncedBytes = 0});
+
+  bool success;
+  int invalidatedSourcesCount;
+  int syncedBytes;
+
+  void incorporateResults(UpdateFSReport report) {
+    if (!report.success) {
+      success = false;
+    }
+    invalidatedSourcesCount += report.invalidatedSourcesCount;
+    syncedBytes += report.syncedBytes;
+  }
+}
+
 class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [rootDirectory].
   DevFS(VMService serviceProtocol,
@@ -422,7 +438,7 @@ class DevFS {
   /// Updates files on the device.
   ///
   /// Returns the number of bytes synced.
-  Future<int> update({
+  Future<UpdateFSReport> update({
     @required String mainPath,
     String target,
     AssetBundle bundle,
@@ -487,7 +503,7 @@ class DevFS {
     }
 
     // Update modified files
-    int numBytes = 0;
+    int syncedBytes = 0;
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
     _entries.forEach((Uri deviceUri, DevFSContent content) {
       String archivePath;
@@ -498,7 +514,7 @@ class DevFS {
       // files to incremental compiler next time user does hot reload.
       if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
         dirtyEntries[deviceUri] = content;
-        numBytes += content.size;
+        syncedBytes += content.size;
         if (archivePath != null && (!bundleFirstUpload || content.isModifiedAfter(firstBuildTime)))
           assetPathsToEvict.add(archivePath);
       }
@@ -516,7 +532,7 @@ class DevFS {
         if (content is DevFSFileContent) {
           filesUris.add(uri);
           invalidatedFiles.add(content.file.uri.toString());
-          numBytes -= content.size;
+          syncedBytes -= content.size;
         }
       }
     }
@@ -545,7 +561,7 @@ class DevFS {
         if (!dirtyEntries.containsKey(entryUri)) {
           final DevFSFileContent content = DevFSFileContent(fs.file(compiledBinary));
           dirtyEntries[entryUri] = content;
-          numBytes += content.size;
+          syncedBytes += content.size;
         }
       }
     }
@@ -576,7 +592,8 @@ class DevFS {
     }
 
     printTrace('DevFS: Sync finished');
-    return numBytes;
+    return UpdateFSReport(success: true, syncedBytes: syncedBytes,
+        invalidatedSourcesCount: invalidatedFiles.length);
   }
 
   void _scanFile(Uri deviceUri, FileSystemEntity file) {
