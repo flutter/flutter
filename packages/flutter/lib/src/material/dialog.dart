@@ -659,6 +659,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// dialog rather than just `Navigator.pop(context, result)`.
 ///
 /// See also:
+///
 ///  * [AlertDialog], for dialogs that have a row of buttons below a body.
 ///  * [SimpleDialog], which handles the scrolling of the contents and does
 ///    not show buttons below its body.

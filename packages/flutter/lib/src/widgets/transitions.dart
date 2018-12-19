@@ -581,9 +581,9 @@ class RelativePositionedTransition extends AnimatedWidget {
 ///
 /// See also:
 ///
-/// * [DecoratedBox], which also draws a [Decoration] but is not animated.
-/// * [AnimatedContainer], a more full-featured container that also animates on
-///   decoration using an internal animation.
+///  * [DecoratedBox], which also draws a [Decoration] but is not animated.
+///  * [AnimatedContainer], a more full-featured container that also animates on
+///    decoration using an internal animation.
 class DecoratedBoxTransition extends AnimatedWidget {
   /// Creates an animated [DecoratedBox] whose [Decoration] animation updates
   /// the widget.
@@ -592,7 +592,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
   ///
   /// See also:
   ///
-  /// * [new DecoratedBox].
+  ///  * [new DecoratedBox].
   const DecoratedBoxTransition({
     Key key,
     @required this.decoration,
@@ -646,7 +646,7 @@ class AlignTransition extends AnimatedWidget {
   ///
   /// See also:
   ///
-  /// * [new Align].
+  ///  * [new Align].
   const AlignTransition({
     Key key,
     @required Animation<AlignmentGeometry> alignment,
@@ -685,8 +685,8 @@ class AlignTransition extends AnimatedWidget {
 ///
 /// See also:
 ///
-/// * [DefaultTextStyle], which also defines a [TextStyle] for its descendants
-///   but is not animated.
+///  * [DefaultTextStyle], which also defines a [TextStyle] for its descendants
+///    but is not animated.
 class DefaultTextStyleTransition extends AnimatedWidget {
   /// Creates an animated [DefaultTextStyle] whose [TextStyle] animation updates
   /// the widget.

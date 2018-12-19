@@ -1124,10 +1124,10 @@ class Navigator extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * [Form], which provides an `onWillPop` callback that enables the form
-  ///   to veto a [pop] initiated by the app's back button.
-  /// * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
-  ///   to define the route's `willPop` method.
+  ///  * [Form], which provides an `onWillPop` callback that enables the form
+  ///    to veto a [pop] initiated by the app's back button.
+  ///  * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
+  ///    to define the route's `willPop` method.
   @optionalTypeArgs
   static Future<bool> maybePop<T extends Object>(BuildContext context, [ T result ]) {
     return Navigator.of(context).maybePop<T>(result);
@@ -1772,10 +1772,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// See also:
   ///
-  /// * [Form], which provides an `onWillPop` callback that enables the form
-  ///   to veto a [pop] initiated by the app's back button.
-  /// * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
-  ///   to define the route's `willPop` method.
+  ///  * [Form], which provides an `onWillPop` callback that enables the form
+  ///    to veto a [pop] initiated by the app's back button.
+  ///  * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
+  ///    to define the route's `willPop` method.
   @optionalTypeArgs
   Future<bool> maybePop<T extends Object>([ T result ]) async {
     final Route<T> route = _history.last;

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
@@ -125,7 +126,6 @@ class _GalleryAppState extends State<GalleryApp> {
         child: home,
       );
     }
-
     return MaterialApp(
       theme: _options.theme.data.copyWith(platform: _options.platform),
       title: 'Flutter Gallery',
@@ -137,7 +137,17 @@ class _GalleryAppState extends State<GalleryApp> {
       builder: (BuildContext context, Widget child) {
         return Directionality(
           textDirection: _options.textDirection,
-          child: _applyTextScaleFactor(child),
+          child: _applyTextScaleFactor(
+            // Specifically use a blank Cupertino theme here and do not transfer
+            // over the Material primary color etc except the brightness to
+            // showcase standard iOS looks.
+            CupertinoTheme(
+              data: CupertinoThemeData(
+                brightness: _options.theme.data.brightness,
+              ),
+              child: child,
+            ),
+          ),
         );
       },
       home: home,
