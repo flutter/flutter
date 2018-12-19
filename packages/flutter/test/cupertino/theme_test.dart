@@ -53,7 +53,7 @@ void main() {
   testWidgets('Dependent attribute can be overridden from cascaded value', (WidgetTester tester) async {
     final CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData(
       brightness: Brightness.dark,
-      textTheme: CupertinoTextTheme(
+      textTheme: CupertinoTextThemeData(
         textStyle: TextStyle(color: CupertinoColors.black),
       )
     ));
@@ -71,7 +71,7 @@ void main() {
       CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData(
         // Default brightness is light,
         barBackgroundColor: Color(0x11223344),
-        textTheme: CupertinoTextTheme(
+        textTheme: CupertinoTextThemeData(
           textStyle: TextStyle(fontFamily: 'Skeuomorphic'),
         ),
       ));
@@ -83,7 +83,7 @@ void main() {
       theme = await testTheme(tester, const CupertinoThemeData(
         brightness: Brightness.light,
         barBackgroundColor: Color(0x11223344),
-        textTheme: CupertinoTextTheme(
+        textTheme: CupertinoTextThemeData(
           textStyle: TextStyle(fontFamily: 'Skeuomorphic'),
         ),
       ));
@@ -95,7 +95,7 @@ void main() {
       theme = await testTheme(tester, const CupertinoThemeData(
         brightness: Brightness.light,
         barBackgroundColor: Color(0x11223344),
-        textTheme: CupertinoTextTheme(
+        textTheme: CupertinoTextThemeData(
           textStyle: TextStyle(fontFamily: 'Flat'),
         ),
       ));
