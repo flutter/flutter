@@ -387,7 +387,7 @@ class TextField extends StatefulWidget {
   /// {@tool sample}
   /// ```dart
   /// Widget counter(int currentLength, int maxLength) {
-  ///   return Text('You have entered $currentLength of $maxLength characters');
+  ///   return Text('$currentLength of $maxLength characters');
   /// }
   /// ```
   /// {@end-tool}
