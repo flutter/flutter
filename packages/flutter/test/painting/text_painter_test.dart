@@ -33,15 +33,15 @@ void main() {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
-    List<TextSpan> children = <TextSpan>[TextSpan(text: 'B'), TextSpan(text: 'C')];
+    List<TextSpan> children = <TextSpan>[const TextSpan(text: 'B'), const TextSpan(text: 'C')];
     painter.text = TextSpan(text: null, children: children);
     painter.layout();
 
     Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
     expect(caretOffset.dx, 0);
-    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 1), ui.Rect.zero);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
     expect(caretOffset.dx, painter.width / 2);
-    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 2), ui.Rect.zero);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
 
     children = <TextSpan>[];
@@ -50,7 +50,7 @@ void main() {
 
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
     expect(caretOffset.dx, 0);
-    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: 1), ui.Rect.zero);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
     expect(caretOffset.dx, 0);
   });
 
