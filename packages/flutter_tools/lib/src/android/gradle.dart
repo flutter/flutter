@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:archive/archive.dart';
 import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
+import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -40,8 +43,8 @@ enum FlutterPluginVersion {
 // of the impact of -q, but users insist they see the error message sometimes
 // anyway.  If we can prove it really is impossible, delete the filter.
 final RegExp ndkMessageFilter = RegExp(r'^(?!NDK is missing a ".*" directory'
-  r'|If you are not using NDK, unset the NDK variable from ANDROID_NDK_HOME or local.properties to remove this warning'
-  r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
+r'|If you are not using NDK, unset the NDK variable from ANDROID_NDK_HOME or local.properties to remove this warning'
+r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
 
 FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
   final File plugin = project.hostAppGradleRoot.childFile(
@@ -72,11 +75,11 @@ FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
 Future<File> getGradleAppOut(AndroidProject androidProject) async {
   switch (getFlutterPluginVersion(androidProject)) {
     case FlutterPluginVersion.none:
-      // Fall through. Pretend we're v1, and just go with it.
+    // Fall through. Pretend we're v1, and just go with it.
     case FlutterPluginVersion.v1:
       return androidProject.gradleAppOutV1File;
     case FlutterPluginVersion.managed:
-      // Fall through. The managed plugin matches plugin v2 for now.
+    // Fall through. The managed plugin matches plugin v2 for now.
     case FlutterPluginVersion.v2:
       return fs.file((await _gradleProject()).apkDirectory.childFile('app.apk'));
   }
@@ -134,18 +137,18 @@ void handleKnownGradleExceptions(String exceptionString) {
   // Android SDK components (e.g. Platform Tools), and the license
   // for that component has not been accepted.
   const String matcher =
-    r'You have not accepted the license agreements of the following SDK components:'
-    r'\s*\[(.+)\]';
+      r'You have not accepted the license agreements of the following SDK components:'
+      r'\s*\[(.+)\]';
   final RegExp licenseFailure = RegExp(matcher, multiLine: true);
   final Match licenseMatch = licenseFailure.firstMatch(exceptionString);
   if (licenseMatch != null) {
     final String missingLicenses = licenseMatch.group(1);
     final String errorMessage =
-      '\n\n* Error running Gradle:\n'
-      'Unable to download needed Android SDK components, as the following licenses have not been accepted:\n'
-      '$missingLicenses\n\n'
-      'To resolve this, please run the following command in a Terminal:\n'
-      'flutter doctor --android-licenses';
+        '\n\n* Error running Gradle:\n'
+        'Unable to download needed Android SDK components, as the following licenses have not been accepted:\n'
+        '$missingLicenses\n\n'
+        'To resolve this, please run the following command in a Terminal:\n'
+        'flutter doctor --android-licenses';
     throwToolExit(errorMessage);
   }
 }
@@ -232,7 +235,11 @@ void updateLocalProperties({
 
   void changeIfNecessary(String key, String value) {
     if (settings.values[key] != value) {
-      settings.values[key] = value;
+      if (value == null) {
+        settings.values.remove(key);
+      } else {
+        settings.values[key] = value;
+      }
       changed = true;
     }
   }
@@ -241,15 +248,16 @@ void updateLocalProperties({
 
   if (androidSdk != null)
     changeIfNecessary('sdk.dir', escapePath(androidSdk.directory));
+
   changeIfNecessary('flutter.sdk', escapePath(Cache.flutterRoot));
-  if (buildInfo != null)
+
+  if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
-  final String buildName = buildInfo?.buildName ?? manifest.buildName;
-  if (buildName != null)
+    final String buildName = buildInfo.buildName ?? manifest.buildName;
     changeIfNecessary('flutter.versionName', buildName);
-  final int buildNumber = buildInfo?.buildNumber ?? manifest.buildNumber;
-  if (buildNumber != null)
-    changeIfNecessary('flutter.versionCode', '$buildNumber');
+    final int buildNumber = buildInfo.buildNumber ?? manifest.buildNumber;
+    changeIfNecessary('flutter.versionCode', buildNumber?.toString());
+  }
 
   if (changed)
     settings.writeContents(localProperties);
@@ -293,13 +301,13 @@ Future<void> buildGradleProject({
 
   switch (getFlutterPluginVersion(project.android)) {
     case FlutterPluginVersion.none:
-      // Fall through. Pretend it's v1, and just go for it.
+    // Fall through. Pretend it's v1, and just go for it.
     case FlutterPluginVersion.v1:
       return _buildGradleProjectV1(project, gradle);
     case FlutterPluginVersion.managed:
-      // Fall through. Managed plugin builds the same way as plugin v2.
+    // Fall through. Managed plugin builds the same way as plugin v2.
     case FlutterPluginVersion.v2:
-      return _buildGradleProjectV2(project, gradle, buildInfo, target,isBuildingBundle);
+      return _buildGradleProjectV2(project, gradle, buildInfo, target, isBuildingBundle);
   }
 }
 
@@ -328,7 +336,8 @@ Future<void> _buildGradleProjectV2(
     FlutterProject flutterProject,
     String gradle,
     BuildInfo buildInfo,
-    String target,bool isBuildingBundle) async {
+    String target,
+    bool isBuildingBundle) async {
   final GradleProject project = await _gradleProject();
 
   String assembleTask;
@@ -379,8 +388,8 @@ Future<void> _buildGradleProjectV2(
   command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
   if (buildInfo.compilationTraceFilePath != null)
     command.add('-Pprecompile=${buildInfo.compilationTraceFilePath}');
-  if (buildInfo.buildHotUpdate)
-    command.add('-Photupdate=true');
+  if (buildInfo.createPatch)
+    command.add('-Ppatch=true');
   if (buildInfo.extraFrontEndOptions != null)
     command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
   if (buildInfo.extraGenSnapshotOptions != null)
@@ -428,7 +437,80 @@ Future<void> _buildGradleProjectV2(
       appSize = ' (${getSizeAsMB(apkFile.lengthSync())})';
     }
     printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.');
-  } else {
+
+    final AndroidApk package = AndroidApk.fromApk(apkFile);
+    final File baselineApkFile =
+    fs.directory(buildInfo.baselineDir).childFile('${package.versionCode}.apk');
+
+    if (buildInfo.createBaseline) {
+      // Save baseline apk for generating dynamic patches in later builds.
+      baselineApkFile.parent.createSync(recursive: true);
+      apkFile.copySync(baselineApkFile.path);
+      printStatus('Saved baseline package ${baselineApkFile.path}.');
+    }
+
+    if (buildInfo.createPatch) {
+      if (!baselineApkFile.existsSync())
+        throwToolExit(
+            'Error: Could not find baseline package ${baselineApkFile.path}.');
+
+      printStatus('Found baseline package ${baselineApkFile.path}.');
+      final Archive newApk = ZipDecoder().decodeBytes(
+          apkFile.readAsBytesSync());
+      final Archive oldApk = ZipDecoder().decodeBytes(
+          baselineApkFile.readAsBytesSync());
+
+      final Archive update = Archive();
+      for (ArchiveFile newFile in newApk) {
+        if (!newFile.isFile ||
+            !newFile.name.startsWith('assets/flutter_assets/'))
+          continue;
+
+        final ArchiveFile oldFile = oldApk.findFile(newFile.name);
+        if (oldFile != null && oldFile.crc32 == newFile.crc32)
+          continue;
+
+        final String name = fs.path.relative(newFile.name, from: 'assets/');
+        update.addFile(
+            ArchiveFile(name, newFile.content.length, newFile.content));
+      }
+
+      final File updateFile = fs.directory(buildInfo.patchDir)
+          .childFile('${package.versionCode}-${buildInfo.patchNumber}.zip');
+
+      if (update.files.isEmpty) {
+        printStatus('No changes detected relative to baseline build.');
+
+        if (updateFile.existsSync()) {
+          updateFile.deleteSync();
+          printStatus('Deleted dynamic patch ${updateFile.path}.');
+        }
+        return;
+      }
+
+      final ArchiveFile oldFile = oldApk.findFile(
+          'assets/flutter_assets/isolate_snapshot_data');
+      if (oldFile == null)
+        throwToolExit(
+            'Error: Could not find baseline assets/flutter_assets/isolate_snapshot_data.');
+
+      final int baselineChecksum = getCrc32(oldFile.content);
+      final Map<String, dynamic> manifest = <String, dynamic>{
+        'baselineChecksum': baselineChecksum,
+        'buildNumber': package.versionCode,
+        'patchNumber': buildInfo.patchNumber,
+      };
+
+      const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+      final String manifestJson = encoder.convert(manifest);
+      update.addFile(ArchiveFile(
+          'manifest.json', manifestJson.length, manifestJson.codeUnits));
+
+      updateFile.parent.createSync(recursive: true);
+      updateFile.writeAsBytesSync(ZipEncoder().encode(update), flush: true);
+      printStatus('Created dynamic patch ${updateFile.path}.');
+    }
+  } else{
     final File bundleFile = _findBundleFile(project, buildInfo);
     if (bundleFile == null)
       throwToolExit('Gradle build failed to produce an Android bundle package.');
@@ -453,7 +535,6 @@ Future<void> _buildGradleProjectV2(
 
 File _findApkFile(GradleProject project, BuildInfo buildInfo) {
   final String apkFileName = project.apkFileFor(buildInfo);
-
   if (apkFileName == null)
     return null;
   File apkFile = fs.file(fs.path.join(project.apkDirectory.path, apkFileName));

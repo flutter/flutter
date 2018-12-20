@@ -197,11 +197,10 @@ someOtherTask
     }
 
     String propertyFor(String key, File file) {
-      return file
-          .readAsLinesSync()
+      final Iterable<String> result = file.readAsLinesSync()
           .where((String line) => line.startsWith('$key='))
-          .map((String line) => line.split('=')[1])
-          .first;
+          .map((String line) => line.split('=')[1]);
+      return result.isEmpty ? null : result.first;
     }
 
     Future<void> checkBuildVersion({
@@ -220,18 +219,15 @@ someOtherTask
       // write schemaData otherwise pubspec.yaml file can't be loaded
       writeEmptySchemaFile(fs);
 
-      try {
-        updateLocalProperties(
-          project: await FlutterProject.fromPath('path/to/project'),
-          buildInfo: buildInfo,
-        );
+      updateLocalProperties(
+        project: await FlutterProject.fromPath('path/to/project'),
+        buildInfo: buildInfo,
+        requireAndroidSdk: false,
+      );
 
-        final File localPropertiesFile = fs.file('path/to/project/android/local.properties');
-        expect(propertyFor('flutter.versionName', localPropertiesFile), expectedBuildName);
-        expect(propertyFor('flutter.versionCode', localPropertiesFile), expectedBuildNumber);
-      } on Exception {
-        // Android SDK not found, skip test
-      }
+      final File localPropertiesFile = fs.file('path/to/project/android/local.properties');
+      expect(propertyFor('flutter.versionName', localPropertiesFile), expectedBuildName);
+      expect(propertyFor('flutter.versionCode', localPropertiesFile), expectedBuildNumber);
     }
 
     testUsingAndroidContext('extract build name and number from pubspec.yaml', () async {
@@ -357,6 +353,48 @@ flutter:
         buildInfo: buildInfo,
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '3',
+      );
+    });
+
+    testUsingAndroidContext('allow build info to unset build name and number', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: null, buildNumber: null),
+        expectedBuildName: null,
+        expectedBuildNumber: null,
+      );
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3),
+        expectedBuildName: '1.0.2',
+        expectedBuildNumber: '3',
+      );
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.3', buildNumber: 4),
+        expectedBuildName: '1.0.3',
+        expectedBuildNumber: '4',
+      );
+      // Values don't get unset.
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: null,
+        expectedBuildName: '1.0.3',
+        expectedBuildNumber: '4',
+      );
+      // Values get unset.
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: null, buildNumber: null),
+        expectedBuildName: null,
+        expectedBuildNumber: null,
       );
     });
   });

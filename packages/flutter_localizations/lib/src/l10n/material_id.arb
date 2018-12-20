@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Luaskan",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Sisa 1 karakter",
-  "remainingTextFieldCharacterCountOther": "Sisa $remainingCount karakter"
+  "remainingTextFieldCharacterCountOther": "Sisa $remainingCount karakter",
+  "refreshIndicatorSemanticLabel": "Memuat ulang"
 }

@@ -102,7 +102,7 @@ const Duration kLongRequestTimeout = Duration(minutes: 1);
 /// Used for RPC requests that should never take a long time.
 const Duration kShortRequestTimeout = Duration(seconds: 5);
 
-// TODO(flutter/flutter#23031): Test this.
+// TODO(mklim): Test this, flutter/flutter#23031.
 /// A connection to the Dart VM Service.
 class VMService {
   VMService(
@@ -1310,6 +1310,14 @@ class Isolate extends ServiceObjectOwner {
         'value': assetPath,
       }
     );
+  }
+
+  Future<List<int>> flutterDumpCompilationTrace() async {
+    final Map<String, dynamic> result =
+      await invokeFlutterExtensionRpcRaw('ext.flutter.dumpCompilationTrace');
+    if (result != null && result['value'] is List<dynamic>)
+        return result['value'].cast<int>();
+    return null;
   }
 
   // Application control extension methods.

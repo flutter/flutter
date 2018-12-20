@@ -59,7 +59,7 @@ class BottomSheet extends StatefulWidget {
   }) : assert(enableDrag != null),
        assert(onClosing != null),
        assert(builder != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        super(key: key);
 
   /// The animation that controls the bottom sheet's position.
@@ -87,10 +87,11 @@ class BottomSheet extends StatefulWidget {
   /// Default is true.
   final bool enableDrag;
 
-  /// The z-coordinate at which to place this material. This controls the size
-  /// of the shadow below the material.
+  /// The z-coordinate at which to place this material relative to its parent.
   ///
-  /// Defaults to 0.
+  /// This controls the size of the shadow below the material.
+  ///
+  /// Defaults to 0. The value is non-negative.
   final double elevation;
 
   @override

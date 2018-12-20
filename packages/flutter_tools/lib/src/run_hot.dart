@@ -48,7 +48,7 @@ class DeviceReloadReport {
   List<Map<String, dynamic>> reports; // List has one report per Flutter view.
 }
 
-// TODO(flutter/flutter#23031): Test this.
+// TODO(mklim): Test this, flutter/flutter#23031.
 class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {
@@ -61,6 +61,7 @@ class HotRunner extends ResidentRunner {
     String projectRootPath,
     String packagesFilePath,
     this.dillOutputPath,
+    bool saveCompilationTrace = false,
     bool stayResident = true,
     bool ipv6 = false,
   }) : super(devices,
@@ -69,6 +70,7 @@ class HotRunner extends ResidentRunner {
              usesTerminalUI: usesTerminalUI,
              projectRootPath: projectRootPath,
              packagesFilePath: packagesFilePath,
+             saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
              ipv6: ipv6);
 

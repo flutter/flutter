@@ -57,5 +57,6 @@
   "collapsedIconTapHint": "توسيع",
   "remainingTextFieldCharacterCountZero": "لا أحرف متبقية",
   "remainingTextFieldCharacterCountOne": "حرف واحد متبقٍ",
-  "remainingTextFieldCharacterCountOther": "$remainingCount حرف متبقٍ"
+  "remainingTextFieldCharacterCountOther": "$remainingCount حرف متبقٍ",
+  "refreshIndicatorSemanticLabel": "إعادة تحميل"
 }

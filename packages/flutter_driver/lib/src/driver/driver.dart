@@ -61,25 +61,38 @@ enum TimelineStream {
 
 const List<TimelineStream> _defaultStreams = <TimelineStream>[TimelineStream.all];
 
+/// Multiplies the timeout values used when establishing a connection to the
+/// Flutter app under test and obtain an instance of [FlutterDriver].
+///
+/// This multiplier applies automatically when using the default implementation
+/// of the [vmServiceConnectFunction].
+///
+/// See also:
+///
+///  * [FlutterDriver.timeoutMultiplier], which multiplies all command timeouts by this number.
+double connectionTimeoutMultiplier = _kDefaultTimeoutMultiplier;
+
+const double _kDefaultTimeoutMultiplier = 1.0;
+
 /// Default timeout for short-running RPCs.
-const Duration _kShortTimeout = Duration(seconds: 5);
+Duration _shortTimeout(double multiplier) => const Duration(seconds: 5) * multiplier;
 
 /// Default timeout for awaiting an Isolate to become runnable.
-const Duration _kIsolateLoadRunnableTimeout = Duration(minutes: 1);
+Duration _isolateLoadRunnableTimeout(double multiplier) => const Duration(minutes: 1) * multiplier;
 
 /// Time to delay before driving a Fuchsia module.
-const Duration _kFuchsiaDriveDelay = Duration(milliseconds: 500);
+Duration _fuchsiaDriveDelay(double multiplier) => const Duration(milliseconds: 500) * multiplier;
 
 /// Default timeout for long-running RPCs.
-final Duration _kLongTimeout = _kShortTimeout * 6;
+Duration _longTimeout(double multiplier) => _shortTimeout(multiplier) * 6;
 
 /// Additional amount of time we give the command to finish or timeout remotely
 /// before timing out locally.
-final Duration _kRpcGraceTime = _kShortTimeout ~/ 2;
+Duration _rpcGraceTime(double multiplier) => _shortTimeout(multiplier) ~/ 2;
 
 /// The amount of time we wait prior to making the next attempt to connect to
 /// the VM service.
-final Duration _kPauseBetweenReconnectAttempts = _kShortTimeout ~/ 5;
+Duration _pauseBetweenReconnectAttempts(double multiplier) => _shortTimeout(multiplier) ~/ 5;
 
 // See https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc#L32
 String _timelineStreamsToString(List<TimelineStream> streams) {
@@ -129,6 +142,7 @@ class FlutterDriver {
     this._appIsolate, {
     bool printCommunication = false,
     bool logCommunicationToFile = true,
+    this.timeoutMultiplier = _kDefaultTimeoutMultiplier,
   }) : _printCommunication = printCommunication,
        _logCommunicationToFile = logCommunicationToFile,
        _driverId = _nextDriverId++;
@@ -155,12 +169,15 @@ class FlutterDriver {
   /// [logCommunicationToFile] determines whether the command communication
   /// between the test and the app should be logged to `flutter_driver_commands.log`.
   ///
+  /// [FlutterDriver] multiplies all command timeouts by [timeoutMultiplier].
+  ///
   /// [isolateNumber] (optional) determines the specific isolate to connect to.
   /// If this is left as `null`, will connect to the first isolate found
   /// running on [dartVmServiceUrl].
   ///
   /// [isolateReadyTimeout] determines how long after we connect to the VM
-  /// service we will wait for the first isolate to become runnable.
+  /// service we will wait for the first isolate to become runnable. Explicitly
+  /// specified non-null values are not affected by [timeoutMultiplier].
   ///
   /// [fuchsiaModuleTarget] (optional) If running on a Fuchsia Device, either
   /// this or the environment variable `FUCHSIA_MODULE_TARGET` must be set. This
@@ -170,10 +187,12 @@ class FlutterDriver {
     String dartVmServiceUrl,
     bool printCommunication = false,
     bool logCommunicationToFile = true,
+    double timeoutMultiplier = _kDefaultTimeoutMultiplier,
     int isolateNumber,
-    Duration isolateReadyTimeout = _kIsolateLoadRunnableTimeout,
+    Duration isolateReadyTimeout,
     Pattern fuchsiaModuleTarget,
   }) async {
+    isolateReadyTimeout ??= _isolateLoadRunnableTimeout(timeoutMultiplier);
     // If running on a Fuchsia device, connect to the first Isolate whose name
     // matches FUCHSIA_MODULE_TARGET.
     //
@@ -191,7 +210,7 @@ class FlutterDriver {
       final List<fuchsia.IsolateRef> refs =
           await fuchsiaConnection.getMainIsolatesByPattern(fuchsiaModuleTarget);
       final fuchsia.IsolateRef ref = refs.first;
-      await Future<void>.delayed(_kFuchsiaDriveDelay);
+      await Future<void>.delayed(_fuchsiaDriveDelay(timeoutMultiplier));
       isolateNumber = ref.number;
       dartVmServiceUrl = ref.dartVm.uri.toString();
       await fuchsiaConnection.stop();
@@ -213,6 +232,7 @@ class FlutterDriver {
 
     // Connect to Dart VM services
     _log.info('Connecting to Flutter application at $dartVmServiceUrl');
+    connectionTimeoutMultiplier = timeoutMultiplier;
     final VMServiceClientConnection connection =
         await vmServiceConnectFunction(dartVmServiceUrl);
     final VMServiceClient client = connection.client;
@@ -243,7 +263,7 @@ class FlutterDriver {
         isolate.pauseEvent is! VMPauseExceptionEvent &&
         isolate.pauseEvent is! VMPauseInterruptedEvent &&
         isolate.pauseEvent is! VMResumeEvent) {
-      await Future<void>.delayed(_kShortTimeout ~/ 10);
+      await Future<void>.delayed(_shortTimeout(timeoutMultiplier) ~/ 10);
       isolate = await isolateRef.loadRunnable();
     }
 
@@ -251,6 +271,7 @@ class FlutterDriver {
       client, connection.peer, isolate,
       printCommunication: printCommunication,
       logCommunicationToFile: logCommunicationToFile,
+      timeoutMultiplier: timeoutMultiplier,
     );
 
     // Attempts to resume the isolate, but does not crash if it fails because
@@ -311,7 +332,7 @@ class FlutterDriver {
         _log.trace('Waiting for service extension');
         // We will never receive the extension event if the user does not
         // register it. If that happens time out.
-        await whenServiceExtensionReady.timeout(_kLongTimeout * 2);
+        await whenServiceExtensionReady.timeout(_longTimeout(timeoutMultiplier) * 2);
       } on TimeoutException catch (_) {
         throw DriverError(
           'Timed out waiting for Flutter Driver extension to become available. '
@@ -352,7 +373,7 @@ class FlutterDriver {
           'registered.'
         );
         await enableIsolateStreams();
-        await waitForServiceExtension().timeout(_kLongTimeout * 2);
+        await waitForServiceExtension().timeout(_longTimeout(timeoutMultiplier) * 2);
         return driver.checkHealth();
       }
     }
@@ -369,16 +390,29 @@ class FlutterDriver {
 
   /// The unique ID of this driver instance.
   final int _driverId;
+
   /// Client connected to the Dart VM running the Flutter application
   final VMServiceClient _serviceClient;
+
   /// JSON-RPC client useful for sending raw JSON requests.
   final rpc.Peer _peer;
+
   /// The main isolate hosting the Flutter application
   final VMIsolate _appIsolate;
+
   /// Whether to print communication between host and app to `stdout`.
   final bool _printCommunication;
+
   /// Whether to log communication between host and app to `flutter_driver_commands.log`.
   final bool _logCommunicationToFile;
+
+  /// [FlutterDriver] multiplies all command timeouts by this number.
+  ///
+  /// The right amount of time a driver command should be given to complete
+  /// depends on various environmental factors, such as the speed of the
+  /// device or the emulator, connection speed and latency, and others. Use
+  /// this multiplier to tailor the timeouts to your environment.
+  final double timeoutMultiplier;
 
   Future<Map<String, dynamic>> _sendCommand(Command command) async {
     Map<String, dynamic> response;
@@ -387,7 +421,7 @@ class FlutterDriver {
       _logCommunication('>>> $serialized');
       response = await _appIsolate
           .invokeExtension(_flutterExtensionMethodName, serialized)
-          .timeout(command.timeout + _kRpcGraceTime);
+          .timeout(command.timeout + _rpcGraceTime(timeoutMultiplier));
       _logCommunication('<<< $response');
     } on TimeoutException catch (error, stackTrace) {
       throw DriverError(
@@ -419,26 +453,31 @@ class FlutterDriver {
 
   /// Checks the status of the Flutter Driver extension.
   Future<Health> checkHealth({Duration timeout}) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     return Health.fromJson(await _sendCommand(GetHealth(timeout: timeout)));
   }
 
   /// Returns a dump of the render tree.
   Future<RenderTree> getRenderTree({Duration timeout}) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     return RenderTree.fromJson(await _sendCommand(GetRenderTree(timeout: timeout)));
   }
 
   /// Taps at the center of the widget located by [finder].
   Future<void> tap(SerializableFinder finder, {Duration timeout}) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     await _sendCommand(Tap(finder, timeout: timeout));
   }
 
   /// Waits until [finder] locates the target.
   Future<void> waitFor(SerializableFinder finder, {Duration timeout}) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     await _sendCommand(WaitFor(finder, timeout: timeout));
   }
 
   /// Waits until [finder] can no longer locate the target.
   Future<void> waitForAbsent(SerializableFinder finder, {Duration timeout}) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     await _sendCommand(WaitForAbsent(finder, timeout: timeout));
   }
 
@@ -447,6 +486,7 @@ class FlutterDriver {
   /// Use this method when you need to wait for the moment when the application
   /// becomes "stable", for example, prior to taking a [screenshot].
   Future<void> waitUntilNoTransientCallbacks({Duration timeout}) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     await _sendCommand(WaitUntilNoTransientCallbacks(timeout: timeout));
   }
 
@@ -464,6 +504,7 @@ class FlutterDriver {
   /// The move events are generated at a given [frequency] in Hz (or events per
   /// second). It defaults to 60Hz.
   Future<void> scroll(SerializableFinder finder, double dx, double dy, Duration duration, { int frequency = 60, Duration timeout }) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     await _sendCommand(Scroll(finder, dx, dy, duration, frequency, timeout: timeout));
   }
 
@@ -475,6 +516,7 @@ class FlutterDriver {
   /// then this method may fail because [finder] doesn't actually exist.
   /// The [scrollUntilVisible] method can be used in this case.
   Future<void> scrollIntoView(SerializableFinder finder, { double alignment = 0.0, Duration timeout }) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     await _sendCommand(ScrollIntoView(finder, alignment: alignment, timeout: timeout));
   }
 
@@ -531,6 +573,7 @@ class FlutterDriver {
 
   /// Returns the text in the `Text` widget located by [finder].
   Future<String> getText(SerializableFinder finder, { Duration timeout }) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     return GetTextResult.fromJson(await _sendCommand(GetText(finder, timeout: timeout))).text;
   }
 
@@ -567,6 +610,7 @@ class FlutterDriver {
   /// });
   /// ```
   Future<void> enterText(String text, { Duration timeout }) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     await _sendCommand(EnterText(text, timeout: timeout));
   }
 
@@ -585,6 +629,7 @@ class FlutterDriver {
   /// channel will be mocked out.
   Future<void> setTextEntryEmulation({ @required bool enabled, Duration timeout }) async {
     assert(enabled != null);
+    timeout ??= _shortTimeout(timeoutMultiplier);
     await _sendCommand(SetTextEntryEmulation(enabled, timeout: timeout));
   }
 
@@ -595,6 +640,7 @@ class FlutterDriver {
   /// callback in [enableFlutterDriverExtension] that can successfully handle
   /// these requests.
   Future<String> requestData(String message, { Duration timeout }) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     return RequestDataResult.fromJson(await _sendCommand(RequestData(message, timeout: timeout))).message;
   }
 
@@ -602,7 +648,8 @@ class FlutterDriver {
   ///
   /// Returns true when the call actually changed the state from on to off or
   /// vice versa.
-  Future<bool> setSemantics(bool enabled, { Duration timeout = _kShortTimeout }) async {
+  Future<bool> setSemantics(bool enabled, { Duration timeout }) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     final SetSemanticsResult result = SetSemanticsResult.fromJson(await _sendCommand(SetSemantics(enabled, timeout: timeout)));
     return result.changedState;
   }
@@ -615,7 +662,8 @@ class FlutterDriver {
   ///
   /// Semantics must be enabled to use this method, either using a platform
   /// specific shell command or [setSemantics].
-  Future<int> getSemanticsId(SerializableFinder finder, { Duration timeout = _kShortTimeout}) async {
+  Future<int> getSemanticsId(SerializableFinder finder, { Duration timeout }) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     final Map<String, dynamic> jsonResponse = await _sendCommand(GetSemanticsId(finder, timeout: timeout));
     final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson(jsonResponse);
     return result.id;
@@ -623,7 +671,7 @@ class FlutterDriver {
 
   /// Take a screenshot.  The image will be returned as a PNG.
   Future<List<int>> screenshot({ Duration timeout }) async {
-    timeout ??= _kLongTimeout;
+    timeout ??= _longTimeout(timeoutMultiplier);
 
     // HACK: this artificial delay here is to deal with a race between the
     //       driver script and the GPU thread. The issue is that driver API
@@ -683,7 +731,8 @@ class FlutterDriver {
   ///     ]
   ///
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
-  Future<List<Map<String, dynamic>>> getVmFlags({ Duration timeout = _kShortTimeout }) async {
+  Future<List<Map<String, dynamic>>> getVmFlags({ Duration timeout }) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     final Map<String, dynamic> result = await _peer.sendRequest('getFlagList').timeout(timeout);
     return result['flags'];
   }
@@ -691,8 +740,9 @@ class FlutterDriver {
   /// Starts recording performance traces.
   Future<void> startTracing({
     List<TimelineStream> streams = _defaultStreams,
-    Duration timeout = _kShortTimeout,
+    Duration timeout,
   }) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     assert(streams != null && streams.isNotEmpty);
     try {
       await _peer.sendRequest(_setVMTimelineFlagsMethodName, <String, String>{
@@ -708,7 +758,8 @@ class FlutterDriver {
   }
 
   /// Stops recording performance traces and downloads the timeline.
-  Future<Timeline> stopTracingAndDownloadTimeline({ Duration timeout = _kShortTimeout }) async {
+  Future<Timeline> stopTracingAndDownloadTimeline({ Duration timeout }) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     try {
       await _peer
           .sendRequest(_setVMTimelineFlagsMethodName, <String, String>{'recordedStreams': '[]'})
@@ -751,7 +802,8 @@ class FlutterDriver {
   }
 
   /// Clears all timeline events recorded up until now.
-  Future<void> clearTimeline({ Duration timeout = _kShortTimeout }) async {
+  Future<void> clearTimeline({ Duration timeout }) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     try {
       await _peer
           .sendRequest(_clearVMTimelineMethodName, <String, String>{})
@@ -782,6 +834,7 @@ class FlutterDriver {
   /// ensure that no action is performed while the app is undergoing a
   /// transition to avoid flakiness.
   Future<T> runUnsynchronized<T>(Future<T> action(), { Duration timeout }) async {
+    timeout ??= _shortTimeout(timeoutMultiplier);
     await _sendCommand(SetFrameSync(false, timeout: timeout));
     T result;
     try {
@@ -841,6 +894,11 @@ typedef VMServiceConnectFunction = Future<VMServiceClientConnection> Function(St
 ///
 /// Overwrite this function if you require a custom method for connecting to
 /// the VM service.
+///
+/// See also:
+///
+///  * [connectionTimeoutMultiplier], which controls the timeouts while
+///    establishing a connection using the default connection function.
 VMServiceConnectFunction vmServiceConnectFunction = _waitAndConnect;
 
 /// Restores [vmServiceConnectFunction] to its default value.
@@ -863,8 +921,8 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
     WebSocket ws1;
     WebSocket ws2;
     try {
-      ws1 = await WebSocket.connect(uri.toString()).timeout(_kShortTimeout);
-      ws2 = await WebSocket.connect(uri.toString()).timeout(_kShortTimeout);
+      ws1 = await WebSocket.connect(uri.toString()).timeout(_shortTimeout(connectionTimeoutMultiplier));
+      ws2 = await WebSocket.connect(uri.toString()).timeout(_shortTimeout(connectionTimeoutMultiplier));
       return VMServiceClientConnection(
         VMServiceClient(IOWebSocketChannel(ws1).cast()),
         rpc.Peer(IOWebSocketChannel(ws2).cast())..listen()
@@ -873,9 +931,9 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
       await ws1?.close();
       await ws2?.close();
 
-      if (timer.elapsed < _kLongTimeout * 2) {
+      if (timer.elapsed < _longTimeout(connectionTimeoutMultiplier) * 2) {
         _log.info('Waiting for application to start');
-        await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
+        await Future<void>.delayed(_pauseBetweenReconnectAttempts(connectionTimeoutMultiplier));
         return attemptConnection();
       } else {
         _log.critical(

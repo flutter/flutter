@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "展開",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "残り 1 文字（半角相当）",
-  "remainingTextFieldCharacterCountOther": "残り $remainingCount 文字（半角相当）"
+  "remainingTextFieldCharacterCountOther": "残り $remainingCount 文字（半角相当）",
+  "refreshIndicatorSemanticLabel": "更新"
 }

@@ -40,6 +40,7 @@ void main() {
       expect(localizations.alertDialogLabel, isNotNull);
       expect(localizations.collapsedIconTapHint, isNotNull);
       expect(localizations.expandedIconTapHint, isNotNull);
+      expect(localizations.refreshIndicatorSemanticLabel, isNotNull);
 
       expect(localizations.remainingTextFieldCharacterCount(0), isNotNull);
       expect(localizations.remainingTextFieldCharacterCount(1), isNotNull);

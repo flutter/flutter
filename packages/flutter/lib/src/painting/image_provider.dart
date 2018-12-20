@@ -664,7 +664,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// AssetImage('icons/heart.png', scale: 1.5)
 /// ```
 ///
-///## Assets in packages
+/// ## Assets in packages
 ///
 /// To fetch an asset from a package, the [package] argument must be provided.
 /// For instance, suppose the structure above is inside a package called
@@ -690,7 +690,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// lib/backgrounds/background1.png
 /// lib/backgrounds/background2.png
 /// lib/backgrounds/background3.png
-///```
+/// ```
 ///
 /// To include, say the first image, the `pubspec.yaml` of the app should specify
 /// it in the `assets` section:
