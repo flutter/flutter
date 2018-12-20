@@ -39,6 +39,7 @@ linter:
     - implementation_imports
     - library_names
     - library_prefixes
+    - no_duplicate_case_values
     - non_constant_identifier_names
     - one_member_abstracts
     - overridden_fields
