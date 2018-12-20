@@ -16,6 +16,7 @@ linter:
     - cancel_subscriptions
     - close_sinks
     - control_flow_in_finally
+    - directives_ordering
     - empty_statements
     - empty_catches
     - hash_and_equals

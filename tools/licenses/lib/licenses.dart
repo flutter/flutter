@@ -6,8 +6,8 @@ import 'dart:convert';
 import 'dart:io' as system;
 
 import 'cache.dart';
-import 'patterns.dart';
 import 'limits.dart';
+import 'patterns.dart';
 
 class FetchedContentsOf extends Key { FetchedContentsOf(dynamic value) : super(value); }
 
