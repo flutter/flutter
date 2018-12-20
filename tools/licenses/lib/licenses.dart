@@ -368,8 +368,8 @@ abstract class License implements Comparable<License> {
   final LicenseType type;
 
   Iterable<String> get licensees => _licensees;
-  List<String> _licensees = <String>[];
-  Set<String> _libraries = Set<String>();
+  final List<String> _licensees = <String>[];
+  final Set<String> _libraries = Set<String>();
 
   bool get isUsed => _licensees.isNotEmpty;
 
