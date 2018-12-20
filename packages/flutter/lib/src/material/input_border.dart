@@ -272,6 +272,7 @@ class OutlineInputBorder extends InputBorder {
   /// [Radius.x] and [Radius.y] values must be the same.
   ///
   /// See also:
+  ///
   ///  * [InputDecoration.hasFloatingPlaceholder], which should be set to false
   ///    when the [borderSide] is [BorderSide.none]. If let as true, the label
   ///    will extend beyond the container as if the border were still being

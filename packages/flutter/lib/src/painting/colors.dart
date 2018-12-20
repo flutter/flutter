@@ -78,10 +78,10 @@ Color _colorFromHue(
 ///
 /// See also:
 ///
-///   * [HSLColor], a color that uses a color space based on human perception of
-///     colored light.
-///   * [HSV and HSL](https://en.wikipedia.org/wiki/HSL_and_HSV) Wikipedia
-///     article, which this implementation is based upon.
+///  * [HSLColor], a color that uses a color space based on human perception of
+///    colored light.
+///  * [HSV and HSL](https://en.wikipedia.org/wiki/HSL_and_HSV) Wikipedia
+///    article, which this implementation is based upon.
 @immutable
 class HSVColor {
   /// Creates a color.
@@ -249,10 +249,10 @@ class HSVColor {
 ///
 /// See also:
 ///
-///   * [HSVColor], a color that uses a color space based on human perception of
-///     pigments (e.g. paint and printer's ink).
-///   * [HSV and HSL](https://en.wikipedia.org/wiki/HSL_and_HSV) Wikipedia
-///     article, which this implementation is based upon.
+///  * [HSVColor], a color that uses a color space based on human perception of
+///    pigments (e.g. paint and printer's ink).
+///  * [HSV and HSL](https://en.wikipedia.org/wiki/HSL_and_HSV) Wikipedia
+///    article, which this implementation is based upon.
 @immutable
 class HSLColor {
   /// Creates a color.

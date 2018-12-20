@@ -658,6 +658,66 @@ void main() {
     // End the test here to ensure the animation is properly disposed of.
   });
 
+  testWidgets('An obscured TextField is not selectable by default', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/24100
+
+    final TextEditingController controller = TextEditingController();
+    Widget buildFrame(bool obscureText, bool enableInteractiveSelection) {
+      return overlay(
+        child: TextField(
+          controller: controller,
+          obscureText: obscureText,
+          enableInteractiveSelection: enableInteractiveSelection,
+        ),
+      );
+    }
+
+    // Obscure text and don't enable or disable selection
+    await tester.pumpWidget(buildFrame(true, null));
+    await tester.enterText(find.byType(TextField), 'abcdefghi');
+    await skipPastScrollingAnimation(tester);
+    expect(controller.selection.isCollapsed, true);
+
+    // Long press doesn't select anything
+    final Offset ePos = textOffsetToPosition(tester, 1);
+    final TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
+    expect(controller.selection.isCollapsed, true);
+  });
+
+  testWidgets('An obscured TextField is selectable when enabled', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/24100
+
+    final TextEditingController controller = TextEditingController();
+    Widget buildFrame(bool obscureText, bool enableInteractiveSelection) {
+      return overlay(
+        child: TextField(
+          controller: controller,
+          obscureText: obscureText,
+          enableInteractiveSelection: enableInteractiveSelection,
+        ),
+      );
+    }
+
+    // Explicitly allow selection on obscured text
+    await tester.pumpWidget(buildFrame(true, true));
+    await tester.enterText(find.byType(TextField), 'abcdefghi');
+    await skipPastScrollingAnimation(tester);
+    expect(controller.selection.isCollapsed, true);
+
+    // Long press does select text
+    final Offset ePos2 = textOffsetToPosition(tester, 1);
+    final TestGesture gesture2 = await tester.startGesture(ePos2, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture2.up();
+    await tester.pump();
+    expect(controller.selection.isCollapsed, false);
+  });
+
   testWidgets('Multiline text will wrap up to maxLines', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
 
@@ -720,6 +780,43 @@ void main() {
     await tester.pumpWidget(builder(null));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(fourLineInputSize));
+  });
+
+
+  testWidgets('Multiline hint text will wrap up to maxLines', (WidgetTester tester) async {
+    final Key textFieldKey = UniqueKey();
+
+    Widget builder(int maxLines, final String hintMsg) {
+      return boilerplate(
+        child: TextField(
+          key: textFieldKey,
+          style: const TextStyle(color: Colors.black, fontSize: 34.0),
+          maxLines: maxLines,
+          decoration: InputDecoration(
+            hintText: hintMsg,
+          ),
+        ),
+      );
+    }
+
+    const String hintPlaceholder = 'Placeholder';
+    const String multipleLineText = 'Here\'s a text, which is more than one line, to demostrate the multiple line hint text';
+    await tester.pumpWidget(builder(null, hintPlaceholder));
+
+    RenderBox findHintText(String hint) => tester.renderObject(find.text(hint));
+
+    final RenderBox hintTextBox = findHintText(hintPlaceholder);
+    final Size oneLineHintSize = hintTextBox.size;
+
+    await tester.pumpWidget(builder(null, hintPlaceholder));
+    expect(findHintText(hintPlaceholder), equals(hintTextBox));
+    expect(hintTextBox.size, equals(oneLineHintSize));
+
+    const int maxLines = 3;
+    await tester.pumpWidget(builder(maxLines, multipleLineText));
+    final Text hintTextWidget = tester.widget(find.text(multipleLineText));
+    expect(hintTextWidget.maxLines, equals(maxLines));
+    expect(findHintText(multipleLineText).size, greaterThan(oneLineHintSize));
   });
 
   testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {
@@ -3421,5 +3518,86 @@ void main() {
     await tester.enterText(find.byType(TextField), '1234');
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(TextField)).width, 2 * stepWidth);
+  });
+
+  testWidgets('TextField style is merged with theme', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/23994
+
+    final ThemeData themeData = ThemeData(
+      textTheme: TextTheme(
+        subhead: TextStyle(
+          color: Colors.blue[500],
+        ),
+      ),
+    );
+
+    Widget buildFrame(TextStyle style) {
+      return MaterialApp(
+        theme: themeData,
+        home: Material(
+          child: Center(
+            child: TextField(
+              style: style,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Empty TextStyle is overridden by theme
+    await tester.pumpWidget(buildFrame(const TextStyle()));
+    EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.color, themeData.textTheme.subhead.color);
+    expect(editableText.style.background, themeData.textTheme.subhead.background);
+    expect(editableText.style.shadows, themeData.textTheme.subhead.shadows);
+    expect(editableText.style.decoration, themeData.textTheme.subhead.decoration);
+    expect(editableText.style.locale, themeData.textTheme.subhead.locale);
+    expect(editableText.style.wordSpacing, themeData.textTheme.subhead.wordSpacing);
+
+    // Properties set on TextStyle override theme
+    const Color setColor = Colors.red;
+    await tester.pumpWidget(buildFrame(const TextStyle(color: setColor)));
+    editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.color, setColor);
+
+    // inherit: false causes nothing to be merged in from theme
+    await tester.pumpWidget(buildFrame(const TextStyle(
+      fontSize: 24.0,
+      textBaseline: TextBaseline.alphabetic,
+      inherit: false,
+    )));
+    editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.color, isNull);
+  });
+
+  testWidgets('style enforces required fields', (WidgetTester tester) async {
+    Widget buildFrame(TextStyle style) {
+      return MaterialApp(
+        home: Material(
+          child: TextField(
+            style: style,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(const TextStyle(
+      inherit: false,
+      fontSize: 12.0,
+      textBaseline: TextBaseline.alphabetic,
+    )));
+    expect(tester.takeException(), isNull);
+
+    // With inherit not set to false, will pickup required fields from theme
+    await tester.pumpWidget(buildFrame(const TextStyle(
+      fontSize: 12.0,
+    )));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildFrame(const TextStyle(
+      inherit: false,
+      fontSize: 12.0,
+    )));
+    expect(tester.takeException(), isNotNull);
   });
 }
