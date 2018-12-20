@@ -607,7 +607,7 @@ abstract class ResidentRunner {
 
         List<int> buffer;
         try {
-          buffer = await view.uiIsolate.flutterDumpCompilationTrace();
+          buffer = await view.uiIsolate.flutterSaveCompilationTrace();
           assert(buffer != null);
         } catch (error) {
           printError('Error communicating with Flutter on the device: $error');
