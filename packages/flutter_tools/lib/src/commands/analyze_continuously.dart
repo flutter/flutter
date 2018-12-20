@@ -72,7 +72,6 @@ class AnalyzeContinuously extends AnalyzeBase {
   void _handleAnalysisStatus(AnalysisServer server, bool isAnalyzing) {
     if (isAnalyzing) {
       analysisStatus?.cancel();
-      analysisStatus = null;
       if (!firstAnalysis)
         printStatus('\n');
       analysisStatus = logger.startProgress('Analyzing $analysisTarget...', timeout: kSlowOperation);

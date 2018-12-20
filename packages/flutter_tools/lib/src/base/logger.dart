@@ -467,22 +467,22 @@ abstract class Status {
   final VoidCallback onFinish;
 
   @protected
-  final Stopwatch stopwatch = Stopwatch();
+  final Stopwatch _stopwatch = Stopwatch();
 
   @protected
-  bool get seemsSlow => stopwatch.elapsed > timeout;
+  bool get seemsSlow => _stopwatch.elapsed > timeout;
 
   @protected
   String get elapsedTime {
     if (timeout > kFastOperation)
-      return getElapsedAsSeconds(stopwatch.elapsed);
-    return getElapsedAsMilliseconds(stopwatch.elapsed);
+      return getElapsedAsSeconds(_stopwatch.elapsed);
+    return getElapsedAsMilliseconds(_stopwatch.elapsed);
   }
 
   /// Call to start spinning.
   void start() {
-    assert(!stopwatch.isRunning);
-    stopwatch.start();
+    assert(!_stopwatch.isRunning);
+    _stopwatch.start();
   }
 
   /// Call to stop spinning after success.
@@ -497,8 +497,8 @@ abstract class Status {
 
   @protected
   void finish() {
-    assert(stopwatch.isRunning);
-    stopwatch.stop();
+    assert(_stopwatch.isRunning);
+    _stopwatch.stop();
     if (onFinish != null)
       onFinish();
   }
