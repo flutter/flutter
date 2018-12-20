@@ -9,6 +9,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 import io.flutter.util.PathUtils;
 import org.json.JSONException;
@@ -31,6 +32,15 @@ import java.util.zip.ZipFile;
 class ResourceExtractor {
     private static final String TAG = "ResourceExtractor";
     private static final String TIMESTAMP_PREFIX = "res_timestamp-";
+
+    @SuppressWarnings("deprecation")
+    static long getVersionCode(PackageInfo packageInfo) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            return packageInfo.getLongVersionCode();
+        } else {
+            return packageInfo.versionCode;
+        }
+    }
 
     private class ExtractTask extends AsyncTask<Void, Void, Void> {
         private static final int BUFFER_SIZE = 16 * 1024;
@@ -202,7 +212,7 @@ class ResourceExtractor {
             }
 
             String expectedTimestamp =
-                    TIMESTAMP_PREFIX + packageInfo.versionCode + "-" + packageInfo.lastUpdateTime;
+                    TIMESTAMP_PREFIX + getVersionCode(packageInfo) + "-" + packageInfo.lastUpdateTime;
 
             if (updateManifest != null) {
                 String buildNumber = updateManifest.optString("buildNumber", null);
@@ -216,8 +226,8 @@ class ResourceExtractor {
                 }
 
                 if (buildNumber != null && patchNumber != null) {
-                    if (!buildNumber.equals(Integer.toString(packageInfo.versionCode))) {
-                        Log.w(TAG, "Outdated update file for " + packageInfo.versionCode);
+                  if (!buildNumber.equals(Long.toString(getVersionCode(packageInfo)))) {
+                        Log.w(TAG, "Outdated update file for " + getVersionCode(packageInfo));
                     } else {
                         final File updateFile = new File(FlutterMain.getUpdateInstallationPath());
                         expectedTimestamp += "-" + patchNumber + "-" + updateFile.lastModified();
