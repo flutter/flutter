@@ -275,12 +275,12 @@ class MethodChannel {
   ///
   /// See also:
   ///
-  /// * [StandardMessageCodec] which defines the payload values supported by
-  ///   [StandardMethodCodec].
-  /// * [JSONMessageCodec] which defines the payload values supported by
-  ///   [JSONMethodCodec].
-  /// * <https://docs.flutter.io/javadoc/io/flutter/plugin/common/MethodCall.html>
-  ///   for how to access method call arguments on Android.
+  ///  * [StandardMessageCodec] which defines the payload values supported by
+  ///    [StandardMethodCodec].
+  ///  * [JSONMessageCodec] which defines the payload values supported by
+  ///    [JSONMethodCodec].
+  ///  * <https://docs.flutter.io/javadoc/io/flutter/plugin/common/MethodCall.html>
+  ///    for how to access method call arguments on Android.
   Future<dynamic> invokeMethod(String method, [dynamic arguments]) async {
     assert(method != null);
     final dynamic result = await BinaryMessages.send(

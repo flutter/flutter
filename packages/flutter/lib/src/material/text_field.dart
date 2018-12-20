@@ -57,9 +57,9 @@ export 'package:flutter/services.dart' show TextInputType, TextInputAction, Text
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
 ///  * [EditableText], which is the raw text editing control at the heart of a
-///    [TextField]. (The [EditableText] widget is rarely used directly unless
+///    [TextField]. The [EditableText] widget is rarely used directly unless
 ///    you are implementing an entirely different design language, such as
-///    Cupertino.)
+///    Cupertino.
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
@@ -76,10 +76,11 @@ class TextField extends StatefulWidget {
   ///
   /// The [maxLength] property is set to null by default, which means the
   /// number of characters allowed in the text field is not restricted. If
-  /// [maxLength] is set, a character counter will be displayed below the
-  /// field, showing how many characters have been entered and how many are
-  /// allowed unless the value is set to [noMaxLength] in which case only the
-  /// current length is displayed.
+  /// [maxLength] is set a character counter will be displayed below the
+  /// field showing how many characters have been entered. If the value is
+  /// set to a positive integer it will also display the maximum allowed
+  /// number of characters to be entered.  If the value is set to
+  /// [TextField.noMaxLength] then only the current length is displayed.
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
@@ -92,8 +93,8 @@ class TextField extends StatefulWidget {
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
   /// The [textAlign], [autofocus], [obscureText], [autocorrect],
-  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
-  /// and [enableInteractiveSelection] arguments must not be null.
+  /// [maxLengthEnforced], [scrollPadding], [maxLines], and [maxLength]
+  /// arguments must not be null.
   ///
   /// See also:
   ///
@@ -126,7 +127,8 @@ class TextField extends StatefulWidget {
     this.cursorColor,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
-    this.enableInteractiveSelection = true,
+    this.enableInteractiveSelection,
+    this.onTap,
   }) : assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
@@ -134,9 +136,8 @@ class TextField extends StatefulWidget {
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
-       assert(maxLength == null || maxLength > 0),
+       assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       assert(enableInteractiveSelection != null),
        super(key: key);
 
   /// Controls the text being edited.
@@ -144,9 +145,44 @@ class TextField extends StatefulWidget {
   /// If null, this widget will create its own [TextEditingController].
   final TextEditingController controller;
 
-  /// Controls whether this widget has keyboard focus.
+  /// Defines the keyboard focus for this widget.
+  ///
+  /// The [focusNode] is a long-lived object that's typically managed by a
+  /// [StatefulWidget] parent. See [FocusNode] for more information.
+  ///
+  /// To give the keyboard focus to this widget, provide a [focusNode] and then
+  /// use the current [FocusScope] to request the focus:
+  ///
+  /// ```dart
+  /// FocusScope.of(context).requestFocus(myFocusNode);
+  /// ```
+  ///
+  /// This happens automatically when the widget is tapped.
+  ///
+  /// To be notified when the widget gains or loses the focus, add a listener
+  /// to the [focusNode]:
+  ///
+  /// ```dart
+  /// focusNode.addListener(() { print(myFocusNode.hasFocus); });
+  /// ```
   ///
   /// If null, this widget will create its own [FocusNode].
+  ///
+  /// ## Keyboard
+  ///
+  /// Requesting the focus will typically cause the keyboard to be shown
+  /// if it's not showing already.
+  ///
+  /// On Android, the user can hide the keyboard - withouth changing the focus -
+  /// with the system back button. They can restore the keyboard's visibility
+  /// by tapping on a text field.  The user might hide the keyboard and
+  /// switch to a physical keyboard, or they might just need to get it
+  /// out of the way for a moment, to expose something it's
+  /// obscuring. In this case requesting the focus again will not
+  /// cause the focus to change, and will not make the keyboard visible.
+  ///
+  /// This widget builds an [EditableText] and will ensure that the keyboard is
+  /// showing when it is tapped by calling [EditableTextState.requestKeyboard()].
   final FocusNode focusNode;
 
   /// The decoration to show around the text field.
@@ -197,20 +233,25 @@ class TextField extends StatefulWidget {
 
   /// If [maxLength] is set to this value, only the "current input length"
   /// part of the character counter is shown.
-  static const int noMaxLength = 9007199254740992; // math.pow(2, 53);
+  static const int noMaxLength = -1;
 
   /// The maximum number of characters (Unicode scalar values) to allow in the
   /// text field.
   ///
   /// If set, a character counter will be displayed below the
-  /// field, showing how many characters have been entered and how many are
-  /// allowed. After [maxLength] characters have been input, additional input
+  /// field showing how many characters have been entered. If set to a number
+  /// greather than 0, it will also display the maximum number allowed. If set
+  /// to [TextField.noMaxLength] then only the current character count is displayed.
+  ///
+  /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
   /// enforces the length with a [LengthLimitingTextInputFormatter], which is
   /// evaluated after the supplied [inputFormatters], if any.
   ///
-  /// This value must be either null or greater than zero. If set to null
-  /// (the default), there is no limit to the number of characters allowed.
+  /// This value must be either null, [TextField.noMaxLength], or greater than 0.
+  /// If null (the default) then there is no limit to the number of characters
+  /// that can be entered. If set to [TextField.noMaxLength], then no limit will
+  /// be enforced, but the number of characters entered will still be displayed.
   ///
   /// Whitespace characters (e.g. newline, space, tab) are included in the
   /// character count.
@@ -256,6 +297,13 @@ class TextField extends StatefulWidget {
   final bool maxLengthEnforced;
 
   /// {@macro flutter.widgets.editableText.onChanged}
+  ///
+  /// See also:
+  ///
+  ///  * [inputFormatters], which are called before [onChanged]
+  ///    runs and can validate and change ("format") the input value.
+  ///  * [onEditingComplete], [onSubmitted], [onSelectionChanged]:
+  ///    which are more specialized input change notifications.
   final ValueChanged<String> onChanged;
 
   /// {@macro flutter.widgets.editableText.onEditingComplete}
@@ -298,6 +346,31 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
 
+  /// {@macro flutter.rendering.editable.selectionEnabled}
+  bool get selectionEnabled {
+    return enableInteractiveSelection ?? !obscureText;
+  }
+
+  /// Called when the user taps on this textfield.
+  ///
+  /// The textfield builds a [GestureDetector] to handle input events like tap,
+  /// to trigger focus requests, to move the caret, adjust the selection, etc.
+  /// Handling some of those events by wrapping the textfield with a competing
+  /// GestureDetector is problematic.
+  ///
+  /// To unconditionally handle taps, without interfering with the textfield's
+  /// internal gesture detector, provide this callback.
+  ///
+  /// If the textfield is created with [enabled] false, taps will not be
+  /// recognized.
+  ///
+  /// To be notified when the textfield gains or loses the focus, provide a
+  /// [focusNode] and add a listener to that.
+  ///
+  /// To listen to arbitrary pointer events without competing with the
+  /// textfield's internal gesture detector, use a [Listener].
+  final GestureTapCallback onTap;
+
   @override
   _TextFieldState createState() => _TextFieldState();
 
@@ -306,6 +379,7 @@ class TextField extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('enabled', enabled, defaultValue: null));
     properties.add(DiagnosticsProperty<InputDecoration>('decoration', decoration));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
@@ -315,6 +389,7 @@ class TextField extends StatefulWidget {
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
+    properties.add(DiagnosticsProperty<GestureTapCallback>('onTap', onTap, defaultValue: false));
   }
 }
 
@@ -340,6 +415,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       .applyDefaults(Theme.of(context).inputDecorationTheme)
       .copyWith(
         enabled: widget.enabled,
+        hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines
       );
 
     if (!needsCounter)
@@ -349,23 +425,26 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     String counterText = '$currentLength';
     String semanticCounterText = '';
 
-    if (widget.maxLength != TextField.noMaxLength) {
+    // Handle a real maxLength (positive number)
+    if (widget.maxLength > 0) {
+      // Show the maxLength in the counter
       counterText += '/${widget.maxLength}';
       final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength);
       semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
+
+      // Handle length exceeds maxLength
+      if (_effectiveController.value.text.runes.length > widget.maxLength) {
+        final ThemeData themeData = Theme.of(context);
+        return effectiveDecoration.copyWith(
+          errorText: effectiveDecoration.errorText ?? '',
+          counterStyle: effectiveDecoration.errorStyle
+            ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
+          counterText: counterText,
+          semanticCounterText: semanticCounterText,
+        );
+      }
     }
 
-    // Handle length exceeds maxLength
-    if (_effectiveController.value.text.runes.length > widget.maxLength) {
-      final ThemeData themeData = Theme.of(context);
-      return effectiveDecoration.copyWith(
-        errorText: effectiveDecoration.errorText ?? '',
-        counterStyle: effectiveDecoration.errorStyle
-          ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
-        counterText: counterText,
-        semanticCounterText: semanticCounterText,
-      );
-    }
     return effectiveDecoration.copyWith(
       counterText: counterText,
       semanticCounterText: semanticCounterText,
@@ -449,10 +528,12 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleTap() {
-    if (widget.enableInteractiveSelection)
+    if (widget.selectionEnabled)
       _renderEditable.handleTap();
     _requestKeyboard();
     _confirmCurrentSplash();
+    if (widget.onTap != null)
+      widget.onTap();
   }
 
   void _handleTapCancel() {
@@ -460,7 +541,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleLongPress() {
-    if (widget.enableInteractiveSelection)
+    if (widget.selectionEnabled)
       _renderEditable.handleLongPress();
     _confirmCurrentSplash();
   }
@@ -507,8 +588,14 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     // TODO(jonahwilliams): uncomment out this check once we have migrated tests.
     // assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
+    assert(
+      !(widget.style != null && widget.style.inherit == false &&
+         (widget.style.fontSize == null || widget.style.textBaseline == null)),
+      'inherit false style must supply fontSize and textBaseline',
+    );
+
     final ThemeData themeData = Theme.of(context);
-    final TextStyle style = widget.style ?? themeData.textTheme.subhead;
+    final TextStyle style = themeData.textTheme.subhead.merge(widget.style);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
@@ -532,7 +619,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
         selectionColor: themeData.textSelectionColor,
-        selectionControls: widget.enableInteractiveSelection
+        selectionControls: widget.selectionEnabled
           ? (themeData.platform == TargetPlatform.iOS
              ? cupertinoTextSelectionControls
              : materialTextSelectionControls)
@@ -546,6 +633,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cursorWidth: widget.cursorWidth,
         cursorRadius: widget.cursorRadius,
         cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
+        backgroundCursorColor: CupertinoColors.inactiveGray,
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: widget.enableInteractiveSelection,

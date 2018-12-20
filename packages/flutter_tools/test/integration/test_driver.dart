@@ -20,7 +20,7 @@ const Duration defaultTimeout = Duration(seconds: 40);
 const Duration appStartTimeout = Duration(seconds: 120);
 const Duration quitTimeout = Duration(seconds: 10);
 
-class FlutterTestDriver {
+abstract class FlutterTestDriver {
   FlutterTestDriver(this._projectFolder, {String logPrefix}):
     _logPrefix = logPrefix != null ? '$logPrefix: ' : '';
 
@@ -33,7 +33,6 @@ class FlutterTestDriver {
   final StreamController<String> _allMessages = StreamController<String>.broadcast();
   final StringBuffer _errorBuffer = StringBuffer();
   String _lastResponse;
-  String _currentRunningAppId;
   Uri _vmServiceWsUri;
   bool _hasExited = false;
 
@@ -52,35 +51,6 @@ class FlutterTestDriver {
       print('$_logPrefix$truncatedMsg');
     }
     return msg;
-  }
-
-  Future<void> run({
-    bool withDebugger = false,
-    bool pauseOnExceptions = false,
-    File pidFile,
-  }) async {
-    await _setupProcess(<String>[
-        'run',
-        '--machine',
-        '-d',
-        'flutter-tester',
-    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile);
-  }
-
-  Future<void> attach(
-    int port, {
-    bool withDebugger = false,
-    bool pauseOnExceptions = false,
-    File pidFile,
-  }) async {
-    await _setupProcess(<String>[
-        'attach',
-        '--machine',
-        '-d',
-        'flutter-tester',
-        '--debug-port',
-        '$port',
-    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile);
   }
 
   Future<void> _setupProcess(
@@ -112,8 +82,8 @@ class FlutterTestDriver {
       _debugPrint('Process exited ($code)');
       _hasExited = true;
     });
-    _transformToLines(_proc.stdout).listen((String line) => _stdout.add(line));
-    _transformToLines(_proc.stderr).listen((String line) => _stderr.add(line));
+    transformToLines(_proc.stdout).listen((String line) => _stdout.add(line));
+    transformToLines(_proc.stderr).listen((String line) => _stderr.add(line));
 
     // Capture stderr to a buffer so we can show it all if any requests fail.
     _stderr.stream.listen(_errorBuffer.writeln);
@@ -121,6 +91,251 @@ class FlutterTestDriver {
     // This is just debug printing to aid running/debugging tests locally.
     _stdout.stream.listen(_debugPrint);
     _stderr.stream.listen(_debugPrint);
+  }
+
+  Future<int> quit() => _killGracefully();
+
+  Future<int> _killGracefully() async {
+    if (_procPid == null)
+      return -1;
+    _debugPrint('Sending SIGTERM to $_procPid..');
+    Process.killPid(_procPid);
+    return _proc.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
+  }
+
+  Future<int> _killForcefully() {
+    _debugPrint('Sending SIGKILL to $_procPid..');
+    Process.killPid(_procPid, ProcessSignal.SIGKILL);
+    return _proc.exitCode;
+  }
+
+  String _flutterIsolateId;
+  Future<String> _getFlutterIsolateId() async {
+    // Currently these tests only have a single isolate. If this
+    // ceases to be the case, this code will need changing.
+    if (_flutterIsolateId == null) {
+      final VM vm = await _vmService.getVM();
+      _flutterIsolateId = vm.isolates.first.id;
+    }
+    return _flutterIsolateId;
+  }
+
+  Future<Isolate> _getFlutterIsolate() async {
+    final Isolate isolate = await _vmService.getIsolate(await _getFlutterIsolateId());
+    return isolate;
+  }
+
+  Future<void> addBreakpoint(Uri uri, int line) async {
+    _debugPrint('Sending breakpoint for $uri:$line');
+    await _vmService.addBreakpointWithScriptUri(
+        await _getFlutterIsolateId(), uri.toString(), line);
+  }
+
+  Future<Isolate> waitForPause() async {
+    _debugPrint('Waiting for isolate to pause');
+    final String flutterIsolate = await _getFlutterIsolateId();
+
+    Future<Isolate> waitForPause() async {
+      final Completer<Event> pauseEvent = Completer<Event>();
+
+      // Start listening for pause events.
+      final StreamSubscription<Event> pauseSub = _vmService.onDebugEvent
+          .where((Event event) =>
+              event.isolate.id == flutterIsolate &&
+              event.kind.startsWith('Pause'))
+          .listen(pauseEvent.complete);
+
+      // But also check if the isolate was already paused (only after we've set
+      // up the sub) to avoid races. If it was paused, we don't need to wait
+      // for the event.
+      final Isolate isolate = await _vmService.getIsolate(flutterIsolate);
+      if (!isolate.pauseEvent.kind.startsWith('Pause')) {
+        await pauseEvent.future;
+      }
+
+      // Cancel the sub on either of the above.
+      await pauseSub.cancel();
+
+      return _getFlutterIsolate();
+    }
+
+    return _timeoutWithMessages<Isolate>(waitForPause,
+        message: 'Isolate did not pause');
+  }
+
+  Future<bool> isAtAsyncSuspension() async {
+    final Isolate isolate = await _getFlutterIsolate();
+    return isolate.pauseEvent.atAsyncSuspension == true;
+  }
+
+  Future<Isolate> resume({bool wait = true}) => _resume(wait: wait);
+  Future<Isolate> stepOver({bool wait = true}) => _resume(step: StepOption.kOver, wait: wait);
+  Future<Isolate> stepOverAsync({ bool wait = true }) => _resume(step: StepOption.kOverAsyncSuspension, wait: wait);
+  Future<Isolate> stepOverOrOverAsyncSuspension({ bool wait = true }) async {
+    return (await isAtAsyncSuspension()) ? stepOverAsync(wait: wait) : stepOver(wait: wait);
+  }
+  Future<Isolate> stepInto({bool wait = true}) => _resume(step: StepOption.kInto, wait: wait);
+  Future<Isolate> stepOut({bool wait = true}) => _resume(step: StepOption.kOut, wait: wait);
+
+  Future<Isolate> _resume({String step, bool wait = true}) async {
+    _debugPrint('Sending resume ($step)');
+    await _timeoutWithMessages<dynamic>(() async => _vmService.resume(await _getFlutterIsolateId(), step: step),
+        message: 'Isolate did not respond to resume ($step)');
+    return wait ? waitForPause() : null;
+  }
+
+  Future<InstanceRef> evaluateInFrame(String expression) async {
+    return _timeoutWithMessages<InstanceRef>(
+        () async => await _vmService.evaluateInFrame(await _getFlutterIsolateId(), 0, expression),
+        message: 'Timed out evaluating expression ($expression)');
+  }
+
+  Future<InstanceRef> evaluate(String targetId, String expression) async {
+    return _timeoutWithMessages<InstanceRef>(
+        () async => await _vmService.evaluate(await _getFlutterIsolateId(), targetId, expression),
+        message: 'Timed out evaluating expression ($expression for $targetId)');
+  }
+
+  Future<Frame> getTopStackFrame() async {
+    final String flutterIsolateId = await _getFlutterIsolateId();
+    final Stack stack = await _vmService.getStack(flutterIsolateId);
+    if (stack.frames.isEmpty) {
+      throw Exception('Stack is empty');
+    }
+    return stack.frames.first;
+  }
+
+  Future<SourcePosition> getSourceLocation() async {
+    final String flutterIsolateId = await _getFlutterIsolateId();
+    final Frame frame = await getTopStackFrame();
+    final Script script = await _vmService.getObject(flutterIsolateId, frame.location.script.id);
+    return _lookupTokenPos(script.tokenPosTable, frame.location.tokenPos);
+  }
+
+  SourcePosition _lookupTokenPos(List<List<int>> table, int tokenPos) {
+    for (List<int> row in table) {
+      final int lineNumber = row[0];
+      int index = 1;
+
+      for (index = 1; index < row.length - 1; index += 2) {
+        if (row[index] == tokenPos) {
+          return SourcePosition(lineNumber, row[index + 1]);
+        }
+      }
+    }
+
+    return null;
+  }
+
+  Future<Map<String, dynamic>> _waitFor({
+    String event,
+    int id,
+    Duration timeout,
+    bool ignoreAppStopEvent = false,
+  }) async {
+    final Completer<Map<String, dynamic>> response = Completer<Map<String, dynamic>>();
+    StreamSubscription<String> sub;
+    sub = _stdout.stream.listen((String line) async {
+      final dynamic json = parseFlutterResponse(line);
+      _lastResponse = line;
+      if (json == null) {
+        return;
+      } else if (
+          (event != null && json['event'] == event)
+          || (id != null && json['id'] == id)) {
+        await sub.cancel();
+        response.complete(json);
+      } else if (!ignoreAppStopEvent && json['event'] == 'app.stop') {
+        await sub.cancel();
+        final StringBuffer error = StringBuffer();
+        error.write('Received app.stop event while waiting for ');
+        error.write('${event != null ? '$event event' : 'response to request $id.'}.\n\n');
+        if (json['params'] != null && json['params']['error'] != null) {
+          error.write('${json['params']['error']}\n\n');
+        }
+        if (json['params'] != null && json['params']['trace'] != null) {
+          error.write('${json['params']['trace']}\n\n');
+        }
+        response.completeError(error.toString());
+      }
+    });
+
+    return _timeoutWithMessages<Map<String, dynamic>>(() => response.future,
+            timeout: timeout,
+            message: event != null
+                ? 'Did not receive expected $event event.'
+                : 'Did not receive response to request "$id".')
+        .whenComplete(() => sub.cancel());
+  }
+
+  Future<T> _timeoutWithMessages<T>(Future<T> Function() f, {Duration timeout, String message}) {
+    // Capture output to a buffer so if we don't get the response we want we can show
+    // the output that did arrive in the timeout error.
+    final StringBuffer messages = StringBuffer();
+    final DateTime start = DateTime.now();
+    void logMessage(String m) {
+      final int ms = DateTime.now().difference(start).inMilliseconds;
+      messages.writeln('[+ ${ms.toString().padLeft(5)}] $m');
+    }
+    final StreamSubscription<String> sub = _allMessages.stream.listen(logMessage);
+
+    return f().timeout(timeout ?? defaultTimeout, onTimeout: () {
+      logMessage('<timed out>');
+      throw '$message';
+    }).catchError((dynamic error) {
+      throw '$error\nReceived:\n${messages.toString()}';
+    }).whenComplete(() => sub.cancel());
+  }
+}
+
+class FlutterRunTestDriver extends FlutterTestDriver {
+  FlutterRunTestDriver(Directory _projectFolder, {String logPrefix}):
+    super(_projectFolder, logPrefix: logPrefix);
+
+  String _currentRunningAppId;
+
+   Future<void> run({
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    File pidFile,
+  }) async {
+    await _setupProcess(<String>[
+        'run',
+        '--machine',
+        '-d',
+        'flutter-tester',
+    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile);
+  }
+
+  Future<void> attach(
+    int port, {
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    File pidFile,
+  }) async {
+    await _setupProcess(<String>[
+        'attach',
+        '--machine',
+        '-d',
+        'flutter-tester',
+        '--debug-port',
+        '$port',
+    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile);
+  }
+
+  @override
+  Future<void> _setupProcess(
+    List<String> args, {
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    File pidFile,
+  }) async {
+    await super._setupProcess(
+      args,
+      withDebugger: withDebugger,
+      pauseOnExceptions: pauseOnExceptions,
+      pidFile: pidFile,
+    );
 
     // Stash the PID so that we can terminate the VM more reliably than using
     // _proc.kill() (because _proc is a shell, because `flutter` is a shell
@@ -146,6 +361,14 @@ class FlutterTestDriver {
         _vmService.streamListen('Isolate'),
         _vmService.streamListen('Debug'),
       ]);
+
+      // On hot restarts, the isolate ID we have for the Flutter thread will
+      // exit so we need to invalidate our cached ID.
+      _vmService.onIsolateEvent.listen((Event event) {
+        if (event.kind == EventKind.kIsolateExit && event.isolate.id == _flutterIsolateId) {
+          _flutterIsolateId = null;
+        }
+      });
 
       // Because we start paused, resume so the app is in a "running" state as
       // expected by tests. Tests will reload/restart as required if they need
@@ -220,93 +443,14 @@ class FlutterTestDriver {
       );
       _currentRunningAppId = null;
     }
-    _debugPrint('Waiting for process to end');
-    return _proc.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
-  }
-
-  Future<int> quit() => _killGracefully();
-
-  Future<int> _killGracefully() async {
-    if (_procPid == null)
-      return -1;
-    _debugPrint('Sending SIGTERM to $_procPid..');
-    Process.killPid(_procPid);
-    return _proc.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
-  }
-
-  Future<int> _killForcefully() {
-    _debugPrint('Sending SIGKILL to $_procPid..');
-    Process.killPid(_procPid, ProcessSignal.SIGKILL);
-    return _proc.exitCode;
-  }
-
-  String _flutterIsolateId;
-  Future<String> _getFlutterIsolateId() async {
-    // Currently these tests only have a single isolate. If this
-    // ceases to be the case, this code will need changing.
-    if (_flutterIsolateId == null) {
-      final VM vm = await _vmService.getVM();
-      _flutterIsolateId = vm.isolates.first.id;
+    if (_proc != null) {
+      _debugPrint('Waiting for process to end');
+      return _proc.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
     }
-    return _flutterIsolateId;
+    return 0;
   }
 
-  Future<Isolate> _getFlutterIsolate() async {
-    final Isolate isolate = await _vmService.getIsolate(await _getFlutterIsolateId());
-    return isolate;
-  }
-
-  Future<void> addBreakpoint(Uri uri, int line) async {
-    _debugPrint('Sending breakpoint for $uri:$line');
-    await _vmService.addBreakpointWithScriptUri(
-        await _getFlutterIsolateId(), uri.toString(), line);
-  }
-
-  Future<Isolate> waitForPause() async {
-    _debugPrint('Waiting for isolate to pause');
-    final String flutterIsolate = await _getFlutterIsolateId();
-
-    Future<Isolate> waitForPause() async {
-      final Completer<Event> pauseEvent = Completer<Event>();
-
-      // Start listening for pause events.
-      final StreamSubscription<Event> pauseSub = _vmService.onDebugEvent
-          .where((Event event) =>
-              event.isolate.id == flutterIsolate &&
-              event.kind.startsWith('Pause'))
-          .listen(pauseEvent.complete);
-
-      // But also check if the isolate was already paused (only after we've set
-      // up the sub) to avoid races. If it was paused, we don't need to wait
-      // for the event.
-      final Isolate isolate = await _vmService.getIsolate(flutterIsolate);
-      if (!isolate.pauseEvent.kind.startsWith('Pause')) {
-        await pauseEvent.future;
-      }
-
-      // Cancel the sub on either of the above.
-      await pauseSub.cancel();
-
-      return _getFlutterIsolate();
-    }
-
-    return _timeoutWithMessages<Isolate>(waitForPause,
-        message: 'Isolate did not pause');
-  }
-
-  Future<Isolate> resume({bool wait = true}) => _resume(wait: wait);
-  Future<Isolate> stepOver({bool wait = true}) => _resume(step: StepOption.kOver, wait: wait);
-  Future<Isolate> stepInto({bool wait = true}) => _resume(step: StepOption.kInto, wait: wait);
-  Future<Isolate> stepOut({bool wait = true}) => _resume(step: StepOption.kOut, wait: wait);
-
-  Future<Isolate> _resume({String step, bool wait = true}) async {
-    _debugPrint('Sending resume ($step)');
-    await _timeoutWithMessages<dynamic>(() async => _vmService.resume(await _getFlutterIsolateId(), step: step),
-        message: 'Isolate did not respond to resume ($step)');
-    return wait ? waitForPause() : null;
-  }
-
-  Future<Isolate> breakAt(Uri uri, int line, {bool restart = false}) async {
+  Future<Isolate> breakAt(Uri uri, int line, { bool restart = false }) async {
     if (restart) {
       // For a hot restart, we need to send the breakpoints after the restart
       // so we need to pause during the restart to avoid races.
@@ -318,122 +462,6 @@ class FlutterTestDriver {
       await hotReload();
       return waitForPause();
     }
-  }
-
-  Future<InstanceRef> evaluateInFrame(String expression) async {
-    return _timeoutWithMessages<InstanceRef>(
-        () async => await _vmService.evaluateInFrame(await _getFlutterIsolateId(), 0, expression),
-        message: 'Timed out evaluating expression ($expression)');
-  }
-
-  Future<InstanceRef> evaluate(String targetId, String expression) async {
-    return _timeoutWithMessages<InstanceRef>(
-        () async => await _vmService.evaluate(await _getFlutterIsolateId(), targetId, expression),
-        message: 'Timed out evaluating expression ($expression for $targetId)');
-  }
-
-  Future<Frame> getTopStackFrame() async {
-    final String flutterIsolateId = await _getFlutterIsolateId();
-    final Stack stack = await _vmService.getStack(flutterIsolateId);
-    if (stack.frames.isEmpty) {
-      throw Exception('Stack is empty');
-    }
-    return stack.frames.first;
-  }
-
-  Future<SourcePosition> getSourceLocation() async {
-    final String flutterIsolateId = await _getFlutterIsolateId();
-    final Frame frame = await getTopStackFrame();
-    final Script script = await _vmService.getObject(flutterIsolateId, frame.location.script.id);
-    return _lookupTokenPos(script.tokenPosTable, frame.location.tokenPos);
-  }
-
-  SourcePosition _lookupTokenPos(List<List<int>> table, int tokenPos) {
-    for (List<int> row in table) {
-      final int lineNumber = row[0];
-      int index = 1;
-
-      for (index = 1; index < row.length - 1; index += 2) {
-        if (row[index] == tokenPos) {
-          return SourcePosition(lineNumber, row[index + 1]);
-        }
-      }
-    }
-
-    return null;
-  }
-
-  Future<Map<String, dynamic>> _waitFor({
-    String event,
-    int id,
-    Duration timeout,
-    bool ignoreAppStopEvent = false,
-  }) async {
-    final Completer<Map<String, dynamic>> response = Completer<Map<String, dynamic>>();
-    StreamSubscription<String> sub;
-    sub = _stdout.stream.listen((String line) async {
-      final dynamic json = _parseFlutterResponse(line);
-      if (json == null) {
-        return;
-      } else if (
-          (event != null && json['event'] == event)
-          || (id != null && json['id'] == id)) {
-        await sub.cancel();
-        response.complete(json);
-      } else if (!ignoreAppStopEvent && json['event'] == 'app.stop') {
-        await sub.cancel();
-        final StringBuffer error = StringBuffer();
-        error.write('Received app.stop event while waiting for ');
-        error.write('${event != null ? '$event event' : 'response to request $id.'}.\n\n');
-        if (json['params'] != null && json['params']['error'] != null) {
-          error.write('${json['params']['error']}\n\n');
-        }
-        if (json['params'] != null && json['params']['trace'] != null) {
-          error.write('${json['params']['trace']}\n\n');
-        }
-        response.completeError(error.toString());
-      }
-    });
-
-    return _timeoutWithMessages<Map<String, dynamic>>(() => response.future,
-            timeout: timeout,
-            message: event != null
-                ? 'Did not receive expected $event event.'
-                : 'Did not receive response to request "$id".')
-        .whenComplete(() => sub.cancel());
-  }
-
-  Future<T> _timeoutWithMessages<T>(Future<T> Function() f, {Duration timeout, String message}) {
-    // Capture output to a buffer so if we don't get the response we want we can show
-    // the output that did arrive in the timeout error.
-    final StringBuffer messages = StringBuffer();
-    final DateTime start = DateTime.now();
-    void logMessage(String m) {
-      final int ms = DateTime.now().difference(start).inMilliseconds;
-      messages.writeln('[+ ${ms.toString().padLeft(5)}] $m');
-    }
-    final StreamSubscription<String> sub = _allMessages.stream.listen(logMessage);
-
-    return f().timeout(timeout ?? defaultTimeout, onTimeout: () {
-      logMessage('<timed out>');
-      throw '$message';
-    }).catchError((dynamic error) {
-      throw '$error\nReceived:\n${messages.toString()}';
-    }).whenComplete(() => sub.cancel());
-  }
-
-  Map<String, dynamic> _parseFlutterResponse(String line) {
-    if (line.startsWith('[') && line.endsWith(']')) {
-      try {
-        final Map<String, dynamic> resp = json.decode(line)[0];
-        _lastResponse = line;
-        return resp;
-      } catch (e) {
-        // Not valid JSON, so likely some other output that was surrounded by [brackets]
-        return null;
-      }
-    }
-    return null;
   }
 
   int id = 1;
@@ -468,8 +496,21 @@ class FlutterTestDriver {
   }
 }
 
-Stream<String> _transformToLines(Stream<List<int>> byteStream) {
+Stream<String> transformToLines(Stream<List<int>> byteStream) {
   return byteStream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
+}
+
+Map<String, dynamic> parseFlutterResponse(String line) {
+  if (line.startsWith('[') && line.endsWith(']')) {
+    try {
+      final Map<String, dynamic> resp = json.decode(line)[0];
+      return resp;
+    } catch (e) {
+      // Not valid JSON, so likely some other output that was surrounded by [brackets]
+      return null;
+    }
+  }
+  return null;
 }
 
 class SourcePosition {

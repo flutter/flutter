@@ -215,7 +215,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     if (widget.backgroundColor != null && widget.backgroundColor.alpha < 255)
       return Container();
 
-    final Color widgetBackgroundColor = widget.backgroundColor;
+    final Color widgetBackgroundColor = widget.backgroundColor ?? const Color(0xFFFFFFFF);
     return Positioned.fill(
       child: IgnorePointer(
         child: Container(
