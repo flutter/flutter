@@ -262,7 +262,15 @@ final List<RegExp> csAttribution = <RegExp>[
 // REFERENCES TO OTHER FILES
 
 class LicenseFileReferencePattern {
-  LicenseFileReferencePattern({ this.firstPrefixIndex, this.indentPrefixIndex, this.copyrightIndex, this.authorIndex, this.fileIndex, this.pattern, this.needsCopyright: true });
+  LicenseFileReferencePattern({
+    this.firstPrefixIndex,
+    this.indentPrefixIndex,
+    this.copyrightIndex,
+    this.authorIndex,
+    this.fileIndex,
+    this.pattern,
+    this.needsCopyright = true
+  });
   final int firstPrefixIndex;
   final int indentPrefixIndex;
   final int copyrightIndex;
@@ -571,7 +579,15 @@ final List<RegExp> csReferencesByTypeNoCopyright = <RegExp>[
 ];
 
 class MultipleVersionedLicenseReferencePattern {
-  MultipleVersionedLicenseReferencePattern({ this.firstPrefixIndex, this.indentPrefixIndex, this.licenseIndices, this.versionIndicies, this.checkLocalFirst: true, this.pattern });
+  MultipleVersionedLicenseReferencePattern({
+    this.firstPrefixIndex,
+    this.indentPrefixIndex,
+    this.licenseIndices,
+    this.versionIndicies,
+    this.checkLocalFirst = true,
+    this.pattern
+  });
+
   final int firstPrefixIndex;
   final int indentPrefixIndex;
   final List<int> licenseIndices;
