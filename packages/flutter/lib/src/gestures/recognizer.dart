@@ -284,17 +284,26 @@ enum GestureRecognizerState {
 /// A base class for gesture recognizers that track a single primary pointer.
 ///
 /// Gestures based on this class will reject the gesture if the primary pointer
-/// travels beyond [kTouchSlop] pixels from the original contact point.
+/// travels beyond [distanceTolerance] pixels from the original contact point.
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
   PrimaryPointerGestureRecognizer({
     this.deadline,
+    this.distanceTolerance = kTouchSlop,
     Object debugOwner,
-  }) : super(debugOwner: debugOwner);
+  }) : assert(
+         distanceTolerance == null || distanceTolerance >= 0,
+         'The distanceTolerance must be positive or null',
+       ),
+       super(debugOwner: debugOwner);
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this
   /// amount of time has elapsed since starting to track the primary pointer.
   final Duration deadline;
+
+  /// The maximum distance in pixels the gesture is allowed to drift from the
+  /// initial touch down position before being rejected.
+  final double distanceTolerance;
 
   /// The current state of the recognizer.
   ///
@@ -326,7 +335,9 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     assert(state != GestureRecognizerState.ready);
     if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
       // TODO(abarth): Maybe factor the slop handling out into a separate class?
-      if (event is PointerMoveEvent && _getDistance(event) > kTouchSlop) {
+      if (event is PointerMoveEvent
+          && distanceTolerance != null
+          && _getDistance(event) > distanceTolerance) {
         resolve(GestureDisposition.rejected);
         stopTrackingPointer(primaryPointer);
       } else {

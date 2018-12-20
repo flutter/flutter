@@ -194,6 +194,8 @@ class GestureDetector extends StatelessWidget {
          final bool haveHorizontalDrag = onHorizontalDragStart != null || onHorizontalDragUpdate != null || onHorizontalDragEnd != null;
          final bool havePan = onPanStart != null || onPanUpdate != null || onPanEnd != null;
          final bool haveScale = onScaleStart != null || onScaleUpdate != null || onScaleEnd != null;
+         final bool haveLongPress = onLongPress != null || onLongPressUp != null;
+         final bool haveLongPressDrag = onLongPressDragDown != null || onLongPressDragUpdate != null || onLongPressDragUp != null;
          if (havePan || haveScale) {
            if (havePan && haveScale) {
              throw FlutterError(
@@ -209,6 +211,11 @@ class GestureDetector extends StatelessWidget {
                'will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.'
              );
            }
+         }
+         if (haveLongPress && haveLongPressDrag) {
+           throw FlutterError(
+             ''
+           );
          }
          return true;
        }()),
@@ -262,6 +269,12 @@ class GestureDetector extends StatelessWidget {
 
   /// A pointer that has triggered a long-press has stopped contacting the screen.
   final GestureLongPressUpCallback onLongPressUp;
+
+  final GestureLongPressDragDownCallback onLongPressDragDown;
+
+  final GestureLongPressDragUpdateCallback onLongPressDragUpdate;
+
+  final GestureLongPressDragUpCallback onLongPressDragUp;
 
   /// A pointer has contacted the screen and might begin to move vertically.
   final GestureDragDownCallback onVerticalDragDown;
@@ -422,13 +435,25 @@ class GestureDetector extends StatelessWidget {
       );
     }
 
-    if (onLongPress != null || onLongPressUp !=null) {
+    if (onLongPress != null || onLongPressUp != null) {
       gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
         () => LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
             ..onLongPress = onLongPress
             ..onLongPressUp = onLongPressUp;
+        },
+      );
+    }
+
+    if (onLongPressDragDown != null || onLongPressDragUpdate != null || onLongPressDragUp != null) {
+      gestures[LongPressDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressDragGestureRecognizer>(
+        () => LongPressDragGestureRecognizer(debugOwner: this),
+        (LongPressDragGestureRecognizer instance) {
+          instance
+            ..onLongPressDown = onLongPressDragDown
+            ..onLongPressDrag = onLongPressDragUpdate
+            ..onLongPressUp = onLongPressDragUp;
         },
       );
     }

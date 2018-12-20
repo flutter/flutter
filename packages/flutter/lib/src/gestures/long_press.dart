@@ -4,6 +4,7 @@
 
 import 'arena.dart';
 import 'constants.dart';
+import 'drag_details.dart';
 import 'events.dart';
 import 'recognizer.dart';
 
@@ -13,6 +14,44 @@ typedef GestureLongPressCallback = void Function();
 
 /// Signature for when a pointer stops contacting the screen after a long press gesture was detected.
 typedef GestureLongPressUpCallback = void Function();
+
+typedef GestureLongPressDragDownCallback = void Function(GestureLongPressDownDetails details);
+
+typedef GestureLongPressDragUpdateCallback = void Function(GestureLongPressDragDetails details);
+
+typedef GestureLongPressDragUpCallback = void Function(GestureLongPressUpDetails details);
+
+class GestureLongPressDownDetails {
+  GestureLongPressDownDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
+    : assert(globalPosition != null);
+
+  final Duration sourceTimeStamp;
+  /// The global position at which the pointer contacted the screen.
+  final Offset globalPosition;
+}
+
+class GestureLongPressUpDetails {
+  GestureLongPressUpDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
+    : assert(globalPosition != null);
+
+  final Duration sourceTimeStamp;
+  /// The global position at which the pointer contacted the screen.
+  final Offset globalPosition;
+}
+
+class GestureLongPressDragDetails {
+  GestureLongPressDragDetails({
+    this.sourceTimeStamp,
+    this.globalPosition = Offset.zero,
+    this.offsetFromOrigin,
+  }) : assert(globalPosition != null),
+       assert(offsetFromOrigin != null);
+
+  final Duration sourceTimeStamp;
+  /// The global position at which the pointer contacted the screen.
+  final Offset globalPosition;
+  final Offset offsetFromOrigin;
+}
 
 /// Recognizes when the user has pressed down at the same location for a long
 /// period of time.
@@ -57,4 +96,81 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   String get debugDescription => 'long press';
+}
+
+class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
+  LongPressDragGestureRecognizer({ Object debugOwner }) : super(
+    deadline: kLongPressTimeout,
+    // Since it's a drag gesture, no travel distance will cause it to get rejected.
+    distanceTolerance: null,
+    debugOwner: debugOwner,
+  );
+
+  bool _longPressAccepted = false;
+
+  Offset _longPressOrigin;
+
+  Duration _longPressDownTimestamp;
+
+  /// Called when a long press gesture has been recognized.
+  GestureLongPressDragDownCallback onLongPressDown;
+
+  GestureLongPressDragUpdateCallback onLongPressDrag;
+
+  /// Called when the pointer stops contacting the screen after the long-press gesture has been recognized.
+  GestureLongPressDragUpCallback onLongPressUp;
+
+  @override
+  void didExceedDeadline() {
+    resolve(GestureDisposition.accepted);
+    _longPressAccepted = true;
+    if (onLongPressDown != null) {
+      invokeCallback<void>('onLongPressDown', () => onLongPressDown(
+        GestureLongPressDownDetails(
+          sourceTimeStamp: _longPressDownTimestamp,
+          globalPosition: _longPressOrigin,
+        ),
+      ));
+    }
+  }
+
+  @override
+  void handlePrimaryPointer(PointerEvent event) {
+    if (event is PointerUpEvent) {
+      if (_longPressAccepted == true && onLongPressUp != null) {
+        _longPressAccepted = false;
+        invokeCallback<void>('onLongPressUp', () => onLongPressUp(
+          GestureLongPressUpDetails(
+            sourceTimeStamp: event.timeStamp,
+            globalPosition: event.position,
+          ),
+        ));
+      } else {
+        resolve(GestureDisposition.rejected);
+      }
+    } else if (event is PointerDownEvent) {
+      // The first touch, initialize the flag with false.
+      _longPressAccepted = false;
+      _longPressDownTimestamp = event.timeStamp;
+      _longPressOrigin = event.position;
+    } else if (event is PointerMoveEvent && _longPressAccepted && onLongPressDrag != null) {
+      invokeCallback<void>('onLongPressDrag', () => onLongPressDrag(
+          GestureLongPressDragDetails(
+            sourceTimeStamp: event.timeStamp,
+            globalPosition: event.position,
+            offsetFromOrigin: event.position - _longPressOrigin,
+          ),
+        ));
+    }
+  }
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {
+    _longPressAccepted = false;
+    _longPressOrigin = null;
+    _longPressDownTimestamp = null;
+  }
+
+  @override
+  String get debugDescription => 'long press drag';
 }
