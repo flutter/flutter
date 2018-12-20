@@ -109,7 +109,7 @@ abstract class License implements Comparable<License> {
   factory License.unique(String body, LicenseType type, { bool reformatted: false, String origin, bool yesWeKnowWhatItLooksLikeButItIsNot: false }) {
     if (!reformatted)
       body = _reformat(body);
-    License result = _registry.putIfAbsent(body, () => UniqueLicense._(body, type, origin: origin, yesWeKnowWhatItLooksLikeButItIsNot: yesWeKnowWhatItLooksLikeButItIsNot));
+    final License result = _registry.putIfAbsent(body, () => UniqueLicense._(body, type, origin: origin, yesWeKnowWhatItLooksLikeButItIsNot: yesWeKnowWhatItLooksLikeButItIsNot));
     assert(() {
       if (result is! UniqueLicense || result.type != type)
         throw 'tried to add a UniqueLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
@@ -121,7 +121,7 @@ abstract class License implements Comparable<License> {
   factory License.template(String body, LicenseType type, { bool reformatted: false, String origin }) {
     if (!reformatted)
       body = _reformat(body);
-    License result = _registry.putIfAbsent(body, () => TemplateLicense._(body, type, origin: origin));
+    final License result = _registry.putIfAbsent(body, () => TemplateLicense._(body, type, origin: origin));
     assert(() {
       if (result is! TemplateLicense || result.type != type)
         throw 'tried to add a TemplateLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
@@ -133,7 +133,7 @@ abstract class License implements Comparable<License> {
   factory License.message(String body, LicenseType type, { bool reformatted: false, String origin }) {
     if (!reformatted)
       body = _reformat(body);
-    License result = _registry.putIfAbsent(body, () => MessageLicense._(body, type, origin: origin));
+    final License result = _registry.putIfAbsent(body, () => MessageLicense._(body, type, origin: origin));
     assert(() {
       if (result is! MessageLicense || result.type != type)
         throw 'tried to add a MessageLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
@@ -143,7 +143,7 @@ abstract class License implements Comparable<License> {
   }
 
   factory License.blank(String body, LicenseType type, { String origin }) {
-    License result = _registry.putIfAbsent(body, () => BlankLicense._(_reformat(body), type, origin: origin));
+    final License result = _registry.putIfAbsent(body, () => BlankLicense._(_reformat(body), type, origin: origin));
     assert(() {
       if (result is! BlankLicense || result.type != type)
         throw 'tried to add a BlankLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
@@ -160,7 +160,7 @@ abstract class License implements Comparable<License> {
   factory License.fromBodyAndType(String body, LicenseType type, { bool reformatted: false, String origin }) {
     if (!reformatted)
       body = _reformat(body);
-    License result = _registry.putIfAbsent(body, () {
+    final License result = _registry.putIfAbsent(body, () {
       switch (type) {
         case LicenseType.bsd:
         case LicenseType.mit:
@@ -200,12 +200,12 @@ abstract class License implements Comparable<License> {
 
   factory License.fromBody(String body, { String origin }) {
     body = _reformat(body);
-    LicenseType type = convertBodyToType(body);
+    final LicenseType type = convertBodyToType(body);
     return License.fromBodyAndType(body, type, reformatted: true, origin: origin);
   }
 
   factory License.fromCopyrightAndLicense(String copyright, String template, LicenseType type, { String origin }) {
-    String body = '$copyright\n\n$template';
+    final String body = '$copyright\n\n$template';
     return _registry.putIfAbsent(body, () => TemplateLicense._(body, type, origin: origin));
   }
 
@@ -526,7 +526,7 @@ class _SplitLicense {
 }
 
 _SplitLicense _splitLicense(String body, { bool verifyResults: true }) {
-  Iterator<_LineRange> lines = _walkLinesForwards(body).iterator;
+  final Iterator<_LineRange> lines = _walkLinesForwards(body).iterator;
   if (!lines.moveNext())
     throw 'tried to split empty license';
   int end = 0;
@@ -718,7 +718,7 @@ class _LicenseMatch {
 }
 
 Iterable<_LicenseMatch> _expand(License template, String copyright, String body, int start, int end, { String debug: '', String origin }) sync* {
-  List<License> results = template.expandTemplate(_reformat(copyright), body, origin: origin).toList();
+  final List<License> results = template.expandTemplate(_reformat(copyright), body, origin: origin).toList();
   if (results.isEmpty)
     throw 'license could not be expanded';
   yield _LicenseMatch(results.first, start, end, debug: 'expanding template for $debug');
@@ -755,7 +755,7 @@ Iterable<_LicenseMatch> _tryReferenceByFilename(String body, LicenseFileReferenc
       if (template == null)
         throw 'failed to find template $filename in $parentDirectory (authors=$authors)';
       assert(_reformat(copyright) != '');
-      String entireLicense = body.substring(match.start, match.end);
+      final String entireLicense = body.substring(match.start, match.end);
       yield* _expand(template, copyright, entireLicense, match.start, match.end, debug: '_tryReferenceByFilename (with explicit copyright) looking for $filename', origin: origin);
     }
   } else {
@@ -786,7 +786,7 @@ Iterable<_LicenseMatch> _tryReferenceByType(String body, RegExp pattern, License
     if (template == null)
       throw 'failed to find accompanying $type license in $parentDirectory';
     assert(() {
-      String copyrights = _reformat(match.getCopyrights());
+      final String copyrights = _reformat(match.getCopyrights());
       assert(needsCopyright && copyrights.isNotEmpty || !needsCopyright && copyrights.isEmpty);
       return true;
     }());
@@ -844,7 +844,7 @@ Iterable<_LicenseMatch> _tryForwardReferencePattern(String fileContents, Forward
 List<License> determineLicensesFor(String fileContents, String filename, LicenseSource parentDirectory, { String origin }) {
   if (fileContents.length > kMaxSize)
     fileContents = fileContents.substring(0, kMaxSize);
-  List<_LicenseMatch> results = <_LicenseMatch>[];
+  final List<_LicenseMatch> results = <_LicenseMatch>[];
   fileContents = fileContents.replaceAll('\t', ' ');
   fileContents = fileContents.replaceAll(newlinePattern, '\n');
   results.addAll(csNoCopyrights.expand((RegExp pattern) => _tryNone(fileContents, filename, pattern, parentDirectory)));
@@ -876,11 +876,11 @@ List<License> determineLicensesFor(String fileContents, String filename, License
         throw 'unmatched potential copyright and license statements; first twenty lines:\n----8<----\n${fileContents.split("\n").take(20).join("\n")}\n----8<----';
     }
   }
-  List<_LicenseMatch> verificationList = results.toList();
+  final List<_LicenseMatch> verificationList = results.toList();
   if (usedTemplate != null && !verificationList.contains(usedTemplate))
     verificationList.add(usedTemplate);
   verificationList.sort((_LicenseMatch a, _LicenseMatch b) {
-    int result = a.start - b.start;
+    final int result = a.start - b.start;
     if (result != 0)
       return result;
     return a.end - b.end;
@@ -911,13 +911,13 @@ License interpretAsRedirectLicense(String fileContents, LicenseSource parentDire
   } on String {
     return null;
   }
-  String body = split.getConditions().trim();
+  final String body = split.getConditions().trim();
   License result;
   for (MultipleVersionedLicenseReferencePattern pattern in csReferencesByUrl) {
-    Match match = pattern.pattern.matchAsPrefix(body);
+    final Match match = pattern.pattern.matchAsPrefix(body);
     if (match != null && match.start == 0 && match.end == body.length) {
       for (int index in pattern.licenseIndices) {
-        License candidate = _dereferenceLicense(index, match.group, pattern, parentDirectory, origin: origin);
+        final License candidate = _dereferenceLicense(index, match.group, pattern, parentDirectory, origin: origin);
         if (result != null && candidate != null)
           throw 'Multiple potential matches in interpretAsRedirectLicense in $parentDirectory; body was:\n------8<------\n$fileContents\n------8<------';
         result = candidate;
