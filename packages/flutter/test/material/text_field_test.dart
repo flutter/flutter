@@ -3456,6 +3456,7 @@ void main() {
 
     expect(tapCount, 0);
     await tester.tap(find.byType(TextField));
+    // Wait a bit so they're all single taps and not double taps.
     await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.byType(TextField));
     await tester.pump(const Duration(milliseconds: 300));
@@ -3635,7 +3636,7 @@ void main() {
   );
 
   testWidgets(
-    'two slow tap does not trigger a word selection (iOS)',
+    'two slow taps do not trigger a word selection (iOS)',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -3692,6 +3693,8 @@ void main() {
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
 
+      // This tap just puts the cursor somewhere different than where the double
+      // tap will occur to test that the double tap moves the existing cursor first.
       await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -3736,6 +3739,8 @@ void main() {
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
 
+      // This tap just puts the cursor somewhere different than where the double
+      // tap will occur to test that the double tap moves the existing cursor first.
       await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
 

@@ -570,7 +570,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
   }
 }
 
-/// A gesture detector to detect non-exclusive event chains for a text field.
+/// A gesture detector to respond to non-exclusive event chains for a text field.
 ///
 /// An ordinary [GestureDetector] configured to handle events like tap and
 /// double tap will only recognize one or the other. This widget detects both:
@@ -626,8 +626,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
 
   /// How this gesture detector should behave during hit testing.
   ///
-  /// This defaults to [HitTestBehavior.deferToChild] if [child] is not null and
-  /// [HitTestBehavior.translucent] if child is null.
+  /// This defaults to [HitTestBehavior.deferToChild].
   final HitTestBehavior behavior;
 
   /// Child below this widget.
