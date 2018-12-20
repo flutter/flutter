@@ -99,7 +99,7 @@ public final class ResourceUpdater {
         try {
             PackageManager packageManager = context.getPackageManager();
             PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
-            return packageInfo == null ? null : Integer.toString(packageInfo.versionCode);
+            return packageInfo == null ? null : Long.toString(ResourceExtractor.getVersionCode(packageInfo));
 
         } catch (PackageManager.NameNotFoundException e) {
             return null;
