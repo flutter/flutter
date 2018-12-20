@@ -1312,7 +1312,7 @@ class Isolate extends ServiceObjectOwner {
     );
   }
 
-  Future<List<int>> flutterSaveCompilationTrace() async {
+  Future<List<int>> flutterDebugSaveCompilationTrace() async {
     final Map<String, dynamic> result =
       await invokeFlutterExtensionRpcRaw('ext.flutter.saveCompilationTrace');
     if (result != null && result['value'] is List<dynamic>)
