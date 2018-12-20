@@ -250,9 +250,11 @@ class TextStyle extends Diagnosticable {
     this.decorationStyle,
     this.debugLabel,
     String fontFamily,
-    this.fontFamilyFallback,
+    List<String> fontFamilyFallback,
     String package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
+       _fontFamilyFallback = fontFamilyFallback,
+       _package = package,
        assert(inherit != null),
        assert(color == null || foreground == null, _kColorForegroundWarning);
 
@@ -303,7 +305,17 @@ class TextStyle extends Diagnosticable {
   /// For example, if a glyph is not found in [fontFamily], then each font family
   /// in [fontFamilyFallback] will be searched in order until it is found. If it
   /// is not found, then a box will be drawn in its place.
-  final List<String> fontFamilyFallback;
+  /// 
+  /// If the font is defined in a package, each font family in the list will be
+  /// prefixed with 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto').
+  /// The package name should be provided by the `package` argument in the
+  /// constructor.
+  List<String> get fontFamilyFallback => _fontFamilyFallback == null ? null : _fontFamilyFallback.map((String str) => 'packages/$_package/$str').toList();
+  final List<String> _fontFamilyFallback;
+
+  // This is stored in order to prefix the fontFamilies in _fontFamilyFallback
+  // in the [fontFamilyFallback] getter.
+  final String _package;
 
   /// The size of glyphs (in logical pixels) to use when painting the text.
   ///
