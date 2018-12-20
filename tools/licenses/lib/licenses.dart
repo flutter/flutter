@@ -5,6 +5,8 @@
 import 'dart:convert';
 import 'dart:io' as system;
 
+import 'package:meta/meta.dart';
+
 import 'cache.dart';
 import 'limits.dart';
 import 'patterns.dart';
@@ -838,7 +840,10 @@ Iterable<_LicenseMatch> _tryReferenceByUrl(String body, MultipleVersionedLicense
   }
 }
 
-Iterable<_LicenseMatch> _tryInline(String body, RegExp pattern, { bool needsCopyright, String origin }) sync* {
+Iterable<_LicenseMatch> _tryInline(String body, RegExp pattern, {
+  @required bool needsCopyright,
+  String origin,
+}) sync* {
   assert(needsCopyright != null);
   for (_PartialLicenseMatch match in _findLicenseBlocks(body, pattern, 1, 2, needsCopyright: false)) {
     // We search with "needsCopyright: false" but then create a _LicenseMatch with

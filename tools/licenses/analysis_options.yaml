@@ -10,6 +10,7 @@ analyzer:
 
 linter:
   rules:
+    - always_require_non_null_named_parameters
     - avoid_empty_else
     - avoid_function_literals_in_foreach_calls
     - comment_references
