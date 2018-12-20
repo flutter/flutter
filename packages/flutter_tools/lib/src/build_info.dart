@@ -13,8 +13,8 @@ class BuildInfo {
   const BuildInfo(this.mode, this.flavor, {
     this.trackWidgetCreation = false,
     this.compilationTraceFilePath,
-    this.createBaseline,
-    this.createPatch,
+    this.createBaseline = false,
+    this.createPatch = false,
     this.patchNumber,
     this.patchDir,
     this.baselineDir,
