@@ -33,6 +33,8 @@
 
 namespace shell {
 
+constexpr char kSkiaChannel[] = "flutter/skia";
+
 std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     blink::TaskRunners task_runners,
     blink::Settings settings,
@@ -727,10 +729,40 @@ void Shell::OnEngineHandlePlatformMessage(
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
+  if (message->channel() == kSkiaChannel) {
+    HandleEngineSkiaMessage(std::move(message));
+    return;
+  }
+
   task_runners_.GetPlatformTaskRunner()->PostTask(
       [view = platform_view_->GetWeakPtr(), message = std::move(message)]() {
         if (view) {
           view->HandlePlatformMessage(std::move(message));
+        }
+      });
+}
+
+void Shell::HandleEngineSkiaMessage(
+    fml::RefPtr<blink::PlatformMessage> message) {
+  const auto& data = message->data();
+
+  rapidjson::Document document;
+  document.Parse(reinterpret_cast<const char*>(data.data()), data.size());
+  if (document.HasParseError() || !document.IsObject())
+    return;
+  auto root = document.GetObject();
+  auto method = root.FindMember("method");
+  if (method->value != "Skia.setResourceCacheMaxBytes")
+    return;
+  auto args = root.FindMember("args");
+  if (args == root.MemberEnd() || !args->value.IsInt())
+    return;
+
+  task_runners_.GetGPUTaskRunner()->PostTask(
+      [rasterizer = rasterizer_->GetWeakPtr(),
+       max_bytes = args->value.GetInt()] {
+        if (rasterizer) {
+          rasterizer->SetResourceCacheMaxBytes(max_bytes);
         }
       });
 }

@@ -73,6 +73,8 @@ class Rasterizer final : public blink::SnapshotDelegate {
     return compositor_context_.get();
   }
 
+  void SetResourceCacheMaxBytes(int max_bytes);
+
  private:
   blink::TaskRunners task_runners_;
   std::unique_ptr<Surface> surface_;
