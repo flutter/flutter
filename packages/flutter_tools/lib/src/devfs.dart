@@ -352,8 +352,8 @@ class _DevFSHttpWriter {
 
 // Basic statistics for DevFS update operation.
 class UpdateFSReport {
-  UpdateFSReport({bool success: false,
-    int invalidatedSourcesCount: 0, int syncedBytes: 0}) {
+  UpdateFSReport({bool success = false,
+    int invalidatedSourcesCount = 0, int syncedBytes = 0}) {
     _success = success;
     _invalidatedSourcesCount = invalidatedSourcesCount;
     _syncedBytes = syncedBytes;
