@@ -424,7 +424,7 @@ Future<void> _buildGradleProjectV2(
   }
   printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.');
 
-  if (buildInfo.createBaseline) {
+  if (buildInfo.createBaseline == true) {
     // Save baseline apk for generating dynamic patches in later builds.
     final AndroidApk package = AndroidApk.fromApk(apkFile);
     final Directory baselineDir = fs.directory(buildInfo.baselineDir);
