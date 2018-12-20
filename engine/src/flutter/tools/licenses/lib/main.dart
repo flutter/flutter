@@ -102,7 +102,8 @@ class _RepositorySourceFile extends _RepositoryLicensedFile {
         throw 'file has no detectable license and no in-scope default license file';
     }
     _licenses.sort();
-    _licenses.forEach((License license) => license.markUsed(io.fullName, libraryName));
+    for (License license in licenses)
+      license.markUsed(io.fullName, libraryName);
     assert(_licenses != null && _licenses.isNotEmpty);
     return _licenses;
   }
@@ -122,7 +123,8 @@ class _RepositoryBinaryFile extends _RepositoryLicensedFile {
       _licenses = parent.nearestLicensesFor(name);
       if (_licenses == null || _licenses.isEmpty)
         throw 'no license file found in scope for ${io.fullName}';
-      _licenses.forEach((License license) => license.markUsed(io.fullName, libraryName));
+      for (License license in licenses)
+        license.markUsed(io.fullName, libraryName);
     }
     return _licenses;
   }
