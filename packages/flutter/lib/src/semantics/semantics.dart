@@ -1143,6 +1143,28 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// If this rect is null [parentSemanticsClipRect] also has to be null.
   Rect parentPaintClipRect;
 
+  /// The elevation adjustment that was applied to this node from its ancestors.
+  ///
+  /// This value should only be accessed to re-calculate the value for
+  /// [elevation] as it is meaningless on its own. If you're looking for the
+  /// actual elevation of this [SemanticsNode] look at the pre-calculated
+  /// [elevation] value.
+  ///
+  /// The [elevation] value is relative to the value of the parent
+  /// [SemanticsNode]. However, when the semantics tree is built or updated,
+  /// [SemanticsConfiguration] are merged into each other, which changes the
+  /// elevation of the parent. These elevation changes need to be taken into
+  /// consideration when calculating the relative [elevation] of a child. This
+  /// value represents the adjustments in elevation that have been applied to
+  /// this node because of the described effect. Caching the value here allows
+  /// the semantics compiler to re-build subtrees of the semantics instead of
+  /// always re-building from the root.
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], the actual elevation of this [SemanticsNode].
+  double elevationAdjustment;
+
   /// The index of this node within the parent's list of semantic children.
   ///
   /// This includes all semantic nodes, not just those currently in the
@@ -1409,6 +1431,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   bool _isDifferentFromCurrentSemanticAnnotation(SemanticsConfiguration config) {
     return _label != config.label ||
         _hint != config.hint ||
+        _elevation != config.elevation ||
+        _thickness != config.thickness ||
         _decreasedValue != config.decreasedValue ||
         _value != config.value ||
         _increasedValue != config.increasedValue ||
@@ -1482,6 +1506,37 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// The reading direction is given by [textDirection].
   String get hint => _hint;
   String _hint = _kEmptyConfig.hint;
+
+  /// The elevation in z-direction at which the [rect] of this [SemanticsNode]
+  /// is located above its parent.
+  ///
+  /// The value is relative to the parent's [elevation]. The sum of the
+  /// [elevation]s of all ancestor node plus this value determines the absolute
+  /// elevation of this [SemanticsNode].
+  ///
+  /// See also:
+  ///
+  ///  * [thickness], which describes how much space in z-direction this
+  ///    [SemanticsNode] occupies starting at this [elevation].
+  ///  * [elevationAdjustment], which has been used to calculate this value.
+  double get elevation => _elevation;
+  double _elevation = _kEmptyConfig.elevation;
+
+  /// Describes how much space the [SemanticsNode] takes up in the z-direction.
+  ///
+  /// A [SemanticsNode] represents multiple [RenderObject]s, which can be
+  /// located at various elevations in 3D. The [thickness] is the difference
+  /// between the elevations of the lowest and highest [RenderObject]
+  /// represented by this [SemanticsNode]. In other words, the thickness
+  /// describes how high the box is that this [SemanticsNode] occupies in three
+  /// dimensional space. The two other dimensions are defined by [rect].
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], which describes the elevation of the box defined by
+  ///    [thickness] and [rect] relative to the parent of this [SemanticsNode].
+  double get thickness => _thickness;
+  double _thickness = _kEmptyConfig.thickness;
 
   /// Provides hint values which override the default hints on supported
   /// platforms.
@@ -1581,6 +1636,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _increasedValue = config.increasedValue;
     _hint = config.hint;
     _hintOverrides = config.hintOverrides;
+    _elevation = config.elevation;
+    _thickness = config.thickness;
     _flags = config._flags;
     _textDirection = config.textDirection;
     _sortKey = config.sortKey;
@@ -1923,6 +1980,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
+    properties.add(DoubleProperty('thicknes', thickness, defaultValue: 0.0));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -3115,6 +3174,36 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// The elevation in z-direction at which the owning [RenderObject] is
+  /// located relative to its parent.
+  double get elevation => _elevation;
+  double _elevation = 0.0;
+  set elevation(double value) {
+    assert(value != null && value >= 0.0);
+    if (value == _elevation) {
+      return;
+    }
+    _elevation = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// The extend that the owning [RenderObject] occupies in z-direction starting
+  /// at [elevation].
+  ///
+  /// It's extremely rare to set this value directly. Instead, it is calculated
+  /// implicitly when other [SemanticsConfiguration]s are merged into this one
+  /// via [absorb].
+  double get thickness => _thickness;
+  double _thickness = 0.0;
+  set thickness(double value) {
+    assert(value != null && value >= 0.0);
+    if (value == _thickness) {
+      return;
+    }
+    _thickness = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// Whether the semantics node is the root of a subtree for which values
   /// should be announced.
   ///
@@ -3436,55 +3525,60 @@ class SemanticsConfiguration {
     return true;
   }
 
-  /// Absorb the semantic information from `other` into this configuration.
+  /// Absorb the semantic information from `child` into this configuration.
   ///
   /// This adds the semantic information of both configurations and saves the
   /// result in this configuration.
   ///
+  /// The [RenderObject] owning the `child` configuration must be a descendant
+  /// of the [RenderObject] that owns this configuration.
+  ///
   /// Only configurations that have [explicitChildNodes] set to false can
   /// absorb other configurations and it is recommended to only absorb compatible
   /// configurations as determined by [isCompatibleWith].
-  void absorb(SemanticsConfiguration other) {
+  void absorb(SemanticsConfiguration child) {
     assert(!explicitChildNodes);
 
-    if (!other.hasBeenAnnotated)
+    if (!child.hasBeenAnnotated)
       return;
 
-    _actions.addAll(other._actions);
-    _customSemanticsActions.addAll(other._customSemanticsActions);
-    _actionsAsBits |= other._actionsAsBits;
-    _flags |= other._flags;
-    _textSelection ??= other._textSelection;
-    _scrollPosition ??= other._scrollPosition;
-    _scrollExtentMax ??= other._scrollExtentMax;
-    _scrollExtentMin ??= other._scrollExtentMin;
-    _hintOverrides ??= other._hintOverrides;
-    _indexInParent ??= other.indexInParent;
-    _scrollIndex ??= other._scrollIndex;
-    _scrollChildCount ??= other._scrollChildCount;
+    _actions.addAll(child._actions);
+    _customSemanticsActions.addAll(child._customSemanticsActions);
+    _actionsAsBits |= child._actionsAsBits;
+    _flags |= child._flags;
+    _textSelection ??= child._textSelection;
+    _scrollPosition ??= child._scrollPosition;
+    _scrollExtentMax ??= child._scrollExtentMax;
+    _scrollExtentMin ??= child._scrollExtentMin;
+    _hintOverrides ??= child._hintOverrides;
+    _indexInParent ??= child.indexInParent;
+    _scrollIndex ??= child._scrollIndex;
+    _scrollChildCount ??= child._scrollChildCount;
 
-    textDirection ??= other.textDirection;
-    _sortKey ??= other._sortKey;
+    textDirection ??= child.textDirection;
+    _sortKey ??= child._sortKey;
     _label = _concatStrings(
       thisString: _label,
       thisTextDirection: textDirection,
-      otherString: other._label,
-      otherTextDirection: other.textDirection,
+      otherString: child._label,
+      otherTextDirection: child.textDirection,
     );
     if (_decreasedValue == '' || _decreasedValue == null)
-      _decreasedValue = other._decreasedValue;
+      _decreasedValue = child._decreasedValue;
     if (_value == '' || _value == null)
-      _value = other._value;
+      _value = child._value;
     if (_increasedValue == '' || _increasedValue == null)
-      _increasedValue = other._increasedValue;
+      _increasedValue = child._increasedValue;
     _hint = _concatStrings(
       thisString: _hint,
       thisTextDirection: textDirection,
-      otherString: other._hint,
-      otherTextDirection: other.textDirection,
+      otherString: child._hint,
+      otherTextDirection: child.textDirection,
     );
 
-    _hasBeenAnnotated = _hasBeenAnnotated || other._hasBeenAnnotated;
+    _thickness = math.max(_thickness, child._thickness + _elevation);
+
+    _hasBeenAnnotated = _hasBeenAnnotated || child._hasBeenAnnotated;
   }
 
   /// Returns an exact copy of this configuration.
@@ -3503,6 +3597,8 @@ class SemanticsConfiguration {
       .._decreasedValue = _decreasedValue
       .._hint = _hint
       .._hintOverrides = _hintOverrides
+      .._elevation = _elevation
+      .._thickness = _thickness
       .._flags = _flags
       .._tagsForChildren = _tagsForChildren
       .._textSelection = _textSelection
