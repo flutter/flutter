@@ -45,6 +45,7 @@ linter:
     - one_member_abstracts
     - overridden_fields
     - package_prefixed_library_names
+    - prefer_asserts_in_initializer_lists
     - prefer_equal_for_default_values
     - prefer_final_locals
     - prefer_is_not_empty

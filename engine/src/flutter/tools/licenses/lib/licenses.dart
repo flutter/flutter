@@ -287,8 +287,9 @@ abstract class License implements Comparable<License> {
   License._(String body, this.type, {
     this.origin,
     bool yesWeKnowWhatItLooksLikeButItIsNot = false
-  }) : body = body, authors = _readAuthors(body) {
-    assert(_reformat(body) == body);
+  }) : body = body,
+       authors = _readAuthors(body),
+       assert(_reformat(body) == body) {
     assert(() {
       try {
         switch (type) {
@@ -533,9 +534,8 @@ Iterable<_LineRange> _walkLinesForwards(String body, { int start = 0, int end })
 }
 
 class _SplitLicense {
-  _SplitLicense(this._body, this._split) {
-    assert(_split == 0 || _split == _body.length || _body[_split] == '\n');
-  }
+  _SplitLicense(this._body, this._split) : assert(_split == 0 || _split == _body.length || _body[_split] == '\n');
+
   final String _body;
   final int _split;
   String getCopyright() => _body.substring(0, _split);
@@ -607,10 +607,9 @@ _SplitLicense _splitLicense(String body, { bool verifyResults = true }) {
 }
 
 class _PartialLicenseMatch {
-  _PartialLicenseMatch(this._body, this.start, this.split, this.end, this._match, { this.hasCopyrights }) {
-    assert(split >= start);
-    assert(split == start || _body[split] == '\n');
-  }
+  _PartialLicenseMatch(this._body, this.start, this.split, this.end, this._match, { this.hasCopyrights }) : assert(split >= start),
+          assert(split == start || _body[split] == '\n');
+
   final String _body;
   final int start;
   final int split;
@@ -959,9 +958,9 @@ class MessageLicense extends License {
 
 // the kind of license that says to include the copyright and the license text (e.g. BSD)
 class TemplateLicense extends License {
-  TemplateLicense._(String body, LicenseType type, { String origin }) : super._(body, type, origin: origin) {
-    assert(!body.startsWith('Apache License'));
-  }
+  TemplateLicense._(String body, LicenseType type, { String origin })
+    : assert(!body.startsWith('Apache License')),
+      super._(body, type, origin: origin);
 
   String _conditions;
 
