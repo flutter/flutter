@@ -495,7 +495,7 @@ class TextStyle extends Diagnosticable {
     Color decorationColor,
     TextDecorationStyle decorationStyle,
     String fontFamily,
-    String fontFamilyFallback,
+    List<String> fontFamilyFallback,
     double fontSizeFactor = 1.0,
     double fontSizeDelta = 0.0,
     int fontWeightDelta = 0,
@@ -850,7 +850,7 @@ class TextStyle extends Diagnosticable {
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
     styles.add(DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
     styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
-    styles.add(StringProperty('${prefix}familyFallback', fontFamilyFallback, defaultValue: null, quoted: false));
+    styles.add(IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null, ifNull: 'unspecified'));
     styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
     String weightDescription;
     if (fontWeight != null) {
@@ -901,6 +901,7 @@ class TextStyle extends Diagnosticable {
     styles.add(DiagnosticsProperty<Locale>('${prefix}locale', locale, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}foreground', foreground, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}background', background, defaultValue: null));
+    styles.add(DiagnosticsProperty<List<String>>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null));
     if (decoration != null || decorationColor != null || decorationStyle != null) {
       final List<String> decorationDescription = <String>[];
       if (decorationStyle != null)
