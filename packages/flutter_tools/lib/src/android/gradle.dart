@@ -422,9 +422,7 @@ Future<void> _buildGradleProjectV2(
     if (apkFile == null)
       throwToolExit('Gradle build failed to produce an Android package.');
     // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
-    apkFile.copySync(project.apkDirectory
-        .childFile('app.apk')
-        .path);
+    apkFile.copySync(project.apkDirectory.childFile('app.apk').path);
 
     printTrace('calculateSha: ${project.apkDirectory}/app.apk');
     final File apkShaFile = project.apkDirectory.childFile('app.apk.sha1');
@@ -451,19 +449,15 @@ Future<void> _buildGradleProjectV2(
 
     if (buildInfo.createPatch) {
       if (!baselineApkFile.existsSync())
-        throwToolExit(
-            'Error: Could not find baseline package ${baselineApkFile.path}.');
+        throwToolExit('Error: Could not find baseline package ${baselineApkFile.path}.');
 
       printStatus('Found baseline package ${baselineApkFile.path}.');
-      final Archive newApk = ZipDecoder().decodeBytes(
-          apkFile.readAsBytesSync());
-      final Archive oldApk = ZipDecoder().decodeBytes(
-          baselineApkFile.readAsBytesSync());
+      final Archive newApk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
+      final Archive oldApk = ZipDecoder().decodeBytes(baselineApkFile.readAsBytesSync());
 
       final Archive update = Archive();
       for (ArchiveFile newFile in newApk) {
-        if (!newFile.isFile ||
-            !newFile.name.startsWith('assets/flutter_assets/'))
+        if (!newFile.isFile || !newFile.name.startsWith('assets/flutter_assets/'))
           continue;
 
         final ArchiveFile oldFile = oldApk.findFile(newFile.name);
@@ -471,8 +465,7 @@ Future<void> _buildGradleProjectV2(
           continue;
 
         final String name = fs.path.relative(newFile.name, from: 'assets/');
-        update.addFile(
-            ArchiveFile(name, newFile.content.length, newFile.content));
+        update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
       }
 
       final File updateFile = fs.directory(buildInfo.patchDir)
@@ -488,11 +481,9 @@ Future<void> _buildGradleProjectV2(
         return;
       }
 
-      final ArchiveFile oldFile = oldApk.findFile(
-          'assets/flutter_assets/isolate_snapshot_data');
+      final ArchiveFile oldFile = oldApk.findFile('assets/flutter_assets/isolate_snapshot_data');
       if (oldFile == null)
-        throwToolExit(
-            'Error: Could not find baseline assets/flutter_assets/isolate_snapshot_data.');
+        throwToolExit('Error: Could not find baseline assets/flutter_assets/isolate_snapshot_data.');
 
       final int baselineChecksum = getCrc32(oldFile.content);
       final Map<String, dynamic> manifest = <String, dynamic>{
@@ -503,8 +494,7 @@ Future<void> _buildGradleProjectV2(
 
       const JsonEncoder encoder = JsonEncoder.withIndent('  ');
       final String manifestJson = encoder.convert(manifest);
-      update.addFile(ArchiveFile(
-          'manifest.json', manifestJson.length, manifestJson.codeUnits));
+      update.addFile(ArchiveFile('manifest.json', manifestJson.length, manifestJson.codeUnits));
 
       updateFile.parent.createSync(recursive: true);
       updateFile.writeAsBytesSync(ZipEncoder().encode(update), flush: true);
