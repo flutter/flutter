@@ -310,7 +310,7 @@ class TextStyle extends Diagnosticable {
   /// prefixed with 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto').
   /// The package name should be provided by the `package` argument in the
   /// constructor.
-  List<String> get fontFamilyFallback => _fontFamilyFallback == null ? null : _fontFamilyFallback.map((String str) => 'packages/$_package/$str').toList();
+  List<String> get fontFamilyFallback => _package != null && _fontFamilyFallback != null ? _fontFamilyFallback.map((String str) => 'packages/$_package/$str').toList() : _fontFamilyFallback;
   final List<String> _fontFamilyFallback;
 
   // This is stored in order to prefix the fontFamilies in _fontFamilyFallback

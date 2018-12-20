@@ -176,6 +176,7 @@ void main() {
     expect(ps5.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 12.0, lineHeight: 123.0x, ellipsis: unspecified, locale: unspecified)');
   });
 
+
   test('TextStyle with text direction', () {
     final ui.ParagraphStyle ps6 = const TextStyle().getParagraphStyle(textDirection: TextDirection.ltr);
     expect(ps6, equals(ui.ParagraphStyle(textDirection: TextDirection.ltr, fontSize: 14.0)));
@@ -194,6 +195,39 @@ void main() {
     const TextStyle s7 = TextStyle(fontFamily: 'test', package: 'p');
     expect(s7.fontFamily, 'packages/p/test');
     expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontFamilyFallback: unspecified, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified)');
+  
+    const TextStyle s8 = TextStyle(fontFamilyFallback: <String>['test', 'test2'], package: 'p');
+    expect(s8.fontFamilyFallback[0], 'packages/p/test');
+    expect(s8.fontFamilyFallback[1], 'packages/p/test2');
+    expect(s8.fontFamilyFallback.length, 2);
+
+    const TextStyle s9 = TextStyle(package: 'p');
+    expect(s9.fontFamilyFallback, null);
+
+    const TextStyle s10 = TextStyle(fontFamilyFallback: <String>[], package: 'p');
+    expect(s10.fontFamilyFallback, <String>[]);
+  });
+
+  test('TextStyle font family fallback', () {
+    const TextStyle s1 = TextStyle(fontFamilyFallback: <String>['Roboto', 'test']);
+    expect(s1.fontFamilyFallback[0], 'Roboto');
+    expect(s1.fontFamilyFallback[1], 'test');
+    expect(s1.fontFamilyFallback.length, 2);
+
+    const TextStyle s2 = TextStyle(fontFamily: 'foo', fontFamilyFallback: <String>['Roboto', 'test']);
+    expect(s2.fontFamilyFallback[0], 'Roboto');
+    expect(s2.fontFamilyFallback[1], 'test');
+    expect(s2.fontFamily, 'foo');
+    expect(s2.fontFamilyFallback.length, 2);
+
+    const TextStyle s3 = TextStyle(fontFamily: 'foo');
+    expect(s3.fontFamily, 'foo');
+    expect(s3.fontFamilyFallback, null);
+
+    const TextStyle s4 = TextStyle(fontFamily: 'foo', fontFamilyFallback: <String>[]);
+    expect(s4.fontFamily, 'foo');
+    expect(s4.fontFamilyFallback, <String>[]);
+    expect(s4.fontFamilyFallback.isEmpty, true);
   });
 
   test('TextStyle.debugLabel', () {
