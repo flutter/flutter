@@ -63,6 +63,7 @@ linter:
     - unnecessary_brace_in_string_interps
     - unnecessary_getters_setters
     - unnecessary_new
+    - unnecessary_overrides
     - unnecessary_statements
     - unnecessary_this
     - package_names

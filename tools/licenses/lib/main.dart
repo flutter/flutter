@@ -112,9 +112,6 @@ class _RepositorySourceFile extends _RepositoryLicensedFile {
 class _RepositoryBinaryFile extends _RepositoryLicensedFile {
   _RepositoryBinaryFile(_RepositoryDirectory parent, fs.File io) : super(parent, io);
 
-  @override
-  fs.File get io => super.io;
-
   List<License> _licenses;
 
   @override
@@ -734,9 +731,6 @@ class _RepositoryMultiLicenseNoticesForFilesFile extends _RepositoryLicenseFile 
     : _licenses = _parseLicense(io),
       super(parent, io);
 
-  @override
-  fs.File get io => super.io;
-
   final Map<String, License> _licenses;
 
   static Map<String, License> _parseLicense(fs.File io) {
@@ -1254,9 +1248,6 @@ class _RepositoryGenericThirdPartyDirectory extends _RepositoryDirectory {
 
 class _RepositoryReachOutFile extends _RepositoryLicensedFile {
   _RepositoryReachOutFile(_RepositoryDirectory parent, fs.File io, this.offset) : super(parent, io);
-
-  @override
-  fs.File get io => super.io;
 
   final int offset;
 
