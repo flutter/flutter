@@ -11,6 +11,7 @@ analyzer:
 linter:
   rules:
     - avoid_empty_else
+    - avoid_function_literals_in_foreach_calls
     - comment_references
     - cancel_subscriptions
     - close_sinks
