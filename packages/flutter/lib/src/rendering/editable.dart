@@ -160,6 +160,7 @@ class RenderEditable extends RenderBox {
        assert(ignorePointer != null),
        assert(obscureText != null),
        assert(textSelectionDelegate != null),
+       assert(cursorWidth != null && cursorWidth >= 0.0),
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,

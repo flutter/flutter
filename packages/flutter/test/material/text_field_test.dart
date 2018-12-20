@@ -3483,9 +3483,11 @@ void main() {
   testWidgets('Includes cursor for TextField', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/24612
 
-    const double stepWidth = 80.0;
-
-    Widget buildFrame(double cursorWidth) {
+    Widget buildFrame({
+      double stepWidth,
+      double cursorWidth,
+      TextAlign textAlign,
+    }) {
       return MaterialApp(
         home: Scaffold(
           body: Center(
@@ -3495,6 +3497,7 @@ void main() {
                 IntrinsicWidth(
                   stepWidth: stepWidth,
                   child: TextField(
+                    textAlign: textAlign,
                     cursorWidth: cursorWidth,
                   ),
                 ),
@@ -3507,17 +3510,48 @@ void main() {
 
     // A cursor of default size doesn't cause the TextField to increase its
     // width.
-    await tester.pumpWidget(buildFrame(2.0));
-    await tester.enterText(find.byType(TextField), '1234');
+    const String text = '1234';
+    double stepWidth = 80.0;
+    await tester.pumpWidget(buildFrame(
+      stepWidth: 80.0,
+      cursorWidth: 2.0,
+      textAlign: TextAlign.left,
+    ));
+    await tester.enterText(find.byType(TextField), text);
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(TextField)).width, stepWidth);
 
     // A wide cursor is counted in the width of the text and causes the
     // TextField to increase to twice the stepWidth.
-    await tester.pumpWidget(buildFrame(18.0));
-    await tester.enterText(find.byType(TextField), '1234');
+    await tester.pumpWidget(buildFrame(
+      stepWidth: stepWidth,
+      cursorWidth: 18.0,
+      textAlign: TextAlign.left,
+    ));
+    await tester.enterText(find.byType(TextField), text);
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(TextField)).width, 2 * stepWidth);
+
+    // A null stepWidth causes the TextField to perfectly wrap the text plus
+    // the cursor regardless of alignment.
+    stepWidth = null;
+    const double WIDTH_OF_CHAR = 16.0;
+    await tester.pumpWidget(buildFrame(
+      stepWidth: stepWidth,
+      cursorWidth: 18.0,
+      textAlign: TextAlign.left,
+    ));
+    await tester.enterText(find.byType(TextField), text);
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(TextField)).width, WIDTH_OF_CHAR * text.length + 18.0);
+    await tester.pumpWidget(buildFrame(
+      stepWidth: stepWidth,
+      cursorWidth: 18.0,
+      textAlign: TextAlign.right,
+    ));
+    await tester.enterText(find.byType(TextField), text);
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(TextField)).width, WIDTH_OF_CHAR * text.length + 18.0);
   });
 
   testWidgets('TextField style is merged with theme', (WidgetTester tester) async {
