@@ -59,7 +59,7 @@ const String kMultiLicenseFileHeader = 'Notices for files contained in';
 
 bool isMultiLicenseNotice(Reader reader) {
   final List<int> bytes = reader();
-  return (ascii.decode(bytes.take(kMultiLicenseFileHeader.length).toList(), allowInvalid: true) == kMultiLicenseFileHeader);
+  return ascii.decode(bytes.take(kMultiLicenseFileHeader.length).toList(), allowInvalid: true) == kMultiLicenseFileHeader;
 }
 
 FileType identifyFile(String name, Reader reader) {
