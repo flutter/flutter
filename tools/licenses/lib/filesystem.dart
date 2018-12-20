@@ -180,7 +180,6 @@ FileType identifyFile(String name, Reader reader) {
     // Documentation
     case '.md': return FileType.text;
     case '.txt': return FileType.text;
-    case '.diff': return FileType.text;
     case '.html': return FileType.text;
     // Fonts
     case '.ttf': return FileType.binary; // TrueType Font
