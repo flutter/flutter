@@ -109,7 +109,7 @@ abstract class License implements Comparable<License> {
   factory License.unique(String body, LicenseType type, { bool reformatted: false, String origin, bool yesWeKnowWhatItLooksLikeButItIsNot: false }) {
     if (!reformatted)
       body = _reformat(body);
-    License result = _registry.putIfAbsent(body, () => new UniqueLicense._(body, type, origin: origin, yesWeKnowWhatItLooksLikeButItIsNot: yesWeKnowWhatItLooksLikeButItIsNot));
+    License result = _registry.putIfAbsent(body, () => UniqueLicense._(body, type, origin: origin, yesWeKnowWhatItLooksLikeButItIsNot: yesWeKnowWhatItLooksLikeButItIsNot));
     assert(() {
       if (result is! UniqueLicense || result.type != type)
         throw 'tried to add a UniqueLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
@@ -121,7 +121,7 @@ abstract class License implements Comparable<License> {
   factory License.template(String body, LicenseType type, { bool reformatted: false, String origin }) {
     if (!reformatted)
       body = _reformat(body);
-    License result = _registry.putIfAbsent(body, () => new TemplateLicense._(body, type, origin: origin));
+    License result = _registry.putIfAbsent(body, () => TemplateLicense._(body, type, origin: origin));
     assert(() {
       if (result is! TemplateLicense || result.type != type)
         throw 'tried to add a TemplateLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
@@ -133,7 +133,7 @@ abstract class License implements Comparable<License> {
   factory License.message(String body, LicenseType type, { bool reformatted: false, String origin }) {
     if (!reformatted)
       body = _reformat(body);
-    License result = _registry.putIfAbsent(body, () => new MessageLicense._(body, type, origin: origin));
+    License result = _registry.putIfAbsent(body, () => MessageLicense._(body, type, origin: origin));
     assert(() {
       if (result is! MessageLicense || result.type != type)
         throw 'tried to add a MessageLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
@@ -143,7 +143,7 @@ abstract class License implements Comparable<License> {
   }
 
   factory License.blank(String body, LicenseType type, { String origin }) {
-    License result = _registry.putIfAbsent(body, () => new BlankLicense._(_reformat(body), type, origin: origin));
+    License result = _registry.putIfAbsent(body, () => BlankLicense._(_reformat(body), type, origin: origin));
     assert(() {
       if (result is! BlankLicense || result.type != type)
         throw 'tried to add a BlankLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
@@ -154,7 +154,7 @@ abstract class License implements Comparable<License> {
 
   factory License.fromMultipleBlocks(List<String> bodies, LicenseType type) {
     final String body = bodies.map((String s) => _reformat(s)).join('\n\n');
-    return _registry.putIfAbsent(body, () => new UniqueLicense._(body, type));
+    return _registry.putIfAbsent(body, () => UniqueLicense._(body, type));
   }
 
   factory License.fromBodyAndType(String body, LicenseType type, { bool reformatted: false, String origin }) {
@@ -166,10 +166,10 @@ abstract class License implements Comparable<License> {
         case LicenseType.mit:
         case LicenseType.zlib:
         case LicenseType.icu:
-          return new TemplateLicense._(body, type, origin: origin);
+          return TemplateLicense._(body, type, origin: origin);
         case LicenseType.unknown:
         case LicenseType.apacheNotice:
-          return new UniqueLicense._(body, type, origin: origin);
+          return UniqueLicense._(body, type, origin: origin);
         case LicenseType.afl:
         case LicenseType.mpl:
         case LicenseType.gpl:
@@ -179,11 +179,11 @@ abstract class License implements Comparable<License> {
         case LicenseType.eclipse:
         case LicenseType.ijg:
         case LicenseType.apsl:
-          return new MessageLicense._(body, type, origin: origin);
+          return MessageLicense._(body, type, origin: origin);
         case LicenseType.openssl:
-          return new MultiLicense._(body, type, origin: origin);
+          return MultiLicense._(body, type, origin: origin);
         case LicenseType.libpng:
-          return new BlankLicense._(body, type, origin: origin);
+          return BlankLicense._(body, type, origin: origin);
       }
     });
     assert(result.type == type);
@@ -195,18 +195,18 @@ abstract class License implements Comparable<License> {
     LicenseType type = convertLicenseNameToType(name);
     if (type == LicenseType.unknown)
       type = convertBodyToType(body);
-    return new License.fromBodyAndType(body, type, origin: origin);
+    return License.fromBodyAndType(body, type, origin: origin);
   }
 
   factory License.fromBody(String body, { String origin }) {
     body = _reformat(body);
     LicenseType type = convertBodyToType(body);
-    return new License.fromBodyAndType(body, type, reformatted: true, origin: origin);
+    return License.fromBodyAndType(body, type, reformatted: true, origin: origin);
   }
 
   factory License.fromCopyrightAndLicense(String copyright, String template, LicenseType type, { String origin }) {
     String body = '$copyright\n\n$template';
-    return _registry.putIfAbsent(body, () => new TemplateLicense._(body, type, origin: origin));
+    return _registry.putIfAbsent(body, () => TemplateLicense._(body, type, origin: origin));
   }
 
   factory License.fromUrl(String url, { String origin }) {
@@ -215,60 +215,60 @@ abstract class License implements Comparable<License> {
     switch (url) {
       case 'Apache:2.0':
       case 'http://www.apache.org/licenses/LICENSE-2.0':
-        body = new system.File('data/apache-license-2.0').readAsStringSync();
+        body = system.File('data/apache-license-2.0').readAsStringSync();
         type = LicenseType.apache;
         break;
       case 'https://developers.google.com/open-source/licenses/bsd':
-        body = new system.File('data/google-bsd').readAsStringSync();
+        body = system.File('data/google-bsd').readAsStringSync();
         type = LicenseType.bsd;
         break;
       case 'http://polymer.github.io/LICENSE.txt':
-        body = new system.File('data/polymer-bsd').readAsStringSync();
+        body = system.File('data/polymer-bsd').readAsStringSync();
         type = LicenseType.bsd;
         break;
       case 'http://www.eclipse.org/legal/epl-v10.html':
-        body = new system.File('data/eclipse-1.0').readAsStringSync();
+        body = system.File('data/eclipse-1.0').readAsStringSync();
         type = LicenseType.eclipse;
         break;
       case 'COPYING3:3':
-        body = new system.File('data/gpl-3.0').readAsStringSync();
+        body = system.File('data/gpl-3.0').readAsStringSync();
         type = LicenseType.gpl;
         break;
       case 'COPYING.LIB:2':
       case 'COPYING.LIother.m_:2': // blame hyatt
-        body = new system.File('data/library-gpl-2.0').readAsStringSync();
+        body = system.File('data/library-gpl-2.0').readAsStringSync();
         type = LicenseType.lgpl;
         break;
       case 'GNU Lesser:2':
         // there has never been such a license, but the authors said they meant the LGPL2.1
       case 'GNU Lesser:2.1':
-        body = new system.File('data/lesser-gpl-2.1').readAsStringSync();
+        body = system.File('data/lesser-gpl-2.1').readAsStringSync();
         type = LicenseType.lgpl;
         break;
       case 'COPYING.RUNTIME:3.1':
       case 'GCC Runtime Library Exception:3.1':
-        body = new system.File('data/gpl-gcc-exception-3.1').readAsStringSync();
+        body = system.File('data/gpl-gcc-exception-3.1').readAsStringSync();
         break;
       case 'Academic Free License:3.0':
-        body = new system.File('data/academic-3.0').readAsStringSync();
+        body = system.File('data/academic-3.0').readAsStringSync();
         type = LicenseType.afl;
         break;
       case 'http://mozilla.org/MPL/2.0/:2.0':
-        body = new system.File('data/mozilla-2.0').readAsStringSync();
+        body = system.File('data/mozilla-2.0').readAsStringSync();
         type = LicenseType.mpl;
         break;
       case 'http://opensource.org/licenses/MIT':
       case 'http://opensource->org/licenses/MIT': // i don't even
-        body = new system.File('data/mit').readAsStringSync();
+        body = system.File('data/mit').readAsStringSync();
         type = LicenseType.mit;
         break;
       case 'http://www.unicode.org/copyright.html':
-        body = new system.File('data/unicode').readAsStringSync();
+        body = system.File('data/unicode').readAsStringSync();
         type = LicenseType.icu;
         break;
       default: throw 'unknown url $url';
     }
-    return _registry.putIfAbsent(body, () => new License.fromBodyAndType(body, type, origin: origin));
+    return _registry.putIfAbsent(body, () => License.fromBodyAndType(body, type, origin: origin));
   }
 
   License._(String body, this.type, { this.origin, bool yesWeKnowWhatItLooksLikeButItIsNot: false }) : body = body, authors = _readAuthors(body) {
@@ -352,7 +352,7 @@ abstract class License implements Comparable<License> {
 
   Iterable<String> get licensees => _licensees;
   List<String> _licensees = <String>[];
-  Set<String> _libraries = new Set<String>();
+  Set<String> _libraries = Set<String>();
 
   bool get isUsed => _licensees.isNotEmpty;
 
@@ -395,7 +395,7 @@ abstract class License implements Comparable<License> {
     return prefixes.join('\n') + '\n\n' + body;
   }
 
-  static final RegExp _copyrightForAuthors = new RegExp(
+  static final RegExp _copyrightForAuthors = RegExp(
     r'Copyright [-0-9 ,(cC)©]+\b(The .+ Authors)\.',
     caseSensitive: false
   );
@@ -417,7 +417,7 @@ void clearLicenseRegistry() {
   _registry.clear();
 }
 
-final License missingLicense = new UniqueLicense._('<missing>', LicenseType.unknown);
+final License missingLicense = UniqueLicense._('<missing>', LicenseType.unknown);
 
 String _reformat(String body) {
   // TODO(ianh): ensure that we're stripping the same amount of leading text on each line
@@ -491,12 +491,12 @@ Iterable<_LineRange> _walkLinesBackwards(String body, int start) sync* {
     start -= 1;
     if (body[start] == '\n') {
       if (end != null)
-        yield new _LineRange(start + 1, end, body);
+        yield _LineRange(start + 1, end, body);
       end = start;
     }
   }
   if (end != null)
-    yield new _LineRange(start, end, body);
+    yield _LineRange(start, end, body);
 }
 
 Iterable<_LineRange> _walkLinesForwards(String body, { int start: 0, int end }) sync* {
@@ -506,13 +506,13 @@ Iterable<_LineRange> _walkLinesForwards(String body, { int start: 0, int end }) 
   while (endIndex < end) {
     if (body[endIndex] == '\n') {
       if (startIndex != null)
-        yield new _LineRange(startIndex, endIndex, body);
+        yield _LineRange(startIndex, endIndex, body);
       startIndex = endIndex + 1;
     }
     endIndex += 1;
   }
   if (startIndex != null)
-    yield new _LineRange(startIndex, endIndex, body);
+    yield _LineRange(startIndex, endIndex, body);
 }
 
 class _SplitLicense {
@@ -586,7 +586,7 @@ _SplitLicense _splitLicense(String body, { bool verifyResults: true }) {
   }
   if (verifyResults && 'Copyright ('.allMatches(body, end).isNotEmpty && !body.startsWith('If you modify libpng'))
     throw 'the license seems to contain a copyright:\n===copyright===\n${body.substring(0, end)}\n===license===\n${body.substring(end)}\n=========';
-  return new _SplitLicense(body, end);
+  return _SplitLicense(body, end);
 }
 
 class _PartialLicenseMatch {
@@ -703,7 +703,7 @@ Iterable<_PartialLicenseMatch> _findLicenseBlocks(String body, RegExp pattern, i
       assert(body[match.start - 1] == '\n');
       split = match.start - 1;
     }
-    yield new _PartialLicenseMatch(body, start, split, match.end, match, hasCopyrights: foundAny);
+    yield _PartialLicenseMatch(body, start, split, match.end, match, hasCopyrights: foundAny);
   }
 }
 
@@ -721,9 +721,9 @@ Iterable<_LicenseMatch> _expand(License template, String copyright, String body,
   List<License> results = template.expandTemplate(_reformat(copyright), body, origin: origin).toList();
   if (results.isEmpty)
     throw 'license could not be expanded';
-  yield new _LicenseMatch(results.first, start, end, debug: 'expanding template for $debug');
+  yield _LicenseMatch(results.first, start, end, debug: 'expanding template for $debug');
   if (results.length > 1)
-    yield* results.skip(1).map((License license) => new _LicenseMatch(license, start, end, isDuplicate: true, debug: 'expanding subsequent template for $debug'));
+    yield* results.skip(1).map((License license) => _LicenseMatch(license, start, end, isDuplicate: true, debug: 'expanding subsequent template for $debug'));
 }
 
 Iterable<_LicenseMatch> _tryNone(String body, String filename, RegExp pattern, LicenseSource parentDirectory) sync* {
@@ -732,16 +732,16 @@ Iterable<_LicenseMatch> _tryNone(String body, String filename, RegExp pattern, L
     if (results == null || results.isEmpty)
       throw 'no default license file found';
     // TODO(ianh): use _expand if the license asks for the copyright to be included (e.g. BSD)
-    yield new _LicenseMatch(results.first, match.start, match.end, debug: '_tryNone');
+    yield _LicenseMatch(results.first, match.start, match.end, debug: '_tryNone');
     if (results.length > 1)
-      yield* results.skip(1).map((License license) => new _LicenseMatch(license, match.start, match.end, isDuplicate: true, debug: 'subsequent _tryNone'));
+      yield* results.skip(1).map((License license) => _LicenseMatch(license, match.start, match.end, isDuplicate: true, debug: 'subsequent _tryNone'));
   }
 }
 
 Iterable<_LicenseMatch> _tryAttribution(String body, RegExp pattern, { String origin }) sync* {
   for (Match match in pattern.allMatches(body)) {
     assert(match.groupCount == 2);
-    yield new _LicenseMatch(new License.unique('Thanks to ${match.group(2)}.', LicenseType.unknown, origin: origin), match.start, match.end, debug: '_tryAttribution');
+    yield _LicenseMatch(License.unique('Thanks to ${match.group(2)}.', LicenseType.unknown, origin: origin), match.start, match.end, debug: '_tryAttribution');
   }
 }
 
@@ -771,7 +771,7 @@ Iterable<_LicenseMatch> _tryReferenceByFilename(String body, LicenseFileReferenc
           'block:\n---\n${match.getEntireLicense()}\n---';
       }
       if (match.getCopyrights() == '') {
-        yield new _LicenseMatch(template, match.start, match.end, debug: '_tryReferenceByFilename (with failed copyright search) looking for $filename');
+        yield _LicenseMatch(template, match.start, match.end, debug: '_tryReferenceByFilename (with failed copyright search) looking for $filename');
       } else {
         yield* _expand(template, match.getCopyrights(), match.getEntireLicense(), match.start, match.end, debug: '_tryReferenceByFilename (with successful copyright search) looking for $filename', origin: origin);
       }
@@ -793,7 +793,7 @@ Iterable<_LicenseMatch> _tryReferenceByType(String body, RegExp pattern, License
     if (needsCopyright)
       yield* _expand(template, match.getCopyrights(), match.getEntireLicense(), match.start, match.end, debug: '_tryReferenceByType', origin: origin);
     else
-      yield new _LicenseMatch(template, match.start, match.end, debug: '_tryReferenceByType (without copyrights) for type $type');
+      yield _LicenseMatch(template, match.start, match.end, debug: '_tryReferenceByType (without copyrights) for type $type');
   }
 }
 
@@ -803,7 +803,7 @@ License _dereferenceLicense(int groupIndex, String group(int index), MultipleVer
     String suffix = '';
     if (pattern.versionIndicies != null && pattern.versionIndicies.containsKey(groupIndex))
       suffix = ':${group(pattern.versionIndicies[groupIndex])}';
-    result = new License.fromUrl('${group(groupIndex)}$suffix', origin: origin);
+    result = License.fromUrl('${group(groupIndex)}$suffix', origin: origin);
   }
   return result;
 }
@@ -813,7 +813,7 @@ Iterable<_LicenseMatch> _tryReferenceByUrl(String body, MultipleVersionedLicense
     bool isDuplicate = false;
     for (int index in pattern.licenseIndices) {
       final License result = _dereferenceLicense(index, match.group, pattern, parentDirectory, origin: origin);
-      yield new _LicenseMatch(result, match.start, match.end, isDuplicate: isDuplicate, debug: '_tryReferenceByUrl');
+      yield _LicenseMatch(result, match.start, match.end, isDuplicate: isDuplicate, debug: '_tryReferenceByUrl');
       isDuplicate = true;
     }
   }
@@ -826,7 +826,7 @@ Iterable<_LicenseMatch> _tryInline(String body, RegExp pattern, { bool needsCopy
     // "missingCopyrights: true" if our own "needsCopyright" argument is true.
     // We use a template license here (not unique) because it's not uncommon for files
     // to reference license blocks in other files, but with their own copyrights.
-    yield new _LicenseMatch(new License.fromBody(match.getEntireLicense(), origin: origin), match.start, match.end, debug: '_tryInline', missingCopyrights: needsCopyright && !match.hasCopyrights);
+    yield _LicenseMatch(License.fromBody(match.getEntireLicense(), origin: origin), match.start, match.end, debug: '_tryInline', missingCopyrights: needsCopyright && !match.hasCopyrights);
   }
 }
 
@@ -947,7 +947,7 @@ class TemplateLicense extends License {
   @override
   Iterable<License> expandTemplate(String copyright, String licenseBody, { String origin }) sync* {
     _conditions ??= _splitLicense(body).getConditions();
-    yield new License.fromCopyrightAndLicense(copyright, _conditions, type, origin: '$origin + ${this.origin}');
+    yield License.fromCopyrightAndLicense(copyright, _conditions, type, origin: '$origin + ${this.origin}');
   }
 }
 
@@ -957,8 +957,8 @@ class MultiLicense extends License {
 
   @override
   Iterable<License> expandTemplate(String copyright, String licenseBody, { String origin }) sync* {
-    yield new License.fromBody(body, origin: '$origin + ${this.origin}');
-    yield new License.fromBody(licenseBody, origin: '$origin + ${this.origin}');
+    yield License.fromBody(body, origin: '$origin + ${this.origin}');
+    yield License.fromBody(licenseBody, origin: '$origin + ${this.origin}');
   }
 }
 

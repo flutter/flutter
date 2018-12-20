@@ -313,7 +313,7 @@ mixin UTF8TextFile implements TextFile {
   @override
   String readString() {
     try {
-      return cache(new UTF8Of(this), () => utf8.decode(readBytes()));
+      return cache(UTF8Of(this), () => utf8.decode(readBytes()));
     } on FormatException {
       print(fullName);
       rethrow;
@@ -324,13 +324,13 @@ mixin UTF8TextFile implements TextFile {
 mixin Latin1TextFile implements TextFile {
   @override
   String readString() {
-    return cache(new Latin1Of(this), () {
+    return cache(Latin1Of(this), () {
       final List<int> bytes = readBytes();
       if (bytes.any((int byte) => byte == 0x00))
         throw '$fullName contains a U+0000 NULL and is probably not actually encoded as Win1252';
       bool isUTF8 = false;
       try {
-        cache(new UTF8Of(this), () => utf8.decode(readBytes()));
+        cache(UTF8Of(this), () => utf8.decode(readBytes()));
         isUTF8 = true;
       } on FormatException {
       }
@@ -355,7 +355,7 @@ mixin ZipFile on File implements Directory {
   @override
   Iterable<IoNode> get walk {
     try {
-      _root ??= ArchiveDirectory.parseArchive(new a.ZipDecoder().decodeBytes(readBytes()), fullName);
+      _root ??= ArchiveDirectory.parseArchive(a.ZipDecoder().decodeBytes(readBytes()), fullName);
       return _root.walk;
     } catch (exception) {
       print('failed to parse archive:\n$fullName');
@@ -370,7 +370,7 @@ mixin TarFile on File implements Directory {
   @override
   Iterable<IoNode> get walk {
     try {
-      _root ??= ArchiveDirectory.parseArchive(new a.TarDecoder().decodeBytes(readBytes()), fullName);
+      _root ??= ArchiveDirectory.parseArchive(a.TarDecoder().decodeBytes(readBytes()), fullName);
       return _root.walk;
     } catch (exception) {
       print('failed to parse archive:\n$fullName');
@@ -386,7 +386,7 @@ mixin GZipFile on File implements Directory {
   Iterable<IoNode> get walk sync* {
     try {
       String innerName = path.basenameWithoutExtension(fullName);
-      _data ??= InMemoryFile.parse(fullName + '!' + innerName, new a.GZipDecoder().decodeBytes(readBytes()));
+      _data ??= InMemoryFile.parse(fullName + '!' + innerName, a.GZipDecoder().decodeBytes(readBytes()));
       if (_data != null)
         yield _data;
     } catch (exception) {
@@ -403,7 +403,7 @@ mixin BZip2File on File implements Directory {
   Iterable<IoNode> get walk sync* {
     try {
       String innerName = path.basenameWithoutExtension(fullName);
-      _data ??= InMemoryFile.parse(fullName + '!' + innerName, new a.BZip2Decoder().decodeBytes(readBytes()));
+      _data ??= InMemoryFile.parse(fullName + '!' + innerName, a.BZip2Decoder().decodeBytes(readBytes()));
       if (_data != null)
         yield _data;
     } catch (exception) {
@@ -420,7 +420,7 @@ class FileSystemDirectory extends IoNode implements Directory {
   FileSystemDirectory(this._directory);
 
   factory FileSystemDirectory.fromPath(String name) {
-    return new FileSystemDirectory(new io.Directory(name));
+    return FileSystemDirectory(io.Directory(name));
   }
 
   final io.Directory _directory;
@@ -432,7 +432,7 @@ class FileSystemDirectory extends IoNode implements Directory {
   String get fullName => _directory.path;
 
   List<int> _readBytes(io.File file) {
-    return cache/*List<int>*/(new BytesOf(file), () => file.readAsBytesSync());
+    return cache/*List<int>*/(BytesOf(file), () => file.readAsBytesSync());
   }
 
   @override
@@ -441,21 +441,21 @@ class FileSystemDirectory extends IoNode implements Directory {
     list.sort((io.FileSystemEntity a, io.FileSystemEntity b) => a.path.compareTo(b.path));
     for (io.FileSystemEntity entity in list) {
       if (entity is io.Directory) {
-        yield new FileSystemDirectory(entity);
+        yield FileSystemDirectory(entity);
       } else if (entity is io.Link) {
-        yield new FileSystemLink(entity);
+        yield FileSystemLink(entity);
       } else {
         assert(entity is io.File);
         io.File fileEntity = entity;
         if (fileEntity.lengthSync() > 0) {
           switch (identifyFile(fileEntity.path, () => _readBytes(fileEntity))) {
-            case FileType.binary: yield new FileSystemFile(fileEntity); break;
-            case FileType.zip: yield new FileSystemZipFile(fileEntity); break;
-            case FileType.tar: yield new FileSystemTarFile(fileEntity); break;
-            case FileType.gz: yield new FileSystemGZipFile(fileEntity); break;
-            case FileType.bzip2: yield new FileSystemBZip2File(fileEntity); break;
-            case FileType.text: yield new FileSystemUTF8TextFile(fileEntity); break;
-            case FileType.latin1Text: yield new FileSystemLatin1TextFile(fileEntity); break;
+            case FileType.binary: yield FileSystemFile(fileEntity); break;
+            case FileType.zip: yield FileSystemZipFile(fileEntity); break;
+            case FileType.tar: yield FileSystemTarFile(fileEntity); break;
+            case FileType.gz: yield FileSystemGZipFile(fileEntity); break;
+            case FileType.bzip2: yield FileSystemBZip2File(fileEntity); break;
+            case FileType.text: yield FileSystemUTF8TextFile(fileEntity); break;
+            case FileType.latin1Text: yield FileSystemLatin1TextFile(fileEntity); break;
             case FileType.metadata: break; // ignore this file
           }
         }
@@ -489,7 +489,7 @@ class FileSystemFile extends IoNode implements File {
 
   @override
   List<int> readBytes() {
-    return cache(new BytesOf(_file), () => _file.readAsBytesSync());
+    return cache(BytesOf(_file), () => _file.readAsBytesSync());
   }
 }
 
@@ -529,7 +529,7 @@ class ArchiveDirectory extends IoNode implements Directory {
   @override
   final String name;
 
-  Map<String, ArchiveDirectory> _subdirectories = new SplayTreeMap<String, ArchiveDirectory>();
+  Map<String, ArchiveDirectory> _subdirectories = SplayTreeMap<String, ArchiveDirectory>();
   List<ArchiveFile> _files = <ArchiveFile>[];
 
   void _add(a.ArchiveFile entry, List<String> remainingPath) {
@@ -537,19 +537,19 @@ class ArchiveDirectory extends IoNode implements Directory {
       final String subdirectoryName = remainingPath.removeAt(0);
       _subdirectories.putIfAbsent(
         subdirectoryName,
-        () => new ArchiveDirectory('$fullName/$subdirectoryName', subdirectoryName)
+        () => ArchiveDirectory('$fullName/$subdirectoryName', subdirectoryName)
       )._add(entry, remainingPath);
     } else {
       if (entry.size > 0) {
         final String entryFullName = fullName + '/' + path.basename(entry.name);
         switch (identifyFile(entry.name, () => entry.content)) {
-          case FileType.binary: _files.add(new ArchiveFile(entryFullName, entry)); break;
-          case FileType.zip: _files.add(new ArchiveZipFile(entryFullName, entry)); break;
-          case FileType.tar: _files.add(new ArchiveTarFile(entryFullName, entry)); break;
-          case FileType.gz: _files.add(new ArchiveGZipFile(entryFullName, entry)); break;
-          case FileType.bzip2: _files.add(new ArchiveBZip2File(entryFullName, entry)); break;
-          case FileType.text: _files.add(new ArchiveUTF8TextFile(entryFullName, entry)); break;
-          case FileType.latin1Text: _files.add(new ArchiveLatin1TextFile(entryFullName, entry)); break;
+          case FileType.binary: _files.add(ArchiveFile(entryFullName, entry)); break;
+          case FileType.zip: _files.add(ArchiveZipFile(entryFullName, entry)); break;
+          case FileType.tar: _files.add(ArchiveTarFile(entryFullName, entry)); break;
+          case FileType.gz: _files.add(ArchiveGZipFile(entryFullName, entry)); break;
+          case FileType.bzip2: _files.add(ArchiveBZip2File(entryFullName, entry)); break;
+          case FileType.text: _files.add(ArchiveUTF8TextFile(entryFullName, entry)); break;
+          case FileType.latin1Text: _files.add(ArchiveLatin1TextFile(entryFullName, entry)); break;
           case FileType.metadata: break; // ignore this file
         }
       }
@@ -557,7 +557,7 @@ class ArchiveDirectory extends IoNode implements Directory {
   }
 
   static ArchiveDirectory parseArchive(a.Archive archive, String ownerPath) {
-    final ArchiveDirectory root = new ArchiveDirectory('$ownerPath!', '');
+    final ArchiveDirectory root = ArchiveDirectory('$ownerPath!', '');
     for (a.ArchiveFile file in archive.files) {
       if (file.size > 0)
         root._add(file, file.name.split('/'));
@@ -623,13 +623,13 @@ class InMemoryFile extends IoNode implements File {
     if (bytes.isEmpty)
       return null;
     switch (identifyFile(fullName, () => bytes)) {
-      case FileType.binary: return new InMemoryFile(fullName, bytes); break;
-      case FileType.zip: return new InMemoryZipFile(fullName, bytes); break;
-      case FileType.tar: return new InMemoryTarFile(fullName, bytes); break;
-      case FileType.gz: return new InMemoryGZipFile(fullName, bytes); break;
-      case FileType.bzip2: return new InMemoryBZip2File(fullName, bytes); break;
-      case FileType.text: return new InMemoryUTF8TextFile(fullName, bytes); break;
-      case FileType.latin1Text: return new InMemoryLatin1TextFile(fullName, bytes); break;
+      case FileType.binary: return InMemoryFile(fullName, bytes); break;
+      case FileType.zip: return InMemoryZipFile(fullName, bytes); break;
+      case FileType.tar: return InMemoryTarFile(fullName, bytes); break;
+      case FileType.gz: return InMemoryGZipFile(fullName, bytes); break;
+      case FileType.bzip2: return InMemoryBZip2File(fullName, bytes); break;
+      case FileType.text: return InMemoryUTF8TextFile(fullName, bytes); break;
+      case FileType.latin1Text: return InMemoryLatin1TextFile(fullName, bytes); break;
       case FileType.metadata: break; // ignore this file
     }
     assert(false);
