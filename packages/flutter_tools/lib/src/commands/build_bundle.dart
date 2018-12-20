@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
+
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -14,7 +16,10 @@ class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({bool verboseHelp = false}) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
-    addBuildModeFlags();
+    usesBuildNumberOption();
+    addBuildModeFlags(verboseHelp: verboseHelp);
+    addDynamicModeFlags(verboseHelp: verboseHelp);
+    addDynamicBaselineFlags(verboseHelp: verboseHelp);
     argParser
       ..addFlag('precompiled', negatable: false)
       // This option is still referenced by the iOS build scripts. We should
@@ -30,23 +35,6 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
         help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
-      )
-      ..addOption('precompile',
-        hide: !verboseHelp,
-        help: 'Precompile functions specified in input file. This flag is only '
-              'allowed when using --dynamic. It takes a Dart compilation trace '
-              'file produced by the training run of the application. With this '
-              'flag, instead of using default Dart VM snapshot provided by the '
-              'engine, the application will use its own snapshot that includes '
-              'additional compiled functions.'
-      )
-      ..addFlag('hotupdate',
-        hide: !verboseHelp,
-        help: 'Build differential snapshot based on the last state of the build '
-              'tree and any changes to the application source code since then. '
-              'This flag is only allowed when using --dynamic. With this flag, '
-              'a partial VM snapshot is generated that is loaded on top of the '
-              'original VM snapshot that contains precompiled code.'
       )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
@@ -86,6 +74,15 @@ class BuildBundleCommand extends BuildSubCommand {
 
     final BuildMode buildMode = getBuildMode();
 
+    int buildNumber;
+    try {
+      buildNumber = argResults['build-number'] != null
+          ? int.parse(argResults['build-number']) : null;
+    } catch (e) {
+      throw UsageException(
+          '--build-number (${argResults['build-number']}) must be an int.', null);
+    }
+
     await build(
       platform: platform,
       buildMode: buildMode,
@@ -98,7 +95,9 @@ class BuildBundleCommand extends BuildSubCommand {
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
       compilationTraceFilePath: argResults['precompile'],
-      buildHotUpdate: argResults['hotupdate'],
+      createPatch: argResults['patch'],
+      buildNumber: buildNumber,
+      baselineDir: argResults['baseline-dir'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],
