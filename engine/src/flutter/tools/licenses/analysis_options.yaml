@@ -54,6 +54,7 @@ linter:
     - prefer_final_locals
     - prefer_is_not_empty
     - prefer_single_quotes
+    - prefer_void_to_null
     - slash_for_doc_comments
     - sort_constructors_first
     - sort_unnamed_constructors_first

@@ -2260,7 +2260,7 @@ Future<void> _collectLicensesForComponent(_RepositoryDirectory componentRoot, {
 
 // MAIN
 
-Future<Null> main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   final ArgParser parser = ArgParser()
     ..addOption('src', help: 'The root of the engine source')
     ..addOption('out', help: 'The directory where output is written')
