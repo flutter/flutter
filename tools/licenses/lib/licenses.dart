@@ -656,9 +656,9 @@ Iterable<_PartialLicenseMatch> _findLicenseBlocks(String body, RegExp pattern, i
         if (lastWasBlank && (foundNonBlank || !needsCopyright))
           break;
         lastWasBlank = true;
-      } else if (((!isBlockCommentLine && line.startsWith('/*')) ||
-                 line.startsWith('<!--') ||
-                 (range.start == 0 && line.startsWith('  $fullPrefix')))) {
+      } else if ((!isBlockCommentLine && line.startsWith('/*'))
+                 || line.startsWith('<!--')
+                 || (range.start == 0 && line.startsWith('  $fullPrefix'))) {
         start = range.start;
         firstLineSpecialComment = true;
         break;
