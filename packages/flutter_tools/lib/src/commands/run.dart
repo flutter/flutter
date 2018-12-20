@@ -35,17 +35,17 @@ abstract class RunCommandBase extends FlutterCommand {
       ..addOption('route',
         help: 'Which route to load when running the app.',
       )
-      ..addFlag('save-compilation-trace',
+      ..addFlag('train',
         hide: !verboseHelp,
         negatable: false,
-        help: 'Save runtime compilation trace to a file.\n'
-              'Compilation trace will be saved to compilation.txt when \'flutter run\' exits. '
+        help: 'Save Dart runtime compilation trace to a file. '
+              'Compilation trace will be saved to a file specified by --compilation-trace-file '
+              'when \'flutter run --dynamic --profile --train\' exits. '
               'This file contains a list of Dart symbols that were compiled by the runtime JIT '
-              'compiler up to that point. This file can be used in later --dynamic builds to '
-              'precompile some code by the offline compiler, thus reducing application startup '
-              'latency at the cost of larger application package.\n'
-              'This flag is only allowed when running --dynamic --profile (recommended) or '
-              '--debug mode.\n'
+              'compiler up to that point. This file can be used in subsequent --dynamic builds '
+              'to precompile some code by the offline compiler. '
+              'This flag is only allowed when running as --dynamic --profile (recommended) or '
+              '--debug (may include unwanted debug symbols).'
       )
       ..addOption('target-platform',
         defaultsTo: 'default',
@@ -315,10 +315,10 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    if (argResults['save-compilation-trace'] &&
+    if (argResults['train'] &&
         getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile)
-      throwToolExit('Error: --save-compilation-trace is only allowed when running '
-          '--dynamic --profile (recommended) or --debug mode.');
+      throwToolExit('Error: --train is only allowed when running as --dynamic --profile '
+          '(recommended) or --debug (may include unwanted debug symbols).');
 
     final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {
       return FlutterDevice(
@@ -345,7 +345,7 @@ class RunCommand extends RunCommandBase {
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
         dillOutputPath: argResults['output-dill'],
-        saveCompilationTrace: argResults['save-compilation-trace'],
+        saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -358,7 +358,7 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
-        saveCompilationTrace: argResults['save-compilation-trace'],
+        saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,
       );

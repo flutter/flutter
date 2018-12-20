@@ -242,14 +242,13 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addDynamicModeFlags({bool verboseHelp = false}) {
-    argParser.addOption('precompile',
+    argParser.addOption('compilation-trace-file',
+        defaultsTo: 'compilation.txt',
         hide: !verboseHelp,
-        help: 'Precompile functions specified in input file. This flag is only '
-              'allowed when using --dynamic. It takes a Dart compilation trace '
-              'file produced by the training run of the application. With this '
-              'flag, instead of using default Dart VM snapshot provided by the '
-              'engine, the application will use its own snapshot that includes '
-              'additional compiled functions.'
+        help: 'Filename of Dart compilation trace file. This file will be produced\n'
+              'by \'flutter run --dynamic --profile --train\' and consumed by subsequent\n'
+              '--dynamic builds such as \'flutter build apk --dynamic\' to precompile\n'
+              'some code by the offline compiler.'
     );
     argParser.addFlag('patch',
         hide: !verboseHelp,
@@ -381,8 +380,8 @@ abstract class FlutterCommand extends Command<void> {
         ? argResults['flavor']
         : null,
       trackWidgetCreation: trackWidgetCreation,
-      compilationTraceFilePath: argParser.options.containsKey('precompile')
-          ? argResults['precompile']
+      compilationTraceFilePath: argParser.options.containsKey('compilation-trace-file')
+          ? argResults['compilation-trace-file']
           : null,
       createBaseline: argParser.options.containsKey('baseline')
           ? argResults['baseline']
@@ -647,23 +646,23 @@ abstract class FlutterCommand extends Command<void> {
 
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
         ? argResults['dynamic'] : false;
-    final String compilationTraceFilePath = argParser.options.containsKey('precompile')
-        ? argResults['precompile'] : null;
+    final String compilationTraceFilePath = argParser.options.containsKey('compilation-trace-file')
+        ? argResults['compilation-trace-file'] : null;
     final bool createBaseline = argParser.options.containsKey('baseline')
         ? argResults['baseline'] : false;
     final bool createPatch = argParser.options.containsKey('patch')
         ? argResults['patch'] : false;
 
-    if (compilationTraceFilePath != null && getBuildMode() == BuildMode.debug)
-      throw ToolExit('Error: --precompile is not allowed when --debug is specified.');
-    if (compilationTraceFilePath != null && !dynamicFlag)
-      throw ToolExit('Error: --precompile is allowed only when --dynamic is specified.');
     if (createBaseline && createPatch)
       throw ToolExit('Error: Only one of --baseline, --patch is allowed.');
+    if (createBaseline && !dynamicFlag)
+      throw ToolExit('Error: --baseline is allowed only when --dynamic is specified.');
     if (createBaseline && compilationTraceFilePath == null)
-      throw ToolExit('Error: --baseline is allowed only when --precompile is specified.');
+      throw ToolExit('Error: --baseline requires --compilation-trace-file to be specified.');
+    if (createPatch && !dynamicFlag)
+      throw ToolExit('Error: --patch is allowed only when --dynamic is specified.');
     if (createPatch && compilationTraceFilePath == null)
-      throw ToolExit('Error: --patch is allowed only when --precompile is specified.');
+      throw ToolExit('Error: --patch requires --compilation-trace-file to be specified.');
   }
 
   ApplicationPackageStore applicationPackages;
