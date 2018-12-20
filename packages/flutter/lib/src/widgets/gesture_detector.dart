@@ -161,6 +161,7 @@ class GestureDetector extends StatelessWidget {
     this.onDoubleTap,
     this.onLongPress,
     this.onLongPressUp,
+    this.onLongPressRejected,
     this.onVerticalDragDown,
     this.onVerticalDragStart,
     this.onVerticalDragUpdate,
@@ -259,6 +260,9 @@ class GestureDetector extends StatelessWidget {
 
   /// A pointer that has triggered a long-press has stopped contacting the screen.
   final GestureLongPressUpCallback onLongPressUp;
+
+  /// A pointer that has triggered a long-press travelled beyond[kTouchSlop] pixels from the original contact point.
+  final GestureLongPressUpCallback onLongPressRejected;
 
   /// A pointer has contacted the screen and might begin to move vertically.
   final GestureDragDownCallback onVerticalDragDown;
@@ -396,14 +400,14 @@ class GestureDetector extends StatelessWidget {
         },
       );
     }
-
-    if (onLongPress != null || onLongPressUp !=null) {
+    if (onLongPress != null || onLongPressUp != null || onLongPressRejected != null) {
       gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
         () => LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
             ..onLongPress = onLongPress
-            ..onLongPressUp = onLongPressUp;
+            ..onLongPressUp = onLongPressUp
+            ..onLongPressRejected = onLongPressRejected;
         },
       );
     }

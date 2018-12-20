@@ -14,6 +14,9 @@ typedef GestureLongPressCallback = void Function();
 /// Signature for when a pointer stops contacting the screen after a long press gesture was detected.
 typedef GestureLongPressUpCallback = void Function();
 
+/// Signature for when a pointer travels beyond[kTouchSlop] pixels from the original contact point.
+typedef GestureLongPressRejectedCallback = void Function();
+
 /// Recognizes when the user has pressed down at the same location for a long
 /// period of time.
 class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
@@ -30,6 +33,9 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   /// Called when the pointer stops contacting the screen after the long-press gesture has been recognized.
   GestureLongPressUpCallback onLongPressUp;
+
+  /// Called when the pointer travels beyond[kTouchSlop] pixels from the original contact point after the long-press gesture has been recognized.
+  GestureLongPressRejectedCallback onLongPressRejected;
 
   @override
   void didExceedDeadline() {
@@ -57,4 +63,13 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   String get debugDescription => 'long press';
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {
+    super.didStopTrackingLastPointer(pointer);
+    if (_longPressAccepted) {
+      _longPressAccepted = false;
+      invokeCallback<void>('onLongPressRejected', onLongPressRejected);
+    }
+  }
 }
