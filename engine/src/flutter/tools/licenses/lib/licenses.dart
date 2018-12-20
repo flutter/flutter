@@ -357,9 +357,10 @@ abstract class License implements Comparable<License> {
   bool get isUsed => _licensees.isNotEmpty;
 
   void markUsed(String filename, String libraryName) {
+    assert(filename != null);
+    assert(filename != '');
     assert(libraryName != null);
     assert(libraryName != '');
-    filename != null;
     _licensees.add(filename);
     _libraries.add(libraryName);
   }
