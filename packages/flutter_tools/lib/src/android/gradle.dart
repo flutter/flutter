@@ -424,18 +424,20 @@ Future<void> _buildGradleProjectV2(
   }
   printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.');
 
-  final AndroidApk package = AndroidApk.fromApk(apkFile);
-  final File baselineApkFile =
-    fs.directory(buildInfo.baselineDir).childFile('${package.versionCode}.apk');
-
   if (buildInfo.createBaseline) {
     // Save baseline apk for generating dynamic patches in later builds.
+    final AndroidApk package = AndroidApk.fromApk(apkFile);
+    final Directory baselineDir = fs.directory(buildInfo.baselineDir);
+    final File baselineApkFile = baselineDir.childFile('${package.versionCode}.apk');
     baselineApkFile.parent.createSync(recursive: true);
     apkFile.copySync(baselineApkFile.path);
     printStatus('Saved baseline package ${baselineApkFile.path}.');
   }
 
   if (buildInfo.createPatch) {
+    final AndroidApk package = AndroidApk.fromApk(apkFile);
+    final Directory baselineDir = fs.directory(buildInfo.baselineDir);
+    final File baselineApkFile = baselineDir.childFile('${package.versionCode}.apk');
     if (!baselineApkFile.existsSync())
       throwToolExit('Error: Could not find baseline package ${baselineApkFile.path}.');
 
