@@ -530,8 +530,8 @@ class ArchiveDirectory extends IoNode implements Directory {
   @override
   final String name;
 
-  Map<String, ArchiveDirectory> _subdirectories = SplayTreeMap<String, ArchiveDirectory>();
-  List<ArchiveFile> _files = <ArchiveFile>[];
+  final Map<String, ArchiveDirectory> _subdirectories = SplayTreeMap<String, ArchiveDirectory>();
+  final List<ArchiveFile> _files = <ArchiveFile>[];
 
   void _add(a.ArchiveFile entry, List<String> remainingPath) {
     if (remainingPath.length > 1) {
