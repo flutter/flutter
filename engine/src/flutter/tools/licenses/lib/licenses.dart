@@ -518,7 +518,7 @@ Iterable<_LineRange> _walkLinesForwards(String body, { int start: 0, int end }) 
 
 class _SplitLicense {
   _SplitLicense(this._body, this._split) {
-    assert(this._split == 0 || this._split == this._body.length || this._body[this._split] == '\n');
+    assert(_split == 0 || _split == _body.length || _body[_split] == '\n');
   }
   final String _body;
   final int _split;

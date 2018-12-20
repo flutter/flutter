@@ -58,4 +58,5 @@ linter:
     - unnecessary_getters_setters
     - unnecessary_new
     - unnecessary_statements
+    - unnecessary_this
     - package_names
