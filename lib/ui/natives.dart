@@ -36,21 +36,32 @@ void _setupHooks() {
   }());
 }
 
-void saveCompilationTrace(String filePath) {
-  final dynamic result = _saveCompilationTrace();
-  if (result is Error)
-    throw result;
-
-  final File file = new File(filePath);
-  file.writeAsBytesSync(result);
-}
-
-List<int> dumpCompilationTrace() {
+/// Returns runtime Dart compilation trace as a UTF-8 encoded memory buffer.
+///
+/// The buffer contains a list of symbols compiled by the Dart JIT at runtime up to the point
+/// when this function was called. This list can be saved to a text file and passed to tools
+/// such as `flutter build` or Dart `gen_snapshot` in order to precompile this code offline.
+///
+/// The list has one symbol per line of the following format: `<namespace>,<class>,<symbol>\n`.
+/// Here are some examples:
+///
+/// ```
+/// dart:core,Duration,get:inMilliseconds
+/// package:flutter/src/widgets/binding.dart,::,runApp
+/// file:///.../my_app.dart,::,main
+/// ```
+///
+/// This function is only effective in debug and dynamic modes, and will throw in AOT mode.
+List<int> saveCompilationTrace() {
   final dynamic result = _saveCompilationTrace();
   if (result is Error)
     throw result;
   return result;
 }
+
+// TODO(sbaranov): This function will go away in subsequent PR, once the framework has caught up.
+@Deprecated('Use saveCompilationTrace() instead.')
+List<int> dumpCompilationTrace() => saveCompilationTrace();
 
 dynamic _saveCompilationTrace() native 'SaveCompilationTrace';
 
