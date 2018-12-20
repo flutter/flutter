@@ -332,6 +332,8 @@ mixin Latin1TextFile implements TextFile {
         cache(UTF8Of(this), () => utf8.decode(readBytes()));
         isUTF8 = true;
       } on FormatException {
+        // Exceptions are fine/expected for non-UTF8 text, which we test for
+        // immediately below.
       }
       if (isUTF8)
         throw '$fullName contains valid UTF-8 and is probably not actually encoded as Win1252';

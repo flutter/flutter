@@ -327,19 +327,19 @@ abstract class License implements Comparable<License> {
     try {
       latin1Encoded = latin1.encode(body);
       isUTF8 = false;
-    } on ArgumentError { }
+    } on ArgumentError { /* Fall through to next encoding check. */ }
     if (!isUTF8) {
       bool isAscii = false;
       try {
         ascii.decode(latin1Encoded);
         isAscii = true;
-      } on FormatException { }
+      } on FormatException { /* Fall through to next encoding check */ }
       if (isAscii)
         return;
       try {
         utf8.decode(latin1Encoded);
         isUTF8 = true;
-      } on FormatException { }
+      } on FormatException { /* We check isUTF8 below and throw if necessary */ }
       if (isUTF8)
         throw 'tried to create a License object with text that appears to have been misdecoded as Latin1 instead of as UTF-8:\n$body';
     }

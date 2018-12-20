@@ -16,6 +16,7 @@ linter:
     - close_sinks
     - control_flow_in_finally
     - empty_statements
+    - empty_catches
     - hash_and_equals
     # - invariant_booleans  # Produces false positives, see https://github.com/flutter/flutter/issues/5790
     - iterable_contains_unrelated_type
