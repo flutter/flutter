@@ -53,4 +53,5 @@ linter:
     - unawaited_futures
     - unnecessary_brace_in_string_interps
     - unnecessary_getters_setters
+    - unnecessary_new
     - package_names

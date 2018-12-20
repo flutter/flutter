@@ -6,30 +6,30 @@
 
 const String kIndent = r'^((?:[-;@#<!.\\"/* ]*(?:REM[-;@#<!.\\"/* ]*)?[-;@#<!.\"/*]+)?)( *)';
 
-final RegExp stripDecorations = new RegExp(
+final RegExp stripDecorations = RegExp(
   r'^((?:(?:[-;@#<!.\\"/* ]*(?:REM[-;@#<!.\\"/* ]*)?[-;@#<!.\"/*]+)?)(?:(?: |\t)*))(.*?)[ */]*$',
   multiLine: true,
   caseSensitive: false
 );
 
-final RegExp newlinePattern = new RegExp(r'\r\n?');
+final RegExp newlinePattern = RegExp(r'\r\n?');
 
-final RegExp beginLicenseBlock = new RegExp(
+final RegExp beginLicenseBlock = RegExp(
   r'^([#;/* ]*) (?:\*\*\*\*\* BEGIN LICENSE BLOCK \*\*\*\*\*[ */]*'
                 r'|@APPLE_LICENSE_HEADER_START@)$'
 );
 
-final RegExp endLicenseBlock = new RegExp(
+final RegExp endLicenseBlock = RegExp(
   r'^([#;/* ]*) (?:\*\*\*\*\* END LICENSE BLOCK \*\*\*\*\*[ */]*'
                 r'|@APPLE_LICENSE_HEADER_END@)$'
 );
 
-final RegExp nonSpace = new RegExp('[^ ]');
-final RegExp trailingComma = new RegExp(r',[ */]*$');
-final RegExp trailingColon = new RegExp(r':(?: |\*|/|\n|=|-)*$');
-final RegExp copyrightMentionPattern = new RegExp(r'©| \(c\) (?!{)|copy\s*right\b|copy\s*left', caseSensitive: false);
-final RegExp licenseMentionPattern = new RegExp(r'license|warrant[iy]', caseSensitive: false);
-final RegExp copyrightMentionOkPattern = new RegExp(
+final RegExp nonSpace = RegExp('[^ ]');
+final RegExp trailingComma = RegExp(r',[ */]*$');
+final RegExp trailingColon = RegExp(r':(?: |\*|/|\n|=|-)*$');
+final RegExp copyrightMentionPattern = RegExp(r'©| \(c\) (?!{)|copy\s*right\b|copy\s*left', caseSensitive: false);
+final RegExp licenseMentionPattern = RegExp(r'license|warrant[iy]', caseSensitive: false);
+final RegExp copyrightMentionOkPattern = RegExp(
   // if a (multiline) block matches this, we ignore it even if it matches copyrightMentionPattern/licenseMentionPattern
   r'(?:These are covered by the following copyright:'
      r'|^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)((?: |\t)*)COPYRIGHT: *\r?\n'
@@ -47,118 +47,118 @@ final RegExp copyrightMentionOkPattern = new RegExp(
      r'^ \*    copyright\.\n'
   r')',
   caseSensitive: false, multiLine: true);
-final RegExp halfCopyrightPattern = new RegExp(r'^(?:Copyright(?: \(c\))? [-0-9, ]+(?: by)?|Written [0-9]+)[ */]*$', caseSensitive: false);
-final RegExp authorPattern = new RegExp(r'Copyright .+(The .+ Authors)\. +All rights reserved\.', caseSensitive: false);
+final RegExp halfCopyrightPattern = RegExp(r'^(?:Copyright(?: \(c\))? [-0-9, ]+(?: by)?|Written [0-9]+)[ */]*$', caseSensitive: false);
+final RegExp authorPattern = RegExp(r'Copyright .+(The .+ Authors)\. +All rights reserved\.', caseSensitive: false);
 
 // copyright blocks start with the first line matching this
 final List<RegExp> copyrightStatementLeadingPatterns = <RegExp>[
-  new RegExp(r'^ *(?:Portions(?: are)? )?Copyright .+$', caseSensitive: false),
-  new RegExp(r'^.*All rights? reserved\.$', caseSensitive: false),
-  new RegExp(r'^ *\(C\) .+$', caseSensitive: false),
-  new RegExp(r'^:copyright: .+$', caseSensitive: false),
-  new RegExp(r'[-_a-zA-Z0-9()]+ function provided freely by .+'),
-  new RegExp(r'^.+ optimized code \(C\) COPYRIGHT .+$', caseSensitive: false),
-  new RegExp(r'©'),
+  RegExp(r'^ *(?:Portions(?: are)? )?Copyright .+$', caseSensitive: false),
+  RegExp(r'^.*All rights? reserved\.$', caseSensitive: false),
+  RegExp(r'^ *\(C\) .+$', caseSensitive: false),
+  RegExp(r'^:copyright: .+$', caseSensitive: false),
+  RegExp(r'[-_a-zA-Z0-9()]+ function provided freely by .+'),
+  RegExp(r'^.+ optimized code \(C\) COPYRIGHT .+$', caseSensitive: false),
+  RegExp(r'©'),
 
   // TODO(ianh): I wish there was a way around including the next few lines so many times in the output:
-  new RegExp(r"^This file (?:is|was) part of the Independent JPEG Group's software[:.]$"),
-  new RegExp(r'^It was modified by The libjpeg-turbo Project to include only code$'),
-  new RegExp(r'^relevant to libjpeg-turbo\.$'),
-  new RegExp(r'^It was modified by The libjpeg-turbo Project to include only code relevant$'),
-  new RegExp(r'^to libjpeg-turbo\.$'),
-  new RegExp(r'^It was modified by The libjpeg-turbo Project to include only code and$'),
-  new RegExp(r'^information relevant to libjpeg-turbo\.$'),
+  RegExp(r"^This file (?:is|was) part of the Independent JPEG Group's software[:.]$"),
+  RegExp(r'^It was modified by The libjpeg-turbo Project to include only code$'),
+  RegExp(r'^relevant to libjpeg-turbo\.$'),
+  RegExp(r'^It was modified by The libjpeg-turbo Project to include only code relevant$'),
+  RegExp(r'^to libjpeg-turbo\.$'),
+  RegExp(r'^It was modified by The libjpeg-turbo Project to include only code and$'),
+  RegExp(r'^information relevant to libjpeg-turbo\.$'),
 ];
 
 // copyright blocks end with the last line that matches this, rest is considered license
 final List<RegExp> copyrightStatementPatterns = <RegExp>[
-  new RegExp(r'^ *(?:Portions(?: created by the Initial Developer)?(?: are)? )?Copyright .+$', caseSensitive: false),
-  new RegExp(r'^\(Version [-0-9.:, ]+ Copyright .+\)$', caseSensitive: false),
-  new RegExp(r'^.*(?:All )?rights? reserved\.$', caseSensitive: false),
-  new RegExp(r'^ *\(C\) .+$', caseSensitive: false),
-  new RegExp(r'^:copyright: .+$', caseSensitive: false),
-  new RegExp(r'^ *[0-9][0-9][0-9][0-9].+ [<(].+@.+[)>]$'),
-  new RegExp(r'^                   [^ ].* [<(].+@.+[)>]$'), // that's exactly the number of spaces to line up with the X if "Copyright (c) 2011 X" is on the previous line
-  new RegExp(r'^ *and .+$', caseSensitive: false),
-  new RegExp(r'^ *others\.?$', caseSensitive: false),
-  new RegExp(r'^for more details\.$', caseSensitive: false),
-  new RegExp(r'^ *For more info read ([^ ]+)$', caseSensitive: false),
-  new RegExp(r'^(?:Google )?Author\(?s?\)?: .+', caseSensitive: false),
-  new RegExp(r'^Written by .+', caseSensitive: false),
-  new RegExp(r'^Based on$', caseSensitive: false),
-  new RegExp(r"^based on (?:code in )?['`][^'`]+['`]$", caseSensitive: false),
-  new RegExp(r"^Based on .+, written by .+, [0-9]+\.$", caseSensitive: false),
-  new RegExp(r'^(?:Based on the )?x86 SIMD extension for IJG JPEG library(?: - version [0-9.]+|,)?$'),
-  new RegExp(r'^This software originally derived from .+\.$'),
-  new RegExp(r'^Derived from .+, which was$'),
-  new RegExp(r'^ *This is part of .+, a .+ library\.$'),
-  new RegExp(r'^This file is part of [^ ]+\.$'),
-  new RegExp(r'^(?:Modification )?[Dd]eveloped [-0-9]+ by .+\.$', caseSensitive: false),
-  new RegExp(r'^Modified .+[:.]$', caseSensitive: false),
-  new RegExp(r'^(?:[^ ]+ )?Modifications:$', caseSensitive: false),
-  new RegExp(r'^ *Modifications for', caseSensitive: false),
-  new RegExp(r'^ *Modifications of', caseSensitive: false),
-  new RegExp(r'^Last changed in .+$', caseSensitive: false),
-  new RegExp(r'[-_a-zA-Z0-9()]+ function provided freely by .+'), // TODO(ianh): file a bug on analyzer about what happens if you omit this comma
-  new RegExp(r'^.+ optimized code \(C\) COPYRIGHT .+$', caseSensitive: false),
-  new RegExp(r'^\(Royal Institute of Technology, Stockholm, Sweden\)\.$'),
-  new RegExp(r'^\(?https?://[^ ]+$\)?'),
+  RegExp(r'^ *(?:Portions(?: created by the Initial Developer)?(?: are)? )?Copyright .+$', caseSensitive: false),
+  RegExp(r'^\(Version [-0-9.:, ]+ Copyright .+\)$', caseSensitive: false),
+  RegExp(r'^.*(?:All )?rights? reserved\.$', caseSensitive: false),
+  RegExp(r'^ *\(C\) .+$', caseSensitive: false),
+  RegExp(r'^:copyright: .+$', caseSensitive: false),
+  RegExp(r'^ *[0-9][0-9][0-9][0-9].+ [<(].+@.+[)>]$'),
+  RegExp(r'^                   [^ ].* [<(].+@.+[)>]$'), // that's exactly the number of spaces to line up with the X if "Copyright (c) 2011 X" is on the previous line
+  RegExp(r'^ *and .+$', caseSensitive: false),
+  RegExp(r'^ *others\.?$', caseSensitive: false),
+  RegExp(r'^for more details\.$', caseSensitive: false),
+  RegExp(r'^ *For more info read ([^ ]+)$', caseSensitive: false),
+  RegExp(r'^(?:Google )?Author\(?s?\)?: .+', caseSensitive: false),
+  RegExp(r'^Written by .+', caseSensitive: false),
+  RegExp(r'^Based on$', caseSensitive: false),
+  RegExp(r"^based on (?:code in )?['`][^'`]+['`]$", caseSensitive: false),
+  RegExp(r"^Based on .+, written by .+, [0-9]+\.$", caseSensitive: false),
+  RegExp(r'^(?:Based on the )?x86 SIMD extension for IJG JPEG library(?: - version [0-9.]+|,)?$'),
+  RegExp(r'^This software originally derived from .+\.$'),
+  RegExp(r'^Derived from .+, which was$'),
+  RegExp(r'^ *This is part of .+, a .+ library\.$'),
+  RegExp(r'^This file is part of [^ ]+\.$'),
+  RegExp(r'^(?:Modification )?[Dd]eveloped [-0-9]+ by .+\.$', caseSensitive: false),
+  RegExp(r'^Modified .+[:.]$', caseSensitive: false),
+  RegExp(r'^(?:[^ ]+ )?Modifications:$', caseSensitive: false),
+  RegExp(r'^ *Modifications for', caseSensitive: false),
+  RegExp(r'^ *Modifications of', caseSensitive: false),
+  RegExp(r'^Last changed in .+$', caseSensitive: false),
+  RegExp(r'[-_a-zA-Z0-9()]+ function provided freely by .+'), // TODO(ianh): file a bug on analyzer about what happens if you omit this comma
+  RegExp(r'^.+ optimized code \(C\) COPYRIGHT .+$', caseSensitive: false),
+  RegExp(r'^\(Royal Institute of Technology, Stockholm, Sweden\)\.$'),
+  RegExp(r'^\(?https?://[^ ]+$\)?'),
 
-  new RegExp(r'^The Original Code is Mozilla Communicator client code, released$'),
-  new RegExp(r'^March 31, 1998.$'), // mozilla first release date
+  RegExp(r'^The Original Code is Mozilla Communicator client code, released$'),
+  RegExp(r'^March 31, 1998.$'), // mozilla first release date
 
-  new RegExp(r'^The Elliptic Curve Public-Key Crypto Library \(ECC Code\) included$'),
-  new RegExp(r'^herein is developed by SUN MICROSYSTEMS, INC\., and is contributed$'),
-  new RegExp(r'^to the OpenSSL project\.$'),
+  RegExp(r'^The Elliptic Curve Public-Key Crypto Library \(ECC Code\) included$'),
+  RegExp(r'^herein is developed by SUN MICROSYSTEMS, INC\., and is contributed$'),
+  RegExp(r'^to the OpenSSL project\.$'),
 
-  new RegExp(r'^This code is derived from software contributed to The NetBSD Foundation$'),
-  new RegExp(r'^by (?:Atsushi Onoe|Dieter Baron|Klaus Klein|Luke Mewburn|Thomas Klausner|,| |and)*\.$'),
+  RegExp(r'^This code is derived from software contributed to The NetBSD Foundation$'),
+  RegExp(r'^by (?:Atsushi Onoe|Dieter Baron|Klaus Klein|Luke Mewburn|Thomas Klausner|,| |and)*\.$'),
 
-  new RegExp(r'^FT_Raccess_Get_HeaderInfo\(\) and raccess_guess_darwin_hfsplus\(\) are$'),
-  new RegExp(r'^derived from ftobjs\.c\.$'),
+  RegExp(r'^FT_Raccess_Get_HeaderInfo\(\) and raccess_guess_darwin_hfsplus\(\) are$'),
+  RegExp(r'^derived from ftobjs\.c\.$'),
 
   // TODO(ianh): I wish there was a way around including the next few lines so many times in the output:
-  new RegExp(r"^This file (?:is|was) part of the Independent JPEG Group's software[:.]$"),
-  new RegExp(r'^It was modified by The libjpeg-turbo Project to include only code$'),
-  new RegExp(r'^relevant to libjpeg-turbo\.$'),
-  new RegExp(r'^It was modified by The libjpeg-turbo Project to include only code relevant$'),
-  new RegExp(r'^to libjpeg-turbo\.$'),
-  new RegExp(r'^It was modified by The libjpeg-turbo Project to include only code and$'),
-  new RegExp(r'^information relevant to libjpeg-turbo\.$'),
+  RegExp(r"^This file (?:is|was) part of the Independent JPEG Group's software[:.]$"),
+  RegExp(r'^It was modified by The libjpeg-turbo Project to include only code$'),
+  RegExp(r'^relevant to libjpeg-turbo\.$'),
+  RegExp(r'^It was modified by The libjpeg-turbo Project to include only code relevant$'),
+  RegExp(r'^to libjpeg-turbo\.$'),
+  RegExp(r'^It was modified by The libjpeg-turbo Project to include only code and$'),
+  RegExp(r'^information relevant to libjpeg-turbo\.$'),
 
-  new RegExp(r'^All or some portions of this file are derived from material licensed$'),
-  new RegExp(r'^to the University of California by American Telephone and Telegraph$'),
-  new RegExp(r'^Co\. or Unix System Laboratories, Inc\. and are reproduced herein with$'),
-  new RegExp(r'^the permission of UNIX System Laboratories, Inc.$'),
+  RegExp(r'^All or some portions of this file are derived from material licensed$'),
+  RegExp(r'^to the University of California by American Telephone and Telegraph$'),
+  RegExp(r'^Co\. or Unix System Laboratories, Inc\. and are reproduced herein with$'),
+  RegExp(r'^the permission of UNIX System Laboratories, Inc.$'),
 
-  new RegExp(r'^This software was developed by the Computer Systems Engineering group$'),
-  new RegExp(r'^at Lawrence Berkeley Laboratory under DARPA contract BG 91-66 and$'),
-  new RegExp(r'^contributed to Berkeley\.$'),
+  RegExp(r'^This software was developed by the Computer Systems Engineering group$'),
+  RegExp(r'^at Lawrence Berkeley Laboratory under DARPA contract BG 91-66 and$'),
+  RegExp(r'^contributed to Berkeley\.$'),
 
-  new RegExp(r'^This code is derived from software contributed to Berkeley by$'),
-  new RegExp(r'^Ralph Campbell\. +This file is derived from the MIPS RISC$'),
-  new RegExp(r'^Architecture book by Gerry Kane\.$'),
+  RegExp(r'^This code is derived from software contributed to Berkeley by$'),
+  RegExp(r'^Ralph Campbell\. +This file is derived from the MIPS RISC$'),
+  RegExp(r'^Architecture book by Gerry Kane\.$'),
 
-  new RegExp(r'^All advertising materials mentioning features or use of this software$'),
-  new RegExp(r'^must display the following acknowledgement:$'),
-  new RegExp(r'^This product includes software developed by the University of$'),
-  new RegExp(r'^California, Lawrence Berkeley Laboratory\.$'),
+  RegExp(r'^All advertising materials mentioning features or use of this software$'),
+  RegExp(r'^must display the following acknowledgement:$'),
+  RegExp(r'^This product includes software developed by the University of$'),
+  RegExp(r'^California, Lawrence Berkeley Laboratory\.$'),
 
-  new RegExp(r'^ *Condition of use and distribution are the same than zlib :$'),
-  new RegExp(r'^The MIT License:$'),
+  RegExp(r'^ *Condition of use and distribution are the same than zlib :$'),
+  RegExp(r'^The MIT License:$'),
 
-  new RegExp(r'^$'), // TODO(ianh): file an issue on what happens if you omit the close quote
+  RegExp(r'^$'), // TODO(ianh): file an issue on what happens if you omit the close quote
 
 ];
 
 // patterns that indicate we're running into another license
 final List<RegExp> licenseFragments = <RegExp>[
-  new RegExp(r'"as is" without express or implied warranty\.'),
-  new RegExp(r'version of this file under any of the LGPL, the MPL or the GPL\.'),
-  new RegExp(r'SUCH DAMAGE\.'),
-  new RegExp(r'found in the LICENSE file'),
-  new RegExp(r'<http://www\.gnu\.org/licenses/>'),
-  new RegExp(r'License & terms of use'),
+  RegExp(r'"as is" without express or implied warranty\.'),
+  RegExp(r'version of this file under any of the LGPL, the MPL or the GPL\.'),
+  RegExp(r'SUCH DAMAGE\.'),
+  RegExp(r'found in the LICENSE file'),
+  RegExp(r'<http://www\.gnu\.org/licenses/>'),
+  RegExp(r'License & terms of use'),
 ];
 
 final String _linebreak      = r' *(?:(?:\*/ *|[*#])?(?:\n\1 *(?:\*/ *)?)*\n\1\2 *)?';
@@ -166,15 +166,15 @@ final String _linebreakLoose = r' *(?:(?:\*/ *|[*#])?\n(?:-|;|#|<|!|/|\*| |REM)*
 
 // LICENSE RECOGNIZERS
 
-final RegExp lrApache = new RegExp(r'^(?: |\r|\n)*Apache License\b');
-final RegExp lrMPL = new RegExp(r'^(?: |\r|\n)*Mozilla Public License Version 2\.0\n');
-final RegExp lrGPL = new RegExp(r'^(?: |\r|\n)*GNU GENERAL PUBLIC LICENSE\n');
-final RegExp lrAPSL = new RegExp(r'^APPLE PUBLIC SOURCE LICENSE Version 2\.0 +- +August 6, 2003');
-final RegExp lrMIT = new RegExp(r'Permission(?: |\n)+is(?: |\n)+hereby(?: |\n)+granted,(?: |\n)+free(?: |\n)+of(?: |\n)+charge,(?: |\n)+to(?: |\n)+any(?: |\n)+person(?: |\n)+obtaining(?: |\n)+a(?: |\n)+copy(?: |\n)+of(?: |\n)+this(?: |\n)+software(?: |\n)+and(?: |\n)+associated(?: |\n)+documentation(?: |\n)+files(?: |\n)+\(the(?: |\n)+"Software"\),(?: |\n)+to(?: |\n)+deal(?: |\n)+in(?: |\n)+the(?: |\n)+Software(?: |\n)+without(?: |\n)+restriction,(?: |\n)+including(?: |\n)+without(?: |\n)+limitation(?: |\n)+the(?: |\n)+rights(?: |\n)+to(?: |\n)+use,(?: |\n)+copy,(?: |\n)+modify,(?: |\n)+merge,(?: |\n)+publish,(?: |\n)+distribute,(?: |\n)+sublicense,(?: |\n)+and/or(?: |\n)+sell(?: |\n)+copies(?: |\n)+of(?: |\n)+the(?: |\n)+Software,(?: |\n)+and(?: |\n)+to(?: |\n)+permit(?: |\n)+persons(?: |\n)+to(?: |\n)+whom(?: |\n)+the(?: |\n)+Software(?: |\n)+is(?: |\n)+furnished(?: |\n)+to(?: |\n)+do(?: |\n)+so,(?: |\n)+subject(?: |\n)+to(?: |\n)+the(?: |\n)+following(?: |\n)+conditions:');
-final RegExp lrOpenSSL = new RegExp(r'Copyright \(c\) 1998-2011 The OpenSSL Project\.  All rights reserved\.(.|\n)*Original SSLeay License');
-final RegExp lrBSD = new RegExp(r'Redistribution(?: |\n)+and(?: |\n)+use(?: |\n)+in(?: |\n)+source(?: |\n)+and(?: |\n)+binary(?: |\n)+forms(?:(?: |\n)+of(?: |\n)+the(?: |\n)+software(?: |\n)+as(?: |\n)+well(?: |\n)+as(?: |\n)+documentation)?,(?: |\n)+with(?: |\n)+or(?: |\n)+without(?: |\n)+modification,(?: |\n)+are(?: |\n)+permitted(?: |\n)+provided(?: |\n)+that(?: |\n)+the(?: |\n)+following(?: |\n)+conditions(?: |\n)+are(?: |\n)+met:');
-final RegExp lrZlib = new RegExp(r'Permission(?: |\n)+is(?: |\n)+granted(?: |\n)+to(?: |\n)+anyone(?: |\n)+to(?: |\n)+use(?: |\n)+this(?: |\n)+software(?: |\n)+for(?: |\n)+any(?: |\n)+purpose,(?: |\n)+including(?: |\n)+commercial(?: |\n)+applications,(?: |\n)+and(?: |\n)+to(?: |\n)+alter(?: |\n)+it(?: |\n)+and(?: |\n)+redistribute(?: |\n)+it(?: |\n)+freely,(?: |\n)+subject(?: |\n)+to(?: |\n)+the(?: |\n)+following(?: |\n)+restrictions:');
-final RegExp lrPNG = new RegExp(r'This code is released under the libpng license\.');
+final RegExp lrApache = RegExp(r'^(?: |\r|\n)*Apache License\b');
+final RegExp lrMPL = RegExp(r'^(?: |\r|\n)*Mozilla Public License Version 2\.0\n');
+final RegExp lrGPL = RegExp(r'^(?: |\r|\n)*GNU GENERAL PUBLIC LICENSE\n');
+final RegExp lrAPSL = RegExp(r'^APPLE PUBLIC SOURCE LICENSE Version 2\.0 +- +August 6, 2003');
+final RegExp lrMIT = RegExp(r'Permission(?: |\n)+is(?: |\n)+hereby(?: |\n)+granted,(?: |\n)+free(?: |\n)+of(?: |\n)+charge,(?: |\n)+to(?: |\n)+any(?: |\n)+person(?: |\n)+obtaining(?: |\n)+a(?: |\n)+copy(?: |\n)+of(?: |\n)+this(?: |\n)+software(?: |\n)+and(?: |\n)+associated(?: |\n)+documentation(?: |\n)+files(?: |\n)+\(the(?: |\n)+"Software"\),(?: |\n)+to(?: |\n)+deal(?: |\n)+in(?: |\n)+the(?: |\n)+Software(?: |\n)+without(?: |\n)+restriction,(?: |\n)+including(?: |\n)+without(?: |\n)+limitation(?: |\n)+the(?: |\n)+rights(?: |\n)+to(?: |\n)+use,(?: |\n)+copy,(?: |\n)+modify,(?: |\n)+merge,(?: |\n)+publish,(?: |\n)+distribute,(?: |\n)+sublicense,(?: |\n)+and/or(?: |\n)+sell(?: |\n)+copies(?: |\n)+of(?: |\n)+the(?: |\n)+Software,(?: |\n)+and(?: |\n)+to(?: |\n)+permit(?: |\n)+persons(?: |\n)+to(?: |\n)+whom(?: |\n)+the(?: |\n)+Software(?: |\n)+is(?: |\n)+furnished(?: |\n)+to(?: |\n)+do(?: |\n)+so,(?: |\n)+subject(?: |\n)+to(?: |\n)+the(?: |\n)+following(?: |\n)+conditions:');
+final RegExp lrOpenSSL = RegExp(r'Copyright \(c\) 1998-2011 The OpenSSL Project\.  All rights reserved\.(.|\n)*Original SSLeay License');
+final RegExp lrBSD = RegExp(r'Redistribution(?: |\n)+and(?: |\n)+use(?: |\n)+in(?: |\n)+source(?: |\n)+and(?: |\n)+binary(?: |\n)+forms(?:(?: |\n)+of(?: |\n)+the(?: |\n)+software(?: |\n)+as(?: |\n)+well(?: |\n)+as(?: |\n)+documentation)?,(?: |\n)+with(?: |\n)+or(?: |\n)+without(?: |\n)+modification,(?: |\n)+are(?: |\n)+permitted(?: |\n)+provided(?: |\n)+that(?: |\n)+the(?: |\n)+following(?: |\n)+conditions(?: |\n)+are(?: |\n)+met:');
+final RegExp lrZlib = RegExp(r'Permission(?: |\n)+is(?: |\n)+granted(?: |\n)+to(?: |\n)+anyone(?: |\n)+to(?: |\n)+use(?: |\n)+this(?: |\n)+software(?: |\n)+for(?: |\n)+any(?: |\n)+purpose,(?: |\n)+including(?: |\n)+commercial(?: |\n)+applications,(?: |\n)+and(?: |\n)+to(?: |\n)+alter(?: |\n)+it(?: |\n)+and(?: |\n)+redistribute(?: |\n)+it(?: |\n)+freely,(?: |\n)+subject(?: |\n)+to(?: |\n)+the(?: |\n)+following(?: |\n)+restrictions:');
+final RegExp lrPNG = RegExp(r'This code is released under the libpng license\.');
 
 
 // "NO COPYRIGHT" STATEMENTS
@@ -185,14 +185,14 @@ final List<RegExp> csNoCopyrights = <RegExp>[
   // groups are ignored
 
   // Seen in Expat files
-  new RegExp(
+  RegExp(
     r'^// No copyright notice; this file based on autogenerated header',
     multiLine: true,
     caseSensitive: false
   ),
 
   // Seen in Android NDK
-  new RegExp(
+  RegExp(
     r'^[/* ]*This header was automatically generated from a Linux kernel header\n'
     r'^[/* ]*of the same name, to make information necessary for userspace to\n'
     r'^[/* ]*call into the kernel available to libc.  It contains only constants,\n'
@@ -202,7 +202,7 @@ final List<RegExp> csNoCopyrights = <RegExp>[
     caseSensitive: false
   ),
 
-  new RegExp(
+  RegExp(
     kIndent +
     r'These constants were taken from version 3 of the DWARF standard, *\n'
     r'^\1\2which is Copyright \(c\) 2005 Free Standards Group, and *\n'
@@ -212,7 +212,7 @@ final List<RegExp> csNoCopyrights = <RegExp>[
   ),
 
   // Freetype
-  new RegExp(
+  RegExp(
     kIndent +
     (r'This is a dummy file, used to please the build system\. It is never included by the auto-fitter sources\.'.replaceAll(' ', _linebreak)),
     multiLine: true,
@@ -220,7 +220,7 @@ final List<RegExp> csNoCopyrights = <RegExp>[
   ),
 
   // Freetype
-  new RegExp(
+  RegExp(
     kIndent +
     (
       r'This software was written by Alexander Peslyak in 2001\. No copyright is '
@@ -248,7 +248,7 @@ final List<RegExp> csAttribution = <RegExp>[
   // group 1 is the prefix, group 2 is the attribution
 
   // Seen in musl in Android SDK
-  new RegExp(
+  RegExp(
     r'^([/* ]*)This code was written by (.+) in [0-9]+; no copyright is claimed\.\n'
     r'^\1This code is in the public domain\. +Attribution is appreciated but\n'
     r'^\1unnecessary\.',
@@ -277,12 +277,12 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
   // used with _tryReferenceByFilename
 
   // libpng files
-  new LicenseFileReferencePattern(
+  LicenseFileReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     fileIndex: 3,
     needsCopyright: true,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'This code is released under the libpng license. For conditions of distribution and use, see the disclaimer and license in (png.h)\b'.replaceAll(' ', _linebreak),
       multiLine: true,
@@ -291,11 +291,11 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
   ),
 
   // typical of much Google-written code
-  new LicenseFileReferencePattern(
+  LicenseFileReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     fileIndex: 3,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'Use of this source(?: code)? is governed by a BS?D-style license that can be found in the '.replaceAll(' ', _linebreak) +
       r'([^ ]+) file\b(?! or at)',
@@ -305,13 +305,13 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
   ),
 
   // Mojo code
-  new LicenseFileReferencePattern(
+  LicenseFileReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     copyrightIndex: 3,
     authorIndex: 4,
     fileIndex: 5,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'(Copyright .+(the .+ authors)\. +All rights reserved.) +' +
       r'Use of this source(?: code)? is governed by a BS?D-style license that can be found in the '.replaceAll(' ', _linebreak) +
@@ -322,13 +322,13 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
   ),
 
   // typical of Dart-derived files
-  new LicenseFileReferencePattern(
+  LicenseFileReferencePattern(
     firstPrefixIndex: 2,
     indentPrefixIndex: 3,
     copyrightIndex: 1,
     authorIndex: 4,
     fileIndex: 5,
-    pattern: new RegExp(
+    pattern: RegExp(
       r'(' + kIndent +
       r'Copyright .+(the .+ authors)\[?\. '
       r'Please see the AUTHORS file for details. All rights (?:re|solve)served\.) '
@@ -341,11 +341,11 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
   ),
 
   // Seen in libjpeg-turbo
-  new LicenseFileReferencePattern(
+  LicenseFileReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     fileIndex: 3,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent + r'For conditions of distribution and use, see (?:the accompanying|copyright notice in)? ([-_.a-zA-Z0-9]+)',
       multiLine: true,
       caseSensitive: false,
@@ -353,11 +353,11 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
   ),
 
   // Seen in Expat files
-  new LicenseFileReferencePattern(
+  LicenseFileReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     fileIndex: 3,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent + r'See the file ([^ ]+) for copying permission\.',
       multiLine: true,
       caseSensitive: false,
@@ -365,11 +365,11 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
   ),
 
   // Seen in Expat files
-  new LicenseFileReferencePattern(
+  LicenseFileReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     fileIndex: 3,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'This is free software. You are permitted to copy, distribute, or modify *\n'
       r'^\1\2it under the terms of the MIT/X license \(contained in the ([^ ]+) file *\n'
@@ -380,11 +380,11 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
   ),
 
   // Seen in FreeType software
-  new LicenseFileReferencePattern(
+  LicenseFileReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     fileIndex: 3,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'This file (?:is part of the FreeType project, and )?may only be used,? '
       r'modified,? and distributed under the terms of the FreeType project '
@@ -397,11 +397,11 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
   ),
 
   // Seen in FreeType cff software from Adobe
-  new LicenseFileReferencePattern(
+  LicenseFileReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     fileIndex: 3,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'This software, and all works of authorship, whether in source or '
       r'object code form as indicated by the copyright notice\(s\) included '
@@ -434,11 +434,11 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
   ),
 
   // Seen in Jinja files
-  new LicenseFileReferencePattern(
+  LicenseFileReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     fileIndex: 3,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent + r':license: [A-Z0-9]+, see (.+) for more details\.',
       multiLine: true,
       caseSensitive: false,
@@ -446,11 +446,11 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
   ),
 
   // Seen in modp_b64
-  new LicenseFileReferencePattern(
+  LicenseFileReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     fileIndex: 3,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent + r'Released under [^ ]+ license\. +See ([^ ]+) for details\.$',
       multiLine: true,
       caseSensitive: false,
@@ -458,11 +458,11 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
   ),
 
   // Seen in libxml files
-  new LicenseFileReferencePattern(
+  LicenseFileReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     fileIndex: 3,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent + r'(?:Copy: )?See ([A-Z0-9]+) for the status of this software\.?',
       multiLine: true,
       caseSensitive: false,
@@ -470,12 +470,12 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
   ),
 
   // Seen in libxml files
-  new LicenseFileReferencePattern(
+  LicenseFileReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     fileIndex: 3,
     needsCopyright: false,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'// This file is dual licensed under the MIT and the University of Illinois Open *\n'
       r'^\1\2// Source Licenses. See (LICENSE\.TXT) for details\.',
@@ -485,12 +485,12 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
   ),
 
   // BoringSSL
-  new LicenseFileReferencePattern(
+  LicenseFileReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     fileIndex: 3,
     needsCopyright: true,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'Licensed under the OpenSSL license \(the "License"\)\. You may not use '
       r'this file except in compliance with the License\. You can obtain a copy '
@@ -513,20 +513,20 @@ final List<RegExp> csReferencesByType = <RegExp>[
   // groups 1 and 2 are the prefix, group 3 is the license type
 
   // Seen in Jinja files, markupsafe files
-  new RegExp(
+  RegExp(
     kIndent + r':license: ([A-Z0-9]+)',
     multiLine: true,
     caseSensitive: false
   ),
 
-  new RegExp(
+  RegExp(
     kIndent +
     r'This software is made available under the terms of the (ICU) License -- ICU 1\.\8\.1 and later\.'.replaceAll(' ', _linebreak),
     multiLine: true,
     caseSensitive: false
   ),
 
-  new RegExp(
+  RegExp(
     kIndent +
     (
       r'(?:@APPLE_LICENSE_HEADER_START@)? '
@@ -557,7 +557,7 @@ final List<RegExp> csReferencesByTypeNoCopyright = <RegExp>[
   // used with _tryReferenceByType
   // groups 1 and 2 are the prefix, group 3 is the license type
 
-  new RegExp(
+  RegExp(
     kIndent +
     r'Written by Andy Polyakov <appro@openssl\.org> for the OpenSSL '
     r'project\. The module is, however, dual licensed under (OpenSSL) and '
@@ -585,13 +585,13 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
   // used with _tryReferenceByUrl
 
   // AFL
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[3],
     versionIndicies: const <int, int>{ 3:4 },
     checkLocalFirst: false,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent + r'Licensed under the (Academic Free License) version (3\.0)',
       multiLine: true,
       caseSensitive: false,
@@ -600,12 +600,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
 
   // Eclipse
   // Seen in auto-generated Java code in the Dart repository.
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[3],
     checkLocalFirst: false,
-    pattern: new RegExp(
+    pattern: RegExp(
       r'^(?:[-;#<!.\\"/* ]*[-;#<!.\"/*]+)?( *)Licensed under the Eclipse Public License v1\.0 \(the "License"\); you may not use this file except *\n'
       r'^\1\2in compliance with the License\. +You may obtain a copy of the License at *\n'
       r'^\1\2 *\n'
@@ -624,12 +624,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
   // Seen in Android code.
   // TODO(ianh): For this license we only need to include the text once, not once per copyright
   // TODO(ianh): For this license we must also include all the NOTICE text (see section 4d)
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[3],
     checkLocalFirst: false,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'Licensed under the Apache License, Version 2\.0 \(the "License"\); *\n'
       r'^\1\2you may not use this file except in compliance with the License\. *\n'
@@ -648,12 +648,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
   ),
 
   // BSD
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[3],
     checkLocalFirst: false,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'Use of this source code is governed by a BS?D-style *\n'
       r'^\1\2license that can be found in the LICENSE file or at *\n'
@@ -665,12 +665,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
 
   // MIT
   // the crazy s/./->/ thing is someone being over-eager with search-and-replace in rapidjson
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[3],
     checkLocalFirst: false,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'Licensed under the MIT License \(the "License"\); you may not use this file except *\n'
       r'^\1\2in compliance with the License(?:\.|->) You may obtain a copy of the License at *\n'
@@ -687,12 +687,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
   ),
 
   // Observatory (polymer)
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[3],
     checkLocalFirst: false,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'This code may only be used under the BSD style license found at (http://polymer.github.io/LICENSE.txt)$',
       multiLine: true,
@@ -701,13 +701,13 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
   ),
 
   // ashmem
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[3],
     versionIndicies: const <int, int>{3:4},
     checkLocalFirst: false,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'This file is dual licensed. +It may be redistributed and/or modified *\n'
       r'^\1\2under the terms of the (Apache) (2\.0) License OR version 2 of the GNU *\n'
@@ -719,12 +719,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
 
   // GNU ISO C++ GPL+Exception
   // Seen in gnu-libstdc++ in Android NDK
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[5, 6],
     versionIndicies: const <int, int>{5:3, 6:4},
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'This file is part of the GNU ISO C\+\+ Library\. +This library is free *\n'
       r'^\1\2software; you can redistribute _?_?it and/or modify _?_?it under the terms *\n'
@@ -752,12 +752,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
 
   // GNU ISO C++ GPL+Exception, alternative wrapping
   // Seen in gnu-libstdc++ in Android NDK
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[5, 6],
     versionIndicies: const <int, int>{5:3, 6:4},
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'This file is part of the GNU ISO C\+\+ Library\. +This library is free *\n'
       r'^\1\2software; you can redistribute it and/or modify it under the *\n'
@@ -785,12 +785,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
 
   // GNU ISO C++ GPL+Exception, alternative footer without exception filename
   // Seen in gnu-libstdc++ in Android NDK
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[6, 4],
     versionIndicies: const <int, int>{6:3, 4:5},
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'This file is part of the GNU ISO C\+\+ Library\. +This library is free *\n'
       r'^\1\2software; you can redistribute it and/or modify it under the *\n'
@@ -817,12 +817,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
 
   // GCC GPL+Exception
   // Seen in gnu-libstdc++ in Android NDK
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[5, 6],
     versionIndicies: const <int, int>{5:3, 6:4},
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'This file is part of GCC. *\n'
       r'^(?:(?:\1\2? *)? *\n)*'
@@ -851,12 +851,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
 
   // GCC GPL+Exception, alternative line wrapping
   // Seen in gnu-libstdc++ in Android NDK
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[5, 6],
     versionIndicies: const <int, int>{ 5:3, 6:4 },
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'This file is part of GCC. *\n'
       r'^(?:(?:\1\2? *)? *\n)*'
@@ -885,12 +885,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
 
   // LGPL 2.1
   // some engine code
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[4],
     versionIndicies: const <int, int>{ 4:3 },
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'This library is free software; you can redistribute it and/or *\n'
       r'^\1\2modify it under the terms of the GNU Library General Public *\n'
@@ -913,12 +913,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
 
   // AFL/LGPL
   // xdg_mime
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[4],
     versionIndicies: const <int, int>{ 4:3 },
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'Licensed under the Academic Free License version 2.0 *\n'
       r'^\1\2Or under the following terms: *\n'
@@ -944,12 +944,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
 
   // MPL
   // root_certificates
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[4],
     versionIndicies: const <int, int>{ 4:3 },
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'This Source Code Form is subject to the terms of the Mozilla Public *\n'
       r'^\1\2License, v\. (2.0)\. +If a copy of the MPL was not distributed with this *\n'
@@ -961,12 +961,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
 
   // MPL/GPL/LGPL
   // engine
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[3],
     versionIndicies: const <int, int>{ 3:4 },
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'(?:Version: [GMPL/012. ]+ *\n'
       r'^(?:(?:\1\2? *)? *\n)*'
@@ -1015,12 +1015,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
 
   // LGPL/MPL/GPL
   // engine
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[4],
     versionIndicies: const <int, int>{ 4:3 },
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'This library is free software; you can redistribute it and/or *\n'
       r'^\1\2modify it under the terms of the GNU Lesser General Public *\n'
@@ -1055,12 +1055,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
   ),
 
   // ICU (Unicode)
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[3],
     checkLocalFirst: false,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'(?:©|Copyright \(C\)) 20.. and later: Unicode, Inc. and others.[ *]*\n'
       r'^\1\2License & terms of use: (http://www.unicode.org/copyright.html)',
@@ -1070,12 +1070,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
   ),
 
   // ICU (Unicode)
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[3],
     checkLocalFirst: false,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'Copyright \(C\) 2016 and later: Unicode, Inc. and others. License & terms of use: (http://www.unicode.org/copyright.html) *\n',
       multiLine: true,
@@ -1084,12 +1084,12 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
   ),
 
   // ICU (Unicode)
-  new MultipleVersionedLicenseReferencePattern(
+  MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[3],
     checkLocalFirst: false,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent +
       r'© 2016 and later: Unicode, Inc. and others. *\n'
       r'^ *License & terms of use: (http://www.unicode.org/copyright.html)#License *\n'
@@ -1110,7 +1110,7 @@ final List<RegExp> csLicenses = <RegExp>[
   // should have two groups, prefixes 1 and 2
 
   // BoringSSL
-  new RegExp(
+  RegExp(
     kIndent +
     r'Redistribution and use in source and binary forms, with or without *\n'
     r'^\1\2modification, are permitted provided that the following conditions *\n'
@@ -1159,7 +1159,7 @@ final List<RegExp> csLicenses = <RegExp>[
     caseSensitive: false
   ),
 
-  new RegExp(
+  RegExp(
     kIndent +
     r'(?:This package is an SSL implementation written *\n'
     r'^\1\2by Eric Young \(eay@cryptsoft\.com\)\. *\n'
@@ -1217,7 +1217,7 @@ final List<RegExp> csLicenses = <RegExp>[
     caseSensitive: false
   ),
 
-  new RegExp(
+  RegExp(
     kIndent +
     (
       r'License to copy and use this software is granted provided that it '
@@ -1242,7 +1242,7 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // BSD-DERIVED LICENSES
 
-  new RegExp(
+  RegExp(
     kIndent +
     (
       'Redistribution and use in source and binary forms, with or without '
@@ -1380,7 +1380,7 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // Seen in libjpeg-turbo
   // TODO(ianh): Mark License as not needing to be shown
-  new RegExp(
+  RegExp(
     kIndent +
     r"This software is provided 'as-is', without any express or implied *\n"
     r'^\1\2warranty\. +In no event will the authors be held liable for any damages *\n'
@@ -1402,7 +1402,7 @@ final List<RegExp> csLicenses = <RegExp>[
   ),
 
   // seen in GLFW
-  new RegExp(
+  RegExp(
     kIndent +
     r"This software is provided 'as-is', without any express or implied *\n"
     r'^\1\2warranty\. +In no event will the authors be held liable for any damages *\n'
@@ -1430,7 +1430,7 @@ final List<RegExp> csLicenses = <RegExp>[
   // MIT-DERIVED LICENSES
 
   // Seen in Mesa
-  new RegExp(
+  RegExp(
     kIndent +
     (
       r'Permission is hereby granted, free of charge, to any person obtaining '
@@ -1503,7 +1503,7 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // OTHER BRIEF LICENSES
 
-  new RegExp(
+  RegExp(
     kIndent +
     r'Permission to use, copy, modify, and distribute this software for any *\n'
     r'^(?:\1\2)?purpose with or without fee is hereby granted, provided that the above *\n'
@@ -1525,7 +1525,7 @@ final List<RegExp> csLicenses = <RegExp>[
   ),
 
   // Seen in the NDK
-  new RegExp(
+  RegExp(
     kIndent +
     r'Permission to use, copy, modify, and/or distribute this software for any *\n'
     r'^\1\2purpose with or without fee is hereby granted, provided that the above *\n'
@@ -1543,7 +1543,7 @@ final List<RegExp> csLicenses = <RegExp>[
   ),
 
   // seen in GLFW
-  new RegExp(
+  RegExp(
     kIndent +
     r'Permission to use, copy, modify, and distribute this software for any *\n'
     r'^\1\2purpose with or without fee is hereby granted, provided that the above *\n'
@@ -1558,7 +1558,7 @@ final List<RegExp> csLicenses = <RegExp>[
   ),
 
   // seen in GLFW, base
-  new RegExp(
+  RegExp(
     kIndent +
     r'Permission to use, copy, modify, and distribute this software for any *\n'
     r'^\1\2purpose without fee is hereby granted, provided that this entire notice *\n'
@@ -1575,7 +1575,7 @@ final List<RegExp> csLicenses = <RegExp>[
   ),
 
   // harfbuzz
-  new RegExp(
+  RegExp(
     kIndent +
     r'Permission is hereby granted, without written agreement and without *\n'
     r'^\1\2license or royalty fees, to use, copy, modify, and distribute this *\n'
@@ -1599,7 +1599,7 @@ final List<RegExp> csLicenses = <RegExp>[
   ),
 
   // NDK
-  new RegExp(
+  RegExp(
     kIndent +
     r'Permission to use, copy, modify and distribute this software and *\n'
     r'^\1\2its documentation is hereby granted, provided that both the copyright *\n'
@@ -1625,7 +1625,7 @@ final List<RegExp> csLicenses = <RegExp>[
   ),
 
   // seen in Android NDK gnu-libstdc++
-  new RegExp(
+  RegExp(
     kIndent +
     (
       r'Permission to use, copy, modify, (?:distribute and sell|sell, and distribute) this software '
@@ -1647,7 +1647,7 @@ final List<RegExp> csLicenses = <RegExp>[
   ),
 
   // Seen in Android NDK
-  new RegExp(
+  RegExp(
     kIndent +
     r'Developed at (?:SunPro|SunSoft), a Sun Microsystems, Inc. business. *\n'
     r'^\1\2Permission to use, copy, modify, and distribute this *\n'
@@ -1658,7 +1658,7 @@ final List<RegExp> csLicenses = <RegExp>[
   ),
 
   // Seen in Android NDK (stlport)
-  new RegExp(
+  RegExp(
     kIndent +
     r'This material is provided "as is", with absolutely no warranty expressed *\n'
     r'^\1\2or implied\. +Any use is at your own risk\. *\n'
@@ -1673,7 +1673,7 @@ final List<RegExp> csLicenses = <RegExp>[
   ),
 
   // freetype2.
-  new RegExp(
+  RegExp(
     kIndent +
     (
       r'Permission to use, copy, modify, distribute, and sell this software and its '
@@ -1700,7 +1700,7 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // TODO(ianh): File a bug on what happens if you replace the // with a #
   // ICU
-  new RegExp(
+  RegExp(
     kIndent +
     r'This file is provided as-is by Unicode, Inc\. \(The Unicode Consortium\)\. '
     r'No claims are made as to fitness for any particular purpose\. No '
@@ -1720,7 +1720,7 @@ final List<RegExp> csLicenses = <RegExp>[
   ),
 
   // OpenSSL
-  new RegExp(
+  RegExp(
     kIndent +
     r'The portions of the attached software \("Contribution"\) is developed by *\n'
     r'^\1\2Nokia Corporation and is licensed pursuant to the OpenSSL open source *\n'
@@ -1755,7 +1755,7 @@ final List<RegExp> csNotices = <RegExp>[
   // used with _tryInline, with needsCopyright: false
   // should have two groups, prefixes 1 and 2
 
-  new RegExp(
+  RegExp(
     kIndent +
     r'The Graphics Interchange Format\(c\) is the copyright property of CompuServe *\n'
     r'^\1\2Incorporated\. +Only CompuServe Incorporated is authorized to define, redefine, *\n'
@@ -1783,7 +1783,7 @@ final List<RegExp> csNotices = <RegExp>[
   // NSPR
   // (Showing the entire block instead of the LGPL for this file is based
   // on advice specifically regarding the prtime.cc file.)
-  new RegExp(
+  RegExp(
     r'()()/\* Portions are Copyright \(C\) 2011 Google Inc \*/\n'
     r'/\* \*\*\*\*\* BEGIN LICENSE BLOCK \*\*\*\*\*\n'
     r' \* Version: MPL 1\.1/GPL 2\.0/LGPL 2\.1\n'
@@ -1823,7 +1823,7 @@ final List<RegExp> csNotices = <RegExp>[
   ),
 
   // Advice for this was "text verbatim".
-  new RegExp(
+  RegExp(
     kIndent +
     r'Copyright \(c\) 2015-2016 Khronos Group\. This work is licensed under a\n'
     r'\1\2Creative Commons Attribution 4\.0 International License; see\n'
@@ -1834,7 +1834,7 @@ final List<RegExp> csNotices = <RegExp>[
 
   // by analogy to the above one
   // seen in jsr305
-  new RegExp(
+  RegExp(
     kIndent +
     r'Copyright .+\n'
     r'\1\2Released under the Creative Commons Attribution License\n'
@@ -1845,7 +1845,7 @@ final List<RegExp> csNotices = <RegExp>[
   ),
 
   // Advice for this was "Just display its text as a politeness. Nothing else required".
-  new RegExp(
+  RegExp(
     r'()()/\* mdXhl\.c \* ----------------------------------------------------------------------------\n'
     r' \* "THE BEER-WARE LICENSE" \(Revision 42\):\n'
     r' \* <phk@FreeBSD\.org> wrote this file\. +As long as you retain this notice you\n'
@@ -1885,10 +1885,10 @@ final List<ForwardReferencePattern> csForwardReferenceLicenses = <ForwardReferen
   // used with _tryForwardReferencePattern
 
   // OpenSSL (in Dart third_party)
-  new ForwardReferencePattern(
+  ForwardReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent + r'(?:'
       +
       (
@@ -1915,19 +1915,19 @@ final List<ForwardReferencePattern> csForwardReferenceLicenses = <ForwardReferen
       multiLine: true,
       caseSensitive: false,
     ),
-    targetPattern: new RegExp('Redistribution and use in source and binary forms(?:.|\n)+OpenSSL')
+    targetPattern: RegExp('Redistribution and use in source and binary forms(?:.|\n)+OpenSSL')
   ),
 
   // libevent
-  new ForwardReferencePattern(
+  ForwardReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
-    pattern: new RegExp(
+    pattern: RegExp(
       kIndent + r'Use is subject to license terms\.$',
       multiLine: true,
       caseSensitive: false,
     ),
-    targetPattern: new RegExp('Redistribution and use in source and binary forms(?:.|\n)+SUN MICROSYSTEMS')
+    targetPattern: RegExp('Redistribution and use in source and binary forms(?:.|\n)+SUN MICROSYSTEMS')
   ),
 
 ];

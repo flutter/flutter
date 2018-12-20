@@ -4,7 +4,7 @@
 
 import 'dart:collection';
 
-Map<Key, dynamic> _cache = new LinkedHashMap<Key, dynamic>();
+Map<Key, dynamic> _cache = LinkedHashMap<Key, dynamic>();
 const int _maxSize = 10;
 
 T cache<T>(Key key, T getter()) {
