@@ -296,11 +296,13 @@ class TextStyle extends Diagnosticable {
   ///
   /// The value provided in [fontFamily] will act as the preferred/first font
   /// family that glyphs are looked for in, followed in order by the font families
-  /// in [fontFamilyFallback]. When [fontFamily] is null or not provided, the
-  /// first value in [fontFamilyFallback] acts as the preferred/first font
-  /// family. When neither is provided, then the default platform font will
-  /// be used. Providing and empty list or null for this property is the same
-  /// as omitting it.
+  /// in [fontFamilyFallback]. If all font families are exhausted and no match
+  /// was found, the default platform font family will be used instead.
+  ///
+  /// When [fontFamily] is null or not provided, the first value in [fontFamilyFallback]
+  /// acts as the preferred/first font family. When neither is provided, then
+  /// the default platform font will be used. Providing and empty list or null
+  /// for this property is the same as omitting it.
   ///
   /// For example, if a glyph is not found in [fontFamily], then each font family
   /// in [fontFamilyFallback] will be searched in order until it is found. If it
