@@ -161,8 +161,8 @@ final List<RegExp> licenseFragments = <RegExp>[
   RegExp(r'License & terms of use'),
 ];
 
-final String _linebreak      = r' *(?:(?:\*/ *|[*#])?(?:\n\1 *(?:\*/ *)?)*\n\1\2 *)?';
-final String _linebreakLoose = r' *(?:(?:\*/ *|[*#])?\n(?:-|;|#|<|!|/|\*| |REM)*)*';
+const String _linebreak      = r' *(?:(?:\*/ *|[*#])?(?:\n\1 *(?:\*/ *)?)*\n\1\2 *)?';
+const String _linebreakLoose = r' *(?:(?:\*/ *|[*#])?\n(?:-|;|#|<|!|/|\*| |REM)*)*';
 
 // LICENSE RECOGNIZERS
 
