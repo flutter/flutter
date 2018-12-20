@@ -106,7 +106,11 @@ abstract class LicenseSource {
 }
 
 abstract class License implements Comparable<License> {
-  factory License.unique(String body, LicenseType type, { bool reformatted: false, String origin, bool yesWeKnowWhatItLooksLikeButItIsNot: false }) {
+  factory License.unique(String body, LicenseType type, {
+    bool reformatted = false,
+    String origin,
+    bool yesWeKnowWhatItLooksLikeButItIsNot = false
+  }) {
     if (!reformatted)
       body = _reformat(body);
     final License result = _registry.putIfAbsent(body, () => UniqueLicense._(body, type, origin: origin, yesWeKnowWhatItLooksLikeButItIsNot: yesWeKnowWhatItLooksLikeButItIsNot));
@@ -118,7 +122,10 @@ abstract class License implements Comparable<License> {
     return result;
   }
 
-  factory License.template(String body, LicenseType type, { bool reformatted: false, String origin }) {
+  factory License.template(String body, LicenseType type, {
+    bool reformatted = false,
+    String origin
+  }) {
     if (!reformatted)
       body = _reformat(body);
     final License result = _registry.putIfAbsent(body, () => TemplateLicense._(body, type, origin: origin));
@@ -130,7 +137,10 @@ abstract class License implements Comparable<License> {
     return result;
   }
 
-  factory License.message(String body, LicenseType type, { bool reformatted: false, String origin }) {
+  factory License.message(String body, LicenseType type, {
+    bool reformatted = false,
+    String origin
+  }) {
     if (!reformatted)
       body = _reformat(body);
     final License result = _registry.putIfAbsent(body, () => MessageLicense._(body, type, origin: origin));
@@ -157,7 +167,10 @@ abstract class License implements Comparable<License> {
     return _registry.putIfAbsent(body, () => UniqueLicense._(body, type));
   }
 
-  factory License.fromBodyAndType(String body, LicenseType type, { bool reformatted: false, String origin }) {
+  factory License.fromBodyAndType(String body, LicenseType type, {
+    bool reformatted = false,
+    String origin
+  }) {
     if (!reformatted)
       body = _reformat(body);
     final License result = _registry.putIfAbsent(body, () {
@@ -271,7 +284,10 @@ abstract class License implements Comparable<License> {
     return _registry.putIfAbsent(body, () => License.fromBodyAndType(body, type, origin: origin));
   }
 
-  License._(String body, this.type, { this.origin, bool yesWeKnowWhatItLooksLikeButItIsNot: false }) : body = body, authors = _readAuthors(body) {
+  License._(String body, this.type, {
+    this.origin,
+    bool yesWeKnowWhatItLooksLikeButItIsNot = false
+  }) : body = body, authors = _readAuthors(body) {
     assert(_reformat(body) == body);
     assert(() {
       try {
@@ -500,7 +516,7 @@ Iterable<_LineRange> _walkLinesBackwards(String body, int start) sync* {
     yield _LineRange(start, end, body);
 }
 
-Iterable<_LineRange> _walkLinesForwards(String body, { int start: 0, int end }) sync* {
+Iterable<_LineRange> _walkLinesForwards(String body, { int start = 0, int end }) sync* {
   int startIndex = start == 0 || body[start-1] == '\n' ? start : null;
   int endIndex = startIndex ?? start;
   end ??= body.length;
@@ -526,7 +542,7 @@ class _SplitLicense {
   String getConditions() => _split >= _body.length ? '' : _body.substring(_split == 0 ? 0 : _split + 1);
 }
 
-_SplitLicense _splitLicense(String body, { bool verifyResults: true }) {
+_SplitLicense _splitLicense(String body, { bool verifyResults = true }) {
   final Iterator<_LineRange> lines = _walkLinesForwards(body).iterator;
   if (!lines.moveNext())
     throw 'tried to split empty license';
@@ -613,7 +629,7 @@ class _PartialLicenseMatch {
   final bool hasCopyrights;
 }
 
-Iterable<_PartialLicenseMatch> _findLicenseBlocks(String body, RegExp pattern, int firstPrefixIndex, int indentPrefixIndex, { bool needsCopyright: true }) sync* {
+Iterable<_PartialLicenseMatch> _findLicenseBlocks(String body, RegExp pattern, int firstPrefixIndex, int indentPrefixIndex, { bool needsCopyright = true }) sync* {
   // I tried doing this with one big RegExp initially, but that way lay madness.
   for (Match match in pattern.allMatches(body)) {
     assert(match.groupCount >= firstPrefixIndex);
@@ -709,7 +725,11 @@ Iterable<_PartialLicenseMatch> _findLicenseBlocks(String body, RegExp pattern, i
 }
 
 class _LicenseMatch {
-  _LicenseMatch(this.license, this.start, this.end, { this.debug: '', this.isDuplicate: false, this.missingCopyrights: false });
+  _LicenseMatch(this.license, this.start, this.end, {
+    this.debug = '',
+    this.isDuplicate = false,
+    this.missingCopyrights = false
+  });
   final License license;
   final int start;
   final int end;
@@ -718,7 +738,7 @@ class _LicenseMatch {
   final bool missingCopyrights;
 }
 
-Iterable<_LicenseMatch> _expand(License template, String copyright, String body, int start, int end, { String debug: '', String origin }) sync* {
+Iterable<_LicenseMatch> _expand(License template, String copyright, String body, int start, int end, { String debug = '', String origin }) sync* {
   final List<License> results = template.expandTemplate(_reformat(copyright), body, origin: origin).toList();
   if (results.isEmpty)
     throw 'license could not be expanded';
@@ -780,7 +800,7 @@ Iterable<_LicenseMatch> _tryReferenceByFilename(String body, LicenseFileReferenc
   }
 }
 
-Iterable<_LicenseMatch> _tryReferenceByType(String body, RegExp pattern, LicenseSource parentDirectory, { String origin, bool needsCopyright: true }) sync* {
+Iterable<_LicenseMatch> _tryReferenceByType(String body, RegExp pattern, LicenseSource parentDirectory, { String origin, bool needsCopyright = true }) sync* {
   for (_PartialLicenseMatch match in _findLicenseBlocks(body, pattern, 1, 2, needsCopyright: needsCopyright)) {
     final LicenseType type = convertLicenseNameToType(match.group(3));
     final License template = parentDirectory.nearestLicenseOfType(type);
@@ -965,8 +985,10 @@ class MultiLicense extends License {
 
 // the kind of license that should not be combined with separate copyright notices
 class UniqueLicense extends License {
-  UniqueLicense._(String body, LicenseType type, { String origin, bool yesWeKnowWhatItLooksLikeButItIsNot: false })
-    : super._(body, type, origin: origin, yesWeKnowWhatItLooksLikeButItIsNot: yesWeKnowWhatItLooksLikeButItIsNot);
+  UniqueLicense._(String body, LicenseType type, {
+    String origin,
+    bool yesWeKnowWhatItLooksLikeButItIsNot = false
+  }) : super._(body, type, origin: origin, yesWeKnowWhatItLooksLikeButItIsNot: yesWeKnowWhatItLooksLikeButItIsNot);
   @override
   Iterable<License> expandTemplate(String copyright, String licenseBody, { String origin }) sync* {
     throw 'attempted to expand non-template license with "$copyright"\ntemplate was: $this';

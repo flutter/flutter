@@ -1097,13 +1097,13 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
     return null;
   }
 
-  License _fullWalkUpForLicenseWithName(String name, { String authors, bool ignoreCase: false }) {
+  License _fullWalkUpForLicenseWithName(String name, { String authors, bool ignoreCase = false }) {
     return _canGoUp(authors)
             ? parent._fullWalkUpForLicenseWithName(name, authors: authors, ignoreCase: ignoreCase)
             : _fullWalkDownForLicenseWithName(name, authors: authors, ignoreCase: ignoreCase);
   }
 
-  License _fullWalkDownForLicenseWithName(String name, { String authors, bool ignoreCase: false }) {
+  License _fullWalkDownForLicenseWithName(String name, { String authors, bool ignoreCase = false }) {
     License result = _localLicenseWithName(name, authors: authors, ignoreCase: ignoreCase);
     if (result == null) {
       for (_RepositoryDirectory directory in _subdirectories) {
@@ -1140,7 +1140,7 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
   /// to the LICENSE in the root of the repo.
   bool get isLicenseRootException => false;
 
-  License _localLicenseWithName(String name, { String authors, bool ignoreCase: false }) {
+  License _localLicenseWithName(String name, { String authors, bool ignoreCase = false }) {
     Map<String, _RepositoryEntry> map;
     if (ignoreCase) {
       // we get here if we're trying a last-ditch effort at finding a file.
