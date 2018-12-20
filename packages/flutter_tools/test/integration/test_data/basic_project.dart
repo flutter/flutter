@@ -26,7 +26,7 @@ class BasicProject extends Project {
   Future<void> main() async {
     while (true) {
       runApp(new MyApp());
-      await Future.delayed(const Duration(milliseconds: 1));
+      await Future.delayed(const Duration(milliseconds: 50));
     }
   }
 

@@ -27,6 +27,8 @@ import '../src/common.dart';
 // taking a long time are printed to the console.
 const bool _printDebugOutputToStdOut = false;
 
+final DateTime startTime = DateTime.now();
+
 const Duration defaultTimeout = Duration(seconds: 5);
 const Duration appStartTimeout = Duration(seconds: 120);
 const Duration quitTimeout = Duration(seconds: 10);
@@ -55,13 +57,21 @@ abstract class FlutterTestDriver {
   int get vmServicePort => _vmServiceWsUri.port;
   bool get hasExited => _hasExited;
 
+  String lastTime = '';
   void _debugPrint(String message, { String topic = '' }) {
     const int maxLength = 2500;
     final String truncatedMessage = message.length > maxLength ? message.substring(0, maxLength) + '...' : message;
     final String line = '${topic.padRight(10)} $truncatedMessage';
     _allMessages.add(line);
+    final int timeInSeconds = DateTime.now().difference(startTime).inSeconds;
+    String time = timeInSeconds.toString().padLeft(5) + 's ';
+    if (time == lastTime) {
+      time = ' ' * time.length;
+    } else {
+      lastTime = time;
+    }
     if (_printDebugOutputToStdOut)
-      print('$_logPrefix$line');
+      print('$time$_logPrefix$line');
   }
 
   Future<void> _setupProcess(
