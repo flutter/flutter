@@ -230,7 +230,7 @@ FileType identifyFile(String name, Reader reader) {
       return FileType.binary;
   }
   bytes ??= reader();
-  assert(bytes.length > 0);
+  assert(bytes.isNotEmpty);
   if (matchesSignature(bytes, <int>[0x1F, 0x8B]))
     return FileType.gz; // GZip archive
   if (matchesSignature(bytes, <int>[0x42, 0x5A]))
