@@ -2171,7 +2171,7 @@ Future<String> _readSignature(String goldenPath) async {
   try {
     final system.File goldenFile = system.File(goldenPath);
     final String goldenSignature = await goldenFile.openRead()
-        .transform(utf8.decoder).transform(LineSplitter()).first;
+        .transform(utf8.decoder).transform(const LineSplitter()).first;
     final RegExp signaturePattern = RegExp(r'Signature: (\w+)');
     final Match goldenMatch = signaturePattern.matchAsPrefix(goldenSignature);
     if (goldenMatch != null)
