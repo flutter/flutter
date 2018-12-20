@@ -350,20 +350,30 @@ class _DevFSHttpWriter {
   }
 }
 
+// Basic statistics for DevFS update operation.
 class UpdateFSReport {
-  UpdateFSReport({this.success: false, this.invalidatedSourcesCount = 0, this.syncedBytes = 0});
+  UpdateFSReport({bool success: false,
+    int invalidatedSourcesCount: 0, int syncedBytes: 0}) {
+    _success = success;
+    _invalidatedSourcesCount = invalidatedSourcesCount;
+    _syncedBytes = syncedBytes;
+  }
 
-  bool success;
-  int invalidatedSourcesCount;
-  int syncedBytes;
+  bool get success => _success;
+  int get invalidatedSourcesCount => _invalidatedSourcesCount;
+  int get syncedBytes => _syncedBytes;
 
   void incorporateResults(UpdateFSReport report) {
-    if (!report.success) {
-      success = false;
+    if (!report._success) {
+      _success = false;
     }
-    invalidatedSourcesCount += report.invalidatedSourcesCount;
-    syncedBytes += report.syncedBytes;
+    _invalidatedSourcesCount += report._invalidatedSourcesCount;
+    _syncedBytes += report._syncedBytes;
   }
+
+  bool _success;
+  int _invalidatedSourcesCount;
+  int _syncedBytes;
 }
 
 class DevFS {
