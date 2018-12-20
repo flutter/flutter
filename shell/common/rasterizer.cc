@@ -360,6 +360,15 @@ void Rasterizer::FireNextFrameCallbackIfPresent() {
   callback();
 }
 
+void Rasterizer::SetResourceCacheMaxBytes(int max_bytes) {
+  GrContext* context = surface_->GetContext();
+  if (context) {
+    int max_resources;
+    context->getResourceCacheLimits(&max_resources, nullptr);
+    context->setResourceCacheLimits(max_resources, max_bytes);
+  }
+}
+
 Rasterizer::Screenshot::Screenshot() {}
 
 Rasterizer::Screenshot::Screenshot(sk_sp<SkData> p_data, SkISize p_size)

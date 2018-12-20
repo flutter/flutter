@@ -179,6 +179,8 @@ class Shell final : public PlatformView::Delegate,
   void OnEngineHandlePlatformMessage(
       fml::RefPtr<blink::PlatformMessage> message) override;
 
+  void HandleEngineSkiaMessage(fml::RefPtr<blink::PlatformMessage> message);
+
   // |shell::Engine::Delegate|
   void OnPreEngineRestart() override;
 
