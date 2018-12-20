@@ -180,9 +180,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     final List<Widget> stacked = <Widget>[];
 
     final MediaQueryData existingMediaQuery = MediaQuery.of(context);
-    final MediaQueryData newMediaQuery = widget.resizeToAvoidBottomInset
-        ? existingMediaQuery.removeViewInsets(removeBottom: true)
-        : existingMediaQuery;
+    MediaQueryData newMediaQuery = MediaQuery.of(context);
 
     Widget content = _TabSwitchingView(
       currentTabIndex: _currentPage,
@@ -191,12 +189,11 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     );
 
     if (widget.resizeToAvoidBottomInset) {
-      content = MediaQuery(
-        data: newMediaQuery,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: existingMediaQuery.viewInsets.bottom),
-          child: content,
-        ),
+      // Remove the view inset and add it back as a padding in the inner content.
+      newMediaQuery = newMediaQuery.removeViewInsets(removeBottom: true);
+      content = Padding(
+        padding: EdgeInsets.only(bottom: existingMediaQuery.viewInsets.bottom),
+        child: content,
       );
     }
 
@@ -220,16 +217,18 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
           child: content,
         );
       } else {
-        content = MediaQuery(
-          data: existingMediaQuery.copyWith(
-            padding: existingMediaQuery.padding.copyWith(
-              bottom: bottomPadding,
-            ),
+        newMediaQuery = newMediaQuery.copyWith(
+          padding: newMediaQuery.padding.copyWith(
+            bottom: bottomPadding,
           ),
-          child: content,
         );
       }
     }
+
+    content = MediaQuery(
+      data: newMediaQuery,
+      child: content,
+    );
 
     // The main content being at the bottom is added to the stack first.
     stacked.add(content);
