@@ -284,11 +284,10 @@ abstract class License implements Comparable<License> {
     return _registry.putIfAbsent(body, () => License.fromBodyAndType(body, type, origin: origin));
   }
 
-  License._(String body, this.type, {
+  License._(this.body, this.type, {
     this.origin,
     bool yesWeKnowWhatItLooksLikeButItIsNot = false
-  }) : body = body,
-       authors = _readAuthors(body),
+  }) : authors = _readAuthors(body),
        assert(_reformat(body) == body) {
     assert(() {
       try {

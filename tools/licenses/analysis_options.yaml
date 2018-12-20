@@ -53,6 +53,7 @@ linter:
     - prefer_equal_for_default_values
     - prefer_final_fields
     - prefer_final_locals
+    - prefer_initializing_formals
     - prefer_is_not_empty
     - prefer_single_quotes
     - prefer_void_to_null
