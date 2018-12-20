@@ -228,6 +228,9 @@ void main() {
     expect(s4.fontFamily, 'foo');
     expect(s4.fontFamilyFallback, <String>[]);
     expect(s4.fontFamilyFallback.isEmpty, true);
+
+    final ui.TextStyle uis1 = s2.getTextStyle();
+    expect(uis1.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: foo, fontFamilyFallback: [Roboto, test], fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified)');
   });
 
   test('TextStyle.debugLabel', () {
