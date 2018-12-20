@@ -43,6 +43,7 @@ linter:
     - one_member_abstracts
     - overridden_fields
     - package_prefixed_library_names
+    - prefer_final_locals
     - prefer_is_not_empty
     - slash_for_doc_comments
     - sort_constructors_first

@@ -58,7 +58,7 @@ bool hasSubsequence(List<int> bytes, List<int> signature, int limit) {
 const String kMultiLicenseFileHeader = 'Notices for files contained in';
 
 bool isMultiLicenseNotice(Reader reader) {
-  List<int> bytes = reader();
+  final List<int> bytes = reader();
   return (ascii.decode(bytes.take(kMultiLicenseFileHeader.length).toList(), allowInvalid: true) == kMultiLicenseFileHeader);
 }
 
@@ -385,7 +385,7 @@ mixin GZipFile on File implements Directory {
   @override
   Iterable<IoNode> get walk sync* {
     try {
-      String innerName = path.basenameWithoutExtension(fullName);
+      final String innerName = path.basenameWithoutExtension(fullName);
       _data ??= InMemoryFile.parse(fullName + '!' + innerName, a.GZipDecoder().decodeBytes(readBytes()));
       if (_data != null)
         yield _data;
@@ -402,7 +402,7 @@ mixin BZip2File on File implements Directory {
   @override
   Iterable<IoNode> get walk sync* {
     try {
-      String innerName = path.basenameWithoutExtension(fullName);
+      final String innerName = path.basenameWithoutExtension(fullName);
       _data ??= InMemoryFile.parse(fullName + '!' + innerName, a.BZip2Decoder().decodeBytes(readBytes()));
       if (_data != null)
         yield _data;
@@ -437,7 +437,7 @@ class FileSystemDirectory extends IoNode implements Directory {
 
   @override
   Iterable<IoNode> get walk sync* {
-    List<io.FileSystemEntity> list = _directory.listSync().toList();
+    final List<io.FileSystemEntity> list = _directory.listSync().toList();
     list.sort((io.FileSystemEntity a, io.FileSystemEntity b) => a.path.compareTo(b.path));
     for (io.FileSystemEntity entity in list) {
       if (entity is io.Directory) {
@@ -446,7 +446,7 @@ class FileSystemDirectory extends IoNode implements Directory {
         yield FileSystemLink(entity);
       } else {
         assert(entity is io.File);
-        io.File fileEntity = entity;
+        final io.File fileEntity = entity;
         if (fileEntity.lengthSync() > 0) {
           switch (identifyFile(fileEntity.path, () => _readBytes(fileEntity))) {
             case FileType.binary: yield FileSystemFile(fileEntity); break;
