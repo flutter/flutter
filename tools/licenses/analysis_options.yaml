@@ -39,6 +39,7 @@ linter:
     - constant_identifier_names
     - control_flow_in_finally
     - empty_constructor_bodies
+    - flutter_style_todos
     - implementation_imports
     - library_names
     - library_prefixes
