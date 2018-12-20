@@ -241,6 +241,64 @@ abstract class FlutterCommand extends Command<void> {
             '--release or --profile; --debug always has this enabled.');
   }
 
+  void addDynamicModeFlags({bool verboseHelp = false}) {
+    argParser.addOption('precompile',
+        hide: !verboseHelp,
+        help: 'Precompile functions specified in input file. This flag is only '
+              'allowed when using --dynamic. It takes a Dart compilation trace '
+              'file produced by the training run of the application. With this '
+              'flag, instead of using default Dart VM snapshot provided by the '
+              'engine, the application will use its own snapshot that includes '
+              'additional compiled functions.'
+    );
+    argParser.addFlag('patch',
+        hide: !verboseHelp,
+        negatable: false,
+        help: 'Generate dynamic patch for current changes from baseline.\n'
+              'Dynamic patch is generated relative to baseline package.\n'
+              'This flag is only allowed when using --dynamic.\n'
+    );
+  }
+
+  void addDynamicPatchingFlags({bool verboseHelp = false}) {
+    argParser.addOption('patch-number',
+        defaultsTo: '1',
+        hide: !verboseHelp,
+        help: 'An integer used as an internal version number for dynamic patch.\n'
+              'Each update should have a unique number to differentiate from previous '
+              'patches for same \'versionCode\' on Android or \'CFBundleVersion\' on iOS.\n'
+              'This flag is only used when --dynamic --patch is specified.\n'
+    );
+    argParser.addOption('patch-dir',
+        defaultsTo: 'public',
+        hide: !verboseHelp,
+        help: 'The directory where to store generated dynamic patches.\n'
+              'This directory can be deployed to a CDN such as Firebase Hosting.\n'
+              'It is recommended to store this directory in version control.\n'
+              'This flag is only used when --dynamic --patch is specified.\n'
+    );
+    argParser.addFlag('baseline',
+        hide: !verboseHelp,
+        negatable: false,
+        help: 'Save built package as baseline for future dynamic patching.\n'
+            'Built package, such as APK file on Android, is saved and '
+            'can be used to generate dynamic patches in later builds.\n'
+            'This flag is only allowed when using --dynamic.\n'
+    );
+
+    addDynamicBaselineFlags(verboseHelp: verboseHelp);
+  }
+
+  void addDynamicBaselineFlags({bool verboseHelp = false}) {
+    argParser.addOption('baseline-dir',
+        defaultsTo: '.baseline',
+        hide: !verboseHelp,
+        help: 'The directory where to store and find generated baseline packages.\n'
+              'It is recommended to store this directory in version control.\n'
+              'This flag is only used when --dynamic --baseline is specified.\n'
+    );
+  }
+
   void usesFuchsiaOptions({bool hide = false}) {
     argParser.addOption(
       'target-model',
@@ -308,6 +366,16 @@ abstract class FlutterCommand extends Command<void> {
           '--build-number (${argResults['build-number']}) must be an int.', null);
     }
 
+    int patchNumber;
+    try {
+      patchNumber = argParser.options.containsKey('patch-number') && argResults['patch-number'] != null
+          ? int.parse(argResults['patch-number'])
+          : null;
+    } catch (e) {
+      throw UsageException(
+          '--patch-number (${argResults['patch-number']}) must be an int.', null);
+    }
+
     return BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
         ? argResults['flavor']
@@ -316,9 +384,19 @@ abstract class FlutterCommand extends Command<void> {
       compilationTraceFilePath: argParser.options.containsKey('precompile')
           ? argResults['precompile']
           : null,
-      buildHotUpdate: argParser.options.containsKey('hotupdate')
-          ? argResults['hotupdate']
+      createBaseline: argParser.options.containsKey('baseline')
+          ? argResults['baseline']
           : false,
+      createPatch: argParser.options.containsKey('patch')
+          ? argResults['patch']
+          : false,
+      patchNumber: patchNumber,
+      patchDir: argParser.options.containsKey('patch-dir')
+          ? argResults['patch-dir']
+          : null,
+      baselineDir: argParser.options.containsKey('baseline-dir')
+          ? argResults['baseline-dir']
+          : null,
       extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
           ? argResults[FlutterOptions.kExtraFrontEndOptions]
           : null,
@@ -571,15 +649,21 @@ abstract class FlutterCommand extends Command<void> {
         ? argResults['dynamic'] : false;
     final String compilationTraceFilePath = argParser.options.containsKey('precompile')
         ? argResults['precompile'] : null;
-    final bool buildHotUpdate = argParser.options.containsKey('hotupdate')
-        ? argResults['hotupdate'] : false;
+    final bool createBaseline = argParser.options.containsKey('baseline')
+        ? argResults['baseline'] : false;
+    final bool createPatch = argParser.options.containsKey('patch')
+        ? argResults['patch'] : false;
 
     if (compilationTraceFilePath != null && getBuildMode() == BuildMode.debug)
       throw ToolExit('Error: --precompile is not allowed when --debug is specified.');
     if (compilationTraceFilePath != null && !dynamicFlag)
       throw ToolExit('Error: --precompile is allowed only when --dynamic is specified.');
-    if (buildHotUpdate && compilationTraceFilePath == null)
-      throw ToolExit('Error: --hotupdate is allowed only when --precompile is specified.');
+    if (createBaseline && createPatch)
+      throw ToolExit('Error: Only one of --baseline, --patch is allowed.');
+    if (createBaseline && compilationTraceFilePath == null)
+      throw ToolExit('Error: --baseline is allowed only when --precompile is specified.');
+    if (createPatch && compilationTraceFilePath == null)
+      throw ToolExit('Error: --patch is allowed only when --precompile is specified.');
   }
 
   ApplicationPackageStore applicationPackages;
