@@ -22,6 +22,24 @@ for f in out/license_script_output/licenses_*; do
     fi
 done
 
+echo "Verifying license tool signature..."
+if ! cmp -s flutter/ci/licenses_golden/tool_signature out/license_script_output/tool_signature
+then
+    echo "============================= ERROR ============================="
+    echo "The license tool signature has changed. This is expected when"
+    echo "there have been changes to the license tool itself. Licenses have"
+    echo "been re-computed for all components. If only the license script has"
+    echo "changed, no diffs are typically expected in the output of the"
+    echo "script. Verify the output, and if it looks correct, update the"
+    echo "license tool signature golden file:"
+    echo "  ci/licences_golden/tool_signature"
+    echo "For more information, see the script in:"
+    echo "  https://github.com/flutter/engine/tree/master/tools/licenses"
+    echo ""
+    diff -U 6 flutter/ci/licenses_golden/tool_signature out/license_script_output/tool_signature
+    exit 1
+fi
+
 echo "Checking license count in licenses_flutter..."
 actualLicenseCount=`tail -n 1 flutter/ci/licenses_golden/licenses_flutter | tr -dc '0-9'`
 expectedLicenseCount=2 # When changing this number: Update the error message below as well describing all expected license types.

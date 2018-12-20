@@ -2055,6 +2055,23 @@ class _RepositoryFlutterTxtThirdPartyDirectory extends _RepositoryDirectory {
   }
 }
 
+/// The license tool directory.
+///
+/// This is a special-case root node that is not used for license aggregation,
+/// but simply to compute a signature for the license tool itself. When this
+/// signature changes, we force re-run license collection for all components in
+/// order to verify the tool itself still produces the same output.
+class _RepositoryFlutterLicenseToolDirectory extends _RepositoryDirectory {
+  _RepositoryFlutterLicenseToolDirectory(fs.Directory io) : super(null, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != '.dart_tool'
+        && entry.name != 'data'
+        && super.shouldRecurse(entry);
+  }
+}
+
 class _RepositoryRoot extends _RepositoryDirectory {
   _RepositoryRoot(fs.Directory io) : super(null, io);
 
@@ -2156,40 +2173,72 @@ class _Progress {
   }
 }
 
-Future<void> _collectLicensesForComponent(_RepositoryDirectory componentRoot, {
-  String inputGolden,
-  String outputGolden,
-  bool force,
-}) async {
-  String signature;
-  if (force) {
-    signature = null;
-  } else {
-    signature = await componentRoot.signature;
-  }
-
-  // Check whether the golden file matches the signature of the current contents
-  // of this directory.
+/// Reads the signature from a golden file.
+Future<String> _readSignature(String goldenPath) async {
   try {
-    system.File goldenFile = new system.File(inputGolden);
+    system.File goldenFile = new system.File(goldenPath);
     String goldenSignature = await goldenFile.openRead()
         .transform(utf8.decoder).transform(new LineSplitter()).first;
     final RegExp signaturePattern = new RegExp(r'Signature: (\w+)');
     Match goldenMatch = signaturePattern.matchAsPrefix(goldenSignature);
-    if (goldenMatch != null && goldenMatch.group(1) == signature) {
-      system.stderr.writeln('    Skipping this component - no change in signature');
-      return;
-    }
+    if (goldenMatch != null)
+      return goldenMatch.group(1);
   } on system.FileSystemException {
-    system.stderr.writeln('    Failed to read signature file, scanning directory.');
+    system.stderr.writeln('    Failed to read signature file.');
+    return null;
+  }
+  return null;
+}
+
+/// Writes a signature to an [system.IOSink] in the expected format.
+void _writeSignature(String signature, system.IOSink sink) {
+  if (signature != null)
+    sink.writeln('Signature: $signature\n');
+}
+
+// Checks for changes to the license tool itself.
+//
+// Returns true if changes are detected.
+Future<bool> _computeLicenseToolChanges(_RepositoryDirectory root, {String goldenSignaturePath, String outputSignaturePath}) async {
+  system.stderr.writeln('Computing signature for license tool');
+  final fs.Directory flutterNode = root.io.walk.firstWhere((fs.IoNode node) => node.name == 'flutter');
+  final fs.Directory toolsNode = flutterNode.walk.firstWhere((fs.IoNode node) => node.name == 'tools');
+  final fs.Directory licenseNode = toolsNode.walk.firstWhere((fs.IoNode node) => node.name == 'licenses');
+  final _RepositoryFlutterLicenseToolDirectory licenseToolDirectory = new _RepositoryFlutterLicenseToolDirectory(licenseNode);
+
+  final String toolSignature = await licenseToolDirectory.signature;
+  system.IOSink sink = new system.File(outputSignaturePath).openWrite();
+  _writeSignature(toolSignature, sink);
+  await sink.close();
+
+  final String goldenSignature = await _readSignature(goldenSignaturePath);
+  return toolSignature != goldenSignature;
+}
+
+/// Collects licenses for the specified component.
+///
+/// If [writeSignature] is set, the signature is written to the output file.
+/// If [force] is set, collection is run regardless of whether or not the signature matches.
+Future<void> _collectLicensesForComponent(_RepositoryDirectory componentRoot, {
+  String inputGoldenPath,
+  String outputGoldenPath,
+  bool writeSignature,
+  bool force,
+}) async {
+  // Check whether the golden file matches the signature of the current contents of this directory.
+  final String goldenSignature = await _readSignature(inputGoldenPath);
+  final String signature = await componentRoot.signature;
+  if (!force && goldenSignature == signature) {
+    system.stderr.writeln('    Skipping this component - no change in signature');
+    return;
   }
 
   _Progress progress = new _Progress(componentRoot.fileCount);
 
-  system.File outFile = new system.File(outputGolden);
+  system.File outFile = new system.File(outputGoldenPath);
   system.IOSink sink = outFile.openWrite();
-  if (signature != null)
-    sink.writeln('Signature: $signature\n');
+  if (writeSignature)
+    _writeSignature(signature, sink);
 
   List<License> licenses = new Set<License>.from(componentRoot.getLicenses(progress).toList()).toList();
 
@@ -2272,6 +2321,17 @@ Future<Null> main(List<String> arguments) async {
       progress.flush();
       system.stderr.writeln('');
     } else {
+      // If changes are detected to the license tool itself, force collection
+      // for all components in order to check we're still generating correct
+      // output.
+      const String toolSignatureFilename = 'tool_signature';
+      final bool forceRunAll = await _computeLicenseToolChanges(
+          root,
+          goldenSignaturePath: path.join(argResults['golden'], toolSignatureFilename),
+          outputSignaturePath: path.join(argResults['out'], toolSignatureFilename),
+      );
+      if (forceRunAll)
+        system.stderr.writeln('    Detected changes to license tool. Forcing license collection for all components.');
 
       final List<String> usedGoldens = <String>[];
       bool isFirstComponent = true;
@@ -2291,23 +2351,25 @@ Future<Null> main(List<String> arguments) async {
               .firstWhere((_RepositoryDirectory dir) => dir.name == component.name);
         }
 
-        // Always run the full license check on the flutter tree.  This tree is
-        // relatively small but changes frequently in ways that do not affect
-        // the license output, and we don't want to require updates to the golden
-        // signature for those changes.
-        final bool force = component.io.name == 'flutter';
+        // Always run the full license check on the flutter tree. The flutter
+        // tree is relatively small and changes frequently in ways that do not
+        // affect the license output, and we don't want to require updates to
+        // the golden signature for those changes.
         final String goldenFileName = 'licenses_${component.io.name}';
         await _collectLicensesForComponent(
             componentRoot,
-            inputGolden: path.join(argResults['golden'], goldenFileName),
-            outputGolden: path.join(argResults['out'], goldenFileName),
-            force: force,
+            inputGoldenPath: path.join(argResults['golden'], goldenFileName),
+            outputGoldenPath: path.join(argResults['out'], goldenFileName),
+            writeSignature: component.io.name != 'flutter',
+            force: forceRunAll || component.io.name == 'flutter',
         );
         usedGoldens.add(goldenFileName);
       }
 
-      final Set<String> unusedGoldens = system.Directory(argResults['golden']).listSync().map((system.FileSystemEntity file) => path.basename(file.path)).toSet()
-        ..removeAll(usedGoldens);
+      final Set<String> unusedGoldens = system.Directory(argResults['golden']).listSync()
+        .map((system.FileSystemEntity file) => path.basename(file.path)).toSet()
+        ..removeAll(usedGoldens)
+        ..remove(toolSignatureFilename);
       if (unusedGoldens.isNotEmpty) {
         system.stderr.writeln('The following golden files in ${argResults['golden']} are unused and need to be deleted:');
         unusedGoldens.map((String s) => ' * $s').forEach(system.stderr.writeln);
