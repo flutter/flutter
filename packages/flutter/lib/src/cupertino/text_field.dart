@@ -647,13 +647,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                     ? _kDisabledBackground
                     : CupertinoColors.darkBackgroundGray,
             child: TextSelectionGestureDetector(
-              behavior: HitTestBehavior.translucent,
               onTapDown: _handleTapDown,
               onSingleTapUp: _handleSingleTapUp,
               onSingleLongTapDown: _handleSingleLongTapDown,
               onDoubleTapDown: _handleDoubleTapDown,
               behavior: HitTestBehavior.translucent,
-              child: _addTextDependentAttachments(paddedEditable),
+              child: _addTextDependentAttachments(paddedEditable, textStyle),
             ),
           ),
         ),
