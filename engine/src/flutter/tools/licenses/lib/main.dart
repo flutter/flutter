@@ -496,43 +496,43 @@ class _RepositoryFreetypeLicenseFile extends _RepositoryLicenseFile {
     : _target = _parseLicense(io), super(parent, io);
 
   static final RegExp _pattern = RegExp(
-    r"The  FreeType 2  font  engine is  copyrighted  work and  cannot be  used\n"
-    r"legally  without a  software license\.   In  order to  make this  project\n"
-    r"usable  to a vast  majority of  developers, we  distribute it  under two\n"
-    r"mutually exclusive open-source licenses\.\n"
-    r"\n"
-    r"This means  that \*you\* must choose  \*one\* of the  two licenses described\n"
-    r"below, then obey  all its terms and conditions when  using FreeType 2 in\n"
-    r"any of your projects or products.\n"
-    r"\n"
+    r'The  FreeType 2  font  engine is  copyrighted  work and  cannot be  used\n'
+    r'legally  without a  software license\.   In  order to  make this  project\n'
+    r'usable  to a vast  majority of  developers, we  distribute it  under two\n'
+    r'mutually exclusive open-source licenses\.\n'
+    r'\n'
+    r'This means  that \*you\* must choose  \*one\* of the  two licenses described\n'
+    r'below, then obey  all its terms and conditions when  using FreeType 2 in\n'
+    r'any of your projects or products.\n'
+    r'\n'
     r"  - The FreeType License, found in  the file `(FTL\.TXT)', which is similar\n"
-    r"    to the original BSD license \*with\* an advertising clause that forces\n"
+    r'    to the original BSD license \*with\* an advertising clause that forces\n'
     r"    you  to  explicitly cite  the  FreeType  project  in your  product's\n"
-    r"    documentation\.  All  details are in the license  file\.  This license\n"
+    r'    documentation\.  All  details are in the license  file\.  This license\n'
     r"    is  suited  to products  which  don't  use  the GNU  General  Public\n"
-    r"    License\.\n"
-    r"\n"
-    r"    Note that  this license  is  compatible  to the  GNU General  Public\n"
-    r"    License version 3, but not version 2\.\n"
-    r"\n"
+    r'    License\.\n'
+    r'\n'
+    r'    Note that  this license  is  compatible  to the  GNU General  Public\n'
+    r'    License version 3, but not version 2\.\n'
+    r'\n'
     r"  - The GNU General Public License version 2, found in  `GPLv2\.TXT' \(any\n"
-    r"    later version can be used  also\), for programs which already use the\n"
-    r"    GPL\.  Note  that the  FTL is  incompatible  with  GPLv2 due  to  its\n"
-    r"    advertisement clause\.\n"
-    r"\n"
-    r"The contributed BDF and PCF drivers  come with a license similar to that\n"
-    r"of the X Window System\.  It is compatible to the above two licenses \(see\n"
-    r"file src/bdf/README and  src/pcf/README\)\.  The same holds  for the files\n"
+    r'    later version can be used  also\), for programs which already use the\n'
+    r'    GPL\.  Note  that the  FTL is  incompatible  with  GPLv2 due  to  its\n'
+    r'    advertisement clause\.\n'
+    r'\n'
+    r'The contributed BDF and PCF drivers  come with a license similar to that\n'
+    r'of the X Window System\.  It is compatible to the above two licenses \(see\n'
+    r'file src/bdf/README and  src/pcf/README\)\.  The same holds  for the files\n'
     r"`fthash\.c' and  `fthash\.h'; their  code was  part of  the BDF  driver in\n"
-    r"earlier FreeType versions\.\n"
-    r"\n"
-    r"The gzip module uses the zlib license \(see src/gzip/zlib\.h\) which too is\n"
-    r"compatible to the above two licenses\.\n"
-    r"\n"
-    r"The MD5 checksum support \(only used for debugging in development builds\)\n"
-    r"is in the public domain\.\n"
-    r"\n*"
-    r"--- end of LICENSE\.TXT ---\n*$"
+    r'earlier FreeType versions\.\n'
+    r'\n'
+    r'The gzip module uses the zlib license \(see src/gzip/zlib\.h\) which too is\n'
+    r'compatible to the above two licenses\.\n'
+    r'\n'
+    r'The MD5 checksum support \(only used for debugging in development builds\)\n'
+    r'is in the public domain\.\n'
+    r'\n*'
+    r'--- end of LICENSE\.TXT ---\n*$'
   );
 
   static String _parseLicense(fs.TextFile io) {

@@ -46,6 +46,7 @@ linter:
     - package_prefixed_library_names
     - prefer_final_locals
     - prefer_is_not_empty
+    - prefer_single_quotes
     - slash_for_doc_comments
     - sort_constructors_first
     - sort_unnamed_constructors_first

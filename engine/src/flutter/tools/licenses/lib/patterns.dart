@@ -87,7 +87,7 @@ final List<RegExp> copyrightStatementPatterns = <RegExp>[
   RegExp(r'^Written by .+', caseSensitive: false),
   RegExp(r'^Based on$', caseSensitive: false),
   RegExp(r"^based on (?:code in )?['`][^'`]+['`]$", caseSensitive: false),
-  RegExp(r"^Based on .+, written by .+, [0-9]+\.$", caseSensitive: false),
+  RegExp(r'^Based on .+, written by .+, [0-9]+\.$', caseSensitive: false),
   RegExp(r'^(?:Based on the )?x86 SIMD extension for IJG JPEG library(?: - version [0-9.]+|,)?$'),
   RegExp(r'^This software originally derived from .+\.$'),
   RegExp(r'^Derived from .+, which was$'),
