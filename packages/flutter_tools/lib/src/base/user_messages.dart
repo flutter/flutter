@@ -267,7 +267,7 @@ class UserMessages {
       'Warning! The \'flutter\' tool you are currently running is from a different Flutter '
       'repository than the one last used by this package. The repository from which the '
       '\'flutter\' tool is currently executing will be used instead.\n'
-      '  running Flutter tool: ${Cache.flutterRoot}\n'
+      '  running Flutter tool: $flutterRoot\n'
       '  previous reference  : $flutterPath\n'
       'This can happen when you have multiple copies of flutter installed. Please check '
       'your system path to verify that you are running the expected version (run '
