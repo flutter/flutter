@@ -14,6 +14,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/time.dart';
+import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
@@ -385,7 +386,7 @@ abstract class FlutterCommand extends Command<void> {
           rethrow;
         } finally {
           final DateTime endTime = systemClock.now();
-          printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
+          printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           // This is checking the result of the call to 'usagePath'
           // (a Future<String>), and not the result of evaluating the Future.
           if (usagePath != null) {
@@ -459,19 +460,17 @@ abstract class FlutterCommand extends Command<void> {
   /// then print an error message and return null.
   Future<List<Device>> findAllTargetDevices() async {
     if (!doctor.canLaunchAnything) {
-      printError("Unable to locate a development device; please run 'flutter doctor' "
-          'for information about installing additional components.');
+      printError(userMessages.flutterNoDevelopmentDevice);
       return null;
     }
 
     List<Device> devices = await deviceManager.getDevices().toList();
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
-      printStatus('No devices found with name or id '
-          "matching '${deviceManager.specifiedDeviceId}'");
+      printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId));
       return null;
     } else if (devices.isEmpty && deviceManager.hasSpecifiedAllDevices) {
-      printStatus('No devices found');
+      printStatus(userMessages.flutterNoDevicesFound);
       return null;
     } else if (devices.isEmpty) {
       printNoConnectedDevices();
@@ -481,15 +480,13 @@ abstract class FlutterCommand extends Command<void> {
     devices = devices.where((Device device) => device.isSupported()).toList();
 
     if (devices.isEmpty) {
-      printStatus('No supported devices connected.');
+      printStatus(userMessages.flutterNoSupportedDevices);
       return null;
     } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
       if (deviceManager.hasSpecifiedDeviceId) {
-        printStatus('Found ${devices.length} devices with name or id matching '
-            "'${deviceManager.specifiedDeviceId}':");
+        printStatus(userMessages.flutterFoundSpecifiedDevices(devices.length, deviceManager.specifiedDeviceId));
       } else {
-        printStatus('More than one device connected; please specify a device with '
-            "the '-d <deviceId>' flag, or use '-d all' to act on all devices.");
+        printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
         devices = await deviceManager.getAllConnectedDevices().toList();
       }
       printStatus('');
@@ -508,8 +505,7 @@ abstract class FlutterCommand extends Command<void> {
     if (deviceList == null)
       return null;
     if (deviceList.length > 1) {
-      printStatus('More than one device connected; please specify a device with '
-        "the '-d <deviceId>' flag.");
+      printStatus(userMessages.flutterSpecifyDevice);
       deviceList = await deviceManager.getAllConnectedDevices().toList();
       printStatus('');
       await Device.printDevices(deviceList);
@@ -519,7 +515,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void printNoConnectedDevices() {
-    printStatus('No connected devices.');
+    printStatus(userMessages.flutterNoConnectedDevices);
   }
 
   @protected
@@ -528,29 +524,11 @@ abstract class FlutterCommand extends Command<void> {
     if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {
-        throw ToolExit(
-          'Error: No pubspec.yaml file found.\n'
-          'This command should be run from the root of your Flutter project.\n'
-          'Do not run this command from the root of your git clone of Flutter.'
-        );
+        throw ToolExit(userMessages.flutterNoPubspec);
       }
 
       if (fs.isFileSync('flutter.yaml')) {
-        throw ToolExit(
-          'Please merge your flutter.yaml into your pubspec.yaml.\n\n'
-          'We have changed from having separate flutter.yaml and pubspec.yaml\n'
-          'files to having just one pubspec.yaml file. Transitioning is simple:\n'
-          'add a line that just says "flutter:" to your pubspec.yaml file, and\n'
-          'move everything from your current flutter.yaml file into the\n'
-          'pubspec.yaml file, below that line, with everything indented by two\n'
-          'extra spaces compared to how it was in the flutter.yaml file. Then, if\n'
-          'you had a "name:" line, move that to the top of your "pubspec.yaml"\n'
-          'file (you may already have one there), so that there is only one\n'
-          '"name:" line. Finally, delete the flutter.yaml file.\n\n'
-          'For an example of what a new-style pubspec.yaml file might look like,\n'
-          'check out the Flutter Gallery pubspec.yaml:\n'
-          'https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/pubspec.yaml\n'
-        );
+        throw ToolExit(userMessages.flutterMergeYamlFiles);
       }
 
       // Validate the current package map only if we will not be running "pub get" later.
@@ -564,7 +542,7 @@ abstract class FlutterCommand extends Command<void> {
     if (_usesTargetOption) {
       final String targetPath = targetFile;
       if (!fs.isFileSync(targetPath))
-        throw ToolExit('Target file "$targetPath" not found.');
+        throw ToolExit(userMessages.flutterTargetFileMissing(targetPath));
     }
 
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
@@ -575,11 +553,11 @@ abstract class FlutterCommand extends Command<void> {
         ? argResults['hotupdate'] : false;
 
     if (compilationTraceFilePath != null && getBuildMode() == BuildMode.debug)
-      throw ToolExit('Error: --precompile is not allowed when --debug is specified.');
+      throw ToolExit(userMessages.flutterPrecompileDisallowedWithDebug);
     if (compilationTraceFilePath != null && !dynamicFlag)
-      throw ToolExit('Error: --precompile is allowed only when --dynamic is specified.');
+      throw ToolExit(userMessages.flutterPrecompileRequiresDynamic);
     if (buildHotUpdate && compilationTraceFilePath == null)
-      throw ToolExit('Error: --hotupdate is allowed only when --precompile is specified.');
+      throw ToolExit(userMessages.flutterHotupdateRequiresPrecomplile);
   }
 
   ApplicationPackageStore applicationPackages;
