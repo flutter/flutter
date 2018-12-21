@@ -1727,7 +1727,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
 
     if (mergeAllDescendantsIntoThisNode) {
-      // TODO(goderbauer): Deal with elevation and thickness.
       _visitDescendants((SemanticsNode node) {
         assert(node.isMergedIntoParent);
         flags |= node._flags;
@@ -1781,6 +1780,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           otherString: node._hint,
           otherTextDirection: node._textDirection,
         );
+
+        thickness = math.max(thickness, node._thickness + node._elevation);
+
         return true;
       });
     }
