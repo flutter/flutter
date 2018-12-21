@@ -32,7 +32,7 @@ void main() {
     test('reports an error if an invalid device is supplied', () async {
       // This test forces flutter to check for all possible devices to catch issues
       // like https://github.com/flutter/flutter/issues/21418 which were skipped
-      // over because other integration tesst run using flutter-tester which short-cuts
+      // over because other integration tests run using flutter-tester which short-cuts
       // some of the checks for devices.
       final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
 
@@ -55,5 +55,5 @@ void main() {
       await _flutter.run(pidFile: pidFile);
       expect(pidFile.existsSync(), isTrue);
     });
-  }, timeout: const Timeout.factor(6));
+  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
 }

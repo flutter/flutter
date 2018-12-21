@@ -105,7 +105,7 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// lib/backgrounds/background1.png
 /// lib/backgrounds/background2.png
 /// lib/backgrounds/background3.png
-///```
+/// ```
 ///
 /// To include, say the first image, the `pubspec.yaml` of the app should specify
 /// it in the `assets` section:

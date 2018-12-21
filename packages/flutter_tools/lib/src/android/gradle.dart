@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:archive/archive.dart';
 import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
+import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -94,7 +97,7 @@ Future<GradleProject> _readGradleProject() async {
   final FlutterProject flutterProject = await FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
   updateLocalProperties(project: flutterProject);
-  final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
+  final Status status = logger.startProgress('Resolving dependencies...', timeout: kSlowOperation);
   GradleProject project;
   try {
     final RunResult propertiesRunResult = await runCheckedAsync(
@@ -171,7 +174,7 @@ Future<String> _ensureGradle(FlutterProject project) async {
 // of validating the Gradle executable. This may take several seconds.
 Future<String> _initializeGradle(FlutterProject project) async {
   final Directory android = project.android.hostAppGradleRoot;
-  final Status status = logger.startProgress('Initializing gradle...', expectSlowOperation: true);
+  final Status status = logger.startProgress('Initializing gradle...', timeout: kSlowOperation);
   String gradle = _locateGradlewExecutable(android);
   if (gradle == null) {
     injectGradleWrapper(android);
@@ -231,7 +234,11 @@ void updateLocalProperties({
 
   void changeIfNecessary(String key, String value) {
     if (settings.values[key] != value) {
-      settings.values[key] = value;
+      if (value == null) {
+        settings.values.remove(key);
+      } else {
+        settings.values[key] = value;
+      }
       changed = true;
     }
   }
@@ -240,15 +247,16 @@ void updateLocalProperties({
 
   if (androidSdk != null)
     changeIfNecessary('sdk.dir', escapePath(androidSdk.directory));
+
   changeIfNecessary('flutter.sdk', escapePath(Cache.flutterRoot));
-  if (buildInfo != null)
+
+  if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
-  final String buildName = buildInfo?.buildName ?? manifest.buildName;
-  if (buildName != null)
+    final String buildName = buildInfo.buildName ?? manifest.buildName;
     changeIfNecessary('flutter.versionName', buildName);
-  final int buildNumber = buildInfo?.buildNumber ?? manifest.buildNumber;
-  if (buildNumber != null)
-    changeIfNecessary('flutter.versionCode', '$buildNumber');
+    final int buildNumber = buildInfo.buildNumber ?? manifest.buildNumber;
+    changeIfNecessary('flutter.versionCode', buildNumber?.toString());
+  }
 
   if (changed)
     settings.writeContents(localProperties);
@@ -304,8 +312,8 @@ Future<void> buildGradleProject({
 Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async {
   // Run 'gradlew build'.
   final Status status = logger.startProgress(
-    "Running 'gradlew build'...",
-    expectSlowOperation: true,
+    'Running \'gradlew build\'...',
+    timeout: kSlowOperation,
     multilineOutput: true,
   );
   final int exitCode = await runCommandAndStreamOutput(
@@ -346,8 +354,8 @@ Future<void> _buildGradleProjectV2(
     }
   }
   final Status status = logger.startProgress(
-    "Gradle task '$assembleTask'...",
-    expectSlowOperation: true,
+    'Running Gradle task \'$assembleTask\'...',
+    timeout: kSlowOperation,
     multilineOutput: true,
   );
   final String gradlePath = fs.file(gradle).absolute.path;
@@ -369,8 +377,8 @@ Future<void> _buildGradleProjectV2(
   command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
   if (buildInfo.compilationTraceFilePath != null)
     command.add('-Pprecompile=${buildInfo.compilationTraceFilePath}');
-  if (buildInfo.buildHotUpdate)
-    command.add('-Photupdate=true');
+  if (buildInfo.createPatch)
+    command.add('-Ppatch=true');
   if (buildInfo.extraFrontEndOptions != null)
     command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
   if (buildInfo.extraGenSnapshotOptions != null)
@@ -415,6 +423,73 @@ Future<void> _buildGradleProjectV2(
     appSize = ' (${getSizeAsMB(apkFile.lengthSync())})';
   }
   printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.');
+
+  if (buildInfo.createBaseline) {
+    // Save baseline apk for generating dynamic patches in later builds.
+    final AndroidApk package = AndroidApk.fromApk(apkFile);
+    final Directory baselineDir = fs.directory(buildInfo.baselineDir);
+    final File baselineApkFile = baselineDir.childFile('${package.versionCode}.apk');
+    baselineApkFile.parent.createSync(recursive: true);
+    apkFile.copySync(baselineApkFile.path);
+    printStatus('Saved baseline package ${baselineApkFile.path}.');
+  }
+
+  if (buildInfo.createPatch) {
+    final AndroidApk package = AndroidApk.fromApk(apkFile);
+    final Directory baselineDir = fs.directory(buildInfo.baselineDir);
+    final File baselineApkFile = baselineDir.childFile('${package.versionCode}.apk');
+    if (!baselineApkFile.existsSync())
+      throwToolExit('Error: Could not find baseline package ${baselineApkFile.path}.');
+
+    printStatus('Found baseline package ${baselineApkFile.path}.');
+    final Archive newApk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
+    final Archive oldApk = ZipDecoder().decodeBytes(baselineApkFile.readAsBytesSync());
+
+    final Archive update = Archive();
+    for (ArchiveFile newFile in newApk) {
+      if (!newFile.isFile || !newFile.name.startsWith('assets/flutter_assets/'))
+        continue;
+
+      final ArchiveFile oldFile = oldApk.findFile(newFile.name);
+      if (oldFile != null && oldFile.crc32 == newFile.crc32)
+        continue;
+
+      final String name = fs.path.relative(newFile.name, from: 'assets/');
+      update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
+    }
+
+    final File updateFile = fs.directory(buildInfo.patchDir)
+        .childFile('${package.versionCode}-${buildInfo.patchNumber}.zip');
+
+    if (update.files.isEmpty) {
+      printStatus('No changes detected relative to baseline build.');
+
+      if (updateFile.existsSync()) {
+        updateFile.deleteSync();
+        printStatus('Deleted dynamic patch ${updateFile.path}.');
+      }
+      return;
+    }
+
+    final ArchiveFile oldFile = oldApk.findFile('assets/flutter_assets/isolate_snapshot_data');
+    if (oldFile == null)
+      throwToolExit('Error: Could not find baseline assets/flutter_assets/isolate_snapshot_data.');
+
+    final int baselineChecksum = getCrc32(oldFile.content);
+    final Map<String, dynamic> manifest = <String, dynamic>{
+      'baselineChecksum': baselineChecksum,
+      'buildNumber': package.versionCode,
+      'patchNumber': buildInfo.patchNumber,
+    };
+
+    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+    final String manifestJson = encoder.convert(manifest);
+    update.addFile(ArchiveFile('manifest.json', manifestJson.length, manifestJson.codeUnits));
+
+    updateFile.parent.createSync(recursive: true);
+    updateFile.writeAsBytesSync(ZipEncoder().encode(update), flush: true);
+    printStatus('Created dynamic patch ${updateFile.path}.');
+  }
 }
 
 File _findApkFile(GradleProject project, BuildInfo buildInfo) {

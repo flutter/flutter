@@ -107,7 +107,7 @@ class AppContext {
 
   /// Gets the value associated with the specified [type], or `null` if no
   /// such value has been associated.
-  dynamic operator [](Type type) {
+  Object operator [](Type type) {
     dynamic value = _generateIfNecessary(type, _overrides);
     if (value == null && _parent != null)
       value = _parent[type];

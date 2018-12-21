@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../emulator.dart';
+import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -427,11 +428,12 @@ class AppDomain extends Domain {
       });
     }
     final Completer<void> appStartedCompleter = Completer<void>();
-    // We don't want to wait for this future to complete and callbacks won't fail.
-    // As it just writes to stdout.
-    appStartedCompleter.future.then<void>((_) { // ignore: unawaited_futures
-      _sendAppEvent(app, 'started');
-    });
+    // We don't want to wait for this future to complete and callbacks won't fail,
+    // as it just writes to stdout.
+    appStartedCompleter.future // ignore: unawaited_futures
+      .then<void>((void value) {
+        _sendAppEvent(app, 'started');
+      });
 
     await app._runInZone<void>(this, () async {
       try {
@@ -514,14 +516,15 @@ class AppDomain extends Domain {
     if (app == null)
       throw "app '$appId' not found";
 
-    return app.stop().timeout(const Duration(seconds: 5)).then<bool>((_) {
-      return true;
-    }).catchError((dynamic error) {
-      _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
-      app.closeLogger();
-      _apps.remove(app);
-      return false;
-    });
+    return app.stop().then<bool>(
+      (void value) => true,
+      onError: (dynamic error, StackTrace stack) {
+        _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
+        app.closeLogger();
+        _apps.remove(app);
+        return false;
+      },
+    );
   }
 
   Future<bool> detach(Map<String, dynamic> args) async {
@@ -531,14 +534,15 @@ class AppDomain extends Domain {
     if (app == null)
       throw "app '$appId' not found";
 
-    return app.detach().timeout(const Duration(seconds: 5)).then<bool>((_) {
-      return true;
-    }).catchError((dynamic error) {
-      _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
-      app.closeLogger();
-      _apps.remove(app);
-      return false;
-    });
+    return app.detach().then<bool>(
+      (void value) => true,
+      onError: (dynamic error, StackTrace stack) {
+        _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
+        app.closeLogger();
+        _apps.remove(app);
+        return false;
+      },
+    );
   }
 
   AppInstance _getApp(String id) {
@@ -567,6 +571,7 @@ class DeviceDomain extends Domain {
     registerHandler('forward', forward);
     registerHandler('unforward', unforward);
 
+    addDeviceDiscoverer(FuchsiaDevices());
     addDeviceDiscoverer(AndroidDevices());
     addDeviceDiscoverer(IOSDevices());
     addDeviceDiscoverer(IOSSimulators());
@@ -576,21 +581,6 @@ class DeviceDomain extends Domain {
   void addDeviceDiscoverer(PollingDeviceDiscovery discoverer) {
     if (!discoverer.supportsPlatform)
       return;
-
-    if (!discoverer.canListAnything) {
-      // This event will affect the client UI. Coordinate changes here
-      // with the Flutter IntelliJ team.
-      sendEvent(
-        'daemon.showMessage',
-        <String, String>{
-          'level': 'warning',
-          'title': 'Unable to list devices',
-          'message':
-              'Unable to discover ${discoverer.name}. Please run '
-              '"flutter doctor" to diagnose potential issues',
-        },
-      );
-    }
 
     _discoverers.add(discoverer);
 
@@ -610,12 +600,18 @@ class DeviceDomain extends Domain {
 
   final List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
 
-  Future<List<Device>> getDevices([Map<String, dynamic> args]) async {
-    final List<Device> devices = <Device>[];
+  /// Return a list of the current devices, with each device represented as a map
+  /// of properties (id, name, platform, ...).
+  Future<List<Map<String, dynamic>>> getDevices([Map<String, dynamic> args]) async {
+    final List<Map<String, dynamic>> devicesInfo = <Map<String, dynamic>>[];
+
     for (PollingDeviceDiscovery discoverer in _discoverers) {
-      devices.addAll(await discoverer.devices);
+      for (Device device in await discoverer.devices) {
+        devicesInfo.add(await _deviceToMap(device));
+      }
     }
-    return devices;
+
+    return devicesInfo;
   }
 
   /// Enable device events.
@@ -779,13 +775,14 @@ class NotifyingLogger extends Logger {
   @override
   Status startProgress(
     String message, {
+    @required Duration timeout,
     String progressId,
-    bool expectSlowOperation = false,
     bool multilineOutput,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
+    assert(timeout != null);
     printStatus(message);
-    return Status();
+    return SilentStatus(timeout: timeout);
   }
 
   void dispose() {
@@ -955,11 +952,12 @@ class _AppRunLogger extends Logger {
   @override
   Status startProgress(
     String message, {
+    @required Duration timeout,
     String progressId,
-    bool expectSlowOperation = false,
     bool multilineOutput,
     int progressIndicatorPadding = 52,
   }) {
+    assert(timeout != null);
     final int id = _nextProgressId++;
 
     _sendProgressEvent(<String, dynamic>{
@@ -968,13 +966,16 @@ class _AppRunLogger extends Logger {
       'message': message,
     });
 
-    _status = Status(onFinish: () {
-      _status = null;
-      _sendProgressEvent(<String, dynamic>{
-        'id': id.toString(),
-        'progressId': progressId,
-        'finished': true
-      });
+    _status = SilentStatus(
+      timeout: timeout,
+      onFinish: () {
+        _status = null;
+        _sendProgressEvent(<String, dynamic>{
+          'id': id.toString(),
+          'progressId': progressId,
+          'finished': true,
+        },
+      );
     })..start();
     return _status;
   }
