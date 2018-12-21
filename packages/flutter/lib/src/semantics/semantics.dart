@@ -1166,7 +1166,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// If this rect is null [parentSemanticsClipRect] also has to be null.
   Rect parentPaintClipRect;
 
-  /// The elevation adjustment that the parent imposes on this note.
+  /// The elevation adjustment that the parent imposes on this node.
   ///
   /// The [elevation] property is relative to the elevation of the parent
   /// [SemanticsNode]. However, as [SemanticsConfiguration]s from various
