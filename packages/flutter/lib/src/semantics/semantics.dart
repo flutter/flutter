@@ -1704,7 +1704,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     double scrollPosition = _scrollPosition;
     double scrollExtentMax = _scrollExtentMax;
     double scrollExtentMin = _scrollExtentMin;
-    double elevation = _elevation;
+    final double elevation = _elevation;
     double thickness = _thickness;
     final Set<int> customSemanticsActionIds = Set<int>();
     for (CustomSemanticsAction action in _customSemanticsActions.keys)

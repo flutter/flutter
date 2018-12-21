@@ -196,7 +196,6 @@ void main() {
 
   testWidgets('force-merge', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final Key key = GlobalKey();
 
     await tester.pumpWidget(MaterialApp(
         home: Card(
@@ -251,7 +250,6 @@ void main() {
 
   testWidgets('force-merge with inversed children', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final Key key = GlobalKey();
 
     await tester.pumpWidget(MaterialApp(
         home: Card(
