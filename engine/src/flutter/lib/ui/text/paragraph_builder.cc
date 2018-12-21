@@ -202,7 +202,7 @@ void decodeTextShadows(Dart_Handle shadows_data,
 }
 
 void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
-                                 const std::string& fontFamily,
+                                 const std::vector<std::string>& fontFamilies,
                                  double fontSize,
                                  double letterSpacing,
                                  double wordSpacing,
@@ -243,17 +243,14 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
     // property wasn't wired up either.
   }
 
-  if (mask & (tsFontWeightMask | tsFontStyleMask | tsFontFamilyMask |
-              tsFontSizeMask | tsLetterSpacingMask | tsWordSpacingMask)) {
+  if (mask & (tsFontWeightMask | tsFontStyleMask | tsFontSizeMask |
+              tsLetterSpacingMask | tsWordSpacingMask)) {
     if (mask & tsFontWeightMask)
       style.font_weight =
           static_cast<txt::FontWeight>(encoded[tsFontWeightIndex]);
 
     if (mask & tsFontStyleMask)
       style.font_style = static_cast<txt::FontStyle>(encoded[tsFontStyleIndex]);
-
-    if (mask & tsFontFamilyMask)
-      style.font_family = fontFamily;
 
     if (mask & tsFontSizeMask)
       style.font_size = fontSize;
@@ -291,6 +288,11 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
 
   if (mask & tsTextShadowsMask) {
     decodeTextShadows(shadows_data, style.text_shadows);
+  }
+
+  if (mask & tsFontFamilyMask) {
+    style.font_families.insert(style.font_families.end(), fontFamilies.begin(),
+                               fontFamilies.end());
   }
 
   m_paragraphBuilder->PushStyle(style);

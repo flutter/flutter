@@ -43,7 +43,9 @@ class TextStyle {
   FontWeight font_weight = FontWeight::w400;
   FontStyle font_style = FontStyle::normal;
   TextBaseline text_baseline = TextBaseline::kAlphabetic;
-  std::string font_family;
+  // An ordered list of fonts in order of priority. The first font is more
+  // highly preferred than the last font.
+  std::vector<std::string> font_families;
   double font_size = 14.0;
   double letter_spacing = 0.0;
   double word_spacing = 0.0;

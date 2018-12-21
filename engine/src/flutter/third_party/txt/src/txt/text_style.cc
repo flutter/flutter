@@ -22,7 +22,8 @@
 
 namespace txt {
 
-TextStyle::TextStyle() : font_family(GetDefaultFontFamily()) {}
+TextStyle::TextStyle()
+    : font_families(std::vector<std::string>(1, GetDefaultFontFamily())) {}
 
 bool TextStyle::equals(const TextStyle& other) const {
   if (color != other.color)
@@ -39,8 +40,6 @@ bool TextStyle::equals(const TextStyle& other) const {
     return false;
   if (font_style != other.font_style)
     return false;
-  if (font_family != other.font_family)
-    return false;
   if (letter_spacing != other.letter_spacing)
     return false;
   if (word_spacing != other.word_spacing)
@@ -53,6 +52,10 @@ bool TextStyle::equals(const TextStyle& other) const {
     return false;
   if (text_shadows.size() != other.text_shadows.size())
     return false;
+  for (size_t font_index = 0; font_index < font_families.size(); ++font_index) {
+    if (font_families[font_index] != other.font_families[font_index])
+      return false;
+  }
   for (size_t shadow_index = 0; shadow_index < text_shadows.size();
        ++shadow_index) {
     if (text_shadows[shadow_index] != other.text_shadows[shadow_index])

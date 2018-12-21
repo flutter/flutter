@@ -290,7 +290,10 @@ bool Paragraph::ComputeLineBreaks() {
           GetMinikinFontCollectionForStyle(run.style);
       if (collection == nullptr) {
         FML_LOG(INFO) << "Could not find font collection for family \""
-                      << run.style.font_family << "\".";
+                      << (run.style.font_families.empty()
+                              ? ""
+                              : run.style.font_families[0])
+                      << "\".";
         return false;
       }
       size_t run_start = std::max(run.start, block_start) - block_start;
@@ -900,8 +903,8 @@ Paragraph::GetMinikinFontCollectionForStyle(const TextStyle& style) {
     }
   }
 
-  return font_collection_->GetMinikinFontCollectionForFamily(style.font_family,
-                                                             locale);
+  return font_collection_->GetMinikinFontCollectionForFamilies(
+      style.font_families, locale);
 }
 
 sk_sp<SkTypeface> Paragraph::GetDefaultSkiaTypeface(const TextStyle& style) {

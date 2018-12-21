@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <vector>
+
 #include "paragraph_style.h"
 
 namespace txt {
@@ -22,7 +24,7 @@ TextStyle ParagraphStyle::GetTextStyle() const {
   TextStyle result;
   result.font_weight = font_weight;
   result.font_style = font_style;
-  result.font_family = font_family;
+  result.font_families = std::vector<std::string>({font_family});
   result.font_size = font_size;
   result.locale = locale;
   result.height = line_height;

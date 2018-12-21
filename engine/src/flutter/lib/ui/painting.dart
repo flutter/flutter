@@ -3802,23 +3802,6 @@ class Shadow {
   @override
   int get hashCode => hashValues(color, offset, blurRadius);
 
-  /// Determines if lists [a] and [b] are deep equivalent.
-  ///
-  /// Returns true if the lists are both null, or if they are both non-null, have
-  /// the same length, and contain the same Shadows in the same order. Returns
-  /// false otherwise.
-  static bool _shadowsListEquals(List<Shadow> a, List<Shadow> b) {
-    // Compare _shadows
-    if (a == null)
-      return b == null;
-    if (b == null || a.length != b.length)
-      return false;
-    for (int index = 0; index < a.length; ++index)
-      if (a[index] != b[index])
-        return false;
-    return true;
-  }
-
   // Serialize [shadows] into ByteData. The format is a single uint_32_t at
   // the beginning indicating the number of shadows, followed by _kBytesPerShadow
   // bytes for each shadow.
