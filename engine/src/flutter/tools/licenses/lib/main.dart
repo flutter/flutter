@@ -13,6 +13,7 @@ import 'dart:math' as math;
 import 'package:args/args.dart';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:licenses/patterns.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'filesystem.dart' as fs;
@@ -1181,13 +1182,13 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
           final List<License> licenses = file.licenses;
           assert(licenses != null && licenses.isNotEmpty);
           result.addAll(licenses);
-          progress.advance(true);
+          progress.advance(success: true);
         } catch (e, stack) {
           system.stderr.writeln('error searching for copyright in: ${file.io}\n$e');
           if (e is! String)
             system.stderr.writeln(stack);
           system.stderr.writeln('\n');
-          progress.advance(false);
+          progress.advance(success: false);
         }
       }
     }
@@ -2137,7 +2138,8 @@ class _Progress {
       update();
     }
   }
-  void advance(bool success) {
+  void advance({@required bool success}) {
+    assert(success != null);
     if (success)
       _withLicense += 1;
     else
