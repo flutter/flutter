@@ -90,5 +90,5 @@ void main() {
       expect(result, isList);
       expect(result, isNotEmpty);
     });
-  }, timeout: const Timeout.factor(10)); // This test uses the `flutter` tool, which could be blocked behind the startup lock for a long time.
+  }, timeout: const Timeout.factor(2));
 }

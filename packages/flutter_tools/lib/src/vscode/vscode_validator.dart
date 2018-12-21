@@ -14,6 +14,7 @@ class VsCodeValidator extends DoctorValidator {
 
   final VsCode _vsCode;
 
+
   static Iterable<DoctorValidator> get installedValidators {
     return VsCode
         .allInstalled()

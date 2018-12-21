@@ -22,63 +22,33 @@ class HotReloadProject extends Project {
   @override
   final String main = r'''
   import 'package:flutter/material.dart';
-  import 'package:flutter/scheduler.dart';
 
   void main() => runApp(new MyApp());
-
-  int count = 1;
 
   class MyApp extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
-      // This method gets called each time we hot reload, during reassemble.
-
-      // Do not remove the next line, it's uncommented by a test to verify that
-      // hot reloading worked:
+      // Do not remove this line, it's uncommented by a test to verify that hot
+      // reloading worked.
       // printHotReloadWorked();
 
-      print('((((TICK $count))))');
-      // tick 1 = startup warmup frame
-      // tick 2 = hot reload warmup reassemble frame
-      // after that there's a post-hot-reload frame scheduled by the tool that
-      // doesn't trigger this to rebuild, but does trigger the first callback
-      // below, then that callback schedules another frame on which we do the
-      // breakpoint.
-      // tick 3 = second hot reload warmup reassemble frame (pre breakpoint)
-      if (count == 2) {
-        SchedulerBinding.instance.scheduleFrameCallback((Duration timestamp) {
-          SchedulerBinding.instance.scheduleFrameCallback((Duration timestamp) {
-            print('breakpoint line'); // SCHEDULED BREAKPOINT
-          });
-        });
-      }
-      count += 1;
-
-      return MaterialApp( // BUILD BREAKPOINT
+      return new MaterialApp( // BREAKPOINT
         title: 'Flutter Demo',
-        home: Container(),
+        home: new Container(),
       );
     }
   }
 
-  void printHotReloadWorked() {
+  printHotReloadWorked() {
     // The call to this function is uncommented by a test to verify that hot
     // reloading worked.
     print('(((((RELOAD WORKED)))))');
   }
   ''';
 
-  Uri get scheduledBreakpointUri => mainDart;
-  int get scheduledBreakpointLine => lineContaining(main, '// SCHEDULED BREAKPOINT');
-
-  Uri get buildBreakpointUri => mainDart;
-  int get buildBreakpointLine => lineContaining(main, '// BUILD BREAKPOINT');
-
   void uncommentHotReloadPrint() {
     final String newMainContents = main.replaceAll(
-      '// printHotReloadWorked();',
-      'printHotReloadWorked();'
-    );
+        '// printHotReloadWorked();', 'printHotReloadWorked();');
     writeFile(fs.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
   }
 }
