@@ -417,6 +417,8 @@ class TextPainter {
   // Unicode value for a zero width joiner character.
   static const int _zwjUtf16 = 0x200d;
 
+  // Get the Offset of the cursor (in logical pixels) based off the near edge
+  // of the character upstream from the given string offset.
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
@@ -424,6 +426,7 @@ class TextPainter {
     final int prevCodeUnit = _text.codeUnitAt(max(0, offset - 1));
     if (prevCodeUnit == null)
       return null;
+
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
     final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _text.codeUnitAt(offset) == _zwjUtf16;
     int graphemeClusterLength = needsSearch ? 2 : 1;
@@ -447,6 +450,13 @@ class TextPainter {
         continue;
       }
       final TextBox box = boxes.first;
+
+      // If the upstream character is a newline, cursor is at start of next line
+      const int NEWLINE_CODE_UNIT = 10;
+      if (prevCodeUnit == NEWLINE_CODE_UNIT) {
+        return Offset(_emptyOffset.dx, box.bottom);
+      }
+
       final double caretEnd = box.end;
       final double dx = box.direction == TextDirection.rtl ? caretEnd - caretPrototype.width : caretEnd;
       return Offset(dx, box.top);
@@ -454,6 +464,8 @@ class TextPainter {
     return null;
   }
 
+  // Get the Offset of the cursor (in logical pixels) based off the near edge
+  // of the character downstream from the given string offset.
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {

@@ -43,8 +43,8 @@ enum FlutterPluginVersion {
 // of the impact of -q, but users insist they see the error message sometimes
 // anyway.  If we can prove it really is impossible, delete the filter.
 final RegExp ndkMessageFilter = RegExp(r'^(?!NDK is missing a ".*" directory'
-r'|If you are not using NDK, unset the NDK variable from ANDROID_NDK_HOME or local.properties to remove this warning'
-r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
+  r'|If you are not using NDK, unset the NDK variable from ANDROID_NDK_HOME or local.properties to remove this warning'
+  r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
 
 FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
   final File plugin = project.hostAppGradleRoot.childFile(
@@ -75,11 +75,11 @@ FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
 Future<File> getGradleAppOut(AndroidProject androidProject) async {
   switch (getFlutterPluginVersion(androidProject)) {
     case FlutterPluginVersion.none:
-    // Fall through. Pretend we're v1, and just go with it.
+      // Fall through. Pretend we're v1, and just go with it.
     case FlutterPluginVersion.v1:
       return androidProject.gradleAppOutV1File;
     case FlutterPluginVersion.managed:
-    // Fall through. The managed plugin matches plugin v2 for now.
+      // Fall through. The managed plugin matches plugin v2 for now.
     case FlutterPluginVersion.v2:
       return fs.file((await _gradleProject()).apkDirectory.childFile('app.apk'));
   }
@@ -137,18 +137,18 @@ void handleKnownGradleExceptions(String exceptionString) {
   // Android SDK components (e.g. Platform Tools), and the license
   // for that component has not been accepted.
   const String matcher =
-      r'You have not accepted the license agreements of the following SDK components:'
-      r'\s*\[(.+)\]';
+    r'You have not accepted the license agreements of the following SDK components:'
+    r'\s*\[(.+)\]';
   final RegExp licenseFailure = RegExp(matcher, multiLine: true);
   final Match licenseMatch = licenseFailure.firstMatch(exceptionString);
   if (licenseMatch != null) {
     final String missingLicenses = licenseMatch.group(1);
     final String errorMessage =
-        '\n\n* Error running Gradle:\n'
-        'Unable to download needed Android SDK components, as the following licenses have not been accepted:\n'
-        '$missingLicenses\n\n'
-        'To resolve this, please run the following command in a Terminal:\n'
-        'flutter doctor --android-licenses';
+      '\n\n* Error running Gradle:\n'
+      'Unable to download needed Android SDK components, as the following licenses have not been accepted:\n'
+      '$missingLicenses\n\n'
+      'To resolve this, please run the following command in a Terminal:\n'
+      'flutter doctor --android-licenses';
     throwToolExit(errorMessage);
   }
 }
@@ -301,11 +301,11 @@ Future<void> buildGradleProject({
 
   switch (getFlutterPluginVersion(project.android)) {
     case FlutterPluginVersion.none:
-    // Fall through. Pretend it's v1, and just go for it.
+      // Fall through. Pretend it's v1, and just go for it.
     case FlutterPluginVersion.v1:
       return _buildGradleProjectV1(project, gradle);
     case FlutterPluginVersion.managed:
-    // Fall through. Managed plugin builds the same way as plugin v2.
+      // Fall through. Managed plugin builds the same way as plugin v2.
     case FlutterPluginVersion.v2:
       return _buildGradleProjectV2(project, gradle, buildInfo, target, isBuildingBundle);
   }
@@ -436,19 +436,20 @@ Future<void> _buildGradleProjectV2(
     }
     printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.');
 
-    final AndroidApk package = AndroidApk.fromApk(apkFile);
-    final File baselineApkFile =
-    fs.directory(buildInfo.baselineDir).childFile('${package.versionCode}.apk');
-
     if (buildInfo.createBaseline) {
       // Save baseline apk for generating dynamic patches in later builds.
+      final AndroidApk package = AndroidApk.fromApk(apkFile);
+      final Directory baselineDir = fs.directory(buildInfo.baselineDir);
+      final File baselineApkFile = baselineDir.childFile('${package.versionCode}.apk');
       baselineApkFile.parent.createSync(recursive: true);
       apkFile.copySync(baselineApkFile.path);
       printStatus('Saved baseline package ${baselineApkFile.path}.');
     }
 
     if (buildInfo.createPatch) {
-      if (!baselineApkFile.existsSync())
+      final AndroidApk package = AndroidApk.fromApk(apkFile);
+    final Directory baselineDir = fs.directory(buildInfo.baselineDir);
+    final File baselineApkFile = baselineDir.childFile('${package.versionCode}.apk');if (!baselineApkFile.existsSync())
         throwToolExit('Error: Could not find baseline package ${baselineApkFile.path}.');
 
       printStatus('Found baseline package ${baselineApkFile.path}.');
@@ -500,7 +501,7 @@ Future<void> _buildGradleProjectV2(
       updateFile.writeAsBytesSync(ZipEncoder().encode(update), flush: true);
       printStatus('Created dynamic patch ${updateFile.path}.');
     }
-  } else{
+  } else {
     final File bundleFile = _findBundleFile(project, buildInfo);
     if (bundleFile == null)
       throwToolExit('Gradle build failed to produce an Android bundle package.');

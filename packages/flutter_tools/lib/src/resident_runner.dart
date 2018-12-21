@@ -490,7 +490,7 @@ abstract class ResidentRunner {
   Future<void> stop() async {
     _stopped = true;
     if (saveCompilationTrace)
-      await _saveCompilationTrace();
+      await _debugSaveCompilationTrace();
     await stopEchoingDeviceLog();
     await preStop();
     return stopApp();
@@ -595,7 +595,7 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<void> _saveCompilationTrace() async {
+  Future<void> _debugSaveCompilationTrace() async {
     if (!supportsServiceProtocol)
       return;
 
@@ -607,7 +607,7 @@ abstract class ResidentRunner {
 
         List<int> buffer;
         try {
-          buffer = await view.uiIsolate.flutterDumpCompilationTrace();
+          buffer = await view.uiIsolate.flutterDebugSaveCompilationTrace();
           assert(buffer != null);
         } catch (error) {
           printError('Error communicating with Flutter on the device: $error');
