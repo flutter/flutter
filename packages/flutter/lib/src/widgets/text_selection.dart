@@ -605,7 +605,8 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// to not qualify as taps (e.g. pans and flings).
   final GestureTapDownCallback onTapDown;
 
-  ///
+  /// Called when a pointer has tapped down and the force of the pointer has
+  /// just become greater than [ForcePressGestureDetector.startPressure].
   final GestureForcePressStartCallback onForcePressStart;
 
   /// Called for each distinct tap except for every second tap of a double tap.
@@ -695,9 +696,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _forcePressStarted(ForcePressDetails details) {
-   if (widget.onForcePressStart != null) {
+   if (widget.onForcePressStart != null)
      widget.onForcePressStart(details);
-   }
   }
 
   void _handleLongPress() {

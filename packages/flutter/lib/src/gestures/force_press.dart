@@ -219,6 +219,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
       assert(pressure.isNaN ? true : (pressure <= 1.0 && pressure >= 0.0));
       _lastPosition = event.position;
       _lastPressure = pressure;
+
       if (_state == _ForceState.possible) {
         if (pressure > startPressure) {
           _state = _ForceState.started;

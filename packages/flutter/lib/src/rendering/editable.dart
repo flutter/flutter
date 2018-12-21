@@ -1137,7 +1137,6 @@ class RenderEditable extends RenderBox {
   /// The input must be the global pointer position without any offset applied.
   void setLastTapDownPosition(Offset globalPosition) {
     _lastTapDownPosition = globalPosition + -_paintOffset;
-//    print(_lastTapDownPosition);
   }
 
   /// If [ignorePointer] is false (the default) then this method is called by
@@ -1196,7 +1195,6 @@ class RenderEditable extends RenderBox {
     assert(_lastTapDownPosition != null);
     if (onSelectionChanged != null) {
       final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
-//      print(_lastTapDownPosition);
       onSelectionChanged(_selectWordAtOffset(position), this, cause);
     }
   }
