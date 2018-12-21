@@ -115,4 +115,9 @@ class AppStateModel extends Model {
     _selectedCategory = newCategory;
     notifyListeners();
   }
+
+  @override
+  String toString() {
+    return 'AppStateModel(totalCost: $totalCost)';
+  }
 }
