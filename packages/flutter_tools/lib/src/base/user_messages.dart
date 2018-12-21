@@ -218,10 +218,11 @@ class UserMessages {
       'check out the Flutter Gallery pubspec.yaml:\n'
       'https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/pubspec.yaml\n';
   String flutterTargetFileMissing(String path) => 'Target file "$path" not found.';
-  String get flutterPrecompileDisallowedWithDebug => 'Error: --precompile is not allowed when --debug is specified.';
-  String get flutterPrecompileRequiresDynamic => 'Error: --precompile is allowed only when --dynamic is specified.';
-  String get flutterHotupdateRequiresPrecomplile => 'Error: --hotupdate is allowed only when --precompile is specified.';
-
+  String get flutterBasePatchFlagsExclusive => 'Error: Only one of --baseline, --patch is allowed.';
+  String get flutterBaselineRequiresDynamic => 'Error: --baseline is allowed only when --dynamic is specified.';
+  String get flutterBaselineRequiresTraceFile => 'Error: --baseline requires --compilation-trace-file to be specified.';
+  String get flutterPatchRequiresDynamic => 'Error: --patch is allowed only when --dynamic is specified.';
+  String get flutterPatchRequiresTraceFile => 'Error: --patch requires --compilation-trace-file to be specified.';
 
   // Messages used in FlutterCommandRunner
   String runnerNoRoot(String error) => 'Unable to locate flutter root: $error';

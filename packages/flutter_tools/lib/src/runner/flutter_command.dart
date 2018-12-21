@@ -632,21 +632,15 @@ abstract class FlutterCommand extends Command<void> {
         ? argResults['patch'] : false;
 
     if (createBaseline && createPatch)
-      throw ToolExit('Error: Only one of --baseline, --patch is allowed.');
+      throw ToolExit(userMessages.flutterBasePatchFlagsExclusive);
     if (createBaseline && !dynamicFlag)
-      throw ToolExit('Error: --baseline is allowed only when --dynamic is specified.');
+      throw ToolExit(userMessages.flutterBaselineRequiresDynamic);
     if (createBaseline && compilationTraceFilePath == null)
-      throw ToolExit('Error: --baseline requires --compilation-trace-file to be specified.');
+      throw ToolExit(userMessages.flutterBaselineRequiresTraceFile);
     if (createPatch && !dynamicFlag)
-      throw ToolExit('Error: --patch is allowed only when --dynamic is specified.');
+      throw ToolExit(userMessages.flutterPatchRequiresDynamic);
     if (createPatch && compilationTraceFilePath == null)
-      throw ToolExit('Error: --patch requires --compilation-trace-file to be specified.');
-    if (compilationTraceFilePath != null && getBuildMode() == BuildMode.debug)
-      throw ToolExit(userMessages.flutterPrecompileDisallowedWithDebug);
-    if (compilationTraceFilePath != null && !dynamicFlag)
-      throw ToolExit(userMessages.flutterPrecompileRequiresDynamic);
-    if (buildHotUpdate && compilationTraceFilePath == null)
-      throw ToolExit(userMessages.flutterHotupdateRequiresPrecomplile);
+      throw ToolExit(userMessages.flutterPatchRequiresTraceFile);
   }
 
   ApplicationPackageStore applicationPackages;
