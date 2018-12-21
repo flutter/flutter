@@ -174,7 +174,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('single note thickness', (WidgetTester tester) async {
+  testWidgets('single node thickness', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(const MaterialApp(
