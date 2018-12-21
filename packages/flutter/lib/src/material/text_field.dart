@@ -655,7 +655,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _cancelCurrentSplash();
   }
 
-  void _handleSingleLongTapDown() {
+  void _handleSingleLongTapDown(GestureLongPressDragDownDetails details) {
     if (widget.selectionEnabled) {
       switch (Theme.of(context).platform) {
         case TargetPlatform.iOS:

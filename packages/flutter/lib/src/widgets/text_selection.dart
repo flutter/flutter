@@ -618,6 +618,8 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onSingleTapUp,
     this.onSingleTapCancel,
     this.onSingleLongTapDown,
+    this.onSingleLongTapDrag,
+    this.onSingleLongTapUp,
     this.onDoubleTapDown,
     this.behavior,
     @required this.child,
@@ -651,7 +653,11 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called for a single long tap that's sustained for longer than
   /// [kLongPressTimeout] but not necessarily lifted. Not called for a
   /// double-tap-hold, which calls [onDoubleTapDown] instead.
-  final GestureLongPressCallback onSingleLongTapDown;
+  final GestureLongPressDragDownCallback onSingleLongTapDown;
+
+  final GestureLongPressDragUpdateCallback onSingleLongTapDrag;
+
+  final GestureLongPressDragUpCallback onSingleLongTapUp;
 
   /// Called after a momentary hold or a short tap that is close in space and
   /// time (within [kDoubleTapTimeout]) to a previous short tap.
@@ -730,16 +736,23 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       widget.onForcePressStart(details);
   }
 
-  void _forcePressEnded(ForcePressDetails details) {
-    if (widget.onForcePressEnd != null)
-      widget.onForcePressEnd(details);
-  }
-
-  void _handleLongPress() {
+  void _handleLongDragDown(GestureLongPressDragDownDetails details) {
     if (!_isDoubleTap && widget.onSingleLongTapDown != null) {
-      widget.onSingleLongTapDown();
+      widget.onSingleLongTapDown(details);
     }
     _isDoubleTap = false;
+  }
+
+  void _handleLongDragUpdate(GestureLongPressDragUpdateDetails details) {
+    if (widget.onSingleLongTapDrag != null) {
+      widget.onSingleLongTapDrag(details);
+    }
+  }
+
+  void _handleLongDragUp(GestureLongPressDragUpDetails details) {
+    if (widget.onSingleLongTapUp != null) {
+      widget.onSingleLongTapUp(details);
+    }
   }
 
   void _doubleTapTimeout() {
@@ -765,7 +778,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       onForcePressStart: widget.onForcePressStart != null ? _forcePressStarted : null,
       onForcePressEnd: widget.onForcePressEnd != null ? _forcePressEnded : null,
       onTapCancel: _handleTapCancel,
-      onLongPress: _handleLongPress,
+      onLongPressDragDown: _handleLongDragDown,
+      onLongPressDragUpdate: _handleLongDragUpdate,
+      onLongPressDragUp: _handleLongDragUp,
       excludeFromSemantics: true,
       behavior: widget.behavior,
       child: widget.child,

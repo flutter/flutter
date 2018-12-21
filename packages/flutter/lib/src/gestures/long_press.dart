@@ -15,14 +15,14 @@ typedef GestureLongPressCallback = void Function();
 /// Signature for when a pointer stops contacting the screen after a long press gesture was detected.
 typedef GestureLongPressUpCallback = void Function();
 
-typedef GestureLongPressDragDownCallback = void Function(GestureLongPressDownDetails details);
+typedef GestureLongPressDragDownCallback = void Function(GestureLongPressDragDownDetails details);
 
-typedef GestureLongPressDragUpdateCallback = void Function(GestureLongPressDragDetails details);
+typedef GestureLongPressDragUpdateCallback = void Function(GestureLongPressDragUpdateDetails details);
 
-typedef GestureLongPressDragUpCallback = void Function(GestureLongPressUpDetails details);
+typedef GestureLongPressDragUpCallback = void Function(GestureLongPressDragUpDetails details);
 
-class GestureLongPressDownDetails {
-  GestureLongPressDownDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
+class GestureLongPressDragDownDetails {
+  GestureLongPressDragDownDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
     : assert(globalPosition != null);
 
   final Duration sourceTimeStamp;
@@ -30,8 +30,8 @@ class GestureLongPressDownDetails {
   final Offset globalPosition;
 }
 
-class GestureLongPressUpDetails {
-  GestureLongPressUpDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
+class GestureLongPressDragUpDetails {
+  GestureLongPressDragUpDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
     : assert(globalPosition != null);
 
   final Duration sourceTimeStamp;
@@ -39,8 +39,8 @@ class GestureLongPressUpDetails {
   final Offset globalPosition;
 }
 
-class GestureLongPressDragDetails {
-  GestureLongPressDragDetails({
+class GestureLongPressDragUpdateDetails {
+  GestureLongPressDragUpdateDetails({
     this.sourceTimeStamp,
     this.globalPosition = Offset.zero,
     this.offsetFromOrigin,
@@ -126,7 +126,7 @@ class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
     _longPressAccepted = true;
     if (onLongPressDown != null) {
       invokeCallback<void>('onLongPressDown', () => onLongPressDown(
-        GestureLongPressDownDetails(
+        GestureLongPressDragDownDetails(
           sourceTimeStamp: _longPressDownTimestamp,
           globalPosition: _longPressOrigin,
         ),
@@ -140,7 +140,7 @@ class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
       if (_longPressAccepted == true && onLongPressUp != null) {
         _longPressAccepted = false;
         invokeCallback<void>('onLongPressUp', () => onLongPressUp(
-          GestureLongPressUpDetails(
+          GestureLongPressDragUpDetails(
             sourceTimeStamp: event.timeStamp,
             globalPosition: event.position,
           ),
@@ -155,7 +155,7 @@ class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
       _longPressOrigin = event.position;
     } else if (event is PointerMoveEvent && _longPressAccepted && onLongPressDrag != null) {
       invokeCallback<void>('onLongPressDrag', () => onLongPressDrag(
-          GestureLongPressDragDetails(
+          GestureLongPressDragUpdateDetails(
             sourceTimeStamp: event.timeStamp,
             globalPosition: event.position,
             offsetFromOrigin: event.position - _longPressOrigin,
@@ -169,6 +169,7 @@ class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
     _longPressAccepted = false;
     _longPressOrigin = null;
     _longPressDownTimestamp = null;
+    super.didStopTrackingLastPointer(pointer);
   }
 
   @override
