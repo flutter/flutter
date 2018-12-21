@@ -527,9 +527,9 @@ void main() {
     expect(binding.frameScheduled, isFalse);
   });
 
-  test('Service extensions - dumpCompilationTrace', () async {
+  test('Service extensions - saveCompilationTrace', () async {
     Map<String, dynamic> result;
-    result = await binding.testExtension('dumpCompilationTrace', <String, String>{});
+    result = await binding.testExtension('saveCompilationTrace', <String, String>{});
     final String trace = String.fromCharCodes(result['value']);
     expect(trace, contains('dart:core,Object,Object.\n'));
     expect(trace, contains('package:test_api/test_api.dart,::,test\n'));
