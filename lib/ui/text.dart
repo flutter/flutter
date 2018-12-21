@@ -833,8 +833,8 @@ class TextBox {
   String toString() => 'TextBox.fromLTRBD(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)}, $direction)';
 }
 
-/// Disambiguates cases where a string offset could match two locations in the
-/// rendered string.
+/// A way to disambiguate a [TextPosition] when its offset could match two
+/// different locations in the rendered string.
 ///
 /// For example, at an offset where the rendered text wraps, there are two
 /// visual positions that the offset could represent: one prior to the line
