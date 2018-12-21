@@ -36,6 +36,7 @@ export 'package:flutter/gestures.dart' show
   ScaleEndDetails,
   TapDownDetails,
   TapUpDetails,
+  ForcePressDetails,
   Velocity;
 
 // Examples can assume:

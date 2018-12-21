@@ -11,12 +11,14 @@ void main() {
   int singleTapCancelCount;
   int singleLongTapDownCount;
   int doubleTapDownCount;
+  int forcePressStartCount;
 
   void _handleTapDown(TapDownDetails details) { tapCount++; }
   void _handleSingleTapUp(TapUpDetails details) { singleTapUpCount++; }
   void _handleSingleTapCancel() { singleTapCancelCount++; }
   void _handleSingleLongTapDown() { singleLongTapDownCount++; }
   void _handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
+  void _handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
 
   setUp(() {
     tapCount = 0;
@@ -24,6 +26,7 @@ void main() {
     singleTapCancelCount = 0;
     singleLongTapDownCount = 0;
     doubleTapDownCount = 0;
+    forcePressStartCount = 0;
   });
 
   Future<void> pumpGestureDetector(WidgetTester tester) async {
@@ -35,6 +38,7 @@ void main() {
         onSingleTapCancel: _handleSingleTapCancel,
         onSingleLongTapDown: _handleSingleLongTapDown,
         onDoubleTapDown: _handleDoubleTapDown,
+        onForcePressStart: _handleForcePressStart,
         child: Container(),
       ),
     );
@@ -141,5 +145,31 @@ void main() {
     expect(singleTapCancelCount, 1);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapDownCount, 0);
+  });
+
+  testWidgets('a force press intiates a force press', (WidgetTester tester) async {
+    await pumpGestureDetector(tester);
+
+    const int pointerValue = 1;
+    TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 20));
+
+    gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 20));
+
+    gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.up();
+
+    expect(forcePressStartCount, 4);
   });
 }

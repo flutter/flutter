@@ -451,6 +451,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     _renderEditable.handleTapDown(details);
   }
 
+  void _handleForcePressStarted(ForcePressDetails details) {
+    _renderEditable.setLastTapDownPosition(details.globalPosition);
+    // The cause is not technically double tap, but we would like the same thing to happen.
+    _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
+  }
+
   void _handleSingleTapUp(TapUpDetails details) {
     _renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
     _requestKeyboard();
@@ -648,6 +654,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                     : CupertinoColors.darkBackgroundGray,
             child: TextSelectionGestureDetector(
               onTapDown: _handleTapDown,
+              onForcePressStart: _handleForcePressStarted,
               onSingleTapUp: _handleSingleTapUp,
               onSingleLongTapDown: _handleSingleLongTapDown,
               onDoubleTapDown: _handleDoubleTapDown,

@@ -590,6 +590,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   const TextSelectionGestureDetector({
     Key key,
     this.onTapDown,
+    this.onForcePressStart,
     this.onSingleTapUp,
     this.onSingleTapCancel,
     this.onSingleLongTapDown,
@@ -603,6 +604,9 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// double click or a long press, except touches that include enough movement
   /// to not qualify as taps (e.g. pans and flings).
   final GestureTapDownCallback onTapDown;
+
+  ///
+  final GestureForcePressStartCallback onForcePressStart;
 
   /// Called for each distinct tap except for every second tap of a double tap.
   /// For example, if the detector was configured [onSingleTapDown] and
@@ -690,6 +694,12 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     }
   }
 
+  void _forcePressStarted(ForcePressDetails details) {
+   if (widget.onForcePressStart != null) {
+     widget.onForcePressStart(details);
+   }
+  }
+
   void _handleLongPress() {
     if (!_isDoubleTap && widget.onSingleLongTapDown != null) {
       widget.onSingleLongTapDown();
@@ -717,6 +727,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     return GestureDetector(
       onTapDown: _handleTapDown,
       onTapUp: _handleTapUp,
+      onForcePressStart: _forcePressStarted,
       onTapCancel: _handleTapCancel,
       onLongPress: _handleLongPress,
       excludeFromSemantics: true,

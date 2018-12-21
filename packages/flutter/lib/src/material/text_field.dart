@@ -528,6 +528,12 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _startSplash(details);
   }
 
+  void _handleForcePressStarted(ForcePressDetails details) {
+    _renderEditable.setLastTapDownPosition(details.globalPosition);
+    // The cause is not technically double tap, but we would like the same thing to happen.
+    _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
+  }
+
   void _handleSingleTapUp(TapUpDetails details) {
     if (widget.selectionEnabled) {
       switch (Theme.of(context).platform) {
@@ -690,6 +696,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
         child: TextSelectionGestureDetector(
           onTapDown: _handleTapDown,
+          onForcePressStart: _handleForcePressStarted,
           onSingleTapUp: _handleSingleTapUp,
           onSingleTapCancel: _handleSingleTapCancel,
           onSingleLongTapDown: _handleSingleLongTapDown,
