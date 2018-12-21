@@ -31,18 +31,16 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
-      await _flutter.breakAt(
-        _project.buildMethodBreakpointUri,
-        _project.buildMethodBreakpointLine,
-      );
+    Future<Isolate> breakInBuildMethod(FlutterTestDriver flutter) async {
+      return _flutter.breakAt(
+          _project.buildMethodBreakpointUri,
+          _project.buildMethodBreakpointLine);
     }
 
-    Future<void> breakInTopLevelFunction(FlutterTestDriver flutter) async {
-      await _flutter.breakAt(
-        _project.topLevelFunctionBreakpointUri,
-        _project.topLevelFunctionBreakpointLine,
-      );
+    Future<Isolate> breakInTopLevelFunction(FlutterTestDriver flutter) async {
+      return _flutter.breakAt(
+          _project.topLevelFunctionBreakpointUri,
+          _project.topLevelFunctionBreakpointLine);
     }
 
     test('can evaluate trivial expressions in top level function', () async {
@@ -80,8 +78,7 @@ void main() {
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions(_flutter);
     });
-
-  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
+  }, timeout: const Timeout.factor(6));
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {

@@ -35,12 +35,14 @@ class Tracing {
     bool waitForFirstFrame = false
   }) async {
     Map<String, dynamic> timeline;
+
     if (!waitForFirstFrame) {
       // Stop tracing immediately and get the timeline
       await vmService.vm.setVMTimelineFlags(<String>[]);
       timeline = await vmService.vm.getVMTimeline();
     } else {
       final Completer<void> whenFirstFrameRendered = Completer<void>();
+
       (await vmService.onTimelineEvent).listen((ServiceEvent timelineEvent) {
         final List<Map<String, dynamic>> events = timelineEvent.timelineEvents;
         for (Map<String, dynamic> event in events) {
@@ -48,10 +50,24 @@ class Tracing {
             whenFirstFrameRendered.complete();
         }
       });
-      await whenFirstFrameRendered.future;
+
+      await whenFirstFrameRendered.future.timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            printError(
+                'Timed out waiting for the first frame event. Either the '
+                    'application failed to start, or the event was missed because '
+                    '"flutter run" took too long to subscribe to timeline events.'
+            );
+            return null;
+          }
+      );
+
       timeline = await vmService.vm.getVMTimeline();
+
       await vmService.vm.setVMTimelineFlags(<String>[]);
     }
+
     return timeline;
   }
 }

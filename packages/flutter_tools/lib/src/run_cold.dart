@@ -64,14 +64,8 @@ class ColdRunner extends ResidentRunner {
     }
 
     // Connect to observatory.
-    if (debuggingOptions.debuggingEnabled) {
-      try {
-        await connectToServiceProtocol();
-      } on String catch (message) {
-        printError(message);
-        return 2;
-      }
-    }
+    if (debuggingOptions.debuggingEnabled)
+      await connectToServiceProtocol();
 
     if (flutterDevices.first.observatoryUris != null) {
       // For now, only support one debugger connection.
