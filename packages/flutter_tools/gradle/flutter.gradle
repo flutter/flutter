@@ -318,8 +318,8 @@ class FlutterPlugin implements Plugin<Project> {
             trackWidgetCreationValue = project.property('track-widget-creation').toBoolean()
         }
         String compilationTraceFilePathValue = null
-        if (project.hasProperty('precompile')) {
-            compilationTraceFilePathValue = project.property('precompile')
+        if (project.hasProperty('compilation-trace-file')) {
+            compilationTraceFilePathValue = project.property('compilation-trace-file')
         }
         Boolean createPatchValue = false
         if (project.hasProperty('patch')) {
@@ -535,7 +535,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--track-widget-creation"
             }
             if (compilationTraceFilePath != null) {
-                args "--precompile", compilationTraceFilePath
+                args "--compilation-trace-file", compilationTraceFilePath
             }
             if (createPatch) {
                 args "--patch"

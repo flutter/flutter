@@ -387,7 +387,7 @@ Future<void> _buildGradleProjectV2(
   assert(buildInfo.trackWidgetCreation != null);
   command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
   if (buildInfo.compilationTraceFilePath != null)
-    command.add('-Pprecompile=${buildInfo.compilationTraceFilePath}');
+    command.add('-Pcompilation-trace-file=${buildInfo.compilationTraceFilePath}');
   if (buildInfo.createPatch)
     command.add('-Ppatch=true');
   if (buildInfo.extraFrontEndOptions != null)
