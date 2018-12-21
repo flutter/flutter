@@ -19,15 +19,22 @@ class BasicProject extends Project {
 
   @override
   final String main = r'''
+  import 'dart:async';
+
   import 'package:flutter/material.dart';
 
-  void main() => runApp(new MyApp());
+  Future<void> main() async {
+    while (true) {
+      runApp(new MyApp());
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
+  }
 
   class MyApp extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
       topLevelFunction();
-      return new MaterialApp( // BREAKPOINT
+      return new MaterialApp( // BUILD BREAKPOINT
         title: 'Flutter Demo',
         home: new Container(),
       );
@@ -39,9 +46,9 @@ class BasicProject extends Project {
   }
   ''';
 
-  Uri get buildMethodBreakpointUri => breakpointUri;
-  int get buildMethodBreakpointLine => breakpointLine;
+  Uri get buildMethodBreakpointUri => mainDart;
+  int get buildMethodBreakpointLine => lineContaining(main, '// BUILD BREAKPOINT');
 
-  Uri get topLevelFunctionBreakpointUri => breakpointUri;
+  Uri get topLevelFunctionBreakpointUri => mainDart;
   int get topLevelFunctionBreakpointLine => lineContaining(main, '// TOP LEVEL BREAKPOINT');
 }

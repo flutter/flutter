@@ -177,7 +177,10 @@ class FlutterDriverExtension {
       if (commandHandler == null || commandDeserializer == null)
         throw 'Extension $_extensionMethod does not support command $commandKind';
       final Command command = commandDeserializer(params);
-      final Result response = await commandHandler(command).timeout(command.timeout);
+      Future<Result> responseFuture = commandHandler(command);
+      if (command.timeout != null)
+        responseFuture = responseFuture.timeout(command.timeout);
+      final Result response = await responseFuture;
       return _makeResponse(response?.toJson());
     } on TimeoutException catch (error, stackTrace) {
       final String msg = 'Timeout while executing $commandKind: $error\n$stackTrace';
