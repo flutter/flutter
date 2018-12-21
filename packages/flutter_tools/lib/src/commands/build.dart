@@ -41,25 +41,4 @@ abstract class BuildSubCommand extends FlutterCommand {
   BuildSubCommand() {
     requiresPubspecYaml();
   }
-
-  @override
-  @mustCallSuper
-  Future<FlutterCommandResult> runCommand() async {
-    if (isRunningOnBot) {
-      final File dotPackages = fs.file('.packages');
-      printStatus('Contents of .packages:');
-      if (dotPackages.existsSync())
-        printStatus(dotPackages.readAsStringSync());
-      else
-        printError('File not found: ${dotPackages.absolute.path}');
-
-      final File pubspecLock = fs.file('pubspec.lock');
-      printStatus('Contents of pubspec.lock:');
-      if (pubspecLock.existsSync())
-        printStatus(pubspecLock.readAsStringSync());
-      else
-        printError('File not found: ${pubspecLock.absolute.path}');
-    }
-    return null;
-  }
 }

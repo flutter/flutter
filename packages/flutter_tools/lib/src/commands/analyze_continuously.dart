@@ -79,6 +79,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisTimer = Stopwatch()..start();
     } else {
       analysisStatus?.stop();
+      analysisStatus = null;
       analysisTimer.stop();
 
       logger.printStatus(terminal.clearScreen(), newline: false);
