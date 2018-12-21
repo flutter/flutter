@@ -4,17 +4,15 @@
 
 import 'dart:async';
 
-import '../android/apk.dart';
+import '../android/app_bundle.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
-class BuildApkCommand extends BuildSubCommand {
-  BuildApkCommand({bool verboseHelp = false}) {
+class BuildAppBundleCommand extends BuildSubCommand {
+  BuildAppBundleCommand({bool verboseHelp = false}) {
     usesTargetOption();
-    addBuildModeFlags(verboseHelp: verboseHelp);
-    addDynamicModeFlags(verboseHelp: verboseHelp);
-    addDynamicPatchingFlags(verboseHelp: verboseHelp);
+    addBuildModeFlags();
     usesFlavorOption();
     usesPubOption();
     usesBuildNumberOption();
@@ -32,18 +30,18 @@ class BuildApkCommand extends BuildSubCommand {
   }
 
   @override
-  final String name = 'apk';
+  final String name = 'appbundle';
 
   @override
-  final String description = 'Build an Android APK file from your app.\n\n'
-    'This command can build debug and release versions of your application. \'debug\' builds support '
+  final String description = 'Build an Android App Bundle file from your app.\n\n'
+    'This command can build debug and release versions of an app bundle for your application. \'debug\' builds support '
     'debugging and a quick development cycle. \'release\' builds don\'t support debugging and are '
-    'suitable for deploying to app stores.';
+    'suitable for deploying to app stores. \n app bundle improves your app size';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     await super.runCommand();
-    await buildApk(
+    await buildAppBundle(
       project: await FlutterProject.current(),
       target: targetFile,
       buildInfo: getBuildInfo(),

@@ -592,7 +592,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
   ///
   /// See also:
   ///
-  ///  * [new DecoratedBox].
+  ///  * [new DecoratedBox]
   const DecoratedBoxTransition({
     Key key,
     @required this.decoration,

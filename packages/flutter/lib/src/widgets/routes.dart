@@ -821,7 +821,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///     );
   ///   },
   /// );
-  ///```
+  /// ```
   ///
   /// We've used [PageRouteBuilder] to demonstrate the [buildTransitions] method
   /// here. The body of an override of the [buildTransitions] method would be

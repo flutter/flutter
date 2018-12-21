@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matcher/matcher.dart';
 
@@ -37,6 +38,10 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeD
 
 Material _getMaterialFromDialog(WidgetTester tester) {
   return tester.widget<Material>(find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
+}
+
+RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
+  return tester.element<StatelessElement>(find.descendant(of: find.byType(AlertDialog), matching: find.text(text))).renderObject;
 }
 
 const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
@@ -114,6 +119,40 @@ void main() {
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.elevation, customElevation);
+  });
+
+  testWidgets('Custom Title Text Style', (WidgetTester tester) async {
+    const String titleText = 'Title';
+    const TextStyle titleTextStyle = TextStyle(color: Colors.pink);
+    const AlertDialog dialog = AlertDialog(
+      title: Text(titleText),
+      titleTextStyle: titleTextStyle,
+      actions: <Widget>[ ],
+    );
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph title = _getTextRenderObjectFromDialog(tester, titleText);
+    expect(title.text.style, titleTextStyle);
+  });
+
+  testWidgets('Custom Content Text Style', (WidgetTester tester) async {
+    const String contentText = 'Content';
+    const TextStyle contentTextStyle = TextStyle(color: Colors.pink);
+    const AlertDialog dialog = AlertDialog(
+      content: Text(contentText),
+      contentTextStyle: contentTextStyle,
+      actions: <Widget>[ ],
+    );
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(content.text.style, contentTextStyle);
   });
 
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
