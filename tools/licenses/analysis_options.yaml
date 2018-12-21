@@ -51,7 +51,7 @@ linter:
     - avoid_init_to_null
     # - avoid_js_rounded_ints # only useful when targeting JS runtime
     - avoid_null_checks_in_equality_operators
-    # - avoid_positional_boolean_parameters # not yet tested
+    - avoid_positional_boolean_parameters
     # - avoid_private_typedef_functions # we prefer having typedef (discussion in https://github.com/flutter/flutter/pull/16356)
     - avoid_relative_lib_imports
     - avoid_renaming_method_parameters
