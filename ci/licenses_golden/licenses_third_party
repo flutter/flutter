@@ -1,4 +1,4 @@
-Signature: d7c30cf5ac4c421cc15ff2731ade24c4
+Signature: a6eed529dc82a8bd4ae675ccf1dcfc7b
 
 UNUSED LICENSES:
 
@@ -149,7 +149,7 @@ FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCryp
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20170615.docx!/word/webSettings.xml
 FILE: ../../../third_party/boringssl/src/crypto/obj/obj_mac.num
 FILE: ../../../third_party/boringssl/src/crypto/poly1305/poly1305_arm_asm.S
-FILE: ../../../third_party/boringssl/src/crypto/rsa_extra/print.c
+FILE: ../../../third_party/boringssl/src/crypto/rsa_extra/rsa_print.c
 FILE: ../../../third_party/boringssl/src/crypto/x509/charmap.h
 FILE: ../../../third_party/boringssl/src/crypto/x509/many_constraints.pem
 FILE: ../../../third_party/boringssl/src/crypto/x509/many_names1.pem
@@ -158,6 +158,7 @@ FILE: ../../../third_party/boringssl/src/crypto/x509/many_names3.pem
 FILE: ../../../third_party/boringssl/src/crypto/x509/some_names1.pem
 FILE: ../../../third_party/boringssl/src/crypto/x509/some_names2.pem
 FILE: ../../../third_party/boringssl/src/crypto/x509/some_names3.pem
+FILE: ../../../third_party/boringssl/src/crypto/x509/x509_time_test.cc
 FILE: ../../../third_party/boringssl/src/crypto/x509v3/v3_ocsp.c
 FILE: ../../../third_party/boringssl/src/fipstools/run_cavp.go
 FILE: ../../../third_party/boringssl/src/infra/config/cq.cfg
@@ -167,6 +168,7 @@ FILE: ../../../third_party/boringssl/src/util/bot/UPDATING
 FILE: ../../../third_party/boringssl/src/util/bot/cmake-linux64.tar.gz.sha1
 FILE: ../../../third_party/boringssl/src/util/bot/cmake-mac.tar.gz.sha1
 FILE: ../../../third_party/boringssl/src/util/bot/cmake-win32.zip.sha1
+FILE: ../../../third_party/boringssl/src/util/bot/nasm-win32.exe.sha1
 FILE: ../../../third_party/boringssl/src/util/bot/perl-win32.zip.sha1
 FILE: ../../../third_party/boringssl/src/util/bot/sde-linux64.tar.bz2.sha1
 FILE: ../../../third_party/boringssl/src/util/bot/yasm-win32.exe.sha1
@@ -390,6 +392,7 @@ ORIGIN: ../../../flutter/third_party/txt/LICENSE
 TYPE: LicenseType.apache
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/METADATA
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/aes_cbc_pkcs5_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/aes_ccm_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/aes_cmac_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/aes_eax_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/aes_gcm_siv_test.json
@@ -397,6 +400,20 @@ FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/aes_
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/aes_siv_cmac_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/chacha20_poly1305_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/dsa_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_brainpoolP224r1_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_brainpoolP256r1_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_brainpoolP320r1_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_brainpoolP384r1_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_brainpoolP512r1_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_secp224r1_ecpoint_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_secp224r1_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_secp256k1_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_secp256r1_ecpoint_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_secp256r1_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_secp384r1_ecpoint_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_secp384r1_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_secp521r1_ecpoint_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_secp521r1_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdh_webcrypto_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdsa_brainpoolP224r1_sha224_test.json
@@ -406,8 +423,11 @@ FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecds
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdsa_brainpoolP512r1_sha512_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdsa_secp224r1_sha224_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdsa_secp224r1_sha256_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdsa_secp224r1_sha512_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdsa_secp256k1_sha256_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdsa_secp256k1_sha512_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdsa_secp256r1_sha256_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdsa_secp256r1_sha512_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdsa_secp384r1_sha384_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdsa_secp384r1_sha512_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecdsa_secp521r1_sha512_test.json
@@ -416,6 +436,21 @@ FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/ecds
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/eddsa_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/kw_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/kwp_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_pss_2048_sha1_mgf1_20_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_pss_2048_sha256_mgf1_0_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_pss_2048_sha256_mgf1_32_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_pss_3072_sha256_mgf1_32_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_pss_4096_sha256_mgf1_32_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_pss_4096_sha512_mgf1_32_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_pss_misc_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_signature_2048_sha224_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_signature_2048_sha256_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_signature_2048_sha512_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_signature_3072_sha256_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_signature_3072_sha384_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_signature_3072_sha512_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_signature_4096_sha384_test.json
+FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_signature_4096_sha512_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/rsa_signature_test.json
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/x25519_test.json
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/async.dart
@@ -1089,7 +1124,7 @@ FILE: ../../../third_party/boringssl/src/crypto/cpu-arm-linux.c
 FILE: ../../../third_party/boringssl/src/crypto/cpu-ppc64le.c
 FILE: ../../../third_party/boringssl/src/crypto/curve25519/spake25519.c
 FILE: ../../../third_party/boringssl/src/crypto/curve25519/spake25519_test.cc
-FILE: ../../../third_party/boringssl/src/crypto/ecdh/ecdh_test.cc
+FILE: ../../../third_party/boringssl/src/crypto/ecdh_extra/ecdh_test.cc
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/check_bn_tests.go
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/p256-x86_64_test.cc
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/modes/polyval.c
@@ -1204,7 +1239,6 @@ FILE: ../../../third_party/boringssl/src/crypto/bytestring/internal.h
 FILE: ../../../third_party/boringssl/src/crypto/chacha/chacha.c
 FILE: ../../../third_party/boringssl/src/crypto/cipher_extra/aead_test.cc
 FILE: ../../../third_party/boringssl/src/crypto/cipher_extra/e_chacha20poly1305.c
-FILE: ../../../third_party/boringssl/src/crypto/cipher_extra/e_ssl3.c
 FILE: ../../../third_party/boringssl/src/crypto/cipher_extra/e_tls.c
 FILE: ../../../third_party/boringssl/src/crypto/cpu-arm.c
 FILE: ../../../third_party/boringssl/src/crypto/crypto.c
@@ -1242,7 +1276,6 @@ FILE: ../../../third_party/boringssl/src/include/openssl/pkcs7.h
 FILE: ../../../third_party/boringssl/src/include/openssl/poly1305.h
 FILE: ../../../third_party/boringssl/src/include/openssl/rand.h
 FILE: ../../../third_party/boringssl/src/include/openssl/safestack.h
-FILE: ../../../third_party/boringssl/src/ssl/custom_extensions.cc
 FILE: ../../../third_party/boringssl/src/ssl/ssl_test.cc
 FILE: ../../../third_party/boringssl/src/tool/args.cc
 FILE: ../../../third_party/boringssl/src/tool/client.cc
@@ -1466,6 +1499,7 @@ LIBRARY: boringssl
 ORIGIN: ../../../third_party/boringssl/src/crypto/bytestring/unicode.c
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/boringssl/src/crypto/bytestring/unicode.c
+FILE: ../../../third_party/boringssl/src/crypto/chacha/internal.h
 FILE: ../../../third_party/boringssl/src/crypto/cipher_extra/e_aesccm.c
 FILE: ../../../third_party/boringssl/src/crypto/cpu-aarch64-fuchsia.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/div_extra.c
@@ -1476,12 +1510,14 @@ FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/make_p256-x86_64-t
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/scalar.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/simple_mul.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/tls/internal.h
+FILE: ../../../third_party/boringssl/src/crypto/pem/pem_test.cc
 FILE: ../../../third_party/boringssl/src/crypto/self_test.cc
 FILE: ../../../third_party/boringssl/src/fipstools/cavp_kas_test.cc
 FILE: ../../../third_party/boringssl/src/fipstools/cavp_tlskdf_test.cc
 FILE: ../../../third_party/boringssl/src/include/openssl/e_os2.h
 FILE: ../../../third_party/boringssl/src/ssl/handoff.cc
-FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/convert_wycheproof.go
+FILE: ../../../third_party/boringssl/src/util/check_filenames.go
+FILE: ../../../third_party/boringssl/src/util/convert_wycheproof.go
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2018, Google Inc.
 
@@ -1866,9 +1902,10 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/crypto/ecdh/ecdh.c
+ORIGIN: ../../../third_party/boringssl/src/crypto/ecdh_extra/ecdh_extra.c
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/crypto/ecdh/ecdh.c
+FILE: ../../../third_party/boringssl/src/crypto/ecdh_extra/ecdh_extra.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ecdh/ecdh.c
 FILE: ../../../third_party/boringssl/src/include/openssl/ecdh.h
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2000-2002 The OpenSSL Project.  All rights reserved.
@@ -1920,9 +1957,10 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/crypto/ecdh/ecdh.c + ../../../third_party/boringssl/src/crypto/ecdh/ecdh.c
+ORIGIN: ../../../third_party/boringssl/src/crypto/ecdh_extra/ecdh_extra.c + ../../../third_party/boringssl/src/crypto/ecdh_extra/ecdh_extra.c
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/crypto/ecdh/ecdh.c
+FILE: ../../../third_party/boringssl/src/crypto/ecdh_extra/ecdh_extra.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ecdh/ecdh.c
 FILE: ../../../third_party/boringssl/src/include/openssl/ecdh.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2002 Sun Microsystems, Inc. ALL RIGHTS RESERVED.
@@ -2979,9 +3017,9 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/crypto/rsa_extra/print.c + ../../../third_party/boringssl/src/LICENSE
+ORIGIN: ../../../third_party/boringssl/src/crypto/rsa_extra/rsa_print.c + ../../../third_party/boringssl/src/LICENSE
 TYPE: LicenseType.unknown
-FILE: ../../../third_party/boringssl/src/crypto/rsa_extra/print.c
+FILE: ../../../third_party/boringssl/src/crypto/rsa_extra/rsa_print.c
 ----------------------------------------------------------------------------------------------------
 Copyright 2006-2017 The OpenSSL Project Authors. All Rights Reserved.
 
@@ -3042,6 +3080,20 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/crypto/x509/x509_time_test.cc + ../../../third_party/boringssl/src/LICENSE
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/crypto/x509/x509_time_test.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2017 The OpenSSL Project Authors. All Rights Reserved.
+
+Licensed under the OpenSSL license (the "License").  You may not use
+this file except in compliance with the License.  You can obtain a copy
+in the file LICENSE in the source distribution or at
+https://www.openssl.org/source/license.html
 ====================================================================================================
 
 ====================================================================================================
@@ -4450,6 +4502,8 @@ FILE: ../../../third_party/dart/client/idea/.idea/vcs.xml
 FILE: ../../../third_party/dart/runtime/CPPLINT.cfg
 FILE: ../../../third_party/dart/runtime/docs/compiler/images/catch-block-entry-0.png
 FILE: ../../../third_party/dart/runtime/docs/compiler/images/catch-block-entry-1.png
+FILE: ../../../third_party/dart/runtime/docs/infra/images/isolated-out-browser.png
+FILE: ../../../third_party/dart/runtime/docs/infra/images/isolated-out-link.png
 FILE: ../../../third_party/dart/runtime/observatory/lib/elements.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/img/chromium_icon.png
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/img/dart_icon.png
@@ -4506,6 +4560,7 @@ FILE: ../../../third_party/dart/runtime/bin/builtin_gen_snapshot.cc
 FILE: ../../../third_party/dart/runtime/bin/builtin_in.cc
 FILE: ../../../third_party/dart/runtime/bin/builtin_natives.cc
 FILE: ../../../third_party/dart/runtime/bin/common_patch.dart
+FILE: ../../../third_party/dart/runtime/bin/crashpad.cc
 FILE: ../../../third_party/dart/runtime/bin/crypto.cc
 FILE: ../../../third_party/dart/runtime/bin/crypto.h
 FILE: ../../../third_party/dart/runtime/bin/crypto_android.cc
@@ -4810,8 +4865,6 @@ FILE: ../../../third_party/dart/runtime/vm/raw_object.cc
 FILE: ../../../third_party/dart/runtime/vm/raw_object.h
 FILE: ../../../third_party/dart/runtime/vm/raw_object_snapshot.cc
 FILE: ../../../third_party/dart/runtime/vm/resolver_test.cc
-FILE: ../../../third_party/dart/runtime/vm/scanner.cc
-FILE: ../../../third_party/dart/runtime/vm/scanner_test.cc
 FILE: ../../../third_party/dart/runtime/vm/scopes.cc
 FILE: ../../../third_party/dart/runtime/vm/scopes.h
 FILE: ../../../third_party/dart/runtime/vm/scopes_test.cc
@@ -5177,6 +5230,101 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
+ORIGIN: ../../../third_party/dart/runtime/bin/crashpad.h + ../../../third_party/dart/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/dart/runtime/bin/crashpad.h
+FILE: ../../../third_party/dart/runtime/bin/dart_embedder_api_impl.cc
+FILE: ../../../third_party/dart/runtime/bin/kernel_isolate.cc
+FILE: ../../../third_party/dart/runtime/bin/kernel_isolate.h
+FILE: ../../../third_party/dart/runtime/bin/typed_data_utils.cc
+FILE: ../../../third_party/dart/runtime/bin/typed_data_utils.h
+FILE: ../../../third_party/dart/runtime/include/dart_embedder_api.h
+FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz.dart
+FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_test.dart
+FILE: ../../../third_party/dart/runtime/vm/base64.cc
+FILE: ../../../third_party/dart/runtime/vm/base64.h
+FILE: ../../../third_party/dart/runtime/vm/base64_test.cc
+FILE: ../../../third_party/dart/runtime/vm/code_patcher_kbc.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/compile_type.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/loops.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/loops.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/loops_test.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_state.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_state.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/base_flow_graph_builder.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/base_flow_graph_builder.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_flow_graph_builder.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_flow_graph_builder.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_evaluator.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_evaluator.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_fingerprints.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_fingerprints.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_helper.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_helper.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.h
+FILE: ../../../third_party/dart/runtime/vm/constants.h
+FILE: ../../../third_party/dart/runtime/vm/constants_kbc.h
+FILE: ../../../third_party/dart/runtime/vm/datastream.cc
+FILE: ../../../third_party/dart/runtime/vm/finalizable_data.h
+FILE: ../../../third_party/dart/runtime/vm/hash.h
+FILE: ../../../third_party/dart/runtime/vm/instructions_kbc.cc
+FILE: ../../../third_party/dart/runtime/vm/instructions_kbc.h
+FILE: ../../../third_party/dart/runtime/vm/interpreter.cc
+FILE: ../../../third_party/dart/runtime/vm/interpreter.h
+FILE: ../../../third_party/dart/runtime/vm/raw_object_fields.cc
+FILE: ../../../third_party/dart/runtime/vm/raw_object_fields.h
+FILE: ../../../third_party/dart/runtime/vm/stack_frame_kbc.h
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.cc
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.h
+FILE: ../../../third_party/dart/runtime/vm/v8_snapshot_writer.cc
+FILE: ../../../third_party/dart/runtime/vm/v8_snapshot_writer.h
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/instantiation.dart
+FILE: ../../../third_party/dart/sdk/lib/js/_js.dart
+FILE: ../../../third_party/dart/sdk/lib/js/_js_client.dart
+FILE: ../../../third_party/dart/sdk/lib/js/_js_server.dart
+FILE: ../../../third_party/dart/sdk/lib/typed_data/unmodifiable_typed_data.dart
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/bin/crypto_fuchsia.cc + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/bin/crypto_fuchsia.cc
@@ -5372,7 +5520,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_elimination.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_elimination.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_to_il.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_to_il.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/intrinsifier_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_dbc.h
@@ -5424,89 +5571,6 @@ FILE: ../../../third_party/dart/sdk/lib/js_util/dart2js/js_util_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/devfs.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
-for details. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google Inc. nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: dart
-ORIGIN: ../../../third_party/dart/runtime/bin/dart_embedder_api_impl.cc + ../../../third_party/dart/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/dart/runtime/bin/dart_embedder_api_impl.cc
-FILE: ../../../third_party/dart/runtime/bin/typed_data_utils.cc
-FILE: ../../../third_party/dart/runtime/bin/typed_data_utils.h
-FILE: ../../../third_party/dart/runtime/include/dart_embedder_api.h
-FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz.dart
-FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_test.dart
-FILE: ../../../third_party/dart/runtime/vm/base64.cc
-FILE: ../../../third_party/dart/runtime/vm/base64.h
-FILE: ../../../third_party/dart/runtime/vm/base64_test.cc
-FILE: ../../../third_party/dart/runtime/vm/code_patcher_kbc.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/loops.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/loops.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_state.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/base_flow_graph_builder.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/base_flow_graph_builder.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_flow_graph_builder.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_flow_graph_builder.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_evaluator.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_evaluator.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_fingerprints.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_fingerprints.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_helper.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_helper.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.h
-FILE: ../../../third_party/dart/runtime/vm/constants.h
-FILE: ../../../third_party/dart/runtime/vm/constants_kbc.h
-FILE: ../../../third_party/dart/runtime/vm/datastream.cc
-FILE: ../../../third_party/dart/runtime/vm/finalizable_data.h
-FILE: ../../../third_party/dart/runtime/vm/hash.h
-FILE: ../../../third_party/dart/runtime/vm/instructions_kbc.cc
-FILE: ../../../third_party/dart/runtime/vm/instructions_kbc.h
-FILE: ../../../third_party/dart/runtime/vm/interpreter.cc
-FILE: ../../../third_party/dart/runtime/vm/interpreter.h
-FILE: ../../../third_party/dart/runtime/vm/interpreter_unsupported.cc
-FILE: ../../../third_party/dart/runtime/vm/stack_frame_kbc.h
-FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.cc
-FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.h
-FILE: ../../../third_party/dart/sdk/lib/js/_js.dart
-FILE: ../../../third_party/dart/sdk/lib/js/_js_client.dart
-FILE: ../../../third_party/dart/sdk/lib/js/_js_server.dart
-FILE: ../../../third_party/dart/sdk/lib/typed_data/unmodifiable_typed_data.dart
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -5600,7 +5664,6 @@ FILE: ../../../third_party/dart/runtime/vm/runtime_entry_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/runtime_entry_ia32.cc
 FILE: ../../../third_party/dart/runtime/vm/runtime_entry_list.h
 FILE: ../../../third_party/dart/runtime/vm/runtime_entry_x64.cc
-FILE: ../../../third_party/dart/runtime/vm/scanner.h
 FILE: ../../../third_party/dart/runtime/vm/stack_frame.h
 FILE: ../../../third_party/dart/runtime/vm/stub_code.h
 FILE: ../../../third_party/dart/runtime/vm/stub_code_ia32_test.cc
@@ -5736,9 +5799,6 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/preambles/d8.js
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/preambles/jsshell.js
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/shared/async_await_error_codes.dart
 FILE: ../../../third_party/dart/sdk/lib/convert/base64.dart
-FILE: ../../../third_party/dart/sdk/lib/dart_client.platform
-FILE: ../../../third_party/dart/sdk/lib/dart_server.platform
-FILE: ../../../third_party/dart/sdk/lib/dart_shared.platform
 FILE: ../../../third_party/dart/sdk/lib/developer/developer.dart
 FILE: ../../../third_party/dart/sdk/lib/developer/extension.dart
 FILE: ../../../third_party/dart/sdk/lib/developer/timeline.dart
@@ -18385,4 +18445,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 307
+Total license count: 308
