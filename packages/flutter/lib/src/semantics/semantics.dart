@@ -1166,22 +1166,17 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// If this rect is null [parentSemanticsClipRect] also has to be null.
   Rect parentPaintClipRect;
 
-  /// The elevation adjustment that was applied to this node from its ancestors.
+  /// The elevation adjustment that the parent imposes on this note.
   ///
-  /// This value should only be accessed to re-calculate the value for
-  /// [elevation] as it is meaningless on its own. If you're looking for the
-  /// actual elevation of this [SemanticsNode] look at the pre-calculated
-  /// [elevation] value.
+  /// The [elevation] property is relative to the elevation of the parent
+  /// [SemanticsNode]. However, as [SemanticsConfiguration]s from various
+  /// ascending [RenderObjects] are merged into each other to form that
+  /// [SemanticsNode] the parent’s elevation may change. This requires an
+  /// adjustment of the child’s relative elevation which is represented by this
+  /// value.
   ///
-  /// The [elevation] value is relative to the value of the parent
-  /// [SemanticsNode]. However, when the semantics tree is built or updated,
-  /// [SemanticsConfiguration] are merged into each other, which changes the
-  /// elevation of the parent. These elevation changes need to be taken into
-  /// consideration when calculating the relative [elevation] of a child. This
-  /// value represents the adjustments in elevation that have been applied to
-  /// this node because of the described effect. Caching the value here allows
-  /// the semantics compiler to re-build subtrees of the semantics instead of
-  /// always re-building from the root.
+  /// The value is rarely accessed directly. Instead, for most use cases the
+  /// [elevation] value should be used, which includes this adjustment.
   ///
   /// See also:
   ///
@@ -1732,7 +1727,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
 
     if (mergeAllDescendantsIntoThisNode) {
-      // TODO(goderbauer): foo.
+      // TODO(goderbauer): Deal with elevation and thickness.
       _visitDescendants((SemanticsNode node) {
         assert(node.isMergedIntoParent);
         flags |= node._flags;
