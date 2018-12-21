@@ -107,7 +107,7 @@ class AnalyzeOnce extends AnalyzeBase {
         ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
         : fs.path.basename(directories.first);
     final Status progress = argResults['preamble']
-        ? logger.startProgress('Analyzing $message...')
+        ? logger.startProgress('Analyzing $message...', timeout: kSlowOperation)
         : null;
 
     await analysisCompleter.future;

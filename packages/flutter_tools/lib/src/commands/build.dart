@@ -4,11 +4,6 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-
-import '../base/file_system.dart';
-import '../base/utils.dart';
-import '../globals.dart';
 import '../runner/flutter_command.dart';
 import 'build_aot.dart';
 import 'build_apk.dart';

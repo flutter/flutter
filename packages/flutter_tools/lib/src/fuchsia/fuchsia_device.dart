@@ -325,7 +325,7 @@ class FuchsiaIsolateDiscoveryProtocol {
     }
     _status ??= logger.startProgress(
       'Waiting for a connection from $_isolateName on ${_device.name}...',
-      expectSlowOperation: true,
+      timeout: null, // could take an arbitrary amount of time
     );
     _pollingTimer ??= Timer(_pollDuration, _findIsolate);
     return _foundUri.future.then((Uri uri) {
