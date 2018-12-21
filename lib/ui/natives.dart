@@ -59,10 +59,6 @@ List<int> saveCompilationTrace() {
   return result;
 }
 
-// TODO(sbaranov): This function will go away in subsequent PR, once the framework has caught up.
-@Deprecated('Use saveCompilationTrace() instead.')
-List<int> dumpCompilationTrace() => saveCompilationTrace();
-
 dynamic _saveCompilationTrace() native 'SaveCompilationTrace';
 
 void _scheduleMicrotask(void callback()) native 'ScheduleMicrotask';
