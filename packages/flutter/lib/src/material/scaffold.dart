@@ -1016,6 +1016,7 @@ class Scaffold extends StatefulWidget {
   /// value changes.
   ///
   /// See also:
+  ///
   ///  * [Scaffold.of], which provides access to the [ScaffoldState] object as a
   ///    whole, from which you can show snackbars, bottom sheets, and so forth.
   static bool hasDrawer(BuildContext context, { bool registerForUpdates = true }) {
@@ -1057,16 +1058,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// See also:
   ///
-  ///   * [ScaffoldState.openDrawer], which opens the [Scaffold.drawer] of a
-  ///   [Scaffold].
+  ///  * [ScaffoldState.openDrawer], which opens the [Scaffold.drawer] of a
+  ///    [Scaffold].
   bool get isDrawerOpen => _drawerOpened;
 
   /// Whether the [Scaffold.endDrawer] is opened.
   ///
   /// See also:
   ///
-  ///   * [ScaffoldState.openEndDrawer], which opens the [Scaffold.endDrawer] of
-  ///     a [Scaffold].
+  ///  * [ScaffoldState.openEndDrawer], which opens the [Scaffold.endDrawer] of
+  ///    a [Scaffold].
   bool get isEndDrawerOpen => _endDrawerOpened;
 
   void _drawerOpenedCallback(bool isOpened) {

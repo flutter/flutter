@@ -51,5 +51,5 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 karakter kaldı",
   "remainingTextFieldCharacterCountOther": "$remainingCount karakter kaldı",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "Yenile"
 }

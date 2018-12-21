@@ -71,6 +71,7 @@ Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) {
 /// {@endtemplate}
 ///
 /// See also:
+///
 ///  * [AndroidView] which is a widget that is used to show an Android view.
 ///  * [PlatformViewsService] which is a service for controlling platform views.
 class RenderAndroidView extends RenderBox {
@@ -261,6 +262,7 @@ class RenderAndroidView extends RenderBox {
 /// {@macro flutter.rendering.platformView.gestures}
 ///
 /// See also:
+///
 ///  * [UiKitView] which is a widget that is used to show a UIView.
 ///  * [PlatformViewsService] which is a service for controlling platform views.
 class RenderUiKitView extends RenderBox {

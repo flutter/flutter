@@ -140,7 +140,7 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 ///
 /// Custom fonts can be declared in the `pubspec.yaml` file as shown below:
 ///
-///```yaml
+/// ```yaml
 /// flutter:
 ///   fonts:
 ///     - family: Raleway
@@ -155,7 +155,7 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 ///          - asset: fonts/Schyler-Regular.ttf
 ///          - asset: fonts/Schyler-Italic.ttf
 ///            style: italic
-///```
+/// ```
 ///
 /// The `family` property determines the name of the font, which you can use in
 /// the [fontFamily] argument. The `asset` property is a path to the font file,
@@ -197,7 +197,7 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 ///
 /// Then the app can declare a font like in the example below:
 ///
-///```yaml
+/// ```yaml
 /// flutter:
 ///   fonts:
 ///     - family: Raleway
@@ -205,14 +205,14 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 ///         - asset: assets/fonts/Raleway-Regular.ttf
 ///         - asset: packages/my_package/fonts/Raleway-Medium.ttf
 ///           weight: 500
-///```
+/// ```
 ///
 /// The `lib/` is implied, so it should not be included in the asset path.
 ///
 /// In this case, since the app locally defines the font, the TextStyle is
 /// created without the `package` argument:
 ///
-///```dart
+/// ```dart
 /// const TextStyle(fontFamily: 'Raleway')
 /// ```
 ///

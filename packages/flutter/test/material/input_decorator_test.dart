@@ -248,6 +248,56 @@ void main() {
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderColor(tester), Colors.transparent);
+
+    // alignLabelWithHint: true positions the label at the text baseline,
+    // aligned with the hint.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        isFocused: false,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          alignLabelWithHint: true,
+          hintText: 'hint',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
+    expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+  });
+
+  testWidgets('InputDecorator alignLabelWithHint for multiline TextField', (WidgetTester tester) async {
+    Widget buildFrame(bool alignLabelWithHint) {
+      return MaterialApp(
+        home: Material(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: TextField(
+              maxLines: 8,
+              decoration: InputDecoration(
+                labelText: 'label',
+                alignLabelWithHint: alignLabelWithHint,
+                hintText: 'hint',
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // alignLabelWithHint: false centers the label in the TextField
+    await tester.pumpWidget(buildFrame(false));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('label')).dy, 76.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 92.0);
+
+    // alignLabelWithHint: true aligns the label with the hint.
+    await tester.pumpWidget(buildFrame(true));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
+    expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
   });
 
   // Overall height for this InputDecorator is 40.0dps
@@ -1552,6 +1602,7 @@ void main() {
         filled: true,
         fillColor: Colors.red,
         border: InputBorder.none,
+        alignLabelWithHint: true,
       )
     );
 
@@ -1567,6 +1618,7 @@ void main() {
     expect(decoration.filled, true);
     expect(decoration.fillColor, Colors.red);
     expect(decoration.border, InputBorder.none);
+    expect(decoration.alignLabelWithHint, true);
 
     // InputDecoration (baseDecoration) defines InputDecoration properties
     decoration = const InputDecoration(
@@ -1582,6 +1634,7 @@ void main() {
       filled: false,
       fillColor: Colors.blue,
       border: OutlineInputBorder(),
+      alignLabelWithHint: false,
     ).applyDefaults(
       const InputDecorationTheme(
         labelStyle: themeStyle,
@@ -1597,6 +1650,7 @@ void main() {
         filled: true,
         fillColor: Colors.red,
         border: InputBorder.none,
+        alignLabelWithHint: true,
       ),
     );
 
@@ -1613,6 +1667,7 @@ void main() {
     expect(decoration.filled, false);
     expect(decoration.fillColor, Colors.blue);
     expect(decoration.border, const OutlineInputBorder());
+    expect(decoration.alignLabelWithHint, false);
   });
 
   testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
@@ -2016,5 +2071,52 @@ void main() {
     const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue));
     expect(underlineInputBorder.hashCode, const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)).hashCode);
     expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder().hashCode));
+  });
+
+  testWidgets('InputDecorationTheme implements debugFillDescription', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const InputDecorationTheme(
+      labelStyle: TextStyle(),
+      helperStyle: TextStyle(),
+      hintStyle: TextStyle(),
+      errorMaxLines: 5,
+      hasFloatingPlaceholder: false,
+      contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+      prefixStyle: TextStyle(),
+      suffixStyle: TextStyle(),
+      counterStyle: TextStyle(),
+      filled: true,
+      fillColor: Colors.red,
+      errorBorder: UnderlineInputBorder(),
+      focusedBorder: UnderlineInputBorder(),
+      focusedErrorBorder: UnderlineInputBorder(),
+      disabledBorder: UnderlineInputBorder(),
+      enabledBorder: UnderlineInputBorder(),
+      border: UnderlineInputBorder(),
+      alignLabelWithHint: true,
+    ).debugFillProperties(builder);
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode n) => n.toString()).toList();
+    expect(description, <String>[
+      'labelStyle: TextStyle(<all styles inherited>)',
+      'helperStyle: TextStyle(<all styles inherited>)',
+      'hintStyle: TextStyle(<all styles inherited>)',
+      'errorMaxLines: 5',
+      'hasFloatingPlaceholder: false',
+      'contentPadding: EdgeInsetsDirectional(40.0, 12.0, 0.0, 12.0)',
+      'prefixStyle: TextStyle(<all styles inherited>)',
+      'suffixStyle: TextStyle(<all styles inherited>)',
+      'counterStyle: TextStyle(<all styles inherited>)',
+      'filled: true',
+      'fillColor: MaterialColor(primary value: Color(0xfff44336))',
+      'errorBorder: UnderlineInputBorder()',
+      'focusedBorder: UnderlineInputBorder()',
+      'focusedErrorBorder: UnderlineInputBorder()',
+      'disabledBorder: UnderlineInputBorder()',
+      'enabledBorder: UnderlineInputBorder()',
+      'border: UnderlineInputBorder()',
+      'alignLabelWithHint: true',
+    ]);
   });
 }
