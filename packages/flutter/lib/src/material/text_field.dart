@@ -20,11 +20,17 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
 
+/// Signature for the [TextField.buildCounter] callback.
 typedef InputCounterWidgetBuilder = Widget Function(
+  /// The build context for the TextField
   BuildContext context,
   {
+    /// The length of the string currently in the input.
     @required int currentLength,
+    /// The maximum string length that can be entered into the TextField.
     @required int maxLength,
+    /// Whether or not the TextField is currently focused.  Mainly provided for
+    /// the liveRegion paramter in the [Semantics] widget for accessibility.
     @required bool isFocused,
   }
 );
@@ -381,14 +387,15 @@ class TextField extends StatefulWidget {
   /// textfield's internal gesture detector, use a [Listener].
   final GestureTapCallback onTap;
 
-  /// Function to generate a custom counter widget. Passed the build context,
-  /// current and max lengths of the input, and [isFocused]. Will be placed
-  /// below the line in place of the default widget built when passing
-  /// [counterText].
+  /// Callback that generates a custom [InputDecorator.counter] widget.
   ///
-  /// Accessibility will be up to you if you use this instead of [counterText].
-  /// Be sure to wrap your widget in a [Semantics] widget and use the given
-  /// [isFocused] value.
+  /// See [InputCounterWidgetBuilder] for the passed arguments.  The returned
+  /// widget will be placed below the line in place of the default widget built
+  /// when passing [counterText].
+  ///
+  /// The returned widget should be accessible, just as the widget generated for
+  /// [counterText] is. For example, wrap the returned widget in a [Semantics]
+  /// widget and use the given [isFocused] value.
   ///
   /// {@tool sample}
   /// ```dart

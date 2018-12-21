@@ -2260,12 +2260,13 @@ class InputDecoration {
   ///
   /// The semantic label can be replaced by providing a [semanticCounterText].
   ///
-  /// If set to empty string and [counter] isn't specified, will display nothing
-  /// in the place of the counter.
+  /// If null or an empty string and [counter] isn't specified, then nothing
+  /// will appear in the counter's location.
   final String counterText;
 
   /// Optional custom counter widget to go in the place otherwise occupied by
-  /// [counterText].
+  /// [counterText].  If this property is non null, then [counterText] is
+  /// ignored.
   final Widget counter;
 
   /// The style to use for the [counterText].
