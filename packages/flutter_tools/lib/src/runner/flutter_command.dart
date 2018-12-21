@@ -454,17 +454,19 @@ abstract class FlutterCommand extends Command<void> {
       body: () async {
         if (flutterUsage.isFirstRun)
           flutterUsage.printWelcome();
-        final String commandPath = await usagePath;
+
         FlutterCommandResult commandResult;
         try {
-          commandResult = await verifyThenRunCommand(commandPath);
+          commandResult = await verifyThenRunCommand();
         } on ToolExit {
           commandResult = const FlutterCommandResult(ExitStatus.fail);
           rethrow;
         } finally {
           final DateTime endTime = systemClock.now();
           printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
-          if (commandPath != null) {
+          // This is checking the result of the call to 'usagePath'
+          // (a Future<String>), and not the result of evaluating the Future.
+          if (usagePath != null) {
             final List<String> labels = <String>[];
             if (commandResult?.exitStatus != null)
               labels.add(getEnumName(commandResult.exitStatus));
@@ -498,7 +500,7 @@ abstract class FlutterCommand extends Command<void> {
   /// then call this method to execute the command
   /// rather than calling [runCommand] directly.
   @mustCallSuper
-  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
+  Future<FlutterCommandResult> verifyThenRunCommand() async {
     await validateCommand();
 
     // Populate the cache. We call this before pub get below so that the sky_engine
@@ -513,6 +515,8 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     setupApplicationPackages();
+
+    final String commandPath = await usagePath;
 
     if (commandPath != null) {
       final Map<String, String> additionalUsageValues = await usageValues;

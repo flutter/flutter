@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert' show AsciiDecoder;
 
+import 'package:quiver/strings.dart';
+
 import '../globals.dart';
 import 'context.dart';
 import 'io.dart' as io;
@@ -170,32 +172,31 @@ class AnsiTerminal {
   /// Return keystrokes from the console.
   ///
   /// Useful when the console is in [singleCharMode].
-  Stream<String> get keystrokes {
+  Stream<String> get onCharInput {
     _broadcastStdInString ??= io.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
     return _broadcastStdInString;
   }
 
-  /// Prompts the user to input a character within a given list. Re-prompts if
-  /// entered character is not in the list.
+  /// Prompts the user to input a character within the accepted list. Re-prompts
+  /// if entered character is not in the list.
   ///
-  /// The `prompt`, if non-null, is the text displayed prior to waiting for user
-  /// input each time. If `prompt` is non-null and `displayAcceptedCharacters`
-  /// is true, the accepted keys are printed next to the `prompt`.
+  /// The [prompt] is the text displayed prior to waiting for user input. The
+  /// [defaultChoiceIndex], if given, will be the character appearing in
+  /// [acceptedCharacters] in the index given if the user presses enter without
+  /// any key input. Setting [displayAcceptedCharacters] also prints the
+  /// accepted keys next to the [prompt].
   ///
-  /// The returned value is the user's input; if `defaultChoiceIndex` is not
-  /// null, and the user presses enter without any other input, the return value
-  /// will be the character in `acceptedCharacters` at the index given by
-  /// `defaultChoiceIndex`.
+  /// Throws a [TimeoutException] if a `timeout` is provided and its duration
+  /// expired without user input. Duration resets per key press.
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
     String prompt,
     int defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
+    Duration timeout,
   }) async {
     assert(acceptedCharacters != null);
     assert(acceptedCharacters.isNotEmpty);
-    assert(prompt == null || prompt.isNotEmpty);
-    assert(displayAcceptedCharacters != null);
     List<String> charactersToDisplay = acceptedCharacters;
     if (defaultChoiceIndex != null) {
       assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
@@ -205,14 +206,17 @@ class AnsiTerminal {
     }
     String choice;
     singleCharMode = true;
-    while (choice == null || choice.length > 1 || !acceptedCharacters.contains(choice)) {
-      if (prompt != null) {
+    while (isEmpty(choice) || choice.length != 1 || !acceptedCharacters.contains(choice)) {
+      if (isNotEmpty(prompt)) {
         printStatus(prompt, emphasis: true, newline: false);
         if (displayAcceptedCharacters)
           printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
         printStatus(': ', emphasis: true, newline: false);
       }
-      choice = await keystrokes.first;
+      Future<String> inputFuture = onCharInput.first;
+      if (timeout != null)
+        inputFuture = inputFuture.timeout(timeout);
+      choice = await inputFuture;
       printStatus(choice);
     }
     singleCharMode = false;

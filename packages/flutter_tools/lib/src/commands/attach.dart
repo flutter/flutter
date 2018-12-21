@@ -149,7 +149,7 @@ class AttachCommand extends FlutterCommand {
         }
         final Status status = logger.startProgress(
           'Waiting for a connection from Flutter on ${device.name}...',
-          timeout: kSlowOperation,
+          expectSlowOperation: true,
         );
         try {
           final int localPort = await device.findIsolatePort(module, localPorts);
@@ -179,7 +179,7 @@ class AttachCommand extends FlutterCommand {
           observatoryUri = await observatoryDiscovery.uri;
           // Determine ipv6 status from the scanned logs.
           usesIpv6 = observatoryDiscovery.ipv6;
-          printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
+          printStatus('Done.');
         } finally {
           await observatoryDiscovery?.cancel();
         }
@@ -217,29 +217,20 @@ class AttachCommand extends FlutterCommand {
         flutterDevice.startEchoingDeviceLog();
       }
 
-      int result;
       if (daemon != null) {
         AppInstance app;
         try {
-          app = await daemon.appDomain.launch(
-            hotRunner,
-            hotRunner.attach,
-            device,
-            null,
-            true,
-            fs.currentDirectory,
-          );
+          app = await daemon.appDomain.launch(hotRunner, hotRunner.attach,
+              device, null, true, fs.currentDirectory);
         } catch (error) {
           throwToolExit(error.toString());
         }
-        result = await app.runner.waitForAppToFinish();
-        assert(result != null);
+        final int result = await app.runner.waitForAppToFinish();
+        if (result != 0)
+          throwToolExit(null, exitCode: result);
       } else {
-        result = await hotRunner.attach();
-        assert(result != null);
+        await hotRunner.attach();
       }
-      if (result != 0)
-        throwToolExit(null, exitCode: result);
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
       for (ForwardedPort port in ports) {
