@@ -3387,7 +3387,10 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       ..tags = _tagsForChildren;
 
     node.elevationAdjustment = elevationAdjustment;
-    _config.elevation += elevationAdjustment;
+    if (elevationAdjustment != 0.0) {
+      _ensureConfigIsWritable();
+      _config.elevation += elevationAdjustment;
+    }
 
     if (geometry != null) {
       assert(_needsGeometryUpdate);

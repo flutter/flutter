@@ -173,4 +173,24 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('single note thickness', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(const MaterialApp(
+        home: Center(
+            child: Material(
+              elevation: 24.0,
+              child: Text('Hello'),
+            )
+        )
+    ));
+
+    final SemanticsNode node = tester.getSemantics(find.text('Hello'));
+    expect(node.thickness, 0.0);
+    expect(node.elevation, 24.0);
+    expect(node.label, 'Hello');
+
+    semantics.dispose();
+  });
 }

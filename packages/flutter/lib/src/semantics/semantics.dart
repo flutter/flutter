@@ -187,6 +187,8 @@ class SemanticsData extends Diagnosticable {
     @required this.hint,
     @required this.textDirection,
     @required this.rect,
+    @required this.elevation,
+    @required this.thickness,
     @required this.textSelection,
     @required this.scrollIndex,
     @required this.scrollChildCount,
@@ -305,6 +307,21 @@ class SemanticsData extends Diagnosticable {
   /// parent).
   final Matrix4 transform;
 
+  /// The elevation of this node reative to the parent node.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.elevation] for a detailed discussion regarding
+  ///    elevation and semantics.
+  final double elevation;
+
+  /// The extend that this node occupies in z-direction starting at [elevation].
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.thickness] for a more detailed definition.
+  final double thickness;
+
   /// The identifiers for the custom semantics actions and standard action
   /// overrides for this node.
   ///
@@ -329,6 +346,8 @@ class SemanticsData extends Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Rect>('rect', rect, showName: false));
     properties.add(TransformProperty('transform', transform, showName: false, defaultValue: null));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
+    properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
     final List<String> actionSummary = <String>[];
     for (SemanticsAction action in SemanticsAction.values.values) {
       if ((actions & action.index) != 0)
@@ -383,6 +402,8 @@ class SemanticsData extends Diagnosticable {
         && typedOther.scrollExtentMax == scrollExtentMax
         && typedOther.scrollExtentMin == scrollExtentMin
         && typedOther.transform == transform
+        && typedOther.elevation == elevation
+        && typedOther.thickness == thickness
         && _sortedListsEqual(typedOther.customSemanticsActionIds, customSemanticsActionIds);
   }
 
@@ -406,6 +427,8 @@ class SemanticsData extends Diagnosticable {
       scrollExtentMax,
       scrollExtentMin,
       transform,
+      elevation,
+      thickness,
       ui.hashList(customSemanticsActionIds),
     );
   }
@@ -1686,6 +1709,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     double scrollPosition = _scrollPosition;
     double scrollExtentMax = _scrollExtentMax;
     double scrollExtentMin = _scrollExtentMin;
+    double elevation = _elevation;
+    double thickness = _thickness;
     final Set<int> customSemanticsActionIds = Set<int>();
     for (CustomSemanticsAction action in _customSemanticsActions.keys)
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -1707,6 +1732,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
 
     if (mergeAllDescendantsIntoThisNode) {
+      // TODO(goderbauer): foo.
       _visitDescendants((SemanticsNode node) {
         assert(node.isMergedIntoParent);
         flags |= node._flags;
@@ -1775,6 +1801,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       textDirection: textDirection,
       rect: rect,
       transform: transform,
+      elevation: elevation,
+      thickness: thickness,
       tags: mergedTags,
       textSelection: textSelection,
       scrollChildCount: scrollChildCount,
@@ -1843,6 +1871,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       scrollExtentMax: data.scrollExtentMax != null ? data.scrollExtentMax : double.nan,
       scrollExtentMin: data.scrollExtentMin != null ? data.scrollExtentMin : double.nan,
       transform: data.transform?.storage ?? _kIdentityTransform,
+// TODO(goderbauer): enable when engine is updated.
+//      elevation: data.elevation,
+//      thickness: data.thickness,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
@@ -3576,7 +3607,7 @@ class SemanticsConfiguration {
       otherTextDirection: child.textDirection,
     );
 
-    _thickness = math.max(_thickness, child._thickness + _elevation);
+    _thickness = math.max(_thickness, child._thickness + child._elevation);
 
     _hasBeenAnnotated = _hasBeenAnnotated || child._hasBeenAnnotated;
   }
