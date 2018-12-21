@@ -1,4 +1,4 @@
-Signature: 44c8e0f5da64180143f4966c84e276ef
+Signature: 9593b800c4ea72259edfc452205ddc2c
 
 UNUSED LICENSES:
 
@@ -3107,10 +3107,10 @@ FILE: ../../../third_party/skia/include/core/SkPictureRecorder.h
 FILE: ../../../third_party/skia/include/core/SkSurfaceProps.h
 FILE: ../../../third_party/skia/include/core/SkTextBlob.h
 FILE: ../../../third_party/skia/include/gpu/GrGpuResource.h
-FILE: ../../../third_party/skia/include/gpu/GrResourceKey.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleInterface.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_indirect.h
 FILE: ../../../third_party/skia/include/ports/SkRemotableFontMgr.h
+FILE: ../../../third_party/skia/include/private/GrResourceKey.h
 FILE: ../../../third_party/skia/include/private/SkHalf.h
 FILE: ../../../third_party/skia/samplecode/SampleHT.cpp
 FILE: ../../../third_party/skia/samplecode/SampleIdentityScale.cpp
