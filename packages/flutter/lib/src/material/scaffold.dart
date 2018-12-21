@@ -277,9 +277,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.currentFloatingActionButtonLocation,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
+    this.extendedBody = false
   }) : assert(previousFloatingActionButtonLocation != null),
        assert(currentFloatingActionButtonLocation != null);
 
+  final bool extendedBody;
   final EdgeInsets minInsets;
   final TextDirection textDirection;
   final _ScaffoldGeometryNotifier geometryNotifier;
@@ -332,9 +334,15 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     final double contentBottom = math.max(0.0, bottom - math.max(minInsets.bottom, bottomWidgetsHeight));
 
     if (hasChild(_ScaffoldSlot.body)) {
+      double bodyMaxHeight = math.max(0.0, contentBottom - contentTop);
+
+      if (extendedBody){
+        bodyMaxHeight += bottomWidgetsHeight;
+      }
+
       final BoxConstraints bodyConstraints = BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
-        maxHeight: math.max(0.0, contentBottom - contentTop),
+        maxHeight: bodyMaxHeight,
       );
       layoutChild(_ScaffoldSlot.body, bodyConstraints);
       positionChild(_ScaffoldSlot.body, Offset(0.0, contentTop));
@@ -737,7 +745,11 @@ class Scaffold extends StatefulWidget {
     this.backgroundColor,
     this.resizeToAvoidBottomPadding = true,
     this.primary = true,
+    this.extendedBody = false
   }) : assert(primary != null), super(key: key);
+
+  /// When "true" - the body fills the entire height of Scaffold
+  final bool extendedBody;
 
   /// An app bar to display at the top of the scaffold.
   final PreferredSizeWidget appBar;
@@ -1736,6 +1748,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             return CustomMultiChildLayout(
               children: children,
               delegate: _ScaffoldLayout(
+                extendedBody: widget.extendedBody,
                 minInsets: minInsets,
                 currentFloatingActionButtonLocation: _floatingActionButtonLocation,
                 floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
