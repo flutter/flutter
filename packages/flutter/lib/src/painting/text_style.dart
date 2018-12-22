@@ -288,7 +288,7 @@ class TextStyle extends Diagnosticable {
   /// in [fontFamilyFallback]. When [fontFamily] is null or not provided, the
   /// first value in [fontFamilyFallback] acts as the preferred/first font
   /// family. When neither is provided, then the default platform font will
-  /// be used. 
+  /// be used.
   final String fontFamily;
 
   /// The ordered list of font families to fall back on when a glyph cannot be
@@ -307,7 +307,7 @@ class TextStyle extends Diagnosticable {
   /// For example, if a glyph is not found in [fontFamily], then each font family
   /// in [fontFamilyFallback] will be searched in order until it is found. If it
   /// is not found, then a box will be drawn in its place.
-  /// 
+  ///
   /// If the font is defined in a package, each font family in the list will be
   /// prefixed with 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto').
   /// The package name should be provided by the `package` argument in the

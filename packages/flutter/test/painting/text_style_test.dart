@@ -195,7 +195,7 @@ void main() {
     const TextStyle s7 = TextStyle(fontFamily: 'test', package: 'p');
     expect(s7.fontFamily, 'packages/p/test');
     expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontFamilyFallback: unspecified, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified)');
-  
+
     const TextStyle s8 = TextStyle(fontFamilyFallback: <String>['test', 'test2'], package: 'p');
     expect(s8.fontFamilyFallback[0], 'packages/p/test');
     expect(s8.fontFamilyFallback[1], 'packages/p/test2');
