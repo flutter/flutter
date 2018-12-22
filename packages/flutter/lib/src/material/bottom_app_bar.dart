@@ -35,13 +35,14 @@ import 'theme.dart';
 ///
 ///  * [ComputeNotch] a function used for creating a notch in a shape.
 ///  * [ScaffoldGeometry.floatingActionBarComputeNotch] the [ComputeNotch] used to
-///    make a notch for the [FloatingActionButton]
+///    make a notch for the [FloatingActionButton].
 ///  * [FloatingActionButton] which the [BottomAppBar] makes a notch for.
 ///  * [AppBar] for a toolbar that is shown at the top of the screen.
 class BottomAppBar extends StatefulWidget {
   /// Creates a bottom application bar.
   ///
   /// The [color], [elevation], and [clipBehavior] arguments must not be null.
+  /// Additionally, [elevation] must be non-negative.
   const BottomAppBar({
     Key key,
     this.color,
@@ -68,8 +69,11 @@ class BottomAppBar extends StatefulWidget {
   /// When null defaults to [ThemeData.bottomAppBarColor].
   final Color color;
 
-  /// The z-coordinate at which to place this bottom app bar. This controls the
-  /// size of the shadow below the bottom app bar.
+  /// The z-coordinate at which to place this bottom app bar relative to its
+  /// parent.
+  ///
+  /// This controls the size of the shadow below the bottom app bar. The
+  /// value is non-negative.
   ///
   /// Defaults to 8, the appropriate elevation for bottom app bars.
   final double elevation;

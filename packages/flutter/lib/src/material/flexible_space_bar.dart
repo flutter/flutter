@@ -86,8 +86,8 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [FlexibleSpaceBarSettings] which creates a settings object that can be
-  ///     used to specify these settings to a [FlexibleSpaceBar].
+  ///  * [FlexibleSpaceBarSettings] which creates a settings object that can be
+  ///    used to specify these settings to a [FlexibleSpaceBar].
   static Widget createSettings({
     double toolbarOpacity,
     double minExtent,
@@ -238,7 +238,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 ///
 /// See also:
 ///
-///   * [FlexibleSpaceBar] which creates a flexible space bar.
+///  * [FlexibleSpaceBar] which creates a flexible space bar.
 class FlexibleSpaceBarSettings extends InheritedWidget {
   /// Creates a Flexible Space Bar Settings widget.
   ///

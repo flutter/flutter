@@ -18,6 +18,7 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/time.dart';
+import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -81,6 +82,7 @@ Future<T> runInContext<T>(
       SystemClock: () => const SystemClock(),
       Stdio: () => const Stdio(),
       Usage: () => Usage(),
+      UserMessages: () => UserMessages(),
       Xcode: () => Xcode(),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
     },

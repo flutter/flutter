@@ -65,17 +65,19 @@ import 'theme.dart';
 class Card extends StatelessWidget {
   /// Creates a material design card.
   ///
-  /// The [clipBehavior] argument must not be null.
+  /// The [clipBehavior] and [elevation] arguments must not be null.
+  /// Additionally, the [elevation] must be non-negative.
   const Card({
     Key key,
     this.color,
-    this.elevation,
+    this.elevation = 1.0,
     this.shape,
     this.margin = const EdgeInsets.all(4.0),
     this.clipBehavior = Clip.none,
     this.child,
     this.semanticContainer = true,
-  }) : super(key: key);
+  }) : assert(elevation != null && elevation >= 0.0),
+       super(key: key);
 
   /// The card's background color.
   ///
@@ -89,7 +91,7 @@ class Card extends StatelessWidget {
   ///
   /// Defines the card's [Material.elevation].
   ///
-  /// The default elevation is 1.0.
+  /// The default elevation is 1.0. The value is always non-negative.
   final double elevation;
 
   /// The shape of the card's [Material].
@@ -139,7 +141,7 @@ class Card extends StatelessWidget {
         child: Material(
           type: MaterialType.card,
           color: color ?? Theme.of(context).cardColor,
-          elevation: elevation ?? 1.0,
+          elevation: elevation,
           shape: shape ?? const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0)),
           ),
