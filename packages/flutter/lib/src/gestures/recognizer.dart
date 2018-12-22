@@ -275,6 +275,9 @@ enum GestureRecognizerState {
   /// been accepted definitively.
   possible,
 
+  /// The gesture has been accepted by the recognizer.
+  accepted,
+
   /// Further pointer events cannot cause this recognizer to recognize the
   /// gesture until the recognizer returns to the [ready] state (typically when
   /// all the pointers the recognizer is tracking are removed from the screen).
@@ -289,11 +292,16 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// Initializes the [deadline] field during construction of subclasses.
   PrimaryPointerGestureRecognizer({
     this.deadline,
-    this.distanceTolerance = kTouchSlop,
+    this.preAcceptSlopTolerance = kTouchSlop,
+    this.postAcceptSlopTolerance = kTouchSlop,
     Object debugOwner,
   }) : assert(
-         distanceTolerance == null || distanceTolerance >= 0,
-         'The distanceTolerance must be positive or null',
+         preAcceptSlopTolerance == null || preAcceptSlopTolerance >= 0,
+         'The preAcceptSlopTolerance must be positive or null',
+       ),
+       assert(
+         postAcceptSlopTolerance == null || postAcceptSlopTolerance >= 0,
+         'The postAcceptSlopTolerance must be positive or null',
        ),
        super(debugOwner: debugOwner);
 
@@ -301,9 +309,18 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// amount of time has elapsed since starting to track the primary pointer.
   final Duration deadline;
 
-  /// The maximum distance in pixels the gesture is allowed to drift from the
-  /// initial touch down position before being rejected.
-  final double distanceTolerance;
+  /// The maximum distance in pixels the gesture is allowed to drift between the
+  /// initial touch down position and the gesture being accepted.
+  ///
+  /// Passing the allowed slop amount causes the gesture to be rejected.
+  final double preAcceptSlopTolerance;
+
+  /// The maximum distance in pixels the gesture is allowed to drift after the
+  /// gesture has been accepted.
+  ///
+  /// Passing the allowed slop amount causes the gesture to be rejected, even
+  /// after being accepted.
+  final double postAcceptSlopTolerance;
 
   /// The current state of the recognizer.
   ///
@@ -333,11 +350,17 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   @override
   void handleEvent(PointerEvent event) {
     assert(state != GestureRecognizerState.ready);
-    if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
-      // TODO(abarth): Maybe factor the slop handling out into a separate class?
-      if (event is PointerMoveEvent
-          && distanceTolerance != null
-          && _getDistance(event) > distanceTolerance) {
+    if (event.pointer == primaryPointer) {
+      final bool isPreAcceptSlopPastTolerance =
+          state == GestureRecognizerState.possible
+          && preAcceptSlopTolerance != null
+          && _getDistance(event) > preAcceptSlopTolerance;
+      final bool isPostAcceptSlopPastTolerance =
+          state == GestureRecognizerState.accepted
+          && postAcceptSlopTolerance != null
+          && _getDistance(event) > postAcceptSlopTolerance;
+
+      if (event is PointerMoveEvent && (isPreAcceptSlopPastTolerance || isPostAcceptSlopPastTolerance)) {
         resolve(GestureDisposition.rejected);
         stopTrackingPointer(primaryPointer);
       } else {
@@ -360,8 +383,21 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void acceptGesture(int pointer) {
+    // Ignore state ready here because that would happen if this recognizer won
+    // by a sweep.
     if (pointer == primaryPointer && state == GestureRecognizerState.possible) {
+      state = GestureRecognizerState.accepted;
+    }
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    // Ignore state ready here because that would happen if this recognizer won
+    // by a sweep.
+    if (pointer == primaryPointer
+        && (state == GestureRecognizerState.possible
+            || state == GestureRecognizerState.accepted)) {
       _stopTimer();
       state = GestureRecognizerState.defunct;
     }

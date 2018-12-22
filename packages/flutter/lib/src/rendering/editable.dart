@@ -1253,7 +1253,6 @@ class RenderEditable extends RenderBox {
   void selectPositionAt({@required Offset position, @required SelectionChangedCause cause}) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
-    assert(_lastTapDownPosition != null);
     if (onSelectionChanged != null) {
       final TextPosition textPosition = _textPainter.getPositionForOffset(globalToLocal(position));
       onSelectionChanged(TextSelection.fromPosition(textPosition), this, cause);
