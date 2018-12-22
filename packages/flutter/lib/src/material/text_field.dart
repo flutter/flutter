@@ -467,6 +467,16 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines
       );
 
+    // No need to build anything if counter or counterText were given directly.
+    if (effectiveDecoration.counter != null
+        || effectiveDecoration.counterText != null)
+      return effectiveDecoration;
+
+    if (effectiveDecoration.counterText != null) {
+      return effectiveDecoration;
+    }
+
+    // If buildCounter was provided, use it to generate a counter widget.
     Widget counter;
     final int currentLength = _effectiveController.value.text.runes.length;
     if (effectiveDecoration.counter == null
@@ -481,7 +491,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       return effectiveDecoration.copyWith(counter: counter);
     }
 
-    if (!needsCounter)
+    // If no maxLength then not showing a counter at all. Otherwise, generate
+    // the default counter.
+    if (widget.maxLength == null)
       return effectiveDecoration;
 
     String counterText = '$currentLength';
