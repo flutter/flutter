@@ -371,20 +371,16 @@ MultiFrameCodec::MultiFrameCodec(std::unique_ptr<SkCodec> codec,
   compressedSizeBytes_ = codec_->getInfo().computeMinByteSize();
   frameBitmaps_.clear();
   decodedCacheSize_ = 0;
-  // Initialize the frame cache, marking frames that are required for other
-  // dependent frames to render.
+  nextFrameIndex_ = 0;
+  // Go through our frame information and mark which frames are required in
+  // order to decode subsequent ones.
+  requiredFrames_.clear();
   for (size_t frameIndex = 0; frameIndex < frameInfos_.size(); frameIndex++) {
-    const auto& frameInfo = frameInfos_[frameIndex];
-    if (frameInfo.fRequiredFrame != SkCodec::kNoFrame) {
-      frameBitmaps_[frameInfo.fRequiredFrame] =
-          std::make_unique<DecodedFrame>(/*required=*/true);
-    }
-    if (frameBitmaps_.count(frameIndex) < 1) {
-      frameBitmaps_[frameIndex] =
-          std::make_unique<DecodedFrame>(/*required=*/false);
+    const int requiredFrame = frameInfos_[frameIndex].fRequiredFrame;
+    if (requiredFrame != SkCodec::kNoFrame) {
+      requiredFrames_[requiredFrame] = true;
     }
   }
-  nextFrameIndex_ = 0;
 }
 
 MultiFrameCodec::~MultiFrameCodec() {}
@@ -400,28 +396,29 @@ int MultiFrameCodec::repetitionCount() {
 sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage(
     fml::WeakPtr<GrContext> resourceContext) {
   // Populate this bitmap from the cache if it exists
-  DecodedFrame& cacheEntry = *frameBitmaps_[nextFrameIndex_];
-  SkBitmap bitmap =
-      cacheEntry.bitmap_ != nullptr ? *cacheEntry.bitmap_ : SkBitmap();
-  if (!bitmap.getPixels()) {  // We haven't decoded this frame yet
+  SkBitmap bitmap = frameBitmaps_[nextFrameIndex_] != nullptr
+                        ? *frameBitmaps_[nextFrameIndex_]
+                        : SkBitmap();
+  const bool frameAlreadyCached = bitmap.getPixels();
+  if (!frameAlreadyCached) {
     const SkImageInfo info = codec_->getInfo().makeColorType(kN32_SkColorType);
     bitmap.allocPixels(info);
 
     SkCodec::Options options;
     options.fFrameIndex = nextFrameIndex_;
-    const int requiredFrame = frameInfos_[nextFrameIndex_].fRequiredFrame;
-    if (requiredFrame != SkCodec::kNoFrame) {
-      const SkBitmap* requiredBitmap =
-          frameBitmaps_[requiredFrame]->bitmap_.get();
-      if (requiredBitmap == nullptr) {
+    const int requiredFrameIndex = frameInfos_[nextFrameIndex_].fRequiredFrame;
+    if (requiredFrameIndex != SkCodec::kNoFrame) {
+      if (lastRequiredFrame_ == nullptr ||
+          lastRequiredFrameIndex_ != requiredFrameIndex) {
         FML_LOG(ERROR) << "Frame " << nextFrameIndex_ << " depends on frame "
-                       << requiredFrame << " which has not been cached.";
+                       << requiredFrameIndex << " which has not been cached.";
         return NULL;
       }
 
-      if (requiredBitmap->getPixels() &&
-          copy_to(&bitmap, requiredBitmap->colorType(), *requiredBitmap)) {
-        options.fPriorFrame = requiredFrame;
+      if (lastRequiredFrame_->getPixels() &&
+          copy_to(&bitmap, lastRequiredFrame_->colorType(),
+                  *lastRequiredFrame_)) {
+        options.fPriorFrame = requiredFrameIndex;
       }
     }
 
@@ -431,15 +428,21 @@ sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage(
       return NULL;
     }
 
-    // Cache the bitmap if this is a required frame or if we're still under our
-    // ratio cap.
     const size_t cachedFrameSize = bitmap.computeByteSize();
-    if (cacheEntry.required_ ||
-        ((decodedCacheSize_ + cachedFrameSize) / compressedSizeBytes_) <=
-            decodedCacheRatioCap_) {
-      cacheEntry.bitmap_ = std::make_unique<SkBitmap>(bitmap);
+    const bool shouldCache = ((decodedCacheSize_ + cachedFrameSize) /
+                              compressedSizeBytes_) <= decodedCacheRatioCap_;
+    if (shouldCache) {
+      frameBitmaps_[nextFrameIndex_] = std::make_shared<SkBitmap>(bitmap);
       decodedCacheSize_ += cachedFrameSize;
     }
+  }
+
+  // Hold onto this if we need it to decode future frames.
+  if (requiredFrames_[nextFrameIndex_]) {
+    lastRequiredFrame_ = frameAlreadyCached
+                             ? frameBitmaps_[nextFrameIndex_]
+                             : std::make_shared<SkBitmap>(bitmap);
+    lastRequiredFrameIndex_ = nextFrameIndex_;
   }
 
   if (resourceContext) {
@@ -508,11 +511,6 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
 
   return Dart_Null();
 }
-
-MultiFrameCodec::DecodedFrame::DecodedFrame(bool required)
-    : required_(required) {}
-
-MultiFrameCodec::DecodedFrame::~DecodedFrame() = default;
 
 SingleFrameCodec::SingleFrameCodec(fml::RefPtr<FrameInfo> frame)
     : frame_(std::move(frame)) {}
