@@ -233,7 +233,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 TextFormField(
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: 'Tell us about yourself',
+                    hintText: 'Tell us about yourself (e.g., write down what you do or what hobbies you have)',
                     helperText: 'Keep it short, this is just a demo.',
                     labelText: 'Life story',
                   ),

@@ -35,7 +35,6 @@ import 'theme.dart';
 ///
 ///  * [PageTransitionsTheme], which defines the default page transitions used
 ///    by [MaterialPageRoute.buildTransitions].
-///
 class MaterialPageRoute<T> extends PageRoute<T> {
   /// Construct a MaterialPageRoute whose contents are defined by [builder].
   ///

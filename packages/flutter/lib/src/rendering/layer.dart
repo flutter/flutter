@@ -165,7 +165,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// See also:
   ///
-  ///   * [AnnotatedRegionLayer], for placing values in the layer tree.
+  ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   S find<S>(Offset regionOffset);
 
   /// Override this method to upload this layer to the engine.
@@ -182,7 +182,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     // Proof by contradiction:
     //
     // If we introduce a loop, this retained layer must be appended to one of
-    // its descendent layers, say A. That means the child structure of A has
+    // its descendant layers, say A. That means the child structure of A has
     // changed so A's _needsAddToScene is true. This contradicts
     // _subtreeNeedsAddToScene being false.
     if (!_subtreeNeedsAddToScene && _engineLayer != null) {
@@ -311,10 +311,10 @@ class PictureLayer extends Layer {
 ///
 /// See also:
 ///
-/// * <https://docs.flutter.io/javadoc/io/flutter/view/TextureRegistry.html>
-///   for how to create and manage backend textures on Android.
-/// * <https://docs.flutter.io/objcdoc/Protocols/FlutterTextureRegistry.html>
-///   for how to create and manage backend textures on iOS.
+///  * <https://docs.flutter.io/javadoc/io/flutter/view/TextureRegistry.html>
+///    for how to create and manage backend textures on Android.
+///  * <https://docs.flutter.io/objcdoc/Protocols/FlutterTextureRegistry.html>
+///    for how to create and manage backend textures on iOS.
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
   /// identified by [textureId], if [freeze] is true new texture frames will not be

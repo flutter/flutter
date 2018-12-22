@@ -34,7 +34,7 @@ if [[ "$SHARD" = "deploy_gallery" ]]; then
     fi
     set -x
 
-    # ANDROID_HOME must be set in the env.
+    # ANDROID_SDK_ROOT must be set in the env.
     (
       cd examples/flutter_gallery
       flutter build apk --release -t lib/main_publish.dart

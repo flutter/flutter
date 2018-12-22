@@ -177,10 +177,10 @@ import 'scrollable.dart';
 ///
 /// See also:
 ///
-/// * [ListView], which handles multiple children in a scrolling list.
-/// * [GridView], which handles multiple children in a scrolling grid.
-/// * [PageView], for a scrollable that works page by page.
-/// * [Scrollable], which handles arbitrary scrolling effects.
+///  * [ListView], which handles multiple children in a scrolling list.
+///  * [GridView], which handles multiple children in a scrolling grid.
+///  * [PageView], for a scrollable that works page by page.
+///  * [Scrollable], which handles arbitrary scrolling effects.
 class SingleChildScrollView extends StatelessWidget {
   /// Creates a box in which a single widget can be scrolled.
   const SingleChildScrollView({
