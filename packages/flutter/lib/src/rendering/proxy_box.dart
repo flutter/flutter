@@ -1053,7 +1053,7 @@ class RenderBackdropFilter extends RenderProxyBox {
 /// information.
 ///
 /// The most efficient way to update the clip provided by this class is to
-/// supply a reclip argument to the constructor of the [CustomClipper]. The
+/// supply a `reclip` argument to the constructor of the [CustomClipper]. The
 /// custom object will listen to this animation and update the clip whenever the
 /// animation ticks, avoiding both the build and layout phases of the pipeline.
 ///
@@ -1063,6 +1063,7 @@ class RenderBackdropFilter extends RenderProxyBox {
 ///  * [ClipRRect], which can be customized with a [CustomClipper<RRect>].
 ///  * [ClipOval], which can be customized with a [CustomClipper<Rect>].
 ///  * [ClipPath], which can be customized with a [CustomClipper<Path>].
+///  * [ShapeBorderClipper], for specifying a clip path using a [ShapeBorder].
 abstract class CustomClipper<T> {
   /// Creates a custom clipper.
   ///
@@ -1141,7 +1142,8 @@ class ShapeBorderClipper extends CustomClipper<Path> {
     if (oldClipper.runtimeType != ShapeBorderClipper)
       return true;
     final ShapeBorderClipper typedOldClipper = oldClipper;
-    return typedOldClipper.shape != shape;
+    return typedOldClipper.shape != shape
+        || typedOldClipper.textDirection != textDirection;
   }
 }
 
