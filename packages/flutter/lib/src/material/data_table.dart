@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -616,7 +617,7 @@ class TableRowInkWell extends InkResponse {
     Key key,
     Widget child,
     GestureTapCallback onTap,
-    GestureTapCallback onDoubleTap,
+    GestureDoubleTapCallback onDoubleTap,
     GestureLongPressCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
   }) : super(

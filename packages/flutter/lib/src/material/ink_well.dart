@@ -231,7 +231,7 @@ class InkResponse extends StatefulWidget {
   final GestureTapCallback onTapCancel;
 
   /// Called when the user double taps this part of the material.
-  final GestureTapCallback onDoubleTap;
+  final GestureDoubleTapCallback onDoubleTap;
 
   /// Called when the user long-presses on this part of the material.
   final GestureLongPressCallback onLongPress;
@@ -517,11 +517,11 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     updateHighlight(false);
   }
 
-  void _handleDoubleTap() {
+  void _handleDoubleTap(DoubleTapDetails details) {
     _currentSplash?.confirm();
     _currentSplash = null;
     if (widget.onDoubleTap != null)
-      widget.onDoubleTap();
+      widget.onDoubleTap(details);
   }
 
   void _handleLongPress(BuildContext context) {
@@ -629,7 +629,7 @@ class InkWell extends InkResponse {
     Key key,
     Widget child,
     GestureTapCallback onTap,
-    GestureTapCallback onDoubleTap,
+    GestureDoubleTapCallback onDoubleTap,
     GestureLongPressCallback onLongPress,
     GestureTapDownCallback onTapDown,
     GestureTapCancelCallback onTapCancel,

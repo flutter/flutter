@@ -15,7 +15,7 @@ import 'tap.dart';
 
 /// Signature for callback when the user has tapped the screen at the same
 /// location twice in quick succession.
-typedef GestureDoubleTapCallback = void Function();
+typedef GestureDoubleTapCallback = void Function(DoubleTapDetails details);
 
 /// Signature used by [MultiTapGestureRecognizer] for when a pointer that might
 /// cause a tap has contacted the screen at a particular location.
@@ -31,6 +31,23 @@ typedef GestureMultiTapCallback = void Function(int pointer);
 /// Signature for when the pointer that previously triggered a
 /// [GestureMultiTapDownCallback] will not end up causing a tap.
 typedef GestureMultiTapCancelCallback = void Function(int pointer);
+
+/// Details for [GestureDoubleTapCallback], such as position.
+///
+/// See also:
+///
+///  * [GestureDetector.onDoubleTap], which receives this information.
+///  * [DoubleTapGestureRecognizer], which passes this information to one of its callbacks.
+class DoubleTapDetails {
+  /// Creates details for a [GestureDoubleTapCallback].
+  ///
+  /// The [globalPosition] argument must not be null.
+  DoubleTapDetails({ this.globalPosition = Offset.zero })
+    : assert(globalPosition != null);
+
+  /// The global position at which the pointer contacted the screen.
+  final Offset globalPosition;
+}
 
 /// TapTracker helps track individual tap sequences as part of a
 /// larger gesture.
@@ -193,8 +210,9 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     tracker.entry.resolve(GestureDisposition.accepted);
     _freezeTracker(tracker);
     _trackers.remove(tracker.pointer);
-    if (onDoubleTap != null)
-      invokeCallback<void>('onDoubleTap', onDoubleTap);
+    if (onDoubleTap != null) {
+      invokeCallback<void>('onDoubleTap', () => onDoubleTap(DoubleTapDetails(globalPosition: tracker._initialPosition)));
+    }
     _reset();
   }
 
