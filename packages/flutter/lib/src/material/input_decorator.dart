@@ -2691,7 +2691,7 @@ class InputDecoration {
 
   @override
   int get hashCode {
-    // Split into two hashValues calls because the hashValues function is
+    // Split into several hashValues calls because the hashValues function is
     // limited to 20 parameters.
     return hashValues(
       icon,
@@ -2713,8 +2713,8 @@ class InputDecoration {
       fillColor,
       border,
       enabled,
-      prefixIcon,
       hashValues(
+        prefixIcon,
         prefix,
         prefixText,
         prefixStyle,
@@ -2733,8 +2733,10 @@ class InputDecoration {
         enabledBorder,
         border,
         enabled,
-        semanticCounterText,
-        alignLabelWithHint,
+        hashValues(
+          semanticCounterText,
+          alignLabelWithHint,
+        ),
       ),
     );
   }
