@@ -1516,7 +1516,7 @@ class InputDecorator extends StatefulWidget {
   _InputDecoratorState createState() => _InputDecoratorState();
 
   /// The RenderBox that defines this decorator's "container". That's the
-  /// area which is filled if [InputDecoration.isFilled] is true. It's the area
+  /// area which is filled if [InputDecoration.filled] is true. It's the area
   /// adjacent to [InputDecoration.icon] and above the widgets that contain
   /// [InputDecoration.helperText], [InputDecoration.errorText], and
   /// [InputDecoration.counterText].
@@ -1956,8 +1956,9 @@ class InputDecoration {
   ///
   /// The [enabled] argument must not be null.
   ///
-  /// Only [prefix] or [prefixText] can be specified.
-  /// The same applies for [suffix] and [suffixText].
+  /// Only one of [prefix] and [prefixText] can be specified.
+  ///
+  /// Similarly, only one of [suffix] and [suffixText] can be specified.
   const InputDecoration({
     this.icon,
     this.labelText,
@@ -1995,8 +1996,8 @@ class InputDecoration {
     this.semanticCounterText,
     this.alignLabelWithHint,
   }) : assert(enabled != null),
-       assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not allowed'),
-       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not allowed'),
+       assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
+       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
        isCollapsed = false;
 
   /// Defines an [InputDecorator] that is the same size as the input field.
@@ -2052,7 +2053,7 @@ class InputDecoration {
   ///
   /// The trailing edge of the icon is padded by 16dps.
   ///
-  /// The decoration's container is the area which is filled if [isFilled] is
+  /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
@@ -2159,7 +2160,7 @@ class InputDecoration {
 
   /// The padding for the input decoration's container.
   ///
-  /// The decoration's container is the area which is filled if [isFilled] is
+  /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
@@ -2176,8 +2177,8 @@ class InputDecoration {
   /// To create a collapsed input decoration, use [InputDecoration..collapsed].
   final bool isCollapsed;
 
-  /// An icon that that appears before the [prefixText] and the input and within
-  /// the decoration's container.
+  /// An icon that that appears before the [prefix] or [prefixText] and before
+  /// the editable part of the text field, within the decoration's container.
   ///
   /// The size and color of the prefix icon is configured automatically using an
   /// [IconTheme] and therefore does not need to be explicitly given in the
@@ -2187,44 +2188,71 @@ class InputDecoration {
   /// can be expanded beyond that. Anything larger than 24px will require
   /// additional padding to ensure it matches the material spec of 12px padding
   /// between the left edge of the input and leading edge of the prefix icon.
-  /// To pad the leading edge of the prefix icon:
+  /// The following snippet shows how to pad the leading edge of the prefix
+  /// icon:
   ///
   /// ```dart
   /// prefixIcon: Padding(
   ///   padding: const EdgeInsetsDirectional.only(start: 12.0),
-  ///   child: myIcon, // icon is 48px widget.
+  ///   child: myIcon, // myIcon is a 48px-wide widget.
   /// )
   /// ```
   ///
-  /// The decoration's container is the area which is filled if [isFilled] is
+  /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
-  /// See [Icon], [ImageIcon].
+  /// See also:
+  ///
+  ///  * [Icon] and [ImageIcon], which are typically used to show icons.
+  ///  * [prefix] and [prefixText], which are other ways to show content
+  ///    before the text field (but after the icon).
+  ///  * [suffixIcon], which is the same but on the trailing edge.
   final Widget prefixIcon;
 
   /// Optional widget to place on the line before the input.
-  /// Can be used to add some padding to the [prefixText] or to
-  /// add a custom widget in front of the input. The widget's baseline
-  /// is lined up with the input baseline.
+  ///
+  /// This can be used, for example, to add some padding to text that would
+  /// otherwise be specified using [prefixText], or to add a custom widget in
+  /// front of the input. The widget's baseline is lined up with the input
+  /// baseline.
   ///
   /// Only one of [prefix] and [prefixText] can be specified.
+  ///
+  /// The [prefix] appears after the [prefixIcon], if both are specified.
+  ///
+  /// See also:
+  ///
+  ///  * [suffix], the equivalent but on the trailing edge.
   final Widget prefix;
 
   /// Optional text prefix to place on the line before the input.
   ///
-  /// Uses the [prefixStyle]. Uses [hintStyle] if [prefixStyle] isn't
-  /// specified. Prefix is not returned as part of the input.
+  /// Uses the [prefixStyle]. Uses [hintStyle] if [prefixStyle] isn't specified.
+  /// The prefix text is not returned as part of the user's input.
+  ///
+  /// If a more elaborate prefix is required, consider using [prefix] instead.
+  /// Only one of [prefix] and [prefixText] can be specified.
+  ///
+  /// The [prefixText] appears after the [prefixIcon], if both are specified.
+  ///
+  /// See also:
+  ///
+  ///  * [suffixText], the equivalent but on the trailing edge.
   final String prefixText;
 
   /// The style to use for the [prefixText].
   ///
   /// If null, defaults to the [hintStyle].
+  ///
+  /// See also:
+  ///
+  ///  * [suffixStyle], the equivalent but on the trailing edge.
   final TextStyle prefixStyle;
 
-  /// An icon that that appears after the input and [suffixText] and within
-  /// the decoration's container.
+  /// An icon that that appears after the editable part of the text field and
+  /// after the [suffix] or [suffixText], within the decoration's container.
   ///
   /// The size and color of the suffix icon is configured automatically using an
   /// [IconTheme] and therefore does not need to be explicitly given in the
@@ -2234,40 +2262,66 @@ class InputDecoration {
   /// can be expanded beyond that. Anything larger than 24px will require
   /// additional padding to ensure it matches the material spec of 12px padding
   /// between the right edge of the input and trailing edge of the prefix icon.
-  /// To pad the trailing edge of the suffix icon:
+  /// The following snipped shows how to pad the trailing edge of the suffix
+  /// icon:
   ///
   /// ```dart
   /// suffixIcon: Padding(
   ///   padding: const EdgeInsetsDirectional.only(end: 12.0),
-  ///   child: myIcon, // icon is 48px widget.
+  ///   child: myIcon, // myIcon is a 48px-wide widget.
   /// )
   /// ```
   ///
-  /// The decoration's container is the area which is filled if [isFilled] is
+  /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
-  /// See [Icon], [ImageIcon].
+  /// See also:
+  ///
+  ///  * [Icon] and [ImageIcon], which are typically used to show icons.
+  ///  * [suffix] and [suffixText], which are other ways to show content
+  ///    after the text field (but before the icon).
+  ///  * [prefixIcon], which is the same but on the leading edge.
   final Widget suffixIcon;
 
   /// Optional widget to place on the line after the input.
-  /// Can be used to add some padding to the [suffixText] or to
-  /// add a custom widget after the input. The widget's baseline
-  /// is lined up with the input baseline.
+  ///
+  /// This can be used, for example, to add some padding to the text that would
+  /// otherwise be specified using [suffixText], or to add a custom widget after
+  /// the input. The widget's baseline is lined up with the input baseline.
   ///
   /// Only one of [suffix] and [suffixText] can be specified.
+  ///
+  /// The [suffix] appears before the [suffixIcon], if both are specified.
+  ///
+  /// See also:
+  ///
+  ///  * [prefix], the equivalent but on the leading edge.
   final Widget suffix;
 
   /// Optional text suffix to place on the line after the input.
   ///
-  /// Uses the [suffixStyle]. Uses [hintStyle] if [suffixStyle] isn't
-  /// specified. Suffix is not returned as part of the input.
+  /// Uses the [suffixStyle]. Uses [hintStyle] if [suffixStyle] isn't specified.
+  /// The suffix text is not returned as part of the user's input.
+  ///
+  /// If a more elaborate suffix is required, consider using [suffix] instead.
+  /// Only one of [suffix] and [suffixText] can be specified.
+  ///
+  /// The [suffixText] appears before the [suffixIcon], if both are specified.
+  ///
+  /// See also:
+  ///
+  ///  * [prefixText], the equivalent but on the leading edge.
   final String suffixText;
 
   /// The style to use for the [suffixText].
   ///
   /// If null, defaults to the [hintStyle].
+  ///
+  /// See also:
+  ///
+  ///  * [prefixStyle], the equivalent but on the leading edge.
   final TextStyle suffixStyle;
 
   /// Optional text to place below the line as a character count.
@@ -2285,10 +2339,10 @@ class InputDecoration {
 
   /// If true the decoration's container is filled with [fillColor].
   ///
-  /// Typically this field set to true if [border] is
-  /// [const UnderlineInputBorder()].
+  /// Typically this field set to true if [border] is an
+  /// [UnderlineInputBorder].
   ///
-  /// The decoration's container is the area which is filled if [isFilled] is
+  /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
@@ -2300,7 +2354,7 @@ class InputDecoration {
   ///
   /// By default the fillColor is based on the current [Theme].
   ///
-  /// The decoration's container is the area which is filled if [isFilled] is
+  /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
@@ -2432,7 +2486,7 @@ class InputDecoration {
   /// a given state, all four borders – [errorBorder], [focusedBorder],
   /// [enabledBorder], [disabledBorder] – must be set.
   ///
-  /// The decoration's container is the area which is filled if [isFilled] is
+  /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
   /// [InputDecoration.icon] and above the widgets that contain
   /// [InputDecoration.helperText], [InputDecoration.errorText], and
@@ -2446,7 +2500,7 @@ class InputDecoration {
   /// is not specified. This border's [InputBorder.borderSide] property is
   /// configured by the InputDecorator, depending on the values of
   /// [InputDecoration.errorText], [InputDecoration.enabled],
-  /// [InputDecorator.isFocused and the current [Theme].
+  /// [InputDecorator.isFocused] and the current [Theme].
   ///
   /// Typically one of [UnderlineInputBorder] or [OutlineInputBorder].
   /// If null, InputDecorator's default is `const UnderlineInputBorder()`.
@@ -2637,8 +2691,8 @@ class InputDecoration {
 
   @override
   int get hashCode {
-    // Split into multiple hashValues calls
-    // because the hashValues function is limited to 20 parameters.
+    // Split into two hashValues calls because the hashValues function is
+    // limited to 20 parameters.
     return hashValues(
       icon,
       labelText,
@@ -2653,22 +2707,20 @@ class InputDecoration {
       errorMaxLines,
       hasFloatingPlaceholder,
       isDense,
+      contentPadding,
+      isCollapsed,
+      filled,
+      fillColor,
+      border,
+      enabled,
+      prefixIcon,
       hashValues(
-        contentPadding,
-        isCollapsed,
-        filled,
-        fillColor,
-        border,
-        enabled,
-        prefixIcon,
         prefix,
         prefixText,
         prefixStyle,
         suffixIcon,
         suffix,
         suffixText,
-      ),
-      hashValues(
         suffixStyle,
         counterText,
         counterStyle,
@@ -2774,7 +2826,7 @@ class InputDecorationTheme extends Diagnosticable {
   /// Creates a value for [ThemeData.inputDecorationTheme] that
   /// defines default values for [InputDecorator].
   ///
-  /// The values of [isDense], [isCollapsed], [isFilled], and [border] must
+  /// The values of [isDense], [isCollapsed], [filled], and [border] must
   /// not be null.
   const InputDecorationTheme({
     this.labelStyle,
@@ -2860,7 +2912,7 @@ class InputDecorationTheme extends Diagnosticable {
   /// The padding for the input decoration's container.
   ///
   /// The decoration's container is the area which is filled if
-  /// [InputDecoration.isFilled] is true and bordered per the [border].
+  /// [InputDecoration.filled] is true and bordered per the [border].
   /// It's the area adjacent to [InputDecoration.icon] and above the
   /// [InputDecoration.icon] and above the widgets that contain
   /// [InputDecoration.helperText], [InputDecoration.errorText], and
@@ -2894,11 +2946,11 @@ class InputDecorationTheme extends Diagnosticable {
 
   /// If true the decoration's container is filled with [fillColor].
   ///
-  /// Typically this field set to true if [border] is
-  /// [const UnderlineInputBorder()].
+  /// Typically this field set to true if [border] is an
+  /// [UnderlineInputBorder].
   ///
   /// The decoration's container is the area, defined by the border's
-  /// [InputBorder.getOuterPath], which is filled if [isFilled] is
+  /// [InputBorder.getOuterPath], which is filled if [filled] is
   /// true and bordered per the [border].
   ///
   /// This property is false by default.
@@ -2909,7 +2961,7 @@ class InputDecorationTheme extends Diagnosticable {
   /// By default the fillColor is based on the current [Theme].
   ///
   /// The decoration's container is the area, defined by the border's
-  /// [InputBorder.getOuterPath], which is filled if [isFilled] is
+  /// [InputBorder.getOuterPath], which is filled if [filled] is
   /// true and bordered per the [border].
   final Color fillColor;
 
@@ -3033,7 +3085,7 @@ class InputDecorationTheme extends Diagnosticable {
 
   /// The shape of the border to draw around the decoration's container.
   ///
-  /// The decoration's container is the area which is filled if [isFilled] is
+  /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
   /// [InputDecoration.icon] and above the widgets that contain
   /// [InputDecoration.helperText], [InputDecoration.errorText], and
@@ -3047,7 +3099,7 @@ class InputDecorationTheme extends Diagnosticable {
   /// is not specified. This border's [InputBorder.borderSide] property is
   /// configured by the InputDecorator, depending on the values of
   /// [InputDecoration.errorText], [InputDecoration.enabled],
-  /// [InputDecorator.isFocused and the current [Theme].
+  /// [InputDecorator.isFocused] and the current [Theme].
   ///
   /// Typically one of [UnderlineInputBorder] or [OutlineInputBorder].
   /// If null, InputDecorator's default is `const UnderlineInputBorder()`.
