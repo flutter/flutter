@@ -184,7 +184,9 @@ Future<void> _flutterBuildAot(String relativePathToApplication) async {
 
 Future<void> _flutterBuildApk(String relativePathToApplication) async {
   // TODO(dnfield): See if we can get Android SDK on all Cirrus platforms.
-  if (Platform.environment['ANDROID_HOME']?.isEmpty ?? true) {
+  if (
+        (Platform.environment['ANDROID_HOME']?.isEmpty ?? true) &&
+        (Platform.environment['ANDROID_SDK_ROOT']?.isEmpty ?? true)) {
     return;
   }
   print('Running APK build tests...');

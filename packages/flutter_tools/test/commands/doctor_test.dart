@@ -55,6 +55,7 @@ void main() {
       message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, 'Flutter extension version 4.5.6');
+      expect(message.isError, isFalse);
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('vs code validator when 64bit installed', () async {
@@ -86,6 +87,7 @@ void main() {
       message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, startsWith('Flutter extension not installed'));
+      expect(message.isError, isTrue);
     }, overrides: noColorTerminalOverride);
   });
 

@@ -221,9 +221,9 @@ class Cache {
     } on SocketException catch (e) {
       if (_hostsBlockedInChina.contains(e.address?.host)) {
         printError(
-          'Failed to retrieve Flutter tool depedencies: ${e.message}.\n'
-          "If you're in China, please follow "
-          'https://github.com/flutter/flutter/wiki/Using-Flutter-in-China',
+          'Failed to retrieve Flutter tool dependencies: ${e.message}.\n'
+          'If you\'re in China, please see this page: '
+          'https://flutter.io/community/china',
           emphasis: true,
         );
       }
