@@ -701,11 +701,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///    of an app using the [bottomNavigationBar] property.
 ///  * [FloatingActionButton], which is a circular button typically shown in the
 ///    bottom right corner of the app using the [floatingActionButton] property.
-///  * [FloatingActionButtonLocation], which is used to place the
-///    [floatingActionButton] within the [Scaffold]'s layout.
-///  * [FloatingActionButtonAnimator], which is used to animate the
-///    [floatingActionButton] from one [floatingActionButtonLocation] to
-///    another.
 ///  * [Drawer], which is a vertical panel that is typically displayed to the
 ///    left of the body (and often hidden on phones) using the [drawer]
 ///    property.
@@ -719,7 +714,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///    using the [ScaffoldState.showBottomSheet] method, or modal, in which case
 ///    it is shown using the [showModalBottomSheet] function.
 ///  * [ScaffoldState], which is the state associated with this widget.
-///  * <https://material.google.com/layout/structure.html>
+///  * <https://material.io/design/layout/responsive-layout-grid.html>
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for material design widgets.
   const Scaffold({
