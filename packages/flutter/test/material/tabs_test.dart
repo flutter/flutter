@@ -1760,6 +1760,87 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('can be notified of TabBar onTap behavior', (WidgetTester tester) async {
+    int tabIndex = -1;
+
+    Widget buildFrame({
+      TabController controller,
+      List<String> tabs,
+    }) {
+      return boilerplate(
+        child: Container(
+          child: TabBar(
+            controller: controller,
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            onTap: (int index) {
+              tabIndex = index;
+            },
+          ),
+        ),
+      );
+    }
+
+    final List<String> tabs = <String>['A', 'B', 'C'];
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.indexOf('C'),
+    );
+
+    await tester.pumpWidget(buildFrame(tabs: tabs, controller: controller));
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
+    expect(controller, isNotNull);
+    expect(controller.index, 2);
+    expect(tabIndex, -1); // no tap so far so tabIndex should reflect that
+
+    // Verify whether the [onTap] notification works when the [TabBar] animates.
+
+    await tester.pumpWidget(buildFrame(tabs: tabs, controller: controller));
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    expect(controller.indexIsChanging, true);
+    await tester.pumpAndSettle();
+    expect(controller.index, 1);
+    expect(controller.previousIndex, 2);
+    expect(controller.indexIsChanging, false);
+    expect(tabIndex, controller.index);
+
+    tabIndex = -1;
+
+    await tester.pumpWidget(buildFrame(tabs: tabs, controller: controller));
+    await tester.tap(find.text('C'));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(controller.index, 2);
+    expect(controller.previousIndex, 1);
+    expect(tabIndex, controller.index);
+
+    tabIndex = -1;
+
+    await tester.pumpWidget(buildFrame(tabs: tabs, controller: controller));
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(controller.index, 0);
+    expect(controller.previousIndex, 2);
+    expect(tabIndex, controller.index);
+
+    tabIndex = -1;
+
+    // Verify whether [onTap] is called even when the [TabController] does
+    // not change.
+
+    final int currentControllerIndex = controller.index;
+    await tester.pumpWidget(buildFrame(tabs: tabs, controller: controller));
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(controller.index, currentControllerIndex); // controller has not changed
+    expect(tabIndex, 0);
+  });
+
   test('illegal constructor combinations', () {
     expect(() => Tab(icon: nonconst(null)), throwsAssertionError);
     expect(() => Tab(icon: Container(), text: 'foo', child: Container()), throwsAssertionError);

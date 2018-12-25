@@ -170,7 +170,7 @@ class Directionality extends InheritedWidget {
 ///
 /// ```dart
 /// Image.network(
-///   'https://github.com/flutter/flutter_gallery_assets/raw/master/lib/products/backpack.png',
+///   'https://raw.githubusercontent.com/flutter/assets-for-api-docs/master/packages/diagrams/assets/blend_mode_destination.jpeg',
 ///   color: Color.fromRGBO(255, 255, 255, 0.5),
 ///   colorBlendMode: BlendMode.modulate
 /// )
@@ -630,7 +630,6 @@ class ClipRRect extends SingleChildRenderObjectWidget {
 /// By default, inscribes an axis-aligned oval into its layout dimensions and
 /// prevents its child from painting outside that oval, but the size and
 /// location of the clip oval can be customized using a custom [clipper].
-/// See also:
 ///
 /// See also:
 ///
@@ -691,6 +690,10 @@ class ClipOval extends SingleChildRenderObjectWidget {
 ///  * To clip to a rectangle, consider [ClipRect].
 ///  * To clip to an oval or circle, consider [ClipOval].
 ///  * To clip to a rounded rectangle, consider [ClipRRect].
+///
+/// To clip to a particular [ShapeBorder], consider using either the
+/// [ClipPath.shape] static method or the [ShapeBorderClipper] custom clipper
+/// class.
 class ClipPath extends SingleChildRenderObjectWidget {
   /// Creates a path clip.
   ///
@@ -698,7 +701,38 @@ class ClipPath extends SingleChildRenderObjectWidget {
   /// size and location of the child. However, rather than use this default,
   /// consider using a [ClipRect], which can achieve the same effect more
   /// efficiently.
-  const ClipPath({ Key key, this.clipper, this.clipBehavior = Clip.antiAlias, Widget child }) : super(key: key, child: child);
+  const ClipPath({
+    Key key,
+    this.clipper,
+    this.clipBehavior = Clip.antiAlias,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  /// Creates a shape clip.
+  ///
+  /// Uses a [ShapeBorderClipper] to configure the [ClipPath] to clip to the
+  /// given [ShapeBorder].
+  static Widget shape({
+    Key key,
+    @required ShapeBorder shape,
+    Clip clipBehavior = Clip.antiAlias,
+    Widget child,
+  }) {
+    assert(shape != null);
+    return Builder(
+      key: key,
+      builder: (BuildContext context) {
+        return ClipPath(
+          clipper: ShapeBorderClipper(
+            shape: shape,
+            textDirection: Directionality.of(context),
+          ),
+          clipBehavior: clipBehavior,
+          child: child,
+        );
+      },
+    );
+  }
 
   /// If non-null, determines which clip to use.
   ///
@@ -748,6 +782,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   /// The [color] is required; physical things have a color.
   ///
   /// The [shape], [elevation], [color], and [shadowColor] must not be null.
+  /// Additionally, the [elevation] must be non-negative.
   const PhysicalModel({
     Key key,
     this.shape = BoxShape.rectangle,
@@ -758,7 +793,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
     this.shadowColor = const Color(0xFF000000),
     Widget child,
   }) : assert(shape != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        super(key: key, child: child);
@@ -777,7 +812,10 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   /// This is ignored if the [shape] is not [BoxShape.rectangle].
   final BorderRadius borderRadius;
 
-  /// The z-coordinate at which to place this physical object.
+  /// The z-coordinate relative to the parent at which to place this physical
+  /// object.
+  ///
+  /// The value is non-negative.
   final double elevation;
 
   /// The background color.
@@ -836,6 +874,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   /// The [color] is required; physical things have a color.
   ///
   /// The [clipper], [elevation], [color], and [shadowColor] must not be null.
+  /// Additionally, the [elevation] must be non-negative.
   const PhysicalShape({
     Key key,
     @required this.clipper,
@@ -846,7 +885,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
     Widget child,
   }) : assert(clipper != null),
        assert(clipBehavior != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        super(key: key, child: child);
@@ -861,7 +900,10 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   /// {@macro flutter.widgets.Clip}
   final Clip clipBehavior;
 
-  /// The z-coordinate at which to place this physical object.
+  /// The z-coordinate relative to the parent at which to place this physical
+  /// object.
+  ///
+  /// The value is non-negative.
   final double elevation;
 
   /// The background color.
@@ -1691,13 +1733,13 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
 ///
 /// See also:
 ///
-/// * [MultiChildLayoutDelegate], for details about how to control the layout of
-///   the children.
-/// * [CustomSingleChildLayout], which uses a delegate to control the layout of
-///   a single child.
-/// * [Stack], which arranges children relative to the edges of the container.
-/// * [Flow], which provides paint-time control of its children using transform
-///   matrices.
+///  * [MultiChildLayoutDelegate], for details about how to control the layout of
+///    the children.
+///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
+///    a single child.
+///  * [Stack], which arranges children relative to the edges of the container.
+///  * [Flow], which provides paint-time control of its children using transform
+///    matrices.
 class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   /// Creates a custom multi-child layout.
   ///
@@ -2471,30 +2513,49 @@ class AspectRatio extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * [The catalog of layout widgets](https://flutter.io/widgets/layout/).
 class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic width.
   ///
   /// This class is relatively expensive. Avoid using it where possible.
   const IntrinsicWidth({ Key key, this.stepWidth, this.stepHeight, Widget child })
-    : super(key: key, child: child);
+    : assert(stepWidth == null || stepWidth >= 0.0),
+      assert(stepHeight == null || stepHeight >= 0.0),
+      super(key: key, child: child);
 
   /// If non-null, force the child's width to be a multiple of this value.
+  ///
+  /// If null or 0.0 the child's width will be the same as its maximum
+  /// intrinsic width.
+  ///
+  /// This value must not be negative.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderBox.getMaxIntrinsicWidth], which defines a widget's max
+  ///    intrinsic width  in general.
   final double stepWidth;
 
   /// If non-null, force the child's height to be a multiple of this value.
+  ///
+  /// If null or 0.0 the child's height will not be constrained.
+  ///
+  /// This value must not be negative.
   final double stepHeight;
+
+  double get _stepWidth => stepWidth == 0.0 ? null : stepWidth;
+  double get _stepHeight => stepHeight == 0.0 ? null : stepHeight;
 
   @override
   RenderIntrinsicWidth createRenderObject(BuildContext context) {
-    return RenderIntrinsicWidth(stepWidth: stepWidth, stepHeight: stepHeight);
+    return RenderIntrinsicWidth(stepWidth: _stepWidth, stepHeight: _stepHeight);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderIntrinsicWidth renderObject) {
     renderObject
-      ..stepWidth = stepWidth
-      ..stepHeight = stepHeight;
+      ..stepWidth = _stepWidth
+      ..stepHeight = _stepHeight;
   }
 }
 
@@ -2511,7 +2572,7 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * [The catalog of layout widgets](https://flutter.io/widgets/layout/).
 class IntrinsicHeight extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic height.
   ///
@@ -3366,7 +3427,7 @@ class PositionedDirectional extends StatelessWidget {
 ///  * [Row], for a version of this widget that is always horizontal.
 ///  * [Column], for a version of this widget that is always vertical.
 ///  * [Expanded], to indicate children that should take all the remaining room.
-///  * [Flexible], to indicate children that should share the remaining room but
+///  * [Flexible], to indicate children that should share the remaining room.
 ///  * [Spacer], a widget that takes up space proportional to it's flex value.
 ///    that may be sized smaller (leaving some remaining room unused).
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
@@ -4670,7 +4731,7 @@ class RawImage extends LeafRenderObjectWidget {
   ///
   /// See also:
   ///
-  ///   * [Paint.invertColors], for the dart:ui implementation.
+  ///  * [Paint.invertColors], for the dart:ui implementation.
   final bool invertColors;
 
   @override
@@ -5199,18 +5260,18 @@ class MetaData extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-/// * [MergeSemantics], which marks a subtree as being a single node for
-///   accessibility purposes.
-/// * [ExcludeSemantics], which excludes a subtree from the semantics tree
-///   (which might be useful if it is, e.g., totally decorative and not
-///   important to the user).
-/// * [RenderObject.semanticsAnnotator], the rendering library API through which
-///   the [Semantics] widget is actually implemented.
-/// * [SemanticsNode], the object used by the rendering library to represent
-///   semantics in the semantics tree.
-/// * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can
-///   be enabled using [WidgetsApp.showSemanticsDebugger] or
-///   [MaterialApp.showSemanticsDebugger].
+///  * [MergeSemantics], which marks a subtree as being a single node for
+///    accessibility purposes.
+///  * [ExcludeSemantics], which excludes a subtree from the semantics tree
+///    (which might be useful if it is, e.g., totally decorative and not
+///    important to the user).
+///  * [RenderObject.semanticsAnnotator], the rendering library API through which
+///    the [Semantics] widget is actually implemented.
+///  * [SemanticsNode], the object used by the rendering library to represent
+///    semantics in the semantics tree.
+///  * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can
+///    be enabled using [WidgetsApp.showSemanticsDebugger] or
+///    [MaterialApp.showSemanticsDebugger].
 @immutable
 class Semantics extends SingleChildRenderObjectWidget {
   /// Creates a semantic annotation.
@@ -5541,7 +5602,7 @@ class MergeSemantics extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-/// * [ExcludeSemantics] which drops all semantics of its descendants.
+///  * [ExcludeSemantics] which drops all semantics of its descendants.
 class BlockSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that excludes the semantics of all widgets painted before
   /// it in the same semantic container.
@@ -5578,7 +5639,7 @@ class BlockSemantics extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-/// * [BlockSemantics] which drops semantics of widgets earlier in the tree.
+///  * [BlockSemantics] which drops semantics of widgets earlier in the tree.
 class ExcludeSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that drops all the semantics of its descendants.
   const ExcludeSemantics({
@@ -5636,7 +5697,8 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 /// {@end-tool}
 ///
 /// See also:
-///   * [CustomScrollView], for an explaination of index semantics.
+///
+///  * [CustomScrollView], for an explaination of index semantics.
 class IndexedSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that annotated the first child semantics node with an index.
   ///
