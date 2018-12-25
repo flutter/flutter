@@ -1,4 +1,4 @@
-Signature: 20348bd60bd40f5b65735217e71506da
+Signature: 5c48b65e7a5486031a9688b7b59893bf
 
 UNUSED LICENSES:
 
@@ -2738,7 +2738,6 @@ FILE: ../../../third_party/skia/bench/RegionBench.cpp
 FILE: ../../../third_party/skia/bench/RepeatTileBench.cpp
 FILE: ../../../third_party/skia/bench/ScalarBench.cpp
 FILE: ../../../third_party/skia/bench/ShaderMaskBench.cpp
-FILE: ../../../third_party/skia/bench/TextBench.cpp
 FILE: ../../../third_party/skia/bench/VertBench.cpp
 FILE: ../../../third_party/skia/experimental/Networking/SkSockets.cpp
 FILE: ../../../third_party/skia/experimental/Networking/SkSockets.h
@@ -2822,7 +2821,6 @@ FILE: ../../../third_party/skia/samplecode/Sample2PtRadial.cpp
 FILE: ../../../third_party/skia/samplecode/SampleAAClip.cpp
 FILE: ../../../third_party/skia/samplecode/SampleAARectModes.cpp
 FILE: ../../../third_party/skia/samplecode/SampleAARects.cpp
-FILE: ../../../third_party/skia/samplecode/SampleAll.cpp
 FILE: ../../../third_party/skia/samplecode/SampleArc.cpp
 FILE: ../../../third_party/skia/samplecode/SampleBigBlur.cpp
 FILE: ../../../third_party/skia/samplecode/SampleBigGradient.cpp
@@ -2865,7 +2863,6 @@ FILE: ../../../third_party/skia/samplecode/SampleShaders.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSlides.cpp
 FILE: ../../../third_party/skia/samplecode/SampleStrokePath.cpp
 FILE: ../../../third_party/skia/samplecode/SampleStrokeRect.cpp
-FILE: ../../../third_party/skia/samplecode/SampleText.cpp
 FILE: ../../../third_party/skia/samplecode/SampleTextAlpha.cpp
 FILE: ../../../third_party/skia/samplecode/SampleTextBox.cpp
 FILE: ../../../third_party/skia/samplecode/SampleTextEffects.cpp
