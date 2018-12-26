@@ -522,15 +522,135 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in.mp4}
   static const Cubic easeIn = Cubic(0.42, 0.0, 1.0, 1.0);
 
+  /// A cubic animation curve that starts slowly and ends quickly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInSine = Cubic(0.47, 0, 0.745, 0.715);
+
+  /// A cubic animation curve that starts slowly and ends quickly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInQuad = Cubic(0.55, 0.085, 0.68, 0.53);
+
+  /// A cubic animation curve that starts slowly and ends quickly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInCubic = Cubic(0.55, 0.055, 0.675, 0.19);
+
+  /// A cubic animation curve that starts slowly and ends quickly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInQuart = Cubic(0.895, 0.03, 0.685, 0.22);
+
+  /// A cubic animation curve that starts slowly and ends quickly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInQuint = Cubic(0.755, 0.05, 0.855, 0.06);
+
+  /// A cubic animation curve that starts slowly and ends quickly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInExpo = Cubic(0.95, 0.05, 0.795, 0.035);
+
+  /// A cubic animation curve that starts slowly and ends quickly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInCirc = Cubic(0.6, 0.04, 0.98, 0.335);
+
+  /// A cubic animation curve that starts slowly and ends quickly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInBack = Cubic(0.6, -0.28, 0.735, 0.045);
+
   /// A cubic animation curve that starts quickly and ends slowly.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out.mp4}
   static const Cubic easeOut = Cubic(0.0, 0.0, 0.58, 1.0);
 
+  /// A cubic animation curve that starts quickly and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeOutSine = Cubic(0.39, 0.575, 0.565, 1.0);
+
+  /// A cubic animation curve that starts quickly and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeOutQuad = Cubic(0.25, 0.46, 0.45, 0.94);
+
+  /// A cubic animation curve that starts quickly and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeOutCubic = Cubic(0.215, 0.61, 0.355, 1.0);
+
+  /// A cubic animation curve that starts quickly and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeOutQuart = Cubic(0.165, 0.84, 0.44, 1.0);
+
+  /// A cubic animation curve that starts quickly and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeOutQuint = Cubic(0.23, 1.0, 0.32, 1.0);
+
+  /// A cubic animation curve that starts quickly and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeOutExpo = Cubic(0.19, 1.0, 0.22, 1.0);
+
+  /// A cubic animation curve that starts quickly and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeOutCirc = Cubic(0.075, 0.82, 0.165, 1.0);
+
+  /// A cubic animation curve that starts quickly and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeOutBack = Cubic(0.175, 0.885, 0.32, 1.275);
+
   /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out.mp4}
   static const Cubic easeInOut = Cubic(0.42, 0.0, 0.58, 1.0);
+
+  /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInOutSine = Cubic(0.445, 0.05, 0.55, 0.95);
+
+  /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInOutQuad = Cubic(0.455, 0.03, 0.515, 0.955);
+
+  /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInOutCubic = Cubic(0.645, 0.045, 0.355, 1.0);
+
+  /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInOutQuart = Cubic(0.77, 0, 0.175, 1.0);
+
+  /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInOutQuint = Cubic(0.86, 0, 0.07, 1.0);
+
+  /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInOutExpo = Cubic(1.0, 0, 0, 1.0);
+
+  /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInOutCirc = Cubic(0.785, 0.135, 0.15, 0.86);
+
+  /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly.
+  ///
+  /// Derived from Robert Penner’s easing functions.
+  static const Cubic easeInOutBack = Cubic(0.68, -0.55, 0.265, 1.55);
 
   /// A curve that starts quickly and eases into its final position.
   ///
