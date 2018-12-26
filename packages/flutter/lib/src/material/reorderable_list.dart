@@ -59,13 +59,14 @@ class ReorderableListView extends StatefulWidget {
     @required this.onReorder,
     this.scrollDirection = Axis.vertical,
     this.padding,
+    this.canControlexpandedReorderList = false,
   }): assert(scrollDirection != null),
-      assert(onReorder != null),
-      assert(children != null),
-      assert(
+        assert(onReorder != null),
+        assert(children != null),
+        assert(
         children.every((Widget w) => w.key != null),
         'All children of this widget must have a key.',
-      );
+        );
 
   /// A non-reorderable header widget to show before the list.
   ///
@@ -82,6 +83,9 @@ class ReorderableListView extends StatefulWidget {
 
   /// The amount of space by which to inset the [children].
   final EdgeInsets padding;
+
+  /// When start Dragging, Control to Extend list by adding last item
+  final bool canControlexpandedReorderList;
 
   /// Called when a list child is dropped into a new position to shuffle the
   /// underlying list.
@@ -117,11 +121,12 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       opaque: true,
       builder: (BuildContext context) {
         return _ReorderableListContent(
-          header: widget.header,
-          children: widget.children,
-          scrollDirection: widget.scrollDirection,
-          onReorder: widget.onReorder,
-          padding: widget.padding,
+            header: widget.header,
+            children: widget.children,
+            scrollDirection: widget.scrollDirection,
+            onReorder: widget.onReorder,
+            padding: widget.padding,
+            canControlexpandedReorderList: widget.canControlexpandedReorderList
         );
       },
     );
@@ -130,10 +135,10 @@ class _ReorderableListViewState extends State<ReorderableListView> {
   @override
   Widget build(BuildContext context) {
     return Overlay(
-      key: _overlayKey,
-      initialEntries: <OverlayEntry>[
-        _listOverlayEntry,
-    ]);
+        key: _overlayKey,
+        initialEntries: <OverlayEntry>[
+          _listOverlayEntry,
+        ]);
   }
 }
 
@@ -146,6 +151,7 @@ class _ReorderableListContent extends StatefulWidget {
     @required this.scrollDirection,
     @required this.padding,
     @required this.onReorder,
+    @required this.canControlexpandedReorderList,
   });
 
   final Widget header;
@@ -153,6 +159,7 @@ class _ReorderableListContent extends StatefulWidget {
   final Axis scrollDirection;
   final EdgeInsets padding;
   final ReorderCallback onReorder;
+  final bool canControlexpandedReorderList;
 
   @override
   _ReorderableListContentState createState() => _ReorderableListContentState();
@@ -210,6 +217,9 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
   // Whether or not we are currently scrolling this view to show a widget.
   bool _scrolling = false;
+
+  //When start Dragging, Extend list by adding last item
+  bool _expandedReorderList = false;
 
   double get _dropAreaExtent {
     if (_draggingFeedbackSize == null) {
@@ -338,6 +348,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         _currentIndex = index;
         _entranceController.value = 1.0;
         _draggingFeedbackSize = keyIndexGlobalKey.currentContext.size;
+        _expandedReorderList = true;
       });
     }
 
@@ -357,6 +368,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
     // Drops toWrap into the last position it was hovering over.
     void onDragEnded() {
+      _expandedReorderList = false;
       reorder(_dragStartIndex, _currentIndex);
     }
 
@@ -472,9 +484,9 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       if (_currentIndex == index) {
         return _buildContainerForScrollDirection(children: <Widget>[
           SizeTransition(
-            sizeFactor: _entranceController,
-            axis: widget.scrollDirection,
-            child: spacing
+              sizeFactor: _entranceController,
+              axis: widget.scrollDirection,
+              child: spacing
           ),
           child,
         ]);
@@ -513,19 +525,25 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     });
   }
 
+  bool checkExtendable() {
+    return !widget.canControlexpandedReorderList || (widget.canControlexpandedReorderList && _expandedReorderList);
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-        final List<Widget> wrappedChildren = <Widget>[];
-        if (widget.header != null) {
-          wrappedChildren.add(widget.header);
-        }
-        for (int i = 0; i < widget.children.length; i += 1) {
-          wrappedChildren.add(_wrap(widget.children[i], i, constraints));
-        }
-        const Key endWidgetKey = Key('DraggableList - End Widget');
+      final List<Widget> wrappedChildren = <Widget>[];
+      if (widget.header != null) {
+        wrappedChildren.add(widget.header);
+      }
+      for (int i = 0; i < widget.children.length; i += 1) {
+        wrappedChildren.add(_wrap(widget.children[i], i, constraints));
+      }
+      const Key endWidgetKey = Key('DraggableList - End Widget');
+
+      if (checkExtendable()) {
         Widget finalDropArea;
         switch (widget.scrollDirection) {
           case Axis.horizontal:
@@ -545,16 +563,18 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
             break;
         }
         wrappedChildren.add(_wrap(
-          finalDropArea,
-          widget.children.length,
-          constraints),
+            finalDropArea,
+            widget.children.length,
+            constraints),
         );
-        return SingleChildScrollView(
-          scrollDirection: widget.scrollDirection,
-          child: _buildContainerForScrollDirection(children: wrappedChildren),
-          padding: widget.padding,
-          controller: _scrollController,
-        );
+      }
+
+      return SingleChildScrollView(
+        scrollDirection: widget.scrollDirection,
+        child: _buildContainerForScrollDirection(children: wrappedChildren),
+        padding: widget.padding,
+        controller: _scrollController,
+      );
     });
   }
 }
