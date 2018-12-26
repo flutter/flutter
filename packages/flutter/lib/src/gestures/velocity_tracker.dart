@@ -86,8 +86,8 @@ class Velocity {
 ///
 /// See also:
 ///
-///  * VelocityTracker, which computes [VelocityEstimate]s.
-///  * Velocity, which encapsulates (just) a velocity vector and provides some
+///  * [VelocityTracker], which computes [VelocityEstimate]s.
+///  * [Velocity], which encapsulates (just) a velocity vector and provides some
 ///    useful velocity operations.
 class VelocityEstimate {
   /// Creates a dimensional velocity estimate.

@@ -36,16 +36,6 @@ void main() {
       expect(names.length, 1);
       expect(names.first, 'lilia-shore-only-last');
     });
-
-    test('parse ls tmp/dart.servies output', () {
-      const String example = '''
-d  2          0 .
-'-  1          0 36780
-''';
-      final List<int> ports = parseFuchsiaDartPortOutput(example);
-      expect(ports.length, 1);
-      expect(ports.single, 36780);
-    });
   });
 
   group('displays friendly error when', () {
@@ -60,7 +50,7 @@ d  2          0 .
     )).thenAnswer((Invocation invocation) => Future<ProcessResult>.value(mockProcessResult));
     when(mockProcessResult.exitCode).thenReturn(1);
     when<String>(mockProcessResult.stdout).thenReturn('');
-    when<String>(mockProcessResult.stderr).thenReturn('ls: lstat /tmp/dart.services: No such file or directory');
+    when<String>(mockProcessResult.stderr).thenReturn('');
     when(mockFuchsiaArtifacts.sshConfig).thenReturn(mockFile);
     when(mockFile.absolute).thenReturn(mockFile);
     when(mockFile.path).thenReturn('');
@@ -78,7 +68,18 @@ d  2          0 .
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('with BUILD_DIR set', () async {
+    final MockProcessManager emptyStdoutProcessManager = MockProcessManager();
+    final MockProcessResult emptyStdoutProcessResult = MockProcessResult();
+    when(emptyStdoutProcessManager.run(
+      any,
+      environment: anyNamed('environment'),
+      workingDirectory: anyNamed('workingDirectory'),
+    )).thenAnswer((Invocation invocation) => Future<ProcessResult>.value(emptyStdoutProcessResult));
+    when(emptyStdoutProcessResult.exitCode).thenReturn(0);
+    when<String>(emptyStdoutProcessResult.stdout).thenReturn('');
+    when<String>(emptyStdoutProcessResult.stderr).thenReturn('');
+
+    testUsingContext('No vmservices found', () async {
       final FuchsiaDevice device = FuchsiaDevice('id');
       ToolExit toolExit;
       try {
@@ -86,9 +87,9 @@ d  2          0 .
       } on ToolExit catch (err) {
         toolExit = err;
       }
-      expect(toolExit.message, 'No Dart Observatories found. Are you running a debug build?');
+      expect(toolExit.message, contains('No Dart Observatories found. Are you running a debug build?'));
     }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => emptyStdoutProcessManager,
       FuchsiaArtifacts: () => mockFuchsiaArtifacts,
     });
 

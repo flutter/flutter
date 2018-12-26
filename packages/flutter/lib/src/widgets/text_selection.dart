@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/gestures.dart' show kDoubleTapTimeout, kDoubleTapSlop;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
@@ -566,5 +567,161 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
         return rtlType;
     }
     return null;
+  }
+}
+
+/// A gesture detector to respond to non-exclusive event chains for a text field.
+///
+/// An ordinary [GestureDetector] configured to handle events like tap and
+/// double tap will only recognize one or the other. This widget detects both:
+/// first the tap and then, if another tap down occurs within a time limit, the
+/// double tap.
+///
+/// See also:
+///
+///  * [TextField], a Material text field which uses this gesture detector.
+///  * [CupertinoTextField], a Cupertino text field which uses this gesture
+///    detector.
+class TextSelectionGestureDetector extends StatefulWidget {
+  /// Create a [TextSelectionGestureDetector].
+  ///
+  /// Multiple callbacks can be called for one sequence of input gesture.
+  /// The [child] parameter must not be null.
+  const TextSelectionGestureDetector({
+    Key key,
+    this.onTapDown,
+    this.onSingleTapUp,
+    this.onSingleTapCancel,
+    this.onSingleLongTapDown,
+    this.onDoubleTapDown,
+    this.behavior,
+    @required this.child,
+  }) : assert(child != null),
+       super(key: key);
+
+  /// Called for every tap down including every tap down that's part of a
+  /// double click or a long press, except touches that include enough movement
+  /// to not qualify as taps (e.g. pans and flings).
+  final GestureTapDownCallback onTapDown;
+
+  /// Called for each distinct tap except for every second tap of a double tap.
+  /// For example, if the detector was configured [onSingleTapDown] and
+  /// [onDoubleTapDown], three quick taps would be recognized as a single tap
+  /// down, followed by a double tap down, followed by a single tap down.
+  final GestureTapUpCallback onSingleTapUp;
+
+  /// Called for each touch that becomes recognized as a gesture that is not a
+  /// short tap, such as a long tap or drag. It is called at the moment when
+  /// another gesture from the touch is recognized.
+  final GestureTapCancelCallback onSingleTapCancel;
+
+  /// Called for a single long tap that's sustained for longer than
+  /// [kLongPressTimeout] but not necessarily lifted. Not called for a
+  /// double-tap-hold, which calls [onDoubleTapDown] instead.
+  final GestureLongPressCallback onSingleLongTapDown;
+
+  /// Called after a momentary hold or a short tap that is close in space and
+  /// time (within [kDoubleTapTimeout]) to a previous short tap.
+  final GestureTapDownCallback onDoubleTapDown;
+
+  /// How this gesture detector should behave during hit testing.
+  ///
+  /// This defaults to [HitTestBehavior.deferToChild].
+  final HitTestBehavior behavior;
+
+  /// Child below this widget.
+  final Widget child;
+
+  @override
+  State<StatefulWidget> createState() => _TextSelectionGestureDetectorState();
+}
+
+class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
+  // Counts down for a short duration after a previous tap. Null otherwise.
+  Timer _doubleTapTimer;
+  Offset _lastTapOffset;
+  // True if a second tap down of a double tap is detected. Used to discard
+  // subsequent tap up / tap hold of the same tap.
+  bool _isDoubleTap = false;
+
+  @override
+  void dispose() {
+    _doubleTapTimer?.cancel();
+    super.dispose();
+  }
+
+  // The down handler is force-run on success of a single tap and optimistically
+  // run before a long press success.
+  void _handleTapDown(TapDownDetails details) {
+    if (widget.onTapDown != null) {
+      widget.onTapDown(details);
+    }
+    // This isn't detected as a double tap gesture in the gesture recognizer
+    // because it's 2 single taps, each of which may do different things depending
+    // on whether it's a single tap, the first tap of a double tap, the second
+    // tap held down, a clean double tap etc.
+    if (_doubleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
+      // If there was already a previous tap, the second down hold/tap is a
+      // double tap down.
+      if (widget.onDoubleTapDown != null) {
+        widget.onDoubleTapDown(details);
+      }
+
+      _doubleTapTimer.cancel();
+      _doubleTapTimeout();
+      _isDoubleTap = true;
+    }
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    if (!_isDoubleTap) {
+      if (widget.onSingleTapUp != null) {
+        widget.onSingleTapUp(details);
+      }
+      _lastTapOffset = details.globalPosition;
+      _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
+    }
+    _isDoubleTap = false;
+  }
+
+  void _handleTapCancel() {
+    if (widget.onSingleTapCancel != null) {
+      widget.onSingleTapCancel();
+    }
+  }
+
+  void _handleLongPress() {
+    if (!_isDoubleTap && widget.onSingleLongTapDown != null) {
+      widget.onSingleLongTapDown();
+    }
+    _isDoubleTap = false;
+  }
+
+  void _doubleTapTimeout() {
+    _doubleTapTimer = null;
+    _lastTapOffset = null;
+  }
+
+  bool _isWithinDoubleTapTolerance(Offset secondTapOffset) {
+    assert(secondTapOffset != null);
+    if (_lastTapOffset == null) {
+      return false;
+    }
+
+    final Offset difference = secondTapOffset - _lastTapOffset;
+    return difference.distance <= kDoubleTapSlop;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: _handleTapDown,
+      onTapUp: _handleTapUp,
+      onTapCancel: _handleTapCancel,
+      onLongPress: _handleLongPress,
+      excludeFromSemantics: true,
+      behavior: widget.behavior,
+      child: widget.child,
+    );
   }
 }

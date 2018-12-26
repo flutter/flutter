@@ -39,7 +39,7 @@ their infrastructure.
 
 To work on this infrastructure you will need:
 
-- [install depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools)
+- [depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools)
 - Python package installer: `sudo apt-get install python-pip`
 - Python coverage package (only needed for `training_simulation`): `sudo pip install coverage`
 
