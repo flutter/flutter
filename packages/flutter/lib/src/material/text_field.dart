@@ -72,9 +72,9 @@ typedef InputCounterWidgetBuilder = Widget Function(
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
 ///  * [EditableText], which is the raw text editing control at the heart of a
-///    [TextField]. (The [EditableText] widget is rarely used directly unless
+///    [TextField]. The [EditableText] widget is rarely used directly unless
 ///    you are implementing an entirely different design language, such as
-///    Cupertino.)
+///    Cupertino.
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
@@ -186,7 +186,7 @@ class TextField extends StatefulWidget {
   ///
   /// ## Keyboard
   ///
-  /// Requesting the focus will typically cause the the keyboard to be shown
+  /// Requesting the focus will typically cause the keyboard to be shown
   /// if it's not showing already.
   ///
   /// On Android, the user can hide the keyboard - withouth changing the focus -
@@ -460,8 +460,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final ThemeData themeData = Theme.of(context);
     final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
-      .applyDefaults(Theme.of(context).inputDecorationTheme)
+      .applyDefaults(themeData.inputDecorationTheme)
       .copyWith(
         enabled: widget.enabled,
         hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines
@@ -508,7 +509,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
       // Handle length exceeds maxLength
       if (_effectiveController.value.text.runes.length > widget.maxLength) {
-        final ThemeData themeData = Theme.of(context);
         return effectiveDecoration.copyWith(
           errorText: effectiveDecoration.errorText ?? '',
           counterStyle: effectiveDecoration.errorStyle
@@ -563,10 +563,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   InteractiveInkFeature _createInkFeature(TapDownDetails details) {
     final MaterialInkController inkController = Material.of(context);
+    final ThemeData themeData = Theme.of(context);
     final BuildContext editableContext = _editableTextKey.currentContext;
     final RenderBox referenceBox = InputDecorator.containerOf(editableContext) ?? editableContext.findRenderObject();
     final Offset position = referenceBox.globalToLocal(details.globalPosition);
-    final Color color = Theme.of(context).splashColor;
+    final Color color = themeData.splashColor;
 
     InteractiveInkFeature splash;
     void handleRemoved() {
@@ -579,7 +580,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       } // else we're probably in deactivate()
     }
 
-    splash = Theme.of(context).splashFactory.create(
+    splash = themeData.splashFactory.create(
       controller: inkController,
       referenceBox: referenceBox,
       position: position,
@@ -601,23 +602,45 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _startSplash(details);
   }
 
-  void _handleTap() {
-    if (widget.selectionEnabled)
-      _renderEditable.handleTap();
+  void _handleSingleTapUp(TapUpDetails details) {
+    if (widget.selectionEnabled) {
+      switch (Theme.of(context).platform) {
+        case TargetPlatform.iOS:
+          _renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          _renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          break;
+      }
+    }
     _requestKeyboard();
     _confirmCurrentSplash();
     if (widget.onTap != null)
       widget.onTap();
   }
 
-  void _handleTapCancel() {
+  void _handleSingleTapCancel() {
     _cancelCurrentSplash();
   }
 
-  void _handleLongPress() {
-    if (widget.selectionEnabled)
-      _renderEditable.handleLongPress();
+  void _handleSingleLongTapDown() {
+    if (widget.selectionEnabled) {
+      switch (Theme.of(context).platform) {
+        case TargetPlatform.iOS:
+          _renderEditable.selectPosition(cause: SelectionChangedCause.longPress);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          _renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+          break;
+      }
+    }
     _confirmCurrentSplash();
+  }
+
+  void _handleDoubleTapDown(TapDownDetails details) {
+    _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
   }
 
   void _startSplash(TapDownDetails details) {
@@ -706,7 +729,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,
         cursorRadius: widget.cursorRadius,
-        cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
+        cursorColor: widget.cursorColor ?? themeData.cursorColor,
         backgroundCursorColor: CupertinoColors.inactiveGray,
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
@@ -739,13 +762,13 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       },
       child: IgnorePointer(
         ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        child: TextSelectionGestureDetector(
           onTapDown: _handleTapDown,
-          onTap: _handleTap,
-          onTapCancel: _handleTapCancel,
-          onLongPress: _handleLongPress,
-          excludeFromSemantics: true,
+          onSingleTapUp: _handleSingleTapUp,
+          onSingleTapCancel: _handleSingleTapCancel,
+          onSingleLongTapDown: _handleSingleLongTapDown,
+          onDoubleTapDown: _handleDoubleTapDown,
+          behavior: HitTestBehavior.translucent,
           child: child,
         ),
       ),

@@ -90,7 +90,7 @@ class SemanticsTag {
 ///
 /// See also:
 ///
-///   * [SemanticsProperties], where the handler for a custom action is provided.
+///  * [SemanticsProperties], where the handler for a custom action is provided.
 @immutable
 class CustomSemanticsAction {
   /// Creates a new [CustomSemanticsAction].
@@ -312,7 +312,7 @@ class SemanticsData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///   * [CustomSemanticsAction], for an explanation of custom actions.
+  ///  * [CustomSemanticsAction], for an explanation of custom actions.
   final List<int> customSemanticsActionIds;
 
   /// Whether [flags] contains the given flag.
@@ -672,7 +672,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// See also:
   ///
-  ///   * [SemanticsFlag.image], for the flag this setting controls.
+  ///  * [SemanticsFlag.image], for the flag this setting controls.
   final bool image;
 
   /// If non-null, whether the node should be considered a live region.
@@ -693,9 +693,10 @@ class SemanticsProperties extends DiagnosticableTree {
   /// automatically.
   ///
   /// See also:
-  ///   * [SemanticsFlag.liveRegion], the semantics flag this setting controls.
-  ///   * [SemanticsConfiguration.liveRegion], for a full description of a live region.
-  ///   * [UpdateLiveRegionEvent], to trigger a polite announcement of a live region.
+  ///
+  ///  * [SemanticsFlag.liveRegion], the semantics flag this setting controls.
+  ///  * [SemanticsConfiguration.liveRegion], for a full description of a live region.
+  ///  * [UpdateLiveRegionEvent], to trigger a polite announcement of a live region.
   final bool liveRegion;
 
   /// Provides a textual description of the widget.
@@ -965,8 +966,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// See also:
   ///
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
-  ///    focus is removed from the node
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  ///    focus is removed from the node.
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   final VoidCallback onDidGainAccessibilityFocus;
 
   /// The handler for [SemanticsAction.didLoseAccessibilityFocus].
@@ -984,8 +985,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// See also:
   ///
   ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
-  ///    accessibility focus
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  ///    accessibility focus.
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   final VoidCallback onDidLoseAccessibilityFocus;
 
   /// The handler for [SemanticsAction.dismiss].
@@ -1006,7 +1007,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// See also:
   ///
-  ///   * [CustomSemanticsAction], for an explanation of custom actions.
+  ///  * [CustomSemanticsAction], for an explanation of custom actions.
   final Map<CustomSemanticsAction, VoidCallback> customSemanticsActions;
 
   @override
@@ -2518,7 +2519,7 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  /// * [addAction] to add an action.
+  ///  * [addAction] to add an action.
   final Map<SemanticsAction, _SemanticsActionHandler> _actions = <SemanticsAction, _SemanticsActionHandler>{};
 
   int _actionsAsBits = 0;
@@ -2880,8 +2881,8 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
-  ///    focus is removed from the node
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  ///    focus is removed from the node.
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   VoidCallback get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
   VoidCallback _onDidGainAccessibilityFocus;
   set onDidGainAccessibilityFocus(VoidCallback value) {
@@ -2904,8 +2905,8 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
-  ///    accessibility focus
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  ///    accessibility focus.
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   VoidCallback get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
   VoidCallback _onDidLoseAccessibilityFocus;
   set onDidLoseAccessibilityFocus(VoidCallback value) {
@@ -3046,9 +3047,9 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [decreasedValue], describes what [value] will be after performing
-  ///    [SemanticsAction.decrease]
+  ///    [SemanticsAction.decrease].
   ///  * [increasedValue], describes what [value] will be after performing
-  ///    [SemanticsAction.increase]
+  ///    [SemanticsAction.increase].
   String get value => _value;
   String _value = '';
   set value(String value) {
@@ -3118,6 +3119,7 @@ class SemanticsConfiguration {
   /// should be announced.
   ///
   /// See also:
+  ///
   ///  * [SemanticsFlag.scopesRoute], for a full description of route scoping.
   bool get scopesRoute => _hasFlag(SemanticsFlag.scopesRoute);
   set scopesRoute(bool value) {
@@ -3127,6 +3129,7 @@ class SemanticsConfiguration {
   /// Whether the semantics node contains the label of a route.
   ///
   /// See also:
+  ///
   ///  * [SemanticsFlag.namesRoute], for a full description of route naming.
   bool get namesRoute => _hasFlag(SemanticsFlag.namesRoute);
   set namesRoute(bool value) {
@@ -3155,7 +3158,7 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  ///   * [SemanticsFlag.isLiveRegion], the semantics flag that this setting controls.
+  ///  * [SemanticsFlag.isLiveRegion], the semantics flag that this setting controls.
   bool get liveRegion => _hasFlag(SemanticsFlag.isLiveRegion);
   set liveRegion(bool value) {
     _setFlag(SemanticsFlag.isLiveRegion, value);

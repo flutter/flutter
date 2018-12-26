@@ -305,7 +305,7 @@ class ListTile extends StatelessWidget {
   ///
   /// See also:
   ///
-  /// * [Divider], which you can use to obtain this effect manually.
+  ///  * [Divider], which you can use to obtain this effect manually.
   static Iterable<Widget> divideTiles({ BuildContext context, @required Iterable<Widget> tiles, Color color }) sync* {
     assert(tiles != null);
     assert(color != null || context != null);

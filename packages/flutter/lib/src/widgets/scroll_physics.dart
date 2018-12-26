@@ -61,8 +61,8 @@ class ScrollPhysics {
   ///
   /// See also:
   ///
-  ///   * [buildParent], a utility method that's often used to define [applyTo]
-  ///     methods for ScrollPhysics subclasses.
+  ///  * [buildParent], a utility method that's often used to define [applyTo]
+  ///    methods for ScrollPhysics subclasses.
   ScrollPhysics applyTo(ScrollPhysics ancestor) {
     return ScrollPhysics(parent: buildParent(ancestor));
   }
