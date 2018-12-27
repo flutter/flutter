@@ -181,9 +181,11 @@ class BoardPainter extends CustomPainter {
       ..style = PaintingStyle.fill
       ..strokeWidth = 2.0;
 
-    board.forEach((BoardPoint boardPoint) {
+    void drawBoardPoint(BoardPoint boardPoint) {
       canvas.drawPath(board.getPathForBoardPoint(boardPoint), hexagonFillPaint);
-    });
+    }
+
+    board.forEach(drawBoardPoint);
   }
 
   @override
