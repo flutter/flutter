@@ -126,7 +126,7 @@ public final class ResourceUpdater {
 
         URI uri;
         try {
-            uri = new URI(metaData.getString("UpdateServerURL") + "/" + getAPKVersion());
+            uri = new URI(metaData.getString("UpdateServerURL") + "/" + getAPKVersion() + ".zip");
 
         } catch (URISyntaxException e) {
             Log.w(TAG, "Invalid AndroidManifest.xml UpdateServerURL: " + e.getMessage());
