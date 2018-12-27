@@ -277,9 +277,9 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// `WidgetsFlutterBinding.ensureInitialized()` function.
   static WidgetsBinding get instance => _instance;
   static WidgetsBinding _instance;
-
+  
   static final List<ServiceExtensionBinding> _serviceExtensionBindings = <ServiceExtensionBinding>[];
-
+  
   /// Adds a persistent ServiceExtensionBinding.
   static void addServiceExtensionBinding(ServiceExtensionBinding binding) {
     _serviceExtensionBindings.add(binding);
