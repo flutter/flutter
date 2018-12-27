@@ -37,20 +37,17 @@ const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 /// eventually completes to a string response.
 typedef DataHandler = Future<String> Function(String message);
 
-class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding, GestureBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding {
-  _DriverBinding(this._handler, this._silenceErrors);
+class _DriverExtensionRegistrar extends ExtensionRegistrarBase {
+  _DriverExtensionRegistrar(this._handler, this._silenceErrors);
 
   final DataHandler _handler;
   final bool _silenceErrors;
 
-  @override
-  void initServiceExtensions() {
-    super.initServiceExtensions();
-    final FlutterDriverExtension extension = FlutterDriverExtension(_handler, _silenceErrors);
-    registerServiceExtension(
-      name: _extensionMethodName,
-      callback: extension.call,
-    );
+  String get name => _extensionMethodName;
+
+  ServiceExtensionCallback get callback{
+    final FlutterDriverExtension _extension=FlutterDriverExtension(_handler, _silenceErrors);
+    return _extension.call;
   }
 }
 
@@ -71,8 +68,7 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
 /// with an `isError` boolean.
 void enableFlutterDriverExtension({ DataHandler handler, bool silenceErrors = false }) {
   assert(WidgetsBinding.instance == null);
-  _DriverBinding(handler, silenceErrors);
-  assert(WidgetsBinding.instance is _DriverBinding);
+  ExtensionBinding.registerExtensionRegistrar(_DriverExtensionRegistrar(handler, silenceErrors));
 }
 
 /// Signature for functions that handle a command and return a result.

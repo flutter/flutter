@@ -943,10 +943,37 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   }
 }
 
+abstract class ExtensionRegistrarBase {
+  /// Name to registers a service extension method with.(full name
+  /// "ext.flutter.name").
+  String get name => null;
+
+  /// Callback called when the extension method is called.
+  ServiceExtensionCallback get callback => null;
+}
+
+/// Binding for service extensions to register.
+mixin ExtensionBinding on BindingBase {
+  static final List<ExtensionRegistrarBase> _extensionRegistrars = <ExtensionRegistrarBase>[];
+  
+  static void registerExtensionRegistrar(ExtensionRegistrarBase registrar) {
+    _extensionRegistrars.add(registrar);
+  }
+
+  @override
+  void initServiceExtensions() {
+    super.initServiceExtensions();
+    _extensionRegistrars.forEach(_registerExtensionWithRegistrar);
+  }
+
+  void _registerExtensionWithRegistrar(ExtensionRegistrarBase registrar) => registerServiceExtension(name: registrar.name, callback: registrar.callback);
+
+}
+
 /// A concrete binding for applications based on the Widgets framework.
 ///
 /// This is the glue that binds the framework to the Flutter engine.
-class WidgetsFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding {
+class WidgetsFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding, ExtensionBinding {
 
   /// Returns an instance of the [WidgetsBinding], creating and
   /// initializing it if necessary. If one is created, it will be a
