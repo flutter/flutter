@@ -469,8 +469,14 @@ Future<void> _buildGradleProjectV2(
         update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
       }
 
-      final File updateFile = fs.directory(buildInfo.patchDir)
-          .childFile('${package.versionCode}-${buildInfo.patchNumber}.zip');
+      File updateFile;
+      if (buildInfo.patchNumber != null) {
+        updateFile = fs.directory(buildInfo.patchDir)
+            .childFile('${package.versionCode}-${buildInfo.patchNumber}.zip');
+      } else {
+        updateFile = fs.directory(buildInfo.patchDir)
+            .childFile('${package.versionCode}.zip');
+      }
 
       if (update.files.isEmpty) {
         printStatus('No changes detected relative to baseline build.');
@@ -490,8 +496,13 @@ Future<void> _buildGradleProjectV2(
       final Map<String, dynamic> manifest = <String, dynamic>{
         'baselineChecksum': baselineChecksum,
         'buildNumber': package.versionCode,
-        'patchNumber': buildInfo.patchNumber,
       };
+
+      if (buildInfo.patchNumber != null) {
+        manifest.addAll(<String, dynamic>{
+          'patchNumber': buildInfo.patchNumber,
+        });
+      }
 
       const JsonEncoder encoder = JsonEncoder.withIndent('  ');
       final String manifestJson = encoder.convert(manifest);
