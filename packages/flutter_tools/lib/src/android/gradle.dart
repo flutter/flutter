@@ -101,7 +101,7 @@ Future<GradleProject> _readGradleProject() async {
   GradleProject project;
   try {
     final RunResult propertiesRunResult = await runCheckedAsync(
-      <String>[gradle, 'app:properties'],
+      <String>[gradle, '--stracktrace', '--debug', '--scan', 'app:properties'],
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
