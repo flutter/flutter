@@ -101,12 +101,12 @@ Future<GradleProject> _readGradleProject() async {
   GradleProject project;
   try {
     final RunResult propertiesRunResult = await runCheckedAsync(
-      <String>[gradle, '--stacktrace', '--debug', 'app:properties'],
+      <String>[gradle, 'app:properties'],
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
     final RunResult tasksRunResult = await runCheckedAsync(
-      <String>[gradle, '--stacktrace', '--debug', 'app:tasks', '--all'],
+      <String>[gradle, 'app:tasks', '--all'],
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
