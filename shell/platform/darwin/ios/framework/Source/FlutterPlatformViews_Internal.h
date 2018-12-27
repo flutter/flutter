@@ -22,6 +22,9 @@
 
 // Stop delaying any active touch sequence (and let it arrive the embedded view).
 - (void)releaseGesture;
+
+// Prevent the touch sequence from ever arriving to the embedded view.
+- (void)blockGesture;
 @end
 
 namespace shell {
@@ -89,6 +92,7 @@ class FlutterPlatformViewsController {
   void OnCreate(FlutterMethodCall* call, FlutterResult& result);
   void OnDispose(FlutterMethodCall* call, FlutterResult& result);
   void OnAcceptGesture(FlutterMethodCall* call, FlutterResult& result);
+  void OnRejectGesture(FlutterMethodCall* call, FlutterResult& result);
 
   void EnsureOverlayInitialized(int64_t overlay_id);
   void EnsureGLOverlayInitialized(int64_t overlay_id,
