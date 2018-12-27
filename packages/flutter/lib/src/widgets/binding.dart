@@ -943,6 +943,8 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   }
 }
 
+/// Base class for ServiceExtensionRegistrar that provide
+/// necessary information to register a ServiceExtension.
 abstract class ExtensionRegistrarBase {
   /// Name to registers a service extension method with.(full name
   /// "ext.flutter.name").

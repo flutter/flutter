@@ -13,7 +13,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RendererBinding, SemanticsHandle;
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -43,8 +42,10 @@ class _DriverExtensionRegistrar extends ExtensionRegistrarBase {
   final DataHandler _handler;
   final bool _silenceErrors;
 
+  @override
   String get name => _extensionMethodName;
 
+  @override
   ServiceExtensionCallback get callback{
     final FlutterDriverExtension _extension=FlutterDriverExtension(_handler, _silenceErrors);
     return _extension.call;
