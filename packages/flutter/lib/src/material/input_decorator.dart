@@ -2750,8 +2750,8 @@ class InputDecoration {
         disabledBorder,
         enabledBorder,
         border,
-        enabled,
         hashValues(
+          enabled,
           semanticCounterText,
           alignLabelWithHint,
         ),
