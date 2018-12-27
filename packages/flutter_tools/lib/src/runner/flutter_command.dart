@@ -261,11 +261,13 @@ abstract class FlutterCommand extends Command<void> {
 
   void addDynamicPatchingFlags({bool verboseHelp = false}) {
     argParser.addOption('patch-number',
-        defaultsTo: '1',
         hide: !verboseHelp,
         help: 'An integer used as an internal version number for dynamic patch.\n'
-              'Each update should have a unique number to differentiate from previous '
+              'Each update may have a unique number to differentiate from previous\n'
               'patches for same \'versionCode\' on Android or \'CFBundleVersion\' on iOS.\n'
+              'This optional setting allows several dynamic patches to coexist\n'
+              'for same baseline build, and is useful for canary and A-B testing\n'
+              'of dynamic patches.\n'
               'This flag is only used when --dynamic --patch is specified.\n'
     );
     argParser.addOption('patch-dir',
