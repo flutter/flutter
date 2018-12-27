@@ -28,6 +28,8 @@ analyzer:
     missing_return: warning
     # allow having TODOs in the code
     todo: ignore
+    #
+    sdk_version_async_exported_from_core: ignore
   exclude:
     - 'bin/cache/**'
     # the following two are relative to the stocks example and the flutter package respectively
