@@ -247,13 +247,12 @@ abstract class WidgetsBindingObserver {
 ///
 /// As BindingBase is a singleton in Flutter framework, and runApp will always ensure there will be
 /// one WidgetsBinding instance. See [WidgetsFlutterBinding.ensureInitialized] for more.
-/// Instances inherited from ServiceExtensionBinding can add itself using [WidgetsBinding.addServiceExtensionBinding]
-/// and will be registered after [WidgetsBinding.initServiceExtensions].
+/// Instances inherited from ServiceExtensionBinding can register itself using [WidgetsBinding.addServiceExtensionBinding]
+/// and the contained service extension will be registered after [WidgetsBinding.initServiceExtensions].
+///
+/// [name] and [callback] corresponds to parameters passed to [BindingBase.registerServiceExtension].
 abstract class ServiceExtensionBinding {
-  /// Same as the name for [BindingBase.registerServiceExtension].
   String get name;
-
-  /// Same as the callback for [BindingBase.registerServiceExtension].
   ServiceExtensionCallback get callback;
 }
 
@@ -278,7 +277,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   static WidgetsBinding get instance => _instance;
   static WidgetsBinding _instance;
   
-  static final List<ServiceExtensionBinding> _serviceExtensionBindings = <ServiceExtensionBinding>[];
+  static List<ServiceExtensionBinding> _serviceExtensionBindings = <ServiceExtensionBinding>[];
   
   /// Adds a persistent ServiceExtensionBinding.
   static void addServiceExtensionBinding(ServiceExtensionBinding binding) {
@@ -352,11 +351,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
       return true;
     }());
 
-    _serviceExtensionBindings.forEach(_registerServiceExtensionBinding);
-  }
-
-  void _registerServiceExtensionBinding(ServiceExtensionBinding binding) {
-    WidgetsBinding.instance.registerServiceExtension(name: binding.name, callback: binding.callback);
+    _serviceExtensionBindings.forEach((ServiceExtensionBinding binding) => WidgetsBinding.instance.registerServiceExtension(name: binding.name, callback: binding.callback));
   }
 
   Future<void> _forceRebuild() {
