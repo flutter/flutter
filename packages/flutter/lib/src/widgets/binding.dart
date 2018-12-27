@@ -957,7 +957,7 @@ abstract class ExtensionRegistrarBase {
 /// Binding for service extensions to register.
 mixin ExtensionBinding on BindingBase {
   static final List<ExtensionRegistrarBase> _extensionRegistrars = <ExtensionRegistrarBase>[];
-  
+
   static void registerExtensionRegistrar(ExtensionRegistrarBase registrar) {
     _extensionRegistrars.add(registrar);
   }
