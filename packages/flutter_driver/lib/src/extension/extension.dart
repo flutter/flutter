@@ -13,6 +13,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RendererBinding, SemanticsHandle;
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -36,19 +37,20 @@ const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 /// eventually completes to a string response.
 typedef DataHandler = Future<String> Function(String message);
 
-class _DriverBinding implements ServiceExtensionBinding {
+class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding, GestureBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding {
   _DriverBinding(this._handler, this._silenceErrors);
 
   final DataHandler _handler;
   final bool _silenceErrors;
 
   @override
-  String get name => _extensionMethodName;
-
-  @override
-  ServiceExtensionCallback get callback {
+  void initServiceExtensions() {
+    super.initServiceExtensions();
     final FlutterDriverExtension extension = FlutterDriverExtension(_handler, _silenceErrors);
-    return extension.call;
+    registerServiceExtension(
+      name: _extensionMethodName,
+      callback: extension.call,
+    );
   }
 }
 
@@ -68,8 +70,9 @@ class _DriverBinding implements ServiceExtensionBinding {
 /// will still be returned in the `response` field of the result json along
 /// with an `isError` boolean.
 void enableFlutterDriverExtension({ DataHandler handler, bool silenceErrors = false }) {
-  final _DriverBinding _driverBinding = _DriverBinding(handler, silenceErrors);
-  WidgetsBinding.addServiceExtensionBinding(_driverBinding);
+  assert(WidgetsBinding.instance == null);
+  _DriverBinding(handler, silenceErrors);
+  assert(WidgetsBinding.instance is _DriverBinding);
 }
 
 /// Signature for functions that handle a command and return a result.

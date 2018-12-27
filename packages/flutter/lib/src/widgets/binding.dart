@@ -243,19 +243,6 @@ abstract class WidgetsBindingObserver {
   void didChangeAccessibilityFeatures() {}
 }
 
-/// An abstract class for service extension registration.
-///
-/// As BindingBase is a singleton in Flutter framework, and runApp will always ensure there will be
-/// one WidgetsBinding instance. See [WidgetsFlutterBinding.ensureInitialized] for more.
-/// Instances inherited from ServiceExtensionBinding can register itself using [WidgetsBinding.addServiceExtensionBinding]
-/// and the contained service extension will be registered after [WidgetsBinding.initServiceExtensions].
-///
-/// [name] and [callback] corresponds to parameters passed to [BindingBase.registerServiceExtension].
-abstract class ServiceExtensionBinding {
-  String get name;
-  ServiceExtensionCallback get callback;
-}
-
 /// The glue between the widgets layer and the Flutter engine.
 mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
   @override
@@ -276,13 +263,6 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// `WidgetsFlutterBinding.ensureInitialized()` function.
   static WidgetsBinding get instance => _instance;
   static WidgetsBinding _instance;
-  
-  static List<ServiceExtensionBinding> _serviceExtensionBindings = <ServiceExtensionBinding>[];
-  
-  /// Adds a persistent ServiceExtensionBinding.
-  static void addServiceExtensionBinding(ServiceExtensionBinding binding) {
-    _serviceExtensionBindings.add(binding);
-  }
 
   @override
   void initServiceExtensions() {
@@ -350,8 +330,6 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 
       return true;
     }());
-
-    _serviceExtensionBindings.forEach((ServiceExtensionBinding binding) => WidgetsBinding.instance.registerServiceExtension(name: binding.name, callback: binding.callback));
   }
 
   Future<void> _forceRebuild() {
