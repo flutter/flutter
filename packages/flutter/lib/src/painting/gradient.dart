@@ -374,14 +374,25 @@ class LinearGradient extends Gradient {
       return b.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
-    final _ColorsAndStops interpolated = _interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
+    final combined_stops = (a._impliedStops() + b._impliedStops())..sort();
+    final interpolated_colors = combined_stops.map<Color>((s) => Color.lerp(a.sample(s), b.sample(s), t)).toList(growable: false);
     return LinearGradient(
       begin: AlignmentGeometry.lerp(a.begin, b.begin, t),
       end: AlignmentGeometry.lerp(a.end, b.end, t),
-      colors: interpolated.colors,
-      stops: interpolated.stops,
+      colors: interpolated_colors,
+      stops: combined_stops,
       tileMode: t < 0.5 ? a.tileMode : b.tileMode, // TODO(ianh): interpolate tile mode
     );
+  }
+
+  Color sample(double t) {
+    final stops = _impliedStops();
+    if (t <= stops.first)
+      return colors.first;
+    if (t >= stops.last)
+      return colors.last;
+    final s = stops.lastIndexWhere((s) => s <= t);
+    return Color.lerp(colors[s], colors[s+1], (t - stops[s])/(stops[s+1] - stops[s]));
   }
 
   @override
