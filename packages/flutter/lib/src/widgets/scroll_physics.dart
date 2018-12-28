@@ -445,6 +445,11 @@ class ClampingScrollPhysics extends ScrollPhysics {
       tolerance: tolerance,
     );
   }
+
+  // Eyeballed from observation to counter the effect of an unintended scroll
+  // from the natural motion of lifting the finger after a scroll.
+  @override
+  double get dragStartDistanceMotionThreshold => 3.5;
 }
 
 /// Scroll physics that always lets the user scroll.
