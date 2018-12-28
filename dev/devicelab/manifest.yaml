@@ -509,6 +509,7 @@ tasks:
       Measures memory usage after Android app suspend and resume.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true # https://github.com/flutter/flutter/issues/25855
 
   analyzer_benchmark:
     description: >
