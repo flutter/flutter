@@ -281,6 +281,7 @@ class _TooltipOverlay extends StatelessWidget {
       brightness: Brightness.dark,
       textTheme: theme.brightness == Brightness.dark ? theme.textTheme : theme.primaryTextTheme,
       platform: theme.platform,
+      backgroundColor: theme.backgroundColor,
     );
     return Positioned.fill(
       child: IgnorePointer(
