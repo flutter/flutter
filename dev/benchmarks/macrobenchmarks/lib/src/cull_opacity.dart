@@ -13,7 +13,7 @@ class _CullOpacityPageState extends State<CullOpacityPage> with SingleTickerProv
   void initState() {
     super.initState();
 
-    _controller = AnimationController(vsync: this, duration: Duration(seconds: 2));
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2));
     _offsetY = Tween<double>(begin: 0, end: -1000.0).animate(_controller)..addListener((){
       setState(() {});
     });
