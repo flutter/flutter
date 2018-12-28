@@ -264,7 +264,7 @@ public class FlutterMain {
             Log.e(TAG, "Unable to read application info", e);
         }
 
-        if (metaData != null && metaData.getBoolean("DynamicUpdates")) {
+        if (metaData != null && metaData.getBoolean("DynamicPatching")) {
             sResourceUpdater = new ResourceUpdater(context);
             sResourceUpdater.startUpdateDownloadOnce();
             sResourceUpdater.waitForDownloadCompletion();

@@ -107,7 +107,7 @@ public final class ResourceUpdater {
     }
 
     public String getUpdateInstallationPath() {
-        return context.getFilesDir().toString() + "/update.zip";
+        return context.getFilesDir().toString() + "/patch.zip";
     }
 
     public String buildUpdateDownloadURL() {
@@ -120,16 +120,16 @@ public final class ResourceUpdater {
             throw new RuntimeException(e);
         }
 
-        if (metaData == null || metaData.getString("UpdateServerURL") == null) {
+        if (metaData == null || metaData.getString("PatchServerURL") == null) {
             return null;
         }
 
         URI uri;
         try {
-            uri = new URI(metaData.getString("UpdateServerURL") + "/" + getAPKVersion() + ".zip");
+            uri = new URI(metaData.getString("PatchServerURL") + "/" + getAPKVersion() + ".zip");
 
         } catch (URISyntaxException e) {
-            Log.w(TAG, "Invalid AndroidManifest.xml UpdateServerURL: " + e.getMessage());
+            Log.w(TAG, "Invalid AndroidManifest.xml PatchServerURL: " + e.getMessage());
             return null;
         }
 
