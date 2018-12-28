@@ -25,6 +25,10 @@ class VarImpl(object):
     """Implements the Var syntax."""
     if var_name in self._local_scope.get("vars", {}):
       return self._local_scope["vars"][var_name]
+    if var_name == 'host_os':
+      return 'linux' # assume some default value
+    if var_name == 'host_cpu':
+      return 'x64' # assume some default value
     raise Exception("Var is not defined: %s" % var_name)
 
 
