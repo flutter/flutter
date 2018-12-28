@@ -78,6 +78,10 @@ class FlutterPlatformViewsController {
   std::map<int64_t, fml::scoped_nsobject<NSObject<FlutterPlatformView>>> views_;
   std::map<int64_t, fml::scoped_nsobject<FlutterTouchInterceptingView>> touch_interceptors_;
   std::map<int64_t, std::unique_ptr<FlutterPlatformViewLayer>> overlays_;
+  // The GrContext that is currently used by all of the overlay surfaces.
+  // We track this to know when the GrContext for the Flutter app has changed
+  // so we can update the overlays with the new context.
+  GrContext* overlays_gr_context_;
   SkISize frame_size_;
 
   // A vector of embedded view IDs according to their composition order.
@@ -97,7 +101,8 @@ class FlutterPlatformViewsController {
   void EnsureOverlayInitialized(int64_t overlay_id);
   void EnsureGLOverlayInitialized(int64_t overlay_id,
                                   std::shared_ptr<IOSGLContext> gl_context,
-                                  GrContext* gr_context);
+                                  GrContext* gr_context,
+                                  bool update_gr_context);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterPlatformViewsController);
 };
