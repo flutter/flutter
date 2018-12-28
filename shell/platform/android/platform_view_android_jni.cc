@@ -253,7 +253,7 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
     const auto file_ext_index = bundlepath.rfind(".");
     if (bundlepath.substr(file_ext_index) == ".zip") {
       asset_manager->PushBack(
-          std::make_unique<blink::ZipAssetStore>(bundlepath));
+          std::make_unique<blink::ZipAssetStore>(bundlepath, "flutter_assets"));
     } else {
       asset_manager->PushBack(
           std::make_unique<blink::DirectoryAssetBundle>(fml::OpenDirectory(

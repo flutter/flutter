@@ -23,7 +23,7 @@ using UniqueUnzipper = fml::UniqueObject<void*, UniqueUnzipperTraits>;
 
 class ZipAssetStore final : public AssetResolver {
  public:
-  ZipAssetStore(std::string file_path);
+  ZipAssetStore(std::string file_path, std::string directory);
 
   ~ZipAssetStore() override;
 
@@ -35,7 +35,9 @@ class ZipAssetStore final : public AssetResolver {
         : file_pos(p_file_pos), uncompressed_size(p_uncompressed_size) {}
   };
 
-  std::string file_path_;
+  const std::string file_path_;
+  const std::string directory_;
+
   mutable std::map<std::string, CacheEntry> stat_cache_;
 
   // |blink::AssetResolver|
