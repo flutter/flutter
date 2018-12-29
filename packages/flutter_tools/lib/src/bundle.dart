@@ -80,18 +80,18 @@ Future<void> build({
 
     } else if (compilationTraceFilePath.isEmpty) {
       // Disable JIT snapshotting if flag is empty.
-      printStatus('JIT snapshot will be disabled for this build...');
+      printStatus('Instruction snapshot will be disabled for this build.');
       compilationTraceFilePath = null;
 
     } else if (!fs.file(compilationTraceFilePath).existsSync()) {
       // Be forgiving if compilation trace file is missing.
-      printError('Warning: Ignoring missing compiler training file $compilationTraceFilePath...');
-      printStatus('JIT snapshot will not use compiler training...');
+      printError('Warning: Ignoring missing training file $compilationTraceFilePath.');
+      printStatus('Instruction snapshot will not use compiler training.');
       final File tmp = fs.systemTempDirectory.childFile('flutterEmptyCompilationTrace.txt');
       compilationTraceFilePath = (tmp..createSync(recursive: true)).path;
 
     } else {
-      printStatus('JIT snapshot will use compiler training file $compilationTraceFilePath...');
+      printStatus('Instruction snapshot will use training file $compilationTraceFilePath.');
     }
   }
 
