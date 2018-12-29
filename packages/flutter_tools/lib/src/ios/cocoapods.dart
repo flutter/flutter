@@ -24,6 +24,9 @@ const String noCocoaPodsConsequence = '''
   Without resolving iOS dependencies with CocoaPods, plugins will not work on iOS.
   For more info, see https://flutter.io/platform-plugins''';
 
+const String unknownCocoaPodsConsequence = '''
+  Make sure that `pod --version` always return pure version like :''';
+
 const String cocoaPodsInstallInstructions = '''
   brew install cocoapods
   pod setup''';
@@ -38,6 +41,8 @@ CocoaPods get cocoaPods => context[CocoaPods];
 enum CocoaPodsStatus {
   /// iOS plugins will not work, installation required.
   notInstalled,
+  /// iOS plugins might not work, upgrade recommended.
+  unknownVersion,
   /// iOS plugins will not work, upgrade required.
   belowMinimumVersion,
   /// iOS plugins may not work in certain situations (Swift, static libraries),
@@ -66,6 +71,8 @@ class CocoaPods {
       return CocoaPodsStatus.notInstalled;
     try {
       final Version installedVersion = Version.parse(versionText);
+      if (installedVersion == null)
+        return CocoaPodsStatus.unknownVersion;
       if (installedVersion < Version.parse(cocoaPodsMinimumVersion))
         return CocoaPodsStatus.belowMinimumVersion;
       else if (installedVersion < Version.parse(cocoaPodsRecommendedVersion))
@@ -112,6 +119,15 @@ class CocoaPods {
           emphasis: true,
         );
         return false;
+      case CocoaPodsStatus.unknownVersion:
+        printError(
+          'Warning: CocoaPods unknown version installed.\n'
+          '$unknownCocoaPodsConsequence $cocoaPodsRecommendedVersion\n'
+          'To upgrade:\n'
+          '$cocoaPodsUpgradeInstructions\n',
+          emphasis: true,
+        );
+        break;
       case CocoaPodsStatus.belowMinimumVersion:
         printError(
           'Warning: CocoaPods minimum required version $cocoaPodsMinimumVersion or greater not installed. Skipping pod install.\n'
