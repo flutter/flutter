@@ -19,6 +19,7 @@ import 'build_info.dart';
 import 'compile.dart';
 import 'dart/dependencies.dart';
 import 'dart/pub.dart';
+import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'resident_runner.dart';
@@ -193,12 +194,12 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
-    final bool devfsResult = await _updateDevFS(fullRestart: true);
+    final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
     _addBenchmarkData(
       'hotReloadInitialDevFSSyncMilliseconds',
       initialUpdateDevFSsTimer.elapsed.inMilliseconds,
     );
-    if (!devfsResult)
+    if (!devfsResult.success)
       return 3;
 
     await refreshViews();
@@ -329,10 +330,10 @@ class HotRunner extends ResidentRunner {
     return devFSUris;
   }
 
-  Future<bool> _updateDevFS({ bool fullRestart = false }) async {
+  Future<UpdateFSReport> _updateDevFS({ bool fullRestart = false }) async {
     if (!await _refreshDartDependencies()) {
       // Did not update DevFS because of a Dart source error.
-      return false;
+      return UpdateFSReport(success: false);
     }
     final bool isFirstUpload = assetBundle.wasBuiltOnce() == false;
     final bool rebuildBundle = assetBundle.needsBuild();
@@ -340,12 +341,12 @@ class HotRunner extends ResidentRunner {
       printTrace('Updating assets');
       final int result = await assetBundle.build();
       if (result != 0)
-        return false;
+        return UpdateFSReport(success: false);
     }
 
-    final List<bool> results = <bool>[];
+    final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
-      results.add(await device.updateDevFS(
+      results.incorporateResults(await device.updateDevFS(
         mainPath: mainPath,
         target: target,
         bundle: assetBundle,
@@ -358,16 +359,15 @@ class HotRunner extends ResidentRunner {
         pathToReload: getReloadPath(fullRestart: fullRestart),
       ));
     }
-    // If there any failures reported, bail out.
-    if (results.any((bool result) => !result)) {
-      return false;
+    if (!results.success) {
+      return results;
     }
 
     if (!hotRunnerConfig.stableDartDependencies) {
       // Clear the set after the sync so they are recomputed next time.
       _dartDependencies = null;
     }
-    return true;
+    return results;
   }
 
   Future<void> _evictDirtyAssets() {
@@ -460,8 +460,8 @@ class HotRunner extends ResidentRunner {
     final Stopwatch restartTimer = Stopwatch()..start();
     // TODO(aam): Add generator reset logic once we switch to using incremental
     // compiler for full application recompilation on restart.
-    final bool updatedDevFS = await _updateDevFS(fullRestart: true);
-    if (!updatedDevFS) {
+    final UpdateFSReport updatedDevFS = await _updateDevFS(fullRestart: true);
+    if (!updatedDevFS.success) {
       for (FlutterDevice device in flutterDevices) {
         if (device.generator != null)
           device.generator.reject();
@@ -618,11 +618,11 @@ class HotRunner extends ResidentRunner {
     final Stopwatch reloadTimer = Stopwatch()..start();
 
     final Stopwatch devFSTimer = Stopwatch()..start();
-    final bool updatedDevFS = await _updateDevFS();
+    final UpdateFSReport updatedDevFS = await _updateDevFS();
     // Record time it took to synchronize to DevFS.
     _addBenchmarkData('hotReloadDevFSSyncMilliseconds',
         devFSTimer.elapsed.inMilliseconds);
-    if (!updatedDevFS)
+    if (!updatedDevFS.success)
       return OperationResult(1, 'DevFS synchronization failed');
     String reloadMessage;
     final Stopwatch vmReloadTimer = Stopwatch()..start();

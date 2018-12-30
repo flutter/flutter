@@ -50,7 +50,7 @@ void showGalleryAboutDialog(BuildContext context) {
             children: <TextSpan>[
               TextSpan(
                 style: aboutTextStyle,
-                text: 'Flutter is an early-stage, open-source project to help developers '
+                text: 'Flutter is an open-source project to help developers '
                       'build high-performance, high-fidelity, mobile apps for '
                       '${defaultTargetPlatform == TargetPlatform.iOS ? 'multiple platforms' : 'iOS and Android'} '
                       'from a single codebase. This gallery is a preview of '
