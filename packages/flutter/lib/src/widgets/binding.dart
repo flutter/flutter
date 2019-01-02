@@ -289,6 +289,15 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
           return _forceRebuild();
         },
       );
+
+      registerServiceExtension(
+        name: 'didSendFirstFrameEvent',
+        callback: (Map<String, String> parameters) async {
+          return <String, dynamic>{
+            'enabled': _needToReportFirstFrame ? 'false' : 'true'
+          };
+        },
+      );
     }
 
     assert(() {
