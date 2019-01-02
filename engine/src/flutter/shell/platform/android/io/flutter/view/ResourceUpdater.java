@@ -26,6 +26,38 @@ import java.util.concurrent.ExecutionException;
 public final class ResourceUpdater {
     private static final String TAG = "ResourceUpdater";
 
+    // Controls when to check if a new patch is available for download, and start downloading.
+    // Note that by default the application will not block to wait for the download to finish.
+    // Patches are downloaded in the background, but the developer can also use [InstallMode]
+    // to control whether to block on download completion, in order to install patches sooner.
+    enum DownloadMode {
+        // Check for and download patch on application restart (but not necessarily apply it).
+        // This is the default setting which will also check for new patches least frequently.
+        ON_RESTART,
+
+        // Check for and download patch on application resume (but not necessarily apply it).
+        // By definition, this setting will check for new patches both on restart and resume.
+        ON_RESUME
+    }
+
+    // Controls when to check that a new patch has been downloaded and needs to be applied.
+    enum InstallMode {
+        // Wait for next application restart before applying downloaded patch. With this
+        // setting, the application will not block to wait for patch download to finish.
+        // The application can be restarted later either by the user, or by the system,
+        // for any reason, at which point the newly downloaded patch will get applied.
+        // This is the default setting, and is the least disruptive way to apply patches.
+        ON_NEXT_RESTART,
+
+        // Apply patch as soon as it's downloaded. This will block to wait for new patch
+        // download to finish, and will immediately apply it. This setting increases the
+        // urgency with which patches are installed, but may also affect startup latency.
+        // For now, this setting is only effective when download happens during restart.
+        // Patches downloaded during resume will not get installed immediately as that
+        // requires force restarting the app (which might be implemented in the future).
+        IMMEDIATE
+    }
+
     private static class DownloadTask extends AsyncTask<String, String, Void> {
         @Override
         protected Void doInBackground(String... args) {
@@ -136,15 +168,73 @@ public final class ResourceUpdater {
         return uri.normalize().toString();
     }
 
+    public DownloadMode getDownloadMode() {
+        Bundle metaData;
+        try {
+            metaData = context.getPackageManager().getApplicationInfo(
+                    context.getPackageName(), PackageManager.GET_META_DATA).metaData;
+
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (metaData == null) {
+            return DownloadMode.ON_RESTART;
+        }
+
+        String patchDownloadMode = metaData.getString("PatchDownloadMode");
+        if (patchDownloadMode == null) {
+            return DownloadMode.ON_RESTART;
+        }
+
+        try {
+            return DownloadMode.valueOf(patchDownloadMode);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Invalid PatchDownloadMode " + patchDownloadMode);
+            return DownloadMode.ON_RESTART;
+        }
+    }
+
+    public InstallMode getInstallMode() {
+        Bundle metaData;
+        try {
+            metaData = context.getPackageManager().getApplicationInfo(
+                    context.getPackageName(), PackageManager.GET_META_DATA).metaData;
+
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (metaData == null) {
+            return InstallMode.ON_NEXT_RESTART;
+        }
+
+        String patchInstallMode = metaData.getString("PatchInstallMode");
+        if (patchInstallMode == null) {
+            return InstallMode.ON_NEXT_RESTART;
+        }
+
+        try {
+            return InstallMode.valueOf(patchInstallMode);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Invalid PatchInstallMode " + patchInstallMode);
+            return InstallMode.ON_NEXT_RESTART;
+        }
+    }
+
     public void startUpdateDownloadOnce() {
-        assert downloadTask == null;
+        if (downloadTask != null ) {
+            return;
+        }
         downloadTask = new DownloadTask();
         downloadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                 buildUpdateDownloadURL(), getUpdateInstallationPath());
     }
 
     public void waitForDownloadCompletion() {
-        assert downloadTask != null;
+        if (downloadTask == null) {
+            return;
+        }
         try {
             downloadTask.get();
         } catch (CancellationException e) {

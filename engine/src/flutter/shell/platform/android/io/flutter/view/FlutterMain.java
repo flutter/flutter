@@ -5,8 +5,11 @@
 package io.flutter.view;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -266,8 +269,17 @@ public class FlutterMain {
 
         if (metaData != null && metaData.getBoolean("DynamicPatching")) {
             sResourceUpdater = new ResourceUpdater(context);
-            sResourceUpdater.startUpdateDownloadOnce();
-            sResourceUpdater.waitForDownloadCompletion();
+            // Also checking for ON_RESUME here since it's more efficient than waiting for actual
+            // onResume. Even though actual onResume is imminent when the app has just restarted,
+            // it's better to start downloading now, in parallel with the rest of initialization,
+            // and avoid a second application restart a bit later when actual onResume happens.
+            if (sResourceUpdater.getDownloadMode() == ResourceUpdater.DownloadMode.ON_RESTART ||
+                sResourceUpdater.getDownloadMode() == ResourceUpdater.DownloadMode.ON_RESUME) {
+                sResourceUpdater.startUpdateDownloadOnce();
+                if (sResourceUpdater.getInstallMode() == ResourceUpdater.InstallMode.IMMEDIATE) {
+                    sResourceUpdater.waitForDownloadCompletion();
+                }
+            }
         }
 
         sResourceExtractor = new ResourceExtractor(context);
@@ -283,9 +295,11 @@ public class FlutterMain {
             .addResource(fromFlutterAssets(sAotIsolateSnapshotData))
             .addResource(fromFlutterAssets(sAotIsolateSnapshotInstr))
             .addResource(fromFlutterAssets(DEFAULT_KERNEL_BLOB));
+
         if (sIsPrecompiledAsSharedLibrary) {
           sResourceExtractor
             .addResource(sAotSharedLibraryPath);
+
         } else {
           sResourceExtractor
             .addResource(sAotVmSnapshotData)
@@ -293,7 +307,16 @@ public class FlutterMain {
             .addResource(sAotIsolateSnapshotData)
             .addResource(sAotIsolateSnapshotInstr);
         }
+
         sResourceExtractor.start();
+    }
+
+    public static void onResume(Context context) {
+        if (sResourceUpdater != null) {
+            if (sResourceUpdater.getDownloadMode() == ResourceUpdater.DownloadMode.ON_RESUME) {
+                sResourceUpdater.startUpdateDownloadOnce();
+            }
+        }
     }
 
     /**
