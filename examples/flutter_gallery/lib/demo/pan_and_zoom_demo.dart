@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter/material.dart' hide Gradient;
 import 'package:vector_math/vector_math.dart' show Vector2;
 import 'pan_and_zoom_demo_board.dart';
@@ -59,6 +60,8 @@ class _MapInteractionState extends State<MapInteraction> {
   // TODO scale at point where user's fingers are?
   double _scaleStart = 1.0; // Scale value at start of scaling gesture
   double _scale = 1.0;
+  DateTime _scaleEndedAtTime;
+  Point<double> _scaleEndedAtOffset;
 
   @override
   void initState() {
@@ -163,6 +166,28 @@ class _MapInteractionState extends State<MapInteraction> {
     setState(() {
       _scaleStart = null;
       _translateFrom = null;
+      _scaleEndedAtTime = DateTime.now();
+      _scaleEndedAtOffset = _offset;
+    });
+
+    Timer.periodic(Duration(milliseconds: 16), (Timer timer) {
+      // TODO This isn't fully safe from duplicate counters.
+      if (_translateFrom != null) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        final Inertia inertia = Inertia(details.velocity, _scaleEndedAtOffset);
+        final Point<double> offsetNext = inertia.getPositionAt(DateTime.now().difference(_scaleEndedAtTime));
+
+        if (_offset.distanceTo(offsetNext) == 0) {
+          timer.cancel();
+          _scaleEndedAtTime = null;
+          _scaleEndedAtOffset = null;
+          return;
+        }
+        _offset = offsetNext;
+      });
     });
   }
 }
@@ -190,4 +215,49 @@ class BoardPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(BoardPainter oldDelegate) => false;
+}
+
+class Inertia {
+  Inertia(this._initialVelocity, this._initialPosition);
+
+  static const double FRICTIONAL_ACCELERATION = 0.01;
+  Velocity _initialVelocity;
+  Point<double> _initialPosition;
+
+  Point<double> getPositionAt(Duration time) {
+    final double velocityTotal = _initialVelocity.pixelsPerSecond.dx.abs() + _initialVelocity.pixelsPerSecond.dy.abs();
+    if (velocityTotal == 0) {
+      return _initialPosition;
+    }
+
+    final double vRatioX = _initialVelocity.pixelsPerSecond.dx.abs() / velocityTotal;
+    final double vRatioY = _initialVelocity.pixelsPerSecond.dy.abs() / velocityTotal;
+    final double vSignX = _initialVelocity.pixelsPerSecond.dx.isNegative ? 1 : -1;
+    final double vSignY = _initialVelocity.pixelsPerSecond.dy.isNegative ? 1 : -1;
+    final double xf = _getPosition(
+      r0: _initialPosition.x,
+      v0: _initialVelocity.pixelsPerSecond.dx / 1000,
+      t: time.inMilliseconds,
+      a: vSignX * FRICTIONAL_ACCELERATION * vRatioX,
+    );
+    final double yf = _getPosition(
+      r0: _initialPosition.y,
+      v0: _initialVelocity.pixelsPerSecond.dy / 1000,
+      t: time.inMilliseconds,
+      a: vSignY * FRICTIONAL_ACCELERATION * vRatioY,
+    );
+    return Point<double>(xf, yf);
+  }
+
+  // Physics equation of motion
+  double _getPosition({double r0, double v0, int t, double a}) {
+    // Don't allow acceleration to change the direction
+    final double stopTime = (v0 / a).abs();
+    if (t > stopTime) {
+      t = stopTime.toInt();
+    }
+
+    final double answer = r0 + v0 * t + 0.5 * a * pow(t, 2);
+    return answer;
+  }
 }
