@@ -499,8 +499,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     if (bytes.lengthInBytes == 0)
       throw Exception('NetworkImage is an empty file: $resolved');
 
-    final Future<ui.Codec> codec = Future<ui.Codec>.value(PaintingBinding.instance.instantiateImageCodec(bytes));
-    return codec;
+    return PaintingBinding.instance.instantiateImageCodec(bytes);
   }
 
   @override
