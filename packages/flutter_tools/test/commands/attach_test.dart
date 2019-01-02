@@ -104,6 +104,7 @@ void main() {
             debuggingOptions: anyNamed('debuggingOptions'),
             packagesFilePath: anyNamed('packagesFilePath'),
             usesTerminalUI: anyNamed('usesTerminalUI'),
+            ipv6: false,
           ),
         )..thenReturn(MockHotRunner());
 
@@ -134,6 +135,7 @@ void main() {
             debuggingOptions: anyNamed('debuggingOptions'),
             packagesFilePath: anyNamed('packagesFilePath'),
             usesTerminalUI: anyNamed('usesTerminalUI'),
+            ipv6: false,
           ),
         )..called(1);
 
@@ -150,6 +152,36 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
       });
+
+      testUsingContext('exits when ipv6 is specified and debug-port is not', () async {
+        testDeviceManager.addDevice(device);
+
+        final AttachCommand command = AttachCommand();
+        await expectLater(
+          createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
+          throwsToolExit(
+            message: 'When the --debug-port is unknown, this command determines '
+                     'the value of --ipv6 on its own.',
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+      },);
+
+      testUsingContext('exits when observatory-port is specified and debug-port is not', () async {
+        testDeviceManager.addDevice(device);
+
+        final AttachCommand command = AttachCommand();
+        await expectLater(
+          createTestCommandRunner(command).run(<String>['attach', '--observatory-port', '100']),
+          throwsToolExit(
+            message: 'When the --debug-port is unknown, this command does not use '
+                     'the value of --observatory-port.',
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+      },);
     });
 
 
@@ -170,7 +202,8 @@ void main() {
           target: anyNamed('target'),
           debuggingOptions: anyNamed('debuggingOptions'),
           packagesFilePath: anyNamed('packagesFilePath'),
-          usesTerminalUI: anyNamed('usesTerminalUI'))).thenReturn(
+          usesTerminalUI: anyNamed('usesTerminalUI'),
+          ipv6: false)).thenReturn(
           MockHotRunner());
 
       testDeviceManager.addDevice(device);
@@ -199,33 +232,92 @@ void main() {
           target: foo.path,
           debuggingOptions: anyNamed('debuggingOptions'),
           packagesFilePath: anyNamed('packagesFilePath'),
-          usesTerminalUI: anyNamed('usesTerminalUI'))).called(1);
+          usesTerminalUI: anyNamed('usesTerminalUI'),
+          ipv6: false)).called(1);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
     },);
 
-    testUsingContext('forwards to given port', () async {
+    group('forwarding to given port', () {
       const int devicePort = 499;
       const int hostPort = 42;
-      final MockPortForwarder portForwarder = MockPortForwarder();
-      final MockAndroidDevice device = MockAndroidDevice();
+      MockPortForwarder portForwarder;
+      MockAndroidDevice device;
 
-      when(device.portForwarder).thenReturn(portForwarder);
-      when(portForwarder.forward(devicePort)).thenAnswer((_) async => hostPort);
-      when(portForwarder.forwardedPorts).thenReturn(
-          <ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
-      when(portForwarder.unforward(any)).thenAnswer((_) async => null);
-      testDeviceManager.addDevice(device);
+      setUp(() {
+        portForwarder = MockPortForwarder();
+        device = MockAndroidDevice();
 
-      final AttachCommand command = AttachCommand();
+        when(device.portForwarder).thenReturn(portForwarder);
+        when(portForwarder.forward(devicePort)).thenAnswer((_) async => hostPort);
+        when(portForwarder.forwardedPorts).thenReturn(
+            <ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
+        when(portForwarder.unforward(any)).thenAnswer((_) async => null);
+      });
 
-      await createTestCommandRunner(command).run(
-          <String>['attach', '--debug-port', '$devicePort']);
+      testUsingContext('succeeds in ipv4 mode', () async {
+        testDeviceManager.addDevice(device);
+        final AttachCommand command = AttachCommand();
 
-      verify(portForwarder.forward(devicePort)).called(1);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
-    },);
+        await createTestCommandRunner(command).run(
+            <String>['attach', '--debug-port', '$devicePort']);
+
+        verify(portForwarder.forward(devicePort)).called(1);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+      });
+
+      testUsingContext('succeeds in ipv6 mode', () async {
+        testDeviceManager.addDevice(device);
+        final AttachCommand command = AttachCommand();
+
+        await createTestCommandRunner(command).run(
+            <String>['attach', '--debug-port', '$devicePort', '--ipv6']);
+
+        verify(portForwarder.forward(devicePort)).called(1);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+      });
+
+      testUsingContext('skips in ipv4 mode with a provided observatory port', () async {
+        testDeviceManager.addDevice(device);
+        final AttachCommand command = AttachCommand();
+
+        await createTestCommandRunner(command).run(
+            <String>[
+              'attach',
+              '--debug-port',
+              '$devicePort',
+              '--observatory-port',
+              '$hostPort',
+            ],
+        );
+
+        verifyNever(portForwarder.forward(devicePort));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+      });
+
+      testUsingContext('skips in ipv6 mode with a provided observatory port', () async {
+        testDeviceManager.addDevice(device);
+        final AttachCommand command = AttachCommand();
+
+        await createTestCommandRunner(command).run(
+            <String>[
+              'attach',
+              '--debug-port',
+              '$devicePort',
+              '--observatory-port',
+              '$hostPort',
+              '--ipv6',
+            ],
+        );
+
+        verifyNever(portForwarder.forward(devicePort));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+      });
+    });
 
     testUsingContext('exits when no device connected', () async {
       final AttachCommand command = AttachCommand();

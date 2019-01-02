@@ -8,7 +8,7 @@ task:
     # test path names with spaces in them.
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
-    ANDROID_HOME: "/opt/android_sdk"
+    ANDROID_SDK_ROOT: "/opt/android_sdk"
   git_fetch_script:
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work

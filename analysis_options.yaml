@@ -28,6 +28,8 @@ analyzer:
     missing_return: warning
     # allow having TODOs in the code
     todo: ignore
+    #
+    sdk_version_async_exported_from_core: ignore
   exclude:
     - 'bin/cache/**'
     # the following two are relative to the stocks example and the flutter package respectively
@@ -114,7 +116,6 @@ linter:
     # - parameter_assignments # we do this commonly
     - prefer_adjacent_string_concatenation
     - prefer_asserts_in_initializer_lists
-    - prefer_bool_in_asserts
     - prefer_collection_literals
     - prefer_conditional_assignment
     - prefer_const_constructors
