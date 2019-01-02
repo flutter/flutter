@@ -62,8 +62,6 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
   // TODO scale at point where user's fingers are?
   double _scaleStart = 1.0; // Scale value at start of scaling gesture
   double _scale = 1.0;
-  DateTime _scaleEndedAtTime;
-  Point<double> _scaleEndedAtOffset;
   Function animationListener;
 
   @override
@@ -79,8 +77,9 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
     );
 
     controller = AnimationController(
-        duration: const Duration(milliseconds: 2000), vsync: this);
-    animation = Tween<double>(begin: 0.0, end: 300.0).animate(controller);
+      vsync: this,
+    );
+    animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
   }
 
   @override
@@ -174,22 +173,29 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
     setState(() {
       _scaleStart = null;
       _translateFrom = null;
-      _scaleEndedAtTime = DateTime.now();
-      _scaleEndedAtOffset = _offset;
     });
 
     animation.removeListener(animationListener);
     controller.reset();
+
+    if (details.velocity.pixelsPerSecond.dx == 0
+      && details.velocity.pixelsPerSecond.dy == 0) {
+      return;
+    }
+
+    final Inertia inertia = Inertia(details.velocity, _offset);
+    controller.duration = Duration(milliseconds: inertia.getDuration().toInt());
     animationListener = () {
+      if (animation.value <= 0) {
+        return;
+      }
+
       setState(() {
-        final Inertia inertia = Inertia(details.velocity, _scaleEndedAtOffset);
         final Point<double> offsetNext = inertia.getPositionAt(
-          DateTime.now().difference(_scaleEndedAtTime),
+          Duration(milliseconds: (animation.value * controller.duration.inMilliseconds).toInt()),
         );
 
         if (_offset.distanceTo(offsetNext) == 0) {
-          _scaleEndedAtTime = null;
-          _scaleEndedAtOffset = null;
           animation.removeListener(animationListener);
           return;
         }
@@ -245,23 +251,37 @@ class Inertia {
       return _initialPosition;
     }
 
-    final double vRatioX = _initialVelocity.pixelsPerSecond.dx.abs() / velocityTotal;
-    final double vRatioY = _initialVelocity.pixelsPerSecond.dy.abs() / velocityTotal;
-    final double vSignX = _initialVelocity.pixelsPerSecond.dx.isNegative ? 1 : -1;
-    final double vSignY = _initialVelocity.pixelsPerSecond.dy.isNegative ? 1 : -1;
     final double xf = _getPosition(
       r0: _initialPosition.x,
       v0: _initialVelocity.pixelsPerSecond.dx / 1000,
       t: time.inMilliseconds,
-      a: vSignX * FRICTIONAL_ACCELERATION * vRatioX,
+      a: acceleration.x,
     );
     final double yf = _getPosition(
       r0: _initialPosition.y,
       v0: _initialVelocity.pixelsPerSecond.dy / 1000,
       t: time.inMilliseconds,
-      a: vSignY * FRICTIONAL_ACCELERATION * vRatioY,
+      a: acceleration.y,
     );
     return Point<double>(xf, yf);
+  }
+
+  // The acceleration opposing the initial velocity
+  Vector2 get acceleration {
+    final double velocityTotal = _initialVelocity.pixelsPerSecond.dx.abs() + _initialVelocity.pixelsPerSecond.dy.abs();
+    final double vRatioX = _initialVelocity.pixelsPerSecond.dx.abs() / velocityTotal;
+    final double vRatioY = _initialVelocity.pixelsPerSecond.dy.abs() / velocityTotal;
+    final double vSignX = _initialVelocity.pixelsPerSecond.dx.isNegative ? 1 : -1;
+    final double vSignY = _initialVelocity.pixelsPerSecond.dy.isNegative ? 1 : -1;
+    return Vector2(
+      vSignX * FRICTIONAL_ACCELERATION * vRatioX,
+      vSignY * FRICTIONAL_ACCELERATION * vRatioY,
+    );
+  }
+
+  // Get the total time that the animation takes to stop
+  double getDuration() {
+    return (_initialVelocity.pixelsPerSecond.dx / 1000 / acceleration.x).abs();
   }
 
   // Physics equation of motion
