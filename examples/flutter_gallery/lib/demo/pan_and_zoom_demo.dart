@@ -52,7 +52,9 @@ class MapInteraction extends StatefulWidget {
 
   @override _MapInteractionState createState() => _MapInteractionState();
 }
-class _MapInteractionState extends State<MapInteraction> {
+class _MapInteractionState extends State<MapInteraction> with SingleTickerProviderStateMixin {
+  Animation<double> animation;
+  AnimationController controller;
   static const double MAX_SCALE = 2.5;
   static const double MIN_SCALE = 0.25;
   Point<double> _offset;
@@ -62,6 +64,7 @@ class _MapInteractionState extends State<MapInteraction> {
   double _scale = 1.0;
   DateTime _scaleEndedAtTime;
   Point<double> _scaleEndedAtOffset;
+  Function animationListener;
 
   @override
   void initState() {
@@ -74,6 +77,10 @@ class _MapInteractionState extends State<MapInteraction> {
       widget.screenSize.width / 2,
       widget.screenSize.height / 2,
     );
+
+    controller = AnimationController(
+        duration: const Duration(milliseconds: 2000), vsync: this);
+    animation = Tween<double>(begin: 0.0, end: 300.0).animate(controller);
   }
 
   @override
@@ -130,6 +137,7 @@ class _MapInteractionState extends State<MapInteraction> {
 
   // Handle panning and pinch zooming events
   void onScaleStart(ScaleStartDetails details) {
+    controller.stop();
     setState(() {
       _scaleStart = _scale;
       _translateFrom = Point<double>(details.focalPoint.dx, details.focalPoint.dy);
@@ -170,25 +178,32 @@ class _MapInteractionState extends State<MapInteraction> {
       _scaleEndedAtOffset = _offset;
     });
 
-    Timer.periodic(Duration(milliseconds: 16), (Timer timer) {
-      // TODO This isn't fully safe from duplicate counters.
-      if (_translateFrom != null) {
-        timer.cancel();
-        return;
-      }
+    animation.removeListener(animationListener);
+    controller.reset();
+    animationListener = () {
       setState(() {
         final Inertia inertia = Inertia(details.velocity, _scaleEndedAtOffset);
-        final Point<double> offsetNext = inertia.getPositionAt(DateTime.now().difference(_scaleEndedAtTime));
+        final Point<double> offsetNext = inertia.getPositionAt(
+          DateTime.now().difference(_scaleEndedAtTime),
+        );
 
         if (_offset.distanceTo(offsetNext) == 0) {
-          timer.cancel();
           _scaleEndedAtTime = null;
           _scaleEndedAtOffset = null;
+          animation.removeListener(animationListener);
           return;
         }
         _offset = offsetNext;
       });
-    });
+    };
+    animation.addListener(animationListener);
+    controller.forward();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }
 
@@ -251,7 +266,7 @@ class Inertia {
 
   // Physics equation of motion
   double _getPosition({double r0, double v0, int t, double a}) {
-    // Don't allow acceleration to change the direction
+    // Stop movement when it would otherwise reverse direction
     final double stopTime = (v0 / a).abs();
     if (t > stopTime) {
       t = stopTime.toInt();
