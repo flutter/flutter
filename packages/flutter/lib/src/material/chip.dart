@@ -1492,7 +1492,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       elevation: isTapping ? widget.pressElevation : 0.0,
       animationDuration: pressedAnimationDuration,
       shape: shape,
-      clipBehavior: widget.clipBehavior,
       child: InkResponse(
         onTap: canTap ? _handleTap : null,
         onTapDown: canTap ? _handleTapDown : null,
@@ -2357,7 +2356,8 @@ class _RenderChip extends RenderBox {
         final Paint darkenPaint = Paint()
           ..color = selectionScrimTween.evaluate(checkmarkAnimation)
           ..blendMode = BlendMode.srcATop;
-        context.canvas.drawRect(avatarRect, darkenPaint);
+        final double shortestSide = math.min(avatarRect.width, avatarRect.height);
+        context.canvas.drawRRect(RRect.fromRectAndRadius(avatarRect, Radius.circular(shortestSide / 2)), darkenPaint);
       }
       // Need to make the check mark be a little smaller than the avatar.
       final double checkSize = avatar.size.height * 0.75;
