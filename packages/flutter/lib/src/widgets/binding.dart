@@ -292,7 +292,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 
       registerServiceExtension(
         name: 'didSendFirstFrameEvent',
-        callback: (Map<String, String> parameters) async {
+        callback: (_) async {
           return <String, dynamic>{
             'enabled': _needToReportFirstFrame ? 'false' : 'true'
           };
