@@ -307,7 +307,7 @@ class SemanticsData extends Diagnosticable {
   /// parent).
   final Matrix4 transform;
 
-  /// The elevation of this node reative to the parent node.
+  /// The elevation of this node relative to the parent semantics node.
   ///
   /// See also:
   ///
@@ -315,7 +315,7 @@ class SemanticsData extends Diagnosticable {
   ///    elevation and semantics.
   final double elevation;
 
-  /// The extend that this node occupies in z-direction starting at [elevation].
+  /// The extent of this node along the z-axis beyond its [elevation]
   ///
   /// See also:
   ///
@@ -1525,7 +1525,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   String get hint => _hint;
   String _hint = _kEmptyConfig.hint;
 
-  /// The elevation in z-direction at which the [rect] of this [SemanticsNode]
+  /// The elevation along the z-axis at which the [rect] of this [SemanticsNode]
   /// is located above its parent.
   ///
   /// The value is relative to the parent's [elevation]. The sum of the
@@ -1540,7 +1540,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   double get elevation => _elevation;
   double _elevation = _kEmptyConfig.elevation;
 
-  /// Describes how much space the [SemanticsNode] takes up in the z-direction.
+  /// Describes how much space the [SemanticsNode] takes up along the z-axis.
   ///
   /// A [SemanticsNode] represents multiple [RenderObject]s, which can be
   /// located at various elevations in 3D. The [thickness] is the difference
