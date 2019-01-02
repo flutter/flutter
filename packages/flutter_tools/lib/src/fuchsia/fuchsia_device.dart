@@ -304,7 +304,7 @@ class FuchsiaDevice extends Device {
 class FuchsiaIsolateDiscoveryProtocol {
   FuchsiaIsolateDiscoveryProtocol(this._device, this._isolateName);
 
-  static const Duration _pollDuration = Duration(seconds: 1);
+  static const Duration _pollDuration = Duration(seconds: 10);
   final Map<int, VMService> _ports = <int, VMService>{};
   final FuchsiaDevice _device;
   final String _isolateName;
