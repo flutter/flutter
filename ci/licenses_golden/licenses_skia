@@ -1,4 +1,4 @@
-Signature: 2e3b3c0acf638f5661ae1827f5fecd2d
+Signature: 9a024e140ecd2e0dd74cc0c8fd353a36
 
 UNUSED LICENSES:
 
@@ -2849,7 +2849,6 @@ FILE: ../../../third_party/skia/samplecode/SampleLCD.cpp
 FILE: ../../../third_party/skia/samplecode/SampleLayerMask.cpp
 FILE: ../../../third_party/skia/samplecode/SampleLayers.cpp
 FILE: ../../../third_party/skia/samplecode/SampleLines.cpp
-FILE: ../../../third_party/skia/samplecode/SampleMeasure.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePatch.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePath.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathClip.cpp
@@ -2863,7 +2862,6 @@ FILE: ../../../third_party/skia/samplecode/SampleShaders.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSlides.cpp
 FILE: ../../../third_party/skia/samplecode/SampleStrokePath.cpp
 FILE: ../../../third_party/skia/samplecode/SampleStrokeRect.cpp
-FILE: ../../../third_party/skia/samplecode/SampleTextAlpha.cpp
 FILE: ../../../third_party/skia/samplecode/SampleTextBox.cpp
 FILE: ../../../third_party/skia/samplecode/SampleTextEffects.cpp
 FILE: ../../../third_party/skia/samplecode/SampleTextureDomain.cpp
