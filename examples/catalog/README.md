@@ -35,5 +35,5 @@ generates and executes `test_driver` apps to collect the screenshots:
 
 ```
 cd examples/catalog
-dart bin/sample_page.dart
+dart bin/sample_page.dart commit
 ```
