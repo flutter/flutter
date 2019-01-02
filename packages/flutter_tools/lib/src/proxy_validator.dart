@@ -8,7 +8,7 @@ import 'base/platform.dart';
 import 'doctor.dart';
 
 class ProxyValidator extends DoctorValidator {
-  ProxyValidator() : super('Proxy Configguration');
+  ProxyValidator() : super('Proxy Configuration');
 
   static bool get shouldShow => _getEnv('HTTP_PROXY').isNotEmpty;
 
