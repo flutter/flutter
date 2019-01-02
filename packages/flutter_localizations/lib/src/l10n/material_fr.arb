@@ -52,5 +52,5 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 caractère restant",
   "remainingTextFieldCharacterCountOther": "$remainingCount caractères restants",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "Actualiser"
 }

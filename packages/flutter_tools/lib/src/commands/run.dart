@@ -24,6 +24,8 @@ abstract class RunCommandBase extends FlutterCommand {
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
+    addDynamicModeFlags(verboseHelp: verboseHelp);
+    addDynamicPatchingFlags(verboseHelp: verboseHelp);
     usesFlavorOption();
     argParser
       ..addFlag('trace-startup',
@@ -33,17 +35,17 @@ abstract class RunCommandBase extends FlutterCommand {
       ..addOption('route',
         help: 'Which route to load when running the app.',
       )
-      ..addFlag('save-compilation-trace',
+      ..addFlag('train',
         hide: !verboseHelp,
         negatable: false,
-        help: 'Save runtime compilation trace to a file.\n'
-              'Compilation trace will be saved to compilation.txt when \'flutter run\' exits. '
+        help: 'Save Dart runtime compilation trace to a file. '
+              'Compilation trace will be saved to a file specified by --compilation-trace-file '
+              'when \'flutter run --dynamic --profile --train\' exits. '
               'This file contains a list of Dart symbols that were compiled by the runtime JIT '
-              'compiler up to that point. This file can be used in later --dynamic builds to '
-              'precompile some code by the offline compiler, thus reducing application startup '
-              'latency at the cost of larger application package.\n'
-              'This flag is only allowed when running --dynamic --profile (recommended) or '
-              '--debug mode.\n'
+              'compiler up to that point. This file can be used in subsequent --dynamic builds '
+              'to precompile some code by the offline compiler. '
+              'This flag is only allowed when running as --dynamic --profile (recommended) or '
+              '--debug (may include unwanted debug symbols).'
       )
       ..addOption('target-platform',
         defaultsTo: 'default',
@@ -103,23 +105,6 @@ class RunCommand extends RunCommandBase {
       ..addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.',
-      )
-      ..addOption('precompile',
-        hide: !verboseHelp,
-        help: 'Precompile functions specified in input file. This flag is only '
-              'allowed when using --dynamic. It takes a Dart compilation trace '
-              'file produced by the training run of the application. With this '
-              'flag, instead of using default Dart VM snapshot provided by the '
-              'engine, the application will use its own snapshot that includes '
-              'additional functions.'
-      )
-      ..addFlag('hotupdate',
-        hide: !verboseHelp,
-        help: 'Build differential snapshot based on the last state of the build '
-              'tree and any changes to the application source code since then. '
-              'This flag is only allowed when using --dynamic. With this flag, '
-              'a partial VM snapshot is generated that is loaded on top of the '
-              'original VM snapshot that contains precompiled code.'
       )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
@@ -330,10 +315,9 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    if (argResults['save-compilation-trace'] &&
-        getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile) {
-      throwToolExit('Error: --save-compilation-trace is only allowed when running '
-          '--dynamic --profile (recommended) or --debug mode.');
+    if (argResults['train'] && getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile) {
+      throwToolExit('Error: --train is only allowed when running as --dynamic --profile '
+        '(recommended) or --debug (may include unwanted debug symbols).');
     }
 
     final List<FlutterDevice> flutterDevices = <FlutterDevice>[];
@@ -364,7 +348,7 @@ class RunCommand extends RunCommandBase {
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
         dillOutputPath: argResults['output-dill'],
-        saveCompilationTrace: argResults['save-compilation-trace'],
+        saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -377,7 +361,7 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
-        saveCompilationTrace: argResults['save-compilation-trace'],
+        saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,
       );

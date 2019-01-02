@@ -41,15 +41,12 @@ import 'observer_list.dart';
 ///    commonly used with [Animation] subclasses, wherein its name. It is a
 ///    subclass of [AnimatedWidget], which can be used to create widgets that
 ///    are driven from a [Listenable].
-///
 ///  * [ValueListenableBuilder], a widget that uses a builder callback to
 ///    rebuild whenever a [ValueListenable] object triggers its notifications,
 ///    providing the builder with the value of the object.
-///
 ///  * [InheritedNotifier], an abstract superclass for widgets that use a
 ///    [Listenable]'s notifications to trigger rebuilds in descendant widgets
 ///    that declare a dependency on them, using the [InheritedWidget] mechanism.
-///
 ///  * [new Listenable.merge], which creates a [Listenable] that triggers
 ///    notifications whenever any of a list of other [Listenable]s trigger their
 ///    notifications.

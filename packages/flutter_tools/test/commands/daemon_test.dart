@@ -179,28 +179,6 @@ void main() {
       await commands.close();
     });
 
-    testUsingContext('daemon should send showMessage on startup if no Android devices are available', () async {
-      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
-      daemon = Daemon(
-          commands.stream,
-          responses.add,
-          notifyingLogger: notifyingLogger,
-      );
-
-      final Map<String, dynamic> response =
-        await responses.stream.skipWhile(_isConnectedEvent).first;
-      expect(response['event'], 'daemon.showMessage');
-      expect(response['params'], isMap);
-      expect(response['params'], containsPair('level', 'warning'));
-      expect(response['params'], containsPair('title', 'Unable to list devices'));
-      expect(response['params'], containsPair('message', contains('Unable to discover Android devices')));
-    }, overrides: <Type, Generator>{
-      AndroidWorkflow: () => MockAndroidWorkflow(canListDevices: false),
-      IOSWorkflow: () => MockIOSWorkflow(),
-      FuchsiaWorkflow: () => MockFuchsiaWorkflow(),
-    });
-
     testUsingContext('device.getDevices should respond with list', () async {
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
@@ -213,6 +191,27 @@ void main() {
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['result'], isList);
+      await responses.close();
+      await commands.close();
+    });
+
+    testUsingContext('device.getDevices reports avaiable devices', () async {
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
+      daemon = Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+      );
+      final MockPollingDeviceDiscovery discoverer = MockPollingDeviceDiscovery();
+      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      discoverer.addDevice(MockAndroidDevice());
+      commands.add(<String, dynamic>{'id': 0, 'method': 'device.getDevices'});
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
+      expect(response['id'], 0);
+      final dynamic result = response['result'];
+      expect(result, isList);
+      expect(result, isNotEmpty);
       await responses.close();
       await commands.close();
     });

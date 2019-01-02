@@ -111,7 +111,7 @@ class ImageCache {
   ///
   /// See also:
   ///
-  ///   * [ImageProvider], for providing images to the [Image] widget.
+  ///  * [ImageProvider], for providing images to the [Image] widget.
   bool evict(Object key) {
     final _CachedImage image = _cache.remove(key);
     if (image != null) {

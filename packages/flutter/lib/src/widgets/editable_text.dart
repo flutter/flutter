@@ -184,8 +184,7 @@ class EditableText extends StatefulWidget {
   /// default to [TextInputType.multiline].
   ///
   /// The [controller], [focusNode], [style], [cursorColor], [backgroundCursorColor],
-  /// [textAlign], [rendererIgnoresPointer], and [enableInteractiveSelection]
-  /// arguments must not be null.
+  /// [textAlign], and [rendererIgnoresPointer] arguments must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -216,7 +215,7 @@ class EditableText extends StatefulWidget {
     this.cursorRadius,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
-    this.enableInteractiveSelection = true,
+    this.enableInteractiveSelection,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -229,7 +228,6 @@ class EditableText extends StatefulWidget {
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
-       assert(enableInteractiveSelection != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
            ? (
@@ -300,7 +298,7 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  ///  * [TextCapitalization], for a description of each capitalization behavior.
   /// {@endtemplate}
   final TextCapitalization textCapitalization;
 
@@ -376,8 +374,25 @@ class EditableText extends StatefulWidget {
   final TextInputAction textInputAction;
 
   /// {@template flutter.widgets.editableText.onChanged}
-  /// Called when the text being edited changes.
+  /// Called when the user initiates a change to the TextField's
+  /// value: when they have inserted or deleted text.
+  ///
+  /// This callback does run not when the TextField's text is changed
+  /// programmatically, via the TextField's [controller]. Typically it
+  /// isn't necessary to be notified of such changes, since they're
+  /// initiated by the app itself.
+  ///
+  /// To be notified of all changes to the TextField's text, cursor,
+  /// and selection, one can add a listener to its [controller] with
+  /// [TextEditingController.addListener].
   /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [inputFormatters], which are called before [onChanged]
+  ///    runs and can validate and change ("format") the input value.
+  ///  * [onEditingComplete], [onSubmitted], [onSelectionChanged]:
+  ///    which are more specialized input change notifications.
   final ValueChanged<String> onChanged;
 
   /// {@template flutter.widgets.editableText.onEditingComplete}
@@ -478,6 +493,11 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to false, resulting in a typical blinking cursor.
   static bool debugDeterministicCursor = false;
+
+  /// {@macro flutter.rendering.editable.selectionEnabled}
+  bool get selectionEnabled {
+    return enableInteractiveSelection ?? !obscureText;
+  }
 
   @override
   EditableTextState createState() => EditableTextState();
@@ -1013,19 +1033,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {
-    return widget.enableInteractiveSelection && _hasFocus && controls?.canCopy(this) == true
+    return widget.selectionEnabled && _hasFocus && controls?.canCopy(this) == true
       ? () => controls.handleCopy(this)
       : null;
   }
 
   VoidCallback _semanticsOnCut(TextSelectionControls controls) {
-    return widget.enableInteractiveSelection && _hasFocus && controls?.canCut(this) == true
+    return widget.selectionEnabled && _hasFocus && controls?.canCut(this) == true
       ? () => controls.handleCut(this)
       : null;
   }
 
   VoidCallback _semanticsOnPaste(TextSelectionControls controls) {
-    return widget.enableInteractiveSelection &&_hasFocus && controls?.canPaste(this) == true
+    return widget.selectionEnabled &&_hasFocus && controls?.canPaste(this) == true
       ? () => controls.handlePaste(this)
       : null;
   }
@@ -1136,11 +1156,10 @@ class _Editable extends LeafRenderObjectWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth,
     this.cursorRadius,
-    this.enableInteractiveSelection = true,
+    this.enableInteractiveSelection,
     this.textSelectionDelegate,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
-       assert(enableInteractiveSelection != null),
        super(key: key);
 
   final TextSpan textSpan;

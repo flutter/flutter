@@ -370,7 +370,7 @@ class FlutterDevice {
     return 0;
   }
 
-  Future<bool> updateDevFS({
+  Future<UpdateFSReport> updateDevFS({
     String mainPath,
     String target,
     AssetBundle bundle,
@@ -386,9 +386,9 @@ class FlutterDevice {
       'Syncing files to device ${device.name}...',
       expectSlowOperation: true,
     );
-    int bytes = 0;
+    UpdateFSReport report;
     try {
-      bytes = await devFS.update(
+      report = await devFS.update(
         mainPath: mainPath,
         target: target,
         bundle: bundle,
@@ -405,11 +405,11 @@ class FlutterDevice {
       );
     } on DevFSException {
       devFSStatus.cancel();
-      return false;
+      return UpdateFSReport(success: false);
     }
     devFSStatus.stop();
-    printTrace('Synced ${getSizeAsMB(bytes)}.');
-    return true;
+    printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
+    return report;
   }
 
   void updateReloadStatus(bool wasReloadSuccessful) {
@@ -492,7 +492,7 @@ abstract class ResidentRunner {
   Future<void> stop() async {
     _stopped = true;
     if (saveCompilationTrace)
-      await _saveCompilationTrace();
+      await _debugSaveCompilationTrace();
     await stopEchoingDeviceLog();
     await preStop();
     return stopApp();
@@ -597,7 +597,7 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<void> _saveCompilationTrace() async {
+  Future<void> _debugSaveCompilationTrace() async {
     if (!supportsServiceProtocol)
       return;
 
@@ -609,7 +609,7 @@ abstract class ResidentRunner {
 
         List<int> buffer;
         try {
-          buffer = await view.uiIsolate.flutterDumpCompilationTrace();
+          buffer = await view.uiIsolate.flutterDebugSaveCompilationTrace();
           assert(buffer != null);
         } catch (error) {
           printError('Error communicating with Flutter on the device: $error');

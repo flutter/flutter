@@ -23,7 +23,7 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 /// Displays its children widgets on a wheel for selection and
 /// calls back when the currently selected item changes.
 ///
-/// Can be used with [showModalBottomSheet] to display the picker modally at the
+/// Can be used with [showCupertinoModalPopup] to display the picker modally at the
 /// bottom of the screen.
 ///
 /// See also:

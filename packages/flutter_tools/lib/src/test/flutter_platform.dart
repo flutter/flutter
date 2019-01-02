@@ -84,7 +84,7 @@ void installHook({
   InternetAddressType serverType = InternetAddressType.IPv4,
   Uri projectRootDirectory,
 }) {
-  assert(!enableObservatory || (!startPaused && observatoryPort == null));
+  assert(enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
     <Runtime>[Runtime.vm],
     () => _FlutterPlatform(
