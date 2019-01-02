@@ -105,14 +105,16 @@ void main() {
     binding = TestServiceExtensionsBinding();
     expect(binding.frameScheduled, isTrue);
 
-    // We need to test this service extension here because the result should
-    // always be true after the first binding.doFrame() call.
+    // We need to test this service extension here because the result is true
+    // after the first binding.doFrame() call.
     Map<String, dynamic> firstFrameResult;
+    expect(binding.debugDidSendFirstFrameEvent, isFalse);
     firstFrameResult = await binding.testExtension('didSendFirstFrameEvent', <String, String>{});
     expect(firstFrameResult, <String, String>{ 'enabled': 'false' });
 
     await binding.doFrame(); // initial frame scheduled by creating the binding
 
+    expect(binding.debugDidSendFirstFrameEvent, isTrue);
     firstFrameResult = await binding.testExtension('didSendFirstFrameEvent', <String, String>{});
     expect(firstFrameResult, <String, String>{ 'enabled': 'true' });
 
@@ -307,12 +309,6 @@ void main() {
     expect(result, <String, String>{ 'enabled': 'false' });
     expect(debugPaintBaselinesEnabled, false);
     expect(binding.frameScheduled, isFalse);
-  });
-
-  test('Service extensions - didSendFirstFrameEvent', () async {
-    Map<String, dynamic> result;
-    result = await binding.testExtension('didSendFirstFrameEvent', <String, String>{});
-    expect(result, <String, String>{ 'enabled': 'true' });
   });
 
   test('Service extensions - profileWidgetBuilds', () async {
@@ -565,7 +561,7 @@ void main() {
 
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 25 + widgetInspectorExtensionCount);
+    expect(binding.extensions.length, 24 + widgetInspectorExtensionCount);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
