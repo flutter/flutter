@@ -3194,6 +3194,15 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   final List<RenderObject> _ancestorChain;
 
   /// The children to be added to the parent.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsNode.parentSemanticsClipRect] for the source and definition
+  ///    of the `parentSemanticsClipRect` argument.
+  ///  * [SemanticsNode.parentPaintClipRect] for the source and definition
+  //     of the `parentPaintClipRect` argument.
+  ///  * [SemanticsNode.elevationAdjustment] for the source and definition
+  //    of the `elevationAdjustment` argument.
   Iterable<SemanticsNode> compileChildren({
     @required Rect parentSemanticsClipRect,
     @required Rect parentPaintClipRect,
