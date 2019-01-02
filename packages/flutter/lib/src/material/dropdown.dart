@@ -7,12 +7,14 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
+import 'checkbox_list_tile.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'input_decorator.dart';
+import 'list_tile.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'scrollbar.dart';
@@ -445,6 +447,46 @@ class DropdownMenuItem<T> extends StatelessWidget {
   }
 }
 
+
+/// An item in a menu created by a [DropdownButton] that allows the item to be
+/// toggled
+///
+/// Inherits [DropdownMenuItem] and provides a checkbox to identify its selected
+/// state.
+/// The type `T` is the type of the value the entry represents. All the entries
+/// in a given menu must represent values with consistent types.
+class CheckboxDropdownMenuItem<T> extends DropdownMenuItem<T> {
+  /// Creates an checkable item for a dropdown menu.
+  ///
+  /// The [child] argument is required.
+  const CheckboxDropdownMenuItem({
+    Key key,
+    @required Widget child,
+    T value,
+    this.selected = false,
+  }) : super(key: key, child: child, value: value);
+
+  /// Whether the item is selected.
+  ///
+  /// True if the item should be checked.
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: _kMenuItemHeight,
+      alignment: AlignmentDirectional.centerStart,
+      child: CheckboxListTile(
+        value: selected,
+        title: child,
+        controlAffinity: ListTileControlAffinity.leading,
+        onChanged: (bool checked) => Navigator.pop(context, _DropdownRouteResult<T>(value)),
+      ),
+    );
+  }
+}
+
+
 /// An inherited widget that causes any descendant [DropdownButton]
 /// widgets to not include their regular underline.
 ///
@@ -485,7 +527,10 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///
 /// See also:
 ///
-///  * [DropdownMenuItem], the class used to represent the [items].
+///  * [DropdownMenuItem], the class used to represent the [items] if a single
+///    value is provided.
+///  * [CheckboxDropdownMenuItem], the class used to represent the [items] if a
+///    a list of values is provided.
 ///  * [DropdownButtonHideUnderline], which prevents its descendant dropdown buttons
 ///    from displaying their underlines.
 ///  * [RaisedButton], [FlatButton], ordinary buttons that trigger a single action.
@@ -503,6 +548,7 @@ class DropdownButton<T> extends StatefulWidget {
     Key key,
     @required this.items,
     this.value,
+    this.values,
     this.hint,
     this.disabledHint,
     @required this.onChanged,
@@ -511,8 +557,11 @@ class DropdownButton<T> extends StatefulWidget {
     this.iconSize = 24.0,
     this.isDense = false,
     this.isExpanded = false,
-  }) : assert(items == null || value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
-      super(key: key);
+  }) : assert(items == null || items.isEmpty ||
+              value == null && values == null ||
+              values == null && items.where((DropdownMenuItem<T> item) => item.value == value).length == 1 ||
+              value == null && items.where((DropdownMenuItem<T> item) => values.contains(item.value)).length == values.length),
+       super(key: key);
 
   /// The list of possible items to select among.
   final List<DropdownMenuItem<T>> items;
@@ -521,6 +570,11 @@ class DropdownButton<T> extends StatefulWidget {
   /// value is null then the menu is popped up as if the first item was
   /// selected.
   final T value;
+
+  /// The currently selected item, or null if no item has been selected. If
+  /// value is null then the menu is popped up as if the first item was
+  /// selected.
+  final List<T> values;
 
   /// Displayed if [value] is null.
   final Widget hint;
@@ -574,12 +628,33 @@ class DropdownButton<T> extends StatefulWidget {
 class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindingObserver {
   int _selectedIndex;
   _DropdownRoute<T> _dropdownRoute;
+  final List<CheckboxDropdownMenuItem<T>> _checkBoxItems = <CheckboxDropdownMenuItem<T>>[];
+  bool _multiple = false;
 
   @override
   void initState() {
     super.initState();
+    _multiple = widget.values != null ? true : false;
+    if (_multiple) {
+      buildCheckboxItems();
+    }
     _updateSelectedIndex();
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  CheckboxDropdownMenuItem<T> createCheckboxDropdownMenuItem(DropdownMenuItem<T> item) {
+    return CheckboxDropdownMenuItem<T>(
+      child: item.child,
+      value: item.value,
+      selected: widget.values.contains(item.value),
+    );
+  }
+
+  void buildCheckboxItems() {
+    _checkBoxItems.clear();
+    _checkBoxItems.addAll(widget.items.map<CheckboxDropdownMenuItem<T>>(
+      (DropdownMenuItem<T> item) => createCheckboxDropdownMenuItem(item)
+    ));
   }
 
   @override
@@ -604,6 +679,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   @override
   void didUpdateWidget(DropdownButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _multiple = widget.values != null ? true : false;
+    if (_multiple) {
+      buildCheckboxItems();
+    }
     _updateSelectedIndex();
   }
 
@@ -612,13 +691,29 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       return;
     }
 
-    assert(widget.value == null ||
-      widget.items.where((DropdownMenuItem<T> item) => item.value == widget.value).length == 1);
     _selectedIndex = null;
-    for (int itemIndex = 0; itemIndex < widget.items.length; itemIndex++) {
-      if (widget.items[itemIndex].value == widget.value) {
-        _selectedIndex = itemIndex;
-        return;
+    if (_multiple) {
+      assert(widget.values == null ||
+          widget.items
+              .where((DropdownMenuItem<T> item) => widget.values.contains(item.value))
+              .length == widget.values.length);
+      for (int itemIndex = 0; itemIndex < _checkBoxItems.length; itemIndex++) {
+        final CheckboxDropdownMenuItem<T> item = _checkBoxItems[itemIndex];
+        if (widget.values.contains(item.value)) {
+          _selectedIndex = itemIndex;
+          return;
+        }
+      }
+    } else {
+      assert(widget.value == null ||
+          widget.items
+              .where((DropdownMenuItem<T> item) => item.value == widget.value)
+              .length == 1);
+      for (int itemIndex = 0; itemIndex < widget.items.length; itemIndex++) {
+        if (widget.items[itemIndex].value == widget.value) {
+          _selectedIndex = itemIndex;
+          return;
+        }
       }
     }
   }
@@ -635,7 +730,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     assert(_dropdownRoute == null);
     _dropdownRoute = _DropdownRoute<T>(
-      items: widget.items,
+      items: _multiple ? _checkBoxItems : widget.items,
       buttonRect: menuMargin.resolve(textDirection).inflateRect(itemRect),
       padding: _kMenuItemPadding.resolve(textDirection),
       selectedIndex: _selectedIndex ?? 0,
@@ -707,13 +802,22 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       ? _kAlignedButtonPadding
       : _kUnalignedButtonPadding;
 
-    // If value is null (then _selectedIndex is null) or if disabled then we
-    // display the hint or nothing at all.
-    final IndexedStack innerItemsWidget = IndexedStack(
-      index: _enabled ? (_selectedIndex ?? hintIndex) : hintIndex,
-      alignment: AlignmentDirectional.centerStart,
-      children: items,
-    );
+    Widget innerItemsWidget;
+    if (_multiple && widget.values != null && widget.values.isNotEmpty) {
+      innerItemsWidget = DropdownMenuItem<Widget>(
+        child: Text(
+          widget.values?.join(', '),
+        )
+      );
+    } else {
+      // If value is null (then _selectedIndex is null) or if disabled then we
+      // display the hint or nothing at all.
+      innerItemsWidget = IndexedStack(
+        index: _enabled ? (_selectedIndex ?? hintIndex) : hintIndex,
+        alignment: AlignmentDirectional.centerStart,
+        children: items,
+      );
+    }
 
     Widget result = DefaultTextStyle(
       style: _textStyle,
@@ -766,6 +870,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 }
 
 /// A convenience widget that wraps a [DropdownButton] in a [FormField].
+/// TODO: Fix onSaved will only return the current value and not values
 class DropdownButtonFormField<T> extends FormField<T> {
   /// Creates a [DropdownButton] widget wrapped in an [InputDecorator] and
   /// [FormField].
@@ -774,6 +879,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
   DropdownButtonFormField({
     Key key,
     T value,
+    List<T> values,
     @required List<DropdownMenuItem<T>> items,
     this.onChanged,
     InputDecoration decoration = const InputDecoration(),
@@ -791,11 +897,12 @@ class DropdownButtonFormField<T> extends FormField<T> {
              .applyDefaults(Theme.of(field.context).inputDecorationTheme);
            return InputDecorator(
              decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-             isEmpty: value == null,
+             isEmpty: value == null && values == null,
              child: DropdownButtonHideUnderline(
                child: DropdownButton<T>(
                  isDense: true,
                  value: value,
+                 values: values,
                  items: items,
                  hint: hint,
                  onChanged: field.didChange,
