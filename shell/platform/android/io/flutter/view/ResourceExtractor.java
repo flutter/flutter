@@ -112,7 +112,9 @@ class ResourceExtractor {
     }
 
     void waitForCompletion() {
-        assert mExtractTask != null;
+        if (mExtractTask == null) {
+            return;
+        }
 
         try {
             mExtractTask.get();
@@ -123,6 +125,17 @@ class ResourceExtractor {
         } catch (InterruptedException e3) {
             deleteFiles();
         }
+    }
+
+    boolean filesMatch() {
+        JSONObject updateManifest = readUpdateManifest();
+        if (!validateUpdateManifest(updateManifest)) {
+            updateManifest = null;
+        }
+
+        final File dataDir = new File(PathUtils.getDataDirectory(mContext));
+        final String timestamp = checkTimestamp(dataDir, updateManifest);
+        return (timestamp == null);
     }
 
     private String[] getExistingTimestamps(File dataDir) {

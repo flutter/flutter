@@ -220,6 +220,7 @@ public final class FlutterActivityDelegate
     @Override
     public void onResume() {
         Application app = (Application) activity.getApplicationContext();
+        FlutterMain.onResume(app);
         if (app instanceof FlutterApplication) {
             FlutterApplication flutterApp = (FlutterApplication) app;
             flutterApp.setCurrentActivity(activity);
