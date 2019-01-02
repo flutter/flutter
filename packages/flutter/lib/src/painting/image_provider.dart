@@ -262,27 +262,31 @@ abstract class ImageProvider<T> {
     assert(configuration != null);
     final ImageStream stream = ImageStream();
     T obtainedKey;
+    Future<void> handleError(dynamic exception, StackTrace stack) async {
+      await null; // wait an event turn in case a listener has been added to the image stream.
+      final _ErrorImageCompleter imageCompleter = _ErrorImageCompleter();
+      stream.setCompleter(imageCompleter);
+      imageCompleter.reportError( // ignore: invalid_use_of_protected_member
+        exception: exception,
+        stack: stack,
+        context: 'while resolving an image',
+        silent: true, // could be a network error or whatnot
+        informationCollector: (StringBuffer information) {
+          information.writeln('Image provider: $this');
+          information.writeln('Image configuration: $configuration');
+          if (obtainedKey != null) {
+            information.writeln('Image key: $obtainedKey');
+          }
+        }
+      );
+    }
     obtainKey(configuration).then<void>((T key) {
       obtainedKey = key;
-      stream.setCompleter(PaintingBinding.instance.imageCache.putIfAbsent(key, () => load(key)));
-    }).catchError(
-      (dynamic exception, StackTrace stack) async {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'services library',
-          context: 'while resolving an image',
-          silent: true, // could be a network error or whatnot
-          informationCollector: (StringBuffer information) {
-            information.writeln('Image provider: $this');
-            information.writeln('Image configuration: $configuration');
-            if (obtainedKey != null)
-              information.writeln('Image key: $obtainedKey');
-          }
-        ));
-        return null;
+      final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(key, () => load(key), onError: handleError);
+      if (completer != null) {
+        stream.setCompleter(completer);
       }
-    );
+    }).catchError(handleError);
     return stream;
   }
 
@@ -495,7 +499,8 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     if (bytes.lengthInBytes == 0)
       throw Exception('NetworkImage is an empty file: $resolved');
 
-    return await PaintingBinding.instance.instantiateImageCodec(bytes);
+    final Future<ui.Codec> codec = Future<ui.Codec>.value(PaintingBinding.instance.instantiateImageCodec(bytes));
+    return codec;
   }
 
   @override
@@ -772,4 +777,9 @@ class ExactAssetImage extends AssetBundleImageProvider {
 
   @override
   String toString() => '$runtimeType(name: "$keyName", scale: $scale, bundle: $bundle)';
+}
+
+// A completer used when resolving an image completes
+class _ErrorImageCompleter extends ImageStreamCompleter {
+  _ErrorImageCompleter();
 }
