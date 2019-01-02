@@ -1,7 +1,7 @@
 # Configuration for move-issues - https://github.com/dessant/move-issues
 
 # Delete the command comment when it contains no other content.
-deleteCommand: true
+deleteCommand: false
 
 # Close the source issue after moving.
 closeSourceIssue: true
