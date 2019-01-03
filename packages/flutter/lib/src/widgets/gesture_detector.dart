@@ -157,6 +157,10 @@ class GestureDetector extends StatelessWidget {
   /// because a combination of a horizontal and vertical drag is a pan. Simply
   /// use the pan callbacks instead.
   ///
+  /// Long press and long press drag callbacks cannot be used simultaneously
+  /// since they overlap. A long press cannot be subsequently dragged while a
+  /// long press drag can be dragged after a long press.
+  ///
   /// By default, gesture detectors contribute semantic information to the tree
   /// that is used by assistive technology.
   GestureDetector({
@@ -278,15 +282,35 @@ class GestureDetector extends StatelessWidget {
 
   /// A pointer has remained in contact with the screen at the same location for
   /// a long period of time.
+  ///
+  /// The long press drag callbacks [onLongPressDragDown], [onLongPressDragUpdate]
+  /// and [onLongPressDragUp] cannot be set while this callback is set.
   final GestureLongPressCallback onLongPress;
 
   /// A pointer that has triggered a long-press has stopped contacting the screen.
+  ///
+  /// The long press drag callbacks [onLongPressDragDown], [onLongPressDragUpdate]
+  /// and [onLongPressDragUp] cannot be set while this callback is set.
   final GestureLongPressUpCallback onLongPressUp;
 
+  /// A pointer has remained in contact with the screen at the same location for
+  /// a long period of time and can subsequently be dragged.
+  ///
+  /// The non-drag long press callbacks [onLongPress] and [onLongPressUp] cannot
+  /// be set while this callback is set.
   final GestureLongPressDragDownCallback onLongPressDragDown;
 
+  /// A pointer has been drag-moved after a long press.
+  ///
+  /// The non-drag long press callbacks [onLongPress] and [onLongPressUp] cannot
+  /// be set while this callback is set.
   final GestureLongPressDragUpdateCallback onLongPressDragUpdate;
 
+  /// A pointer that has triggered a long press has stopped contacting the screen
+  /// regardless of whether the pointer is dragged after the long press.
+  ///
+  /// The non-drag long press callbacks [onLongPress] and [onLongPressUp] cannot
+  /// be set while this callback is set.
   final GestureLongPressDragUpCallback onLongPressDragUp;
 
   /// A pointer has contacted the screen and might begin to move vertically.

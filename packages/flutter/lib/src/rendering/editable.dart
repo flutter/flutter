@@ -1247,15 +1247,27 @@ class RenderEditable extends RenderBox {
   /// programmatically manipulate its `value` or `selection` directly.
   /// {@endtemplate}
   void selectPosition({@required SelectionChangedCause cause}) {
-    selectPositionAt(position: _lastTapDownPosition, cause: cause);
+    selectPositionAt(from: _lastTapDownPosition, cause: cause);
   }
 
-  void selectPositionAt({@required Offset position, @required SelectionChangedCause cause}) {
+  /// Select text between the [from] and [to] locations.
+  void selectPositionAt({@required Offset from, Offset to, @required SelectionChangedCause cause}) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
     if (onSelectionChanged != null) {
-      final TextPosition textPosition = _textPainter.getPositionForOffset(globalToLocal(position));
-      onSelectionChanged(TextSelection.fromPosition(textPosition), this, cause);
+      final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from));
+      final TextPosition toPosition = to == null
+          ? null
+          : _textPainter.getPositionForOffset(globalToLocal(to));
+      onSelectionChanged(
+        TextSelection(
+          baseOffset: fromPosition.offset,
+          extentOffset: toPosition?.offset ?? fromPosition.offset,
+          affinity: fromPosition.affinity,
+        ),
+        this,
+        cause,
+      );
     }
   }
 

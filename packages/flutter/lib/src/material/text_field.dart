@@ -657,9 +657,17 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   void _handleSingleLongTapDown(GestureLongPressDragDownDetails details) {
     if (widget.selectionEnabled) {
+      // We can't break the API for SelectionChangedCause now.
+      // The various SelectionChangedCause.tap below are really meant to imply
+      // "don't show the text selection toolbar" in
+      // EditableTextState._handleSelectionChanged while the cursor is still
+      // being dragged around.
       switch (Theme.of(context).platform) {
         case TargetPlatform.iOS:
-          _renderEditable.selectPosition(cause: SelectionChangedCause.longPress);
+          _renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.tap,
+          );
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
@@ -670,6 +678,48 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       _editableTextKey.currentState.showToolbar();
     }
     _confirmCurrentSplash();
+  }
+
+  void _handleSingleLongTapDrag(GestureLongPressDragUpdateDetails details) {
+    if (widget.selectionEnabled) {
+      switch (Theme.of(context).platform) {
+        case TargetPlatform.iOS:
+          _renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            // We can't break the API for SelectionChangedCause now.
+            // SelectionChangedCause.tap is really meant to imply "don't show the text
+            // selection toolbar" in EditableTextState._handleSelectionChanged
+            // while the cursor is still being dragged around.
+            cause: SelectionChangedCause.tap,
+          );
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          // TODO(xster): implement _renderEditable.selectWordAt()
+          break;
+      }
+    }
+  }
+
+  void _handleSingleLongTapUp(GestureLongPressDragUpDetails details) {
+    if (widget.selectionEnabled) {
+      // We can't break the API for SelectionChangedCause now.
+      // The various SelectionChangedCause.longPress below are really meant to
+      // imply "show the text selection toolbar" in
+      // EditableTextState._handleSelectionChanged once the drag is finished.
+      switch (Theme.of(context).platform) {
+        case TargetPlatform.iOS:
+          _renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          _renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+          break;
+      }
+    }
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
@@ -833,6 +883,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           onSingleTapUp: _handleSingleTapUp,
           onSingleTapCancel: _handleSingleTapCancel,
           onSingleLongTapDown: _handleSingleLongTapDown,
+          onSingleLongTapDrag: _handleSingleLongTapDrag,
+          onSingleLongTapUp: _handleSingleLongTapUp,
           onDoubleTapDown: _handleDoubleTapDown,
           behavior: HitTestBehavior.translucent,
           child: child,

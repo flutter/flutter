@@ -287,7 +287,9 @@ enum GestureRecognizerState {
 /// A base class for gesture recognizers that track a single primary pointer.
 ///
 /// Gestures based on this class will reject the gesture if the primary pointer
-/// travels beyond [distanceTolerance] pixels from the original contact point.
+/// travels beyond [preAcceptSlopTolerance] pixels from the original contact
+/// point before the gesture is accepted or beyond [postAcceptSlopTolerance]
+/// after the gesture is accepted.
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
   PrimaryPointerGestureRecognizer({
@@ -309,17 +311,17 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// amount of time has elapsed since starting to track the primary pointer.
   final Duration deadline;
 
-  /// The maximum distance in pixels the gesture is allowed to drift between the
-  /// initial touch down position and the gesture being accepted.
+  /// The maximum distance in pixels the gesture is allowed to drift from the
+  /// initial touch down position before the gesture being accepted.
   ///
-  /// Passing the allowed slop amount causes the gesture to be rejected.
+  /// Drifting past the allowed slop amount causes the gesture to be rejected.
   final double preAcceptSlopTolerance;
 
   /// The maximum distance in pixels the gesture is allowed to drift after the
   /// gesture has been accepted.
   ///
-  /// Passing the allowed slop amount causes the gesture to be rejected, even
-  /// after being accepted.
+  /// Drifting past the allowed slop amount causes the gesture to be rejected,
+  /// even after being accepted.
   final double postAcceptSlopTolerance;
 
   /// The current state of the recognizer.
@@ -384,8 +386,8 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   @override
   void acceptGesture(int pointer) {
-    // Ignore state ready here because that would happen if this recognizer won
-    // by a sweep.
+    // Ignore state 'ready' here because that would happen if this recognizer
+    // won by a sweep.
     if (pointer == primaryPointer && state == GestureRecognizerState.possible) {
       state = GestureRecognizerState.accepted;
     }

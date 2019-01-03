@@ -984,7 +984,7 @@ void main() {
   );
 
   testWidgets(
-    'long press tap is not a double tap',
+    'long press tap cannot initiate a double tap',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -1014,8 +1014,70 @@ void main() {
         const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
 
-      // Collapsed toolbar shows 2 buttons.
+      // Toolbar now dismissed.
       expect(find.byType(CupertinoButton), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'long press drag moves the cursor under the drag and shows toolbar on lift',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+
+      final TestGesture gesture =
+          await tester.startGesture(textfieldStart + const Offset(50.0, 5.0));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Collapsed cursor for iOS long press.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.upstream),
+      );
+      expect(find.byType(CupertinoButton), findsNothing);
+
+      await gesture.moveBy(const Offset(50, 0));
+      await tester.pump();
+
+      // The selection position is now moved with the drag.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 6, affinity: TextAffinity.upstream),
+      );
+      expect(find.byType(CupertinoButton), findsNothing);
+
+      await gesture.moveBy(const Offset(50, 0));
+      await tester.pump();
+
+      // The selection position is now moved with the drag.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.upstream),
+      );
+      expect(find.byType(CupertinoButton), findsNothing);
+
+      await gesture.up();
+      await tester.pump();
+
+      // The selection isn't affected by the gesture lift.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.upstream),
+      );
+      // The toolbar now shows up.
+      expect(find.byType(CupertinoButton), findsNWidgets(2));
     },
   );
 

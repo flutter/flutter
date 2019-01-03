@@ -655,8 +655,10 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// double-tap-hold, which calls [onDoubleTapDown] instead.
   final GestureLongPressDragDownCallback onSingleLongTapDown;
 
+  /// Called for a single long tap that's dragged while still in pressed.
   final GestureLongPressDragUpdateCallback onSingleLongTapDrag;
 
+  /// Called for a single long tap that's now lifted.
   final GestureLongPressDragUpCallback onSingleLongTapUp;
 
   /// Called after a momentary hold or a short tap that is close in space and
@@ -740,19 +742,19 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     if (!_isDoubleTap && widget.onSingleLongTapDown != null) {
       widget.onSingleLongTapDown(details);
     }
-    _isDoubleTap = false;
   }
 
   void _handleLongDragUpdate(GestureLongPressDragUpdateDetails details) {
-    if (widget.onSingleLongTapDrag != null) {
+    if (!_isDoubleTap && widget.onSingleLongTapDrag != null) {
       widget.onSingleLongTapDrag(details);
     }
   }
 
   void _handleLongDragUp(GestureLongPressDragUpDetails details) {
-    if (widget.onSingleLongTapUp != null) {
+    if (!_isDoubleTap && widget.onSingleLongTapUp != null) {
       widget.onSingleLongTapUp(details);
     }
+    _isDoubleTap = false;
   }
 
   void _doubleTapTimeout() {

@@ -4,7 +4,6 @@
 
 import 'arena.dart';
 import 'constants.dart';
-import 'drag_details.dart';
 import 'events.dart';
 import 'recognizer.dart';
 
@@ -78,6 +77,9 @@ class GestureLongPressDragUpdateDetails {
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
+
+  /// A delta offset from the point where the long press drag initially contacted
+  /// the screen.
   final Offset offsetFromOrigin;
 }
 
@@ -150,10 +152,25 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   String get debugDescription => 'long press';
 }
 
+/// Recognizes long presses that can be subsequently dragged around.
+///
+/// Similar to a [LongPressGestureRecognizer] where a press has to be held down
+/// at the same location for a long period of time. However, after
+/// [onLongPressDown] is triggered after the hold threshold, drags will not
+/// subsequently cancel the gesture while it's still held. The [onLongPressDrag]
+/// callback will be called as the drag moves.
+///
+/// See also:
+///
+///  * [LongPressGestureRecognizer], which cannot be dragged during the gesture.
 class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
+  /// Creates a long-press-drag gesture recognizer.
+  ///
+  /// Consider assigning the [onLongPressDrag] callback after creating this object.
   LongPressDragGestureRecognizer({ Object debugOwner }) : super(
     deadline: kLongPressTimeout,
-    // Since it's a drag gesture, no travel distance will cause it to get rejected.
+    // Since it's a drag gesture, no travel distance will cause it to get
+    // rejected after the long-press is accepted.
     postAcceptSlopTolerance: null,
     debugOwner: debugOwner,
   );
@@ -167,15 +184,18 @@ class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Called when a long press gesture has been recognized.
   GestureLongPressDragDownCallback onLongPressDown;
 
+  /// Called as the primary pointer is dragged after the long press.
   GestureLongPressDragUpdateCallback onLongPressDrag;
 
-  /// Called when the pointer stops contacting the screen after the long-press gesture has been recognized.
+  /// Called when the pointer stops contacting the screen after the
+  /// long-press gesture has been recognized.
   GestureLongPressDragUpCallback onLongPressUp;
 
   @override
   void didExceedDeadline() {
     resolve(GestureDisposition.accepted);
     _longPressAccepted = true;
+    super.acceptGesture(primaryPointer);
     if (onLongPressDown != null) {
       invokeCallback<void>('onLongPressDown', () => onLongPressDown(
         GestureLongPressDragDownDetails(
@@ -214,6 +234,12 @@ class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
         ),
       ));
     }
+  }
+
+  @override
+  void acceptGesture(int pointer) {
+    // Winning the arena isn't important here since it may happen from a sweep.
+    // Explicitly exceeding the deadline puts the gesture in accepted state.
   }
 
   @override
