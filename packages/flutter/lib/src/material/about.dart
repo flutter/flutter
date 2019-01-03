@@ -472,10 +472,13 @@ class _LicensePageState extends State<LicensePage> {
         context: context,
         child: DefaultTextStyle(
           style: Theme.of(context).textTheme.caption,
-          child: Scrollbar(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-              children: contents,
+          child: SafeArea(
+            bottom: false,
+            child: Scrollbar(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                children: contents,
+              ),
             ),
           ),
         ),

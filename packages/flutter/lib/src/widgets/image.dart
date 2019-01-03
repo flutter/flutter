@@ -83,9 +83,11 @@ Future<void> precacheImage(
   final ImageStream stream = provider.resolve(config);
   void listener(ImageInfo image, bool sync) {
     completer.complete();
+    stream.removeListener(listener);
   }
   void errorListener(dynamic exception, StackTrace stackTrace) {
     completer.complete();
+    stream.removeListener(listener);
     if (onError != null) {
       onError(exception, stackTrace);
     } else {
@@ -99,7 +101,6 @@ Future<void> precacheImage(
     }
   }
   stream.addListener(listener, onError: errorListener);
-  completer.future.then<void>((void value) { stream.removeListener(listener); });
   return completer.future;
 }
 

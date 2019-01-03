@@ -160,6 +160,7 @@ class RenderEditable extends RenderBox {
        assert(ignorePointer != null),
        assert(obscureText != null),
        assert(textSelectionDelegate != null),
+       assert(cursorWidth != null && cursorWidth >= 0.0),
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -1060,7 +1061,7 @@ class RenderEditable extends RenderBox {
   @override
   double computeMaxIntrinsicWidth(double height) {
     _layoutText(double.infinity);
-    return _textPainter.maxIntrinsicWidth;
+    return _textPainter.maxIntrinsicWidth + cursorWidth;
   }
 
   /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].

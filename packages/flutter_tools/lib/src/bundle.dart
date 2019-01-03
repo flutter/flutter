@@ -73,6 +73,28 @@ Future<void> build({
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
 
+  if (compilationTraceFilePath != null) {
+    if (buildMode != BuildMode.dynamicProfile && buildMode != BuildMode.dynamicRelease) {
+      // Silently ignore JIT snapshotting for those builds that don't support it.
+      compilationTraceFilePath = null;
+
+    } else if (compilationTraceFilePath.isEmpty) {
+      // Disable JIT snapshotting if flag is empty.
+      printStatus('JIT snapshot will be disabled for this build...');
+      compilationTraceFilePath = null;
+
+    } else if (!fs.file(compilationTraceFilePath).existsSync()) {
+      // Be forgiving if compilation trace file is missing.
+      printError('Warning: Ignoring missing compiler training file $compilationTraceFilePath...');
+      printStatus('JIT snapshot will not use compiler training...');
+      final File tmp = fs.systemTempDirectory.childFile('flutterEmptyCompilationTrace.txt');
+      compilationTraceFilePath = (tmp..createSync(recursive: true)).path;
+
+    } else {
+      printStatus('JIT snapshot will use compiler training file $compilationTraceFilePath...');
+    }
+  }
+
   DevFSContent kernelContent;
   if (!precompiledSnapshot) {
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)

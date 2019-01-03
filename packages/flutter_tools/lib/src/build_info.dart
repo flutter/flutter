@@ -54,7 +54,7 @@ class BuildInfo {
   final bool createPatch;
 
   /// Internal version number of dynamic patch (not displayed to users).
-  /// Each patch should have a unique number to differentiate from previous
+  /// Each patch may have a unique number to differentiate from previous
   /// patches for the same versionCode on Android or CFBundleVersion on iOS.
   final int patchNumber;
 
