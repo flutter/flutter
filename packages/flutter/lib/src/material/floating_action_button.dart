@@ -232,11 +232,8 @@ class FloatingActionButton extends StatefulWidget {
 }
 
 class _FloatingActionButtonState extends State<FloatingActionButton> {
-  bool _highlight = false;
-
   void _handleHighlightChanged(bool value) {
     setState(() {
-      _highlight = value;
     });
   }
 
@@ -258,7 +255,8 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     result = RawMaterialButton(
       onPressed: widget.onPressed,
       onHighlightChanged: _handleHighlightChanged,
-      elevation: _highlight ? widget.highlightElevation : widget.elevation,
+      elevation: widget.elevation,
+      highlightElevation: widget.highlightElevation,
       constraints: widget._sizeConstraints,
       materialTapTargetSize: widget.materialTapTargetSize ?? theme.materialTapTargetSize,
       fillColor: widget.backgroundColor ?? theme.accentColor,
