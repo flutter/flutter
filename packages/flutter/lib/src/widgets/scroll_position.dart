@@ -253,12 +253,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// See also:
   ///
-  ///  * The method [correctBy], which is a method of [ViewportOffset] used
+  ///  * [correctBy], which is a method of [ViewportOffset] used
   ///    by viewport render objects to correct the offset during layout
   ///    without notifying its listeners.
-  ///  * The method [jumpTo], for making changes to position while not in the
+  ///  * [jumpTo], for making changes to position while not in the
   ///    middle of layout and applying the new position immediately.
-  ///  * The method [animateTo], which is like [jumpTo] but animating to the
+  ///  * [animateTo], which is like [jumpTo] but animating to the
   ///    distination offset.
   void correctPixels(double value) {
     _pixels = value;
@@ -473,11 +473,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// See also:
   ///
-  /// * [applyViewportDimension], which is called when new
-  ///   viewport dimensions are established.
-  /// * [applyContentDimensions], which is called after new
-  ///   viewport dimensions are established, and also if new content dimensions
-  ///   are established, and which calls [ScrollPosition.applyNewDimensions].
+  ///  * [applyViewportDimension], which is called when new
+  ///    viewport dimensions are established.
+  ///  * [applyContentDimensions], which is called after new
+  ///    viewport dimensions are established, and also if new content dimensions
+  ///    are established, and which calls [ScrollPosition.applyNewDimensions].
   @protected
   @mustCallSuper
   void applyNewDimensions() {

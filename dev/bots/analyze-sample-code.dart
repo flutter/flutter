@@ -124,7 +124,7 @@ class SampleChecker {
 
   /// Finds the location of the snippets script.
   String get _snippetsExecutable {
-    final String platformScriptPath = path.dirname(Platform.script.toFilePath());
+    final String platformScriptPath = path.dirname(path.fromUri(Platform.script));
     return path.canonicalize(path.join(platformScriptPath, '..', 'snippets', 'lib', 'main.dart'));
   }
 
@@ -206,18 +206,18 @@ class SampleChecker {
     if (_snippetsSnapshotPath == null) {
       _snippetsSnapshotPath = '$_snippetsExecutable.snapshot';
       return Process.runSync(
-        path.absolute(Platform.executable),
+        path.canonicalize(Platform.executable),
         <String>[
           '--snapshot=$_snippetsSnapshotPath',
           '--snapshot-kind=app-jit',
-          path.absolute(_snippetsExecutable),
+          path.canonicalize(_snippetsExecutable),
         ]..addAll(args),
         workingDirectory: workingDirectory,
       );
     } else {
       return Process.runSync(
-        path.absolute(Platform.executable),
-        <String>[path.absolute(_snippetsSnapshotPath)]..addAll(args),
+        path.canonicalize(Platform.executable),
+        <String>[path.canonicalize(_snippetsSnapshotPath)]..addAll(args),
         workingDirectory: workingDirectory,
       );
     }

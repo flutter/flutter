@@ -289,6 +289,15 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
           return _forceRebuild();
         },
       );
+
+      registerServiceExtension(
+        name: 'didSendFirstFrameEvent',
+        callback: (_) async {
+          return <String, dynamic>{
+            'enabled': _needToReportFirstFrame ? 'false' : 'true'
+          };
+        },
+      );
     }
 
     assert(() {
@@ -745,12 +754,12 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 ///
 /// See also:
 ///
-/// * [WidgetsBinding.attachRootWidget], which creates the root widget for the
-///   widget hierarchy.
-/// * [RenderObjectToWidgetAdapter.attachToRenderTree], which creates the root
-///   element for the element hierarchy.
-/// * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
-///   ensure the widget, element, and render trees are all built.
+///  * [WidgetsBinding.attachRootWidget], which creates the root widget for the
+///    widget hierarchy.
+///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which creates the root
+///    element for the element hierarchy.
+///  * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
+///    ensure the widget, element, and render trees are all built.
 void runApp(Widget app) {
   WidgetsFlutterBinding.ensureInitialized()
     ..attachRootWidget(app)

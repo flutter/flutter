@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/shape_decoration_test.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
   @override
@@ -236,6 +237,69 @@ void main() {
           shape: const StadiumBorder(),
         ),
       );
+    });
+
+    testWidgets('supports directional clips', (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+      final ShapeBorder shape = TestBorder((String message) { logs.add(message); });
+      Widget buildMaterial() {
+        return Material(
+          type: MaterialType.transparency,
+          shape: shape,
+          child: const SizedBox(width: 100.0, height: 100.0),
+          clipBehavior: Clip.antiAlias,
+        );
+      }
+      final Widget material = buildMaterial();
+      // verify that a regular clip works as one would expect
+      logs.add('--0');
+      await tester.pumpWidget(material);
+      // verify that pumping again doesn't recompute the clip
+      // even though the widget itself is new (the shape doesn't change identity)
+      logs.add('--1');
+      await tester.pumpWidget(buildMaterial());
+      // verify that Material passes the TextDirection on to its shape when it's transparent
+      logs.add('--2');
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: material,
+      ));
+      // verify that changing the text direction from LTR to RTL has an effect
+      // even though the widget itself is identical
+      logs.add('--3');
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.rtl,
+        child: material,
+      ));
+      // verify that pumping again with a text direction has no effect
+      logs.add('--4');
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.rtl,
+        child: buildMaterial(),
+      ));
+      logs.add('--5');
+      // verify that changing the text direction and the widget at the same time
+      // works as expected
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: material,
+      ));
+      expect(logs, <String>[
+        '--0',
+        'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) null',
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) null',
+        '--1',
+        '--2',
+        'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+        '--3',
+        'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
+        '--4',
+        '--5',
+        'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+      ]);
     });
   });
 
