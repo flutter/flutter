@@ -216,6 +216,41 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// const TextStyle(fontFamily: 'Raleway')
 /// ```
 ///
+/// ### Custom Font Fallback
+/// 
+/// A custom [fontFamilyFallback] list can be provided. The list should be an
+/// ordered list of strings of font family names in the order they will be attempted.
+///
+/// The fonts in [fontFamilyFallback] will be used only if the requested glyph is
+/// not present in the [fontFamily].
+///
+/// The fallback order is:
+///
+///  * [fontFamily]
+///  * [fontFamilyFallback] in order of first to last.
+///
+/// The glyph used will always be the first matching version in fallback order.
+///
+/// The [fontFamilyFallback] property is commonly used to specify different font
+/// families for multilingual text spans as well as separate fonts for glyphs such
+/// as emojis.
+///
+/// In the following example, any glyphs not present in the font `Raleway` will be attempted
+/// to be resolved `Noto Sans CJK SC`, and finally in `Noto Color Emoji`:
+///
+/// ```dart
+/// const TextStyle(
+///   fontFamily: 'Raleway',
+///   fontFamilyFallback: <String>[
+///     'Noto Sans CJK SC',
+///     'Noto Color Emoji',
+///   ],
+/// )
+/// ```
+///
+/// If all custom fallback font families are exhausted and no match was found
+/// or no custom fallback was provided, the platform font fallback will be used.
+///
 /// See also:
 ///
 ///  * [Text], the widget for showing text in a single style.
