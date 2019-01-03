@@ -9,20 +9,24 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-/// Defines a theme for [BottomAppBar] widgets.
+/// Defines default property values for descendant [BottomAppBar] widgets.
 ///
 /// Descendant widgets obtain the current [BottomAppBarTheme] object using
 /// `BottomAppBarTheme.of(context)`. Instances of [BottomAppBarTheme] can be
 /// customized with [BottomAppBarTheme.copyWith].
 ///
+/// Typically a [BottomAppBarTheme] is specified as part of the overall [Theme]
+/// with [ThemeData.bottomAppBarTheme].
+///
+/// All properties are `null` by default. When null, the [BottomAppBar] constructor
+/// provides defaults.
+///
 /// See also:
 ///
-///  * [BottomAppBar], a material bottom app bar that can be customized using
-///    this [BottomAppBarTheme].
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
 class BottomAppBarTheme extends Diagnosticable {
-  /// Creates a BAB theme that can be used for [ThemeData.BottomAppBarTheme].
+  /// Creates a theme that can be used for [ThemeData.BottomAppBarTheme].
   const BottomAppBarTheme({
     this.color,
     this.elevation,
@@ -100,9 +104,8 @@ class BottomAppBarTheme extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const double defaultElevation = 8.0;
     properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: defaultElevation));
+    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<NotchedShape>('shape', shape, defaultValue: null));
   }
 }

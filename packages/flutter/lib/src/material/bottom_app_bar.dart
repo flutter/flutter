@@ -53,6 +53,7 @@ class BottomAppBar extends StatefulWidget {
     this.notchMargin = 4.0,
     this.child,
   }) : assert(clipBehavior != null),
+       assert(elevation == null || elevation >= 0.0),
        assert(notchMargin != null),
        super(key: key);
 
