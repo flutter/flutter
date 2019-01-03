@@ -217,7 +217,7 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// ```
 ///
 /// ### Custom Font Fallback
-/// 
+///
 /// A custom [fontFamilyFallback] list can be provided. The list should be an
 /// ordered list of strings of font family names in the order they will be attempted.
 ///
