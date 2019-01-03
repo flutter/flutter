@@ -170,6 +170,11 @@ class UserMessages {
       '$consequence\n'
       'To install:\n'
       '$installInstructions';
+  String cocoaPodsUnknownVersion(String consequence, String upgradeInstructions) =>
+      'Unknown CocoaPods version installed.\n'
+      '$consequence\n'
+      'To upgrade:\n'
+      '$upgradeInstructions';
   String cocoaPodsOutdated(String recVersion, String consequence, String upgradeInstructions) =>
       'CocoaPods out of date ($recVersion is recommended).\n'
       '$consequence\n'
