@@ -309,11 +309,10 @@ class _DecelerateCurve extends Curve {
 
   @override
   double transform(double t) {
-//    print(t);
     assert(t >= 0.0 && t <= 1.0);
     // Intended to match the behavior of:
     // https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/view/animation/DecelerateInterpolator.java
-    // ...as of December 2016.
+    // (for an exponent of 2)...as of December 2016.
     t = 1.0 - t;
     return 1.0 - math.pow(t, exponent);
   }
@@ -531,10 +530,20 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in.mp4}
   static const Cubic easeIn = Cubic(0.42, 0.0, 1.0, 1.0);
 
+  /// A cubic animation curve that starts starts slowly and ends linearly.
+  ///
+  /// The symmetric animation to [linearToEaseOut].
+  static const Cubic easeInToLinear = Cubic(0.42, 0.0, 0.55, 0.0);
+
   /// A cubic animation curve that starts quickly and ends slowly.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out.mp4}
   static const Cubic easeOut = Cubic(0.0, 0.0, 0.58, 1.0);
+
+  /// A cubic animation curve that starts linearly and ends slowly.
+  ///
+  /// A symmetric animation to [easeInToLinear].
+  static const Cubic linearToEaseOut = Cubic(0.45, 1.0, 0.58, 1.0);
 
   /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly.
   ///

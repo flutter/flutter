@@ -1821,7 +1821,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(route._navigator == this);
     bool debugPredictedWouldPop;
     assert(() { debugPredictedWouldPop = !route.willHandlePopInternally; return true; }());
-
     if (route.didPop(result ?? route.currentResult)) {
       assert(debugPredictedWouldPop);
       if (_history.length > 1) {
@@ -1829,7 +1828,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         // If route._navigator is null, the route called finalizeRoute from
         // didPop, which means the route has already been disposed and doesn't
         // need to be added to _poppedRoutes for later disposal.
-
         if (route._navigator != null)
           _poppedRoutes.add(route);
         _history.last.didPopNext(route);

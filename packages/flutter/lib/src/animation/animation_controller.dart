@@ -505,7 +505,6 @@ class AnimationController extends Animation<double>
   }
 
   TickerFuture _animateToInternal(double target, { Duration duration, Curve curve = Curves.linear, AnimationBehavior animationBehavior }) {
-    print(curve);
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
     double scale = 1.0;
     if (SemanticsBinding.instance.disableAnimations) {
