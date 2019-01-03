@@ -200,7 +200,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// All the engine layers that are in the subtree of the retained layer will
   /// be automatically appended to the current engine layer tree.
   ///
-  /// Therefore, when implementing a subclas of the [Layer] concept defined in
+  /// Therefore, when implementing a subclass of the [Layer] concept defined in
   /// the rendering layer of Flutter's framework, once this is called, there's
   /// no need to call [addToScene] for its children layers.
   EngineLayer addRetained(EngineLayer retainedLayer) native 'SceneBuilder_addRetained';
