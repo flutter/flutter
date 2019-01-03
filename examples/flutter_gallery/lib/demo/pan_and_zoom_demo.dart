@@ -58,9 +58,9 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
   AnimationController _controller;
   static const double MAX_SCALE = 2.5;
   static const double MIN_SCALE = 0.25;
-  Point<double> _offset;
+  Point<double> _offset; // Offset from origin of viewport when scale is 1.0
   Point<double> _translateFrom; // Point where a single translation began
-  // TODO scale at point where user's fingers are?
+  Point<double> _scaleFocalPoint; // Point where a single translation began
   double _scaleStart = 1.0; // Scale value at start of scaling gesture
   double _scale = 1.0;
 
@@ -133,23 +133,58 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
     return scale * translate;
   }
 
+  // Given a point in screen coordinates, return the point in the scene.
+  Offset _fromScreen(Offset screenPoint, Point<double> offset, double scale) {
+    // Locate the center of the screen in scene coordinates
+    final Offset centerOfScreen = Offset(
+      offset.x - widget.screenSize.width / 2,
+      offset.y - widget.screenSize.height / 2,
+    );
+    final Offset fromCenterOfScreen = Offset(
+      (screenPoint.dx - widget.screenSize.width / 2) / scale,
+      (screenPoint.dy - widget.screenSize.height / 2) / scale,
+    );
+    return centerOfScreen + fromCenterOfScreen;
+  }
+
   // Handle panning and pinch zooming events
   void onScaleStart(ScaleStartDetails details) {
     _controller.stop();
     setState(() {
       _scaleStart = _scale;
       _translateFrom = Point<double>(details.focalPoint.dx, details.focalPoint.dy);
+      _scaleFocalPoint = Point<double>(
+        _translateFrom.x / _scale + _offset.x,
+        _translateFrom.y / _scale + _offset.y,
+      );
     });
   }
   void onScaleUpdate(ScaleUpdateDetails details) {
     setState(() {
       if (_scaleStart != null) {
+        final Offset focalPointScene = _fromScreen(details.focalPoint, _offset, _scale);
         _scale = _scaleStart * details.scale;
         if (_scale > MAX_SCALE) {
           _scale = MAX_SCALE;
         }
         if (_scale < MIN_SCALE) {
           _scale = MIN_SCALE;
+        }
+
+        if (details.scale != 1.0) {
+          // While scaling, translate such that the user's fingers stay on the
+          // same place in the scene. That means that the focal point of the
+          // scale should be on the same place in the scene before and after the
+          // scale.
+          final Offset focalPointSceneNext = _fromScreen(details.focalPoint, _offset, _scale);
+          final Offset nextOffset = Offset(
+            _offset.x + focalPointSceneNext.dx - focalPointScene.dx,
+            _offset.y + focalPointSceneNext.dy - focalPointScene.dy,
+          );
+          _offset = Point<double>(
+            nextOffset.dx,
+            nextOffset.dy,
+          );
         }
       }
       if (_translateFrom != null && details.scale == 1.0) {
