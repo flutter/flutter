@@ -630,6 +630,18 @@ class UiKitViewController {
     return SystemChannels.platform_views.invokeMethod('acceptGesture', args);
   }
 
+  /// Rejects an active gesture.
+  ///
+  /// When a touch sequence is happening on the embedded UIView all touch events are delayed.
+  /// Calling this method drops the buffered touch events and prevents any future touch events for
+  /// the pointers that are part of the active touch sequence from arriving to the embedded view.
+  Future<void> rejectGesture() {
+    final Map<String, dynamic> args = <String, dynamic> {
+      'id': id,
+    };
+    return SystemChannels.platform_views.invokeMethod('rejectGesture', args);
+  }
+
   /// Disposes the view.
   ///
   /// The [UiKitViewController] object is unusable after calling this.

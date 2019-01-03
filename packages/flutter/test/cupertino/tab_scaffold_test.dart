@@ -312,6 +312,89 @@ void main() {
     ));
     expect(tab2.text.style.color, CupertinoColors.destructiveRed);
   });
+
+  testWidgets('Tab contents are padded when there are view insets', (WidgetTester tester) async {
+    BuildContext innerContext;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            viewInsets: EdgeInsets.only(bottom: 200),
+          ),
+          child: CupertinoTabScaffold(
+            tabBar: _buildTabBar(),
+            tabBuilder: (BuildContext context, int index) {
+              innerContext = context;
+              return const Placeholder();
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder)), Rect.fromLTWH(0, 0, 800, 400));
+    // Don't generate more media query padding from the translucent bottom
+    // tab since the tab is behind the keyboard now.
+    expect(MediaQuery.of(innerContext).padding.bottom, 0);
+  });
+
+  testWidgets('Tab contents are not inset when resizeToAvoidBottomInset overriden', (WidgetTester tester) async {
+    BuildContext innerContext;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            viewInsets: EdgeInsets.only(bottom: 200),
+          ),
+          child: CupertinoTabScaffold(
+            resizeToAvoidBottomInset: false,
+            tabBar: _buildTabBar(),
+            tabBuilder: (BuildContext context, int index) {
+              innerContext = context;
+              return const Placeholder();
+            }
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder)), Rect.fromLTWH(0, 0, 800, 600));
+    // Media query padding shows up in the inner content because it wasn't masked
+    // by the view inset.
+    expect(MediaQuery.of(innerContext).padding.bottom, 50);
+  });
+
+  testWidgets('Tab and page scaffolds do not double stack view insets', (WidgetTester tester) async {
+    BuildContext innerContext;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            viewInsets: EdgeInsets.only(bottom: 200),
+          ),
+          child: CupertinoTabScaffold(
+            tabBar: _buildTabBar(),
+            tabBuilder: (BuildContext context, int index) {
+              return CupertinoPageScaffold(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    innerContext = context;
+                    return const Placeholder();
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder)), Rect.fromLTWH(0, 0, 800, 400));
+    expect(MediaQuery.of(innerContext).padding.bottom, 0);
+  });
 }
 
 CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
