@@ -53,8 +53,8 @@ class MapInteraction extends StatefulWidget {
   @override _MapInteractionState createState() => _MapInteractionState();
 }
 class _MapInteractionState extends State<MapInteraction> with SingleTickerProviderStateMixin {
-  Animation<double> animation;
-  AnimationController controller;
+  Animation<double> _animation;
+  AnimationController _controller;
   static const double MAX_SCALE = 2.5;
   static const double MIN_SCALE = 0.25;
   Point<double> _offset;
@@ -76,10 +76,10 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
       widget.screenSize.height / 2,
     );
 
-    controller = AnimationController(
+    _controller = AnimationController(
       vsync: this,
     );
-    animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
   }
 
   @override
@@ -136,7 +136,7 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
 
   // Handle panning and pinch zooming events
   void onScaleStart(ScaleStartDetails details) {
-    controller.stop();
+    _controller.stop();
     setState(() {
       _scaleStart = _scale;
       _translateFrom = Point<double>(details.focalPoint.dx, details.focalPoint.dy);
@@ -175,8 +175,8 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
       _translateFrom = null;
     });
 
-    animation.removeListener(animationListener);
-    controller.reset();
+    _animation.removeListener(animationListener);
+    _controller.reset();
 
     if (details.velocity.pixelsPerSecond.dx == 0
       && details.velocity.pixelsPerSecond.dy == 0) {
@@ -184,31 +184,31 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
     }
 
     final Inertia inertia = Inertia(details.velocity, _offset);
-    controller.duration = Duration(milliseconds: inertia.getDuration().toInt());
+    _controller.duration = Duration(milliseconds: inertia.getDuration().toInt());
     animationListener = () {
-      if (animation.value <= 0) {
+      if (_animation.value <= 0) {
         return;
       }
 
       setState(() {
         final Point<double> offsetNext = inertia.getPositionAt(
-          Duration(milliseconds: (animation.value * controller.duration.inMilliseconds).toInt()),
+          Duration(milliseconds: (_animation.value * _controller.duration.inMilliseconds).toInt()),
         );
 
         if (_offset.distanceTo(offsetNext) == 0) {
-          animation.removeListener(animationListener);
+          _animation.removeListener(animationListener);
           return;
         }
         _offset = offsetNext;
       });
     };
-    animation.addListener(animationListener);
-    controller.forward();
+    _animation.addListener(animationListener);
+    _controller.forward();
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 }
