@@ -36,12 +36,13 @@ void showGalleryAboutDialog(BuildContext context) {
   final ThemeData themeData = Theme.of(context);
   final TextStyle aboutTextStyle = themeData.textTheme.body2;
   final TextStyle linkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
+  final String monthYear =  MaterialLocalizations.of(context).formatMonthYear(DateTime.now());
 
   showAboutDialog(
     context: context,
-    applicationVersion: 'April 2018 Preview',
+    applicationVersion: monthYear,
     applicationIcon: const FlutterLogo(),
-    applicationLegalese: '© 2017 The Chromium Authors',
+    applicationLegalese: '© 2019 The Chromium Authors',
     children: <Widget>[
       Padding(
         padding: const EdgeInsets.only(top: 24.0),
@@ -53,9 +54,9 @@ void showGalleryAboutDialog(BuildContext context) {
                 text: 'Flutter is an open-source project to help developers '
                       'build high-performance, high-fidelity, mobile apps for '
                       '${defaultTargetPlatform == TargetPlatform.iOS ? 'multiple platforms' : 'iOS and Android'} '
-                      'from a single codebase. This gallery is a preview of '
-                      "Flutter's many widgets, behaviors, animations, layouts, "
-                      'and more. Learn more about Flutter at '
+                      'from a single codebase. This design lab is a playground '
+                      "and showcase of Flutter's many widgets, behaviors, "
+                      'animations, layouts, and more. Learn more about Flutter at '
               ),
               _LinkTextSpan(
                 style: linkStyle,
