@@ -529,7 +529,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleForcePressStarted(ForcePressDetails details) {
-    _renderEditable.setLastTapDownPosition(details.globalPosition);
+//    _renderEditable.setLastTapDownPosition(details.globalPosition);
     // The cause is not technically double tap, but we would like the same thing to happen.
     _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
   }
