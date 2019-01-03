@@ -142,8 +142,8 @@ class PaginatedDataTable extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * [onRowsPerPageChanged]
-  /// * [defaultRowsPerPage]
+  ///  * [onRowsPerPageChanged]
+  ///  * [defaultRowsPerPage]
   final int rowsPerPage;
 
   /// The default value for [rowsPerPage].

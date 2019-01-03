@@ -27,6 +27,7 @@ const double _kTextAndIconTabHeight = 72.0;
 /// Defines how the bounds of the selected tab indicator are computed.
 ///
 /// See also:
+///
 ///  * [TabBar], which displays a row of tabs.
 ///  * [TabBarView], which displays a widget for the currently selected tab.
 ///  * [TabBar.indicator], which defines the appearance of the selected tab
@@ -550,6 +551,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.onTap,
   }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(indicator != null || (indicatorWeight != null && indicatorWeight > 0.0)),
@@ -664,6 +666,17 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+  /// An optional callback that's called when the [TabBar] is tapped.
+  ///
+  /// The callback is applied to the index of the tab where the tap occurred.
+  ///
+  /// This callback has no effect on the default handling of taps. It's for
+  /// applications that want to do a little extra work when a tab is tapped,
+  /// even if the tap doesn't change the TabController's index. TabBar [onTap]
+  /// callbacks should not make changes to the TabController since that would
+  /// interfere with the default tap handler.
+  final ValueChanged<int> onTap;
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
@@ -888,6 +901,9 @@ class _TabBarState extends State<TabBar> {
   void _handleTap(int index) {
     assert(index >= 0 && index < widget.tabs.length);
     _controller.animateTo(index);
+    if (widget.onTap != null) {
+      widget.onTap(index);
+    }
   }
 
   Widget _buildStyledTab(Widget child, bool selected, Animation<double> animation) {
@@ -1178,7 +1194,7 @@ class _TabBarViewState extends State<TabBarView> {
     if (notification is ScrollUpdateNotification && !_controller.indexIsChanging) {
       if ((_pageController.page - _controller.index).abs() > 1.0) {
         _controller.index = _pageController.page.floor();
-        _currentIndex=_controller.index;
+        _currentIndex =_controller.index;
       }
       _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0);
     } else if (notification is ScrollEndNotification) {

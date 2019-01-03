@@ -89,7 +89,8 @@ class CupertinoSwitch extends StatefulWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to [CupertinoColors.activeGreen].
+  /// Defaults to [CupertinoColors.activeGreen] when null and ignores the
+  /// [CupertinoTheme] in accordance to native iOS behavior.
   final Color activeColor;
 
   /// {@template flutter.cupertino.switch.dragStartBehavior}
