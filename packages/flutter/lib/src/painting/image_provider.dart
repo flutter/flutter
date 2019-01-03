@@ -266,7 +266,7 @@ abstract class ImageProvider<T> {
       await null; // wait an event turn in case a listener has been added to the image stream.
       final _ErrorImageCompleter imageCompleter = _ErrorImageCompleter();
       stream.setCompleter(imageCompleter);
-      imageCompleter.reportError( // ignore: invalid_use_of_protected_member
+      imageCompleter.setError(
         exception: exception,
         stack: stack,
         context: 'while resolving an image',
@@ -778,7 +778,23 @@ class ExactAssetImage extends AssetBundleImageProvider {
   String toString() => '$runtimeType(name: "$keyName", scale: $scale, bundle: $bundle)';
 }
 
-// A completer used when resolving an image completes
+// A completer used when resolving an image fails sync.
 class _ErrorImageCompleter extends ImageStreamCompleter {
   _ErrorImageCompleter();
+
+  void setError({
+    String context,
+    dynamic exception,
+    StackTrace stack,
+    InformationCollector informationCollector,
+    bool silent = false,
+  }) {
+    reportError(
+      context: context,
+      exception: exception,
+      stack: stack,
+      informationCollector: informationCollector,
+      silent: silent,
+    );
+  }
 }
