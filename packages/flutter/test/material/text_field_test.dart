@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -4199,6 +4200,7 @@ void main() {
   );
 
   testWidgets('force press selects word', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -4218,14 +4220,13 @@ void main() {
     final TestGesture gesture =
     await tester.startGesture(textfieldStart + const Offset(150.0, 5.0));
     await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
-    // force press selection.
-    expect(
-      controller.selection,
-      const TextSelection(baseOffset: 8, extentOffset: 12),
-    );
+
+    // We don't want this gesture to select any word on Android.
+    expect(controller.selection, const TextSelection.collapsed(offset: -1));
 
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(find.byType(FlatButton), findsNWidgets(3));
+    expect(find.byType(FlatButton), findsNothing);
+    debugDefaultTargetPlatformOverride = null;
   });
 }

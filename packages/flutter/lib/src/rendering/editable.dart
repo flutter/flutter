@@ -1126,18 +1126,11 @@ class RenderEditable extends RenderBox {
   /// When [ignorePointer] is true, an ancestor widget must respond to tap
   /// down events by calling this method.
   void handleTapDown(TapDownDetails details) {
-    setLastTapDownPosition(details.globalPosition);
+    _lastTapDownPosition = details.globalPosition + -_paintOffset;
   }
   void _handleTapDown(TapDownDetails details) {
     assert(!ignorePointer);
     handleTapDown(details);
-  }
-
-  /// Sets the last tap down position.
-  ///
-  /// The input must be the global pointer position without any offset applied.
-  void setLastTapDownPosition(Offset globalPosition) {
-    _lastTapDownPosition = globalPosition + -_paintOffset;
   }
 
   /// If [ignorePointer] is false (the default) then this method is called by
@@ -1198,6 +1191,12 @@ class RenderEditable extends RenderBox {
       final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
       onSelectionChanged(_selectWordAtOffset(position), this, cause);
     }
+  }
+
+  /// Select a word at the given global position.
+  void selectWordAt(Offset globalPosition, {@required SelectionChangedCause cause}) {
+    _lastTapDownPosition = globalPosition;
+    selectWord(cause: cause);
   }
 
   /// Move the selection to the beginning or end of a word.
