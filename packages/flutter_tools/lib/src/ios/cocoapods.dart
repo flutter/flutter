@@ -25,7 +25,8 @@ const String noCocoaPodsConsequence = '''
   For more info, see https://flutter.io/platform-plugins''';
 
 const String unknownCocoaPodsConsequence = '''
-  Make sure that `pod --version` always return pure version like :''';
+  Flutter is unable to determine the installed CocoaPods's version.
+  Ensure that the output of 'pod --version' contains only digits and . to be recognized by Flutter.''';
 
 const String cocoaPodsInstallInstructions = '''
   brew install cocoapods
@@ -121,8 +122,8 @@ class CocoaPods {
         return false;
       case CocoaPodsStatus.unknownVersion:
         printError(
-          'Warning: CocoaPods unknown version installed.\n'
-          '$unknownCocoaPodsConsequence $cocoaPodsRecommendedVersion\n'
+          'Warning: Unknown CocoaPods version installed.\n'
+          '$unknownCocoaPodsConsequence\n'
           'To upgrade:\n'
           '$cocoaPodsUpgradeInstructions\n',
           emphasis: true,

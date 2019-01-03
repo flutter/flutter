@@ -196,7 +196,7 @@ class CocoaPodsValidator extends DoctorValidator {
         else if (cocoaPodsStatus == CocoaPodsStatus.unknownVersion) {
           status = ValidationType.partial;
           messages.add(ValidationMessage.hint(
-              userMessages.cocoaPodsUnknownVersion('$unknownCocoaPodsConsequence ${cocoaPods.cocoaPodsRecommendedVersion}', cocoaPodsUpgradeInstructions)));
+              userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
         } else {
           status = ValidationType.partial;
           messages.add(ValidationMessage.hint(

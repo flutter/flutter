@@ -171,7 +171,7 @@ class UserMessages {
       'To install:\n'
       '$installInstructions';
   String cocoaPodsUnknownVersion(String consequence, String upgradeInstructions) =>
-      'CocoaPods unknown version installed.\n'
+      'Unknown CocoaPods version installed.\n'
       '$consequence\n'
       'To upgrade:\n'
       '$upgradeInstructions';
