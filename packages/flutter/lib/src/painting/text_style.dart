@@ -18,10 +18,9 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 
 /// An immutable style in which paint text.
 ///
-/// {@tool sample}
-///
 /// ### Bold
 ///
+/// {@tool sample}
 /// Here, a single line of text in a [Text] widget is given a specific style
 /// override. The style is mixed with the ambient [DefaultTextStyle] by the
 /// [Text] widget.
@@ -33,10 +32,10 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool sample}
 ///
 /// ### Italics
 ///
+/// {@tool sample}
 /// As in the previous example, the [Text] widget is given a specific style
 /// override which is implicitly mixed with the ambient [DefaultTextStyle].
 ///
@@ -84,6 +83,7 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 ///
 /// ### Size
 ///
+/// {@tool sample}
 /// In this example, the ambient [DefaultTextStyle] is explicitly manipulated to
 /// obtain a [TextStyle] that doubles the default font size.
 ///
@@ -93,21 +93,25 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 ///   style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ### Line height
 ///
+/// {@tool sample}
 /// The [height] property can be used to change the line height. Here, the line
-/// height is set to 100 logical pixels, so that the text is very spaced out.
+/// height is set to 5 times the font size, so that the text is very spaced out.
 ///
 /// ```dart
 /// Text(
 ///   'Don\'t act surprised, you guys, cuz I wrote \'em!',
-///   style: TextStyle(height: 100.0),
+///   style: TextStyle(height: 5.0),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ### Wavy red underline with black text
 ///
+/// {@tool sample}
 /// Styles can be combined. In this example, the misspelt word is drawn in black
 /// text and underlined with a wavy red line to indicate a spelling error. (The
 /// remainder is styled according to the Flutter default text styles, not the
@@ -135,6 +139,7 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ### Custom Fonts
 ///
@@ -169,9 +174,11 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// To select a custom font, create [TextStyle] using the [fontFamily]
 /// argument as shown in the example below:
 ///
+/// {@tool sample}
 /// ```dart
 /// const TextStyle(fontFamily: 'Raleway')
 /// ```
+/// {@end-tool}
 ///
 /// To use a font family defined in a package, the [package] argument must be
 /// provided. For instance, suppose the font declaration above is in the
@@ -212,9 +219,48 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// In this case, since the app locally defines the font, the TextStyle is
 /// created without the `package` argument:
 ///
+/// {@tool sample}
 /// ```dart
 /// const TextStyle(fontFamily: 'Raleway')
 /// ```
+/// {@end-tool}
+///
+/// ### Custom Font Fallback
+///
+/// A custom [fontFamilyFallback] list can be provided. The list should be an
+/// ordered list of strings of font family names in the order they will be attempted.
+///
+/// The fonts in [fontFamilyFallback] will be used only if the requested glyph is
+/// not present in the [fontFamily].
+///
+/// The fallback order is:
+///
+///  * [fontFamily]
+///  * [fontFamilyFallback] in order of first to last.
+///
+/// The glyph used will always be the first matching version in fallback order.
+///
+/// The [fontFamilyFallback] property is commonly used to specify different font
+/// families for multilingual text spans as well as separate fonts for glyphs such
+/// as emojis.
+///
+/// {@tool sample}
+/// In the following example, any glyphs not present in the font `Raleway` will be attempted
+/// to be resolved with `Noto Sans CJK SC`, and then with `Noto Color Emoji`:
+///
+/// ```dart
+/// const TextStyle(
+///   fontFamily: 'Raleway',
+///   fontFamilyFallback: <String>[
+///     'Noto Sans CJK SC',
+///     'Noto Color Emoji',
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+///
+/// If all custom fallback font families are exhausted and no match was found
+/// or no custom fallback was provided, the platform font fallback will be used.
 ///
 /// See also:
 ///
