@@ -147,8 +147,8 @@ class Dismissible extends StatefulWidget {
 
   /// Determines the way that drag start behavior is handled.
   ///
-  /// If set to [DragStartBehavior.start], dismissible closing drag behavior will
-  /// begin upon the detection of a drag gesture. If set to
+  /// If set to [DragStartBehavior.start], the drag gesture used to dismiss a
+  /// dismissible will begin upon the detection of a drag gesture. If set to
   /// [DragStartBehavior.down] it will begin when a down event is first detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag

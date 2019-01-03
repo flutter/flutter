@@ -283,6 +283,8 @@ class DayPicker extends StatelessWidget {
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate selectableDayPredicate;
 
+  /// The initial drag behavior of the date picker wheel.
+  ///
   /// If set to [DragStartBehavior.start], picker drag behavior will begin upon the
   /// drag gesture winning the arena. If set to [DragStartBehavior.down] it will
   /// begin when a down event is first detected.

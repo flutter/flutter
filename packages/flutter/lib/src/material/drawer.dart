@@ -202,9 +202,10 @@ class DrawerController extends StatefulWidget {
   /// {@template flutter.material.drawer.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
-  /// If set to [DragStartBehavior.start], drawer opening drag behavior will
-  /// begin upon the detection of a drag gesture. If set to
-  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  /// If set to [DragStartBehavior.start], the drag behavior used for opening
+  /// and closing a drawer will begin upon the detection of a drag gesture. If
+  /// set to [DragStartBehavior.down] it will begin when a down event is first
+  /// detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make

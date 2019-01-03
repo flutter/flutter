@@ -573,7 +573,7 @@ class RawGestureDetector extends StatefulWidget {
     this.excludeFromSemantics = false,
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
-       super(key: key) ;
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///

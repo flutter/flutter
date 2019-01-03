@@ -103,6 +103,8 @@ class CupertinoSwitch extends StatefulWidget {
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
+  ///
+  /// By default, the drag start behavior is [DragStartBehavior.start].
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 

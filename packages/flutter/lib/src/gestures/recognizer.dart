@@ -25,12 +25,19 @@ export 'pointer_router.dart' show PointerRouter;
 typedef RecognizerCallback<T> = T Function();
 
 /// Configuration of offset passed to [DragStartDetails].
+///
+/// The settings used to determine how when a drag formally starts when the user
+/// initiates a drag.
+///
+/// See also:
+///   * [@macro flutter.gestures.monodrag.dragStartExample]
 enum DragStartBehavior {
-  /// Set the initial offset, at the position where we first detected a down
-  /// event.
+  /// Set the initial offset, at the position where the first down even was
+  /// detected.
   down,
 
-  /// Set the initial position at the position we detected a drag start event.
+  /// Set the initial position at the position where the drag start event was
+  /// detected.
   start,
 }
 
