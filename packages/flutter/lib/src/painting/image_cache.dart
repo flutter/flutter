@@ -126,7 +126,12 @@ class ImageCache {
   /// key is moved to the "most recently used" position.
   ///
   /// The arguments must not be null. The `loader` cannot return null.
-  ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader()) {
+  ///
+  /// In the event that the loader throws an exception, it will be caught only if
+  /// `onError` is also provided. When an exception is caught resolving an image,
+  /// no completers are cached and `null` is returned instead of a new
+  /// completer.
+  ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader(), { ImageErrorListener onError }) {
     assert(key != null);
     assert(loader != null);
     ImageStreamCompleter result = _pendingImages[key];
@@ -140,7 +145,16 @@ class ImageCache {
       _cache[key] = image;
       return image.completer;
     }
-    result = loader();
+    try {
+      result = loader();
+    } catch (error, stackTrace) {
+      if (onError != null) {
+        onError(error, stackTrace);
+        return null;
+      } else {
+        rethrow;
+      }
+    }
     void listener(ImageInfo info, bool syncCall) {
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
