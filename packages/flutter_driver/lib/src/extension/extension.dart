@@ -38,6 +38,7 @@ typedef DataHandler = Future<String> Function(String message);
 
 class _DriverExtensionRegistrar extends ExtensionRegistrarBase {
   _DriverExtensionRegistrar(this._handler, this._silenceErrors);
+  FlutterDriverExtension _driverExtension;
 
   final DataHandler _handler;
   final bool _silenceErrors;
@@ -47,8 +48,8 @@ class _DriverExtensionRegistrar extends ExtensionRegistrarBase {
 
   @override
   ServiceExtensionCallback get callback{
-    final FlutterDriverExtension _extension=FlutterDriverExtension(_handler, _silenceErrors);
-    return _extension.call;
+    _driverExtension = _driverExtension ?? FlutterDriverExtension(_handler, _silenceErrors);
+    return _driverExtension.call;
   }
 }
 

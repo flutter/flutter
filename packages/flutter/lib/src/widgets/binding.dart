@@ -943,46 +943,6 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   }
 }
 
-/// Base class that provide necessary information to register a ServiceExtension.
-abstract class ExtensionRegistrarBase {
-  /// Name to registers a service extension method with.(full name
-  /// "ext.flutter.name").
-  String get name;
-
-  /// Callback called when the extension method is called.
-  ServiceExtensionCallback get callback;
-}
-
-/// Binding for service extensions to register.
-///
-/// There might be multiple optional ServiceExtensions in practice.
-/// For example, ServiceExtension used by 'flutter driver' is valid only in that command.
-/// Using [ExtensionBinding.registerExtensionRegistrar], developers can register custom service extensions conditionally,
-/// without inheriting & instancing a [BindingBase] instance.
-mixin ExtensionBinding on BindingBase {
-  /// List to save ExtensionRegistrars.
-  static final List<ExtensionRegistrarBase> _extensionRegistrars = <ExtensionRegistrarBase>[];
-
-  /// Calling [ExtensionBinding.registerExtensionRegistrar] with a registrar will save it in [_extensionRegistrars].
-  /// However, the service extension corresponding to the registrar won't be registered directly.
-  /// It will be actually registered until the singleton [BindingBase]'s instantiation.
-  ///
-  /// It's declared static so that developers doesn't need to instantiate a [ExtensionBinding] instance to call [ExtensionBinding.registerExtensionRegistrar].
-  /// [_extensionRegistrars] is declared static for the same reason.
-  static void registerExtensionRegistrar(ExtensionRegistrarBase registrar) {
-    _extensionRegistrars.add(registrar);
-  }
-
-  @override
-  void initServiceExtensions() {
-    super.initServiceExtensions();
-    for(ExtensionRegistrarBase registrar in _extensionRegistrars) {
-      registerServiceExtension(name: registrar.name, callback: registrar.callback);
-    }
-  }
-
-}
-
 /// A concrete binding for applications based on the Widgets framework.
 ///
 /// This is the glue that binds the framework to the Flutter engine.
