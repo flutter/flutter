@@ -72,3 +72,15 @@ class TestImage implements ui.Image {
     throw UnimplementedError();
   }
 }
+
+class ErrorImageProvider extends ImageProvider<ErrorImageProvider> {
+  @override
+  ImageStreamCompleter load(ErrorImageProvider key) {
+    throw Error();
+  }
+
+  @override
+  Future<ErrorImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<ErrorImageProvider>(this);
+  }
+}
