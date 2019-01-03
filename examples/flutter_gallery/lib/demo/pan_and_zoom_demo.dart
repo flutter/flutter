@@ -63,7 +63,6 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
   // TODO scale at point where user's fingers are?
   double _scaleStart = 1.0; // Scale value at start of scaling gesture
   double _scale = 1.0;
-  Function _animationListener;
 
   @override
   void initState() {
@@ -175,34 +174,27 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
       _translateFrom = null;
     });
 
-    _animation?.removeListener(_animationListener);
+    _animation?.removeListener(_onAnimate);
     _controller.reset();
 
+    // If the scale ended with velocity, animate inertial movement
     final double velocityTotal = details.velocity.pixelsPerSecond.dx.abs()
       + details.velocity.pixelsPerSecond.dy.abs();
     if (velocityTotal == 0) {
       return;
     }
 
-    final Inertia inertia = Inertia(details.velocity, _offset);
-    _animation = Tween<Point<double>>(begin: _offset, end: inertia.finalPosition).animate(_controller);
-    _controller.duration = Duration(milliseconds: inertia.duration.toInt());
-
-    _animationListener = () {
-      if (_controller.value <= 0) {
-        return;
-      }
-
-      setState(() {
-        if (_offset.distanceTo(_animation.value) == 0) {
-          _animation.removeListener(_animationListener);
-          return;
-        }
-        _offset = _animation.value;
-      });
-    };
-    _animation.addListener(_animationListener);
+    final InertialMotion inertialMotion = InertialMotion(details.velocity, _offset);
+    _animation = Tween<Point<double>>(begin: _offset, end: inertialMotion.finalPosition).animate(_controller);
+    _controller.duration = Duration(milliseconds: inertialMotion.duration.toInt());
+    _animation.addListener(_onAnimate);
     _controller.forward();
+  }
+
+  void _onAnimate() {
+    setState(() {
+      _offset = _animation.value;
+    });
   }
 
   @override
@@ -237,40 +229,26 @@ class BoardPainter extends CustomPainter {
   bool shouldRepaint(BoardPainter oldDelegate) => false;
 }
 
-class Inertia {
-  Inertia(this._initialVelocity, this._initialPosition);
+// Provides calculations for an object moving with inertia and friction.
+class InertialMotion {
+  InertialMotion(this._initialVelocity, this._initialPosition);
 
-  static const double FRICTIONAL_ACCELERATION = 0.01;
+  static const double FRICTIONAL_ACCELERATION = 0.01; // How quickly to stop
   Velocity _initialVelocity;
   Point<double> _initialPosition;
 
-  Point<double> getPositionAt(Duration time) {
-    final double velocityTotal = _initialVelocity.pixelsPerSecond.dx.abs() + _initialVelocity.pixelsPerSecond.dy.abs();
-    if (velocityTotal == 0) {
-      return _initialPosition;
-    }
-
-    final double xf = _getPosition(
-      r0: _initialPosition.x,
-      v0: _initialVelocity.pixelsPerSecond.dx / 1000,
-      t: time.inMilliseconds,
-      a: acceleration.x,
-    );
-    final double yf = _getPosition(
-      r0: _initialPosition.y,
-      v0: _initialVelocity.pixelsPerSecond.dy / 1000,
-      t: time.inMilliseconds,
-      a: acceleration.y,
-    );
-    return Point<double>(xf, yf);
+  // The position when the motion stops.
+  Point<double> get finalPosition {
+    return _getPositionAt(Duration(milliseconds: duration.toInt()));
   }
 
-  Point<double> get finalPosition {
-    return getPositionAt(Duration(milliseconds: duration.toInt()));
+  // Get the total time that the animation takes to stop
+  double get duration {
+    return (_initialVelocity.pixelsPerSecond.dx / 1000 / _acceleration.x).abs();
   }
 
   // The acceleration opposing the initial velocity
-  Vector2 get acceleration {
+  Vector2 get _acceleration {
     final double velocityTotal = _initialVelocity.pixelsPerSecond.dx.abs() + _initialVelocity.pixelsPerSecond.dy.abs();
     final double vRatioX = _initialVelocity.pixelsPerSecond.dx.abs() / velocityTotal;
     final double vRatioY = _initialVelocity.pixelsPerSecond.dy.abs() / velocityTotal;
@@ -282,18 +260,34 @@ class Inertia {
     );
   }
 
-  // Get the total time that the animation takes to stop
-  double get duration {
-    return (_initialVelocity.pixelsPerSecond.dx / 1000 / acceleration.x).abs();
+  // The position at a given time
+  Point<double> _getPositionAt(Duration time) {
+    final double xf = _getPosition(
+      r0: _initialPosition.x,
+      v0: _initialVelocity.pixelsPerSecond.dx / 1000,
+      t: time.inMilliseconds,
+      a: _acceleration.x,
+    );
+    final double yf = _getPosition(
+      r0: _initialPosition.y,
+      v0: _initialVelocity.pixelsPerSecond.dy / 1000,
+      t: time.inMilliseconds,
+      a: _acceleration.y,
+    );
+    return Point<double>(xf, yf);
   }
 
   // Physics equation of motion
   double _getPosition({double r0, double v0, int t, double a}) {
+    // TODO Is this check necessary? Should never be a problem since it's being
+    // called based only on the duration until stopping
     // Stop movement when it would otherwise reverse direction
+    /*
     final double stopTime = (v0 / a).abs();
     if (t > stopTime) {
       t = stopTime.toInt();
     }
+    */
 
     final double answer = r0 + v0 * t + 0.5 * a * pow(t, 2);
     return answer;
