@@ -275,6 +275,14 @@ void debugWidgetBuilderValue(Widget widget, Widget built) {
         'To return an empty space that takes as little room as possible, return "new Container(width: 0.0, height: 0.0)".'
       );
     }
+    if (widget == built) {
+      throw FlutterError(
+        'A build function returned context.widget.\n'
+        'The offending widget is: $widget\n'
+        'Build functions must never return their BuildContext parameter\'s widget or a child that contains "context.widget". '
+        'Doing so introduces a loop in the widget tree that can cause the app to crash.'
+      );
+    }
     return true;
   }());
 }

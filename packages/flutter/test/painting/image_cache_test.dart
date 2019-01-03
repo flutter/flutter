@@ -128,5 +128,18 @@ void main() {
       expect(imageCache.currentSizeBytes, 256);
       expect(imageCache.maximumSizeBytes, 256 + 1000);
     });
+
+    test('Returns null if an error is caught resolving an image', () {
+      final ErrorImageProvider errorImage = ErrorImageProvider();
+      expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage)), throwsA(isInstanceOf<Error>()));
+      bool caughtError = false;
+      final ImageStreamCompleter result = imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage), onError: (dynamic error, StackTrace stackTrace) {
+        caughtError = true;
+      });
+      expect(result, null);
+      expect(caughtError, true);
+    });
   });
 }
+
+

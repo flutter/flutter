@@ -31,14 +31,6 @@ import 'theme.dart';
 ///
 /// For a documentation about the various parameters, see [TextField].
 ///
-/// See also:
-///
-///  * <https://material.google.com/components/text-fields.html>
-///  * [TextField], which is the underlying text field without the [Form]
-///    integration.
-///  * [InputDecorator], which shows the labels and other visual elements that
-///    surround the actual text editing widget.
-///
 /// {@tool sample}
 ///
 /// Creates a [TextFormField] with an [InputDecoration] and validator function.
@@ -60,6 +52,14 @@ import 'theme.dart';
 /// )
 /// ```
 /// {@end-tool}
+///
+/// See also:
+///
+///  * <https://material.google.com/components/text-fields.html>
+///  * [TextField], which is the underlying text field without the [Form]
+///    integration.
+///  * [InputDecorator], which shows the labels and other visual elements that
+///    surround the actual text editing widget.
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
   ///
@@ -95,6 +95,9 @@ class TextFormField extends FormField<String> {
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
     bool enabled = true,
+    double cursorWidth = 2.0,
+    Radius cursorRadius,
+    Color cursorColor,
     Brightness keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     bool enableInteractiveSelection = true,
@@ -141,6 +144,9 @@ class TextFormField extends FormField<String> {
         onSubmitted: onFieldSubmitted,
         inputFormatters: inputFormatters,
         enabled: enabled,
+        cursorWidth: cursorWidth,
+        cursorRadius: cursorRadius,
+        cursorColor: cursorColor,
         scrollPadding: scrollPadding,
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: enableInteractiveSelection,

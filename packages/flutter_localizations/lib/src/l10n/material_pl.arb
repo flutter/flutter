@@ -55,5 +55,5 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Jeszcze 1 znak",
   "remainingTextFieldCharacterCountOther": "Jeszcze $remainingCount znaku",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "Odśwież"
 }

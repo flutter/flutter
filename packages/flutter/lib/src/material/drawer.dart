@@ -85,17 +85,22 @@ class Drawer extends StatelessWidget {
   /// Creates a material design drawer.
   ///
   /// Typically used in the [Scaffold.drawer] property.
+  ///
+  /// The [elevation] must be non-negative.
   const Drawer({
     Key key,
     this.elevation = 16.0,
     this.child,
     this.semanticLabel,
-  }) : super(key: key);
+  }) : assert(elevation != null && elevation >= 0.0),
+       super(key: key);
 
-  /// The z-coordinate at which to place this drawer. This controls the size of
-  /// the shadow below the drawer.
+  /// The z-coordinate at which to place this drawer relative to its parent.
   ///
-  /// Defaults to 16, the appropriate elevation for drawers.
+  /// This controls the size of the shadow below the drawer.
+  ///
+  /// Defaults to 16, the appropriate elevation for drawers. The value is
+  /// always non-negative.
   final double elevation;
 
   /// The widget below this widget in the tree.
