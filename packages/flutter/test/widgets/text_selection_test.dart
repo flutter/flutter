@@ -17,7 +17,7 @@ void main() {
   void _handleTapDown(TapDownDetails details) { tapCount++; }
   void _handleSingleTapUp(TapUpDetails details) { singleTapUpCount++; }
   void _handleSingleTapCancel() { singleTapCancelCount++; }
-  void _handleSingleLongTapDown() { singleLongTapDownCount++; }
+  void _handleSingleLongTapDown(GestureLongPressDragDownDetails details) { singleLongTapDownCount++; }
   void _handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
   void _handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
   void _handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
