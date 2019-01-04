@@ -602,7 +602,7 @@ abstract class ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         final int index = device.views.indexOf(view);
-        printStatus('Saving compilation trace for '
+        printStatus('Saving compilation training file for '
             '${device.device.name}${index == 0 ? '' :'/Isolate$index'}...');
 
         List<int> buffer;
@@ -619,7 +619,7 @@ abstract class ResidentRunner {
 
         outputFile.parent.createSync(recursive: true);
         outputFile.writeAsBytesSync(buffer);
-        printStatus('Compilation trace written to ${fs.path.relative(outputFile.path)}.');
+        printStatus('Compilation training written to ${fs.path.relative(outputFile.path)}.');
       }
     }
   }
