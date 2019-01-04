@@ -661,12 +661,11 @@ void main() {
   });
 
   testWidgets('InputDecorator counter text, widget, and null', (WidgetTester tester) async {
-    const int maxLength = 10;
-
     Widget buildFrame({
       InputCounterWidgetBuilder buildCounter,
       String counterText,
       Widget counter,
+      int maxLength,
     }) {
       return MaterialApp(
         home: Scaffold(
@@ -691,7 +690,8 @@ void main() {
 
     // When counter, counterText, and buildCounter are null, defaults to showing
     // the built-in counter.
-    await tester.pumpWidget(buildFrame());
+    int maxLength = 10;
+    await tester.pumpWidget(buildFrame(maxLength: maxLength));
     Finder counterFinder = find.byType(Text);
     expect(counterFinder, findsOneWidget);
     final Text counterWidget = tester.widget(counterFinder);
@@ -714,6 +714,7 @@ void main() {
       counterText: counterText,
       counter: counter,
       buildCounter: buildCounter,
+      maxLength: maxLength,
     ));
     counterFinder = find.byKey(counterKey);
     expect(counterFinder, findsOneWidget);
@@ -725,6 +726,7 @@ void main() {
     await tester.pumpWidget(buildFrame(
       counterText: counterText,
       buildCounter: buildCounter,
+      maxLength: maxLength,
     ));
     expect(find.text(counterText), findsOneWidget);
     counterFinder = find.byKey(counterKey);
@@ -735,6 +737,7 @@ void main() {
     // generated widget.
     await tester.pumpWidget(buildFrame(
       buildCounter: buildCounter,
+      maxLength: maxLength,
     ));
     expect(find.byKey(buildCounterKey), findsOneWidget);
     expect(counterFinder, findsNothing);
@@ -742,8 +745,16 @@ void main() {
 
     // When counterText is empty string and counter and buildCounter are null,
     // shows nothing.
-    await tester.pumpWidget(buildFrame(counterText: ''));
+    await tester.pumpWidget(buildFrame(counterText: '', maxLength: maxLength));
     expect(find.byType(Text), findsNothing);
+
+    // When no maxLength, can still show a counter
+    maxLength = null;
+    await tester.pumpWidget(buildFrame(
+      buildCounter: buildCounter,
+      maxLength: maxLength,
+    ));
+    expect(find.byKey(buildCounterKey), findsOneWidget);
   });
 
   testWidgets('InputDecoration errorMaxLines', (WidgetTester tester) async {

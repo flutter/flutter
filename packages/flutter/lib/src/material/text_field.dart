@@ -487,10 +487,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       return effectiveDecoration.copyWith(counter: counter);
     }
 
-    // If no maxLength then not showing a counter at all. Otherwise, generate
-    // the default counter.
     if (widget.maxLength == null)
-      return effectiveDecoration;
+      return effectiveDecoration; // No counter widget
 
     String counterText = '$currentLength';
     String semanticCounterText = '';
