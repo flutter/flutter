@@ -108,12 +108,8 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     if (!fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final String text = await fuchsiaSdk.netls();
-    final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
-    for (String name in parseFuchsiaDeviceOutput(text)) {
-      final String id = await fuchsiaSdk.netaddr();
-      devices.add(FuchsiaDevice(id, name: name));
-    }
+    final String text = await fuchsiaSdk.listDevices();
+    final List<FuchsiaDevice> devices = parseListDevices(text);
     return devices;
   }
 
@@ -127,6 +123,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 ///     $ ./netls
 ///     > device liliac-shore-only-last (fe80::82e4:da4d:fe81:227d/3)
 @visibleForTesting
+@deprecated
 List<String> parseFuchsiaDeviceOutput(String text) {
   final List<String> names = <String>[];
   for (String rawLine in text.trim().split('\n')) {
@@ -139,6 +136,20 @@ List<String> parseFuchsiaDeviceOutput(String text) {
     names.add(name);
   }
   return names;
+}
+
+@visibleForTesting
+List<FuchsiaDevice> parseListDevices(String text) {
+  final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
+  for (String rawLine in text.trim().split('\n')) {
+    final String line = rawLine.trim();
+    // ['ip', 'device name']
+    final List<String> words = line.split(' ');
+    final String name = words[1];
+    final String id = words[0];
+    devices.add(FuchsiaDevice(id, name: name));
+  }
+  return devices;
 }
 
 class FuchsiaDevice extends Device {

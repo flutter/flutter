@@ -28,6 +28,20 @@ class FuchsiaSdk {
   static const List<String> _netlsCommand = <String>['fx', 'netls', '--nowait'];
   static const List<String> _syslogCommand = <String>['fx', 'syslog', '--clock', 'Local'];
 
+  /// Example output:
+  ///    $ dev_finder list -full
+  ///    > 192.168.42.56 paper-pulp-bush-angel
+  Future<String> listDevices() async {
+    try {
+      final String path = fuchsiaArtifacts.devFinder.absolute.path;
+      final RunResult process = await runAsync(<String>[path, 'list', '-full']);
+      return process.stdout.trim();
+    } on ArgumentError catch (exception) {
+      throwToolExit('$exception');
+    }
+    return null;
+  }
+
   /// Invokes the `netaddr` command.
   ///
   /// This returns the network address of an attached fuchsia device. Does
@@ -36,10 +50,15 @@ class FuchsiaSdk {
   /// Example output:
   ///     $ fx netaddr --fuchsia --nowait
   ///     > fe80::9aaa:fcff:fe60:d3af%eth1
+  @Deprecated('Use listDevices instead')
   Future<String> netaddr() async {
     try {
       final RunResult process = await runAsync(_netaddrCommand);
-      return process.stdout.trim();
+      final String result = process.stdout.trim();
+      if (result.contains('timeout')) {
+        return '';
+      }
+      return result;
     } on ArgumentError catch (exception) {
       throwToolExit('$exception');
     }
@@ -78,6 +97,8 @@ class FuchsiaSdk {
   /// Example output:
   ///     $ fx netls --nowait
   ///     > device liliac-shore-only-last (fe80::82e4:da4d:fe81:227d/3)
+  @Deprecated('Use listDevices instead')
+
   Future<String> netls() async {
     try {
       final RunResult process = await runAsync(_netlsCommand);
@@ -93,12 +114,13 @@ class FuchsiaSdk {
 class FuchsiaArtifacts {
   /// Creates a new [FuchsiaArtifacts].
   ///
-  /// May optionally provide a file `sshConfig` file.
-  FuchsiaArtifacts({File sshConfig})
-    : _sshConfig = sshConfig;
+  /// May optionally provide a file `sshConfig` file and `devFinder` file.
+  FuchsiaArtifacts({File sshConfig, File devFinder})
+    : _sshConfig = sshConfig,
+      _devFinder = devFinder;
 
   /// The location of the SSH configuration file used to interact with a
-  /// fuchsia device.
+  /// Fuchsia device.
   ///
   /// Requires the env variable `BUILD_DIR` to be set if not provided by
   /// the constructor.
@@ -114,4 +136,22 @@ class FuchsiaArtifacts {
     return _sshConfig;
   }
   File _sshConfig;
+
+  /// The location of the dev finder tool used to locate connected
+  /// Fuchsia devices.
+  ///
+  /// Requires the env variable `BUILD_DIR` to be set if not provided by
+  /// the constructor.
+  File get devFinder {
+    if (_devFinder == null) {
+      final String buildDirectory = platform.environment['BUILD_DIR'];
+      if (buildDirectory == null) {
+        throwToolExit('BUILD_DIR must be supplied to dev_finder. For example:\n'
+          '  export BUILD_DIR=path/to/fuchsia/out/x64\n');
+      }
+      _devFinder = fs.file('$buildDirectory/host_x64/dev_finder');
+    }
+    return _devFinder;
+  }
+  File _devFinder;
 }
