@@ -669,12 +669,12 @@ class HotRunner extends ResidentRunner {
           // Relation of [invalidatedSourcesCount] to [syncedLibraryCount] should help
           // understand sync/transfer "overhead" of updating this number of source files.
           final Map<String, dynamic> details = reloadReport['details'];
-          analyticsParameters['finalLibraryCount'] = "${details['finalLibraryCount']}";
-          analyticsParameters['syncedLibraryCount'] = "${details['receivedLibraryCount']}";
-          analyticsParameters['syncedClassesCount'] = "${details['receivedClassesCount']}";
-          analyticsParameters['syncedProceduresCount'] = "${details['receivedProceduresCount']}";
-          analyticsParameters['syncedBytes'] = '${updatedDevFS.syncedBytes}';
-          analyticsParameters['invalidatedSourcesCount'] = '${updatedDevFS.invalidatedSourcesCount}';
+          analyticsParameters[kEventReloadFinalLibraryCount] = "${details['finalLibraryCount']}";
+          analyticsParameters[kEventReloadSyncedLibraryCount] = "${details['receivedLibraryCount']}";
+          analyticsParameters[kEventReloadSyncedClassesCount] = "${details['receivedClassesCount']}";
+          analyticsParameters[kEventReloadSyncedProceduresCount] = "${details['receivedProceduresCount']}";
+          analyticsParameters[kEventReloadSyncedBytes] = '${updatedDevFS.syncedBytes}';
+          analyticsParameters[kEventReloadInvalidatedSourcesCount] = '${updatedDevFS.invalidatedSourcesCount}';
           flutterUsage.sendEvent('hot', 'reload', parameters: analyticsParameters);
           final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
           final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
