@@ -54,6 +54,11 @@ import 'image_provider.dart';
 /// ```
 /// {@end-tool}
 ///
+/// Note that the [shape] or the [borderRadius] won't clip the children of the
+/// decorated [Container]. If the clip is required, insert a clip widget
+/// (e.g., [ClipRect], [ClipRRect], [ClipPath]) as the child of the [Container].
+/// Be aware that clipping may be costly in terms of performance.
+///
 /// See also:
 ///
 ///  * [DecoratedBox] and [Container], widgets that can be configured with
