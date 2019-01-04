@@ -30,7 +30,7 @@ typedef InputCounterWidgetBuilder = Widget Function(
     /// The maximum string length that can be entered into the TextField.
     @required int maxLength,
     /// Whether or not the TextField is currently focused.  Mainly provided for
-    /// the liveRegion paramter in the [Semantics] widget for accessibility.
+    /// the [liveRegion] parameter in the [Semantics] widget for accessibility.
     @required bool isFocused,
   }
 );
@@ -389,9 +389,9 @@ class TextField extends StatefulWidget {
 
   /// Callback that generates a custom [InputDecorator.counter] widget.
   ///
-  /// See [InputCounterWidgetBuilder] for the passed arguments.  The returned
-  /// widget will be placed below the line in place of the default widget built
-  /// when passing [counterText].
+  /// See [InputCounterWidgetBuilder] for an explanation of the passed in
+  /// arguments.  The returned widget will be placed below the line in place of
+  /// the default widget built when [counterText] is specified.
   ///
   /// The returned widget should be accessible, just as the widget generated for
   /// [counterText] is. For example, wrap the returned widget in a [Semantics]
@@ -469,13 +469,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       );
 
     // No need to build anything if counter or counterText were given directly.
-    if (effectiveDecoration.counter != null
-        || effectiveDecoration.counterText != null)
+    if (effectiveDecoration.counter != null || effectiveDecoration.counterText != null)
       return effectiveDecoration;
-
-    if (effectiveDecoration.counterText != null) {
-      return effectiveDecoration;
-    }
 
     // If buildCounter was provided, use it to generate a counter widget.
     Widget counter;
