@@ -4201,7 +4201,7 @@ void main() {
   testWidgets('default TextField debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-    TextField().debugFillProperties(builder);
+    const TextField().debugFillProperties(builder);
 
     final List<String> description = builder.properties
       .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
@@ -4214,12 +4214,12 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     // Not checking controller, inputFormatters, focusNode
-    TextField(
-      decoration: const InputDecoration(labelText: 'foo'),
+    const TextField(
+      decoration: InputDecoration(labelText: 'foo'),
       keyboardType: TextInputType.text,
       textInputAction: TextInputAction.done,
       textCapitalization: TextCapitalization.none,
-      style: const TextStyle(color: Color(0xff00ff00)),
+      style: TextStyle(color: Color(0xff00ff00)),
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
       autofocus: true,
@@ -4231,7 +4231,7 @@ void main() {
       enabled: false,
       cursorWidth: 1.0,
       cursorRadius: Radius.zero,
-      cursorColor: const Color(0xff00ff00),
+      cursorColor: Color(0xff00ff00),
       keyboardAppearance: Brightness.dark,
       scrollPadding: EdgeInsets.zero,
       enableInteractiveSelection: false,
