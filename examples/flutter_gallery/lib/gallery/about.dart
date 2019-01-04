@@ -36,11 +36,10 @@ void showGalleryAboutDialog(BuildContext context) {
   final ThemeData themeData = Theme.of(context);
   final TextStyle aboutTextStyle = themeData.textTheme.body2;
   final TextStyle linkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
-  final String monthYear =  MaterialLocalizations.of(context).formatMonthYear(DateTime.now());
 
   showAboutDialog(
     context: context,
-    applicationVersion: monthYear,
+    applicationVersion: 'January 2019',
     applicationIcon: const FlutterLogo(),
     applicationLegalese: '© 2019 The Chromium Authors',
     children: <Widget>[
