@@ -532,10 +532,12 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (widget.selectionEnabled) {
       switch (Theme.of(context).platform) {
         case TargetPlatform.iOS:
-          // The cause is not technically double tap, but we would like the same thing to happen.
+          // The cause is not technically double tap, but we would like to show
+          // the toolbar.
           _renderEditable.selectWordAt(details.globalPosition, cause: SelectionChangedCause.doubleTap);
           break;
-        default:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
           break;
       }
     }

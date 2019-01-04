@@ -1119,7 +1119,7 @@ void main() {
       final TestGesture gesture =
       await tester.startGesture(textfieldStart + const Offset(150.0, 5.0));
       await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
-      // force press selection.
+      // We expect the force press to select a word at the given location.
       expect(
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
