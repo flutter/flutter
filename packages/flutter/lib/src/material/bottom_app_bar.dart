@@ -42,8 +42,12 @@ import 'theme.dart';
 class BottomAppBar extends StatefulWidget {
   /// Creates a bottom application bar.
   ///
-  /// The [color], [elevation], and [clipBehavior] arguments must not be null.
+  /// The [clipBehavior] arguments must not be null.
   /// Additionally, [elevation] must be non-negative.
+  ///
+  /// If [color], [elevation], or [shape] arguments are null, they will be
+  /// pulled from [BottomAppBarTheme]. If null on [BottomAppBarTheme], they will
+  /// fall back onto default values.
   const BottomAppBar({
     Key key,
     this.color,
@@ -67,7 +71,8 @@ class BottomAppBar extends StatefulWidget {
 
   /// The bottom app bar's background color.
   ///
-  /// When null defaults to [ThemeData.bottomAppBarColor].
+  /// When null defaults to [ThemeData.bottomAppBarTheme.color], if that's null,
+  /// [ThemeData.bottomAppBarColor] is used.
   final Color color;
 
   /// The z-coordinate at which to place this bottom app bar relative to its
@@ -76,12 +81,14 @@ class BottomAppBar extends StatefulWidget {
   /// This controls the size of the shadow below the bottom app bar. The
   /// value is non-negative.
   ///
-  /// Defaults to 8, the appropriate elevation for bottom app bars.
+  /// When null defaults to [ThemeData.bottomAppBarTheme.elevation], if that's
+  /// null, defaults to 8.
   final double elevation;
 
   /// The notch that is made for the floating action button.
   ///
-  /// If null the bottom app bar will be rectangular with no notch.
+  /// When null defaults to [ThemeData.bottomAppBarTheme.shape], if that's null,
+  /// the default shape will be rectangular with no notch.
   final NotchedShape shape;
 
   /// {@macro flutter.widgets.Clip}
