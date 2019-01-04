@@ -67,10 +67,11 @@ void main() {
     ));
 
     final PhysicalShape widget = _getBabRenderObject(tester);
+
     expect(widget.color, Colors.white);
   });
 
-  testWidgets('BAB theme customizes shape and notch margin', (WidgetTester tester) async {
+  testWidgets('BAB theme customizes shape', (WidgetTester tester) async {
     const BottomAppBarTheme theme = BottomAppBarTheme(
         color: Colors.white30,
         shape: CircularNotchedRectangle(),
@@ -84,6 +85,18 @@ void main() {
       matchesGoldenFile('bottom_app_bar_theme.custom_shape.png'),
       skip: !Platform.isLinux,
     );
+  });
+
+  testWidgets('BAB theme does not affect defaults', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(bottomAppBarTheme: const BottomAppBarTheme()),
+      home: const Scaffold(body: BottomAppBar()),
+    ));
+
+    final PhysicalShape widget = _getBabRenderObject(tester);
+
+    expect(widget.color, Colors.white);
+    expect(widget.elevation, equals(8.0));
   });
 }
 
