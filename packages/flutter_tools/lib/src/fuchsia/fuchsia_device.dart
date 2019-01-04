@@ -123,7 +123,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 ///     $ ./netls
 ///     > device liliac-shore-only-last (fe80::82e4:da4d:fe81:227d/3)
 @visibleForTesting
-@deprecated
+@Deprecated('Use parseListDevices with listDevices instead')
 List<String> parseFuchsiaDeviceOutput(String text) {
   final List<String> names = <String>[];
   for (String rawLine in text.trim().split('\n')) {
