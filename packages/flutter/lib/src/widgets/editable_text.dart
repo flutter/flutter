@@ -185,7 +185,8 @@ class EditableText extends StatefulWidget {
   /// default to [TextInputType.multiline].
   ///
   /// The [controller], [focusNode], [style], [cursorColor], [backgroundCursorColor],
-  /// [textAlign], and [rendererIgnoresPointer] arguments must not be null.
+  /// [textAlign], [dragStartBehavior] and [rendererIgnoresPointer] arguments
+  /// must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -230,6 +231,7 @@ class EditableText extends StatefulWidget {
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
+       assert(dragStartBehavior != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
            ? (

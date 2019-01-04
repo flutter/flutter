@@ -50,6 +50,8 @@ typedef GestureDragCancelCallback = void Function();
 ///  * [PanGestureRecognizer], for drags that are not locked to a single axis.
 abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
+  ///
+  /// [dragStartBehavior] must not be null.
   DragGestureRecognizer({
     Object debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -66,7 +68,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// For more information about the gesture arena:
   /// https://flutter.io/docs/development/ui/advanced/gestures#gesture-disambiguation
   ///
-  /// For example:
+  /// ## Example:
+  ///
   /// [@template flutter.gestures.monodrag.dragStartExample]
   /// A finger presses down on the screen with offset (500.0, 500.0),
   /// and then moves to position (510.0, 500.0) before winning the arena.

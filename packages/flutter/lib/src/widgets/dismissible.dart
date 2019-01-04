@@ -87,6 +87,7 @@ class Dismissible extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(key != null),
        assert(secondaryBackground != null ? background != null : true),
+       assert(dragStartBehavior != null),
        super(key: key);
 
   /// The widget below this widget in the tree.

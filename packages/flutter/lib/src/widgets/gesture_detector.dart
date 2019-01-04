@@ -187,6 +187,7 @@ class GestureDetector extends StatelessWidget {
     this.excludeFromSemantics = false,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(excludeFromSemantics != null),
+       assert(dragStartBehavior != null),
        assert(() {
          final bool haveVerticalDrag = onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null;
          final bool haveHorizontalDrag = onHorizontalDragStart != null || onHorizontalDragUpdate != null || onHorizontalDragEnd != null;

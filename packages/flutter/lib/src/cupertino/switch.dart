@@ -52,13 +52,16 @@ import 'thumb_painter.dart';
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/switches/>
 class CupertinoSwitch extends StatefulWidget {
   /// Creates an iOS-style switch.
+  ///
+  /// [dragStartBehavior] must not be null.
   const CupertinoSwitch({
     Key key,
     @required this.value,
     @required this.onChanged,
     this.activeColor,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : super(key: key);
+  }) : assert(dragStartBehavior != null),
+       super(key: key);
 
   /// Whether this switch is on or off.
   final bool value;
@@ -96,9 +99,10 @@ class CupertinoSwitch extends StatefulWidget {
   /// {@template flutter.cupertino.switch.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
-  /// If set to [DragStartBehavior.start], switching drag behavior will
-  /// begin upon the detection of a drag gesture. If set to
-  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  /// If set to [DragStartBehavior.start], the drag behavior used to move the
+  /// switch from on to off will begin upon the detection of a drag gesture. If
+  /// set to [DragStartBehavior.down] it will begin when a down event is first
+  /// detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
