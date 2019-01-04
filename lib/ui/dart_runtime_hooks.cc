@@ -318,14 +318,16 @@ static std::string GetFunctionName(Dart_Handle func) {
 }
 
 void GetCallbackHandle(Dart_NativeArguments args) {
-  const char* kAnonymousClosureName = "<anonymous closure>";
   Dart_Handle func = Dart_GetNativeArgument(args, 0);
   std::string name = GetFunctionName(func);
   std::string class_name = GetFunctionClassName(func);
   std::string library_path = GetFunctionLibraryUrl(func);
 
-  // TODO(24394): check !Dart_IsTearOff(func) instead of string comparison.
-  if (name.empty() || (name == kAnonymousClosureName)) {
+  // `name` is empty if `func` can't be used as a callback. This is the case
+  // when `func` is not a function object or is not a static function. Anonymous
+  // closures (e.g. `(int a, int b) => a + b;`) also cannot be used as
+  // callbacks, so `func` must be a tear-off of a named static function.
+  if (!Dart_IsTearOff(func) || name.empty()) {
     Dart_SetReturnValue(args, Dart_Null());
     return;
   }

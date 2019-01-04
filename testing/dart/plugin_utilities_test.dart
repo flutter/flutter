@@ -27,7 +27,7 @@ void main() {
     expect(topClosure, isNotNull);
     expect(topClosure(), "top");
 
-    // Static method callback
+    // Static method callback.
     final hGetInt = PluginUtilities.getCallbackHandle(Foo.getInt);
     expect(hGetInt, isNotNull);
     expect(hGetInt, isNot(0));
@@ -39,5 +39,9 @@ void main() {
     // Instance method callbacks cannot be looked up.
     final foo = new Foo();
     expect(PluginUtilities.getCallbackHandle(foo.getDouble), isNull);
+
+    // Anonymous closures cannot be looked up.
+    final anon = (int a, int b) => a + b;
+    expect(PluginUtilities.getCallbackHandle(anon), isNull);
   });
 }
