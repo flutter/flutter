@@ -277,7 +277,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.currentFloatingActionButtonLocation,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
-    this.extendedBody = false
+    this.extendedBody = false,
   }) : assert(previousFloatingActionButtonLocation != null),
        assert(currentFloatingActionButtonLocation != null);
 
@@ -336,7 +336,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     if (hasChild(_ScaffoldSlot.body)) {
       double bodyMaxHeight = math.max(0.0, contentBottom - contentTop);
 
-      if (extendedBody){
+      if (extendedBody) {
         bodyMaxHeight += bottomWidgetsHeight;
       }
 
@@ -745,7 +745,7 @@ class Scaffold extends StatefulWidget {
     this.backgroundColor,
     this.resizeToAvoidBottomPadding = true,
     this.primary = true,
-    this.extendedBody = false
+    this.extendedBody = false,
   }) : assert(primary != null), super(key: key);
 
   /// When "true" - the body fills the entire height of Scaffold
