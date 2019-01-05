@@ -348,18 +348,19 @@ class CupertinoPageTransition extends StatelessWidget {
        _primaryPositionAnimation = (linearTransition ? primaryRouteAnimation :
          CurvedAnimation(
            parent: primaryRouteAnimation,
-           curve: Curves.easeOut,
-           reverseCurve: Curves.easeIn,
+           curve: Curves.fastOutSlowIn,
+           reverseCurve: Curves.fastOutSlowIn.flipped,
          )
        ).drive(_kRightMiddleTween),
        _secondaryPositionAnimation = CurvedAnimation(
          parent: secondaryRouteAnimation,
-         curve: Curves.easeOut,
-         reverseCurve: Curves.easeIn,
+         curve: Curves.fastOutSlowIn,
+         reverseCurve: Curves.fastOutSlowIn.flipped,
        ).drive(_kMiddleLeftTween),
        _primaryShadowAnimation = CurvedAnimation(
          parent: primaryRouteAnimation,
-         curve: Curves.easeOut,
+         curve: Curves.fastOutSlowIn,
+         reverseCurve: Curves.fastOutSlowIn.flipped,
        ).drive(_kGradientShadowTween),
        super(key: key);
 
@@ -403,7 +404,7 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
     @required Animation<double> animation,
     @required this.child,
   }) : _positionAnimation = animation
-         .drive(CurveTween(curve: Curves.easeInOut))
+         .drive(CurveTween(curve: Curves.fastOutSlowIn))
          .drive(_kBottomUpTween),
        super(key: key);
 
@@ -783,8 +784,8 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     assert(_animation == null);
     _animation = CurvedAnimation(
       parent: super.createAnimation(),
-      curve: Curves.ease,
-      reverseCurve: Curves.ease.flipped,
+      curve: Curves.fastOutSlowIn,
+      reverseCurve: Curves.fastOutSlowIn.flipped,
     );
     _offsetTween = Tween<Offset>(
       begin: const Offset(0.0, 1.0),
