@@ -29,9 +29,10 @@ import 'theme.dart';
 /// Date picker UI mode for either showing a list of available years or a
 /// monthly calendar initially in the dialog shown by calling [showDatePicker].
 ///
-/// Also see:
+/// See also:
 ///
-///  * <https://material.io/guidelines/components/pickers.html#pickers-date-pickers>
+///  * [showDatePicker], which shows a dialog that contains a material design
+///    date picker.
 enum DatePickerMode {
   /// Show a date picker UI for choosing a month and day.
   day,
@@ -232,8 +233,10 @@ const _DayPickerGridDelegate _kDayPickerGridDelegate = _DayPickerGridDelegate();
 ///
 /// See also:
 ///
-///  * [showDatePicker].
-///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
+///  * [showDatePicker], which shows a dialog that contains a material design
+///    date picker.
+///  * [showTimePicker], which shows a dialog that contains a material design
+///    time picker.
 class DayPicker extends StatelessWidget {
   /// Creates a day picker.
   ///
@@ -483,8 +486,10 @@ class DayPicker extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [showDatePicker]
-///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
+///  * [showDatePicker], which shows a dialog that contains a material design
+///    date picker.
+///  * [showTimePicker], which shows a dialog that contains a material design
+///    time picker.
 class MonthPicker extends StatefulWidget {
   /// Creates a month picker.
   ///
@@ -736,8 +741,10 @@ class _MonthPickerSortKey extends OrdinalSortKey {
 ///
 /// See also:
 ///
-///  * [showDatePicker]
-///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
+///  * [showDatePicker], which shows a dialog that contains a material design
+///    date picker.
+///  * [showTimePicker], which shows a dialog that contains a material design
+///    time picker.
 class YearPicker extends StatefulWidget {
   /// Creates a year picker.
   ///
@@ -1065,8 +1072,14 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 ///
 /// See also:
 ///
-///  * [showTimePicker]
-///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
+///  * [showTimePicker], which shows a dialog that contains a material design
+///    time picker.
+///  * [DayPicker], which displays the days of a given month and allows
+///    choosing a day.
+///  * [MonthPicker], which displays a scrollable list of months to allow
+///    picking a month.
+///  * [YearPicker], which displays a scrollable list of years to allow picking
+///    a year.
 Future<DateTime> showDatePicker({
   @required BuildContext context,
   @required DateTime initialDate,

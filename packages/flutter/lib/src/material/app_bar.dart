@@ -131,7 +131,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///
   /// The arguments [elevation], [primary], [toolbarOpacity], [bottomOpacity]
-  /// and [automaticallyImplyLeading] must not be null.
+  /// and [automaticallyImplyLeading] must not be null. Additionally,
+  /// [elevation] must be non-negative.
   ///
   /// Typically used in the [Scaffold.appBar] property.
   AppBar({
@@ -153,7 +154,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.toolbarOpacity = 1.0,
     this.bottomOpacity = 1.0,
   }) : assert(automaticallyImplyLeading != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(primary != null),
        assert(titleSpacing != null),
        assert(toolbarOpacity != null),
@@ -264,10 +265,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
   final PreferredSizeWidget bottom;
 
-  /// The z-coordinate at which to place this app bar. This controls the size of
-  /// the shadow below the app bar.
+  /// The z-coordinate at which to place this app bar relative to its parent.
+  ///
+  /// This controls the size of the shadow below the app bar.
   ///
   /// Defaults to 4, the appropriate elevation for app bars.
+  ///
+  /// The value is non-negative.
   final double elevation;
 
   /// The color to use for the app bar's material. Typically this should be set
@@ -646,7 +650,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
-    final double toolbarOpacity = pinned && !floating ? 1.0
+    final double toolbarOpacity = pinned ? 1.0
       : ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0);
     final Widget appBar = FlexibleSpaceBar.createSettings(
       minExtent: minExtent,
@@ -987,8 +991,8 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * [SliverAppBar] for more animated examples of how this property changes the
-  ///   behavior of the app bar in combination with [pinned] and [snap].
+  ///  * [SliverAppBar] for more animated examples of how this property changes the
+  ///    behavior of the app bar in combination with [pinned] and [snap].
   final bool floating;
 
   /// Whether the app bar should remain visible at the start of the scroll view.
@@ -1008,8 +1012,8 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * [SliverAppBar] for more animated examples of how this property changes the
-  ///   behavior of the app bar in combination with [floating].
+  ///  * [SliverAppBar] for more animated examples of how this property changes the
+  ///    behavior of the app bar in combination with [floating].
   final bool pinned;
 
   /// If [snap] and [floating] are true then the floating app bar will "snap"
@@ -1035,8 +1039,8 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * [SliverAppBar] for more animated examples of how this property changes the
-  ///   behavior of the app bar in combination with [pinned] and [floating].
+  ///  * [SliverAppBar] for more animated examples of how this property changes the
+  ///    behavior of the app bar in combination with [pinned] and [floating].
   final bool snap;
 
   @override

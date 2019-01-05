@@ -8,7 +8,7 @@ task:
     # test path names with spaces in them.
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
-    ANDROID_HOME: "/opt/android_sdk"
+    ANDROID_SDK_ROOT: "/opt/android_sdk"
   git_fetch_script:
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
@@ -67,7 +67,19 @@ task:
       env:
         SHARD: build_tests
       test_script:
+        # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they
+        # might include non-ASCII characters which makes Gradle crash.
+        # See: https://github.com/flutter/flutter/issues/24935
+        # This is a temporary workaround until we figure how to properly configure
+        # a UTF8 locale on Cirrus (or until the Gradle bug is fixed).
+        # TODO(amirh): Set the locale to UTF8.
+        - echo "$CIRRUS_CHANGE_MESSAGE" > /tmp/cirrus_change_message.txt
+        - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
+        - export CIRRUS_CHANGE_MESSAGE=""
+        - export CIRRUS_COMMIT_MESSAGE=""
         - dart ./dev/bots/test.dart
+        - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
+        - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
       container:
         cpu: 4
         memory: 12G

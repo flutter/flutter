@@ -71,7 +71,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 ///
 /// See also:
 ///
-///   * [ImageCache], which holds images that may be reused.
+///  * [ImageCache], which holds images that may be reused.
 Future<void> precacheImage(
   ImageProvider provider,
   BuildContext context, {
@@ -83,9 +83,11 @@ Future<void> precacheImage(
   final ImageStream stream = provider.resolve(config);
   void listener(ImageInfo image, bool sync) {
     completer.complete();
+    stream.removeListener(listener);
   }
   void errorListener(dynamic exception, StackTrace stackTrace) {
     completer.complete();
+    stream.removeListener(listener);
     if (onError != null) {
       onError(exception, stackTrace);
     } else {
@@ -99,7 +101,6 @@ Future<void> precacheImage(
     }
   }
   stream.addListener(listener, onError: errorListener);
-  completer.future.then<void>((void value) { stream.removeListener(listener); });
   return completer.future;
 }
 
@@ -361,7 +362,7 @@ class Image extends StatefulWidget {
   /// lib/backgrounds/background1.png
   /// lib/backgrounds/background2.png
   /// lib/backgrounds/background3.png
-  ///```
+  /// ```
   ///
   /// To include, say the first image, the `pubspec.yaml` of the app should
   /// specify it in the assets section:

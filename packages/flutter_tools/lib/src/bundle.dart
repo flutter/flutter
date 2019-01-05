@@ -60,7 +60,9 @@ Future<void> build({
   bool reportLicensedPackages = false,
   bool trackWidgetCreation = false,
   String compilationTraceFilePath,
-  bool buildHotUpdate = false,
+  bool createPatch = false,
+  int buildNumber,
+  String baselineDir,
   List<String> extraFrontEndOptions = const <String>[],
   List<String> extraGenSnapshotOptions = const <String>[],
   List<String> fileSystemRoots,
@@ -70,6 +72,27 @@ Future<void> build({
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
+
+  if (compilationTraceFilePath != null) {
+    if (buildMode != BuildMode.dynamicProfile && buildMode != BuildMode.dynamicRelease) {
+      // Silently ignore JIT snapshotting for those builds that don't support it.
+      compilationTraceFilePath = null;
+
+    } else if (compilationTraceFilePath.isEmpty) {
+      // Disable JIT snapshotting if flag is empty.
+      printStatus('Code snapshot will be disabled for this build.');
+      compilationTraceFilePath = null;
+
+    } else if (!fs.file(compilationTraceFilePath).existsSync()) {
+      // Be forgiving if compilation trace file is missing.
+      printError('Warning: Ignoring missing compilation training file $compilationTraceFilePath.');
+      final File tmp = fs.systemTempDirectory.childFile('flutterEmptyCompilationTrace.txt');
+      compilationTraceFilePath = (tmp..createSync(recursive: true)).path;
+
+    } else {
+      printStatus('Code snapshot will use compilation training file $compilationTraceFilePath.');
+    }
+  }
 
   DevFSContent kernelContent;
   if (!precompiledSnapshot) {
@@ -108,7 +131,9 @@ Future<void> build({
         packagesPath: packagesPath,
         compilationTraceFilePath: compilationTraceFilePath,
         extraGenSnapshotOptions: extraGenSnapshotOptions,
-        buildHotUpdate: buildHotUpdate,
+        createPatch: createPatch,
+        buildNumber: buildNumber,
+        baselineDir: baselineDir,
       );
       if (snapshotExitCode != 0) {
         throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');
