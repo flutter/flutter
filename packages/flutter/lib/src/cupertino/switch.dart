@@ -109,6 +109,10 @@ class CupertinoSwitch extends StatefulWidget {
   /// drag behavior feel slightly more reactive.
   ///
   /// By default, the drag start behavior is [DragStartBehavior.start].
+  ///
+  /// See also:
+  ///
+  ///   * {@macro flutter.gestures.monodrag.dragStartExample}
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 

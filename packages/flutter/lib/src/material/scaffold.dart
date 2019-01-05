@@ -734,7 +734,9 @@ class Scaffold extends StatefulWidget {
     this.resizeToAvoidBottomPadding = true,
     this.primary = true,
     this.drawerDragStartBehavior = DragStartBehavior.start,
-  }) : assert(primary != null), super(key: key);
+  }) : assert(primary != null),
+       assert(drawerDragStartBehavior != null),
+       super(key: key);
 
   /// An app bar to display at the top of the scaffold.
   final PreferredSizeWidget appBar;

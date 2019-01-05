@@ -554,6 +554,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.onTap,
   }) : assert(tabs != null),
        assert(isScrollable != null),
+       assert(dragStartBehavior != null),
        assert(indicator != null || (indicatorWeight != null && indicatorWeight > 0.0)),
        assert(indicator != null || (indicatorPadding != null)),
        super(key: key);
@@ -1042,7 +1043,9 @@ class TabBarView extends StatefulWidget {
     this.controller,
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(children != null), super(key: key);
+  }) : assert(children != null),
+       assert(dragStartBehavior != null),
+       super(key: key);
 
   /// This widget's selection and animation state.
   ///

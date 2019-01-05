@@ -381,6 +381,12 @@ class GestureDetector extends StatelessWidget {
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
+  ///
+  /// By default, will
+  ///
+  /// See also:
+  ///
+  ///   * {@macro flutter.gestures.monodrag.dragStartExample}
   final DragStartBehavior dragStartBehavior;
 
   @override

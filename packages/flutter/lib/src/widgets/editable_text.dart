@@ -288,6 +288,10 @@ class EditableText extends StatefulWidget {
   /// its left.
   ///
   /// Defaults to the ambient [Directionality], if any.
+  ///
+  /// See also:
+  ///
+  ///   * {@macro flutter.gestures.monodrag.dragStartExample}
   /// {@endtemplate}
   final TextDirection textDirection;
 

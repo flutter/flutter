@@ -137,6 +137,7 @@ class TextField extends StatefulWidget {
        assert(autocorrect != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
+       assert(dragStartBehavior != null),
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),

@@ -26,11 +26,12 @@ typedef RecognizerCallback<T> = T Function();
 
 /// Configuration of offset passed to [DragStartDetails].
 ///
-/// The settings used to determine how when a drag formally starts when the user
+/// The settings determines when a drag formally starts when the user
 /// initiates a drag.
 ///
 /// See also:
-///   * [@macro flutter.gestures.monodrag.dragStartExample]
+///
+///   * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
 enum DragStartBehavior {
   /// Set the initial offset, at the position where the first down even was
   /// detected.
