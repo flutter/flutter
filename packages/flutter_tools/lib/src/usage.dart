@@ -17,6 +17,12 @@ import 'version.dart';
 
 const String _kFlutterUA = 'UA-67589403-6';
 const String kEventReloadReasonParameterName = 'cd5';
+const String kEventReloadFinalLibraryCount = 'cd6';
+const String kEventReloadSyncedLibraryCount = 'cd7';
+const String kEventReloadSyncedClassesCount = 'cd8';
+const String kEventReloadSyncedProceduresCount = 'cd9';
+const String kEventReloadSyncedBytes = 'cd10';
+const String kEventReloadInvalidatedSourcesCount = 'cd11';
 
 Usage get flutterUsage => Usage.instance;
 
