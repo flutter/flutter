@@ -934,3 +934,70 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
       widget.onChanged(value);
   }
 }
+
+/// A convenience widget that wraps a [DropdownButton] in a [FormField].
+class MultiDropdownButtonFormField<T> extends FormField<List<T>> {
+  /// Creates a [DropdownButton] widget wrapped in an [InputDecorator] and
+  /// [FormField].
+  ///
+  /// The [DropdownButton] [items] parameters must not be null.
+  MultiDropdownButtonFormField({
+    Key key,
+    List<T> values,
+    @required List<DropdownMenuItem<T>> items,
+    this.onChanged,
+    InputDecoration decoration = const InputDecoration(),
+    FormFieldSetter<List<T>> onSaved,
+    FormFieldValidator<List<T>> validator,
+    Widget hint,
+  }) : assert(decoration != null),
+        super(
+          key: key,
+          onSaved: onSaved,
+          initialValue: values,
+          validator: validator,
+          builder: (FormFieldState<List<T>> field) {
+            final _MultiDropdownButtonFormFieldState<T> state = field;
+            final InputDecoration effectiveDecoration = decoration
+                .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+            return InputDecorator(
+              decoration: effectiveDecoration.copyWith(errorText: field.errorText),
+              isEmpty: values == null,
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<T>(
+                  isDense: true,
+                  values: state.value,
+                  items: items,
+                  hint: hint,
+                  onChanged: state.valueDidChange,
+                ),
+              ),
+            );
+          }
+      );
+
+  /// Called when the user selects an item.
+  final ValueChanged<List<T>> onChanged;
+
+  @override
+  FormFieldState<List<T>> createState() => _MultiDropdownButtonFormFieldState<T>();
+}
+
+class _MultiDropdownButtonFormFieldState<T> extends FormFieldState<List<T>> {
+  @override
+  MultiDropdownButtonFormField<T> get widget => super.widget;
+
+  @override
+  void didChange(List<T> value) {
+    super.didChange(value);
+    if (widget.onChanged != null)
+      widget.onChanged(value);
+  }
+
+  void valueDidChange(T val) {
+    if (!value.remove(val)) {
+      value.add(val);
+    }
+    didChange(value);
+  }
+}
