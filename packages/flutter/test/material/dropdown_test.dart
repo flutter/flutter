@@ -542,6 +542,34 @@ void main() {
     expect(buttonBox.size, equals(buttonBoxNullValue.size));
   });
 
+  testWidgets('Size of DropdownButton with no items', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    List<String> items;
+
+    Widget build() => buildFrame(buttonKey: buttonKey, items: items, onChanged: onChanged);
+
+    await tester.pumpWidget(build());
+    final RenderBox buttonBoxNullItems = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBoxNullItems.attached);
+
+
+    items = <String>[];
+    await tester.pumpWidget(build());
+    final RenderBox buttonBoxEmptyItems = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBoxEmptyItems.attached);
+
+
+    items = ['one', 'two', 'three', 'four'];
+    await tester.pumpWidget(build());
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBox.attached);
+
+    // A Dropdown button with a null value should be the same size as a
+    // one with a non-null value.
+    expect(buttonBox.localToGlobal(Offset.zero), equals(buttonBoxNullItems.localToGlobal(Offset.zero)));
+    expect(buttonBox.size, equals(buttonBoxNullItems.size));
+  });
+
   testWidgets('Layout of a DropdownButton with null value', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     String value;
