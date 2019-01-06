@@ -953,7 +953,8 @@ class MultiDropdownButtonFormField<T> extends FormField<List<T>> {
         super(
           key: key,
           onSaved: onSaved,
-          initialValue: values,
+          // Shallow copy to isolate form state from values
+          initialValue: List<T>.from(values),
           validator: validator,
           builder: (FormFieldState<List<T>> field) {
             final _MultiDropdownButtonFormFieldState<T> state = field;
