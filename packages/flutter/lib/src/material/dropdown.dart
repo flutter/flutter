@@ -787,6 +787,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
          initialValue: value,
          validator: validator,
          builder: (FormFieldState<T> field) {
+           final _DropdownButtonFormFieldState<T> state = field;
            final InputDecoration effectiveDecoration = decoration
              .applyDefaults(Theme.of(field.context).inputDecorationTheme);
            return InputDecorator(
@@ -795,10 +796,10 @@ class DropdownButtonFormField<T> extends FormField<T> {
              child: DropdownButtonHideUnderline(
                child: DropdownButton<T>(
                  isDense: true,
-                 value: value,
+                 value: state.value,
                  items: items,
                  hint: hint,
-                 onChanged: field.didChange,
+                 onChanged: state.didChange,
                ),
              ),
            );
