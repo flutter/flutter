@@ -882,7 +882,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
   DropdownButtonFormField({
     Key key,
     T value,
-    List<T> values,
     @required List<DropdownMenuItem<T>> items,
     this.onChanged,
     InputDecoration decoration = const InputDecoration(),
@@ -901,7 +900,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
              .applyDefaults(Theme.of(field.context).inputDecorationTheme);
            return InputDecorator(
              decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-             isEmpty: value == null && values == null,
+             isEmpty: state.value == null,
              child: DropdownButtonHideUnderline(
                child: DropdownButton<T>(
                  isDense: true,
@@ -962,7 +961,7 @@ class MultiDropdownButtonFormField<T> extends FormField<List<T>> {
                 .applyDefaults(Theme.of(field.context).inputDecorationTheme);
             return InputDecorator(
               decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-              isEmpty: values == null,
+              isEmpty: state.value == null || state.value.isEmpty,
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<T>(
                   isDense: true,
