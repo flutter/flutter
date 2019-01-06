@@ -557,16 +557,11 @@ class DropdownButton<T> extends StatefulWidget {
     this.iconSize = 24.0,
     this.isDense = false,
     this.isExpanded = false,
-<<<<<<< HEAD
   }) : assert(items == null || items.isEmpty ||
               value == null && values == null ||
               values == null && items.where((DropdownMenuItem<T> item) => item.value == value).length == 1 ||
               value == null && items.where((DropdownMenuItem<T> item) => values.contains(item.value)).length == values.length),
        super(key: key);
-=======
-  }) : assert(items == null || items.isEmpty || value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
-      super(key: key);
->>>>>>> dropdown_no_items_bug
 
   /// The list of possible items to select among.
   final List<DropdownMenuItem<T>> items;
@@ -818,8 +813,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     } else {
       // If value is null (then _selectedIndex is null) or if disabled then we
       // display the hint or nothing at all.
-      if (items.isEMpty) {
-        innerItemsWidget = COntainer();
+      if (items.isEmpty) {
+        innerItemsWidget = Container();
       } else {
         innerItemsWidget = IndexedStack(
           index: _enabled ? (_selectedIndex ?? hintIndex) : hintIndex,
