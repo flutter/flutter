@@ -804,10 +804,11 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     Widget innerItemsWidget;
     if (_multiple && widget.values != null && widget.values.isNotEmpty) {
-      innerItemsWidget = DropdownMenuItem<Widget>(
+      innerItemsWidget = Expanded(
         child: Text(
           widget.values?.join(', '),
-        )
+          maxLines: null,
+        ),
       );
     } else {
       // If value is null (then _selectedIndex is null) or if disabled then we
@@ -817,18 +818,21 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         alignment: AlignmentDirectional.centerStart,
         children: items,
       );
+      if (widget.isExpanded) {
+        innerItemsWidget = Expanded(child: innerItemsWidget);
+      }
     }
 
     Widget result = DefaultTextStyle(
       style: _textStyle,
       child: Container(
         padding: padding.resolve(Directionality.of(context)),
-        height: widget.isDense ? _denseButtonHeight : null,
+        height: widget.isDense && !_multiple ? _denseButtonHeight : null,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            widget.isExpanded ? Expanded(child: innerItemsWidget) : innerItemsWidget,
+            innerItemsWidget,
             Icon(Icons.arrow_drop_down,
               size: widget.iconSize,
               color: _downArrowColor,
