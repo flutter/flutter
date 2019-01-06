@@ -1959,22 +1959,22 @@ testWidgets(
     );
     await tester.pumpWidget(editableText);
     final EditableTextState state = tester.firstState(find.byType(EditableText));
-    state.updateEditingValue(TextEditingValue(
+    state.updateEditingValue(const TextEditingValue(
       text: 'a',
     ));
     expect(called, 1);
     // same value.
-    state.updateEditingValue(TextEditingValue(
+    state.updateEditingValue(const TextEditingValue(
       text: 'a',
     ));
     expect(called, 1);
     // same value with different selection.
-    state.updateEditingValue(TextEditingValue(
+    state.updateEditingValue(const TextEditingValue(
       text: 'a',
-      selection: const TextSelection.collapsed(offset: 1),
+      selection: TextSelection.collapsed(offset: 1),
     ));
     // different value.
-    state.updateEditingValue(TextEditingValue(
+    state.updateEditingValue(const TextEditingValue(
       text: 'b',
     ));
     expect(called, 2);
