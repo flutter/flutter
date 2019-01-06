@@ -279,10 +279,10 @@ void main() {
     expect(value, equals('three'));
   });
 
-  testWidgets('Dropdown form field using form field state', (WidgetTester tester) async {
+  testWidgets('Dropdown form field uses form field state', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    String value = 'one';
+    String value;
 
     await tester.pumpWidget(
         StatefulBuilder(
@@ -318,13 +318,24 @@ void main() {
         )
     );
 
-    expect(value, equals('one'));
-    await tester.tap(find.text('one'));
+    int getIndex() {
+      final IndexedStack stack = tester.element(find.byType(IndexedStack)).widget;
+      return stack.index;
+    }
+
+    // Initial value of null displays hint
+    expect(value, equals(null));
+    expect(getIndex(), 4);
+
+    await tester.tap(find.text('Select Value'));
     await tester.pumpAndSettle();
+
     await tester.tap(find.text('three').last);
-    await tester.pump();
     await tester.pumpAndSettle();
-    expect(value, equals('one'));
+    expect(getIndex(), 2);
+
+    // Changes only made to FormField state until form saved
+    expect(value, equals(null));
     final FormState form = formKey.currentState;
     form.save();
     expect(value, equals('three'));
