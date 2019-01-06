@@ -874,7 +874,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 }
 
 /// A convenience widget that wraps a [DropdownButton] in a [FormField].
-// TODO(jimshepherd): Fix onSaved will only return the current value and not values, https://https://github.com/flutter/flutter/pull/25955
 class DropdownButtonFormField<T> extends FormField<T> {
   /// Creates a [DropdownButton] widget wrapped in an [InputDecorator] and
   /// [FormField].
@@ -897,6 +896,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
          initialValue: value,
          validator: validator,
          builder: (FormFieldState<T> field) {
+           final _DropdownButtonFormFieldState<T> state = field;
            final InputDecoration effectiveDecoration = decoration
              .applyDefaults(Theme.of(field.context).inputDecorationTheme);
            return InputDecorator(
@@ -905,11 +905,10 @@ class DropdownButtonFormField<T> extends FormField<T> {
              child: DropdownButtonHideUnderline(
                child: DropdownButton<T>(
                  isDense: true,
-                 value: value,
-                 values: values,
+                 value: state.value,
                  items: items,
                  hint: hint,
-                 onChanged: field.didChange,
+                 onChanged: state.didChange,
                ),
              ),
            );
