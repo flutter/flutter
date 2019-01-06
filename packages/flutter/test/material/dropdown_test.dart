@@ -279,6 +279,57 @@ void main() {
     expect(value, equals('three'));
   });
 
+  testWidgets('Dropdown form field using form field state', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String value = 'one';
+
+    await tester.pumpWidget(
+        StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return MaterialApp(
+                home: Material(
+                  child: Form(
+                    key: formKey,
+                    child: DropdownButtonFormField<String>(
+                      key: buttonKey,
+                      value: value,
+                      hint: const Text('Select Value'),
+                      decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.fastfood)
+                      ),
+                      items: menuItems.map((String val) {
+                        return DropdownMenuItem<String>(
+                            value: val,
+                            child: Text(val)
+                        );
+                      }).toList(),
+                      validator: (String v) => v == null ? 'Must select value' : null,
+                      onSaved: (String v) {
+                        setState(() {
+                          value = v;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              );
+            }
+        )
+    );
+
+    expect(value, equals('one'));
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('three').last);
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, equals('one'));
+    final FormState form = formKey.currentState;
+    form.save();
+    expect(value, equals('three'));
+  });
+
   testWidgets('Dropdown in ListView', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12053
     // Positions a DropdownButton at the left and right edges of the screen,
