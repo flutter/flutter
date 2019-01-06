@@ -559,7 +559,7 @@ void main() {
     assert(buttonBoxEmptyItems.attached);
 
 
-    items = ['one', 'two', 'three', 'four'];
+    items = <String>['one', 'two', 'three', 'four'];
     await tester.pumpWidget(build());
     final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
     assert(buttonBox.attached);
