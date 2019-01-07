@@ -136,6 +136,7 @@ java_library("flutter_shell_java") {
     "io/flutter/plugin/platform/VirtualDisplayController.java",
     "io/flutter/util/PathUtils.java",
     "io/flutter/util/Preconditions.java",
+    "io/flutter/util/Predicate.java",
     "io/flutter/view/AccessibilityBridge.java",
     "io/flutter/view/FlutterCallbackInformation.java",
     "io/flutter/view/FlutterMain.java",
