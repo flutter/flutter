@@ -706,7 +706,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _forcePressEnded(ForcePressDetails details) {
-    if (widget.onForcePressStart != null)
+    if (widget.onForcePressEnd != null)
       widget.onForcePressEnd(details);
   }
 

@@ -457,7 +457,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     _renderEditable.selectWordAt(details.globalPosition, cause: SelectionChangedCause.keyboard);
   }
 
-  void _handleForceEnded(ForcePressDetails details) {
+  void _handleForcePressEnded(ForcePressDetails details) {
     // The cause is not technically double tap, but we would still like to show
     // the toolbar and handles.
     _renderEditable.selectWordAt(details.globalPosition, cause: SelectionChangedCause.doubleTap);

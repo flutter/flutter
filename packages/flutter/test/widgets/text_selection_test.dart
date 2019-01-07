@@ -12,6 +12,7 @@ void main() {
   int singleLongTapDownCount;
   int doubleTapDownCount;
   int forcePressStartCount;
+  int forcePressEndCount;
 
   void _handleTapDown(TapDownDetails details) { tapCount++; }
   void _handleSingleTapUp(TapUpDetails details) { singleTapUpCount++; }
@@ -19,6 +20,7 @@ void main() {
   void _handleSingleLongTapDown() { singleLongTapDownCount++; }
   void _handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
   void _handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
+  void _handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
 
   setUp(() {
     tapCount = 0;
@@ -27,6 +29,7 @@ void main() {
     singleLongTapDownCount = 0;
     doubleTapDownCount = 0;
     forcePressStartCount = 0;
+    forcePressEndCount = 0;
   });
 
   Future<void> pumpGestureDetector(WidgetTester tester) async {
@@ -39,6 +42,7 @@ void main() {
         onSingleLongTapDown: _handleSingleLongTapDown,
         onDoubleTapDown: _handleDoubleTapDown,
         onForcePressStart: _handleForcePressStart,
+        onForcePressEnd: _handleForcePressEnd,
         child: Container(),
       ),
     );
@@ -171,5 +175,29 @@ void main() {
     await gesture.up();
 
     expect(forcePressStartCount, 4);
+  });
+
+  testWidgets('a tap and then force press intiates a force press and not a double tap', (WidgetTester tester) async {
+    await pumpGestureDetector(tester);
+
+    const int pointerValue = 1;
+    TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+
+    // Initiate a quick tap.
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.0, pressureMin: 0, pressureMax: 1));
+    await tester.pump(const Duration(milliseconds: 50));
+    await gesture.up();
+
+    // Initiate a force tap.
+    gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    expect(forcePressStartCount, 1);
+
+    await tester.pump(const Duration(milliseconds: 50));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(forcePressEndCount, 1);
+    expect(doubleTapDownCount, 0);
   });
 }

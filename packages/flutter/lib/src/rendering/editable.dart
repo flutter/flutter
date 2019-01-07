@@ -1190,8 +1190,8 @@ class RenderEditable extends RenderBox {
   /// Select a word at the given global position.
   void selectWordAt(Offset globalPosition, {@required SelectionChangedCause cause}) {
     assert(cause != null);
+    assert(globalPosition != null);
     _layoutText(constraints.maxWidth);
-    assert(_lastTapDownPosition != null);
     if (onSelectionChanged != null) {
       final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition));
       onSelectionChanged(_selectWordAtOffset(position), this, cause);
