@@ -199,7 +199,7 @@ Future<void> assemble({
   final Map<String, DevFSContent> assetEntries = Map<String, DevFSContent>.from(assetBundle.entries);
   if (kernelContent != null) {
     if (compilationTraceFilePath != null) {
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
+      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, null, buildMode);
       final String isolateSnapshotData = fs.path.join(getBuildDirectory(), _kIsolateSnapshotData);
       final String isolateSnapshotInstr = fs.path.join(getBuildDirectory(), _kIsolateSnapshotInstr);
       assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
