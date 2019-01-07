@@ -167,7 +167,7 @@ class ImageStream extends Diagnosticable {
     for (int i = 0; i < _listeners.length; ++i) {
       if (_listeners[i].listener == listener) {
         _listeners.removeAt(i);
-        continue;
+        break;
       }
     }
   }
@@ -263,7 +263,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     for (int i = 0; i < _listeners.length; ++i) {
       if (_listeners[i].listener == listener) {
         _listeners.removeAt(i);
-        continue;
+        break;
       }
     }
   }

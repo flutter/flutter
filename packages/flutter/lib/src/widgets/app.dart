@@ -47,9 +47,8 @@ typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Ite
 /// The signature of [WidgetsApp.localeResolutionCallback].
 ///
 /// It is recommended to provide a [LocaleListResolutionCallback] instead of a
-/// [LocaleResolutionCallback] when possible, as [LocaleListResolutionCallback] as
-/// this callback only recieves a subset of the information provided
-/// in [LocaleListResolutionCallback].
+/// [LocaleResolutionCallback] when possible, as [LocaleResolutionCallback] only
+/// recieves a subset of the information provided in [LocaleListResolutionCallback].
 ///
 /// A [LocaleResolutionCallback] is responsible for computing the locale of the app's
 /// [Localizations] object when the app starts and when user changes the default

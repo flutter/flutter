@@ -19,12 +19,22 @@ import 'controller.dart';
 import 'finders.dart';
 import 'matchers.dart';
 import 'test_async_utils.dart';
+import 'test_compat.dart';
 import 'test_text_input.dart';
 
 /// Keep users from needing multiple imports to test semantics.
 export 'package:flutter/rendering.dart' show SemanticsHandle;
 
+/// Hide these imports so that they do not conflict with our own implementations in
+/// test_compat.dart. This handles setting up a declarer when one is not defined, which
+/// can happen when a test is executed via flutter_run.
 export 'package:test_api/test_api.dart' hide
+  test,
+  group,
+  setUpAll,
+  tearDownAll,
+  setUp,
+  tearDown,
   expect, // we have our own wrapper below
   TypeMatcher, // matcher's TypeMatcher conflicts with the one in the Flutter framework
   isInstanceOf; // we have our own wrapper in matchers.dart
@@ -63,7 +73,7 @@ void testWidgets(String description, WidgetTesterCallback callback, {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
-  test_package.test(
+  test(
     description,
     () {
       tester._recordNumberOfSemanticsHandles();

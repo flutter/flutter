@@ -112,6 +112,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  cull_opacity_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of culling opacity widgets on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true # mark a new test as flaky
+
   flavors_test:
     description: >
       Checks that flavored builds work on Android.
@@ -481,6 +488,7 @@ tasks:
       Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true # https://github.com/flutter/flutter/issues/25481
 
   flutter_gallery__transition_perf_with_semantics:
     description: >
@@ -488,6 +496,7 @@ tasks:
       with semantics enabled.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true # https://github.com/flutter/flutter/issues/25481
 
   flutter_gallery__memory_nav:
     description: >
@@ -500,6 +509,7 @@ tasks:
       Measures memory usage after Android app suspend and resume.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true # https://github.com/flutter/flutter/issues/25855
 
   analyzer_benchmark:
     description: >

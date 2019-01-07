@@ -207,8 +207,8 @@ class TextTheme extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///   * [merge] is used instead of [copyWith] when you want to merge all
-  ///     of the fields of a TextTheme instead of individual fields.
+  ///  * [merge] is used instead of [copyWith] when you want to merge all
+  ///    of the fields of a TextTheme instead of individual fields.
   TextTheme copyWith({
     TextStyle display4,
     TextStyle display3,
@@ -289,9 +289,9 @@ class TextTheme extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///   * [copyWith] is used instead of [merge] when you wish to override
-  ///     individual fields in the [TextTheme] instead of merging all of the
-  ///     fields of two [TextTheme]s.
+  ///  * [copyWith] is used instead of [merge] when you wish to override
+  ///    individual fields in the [TextTheme] instead of merging all of the
+  ///    fields of two [TextTheme]s.
   TextTheme merge(TextTheme other) {
     if (other == null)
       return this;

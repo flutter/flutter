@@ -1196,6 +1196,7 @@ void main() {
 
       expect(verticalDragAcceptedByParent, true);
       expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 1);
     });
 
     testWidgets('UiKitView gesture recognizers', (WidgetTester tester) async {
@@ -1237,6 +1238,7 @@ void main() {
 
       expect(verticalDragAcceptedByParent, false);
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
     testWidgets('UiKitView can claim gesture after all pointers are up', (WidgetTester tester) async {
@@ -1276,6 +1278,7 @@ void main() {
       expect(verticalDragAcceptedByParent, false);
 
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
     testWidgets('UiKitView rebuilt during gesture', (WidgetTester tester) async {
@@ -1320,6 +1323,7 @@ void main() {
       await gesture.up();
 
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
     testWidgets('UiKitView with eager gesture recognizer', (WidgetTester tester) async {
@@ -1359,6 +1363,7 @@ void main() {
       // the Android view). Here we assert that with the eager recognizer in the gesture team the
       // pointer down event is immediately dispatched.
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
     testWidgets('AndroidView rebuilt with same gestureRecognizers', (WidgetTester tester) async {

@@ -128,6 +128,17 @@ void main() {
       expect(imageCache.maximumSizeBytes, 256 + 1000);
     });
 
+    test('Returns null if an error is caught resolving an image', () {
+      final ErrorImageProvider errorImage = ErrorImageProvider();
+      expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage)), throwsA(isInstanceOf<Error>()));
+      bool caughtError = false;
+      final ImageStreamCompleter result = imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage), onError: (dynamic error, StackTrace stackTrace) {
+        caughtError = true;
+      });
+      expect(result, null);
+      expect(caughtError, true);
+    });
+
     test('already pending image is returned when it is put into the cache again', () async {
       const TestImage testImage = TestImage(width: 8, height: 8);
 
@@ -195,3 +206,4 @@ void main() {
     });
   });
 }
+
