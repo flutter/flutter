@@ -195,6 +195,7 @@ class SingleChildScrollView extends StatelessWidget {
     this.child,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(scrollDirection != null),
+       assert(dragStartBehavior != null),
        assert(!(controller != null && primary == true),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
           'You cannot both set primary to true and pass an explicit controller.'

@@ -75,6 +75,7 @@ class Switch extends StatefulWidget {
     this.materialTapTargetSize,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : _switchType = _SwitchType.material,
+       assert(dragStartBehavior != null),
        super(key: key);
 
   /// Creates a [CupertinoSwitch] if the target platform is iOS, creates a

@@ -68,9 +68,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// For more information about the gesture arena:
   /// https://flutter.io/docs/development/ui/advanced/gestures#gesture-disambiguation
   ///
+  /// By default, the drag start behavior is [DragStartBehavior.start].
+  ///
   /// ## Example:
   ///
-  /// [@template flutter.gestures.monodrag.dragStartExample]
+  /// {@template flutter.gestures.monodrag.dragStartExample}
   /// A finger presses down on the screen with offset (500.0, 500.0),
   /// and then moves to position (510.0, 500.0) before winning the arena.
   /// With [dragStartBehavior] set to [DragStartBehavior.down], the [onStart]
@@ -78,7 +80,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// at (500.0, 500.0). If it is instead set to [DragStartBehavior.start],
   /// [onStart] will be called at the time corresponding to the touch's position
   /// at (510.0, 500.0).
-  /// [@end template]
+  /// {@endtemplate}
   DragStartBehavior dragStartBehavior;
 
   /// A pointer has contacted the screen and might begin to move.

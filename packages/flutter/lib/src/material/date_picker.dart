@@ -256,6 +256,7 @@ class DayPicker extends StatelessWidget {
        assert(currentDate != null),
        assert(onChanged != null),
        assert(displayedMonth != null),
+       assert(dragStartBehavior != null),
        assert(!firstDate.isAfter(lastDate)),
        assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate)),
        super(key: key);
