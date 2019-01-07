@@ -400,6 +400,10 @@ class FlutterEngine extends CachedArtifact {
     <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
     <String>['android-arm64-profile/darwin-x64', 'android-arm64-profile/darwin-x64.zip'],
     <String>['android-arm64-release/darwin-x64', 'android-arm64-release/darwin-x64.zip'],
+    <String>['android-arm-dynamic-profile/darwin-x64', 'android-arm-dynamic-profile/darwin-x64.zip'],
+    <String>['android-arm-dynamic-release/darwin-x64', 'android-arm-dynamic-release/darwin-x64.zip'],
+    <String>['android-arm64-dynamic-profile/darwin-x64', 'android-arm64-dynamic-profile/darwin-x64.zip'],
+    <String>['android-arm64-dynamic-release/darwin-x64', 'android-arm64-dynamic-release/darwin-x64.zip'],
   ];
 
   List<List<String>> get _linuxBinaryDirs => <List<String>>[
@@ -420,6 +424,10 @@ class FlutterEngine extends CachedArtifact {
     <String>['android-arm-release/windows-x64', 'android-arm-release/windows-x64.zip'],
     <String>['android-arm64-profile/windows-x64', 'android-arm64-profile/windows-x64.zip'],
     <String>['android-arm64-release/windows-x64', 'android-arm64-release/windows-x64.zip'],
+    <String>['android-arm-dynamic-profile/windows-x64', 'android-arm-dynamic-profile/windows-x64.zip'],
+    <String>['android-arm-dynamic-release/windows-x64', 'android-arm-dynamic-release/windows-x64.zip'],
+    <String>['android-arm64-dynamic-profile/windows-x64', 'android-arm64-dynamic-profile/windows-x64.zip'],
+    <String>['android-arm64-dynamic-release/windows-x64', 'android-arm64-dynamic-release/windows-x64.zip'],
   ];
 
   List<List<String>> get _androidBinaryDirs => <List<String>>[
