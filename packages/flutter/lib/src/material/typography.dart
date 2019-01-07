@@ -68,7 +68,8 @@ enum ScriptCategory {
 /// `Typography(platform: platform)` which uses [englishLike2014],
 /// [dense2014] and [tall2014]. To use the 2018 text theme
 /// geometries, specify a typography value:
-/// ```
+///
+/// ```dart
 /// Typography(
 ///   platorm: platform,
 ///   englishLike: Typography.englishLike2018,

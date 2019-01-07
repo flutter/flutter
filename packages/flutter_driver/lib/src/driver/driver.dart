@@ -601,12 +601,12 @@ class FlutterDriver {
   ///
   /// ```dart
   /// test('enters text in a text field', () async {
-  ///  var textField = find.byValueKey('enter-text-field');
-  ///  await driver.tap(textField);  // acquire focus
-  ///  await driver.enterText('Hello!');  // enter text
-  ///  await driver.waitFor(find.text('Hello!'));  // verify text appears on UI
-  ///  await driver.enterText('World!');  // enter another piece of text
-  ///  await driver.waitFor(find.text('World!'));  // verify new text appears
+  ///   var textField = find.byValueKey('enter-text-field');
+  ///   await driver.tap(textField);  // acquire focus
+  ///   await driver.enterText('Hello!');  // enter text
+  ///   await driver.waitFor(find.text('Hello!'));  // verify text appears on UI
+  ///   await driver.enterText('World!');  // enter another piece of text
+  ///   await driver.waitFor(find.text('World!'));  // verify new text appears
   /// });
   /// ```
   Future<void> enterText(String text, { Duration timeout }) async {
