@@ -984,7 +984,7 @@ class ParagraphConstraints {
   /// Creates constraints for laying out a pargraph.
   ///
   /// The [width] argument must not be null.
-  ParagraphConstraints({
+  const ParagraphConstraints({
     this.width,
   }) : assert(width != null);
 
