@@ -1,4 +1,4 @@
-Signature: f15aba07ce7626073498d1ee7a60bfed
+Signature: 6b47f70224c59ae6a88c0cdc03aaa843
 
 UNUSED LICENSES:
 
@@ -4028,7 +4028,6 @@ FILE: ../../../third_party/skia/include/utils/SkLua.h
 FILE: ../../../third_party/skia/include/utils/SkLuaCanvas.h
 FILE: ../../../third_party/skia/samplecode/SampleChart.cpp
 FILE: ../../../third_party/skia/samplecode/SampleClock.cpp
-FILE: ../../../third_party/skia/samplecode/SampleFilterFuzz.cpp
 FILE: ../../../third_party/skia/samplecode/SampleLua.cpp
 FILE: ../../../third_party/skia/samplecode/SampleManyRects.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePdfFileViewer.cpp
