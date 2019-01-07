@@ -184,6 +184,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 }
 
 abstract class Device {
+
   Device(this.id);
 
   final String id;
