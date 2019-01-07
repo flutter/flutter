@@ -396,7 +396,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 /// The [AnimatedContainer] will automatically animate between the old and
 /// new values of properties when they change using the provided curve and
-/// duration. Properties that are null are not animated. Its child and 
+/// duration. Properties that are null are not animated. Its child and
 /// descendants are not animated.
 ///
 /// This class is useful for generating simple implicit transitions between
