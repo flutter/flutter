@@ -311,6 +311,7 @@ class FuchsiaIsolateDiscoveryProtocol {
   final Completer<Uri> _foundUri = Completer<Uri>();
   Timer _pollingTimer;
   Status _status;
+  bool _locked = false;
 
   Future<Uri> get uri {
     _status ??= logger.startProgress(
@@ -329,6 +330,12 @@ class FuchsiaIsolateDiscoveryProtocol {
   }
 
   Future<void> _findIsolate(Timer timer) async {
+    // Prevent a timer callback from firing while there is already an operation
+    // pending
+    if (_locked) {
+      return;
+    }
+    _locked = true;
     final List<int> ports = await _device.servicePorts();
     for (int port in ports) {
       VMService service;
@@ -361,6 +368,7 @@ class FuchsiaIsolateDiscoveryProtocol {
         }
       }
     }
+    _locked = false;
   }
 }
 
