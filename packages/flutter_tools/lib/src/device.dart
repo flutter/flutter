@@ -183,24 +183,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   String toString() => '$name device discovery';
 }
 
-/// The Features that are not uniformly supported across flutter devices.
-abstract class DeviceCapabilities {
-  /// Whether this device implements support for hot reload.
-  bool get supportsHotReload;
-
-  /// Whether this device implements support for hot restart.
-  bool get supportsHotRestart;
-
-  /// Whether flutter applications running on this device can be terminated
-  /// from the vmservice.
-  bool get supportsStopApp;
-
-  /// Whether the device supports taking screenshots of a running flutter
-  /// application.
-  bool get supportsScreenshot;
-}
-
-abstract class Device implements DeviceCapabilities {
+abstract class Device {
   Device(this.id);
 
   final String id;
@@ -287,16 +270,18 @@ abstract class Device implements DeviceCapabilities {
     bool ipv6 = false,
   });
 
-  @override
+  /// Whether this device implements support for hot reload.
   bool get supportsHotReload => true;
 
-  @override
+  /// Whether this device implements support for hot restart.
   bool get supportsHotRestart => true;
 
-  @override
+  /// Whether flutter applications running on this device can be terminated
+  /// from the vmservice.
   bool get supportsStopApp => true;
 
-  @override
+  /// Whether the device supports taking screenshots of a running flutter
+  /// application.
   bool get supportsScreenshot => false;
 
   /// Stop an app package on the current device.
