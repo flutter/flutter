@@ -183,7 +183,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   String toString() => '$name device discovery';
 }
 
-/// The Features that are not uniformly supported across flutter devices.
+/// Features that are not uniformly supported across flutter devices.
 abstract class DeviceCapabilities {
   /// Whether this device implements support for hot reload.
   bool get supportsHotReload;
