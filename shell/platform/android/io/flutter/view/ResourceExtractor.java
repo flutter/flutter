@@ -118,11 +118,7 @@ class ResourceExtractor {
 
         try {
             mExtractTask.get();
-        } catch (CancellationException e) {
-            deleteFiles();
-        } catch (ExecutionException e2) {
-            deleteFiles();
-        } catch (InterruptedException e3) {
+        } catch (CancellationException | ExecutionException | InterruptedException e) {
             deleteFiles();
         }
     }
@@ -224,11 +220,6 @@ class ResourceExtractor {
         ZipFile zipFile;
         try {
             zipFile = new ZipFile(updateFile);
-
-        } catch (ZipException e) {
-            Log.w(TAG, "Exception unpacking resources: " + e.getMessage());
-            deleteFiles();
-            return false;
 
         } catch (IOException e) {
             Log.w(TAG, "Exception unpacking resources: " + e.getMessage());
@@ -395,17 +386,10 @@ class ResourceExtractor {
             Scanner scanner = new Scanner(zipFile.getInputStream(entry));
             return new JSONObject(scanner.useDelimiter("\\A").next());
 
-        } catch (ZipException e) {
+        } catch (IOException | JSONException e) {
             Log.w(TAG, "Invalid update file: " + e);
             return null;
 
-        } catch (IOException e) {
-            Log.w(TAG, "Invalid update file: " + e);
-            return null;
-
-        } catch (JSONException e) {
-            Log.w(TAG, "Invalid update file: " + e);
-            return null;
         }
     }
 }
