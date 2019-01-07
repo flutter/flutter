@@ -1142,7 +1142,7 @@ void main() {
       tester,
       fromTitle: 'Page 1',
       toTitle: 'Page 2',
-    );t
+    );
 
     // Go to the next page.
     await tester.pump(const Duration(milliseconds: 500));
