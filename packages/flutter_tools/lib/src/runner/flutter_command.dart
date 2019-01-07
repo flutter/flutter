@@ -237,8 +237,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag('dynamic',
       hide: !verboseHelp,
       negatable: false,
-      help: 'Enable dynamic code. This flag is intended for use with\n'
-            '--release or --profile; --debug always has this enabled.');
+      help: 'Enable dynamic code. Only allowed with --release or --profile.');
   }
 
   void addDynamicModeFlags({bool verboseHelp = false}) {
@@ -328,12 +327,24 @@ abstract class FlutterCommand extends Command<void> {
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
         ? argResults['dynamic']
         : false;
-    if (argResults['debug'])
+
+    if (argResults['debug']) {
+      if (dynamicFlag)
+        throw ToolExit('Error: --dynamic requires --release or --profile.');
       return BuildMode.debug;
+    }
     if (argResults['profile'])
       return dynamicFlag ? BuildMode.dynamicProfile : BuildMode.profile;
     if (argResults['release'])
       return dynamicFlag ? BuildMode.dynamicRelease : BuildMode.release;
+
+    if (_defaultBuildMode == BuildMode.debug && dynamicFlag)
+      throw ToolExit('Error: --dynamic requires --release or --profile.');
+    if (_defaultBuildMode == BuildMode.release && dynamicFlag)
+      return BuildMode.dynamicRelease;
+    if (_defaultBuildMode == BuildMode.profile && dynamicFlag)
+      return BuildMode.dynamicProfile;
+
     return _defaultBuildMode;
   }
 
