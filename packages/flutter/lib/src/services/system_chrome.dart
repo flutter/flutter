@@ -352,7 +352,6 @@ class SystemChrome {
   /// ```
   ///
   /// ```dart
-  ///
   ///    final _random = math.Random();
   ///    SystemUiOverlayStyle _currentStyle = SystemUiOverlayStyle.light;
   ///
