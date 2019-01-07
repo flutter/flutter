@@ -36,6 +36,15 @@ void main() {
       expect(names.length, 1);
       expect(names.first, 'lilia-shore-only-last');
     });
+
+    test('default capabilities', () async {
+      final FuchsiaDevice device = FuchsiaDevice('123');
+
+      expect(device.supportsHotReload, true);
+      expect(device.supportsHotRestart, false);
+      expect(device.supportsStopApp, false);
+      expect(await device.stopApp(null), false);
+    });
   });
 
   group('displays friendly error when', () {

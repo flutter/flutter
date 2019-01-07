@@ -276,6 +276,10 @@ abstract class Device {
   /// Whether this device implements support for hot restart.
   bool get supportsHotRestart => true;
 
+  /// Whether flutter applications running on this device can be terminated
+  /// from the vmservice.
+  bool get supportsStopApp => true;
+
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);
 
