@@ -100,6 +100,7 @@ Future<void> main(List<String> arguments) async {
 
   createFooter('$kDocsRoot/lib/footer.html');
   copyAssets();
+  createSearchMetadata('$kDocsRoot/lib/opensearch.xml', '$kDocsRoot/doc/opensearch.xml');
   cleanOutSnippets();
 
   final List<String> dartdocBaseArgs = <String>['global', 'run'];
@@ -134,6 +135,7 @@ Future<void> main(List<String> arguments) async {
     '--header', 'analytics.html',
     '--header', 'survey.html',
     '--header', 'snippets.html',
+    '--header', 'opensearch.html',
     '--footer-text', 'lib/footer.html',
     '--exclude-packages',
     <String>[
@@ -231,20 +233,25 @@ ArgParser _createArgsParser() {
 
 final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
 
+String getBranchName() {
+  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
+  if (gitResult.exitCode != 0)
+    throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
+  final Match gitBranchMatch = gitBranchRegexp.firstMatch(
+      gitResult.stdout.trim().split('\n').first);
+  return gitBranchMatch == null ? '' : gitBranchMatch.group(1).split('...').first;
+}
+
 void createFooter(String footerPath) {
   const int kGitRevisionLength = 10;
 
-  ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
+  final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
   if (gitResult.exitCode != 0)
     throw 'git rev-parse exit with non-zero exit code: ${gitResult.exitCode}';
   String gitRevision = gitResult.stdout.trim();
 
-  gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
-   if (gitResult.exitCode != 0)
-    throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
-  final Match gitBranchMatch = gitBranchRegexp.firstMatch(
-      gitResult.stdout.trim().split('\n').first);
-  final String gitBranchOut = gitBranchMatch == null ? '' : '• </span class="no-break">${gitBranchMatch.group(1).split('...').first}</span>';
+  final String gitBranch = getBranchName();
+  final String gitBranchOut = gitBranch.isEmpty ? '' : '• </span class="no-break">$gitBranch</span>';
 
   gitRevision = gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
 
@@ -254,6 +261,21 @@ void createFooter(String footerPath) {
     '• </span class="no-break">$timestamp<span>',
     '• </span class="no-break">$gitRevision</span>',
     gitBranchOut].join(' '));
+}
+
+/// Generates an OpenSearch XML description that can be used to add a custom
+/// search for Flutter API docs to the browser. Unfortunately, it has to know
+/// the URL to which site to search, so we customize it here based upon the
+/// branch name.
+void createSearchMetadata(String templatePath, String metadataPath) {
+  final String template = File(templatePath).readAsStringSync();
+  final String branch = getBranchName();
+  final String metadata = template.replaceAll(
+    '{SITE_URL}',
+    branch == 'stable' ? 'https://docs.flutter.io/' : 'https://master-docs.flutter.io/',
+  );
+  Directory(path.dirname(metadataPath)).create(recursive: true);
+  File(metadataPath).writeAsStringSync(metadata);
 }
 
 /// Recursively copies `srcDir` to `destDir`, invoking [onFileCopied], if
@@ -292,7 +314,8 @@ void copyAssets() {
           (File src, File dest) => print('Copied ${src.path} to ${dest.path}'));
 }
 
-
+/// Clean out any existing snippets so that we don't publish old files from
+/// previous runs accidentally.
 void cleanOutSnippets() {
   final Directory snippetsDir = Directory(path.join(kPublishRoot, 'snippets'));
   if (snippetsDir.existsSync()) {
