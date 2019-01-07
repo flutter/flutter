@@ -101,6 +101,12 @@ public class FlutterFragmentActivity
             super.onBackPressed();
         }
     }
+        
+    @Override
+    protected void onStart() {
+        super.onStart();
+        eventDelegate.onStart();
+    }
 
     @Override
     protected void onStop() {
