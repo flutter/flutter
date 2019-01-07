@@ -33,7 +33,7 @@ abstract class Decoration extends Diagnosticable {
   ///
   /// This is intended to be used as follows:
   /// ```dart
-  ///   assert(myDecoration.debugAssertIsValid());
+  /// assert(myDecoration.debugAssertIsValid());
   /// ```
   bool debugAssertIsValid() => true;
 
