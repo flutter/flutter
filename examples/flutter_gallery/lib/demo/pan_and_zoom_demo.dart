@@ -60,7 +60,6 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
   static const double MIN_SCALE = 0.25;
   Point<double> _offset; // Offset from origin of viewport when scale is 1.0
   Point<double> _translateFrom; // Point where a single translation began
-  Point<double> _scaleFocalPoint; // Point where a single translation began
   double _scaleStart = 1.0; // Scale value at start of scaling gesture
   double _scale = 1.0;
 
@@ -120,8 +119,8 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
     final Point<double> finalCenterOfScreen = scaledCenterOfScreen + _offset;
     // Translate the original center of the screen to the final center.
     final Vector2 translationVector = Vector2(
-        finalCenterOfScreen.x - originalCenterOfScreen.x,
-        finalCenterOfScreen.y - originalCenterOfScreen.y,
+      finalCenterOfScreen.x - originalCenterOfScreen.x,
+      finalCenterOfScreen.y - originalCenterOfScreen.y,
     );
     final Matrix4 translate = Matrix4(
       1, 0, 0, 0,
@@ -134,17 +133,22 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
   }
 
   // Given a point in screen coordinates, return the point in the scene.
+  // Scene coordinates are independent of scale, just like _offset.
   Offset _fromScreen(Offset screenPoint, Point<double> offset, double scale) {
-    // Locate the center of the screen in scene coordinates
-    final Offset centerOfScreen = Offset(
-      offset.x - widget.screenSize.width / 2,
-      offset.y - widget.screenSize.height / 2,
+    // Locate the center of the screen in scene coordinates at a scale of 1.0.
+    final Offset centerOfScreenSceneCoords = Offset(
+      widget.screenSize.width / 2 - offset.x,
+      widget.screenSize.height / 2 - offset.y,
     );
+    // After scaling, the center of the screen is still the same scene coords.
+    // Find the distance from the center of the screen to the given screenPoint.
     final Offset fromCenterOfScreen = Offset(
-      (screenPoint.dx - widget.screenSize.width / 2) / scale,
-      (screenPoint.dy - widget.screenSize.height / 2) / scale,
+      screenPoint.dx - widget.screenSize.width / 2,
+      screenPoint.dy - widget.screenSize.height / 2,
     );
-    return centerOfScreen + fromCenterOfScreen;
+    final Offset fromCenterOfScreenSceneCoords = fromCenterOfScreen / scale;
+    // The absolute location of screenPoint in scene coords is the sum.
+    return centerOfScreenSceneCoords + fromCenterOfScreenSceneCoords;
   }
 
   // Handle panning and pinch zooming events
@@ -153,10 +157,6 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
     setState(() {
       _scaleStart = _scale;
       _translateFrom = Point<double>(details.focalPoint.dx, details.focalPoint.dy);
-      _scaleFocalPoint = Point<double>(
-        _translateFrom.x / _scale + _offset.x,
-        _translateFrom.y / _scale + _offset.y,
-      );
     });
   }
   void onScaleUpdate(ScaleUpdateDetails details) {
