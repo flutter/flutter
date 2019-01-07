@@ -1938,6 +1938,47 @@ testWidgets(
 
     expect(controller.selection.baseOffset, 11);
   });
+
+  testWidgets('Formatters are skipped if text has not changed', (WidgetTester tester) async {
+    int called = 0;
+    final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
+      called += 1;
+      return newValue;
+    });
+    final TextEditingController controller = TextEditingController();
+    final EditableText editableText = EditableText(
+      controller: controller,
+      backgroundCursorColor: Colors.red,
+      cursorColor: Colors.red,
+      focusNode: FocusNode(),
+      style: textStyle,
+      inputFormatters: <TextInputFormatter>[
+        formatter,
+      ],
+      textDirection: TextDirection.ltr,
+    );
+    await tester.pumpWidget(editableText);
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+    state.updateEditingValue(const TextEditingValue(
+      text: 'a',
+    ));
+    expect(called, 1);
+    // same value.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'a',
+    ));
+    expect(called, 1);
+    // same value with different selection.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'a',
+      selection: TextSelection.collapsed(offset: 1),
+    ));
+    // different value.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'b',
+    ));
+    expect(called, 2);
+  });
 }
 
 class MockTextSelectionControls extends Mock implements TextSelectionControls {}
