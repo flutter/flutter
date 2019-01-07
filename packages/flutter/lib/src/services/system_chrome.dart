@@ -339,17 +339,17 @@ class SystemChrome {
   /// directly. This widget places a value directly into the layer tree where
   /// it can be hit-tested by the framework. On every frame, the framework will
   /// hit-test and select the annotated region it finds under the status and
-  /// navigation bar and synthesize them into a single style. Passing
-  /// `sized: false` to an annotated region widget will make the framework hit
-  /// the first annotated region it finds in the layer tree. This allows
-  /// overriding of the default styles provided by the Material [AppBar] and
-  /// the Cupertino [NavBar].
+  /// navigation bar and synthesize them into a single style. This can be used
+  /// to configure the system styles when an app bar is not used.
   ///
   /// {@tool snippet --template=stateful_widget}
   /// The following example creates a widget that changes the status bar color
   /// to a random value on Android.
   ///
   /// ```dart
+  ///    import 'dart:math' as math;
+  ///    import 'package:flutter/foundation.dart';
+  ///
   ///    final _random = math.Random();
   ///    SystemUiOverlayStyle _currentStyle = SystemUiOverlayStyle.light;
   ///
@@ -371,7 +371,6 @@ class SystemChrome {
   ///    Widget build(BuildContext context) {
   ///      return Scaffold(
   ///        body: AnnotatedRegion(
-  ///          sized: false,
   ///          value: _currentStyle,
   ///           child: Center(
   ///             child: RaisedButton(
