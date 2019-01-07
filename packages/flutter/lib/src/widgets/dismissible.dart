@@ -160,7 +160,7 @@ class Dismissible extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * {@macro flutter.gestures.monodrag.dragStartExample}
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
   final DragStartBehavior dragStartBehavior;
 
   @override

@@ -197,7 +197,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * {@macro flutter.gestures.monodrag.dragStartExample}
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
