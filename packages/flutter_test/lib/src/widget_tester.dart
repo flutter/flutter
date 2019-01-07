@@ -59,11 +59,11 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// ## Sample code
 ///
 /// ```dart
-///     testWidgets('MyWidget', (WidgetTester tester) async {
-///       await tester.pumpWidget(new MyWidget());
-///       await tester.tap(find.text('Save'));
-///       expect(find.text('Success'), findsOneWidget);
-///     });
+/// testWidgets('MyWidget', (WidgetTester tester) async {
+///   await tester.pumpWidget(new MyWidget());
+///   await tester.tap(find.text('Save'));
+///   expect(find.text('Success'), findsOneWidget);
+/// });
 /// ```
 @isTest
 void testWidgets(String description, WidgetTesterCallback callback, {
