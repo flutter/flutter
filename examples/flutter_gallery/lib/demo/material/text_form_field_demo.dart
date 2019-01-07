@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../../gallery/demo.dart';
 
@@ -67,6 +68,7 @@ class _PasswordFieldState extends State<PasswordField> {
         labelText: widget.labelText,
         helperText: widget.helperText,
         suffixIcon: GestureDetector(
+          dragStartBehavior: DragStartBehavior.down,
           onTap: () {
             setState(() {
               _obscureText = !_obscureText;
@@ -167,6 +169,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawerDragStartBehavior: DragStartBehavior.down,
       key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Text fields'),
@@ -180,6 +183,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           autovalidate: _autovalidate,
           onWillPop: _warnUserAboutInvalidData,
           child: SingleChildScrollView(
+            dragStartBehavior: DragStartBehavior.down,
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
