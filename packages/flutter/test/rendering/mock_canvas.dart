@@ -28,7 +28,7 @@ import 'recording_canvas.dart';
 /// To specify the pattern, call the methods on the returned object. For example:
 ///
 /// ```dart
-///  expect(myRenderObject, paints..circle(radius: 10.0)..circle(radius: 20.0));
+/// expect(myRenderObject, paints..circle(radius: 10.0)..circle(radius: 20.0));
 /// ```
 ///
 /// This particular pattern would verify that the render object `myRenderObject`
