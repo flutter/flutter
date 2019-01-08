@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../widgets/semantics_tester.dart';
 
@@ -202,7 +201,6 @@ void main() {
           drawer: Drawer(
             key: drawerKey,
             child: ListView(
-              dragStartBehavior: DragStartBehavior.down,
               controller: scrollOffset,
               children: List<Widget>.generate(10,
                 (int index) => SizedBox(height: 100.0, child: Text('D$index'))
@@ -632,7 +630,6 @@ void main() {
               viewInsets: EdgeInsets.only(bottom: 200.0),
             ),
             child: Scaffold(
-              drawerDragStartBehavior: DragStartBehavior.down,
               appBar: PreferredSize(
                 preferredSize: const Size(11.0, 13.0),
                 child: Container(

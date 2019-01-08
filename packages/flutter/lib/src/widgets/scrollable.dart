@@ -81,9 +81,7 @@ class Scrollable extends StatefulWidget {
     @required this.viewportBuilder,
     this.excludeFromSemantics = false,
     this.semanticChildCount,
-    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(axisDirection != null),
-       assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
        assert(excludeFromSemantics != null),
        super (key: key);
@@ -181,25 +179,6 @@ class Scrollable extends StatefulWidget {
   ///  * [CustomScrollView], for an explanation of scroll semantics.
   ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
   final int semanticChildCount;
-
-  /// {@template flutter.widgets.scrollable.dragStartBehavior}
-  /// Determines the way that drag start behavior is handled.
-  ///
-  /// If set to [DragStartBehavior.start], scrolling drag behavior will
-  /// begin upon the detection of a drag gesture. If set to
-  /// [DragStartBehavior.down] it will begin when a down event is first detected.
-  ///
-  /// In general, setting this to [DragStartBehavior.start] will make drag
-  /// animation smoother and setting it to [DragStartBehavior.down] will make
-  /// drag behavior feel slightly more reactive.
-  ///
-  /// By default, the drag start behavior is [DragStartBehavior.start].
-  ///
-  /// See also:
-  ///
-  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
-  /// {@endtemplate}
-  final DragStartBehavior dragStartBehavior;
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -412,8 +391,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                   ..onCancel = _handleDragCancel
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
-                  ..maxFlingVelocity = _physics?.maxFlingVelocity
-                  ..dragStartBehavior = widget.dragStartBehavior;
+                  ..maxFlingVelocity = _physics?.maxFlingVelocity;
               },
             ),
           };
@@ -431,8 +409,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                   ..onCancel = _handleDragCancel
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
-                  ..maxFlingVelocity = _physics?.maxFlingVelocity
-                  ..dragStartBehavior = widget.dragStartBehavior;
+                  ..maxFlingVelocity = _physics?.maxFlingVelocity;
               },
             ),
           };
