@@ -568,6 +568,7 @@ class AnimationController extends Animation<double>
       }
       return true;
     }());
+    assert(reverse != null);
     return animateWith(_RepeatingSimulation(min, max, reverse, period));
   }
 
@@ -746,7 +747,7 @@ class _InterpolationSimulation extends Simulation {
 
 class _RepeatingSimulation extends Simulation {
   _RepeatingSimulation(this.min, this.max, this.reverse, Duration period)
-      : _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond {
+    : _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond {
     assert(_periodInSeconds > 0.0);
   }
 
@@ -764,12 +765,12 @@ class _RepeatingSimulation extends Simulation {
     assert(timeInSeconds >= 0.0);
     final double t = (timeInSeconds / _periodInSeconds) % 1.0;
 
-    if(_previousT > t) {
+    if (_previousT > t) {
       _isPlayingReverse = !_isPlayingReverse;
     }
     _previousT = t;
 
-    if(reverse && _isPlayingReverse) {
+    if (reverse && _isPlayingReverse) {
       return ui.lerpDouble(max, min, t);
     } else {
       return ui.lerpDouble(min, max, t);
