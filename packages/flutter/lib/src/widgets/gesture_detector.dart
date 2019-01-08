@@ -383,6 +383,10 @@ class GestureDetector extends StatelessWidget {
   /// drag behavior feel slightly more reactive.
   ///
   /// By default, the drag start behavior is [DragStartBehavior.start].
+  /// 
+  /// Only the [onStart] callbacks for the [VerticalDragGestureRecognizer],
+  /// [HorizontalDragGestureRecognizer] and [PanGestureRecognizer] are affected
+  /// by this setting.
   ///
   /// See also:
   ///
