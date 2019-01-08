@@ -12,7 +12,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+<<<<<<< HEAD
 import 'package:flutter/foundation.dart';
+=======
+import 'package:flutter/gestures.dart' show DragStartBehavior;
+>>>>>>> 08538f91f0b7f3f448355e998bb536b06a1d1145
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -502,9 +506,12 @@ void main() {
     final TextEditingController controller = TextEditingController();
 
     await tester.pumpWidget(
-      overlay(
-        child: TextField(
-          controller: controller,
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+          ),
         ),
       ),
     );
@@ -543,7 +550,7 @@ void main() {
     await tester.pump();
 
     expect(controller.selection.baseOffset, selection.baseOffset);
-    expect(controller.selection.extentOffset, selection.extentOffset+2);
+    expect(controller.selection.extentOffset, selection.extentOffset);
 
     // Drag the left handle 2 letters to the left.
     handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
@@ -555,8 +562,8 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, selection.baseOffset-2);
-    expect(controller.selection.extentOffset, selection.extentOffset+2);
+    expect(controller.selection.baseOffset, selection.baseOffset);
+    expect(controller.selection.extentOffset, selection.extentOffset);
   });
 
   testWidgets('Can use selection toolbar', (WidgetTester tester) async {
@@ -827,6 +834,7 @@ void main() {
     await tester.pumpWidget(
       overlay(
         child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
           controller: controller,
           style: const TextStyle(color: Colors.black, fontSize: 34.0),
           maxLines: 3,
@@ -910,6 +918,7 @@ void main() {
     await tester.pumpWidget(
       overlay(
         child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
           key: textFieldKey,
           controller: controller,
           style: const TextStyle(color: Colors.black, fontSize: 34.0),
@@ -4261,5 +4270,70 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(CupertinoButton), findsNWidgets(3));
     debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('default TextField debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    const TextField().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString()).toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('TextField implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    // Not checking controller, inputFormatters, focusNode
+    const TextField(
+      decoration: InputDecoration(labelText: 'foo'),
+      keyboardType: TextInputType.text,
+      textInputAction: TextInputAction.done,
+      textCapitalization: TextCapitalization.none,
+      style: TextStyle(color: Color(0xff00ff00)),
+      textAlign: TextAlign.end,
+      textDirection: TextDirection.ltr,
+      autofocus: true,
+      obscureText: true,
+      autocorrect: false,
+      maxLines: 10,
+      maxLength: 100,
+      maxLengthEnforced: false,
+      enabled: false,
+      cursorWidth: 1.0,
+      cursorRadius: Radius.zero,
+      cursorColor: Color(0xff00ff00),
+      keyboardAppearance: Brightness.dark,
+      scrollPadding: EdgeInsets.zero,
+      enableInteractiveSelection: false,
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString()).toList();
+
+    expect(description, <String>[
+      'enabled: false',
+      'decoration: InputDecoration(labelText: "foo")',
+      'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
+      'autofocus: true',
+      'obscureText: true',
+      'autocorrect: false',
+      'maxLines: 10',
+      'maxLength: 100',
+      'maxLength not enforced',
+      'textInputAction: done',
+      'textAlign: end',
+      'textDirection: ltr',
+      'cursorWidth: 1.0',
+      'cursorRadius: Radius.circular(0.0)',
+      'cursorColor: Color(0xff00ff00)',
+      'keyboardAppearance: Brightness.dark',
+      'scrollPadding: EdgeInsets.zero',
+      'selection disabled'
+    ]);
   });
 }

@@ -117,6 +117,7 @@ class AndroidView extends StatefulWidget {
   ///
   /// For example, with the following setup vertical drags will not be dispatched to the Android
   /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
+  ///
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails d) {},
@@ -125,8 +126,10 @@ class AndroidView extends StatefulWidget {
   ///   ),
   /// )
   /// ```
+  ///
   /// To get the [AndroidView] to claim the vertical drag gestures we can pass a vertical drag
   /// gesture recognizer factory in [gestureRecognizers] e.g:
+  ///
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails details) {},
@@ -247,6 +250,7 @@ class UiKitView extends StatefulWidget {
   ///
   /// For example, with the following setup vertical drags will not be dispatched to the UIKit
   /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
+  ///
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails details) {},
@@ -255,8 +259,10 @@ class UiKitView extends StatefulWidget {
   ///   ),
   /// )
   /// ```
+  ///
   /// To get the [UiKitView] to claim the vertical drag gestures we can pass a vertical drag
   /// gesture recognizer factory in [gestureRecognizers] e.g:
+  ///
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails details) {},
