@@ -85,9 +85,9 @@ void main() {
 
       final RawKeyEventDataAndroid data = events[0].data;
 
-      expect(data.isCtrlPressed(), true);
-      expect(data.isShiftPressed(), true);
-      expect(data.isAltPressed(), true);
+      expect(data.isCtrlPressed(), equals(true));
+      expect(data.isShiftPressed(), equals(true));
+      expect(data.isAltPressed(), equals(true));
 
       await tester.pumpWidget(Container());
       focusNode.dispose();
