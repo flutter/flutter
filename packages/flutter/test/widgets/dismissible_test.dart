@@ -5,7 +5,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 const double itemExtent = 100.0;
 Axis scrollDirection = Axis.vertical;
@@ -22,7 +21,6 @@ Widget buildTest({ double startToEndThreshold, TextDirection textDirection = Tex
       builder: (BuildContext context, StateSetter setState) {
         Widget buildDismissibleItem(int item) {
           return Dismissible(
-            dragStartBehavior: DragStartBehavior.down,
             key: ValueKey<int>(item),
             direction: dismissDirection,
             onDismissed: (DismissDirection direction) {
@@ -51,7 +49,6 @@ Widget buildTest({ double startToEndThreshold, TextDirection textDirection = Tex
         return Container(
           padding: const EdgeInsets.all(10.0),
           child: ListView(
-            dragStartBehavior: DragStartBehavior.down,
             scrollDirection: scrollDirection,
             itemExtent: itemExtent,
             children: <int>[0, 1, 2, 3, 4]
@@ -202,7 +199,6 @@ class Test1215DismissibleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      dragStartBehavior: DragStartBehavior.down,
       key: ObjectKey(text),
       child: AspectRatio(
         aspectRatio: 1.0,
