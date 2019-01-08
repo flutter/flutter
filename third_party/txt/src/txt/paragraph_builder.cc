@@ -84,6 +84,7 @@ std::unique_ptr<Paragraph> ParagraphBuilder::Build() {
   paragraph->SetText(std::move(text_), std::move(runs_));
   paragraph->SetParagraphStyle(paragraph_style_);
   paragraph->SetFontCollection(font_collection_);
+  SetParagraphStyle(paragraph_style_);
   return paragraph;
 }
 
