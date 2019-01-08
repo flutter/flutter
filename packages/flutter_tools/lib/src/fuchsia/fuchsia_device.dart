@@ -327,7 +327,8 @@ class FuchsiaIsolateDiscoveryProtocol {
 
   void dispose() {
     if (!_foundUri.isCompleted) {
-      _status.cancel();
+      _status?.cancel();
+      _status = null;
       _foundUri.completeError(Exception('Did not complete'));
     }
   }
