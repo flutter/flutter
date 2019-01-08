@@ -181,12 +181,12 @@ class MaterialApp extends StatefulWidget {
   /// ```dart
   /// import 'package:flutter_localizations/flutter_localizations.dart';
   /// MaterialApp(
-  ///  localizationsDelegates: [
-  ///    // ... app-specific localization delegate[s] here
-  ///    GlobalMaterialLocalizations.delegate,
-  ///    GlobalWidgetsLocalizations.delegate,
-  ///  ],
-  ///  supportedLocales: [
+  ///   localizationsDelegates: [
+  ///     // ... app-specific localization delegate[s] here
+  ///     GlobalMaterialLocalizations.delegate,
+  ///     GlobalWidgetsLocalizations.delegate,
+  ///   ],
+  ///   supportedLocales: [
   ///     const Locale('en', 'US'), // English
   ///     const Locale('he', 'IL'), // Hebrew
   ///     // ... other locales the app supports
@@ -443,7 +443,7 @@ class _MaterialAppState extends State<MaterialApp> {
             mini: true,
           );
         },
-      )
+      ),
     );
 
     assert(() {

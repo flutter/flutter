@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../../gallery/demo.dart';
 
@@ -79,6 +80,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawerDragStartBehavior: DragStartBehavior.down,
       key: _scaffoldKey,
       appBar: AppBar(
         leading: IconButton(
@@ -106,6 +108,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
               ),
               otherAccountsPictures: <Widget>[
                 GestureDetector(
+                  dragStartBehavior: DragStartBehavior.down,
                   onTap: () {
                     _onOtherAccountsTap(context);
                   },
@@ -120,6 +123,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                   ),
                 ),
                 GestureDetector(
+                  dragStartBehavior: DragStartBehavior.down,
                   onTap: () {
                     _onOtherAccountsTap(context);
                   },
@@ -149,6 +153,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
               removeTop: true,
               child: Expanded(
                 child: ListView(
+                  dragStartBehavior: DragStartBehavior.down,
                   padding: const EdgeInsets.only(top: 8.0),
                   children: <Widget>[
                     Stack(
