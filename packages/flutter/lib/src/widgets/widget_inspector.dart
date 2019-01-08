@@ -935,6 +935,42 @@ mixin WidgetInspectorService {
     return Future<void>.value();
   }
 
+  static const String consoleObjectGroup = 'console-group';
+
+  void _reportError(FlutterErrorDetails details) {
+    print("XXX --- REPORTED AN ERROR!");
+
+
+    Map<String, Object> json = {
+      'exceptionId': toId(details.exception, consoleObjectGroup),
+      'stackId' : toId(details.stack, consoleObjectGroup),
+      'library': details.library,
+      'context': details.context,
+      'id': toId(details, consoleObjectGroup),
+      'silent': details.silent,
+    };
+    if (details.stack != null) {
+      Iterable<String> stackLines = (details.stack != null) ? details.stack.toString().trimRight().split('\n') : null;
+
+      if (details.stackFilter != null) {
+        stackLines = details.stackFilter(stackLines);
+      } else {
+        stackLines = FlutterError.defaultStackFilter(stackLines);
+      }
+      json['filteredStackLines'] = stackLines.toList();
+    }
+
+    if (details.informationCollector != null) {
+      StringBuffer information = new StringBuffer();
+      details.informationCollector(information);
+      json['information'] = information.toString();
+    }
+    if (details is FlutterErrorDetailsForRendering) {
+      json['renderObject'] = details.renderObject;
+    }
+    postEvent('Flutter.Error', json);
+  }
+
   /// Called to register service extensions.
   ///
   /// See also:
@@ -949,6 +985,10 @@ mixin WidgetInspectorService {
     assert(() { _debugServiceExtensionsRegistered = true; return true; }());
 
     SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
+
+    // We should only actually do this once a service extension enabling it is
+    // turned on but this is a prototype. XXXX.
+    FlutterError.onError = _reportError;
 
     _registerBoolServiceExtension(
       name: 'show',
@@ -2155,7 +2195,6 @@ class _WidgetInspectorState extends State<WidgetInspector>
         // changed.
       });
     };
-    assert(WidgetInspectorService.instance.selectionChangedCallback == null);
     WidgetInspectorService.instance.selectionChangedCallback = _selectionChangedCallback;
   }
 
