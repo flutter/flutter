@@ -305,11 +305,11 @@ abstract class SelectableChipAttributes {
   /// are) of the chip.
   String get tooltip;
 
-  /// The shape of the avatar border to be used to draw a darkended layer when
-  /// a checkmark is drawn over it.
+  /// The shape of the avatar, used to draw a darkended layer when a checkmark
+  /// is drawn over it.
   ///
   /// Defaults to [CircleBorder].
-  ShapeBorder get avatarBorderShape;
+  ShapeBorder get avatarBorder;
 }
 
 /// An interface for material design chips that can be enabled and disabled.
@@ -610,7 +610,7 @@ class InputChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-    this.avatarBorderShape = const CircleBorder(),
+    this.avatarBorder = const CircleBorder(),
   })  : assert(selected != null),
         assert(isEnabled != null),
         assert(label != null),
@@ -660,7 +660,7 @@ class InputChip extends StatelessWidget
   @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
-  final ShapeBorder avatarBorderShape;
+  final ShapeBorder avatarBorder;
 
   @override
   Widget build(BuildContext context) {
@@ -688,7 +688,7 @@ class InputChip extends StatelessWidget
       padding: padding,
       materialTapTargetSize: materialTapTargetSize,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
-      avatarBorderShape: avatarBorderShape,
+      avatarBorder: avatarBorder,
     );
   }
 }
@@ -772,7 +772,7 @@ class ChoiceChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-    this.avatarBorderShape = const CircleBorder(),
+    this.avatarBorder = const CircleBorder(),
   })  : assert(selected != null),
         assert(label != null),
         assert(clipBehavior != null),
@@ -809,7 +809,7 @@ class ChoiceChip extends StatelessWidget
   @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
-  final ShapeBorder avatarBorderShape;
+  final ShapeBorder avatarBorder;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -837,7 +837,7 @@ class ChoiceChip extends StatelessWidget
       padding: padding,
       isEnabled: isEnabled,
       materialTapTargetSize: materialTapTargetSize,
-      avatarBorderShape: avatarBorderShape,
+      avatarBorder: avatarBorder,
     );
   }
 }
@@ -953,7 +953,7 @@ class FilterChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-    this.avatarBorderShape = const CircleBorder(),
+    this.avatarBorder = const CircleBorder(),
   })  : assert(selected != null),
         assert(label != null),
         assert(clipBehavior != null),
@@ -990,7 +990,7 @@ class FilterChip extends StatelessWidget
   @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
-  final ShapeBorder avatarBorderShape;
+  final ShapeBorder avatarBorder;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -1015,7 +1015,7 @@ class FilterChip extends StatelessWidget
       padding: padding,
       isEnabled: isEnabled,
       materialTapTargetSize: materialTapTargetSize,
-      avatarBorderShape: avatarBorderShape,
+      avatarBorder: avatarBorder,
     );
   }
 }
@@ -1208,7 +1208,7 @@ class RawChip extends StatefulWidget
     this.clipBehavior = Clip.none,
     this.backgroundColor,
     this.materialTapTargetSize,
-    this.avatarBorderShape = const CircleBorder(),
+    this.avatarBorder = const CircleBorder(),
   })  : assert(label != null),
         assert(isEnabled != null),
         assert(clipBehavior != null),
@@ -1259,7 +1259,7 @@ class RawChip extends StatefulWidget
   @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
-  final CircleBorder avatarBorderShape;
+  final CircleBorder avatarBorder;
 
   /// Whether or not to show a check mark when [selected] is true.
   ///
@@ -1565,7 +1565,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
               avatarDrawerAnimation: avatarDrawerAnimation,
               deleteDrawerAnimation: deleteDrawerAnimation,
               isEnabled: widget.isEnabled,
-              avatarBorderShape: widget.avatarBorderShape,
+              avatarBorder: widget.avatarBorder,
             ),
           ),
         ),
@@ -1646,7 +1646,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
     this.avatarDrawerAnimation,
     this.deleteDrawerAnimation,
     this.enableAnimation,
-    this.avatarBorderShape,
+    this.avatarBorder,
   })  : assert(theme != null),
         super(key: key);
 
@@ -1657,7 +1657,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
   final Animation<double> avatarDrawerAnimation;
   final Animation<double> deleteDrawerAnimation;
   final Animation<double> enableAnimation;
-  final ShapeBorder avatarBorderShape;
+  final ShapeBorder avatarBorder;
 
   @override
   _RenderChipElement createElement() => _RenderChipElement(this);
@@ -1673,7 +1673,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
       ..avatarDrawerAnimation = avatarDrawerAnimation
       ..deleteDrawerAnimation = deleteDrawerAnimation
       ..enableAnimation = enableAnimation
-      ..avatarBorderShape = avatarBorderShape;
+      ..avatarBorder = avatarBorder;
   }
 
   @override
@@ -1687,7 +1687,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
       avatarDrawerAnimation: avatarDrawerAnimation,
       deleteDrawerAnimation: deleteDrawerAnimation,
       enableAnimation: enableAnimation,
-      avatarBorderShape: avatarBorderShape,
+      avatarBorder: avatarBorder,
     );
   }
 }
@@ -1875,7 +1875,7 @@ class _RenderChip extends RenderBox {
     this.avatarDrawerAnimation,
     this.deleteDrawerAnimation,
     this.enableAnimation,
-    this.avatarBorderShape,
+    this.avatarBorder,
   })  : assert(theme != null),
         assert(textDirection != null),
         _theme = theme,
@@ -1897,7 +1897,7 @@ class _RenderChip extends RenderBox {
   Animation<double> avatarDrawerAnimation;
   Animation<double> deleteDrawerAnimation;
   Animation<double> enableAnimation;
-  ShapeBorder avatarBorderShape;
+  ShapeBorder avatarBorder;
 
   RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _ChipSlot slot) {
     if (oldChild != null) {
@@ -2385,7 +2385,7 @@ class _RenderChip extends RenderBox {
         final Paint darkenPaint = Paint()
           ..color = selectionScrimTween.evaluate(checkmarkAnimation)
           ..blendMode = BlendMode.srcATop;
-        final Path path =  avatarBorderShape.getOuterPath(avatarRect);
+        final Path path =  avatarBorder.getOuterPath(avatarRect);
         context.canvas.drawPath(path, darkenPaint);
       }
       // Need to make the check mark be a little smaller than the avatar.
