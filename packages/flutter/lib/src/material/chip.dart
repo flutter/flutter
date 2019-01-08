@@ -38,19 +38,6 @@ const Duration _kDisableDuration = Duration(milliseconds: 75);
 const Color _kSelectScrimColor = Color(0x60191919);
 const Icon _kDefaultDeleteIcon = Icon(Icons.cancel, size: _kDeleteIconSize);
 
-/// A function which describes the shape of the avatar widget as a path.
-///
-/// The path is used to draw an additional darkened layer over the avatar
-/// when combined with a selected choice chip. Differently shaped avatars
-/// may require different paths. The default implementation creates a circle
-/// to cover the [CircleAvatar] widget.
-typedef AvatarShapeDescriber = Path Function(Rect avatarRect);
-
-Path _kDefaultAvatarPath(Rect avatarRect) {
-  final Radius radius = Radius.circular(avatarRect.shortestSide / 2);
-  return Path()..addRRect(RRect.fromRectAndRadius(avatarRect, radius));
-}
-
 /// An interface defining the base attributes for a material design chip.
 ///
 /// Chips are compact elements that represent an attribute, text, entity, or
@@ -318,8 +305,11 @@ abstract class SelectableChipAttributes {
   /// are) of the chip.
   String get tooltip;
 
-  /// A function which describes the shape of the avatar widget as a path.
-  AvatarShapeDescriber get avatarShapeDescriber;
+  /// The shape of the avatar border to be used to draw a darkended layer when
+  /// a checkmark is drawn over it.
+  ///
+  /// Defaults to [CircleBorder].
+  ShapeBorder get avatarBorderShape;
 }
 
 /// An interface for material design chips that can be enabled and disabled.
@@ -620,7 +610,7 @@ class InputChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-    this.avatarShapeDescriber = _kDefaultAvatarPath,
+    this.avatarBorderShape = const CircleBorder(),
   })  : assert(selected != null),
         assert(isEnabled != null),
         assert(label != null),
@@ -670,7 +660,7 @@ class InputChip extends StatelessWidget
   @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
-  final AvatarShapeDescriber avatarShapeDescriber;
+  final ShapeBorder avatarBorderShape;
 
   @override
   Widget build(BuildContext context) {
@@ -698,7 +688,7 @@ class InputChip extends StatelessWidget
       padding: padding,
       materialTapTargetSize: materialTapTargetSize,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
-      avatarShapeDescriber: avatarShapeDescriber,
+      avatarBorderShape: avatarBorderShape,
     );
   }
 }
@@ -782,7 +772,7 @@ class ChoiceChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-    this.avatarShapeDescriber = _kDefaultAvatarPath,
+    this.avatarBorderShape = const CircleBorder(),
   })  : assert(selected != null),
         assert(label != null),
         assert(clipBehavior != null),
@@ -819,7 +809,7 @@ class ChoiceChip extends StatelessWidget
   @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
-  final AvatarShapeDescriber avatarShapeDescriber;
+  final ShapeBorder avatarBorderShape;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -847,7 +837,7 @@ class ChoiceChip extends StatelessWidget
       padding: padding,
       isEnabled: isEnabled,
       materialTapTargetSize: materialTapTargetSize,
-      avatarShapeDescriber: avatarShapeDescriber,
+      avatarBorderShape: avatarBorderShape,
     );
   }
 }
@@ -963,7 +953,7 @@ class FilterChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-    this.avatarShapeDescriber = _kDefaultAvatarPath,
+    this.avatarBorderShape = const CircleBorder(),
   })  : assert(selected != null),
         assert(label != null),
         assert(clipBehavior != null),
@@ -1000,7 +990,7 @@ class FilterChip extends StatelessWidget
   @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
-  final AvatarShapeDescriber avatarShapeDescriber;
+  final ShapeBorder avatarBorderShape;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -1025,7 +1015,7 @@ class FilterChip extends StatelessWidget
       padding: padding,
       isEnabled: isEnabled,
       materialTapTargetSize: materialTapTargetSize,
-      avatarShapeDescriber: avatarShapeDescriber,
+      avatarBorderShape: avatarBorderShape,
     );
   }
 }
@@ -1218,7 +1208,7 @@ class RawChip extends StatefulWidget
     this.clipBehavior = Clip.none,
     this.backgroundColor,
     this.materialTapTargetSize,
-    this.avatarShapeDescriber = _kDefaultAvatarPath,
+    this.avatarBorderShape = const CircleBorder(),
   })  : assert(label != null),
         assert(isEnabled != null),
         assert(clipBehavior != null),
@@ -1269,7 +1259,7 @@ class RawChip extends StatefulWidget
   @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
-  final AvatarShapeDescriber avatarShapeDescriber;
+  final CircleBorder avatarBorderShape;
 
   /// Whether or not to show a check mark when [selected] is true.
   ///
@@ -1575,7 +1565,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
               avatarDrawerAnimation: avatarDrawerAnimation,
               deleteDrawerAnimation: deleteDrawerAnimation,
               isEnabled: widget.isEnabled,
-              avatarShapeDescriber: widget.avatarShapeDescriber,
+              avatarBorderShape: widget.avatarBorderShape,
             ),
           ),
         ),
@@ -1656,7 +1646,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
     this.avatarDrawerAnimation,
     this.deleteDrawerAnimation,
     this.enableAnimation,
-    this.avatarShapeDescriber,
+    this.avatarBorderShape,
   })  : assert(theme != null),
         super(key: key);
 
@@ -1667,7 +1657,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
   final Animation<double> avatarDrawerAnimation;
   final Animation<double> deleteDrawerAnimation;
   final Animation<double> enableAnimation;
-  final AvatarShapeDescriber avatarShapeDescriber;
+  final ShapeBorder avatarBorderShape;
 
   @override
   _RenderChipElement createElement() => _RenderChipElement(this);
@@ -1683,7 +1673,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
       ..avatarDrawerAnimation = avatarDrawerAnimation
       ..deleteDrawerAnimation = deleteDrawerAnimation
       ..enableAnimation = enableAnimation
-      ..avatarShapeDescriber = avatarShapeDescriber;
+      ..avatarBorderShape = avatarBorderShape;
   }
 
   @override
@@ -1697,7 +1687,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
       avatarDrawerAnimation: avatarDrawerAnimation,
       deleteDrawerAnimation: deleteDrawerAnimation,
       enableAnimation: enableAnimation,
-      avatarShapeDescriber: avatarShapeDescriber,
+      avatarBorderShape: avatarBorderShape,
     );
   }
 }
@@ -1885,7 +1875,7 @@ class _RenderChip extends RenderBox {
     this.avatarDrawerAnimation,
     this.deleteDrawerAnimation,
     this.enableAnimation,
-    this.avatarShapeDescriber,
+    this.avatarBorderShape,
   })  : assert(theme != null),
         assert(textDirection != null),
         _theme = theme,
@@ -1907,7 +1897,7 @@ class _RenderChip extends RenderBox {
   Animation<double> avatarDrawerAnimation;
   Animation<double> deleteDrawerAnimation;
   Animation<double> enableAnimation;
-  AvatarShapeDescriber avatarShapeDescriber;
+  ShapeBorder avatarBorderShape;
 
   RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _ChipSlot slot) {
     if (oldChild != null) {
@@ -2395,7 +2385,7 @@ class _RenderChip extends RenderBox {
         final Paint darkenPaint = Paint()
           ..color = selectionScrimTween.evaluate(checkmarkAnimation)
           ..blendMode = BlendMode.srcATop;
-        final Path path = avatarShapeDescriber(avatarRect);
+        final Path path =  avatarBorderShape.getOuterPath(avatarRect);
         context.canvas.drawPath(path, darkenPaint);
       }
       // Need to make the check mark be a little smaller than the avatar.
