@@ -317,14 +317,21 @@ class FuchsiaIsolateDiscoveryProtocol {
   Status _status;
   int _iteration = 0;
 
-  Future<Uri> get uri {
+  FutureOr<Uri> get uri {
+    if (_uri != null) {
+      return _uri;
+    }
     _status ??= logger.startProgress(
       'Waiting for a connection from $_isolateName on ${_device.name}...',
       expectSlowOperation: true,
     );
     _pollingTimer ??= Timer(_pollDuration, _findIsolate);
-    return _foundUri.future;
+    return _foundUri.future.then((Uri uri) {
+      _uri = uri;
+      return uri;
+    });
   }
+  Uri _uri;
 
   void dispose() {
     if (!_foundUri.isCompleted) {
