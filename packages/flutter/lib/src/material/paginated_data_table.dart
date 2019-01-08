@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'button_bar.dart';
 import 'button_theme.dart';
@@ -75,11 +74,9 @@ class PaginatedDataTable extends StatefulWidget {
     this.rowsPerPage = defaultRowsPerPage,
     this.availableRowsPerPage = const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
     this.onRowsPerPageChanged,
-    this.dragStartBehavior = DragStartBehavior.start,
     @required this.source
   }) : assert(header != null),
        assert(columns != null),
-       assert(dragStartBehavior != null),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(sortAscending != null),
@@ -172,9 +169,6 @@ class PaginatedDataTable extends StatefulWidget {
   /// [PaginatedDataTable] widget itself; it should be reused each time the
   /// [PaginatedDataTable] constructor is called.
   final DataTableSource source;
-
-  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
-  final DragStartBehavior dragStartBehavior;
 
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
@@ -423,7 +417,6 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            dragStartBehavior: widget.dragStartBehavior,
             child: DataTable(
               key: _tableKey,
               columns: widget.columns,
@@ -442,7 +435,6 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               child: Container(
                 height: 56.0,
                 child: SingleChildScrollView(
-                  dragStartBehavior: widget.dragStartBehavior,
                   scrollDirection: Axis.horizontal,
                   reverse: true,
                   child: Row(

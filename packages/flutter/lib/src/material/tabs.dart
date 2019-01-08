@@ -7,7 +7,6 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'app_bar.dart';
 import 'colors.dart';
@@ -550,11 +549,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.labelPadding,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
-    this.dragStartBehavior = DragStartBehavior.start,
     this.onTap,
   }) : assert(tabs != null),
        assert(isScrollable != null),
-       assert(dragStartBehavior != null),
        assert(indicator != null || (indicatorWeight != null && indicatorWeight > 0.0)),
        assert(indicator != null || (indicatorPadding != null)),
        super(key: key);
@@ -664,9 +661,6 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this property is null then the [labelStyle] value is used. If [labelStyle]
   /// is null then the text style of the theme's body2 definition is used.
   final TextStyle unselectedLabelStyle;
-
-  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
-  final DragStartBehavior dragStartBehavior;
 
   /// An optional callback that's called when the [TabBar] is tapped.
   ///
@@ -1017,7 +1011,6 @@ class _TabBarState extends State<TabBar> {
     if (widget.isScrollable) {
       _scrollController ??= _TabBarScrollController(this);
       tabBar = SingleChildScrollView(
-        dragStartBehavior: widget.dragStartBehavior,
         scrollDirection: Axis.horizontal,
         controller: _scrollController,
         child: tabBar,
@@ -1042,10 +1035,7 @@ class TabBarView extends StatefulWidget {
     @required this.children,
     this.controller,
     this.physics,
-    this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(children != null),
-       assert(dragStartBehavior != null),
-       super(key: key);
+  }) : assert(children != null), super(key: key);
 
   /// This widget's selection and animation state.
   ///
@@ -1066,9 +1056,6 @@ class TabBarView extends StatefulWidget {
   ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics physics;
-
-  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
-  final DragStartBehavior dragStartBehavior;
 
   @override
   _TabBarViewState createState() => _TabBarViewState();
@@ -1214,7 +1201,6 @@ class _TabBarViewState extends State<TabBarView> {
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: PageView(
-        dragStartBehavior: widget.dragStartBehavior,
         controller: _pageController,
         physics: widget.physics == null ? _kTabBarViewPhysics : _kTabBarViewPhysics.applyTo(widget.physics),
         children: _children,
