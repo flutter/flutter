@@ -203,6 +203,7 @@ class SettingsFile {
   final Map<String, String> values = <String, String>{};
 
   void writeContents(File file) {
+    file.parent.createSync(recursive: true);
     file.writeAsStringSync(values.keys.map<String>((String key) {
       return '$key=${values[key]}';
     }).join('\n'));
