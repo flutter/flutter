@@ -621,6 +621,28 @@ void main() {
     expect(isSync, isTrue);
   });
 
+  testWidgets('Precache remove listeners immediately after future completes, does not crash on successive calls #25143', (WidgetTester tester) async {
+    final TestImageStreamCompleter imageStreamCompleter = TestImageStreamCompleter();
+    final TestImageProvider provider = TestImageProvider(streamCompleter: imageStreamCompleter);
+
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          precacheImage(provider, context);
+          return Container();
+        }
+      )
+    );
+
+    expect(imageStreamCompleter.listeners.length, 2);
+    imageStreamCompleter.listeners.keys.toList()[1](null, null);
+
+    expect(imageStreamCompleter.listeners.length, 1);
+    imageStreamCompleter.listeners.keys.toList()[0](null, null);
+
+    expect(imageStreamCompleter.listeners.length, 0);
+  });
+
   testWidgets('Precache completes with onError on error', (WidgetTester tester) async {
     dynamic capturedException;
     StackTrace capturedStackTrace;
